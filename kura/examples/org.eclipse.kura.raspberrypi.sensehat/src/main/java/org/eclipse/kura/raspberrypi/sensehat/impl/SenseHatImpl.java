@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -11,8 +11,11 @@
  *******************************************************************************/
 package org.eclipse.kura.raspberrypi.sensehat.impl;
 
+import java.io.IOException;
+
 import org.eclipse.kura.raspberrypi.sensehat.SenseHat;
 import org.eclipse.kura.raspberrypi.sensehat.ledmatrix.FrameBuffer;
+import org.eclipse.kura.raspberrypi.sensehat.ledmatrix.FrameBufferRaw;
 import org.eclipse.kura.raspberrypi.sensehat.sensors.HTS221;
 import org.eclipse.kura.raspberrypi.sensehat.sensors.LPS25H;
 import org.eclipse.kura.raspberrypi.sensehat.sensors.LSM9DS1;
@@ -63,6 +66,15 @@ public class SenseHatImpl implements SenseHat {
     @Override
     public LSM9DS1 getIMUSensor(int bus, int accAddress, int magAddress, int addressSize, int frequency) {
         return LSM9DS1.getIMUSensor(bus, accAddress, magAddress, addressSize, frequency);
+    }
+
+    @Override
+    public FrameBufferRaw getFrameBufferRaw() {
+        try {
+            return FrameBufferRaw.getFrameBuffer(m_ctx);
+        } catch (IOException e) {
+            return null;
+        }
     }
 
 }

@@ -27,7 +27,7 @@ import org.eclipse.kura.core.configuration.XmlComponentConfigurations;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
 import org.eclipse.kura.marshalling.Marshaller;
 import org.eclipse.kura.util.service.ServiceUtil;
-import org.eclipse.kura.wire.WireConfiguration;
+import org.eclipse.kura.wire.graph.MultiportWireConfiguration;
 import org.eclipse.kura.wire.graph.WireComponentConfiguration;
 import org.eclipse.kura.wire.graph.WireGraphConfiguration;
 import org.osgi.framework.BundleContext;
@@ -108,7 +108,7 @@ public class ConfigurationUpgrade {
         if (oldWireGraph != null) {
             List<WireComponentConfiguration> wireComponentConfigurations = getWireComponentConfigurationsFromOldJson(
                     oldWireGraph);
-            List<WireConfiguration> wireConfigurations = getInstance(oldProperties);
+            List<MultiportWireConfiguration> wireConfigurations = getInstance(oldProperties);
             WireGraphConfiguration wireGraphConfiguration = new WireGraphConfiguration(wireComponentConfigurations,
                     wireConfigurations);
             String newJson = marshalJson(bundleContext, wireGraphConfiguration);
@@ -166,8 +166,8 @@ public class ConfigurationUpgrade {
         return new WireComponentConfiguration(new ComponentConfigurationImpl(componentPid, null, null), properties);
     }
 
-    private static List<WireConfiguration> getInstance(final Map<String, Object> properties) {
-        final List<WireConfiguration> wireConfs = new CopyOnWriteArrayList<>();
+    private static List<MultiportWireConfiguration> getInstance(final Map<String, Object> properties) {
+        final List<MultiportWireConfiguration> wireConfs = new CopyOnWriteArrayList<>();
         final Set<Long> wireIds = new HashSet<>();
         for (final Map.Entry<String, Object> entry : properties.entrySet()) {
             final String key = entry.getKey();
@@ -198,7 +198,8 @@ public class ConfigurationUpgrade {
                     }
                 }
             }
-            final WireConfiguration configuration = new WireConfiguration(emitterPid, receiverPid);
+            final MultiportWireConfiguration configuration = new MultiportWireConfiguration(emitterPid, receiverPid, 0,
+                    0);
             configuration.setFilter(filter);
             wireConfs.add(configuration);
         }

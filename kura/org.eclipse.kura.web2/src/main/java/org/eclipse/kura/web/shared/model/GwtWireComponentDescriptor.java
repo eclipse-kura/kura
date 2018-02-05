@@ -11,6 +11,7 @@
 package org.eclipse.kura.web.shared.model;
 
 import java.io.Serializable;
+import java.util.Map;
 
 public final class GwtWireComponentDescriptor extends GwtBaseModel implements Serializable {
 
@@ -20,19 +21,28 @@ public final class GwtWireComponentDescriptor extends GwtBaseModel implements Se
 
     private int minInputPorts;
     private int maxInputPorts;
+    private int defaultInputPorts;
     private int minOutputPorts;
     private int maxOutputPorts;
+    private int defaultOutputPorts;
+    private Map<Integer, String> inputPortNames;
+    private Map<Integer, String> outputPortNames;
 
     public GwtWireComponentDescriptor() {
     }
 
-    public GwtWireComponentDescriptor(String factoryPid, int minInputPorts, int maxInputPorts, int minOutputPorts,
-            int maxOutputPorts) {
+    public GwtWireComponentDescriptor(String factoryPid, int minInputPorts, int maxInputPorts, int defaultInputPorts,
+            int minOutputPorts, int maxOutputPorts, int defaultOutputPorts, Map<Integer, String> inputPortNames,
+            Map<Integer, String> outputPortNames) {
         this.factoryPid = factoryPid;
         this.minInputPorts = minInputPorts;
         this.maxInputPorts = maxInputPorts;
         this.minOutputPorts = minOutputPorts;
         this.maxOutputPorts = maxOutputPorts;
+        this.defaultInputPorts = defaultInputPorts;
+        this.defaultOutputPorts = defaultOutputPorts;
+        this.inputPortNames = inputPortNames;
+        this.outputPortNames = outputPortNames;
     }
 
     public String getFactoryPid() {
@@ -55,6 +65,14 @@ public final class GwtWireComponentDescriptor extends GwtBaseModel implements Se
         return maxOutputPorts;
     }
 
+    public int getDefaultInputPorts() {
+        return defaultInputPorts;
+    }
+
+    public int getDefaultOutputPorts() {
+        return defaultOutputPorts;
+    }
+
     public void setFactoryPid(String factoryPid) {
         this.factoryPid = factoryPid;
     }
@@ -75,4 +93,27 @@ public final class GwtWireComponentDescriptor extends GwtBaseModel implements Se
         this.maxOutputPorts = maxOutputPorts;
     }
 
+    public void setDefaultInputPorts(int defaultInputPorts) {
+        this.defaultInputPorts = defaultInputPorts;
+    }
+
+    public void setDefaultOutputPorts(int defaultOutputPorts) {
+        this.defaultOutputPorts = defaultOutputPorts;
+    }
+
+    public Map<Integer, String> getInputPortNames() {
+        return inputPortNames;
+    }
+
+    public void setInputPortNames(Map<Integer, String> inputPortNames) {
+        this.inputPortNames = inputPortNames;
+    }
+
+    public Map<Integer, String> getOutputPortNames() {
+        return outputPortNames;
+    }
+
+    public void setOutputPortNames(Map<Integer, String> outputPortNames) {
+        this.outputPortNames = outputPortNames;
+    }
 }

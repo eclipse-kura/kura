@@ -15,10 +15,13 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -99,6 +102,11 @@ public class ScriptFilterTest {
 
             return null;
         }).when(wire).update(anyObject());
+
+        final Dictionary wireProperties = new Hashtable<>();
+        wireProperties.put("emitter.port", 0);
+
+        when(wire.getProperties()).thenReturn(wireProperties);
 
         Wire[] wires = { wire };
         filter.consumersConnected(wires);

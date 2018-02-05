@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Copyright (c) 2018 Eurotech and/or its affiliates and others
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.wire.GainOffset" 
+         name="GainOffset" 
+         description="A wire component that applies a gain and an offset to a configurable set of input properties.">
+         
+        <AD id="configuration"
+            name="configuration"
+            type="String" cardinality="0"
+            required="true"
+            default="toBeMultipliedByTwo | 2&#13;toBeMultipliedBy3AndIncreasedBy1 | 3 | 1"
+            description="Specifies the properties on which apply a gain and offset. Must be a list of items in the form &lt;property name&gt;|&lt;gain&gt;|&lt;offset&gt; separated by &#59; or by a new line. The offset parameter can be omitted, in this case it will be assumed as 0.|textarea">
+        </AD>
+        
+        <AD id="emit.received.properties"
+            name="emit.received.properties"
+            type="Boolean" cardinality="0"
+            required="true"
+            default="false"
+            description="Specifies whether received properties should be included in the emitted envelope or not.">
+        </AD>
+    </OCD>
+    
+    <Designate pid="org.eclipse.kura.wire.GainOffset" factoryPid="org.eclipse.kura.wire.GainOffset">
+        <Object ocdref="org.eclipse.kura.wire.GainOffset"/>
+    </Designate>
+</MetaData>

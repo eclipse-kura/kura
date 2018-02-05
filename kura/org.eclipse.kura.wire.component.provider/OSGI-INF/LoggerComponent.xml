@@ -20,7 +20,6 @@
    <service>
       <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
       <provide interface="org.eclipse.kura.wire.WireComponent"/>
-      <provide interface="org.eclipse.kura.wire.WireReceiver"/>
       <provide interface="org.osgi.service.wireadmin.Consumer"/>
    </service>
    <reference bind="bindWireHelperService" 
@@ -29,4 +28,10 @@
    	          name="WireHelperService" 
    	          policy="static" 
    	          unbind="unbindWireHelperService"/>
+   <property name="input.cardinality.minimum" type="Integer" value="1"/>
+   <property name="input.cardinality.maximum" type="Integer" value="1"/>
+   <property name="input.cardinality.default" type="Integer" value="1"/>
+   <property name="output.cardinality.minimum" type="Integer" value="0"/>
+   <property name="output.cardinality.maximum" type="Integer" value="0"/>
+   <property name="output.cardinality.default" type="Integer" value="0"/>
 </scr:component>

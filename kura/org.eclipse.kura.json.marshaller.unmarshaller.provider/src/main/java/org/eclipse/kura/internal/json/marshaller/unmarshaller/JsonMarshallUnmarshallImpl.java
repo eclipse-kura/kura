@@ -21,7 +21,7 @@ import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.marshalling.Marshaller;
 import org.eclipse.kura.marshalling.Unmarshaller;
-import org.eclipse.kura.wire.WireConfiguration;
+import org.eclipse.kura.wire.graph.MultiportWireConfiguration;
 import org.eclipse.kura.wire.graph.WireComponentConfiguration;
 import org.eclipse.kura.wire.graph.WireGraphConfiguration;
 
@@ -39,8 +39,10 @@ public class JsonMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
     private static final String OUTPUT_PORT_NAMES_KEY = "outputPortNames";
     private static final String INPUT_PORT_NAMES_KEY = "inputPortNames";
     private static final String POSITION_KEY = "position";
-    private static final String RECEIVER_KEY = "receiver";
-    private static final String EMITTER_KEY = "emitter";
+    private static final String RECEIVER_PID_KEY = "receiver";
+    private static final String RECEIVER_PORT_KEY = "receiverPort";
+    private static final String EMITTER_PID_KEY = "emitter";
+    private static final String EMITTER_PORT_KEY = "emitterPort";
     private static final String WIRES_KEY = "wires";
     private static final String COMPONENTS_KEY = "components";
 
@@ -65,16 +67,18 @@ public class JsonMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
         return wireGraphConfiguration;
     }
 
-    private static JsonObject marshalWireConfiguration(WireConfiguration wireConfig) {
+    private static JsonObject marshalWireConfiguration(MultiportWireConfiguration wireConfig) {
         JsonObject result = new JsonObject();
-        result.add(EMITTER_KEY, wireConfig.getEmitterPid());
-        result.add(RECEIVER_KEY, wireConfig.getReceiverPid());
+        result.add(EMITTER_PID_KEY, wireConfig.getEmitterPid());
+        result.add(EMITTER_PORT_KEY, wireConfig.getEmitterPort());
+        result.add(RECEIVER_PID_KEY, wireConfig.getReceiverPid());
+        result.add(RECEIVER_PORT_KEY, wireConfig.getReceiverPort());
         return result;
     }
 
-    private static JsonArray marshalWireConfigurationList(List<WireConfiguration> wireConfigurations) {
+    private static JsonArray marshalWireConfigurationList(List<MultiportWireConfiguration> wireConfigurations) {
         JsonArray value = new JsonArray();
-        for (WireConfiguration wireConfiguration : wireConfigurations) {
+        for (MultiportWireConfiguration wireConfiguration : wireConfigurations) {
             value.add(marshalWireConfiguration(wireConfiguration));
         }
 
@@ -161,7 +165,7 @@ public class JsonMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
     private WireGraphConfiguration unmarshalToWireGraphConfiguration(String jsonString) {
 
         List<WireComponentConfiguration> wireCompConfigList = new ArrayList<>();
-        List<WireConfiguration> wireConfigList = new ArrayList<>();
+        List<MultiportWireConfiguration> wireConfigList = new ArrayList<>();
 
         JsonObject json = Json.parse(jsonString).asObject();
 
@@ -177,8 +181,8 @@ public class JsonMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
         return new WireGraphConfiguration(wireCompConfigList, wireConfigList);
     }
 
-    private static List<WireConfiguration> unmarshalWireConfiguration(JsonArray array) {
-        List<WireConfiguration> wireConfigurationList = new ArrayList<>();
+    private static List<MultiportWireConfiguration> unmarshalWireConfiguration(JsonArray array) {
+        List<MultiportWireConfiguration> wireConfigurationList = new ArrayList<>();
 
         Iterator<JsonValue> jsonIterator = array.iterator();
         while (jsonIterator.hasNext()) {
@@ -186,19 +190,27 @@ public class JsonMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
 
             String emitterPid = null;
             String receiverPid = null;
+            int emitterPort = 0;
+            int receiverPort = 0;
+
             for (JsonObject.Member member : jsonWireConfig) {
                 String name = member.getName();
                 JsonValue value = member.getValue();
-                if (EMITTER_KEY.equalsIgnoreCase(name) && value.isString()) {
+                if (EMITTER_PID_KEY.equalsIgnoreCase(name) && value.isString()) {
                     emitterPid = value.asString();
-                } else if (RECEIVER_KEY.equalsIgnoreCase(name) && value.isString()) {
+                } else if (RECEIVER_PID_KEY.equalsIgnoreCase(name) && value.isString()) {
                     receiverPid = value.asString();
+                } else if (EMITTER_PORT_KEY.equalsIgnoreCase(name) && value.isNumber()) {
+                    emitterPort = value.asInt();
+                } else if (RECEIVER_PORT_KEY.equalsIgnoreCase(name) && value.isNumber()) {
+                    receiverPort = value.asInt();
                 }
 
             }
 
             if (emitterPid != null && receiverPid != null) {
-                WireConfiguration wireConfiguration = new WireConfiguration(emitterPid, receiverPid);
+                MultiportWireConfiguration wireConfiguration = new MultiportWireConfiguration(emitterPid, receiverPid,
+                        emitterPort, receiverPort);
                 wireConfigurationList.add(wireConfiguration);
             }
         }

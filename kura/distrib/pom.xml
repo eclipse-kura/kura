@@ -472,6 +472,11 @@
                                     <artifactId>org.eclipse.kura.xml.marshaller.unmarshaller.provider</artifactId>
                                     <version>${org.eclipse.kura.xml.marshaller.unmarshaller.provider.version}</version>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.wire.component.conditional.provider</artifactId>
+                                    <version>${org.eclipse.kura.wire.component.conditional.provider.version}</version>
+                                </artifactItem>
                             </artifactItems>
                             <stripVersion>true</stripVersion>
                             <outputDirectory>${project.basedir}/target/plugins</outputDirectory>
@@ -670,6 +675,8 @@
                                     tofile="target/plugins/org.eclipse.kura.json.marshaller.unmarshaller.provider_${org.eclipse.kura.json.marshaller.unmarshaller.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.xml.marshaller.unmarshaller.provider.jar"
                                     tofile="target/plugins/org.eclipse.kura.xml.marshaller.unmarshaller.provider_${org.eclipse.kura.xml.marshaller.unmarshaller.provider.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.wire.component.conditional.provider.jar"
+                                    tofile="target/plugins/org.eclipse.kura.wire.component.conditional.provider_${org.eclipse.kura.wire.component.conditional.provider.version}.jar" />
                             </tasks>
                         </configuration>
                     </execution>

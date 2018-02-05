@@ -58,13 +58,18 @@ var WireComposer = function (element) {
 				|| typeof link.attributes.target.id == 'undefined') {
 			return 
 		}
-		var sourceCell = self.graph.getCell(link.attributes.source.id)
-		var targetCell = self.graph.getCell(link.attributes.target.id)
+		var emitterComponent = self.graph.getCell(link.attributes.source.id).attributes.wireComponent
+		var receiverComponent = self.graph.getCell(link.attributes.target.id).attributes.wireComponent
+		
+		if (!emitterComponent || !receiverComponent) {
+			return
+		}
+		
 		var wire = {
-			emitterPort: 0,
-			receiverPort: 0,
-			emitterPid: sourceCell.attributes.wireComponent.pid,
-			receiverPid: targetCell.attributes.wireComponent.pid
+			emitterPort: emitterComponent.getPortIndex(link.get('source').port, 'out'),
+			receiverPort: receiverComponent.getPortIndex(link.get('target').port, 'in'),
+			emitterPid: emitterComponent.pid,
+			receiverPid: receiverComponent.pid
 		}
 		link.attributes.wire = wire
 		if (!link.attributes.wire) {
@@ -200,6 +205,16 @@ WireComposer.prototype.addWireComponent = function (component) {
 	var self = this
 	var position = component.renderingProperties.position
 	
+	var inputPorts = [];
+	for (var i = 0; i < component.inputPortCount; i++) { 
+		inputPorts.push(component.getPortName(i, 'in'));
+	}
+	
+	var outputPorts = [];
+	for (var j = 0; j < component.outputPortCount; j++) { 
+		outputPorts.push(component.getPortName(j, 'out'));
+	}
+	
 	if (!position) {
 		position = this.getNewComponentCoords()
 		component.renderingProperties.position = position
@@ -219,11 +234,13 @@ WireComposer.prototype.addWireComponent = function (component) {
 				'clip-path': 'url(#component-clip)'
 			}
 		},
-		inPorts : component.inputPortCount > 0 ? [""] : [],
-		outPorts : component.outputPortCount > 0 ? [""] : [],
+		inPorts : inputPorts,
+		outPorts : outputPorts,
 		wireComponent: component
 	})
 
+	console.log(componentCell)
+	
 	componentCell.on('change:position', function(cellView) {
 		self.fillRenderingProperties(cellView)
 		self.dispatchWireComponentChanged(component)
@@ -277,10 +294,12 @@ WireComposer.prototype.addWire = function (wire) {
 	if (emitter != null && receiver != null) {
 		var link = new joint.shapes.customLink.Element({
 			source : {
-				id : emitter.id
+				id : emitter.id,
+				port : emitter.attributes.wireComponent.getPortName(wire.emitterPort, 'out')
 			},
 			target : {
-				id : receiver.id
+				id : receiver.id,
+				port : receiver.attributes.wireComponent.getPortName(wire.receiverPort, 'in')
 			},
 			wire: wire
 		});
@@ -495,6 +514,35 @@ WireComposer.prototype.setListener = function (listener) {
 
 WireComposer.prototype.fillRenderingProperties = function (componentCell) {
 	componentCell.attributes.wireComponent.renderingProperties.position = componentCell.attributes.position
+}
+
+var WireComponent = function () {
+	this.renderingProperties = {}
+}
+
+WireComponent.prototype.portNameRegex = /(in|out)(\d+)/
+
+WireComponent.prototype.getPortIndex = function (portName, direction) {
+	var portNames = direction === 'in' ? this.renderingProperties.inputPortNames : this.renderingProperties.outputPortNames
+	if (portNames) {
+		for (var p in portNames) {
+			if (portNames[p] === portName) {
+				return parseInt(p)
+			}
+		}
+	}
+
+	return parseInt(this.portNameRegex.exec(portName)[2])
+}
+
+WireComponent.prototype.getPortName = function (portIndex, direction) {
+	var portNames = direction === 'in' ? this.renderingProperties.inputPortNames : this.renderingProperties.outputPortNames
+	var result
+	if (portNames) {
+		result = portNames[portIndex]
+	}
+
+	return result ? result : direction + portIndex
 }
 
 var Scroller = function () {

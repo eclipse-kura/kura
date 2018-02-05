@@ -15,7 +15,11 @@ package org.eclipse.kura.internal.wire.helper;
 
 import static java.util.Objects.requireNonNull;
 import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_PID;
+import static org.eclipse.kura.wire.graph.Constants.EMITTER_PORT_COUNT_PROP_NAME;
+import static org.eclipse.kura.wire.graph.Constants.RECEIVER_PORT_COUNT_PROP_NAME;
 import static org.osgi.framework.Constants.SERVICE_PID;
+
+import java.util.Arrays;
 
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.WireMessages;
@@ -40,28 +44,12 @@ public final class WireHelperServiceImpl implements WireHelperService {
 
     private volatile EventAdmin eventAdmin;
 
-    /**
-     * Binds the Event Admin Service.
-     *
-     * @param eventAdmin
-     *            the new Event Admin Service
-     */
     public void bindEventAdmin(final EventAdmin eventAdmin) {
-        if (this.eventAdmin == null) {
-            this.eventAdmin = eventAdmin;
-        }
+        this.eventAdmin = eventAdmin;
     }
 
-    /**
-     * Unbinds the Event Admin Service.
-     *
-     * @param eventAdmin
-     *            the new Event Admin Service
-     */
     public void unbindEventAdmin(final EventAdmin eventAdmin) {
-        if (this.eventAdmin == eventAdmin) {
-            this.eventAdmin = null;
-        }
+        this.eventAdmin = null;
     }
 
     /** {@inheritDoc} */
@@ -158,9 +146,32 @@ public final class WireHelperServiceImpl implements WireHelperService {
         return false;
     }
 
+    private int getIntOrDefault(Object portCount, int defaultValue) {
+        if (portCount instanceof Integer) {
+            return (Integer) portCount;
+        }
+        return defaultValue;
+    }
+
     /** {@inheritDoc} */
     @Override
     public WireSupport newWireSupport(final WireComponent wireComponent) {
-        return new WireSupportImpl(wireComponent, this, this.eventAdmin);
+        requireNonNull(wireComponent, wireMessages.wireComponentNonNull());
+        final BundleContext context = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
+        return Arrays.stream(ServiceUtil.getServiceReferences(context, WireComponent.class, null)).filter(ref -> {
+            final boolean matches = context.getService(ref) == wireComponent;
+            context.ungetService(ref);
+            return matches;
+        }).map(ref -> {
+            final String servicePid = (String) ref.getProperty(SERVICE_PID);
+            final String kuraServicePid = (String) ref.getProperty(KURA_SERVICE_PID);
+            int receiverPortCount = getIntOrDefault(ref.getProperty(RECEIVER_PORT_COUNT_PROP_NAME.value()),
+                    wireComponent instanceof WireReceiver ? 1 : 0);
+            int emitterPortCount = getIntOrDefault(ref.getProperty(EMITTER_PORT_COUNT_PROP_NAME.value()),
+                    wireComponent instanceof WireEmitter ? 1 : 0);
+
+            return new WireSupportImpl(wireComponent, servicePid, kuraServicePid, this.eventAdmin, receiverPortCount,
+                    emitterPortCount);
+        }).findAny().orElse(null);
     }
 }

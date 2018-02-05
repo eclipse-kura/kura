@@ -457,6 +457,7 @@ public final class GwtServerUtil {
         return gwtConfig;
     }
 
+    @SuppressWarnings("unchecked")
     public static GwtConfigComponent toGwtConfigComponent(String pid, Object descriptor) {
         final List<Tad> ads = (List<Tad>) descriptor;
 
@@ -509,9 +510,7 @@ public final class GwtServerUtil {
         return currentCC;
     }
 
-    @SuppressWarnings("unchecked")
     public static GwtConfigComponent toGwtConfigComponent(DriverDescriptor descriptor) {
         return toGwtConfigComponent(descriptor.getPid(), descriptor.getChannelDescriptor());
     }
-
 }

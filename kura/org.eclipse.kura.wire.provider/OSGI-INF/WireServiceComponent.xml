@@ -20,12 +20,6 @@
    </service>
    <property name="service.pid" value="org.eclipse.kura.wire.WireService"/>
    <property name="kura.service.pid" value="org.eclipse.kura.wire.WireService"/>
-   <reference bind="bindWireHelperService" 
-   	          cardinality="1..1" 
-   	          interface="org.eclipse.kura.wire.WireHelperService" 
-   	          name="WireHelperService" 
-   	          policy="static" 
-   	          unbind="unbindWireHelperService"/>
    <reference name="WireAdmin" 
               bind="bindWireAdmin" 
               unbind="unbindWireAdmin"

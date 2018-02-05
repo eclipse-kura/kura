@@ -28,6 +28,7 @@ import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.AlertDialog;
 import org.eclipse.kura.web.client.ui.wires.composer.BlinkEffect;
 import org.eclipse.kura.web.client.ui.wires.composer.DropEvent;
+import org.eclipse.kura.web.client.ui.wires.composer.PortNames;
 import org.eclipse.kura.web.client.ui.wires.composer.Wire;
 import org.eclipse.kura.web.client.ui.wires.composer.WireComponent;
 import org.eclipse.kura.web.client.ui.wires.composer.WireComposer;
@@ -312,7 +313,12 @@ public class WiresPanelUi extends Composite
 
         for (GwtWireComponentConfiguration config : configuration.getWireComponentConfigurations()) {
             configurationList.add(config.getConfiguration());
-            wireComposer.addWireComponent(WireComponent.fromGwt(config));
+            final WireComponent component = WireComponent.fromGwt(config);
+            final GwtWireComponentDescriptor descriptor = descriptors.getDescriptor(component.getFactoryPid());
+            // TODO: place port names in GwtWireComponentConfiguration
+            component.getRenderingProperties().setInputPortNames(PortNames.fromMap(descriptor.getInputPortNames()));
+            component.getRenderingProperties().setOutputPortNames(PortNames.fromMap(descriptor.getOutputPortNames()));
+            wireComposer.addWireComponent(component);
         }
 
         for (GwtWireConfiguration config : configuration.getWires()) {

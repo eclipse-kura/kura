@@ -11,6 +11,7 @@
  *  Amit Kumar Mondal
  *
  *******************************************************************************/
+
 package org.eclipse.kura.wire;
 
 import static java.util.Objects.requireNonNull;
@@ -48,7 +49,6 @@ public class WireConfiguration {
 
     private final String receiverPid;
 
-    /** The actual {@link WireAdmin}'s {@link Wire}. */
     @Nullable
     private Wire wire;
 
@@ -125,7 +125,7 @@ public class WireConfiguration {
     public void setWire(final Wire wire) {
         this.wire = wire;
     }
-    
+
     /** {@inheritDoc} */
     @Override
     public boolean equals(final Object obj) {
@@ -155,7 +155,7 @@ public class WireConfiguration {
         }
         return true;
     }
-    
+
     /** {@inheritDoc} */
     @Override
     public int hashCode() {
@@ -165,7 +165,6 @@ public class WireConfiguration {
         result = (prime * result) + ((this.receiverPid == null) ? 0 : this.receiverPid.hashCode());
         return result;
     }
-
 
     /** {@inheritDoc} */
     @Override

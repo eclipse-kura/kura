@@ -13,7 +13,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.kura.web.client.ui.wires.composer.PortNames;
 import org.eclipse.kura.web.client.ui.wires.composer.WireComponent;
+import org.eclipse.kura.web.client.ui.wires.composer.WireComponentRenderingProperties;
 import org.eclipse.kura.web.shared.model.GwtWireComponentDescriptor;
 
 public class WireComponentDescriptors {
@@ -47,6 +49,11 @@ public class WireComponentDescriptors {
         result.setFactoryPid(factoryPid);
         result.setInputPortCount(descriptor.getMinInputPorts());
         result.setOutputPortCount(descriptor.getMinOutputPorts());
+
+        final WireComponentRenderingProperties renderingProperties = WireComponentRenderingProperties.create();
+        renderingProperties.setInputPortNames(PortNames.fromMap(descriptor.getInputPortNames()));
+        renderingProperties.setOutputPortNames(PortNames.fromMap(descriptor.getOutputPortNames()));
+        result.setRenderingProperties(renderingProperties);
 
         return result;
     }

@@ -115,7 +115,7 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
         ConfigurationServiceTest.systemService = null;
     }
 
-    public void usetDataService(DataService dataService) {
+    public void unsetDataService(DataService dataService) {
         ConfigurationServiceTest.dataService = null;
     }
 

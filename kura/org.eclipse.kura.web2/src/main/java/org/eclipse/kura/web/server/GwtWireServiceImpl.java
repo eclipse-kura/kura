@@ -48,8 +48,10 @@ import org.eclipse.kura.web.shared.model.GwtWireConfiguration;
 import org.eclipse.kura.web.shared.model.GwtWireGraphConfiguration;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtWireService;
-import org.eclipse.kura.wire.WireConfiguration;
+import org.eclipse.kura.wire.graph.MultiportWireConfiguration;
 import org.eclipse.kura.wire.graph.WireComponentConfiguration;
+import org.eclipse.kura.wire.graph.WireComponentDefinition;
+import org.eclipse.kura.wire.graph.WireComponentDefinitionService;
 import org.eclipse.kura.wire.graph.WireGraphConfiguration;
 import org.eclipse.kura.wire.graph.WireGraphService;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -164,7 +166,9 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
         result.setWires(wireGraphConfiguration.getWireConfigurations().stream().map(config -> {
             final GwtWireConfiguration gwtConfig = new GwtWireConfiguration();
             gwtConfig.setEmitterPid(config.getEmitterPid());
+            gwtConfig.setEmitterPort(config.getEmitterPort());
             gwtConfig.setReceiverPid(config.getReceiverPid());
+            gwtConfig.setReceiverPort(config.getReceiverPort());
             return gwtConfig;
         }).collect(Collectors.toList()));
 
@@ -227,8 +231,9 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
                     return new WireComponentConfiguration(config, renderingProperties);
                 }).collect(Collectors.toList());
 
-        final List<WireConfiguration> wireConfigurations = gwtConfigurations.getWires().stream()
-                .map(gwtWire -> new WireConfiguration(gwtWire.getEmitterPid(), gwtWire.getReceiverPid()))
+        final List<MultiportWireConfiguration> wireConfigurations = gwtConfigurations
+                .getWires().stream().map(gwtWire -> new MultiportWireConfiguration(gwtWire.getEmitterPid(),
+                        gwtWire.getReceiverPid(), gwtWire.getEmitterPort(), gwtWire.getReceiverPort()))
                 .collect(Collectors.toList());
 
         final List<ComponentConfiguration> additionalConfigs = additionalGwtConfigs.stream().map(gwtConfig -> {
@@ -277,40 +282,32 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
 
     private void fillWireComponentDefinitions(List<GwtWireComponentDescriptor> resultDescriptors,
             List<GwtConfigComponent> resultDefinitions) throws GwtKuraException {
-        ServiceLocator.applyToServiceOptionally(OCDService.class, ocdService -> {
 
-            final Map<String, GwtWireComponentDescriptor> descriptors = new HashMap<>();
-            final Map<String, GwtConfigComponent> definitions = new HashMap<>();
+        ServiceLocator.applyToServiceOptionally(WireComponentDefinitionService.class,
+                wireComponentDefinitionService -> {
+                    for (WireComponentDefinition wireComponentDefinition : wireComponentDefinitionService
+                            .getComponentDefinitions()) {
+                        final GwtWireComponentDescriptor result = new GwtWireComponentDescriptor(
+                                wireComponentDefinition.getFactoryPid(), wireComponentDefinition.getMinInputPorts(),
+                                wireComponentDefinition.getMaxInputPorts(),
+                                wireComponentDefinition.getDefaultInputPorts(),
+                                wireComponentDefinition.getMinOutputPorts(),
+                                wireComponentDefinition.getMaxOutputPorts(),
+                                wireComponentDefinition.getDefaultOutputPorts(),
+                                wireComponentDefinition.getInputPortNames(),
+                                wireComponentDefinition.getOutputPortNames());
 
-            for (ComponentConfiguration receiver : ocdService
-                    .getServiceProviderOCDs("org.eclipse.kura.wire.WireReceiver")) {
-                descriptors.put(receiver.getPid(), new GwtWireComponentDescriptor(receiver.getPid(), 1, 1, 0, 0));
-                final GwtConfigComponent definition = GwtServerUtil.toGwtConfigComponent(receiver);
-                if (definition != null) {
-                    definition.setIsWireComponent(true);
-                    definitions.put(receiver.getPid(), definition);
-                }
-            }
-            for (ComponentConfiguration emitter : ocdService
-                    .getServiceProviderOCDs("org.eclipse.kura.wire.WireEmitter")) {
-                final GwtWireComponentDescriptor desc = descriptors.get(emitter.getPid());
-                if (desc != null) {
-                    desc.setMinOutputPorts(1);
-                    desc.setMaxOutputPorts(1);
-                } else {
-                    descriptors.put(emitter.getPid(), new GwtWireComponentDescriptor(emitter.getPid(), 0, 0, 1, 1));
-                    final GwtConfigComponent definition = GwtServerUtil.toGwtConfigComponent(emitter);
-                    if (definition != null) {
-                        definition.setIsWireComponent(true);
-                        definitions.put(emitter.getPid(), definition);
+                        final GwtConfigComponent ocd = GwtServerUtil
+                                .toGwtConfigComponent(wireComponentDefinition.getComponentOCD());
+                        if (ocd != null) {
+                            resultDefinitions.add(ocd);
+                        }
+
+                        resultDescriptors.add(result);
                     }
-                }
-            }
-            resultDescriptors.addAll(descriptors.values());
-            resultDefinitions.addAll(definitions.values());
-            resultDefinitions.add(getWireAssetDefinition());
-            return (Void) null;
-        });
+                    resultDefinitions.add(getWireAssetDefinition());
+                    return (Void) null;
+                });
     }
 
     private void fillDriverDefinitions(List<GwtConfigComponent> resultDefinitions) throws GwtKuraException {

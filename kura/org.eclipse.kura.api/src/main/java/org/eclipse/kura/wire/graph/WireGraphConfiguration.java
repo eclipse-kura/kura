@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.wire.graph;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.kura.wire.WireConfiguration;
@@ -32,19 +33,19 @@ import org.osgi.annotation.versioning.ProviderType;
 public class WireGraphConfiguration {
 
     private final List<WireComponentConfiguration> wireComponentConfigurations;
-    private final List<WireConfiguration> wireConfigurations;
+    private final List<MultiportWireConfiguration> wireConfigurations;
 
     public WireGraphConfiguration(List<WireComponentConfiguration> wireComponentConfigurations,
-            List<WireConfiguration> wireConfigurations) {
-        this.wireComponentConfigurations = wireComponentConfigurations;
-        this.wireConfigurations = wireConfigurations;
+            List<MultiportWireConfiguration> wireConfigurations) {
+        this.wireComponentConfigurations = Collections.unmodifiableList(wireComponentConfigurations);
+        this.wireConfigurations = Collections.unmodifiableList(wireConfigurations);
     }
 
     public List<WireComponentConfiguration> getWireComponentConfigurations() {
         return this.wireComponentConfigurations;
     }
 
-    public List<WireConfiguration> getWireConfigurations() {
+    public List<MultiportWireConfiguration> getWireConfigurations() {
         return this.wireConfigurations;
     }
 

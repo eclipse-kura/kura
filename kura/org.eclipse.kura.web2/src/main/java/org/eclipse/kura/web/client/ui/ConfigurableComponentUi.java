@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -23,6 +23,7 @@ import org.gwtbootstrap3.client.ui.FormGroup;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
 public class ConfigurableComponentUi extends AbstractServicesUi implements HasConfiguration {
@@ -38,6 +39,8 @@ public class ConfigurableComponentUi extends AbstractServicesUi implements HasCo
 
     @UiField
     FieldSet fields;
+    @UiField
+    Label componentDescription;
 
     public ConfigurableComponentUi(final GwtConfigComponent originalConfig) {
         initWidget(uiBinder.createAndBindUi(this));
@@ -45,6 +48,8 @@ public class ConfigurableComponentUi extends AbstractServicesUi implements HasCo
     }
 
     public void setConfiguration(GwtConfigComponent originalConfig) {
+        final String description = originalConfig.getComponentDescription();
+        componentDescription.setText(description != null ? description : "");
         restoreConfiguration(originalConfig);
         this.fields.clear();
 

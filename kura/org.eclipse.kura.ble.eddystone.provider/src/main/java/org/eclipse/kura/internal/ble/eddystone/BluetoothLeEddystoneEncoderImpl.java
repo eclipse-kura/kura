@@ -21,7 +21,7 @@ public class BluetoothLeEddystoneEncoderImpl implements BluetoothLeEddystoneEnco
     private static final Logger logger = LoggerFactory.getLogger(BluetoothLeEddystoneEncoderImpl.class);
 
     // See https://github.com/google/eddystone/blob/master/protocol-specification.md
-    private static final byte PKT_BYTES_NUMBER = (byte) 0x1e;
+    private static final byte PKT_BYTES_NUMBER = (byte) 0x1f;
     private static final byte PAYLOAD_BYTES_NUMBER = (byte) 0x03;
     private static final byte UUID_LIST = (byte) 0x03;
     private static final byte[] EDDYSTONE_UUID = { (byte) 0xFE, (byte) 0xAA };
@@ -73,7 +73,7 @@ public class BluetoothLeEddystoneEncoderImpl implements BluetoothLeEddystoneEnco
     }
 
     private byte[] encodeUID(byte flags, BluetoothLeEddystone beacon) {
-        byte[] data = new byte[PKT_BYTES_NUMBER + 2];
+        byte[] data = new byte[PKT_BYTES_NUMBER + 1];
 
         data[0] = PKT_BYTES_NUMBER;
         data[1] = BluetoothLeBeacon.AD_BYTES_NUMBER;

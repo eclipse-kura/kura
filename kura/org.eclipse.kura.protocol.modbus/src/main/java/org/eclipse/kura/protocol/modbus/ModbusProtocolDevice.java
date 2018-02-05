@@ -670,9 +670,9 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
             } else {
                 if (!this.connected) {
                     try {
-                    	this.socket = new Socket();
-                    	this.socket.connect(new InetSocketAddress(this.ipAddress, this.port), 
-                    			ModbusProtocolDevice.this.m_respTout);
+                        this.socket = new Socket();
+                        this.socket.connect(new InetSocketAddress(this.ipAddress, this.port), 
+                            ModbusProtocolDevice.this.m_respTout);
                         try {
                             this.inputStream = this.socket.getInputStream();
                             this.outputStream = this.socket.getOutputStream();
@@ -683,7 +683,7 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
                             s_logger.error("Failed to get socket streams: " + e);
                         }
                     } catch (IOException e) {
-                    	this.socket = null;
+                        this.socket = null;
                         s_logger.error("Failed to connect to remote: " + e);
                     }
                 }

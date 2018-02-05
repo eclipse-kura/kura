@@ -419,7 +419,7 @@ public class DeploymentAgent implements DeploymentAgentService {
         }
     }
 
-    private Properties readDeployedPackages() {
+    protected Properties readDeployedPackages() {
         Properties deployedPackages = new Properties();
         if (this.dpaConfPath != null) {
             try (FileReader fr = new FileReader(this.dpaConfPath)) {

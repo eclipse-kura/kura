@@ -58,7 +58,7 @@ public class BluetoothLeEddystoneEncoderDecoderImplTest {
 
         encoded = encoder.encode(beacon);
 
-        byte[] expected = { 30, 2, 1, 31, 3, 3, (byte) 0xAA, (byte) 0xFE, 23, 22, (byte) 0xAA, (byte) 0xFE, 0, 50, 0, 1,
+        byte[] expected = { 31, 2, 1, 31, 3, 3, (byte) 0xAA, (byte) 0xFE, 23, 22, (byte) 0xAA, (byte) 0xFE, 0, 50, 0, 1,
                 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 0, 0 };
 
         assertArrayEquals(expected, encoded);

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018 Eurotech and/or its affiliates and others
  *
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
@@ -62,12 +62,9 @@ import org.slf4j.LoggerFactory;
  * externally.
  * <br/>
  * <br/>
- * The required properties are enlisted in {@link GPIOChannelDescriptor} and
- * the driver connection specific properties are enlisted in
- * {@link GPIOOptions}
+ * The required properties are enlisted in {@link GPIOChannelDescriptor}.
  *
  * @see Driver
- * @see GPIOOptions
  * @see GPIOChannelDescriptor
  *
  */

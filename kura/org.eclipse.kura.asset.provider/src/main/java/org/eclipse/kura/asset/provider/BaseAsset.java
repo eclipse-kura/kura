@@ -21,6 +21,7 @@ import static org.eclipse.kura.channel.ChannelType.READ_WRITE;
 import static org.eclipse.kura.channel.ChannelType.WRITE;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -283,7 +284,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
             List<ChannelRecord> readRecords = getAllReadRecords();
             hasReadChannels = !readRecords.isEmpty();
             tryPrepareRead(readRecords);
-            tryUpdateChannelListeners();
+            tryAttachChannelListeners();
         }
     }
 
@@ -416,7 +417,8 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         if (this.assetConfiguration != null) {
             for (Entry<String, Channel> e : assetConfiguration.getAssetChannels().entrySet()) {
                 final Channel channel = e.getValue();
-                if (channel.getType() == ChannelType.READ || channel.getType() == ChannelType.READ_WRITE) {
+                if (channel.isEnabled()
+                        && (channel.getType() == ChannelType.READ || channel.getType() == ChannelType.READ_WRITE)) {
                     readRecords.add(channel.createReadRecord());
                 }
             }
@@ -450,6 +452,17 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         return channelRecords;
     }
 
+    private void validateChannel(final Channel channel, final EnumSet<ChannelType> allowedTypes,
+            final String typeNotAllowedMessage) {
+        if (channel == null) {
+            throw new IllegalArgumentException(message.channelUnavailable());
+        } else if (!allowedTypes.contains(channel.getType())) {
+            throw new IllegalArgumentException(typeNotAllowedMessage);
+        } else if (!channel.isEnabled()) {
+            throw new IllegalArgumentException(message.channelNotEnabled());
+        }
+    }
+
     /** {@inheritDoc} */
     @Override
     public List<ChannelRecord> read(final Set<String> channelNames) throws KuraException {
@@ -464,13 +477,13 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         for (final String name : channelNames) {
 
             final Channel channel = channels.get(name);
-            if (channel == null) {
-                channelRecords.add(ChannelRecord.createStatusRecord(name,
-                        new ChannelStatus(FAILURE, message.channelUnavailable(), null)));
-                continue;
-            } else if (!(channel.getType() == READ || channel.getType() == READ_WRITE)) {
-                channelRecords.add(ChannelRecord.createStatusRecord(name,
-                        new ChannelStatus(FAILURE, message.channelTypeNotReadable(), null)));
+            try {
+                validateChannel(channel, EnumSet.of(READ, READ_WRITE), message.channelTypeNotReadable());
+            } catch (Exception e) {
+                final ChannelRecord record = ChannelRecord.createStatusRecord(name,
+                        new ChannelStatus(FAILURE, e.getMessage(), e));
+                record.setTimestamp(System.currentTimeMillis());
+                channelRecords.add(record);
                 continue;
             }
 
@@ -520,7 +533,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
 
         this.channelListeners.add(reg);
 
-        if (this.driver != null) {
+        if (this.driver != null && channel.isEnabled()) {
             tryAttachListener(channel, reg);
         }
     }
@@ -600,11 +613,11 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
             final String channelName = channelRecord.getChannelName();
 
             final Channel channel = channels.get(channelName);
-            if (channel == null) {
-                channelRecord.setChannelStatus(new ChannelStatus(FAILURE, message.channelUnavailable(), null));
-                continue;
-            } else if (!(channel.getType() == WRITE || channel.getType() == READ_WRITE)) {
-                channelRecord.setChannelStatus(new ChannelStatus(FAILURE, message.channelTypeNotReadable(), null));
+            try {
+                validateChannel(channel, EnumSet.of(WRITE, READ_WRITE), message.channelTypeNotWritable());
+            } catch (Exception e) {
+                channelRecord.setChannelStatus(new ChannelStatus(FAILURE, e.getMessage(), e));
+                channelRecord.setTimestamp(System.currentTimeMillis());
                 continue;
             }
 
@@ -662,27 +675,22 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         }
     }
 
-    protected void cleanupAndReattachListeners() {
+    protected boolean isChannelListenerValid(final Channel channel, final ChannelListenerRegistration reg) {
+        return channel != null && reg.isValid;
+    }
+
+    protected void tryAttachChannelListeners() {
         final Map<String, Channel> channels = this.assetConfiguration.getAssetChannels();
         final Iterator<ChannelListenerRegistration> i = this.channelListeners.iterator();
         while (i.hasNext()) {
             final ChannelListenerRegistration reg = i.next();
             final Channel channel = channels.get(reg.channelName);
-            if (isChannelListenerValid(channel, reg)) {
-                tryAttachListener(channel, reg);
-            } else {
+            if (!isChannelListenerValid(channel, reg)) {
                 i.remove();
+            } else if (channel.isEnabled()) {
+                tryAttachListener(channel, reg);
             }
         }
-    }
-
-    protected boolean isChannelListenerValid(final Channel channel, final ChannelListenerRegistration reg) {
-        return channel != null && reg.isValid;
-    }
-
-    protected void tryUpdateChannelListeners() {
-        detachAllListeners();
-        cleanupAndReattachListeners();
     }
 
     @SuppressWarnings("unchecked")

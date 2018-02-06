@@ -287,4 +287,10 @@ public interface AssetMessages {
     @En("Failed to unregister channel listener")
     public String errorUnregisteringChannelListener();
 
+    @En("Determines if the channel is enabled or not")
+    public String enabledDescription();
+
+    @En("Channel is not enabled")
+    public String channelNotEnabled();
+
 }

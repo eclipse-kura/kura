@@ -209,7 +209,7 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
             final int emitterPort = conf.getEmitterPort();
             final int receiverPort = conf.getReceiverPort();
             if (nonNull(emitterServicePid) && nonNull(receiverServicePid) && nonNull(emitterPort)
-                    && nonNull(receiverPort) && isNull(conf.getWire())) {
+                    && nonNull(receiverPort)) {
                 final boolean found = checkWireExistence(emitterServicePid, receiverServicePid, emitterPort,
                         receiverPort);
                 if (!found) {

@@ -400,11 +400,11 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
     }
 
     @Override
-    protected void tryUpdateChannelListeners() {
+    protected void tryAttachChannelListeners() {
         getAssetConfiguration().getAssetChannels().entrySet().stream()
                 .filter(e -> isListeningChannel(e.getValue().getConfiguration()))
                 .map(e -> new ChannelListenerRegistration(e.getKey(), this)).forEach(this.channelListeners::add);
-        super.tryUpdateChannelListeners();
+        super.tryAttachChannelListeners();
     }
 
     @Override

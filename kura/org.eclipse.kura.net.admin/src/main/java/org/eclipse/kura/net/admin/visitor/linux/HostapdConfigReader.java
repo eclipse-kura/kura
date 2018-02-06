@@ -68,24 +68,24 @@ public class HostapdConfigReader implements NetworkConfigurationVisitor {
 
         List<WifiInterfaceAddressConfig> wifiInterfaceAddressConfigs = wifiInterfaceConfig.getNetInterfaceAddresses();
 
-        if (wifiInterfaceAddressConfigs == null || wifiInterfaceAddressConfigs.size() == 0) {
-            wifiInterfaceAddressConfigs = new ArrayList<WifiInterfaceAddressConfig>();
+        if (wifiInterfaceAddressConfigs == null || wifiInterfaceAddressConfigs.isEmpty()) {
+            wifiInterfaceAddressConfigs = new ArrayList<>();
             wifiInterfaceAddressConfigs.add(new WifiInterfaceAddressConfigImpl());
             wifiInterfaceConfig.setNetInterfaceAddresses(wifiInterfaceAddressConfigs);
         }
 
-        for (WifiInterfaceAddressConfig wifiInterfaceAddressConfig : wifiInterfaceAddressConfigs) {
-            if (wifiInterfaceAddressConfig instanceof WifiInterfaceAddressConfigImpl) {
-                List<NetConfig> netConfigs = wifiInterfaceAddressConfig.getConfigs();
+        WifiInterfaceAddressConfig wifiInterfaceAddressConfig = wifiInterfaceAddressConfigs.get(0);
+        if (wifiInterfaceAddressConfig instanceof WifiInterfaceAddressConfigImpl) {
+            List<NetConfig> netConfigs = wifiInterfaceAddressConfig.getConfigs();
 
-                if (netConfigs == null) {
-                    netConfigs = new ArrayList<NetConfig>();
-                    ((WifiInterfaceAddressConfigImpl) wifiInterfaceAddressConfig).setNetConfigs(netConfigs);
-                }
-
-                netConfigs.add(getWifiHostConfig(interfaceName));
+            if (netConfigs == null) {
+                netConfigs = new ArrayList<>();
+                ((WifiInterfaceAddressConfigImpl) wifiInterfaceAddressConfig).setNetConfigs(netConfigs);
             }
+
+            netConfigs.add(getWifiHostConfig(interfaceName));
         }
+
     }
 
     private WifiConfig getWifiHostConfig(String ifaceName) throws KuraException {

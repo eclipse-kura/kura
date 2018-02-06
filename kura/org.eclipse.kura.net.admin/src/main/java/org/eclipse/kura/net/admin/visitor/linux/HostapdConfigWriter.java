@@ -15,13 +15,13 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.core.net.AbstractNetInterface;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
 import org.eclipse.kura.core.util.IOUtil;
@@ -85,8 +85,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
         if (netInterfaceConfig == null) {
             return;
         }
-
-        List<NetConfig> netConfigs = getNetConfigs(netInterfaceConfig);
+        List<NetConfig> netConfigs = ((AbstractNetInterface<?>) netInterfaceConfig).getNetConfigs();
         if (netConfigs.isEmpty()) {
             return;
         }
@@ -139,19 +138,6 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
             }
         }
         return status;
-    }
-
-    private List<NetConfig> getNetConfigs(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig) {
-
-        List<NetConfig> netConfigs = new ArrayList<>();
-
-        List<? extends NetInterfaceAddressConfig> netInterfaceAddressConfigs = netInterfaceConfig
-                .getNetInterfaceAddresses();
-        for (NetInterfaceAddressConfig netInterfaceAddressConfig : netInterfaceAddressConfigs) {
-            netConfigs = netInterfaceAddressConfig.getConfigs();
-        }
-
-        return netConfigs;
     }
 
     private void generateHostapdConf(WifiConfig wifiConfig, String interfaceName) throws KuraException, IOException {

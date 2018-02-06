@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.core.net.AbstractNetInterface;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
 import org.eclipse.kura.core.net.WifiInterfaceConfigImpl;
@@ -70,22 +71,18 @@ public class WifiConfigWriter implements NetworkConfigurationVisitor {
         String interfaceName = wifiInterfaceConfig.getName();
         s_logger.debug("Writing wifi config for {}", interfaceName);
 
-        List<WifiInterfaceAddressConfig> wifiInterfaceAddressConfigs = wifiInterfaceConfig.getNetInterfaceAddresses();
+        WifiInterfaceAddressConfig wifiInterfaceAddressConfig = (WifiInterfaceAddressConfig) ((AbstractNetInterface<?>) wifiInterfaceConfig)
+                .getNetInterfaceAddressConfig();
 
-        if (wifiInterfaceAddressConfigs != null) {
-            for (WifiInterfaceAddressConfig wifiInterfaceAddressConfig : wifiInterfaceAddressConfigs) {
-                // Store the selected wifi mode
-                WifiMode wifiMode = wifiInterfaceAddressConfig.getMode();
-
-                s_logger.debug("Store wifiMode: {}", wifiMode);
-                StringBuilder key = new StringBuilder("net.interface." + interfaceName + ".config.wifi.mode");
-                try {
-                    KuranetConfig.setProperty(key.toString(), wifiMode.toString());
-                } catch (Exception e) {
-                    s_logger.error("Failed to save kuranet config", e);
-                    throw KuraException.internalError(e);
-                }
-            }
+        // Store the selected wifi mode
+        WifiMode wifiMode = wifiInterfaceAddressConfig.getMode();
+        s_logger.debug("Store wifiMode: {}", wifiMode);
+        StringBuilder key = new StringBuilder("net.interface." + interfaceName + ".config.wifi.mode");
+        try {
+            KuranetConfig.setProperty(key.toString(), wifiMode.toString());
+        } catch (Exception e) {
+            s_logger.error("Failed to save kuranet config", e);
+            throw KuraException.internalError(e);
         }
     }
 }

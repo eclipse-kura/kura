@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -73,26 +73,26 @@ public class WifiConfigReader implements NetworkConfigurationVisitor {
 
         List<WifiInterfaceAddressConfig> wifiInterfaceAddressConfigs = wifiInterfaceConfig.getNetInterfaceAddresses();
 
-        if (wifiInterfaceAddressConfigs == null || wifiInterfaceAddressConfigs.size() == 0) {
+        if (wifiInterfaceAddressConfigs == null || wifiInterfaceAddressConfigs.isEmpty()) {
             wifiInterfaceAddressConfigs = new ArrayList<WifiInterfaceAddressConfig>();
             wifiInterfaceAddressConfigs.add(new WifiInterfaceAddressConfigImpl());
             wifiInterfaceConfig.setNetInterfaceAddresses(wifiInterfaceAddressConfigs);
         }
 
-        for (WifiInterfaceAddressConfig wifiInterfaceAddressConfig : wifiInterfaceAddressConfigs) {
-            if (wifiInterfaceAddressConfig instanceof WifiInterfaceAddressConfigImpl) {
-                StringBuilder wifiModeKey = new StringBuilder("net.interface.").append(interfaceName)
-                        .append(".config.wifi.mode");
+        WifiInterfaceAddressConfig wifiInterfaceAddressConfig = wifiInterfaceAddressConfigs.get(0);
+        if (wifiInterfaceAddressConfig != null
+                && wifiInterfaceAddressConfig instanceof WifiInterfaceAddressConfigImpl) {
+            StringBuilder wifiModeKey = new StringBuilder("net.interface.").append(interfaceName)
+                    .append(".config.wifi.mode");
 
-                WifiMode wifiMode = WifiMode.UNKNOWN;
-                String wifiModeString = KuranetConfig.getProperty(wifiModeKey.toString());
-                if (wifiModeString != null) {
-                    wifiMode = WifiMode.valueOf(wifiModeString);
-                }
-
-                s_logger.debug("Got wifiMode: {}", wifiMode);
-                ((WifiInterfaceAddressConfigImpl) wifiInterfaceAddressConfig).setMode(wifiMode);
+            WifiMode wifiMode = WifiMode.UNKNOWN;
+            String wifiModeString = KuranetConfig.getProperty(wifiModeKey.toString());
+            if (wifiModeString != null) {
+                wifiMode = WifiMode.valueOf(wifiModeString);
             }
+
+            s_logger.debug("Got wifiMode: {}", wifiMode);
+            ((WifiInterfaceAddressConfigImpl) wifiInterfaceAddressConfig).setMode(wifiMode);
         }
     }
 }

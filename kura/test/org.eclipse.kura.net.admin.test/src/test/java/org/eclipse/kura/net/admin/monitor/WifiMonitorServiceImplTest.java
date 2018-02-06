@@ -322,38 +322,6 @@ public class WifiMonitorServiceImplTest {
     }
 
     @Test
-    public void testGetIP4ConfigNull() throws Throwable {
-        // test no result due to no input
-
-        WifiMonitorServiceImpl svc = new WifiMonitorServiceImpl();
-
-        WifiInterfaceConfigImpl wifiInterfaceConfig = null;
-
-        NetConfigIP4 result = (NetConfigIP4) TestUtil.invokePrivate(svc, "getIP4config", wifiInterfaceConfig);
-
-        assertNull(result);
-    }
-
-    @Test
-    public void testGetIP4Config() throws Throwable {
-        // proper input => proper output
-
-        WifiMonitorServiceImpl svc = new WifiMonitorServiceImpl();
-
-        WifiBuilder builder = new WifiBuilder("wlan1").addWifiInterfaceAddressConfig(WifiMode.UNKNOWN)
-                .addNetConfigIP4(NetInterfaceStatus.netIPv4StatusDisabled, true);
-        NetConfigIP4 netConfig = (NetConfigIP4) builder.getNetConfig();
-        WifiInterfaceConfigImpl wifiInterfaceConfig = builder.addWifiConfig()
-                .addNetConfigIP4(NetInterfaceStatus.netIPv4StatusEnabledLAN, true).build();
-
-        NetConfigIP4 result = (NetConfigIP4) TestUtil.invokePrivate(svc, "getIP4config", wifiInterfaceConfig);
-
-        assertNotNull(result);
-        assertEquals(NetInterfaceStatus.netIPv4StatusDisabled, result.getStatus());
-        assertEquals(netConfig, result);
-    }
-
-    @Test
     public void testEnableInterfaceNotWifi() throws Throwable {
         // does nothing and returns
 

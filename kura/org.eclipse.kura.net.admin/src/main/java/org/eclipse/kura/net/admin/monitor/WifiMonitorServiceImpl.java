@@ -30,6 +30,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.core.net.AbstractNetInterface;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.WifiInterfaceConfigImpl;
 import org.eclipse.kura.linux.net.route.RouteService;
@@ -326,7 +327,8 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
 
                             logger.debug("monitor() :: pingAccessPoint()? {}", wifiConfig.pingAccessPoint());
                             if (wifiConfig.pingAccessPoint()) {
-                                NetConfigIP4 netConfigIP4 = getIP4config(wifiInterfaceConfig);
+                                NetConfigIP4 netConfigIP4 = ((AbstractNetInterface<?>) wifiInterfaceConfig)
+                                        .getIP4config();
                                 if (netConfigIP4 != null && netConfigIP4.isDhcp()) {
                                     boolean isApReachable = false;
                                     for (int i = 0; i < 3; i++) {
@@ -342,7 +344,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                                 }
                             }
 
-                            NetConfigIP4 netConfigIP4 = getIP4config(wifiInterfaceConfig);
+                            NetConfigIP4 netConfigIP4 = ((AbstractNetInterface<?>) wifiInterfaceConfig).getIP4config();
                             if (netConfigIP4.getStatus().equals(NetInterfaceStatus.netIPv4StatusEnabledLAN)
                                     && netConfigIP4.isDhcp()) {
                                 RouteService rs = RouteServiceImpl.getInstance();
@@ -539,8 +541,11 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
     }
 
     private boolean isWifiEnabled(WifiInterfaceConfigImpl wifiInterfaceConfig) {
+        if (wifiInterfaceConfig == null) {
+            return false;
+        }
         WifiMode wifiMode = getWifiInterfaceMode(wifiInterfaceConfig);
-        NetInterfaceStatus status = getWifiInterfaceStatus(wifiInterfaceConfig);
+        NetInterfaceStatus status = ((AbstractNetInterface<?>) wifiInterfaceConfig).getInterfaceStatus();
 
         boolean statusEnabled = status.equals(NetInterfaceStatus.netIPv4StatusEnabledLAN)
                 || status.equals(NetInterfaceStatus.netIPv4StatusEnabledWAN);
@@ -552,33 +557,15 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
         return statusEnabled && wifiEnabled;
     }
 
-    private boolean isWifiManaged(WifiInterfaceConfigImpl wifiInterfaceConfig) {
-        NetInterfaceStatus status = getWifiInterfaceStatus(wifiInterfaceConfig);
-        logger.debug("isEthernetManaged() :: {} interface - status: {}", wifiInterfaceConfig.getName(), status);
-        return !status.equals(NetInterfaceStatus.netIPv4StatusUnmanaged);
-    }
-
-    private NetInterfaceStatus getWifiInterfaceStatus(WifiInterfaceConfigImpl wifiInterfaceConfig) {
-        if (wifiInterfaceConfig == null) {
-            logger.debug("wifiInterfaceConfig is null");
-            return NetInterfaceStatus.netIPv4StatusUnknown;
-        }
-        NetInterfaceStatus status = NetInterfaceStatus.netIPv4StatusUnknown;
-        for (WifiInterfaceAddressConfig wifiInterfaceAddressConfig : wifiInterfaceConfig.getNetInterfaceAddresses()) {
-            for (NetConfig netConfig : wifiInterfaceAddressConfig.getConfigs()) {
-                if (netConfig instanceof NetConfigIP4) {
-                    status = ((NetConfigIP4) netConfig).getStatus();
-                    break;
-                }
-            }
-        }
-        return status;
-    }
-
     private WifiMode getWifiInterfaceMode(WifiInterfaceConfigImpl wifiInterfaceConfig) {
         WifiMode wifiMode = WifiMode.UNKNOWN;
-        for (WifiInterfaceAddressConfig wifiInterfaceAddressConfig : wifiInterfaceConfig.getNetInterfaceAddresses()) {
+        WifiInterfaceAddressConfig wifiInterfaceAddressConfig;
+        try {
+            wifiInterfaceAddressConfig = (WifiInterfaceAddressConfig) ((AbstractNetInterface<?>) wifiInterfaceConfig)
+                    .getNetInterfaceAddressConfig();
             wifiMode = wifiInterfaceAddressConfig.getMode();
+        } catch (KuraException e) {
+            logger.error("Failed to obtain WifiInterfaceMode", e);
         }
         return wifiMode;
     }
@@ -588,37 +575,25 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
             return null;
         }
         WifiConfig selectedWifiConfig = null;
-        loop: for (WifiInterfaceAddressConfig wifiInterfaceAddressConfig : wifiInterfaceConfig
-                .getNetInterfaceAddresses()) {
+        WifiInterfaceAddressConfig wifiInterfaceAddressConfig;
+        try {
+            wifiInterfaceAddressConfig = (WifiInterfaceAddressConfig) ((AbstractNetInterface<?>) wifiInterfaceConfig)
+                    .getNetInterfaceAddressConfig();
             WifiMode wifiMode = wifiInterfaceAddressConfig.getMode();
             for (NetConfig netConfig : wifiInterfaceAddressConfig.getConfigs()) {
                 if (netConfig instanceof WifiConfig) {
                     WifiConfig wifiConfig = (WifiConfig) netConfig;
                     if (wifiMode.equals(wifiConfig.getMode())) {
                         selectedWifiConfig = wifiConfig;
-                        break loop;
+                        break;
                     }
                 }
             }
+        } catch (KuraException e) {
+            logger.error("Failed to obtain WifiConfig", e);
         }
-        return selectedWifiConfig;
-    }
 
-    private NetConfigIP4 getIP4config(WifiInterfaceConfigImpl wifiInterfaceConfig) {
-        if (wifiInterfaceConfig == null) {
-            return null;
-        }
-        NetConfigIP4 netConfigIP4 = null;
-        loop: for (WifiInterfaceAddressConfig wifiInterfaceAddressConfig : wifiInterfaceConfig
-                .getNetInterfaceAddresses()) {
-            for (NetConfig netConfig : wifiInterfaceAddressConfig.getConfigs()) {
-                if (netConfig instanceof NetConfigIP4) {
-                    netConfigIP4 = (NetConfigIP4) netConfig;
-                    break loop;
-                }
-            }
-        }
-        return netConfigIP4;
+        return selectedWifiConfig;
     }
 
     private void disableInterface(String interfaceName) throws KuraException {
@@ -643,15 +618,16 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
         boolean isDhcpClient = false;
         boolean enableDhcpServer = false;
 
-        for (WifiInterfaceAddressConfig wifiInterfaceAddressConfig : wifiInterfaceConfig.getNetInterfaceAddresses()) {
-            wifiMode = wifiInterfaceAddressConfig.getMode();
-            for (NetConfig netConfig : wifiInterfaceAddressConfig.getConfigs()) {
-                if (netConfig instanceof NetConfigIP4) {
-                    status = ((NetConfigIP4) netConfig).getStatus();
-                    isDhcpClient = ((NetConfigIP4) netConfig).isDhcp();
-                } else if (netConfig instanceof DhcpServerConfig4) {
-                    enableDhcpServer = ((DhcpServerConfig4) netConfig).isEnabled();
-                }
+        WifiInterfaceAddressConfig wifiInterfaceAddressConfig = (WifiInterfaceAddressConfig) ((AbstractNetInterface<?>) wifiInterfaceConfig)
+                .getNetInterfaceAddressConfig();
+
+        wifiMode = wifiInterfaceAddressConfig.getMode();
+        for (NetConfig netConfig : wifiInterfaceAddressConfig.getConfigs()) {
+            if (netConfig instanceof NetConfigIP4) {
+                status = ((NetConfigIP4) netConfig).getStatus();
+                isDhcpClient = ((NetConfigIP4) netConfig).isDhcp();
+            } else if (netConfig instanceof DhcpServerConfig4) {
+                enableDhcpServer = ((DhcpServerConfig4) netConfig).isEnabled();
             }
         }
 
@@ -692,7 +668,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                         if (isWifiEnabled((WifiInterfaceConfigImpl) netInterfaceConfig)) {
                             logger.debug("Adding {} to enabledInterfaces", interfaceName);
                             this.enabledInterfaces.add(interfaceName);
-                        } else if (!isWifiManaged((WifiInterfaceConfigImpl) netInterfaceConfig)) {
+                        } else if (!((AbstractNetInterface<?>) netInterfaceConfig).isInterfaceManaged()) {
                             logger.debug("Adding {} to unmanagedInterfaces", interfaceName);
                             this.unmanagedInterfaces.add(interfaceName);
                         } else {
@@ -842,7 +818,8 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
             if (isWifiEnabled(newConfig) && !enabledIfaces.contains(interfaceName)) {
                 logger.debug("Adding {} to list of enabled interfaces", interfaceName);
                 enabledIfaces.add(interfaceName);
-            } else if (!isWifiManaged(newConfig) && !unmanagedIfaces.contains(interfaceName)) {
+            } else if ((newConfig != null) && !((AbstractNetInterface<?>) newConfig).isInterfaceManaged()
+                    && !unmanagedIfaces.contains(interfaceName)) {
                 logger.debug("Removing {} from list of enabled interfaces because it is set not to be managed by Kura",
                         interfaceName);
                 unmanagedIfaces.add(interfaceName);
@@ -914,34 +891,46 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
 
     @Override
     public int getSignalLevel(String interfaceName, String ssid) throws KuraException {
-        int rssi = 0;
+        int rssi;
+        if ((rssi = getSignalLevelWithLinkTool(interfaceName, ssid)) != 0) {
+            return rssi;
+        }
+        return getSignalLevelWithScanTool(interfaceName, ssid);
+    }
+
+    private int getSignalLevelWithLinkTool(String interfaceName, String ssid) throws KuraException {
         InterfaceState wifiState = this.interfaceStatuses.get(interfaceName);
-        if (wifiState != null && ssid != null) {
-            if (wifiState.isUp()) {
-                logger.trace("getSignalLevel() :: using 'iw dev wlan0 link' command ...");
-                LinkTool linkTool = getLinkTool(interfaceName);
+        if (wifiState == null || ssid == null) {
+            return 0;
+        }
+        int rssi = 0;
+        if (wifiState.isUp()) {
+            logger.trace("getSignalLevelWithLinkTool() :: using 'iw dev wlan0 link' command ...");
+            LinkTool linkTool = getLinkTool(interfaceName);
 
-                if (linkTool != null && linkTool.get() && linkTool.isLinkDetected()) {
-                    rssi = linkTool.getSignal();
-                    logger.debug("getSignalLevel() :: rssi={} (using 'iw dev wlan0 link')", rssi);
-                }
+            if (linkTool != null && linkTool.get() && linkTool.isLinkDetected()) {
+                rssi = linkTool.getSignal();
+                logger.debug("getSignalLevelWithLinkTool() :: rssi={} (using 'iw dev wlan0 link')", rssi);
             }
+        }
+        return rssi;
+    }
 
-            if (rssi == 0) {
-                logger.trace("getSignalLevel() :: using 'iw dev wlan0 scan' command ...");
-                IScanTool scanTool = getScanTool(interfaceName);
-                if (scanTool != null) {
-                    List<WifiAccessPoint> wifiAccessPoints = scanTool.scan();
-                    for (WifiAccessPoint wap : wifiAccessPoints) {
-                        if (ssid.equals(wap.getSSID())) {
-                            if (wap.getStrength() > 0) {
-                                rssi = 0 - wap.getStrength();
-                                logger.debug("getSignalLevel() :: rssi={} (using 'iw dev wlan0 scan')", rssi);
-                            }
-                            break;
-                        }
-                    }
+    private int getSignalLevelWithScanTool(String interfaceName, String ssid) throws KuraException {
+        logger.trace("getSignalLevelWithScanTool() :: using 'iw dev wlan0 scan' command ...");
+        IScanTool scanTool = getScanTool(interfaceName);
+        if (scanTool == null) {
+            return 0;
+        }
+        int rssi = 0;
+        List<WifiAccessPoint> wifiAccessPoints = scanTool.scan();
+        for (WifiAccessPoint wap : wifiAccessPoints) {
+            if (ssid.equals(wap.getSSID())) {
+                if (wap.getStrength() > 0) {
+                    rssi = 0 - wap.getStrength();
+                    logger.debug("getSignalLevelWithScanTool() :: rssi={} (using 'iw dev wlan0 scan')", rssi);
                 }
+                break;
             }
         }
         return rssi;

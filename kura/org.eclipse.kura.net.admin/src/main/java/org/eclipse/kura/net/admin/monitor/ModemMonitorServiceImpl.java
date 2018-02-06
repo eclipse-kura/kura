@@ -27,6 +27,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.comm.CommURI;
+import org.eclipse.kura.core.net.AbstractNetInterface;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.linux.net.ConnectionInfoImpl;
 import org.eclipse.kura.linux.net.modem.SupportedSerialModemInfo;
@@ -376,7 +377,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
                         }
 
                         if (netInterfaceConfig != null) {
-                            newNetConfigs = getNetConfigs(netInterfaceConfig);
+                            newNetConfigs = ((AbstractNetInterface<?>) netInterfaceConfig).getNetConfigs();
                         } else {
                             if (oldNetConfigs != null && pppService != null
                                     && !ifaceName.equals(pppService.getIfaceName())) {
@@ -482,33 +483,23 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
         return ret;
     }
 
-    private List<NetConfig> getNetConfigs(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig) {
-        List<NetConfig> netConfigs = null;
-        if (netInterfaceConfig != null) {
-            List<? extends NetInterfaceAddressConfig> netInterfaceAddressConfigs = netInterfaceConfig
-                    .getNetInterfaceAddresses();
-            for (NetInterfaceAddressConfig netInterfaceAddressConfig : netInterfaceAddressConfigs) {
-                netConfigs = netInterfaceAddressConfig.getConfigs();
-            }
-        }
-        return netConfigs;
-    }
-
     private ModemConfig getModemConfig(List<NetConfig> netConfigs) {
-        ModemConfig modemConfig = null;
+        ModemConfig modemConfig = new ModemConfig();
         for (NetConfig netConfig : netConfigs) {
             if (netConfig instanceof ModemConfig) {
                 modemConfig = (ModemConfig) netConfig;
+                break;
             }
         }
         return modemConfig;
     }
 
     private NetConfigIP4 getNetConfigIp4(List<NetConfig> netConfigs) {
-        NetConfigIP4 netConfigIP4 = null;
+        NetConfigIP4 netConfigIP4 = new NetConfigIP4(NetInterfaceStatus.netIPv4StatusUnknown, false);
         for (NetConfig netConfig : netConfigs) {
             if (netConfig instanceof NetConfigIP4) {
                 netConfigIP4 = (NetConfigIP4) netConfig;
+                break;
             }
         }
         return netConfigIP4;
@@ -718,31 +709,28 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 
         if (newStatuses != null) {
             // post NetworkStatusChangeEvent on current and new interfaces
-            for (Map.Entry<String,InterfaceState> newStatus : newStatuses.entrySet()) {
-                String interfaceName =  newStatus.getKey();
+            for (Map.Entry<String, InterfaceState> newStatus : newStatuses.entrySet()) {
+                String interfaceName = newStatus.getKey();
                 InterfaceState interfaceState = newStatus.getValue();
                 if (oldStatuses != null && oldStatuses.containsKey(interfaceName)) {
                     if (!interfaceState.equals(oldStatuses.get(interfaceName))) {
                         logger.debug("Posting NetworkStatusChangeEvent on interface: {}", interfaceName);
-                        this.eventAdmin.postEvent(
-                                new NetworkStatusChangeEvent(interfaceName, interfaceState, null));
+                        this.eventAdmin.postEvent(new NetworkStatusChangeEvent(interfaceName, interfaceState, null));
                     }
                 } else {
                     logger.debug("Posting NetworkStatusChangeEvent on enabled interface: {}", interfaceName);
-                    this.eventAdmin.postEvent(
-                            new NetworkStatusChangeEvent(interfaceName, interfaceState, null));
+                    this.eventAdmin.postEvent(new NetworkStatusChangeEvent(interfaceName, interfaceState, null));
                 }
             }
 
             // post NetworkStatusChangeEvent on interfaces that are no longer there
             if (oldStatuses != null) {
-                for (Map.Entry<String,InterfaceState> oldStatus : oldStatuses.entrySet()) {
+                for (Map.Entry<String, InterfaceState> oldStatus : oldStatuses.entrySet()) {
                     String interfaceName = oldStatus.getKey();
                     InterfaceState interfaceState = oldStatus.getValue();
                     if (!newStatuses.containsKey(interfaceName)) {
                         logger.debug("Posting NetworkStatusChangeEvent on disabled interface: {}", interfaceName);
-                        this.eventAdmin.postEvent(
-                                new NetworkStatusChangeEvent(interfaceName, interfaceState, null));
+                        this.eventAdmin.postEvent(new NetworkStatusChangeEvent(interfaceName, interfaceState, null));
                     }
                 }
             }
@@ -797,7 +785,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
                     }
 
                     if (netInterfaceConfig != null) {
-                        netConfigs = getNetConfigs(netInterfaceConfig);
+                        netConfigs = ((AbstractNetInterface<?>) netInterfaceConfig).getNetConfigs();
                         if (netConfigs != null && !netConfigs.isEmpty()) {
                             modem.setConfiguration(netConfigs);
                         }

@@ -24,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.core.net.AbstractNetInterface;
 import org.eclipse.kura.core.net.EthernetInterfaceConfigImpl;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.linux.net.dhcp.DhcpServerManager;
@@ -197,8 +198,10 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
                 boolean dhcpServerEnabled = false;
                 boolean postStatusChangeEvent = false;
 
-                NetInterfaceConfig<NetInterfaceAddressConfig> currentInterfaceConfig = this.networkConfiguration.get(interfaceName);
-                NetInterfaceConfig<NetInterfaceAddressConfig> newInterfaceConfig = this.newNetworkConfiguration.get(interfaceName);
+                NetInterfaceConfig<NetInterfaceAddressConfig> currentInterfaceConfig = this.networkConfiguration
+                        .get(interfaceName);
+                NetInterfaceConfig<NetInterfaceAddressConfig> newInterfaceConfig = this.newNetworkConfiguration
+                        .get(interfaceName);
 
                 startInterfaceIfDown(interfaceName);
 
@@ -213,7 +216,7 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
                     if (isConfigChanged(newNiacs, curNiacs)) {
                         logger.info("Found a new Ethernet network configuration for {}", interfaceName);
 
-                        if (!isEthernetManaged(newInterfaceConfig)) {
+                        if (!((AbstractNetInterface<?>) newInterfaceConfig).isInterfaceManaged()) {
                             logger.info(
                                     "The {} interface is configured not to be managed by Kura and will not be monitored.",
                                     interfaceName);
@@ -235,8 +238,7 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
                 }
 
                 // Monitor for status changes and ensure dhcp server is running when enabled
-
-                interfaceEnabled = isEthernetEnabled(currentInterfaceConfig);
+                interfaceEnabled = ((AbstractNetInterface<?>) currentInterfaceConfig).isInterfaceEnabled();
                 InterfaceState prevInterfaceState = this.interfaceState.get(interfaceName);
 
                 // FIXME:MC Deprecate this constructor and prefer the one with the explicit parameters
@@ -250,8 +252,8 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 
                 // Find if DHCP server or DHCP client mode is enabled
                 if (currentInterfaceConfig != null) {
-                    NetInterfaceStatus netInterfaceStatus = getEthernetInterfaceStatus(currentInterfaceConfig);
-
+                    NetInterfaceStatus netInterfaceStatus = ((AbstractNetInterface<?>) currentInterfaceConfig)
+                            .getInterfaceStatus();
                     curNiacs = currentInterfaceConfig.getNetInterfaceAddresses();
 
                     if (curNiacs != null && !curNiacs.isEmpty()) {
@@ -314,7 +316,8 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 
                 // Manage the DHCP server and validate routes
                 if (currentInterfaceState != null && currentInterfaceState.isUp() && currentInterfaceState.isLinkUp()) {
-                    NetInterfaceStatus netInterfaceStatus = getEthernetInterfaceStatus(currentInterfaceConfig);
+                    NetInterfaceStatus netInterfaceStatus = ((AbstractNetInterface<?>) currentInterfaceConfig)
+                            .getInterfaceStatus();
                     if (netInterfaceStatus == NetInterfaceStatus.netIPv4StatusEnabledWAN) {
                         // This should be the default gateway - make sure it is
                         boolean found = false;
@@ -405,7 +408,7 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
                                     netInterfaceConfig.getName());
                             EthernetInterfaceConfigImpl newEthernetConfig = (EthernetInterfaceConfigImpl) netInterfaceConfig;
                             this.newNetworkConfiguration.put(netInterfaceConfig.getName(), newEthernetConfig);
-                            if (isEthernetManaged(newEthernetConfig)) {
+                            if (((AbstractNetInterface<?>) newEthernetConfig).isInterfaceManaged()) {
                                 logger.debug("handleEvent() :: Starting monitor for {} interface",
                                         netInterfaceConfig.getName());
                                 startMonitor(netInterfaceConfig.getName());
@@ -476,55 +479,13 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
         return false;
     }
 
-    // Verify if interface is enabled in configuration
-    private boolean isEthernetEnabled(NetInterfaceConfig<NetInterfaceAddressConfig> ethernetInterfaceConfig) {
-        NetInterfaceStatus status = getEthernetInterfaceStatus(ethernetInterfaceConfig);
-        logger.debug("isEthernetEnabled() :: Status for {} iface is {}", ethernetInterfaceConfig.getName(), status);
-        return status.equals(NetInterfaceStatus.netIPv4StatusEnabledLAN)
-                || status.equals(NetInterfaceStatus.netIPv4StatusEnabledWAN);
-    }
-
-    // Verify if interface is configured to be managed by Kura
-    private boolean isEthernetManaged(NetInterfaceConfig<NetInterfaceAddressConfig> ethernetInterfaceConfig) {
-        NetInterfaceStatus status = getEthernetInterfaceStatus(ethernetInterfaceConfig);
-        logger.debug("isEthernetManaged() :: Status for {} iface is {}", ethernetInterfaceConfig.getName(), status);
-        return !status.equals(NetInterfaceStatus.netIPv4StatusUnmanaged);
-    }
-
-    private NetInterfaceStatus getEthernetInterfaceStatus(NetInterfaceConfig<NetInterfaceAddressConfig> ethernetInterfaceConfig) {
-        List<NetConfig> netConfigs = getNetConfigs(ethernetInterfaceConfig);
-        if (netConfigs == null) {
-            return NetInterfaceStatus.netIPv4StatusUnknown;
-        }
-        NetInterfaceStatus status = NetInterfaceStatus.netIPv4StatusUnknown;
-        for (NetConfig netConfig : netConfigs) {
-            if (netConfig instanceof NetConfigIP4) {
-                status = ((NetConfigIP4) netConfig).getStatus();
-                break;
-            }
-        }
-        return status;
-    }
-
-    private List<NetConfig> getNetConfigs(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig) {
-
-        List<NetConfig> netConfigs = null;
-        if (netInterfaceConfig != null) {
-            List<? extends NetInterfaceAddressConfig> netInterfaceAddressConfigs = netInterfaceConfig
-                    .getNetInterfaceAddresses();
-            for (NetInterfaceAddressConfig netInterfaceAddressConfig : netInterfaceAddressConfigs) {
-                netConfigs = netInterfaceAddressConfig.getConfigs();
-            }
-        }
-        return netConfigs;
-    }
-
     // Initialize a monitor thread for each ethernet interface
     private void initializeMonitors() {
-        for (Entry<String, NetInterfaceConfig<NetInterfaceAddressConfig>> networkConfig : this.networkConfiguration.entrySet()) {
+        for (Entry<String, NetInterfaceConfig<NetInterfaceAddressConfig>> networkConfig : this.networkConfiguration
+                .entrySet()) {
             String interfaceName = networkConfig.getKey();
             NetInterfaceConfig<NetInterfaceAddressConfig> ifaceConfig = networkConfig.getValue();
-            if (isEthernetManaged(ifaceConfig)) {
+            if (((AbstractNetInterface<?>) ifaceConfig).isInterfaceManaged()) {
                 logger.debug("initializeMonitors() :: Starting monitor for {} interface", interfaceName);
                 startMonitor(interfaceName);
             }

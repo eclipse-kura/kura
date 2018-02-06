@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -26,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.core.net.AbstractNetInterface;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.modem.ModemInterfaceConfigImpl;
 import org.eclipse.kura.linux.net.dns.LinuxDns;
@@ -280,51 +281,25 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
     private void getAllowedNetworks(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig)
             throws KuraException {
 
-        String interfaceName = netInterfaceConfig.getName();
-        logger.debug("Getting DNS proxy config for {}", interfaceName);
+        logger.debug("Getting DNS proxy config for {}", netInterfaceConfig.getName());
+        List<NetConfig> netConfigs = ((AbstractNetInterface<?>) netInterfaceConfig).getNetConfigs();
+        for (NetConfig netConfig : netConfigs) {
+            if ((netConfig instanceof DhcpServerConfig) && ((DhcpServerConfig) netConfig).isPassDns()) {
+                logger.debug("Found an allowed network: {}/{}", ((DhcpServerConfig) netConfig).getRouterAddress(),
+                        ((DhcpServerConfig) netConfig).getPrefix());
+                this.enabled = true;
 
-        List<? extends NetInterfaceAddressConfig> netInterfaceAddressConfigs = netInterfaceConfig
-                .getNetInterfaceAddresses();
-
-        if (netInterfaceAddressConfigs != null && !netInterfaceAddressConfigs.isEmpty()) {
-            for (NetInterfaceAddressConfig netInterfaceAddressConfig : netInterfaceAddressConfigs) {
-                List<NetConfig> netConfigs = netInterfaceAddressConfig.getConfigs();
-                if (netConfigs != null && !netConfigs.isEmpty()) {
-                    for (int i = 0; i < netConfigs.size(); i++) {
-                        NetConfig netConfig = netConfigs.get(i);
-                        if ((netConfig instanceof DhcpServerConfig) && ((DhcpServerConfig) netConfig).isPassDns()) {
-                            logger.debug("Found an allowed network: {}/{}",
-                                    ((DhcpServerConfig) netConfig).getRouterAddress(),
-                                    ((DhcpServerConfig) netConfig).getPrefix());
-                            this.enabled = true;
-
-                            // this is an 'allowed network'
-                            this.allowedNetworks.add(new NetworkPair<IP4Address>(
-                                    (IP4Address) ((DhcpServerConfig) netConfig).getRouterAddress(),
-                                    ((DhcpServerConfig) netConfig).getPrefix()));
-                        }
-                    }
-                }
+                // this is an 'allowed network'
+                this.allowedNetworks
+                        .add(new NetworkPair<IP4Address>((IP4Address) ((DhcpServerConfig) netConfig).getRouterAddress(),
+                                ((DhcpServerConfig) netConfig).getPrefix()));
             }
         }
     }
 
     private boolean isEnabledForWan(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig) {
-        for (NetInterfaceAddressConfig netInterfaceAddressConfig : netInterfaceConfig.getNetInterfaceAddresses()) {
-            if (netInterfaceAddressConfig != null) {
-                List<NetConfig> netConfigs = netInterfaceAddressConfig.getConfigs();
-                if (netConfigs != null) {
-                    for (NetConfig netConfig : netConfigs) {
-                        if (netConfig instanceof NetConfigIP4) {
-                            return NetInterfaceStatus.netIPv4StatusEnabledWAN
-                                    .equals(((NetConfigIP4) netConfig).getStatus());
-                        }
-                    }
-                }
-            }
-        }
-
-        return false;
+        return ((AbstractNetInterface<?>) netInterfaceConfig).getInterfaceStatus()
+                .equals(NetInterfaceStatus.netIPv4StatusEnabledWAN);
     }
 
     private void setDnsServers(Set<IPAddress> newServers) {
@@ -383,43 +358,39 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
         LinuxDns linuxDns = this.dnsUtil;
         LinkedHashSet<IPAddress> serverList = new LinkedHashSet<>();
 
-        for (NetInterfaceAddressConfig netInterfaceAddressConfig : netInterfaceConfig.getNetInterfaceAddresses()) {
-            for (NetConfig netConfig : netInterfaceAddressConfig.getConfigs()) {
-                if (netConfig instanceof NetConfigIP4) {
-                    NetConfigIP4 netConfigIP4 = (NetConfigIP4) netConfig;
-                    List<IP4Address> userServers = netConfigIP4.getDnsServers();
-                    if (netConfigIP4.isDhcp()) {
-                        // If DHCP but there are user defined entries, use those instead
-                        if (userServers != null && !userServers.isEmpty()) {
-                            logger.debug("Configured for DHCP with user-defined servers - adding: {}", userServers);
-                            serverList.addAll(userServers);
-                        } else {
-                            if (netInterfaceConfig.getType().equals(NetInterfaceType.MODEM)) {
-                                // FIXME - don't like this
-                                // cannot use interfaceName here because it one config behind
-                                int pppNo = ((ModemInterfaceConfigImpl) netInterfaceConfig).getPppNum();
-                                if (pppHasAddress(pppNo)) {
-                                    List<IPAddress> servers = linuxDns.getPppDnServers();
-                                    if (servers != null) {
-                                        logger.debug("Adding PPP dns servers: {}", servers);
-                                        serverList.addAll(servers);
-                                    }
-                                }
-                            } else {
-                                String currentAddress = getCurrentIpAddress(interfaceName);
-                                List<IPAddress> servers = linuxDns.getDhcpDnsServers(interfaceName, currentAddress);
-                                if (!servers.isEmpty()) {
-                                    logger.debug("Configured for DHCP - adding DHCP servers: {}", servers);
-                                    serverList.addAll(servers);
-                                }
+        NetConfigIP4 netConfigIP4 = ((AbstractNetInterface<?>) netInterfaceConfig).getIP4config();
+        if (netConfigIP4 != null) {
+            List<IP4Address> userServers = netConfigIP4.getDnsServers();
+            if (netConfigIP4.isDhcp()) {
+                // If DHCP but there are user defined entries, use those instead
+                if (userServers != null && !userServers.isEmpty()) {
+                    logger.debug("Configured for DHCP with user-defined servers - adding: {}", userServers);
+                    serverList.addAll(userServers);
+                } else {
+                    if (netInterfaceConfig.getType().equals(NetInterfaceType.MODEM)) {
+                        // FIXME - don't like this
+                        // cannot use interfaceName here because it one config behind
+                        int pppNo = ((ModemInterfaceConfigImpl) netInterfaceConfig).getPppNum();
+                        if (pppHasAddress(pppNo)) {
+                            List<IPAddress> servers = linuxDns.getPppDnServers();
+                            if (servers != null) {
+                                logger.debug("Adding PPP dns servers: {}", servers);
+                                serverList.addAll(servers);
                             }
                         }
                     } else {
-                        // If static, use the user defined entries
-                        logger.debug("Configured for static - adding user-defined servers: {}", userServers);
-                        serverList.addAll(userServers);
+                        String currentAddress = getCurrentIpAddress(interfaceName);
+                        List<IPAddress> servers = linuxDns.getDhcpDnsServers(interfaceName, currentAddress);
+                        if (!servers.isEmpty()) {
+                            logger.debug("Configured for DHCP - adding DHCP servers: {}", servers);
+                            serverList.addAll(servers);
+                        }
                     }
                 }
+            } else {
+                // If static, use the user defined entries
+                logger.debug("Configured for static - adding user-defined servers: {}", userServers);
+                serverList.addAll(userServers);
             }
         }
         return serverList;

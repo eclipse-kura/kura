@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -22,6 +22,7 @@ import java.util.StringTokenizer;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.core.net.AbstractNetInterface;
 import org.eclipse.kura.core.net.NetInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
@@ -79,48 +80,39 @@ public class DhcpConfigReader implements NetworkConfigurationVisitor {
 
     private void getConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig,
             Properties kuraExtendedProps) throws KuraException {
-        String interfaceName = netInterfaceConfig.getName();
-        logger.debug("Getting DHCP server config for {}", interfaceName);
 
         NetInterfaceType type = netInterfaceConfig.getType();
-        if (type == NetInterfaceType.ETHERNET || type == NetInterfaceType.WIFI) {
-            String configFilename = getConfigFilename(interfaceName);
-            File dhcpConfigFile = new File(configFilename);
+        if (!(type == NetInterfaceType.ETHERNET || type == NetInterfaceType.WIFI)) {
+            return;
+        }
+        String interfaceName = netInterfaceConfig.getName();
+        logger.debug("Getting DHCP server config for {}", interfaceName);
+        String configFilename = getConfigFilename(interfaceName);
+        File dhcpConfigFile = new File(configFilename);
 
-            if (dhcpConfigFile.exists()) {
-                DhcpServerConfig4 dhcpServerConfig4 = populateConfig(interfaceName, dhcpConfigFile, kuraExtendedProps);
+        if (!dhcpConfigFile.exists()) {
+            logger.debug("There is no current DHCP server configuration for {}", interfaceName);
+            return;
+        }
 
-                if (dhcpServerConfig4 != null) {
-                    List<? extends NetInterfaceAddressConfig> netInterfaceAddressConfigs = netInterfaceConfig
-                            .getNetInterfaceAddresses();
+        DhcpServerConfig4 dhcpServerConfig4 = populateConfig(interfaceName, dhcpConfigFile, kuraExtendedProps);
+        if (dhcpServerConfig4 == null) {
+            return;
+        }
 
-                    if (netInterfaceAddressConfigs == null) {
-                        throw KuraException
-                                .internalError("NetInterfaceAddress list is null for interface " + interfaceName);
-                    } else if (netInterfaceAddressConfigs.isEmpty()) {
-                        throw KuraException
-                                .internalError("NetInterfaceAddress list is empty for interface " + interfaceName);
-                    }
-
-                    for (NetInterfaceAddressConfig netInterfaceAddressConfig : netInterfaceAddressConfigs) {
-                        List<NetConfig> netConfigs = netInterfaceAddressConfig.getConfigs();
-
-                        if (netConfigs == null) {
-                            netConfigs = new ArrayList<>();
-                            if (netInterfaceAddressConfig instanceof NetInterfaceAddressConfigImpl) {
-                                ((NetInterfaceAddressConfigImpl) netInterfaceAddressConfig).setNetConfigs(netConfigs);
-                            } else if (netInterfaceAddressConfig instanceof WifiInterfaceAddressConfigImpl) {
-                                ((WifiInterfaceAddressConfigImpl) netInterfaceAddressConfig).setNetConfigs(netConfigs);
-                            }
-                        }
-
-                        netConfigs.add(dhcpServerConfig4);
-                    }
-                }
-            } else {
-                logger.debug("There is no current DHCP server configuration for {}", interfaceName);
+        NetInterfaceAddressConfig netInterfaceAddressConfig = ((AbstractNetInterface<?>) netInterfaceConfig)
+                .getNetInterfaceAddressConfig();
+        List<NetConfig> netConfigs = netInterfaceAddressConfig.getConfigs();
+        if (netConfigs == null) {
+            netConfigs = new ArrayList<>();
+            if (netInterfaceAddressConfig instanceof NetInterfaceAddressConfigImpl) {
+                ((NetInterfaceAddressConfigImpl) netInterfaceAddressConfig).setNetConfigs(netConfigs);
+            } else if (netInterfaceAddressConfig instanceof WifiInterfaceAddressConfigImpl) {
+                ((WifiInterfaceAddressConfigImpl) netInterfaceAddressConfig).setNetConfigs(netConfigs);
             }
         }
+
+        netConfigs.add(dhcpServerConfig4);
     }
 
     private DhcpServerConfig4 populateConfig(String interfaceName, File dhcpConfigFile, Properties kuraExtendedProps)
@@ -150,7 +142,6 @@ public class DhcpConfigReader implements NetworkConfigurationVisitor {
             IP4Address rangeEnd = null;
             boolean passDns = true;
             ArrayList<IP4Address> dnsList = new ArrayList<>();
-
 
             String line = null;
             while ((line = br.readLine()) != null) {
@@ -259,7 +250,6 @@ public class DhcpConfigReader implements NetworkConfigurationVisitor {
             IP4Address rangeEnd = null;
             boolean passDns = true;
             ArrayList<IP4Address> dnsList = new ArrayList<>();
-
 
             String line = null;
             while ((line = br.readLine()) != null) {

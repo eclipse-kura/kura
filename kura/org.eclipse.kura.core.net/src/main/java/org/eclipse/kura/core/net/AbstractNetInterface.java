@@ -16,13 +16,23 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.kura.KuraErrorCode;
+import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.net.util.NetworkUtil;
+import org.eclipse.kura.net.NetConfig;
+import org.eclipse.kura.net.NetConfigIP4;
 import org.eclipse.kura.net.NetInterface;
 import org.eclipse.kura.net.NetInterfaceAddress;
+import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceState;
+import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.usb.UsbDevice;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class AbstractNetInterface<T extends NetInterfaceAddress> implements NetInterface<T> {
+
+    private static final Logger logger = LoggerFactory.getLogger(AbstractNetInterface.class);
 
     private String name;
     private byte[] hardwareAddress;
@@ -334,5 +344,88 @@ public abstract class AbstractNetInterface<T extends NetInterfaceAddress> implem
             return false;
         }
         return true;
+    }
+
+    public NetInterfaceAddressConfig getNetInterfaceAddressConfig() throws KuraException {
+        if (this.getNetInterfaceAddresses() == null || this.getNetInterfaceAddresses().isEmpty()) {
+            throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, "Empty NetInterfaceAddressConfig list");
+        }
+        return (NetInterfaceAddressConfig) this.getNetInterfaceAddresses().get(0);
+    }
+
+    /**
+     * Returns a list of network configurations
+     * 
+     * @return list of network configurations as {@link List<NetConfig>}
+     */
+    public List<NetConfig> getNetConfigs() {
+        List<NetConfig> ret = new ArrayList<>();
+        try {
+            List<NetConfig> netConfigs = getNetInterfaceAddressConfig().getConfigs();
+            if (netConfigs != null) {
+                ret = netConfigs;
+            }
+        } catch (KuraException e) {
+            logger.error("Failed to obtain NetConfigs", e);
+        }
+        return ret;
+    }
+
+    /**
+     * Reports interface status
+     * 
+     * @return interface status as {@link NetInterfaceStatus}
+     */
+    public NetInterfaceStatus getInterfaceStatus() {
+        List<NetConfig> netConfigs = getNetConfigs();
+        if (netConfigs == null) {
+            return NetInterfaceStatus.netIPv4StatusUnknown;
+        }
+        NetInterfaceStatus status = NetInterfaceStatus.netIPv4StatusUnknown;
+        for (NetConfig netConfig : netConfigs) {
+            if (netConfig instanceof NetConfigIP4) {
+                status = ((NetConfigIP4) netConfig).getStatus();
+                break;
+            }
+        }
+        return status;
+    }
+
+    /**
+     * Reports IPv4 configuration
+     * 
+     * @return IPv4 configuration as {@link NetConfigIP4}
+     */
+    public NetConfigIP4 getIP4config() {
+        NetConfigIP4 netConfigIP4 = null;
+        List<NetConfig> netConfigs = getNetConfigs();
+        for (NetConfig netConfig : netConfigs) {
+            if (netConfig instanceof NetConfigIP4) {
+                netConfigIP4 = (NetConfigIP4) netConfig;
+                break;
+            }
+        }
+        return netConfigIP4;
+    }
+
+    /**
+     * Reports if interface is managed by the NetAdmin
+     * 
+     * @return boolean
+     */
+    public boolean isInterfaceManaged() {
+        NetInterfaceStatus status = getInterfaceStatus();
+        return !status.equals(NetInterfaceStatus.netIPv4StatusUnmanaged);
+    }
+
+    /**
+     * Reports if interface is enabled in configuration
+     * 
+     * @return boolean
+     */
+    public boolean isInterfaceEnabled() {
+        NetInterfaceStatus status = getInterfaceStatus();
+        return status.equals(NetInterfaceStatus.netIPv4StatusEnabledLAN)
+                || status.equals(NetInterfaceStatus.netIPv4StatusEnabledWAN);
     }
 }

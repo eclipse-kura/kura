@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -21,6 +21,7 @@ import java.util.Properties;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.core.net.AbstractNetInterface;
 import org.eclipse.kura.core.net.EthernetInterfaceConfigImpl;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
@@ -85,16 +86,10 @@ public class DhcpConfigWriter implements NetworkConfigurationVisitor {
         String tmpDhcpConfigFileName = new StringBuilder(dhcpConfigFileName).append(".tmp").toString();
 
         logger.debug("Writing DHCP config for {}", interfaceName);
+        NetInterfaceAddressConfig netInterfaceAddressConfig = ((AbstractNetInterface<?>) netInterfaceConfig)
+                .getNetInterfaceAddressConfig();
+        writeNetInterfaceConfig(interfaceName, dhcpConfigFileName, tmpDhcpConfigFileName, netInterfaceAddressConfig);
 
-        List<? extends NetInterfaceAddressConfig> netInterfaceAddressConfigs = netInterfaceConfig
-                .getNetInterfaceAddresses();
-
-        if (netInterfaceAddressConfigs != null && !netInterfaceAddressConfigs.isEmpty()) {
-            for (NetInterfaceAddressConfig netInterfaceAddressConfig : netInterfaceAddressConfigs) {
-                writeNetInterfaceConfig(interfaceName, dhcpConfigFileName, tmpDhcpConfigFileName,
-                        netInterfaceAddressConfig);
-            }
-        }
     }
 
     private void writeNetInterfaceConfig(String interfaceName, String dhcpConfigFileName, String tmpDhcpConfigFileName,
@@ -182,25 +177,24 @@ public class DhcpConfigWriter implements NetworkConfigurationVisitor {
         boolean enabled = false;
         boolean passDns = false;
 
-        List<? extends NetInterfaceAddressConfig> netInterfaceAddressConfigs = null;
+        NetInterfaceAddressConfig netInterfaceAddressConfig = null;
         if (netInterfaceConfig instanceof EthernetInterfaceConfigImpl) {
-            netInterfaceAddressConfigs = ((EthernetInterfaceConfigImpl) netInterfaceConfig).getNetInterfaceAddresses();
+            netInterfaceAddressConfig = ((EthernetInterfaceConfigImpl) netInterfaceConfig).getNetInterfaceAddresses()
+                    .get(0);
         } else if (netInterfaceConfig instanceof WifiInterfaceConfigImpl) {
-            netInterfaceAddressConfigs = ((WifiInterfaceConfigImpl) netInterfaceConfig).getNetInterfaceAddresses();
+            netInterfaceAddressConfig = ((WifiInterfaceConfigImpl) netInterfaceConfig).getNetInterfaceAddresses()
+                    .get(0);
         } else {
             logger.error("not adding config for {}", netInterfaceConfig.getName());
         }
 
-        if (netInterfaceAddressConfigs != null && !netInterfaceAddressConfigs.isEmpty()) {
-            for (NetInterfaceAddressConfig netInterfaceAddressConfig : netInterfaceAddressConfigs) {
-                List<NetConfig> netConfigs = netInterfaceAddressConfig.getConfigs();
-                if (netConfigs != null && !netConfigs.isEmpty()) {
-                    for (int i = 0; i < netConfigs.size(); i++) {
-                        NetConfig netConfig = netConfigs.get(i);
-                        if (netConfig instanceof DhcpServerConfig4) {
-                            enabled = ((DhcpServerConfig4) netConfig).isEnabled();
-                            passDns = ((DhcpServerConfig4) netConfig).isPassDns();
-                        }
+        if (netInterfaceAddressConfig != null) {
+            List<NetConfig> netConfigs = netInterfaceAddressConfig.getConfigs();
+            if (netConfigs != null) {
+                for (NetConfig netConfig : netConfigs) {
+                    if (netConfig instanceof DhcpServerConfig4) {
+                        enabled = ((DhcpServerConfig4) netConfig).isEnabled();
+                        passDns = ((DhcpServerConfig4) netConfig).isPassDns();
                     }
                 }
             }

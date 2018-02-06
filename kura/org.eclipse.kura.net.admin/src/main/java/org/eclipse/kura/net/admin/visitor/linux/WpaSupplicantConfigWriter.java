@@ -21,6 +21,7 @@ import java.util.regex.Matcher;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.core.net.AbstractNetInterface;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
 import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
@@ -52,7 +53,7 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 
     private static final String WPA_TMP_CONFIG_FILE = "/etc/wpa_supplicant.conf.tmp";
     private static final String TMP_WPA_CONFIG_FILE = "/tmp/wpa_supplicant.conf";
-    private static final String WPA_SUPPLICANT_CONF_RESOURCE = "/src/main/resources/wifi/wpasupplicant.conf"; 
+    private static final String WPA_SUPPLICANT_CONF_RESOURCE = "/src/main/resources/wifi/wpasupplicant.conf";
 
     private static final String OS_VERSION = System.getProperty("kura.os.version");
 
@@ -130,45 +131,42 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
         String interfaceName = netInterfaceConfig.getName();
         logger.debug("Writing wpa_supplicant config for {}", interfaceName);
 
-        List<? extends NetInterfaceAddressConfig> netInterfaceAddressConfigs = netInterfaceConfig
-                .getNetInterfaceAddresses();
+        NetInterfaceAddressConfig netInterfaceAddressConfig = ((AbstractNetInterface<?>) netInterfaceConfig)
+                .getNetInterfaceAddressConfig();
+        if (netInterfaceAddressConfig instanceof WifiInterfaceAddressConfigImpl) {
+            List<NetConfig> netConfigs = netInterfaceAddressConfig.getConfigs();
+            NetInterfaceStatus netInterfaceStatus = NetInterfaceStatus.netIPv4StatusDisabled;
+            WifiMode wifiMode = ((WifiInterfaceAddressConfigImpl) netInterfaceAddressConfig).getMode();
+            WifiConfig infraConfig = null;
+            WifiConfig adhocConfig = null;
 
-        for (NetInterfaceAddressConfig netInterfaceAddressConfig : netInterfaceAddressConfigs) {
-            if (netInterfaceAddressConfig instanceof WifiInterfaceAddressConfigImpl) {
-                List<NetConfig> netConfigs = netInterfaceAddressConfig.getConfigs();
-                NetInterfaceStatus netInterfaceStatus = NetInterfaceStatus.netIPv4StatusDisabled;
-                WifiMode wifiMode = ((WifiInterfaceAddressConfigImpl) netInterfaceAddressConfig).getMode();
-                WifiConfig infraConfig = null;
-                WifiConfig adhocConfig = null;
-
-                // Get the wifi configs
-                if (netConfigs != null) {
-                    for (NetConfig netConfig : netConfigs) {
-                        if (netConfig instanceof WifiConfig) {
-                            if (((WifiConfig) netConfig).getMode() == WifiMode.ADHOC) {
-                                adhocConfig = (WifiConfig) netConfig;
-                            } else if (((WifiConfig) netConfig).getMode() == WifiMode.INFRA) {
-                                infraConfig = (WifiConfig) netConfig;
-                            }
-                        } else if (netConfig instanceof NetConfigIP4) {
-                            netInterfaceStatus = ((NetConfigIP4) netConfig).getStatus();
+            // Get the wifi configs
+            if (netConfigs != null) {
+                for (NetConfig netConfig : netConfigs) {
+                    if (netConfig instanceof WifiConfig) {
+                        if (((WifiConfig) netConfig).getMode() == WifiMode.ADHOC) {
+                            adhocConfig = (WifiConfig) netConfig;
+                        } else if (((WifiConfig) netConfig).getMode() == WifiMode.INFRA) {
+                            infraConfig = (WifiConfig) netConfig;
                         }
+                    } else if (netConfig instanceof NetConfigIP4) {
+                        netInterfaceStatus = ((NetConfigIP4) netConfig).getStatus();
                     }
                 }
-
-                if (netInterfaceStatus == NetInterfaceStatus.netIPv4StatusDisabled
-                        || netInterfaceStatus == NetInterfaceStatus.netIPv4StatusUnmanaged) {
-                    logger.info("Network interface status for {} is {} - not overwriting wpaconfig file", interfaceName,
-                            netInterfaceStatus);
-                    return;
-                }
-
-                // Choose which config to write
-                WifiConfig wpaSupplicantConfig = chooseConfig(interfaceName, wifiMode, infraConfig, adhocConfig);
-
-                // Write the config
-                writeAndMoveFile(interfaceName, wpaSupplicantConfig);
             }
+
+            if (netInterfaceStatus == NetInterfaceStatus.netIPv4StatusDisabled
+                    || netInterfaceStatus == NetInterfaceStatus.netIPv4StatusUnmanaged) {
+                logger.info("Network interface status for {} is {} - not overwriting wpaconfig file", interfaceName,
+                        netInterfaceStatus);
+                return;
+            }
+
+            // Choose which config to write
+            WifiConfig wpaSupplicantConfig = chooseConfig(interfaceName, wifiMode, infraConfig, adhocConfig);
+
+            // Write the config
+            writeAndMoveFile(interfaceName, wpaSupplicantConfig);
         }
     }
 

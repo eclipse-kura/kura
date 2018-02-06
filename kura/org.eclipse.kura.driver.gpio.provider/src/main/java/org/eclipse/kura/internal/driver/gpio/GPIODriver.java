@@ -20,9 +20,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.eclipse.kura.channel.ChannelFlag;
 import org.eclipse.kura.channel.ChannelRecord;
@@ -74,8 +76,8 @@ public final class GPIODriver implements Driver, ConfigurableComponent {
     private static final Logger logger = LoggerFactory.getLogger(GPIODriver.class);
     private static final GPIOMessages message = LocalizationAdapter.adapt(GPIOMessages.class);
 
-    private List<String> gpioNameList;
-    private List<GPIOListener> gpioListeners;
+    private Set<String> gpioNames;
+    private Set<GPIOListener> gpioListeners;
     private final List<GPIOService> gpioServices = new ArrayList<>();
 
     protected synchronized void bindGPIOService(final GPIOService gpioService) {
@@ -90,8 +92,8 @@ public final class GPIODriver implements Driver, ConfigurableComponent {
 
     protected synchronized void activate(final Map<String, Object> properties) {
         logger.debug("Activating GPIO Driver...");
-        this.gpioNameList = new ArrayList<>();
-        this.gpioListeners = new ArrayList<>();
+        this.gpioNames = new HashSet<>();
+        this.gpioListeners = new HashSet<>();
         logger.debug("Activating GPIO Driver... Done");
     }
 
@@ -107,21 +109,29 @@ public final class GPIODriver implements Driver, ConfigurableComponent {
     }
 
     private void doDeactivate() {
-        for (String name : this.gpioNameList) {
+        for (GPIOListener gpioListener : this.gpioListeners) {
+            KuraGPIOPin pin = gpioListener.getPin();
+            try {
+                pin.removePinStatusListener(gpioListener);
+            } catch (KuraClosedDeviceException | IOException e) {
+                logger.error(message.errorRemovingListener(pin.getName()), e);
+            }
+        }
+        this.gpioListeners.clear();
+
+        for (String name : this.gpioNames) {
             for (GPIOService service : this.gpioServices) {
                 KuraGPIOPin pin = service.getPinByName(name);
                 if (pin != null && pin.isOpen()) {
                     try {
                         pin.close();
                     } catch (IOException e) {
-                        logger.error(message.errorOpeningResource(pin.getName()), e);
+                        logger.error(message.errorClosingResource(pin.getName()), e);
                     }
                 }
             }
         }
-        this.gpioNameList.clear();
-        this.gpioListeners.clear();
-
+        this.gpioNames.clear();
     }
 
     @Override
@@ -209,6 +219,7 @@ public final class GPIODriver implements Driver, ConfigurableComponent {
             if (listener == gpioListener.getListener()) {
                 try {
                     gpioListener.getPin().removePinStatusListener(gpioListener);
+                    this.gpioListeners.remove(gpioListener);
                 } catch (KuraClosedDeviceException | IOException e) {
                     logger.error(message.errorRemovingListener(gpioListener.getPin().getName()), e);
                 }
@@ -241,8 +252,8 @@ public final class GPIODriver implements Driver, ConfigurableComponent {
     }
 
     private void updateGpioList(String resourceName) {
-        if (!this.gpioNameList.contains(resourceName)) {
-            this.gpioNameList.add(resourceName);
+        if (!this.gpioNames.contains(resourceName)) {
+            this.gpioNames.add(resourceName);
         }
     }
 

@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -137,7 +138,7 @@ public final class GPIODriver implements Driver, ConfigurableComponent {
     }
 
     @Override
-    public void disconnect() throws ConnectionException {
+    public synchronized void disconnect() throws ConnectionException {
         doDeactivate();
     }
 
@@ -147,25 +148,25 @@ public final class GPIODriver implements Driver, ConfigurableComponent {
     }
 
     @Override
-    public void read(final List<ChannelRecord> records) throws ConnectionException {
+    public synchronized void read(final List<ChannelRecord> records) throws ConnectionException {
         for (final ChannelRecord record : records) {
             Optional<GPIORequestInfo> requestInfo = GPIORequestInfo.extract(record);
             if (requestInfo.isPresent()) {
-                updateGpioList(requestInfo.get().resourceName);
+                this.gpioNames.add(requestInfo.get().resourceName);
                 runReadRequest(requestInfo.get());
             }
         }
     }
 
     @Override
-    public void write(final List<ChannelRecord> records) throws ConnectionException {
+    public synchronized void write(final List<ChannelRecord> records) throws ConnectionException {
         for (final ChannelRecord record : records) {
             GPIORequestInfo.extract(record).ifPresent(this::runWriteRequest);
         }
     }
 
     @Override
-    public PreparedRead prepareRead(List<ChannelRecord> channelRecords) {
+    public synchronized PreparedRead prepareRead(List<ChannelRecord> channelRecords) {
         requireNonNull(channelRecords, message.recordListNonNull());
 
         GPIOPreparedRead preparedRead = new GPIOPreparedRead();
@@ -175,20 +176,20 @@ public final class GPIODriver implements Driver, ConfigurableComponent {
             Optional<GPIORequestInfo> requestInfo = GPIORequestInfo.extract(record);
             if (requestInfo.isPresent()) {
                 preparedRead.requestInfos.add(requestInfo.get());
-                updateGpioList(requestInfo.get().resourceName);
+                this.gpioNames.add(requestInfo.get().resourceName);
             }
         }
         return preparedRead;
     }
 
     @Override
-    public void registerChannelListener(final Map<String, Object> channelConfig, final ChannelListener listener)
-            throws ConnectionException {
+    public synchronized void registerChannelListener(final Map<String, Object> channelConfig,
+            final ChannelListener listener) throws ConnectionException {
         String name = GPIOChannelDescriptor.getResourceName(channelConfig);
         KuraGPIODirection direction = GPIOChannelDescriptor.getResourceDirection(channelConfig);
         if (GPIOChannelDescriptor.isResourceEnabled(channelConfig)
                 && !GPIOChannelDescriptor.DEFAULT_RESOURCE_NAME.equals(name) && direction != null) {
-            updateGpioList(name);
+            this.gpioNames.add(name);
             KuraGPIOPin pin;
             if (KuraGPIODirection.INPUT.equals(direction)) {
                 pin = getPin(name, direction, KuraGPIOMode.INPUT_PULL_UP,
@@ -211,12 +212,14 @@ public final class GPIODriver implements Driver, ConfigurableComponent {
     }
 
     @Override
-    public void unregisterChannelListener(final ChannelListener listener) throws ConnectionException {
-        for (GPIOListener gpioListener : this.gpioListeners) {
+    public synchronized void unregisterChannelListener(final ChannelListener listener) throws ConnectionException {
+        Iterator<GPIOListener> iterator = this.gpioListeners.iterator();
+        while (iterator.hasNext()) {
+            GPIOListener gpioListener = iterator.next();
             if (listener == gpioListener.getListener()) {
                 try {
                     gpioListener.getPin().removePinStatusListener(gpioListener);
-                    this.gpioListeners.remove(gpioListener);
+                    iterator.remove();
                 } catch (KuraClosedDeviceException | IOException e) {
                     logger.error(message.errorRemovingListener(gpioListener.getPin().getName()), e);
                 }
@@ -224,14 +227,14 @@ public final class GPIODriver implements Driver, ConfigurableComponent {
         }
     }
 
-    private void runWriteRequest(GPIORequestInfo requestInfo) {
+    private synchronized void runWriteRequest(GPIORequestInfo requestInfo) {
         if (requestInfo.resourceEnabled && !GPIOChannelDescriptor.DEFAULT_RESOURCE_NAME.equals(requestInfo.resourceName)
                 && requestInfo.resourceDirection != null) {
             ChannelRecord record = requestInfo.channelRecord;
 
             try {
                 final TypedValue<Boolean> value = getBooleanValue(record.getValue());
-                updateGpioList(requestInfo.resourceName);
+                this.gpioNames.add(requestInfo.resourceName);
                 KuraGPIOPin pin = getPin(requestInfo.resourceName, requestInfo.resourceDirection,
                         requestInfo.resourceMode, requestInfo.resourceTrigger);
                 if (pin != null) {
@@ -245,12 +248,6 @@ public final class GPIODriver implements Driver, ConfigurableComponent {
                 logger.warn(message.writeFailed());
                 return;
             }
-        }
-    }
-
-    private void updateGpioList(String resourceName) {
-        if (!this.gpioNames.contains(resourceName)) {
-            this.gpioNames.add(resourceName);
         }
     }
 
@@ -336,7 +333,7 @@ public final class GPIODriver implements Driver, ConfigurableComponent {
         }
     }
 
-    private void runReadRequest(GPIORequestInfo requestInfo) {
+    private synchronized void runReadRequest(GPIORequestInfo requestInfo) {
         if (requestInfo.resourceEnabled && !GPIOChannelDescriptor.DEFAULT_RESOURCE_NAME.equals(requestInfo.resourceName)
                 && requestInfo.resourceDirection != null) {
             ChannelRecord record = requestInfo.channelRecord;

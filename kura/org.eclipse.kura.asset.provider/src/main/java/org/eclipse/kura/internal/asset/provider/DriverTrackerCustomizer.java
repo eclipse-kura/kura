@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -92,7 +92,7 @@ public final class DriverTrackerCustomizer implements ServiceTrackerCustomizer<D
         this.context.ungetService(reference);
         if (reference.getProperty(KURA_SERVICE_PID).equals(this.driverId)) {
             logger.info(message.driverRemoved() + service);
-            this.baseAsset.setDriver(null);
+            this.baseAsset.unsetDriver();
         }
     }
 }

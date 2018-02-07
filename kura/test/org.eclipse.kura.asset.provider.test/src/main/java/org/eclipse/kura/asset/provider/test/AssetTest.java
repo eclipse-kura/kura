@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -42,6 +42,7 @@ import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.metatype.AD;
 import org.eclipse.kura.configuration.metatype.OCD;
+import org.eclipse.kura.driver.Driver;
 import org.eclipse.kura.driver.Driver.ConnectionException;
 import org.eclipse.kura.test.annotation.TestTarget;
 import org.eclipse.kura.type.DataType;
@@ -192,6 +193,7 @@ public final class AssetTest {
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testListen() throws KuraException {
+
         AtomicBoolean invoked = new AtomicBoolean(false);
 
         final ChannelListener listener = new ChannelListener() {
@@ -207,6 +209,107 @@ public final class AssetTest {
         asset.registerChannelListener("1.CH", listener);
 
         assertTrue(invoked.get());
+    }
+
+    /**
+     * Listeners should be removed from the driver when it is detached from the asset and added when it is attached.
+     */
+    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @Test
+    public void testListenerAttachOnDriverChange() throws KuraException {
+        final Driver driver = ((BaseAsset) asset).getDriver();
+
+        final ArrayList<Boolean> attachSequence = new ArrayList<>();
+
+        final ChannelListener listener = new ChannelListener() {
+
+            @Override
+            public void onChannelEvent(ChannelEvent event) {
+                if ("unregister".equals(event.getChannelRecord().getChannelName())) {
+                    attachSequence.add(false);
+                } else {
+                    attachSequence.add(true);
+                }
+            }
+        };
+
+        asset.registerChannelListener("1.CH", listener);
+        assertEquals(Arrays.asList(true), attachSequence);
+
+        ((BaseAsset) asset).unsetDriver();
+        assertEquals(Arrays.asList(true, false), attachSequence);
+
+        ((BaseAsset) asset).setDriver(driver);
+        assertEquals(Arrays.asList(true, false, false, true), attachSequence);
+    }
+
+    /**
+     * It should be possible to add listeners to an asset even if the driver is not attached, the asset should attach
+     * them later on when the driver is tracked
+     */
+    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @Test
+    public void testAttachListenerWhitoutDriver() throws KuraException {
+        final Driver driver = ((BaseAsset) asset).getDriver();
+
+        final ArrayList<Boolean> attachSequence = new ArrayList<>();
+
+        final ChannelListener listener = new ChannelListener() {
+
+            @Override
+            public void onChannelEvent(ChannelEvent event) {
+                if ("unregister".equals(event.getChannelRecord().getChannelName())) {
+                    attachSequence.add(false);
+                } else {
+                    attachSequence.add(true);
+                }
+            }
+        };
+
+        ((BaseAsset) asset).unsetDriver();
+
+        asset.registerChannelListener("1.CH", listener);
+        assertEquals(Arrays.asList(), attachSequence);
+
+        asset.registerChannelListener("1.CH", listener);
+        assertEquals(Arrays.asList(), attachSequence);
+
+        ((BaseAsset) asset).setDriver(driver);
+        assertEquals(Arrays.asList(false, true), attachSequence);
+    }
+
+    /**
+     * The same channel listener should not be attached multiple times.
+     */
+    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @Test
+    public void testShouldNotReattachSameListener() throws KuraException {
+
+        final ArrayList<Boolean> attachSequence = new ArrayList<>();
+
+        final ChannelListener listener = new ChannelListener() {
+
+            @Override
+            public void onChannelEvent(ChannelEvent event) {
+                if ("unregister".equals(event.getChannelRecord().getChannelName())) {
+                    attachSequence.add(false);
+                } else {
+                    attachSequence.add(true);
+                }
+            }
+        };
+
+        asset.registerChannelListener("1.CH", listener);
+        assertEquals(Arrays.asList(true), attachSequence);
+
+        asset.registerChannelListener("1.CH", listener);
+        assertEquals(Arrays.asList(true), attachSequence);
+
+        asset.registerChannelListener("1.CH", listener);
+        assertEquals(Arrays.asList(true), attachSequence);
+
+        asset.registerChannelListener("1.CH", listener);
+        assertEquals(Arrays.asList(true), attachSequence);
     }
 
     /**

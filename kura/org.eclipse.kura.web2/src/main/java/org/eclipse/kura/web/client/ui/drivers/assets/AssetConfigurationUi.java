@@ -38,6 +38,7 @@ import org.eclipse.kura.web.client.ui.wires.ValidationInputCell;
 import org.eclipse.kura.web.shared.AssetConstants;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter;
+import org.eclipse.kura.web.shared.model.GwtConfigParameter.GwtConfigParameterType;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.FieldSet;
 import org.gwtbootstrap3.client.ui.FormGroup;
@@ -279,7 +280,15 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
 
     private Column<ChannelModel, String> getInputCellColumn(final GwtConfigParameter param, boolean isReadOnly) {
         final String id = param.getId();
-        final AbstractCell<String> cell = isReadOnly ? new TextCell() : new ValidationInputCell();
+        final AbstractCell<String> cell;
+        if (isReadOnly) {
+            cell = new TextCell();
+        } else if (param.getType() == GwtConfigParameterType.BOOLEAN) {
+            cell = new BooleanInputCell();
+        } else {
+            cell = new ValidationInputCell();
+        }
+
         final Column<ChannelModel, String> result = new Column<ChannelModel, String>(cell) {
 
             @Override

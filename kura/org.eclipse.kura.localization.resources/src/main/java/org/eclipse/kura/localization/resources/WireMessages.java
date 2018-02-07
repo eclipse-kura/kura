@@ -1,5 +1,5 @@
 /*******************************************************************************
-f * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
+f * Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -699,4 +699,20 @@ public interface WireMessages {
 
     @En("Unexpected exception while dispatching envelope")
     public String fifoUnexpectedExceptionWhileDispatching();
+
+    @En("Specifies wheter the values of all READ or READ_WRITE channels should be emitted in case of a channel event. "
+            + "If set to true, the values for all channels will be read and emitted, if set to false, only the value for the channel related to the event will be emitted.")
+    public String emitAllChannelsDescription();
+
+    @En("If set to false, a timestamp per channel will be included in the emitted envelope, if set to true, only a single timestamp will be emitted.")
+    public String singleTimestampDescription();
+
+    @En("Specifies wheter errors should be included or not in the emitted envelope")
+    public String emitErrorsDescription();
+
+    @En("Failed to retreive \"listen\" property from channel configuration")
+    public String errorRetrievingListenable();
+
+    @En("Specifies if WireAsset should emit envelopes on Channel change")
+    public String listen();
 }

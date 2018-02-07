@@ -10,7 +10,7 @@
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
     <OCD id="org.eclipse.kura.wire.Join"
          name="Join"
-         description="A wire component merges the properties contained in envelopes received on different ports into a single envelope">
+         description="A wire component merges the properties contained in envelopes received on different ports into a single envelope. If properties with the same name are received on different ports at the same time, the component will emit the value received on the port having the greatest index.">
 
          <AD id="barrier"
             name="barrier"

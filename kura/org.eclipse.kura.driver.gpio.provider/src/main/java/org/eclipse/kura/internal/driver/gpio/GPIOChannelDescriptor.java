@@ -33,7 +33,6 @@ import org.eclipse.kura.gpio.KuraGPIOTrigger;
  * <ul>
  * <li>resource.name</li> denotes the GPIO number/identifier
  * <li>resource.direction</li> denotes the GPIO direction
- * <li>resource.mode</li> denotes the GPIO output/input mode
  * <li>resource.trigger</li> denotes the GPIO event that triggers a listener
  * </ul>
  */
@@ -42,7 +41,6 @@ public final class GPIOChannelDescriptor implements ChannelDescriptor {
     protected static final String DEFAULT_RESOURCE_NAME = "#select resource";
     protected static final String DEFAULT_RESOURCE_DIRECTION = "#select direction";
 
-    private static final String RESOURCE_ENABLE = "resource.enable";
     private static final String RESOURCE_NAME = "resource.name";
     private static final String RESOURCE_DIRECTION = "resource.direction";
     private static final String RESOURCE_TRIGGER = "resource.trigger";
@@ -89,15 +87,6 @@ public final class GPIOChannelDescriptor implements ChannelDescriptor {
     public Object getDescriptor() {
         final List<Tad> elements = new ArrayList<>();
 
-        final Tad resourceEnable = new Tad();
-        resourceEnable.setName(RESOURCE_ENABLE);
-        resourceEnable.setId(RESOURCE_ENABLE);
-        resourceEnable.setDescription(RESOURCE_ENABLE);
-        resourceEnable.setType(Tscalar.BOOLEAN);
-        resourceEnable.setRequired(true);
-        resourceEnable.setDefault("false");
-        elements.add(resourceEnable);
-
         Map<Integer, String> availablePins = new HashMap<>();
         for (GPIOService service : this.gpioServices) {
             availablePins.putAll(service.getAvailablePins());
@@ -134,10 +123,6 @@ public final class GPIOChannelDescriptor implements ChannelDescriptor {
         elements.add(resourceTriggers);
 
         return elements;
-    }
-
-    static Boolean isResourceEnabled(Map<String, Object> properties) {
-        return Boolean.valueOf((String) properties.get(RESOURCE_ENABLE));
     }
 
     static String getResourceName(Map<String, Object> properties) {

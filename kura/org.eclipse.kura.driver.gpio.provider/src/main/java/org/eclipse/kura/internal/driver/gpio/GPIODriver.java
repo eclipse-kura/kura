@@ -187,8 +187,7 @@ public final class GPIODriver implements Driver, ConfigurableComponent {
             final ChannelListener listener) throws ConnectionException {
         String name = GPIOChannelDescriptor.getResourceName(channelConfig);
         KuraGPIODirection direction = GPIOChannelDescriptor.getResourceDirection(channelConfig);
-        if (GPIOChannelDescriptor.isResourceEnabled(channelConfig)
-                && !GPIOChannelDescriptor.DEFAULT_RESOURCE_NAME.equals(name) && direction != null) {
+        if (!GPIOChannelDescriptor.DEFAULT_RESOURCE_NAME.equals(name) && direction != null) {
             this.gpioNames.add(name);
             KuraGPIOPin pin;
             if (KuraGPIODirection.INPUT.equals(direction)) {
@@ -228,7 +227,7 @@ public final class GPIODriver implements Driver, ConfigurableComponent {
     }
 
     private synchronized void runWriteRequest(GPIORequestInfo requestInfo) {
-        if (requestInfo.resourceEnabled && !GPIOChannelDescriptor.DEFAULT_RESOURCE_NAME.equals(requestInfo.resourceName)
+        if (!GPIOChannelDescriptor.DEFAULT_RESOURCE_NAME.equals(requestInfo.resourceName)
                 && requestInfo.resourceDirection != null) {
             ChannelRecord record = requestInfo.channelRecord;
 
@@ -334,7 +333,7 @@ public final class GPIODriver implements Driver, ConfigurableComponent {
     }
 
     private synchronized void runReadRequest(GPIORequestInfo requestInfo) {
-        if (requestInfo.resourceEnabled && !GPIOChannelDescriptor.DEFAULT_RESOURCE_NAME.equals(requestInfo.resourceName)
+        if (!GPIOChannelDescriptor.DEFAULT_RESOURCE_NAME.equals(requestInfo.resourceName)
                 && requestInfo.resourceDirection != null) {
             ChannelRecord record = requestInfo.channelRecord;
             try {
@@ -368,7 +367,6 @@ public final class GPIODriver implements Driver, ConfigurableComponent {
         private String resourceName;
         private KuraGPIODirection resourceDirection;
         private KuraGPIOMode resourceMode;
-        private Boolean resourceEnabled;
         private KuraGPIOTrigger resourceTrigger;
         private final ChannelRecord channelRecord;
 
@@ -392,7 +390,6 @@ public final class GPIODriver implements Driver, ConfigurableComponent {
             }
 
             GPIORequestInfo request = new GPIORequestInfo(record, dataType);
-            request.resourceEnabled = GPIOChannelDescriptor.isResourceEnabled(channelConfig);
             request.resourceName = GPIOChannelDescriptor.getResourceName(channelConfig);
             request.resourceDirection = GPIOChannelDescriptor.getResourceDirection(channelConfig);
             request.resourceTrigger = GPIOChannelDescriptor.getResourceTrigger(channelConfig);

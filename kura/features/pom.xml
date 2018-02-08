@@ -56,7 +56,6 @@
         <module>org.eclipse.kura.driver.s7plc</module>
         <module>org.eclipse.kura.driver.ble.sensortag</module>
         <module>org.eclipse.kura.wire.script.filter</module>
-        <module>org.eclipse.kura.wire.component.join</module>
         <module>org.eclipse.kura.driver.gpio</module>
     </modules>
 

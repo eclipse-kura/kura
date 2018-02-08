@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2011, 2017 Eurotech and/or its affiliates and others
+    Copyright (c) 2011, 2018 Eurotech and/or its affiliates and others
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -477,6 +477,11 @@
                                     <artifactId>org.eclipse.kura.wire.component.conditional.provider</artifactId>
                                     <version>${org.eclipse.kura.wire.component.conditional.provider.version}</version>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.wire.component.join.provider</artifactId>
+                                    <version>${org.eclipse.kura.wire.component.join.provider.version}</version>
+                                </artifactItem>
                             </artifactItems>
                             <stripVersion>true</stripVersion>
                             <outputDirectory>${project.basedir}/target/plugins</outputDirectory>
@@ -677,6 +682,8 @@
                                     tofile="target/plugins/org.eclipse.kura.xml.marshaller.unmarshaller.provider_${org.eclipse.kura.xml.marshaller.unmarshaller.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.wire.component.conditional.provider.jar"
                                     tofile="target/plugins/org.eclipse.kura.wire.component.conditional.provider_${org.eclipse.kura.wire.component.conditional.provider.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.wire.component.join.provider.jar"
+                                    tofile="target/plugins/org.eclipse.kura.wire.component.join.provider_${org.eclipse.kura.wire.component.join.provider.version}.jar" />
                             </tasks>
                         </configuration>
                     </execution>
@@ -2516,6 +2523,20 @@
                                             todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.broker.artemis.xml_${org.eclipse.kura.broker.artemis.xml.version}.jar"
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
+                                        
+                                        <copy
+                                            file="${project.build.directory}/plugins/org.eclipse.kura.wire.component.conditional.provider_${org.eclipse.kura.wire.component.conditional.provider.version}.jar"
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
+                                        <copy
+                                            file="${project.build.directory}/plugins/org.eclipse.kura.wire.component.join.provider_${org.eclipse.kura.wire.component.join.provider.version}.jar"
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
+                                            
+                                        <copy
+                                            file="${project.build.directory}/plugins/org.eclipse.kura.json.marshaller.unmarshaller.provider_${org.eclipse.kura.json.marshaller.unmarshaller.provider.version}.jar"
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
+                                        <copy
+                                            file="${project.build.directory}/plugins/org.eclipse.kura.xml.marshaller.unmarshaller.provider_${org.eclipse.kura.xml.marshaller.unmarshaller.provider.version}.jar"
                                             todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
                                     </target>
                                 </configuration>

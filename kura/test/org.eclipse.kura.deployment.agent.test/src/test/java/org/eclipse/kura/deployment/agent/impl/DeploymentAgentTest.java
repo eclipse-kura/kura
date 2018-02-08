@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates and others
  *
  *   All rights reserved. This program and the accompanying materials
  *   are made available under the terms of the Eclipse Public License v1.0
@@ -203,17 +203,21 @@ public class DeploymentAgentTest {
     public void testUninstaller() throws Throwable {
         // test the uninstaller method
 
-        DeploymentAgent svc = new DeploymentAgent();
-
         Queue<String> queue = new ConcurrentLinkedQueue<>();
 
-        TestUtil.setFieldValue(svc, "uninstPackageNames", queue);
-
         String name = "dpName";
-        Properties deployedPackages = new Properties();
+        final Properties deployedPackages = new Properties();
         deployedPackages.put(name, "file:///tmp/nonExistingDp.dp");
 
-        TestUtil.setFieldValue(svc, "deployedPackages", deployedPackages);
+        DeploymentAgent svc = new DeploymentAgent() {
+
+            @Override
+            protected Properties readDeployedPackages() {
+                return deployedPackages;
+            }
+        };
+
+        TestUtil.setFieldValue(svc, "uninstPackageNames", queue);
 
         EventAdmin eaMock = mock(EventAdmin.class);
         svc.setEventAdmin(eaMock);
@@ -300,9 +304,6 @@ public class DeploymentAgentTest {
             }
         };
 
-        Properties deployedPackages = new Properties();
-        TestUtil.setFieldValue(svc, "deployedPackages", deployedPackages);
-
         String dpaConfPath = "target/dpa.properties";
         TestUtil.setFieldValue(svc, "dpaConfPath", dpaConfPath);
 
@@ -333,9 +334,6 @@ public class DeploymentAgentTest {
             }
         };
 
-        Properties deployedPackages = new Properties();
-        TestUtil.setFieldValue(svc, "deployedPackages", deployedPackages);
-
         String dpaConfPath = "target/dpa.properties";
         TestUtil.setFieldValue(svc, "dpaConfPath", dpaConfPath);
 
@@ -354,17 +352,14 @@ public class DeploymentAgentTest {
     public void testInstallDeploymentPackageInternal() throws Throwable {
         // test installation of packages stored in the configuration file
 
+        DeploymentPackage dp = mock(DeploymentPackage.class);
+        when(dp.getName()).thenReturn("dpName");
+
         DeploymentAgent svc = new DeploymentAgent();
 
         DeploymentAdmin daMock = mock(DeploymentAdmin.class);
         svc.setDeploymentAdmin(daMock);
-
-        DeploymentPackage dp = mock(DeploymentPackage.class);
-        when(dp.getName()).thenReturn("dpName");
         when(daMock.installDeploymentPackage(anyObject())).thenReturn(dp);
-
-        Properties deployedPackages = new Properties();
-        TestUtil.setFieldValue(svc, "deployedPackages", deployedPackages);
 
         String dpaConfPath = "target/dpa.properties";
         TestUtil.setFieldValue(svc, "dpaConfPath", dpaConfPath);
@@ -400,10 +395,14 @@ public class DeploymentAgentTest {
     public void testAddPackageToConfFileNoConfigFile() throws Throwable {
         // test adding packages to configuration file that is not set
 
-        DeploymentAgent svc = new DeploymentAgent();
+        final Properties deployedPackages = mock(Properties.class);
+        DeploymentAgent svc = new DeploymentAgent() {
 
-        Properties deployedPackages = mock(Properties.class);
-        TestUtil.setFieldValue(svc, "deployedPackages", deployedPackages);
+            @Override
+            protected Properties readDeployedPackages() {
+                return deployedPackages;
+            }
+        };
 
         String dpName = "testdp";
         String url = "file:///tmp/testdp.dp";
@@ -418,10 +417,14 @@ public class DeploymentAgentTest {
     public void testAddPackageToConfFileStoreException() throws Throwable {
         // test adding packages to configuration file, but fail doing so
 
-        DeploymentAgent svc = new DeploymentAgent();
+        final Properties deployedPackages = mock(Properties.class);
+        DeploymentAgent svc = new DeploymentAgent() {
 
-        Properties deployedPackages = mock(Properties.class);
-        TestUtil.setFieldValue(svc, "deployedPackages", deployedPackages);
+            @Override
+            protected Properties readDeployedPackages() {
+                return deployedPackages;
+            }
+        };
 
         doThrow(new IOException("test")).when(deployedPackages).store((FileOutputStream) anyObject(), anyObject());
 
@@ -441,10 +444,15 @@ public class DeploymentAgentTest {
     public void testRemovePackageToConfFileNoConfigFile() throws Throwable {
         // test removing packages from configuration file that is not set
 
-        DeploymentAgent svc = new DeploymentAgent();
-
         Properties deployedPackages = mock(Properties.class);
-        TestUtil.setFieldValue(svc, "deployedPackages", deployedPackages);
+
+        DeploymentAgent svc = new DeploymentAgent() {
+
+            @Override
+            protected Properties readDeployedPackages() {
+                return deployedPackages;
+            }
+        };
 
         String dpName = "testdp";
 
@@ -458,10 +466,14 @@ public class DeploymentAgentTest {
     public void testRemovePackageToConfFileStoreException() throws Throwable {
         // test removing packages from configuration file, but fail doing so
 
-        DeploymentAgent svc = new DeploymentAgent();
+        final Properties deployedPackages = mock(Properties.class);
+        DeploymentAgent svc = new DeploymentAgent() {
 
-        Properties deployedPackages = mock(Properties.class);
-        TestUtil.setFieldValue(svc, "deployedPackages", deployedPackages);
+            @Override
+            protected Properties readDeployedPackages() {
+                return deployedPackages;
+            }
+        };
 
         doThrow(new IOException("test")).when(deployedPackages).store((FileOutputStream) anyObject(), anyObject());
 
@@ -480,10 +492,14 @@ public class DeploymentAgentTest {
     public void testRemovePackageToConfFile() throws Throwable {
         // test removing packages from configuration file
 
-        DeploymentAgent svc = new DeploymentAgent();
+        final Properties deployedPackages = mock(Properties.class);
+        DeploymentAgent svc = new DeploymentAgent() {
 
-        Properties deployedPackages = mock(Properties.class);
-        TestUtil.setFieldValue(svc, "deployedPackages", deployedPackages);
+            @Override
+            protected Properties readDeployedPackages() {
+                return deployedPackages;
+            }
+        };
 
         String dpaConfPath = "target/dpa.properties";
         TestUtil.setFieldValue(svc, "dpaConfPath", dpaConfPath);

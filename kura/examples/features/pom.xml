@@ -51,6 +51,7 @@
 
     <modules>
       <module>org.eclipse.kura.raspberrypi.sensehat.example.bundle</module>
+      <module>org.eclipse.kura.example.driver.sensehat</module>
     </modules>
 
     <profiles>

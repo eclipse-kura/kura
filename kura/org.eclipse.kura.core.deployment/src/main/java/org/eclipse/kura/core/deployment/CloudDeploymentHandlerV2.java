@@ -15,8 +15,11 @@ package org.eclipse.kura.core.deployment;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
+import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -168,10 +171,10 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableCo
     //
     // ----------------------------------------------------------------
 
-    @Override
-    protected void activate(ComponentContext componentContext) {
+    protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
         logger.info("Cloud Deployment v2 is starting");
         super.activate(componentContext);
+        updated(properties);
 
         this.bundleContext = componentContext.getBundleContext();
 
@@ -186,6 +189,17 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableCo
         installImplementation.setDpaConfPath(dpaConfPath);
         installImplementation.setDeploymentAdmin(this.deploymentAdmin);
         installImplementation.sendInstallConfirmations();
+    }
+
+    protected void updated(Map<String, Object> properties) {
+        this.componentOptions = new CloudDeploymentHandlerV2Options(properties);
+        final Properties associations = new Properties();
+        try {
+            associations.load(new StringReader(this.componentOptions.getHookAssociations()));
+        } catch (Exception e) {
+            logger.warn("failed to parse hook associations from configuration", e);
+        }
+        this.deploymentHookManager.updateAssociations(associations);
     }
 
     @Override
@@ -216,7 +230,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableCo
             getCloudApplicationClient().controlPublish(options.getRequestClientId(), messageTopic, messagePayload, 1,
                     DFLT_RETAIN, DFLT_PRIORITY);
         } catch (KuraException e) {
-            logger.error("Error publishing response for command {} {}", messageType, e);
+            logger.error("Error publishing response for command {}", messageType, e);
         }
     }
 
@@ -457,6 +471,8 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableCo
 
                         downloadImplementation.downloadDeploymentPackageInternal();
                     } catch (KuraException e) {
+                        logger.warn("deployment package download failed", e);
+
                         try {
                             File dpFile = getDpDownloadFile(options);
                             if (dpFile != null) {
@@ -839,7 +855,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableCo
             response.setTimestamp(new Date());
             response.setBody(s.getBytes("UTF-8"));
         } catch (Exception e) {
-            logger.error("Error getting resource {}: {}", RESOURCE_BUNDLES, e);
+            logger.error("Error getting resource {}", RESOURCE_BUNDLES, e);
         }
     }
 

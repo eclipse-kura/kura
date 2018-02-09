@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -21,7 +21,7 @@ import java.util.concurrent.CancellationException;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.deployment.CloudDeploymentHandlerV2;
-import org.eclipse.kura.core.deployment.CloudDeploymentHandlerV2.DOWNLOAD_STATUS;
+import org.eclipse.kura.core.deployment.DownloadStatus;
 import org.eclipse.kura.core.deployment.download.DeploymentPackageDownloadOptions;
 import org.eclipse.kura.core.deployment.download.DownloadCountingOutputStream;
 import org.eclipse.kura.core.deployment.download.DownloadFactory;
@@ -245,7 +245,7 @@ public class DownloadImpl implements ProgressListener {
         respPayload.setTimestamp(new Date());
         respPayload.addMetric(KuraNotifyPayload.METRIC_TRANSFER_SIZE, 0);
         respPayload.addMetric(KuraNotifyPayload.METRIC_TRANSFER_PROGRESS, 100);
-        respPayload.addMetric(KuraNotifyPayload.METRIC_TRANSFER_STATUS, DOWNLOAD_STATUS.ALREADY_DONE.getStatusString());
+        respPayload.addMetric(KuraNotifyPayload.METRIC_TRANSFER_STATUS, DownloadStatus.ALREADY_DONE.getStatusString());
     }
 
     private void alreadyDownloadedAsync() {
@@ -253,7 +253,7 @@ public class DownloadImpl implements ProgressListener {
         notify.setTimestamp(new Date());
         notify.setTransferSize(0);
         notify.setTransferProgress(100);
-        notify.setTransferStatus(DOWNLOAD_STATUS.COMPLETED.getStatusString());
+        notify.setTransferStatus(DownloadStatus.COMPLETED.getStatusString());
         notify.setJobId(this.options.getJobId());
 
         this.callback.publishMessage(this.options, notify, RESOURCE_DOWNLOAD);
@@ -264,7 +264,7 @@ public class DownloadImpl implements ProgressListener {
         notify.setTimestamp(new Date());
         notify.setTransferSize(0);
         notify.setTransferProgress(0);
-        notify.setTransferStatus(DOWNLOAD_STATUS.FAILED.getStatusString());
+        notify.setTransferStatus(DownloadStatus.FAILED.getStatusString());
         notify.setJobId(this.options.getJobId());
         notify.setErrorMessage(e == null ? "Error during download process and verification!" : e.getMessage()); // message
                                                                                                                 // to

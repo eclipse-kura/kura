@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -25,8 +25,8 @@ import org.apache.commons.io.FileUtils;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.deployment.CloudDeploymentHandlerV2;
-import org.eclipse.kura.core.deployment.CloudDeploymentHandlerV2.INSTALL_STATUS;
 import org.eclipse.kura.core.deployment.DeploymentPackageOptions;
+import org.eclipse.kura.core.deployment.InstallStatus;
 import org.eclipse.kura.core.deployment.download.DeploymentPackageDownloadOptions;
 import org.eclipse.kura.core.util.ProcessUtil;
 import org.eclipse.kura.core.util.SafeProcess;
@@ -171,20 +171,20 @@ public class InstallImpl {
 
     public void installInProgressSyncMessage(KuraResponsePayload respPayload) {
         respPayload.setTimestamp(new Date());
-        respPayload.addMetric(KuraInstallPayload.METRIC_INSTALL_STATUS, INSTALL_STATUS.IN_PROGRESS.getStatusString());
+        respPayload.addMetric(KuraInstallPayload.METRIC_INSTALL_STATUS, InstallStatus.IN_PROGRESS.getStatusString());
         respPayload.addMetric(KuraInstallPayload.METRIC_DP_NAME, this.options.getDpName());
         respPayload.addMetric(KuraInstallPayload.METRIC_DP_VERSION, this.options.getDpVersion());
     }
 
     public void installIdleSyncMessage(KuraResponsePayload respPayload) {
         respPayload.setTimestamp(new Date());
-        respPayload.addMetric(KuraInstallPayload.METRIC_INSTALL_STATUS, INSTALL_STATUS.IDLE.getStatusString());
+        respPayload.addMetric(KuraInstallPayload.METRIC_INSTALL_STATUS, InstallStatus.IDLE.getStatusString());
     }
 
     public void installCompleteAsync(DeploymentPackageOptions options, String dpName) throws KuraException {
         KuraInstallPayload notify = new KuraInstallPayload(options.getClientId());
         notify.setTimestamp(new Date());
-        notify.setInstallStatus(INSTALL_STATUS.COMPLETED.getStatusString());
+        notify.setInstallStatus(InstallStatus.COMPLETED.getStatusString());
         notify.setJobId(options.getJobId());
         notify.setDpName(dpName); // Probably split dpName and dpVersion?
         notify.setInstallProgress(PROGRESS_COMPLETE);
@@ -196,7 +196,7 @@ public class InstallImpl {
             throws KuraException {
         KuraInstallPayload notify = new KuraInstallPayload(options.getClientId());
         notify.setTimestamp(new Date());
-        notify.setInstallStatus(INSTALL_STATUS.FAILED.getStatusString());
+        notify.setInstallStatus(InstallStatus.FAILED.getStatusString());
         notify.setJobId(options.getJobId());
         notify.setDpName(dpName); // Probably split dpName and dpVersion?
         notify.setInstallProgress(0);

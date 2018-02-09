@@ -1,3 +1,11 @@
+/*******************************************************************************
+ * Copyright (c) 2018 Eurotech and/or its affiliates and others
+ *
+ *   All rights reserved. This program and the accompanying materials
+ *   are made available under the terms of the Eclipse Public License v1.0
+ *   which accompanies this distribution, and is available at
+ *   http://www.eclipse.org/legal/epl-v10.html
+ ******************************************************************************/
 package org.eclipse.kura.core.deployment;
 
 import static org.junit.Assert.assertEquals;
@@ -22,33 +30,217 @@ import java.util.Properties;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.cloud.CloudClient;
+import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.cloud.CloudletTopic;
 import org.eclipse.kura.configuration.ConfigurationService;
-import org.eclipse.kura.core.deployment.CloudDeploymentHandlerV2.DOWNLOAD_STATUS;
 import org.eclipse.kura.core.deployment.download.DeploymentPackageDownloadOptions;
 import org.eclipse.kura.core.deployment.download.DownloadCountingOutputStream;
 import org.eclipse.kura.core.deployment.download.impl.DownloadImpl;
+import org.eclipse.kura.core.deployment.download.impl.KuraNotifyPayload;
 import org.eclipse.kura.core.deployment.hook.DeploymentHookManager;
 import org.eclipse.kura.core.deployment.install.DeploymentPackageInstallOptions;
+import org.eclipse.kura.core.deployment.install.InstallImpl;
+import org.eclipse.kura.core.deployment.install.KuraInstallPayload;
 import org.eclipse.kura.core.deployment.uninstall.UninstallImpl;
+import org.eclipse.kura.core.deployment.util.FileUtilities;
+import org.eclipse.kura.core.deployment.xml.XmlBundle;
+import org.eclipse.kura.core.deployment.xml.XmlBundleInfo;
+import org.eclipse.kura.core.deployment.xml.XmlBundles;
+import org.eclipse.kura.core.deployment.xml.XmlDeploymentPackage;
+import org.eclipse.kura.core.deployment.xml.XmlDeploymentPackages;
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.data.DataTransportService;
 import org.eclipse.kura.deployment.hook.DeploymentHook;
 import org.eclipse.kura.deployment.hook.RequestContext;
 import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
+import org.eclipse.kura.ssl.SslManagerService;
+import org.eclipse.kura.system.SystemService;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.Version;
+import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.ComponentException;
+import org.osgi.service.deploymentadmin.BundleInfo;
+import org.osgi.service.deploymentadmin.DeploymentAdmin;
+import org.osgi.service.deploymentadmin.DeploymentPackage;
 
 public class CloudDeploymentHandlerV2Test {
+
+    private static final String CLOUD_SERVICE_FIELD = "m_cloudService";
+    private static final String COMPONENT_OPTIONS_FIELD = "componentOptions";
+    private static final String DEPLOY_V2_APPID = "DEPLOY-V2";
+    private static final String TEST_XML = "testXml";
+
+    @Test(expected = NullPointerException.class)
+    public void testActivateNoDeploymentHookManagerException() throws NoSuchFieldException, KuraException {
+        CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
+        TestUtil.setFieldValue(handler, COMPONENT_OPTIONS_FIELD, new CloudDeploymentHandlerV2Options(new HashMap<>()));
+
+        ComponentContext componentContext = mock(ComponentContext.class);
+        CloudService cloudService = mock(CloudService.class);
+        CloudClient cloudClient = mock(CloudClient.class);
+        when(cloudService.newCloudClient(DEPLOY_V2_APPID)).thenReturn(cloudClient);
+
+        TestUtil.setFieldValue(handler, CLOUD_SERVICE_FIELD, cloudService);
+
+        handler.activate(componentContext, new HashMap<>());
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testActivateNoSystemServiceException() throws NoSuchFieldException, KuraException {
+        CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
+        TestUtil.setFieldValue(handler, COMPONENT_OPTIONS_FIELD, new CloudDeploymentHandlerV2Options(new HashMap<>()));
+
+        DeploymentHookManager dhmMock = mock(DeploymentHookManager.class);
+        handler.setDeploymentHookManager(dhmMock);
+
+        ComponentContext componentContext = mock(ComponentContext.class);
+        CloudService cloudService = mock(CloudService.class);
+        CloudClient cloudClient = mock(CloudClient.class);
+        when(cloudService.newCloudClient(DEPLOY_V2_APPID)).thenReturn(cloudClient);
+
+        TestUtil.setFieldValue(handler, CLOUD_SERVICE_FIELD, cloudService);
+
+        handler.activate(componentContext, new HashMap<>());
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testActivateNullSystemServicePropertiesException() throws NoSuchFieldException, KuraException {
+        CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
+        TestUtil.setFieldValue(handler, COMPONENT_OPTIONS_FIELD, new CloudDeploymentHandlerV2Options(new HashMap<>()));
+
+        DeploymentHookManager dhmMock = mock(DeploymentHookManager.class);
+        handler.setDeploymentHookManager(dhmMock);
+
+        ComponentContext componentContext = mock(ComponentContext.class);
+        CloudService cloudService = mock(CloudService.class);
+        CloudClient cloudClient = mock(CloudClient.class);
+        SystemService systemService = mock(SystemService.class);
+
+        handler.setSystemService(systemService);
+        when(cloudService.newCloudClient(DEPLOY_V2_APPID)).thenReturn(cloudClient);
+        when(systemService.getProperties()).thenReturn(null);
+
+        TestUtil.setFieldValue(handler, CLOUD_SERVICE_FIELD, cloudService);
+
+        handler.activate(componentContext, new HashMap<>());
+
+    }
+
+    @Test(expected = ComponentException.class)
+    public void testActivateMissingDpaPathException() throws NoSuchFieldException, KuraException {
+        CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
+        TestUtil.setFieldValue(handler, COMPONENT_OPTIONS_FIELD, new CloudDeploymentHandlerV2Options(new HashMap<>()));
+
+        DeploymentHookManager dhmMock = mock(DeploymentHookManager.class);
+        handler.setDeploymentHookManager(dhmMock);
+
+        ComponentContext componentContext = mock(ComponentContext.class);
+        CloudService cloudService = mock(CloudService.class);
+        CloudClient cloudClient = mock(CloudClient.class);
+        SystemService systemService = mock(SystemService.class);
+
+        handler.setSystemService(systemService);
+        when(cloudService.newCloudClient(DEPLOY_V2_APPID)).thenReturn(cloudClient);
+        when(systemService.getProperties()).thenReturn(new Properties());
+
+        TestUtil.setFieldValue(handler, CLOUD_SERVICE_FIELD, cloudService);
+
+        handler.activate(componentContext, new HashMap<>());
+
+    }
+
+    @Test(expected = ComponentException.class)
+    public void testActivateMissingPackagesPath() throws NoSuchFieldException, KuraException {
+        CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
+        TestUtil.setFieldValue(handler, COMPONENT_OPTIONS_FIELD, new CloudDeploymentHandlerV2Options(new HashMap<>()));
+
+        DeploymentHookManager dhmMock = mock(DeploymentHookManager.class);
+        handler.setDeploymentHookManager(dhmMock);
+
+        ComponentContext componentContext = mock(ComponentContext.class);
+        CloudService cloudService = mock(CloudService.class);
+        CloudClient cloudClient = mock(CloudClient.class);
+        SystemService systemService = mock(SystemService.class);
+
+        handler.setSystemService(systemService);
+        when(cloudService.newCloudClient(DEPLOY_V2_APPID)).thenReturn(cloudClient);
+        when(systemService.getProperties()).thenReturn(new Properties());
+        System.setProperty("dpa.configuration", "/opt/eclipse/kura/kura/dpa.properties");
+
+        TestUtil.setFieldValue(handler, CLOUD_SERVICE_FIELD, cloudService);
+
+        handler.activate(componentContext, new HashMap<>());
+    }
+
+    @Test(expected = ComponentException.class)
+    public void testActivateMissingKuraDataDir() throws NoSuchFieldException, KuraException {
+        CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
+        TestUtil.setFieldValue(handler, COMPONENT_OPTIONS_FIELD, new CloudDeploymentHandlerV2Options(new HashMap<>()));
+
+        DeploymentHookManager dhmMock = mock(DeploymentHookManager.class);
+        handler.setDeploymentHookManager(dhmMock);
+
+        ComponentContext componentContext = mock(ComponentContext.class);
+        CloudService cloudService = mock(CloudService.class);
+        CloudClient cloudClient = mock(CloudClient.class);
+        SystemService systemService = mock(SystemService.class);
+
+        Properties systemServiceProps = new Properties();
+        systemServiceProps.setProperty("kura.packages", "/opt/eclipse/kura/kura/packages");
+
+        handler.setSystemService(systemService);
+        when(cloudService.newCloudClient(DEPLOY_V2_APPID)).thenReturn(cloudClient);
+        when(systemService.getProperties()).thenReturn(systemServiceProps);
+        System.setProperty("dpa.configuration", "/opt/eclipse/kura/kura/dpa.properties");
+
+        TestUtil.setFieldValue(handler, CLOUD_SERVICE_FIELD, cloudService);
+
+        handler.activate(componentContext, new HashMap<>());
+    }
+
+    @Test
+    public void testActivateOk() throws NoSuchFieldException, KuraException {
+        CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
+        TestUtil.setFieldValue(handler, COMPONENT_OPTIONS_FIELD, new CloudDeploymentHandlerV2Options(new HashMap<>()));
+
+        DeploymentHookManager dhmMock = mock(DeploymentHookManager.class);
+        handler.setDeploymentHookManager(dhmMock);
+
+        ComponentContext componentContext = mock(ComponentContext.class);
+        CloudService cloudService = mock(CloudService.class);
+        CloudClient cloudClient = mock(CloudClient.class);
+        SystemService systemService = mock(SystemService.class);
+
+        Properties systemServiceProps = new Properties();
+        systemServiceProps.setProperty("kura.packages", "/opt/eclipse/kura/kura/packages");
+        systemServiceProps.setProperty("kura.data", "/opt/eclipse/kura/data");
+
+        handler.setSystemService(systemService);
+        when(cloudService.newCloudClient(DEPLOY_V2_APPID)).thenReturn(cloudClient);
+        when(systemService.getProperties()).thenReturn(systemServiceProps);
+        System.setProperty("dpa.configuration", "/opt/eclipse/kura/kura/dpa.properties");
+
+        TestUtil.setFieldValue(handler, CLOUD_SERVICE_FIELD, cloudService);
+
+        handler.activate(componentContext, new HashMap<>());
+
+        assertNotNull(TestUtil.getFieldValue(handler, "options"));
+        assertNotNull(TestUtil.getFieldValue(handler, "installImplementation"));
+
+        handler.deactivate(componentContext);
+        assertNull(TestUtil.getFieldValue(handler, "bundleContext"));
+    }
 
     @Test
     public void testDoGetNoResources() throws KuraException, NoSuchFieldException {
         CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
-        TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
+        TestUtil.setFieldValue(handler, COMPONENT_OPTIONS_FIELD, new CloudDeploymentHandlerV2Options(new HashMap<>()));
 
         CloudletTopic reqTopic = CloudletTopic.parseAppTopic("GET");
         KuraRequestPayload reqPayload = new KuraRequestPayload();
@@ -63,7 +255,7 @@ public class CloudDeploymentHandlerV2Test {
     @Test
     public void testDoGetOtherwise() throws KuraException, NoSuchFieldException {
         CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
-        TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
+        TestUtil.setFieldValue(handler, COMPONENT_OPTIONS_FIELD, new CloudDeploymentHandlerV2Options(new HashMap<>()));
 
         CloudletTopic reqTopic = CloudletTopic.parseAppTopic("GET/test");
         KuraRequestPayload reqPayload = new KuraRequestPayload();
@@ -76,9 +268,513 @@ public class CloudDeploymentHandlerV2Test {
     }
 
     @Test
+    public void testDoGetDownloadNoPendingRequest() throws KuraException, NoSuchFieldException {
+        CloudDeploymentHandlerV2 deployment = new CloudDeploymentHandlerV2();
+        CloudletTopic topic = CloudletTopic.parseAppTopic("GET/download");
+
+        KuraRequestPayload request = new KuraRequestPayload();
+        KuraResponsePayload response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+
+        TestUtil.setFieldValue(deployment, "pendingPackageUrl", null);
+
+        deployment.doGet(topic, request, response);
+
+        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, response.getResponseCode());
+        assertEquals(0, response.getMetric(KuraNotifyPayload.METRIC_TRANSFER_SIZE));
+        assertEquals(100, response.getMetric(KuraNotifyPayload.METRIC_TRANSFER_PROGRESS));
+        assertEquals(DownloadStatus.ALREADY_DONE.getStatusString(),
+                response.getMetric(KuraNotifyPayload.METRIC_TRANSFER_STATUS));
+
+    }
+
+    @Test
+    public void testDoGetDownloadPendingRequest() throws KuraException, NoSuchFieldException {
+        CloudDeploymentHandlerV2 deployment = new CloudDeploymentHandlerV2();
+        CloudletTopic topic = CloudletTopic.parseAppTopic("GET/download");
+
+        KuraRequestPayload request = new KuraRequestPayload();
+        KuraResponsePayload response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+
+        DeploymentPackageDownloadOptions dlOptions = mock(DeploymentPackageDownloadOptions.class);
+        TestUtil.setFieldValue(deployment, "downloadOptions", dlOptions);
+        TestUtil.setFieldValue(deployment, "pendingPackageUrl", "someValidUrl");
+
+        DownloadImpl dlMock = mock(DownloadImpl.class);
+        TestUtil.setFieldValue(deployment, "downloadImplementation", dlMock);
+
+        DownloadCountingOutputStream stream = mock(DownloadCountingOutputStream.class);
+        when(dlMock.getDownloadHelper()).thenReturn(stream);
+
+        when(stream.getDownloadTransferStatus()).thenReturn(DownloadStatus.IN_PROGRESS);
+        when(stream.getDownloadTransferProgressPercentage()).thenReturn(10L);
+
+        when(dlOptions.getJobId()).thenReturn(1234L);
+
+        deployment.doGet(topic, request, response);
+
+        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, response.getResponseCode());
+        assertEquals(0, response.getMetric(KuraNotifyPayload.METRIC_TRANSFER_SIZE));
+        assertEquals(10, response.getMetric(KuraNotifyPayload.METRIC_TRANSFER_PROGRESS));
+        assertEquals(DownloadStatus.IN_PROGRESS.getStatusString(),
+                response.getMetric(KuraNotifyPayload.METRIC_TRANSFER_STATUS));
+        assertEquals(1234L, response.getMetric(KuraNotifyPayload.METRIC_JOB_ID));
+
+    }
+
+    @Test
+    public void testDoGetInstallNoPendingRequest() throws KuraException, NoSuchFieldException {
+        CloudDeploymentHandlerV2 deployment = new CloudDeploymentHandlerV2();
+        CloudletTopic topic = CloudletTopic.parseAppTopic("GET/install");
+
+        KuraRequestPayload request = new KuraRequestPayload();
+        KuraResponsePayload response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+
+        InstallImpl ilMock = new InstallImpl(null, null);
+        TestUtil.setFieldValue(deployment, "installImplementation", ilMock);
+
+        deployment.doGet(topic, request, response);
+
+        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, response.getResponseCode());
+        assertNotNull(response.getTimestamp());
+        assertEquals(InstallStatus.IDLE.getStatusString(),
+                response.getMetric(KuraInstallPayload.METRIC_INSTALL_STATUS));
+    }
+
+    @Test
+    public void testDoGetInstallInProgress() throws KuraException, NoSuchFieldException {
+        CloudDeploymentHandlerV2 deployment = new CloudDeploymentHandlerV2();
+        CloudletTopic topic = CloudletTopic.parseAppTopic("GET/install");
+
+        KuraRequestPayload request = new KuraRequestPayload();
+        KuraResponsePayload response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+
+        String dpName = "heater";
+        String dpVersion = "1.0.0";
+        DeploymentPackageInstallOptions options = new DeploymentPackageInstallOptions(dpName, dpVersion);
+        InstallImpl ilMock = new InstallImpl(null, null);
+        TestUtil.setFieldValue(deployment, "installImplementation", ilMock);
+        TestUtil.setFieldValue(deployment, "isInstalling", true);
+        TestUtil.setFieldValue(ilMock, "options", options);
+
+        deployment.doGet(topic, request, response);
+
+        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, response.getResponseCode());
+        assertNotNull(response.getTimestamp());
+        assertEquals(InstallStatus.IN_PROGRESS.getStatusString(),
+                response.getMetric(KuraInstallPayload.METRIC_INSTALL_STATUS));
+    }
+
+    @Test
+    public void testDoGetPackagesEmptyList() throws KuraException, NoSuchFieldException {
+        CloudDeploymentHandlerV2 deployment = new CloudDeploymentHandlerV2() {
+
+            @Override
+            protected String marshal(Object object) {
+                XmlDeploymentPackages packages = (XmlDeploymentPackages) object;
+                XmlDeploymentPackage[] packagesArray = packages.getDeploymentPackages();
+
+                assertEquals(0, packagesArray.length);
+
+                return TEST_XML;
+            }
+        };
+        CloudletTopic topic = CloudletTopic.parseAppTopic("GET/packages");
+
+        KuraRequestPayload request = new KuraRequestPayload();
+        KuraResponsePayload response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+
+        DeploymentAdmin deploymentAdmin = mock(DeploymentAdmin.class);
+        DeploymentPackage[] deployedPackages = new DeploymentPackage[0];
+
+        TestUtil.setFieldValue(deployment, "deploymentAdmin", deploymentAdmin);
+
+        when(deploymentAdmin.listDeploymentPackages()).thenReturn(deployedPackages);
+
+        deployment.doGet(topic, request, response);
+
+        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, response.getResponseCode());
+        assertEquals(TEST_XML, new String(response.getBody(), Charset.forName("UTF-8")));
+    }
+
+    @Test
+    public void testDoGetPackagesOneElementListNoBundleInfos() throws KuraException, NoSuchFieldException {
+        DeploymentAdmin deploymentAdmin = mock(DeploymentAdmin.class);
+        DeploymentPackage[] deployedPackages = new DeploymentPackage[1];
+        DeploymentPackage dp = mock(DeploymentPackage.class);
+        deployedPackages[0] = dp;
+
+        CloudDeploymentHandlerV2 deployment = new CloudDeploymentHandlerV2() {
+
+            @Override
+            protected String marshal(Object object) {
+                XmlDeploymentPackages packages = (XmlDeploymentPackages) object;
+                XmlDeploymentPackage[] packagesArray = packages.getDeploymentPackages();
+
+                assertEquals(1, packagesArray.length);
+                assertEquals(dp.getName(), packagesArray[0].getName());
+                assertEquals(dp.getVersion().toString(), packagesArray[0].getVersion());
+
+                assertEquals(0, packagesArray[0].getBundleInfos().length);
+
+                return TEST_XML;
+            }
+        };
+        CloudletTopic topic = CloudletTopic.parseAppTopic("GET/packages");
+
+        KuraRequestPayload request = new KuraRequestPayload();
+        KuraResponsePayload response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+
+
+        TestUtil.setFieldValue(deployment, "deploymentAdmin", deploymentAdmin);
+
+        when(deploymentAdmin.listDeploymentPackages()).thenReturn(deployedPackages);
+        when(dp.getName()).thenReturn("heater");
+        when(dp.getVersion()).thenReturn(new Version("1.0.0"));
+        when(dp.getBundleInfos()).thenReturn(new BundleInfo[0]);
+
+        deployment.doGet(topic, request, response);
+
+        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, response.getResponseCode());
+        assertEquals(TEST_XML, new String(response.getBody(), Charset.forName("UTF-8")));
+    }
+
+    @Test
+    public void testDoGetPackagesOneElementList() throws KuraException, NoSuchFieldException {
+        DeploymentAdmin deploymentAdmin = mock(DeploymentAdmin.class);
+        DeploymentPackage[] deployedPackages = new DeploymentPackage[1];
+        DeploymentPackage dp = mock(DeploymentPackage.class);
+        deployedPackages[0] = dp;
+
+        BundleInfo[] bundleInfos = new BundleInfo[1];
+        BundleInfo bundleInfo = mock(BundleInfo.class);
+        bundleInfos[0] = bundleInfo;
+
+        CloudDeploymentHandlerV2 deployment = new CloudDeploymentHandlerV2() {
+
+            @Override
+            protected String marshal(Object object) {
+                XmlDeploymentPackages packages = (XmlDeploymentPackages) object;
+                XmlDeploymentPackage[] packagesArray = packages.getDeploymentPackages();
+
+                assertEquals(1, packagesArray.length);
+                assertEquals(dp.getName(), packagesArray[0].getName());
+                assertEquals(dp.getVersion().toString(), packagesArray[0].getVersion());
+
+                XmlBundleInfo[] bis = packagesArray[0].getBundleInfos();
+                assertEquals(1, bis.length);
+                assertEquals(bundleInfo.getSymbolicName(), bis[0].getName());
+                assertEquals(bundleInfo.getVersion().toString(), bis[0].getVersion());
+
+                return TEST_XML;
+            }
+        };
+        CloudletTopic topic = CloudletTopic.parseAppTopic("GET/packages");
+
+        KuraRequestPayload request = new KuraRequestPayload();
+        KuraResponsePayload response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+
+        TestUtil.setFieldValue(deployment, "deploymentAdmin", deploymentAdmin);
+
+        when(deploymentAdmin.listDeploymentPackages()).thenReturn(deployedPackages);
+        when(dp.getName()).thenReturn("heater");
+        when(dp.getVersion()).thenReturn(new Version("1.0.0"));
+        when(dp.getBundleInfos()).thenReturn(bundleInfos);
+        when(bundleInfo.getSymbolicName()).thenReturn("org.eclipse.kura.demo.heater");
+        when(bundleInfo.getVersion()).thenReturn(new Version("1.0.0"));
+
+        deployment.doGet(topic, request, response);
+
+        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, response.getResponseCode());
+        assertEquals(TEST_XML, new String(response.getBody(), Charset.forName("UTF-8")));
+    }
+
+    @Test
+    public void testDoGetBundlesNoBundleInstalled() throws KuraException, NoSuchFieldException {
+        String xml = TEST_XML;
+
+        CloudDeploymentHandlerV2 deployment = new CloudDeploymentHandlerV2() {
+
+            @Override
+            protected String marshal(Object object) {
+                XmlBundles bundles = (XmlBundles) object;
+                XmlBundle[] bundleArray = bundles.getBundles();
+                assertEquals(0, bundleArray.length);
+
+                return xml;
+            }
+        };
+        CloudletTopic topic = CloudletTopic.parseAppTopic("GET/bundles");
+
+        KuraRequestPayload request = new KuraRequestPayload();
+        KuraResponsePayload response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+
+        BundleContext context = mock(BundleContext.class);
+        TestUtil.setFieldValue(deployment, "bundleContext", context);
+
+        when(context.getBundles()).thenReturn(new Bundle[0]);
+
+        deployment.doGet(topic, request, response);
+
+        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, response.getResponseCode());
+        assertEquals(xml, new String(response.getBody(), Charset.forName("UTF-8")));
+    }
+
+    @Test
+    public void testDoGetBundlesBundleUninstalled() throws KuraException, NoSuchFieldException {
+        Bundle[] bundles = new Bundle[1];
+        Bundle bundle = mock(Bundle.class);
+        bundles[0] = bundle;
+
+        CloudDeploymentHandlerV2 deployment = new CloudDeploymentHandlerV2() {
+
+            @Override
+            protected String marshal(Object object) {
+                XmlBundles bundles = (XmlBundles) object;
+                XmlBundle[] bundleArray = bundles.getBundles();
+                assertEquals(1, bundleArray.length);
+
+                assertEquals(bundle.getSymbolicName(), bundleArray[0].getName());
+                assertEquals(bundle.getVersion().toString(), bundleArray[0].getVersion());
+                assertEquals(bundle.getBundleId(), bundleArray[0].getId());
+                assertEquals("UNINSTALLED", bundleArray[0].getState());
+
+                return TEST_XML;
+            }
+        };
+        CloudletTopic topic = CloudletTopic.parseAppTopic("GET/bundles");
+
+        KuraRequestPayload request = new KuraRequestPayload();
+        KuraResponsePayload response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+
+        BundleContext context = mock(BundleContext.class);
+        TestUtil.setFieldValue(deployment, "bundleContext", context);
+
+        when(context.getBundles()).thenReturn(bundles);
+        when(bundle.getSymbolicName()).thenReturn("org.eclipse.kura.demo.heater");
+        when(bundle.getVersion()).thenReturn(new Version("1.0.0"));
+        when(bundle.getBundleId()).thenReturn(1L);
+        when(bundle.getState()).thenReturn(Bundle.UNINSTALLED);
+
+        deployment.doGet(topic, request, response);
+
+        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, response.getResponseCode());
+        assertEquals(TEST_XML, new String(response.getBody(), Charset.forName("UTF-8")));
+    }
+
+    @Test
+    public void testDoGetBundlesBundleInstalled() throws KuraException, NoSuchFieldException {
+        Bundle[] bundles = new Bundle[1];
+        Bundle bundle = mock(Bundle.class);
+        bundles[0] = bundle;
+
+        CloudDeploymentHandlerV2 deployment = new CloudDeploymentHandlerV2() {
+
+            @Override
+            protected String marshal(Object object) {
+                XmlBundles bundles = (XmlBundles) object;
+                XmlBundle[] bundleArray = bundles.getBundles();
+                assertEquals(1, bundleArray.length);
+
+                assertEquals(bundle.getSymbolicName(), bundleArray[0].getName());
+                assertEquals(bundle.getVersion().toString(), bundleArray[0].getVersion());
+                assertEquals(bundle.getBundleId(), bundleArray[0].getId());
+                assertEquals("INSTALLED", bundleArray[0].getState());
+
+                return TEST_XML;
+            }
+        };
+        CloudletTopic topic = CloudletTopic.parseAppTopic("GET/bundles");
+
+        KuraRequestPayload request = new KuraRequestPayload();
+        KuraResponsePayload response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+
+        BundleContext context = mock(BundleContext.class);
+        TestUtil.setFieldValue(deployment, "bundleContext", context);
+
+        when(context.getBundles()).thenReturn(bundles);
+        when(bundle.getSymbolicName()).thenReturn("org.eclipse.kura.demo.heater");
+        when(bundle.getVersion()).thenReturn(new Version("1.0.0"));
+        when(bundle.getBundleId()).thenReturn(1L);
+        when(bundle.getState()).thenReturn(Bundle.INSTALLED);
+
+        deployment.doGet(topic, request, response);
+
+        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, response.getResponseCode());
+        assertEquals(TEST_XML, new String(response.getBody(), Charset.forName("UTF-8")));
+    }
+
+    @Test
+    public void testDoGetBundlesBundleResolved() throws KuraException, NoSuchFieldException {
+        Bundle[] bundles = new Bundle[1];
+        Bundle bundle = mock(Bundle.class);
+        bundles[0] = bundle;
+
+        CloudDeploymentHandlerV2 deployment = new CloudDeploymentHandlerV2() {
+
+            @Override
+            protected String marshal(Object object) {
+                XmlBundles bundles = (XmlBundles) object;
+                XmlBundle[] bundleArray = bundles.getBundles();
+                assertEquals(1, bundleArray.length);
+
+                assertEquals(bundle.getSymbolicName(), bundleArray[0].getName());
+                assertEquals(bundle.getVersion().toString(), bundleArray[0].getVersion());
+                assertEquals(bundle.getBundleId(), bundleArray[0].getId());
+                assertEquals("RESOLVED", bundleArray[0].getState());
+
+                return TEST_XML;
+            }
+        };
+        CloudletTopic topic = CloudletTopic.parseAppTopic("GET/bundles");
+
+        KuraRequestPayload request = new KuraRequestPayload();
+        KuraResponsePayload response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+
+        BundleContext context = mock(BundleContext.class);
+        TestUtil.setFieldValue(deployment, "bundleContext", context);
+
+        when(context.getBundles()).thenReturn(bundles);
+        when(bundle.getSymbolicName()).thenReturn("org.eclipse.kura.demo.heater");
+        when(bundle.getVersion()).thenReturn(new Version("1.0.0"));
+        when(bundle.getBundleId()).thenReturn(1L);
+        when(bundle.getState()).thenReturn(Bundle.RESOLVED);
+
+        deployment.doGet(topic, request, response);
+
+        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, response.getResponseCode());
+        assertEquals(TEST_XML, new String(response.getBody(), Charset.forName("UTF-8")));
+    }
+
+    @Test
+    public void testDoGetBundlesBundleStarting() throws KuraException, NoSuchFieldException {
+        Bundle[] bundles = new Bundle[1];
+        Bundle bundle = mock(Bundle.class);
+        bundles[0] = bundle;
+
+        CloudDeploymentHandlerV2 deployment = new CloudDeploymentHandlerV2() {
+
+            @Override
+            protected String marshal(Object object) {
+                XmlBundles bundles = (XmlBundles) object;
+                XmlBundle[] bundleArray = bundles.getBundles();
+                assertEquals(1, bundleArray.length);
+
+                assertEquals(bundle.getSymbolicName(), bundleArray[0].getName());
+                assertEquals(bundle.getVersion().toString(), bundleArray[0].getVersion());
+                assertEquals(bundle.getBundleId(), bundleArray[0].getId());
+                assertEquals("STARTING", bundleArray[0].getState());
+
+                return TEST_XML;
+            }
+        };
+        CloudletTopic topic = CloudletTopic.parseAppTopic("GET/bundles");
+
+        KuraRequestPayload request = new KuraRequestPayload();
+        KuraResponsePayload response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+
+        BundleContext context = mock(BundleContext.class);
+        TestUtil.setFieldValue(deployment, "bundleContext", context);
+
+        when(context.getBundles()).thenReturn(bundles);
+        when(bundle.getSymbolicName()).thenReturn("org.eclipse.kura.demo.heater");
+        when(bundle.getVersion()).thenReturn(new Version("1.0.0"));
+        when(bundle.getBundleId()).thenReturn(1L);
+        when(bundle.getState()).thenReturn(Bundle.STARTING);
+
+        deployment.doGet(topic, request, response);
+
+        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, response.getResponseCode());
+        assertEquals(TEST_XML, new String(response.getBody(), Charset.forName("UTF-8")));
+    }
+
+    @Test
+    public void testDoGetBundlesBundleStopping() throws KuraException, NoSuchFieldException {
+        Bundle[] bundles = new Bundle[1];
+        Bundle bundle = mock(Bundle.class);
+        bundles[0] = bundle;
+
+        CloudDeploymentHandlerV2 deployment = new CloudDeploymentHandlerV2() {
+
+            @Override
+            protected String marshal(Object object) {
+                XmlBundles bundles = (XmlBundles) object;
+                XmlBundle[] bundleArray = bundles.getBundles();
+                assertEquals(1, bundleArray.length);
+
+                assertEquals(bundle.getSymbolicName(), bundleArray[0].getName());
+                assertEquals(bundle.getVersion().toString(), bundleArray[0].getVersion());
+                assertEquals(bundle.getBundleId(), bundleArray[0].getId());
+                assertEquals("STOPPING", bundleArray[0].getState());
+
+                return TEST_XML;
+            }
+        };
+        CloudletTopic topic = CloudletTopic.parseAppTopic("GET/bundles");
+
+        KuraRequestPayload request = new KuraRequestPayload();
+        KuraResponsePayload response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+
+        BundleContext context = mock(BundleContext.class);
+        TestUtil.setFieldValue(deployment, "bundleContext", context);
+
+        when(context.getBundles()).thenReturn(bundles);
+        when(bundle.getSymbolicName()).thenReturn("org.eclipse.kura.demo.heater");
+        when(bundle.getVersion()).thenReturn(new Version("1.0.0"));
+        when(bundle.getBundleId()).thenReturn(1L);
+        when(bundle.getState()).thenReturn(Bundle.STOPPING);
+
+        deployment.doGet(topic, request, response);
+
+        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, response.getResponseCode());
+        assertEquals(TEST_XML, new String(response.getBody(), Charset.forName("UTF-8")));
+    }
+
+    @Test
+    public void testDoGetBundlesBundleActive() throws KuraException, NoSuchFieldException {
+        Bundle[] bundles = new Bundle[1];
+        Bundle bundle = mock(Bundle.class);
+        bundles[0] = bundle;
+
+        CloudDeploymentHandlerV2 deployment = new CloudDeploymentHandlerV2() {
+
+            @Override
+            protected String marshal(Object object) {
+                XmlBundles bundles = (XmlBundles) object;
+                XmlBundle[] bundleArray = bundles.getBundles();
+                assertEquals(1, bundleArray.length);
+
+                assertEquals(bundle.getSymbolicName(), bundleArray[0].getName());
+                assertEquals(bundle.getVersion().toString(), bundleArray[0].getVersion());
+                assertEquals(bundle.getBundleId(), bundleArray[0].getId());
+                assertEquals("ACTIVE", bundleArray[0].getState());
+
+                return TEST_XML;
+            }
+        };
+        CloudletTopic topic = CloudletTopic.parseAppTopic("GET/bundles");
+
+        KuraRequestPayload request = new KuraRequestPayload();
+        KuraResponsePayload response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+
+        BundleContext context = mock(BundleContext.class);
+        TestUtil.setFieldValue(deployment, "bundleContext", context);
+
+        when(context.getBundles()).thenReturn(bundles);
+        when(bundle.getSymbolicName()).thenReturn("org.eclipse.kura.demo.heater");
+        when(bundle.getVersion()).thenReturn(new Version("1.0.0"));
+        when(bundle.getBundleId()).thenReturn(1L);
+        when(bundle.getState()).thenReturn(Bundle.ACTIVE);
+
+        deployment.doGet(topic, request, response);
+
+        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, response.getResponseCode());
+        assertEquals(TEST_XML, new String(response.getBody(), Charset.forName("UTF-8")));
+    }
+
+    @Test
     public void testDoDelNoResources() throws KuraException, NoSuchFieldException {
         CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
-        TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
+        TestUtil.setFieldValue(handler, COMPONENT_OPTIONS_FIELD, new CloudDeploymentHandlerV2Options(new HashMap<>()));
 
         CloudletTopic reqTopic = CloudletTopic.parseAppTopic("DEL");
         KuraRequestPayload reqPayload = new KuraRequestPayload();
@@ -93,7 +789,7 @@ public class CloudDeploymentHandlerV2Test {
     @Test
     public void testDoDelOtherwise() throws KuraException, NoSuchFieldException {
         CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
-        TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
+        TestUtil.setFieldValue(handler, COMPONENT_OPTIONS_FIELD, new CloudDeploymentHandlerV2Options(new HashMap<>()));
 
         CloudletTopic reqTopic = CloudletTopic.parseAppTopic("DEL/test");
         KuraRequestPayload reqPayload = new KuraRequestPayload();
@@ -108,7 +804,7 @@ public class CloudDeploymentHandlerV2Test {
     @Test
     public void testDoDelNormal() throws Exception {
         CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
-        TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
+        TestUtil.setFieldValue(handler, COMPONENT_OPTIONS_FIELD, new CloudDeploymentHandlerV2Options(new HashMap<>()));
 
         DownloadImpl dlMock = mock(DownloadImpl.class);
         TestUtil.setFieldValue(handler, "downloadImplementation", dlMock);
@@ -132,7 +828,7 @@ public class CloudDeploymentHandlerV2Test {
     @Test
     public void testDoDelException() throws Exception {
         CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
-        TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
+        TestUtil.setFieldValue(handler, COMPONENT_OPTIONS_FIELD, new CloudDeploymentHandlerV2Options(new HashMap<>()));
 
         DownloadImpl dlMock = mock(DownloadImpl.class);
         String mesg = "test";
@@ -156,7 +852,7 @@ public class CloudDeploymentHandlerV2Test {
     @Test
     public void testDoExecNoResources() throws KuraException, NoSuchFieldException {
         CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
-        TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
+        TestUtil.setFieldValue(handler, COMPONENT_OPTIONS_FIELD, new CloudDeploymentHandlerV2Options(new HashMap<>()));
 
         CloudletTopic reqTopic = CloudletTopic.parseAppTopic("EXEC");
         KuraRequestPayload reqPayload = new KuraRequestPayload();
@@ -171,7 +867,7 @@ public class CloudDeploymentHandlerV2Test {
     @Test
     public void testDoExecOtherwise() throws KuraException, NoSuchFieldException {
         CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
-        TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
+        TestUtil.setFieldValue(handler, COMPONENT_OPTIONS_FIELD, new CloudDeploymentHandlerV2Options(new HashMap<>()));
 
         CloudletTopic reqTopic = CloudletTopic.parseAppTopic("EXEC/test");
         KuraRequestPayload reqPayload = new KuraRequestPayload();
@@ -188,7 +884,7 @@ public class CloudDeploymentHandlerV2Test {
         // fail immediately after calling doExecInstall
 
         CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
-        TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
+        TestUtil.setFieldValue(handler, COMPONENT_OPTIONS_FIELD, new CloudDeploymentHandlerV2Options(new HashMap<>()));
 
         CloudletTopic reqTopic = CloudletTopic.parseAppTopic("EXEC/" + CloudDeploymentHandlerV2.RESOURCE_INSTALL);
         KuraRequestPayload reqPayload = new KuraRequestPayload();
@@ -206,7 +902,7 @@ public class CloudDeploymentHandlerV2Test {
         // fail at pending test
 
         CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
-        TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
+        TestUtil.setFieldValue(handler, COMPONENT_OPTIONS_FIELD, new CloudDeploymentHandlerV2Options(new HashMap<>()));
 
         CloudletTopic reqTopic = CloudletTopic.parseAppTopic("EXEC/" + CloudDeploymentHandlerV2.RESOURCE_INSTALL);
         KuraRequestPayload reqPayload = new KuraRequestPayload();
@@ -221,7 +917,6 @@ public class CloudDeploymentHandlerV2Test {
         handler.setDataTransportService(dtsMock);
 
         DownloadImpl dlMock = mock(DownloadImpl.class);
-        String mesg = "test";
         KuraException ex = new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
         when(dlMock.isAlreadyDownloaded()).thenThrow(ex);
         TestUtil.setFieldValue(handler, "downloadImplementation", dlMock);
@@ -240,7 +935,7 @@ public class CloudDeploymentHandlerV2Test {
         // fail because not downloaded
 
         CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
-        TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
+        TestUtil.setFieldValue(handler, COMPONENT_OPTIONS_FIELD, new CloudDeploymentHandlerV2Options(new HashMap<>()));
 
         CloudletTopic reqTopic = CloudletTopic.parseAppTopic("EXEC/" + CloudDeploymentHandlerV2.RESOURCE_INSTALL);
         KuraRequestPayload reqPayload = new KuraRequestPayload();
@@ -268,7 +963,7 @@ public class CloudDeploymentHandlerV2Test {
     }
 
     @Test
-    public void testDoExecInstallDownloaded() throws KuraException, NoSuchFieldException {
+    public void testDoExecInstallDownloadedExceptionInstalling() throws KuraException, NoSuchFieldException {
         // fail without file
 
         CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2() {
@@ -278,7 +973,7 @@ public class CloudDeploymentHandlerV2Test {
                 throw new IOException("test");
             }
         };
-        TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
+        TestUtil.setFieldValue(handler, COMPONENT_OPTIONS_FIELD, new CloudDeploymentHandlerV2Options(new HashMap<>()));
 
         CloudletTopic reqTopic = CloudletTopic.parseAppTopic("EXEC/" + CloudDeploymentHandlerV2.RESOURCE_INSTALL);
         KuraRequestPayload reqPayload = new KuraRequestPayload();
@@ -309,11 +1004,64 @@ public class CloudDeploymentHandlerV2Test {
     }
 
     @Test
+    public void testDoExecInstallDownloaded() throws KuraException, NoSuchFieldException, InterruptedException {
+
+        CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2() {
+
+            @Override
+            protected File getDpDownloadFile(final DeploymentPackageInstallOptions options) throws IOException {
+                String dpName = FileUtilities.getFileName(options.getDpName(), options.getDpVersion(), ".dp");
+                String packageFilename = new StringBuilder().append("/tmp").append(File.separator).append(dpName)
+                        .toString();
+                return new File(packageFilename);
+            }
+        };
+
+        TestUtil.setFieldValue(handler, COMPONENT_OPTIONS_FIELD, new CloudDeploymentHandlerV2Options(new HashMap<>()));
+
+        DeploymentHookManager dhmMock = mock(DeploymentHookManager.class);
+        handler.setDeploymentHookManager(dhmMock);
+
+        CloudletTopic reqTopic = CloudletTopic.parseAppTopic("EXEC/" + CloudDeploymentHandlerV2.RESOURCE_INSTALL);
+        KuraRequestPayload reqPayload = new KuraRequestPayload();
+        KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+
+        reqPayload.addMetric(DeploymentPackageOptions.METRIC_DP_NAME, "heater");
+        reqPayload.addMetric(DeploymentPackageOptions.METRIC_DP_VERSION, "1.0.0");
+        reqPayload.addMetric(DeploymentPackageOptions.METRIC_JOB_ID, 1234L);
+        reqPayload.addMetric(DeploymentPackageInstallOptions.METRIC_DP_INSTALL_SYSTEM_UPDATE, false);
+
+        DataTransportService dtsMock = mock(DataTransportService.class);
+        handler.setDataTransportService(dtsMock);
+
+        DownloadImpl dlMock = mock(DownloadImpl.class);
+        when(dlMock.isAlreadyDownloaded()).thenReturn(true);
+        TestUtil.setFieldValue(handler, "downloadImplementation", dlMock);
+
+        TestUtil.setFieldValue(handler, "isInstalling", false);
+
+        InstallImpl installImpl = mock(InstallImpl.class);
+        TestUtil.setFieldValue(handler, "installImplementation", installImpl);
+
+        handler.doExec(reqTopic, reqPayload, respPayload);
+
+        assertEquals("Response code should match expected", KuraResponsePayload.RESPONSE_CODE_OK,
+                respPayload.getResponseCode());
+
+        Thread.sleep(500);
+        assertNull(TestUtil.getFieldValue(handler, "installOptions"));
+        assertFalse((boolean) TestUtil.getFieldValue(handler, "isInstalling"));
+
+        // DeploymentPackageInstallOptions options = new DeploymentPackageInstallOptions(reqPayload);
+        // verify(installImpl).installDp(options, new File("/tmp/heater-1.0.0.dp"));
+    }
+
+    @Test
     public void testDoExecDownloadOptionsException() throws KuraException, NoSuchFieldException {
         // fail soon after calling doExecDownload
 
         CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
-        TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
+        TestUtil.setFieldValue(handler, COMPONENT_OPTIONS_FIELD, new CloudDeploymentHandlerV2Options(new HashMap<>()));
 
         CloudletTopic reqTopic = CloudletTopic.parseAppTopic("EXEC/" + CloudDeploymentHandlerV2.RESOURCE_DOWNLOAD);
         KuraRequestPayload reqPayload = new KuraRequestPayload();
@@ -333,7 +1081,7 @@ public class CloudDeploymentHandlerV2Test {
         // fail at pending url
 
         CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
-        TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
+        TestUtil.setFieldValue(handler, COMPONENT_OPTIONS_FIELD, new CloudDeploymentHandlerV2Options(new HashMap<>()));
 
         CloudletTopic reqTopic = CloudletTopic.parseAppTopic("EXEC/" + CloudDeploymentHandlerV2.RESOURCE_DOWNLOAD);
         KuraRequestPayload reqPayload = new KuraRequestPayload();
@@ -362,7 +1110,7 @@ public class CloudDeploymentHandlerV2Test {
         assertNotNull("Response timestamp should be set", respPayload.getTimestamp());
         assertEquals("Body should match", "Another resource is already in download",
                 new String(respPayload.getBody(), Charset.forName("UTF-8")));
-        assertEquals(DOWNLOAD_STATUS.IN_PROGRESS.getStatusString(),
+        assertEquals(DownloadStatus.IN_PROGRESS.getStatusString(),
                 respPayload.getMetric(CloudDeploymentHandlerV2.METRIC_DOWNLOAD_STATUS));
     }
 
@@ -379,7 +1127,7 @@ public class CloudDeploymentHandlerV2Test {
                 return dlMock;
             }
         };
-        TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
+        TestUtil.setFieldValue(handler, COMPONENT_OPTIONS_FIELD, new CloudDeploymentHandlerV2Options(new HashMap<>()));
 
         CloudletTopic reqTopic = CloudletTopic.parseAppTopic("EXEC/" + CloudDeploymentHandlerV2.RESOURCE_DOWNLOAD);
         KuraRequestPayload reqPayload = new KuraRequestPayload();
@@ -424,7 +1172,7 @@ public class CloudDeploymentHandlerV2Test {
                 return dlMock;
             }
         };
-        TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
+        TestUtil.setFieldValue(handler, COMPONENT_OPTIONS_FIELD, new CloudDeploymentHandlerV2Options(new HashMap<>()));
 
         CloudletTopic reqTopic = CloudletTopic.parseAppTopic("EXEC/" + CloudDeploymentHandlerV2.RESOURCE_DOWNLOAD);
         KuraRequestPayload reqPayload = new KuraRequestPayload();
@@ -458,11 +1206,103 @@ public class CloudDeploymentHandlerV2Test {
     }
 
     @Test
+    public void testDoExecDownloadSuccessfulNoInstall() throws KuraException, NoSuchFieldException {
+        DownloadImpl dlMock = mock(DownloadImpl.class);
+
+        CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2() {
+
+            @Override
+            protected DownloadImpl createDownloadImpl(DeploymentPackageDownloadOptions options) {
+                return dlMock;
+            }
+        };
+
+        TestUtil.setFieldValue(handler, COMPONENT_OPTIONS_FIELD, new CloudDeploymentHandlerV2Options(new HashMap<>()));
+
+        DeploymentHookManager dhmMock = mock(DeploymentHookManager.class);
+        handler.setDeploymentHookManager(dhmMock);
+
+        CloudletTopic reqTopic = CloudletTopic.parseAppTopic("EXEC/" + CloudDeploymentHandlerV2.RESOURCE_DOWNLOAD);
+        KuraRequestPayload reqPayload = new KuraRequestPayload();
+        KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+
+        reqPayload.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_DOWNLOAD_URI,
+                "https://s3-us-west-2.amazonaws.com/kura-repo/drivers/3.0.0-RELEASE/org.eclipse.kura.demo.heater_1.0.100.dp");
+        reqPayload.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_DOWNLOAD_PROTOCOL, "http");
+        reqPayload.addMetric(DeploymentPackageOptions.METRIC_DP_NAME, "heater");
+        reqPayload.addMetric(DeploymentPackageOptions.METRIC_DP_VERSION, "1.0.0");
+        reqPayload.addMetric(DeploymentPackageOptions.METRIC_JOB_ID, 1234L);
+        reqPayload.addMetric(DeploymentPackageInstallOptions.METRIC_DP_INSTALL_SYSTEM_UPDATE, false);
+
+        DataTransportService dtsMock = mock(DataTransportService.class);
+        handler.setDataTransportService(dtsMock);
+
+        SslManagerService sslManagerService = mock(SslManagerService.class);
+        handler.setSslManagerService(sslManagerService);
+
+        when(dlMock.isAlreadyDownloaded()).thenReturn(false);
+        when(dtsMock.getClientId()).thenReturn("ClientId");
+        TestUtil.setFieldValue(handler, "pendingPackageUrl", null);
+
+        handler.doExec(reqTopic, reqPayload, respPayload);
+
+        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, respPayload.getResponseCode());
+    }
+
+    @Test
+    public void testDoExecDownloadFailure()
+            throws KuraException, NoSuchFieldException, IOException, InterruptedException {
+        DownloadImpl dlMock = mock(DownloadImpl.class);
+
+        CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2() {
+
+            @Override
+            protected DownloadImpl createDownloadImpl(DeploymentPackageDownloadOptions options) {
+                return dlMock;
+            }
+        };
+
+        TestUtil.setFieldValue(handler, COMPONENT_OPTIONS_FIELD, new CloudDeploymentHandlerV2Options(new HashMap<>()));
+
+        DeploymentHookManager dhmMock = mock(DeploymentHookManager.class);
+        handler.setDeploymentHookManager(dhmMock);
+
+        CloudletTopic reqTopic = CloudletTopic.parseAppTopic("EXEC/" + CloudDeploymentHandlerV2.RESOURCE_DOWNLOAD);
+        KuraRequestPayload reqPayload = new KuraRequestPayload();
+        KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+
+        reqPayload.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_DOWNLOAD_URI, "http://heater.value");
+        reqPayload.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_DOWNLOAD_PROTOCOL, "http");
+        reqPayload.addMetric(DeploymentPackageOptions.METRIC_DP_NAME, "heater");
+        reqPayload.addMetric(DeploymentPackageOptions.METRIC_DP_VERSION, "1.0.0");
+        reqPayload.addMetric(DeploymentPackageOptions.METRIC_JOB_ID, 1234L);
+        reqPayload.addMetric(DeploymentPackageInstallOptions.METRIC_DP_INSTALL_SYSTEM_UPDATE, false);
+
+        DataTransportService dtsMock = mock(DataTransportService.class);
+        handler.setDataTransportService(dtsMock);
+
+        SslManagerService sslManagerService = mock(SslManagerService.class);
+        handler.setSslManagerService(sslManagerService);
+
+        when(dtsMock.getClientId()).thenReturn("ClientId");
+
+        when(dlMock.isAlreadyDownloaded()).thenReturn(false);
+        doThrow(new KuraException(KuraErrorCode.INTERNAL_ERROR)).when(dlMock).downloadDeploymentPackageInternal();
+
+        handler.doExec(reqTopic, reqPayload, respPayload);
+
+        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, respPayload.getResponseCode());
+
+        Thread.sleep(500);
+        assertNull(TestUtil.getFieldValue(handler, "pendingPackageUrl"));
+    }
+
+    @Test
     public void testDoExecUninstallOptionsException() throws KuraException, NoSuchFieldException {
         // fail soon after calling doExecUninstall
 
         CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
-        TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
+        TestUtil.setFieldValue(handler, COMPONENT_OPTIONS_FIELD, new CloudDeploymentHandlerV2Options(new HashMap<>()));
 
         CloudletTopic reqTopic = CloudletTopic.parseAppTopic("EXEC/" + CloudDeploymentHandlerV2.RESOURCE_UNINSTALL);
         KuraRequestPayload reqPayload = new KuraRequestPayload();
@@ -482,7 +1322,7 @@ public class CloudDeploymentHandlerV2Test {
         // fail at installing/pending package name
 
         CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
-        TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
+        TestUtil.setFieldValue(handler, COMPONENT_OPTIONS_FIELD, new CloudDeploymentHandlerV2Options(new HashMap<>()));
 
         CloudletTopic reqTopic = CloudletTopic.parseAppTopic("EXEC/" + CloudDeploymentHandlerV2.RESOURCE_UNINSTALL);
         KuraRequestPayload reqPayload = new KuraRequestPayload();
@@ -520,7 +1360,7 @@ public class CloudDeploymentHandlerV2Test {
                 throw new RuntimeException(testMesg);
             }
         };
-        TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
+        TestUtil.setFieldValue(handler, COMPONENT_OPTIONS_FIELD, new CloudDeploymentHandlerV2Options(new HashMap<>()));
 
         CloudletTopic reqTopic = CloudletTopic.parseAppTopic("EXEC/" + CloudDeploymentHandlerV2.RESOURCE_UNINSTALL);
         KuraRequestPayload reqPayload = new KuraRequestPayload();
@@ -556,7 +1396,7 @@ public class CloudDeploymentHandlerV2Test {
         // don't fail before the actual call
 
         CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
-        TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
+        TestUtil.setFieldValue(handler, COMPONENT_OPTIONS_FIELD, new CloudDeploymentHandlerV2Options(new HashMap<>()));
 
         CloudletTopic reqTopic = CloudletTopic.parseAppTopic("EXEC/" + CloudDeploymentHandlerV2.RESOURCE_STOP);
         KuraRequestPayload reqPayload = new KuraRequestPayload();
@@ -592,7 +1432,7 @@ public class CloudDeploymentHandlerV2Test {
         // fail because of String bundle id
 
         CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
-        TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
+        TestUtil.setFieldValue(handler, COMPONENT_OPTIONS_FIELD, new CloudDeploymentHandlerV2Options(new HashMap<>()));
 
         CloudletTopic reqTopic = CloudletTopic.parseAppTopic("EXEC/" + CloudDeploymentHandlerV2.RESOURCE_START + "/aa");
         KuraRequestPayload reqPayload = new KuraRequestPayload();
@@ -613,7 +1453,7 @@ public class CloudDeploymentHandlerV2Test {
         // fail because of null bundle
 
         CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
-        TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
+        TestUtil.setFieldValue(handler, COMPONENT_OPTIONS_FIELD, new CloudDeploymentHandlerV2Options(new HashMap<>()));
 
         CloudletTopic reqTopic = CloudletTopic.parseAppTopic("EXEC/" + CloudDeploymentHandlerV2.RESOURCE_START + "/99");
         KuraRequestPayload reqPayload = new KuraRequestPayload();
@@ -638,7 +1478,7 @@ public class CloudDeploymentHandlerV2Test {
         // fail because of start exception
 
         CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
-        TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
+        TestUtil.setFieldValue(handler, COMPONENT_OPTIONS_FIELD, new CloudDeploymentHandlerV2Options(new HashMap<>()));
 
         CloudletTopic reqTopic = CloudletTopic.parseAppTopic("EXEC/" + CloudDeploymentHandlerV2.RESOURCE_START + "/99");
         KuraRequestPayload reqPayload = new KuraRequestPayload();
@@ -668,7 +1508,7 @@ public class CloudDeploymentHandlerV2Test {
         // OK
 
         CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
-        TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
+        TestUtil.setFieldValue(handler, COMPONENT_OPTIONS_FIELD, new CloudDeploymentHandlerV2Options(new HashMap<>()));
 
         CloudletTopic reqTopic = CloudletTopic.parseAppTopic("EXEC/" + CloudDeploymentHandlerV2.RESOURCE_STOP + "/99");
         KuraRequestPayload reqPayload = new KuraRequestPayload();
@@ -718,7 +1558,7 @@ public class CloudDeploymentHandlerV2Test {
     public void testDoExecDownloadNoRegisteredHookException() throws KuraException, NoSuchFieldException {
 
         CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
-        TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
+        TestUtil.setFieldValue(handler, COMPONENT_OPTIONS_FIELD, new CloudDeploymentHandlerV2Options(new HashMap<>()));
 
         final DeploymentHookManager manager = getDeploymentHookManager();
         handler.setDeploymentHookManager(manager);
@@ -751,7 +1591,7 @@ public class CloudDeploymentHandlerV2Test {
     public void testDoExecInstallNoRegisteredHookException() throws KuraException, NoSuchFieldException {
 
         CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
-        TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
+        TestUtil.setFieldValue(handler, COMPONENT_OPTIONS_FIELD, new CloudDeploymentHandlerV2Options(new HashMap<>()));
 
         final DeploymentHookManager manager = getDeploymentHookManager();
         handler.setDeploymentHookManager(manager);
@@ -782,7 +1622,7 @@ public class CloudDeploymentHandlerV2Test {
     public void testDoExecDownloadShouldAbortOnPreDownload() throws KuraException, NoSuchFieldException {
 
         CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
-        TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
+        TestUtil.setFieldValue(handler, COMPONENT_OPTIONS_FIELD, new CloudDeploymentHandlerV2Options(new HashMap<>()));
 
         final DeploymentHookManager manager = getDeploymentHookManager();
         manager.bindHook(mockHookReference("testHook", new DeploymentHook() {
@@ -833,7 +1673,7 @@ public class CloudDeploymentHandlerV2Test {
     public void testDoExecInstallShouldAbortOnPostDownload() throws KuraException, NoSuchFieldException {
 
         CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
-        TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
+        TestUtil.setFieldValue(handler, COMPONENT_OPTIONS_FIELD, new CloudDeploymentHandlerV2Options(new HashMap<>()));
 
         final DeploymentHookManager manager = getDeploymentHookManager();
         manager.bindHook(mockHookReference("testHook", new DeploymentHook() {

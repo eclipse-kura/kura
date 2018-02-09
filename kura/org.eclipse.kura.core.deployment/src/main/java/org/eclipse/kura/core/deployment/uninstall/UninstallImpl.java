@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -17,7 +17,7 @@ import java.util.Date;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.deployment.CloudDeploymentHandlerV2;
-import org.eclipse.kura.core.deployment.CloudDeploymentHandlerV2.UNINSTALL_STATUS;
+import org.eclipse.kura.core.deployment.UninstallStatus;
 import org.eclipse.kura.core.util.ProcessUtil;
 import org.eclipse.kura.core.util.SafeProcess;
 import org.osgi.service.deploymentadmin.DeploymentAdmin;
@@ -42,7 +42,7 @@ public class UninstallImpl {
     private void uninstallCompleteAsync(DeploymentPackageUninstallOptions options, String dpName) throws KuraException {
         KuraUninstallPayload notify = new KuraUninstallPayload(options.getClientId());
         notify.setTimestamp(new Date());
-        notify.setUninstallStatus(UNINSTALL_STATUS.COMPLETED.getStatusString());
+        notify.setUninstallStatus(UninstallStatus.COMPLETED.getStatusString());
         notify.setJobId(options.getJobId());
         notify.setDpName(dpName); // Probably split dpName and dpVersion?
         notify.setUninstallProgress(100);
@@ -54,7 +54,7 @@ public class UninstallImpl {
             throws KuraException {
         KuraUninstallPayload notify = new KuraUninstallPayload(options.getClientId());
         notify.setTimestamp(new Date());
-        notify.setUninstallStatus(UNINSTALL_STATUS.FAILED.getStatusString());
+        notify.setUninstallStatus(UninstallStatus.FAILED.getStatusString());
         notify.setJobId(options.getJobId());
         notify.setDpName(dpName); // Probably split dpName and dpVersion?
         notify.setUninstallProgress(0);

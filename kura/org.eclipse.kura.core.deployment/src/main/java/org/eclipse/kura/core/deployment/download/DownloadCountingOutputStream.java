@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -15,7 +15,7 @@ package org.eclipse.kura.core.deployment.download;
 import java.io.IOException;
 
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.core.deployment.CloudDeploymentHandlerV2.DOWNLOAD_STATUS;
+import org.eclipse.kura.core.deployment.DownloadStatus;
 
 public interface DownloadCountingOutputStream {
 
@@ -23,7 +23,7 @@ public interface DownloadCountingOutputStream {
 
     public void startWork() throws KuraException;
 
-    public DOWNLOAD_STATUS getDownloadTransferStatus();
+    public DownloadStatus getDownloadTransferStatus();
 
     public Long getDownloadTransferProgressPercentage();
 

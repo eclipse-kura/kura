@@ -124,16 +124,29 @@ public final class AssetTest {
         channels.put("kura.service.pid", "AssetTest");
         channels.put(AssetConstants.ASSET_DESC_PROP.value(), "sample.asset.desc");
         channels.put(AssetConstants.ASSET_DRIVER_PROP.value(), "org.eclipse.kura.asset.stub.driver");
-        channels.put("1.CH#name", "sample.channel1.name");
+        channels.put("1.CH#+name", "1.CH");
         channels.put("1.CH#+type", "READ");
         channels.put("1.CH#+value.type", "INTEGER");
         channels.put("1.CH#DRIVER.modbus.register", "sample.channel1.modbus.register");
         channels.put("1.CH#DRIVER.modbus.FC", "sample.channel1.modbus.FC");
-        channels.put("2.CH#name", "sample.channel2.name");
+        channels.put("2.CH#+name", "2.CH");
+        channels.put("2.CH#+enabled", "true");
         channels.put("2.CH#+type", "WRITE");
         channels.put("2.CH#+value.type", "BOOLEAN");
         channels.put("2.CH#DRIVER.modbus.register", "sample.channel2.modbus.register");
         channels.put("2.CH#DRIVER.modbus.DUMMY.NN", "sample.channel2.modbus.FC");
+        channels.put("3.CH#+name", "3.CH");
+        channels.put("3.CH#+type", "READ");
+        channels.put("3.CH#+enabled", "false");
+        channels.put("3.CH#+value.type", "INTEGER");
+        channels.put("3.CH#DRIVER.modbus.register", "sample.channel1.modbus.register");
+        channels.put("3.CH#DRIVER.modbus.FC", "sample.channel1.modbus.FC");
+        channels.put("4.CH#+name", "3.CH");
+        channels.put("4.CH#+enabled", "false");
+        channels.put("4.CH#+type", "WRITE");
+        channels.put("4.CH#+value.type", "BOOLEAN");
+        channels.put("4.CH#DRIVER.modbus.register", "sample.channel2.modbus.register");
+        channels.put("4.CH#DRIVER.modbus.DUMMY.NN", "sample.channel2.modbus.FC");
 
         ((BaseAsset) asset).updated(channels);
     }
@@ -168,19 +181,19 @@ public final class AssetTest {
         final AssetConfiguration assetConfiguration = asset.getAssetConfiguration();
         assertNotNull(assetConfiguration);
         final Map<String, Channel> channels = assetConfiguration.getAssetChannels();
-        assertEquals(2, channels.size());
+        assertEquals(4, channels.size());
 
         final Channel channel1 = channels.get("1.CH");
-        // FIXME? should this be so:
-        // assertEquals("sample.channel1.name", channel1.getName());
-        // or so:
-        // assertEquals("sample.channel1.name", channel1.getConfiguration().get("name"));
+        assertTrue(channel1.isEnabled());
+        assertEquals("1.CH", channel1.getName());
         assertEquals(ChannelType.READ, channel1.getType());
         assertEquals(DataType.INTEGER, channel1.getValueType());
         assertEquals("sample.channel1.modbus.register", channel1.getConfiguration().get("DRIVER.modbus.register"));
         assertEquals("sample.channel1.modbus.FC", channel1.getConfiguration().get("DRIVER.modbus.FC"));
 
         final Channel channel2 = channels.get("2.CH");
+        assertTrue(channel2.isEnabled());
+        assertEquals("2.CH", channel2.getName());
         assertEquals(ChannelType.WRITE, channel2.getType());
         assertEquals(DataType.BOOLEAN, channel2.getValueType());
         assertEquals("sample.channel2.modbus.register", channel2.getConfiguration().get("DRIVER.modbus.register"));
@@ -240,7 +253,7 @@ public final class AssetTest {
         assertEquals(Arrays.asList(true, false), attachSequence);
 
         ((BaseAsset) asset).setDriver(driver);
-        assertEquals(Arrays.asList(true, false, false, true), attachSequence);
+        assertEquals(Arrays.asList(true, false, true), attachSequence);
     }
 
     /**
@@ -275,7 +288,7 @@ public final class AssetTest {
         assertEquals(Arrays.asList(), attachSequence);
 
         ((BaseAsset) asset).setDriver(driver);
-        assertEquals(Arrays.asList(false, true), attachSequence);
+        assertEquals(Arrays.asList(true), attachSequence);
     }
 
     /**
@@ -472,19 +485,122 @@ public final class AssetTest {
 
         List<AD> ads = ocd.getAD();
         assertNotNull(ads);
-        assertEquals(10, ads.size()); // description, driver, 8 from BaseChannelDescriptor and StubChannelDescriptor
+        assertEquals(22, ads.size()); // description, driver, 20 from BaseChannelDescriptor and StubChannelDescriptor
 
         assertEquals("asset.desc", ads.get(0).getId());
         assertEquals("driver.pid", ads.get(1).getId());
 
-        String[] expectedValues = { "#+name", "#+type", "#+value.type", "#unit.id" };
-        for (int i = 0; i < expectedValues.length; i += 2) {
-            String id = ads.get(i * 2 + 2).getId();
-            String id2 = ads.get(i * 2 + 3).getId();
-
-            assertEquals("1.CH" + expectedValues[i], id);
-            assertEquals("2.CH" + expectedValues[i], id2);
+        String[] expectedValues = { "#+enabled", "#+name", "#+type", "#+value.type", "#unit.id" };
+        final int expectedChannelCount = 4;
+        for (int i = 0; i < expectedValues.length; i++) {
+            for (int j = 0; j < expectedChannelCount; j++) {
+                assertEquals((j + 1) + ".CH" + expectedValues[i], ads.get(2 + i * expectedChannelCount + j).getId());
+            }
         }
+    }
+
+    /**
+     * Tests reading disabled channel
+     */
+    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @Test
+    public void testReadChannelDisabled() throws KuraException {
+        List<ChannelRecord> result = asset.read(new HashSet(Arrays.asList("3.CH")));
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(ChannelFlag.FAILURE, result.get(0).getChannelStatus().getChannelFlag());
+    }
+
+    /**
+     * Tests writing disabled channel
+     */
+    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @Test
+    public void testWriteChannelDisabled() throws KuraException {
+        ChannelRecord channelRecord = ChannelRecord.createWriteRecord("4.CH", TypedValues.newLongValue(1L));
+
+        List<ChannelRecord> list = Arrays.asList(channelRecord);
+        assertEquals(1, list.size());
+
+        asset.write(list);
+
+        assertEquals(ChannelFlag.FAILURE, channelRecord.getChannelStatus().getChannelFlag());
+    }
+
+    /**
+     * It should be possible to attach listeners on disabled channels, but listener should not be forwarded to the
+     * driver in this case driver
+     */
+    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @Test
+    public void testListenerAttachOnDisabledChannel() throws KuraException {
+        final ArrayList<Boolean> attachSequence = new ArrayList<>();
+
+        final ChannelListener listener = new ChannelListener() {
+
+            @Override
+            public void onChannelEvent(ChannelEvent event) {
+                if ("unregister".equals(event.getChannelRecord().getChannelName())) {
+                    attachSequence.add(false);
+                } else {
+                    attachSequence.add(true);
+                }
+            }
+        };
+
+        asset.registerChannelListener("3.CH", listener);
+        assertEquals(Arrays.asList(), attachSequence);
+    }
+
+    /**
+     * Listeners attached to a channel should be detached from the driver if the channel is disabled and reattached if
+     * the channel is enabled again
+     */
+    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @Test
+    public void testEnableDisableChannelWithListener() throws KuraException {
+        final ArrayList<Boolean> attachSequence = new ArrayList<>();
+
+        final Map<String, Object> channels = CollectionUtil.newHashMap();
+        channels.put("kura.service.pid", "AssetTest");
+        channels.put(AssetConstants.ASSET_DESC_PROP.value(), "sample.asset.desc");
+        channels.put(AssetConstants.ASSET_DRIVER_PROP.value(), "org.eclipse.kura.asset.stub.driver");
+        channels.put("3.CH#+name", "3.CH");
+        channels.put("3.CH#+type", "READ");
+        channels.put("3.CH#+enabled", "false");
+        channels.put("3.CH#+value.type", "INTEGER");
+        channels.put("3.CH#DRIVER.modbus.register", "sample.channel1.modbus.register");
+        channels.put("3.CH#DRIVER.modbus.FC", "sample.channel1.modbus.FC");
+
+        ((BaseAsset) asset).updated(channels);
+
+        final ChannelListener listener = new ChannelListener() {
+
+            @Override
+            public void onChannelEvent(ChannelEvent event) {
+                if ("unregister".equals(event.getChannelRecord().getChannelName())) {
+                    attachSequence.add(false);
+                } else {
+                    attachSequence.add(true);
+                }
+            }
+        };
+
+        asset.registerChannelListener("3.CH", listener);
+        assertEquals(Arrays.asList(), attachSequence);
+
+        channels.put("3.CH#+enabled", "true");
+        ((BaseAsset) asset).updated(channels);
+
+        assertEquals(Arrays.asList(false, true), attachSequence);
+
+        channels.put("3.CH#+enabled", "false");
+        ((BaseAsset) asset).updated(channels);
+
+        assertEquals(Arrays.asList(false, true, false), attachSequence);
+
+        initt();
     }
 
     public static void bindAsset(Asset asset) {

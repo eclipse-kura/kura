@@ -87,6 +87,17 @@ public class BaseChannelDescriptor implements ChannelDescriptor {
     protected BaseChannelDescriptor() {
         this.defaultElements = CollectionUtil.newArrayList();
 
+        final Tad enabled = new Tad();
+        enabled.setId(AssetConstants.ENABLED.value());
+        enabled.setName(AssetConstants.ENABLED.value().substring(1));
+        enabled.setType(Tscalar.BOOLEAN);
+        enabled.setDefault("true");
+        enabled.setDescription(messages.enabledDescription());
+        enabled.setCardinality(0);
+        enabled.setRequired(true);
+
+        this.defaultElements.add(enabled);
+
         final Tad name = new Tad();
         name.setId(NAME.value());
         name.setName(NAME.value().substring(1));

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -176,7 +176,9 @@ public class AssetDataUi extends Composite {
 
             @Override
             public void render(Context context, AssetModel.ChannelModel object, SafeHtmlBuilder sb) {
-                if ("READ".equals(object.getValue(AssetConstants.TYPE.value()))) {
+                if ("false".equals(object.getValue(AssetConstants.ENABLED.value()))) {
+                    sb.appendEscaped("This channel is disabled");
+                } else if ("READ".equals(object.getValue(AssetConstants.TYPE.value()))) {
                     sb.appendEscaped(getValue(object));
                 } else {
                     super.render(context, object, sb);

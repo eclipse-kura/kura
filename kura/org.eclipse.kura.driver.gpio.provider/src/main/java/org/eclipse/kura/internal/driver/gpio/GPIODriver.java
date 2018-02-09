@@ -73,6 +73,7 @@ public final class GPIODriver implements Driver, ConfigurableComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(GPIODriver.class);
     private static final GPIOMessages message = LocalizationAdapter.adapt(GPIOMessages.class);
+    private static final String WRITE_FAILED_MESSAGE = message.writeFailed();
 
     private Set<String> gpioNames;
     private Set<GPIOListener> gpioListeners;
@@ -227,10 +228,9 @@ public final class GPIODriver implements Driver, ConfigurableComponent {
     }
 
     private synchronized void runWriteRequest(GPIORequestInfo requestInfo) {
+        ChannelRecord record = requestInfo.channelRecord;
         if (!GPIOChannelDescriptor.DEFAULT_RESOURCE_NAME.equals(requestInfo.resourceName)
                 && requestInfo.resourceDirection != null) {
-            ChannelRecord record = requestInfo.channelRecord;
-
             try {
                 final TypedValue<Boolean> value = getBooleanValue(record.getValue());
                 this.gpioNames.add(requestInfo.resourceName);
@@ -242,12 +242,17 @@ public final class GPIODriver implements Driver, ConfigurableComponent {
                     record.setTimestamp(System.currentTimeMillis());
                 }
             } catch (IOException | KuraUnavailableDeviceException | KuraClosedDeviceException e) {
-                record.setChannelStatus(new ChannelStatus(ChannelFlag.FAILURE, message.readFailed(), null));
-                record.setTimestamp(System.currentTimeMillis());
-                logger.warn(message.writeFailed());
-                return;
+                setFailureRecord(record);
             }
+        } else {
+            setFailureRecord(record);
         }
+    }
+
+    private void setFailureRecord(ChannelRecord record) {
+        record.setChannelStatus(new ChannelStatus(ChannelFlag.FAILURE, message.readFailed(), null));
+        record.setTimestamp(System.currentTimeMillis());
+        logger.warn(WRITE_FAILED_MESSAGE);
     }
 
     private KuraGPIOPin getPin(String resourceName, KuraGPIODirection resourceDirection, KuraGPIOMode resourceMode,
@@ -333,9 +338,9 @@ public final class GPIODriver implements Driver, ConfigurableComponent {
     }
 
     private synchronized void runReadRequest(GPIORequestInfo requestInfo) {
+        ChannelRecord record = requestInfo.channelRecord;
         if (!GPIOChannelDescriptor.DEFAULT_RESOURCE_NAME.equals(requestInfo.resourceName)
                 && requestInfo.resourceDirection != null) {
-            ChannelRecord record = requestInfo.channelRecord;
             try {
                 KuraGPIOPin pin = getPin(requestInfo.resourceName, requestInfo.resourceDirection,
                         requestInfo.resourceMode, requestInfo.resourceTrigger);
@@ -353,11 +358,10 @@ public final class GPIODriver implements Driver, ConfigurableComponent {
                     record.setTimestamp(System.currentTimeMillis());
                 }
             } catch (IOException | KuraUnavailableDeviceException | KuraClosedDeviceException e) {
-                record.setChannelStatus(new ChannelStatus(ChannelFlag.FAILURE, message.readFailed(), null));
-                record.setTimestamp(System.currentTimeMillis());
-                logger.warn(message.readFailed());
-                return;
+                setFailureRecord(record);
             }
+        } else {
+            setFailureRecord(record);
         }
     }
 

@@ -19,7 +19,6 @@ import static java.util.Objects.requireNonNull;
 import static org.eclipse.kura.channel.ChannelType.READ_WRITE;
 import static org.eclipse.kura.channel.ChannelType.WRITE;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -100,20 +99,6 @@ import org.slf4j.LoggerFactory;
  */
 public final class WireAsset extends BaseAsset implements WireEmitter, WireReceiver, ChannelListener {
 
-    private static final String ERROR_NOT_SPECIFIED_MESSAGE = "ERROR NOT SPECIFIED";
-
-    private static final String PROPERTY_SEPARATOR = "_";
-
-    private static final String PROP_SINGLE_TIMESTAMP_NAME = "assetTimestamp";
-    private static final String PROP_ASSET_NAME = "assetName";
-    private static final String PROP_SUFFIX_TIMESTAMP = PROPERTY_SEPARATOR + "timestamp";
-    private static final String PROP_SUFFIX_ERROR = PROPERTY_SEPARATOR + "error";
-
-    private static final String PROP_VALUE_NO_ERROR = "";
-
-    /** Configuration PID Property. */
-    private static final String CONF_PID = "org.eclipse.kura.wire.WireAsset";
-
     private static final Logger logger = LoggerFactory.getLogger(WireAsset.class);
 
     private static final WireMessages message = LocalizationAdapter.adapt(WireMessages.class);
@@ -177,6 +162,7 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
         logger.debug(message.updatingWireAsset());
         this.options = new WireAssetOptions(properties);
         super.updated(properties);
+
         this.recordFiller = this.options.emitErrors() ? this::fillRecordWithErrors : this::fillRecordWithoutErrors;
         logger.debug(message.updatingWireAssetDone());
     }
@@ -304,21 +290,22 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
 
         final Map<String, TypedValue<?>> wireRecordProperties = new HashMap<>();
         try {
-            wireRecordProperties.put(PROP_ASSET_NAME, TypedValues.newStringValue(getKuraServicePid()));
+            wireRecordProperties.put(WireAssetConstants.PROP_ASSET_NAME.value(),
+                    TypedValues.newStringValue(getKuraServicePid()));
         } catch (KuraException e) {
             logger.error(message.configurationNonNull(), e);
         }
 
+        final TimestampFiller timestampFiller = this.options.getTimestampMode().createFiller(wireRecordProperties);
+
         for (final ChannelRecord channelRecord : channelRecords) {
             this.recordFiller.accept(channelRecord, wireRecordProperties);
+            timestampFiller.processRecord(channelRecord);
         }
 
-        if (this.options.emitSingleTimestamp()) {
-            wireRecordProperties.put(PROP_SINGLE_TIMESTAMP_NAME, TypedValues.newLongValue(System.currentTimeMillis()));
-        }
+        timestampFiller.fillSingleTimestamp();
 
-        final WireRecord wireRecord = new WireRecord(wireRecordProperties);
-        this.wireSupport.emit(Arrays.asList(wireRecord));
+        this.wireSupport.emit(Collections.singletonList(new WireRecord(wireRecordProperties)));
     }
 
     private void fillRecordWithoutErrors(final ChannelRecord channelRecord,
@@ -331,10 +318,6 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
         }
 
         wireRecordProperties.put(channelName, channelRecord.getValue());
-        if (!this.options.emitSingleTimestamp()) {
-            wireRecordProperties.put(channelName + PROP_SUFFIX_TIMESTAMP,
-                    TypedValues.newLongValue(channelRecord.getTimestamp()));
-        }
     }
 
     private void fillRecordWithErrors(final ChannelRecord channelRecord,
@@ -344,19 +327,17 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
         if (channelStatus.getChannelFlag() == ChannelFlag.FAILURE) {
             final String errorMessage = getErrorMessage(channelStatus);
             logger.warn(errorMessage);
-            wireRecordProperties.put(channelName + PROP_SUFFIX_ERROR, TypedValues.newStringValue(errorMessage));
+            wireRecordProperties.put(channelName + WireAssetConstants.PROP_SUFFIX_ERROR.value(),
+                    TypedValues.newStringValue(errorMessage));
         } else {
-            wireRecordProperties.put(channelName + PROP_SUFFIX_ERROR, TypedValues.newStringValue(PROP_VALUE_NO_ERROR));
+            wireRecordProperties.put(channelName + WireAssetConstants.PROP_SUFFIX_ERROR.value(),
+                    TypedValues.newStringValue(WireAssetConstants.PROP_VALUE_NO_ERROR.value()));
             wireRecordProperties.put(channelName, channelRecord.getValue());
-        }
-        if (!this.options.emitSingleTimestamp()) {
-            wireRecordProperties.put(channelName + PROP_SUFFIX_TIMESTAMP,
-                    TypedValues.newLongValue(channelRecord.getTimestamp()));
         }
     }
 
     private String getErrorMessage(final ChannelStatus channelStatus) {
-        String errorMessage = ERROR_NOT_SPECIFIED_MESSAGE;
+        String errorMessage = WireAssetConstants.ERROR_NOT_SPECIFIED_MESSAGE.value();
         final Exception exception = channelStatus.getException();
         final String exceptionMsg = channelStatus.getExceptionMessage();
         if (nonNull(exception) && nonNull(exceptionMsg)) {

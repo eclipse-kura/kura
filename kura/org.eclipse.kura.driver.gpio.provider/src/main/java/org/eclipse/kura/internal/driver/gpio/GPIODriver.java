@@ -74,6 +74,7 @@ public final class GPIODriver implements Driver, ConfigurableComponent {
     private static final Logger logger = LoggerFactory.getLogger(GPIODriver.class);
     private static final GPIOMessages message = LocalizationAdapter.adapt(GPIOMessages.class);
     private static final String WRITE_FAILED_MESSAGE = message.writeFailed();
+    private static final String READ_FAILED_MESSAGE = message.readFailed();
 
     private Set<String> gpioNames;
     private Set<GPIOListener> gpioListeners;
@@ -242,17 +243,17 @@ public final class GPIODriver implements Driver, ConfigurableComponent {
                     record.setTimestamp(System.currentTimeMillis());
                 }
             } catch (IOException | KuraUnavailableDeviceException | KuraClosedDeviceException e) {
-                setFailureRecord(record);
+                setFailureRecord(record, WRITE_FAILED_MESSAGE);
             }
         } else {
-            setFailureRecord(record);
+            setFailureRecord(record, WRITE_FAILED_MESSAGE);
         }
     }
 
-    private void setFailureRecord(ChannelRecord record) {
-        record.setChannelStatus(new ChannelStatus(ChannelFlag.FAILURE, message.readFailed(), null));
+    private void setFailureRecord(ChannelRecord record, String errorMessage) {
+        record.setChannelStatus(new ChannelStatus(ChannelFlag.FAILURE, errorMessage, null));
         record.setTimestamp(System.currentTimeMillis());
-        logger.warn(WRITE_FAILED_MESSAGE);
+        logger.warn(errorMessage);
     }
 
     private KuraGPIOPin getPin(String resourceName, KuraGPIODirection resourceDirection, KuraGPIOMode resourceMode,
@@ -358,10 +359,10 @@ public final class GPIODriver implements Driver, ConfigurableComponent {
                     record.setTimestamp(System.currentTimeMillis());
                 }
             } catch (IOException | KuraUnavailableDeviceException | KuraClosedDeviceException e) {
-                setFailureRecord(record);
+                setFailureRecord(record, READ_FAILED_MESSAGE);
             }
         } else {
-            setFailureRecord(record);
+            setFailureRecord(record, READ_FAILED_MESSAGE);
         }
     }
 

@@ -10,8 +10,12 @@
 
 package org.eclipse.kura.internal.wire.asset;
 
+import java.util.List;
+
 import org.eclipse.kura.asset.provider.BaseAssetOCD;
+import org.eclipse.kura.configuration.metatype.Option;
 import org.eclipse.kura.core.configuration.metatype.Tad;
+import org.eclipse.kura.core.configuration.metatype.Toption;
 import org.eclipse.kura.core.configuration.metatype.Tscalar;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.WireMessages;
@@ -19,6 +23,17 @@ import org.eclipse.kura.localization.resources.WireMessages;
 public class WireAssetOCD extends BaseAssetOCD {
 
     private static final WireMessages message = LocalizationAdapter.adapt(WireMessages.class);
+
+    private static void addOptions(Tad target, Enum<?>[] values) {
+        final List<Option> options = target.getOption();
+        for (Enum<?> value : values) {
+            final String name = value.name();
+            final Toption option = new Toption();
+            option.setLabel(name);
+            option.setValue(name);
+            options.add(option);
+        }
+    }
 
     public WireAssetOCD() {
         super();
@@ -34,16 +49,18 @@ public class WireAssetOCD extends BaseAssetOCD {
 
         addAD(emitAllChannelsAd);
 
-        final Tad singleTimestampAd = new Tad();
-        singleTimestampAd.setId(WireAssetOptions.SINGLE_TIMESTAMP_PROP_NAME);
-        singleTimestampAd.setName(WireAssetOptions.SINGLE_TIMESTAMP_PROP_NAME);
-        singleTimestampAd.setCardinality(0);
-        singleTimestampAd.setType(Tscalar.BOOLEAN);
-        singleTimestampAd.setDescription(message.singleTimestampDescription());
-        singleTimestampAd.setRequired(true);
-        singleTimestampAd.setDefault("false");
+        final Tad timestampModeAd = new Tad();
+        timestampModeAd.setId(WireAssetOptions.TIMESTAMP_MODE_PROP_NAME);
+        timestampModeAd.setName(WireAssetOptions.TIMESTAMP_MODE_PROP_NAME);
+        timestampModeAd.setCardinality(0);
+        timestampModeAd.setType(Tscalar.STRING);
+        timestampModeAd.setDescription(message.timestampModeDescription());
+        timestampModeAd.setRequired(true);
+        timestampModeAd.setDefault(TimestampMode.PER_CHANNEL.name());
 
-        addAD(singleTimestampAd);
+        addOptions(timestampModeAd, TimestampMode.values());
+
+        addAD(timestampModeAd);
 
         final Tad emitErrorsAd = new Tad();
         emitErrorsAd.setId(WireAssetOptions.EMIT_ERRORS_PROP_NAME);

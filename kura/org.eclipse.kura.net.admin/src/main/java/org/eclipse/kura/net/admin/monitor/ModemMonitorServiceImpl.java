@@ -296,7 +296,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
     private NetInterfaceStatus getNetInterfaceStatus(List<NetConfig> netConfigs) {
 
         NetInterfaceStatus interfaceStatus = NetInterfaceStatus.netIPv4StatusUnknown;
-        if (netConfigs != null && !netConfigs.isEmpty()) {
+        if (netConfigs != null) {
             for (NetConfig netConfig : netConfigs) {
                 if (netConfig instanceof NetConfigIP4) {
                     interfaceStatus = ((NetConfigIP4) netConfig).getStatus();
@@ -308,7 +308,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
     }
 
     private void setNetInterfaceStatus(NetInterfaceStatus netInterfaceStatus, List<NetConfig> netConfigs) {
-        if (netConfigs != null && !netConfigs.isEmpty()) {
+        if (netConfigs != null) {
             for (NetConfig netConfig : netConfigs) {
                 if (netConfig instanceof NetConfigIP4) {
                     ((NetConfigIP4) netConfig).setStatus(netInterfaceStatus);
@@ -507,7 +507,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 
     private int getInterfaceNumber(List<NetConfig> netConfigs) {
         int ifaceNo = -1;
-        if (netConfigs != null && !netConfigs.isEmpty()) {
+        if (netConfigs != null) {
             for (NetConfig netConfig : netConfigs) {
                 if (netConfig instanceof ModemConfig) {
                     ifaceNo = ((ModemConfig) netConfig).getPppNumber();
@@ -523,7 +523,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
     }
 
     private void setInterfaceNumber(String ifaceName, List<NetConfig> netConfigs) {
-        if (netConfigs != null && !netConfigs.isEmpty()) {
+        if (netConfigs != null) {
             for (NetConfig netConfig : netConfigs) {
                 if (netConfig instanceof ModemConfig) {
                     ((ModemConfig) netConfig).setPppNumber(getInterfaceNumber(ifaceName));
@@ -536,7 +536,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
     private long getModemResetTimeoutMsec(String ifaceName, List<NetConfig> netConfigs) {
         long resetToutMsec = 0L;
 
-        if (ifaceName != null && netConfigs != null && !netConfigs.isEmpty()) {
+        if (ifaceName != null && netConfigs != null) {
             for (NetConfig netConfig : netConfigs) {
                 if (netConfig instanceof ModemConfig) {
                     resetToutMsec = ((ModemConfig) netConfig).getResetTimeout() * 60000;
@@ -549,7 +549,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 
     private boolean isGpsEnabledInConfig(List<NetConfig> netConfigs) {
         boolean isGpsEnabled = false;
-        if (netConfigs != null && !netConfigs.isEmpty()) {
+        if (netConfigs != null) {
             for (NetConfig netConfig : netConfigs) {
                 if (netConfig instanceof ModemConfig) {
                     isGpsEnabled = ((ModemConfig) netConfig).isGpsEnabled();

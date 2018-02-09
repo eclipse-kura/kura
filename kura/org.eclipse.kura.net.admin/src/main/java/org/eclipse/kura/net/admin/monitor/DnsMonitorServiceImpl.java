@@ -250,7 +250,7 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
         this.allowedNetworks = new HashSet<>();
         this.forwarders = new HashSet<>();
 
-        if ((this.networkConfiguration != null) && (this.networkConfiguration.getNetInterfaceConfigs() != null)) {
+        if (this.networkConfiguration != null && this.networkConfiguration.getNetInterfaceConfigs() != null) {
             List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = this.networkConfiguration
                     .getNetInterfaceConfigs();
             for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {
@@ -284,14 +284,14 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
         logger.debug("Getting DNS proxy config for {}", netInterfaceConfig.getName());
         List<NetConfig> netConfigs = ((AbstractNetInterface<?>) netInterfaceConfig).getNetConfigs();
         for (NetConfig netConfig : netConfigs) {
-            if ((netConfig instanceof DhcpServerConfig) && ((DhcpServerConfig) netConfig).isPassDns()) {
+            if (netConfig instanceof DhcpServerConfig && ((DhcpServerConfig) netConfig).isPassDns()) {
                 logger.debug("Found an allowed network: {}/{}", ((DhcpServerConfig) netConfig).getRouterAddress(),
                         ((DhcpServerConfig) netConfig).getPrefix());
                 this.enabled = true;
 
                 // this is an 'allowed network'
                 this.allowedNetworks
-                        .add(new NetworkPair<IP4Address>((IP4Address) ((DhcpServerConfig) netConfig).getRouterAddress(),
+                        .add(new NetworkPair<>((IP4Address) ((DhcpServerConfig) netConfig).getRouterAddress(),
                                 ((DhcpServerConfig) netConfig).getPrefix()));
             }
         }
@@ -327,7 +327,7 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
     // Get a list of dns servers for all WAN interfaces
     private Set<IPAddress> getConfiguredDnsServers() {
         LinkedHashSet<IPAddress> serverList = new LinkedHashSet<>();
-        if ((this.networkConfiguration != null) && (this.networkConfiguration.getNetInterfaceConfigs() != null)) {
+        if (this.networkConfiguration != null && this.networkConfiguration.getNetInterfaceConfigs() != null) {
             List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = this.networkConfiguration
                     .getNetInterfaceConfigs();
             // If there are multiple WAN interfaces, their configured DNS servers are all included in no particular

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -148,8 +148,8 @@ public class NetworkConfigurationServiceImpl
         this.executorUtil = Executors.newSingleThreadScheduledExecutor();
 
         this.executorUtil.schedule(() -> {
-                // make sure we don't miss the setting of firstConfig
-                NetworkConfigurationServiceImpl.this.firstConfig = false;
+            // make sure we don't miss the setting of firstConfig
+            NetworkConfigurationServiceImpl.this.firstConfig = false;
         }, 3, TimeUnit.MINUTES);
 
         initVisitors();
@@ -370,7 +370,7 @@ public class NetworkConfigurationServiceImpl
 
         // ignore mon interface, redpine vlan interface and usb0 for beaglebone
         if (interfaceName.startsWith("mon.") || interfaceName.startsWith("rpine")
-                || (interfaceName.startsWith("usb0") && "beaglebone".equals(System.getProperty("target.device")))) {
+                || interfaceName.startsWith("usb0") && "beaglebone".equals(System.getProperty("target.device"))) {
             result = true;
         }
 

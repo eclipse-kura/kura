@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -36,12 +36,12 @@ public class TelitLe910v2ModemFactory implements CellularModemFactory {
     private TelitLe910v2ModemFactory() {
         this.s_bundleContext = FrameworkUtil.getBundle(NetworkConfigurationService.class).getBundleContext();
 
-        ServiceTracker<ConnectionFactory, ConnectionFactory> serviceTracker = new ServiceTracker<ConnectionFactory, ConnectionFactory>(
+        ServiceTracker<ConnectionFactory, ConnectionFactory> serviceTracker = new ServiceTracker<>(
                 this.s_bundleContext, ConnectionFactory.class, null);
         serviceTracker.open(true);
         this.m_connectionFactory = serviceTracker.getService();
 
-        this.m_modemServices = new Hashtable<String, TelitLe910v2>();
+        this.m_modemServices = new Hashtable<>();
     }
 
     public static TelitLe910v2ModemFactory getInstance() {

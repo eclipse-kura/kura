@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -43,12 +43,12 @@ public class SierraMc87xxModemFactory implements CellularModemFactory {
     private SierraMc87xxModemFactory() {
         this.s_bundleContext = FrameworkUtil.getBundle(NetworkConfigurationService.class).getBundleContext();
 
-        ServiceTracker<ConnectionFactory, ConnectionFactory> serviceTracker = new ServiceTracker<ConnectionFactory, ConnectionFactory>(
+        ServiceTracker<ConnectionFactory, ConnectionFactory> serviceTracker = new ServiceTracker<>(
                 this.s_bundleContext, ConnectionFactory.class, null);
         serviceTracker.open(true);
         this.m_connectionFactory = serviceTracker.getService();
 
-        this.m_modemServices = new Hashtable<String, SierraMc87xx>();
+        this.m_modemServices = new Hashtable<>();
     }
 
     public static SierraMc87xxModemFactory getInstance() {

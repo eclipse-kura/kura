@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 Eurotech and others.
+ * Copyright (c) 2016, 2018 Eurotech and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -138,18 +138,15 @@ public class FirewallConfigurationServiceImpl implements FirewallConfigurationSe
             try {
                 logger.debug("getFirewallConfiguration() :: Adding port forwarding - inbound iface is {}",
                         portForwardRule.getInboundIface());
-                firewallConfiguration
-                        .addConfig(
-                                new FirewallPortForwardConfigIP4(portForwardRule.getInboundIface(),
-                                        portForwardRule.getOutboundIface(),
-                                        (IP4Address) IPAddress.parseHostAddress(portForwardRule.getAddress()),
-                                        NetProtocol.valueOf(portForwardRule.getProtocol()), portForwardRule.getInPort(),
-                                        portForwardRule.getOutPort(), portForwardRule.isMasquerade(),
-                                        new NetworkPair<IP4Address>(
-                                                (IP4Address) IPAddress
-                                                        .parseHostAddress(portForwardRule.getPermittedNetwork()),
-                                                (short) portForwardRule.getPermittedNetworkMask()),
-                                        portForwardRule.getPermittedMAC(), portForwardRule.getSourcePortRange()));
+                firewallConfiguration.addConfig(new FirewallPortForwardConfigIP4(portForwardRule.getInboundIface(),
+                        portForwardRule.getOutboundIface(),
+                        (IP4Address) IPAddress.parseHostAddress(portForwardRule.getAddress()),
+                        NetProtocol.valueOf(portForwardRule.getProtocol()), portForwardRule.getInPort(),
+                        portForwardRule.getOutPort(), portForwardRule.isMasquerade(),
+                        new NetworkPair<>(
+                                (IP4Address) IPAddress.parseHostAddress(portForwardRule.getPermittedNetwork()),
+                                (short) portForwardRule.getPermittedNetworkMask()),
+                        portForwardRule.getPermittedMAC(), portForwardRule.getSourcePortRange()));
             } catch (UnknownHostException e) {
                 throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
             }
@@ -288,51 +285,51 @@ public class FirewallConfigurationServiceImpl implements FirewallConfigurationSe
     }
 
     protected void addLocalRules(ArrayList<LocalRule> localRules) throws KuraException {
-        firewall.addLocalRules(localRules);
+        this.firewall.addLocalRules(localRules);
     }
 
     protected void addNatRules(ArrayList<NATRule> natRules) throws KuraException {
-        firewall.addNatRules(natRules);
+        this.firewall.addNatRules(natRules);
     }
 
     protected void addPortForwardRules(ArrayList<PortForwardRule> portForwardRules) throws KuraException {
-        firewall.addPortForwardRules(portForwardRules);
+        this.firewall.addPortForwardRules(portForwardRules);
     }
 
     protected void deleteAllLocalRules() throws KuraException {
-        firewall.deleteAllLocalRules();
+        this.firewall.deleteAllLocalRules();
     }
 
     protected void deleteAllNatRules() throws KuraException {
-        firewall.deleteAllNatRules();
+        this.firewall.deleteAllNatRules();
     }
 
     protected void deleteAllPortForwardRules() throws KuraException {
-        firewall.deleteAllPortForwardRules();
+        this.firewall.deleteAllPortForwardRules();
     }
 
     protected Set<NATRule> getAutoNatRules() throws KuraException {
-        return firewall.getAutoNatRules();
+        return this.firewall.getAutoNatRules();
     }
 
     protected LinuxFirewall getLinuxFirewall() {
-        if (firewall == null) {
-            firewall = LinuxFirewall.getInstance();
+        if (this.firewall == null) {
+            this.firewall = LinuxFirewall.getInstance();
         }
 
-        return firewall;
+        return this.firewall;
     }
 
     protected Set<LocalRule> getLocalRules() throws KuraException {
-        return firewall.getLocalRules();
+        return this.firewall.getLocalRules();
     }
 
     protected Set<NATRule> getNatRules() throws KuraException {
-        return firewall.getNatRules();
+        return this.firewall.getNatRules();
     }
 
     protected Set<PortForwardRule> getPortForwardRules() throws KuraException {
-        return firewall.getPortForwardRules();
+        return this.firewall.getPortForwardRules();
     }
 
     private Tocd getDefinition() throws KuraException {

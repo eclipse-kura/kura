@@ -202,7 +202,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                     }
 
                     List<NetConfig> netConfigs = addressConfig.getConfigs();
-                    if (netConfigs != null && !netConfigs.isEmpty()) {
+                    if (netConfigs != null) {
                         boolean isNatEnabled = false;
                         boolean isDhcpServerEnabled = false;
 

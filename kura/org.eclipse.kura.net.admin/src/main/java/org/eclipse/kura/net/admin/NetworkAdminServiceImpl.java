@@ -267,7 +267,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         boolean hadDhcpServerConfigIP4 = false;
         boolean hadNatConfig = false;
 
-        if (netConfigs != null && !netConfigs.isEmpty()) {
+        if (netConfigs != null) {
             for (NetConfig netConfig : netConfigs) {
                 if (!netConfig.isValid()) {
                     throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR,
@@ -422,7 +422,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
                         }
 
                         // add configs that did not match any in the current configuration
-                        if (netConfigs != null && !netConfigs.isEmpty()) {
+                        if (netConfigs != null) {
                             for (NetConfig netConfig : netConfigs) {
                                 if (netConfig instanceof NetConfigIP4 && !hadNetConfig4) {
                                     logger.debug("adding new NetConfig4 to existing config for {}", interfaceName);
@@ -495,7 +495,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         boolean hadDhcpServerConfigIP4 = false;
         boolean hadNatConfig = false;
 
-        if (netConfigs != null && !netConfigs.isEmpty()) {
+        if (netConfigs != null) {
             for (NetConfig netConfig : netConfigs) {
                 if (!netConfig.isValid()) {
                     throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR,
@@ -669,7 +669,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
                         }
 
                         // add configs that did not match any in the current configuration
-                        if (netConfigs != null && !netConfigs.isEmpty()) {
+                        if (netConfigs != null) {
                             for (NetConfig netConfig : netConfigs) {
                                 if (netConfig instanceof NetConfigIP4 && !hadNetConfig4) {
                                     logger.debug("adding new NetConfig4 to existing config for {}", interfaceName);
@@ -750,7 +750,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         boolean hadNetConfig6 = false;
         boolean hadModemConfig = false;
 
-        if (netConfigs != null && !netConfigs.isEmpty()) {
+        if (netConfigs != null) {
             for (NetConfig netConfig : netConfigs) {
                 if (!netConfig.isValid()) {
                     throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR,
@@ -896,7 +896,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
                         }
 
                         // add configs that did not match any in the current configuration
-                        if (netConfigs != null && !netConfigs.isEmpty()) {
+                        if (netConfigs != null) {
                             for (NetConfig netConfig : netConfigs) {
                                 if (netConfig instanceof NetConfigIP4 && !hadNetConfig4) {
                                     logger.debug("adding new NetConfig4 to existing config for {}", interfaceName);
@@ -1226,12 +1226,12 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
     @Override
     public synchronized boolean verifyWifiCredentials(String ifaceName, WifiConfig wifiConfig, int tout) {
 
-        if (wifiClientMonitorServiceLock == null) {
+        if (this.wifiClientMonitorServiceLock == null) {
             return false;
         }
 
         // hack to synchronize with WifiClientMonitorService
-        synchronized (wifiClientMonitorServiceLock) {
+        synchronized (this.wifiClientMonitorServiceLock) {
             boolean ret = false;
             WpaSupplicantConfigWriter wpaSupplicantConfigWriter = WpaSupplicantConfigWriter.getInstance();
             try {

@@ -259,7 +259,7 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
                     if (curNiacs != null && !curNiacs.isEmpty()) {
                         for (NetInterfaceAddressConfig niac : curNiacs) {
                             List<NetConfig> netConfigs = niac.getConfigs();
-                            if (netConfigs != null && !netConfigs.isEmpty()) {
+                            if (netConfigs != null) {
                                 for (NetConfig netConfig : netConfigs) {
                                     if (netConfig instanceof DhcpServerConfig4) {
                                         // only enable if Enabled for LAN

@@ -185,6 +185,7 @@ public class ServiceComponent implements ConfigurableComponent {
 
         final String mqttAcceptor = String.format(
                 "tcp://%s:%s?tcpSendBufferSize=1048576;tcpReceiveBufferSize=1048576;protocols=MQTT", address, port);
+
         acceptorNode.setTextContent(mqttAcceptor);
     }
 

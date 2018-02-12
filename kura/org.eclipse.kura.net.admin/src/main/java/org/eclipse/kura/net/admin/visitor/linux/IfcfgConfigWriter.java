@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -29,6 +29,7 @@ import java.util.Scanner;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.core.net.AbstractNetInterface;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
 import org.eclipse.kura.linux.net.util.KuraConstants;
@@ -55,7 +56,7 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
 
     private static final String LOCALHOST = "127.0.0.1";
 
-    private static String OS_VERSION = System.getProperty("kura.os.version");
+    private static String osVersion = System.getProperty("kura.os.version");
 
     private static IfcfgConfigWriter instance;
 
@@ -77,9 +78,11 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
         List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = config
                 .getModifiedNetInterfaceConfigs();
 
-        if (!netInterfaceConfigs.isEmpty()) {
-            for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {
-                writeConfig(netInterfaceConfig);
+        for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {
+            if (netInterfaceConfig != null) {
+                if (((AbstractNetInterface<?>) netInterfaceConfig).isInterfaceManaged()) {
+                    writeConfig(netInterfaceConfig);
+                }
                 writeKuraExtendedConfig(netInterfaceConfig);
             }
         }
@@ -100,14 +103,14 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
     }
 
     private boolean isDebian() {
-        return OS_VERSION
+        return osVersion
                 .equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion())
-                || OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName())
-                || OS_VERSION.equals(KuraConstants.BeagleBone.getImageName())
-                || OS_VERSION.equals(
+                || osVersion.equals(KuraConstants.Raspberry_Pi.getImageName())
+                || osVersion.equals(KuraConstants.BeagleBone.getImageName())
+                || osVersion.equals(
                         KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion()
                                 + "_" + KuraConstants.Intel_Edison.getTargetName())
-                || OS_VERSION.equals(KuraConstants.ReliaGATE_50_21_Ubuntu.getImageName() + "_"
+                || osVersion.equals(KuraConstants.ReliaGATE_50_21_Ubuntu.getImageName() + "_"
                         + KuraConstants.ReliaGATE_50_21_Ubuntu.getImageVersion());
     }
 
@@ -134,106 +137,100 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
             // TYPE
             sb.append("TYPE=").append(netInterfaceConfig.getType()).append("\n");
 
-            List<? extends NetInterfaceAddressConfig> netInterfaceAddressConfigs = netInterfaceConfig
-                    .getNetInterfaceAddresses();
-            logger.debug("There are {} NetInterfaceConfigs in this configuration", netInterfaceAddressConfigs.size());
-
+            NetInterfaceAddressConfig netInterfaceAddressConfig = ((AbstractNetInterface<?>) netInterfaceConfig)
+                    .getNetInterfaceAddressConfig();
             boolean allowWrite = false;
-            for (NetInterfaceAddressConfig netInterfaceAddressConfig : netInterfaceAddressConfigs) {
-                List<NetConfig> netConfigs = netInterfaceAddressConfig.getConfigs();
+            List<NetConfig> netConfigs = netInterfaceAddressConfig.getConfigs();
+            if (netConfigs != null) {
+                for (NetConfig netConfig : netConfigs) {
+                    if (netConfig instanceof NetConfigIP4) {
+                        // ONBOOT
+                        sb.append("ONBOOT=");
+                        if (((NetConfigIP4) netConfig).isAutoConnect()) {
+                            sb.append("yes");
+                        } else {
+                            sb.append("no");
+                        }
+                        sb.append("\n");
 
-                if (netConfigs != null) {
-                    for (NetConfig netConfig : netConfigs) {
-                        if (netConfig instanceof NetConfigIP4) {
-                            // ONBOOT
-                            sb.append("ONBOOT=");
-                            if (((NetConfigIP4) netConfig).isAutoConnect()) {
-                                sb.append("yes");
-                            } else {
-                                sb.append("no");
-                            }
+                        if (((NetConfigIP4) netConfig).isDhcp()) {
+                            // BOOTPROTO
+                            sb.append("BOOTPROTO=");
+                            logger.debug("new config is DHCP");
+                            sb.append("dhcp");
+                            sb.append("\n");
+                        } else {
+                            // BOOTPROTO
+                            sb.append("BOOTPROTO=");
+                            logger.debug("new config is STATIC");
+                            sb.append("static");
                             sb.append("\n");
 
-                            if (((NetConfigIP4) netConfig).isDhcp()) {
-                                // BOOTPROTO
-                                sb.append("BOOTPROTO=");
-                                logger.debug("new config is DHCP");
-                                sb.append("dhcp");
-                                sb.append("\n");
-                            } else {
-                                // BOOTPROTO
-                                sb.append("BOOTPROTO=");
-                                logger.debug("new config is STATIC");
-                                sb.append("static");
-                                sb.append("\n");
+                            // IPADDR
+                            sb.append("IPADDR=").append(((NetConfigIP4) netConfig).getAddress().getHostAddress())
+                                    .append("\n");
 
-                                // IPADDR
-                                sb.append("IPADDR=").append(((NetConfigIP4) netConfig).getAddress().getHostAddress())
+                            // PREFIX
+                            sb.append("PREFIX=").append(((NetConfigIP4) netConfig).getNetworkPrefixLength())
+                                    .append("\n");
+
+                            // Gateway
+                            if (((NetConfigIP4) netConfig).getGateway() != null) {
+                                sb.append("GATEWAY=").append(((NetConfigIP4) netConfig).getGateway().getHostAddress())
                                         .append("\n");
+                            }
+                        }
 
-                                // PREFIX
-                                sb.append("PREFIX=").append(((NetConfigIP4) netConfig).getNetworkPrefixLength())
-                                        .append("\n");
+                        // DEFROUTE
+                        if (((NetConfigIP4) netConfig).getStatus() == NetInterfaceStatus.netIPv4StatusEnabledWAN) {
+                            sb.append("DEFROUTE=yes\n");
+                        } else {
+                            sb.append("DEFROUTE=no\n");
+                        }
 
-                                // Gateway
-                                if (((NetConfigIP4) netConfig).getGateway() != null) {
-                                    sb.append("GATEWAY=")
-                                            .append(((NetConfigIP4) netConfig).getGateway().getHostAddress())
+                        // DNS
+                        List<? extends IPAddress> dnsAddresses = ((NetConfigIP4) netConfig).getDnsServers();
+                        if (dnsAddresses != null) {
+                            for (int i = 0; i < dnsAddresses.size(); i++) {
+                                IPAddress ipAddr = dnsAddresses.get(i);
+                                if (!(ipAddr.isLoopbackAddress() || ipAddr.isLinkLocalAddress()
+                                        || ipAddr.isMulticastAddress())) {
+                                    sb.append("DNS").append(i + 1).append("=").append(ipAddr.getHostAddress())
                                             .append("\n");
                                 }
                             }
-
-                            // DEFROUTE
-                            if (((NetConfigIP4) netConfig).getStatus() == NetInterfaceStatus.netIPv4StatusEnabledWAN) {
-                                sb.append("DEFROUTE=yes\n");
-                            } else {
-                                sb.append("DEFROUTE=no\n");
-                            }
-
-                            // DNS
-                            List<? extends IPAddress> dnsAddresses = ((NetConfigIP4) netConfig).getDnsServers();
-                            if (dnsAddresses != null) {
-                                for (int i = 0; i < dnsAddresses.size(); i++) {
-                                    IPAddress ipAddr = dnsAddresses.get(i);
-                                    if (!(ipAddr.isLoopbackAddress() || ipAddr.isLinkLocalAddress()
-                                            || ipAddr.isMulticastAddress())) {
-                                        sb.append("DNS").append(i + 1).append("=").append(ipAddr.getHostAddress())
-                                                .append("\n");
-                                    }
-                                }
-                            } else {
-                                logger.debug("no DNS entries");
-                            }
-
-                            allowWrite = true;
+                        } else {
+                            logger.debug("no DNS entries");
                         }
+
+                        allowWrite = true;
                     }
+                }
+            } else {
+                logger.debug("writeRedhatConfig() :: netConfigs is null");
+            }
+
+            // WIFI
+            if (netInterfaceAddressConfig instanceof WifiInterfaceAddressConfig) {
+                logger.debug("new config is a WifiInterfaceAddressConfig");
+                sb.append("\n#Wireless configuration\n");
+
+                // MODE
+                String mode = null;
+                WifiMode wifiMode = ((WifiInterfaceAddressConfig) netInterfaceAddressConfig).getMode();
+                if (wifiMode == WifiMode.INFRA) {
+                    mode = "Managed";
+                } else if (wifiMode == WifiMode.MASTER) {
+                    mode = "Master";
+                } else if (wifiMode == WifiMode.ADHOC) {
+                    mode = "Ad-Hoc";
+                } else if (wifiMode == null) {
+                    logger.error("WifiMode is null");
+                    mode = "null";
                 } else {
-                    logger.debug("writeRedhatConfig() :: netConfigs is null");
+                    mode = wifiMode.toString();
                 }
-
-                // WIFI
-                if (netInterfaceAddressConfig instanceof WifiInterfaceAddressConfig) {
-                    logger.debug("new config is a WifiInterfaceAddressConfig");
-                    sb.append("\n#Wireless configuration\n");
-
-                    // MODE
-                    String mode = null;
-                    WifiMode wifiMode = ((WifiInterfaceAddressConfig) netInterfaceAddressConfig).getMode();
-                    if (wifiMode == WifiMode.INFRA) {
-                        mode = "Managed";
-                    } else if (wifiMode == WifiMode.MASTER) {
-                        mode = "Master";
-                    } else if (wifiMode == WifiMode.ADHOC) {
-                        mode = "Ad-Hoc";
-                    } else if (wifiMode == null) {
-                        logger.error("WifiMode is null");
-                        mode = "null";
-                    } else {
-                        mode = wifiMode.toString();
-                    }
-                    sb.append("MODE=").append(mode).append("\n");
-                }
+                sb.append("MODE=").append(mode).append("\n");
             }
 
             if (allowWrite) {
@@ -403,8 +400,7 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
                     logger.info("Not rewriting network interfaces file because it is the same");
                 }
             } catch (IOException e) {
-                logger.error("Failed to rename debian tmp config file {} to {}", tmpFile.getName(), file.getName(),
-                        e);
+                logger.error("Failed to rename debian tmp config file {} to {}", tmpFile.getName(), file.getName(), e);
                 throw KuraException.internalError(e.getMessage());
             }
         }
@@ -428,112 +424,97 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
 
     private String debianWriteUtility(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig,
             String interfaceName) {
-
-        List<? extends NetInterfaceAddressConfig> netInterfaceAddressConfigs = netInterfaceConfig
-                .getNetInterfaceAddresses();
         StringBuilder sb = new StringBuilder();
+        List<NetConfig> netConfigs = ((AbstractNetInterface<?>) netInterfaceConfig).getNetConfigs();
+        if (netConfigs != null) {
+            for (NetConfig netConfig : netConfigs) {
+                if (netConfig instanceof NetConfigIP4) {
+                    logger.debug("Writing netconfig {} for {}", netConfig.getClass().toString(), interfaceName);
 
-        logger.debug("There are {} NetInterfaceAddressConfigs in this configuration",
-                netInterfaceAddressConfigs.size());
-
-        for (NetInterfaceAddressConfig netInterfaceAddressConfig : netInterfaceAddressConfigs) {
-            List<NetConfig> netConfigs = netInterfaceAddressConfig.getConfigs();
-
-            if (netConfigs != null) {
-                for (NetConfig netConfig : netConfigs) {
-                    if (netConfig instanceof NetConfigIP4) {
-                        logger.debug("Writing netconfig {} for {}", netConfig.getClass().toString(), interfaceName);
-
-                        // ONBOOT
-                        if (((NetConfigIP4) netConfig).isAutoConnect()) {
-                            if (OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName())
-                                    && netInterfaceConfig.getType() == NetInterfaceType.WIFI
-                                    && ((NetConfigIP4) netConfig).isDhcp()) {
-                                sb.append("#!kura!auto " + interfaceName + "\n");
-                            } else {
-                                sb.append("auto " + interfaceName + "\n");
-                            }
-                        }
-
-                        // BOOTPROTO
-                        if (OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName())
+                    // ONBOOT
+                    if (((NetConfigIP4) netConfig).isAutoConnect()) {
+                        if (osVersion.equals(KuraConstants.Raspberry_Pi.getImageName())
                                 && netInterfaceConfig.getType() == NetInterfaceType.WIFI
                                 && ((NetConfigIP4) netConfig).isDhcp()) {
-                            sb.append("# Commented out to prevent wpa_supplicant from starting dhclient\n");
-                            sb.append("#!kura!iface " + interfaceName + " inet ");
+                            sb.append("#!kura!auto " + interfaceName + "\n");
                         } else {
-                            sb.append("iface " + interfaceName + " inet ");
+                            sb.append("auto " + interfaceName + "\n");
                         }
-                        if (((NetConfigIP4) netConfig).isDhcp()) {
-                            logger.debug("new config is DHCP");
-                            sb.append("dhcp\n");
-                        } else {
-                            logger.debug("new config is STATIC");
-                            sb.append("static\n");
-                        }
-
-                        if (!((NetConfigIP4) netConfig).isDhcp()) {
-                            // IPADDR
-                            sb.append("\taddress ").append(((NetConfigIP4) netConfig).getAddress().getHostAddress())
-                                    .append("\n");
-
-                            // NETMASK
-                            sb.append("\tnetmask ").append(((NetConfigIP4) netConfig).getSubnetMask().getHostAddress())
-                                    .append("\n");
-
-                            // NETWORK
-                            // TODO: Handle Debian NETWORK value
-
-                            // Gateway
-                            if (((NetConfigIP4) netConfig).getGateway() != null) {
-                                sb.append("\tgateway ").append(((NetConfigIP4) netConfig).getGateway().getHostAddress())
-                                        .append("\n");
-                            }
-                        } else {
-                            // DEFROUTE
-                            if (((NetConfigIP4) netConfig).getStatus() == NetInterfaceStatus.netIPv4StatusEnabledLAN) {
-                                sb.append("\tpost-up route del default dev ");
-                                sb.append(interfaceName);
-                                sb.append("\n");
-                            }
-                        }
-
-                        // DNS
-                        List<? extends IPAddress> dnsAddresses = ((NetConfigIP4) netConfig).getDnsServers();
-                        boolean setDns = false;
-                        for (int i = 0; i < dnsAddresses.size(); i++) {
-                            if (!LOCALHOST.equals(dnsAddresses.get(i).getHostAddress())) {
-                                if (!setDns) {
-                                    /*
-                                     * IAB:
-                                     * If DNS servers are listed, those entries will be appended to the
-                                     * /etc/resolv.conf
-                                     * file on every ifdown/ifup sequence resulting in multiple entries for the same
-                                     * servers.
-                                     * (Tested on 10-20, 10-10, and Raspberry Pi).
-                                     * Commenting out dns-nameservers in the /etc/network interfaces file allows DNS
-                                     * servers
-                                     * to be picked up by the IfcfgConfigReader and be displayed on the Web UI but
-                                     * the
-                                     * /etc/resolv.conf file will only be updated by Kura.
-                                     */
-                                    sb.append("\t#dns-nameservers ");
-                                    setDns = true;
-                                }
-                                sb.append(dnsAddresses.get(i).getHostAddress() + " ");
-                            }
-                        }
-                        sb.append("\n");
                     }
-                }
-            } else {
-                logger.debug("debianWriteUtility() :: netConfigs is null");
-            }
 
-            // WIFI
-            if (netInterfaceAddressConfig instanceof WifiInterfaceAddressConfig) {
-                logger.debug("new config is a WifiInterfaceAddressConfig");
+                    // BOOTPROTO
+                    if (osVersion.equals(KuraConstants.Raspberry_Pi.getImageName())
+                            && netInterfaceConfig.getType() == NetInterfaceType.WIFI
+                            && ((NetConfigIP4) netConfig).isDhcp()) {
+                        sb.append("# Commented out to prevent wpa_supplicant from starting dhclient\n");
+                        sb.append("#!kura!iface " + interfaceName + " inet ");
+                    } else {
+                        sb.append("iface " + interfaceName + " inet ");
+                    }
+                    if (((NetConfigIP4) netConfig).isDhcp()) {
+                        logger.debug("new config is DHCP");
+                        sb.append("dhcp\n");
+                    } else {
+                        logger.debug("new config is STATIC");
+                        sb.append("static\n");
+                    }
+
+                    if (!((NetConfigIP4) netConfig).isDhcp()) {
+                        // IPADDR
+                        sb.append("\taddress ").append(((NetConfigIP4) netConfig).getAddress().getHostAddress())
+                                .append("\n");
+
+                        // NETMASK
+                        sb.append("\tnetmask ").append(((NetConfigIP4) netConfig).getSubnetMask().getHostAddress())
+                                .append("\n");
+
+                        // NETWORK
+                        // TODO: Handle Debian NETWORK value
+
+                        // Gateway
+                        if (((NetConfigIP4) netConfig).getGateway() != null) {
+                            sb.append("\tgateway ").append(((NetConfigIP4) netConfig).getGateway().getHostAddress())
+                                    .append("\n");
+                        }
+                    } else {
+                        // DEFROUTE
+                        if (((NetConfigIP4) netConfig).getStatus() == NetInterfaceStatus.netIPv4StatusEnabledLAN) {
+                            sb.append("\tpost-up route del default dev ");
+                            sb.append(interfaceName);
+                            sb.append("\n");
+                        }
+                    }
+
+                    // DNS
+                    List<? extends IPAddress> dnsAddresses = ((NetConfigIP4) netConfig).getDnsServers();
+                    boolean setDns = false;
+                    for (int i = 0; i < dnsAddresses.size(); i++) {
+                        if (!LOCALHOST.equals(dnsAddresses.get(i).getHostAddress())) {
+                            if (!setDns) {
+                                /*
+                                 * IAB:
+                                 * If DNS servers are listed, those entries will be appended to the
+                                 * /etc/resolv.conf
+                                 * file on every ifdown/ifup sequence resulting in multiple entries for the same
+                                 * servers.
+                                 * (Tested on 10-20, 10-10, and Raspberry Pi).
+                                 * Commenting out dns-nameservers in the /etc/network interfaces file allows DNS
+                                 * servers
+                                 * to be picked up by the IfcfgConfigReader and be displayed on the Web UI but
+                                 * the
+                                 * /etc/resolv.conf file will only be updated by Kura.
+                                 */
+                                sb.append("\t#dns-nameservers ");
+                                setDns = true;
+                            }
+                            sb.append(dnsAddresses.get(i).getHostAddress() + " ");
+                        }
+                    }
+                    sb.append("\n");
+                }
             }
+        } else {
+            logger.debug("debianWriteUtility() :: netConfigs is null");
         }
         return sb.toString();
     }
@@ -559,33 +540,9 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
 
     public static void writeKuraExtendedConfig(
             NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig) throws KuraException {
-        NetInterfaceStatus netInterfaceStatus = null;
 
-        boolean gotNetConfigIP4 = false;
-
-        List<? extends NetInterfaceAddressConfig> netInterfaceAddressConfigs = netInterfaceConfig
-                .getNetInterfaceAddresses();
-
-        if (netInterfaceAddressConfigs != null) {
-            for (NetInterfaceAddressConfig netInterfaceAddressConfig : netInterfaceAddressConfigs) {
-                List<NetConfig> netConfigs = netInterfaceAddressConfig.getConfigs();
-                if (netConfigs != null) {
-                    for (int i = 0; i < netConfigs.size(); i++) {
-                        NetConfig netConfig = netConfigs.get(i);
-                        if (netConfig instanceof NetConfigIP4) {
-                            netInterfaceStatus = ((NetConfigIP4) netConfig).getStatus();
-                            gotNetConfigIP4 = true;
-                        }
-                    }
-                }
-            }
-        }
-
-        if (!gotNetConfigIP4) {
-            netInterfaceStatus = NetInterfaceStatus.netIPv4StatusDisabled;
-        }
-
-        logger.debug("Setting NetInterfaceStatus to " + netInterfaceStatus + " for " + netInterfaceConfig.getName());
+        NetInterfaceStatus netInterfaceStatus = ((AbstractNetInterface<?>) netInterfaceConfig).getInterfaceStatus();
+        logger.debug("Setting NetInterfaceStatus to {} for {}", netInterfaceStatus, netInterfaceConfig.getName());
 
         // set it all
         Properties kuraExtendedProps = getInstance().getKuranetProperties();
@@ -682,8 +639,8 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
                 netInterfaceConfig.getName());
 
         // FIXME: assumes only one addressConfig
-        Properties newConfig = parseNetInterfaceAddressConfig(netInterfaceConfig.getNetInterfaceAddresses().get(0));
-
+        Properties newConfig = parseNetInterfaceAddressConfig(
+                ((AbstractNetInterface<?>) netInterfaceConfig).getNetInterfaceAddressConfig());
         logger.debug("Comparing configs for {}", netInterfaceConfig.getName());
         logger.debug("oldProps: {}", oldConfig);
         logger.debug("newProps: {}", newConfig);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates and others
  *
  *   All rights reserved. This program and the accompanying materials
  *   are made available under the terms of the Eclipse Public License v1.0
@@ -322,38 +322,6 @@ public class WifiMonitorServiceImplTest {
     }
 
     @Test
-    public void testGetIP4ConfigNull() throws Throwable {
-        // test no result due to no input
-
-        WifiMonitorServiceImpl svc = new WifiMonitorServiceImpl();
-
-        WifiInterfaceConfigImpl wifiInterfaceConfig = null;
-
-        NetConfigIP4 result = (NetConfigIP4) TestUtil.invokePrivate(svc, "getIP4config", wifiInterfaceConfig);
-
-        assertNull(result);
-    }
-
-    @Test
-    public void testGetIP4Config() throws Throwable {
-        // proper input => proper output
-
-        WifiMonitorServiceImpl svc = new WifiMonitorServiceImpl();
-
-        WifiBuilder builder = new WifiBuilder("wlan1").addWifiInterfaceAddressConfig(WifiMode.UNKNOWN)
-                .addNetConfigIP4(NetInterfaceStatus.netIPv4StatusDisabled, true);
-        NetConfigIP4 netConfig = (NetConfigIP4) builder.getNetConfig();
-        WifiInterfaceConfigImpl wifiInterfaceConfig = builder.addWifiConfig()
-                .addNetConfigIP4(NetInterfaceStatus.netIPv4StatusEnabledLAN, true).build();
-
-        NetConfigIP4 result = (NetConfigIP4) TestUtil.invokePrivate(svc, "getIP4config", wifiInterfaceConfig);
-
-        assertNotNull(result);
-        assertEquals(NetInterfaceStatus.netIPv4StatusDisabled, result.getStatus());
-        assertEquals(netConfig, result);
-    }
-
-    @Test
     public void testEnableInterfaceNotWifi() throws Throwable {
         // does nothing and returns
 
@@ -447,6 +415,7 @@ public class WifiMonitorServiceImplTest {
 
         assertNull(TestUtil.getFieldValue(svc, "enabledInterfaces"));
         assertNull(TestUtil.getFieldValue(svc, "disabledInterfaces"));
+        assertNull(TestUtil.getFieldValue(svc, "unmanagedInterfaces"));
     }
 
     @Test
@@ -454,21 +423,32 @@ public class WifiMonitorServiceImplTest {
         // no new configuration => only disable interfaces
 
         WifiMonitorServiceImpl svc = new WifiMonitorServiceImpl();
-
+        
         String interfaceName = "wlan1";
 
         Set<String> interfaces = new HashSet<>();
         interfaces.add(interfaceName);
+        
+        WifiInterfaceConfigImpl wifiInterfaceConfig = new WifiBuilder(interfaceName)
+                .addWifiInterfaceAddressConfig(WifiMode.UNKNOWN)
+                .addNetConfigIP4(NetInterfaceStatus.netIPv4StatusDisabled, false).build();
 
+        NetworkConfiguration nc = new NetworkConfiguration();
+        nc.addNetInterfaceConfig(wifiInterfaceConfig);
+        TestUtil.setFieldValue(svc, "newNetConfiguration", nc); // add to new configurations - enabled for enabling
+        
         TestUtil.invokePrivate(svc, "updateInterfacesLists", interfaces);
-
+        
         Set<String> enabled = (Set<String>) TestUtil.getFieldValue(svc, "enabledInterfaces");
         Set<String> disabled = (Set<String>) TestUtil.getFieldValue(svc, "disabledInterfaces");
-
+        Set<String> unmanaged = (Set<String>) TestUtil.getFieldValue(svc, "unmanagedInterfaces");
+        
         assertNotNull(enabled);
         assertTrue(enabled.isEmpty());
         assertNotNull(disabled);
         assertEquals(1, disabled.size());
+        assertNotNull(unmanaged);
+        assertTrue(unmanaged.isEmpty());
     }
 
     @Test
@@ -494,11 +474,14 @@ public class WifiMonitorServiceImplTest {
 
         Set<String> enabled = (Set<String>) TestUtil.getFieldValue(svc, "enabledInterfaces");
         Set<String> disabled = (Set<String>) TestUtil.getFieldValue(svc, "disabledInterfaces");
+        Set<String> unmanaged = (Set<String>) TestUtil.getFieldValue(svc, "unmanagedInterfaces");
 
         assertNotNull(enabled);
         assertEquals(1, enabled.size());
         assertNotNull(disabled);
         assertTrue(disabled.isEmpty());
+        assertNotNull(unmanaged);
+        assertTrue(unmanaged.isEmpty());
     }
 
     @Test
@@ -507,36 +490,46 @@ public class WifiMonitorServiceImplTest {
 
         WifiMonitorServiceImpl svc = new WifiMonitorServiceImpl();
 
-        String interfaceName = "wlan0";
+        String interfaceName1 = "wlan0";
         String interfaceName2 = "wlan1";
-
+        String interfaceName3 = "wlan2";
+        
         Set<String> interfaces = new HashSet<>();
-        interfaces.add(interfaceName);
+        interfaces.add(interfaceName1);
         interfaces.add(interfaceName2);
+        interfaces.add(interfaceName3);
 
-        WifiInterfaceConfigImpl wifiInterfaceConfig = new WifiBuilder(interfaceName)
+        WifiInterfaceConfigImpl wifiInterfaceConfig1 = new WifiBuilder(interfaceName1)
                 .addWifiInterfaceAddressConfig(WifiMode.INFRA)
                 .addNetConfigIP4(NetInterfaceStatus.netIPv4StatusEnabledLAN, true).build(); // to be enabled
         WifiInterfaceConfigImpl wifiInterfaceConfig2 = new WifiBuilder(interfaceName2)
                 .addWifiInterfaceAddressConfig(WifiMode.INFRA)
                 .addNetConfigIP4(NetInterfaceStatus.netIPv4StatusDisabled, true).build(); // to be disabled
+        WifiInterfaceConfigImpl wifiInterfaceConfig3 = new WifiBuilder(interfaceName3)
+                .addWifiInterfaceAddressConfig(WifiMode.UNKNOWN)
+                .addNetConfigIP4(NetInterfaceStatus.netIPv4StatusUnmanaged, true).build(); // to be unmanaged
 
         NetworkConfiguration nc = new NetworkConfiguration();
-        nc.addNetInterfaceConfig(wifiInterfaceConfig);
+        nc.addNetInterfaceConfig(wifiInterfaceConfig1);
         nc.addNetInterfaceConfig(wifiInterfaceConfig2);
+        nc.addNetInterfaceConfig(wifiInterfaceConfig3);
         TestUtil.setFieldValue(svc, "newNetConfiguration", nc);
 
         TestUtil.invokePrivate(svc, "updateInterfacesLists", interfaces);
 
         Set<String> enabled = (Set<String>) TestUtil.getFieldValue(svc, "enabledInterfaces");
         Set<String> disabled = (Set<String>) TestUtil.getFieldValue(svc, "disabledInterfaces");
+        Set<String> unmanaged = (Set<String>) TestUtil.getFieldValue(svc, "unmanagedInterfaces");
 
         assertNotNull(enabled);
         assertEquals(1, enabled.size());
-        assertEquals(interfaceName, enabled.iterator().next());
+        assertEquals(interfaceName1, enabled.iterator().next());
         assertNotNull(disabled);
         assertEquals(1, disabled.size());
         assertEquals(interfaceName2, disabled.iterator().next());
+        assertNotNull(unmanaged);
+        assertEquals(1, unmanaged.size());
+        assertEquals(interfaceName3, unmanaged.iterator().next());
     }
 
     @Test

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -21,6 +21,7 @@ import java.util.Set;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.core.net.AbstractNetInterface;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
 import org.eclipse.kura.core.net.modem.ModemInterfaceConfigImpl;
@@ -43,7 +44,6 @@ import org.eclipse.kura.net.admin.util.LinuxFileUtil;
 import org.eclipse.kura.net.admin.visitor.linux.util.KuranetConfig;
 import org.eclipse.kura.net.admin.visitor.linux.util.ModemXchangeScript;
 import org.eclipse.kura.net.modem.ModemConfig;
-import org.eclipse.kura.net.modem.ModemInterfaceAddressConfig;
 import org.eclipse.kura.usb.UsbDevice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -117,14 +117,12 @@ public class PppConfigWriter implements NetworkConfigurationVisitor {
         ModemConfig modemConfig = null;
         NetConfigIP4 netConfigIP4 = null;
 
-        for (ModemInterfaceAddressConfig modemInterfaceAddressConfig : modemInterfaceConfig
-                .getNetInterfaceAddresses()) {
-            for (NetConfig netConfig : modemInterfaceAddressConfig.getConfigs()) {
-                if (netConfig instanceof ModemConfig) {
-                    modemConfig = (ModemConfig) netConfig;
-                } else if (netConfig instanceof NetConfigIP4) {
-                    netConfigIP4 = (NetConfigIP4) netConfig;
-                }
+        List<NetConfig> netConfigs = ((AbstractNetInterface<?>) modemInterfaceConfig).getNetConfigs();
+        for (NetConfig netConfig : netConfigs) {
+            if (netConfig instanceof ModemConfig) {
+                modemConfig = (ModemConfig) netConfig;
+            } else if (netConfig instanceof NetConfigIP4) {
+                netConfigIP4 = (NetConfigIP4) netConfig;
             }
         }
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -84,7 +84,7 @@ public class CnS {
         this.objectId = objectID;
         this.operationType = opType;
 
-        List<Byte> alMsg = new ArrayList<Byte>();
+        List<Byte> alMsg = new ArrayList<>();
 
         // form "Object ID" field
         alMsg.add(Byte.valueOf((byte) (objectID >> 8 & 0xff)));
@@ -129,7 +129,7 @@ public class CnS {
         this.objectId = objectID;
         this.operationType = opType;
 
-        List<Byte> alMsg = new ArrayList<Byte>();
+        List<Byte> alMsg = new ArrayList<>();
 
         // form "Object ID" field
         alMsg.add(Byte.valueOf((byte) (objectID >> 8 & 0xff)));
@@ -178,7 +178,7 @@ public class CnS {
         this.objectId = objectID;
         this.operationType = opType;
 
-        List<Byte> alMsg = new ArrayList<Byte>();
+        List<Byte> alMsg = new ArrayList<>();
 
         // form "Object ID" field
         alMsg.add(Byte.valueOf((byte) (objectID >> 8 & 0xff)));
@@ -225,7 +225,7 @@ public class CnS {
         this.objectId = objectID;
         this.operationType = opType;
 
-        List<Byte> alMsg = new ArrayList<Byte>();
+        List<Byte> alMsg = new ArrayList<>();
 
         // form "Object ID" field
         alMsg.add(Byte.valueOf((byte) (objectID >> 8 & 0xff)));

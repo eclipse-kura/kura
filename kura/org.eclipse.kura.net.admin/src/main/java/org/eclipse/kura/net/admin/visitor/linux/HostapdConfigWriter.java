@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -21,9 +21,9 @@ import java.util.regex.Matcher;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.core.net.AbstractNetInterface;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
-import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.util.IOUtil;
 import org.eclipse.kura.core.util.ProcessUtil;
 import org.eclipse.kura.core.util.SafeProcess;
@@ -70,7 +70,6 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 
         for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {
             if (netInterfaceConfig.getType() == NetInterfaceType.WIFI) {
-                // ignore 'mon' interface
                 if (netInterfaceConfig.getName().startsWith("mon.")) {
                     continue;
                 }
@@ -83,68 +82,65 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
     private void writeConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig)
             throws KuraException {
 
+        if (netInterfaceConfig == null) {
+            return;
+        }
+        List<NetConfig> netConfigs = ((AbstractNetInterface<?>) netInterfaceConfig).getNetConfigs();
+        if (netConfigs.isEmpty()) {
+            return;
+        }
         String interfaceName = netInterfaceConfig.getName();
-
-        List<? extends NetInterfaceAddressConfig> netInterfaceAddressConfigs = netInterfaceConfig
-                .getNetInterfaceAddresses();
-
-        if (netInterfaceAddressConfigs != null && !netInterfaceAddressConfigs.isEmpty()) {
-            for (NetInterfaceAddressConfig netInterfaceAddressConfig : netInterfaceAddressConfigs) {
-                if (netInterfaceAddressConfig instanceof WifiInterfaceAddressConfigImpl) {
-                    List<NetConfig> netConfigs = netInterfaceAddressConfig.getConfigs();
-                    NetInterfaceStatus netInterfaceStatus = NetInterfaceStatus.netIPv4StatusDisabled;
-                    WifiConfig apConfig = null;
-                    String interfaceDriver = null;
-                    if (netConfigs != null) {
-                        for (NetConfig netConfig : netConfigs) {
-                            try {
-                                if (netConfig instanceof WifiConfig) {
-                                    if (((WifiConfig) netConfig).getMode() == WifiMode.MASTER) {
-                                        logger.debug("Found wifiConfig with mode set to master");
-                                        interfaceDriver = ((WifiConfig) netConfig).getDriver();
-                                        if (interfaceDriver != null) {
-                                            logger.debug("Writing wifiConfig: {}", netConfig);
-                                            apConfig = (WifiConfig) netConfig;
-                                        } else {
-                                            logger.error("Can't generate hostapd config - no driver specified");
-                                        }
-                                    }
-                                } else if (netConfig instanceof NetConfigIP4) {
-                                    netInterfaceStatus = ((NetConfigIP4) netConfig).getStatus();
-                                }
-                            } catch (Exception e) {
-                                logger.error("Failed to configure Hostapd");
-                                throw KuraException.internalError(e);
-                            }
-                        }
-
-                        if (netInterfaceStatus == NetInterfaceStatus.netIPv4StatusDisabled) {
-                            logger.info(
-                                    "Network interface status for {} is disabled - not overwriting hostapd configuration file",
-                                    interfaceName);
-                            return;
-                        }
-
-                        if (apConfig != null) {
-                            try {
-                                generateHostapdConf(apConfig, interfaceName, interfaceDriver);
-                            } catch (Exception e) {
-                                logger.error("Failed to generate hostapd configuration file for {} interface",
-                                        interfaceName);
-                                throw KuraException.internalError(e);
-                            }
-                        }
-                    }
-                }
+        WifiConfig apConfig = getAccessPointConfig(netConfigs);
+        NetInterfaceStatus netInterfaceStatus = getNetInterfaceStatus(netConfigs);
+        if (!isInterfaceEnabled(netInterfaceStatus)) {
+            logger.info("Network interface status for {} is {} - not overwriting hostapd configuration file",
+                    interfaceName, netInterfaceStatus);
+            return;
+        }
+        if (apConfig != null) {
+            try {
+                generateHostapdConf(apConfig, interfaceName);
+            } catch (Exception e) {
+                logger.error("Failed to generate hostapd configuration file for {} interface", interfaceName);
+                throw KuraException.internalError(e);
             }
         }
     }
 
-    /*
-     * This method generates hostapd configuration file
-     */
-    private void generateHostapdConf(WifiConfig wifiConfig, String interfaceName, String interfaceDriver)
-            throws Exception {
+    private boolean isInterfaceEnabled(NetInterfaceStatus status) {
+        return status.equals(NetInterfaceStatus.netIPv4StatusEnabledLAN)
+                || status.equals(NetInterfaceStatus.netIPv4StatusEnabledWAN);
+    }
+
+    private WifiConfig getAccessPointConfig(List<NetConfig> netConfigs) {
+        if (netConfigs == null) {
+            return null;
+        }
+        WifiConfig apConfig = null;
+        for (NetConfig netConfig : netConfigs) {
+            if (netConfig instanceof WifiConfig && ((WifiConfig) netConfig).getMode() == WifiMode.MASTER) {
+                apConfig = (WifiConfig) netConfig;
+                break;
+            }
+        }
+        return apConfig;
+    }
+
+    private NetInterfaceStatus getNetInterfaceStatus(List<NetConfig> netConfigs) {
+        if (netConfigs == null) {
+            return NetInterfaceStatus.netIPv4StatusDisabled;
+        }
+        NetInterfaceStatus status = NetInterfaceStatus.netIPv4StatusDisabled;
+        for (NetConfig netConfig : netConfigs) {
+            if (netConfig instanceof NetConfigIP4) {
+                status = ((NetConfigIP4) netConfig).getStatus();
+                break;
+            }
+        }
+        return status;
+    }
+
+    private void generateHostapdConf(WifiConfig wifiConfig, String interfaceName) throws KuraException, IOException {
 
         logger.debug("Generating Hostapd Config");
 
@@ -171,7 +167,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
         }
 
         // common updates
-        fileAsString = updateInterfaceAndDriver(interfaceName, interfaceDriver, fileAsString);
+        fileAsString = updateInterfaceAndDriver(interfaceName, wifiConfig.getDriver(), fileAsString);
 
         fileAsString = updateSsid(wifiConfig, fileAsString);
 
@@ -297,7 +293,6 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
             String drv = HostapdManager.getDriver(interfaceName);
             logger.warn("The 'driver' parameter must be set: setting to: {}", drv);
             fileAsString = fileAsString.replaceFirst("KURA_DRIVER", drv);
-            // throw KuraException.internalError("the driver name can not be null");
         }
         return fileAsString;
     }
@@ -400,7 +395,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
         }
     }
 
-    private void moveFile(String ifaceName) throws Exception {
+    private void moveFile(String ifaceName) throws KuraException, IOException {
         File tmpFile = getTemporaryFile();
         File file = getFinalFile(ifaceName);
         if (!FileUtils.contentEquals(tmpFile, file)) {

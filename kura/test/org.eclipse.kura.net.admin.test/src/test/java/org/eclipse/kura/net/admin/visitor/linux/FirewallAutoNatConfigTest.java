@@ -181,7 +181,7 @@ public class FirewallAutoNatConfigTest {
             reader.visit(config);
             fail("Exception expected.");
         } catch (KuraException e) {
-            assertEquals(KuraErrorCode.INTERNAL_ERROR, e.getCode());
+            assertEquals(KuraErrorCode.CONFIGURATION_ERROR, e.getCode());
         }
     }
 
@@ -214,7 +214,7 @@ public class FirewallAutoNatConfigTest {
             reader.visit(config);
             fail("Exception expected.");
         } catch (KuraException e) {
-            assertEquals(KuraErrorCode.INTERNAL_ERROR, e.getCode());
+            assertEquals(KuraErrorCode.CONFIGURATION_ERROR, e.getCode());
         }
     }
 
@@ -294,7 +294,6 @@ public class FirewallAutoNatConfigTest {
     public void testReaderVisitWithFirewallFileNullAddressList() throws KuraException {
         String intfName = "testInterface";
         String destinationInterface = "destInterface";
-
         FirewallAutoNatConfigReader reader = new FirewallAutoNatConfigReader() {
 
             @Override
@@ -318,12 +317,11 @@ public class FirewallAutoNatConfigTest {
         WifiInterfaceConfigImpl netInterfaceConfig = new WifiInterfaceConfigImpl(intfName);
         netInterfaceConfig.setNetInterfaceAddresses(null);
         config.addNetInterfaceConfig(netInterfaceConfig);
-
         try {
             reader.visit(config);
             fail("Exception expected.");
         } catch (KuraException e) {
-            assertEquals(KuraErrorCode.INTERNAL_ERROR, e.getCode());
+            assertEquals(KuraErrorCode.CONFIGURATION_ERROR, e.getCode());
         }
     }
 
@@ -359,7 +357,7 @@ public class FirewallAutoNatConfigTest {
             reader.visit(config);
             fail("Exception expected.");
         } catch (KuraException e) {
-            assertEquals(KuraErrorCode.INTERNAL_ERROR, e.getCode());
+            assertEquals(KuraErrorCode.CONFIGURATION_ERROR, e.getCode());
         }
     }
 

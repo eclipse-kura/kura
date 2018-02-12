@@ -390,7 +390,7 @@ public class ModemMonitorServiceImplTest {
 
         NetConfig result = (NetConfig) TestUtil.invokePrivate(svc, "getModemConfig", netConfigs);
 
-        assertNull(result);
+        assertNotNull(result);
     }
 
     @Test
@@ -420,9 +420,9 @@ public class ModemMonitorServiceImplTest {
         NetConfig nc = new ModemConfig(1, PdpType.PPP, "apn", IPAddress.parseHostAddress("10.10.10.10"), 1, 2);
         netConfigs.add(nc);
 
-        NetConfig result = (NetConfig) TestUtil.invokePrivate(svc, "getNetConfigIp4", netConfigs);
-
-        assertNull(result);
+        NetConfigIP4 result = (NetConfigIP4)TestUtil.invokePrivate(svc, "getNetConfigIp4", netConfigs);
+        assertNotNull(result);
+        assertEquals(result.getStatus(), NetInterfaceStatus.netIPv4StatusUnknown);
     }
 
     @Test

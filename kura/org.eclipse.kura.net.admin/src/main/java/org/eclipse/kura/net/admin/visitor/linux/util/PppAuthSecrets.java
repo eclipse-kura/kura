@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -60,11 +60,11 @@ public class PppAuthSecrets {
 
         this.secretsFilename = secretsFilename;
 
-        this.providers = new ArrayList<String>();
-        this.clients = new ArrayList<String>();
-        this.servers = new ArrayList<String>();
-        this.secrets = new ArrayList<String>();
-        this.ipAddresses = new ArrayList<String>();
+        this.providers = new ArrayList<>();
+        this.clients = new ArrayList<>();
+        this.servers = new ArrayList<>();
+        this.secrets = new ArrayList<>();
+        this.ipAddresses = new ArrayList<>();
 
         BufferedReader br = null;
         try {

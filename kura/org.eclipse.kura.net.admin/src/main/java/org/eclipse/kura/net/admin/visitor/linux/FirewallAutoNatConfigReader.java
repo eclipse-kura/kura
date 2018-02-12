@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -18,6 +18,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.core.net.AbstractNetInterface;
 import org.eclipse.kura.core.net.NetInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
@@ -98,20 +99,17 @@ public class FirewallAutoNatConfigReader implements NetworkConfigurationVisitor 
             natEnabled = Boolean.parseBoolean(prop);
         }
 
-        sb = new StringBuilder().append("net.interface.").append(interfaceName)
-                .append(".config.nat.masquerade");
+        sb = new StringBuilder().append("net.interface.").append(interfaceName).append(".config.nat.masquerade");
         if ((prop = kuraProps.getProperty(sb.toString())) != null) {
             useMasquerade = Boolean.parseBoolean(prop);
         }
 
-        sb = new StringBuilder().append("net.interface.").append(interfaceName)
-                .append(".config.nat.src.interface");
+        sb = new StringBuilder().append("net.interface.").append(interfaceName).append(".config.nat.src.interface");
         if ((prop = kuraProps.getProperty(sb.toString())) != null) {
             srcIface = prop;
         }
 
-        sb = new StringBuilder().append("net.interface.").append(interfaceName)
-                .append(".config.nat.dst.interface");
+        sb = new StringBuilder().append("net.interface.").append(interfaceName).append(".config.nat.dst.interface");
         if ((prop = kuraProps.getProperty(sb.toString())) != null) {
             dstIface = prop;
         }
@@ -125,32 +123,20 @@ public class FirewallAutoNatConfigReader implements NetworkConfigurationVisitor 
             String interfaceName, String srcIface, String dstIface, boolean useMasquerade) throws KuraException {
 
         FirewallAutoNatConfig natConfig = new FirewallAutoNatConfig(srcIface, dstIface, useMasquerade);
+        NetInterfaceAddressConfig netInterfaceAddressConfig = ((AbstractNetInterface<?>) netInterfaceConfig)
+                .getNetInterfaceAddressConfig();
+        List<NetConfig> netConfigs = netInterfaceAddressConfig.getConfigs();
 
-        List<? extends NetInterfaceAddressConfig> netInterfaceAddressConfigs = netInterfaceConfig
-                .getNetInterfaceAddresses();
-
-        if (netInterfaceAddressConfigs == null) {
-            throw KuraException
-                    .internalError("NetInterfaceAddress list is null for interface " + interfaceName);
-        } else if (netInterfaceAddressConfigs.isEmpty()) {
-            throw KuraException
-                    .internalError("NetInterfaceAddress list is empty for interface " + interfaceName);
-        }
-
-        for (NetInterfaceAddressConfig netInterfaceAddressConfig : netInterfaceAddressConfigs) {
-            List<NetConfig> netConfigs = netInterfaceAddressConfig.getConfigs();
-
-            if (netConfigs == null) {
-                netConfigs = new ArrayList<>();
-                if (netInterfaceAddressConfig instanceof NetInterfaceAddressConfigImpl) {
-                    ((NetInterfaceAddressConfigImpl) netInterfaceAddressConfig).setNetConfigs(netConfigs);
-                } else if (netInterfaceAddressConfig instanceof WifiInterfaceAddressConfigImpl) {
-                    ((WifiInterfaceAddressConfigImpl) netInterfaceAddressConfig).setNetConfigs(netConfigs);
-                }
+        if (netConfigs == null) {
+            netConfigs = new ArrayList<>();
+            if (netInterfaceAddressConfig instanceof NetInterfaceAddressConfigImpl) {
+                ((NetInterfaceAddressConfigImpl) netInterfaceAddressConfig).setNetConfigs(netConfigs);
+            } else if (netInterfaceAddressConfig instanceof WifiInterfaceAddressConfigImpl) {
+                ((WifiInterfaceAddressConfigImpl) netInterfaceAddressConfig).setNetConfigs(netConfigs);
             }
-
-            netConfigs.add(natConfig);
         }
+
+        netConfigs.add(natConfig);
     }
 
     private void getRulesFromFile(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig,

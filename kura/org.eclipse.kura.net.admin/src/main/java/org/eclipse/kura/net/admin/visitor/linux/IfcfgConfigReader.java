@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -51,7 +51,7 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
     private static final String REDHAT_NET_CONFIGURATION_DIRECTORY = "/etc/sysconfig/network-scripts/";
     private static final String DEBIAN_NET_CONFIGURATION_DIRECTORY = "/etc/network/";
 
-    private static String OS_VERSION = System.getProperty("kura.os.version");
+    private static String osVersion = System.getProperty("kura.os.version");
 
     private static IfcfgConfigReader instance;
 
@@ -222,81 +222,75 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
                     }
                 }
 
-                List<? extends NetInterfaceAddressConfig> netInterfaceAddressConfigs = netInterfaceConfig
-                        .getNetInterfaceAddresses();
+                NetInterfaceAddressConfig netInterfaceAddressConfig = netInterfaceConfig.getNetInterfaceAddresses()
+                        .get(0);
 
-                if (netInterfaceAddressConfigs == null) {
+                if (netInterfaceAddressConfig == null) {
                     throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "InterfaceAddressConfig list is null");
-                } else if (netInterfaceAddressConfigs.isEmpty()) {
-                    throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "InterfaceAddressConfig list has no entries");
                 }
-
-                for (NetInterfaceAddressConfig netInterfaceAddressConfig : netInterfaceAddressConfigs) {
-                    List<NetConfig> netConfigs = netInterfaceAddressConfig.getConfigs();
-
-                    if (netConfigs == null) {
-                        netConfigs = new ArrayList<>();
-                        if (netInterfaceAddressConfig instanceof NetInterfaceAddressConfigImpl) {
-                            ((NetInterfaceAddressConfigImpl) netInterfaceAddressConfig).setNetConfigs(netConfigs);
-                            if (dhcp) {
-                                // obtain gateway provided by DHCP server
-                                List<? extends IPAddress> dhcpRouters = getDhcpRouters(interfaceName,
-                                        netInterfaceAddressConfig.getAddress());
-                                if (!dhcpRouters.isEmpty()) {
-                                    ((NetInterfaceAddressConfigImpl) netInterfaceAddressConfig)
-                                            .setGateway(dhcpRouters.get(0));
-                                }
-
-                                // Replace with DNS provided by DHCP server
-                                // (displayed as read-only in Denali)
-                                List<? extends IPAddress> dhcpDnsServers = getDhcpDnsServers(interfaceName,
-                                        netInterfaceAddressConfig.getAddress());
-                                if (!dhcpDnsServers.isEmpty()) {
-                                    ((NetInterfaceAddressConfigImpl) netInterfaceAddressConfig)
-                                            .setDnsServers(dhcpDnsServers);
-                                }
+                List<NetConfig> netConfigs = netInterfaceAddressConfig.getConfigs();
+                if (netConfigs == null) {
+                    netConfigs = new ArrayList<>();
+                    if (netInterfaceAddressConfig instanceof NetInterfaceAddressConfigImpl) {
+                        ((NetInterfaceAddressConfigImpl) netInterfaceAddressConfig).setNetConfigs(netConfigs);
+                        if (dhcp) {
+                            // obtain gateway provided by DHCP server
+                            List<? extends IPAddress> dhcpRouters = getDhcpRouters(interfaceName,
+                                    netInterfaceAddressConfig.getAddress());
+                            if (!dhcpRouters.isEmpty()) {
+                                ((NetInterfaceAddressConfigImpl) netInterfaceAddressConfig)
+                                        .setGateway(dhcpRouters.get(0));
                             }
-                        } else if (netInterfaceAddressConfig instanceof WifiInterfaceAddressConfigImpl) {
-                            ((WifiInterfaceAddressConfigImpl) netInterfaceAddressConfig).setNetConfigs(netConfigs);
-                            if (dhcp) {
-                                // obtain gateway provided by DHCP server
-                                List<? extends IPAddress> dhcpRouters = getDhcpRouters(interfaceName,
-                                        netInterfaceAddressConfig.getAddress());
-                                if (!dhcpRouters.isEmpty()) {
-                                    ((WifiInterfaceAddressConfigImpl) netInterfaceAddressConfig)
-                                            .setGateway(dhcpRouters.get(0));
-                                }
 
-                                // Replace with DNS provided by DHCP server
-                                // (displayed as read-only in Denali)
-                                List<? extends IPAddress> dhcpDnsServers = getDhcpDnsServers(interfaceName,
-                                        netInterfaceAddressConfig.getAddress());
-                                if (!dhcpDnsServers.isEmpty()) {
-                                    ((WifiInterfaceAddressConfigImpl) netInterfaceAddressConfig)
-                                            .setDnsServers(dhcpDnsServers);
-                                }
+                            // Replace with DNS provided by DHCP server
+                            // (displayed as read-only in Denali)
+                            List<? extends IPAddress> dhcpDnsServers = getDhcpDnsServers(interfaceName,
+                                    netInterfaceAddressConfig.getAddress());
+                            if (!dhcpDnsServers.isEmpty()) {
+                                ((NetInterfaceAddressConfigImpl) netInterfaceAddressConfig)
+                                        .setDnsServers(dhcpDnsServers);
+                            }
+                        }
+                    } else if (netInterfaceAddressConfig instanceof WifiInterfaceAddressConfigImpl) {
+                        ((WifiInterfaceAddressConfigImpl) netInterfaceAddressConfig).setNetConfigs(netConfigs);
+                        if (dhcp) {
+                            // obtain gateway provided by DHCP server
+                            List<? extends IPAddress> dhcpRouters = getDhcpRouters(interfaceName,
+                                    netInterfaceAddressConfig.getAddress());
+                            if (!dhcpRouters.isEmpty()) {
+                                ((WifiInterfaceAddressConfigImpl) netInterfaceAddressConfig)
+                                        .setGateway(dhcpRouters.get(0));
+                            }
+
+                            // Replace with DNS provided by DHCP server
+                            // (displayed as read-only in Denali)
+                            List<? extends IPAddress> dhcpDnsServers = getDhcpDnsServers(interfaceName,
+                                    netInterfaceAddressConfig.getAddress());
+                            if (!dhcpDnsServers.isEmpty()) {
+                                ((WifiInterfaceAddressConfigImpl) netInterfaceAddressConfig)
+                                        .setDnsServers(dhcpDnsServers);
                             }
                         }
                     }
-
-                    NetConfigIP4 netConfig = new NetConfigIP4(netInterfaceStatus, autoConnect);
-                    setNetConfigIP4(netConfig, autoConnect, dhcp, address, gateway, prefixString, netmask, kuraProps);
-                    logger.debug("NetConfig: {}", netConfig);
-                    netConfigs.add(netConfig);
                 }
+
+                NetConfigIP4 netConfig = new NetConfigIP4(netInterfaceStatus, autoConnect);
+                setNetConfigIP4(netConfig, autoConnect, dhcp, address, gateway, prefixString, netmask, kuraProps);
+                logger.debug("NetConfig: {}", netConfig);
+                netConfigs.add(netConfig);
             }
         }
     }
 
     private boolean isDebian() {
-        return OS_VERSION
+        return osVersion
                 .equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion())
-                || OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName())
-                || OS_VERSION.equals(KuraConstants.BeagleBone.getImageName())
-                || OS_VERSION.equals(
+                || osVersion.equals(KuraConstants.Raspberry_Pi.getImageName())
+                || osVersion.equals(KuraConstants.BeagleBone.getImageName())
+                || osVersion.equals(
                         KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion()
                                 + "_" + KuraConstants.Intel_Edison.getTargetName())
-                || OS_VERSION.equals(KuraConstants.ReliaGATE_50_21_Ubuntu.getImageName() + "_"
+                || osVersion.equals(KuraConstants.ReliaGATE_50_21_Ubuntu.getImageName() + "_"
                         + KuraConstants.ReliaGATE_50_21_Ubuntu.getImageVersion());
     }
 

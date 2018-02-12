@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -79,18 +79,18 @@ public class WpaSupplicantConfigReader implements NetworkConfigurationVisitor {
             wifiInterfaceConfig.setNetInterfaceAddresses(wifiInterfaceAddressConfigs);
         }
 
-        for (WifiInterfaceAddressConfig wifiInterfaceAddressConfig : wifiInterfaceAddressConfigs) {
-            if (wifiInterfaceAddressConfig instanceof WifiInterfaceAddressConfigImpl) {
-                List<NetConfig> netConfigs = wifiInterfaceAddressConfig.getConfigs();
+        WifiInterfaceAddressConfig wifiInterfaceAddressConfig = wifiInterfaceAddressConfigs.get(0);
+        if (wifiInterfaceAddressConfig != null
+                && wifiInterfaceAddressConfig instanceof WifiInterfaceAddressConfigImpl) {
+            List<NetConfig> netConfigs = wifiInterfaceAddressConfig.getConfigs();
 
-                if (netConfigs == null) {
-                    netConfigs = new ArrayList<>();
-                    ((WifiInterfaceAddressConfigImpl) wifiInterfaceAddressConfig).setNetConfigs(netConfigs);
-                }
-
-                // Get infrastructure config
-                netConfigs.add(getWifiClientConfig(interfaceName, WifiMode.INFRA));
+            if (netConfigs == null) {
+                netConfigs = new ArrayList<>();
+                ((WifiInterfaceAddressConfigImpl) wifiInterfaceAddressConfig).setNetConfigs(netConfigs);
             }
+
+            // Get infrastructure config
+            netConfigs.add(getWifiClientConfig(interfaceName, WifiMode.INFRA));
         }
     }
 

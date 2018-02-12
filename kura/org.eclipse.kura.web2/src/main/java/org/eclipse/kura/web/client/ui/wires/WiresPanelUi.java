@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -16,10 +16,8 @@ package org.eclipse.kura.web.client.ui.wires;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 
 import org.eclipse.kura.web.client.configuration.Configurations;
@@ -64,14 +62,14 @@ public class WiresPanelUi extends Composite
 
     static final String WIRE_ASSET = "WireAsset";
     static final String FACTORY_PID_DROP_PREFIX = "factory://";
-    private static final String ASSET_DESCRIPTION_PROP = "asset.desc";
     private static final String WIRE_ASSET_PID = "org.eclipse.kura.wire.WireAsset";
-    private static final String DRIVER_PID = "driver.pid";
 
     @UiField
     Button btnSave;
     @UiField
     Button btnReset;
+    @UiField
+    Button btnDownload;
     @UiField
     Button btnZoomIn;
     @UiField
@@ -108,17 +106,6 @@ public class WiresPanelUi extends Composite
     interface WiresPanelUiUiBinder extends UiBinder<Widget, WiresPanelUi> {
     }
 
-    private List<String> components;
-    private final Map<String, GwtConfigComponent> configs = new HashMap<>();
-    private final List<String> drivers;
-    private final List<String> emitters;
-
-    private String graph;
-    private final List<String> receivers;
-    private String wireComponentsConfigJson;
-    private String wireConfigsJson;
-    private String wires;
-
     private WireComposer wireComposer;
     private BlinkEffect blinkEffect;
 
@@ -127,10 +114,6 @@ public class WiresPanelUi extends Composite
 
     public WiresPanelUi() {
         initWidget(uiBinder.createAndBindUi(this));
-        this.emitters = new ArrayList<>();
-        this.receivers = new ArrayList<>();
-        this.components = new ArrayList<>();
-        this.drivers = new ArrayList<>();
 
         this.wireComposer = WireComposer.create(composer.getElement());
         this.wireComposer.setListener(this);
@@ -232,6 +215,13 @@ public class WiresPanelUi extends Composite
                         wireComposer.clear();
                     }
                 });
+            }
+        });
+        this.btnDownload.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                WiresRPC.downloadWiresSnapshot();
             }
         });
     }
@@ -448,6 +438,7 @@ public class WiresPanelUi extends Composite
         final boolean isDirty = isDirty();
         this.btnSave.setEnabled(isDirty);
         this.btnReset.setEnabled(isDirty);
+        this.btnDownload.setEnabled(!isDirty);
     }
 
     public void unload() {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -12,6 +12,7 @@ package org.eclipse.kura.web.client.ui.wires;
 import java.util.List;
 
 import org.eclipse.kura.web.client.ui.EntryClassUi;
+import org.eclipse.kura.web.client.util.DownloadHelper;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtWireComposerStaticInfo;
@@ -179,6 +180,24 @@ public final class WiresRPC {
                         });
                     }
                 });
+            }
+        });
+    }
+
+    public static void downloadWiresSnapshot() {
+        EntryClassUi.showWaitModal();
+        gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+
+            @Override
+            public void onFailure(Throwable ex) {
+                EntryClassUi.hideWaitModal();
+                FailureHandler.handle(ex);
+            }
+
+            @Override
+            public void onSuccess(GwtXSRFToken token) {
+                EntryClassUi.hideWaitModal();
+                DownloadHelper.instance().startDownload(token, "/wiresSnapshot");
             }
         });
     }

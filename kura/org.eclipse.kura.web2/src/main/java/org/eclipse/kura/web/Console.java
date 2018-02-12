@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -38,6 +38,7 @@ import org.eclipse.kura.web.server.servlet.DeviceSnapshotsServlet;
 import org.eclipse.kura.web.server.servlet.EventHandlerServlet;
 import org.eclipse.kura.web.server.servlet.FileServlet;
 import org.eclipse.kura.web.server.servlet.SkinServlet;
+import org.eclipse.kura.web.server.servlet.WiresSnapshotServlet;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
@@ -287,6 +288,7 @@ public class Console implements ConfigurableComponent {
         this.m_httpService.registerServlet(servletRoot + "/ssl", new GwtSslServiceImpl(), null, httpCtx);
         this.m_httpService.registerServlet(servletRoot + "/cloudservices", new GwtCloudServiceImpl(), null, httpCtx);
         this.m_httpService.registerServlet(servletRoot + "/wires", new GwtWireServiceImpl(), null, httpCtx);
+        this.m_httpService.registerServlet(servletRoot + "/wiresSnapshot", new WiresSnapshotServlet(), null, httpCtx);
         this.m_httpService.registerServlet(servletRoot + "/assetservices", new GwtAssetServiceImpl(), null, httpCtx);
         this.m_httpService.registerServlet("/sse", new EventHandlerServlet(), null, httpCtx);
         this.m_httpService.registerServlet(servletRoot + "/event", this.eventService, null, httpCtx);

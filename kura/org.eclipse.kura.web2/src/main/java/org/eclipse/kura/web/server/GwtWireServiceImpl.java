@@ -324,6 +324,8 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
 
     @Override
     public GwtWireComposerStaticInfo getWireComposerStaticInfo(GwtXSRFToken xsrfToken) throws GwtKuraException {
+        this.checkXSRFToken(xsrfToken);
+
         final GwtWireComposerStaticInfo result = new GwtWireComposerStaticInfo();
 
         final List<GwtWireComponentDescriptor> componentDescriptors = new ArrayList<>();

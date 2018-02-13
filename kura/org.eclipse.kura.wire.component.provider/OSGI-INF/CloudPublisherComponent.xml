@@ -30,4 +30,5 @@
    	          name="WireHelperService" 
    	          policy="static" 
    	          unbind="unbindWireHelperService"/>
+   <reference bind="setPositionService" cardinality="1..1" interface="org.eclipse.kura.position.PositionService" name="PositionService" policy="static" unbind="unsetPositionService"/>
 </scr:component>

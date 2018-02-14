@@ -17,7 +17,7 @@
     
     <property name="p2.repo" location="../org.eclipse.kura-p2/target/repository"/>
     <property name="p2.target.platform.common" location="../../target-platform/p2-repo-common/target/repository"/>
-    <property name="p2.target.platform.equinox" location="../../target-platform/p2-repo-equinox_3.11.1/target/repository"/>
+    <property name="p2.target.platform.equinox" location="../../target-platform/p2-repo-equinox_3.12.50/target/repository"/>
     
     <property name="p2tom2.configuration" location="p2tom2.properties"/>
 

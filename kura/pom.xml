@@ -152,9 +152,9 @@
             </activation>
             <repositories>
                 <repository>
-                    <id>p2-repo-equinox_3.11.1</id>
+                    <id>p2-repo-equinox_3.12.50</id>
                     <layout>p2</layout>
-                    <url>file:///${kura.basedir}/target-definition/equinox_3.11.1/repository/</url>
+                    <url>file:///${kura.basedir}/target-definition/equinox_3.12.50/repository/</url>
                 </repository>
             </repositories>
         </profile>
@@ -168,9 +168,9 @@
             </activation>
             <repositories>
                 <repository>
-                    <id>p2-repo-equinox_3.11.1</id>
+                    <id>p2-repo-equinox_3.12.50</id>
                     <layout>p2</layout>
-                    <url>file:///${kura.basedir}/target-definition/equinox_3.11.1/repository/</url>
+                    <url>file:///${kura.basedir}/target-definition/equinox_3.12.50/repository/</url>
                 </repository>
             </repositories>
         </profile>

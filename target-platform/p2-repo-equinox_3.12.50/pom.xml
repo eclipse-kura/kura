@@ -8,11 +8,11 @@
         <version>3.3.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>p2-repo-equinox_3.11.1</artifactId>
+    <artifactId>p2-repo-equinox_3.12.50</artifactId>
     <packaging>pom</packaging>
 
     <properties>
-        <equinox.download.url>https://s3-us-west-2.amazonaws.com/kura-repo/R-Neon.1-201609071200/equinox-SDK-Neon.1.zip</equinox.download.url>
+        <equinox.download.url>http://archive.eclipse.org/equinox/drops/R-Oxygen.2-201711300510/equinox-SDK-Oxygen.2.zip</equinox.download.url>
     </properties>
 
     <build>
@@ -101,21 +101,6 @@
                                     <artifactId>jetty-util</artifactId>
                                     <version>${org.eclipse.jetty.util.version}</version>
                                 </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.platform</groupId>
-                                    <artifactId>org.eclipse.equinox.http.jetty</artifactId>
-                                    <version>${org.eclipse.equinox.http.jetty.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.platform</groupId>
-                                    <artifactId>org.eclipse.equinox.http.registry</artifactId>
-                                    <version>${org.eclipse.equinox.http.registry.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.platform</groupId>
-                                    <artifactId>org.eclipse.equinox.http.servlet</artifactId>
-                                    <version>${org.eclipse.equinox.http.servlet.version}</version>
-                                </artifactItem>
                             </artifactItems>
                             <stripVersion>true</stripVersion>
                             <outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>
@@ -168,11 +153,13 @@
                                         <exclude name="plugins/org.eclipse.equinox.security*.jar" />
                                         <exclude name="plugins/org.eclipse.equinox.console.ssh*.jar" />
                                         <exclude name="plugins/org.eclipse.equinox.simpleconfig*.jar" />
-                                        <exclude name="plugins/org.eclipse.equinox.http*.jar" />
+                                        <exclude name="plugins/org.eclipse.equinox.http.servletbridge*.jar" />
 
                                         <include name="plugins/org.eclipse.equinox.launcher_*.jar" />
                                         <include name="plugins/org.eclipse.equinox.launcher.source_*.jar" />
                                         <exclude name="plugins/org.eclipse.equinox.launcher.*.jar" />
+
+                                        <include name="plugins/org.apache.felix.scr*.jar" />
 
                                         <include name="plugins/org.eclipse.core*.jar" />
                                         <include name="plugins/org.eclipse.equinox*.jar" />
@@ -217,12 +204,12 @@
                                     tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.servlet_${org.eclipse.jetty.servlet.version}.jar" />
                                 <move file="${project.build.directory}/source/plugins/jetty-util.jar"
                                     tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.util_${org.eclipse.jetty.util.version}.jar" />
-                                <move file="${project.build.directory}/source/plugins/org.eclipse.equinox.http.jetty.jar"
+                                <!-- <move file="${project.build.directory}/source/plugins/org.eclipse.equinox.http.jetty.jar"
                                     tofile="${project.build.directory}/source/plugins/org.eclipse.equinox.http.jetty_${org.eclipse.equinox.http.jetty.version}.jar" />
                                 <move file="${project.build.directory}/source/plugins/org.eclipse.equinox.http.registry.jar"
                                     tofile="${project.build.directory}/source/plugins/org.eclipse.equinox.http.registry_${org.eclipse.equinox.http.registry.version}.jar" />
                                 <move file="${project.build.directory}/source/plugins/org.eclipse.equinox.http.servlet.jar"
-                                    tofile="${project.build.directory}/source/plugins/org.eclipse.equinox.http.servlet_${org.eclipse.equinox.http.servlet.version}.jar" />
+                                    tofile="${project.build.directory}/source/plugins/org.eclipse.equinox.http.servlet_${org.eclipse.equinox.http.servlet.version}.jar" /> -->
                             </target>
                         </configuration>
                     </execution>
@@ -234,9 +221,9 @@
                         </goals>
                         <configuration>
                             <target>
-                                <delete dir="../../kura/target-definition/equinox_3.11.1/" />
-                                <mkdir dir="../../kura/target-definition/equinox_3.11.1/repository" />
-                                <copy todir="../../kura/target-definition/equinox_3.11.1/repository">
+                                <delete dir="../../kura/target-definition/equinox_3.12.50/" />
+                                <mkdir dir="../../kura/target-definition/equinox_3.12.50/repository" />
+                                <copy todir="../../kura/target-definition/equinox_3.12.50/repository">
                                     <fileset dir="${project.build.directory}/repository" />
                                 </copy>
                             </target>
@@ -261,7 +248,7 @@
             <!-- profile for falling back to non-mirror download links -->
             <id>no-mirror</id>
             <properties>
-                <equinox.download.url>http://archive.eclipse.org/equinox/drops/R-Neon.1-201609071200/equinox-SDK-Neon.1.zip</equinox.download.url>
+                <equinox.download.url>http://archive.eclipse.org/equinox/drops/R-Oxygen.2-201711300510/equinox-SDK-Oxygen.2.zip</equinox.download.url>
             </properties>
         </profile>
     </profiles>

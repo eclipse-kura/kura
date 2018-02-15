@@ -1364,7 +1364,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
                     configs = loadLatestSnapshotConfigurations();
                 }
             } catch (Exception ex) {
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, ex);
             }
         }
 

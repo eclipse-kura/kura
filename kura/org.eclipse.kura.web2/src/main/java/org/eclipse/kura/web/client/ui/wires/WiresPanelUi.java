@@ -65,6 +65,7 @@ public class WiresPanelUi extends Composite
     static final String WIRE_ASSET = "WireAsset";
     static final String FACTORY_PID_DROP_PREFIX = "factory://";
     private static final String WIRE_ASSET_PID = "org.eclipse.kura.wire.WireAsset";
+    private static final String DRIVER_PID = "driver.pid";
 
     @UiField
     Button btnSave;
@@ -155,7 +156,7 @@ public class WiresPanelUi extends Composite
                 final List<String> invalidConfigurationPids = configurations.getInvalidConfigurationPids();
                 if (!invalidConfigurationPids.isEmpty()) {
                     confirmDialog.show(
-                            MSGS.wiresConfigurationInvalid(
+                            MSGS.cannotSaveWiresConfigurationInvalid(
                                     invalidConfigurationPids.toString().replaceAll("[\\[\\]]", "")),
                             AlertDialog.Severity.ALERT, null);
                     return;
@@ -223,6 +224,14 @@ public class WiresPanelUi extends Composite
 
             @Override
             public void onClick(ClickEvent event) {
+                final List<String> invalidConfigurationPids = configurations.getInvalidConfigurationPids();
+                if (!invalidConfigurationPids.isEmpty()) {
+                    confirmDialog.show(
+                            MSGS.cannotDownloadSnapshotWiresConfigurationInvalid(
+                                    invalidConfigurationPids.toString().replaceAll("[\\[\\]]", "")),
+                            AlertDialog.Severity.ALERT, null);
+                    return;
+                }
                 WiresRPC.downloadWiresSnapshot();
             }
         });

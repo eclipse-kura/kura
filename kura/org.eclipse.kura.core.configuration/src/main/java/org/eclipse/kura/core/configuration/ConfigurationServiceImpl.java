@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and others
+ * Copyright (c) 2011, 2018 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
@@ -454,21 +455,43 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         }
     }
 
+    private boolean isFactoryComponent(Configuration config) {
+        final Dictionary<String, Object> configurationProperties = config.getProperties();
+        if (configurationProperties != null) {
+            return configurationProperties.get(ConfigurationAdmin.SERVICE_FACTORYPID) != null;
+        }
+        return false;
+    }
+
     @Override
     public synchronized void deleteFactoryConfiguration(String pid, boolean takeSnapshot) throws KuraException {
         if (pid == null) {
             throw new KuraException(KuraErrorCode.INVALID_PARAMETER, "pid cannot be null");
-        } else if (this.factoryPidByPid.get(pid) == null) {
-            return;
         }
 
         try {
-            logger.info("Deleting configuration for pid {}", pid);
-            Configuration config = this.configurationAdmin.getConfiguration(this.servicePidByPid.get(pid), "?");
+            final Configuration[] configurations = this.configurationAdmin.listConfigurations(null);
 
-            if (config != null) {
-                config.delete();
+            if (configurations == null) {
+                logger.warn("ConfigurationAdmin has no configurations");
+                return;
             }
+
+            final Optional<Configuration> config = Arrays.stream(configurations).filter(c -> {
+                final Object kuraServicePid = c.getProperties().get(KURA_SERVICE_PID);
+                final String factoryPid = c.getFactoryPid();
+                return pid.equals(kuraServicePid) && factoryPid != null;
+            }).findAny();
+
+            if (!config.isPresent()) {
+                logger.warn("The component with kura.service.pid {} does not exist or it is not a Factory Component",
+                        pid);
+                return;
+            }
+
+            logger.info("Deleting factory configuration for component with pid {}...", pid);
+
+            config.get().delete();
 
             unregisterComponentConfiguration(pid);
 
@@ -477,7 +500,8 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
             if (takeSnapshot) {
                 snapshot();
             }
-        } catch (IOException e) {
+            logger.info("Deleting factory configuration for component with pid {}...done", pid);
+        } catch (Exception e) {
             throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, e, "Cannot delete component instance " + pid);
         }
     }

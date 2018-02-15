@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
  *
  *   All rights reserved. This program and the accompanying materials
  *   are made available under the terms of the Eclipse Public License v1.0
@@ -352,47 +352,78 @@ public class ConfigurationServiceTest {
     }
 
     @Test
-    public void testDeleteFactoryConfigurationNonExistingFactoryPid() throws KuraException {
-        // negative test; pid not registered
+    public void testDeleteFactoryConfigurationNonFactoryComponent()
+            throws KuraException, NoSuchFieldException, IOException, InvalidSyntaxException {
 
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl();
 
         String pid = "pid";
         boolean takeSnapshot = false;
 
+        final Configuration configMock = prepareConfigForDeleteFactoryConfigTests(pid, null);
+        final ConfigurationAdmin configAdmin = prepareConfigAdminForDeleteFactoryConfigTests(configMock);
+
+        cs.setConfigurationAdmin(configAdmin);
+
         try {
             cs.deleteFactoryConfiguration(pid, takeSnapshot);
-        } catch (KuraException e) {
+        } catch (Exception e) {
             fail("Exception not expected.");
         }
+
+        verify(configMock, Mockito.times(0)).delete();
     }
 
     @Test
     public void testDeleteFactoryConfigurationNonExistingServicePid() throws KuraException, NoSuchFieldException {
-        // pid ony registered in factory pids
-
-        // The interesting thing is that factory PIDs are checked in the code, but service PIDs are not... This is
-        // because by design the service expects the service PID to exist.
+        ConfigurationServiceImpl cs = new ConfigurationServiceImpl();
+        cs.setConfigurationAdmin(mock(ConfigurationAdmin.class));
 
         String pid = "pid";
         boolean takeSnapshot = false;
 
-        ConfigurationServiceImpl cs = new ConfigurationServiceImpl();
-
-        Map<String, String> pids = (Map<String, String>) TestUtil.getFieldValue(cs, "factoryPidByPid");
-        pids.put(pid, pid);
-
         try {
             cs.deleteFactoryConfiguration(pid, takeSnapshot);
-
-            fail("PID not in service PIDs list - exception expected.");
-        } catch (NullPointerException e) {
-            // OK - always assume that service PID exists - by design
+        } catch (Exception e) {
+            fail("Exception not expected.");
         }
     }
 
+    private Configuration prepareConfigForDeleteFactoryConfigTests(final String configPid,
+            final String configFactoryPid) {
+        if (configPid == null) {
+            return null;
+        }
+
+        final Dictionary<String, Object> properties = new Hashtable<>();
+        properties.put(ConfigurationService.KURA_SERVICE_PID, configPid);
+        Configuration configMock = mock(Configuration.class);
+        if (configFactoryPid != null) {
+            properties.put(ConfigurationAdmin.SERVICE_FACTORYPID, configFactoryPid);
+            when(configMock.getFactoryPid()).thenReturn(configFactoryPid);
+        }
+
+        when(configMock.getProperties()).thenReturn(properties);
+
+        when(configMock.getPid()).thenReturn(configPid);
+
+        return configMock;
+    }
+
+    private ConfigurationAdmin prepareConfigAdminForDeleteFactoryConfigTests(Configuration config)
+            throws IOException, InvalidSyntaxException {
+        ConfigurationAdmin configAdminMock = mock(ConfigurationAdmin.class);
+
+        if (config != null) {
+            when(configAdminMock.listConfigurations(anyObject())).thenReturn(new Configuration[] { config });
+        }
+
+        return configAdminMock;
+    }
+
     @Test
-    public void testDeleteFactoryConfigurationNoSnapshot() throws KuraException, IOException, NoSuchFieldException {
+    public void testDeleteFactoryConfigurationNoSnapshot()
+            throws KuraException, IOException, NoSuchFieldException, InvalidSyntaxException {
         // positive test; pid registered in factory and service pids, configuration delete is expected, no snapshot
 
         String factoryPid = "fpid";
@@ -416,17 +447,10 @@ public class ConfigurationServiceTest {
             }
         };
 
-        Map<String, String> pids = (Map<String, String>) TestUtil.getFieldValue(cs, "factoryPidByPid");
-        pids.put(servicePid, factoryPid);
+        final Configuration configMock = prepareConfigForDeleteFactoryConfigTests(servicePid, factoryPid);
+        final ConfigurationAdmin configAdmin = prepareConfigAdminForDeleteFactoryConfigTests(configMock);
 
-        pids = (Map<String, String>) TestUtil.getFieldValue(cs, "servicePidByPid");
-        pids.put(servicePid, servicePid);
-
-        ConfigurationAdmin configAdminMock = mock(ConfigurationAdmin.class);
-        cs.setConfigurationAdmin(configAdminMock);
-
-        Configuration configMock = mock(Configuration.class);
-        when(configAdminMock.getConfiguration(servicePid, "?")).thenReturn(configMock);
+        cs.setConfigurationAdmin(configAdmin);
 
         cs.deleteFactoryConfiguration(servicePid, takeSnapshot);
 
@@ -434,7 +458,8 @@ public class ConfigurationServiceTest {
     }
 
     @Test
-    public void testDeleteFactoryConfigurationWithSnapshot() throws KuraException, IOException, NoSuchFieldException {
+    public void testDeleteFactoryConfigurationWithSnapshot()
+            throws KuraException, IOException, NoSuchFieldException, InvalidSyntaxException {
         // positive test; pid registered in factory and service pids, configuration delete is expected, take a snapshot
 
         String factoryPid = "fpid";
@@ -458,17 +483,10 @@ public class ConfigurationServiceTest {
             }
         };
 
-        Map<String, String> pids = (Map<String, String>) TestUtil.getFieldValue(cs, "factoryPidByPid");
-        pids.put(servicePid, factoryPid);
+        final Configuration configMock = prepareConfigForDeleteFactoryConfigTests(servicePid, factoryPid);
+        final ConfigurationAdmin configAdmin = prepareConfigAdminForDeleteFactoryConfigTests(configMock);
 
-        pids = (Map<String, String>) TestUtil.getFieldValue(cs, "servicePidByPid");
-        pids.put(servicePid, servicePid);
-
-        ConfigurationAdmin configAdminMock = mock(ConfigurationAdmin.class);
-        cs.setConfigurationAdmin(configAdminMock);
-
-        Configuration configMock = mock(Configuration.class);
-        when(configAdminMock.getConfiguration(servicePid, "?")).thenReturn(configMock);
+        cs.setConfigurationAdmin(configAdmin);
 
         assertFalse("snapshot still untouched", snapshots[0]);
 
@@ -476,36 +494,6 @@ public class ConfigurationServiceTest {
 
         verify(configMock, Mockito.times(1)).delete();
         assertTrue("snapshot taken", snapshots[0]);
-    }
-
-    @Test
-    public void testDeleteFactoryConfigurationConfigurationException()
-            throws KuraException, IOException, NoSuchFieldException {
-        // negative test; pid registered in factory and service pids, configuration retrieval fails
-
-        String factoryPid = "fpid";
-        final String servicePid = "spid";
-        final boolean takeSnapshot = true;
-
-        ConfigurationServiceImpl cs = new ConfigurationServiceImpl();
-
-        Map<String, String> pids = (Map<String, String>) TestUtil.getFieldValue(cs, "factoryPidByPid");
-        pids.put(servicePid, factoryPid);
-
-        pids = (Map<String, String>) TestUtil.getFieldValue(cs, "servicePidByPid");
-        pids.put(servicePid, servicePid);
-
-        ConfigurationAdmin configAdminMock = mock(ConfigurationAdmin.class);
-        cs.setConfigurationAdmin(configAdminMock);
-
-        Throwable ioe = new IOException("test");
-        when(configAdminMock.getConfiguration(servicePid, "?")).thenThrow(ioe);
-
-        try {
-            cs.deleteFactoryConfiguration(servicePid, takeSnapshot);
-        } catch (KuraException e) {
-            assertTrue(e.getMessage().contains("Cannot delete"));
-        }
     }
 
     @Test

@@ -299,7 +299,6 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
     }
 
     /** {@inheritDoc} */
-    @SuppressWarnings("unchecked")
     @Override
     public ComponentConfiguration getConfiguration() throws KuraException {
         requireNonNull(this.properties, message.propertiesNonNull());
@@ -313,13 +312,17 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         }
         ChannelDescriptor channelDescriptor = null;
         if (this.driver != null) {
-            channelDescriptor = this.driver.getChannelDescriptor();
+            try {
+                channelDescriptor = this.driver.getChannelDescriptor();
+            } catch (Exception e) {
+                logger.warn("Failed to get channel descriptor", e);
+            }
         }
         if (channelDescriptor != null) {
-            List<Tad> driverSpecificChannelConfiguration = null;
+            List<?> driverSpecificChannelConfiguration = null;
             final Object descriptor = channelDescriptor.getDescriptor();
             if (descriptor instanceof List<?>) {
-                driverSpecificChannelConfiguration = (List<Tad>) descriptor;
+                driverSpecificChannelConfiguration = (List<?>) descriptor;
             }
 
             fillDriverSpecificChannelConfiguration(mainOcd, driverSpecificChannelConfiguration);
@@ -337,7 +340,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
      *            the driver specific configuration.
      */
     private void fillDriverSpecificChannelConfiguration(final Tocd mainOcd,
-            final List<Tad> driverSpecificChannelConfiguration) {
+            final List<?> driverSpecificChannelConfiguration) {
         if (mainOcd == null || driverSpecificChannelConfiguration == null) {
             return;
         }
@@ -346,7 +349,10 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
                 .forEach(attribute -> {
                     for (final Entry<String, Channel> entry : this.assetConfiguration.getAssetChannels().entrySet()) {
                         final String channelName = entry.getKey();
-                        final Tad newAttribute = cloneAd(attribute, channelName);
+                        if (!(attribute instanceof Tad)) {
+                            return;
+                        }
+                        final Tad newAttribute = cloneAd((Tad) attribute, channelName);
                         mainOcd.addAD(newAttribute);
                     }
                 });
@@ -357,12 +363,18 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         if (driver == null || properties == null || assetConfiguration == null) {
             return;
         }
-        final ChannelDescriptor channelDescriptor = driver.getChannelDescriptor();
-        if (channelDescriptor == null) {
-            return;
-        }
-        final Object driverDescriptor = channelDescriptor.getDescriptor();
-        if (!(driverDescriptor instanceof List<?>)) {
+        Object driverDescriptor = null;
+        try {
+            final ChannelDescriptor channelDescriptor = driver.getChannelDescriptor();
+            if (channelDescriptor == null) {
+                return;
+            }
+            driverDescriptor = channelDescriptor.getDescriptor();
+            if (!(driverDescriptor instanceof List<?>)) {
+                return;
+            }
+        } catch (Exception e) {
+            logger.warn("Failed to get channel descriptor", e);
             return;
         }
         Map<String, Object> newConfiguration = null;

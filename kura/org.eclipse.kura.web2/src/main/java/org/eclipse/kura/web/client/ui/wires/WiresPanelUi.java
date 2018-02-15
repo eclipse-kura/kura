@@ -495,28 +495,28 @@ public class WiresPanelUi extends Composite
         return assetPids;
     }
 
-    private void validateConfiguration(GwtConfigComponent gwtConfig) {
-        final String pid = gwtConfig.getComponentId();
-        if (gwtConfig == null || !gwtConfig.isValid()) {
-            throw new IllegalArgumentException(MSGS.errorComponentConfigurationMissing(pid));
-        }
-        if (WIRE_ASSET_PID.equals(gwtConfig.getFactoryId())) {
-            final String driverPid = (String) gwtConfig.getParameterValue(DRIVER_PID);
-            if (configurations.getConfiguration(driverPid) == null) {
-                throw new IllegalArgumentException(MSGS.errorDriverConfigurationMissing(pid, driverPid));
-            }
-        }
-    }
-
     private HasConfiguration validateAndGetWireComponentConfiguration(String pid) {
         try {
             final HasConfiguration configuration = configurations.getConfiguration(pid);
             if (configuration == null) {
                 throw new IllegalArgumentException(MSGS.errorComponentConfigurationMissing(pid));
             }
-            validateConfiguration(configuration.getConfiguration());
+            GwtConfigComponent gwtConfig = configuration.getConfiguration();
+            if (gwtConfig == null || !gwtConfig.isValid()) {
+                throw new IllegalArgumentException(MSGS.errorComponentConfigurationMissing(pid));
+            }
+            if (WIRE_ASSET_PID.equals(gwtConfig.getFactoryId())) {
+                final String driverPid = (String) gwtConfig.getParameterValue(DRIVER_PID);
+                if (configurations.getConfiguration(driverPid) == null) {
+                    throw new IllegalArgumentException(MSGS.errorDriverConfigurationMissing(pid, driverPid));
+                }
+                if (configurations.getChannelDescriptor(driverPid) == null) {
+                    throw new IllegalArgumentException(MSGS.errorDriverDescriptorMissingForAsset(pid, driverPid));
+                }
+            }
             return configuration;
         } catch (IllegalArgumentException e) {
+            configurations.invalidateConfiguration(pid);
             throw e;
         } catch (Exception e) {
             throw new IllegalArgumentException(MSGS.errorUnexpectedErrorLoadingComponentConfig(pid));

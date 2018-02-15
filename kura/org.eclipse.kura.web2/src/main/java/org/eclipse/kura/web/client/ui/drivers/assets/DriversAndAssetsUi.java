@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -317,7 +317,7 @@ public class DriversAndAssetsUi extends Composite implements DriversAndAssetsLis
     public void onSelectionChanged(DriverAssetInfo info) {
         if (info != null) {
             this.deleteButton.setEnabled(true);
-            this.newAssetButton.setEnabled(!info.isAsset());
+            this.newAssetButton.setEnabled(!info.isAsset() && info.isValid());
         } else {
             this.deleteButton.setEnabled(false);
             this.newAssetButton.setEnabled(false);

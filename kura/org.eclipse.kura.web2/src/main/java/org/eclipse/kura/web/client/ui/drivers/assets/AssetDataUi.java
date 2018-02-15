@@ -169,7 +169,7 @@ public class AssetDataUi extends Composite {
                 }
                 final String value = result.getValue();
                 if (value == null) {
-                    return "asset-read-error";
+                    return "cell-not-valid cell-readonly";
                 }
                 return null;
             }

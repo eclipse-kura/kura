@@ -455,14 +455,6 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         }
     }
 
-    private boolean isFactoryComponent(Configuration config) {
-        final Dictionary<String, Object> configurationProperties = config.getProperties();
-        if (configurationProperties != null) {
-            return configurationProperties.get(ConfigurationAdmin.SERVICE_FACTORYPID) != null;
-        }
-        return false;
-    }
-
     @Override
     public synchronized void deleteFactoryConfiguration(String pid, boolean takeSnapshot) throws KuraException {
         if (pid == null) {

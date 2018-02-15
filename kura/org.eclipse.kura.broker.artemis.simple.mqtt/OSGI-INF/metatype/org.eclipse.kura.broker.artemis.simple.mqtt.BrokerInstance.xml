@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    Copyright (c) 2017 Red Hat Inc
+    Copyright (c) 2017, 2018 Red Hat Inc
 
     All rights reserved. This program and the accompanying materials
     are made available under the terms of the Eclipse Public License v1.0
@@ -26,7 +26,7 @@
 		<AD
 			id="address"
 			name="MQTT address"
-			description="MQTT broker listener address"
+			description="The address the MQTT broker listens for incoming connections. Be sure to check if the firewall is configured correctly to allow access to this address."
 			type="String"
 			cardinality="1"
 			required="false"
@@ -35,7 +35,7 @@
 		<AD
 			id="port"
 			name="MQTT port"
-			description="MQTT broker port"
+			description="The port of the MQTT broker. Be sure to check if the firewall is configured correctly to allow access to this port."
 			type="Integer"
 			cardinality="1"
 			required="true"

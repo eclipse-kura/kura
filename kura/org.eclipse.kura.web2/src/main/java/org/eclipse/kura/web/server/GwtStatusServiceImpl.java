@@ -242,8 +242,15 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
                     currentStatus = "Unmanaged";
                 }
 
-                String currentConfigMode = gwtNetInterfaceConfig
-                        .getConfigModeEnum() == GwtNetIfConfigMode.netIPv4ConfigModeDHCP ? "DHCP" : "Manual";
+                String currentConfigMode;
+                if (gwtNetInterfaceConfig.getConfigModeEnum() == GwtNetIfConfigMode.netIPv4ConfigModeL2Only) {
+                    currentConfigMode = "L2Only";
+                } else if (gwtNetInterfaceConfig.getConfigModeEnum() == GwtNetIfConfigMode.netIPv4ConfigModeDHCP) {
+                    currentConfigMode = "DHCP";
+                } else {
+                    currentConfigMode = "Manual";
+                }
+                
                 String currentRouterMode;
                 if (gwtNetInterfaceConfig.getRouterModeEnum() == GwtNetRouterMode.netRouterDchp) {
                     currentRouterMode = "DHCPD";

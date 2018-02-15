@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and others
+ * Copyright (c) 2011, 2018 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -25,6 +25,7 @@ public enum KuraConstants {
     Reliagate_10_11("yocto", "1.2.1", "reliagate-10-11"),
     Reliagate_20_25("yocto", "1.2.1", "reliagate-20-25"),
     BoltGATE_20_25("yocto", "1.2.1", "boltgate-20-25"),
+    BoltMAR_20_28("yocto", "1.2.1", "boltmar-20-28"),
     Reliagate_20_26("rhel", "7.3", "reliagate-20-26"),
     Fedora_Pi("fedora", "2x", "raspberry-pi");
 

@@ -565,6 +565,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
                                     newNetConfigs.add(netConfig4);
                                     if (!netConfig.equals(netConfig4)) {
                                         logger.debug("updating NetConfig4 for {}", interfaceName);
+                                        logger.debug("Is new State L2Only? {}", netConfig4.isL2Only());
                                         logger.debug("Is new State DHCP? {}", netConfig4.isDhcp());
                                         configurationChanged = true;
                                         if (!modifiedInterfaceNames.contains(interfaceName)) {
@@ -965,16 +966,17 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
                         wifiNetInterfaceAddressConfigs);
 
                 wifiMode = wifiInterfaceAddressConfig.getMode();
-                wifiInterfaceState = new WifiInterfaceState(interfaceName, wifiMode);
-
+                boolean isL2Only = false;
                 for (NetConfig netConfig : wifiInterfaceAddressConfig.getConfigs()) {
                     if (netConfig instanceof NetConfigIP4) {
                         status = ((NetConfigIP4) netConfig).getStatus();
+                        isL2Only = ((NetConfigIP4) netConfig).isL2Only();
                         logger.debug("Interface status is set to {}", status);
                     } else if (netConfig instanceof WifiConfig && ((WifiConfig) netConfig).getMode() == wifiMode) {
                         wifiConfig = (WifiConfig) netConfig;
                     }
                 }
+                wifiInterfaceState = new WifiInterfaceState(interfaceName, wifiMode, isL2Only);
             }
 
             if (!LinuxNetworkUtil.hasAddress(interfaceName)
@@ -1047,30 +1049,23 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 
     @Override
     public void disableInterface(String interfaceName) throws KuraException {
+        if ("lo".equals(interfaceName)) {
+            return;
+        }
+        manageDhcpClient(interfaceName, false);
+        manageDhcpServer(interfaceName, false);
 
-        if (!"lo".equals(interfaceName)) {
-            try {
-                if (LinuxNetworkUtil.hasAddress(interfaceName)) {
-                    logger.info("bringing interface {} down", interfaceName);
-                    manageDhcpClient(interfaceName, false);
-                    manageDhcpServer(interfaceName, false);
-
-                    // FIXME: can we avoid getting the interface type again and ask for the caller to pass it in?
-                    NetInterfaceType type = LinuxNetworkUtil.getType(interfaceName);
-                    if (type == NetInterfaceType.WIFI) {
-                        disableWifiInterface(interfaceName);
-                    }
-
-                    LinuxNetworkUtil.disableInterface(interfaceName);
-
-                } else {
-                    logger.info("not bringing interface {} down because it is already down", interfaceName);
-                    manageDhcpClient(interfaceName, false);
-                    manageDhcpServer(interfaceName, false);
-                }
-            } catch (Exception e) {
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+        NetInterfaceType type = LinuxNetworkUtil.getType(interfaceName);
+        if (type == NetInterfaceType.WIFI) {
+            disableWifiInterface(interfaceName);
+        }
+        try {
+            if (LinuxNetworkUtil.hasAddress(interfaceName)) {
+                logger.info("bringing interface {} down", interfaceName);
+                LinuxNetworkUtil.disableInterface(interfaceName);
             }
+        } catch (Exception e) {
+            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
         }
     }
 

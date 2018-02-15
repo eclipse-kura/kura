@@ -276,8 +276,9 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                         disableInterface(interfaceName);
                         // Update the current wifi state
                         this.interfaceStatuses.remove(interfaceName);
+                        NetConfigIP4 netConfig = ((AbstractNetInterface<?>) wifiInterfaceConfig).getIP4config();
                         this.interfaceStatuses.put(interfaceName,
-                                new InterfaceState(NetInterfaceType.WIFI, interfaceName));
+                                new InterfaceState(NetInterfaceType.WIFI, interfaceName, netConfig.isL2Only()));
                     }
 
                     // Get current state
@@ -818,7 +819,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
             if (isWifiEnabled(newConfig) && !enabledIfaces.contains(interfaceName)) {
                 logger.debug("Adding {} to list of enabled interfaces", interfaceName);
                 enabledIfaces.add(interfaceName);
-            } else if ((newConfig != null) && !((AbstractNetInterface<?>) newConfig).isInterfaceManaged()
+            } else if (newConfig != null && !((AbstractNetInterface<?>) newConfig).isInterfaceManaged()
                     && !unmanagedIfaces.contains(interfaceName)) {
                 logger.debug("Removing {} from list of enabled interfaces because it is set not to be managed by Kura",
                         interfaceName);
@@ -967,7 +968,8 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
             }
             WifiConfig wifiConfig = getWifiConfig(wifiInterfaceConfig);
             if (wifiConfig != null) {
-                statuses.put(interfaceName, new WifiInterfaceState(interfaceName, wifiConfig.getMode()));
+                statuses.put(interfaceName, new WifiInterfaceState(interfaceName, wifiConfig.getMode(),
+                        ((AbstractNetInterface<?>) wifiInterfaceConfig).getIP4config().isL2Only()));
             }
         }
         return statuses;

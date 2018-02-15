@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -17,38 +17,52 @@ import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.eclipse.kura.net.ConnectionInfo;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetInterfaceType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class InterfaceState {
 
-    private final String m_name;
-    private final boolean m_up;
-    protected boolean m_link;
-    private final IPAddress m_ipAddress;
+    private static final Logger logger = LoggerFactory.getLogger(InterfaceState.class);
+    private final String name;
+    private final boolean up;
+    protected boolean link;
+    private final IPAddress ipAddress;
 
     public InterfaceState(String interfaceName, boolean up, boolean link, IPAddress ipAddress) {
-        this.m_name = interfaceName;
-        this.m_up = up;
-        this.m_link = link;
-        this.m_ipAddress = ipAddress;
+        this.name = interfaceName;
+        this.up = up;
+        this.link = link;
+        this.ipAddress = ipAddress;
     }
 
     public InterfaceState(NetInterfaceType type, String interfaceName) throws KuraException {
-        this.m_name = interfaceName;
-        this.m_up = LinuxNetworkUtil.hasAddress(interfaceName);
-        this.m_link = LinuxNetworkUtil.isLinkUp(type, interfaceName);
-
+        this.name = interfaceName;
+        this.up = LinuxNetworkUtil.hasAddress(interfaceName);
+        this.link = LinuxNetworkUtil.isLinkUp(type, interfaceName);
+        logger.debug("InterfaceState() :: {} - link?={}", interfaceName, this.link);
+        logger.debug("InterfaceState() :: {} - up?={}", interfaceName, this.up);
         ConnectionInfo connInfo = new ConnectionInfoImpl(interfaceName);
-        this.m_ipAddress = connInfo.getIpAddress();
+        this.ipAddress = connInfo.getIpAddress();
+    }
+
+    public InterfaceState(NetInterfaceType type, String interfaceName, boolean isL2OnlyInterface) throws KuraException {
+        this.name = interfaceName;
+        this.up = isL2OnlyInterface ? LinuxNetworkUtil.isUp(interfaceName) : LinuxNetworkUtil.hasAddress(interfaceName);
+        this.link = LinuxNetworkUtil.isLinkUp(type, interfaceName);
+        logger.debug("InterfaceState() :: {} - link?={}", interfaceName, this.link);
+        logger.debug("InterfaceState() :: {} - up?={}", interfaceName, this.up);
+        ConnectionInfo connInfo = new ConnectionInfoImpl(interfaceName);
+        this.ipAddress = connInfo.getIpAddress();
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + (this.m_name != null ? this.m_name.hashCode() : 0);
-        result = prime * result + (this.m_link ? 1231 : 1237);
-        result = prime * result + (this.m_up ? 1231 : 1237);
-        result = prime * result + (this.m_ipAddress != null ? this.m_ipAddress.hashCode() : 0);
+        result = prime * result + (this.name != null ? this.name.hashCode() : 0);
+        result = prime * result + (this.link ? 1231 : 1237);
+        result = prime * result + (this.up ? 1231 : 1237);
+        result = prime * result + (this.ipAddress != null ? this.ipAddress.hashCode() : 0);
         return result;
     }
 
@@ -64,24 +78,24 @@ public class InterfaceState {
             return false;
         }
         InterfaceState other = (InterfaceState) obj;
-        if (this.m_name != null) {
-            if (!this.m_name.equals(other.m_name)) {
+        if (this.name != null) {
+            if (!this.name.equals(other.name)) {
                 return false;
             }
-        } else if (other.m_name != null) {
+        } else if (other.name != null) {
             return false;
         }
-        if (this.m_link != other.m_link) {
+        if (this.link != other.link) {
             return false;
         }
-        if (this.m_up != other.m_up) {
+        if (this.up != other.up) {
             return false;
         }
-        if (this.m_ipAddress != null) {
-            if (!this.m_ipAddress.equals(other.m_ipAddress)) {
+        if (this.ipAddress != null) {
+            if (!this.ipAddress.equals(other.ipAddress)) {
                 return false;
             }
-        } else if (other.m_ipAddress != null) {
+        } else if (other.ipAddress != null) {
             return false;
         }
 
@@ -89,31 +103,31 @@ public class InterfaceState {
     }
 
     public String getName() {
-        return this.m_name;
+        return this.name;
     }
 
     public boolean isUp() {
-        return this.m_up;
+        return this.up;
     }
 
     public boolean isLinkUp() {
-        return this.m_link;
+        return this.link;
     }
 
     public IPAddress getIpAddress() {
-        return this.m_ipAddress;
+        return this.ipAddress;
     }
 
     @Override
     public String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append(this.m_name);
+        StringBuilder sb = new StringBuilder();
+        sb.append(this.name);
         sb.append(" -- Link Up?: ");
-        sb.append(this.m_link);
+        sb.append(this.link);
         sb.append(", Is Up?: ");
-        sb.append(this.m_up);
+        sb.append(this.up);
         sb.append(", IP Address: ");
-        sb.append(this.m_ipAddress);
+        sb.append(this.ipAddress);
         return sb.toString();
     }
 }

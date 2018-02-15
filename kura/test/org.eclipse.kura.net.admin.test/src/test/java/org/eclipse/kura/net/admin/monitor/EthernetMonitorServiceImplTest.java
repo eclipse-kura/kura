@@ -354,7 +354,7 @@ public class EthernetMonitorServiceImplTest {
             int callNo = 1;
 
             @Override
-            protected InterfaceState getEthernetInterfaceState(String interfaceName) throws KuraException {
+            protected InterfaceState getEthernetInterfaceState(String interfaceName, boolean isL2Only) throws KuraException {
                 InterfaceState isMock = mock(InterfaceState.class);
 
                 if (callNo == 1) {

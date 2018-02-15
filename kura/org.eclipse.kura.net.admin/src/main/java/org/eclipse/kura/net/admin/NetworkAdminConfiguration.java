@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -16,6 +16,7 @@ public enum NetworkAdminConfiguration {
     CONFIG_MTU,
     CONFIG_AUTOCONNECT,
     CONFIG_DRIVER,
+    CONFIG_IPV4_L2ONLY_ENABLED,
     CONFIG_IPV4_DHCP_CLIENT_ENABLED,
     CONFIG_IPV4_ADDRESS,
     CONFIG_IPV4_PREFIX,

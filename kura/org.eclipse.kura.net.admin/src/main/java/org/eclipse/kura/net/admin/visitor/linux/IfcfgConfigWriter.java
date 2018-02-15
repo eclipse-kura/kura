@@ -143,68 +143,63 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
             List<NetConfig> netConfigs = netInterfaceAddressConfig.getConfigs();
             if (netConfigs != null) {
                 for (NetConfig netConfig : netConfigs) {
-                    if (netConfig instanceof NetConfigIP4) {
-                        // ONBOOT
-                        sb.append("ONBOOT=");
-                        if (((NetConfigIP4) netConfig).isAutoConnect()) {
-                            sb.append("yes");
-                        } else {
-                            sb.append("no");
-                        }
-                        sb.append("\n");
-
-                        if (((NetConfigIP4) netConfig).isDhcp()) {
-                            // BOOTPROTO
-                            sb.append("BOOTPROTO=");
-                            logger.debug("new config is DHCP");
-                            sb.append("dhcp");
-                            sb.append("\n");
-                        } else {
-                            // BOOTPROTO
-                            sb.append("BOOTPROTO=");
-                            logger.debug("new config is STATIC");
-                            sb.append("static");
-                            sb.append("\n");
-
-                            // IPADDR
-                            sb.append("IPADDR=").append(((NetConfigIP4) netConfig).getAddress().getHostAddress())
-                                    .append("\n");
-
-                            // PREFIX
-                            sb.append("PREFIX=").append(((NetConfigIP4) netConfig).getNetworkPrefixLength())
-                                    .append("\n");
-
-                            // Gateway
-                            if (((NetConfigIP4) netConfig).getGateway() != null) {
-                                sb.append("GATEWAY=").append(((NetConfigIP4) netConfig).getGateway().getHostAddress())
-                                        .append("\n");
-                            }
-                        }
-
-                        // DEFROUTE
-                        if (((NetConfigIP4) netConfig).getStatus() == NetInterfaceStatus.netIPv4StatusEnabledWAN) {
-                            sb.append("DEFROUTE=yes\n");
-                        } else {
-                            sb.append("DEFROUTE=no\n");
-                        }
-
-                        // DNS
-                        List<? extends IPAddress> dnsAddresses = ((NetConfigIP4) netConfig).getDnsServers();
-                        if (dnsAddresses != null) {
-                            for (int i = 0; i < dnsAddresses.size(); i++) {
-                                IPAddress ipAddr = dnsAddresses.get(i);
-                                if (!(ipAddr.isLoopbackAddress() || ipAddr.isLinkLocalAddress()
-                                        || ipAddr.isMulticastAddress())) {
-                                    sb.append("DNS").append(i + 1).append("=").append(ipAddr.getHostAddress())
-                                            .append("\n");
-                                }
-                            }
-                        } else {
-                            logger.debug("no DNS entries");
-                        }
-
-                        allowWrite = true;
+                    if (!(netConfig instanceof NetConfigIP4)) {
+                        continue;
                     }
+                    // ONBOOT
+                    sb.append("ONBOOT=");
+                    if (((NetConfigIP4) netConfig).isAutoConnect()) {
+                        sb.append("yes");
+                    } else {
+                        sb.append("no");
+                    }
+                    sb.append("\n");
+                    if (((NetConfigIP4) netConfig).isL2Only()) {
+                        logger.debug("new config is Layer 2 Only");
+                        sb.append("BOOTPROTO=none\n");
+                    } else if (((NetConfigIP4) netConfig).isDhcp()) {
+                        logger.debug("new config is DHCP");
+                        sb.append("BOOTPROTO=dhcp\n");
+                    } else {
+                        logger.debug("new config is STATIC");
+                        sb.append("BOOTPROTO=static\n");
+
+                        // IPADDR
+                        sb.append("IPADDR=").append(((NetConfigIP4) netConfig).getAddress().getHostAddress())
+                                .append("\n");
+
+                        // PREFIX
+                        sb.append("PREFIX=").append(((NetConfigIP4) netConfig).getNetworkPrefixLength()).append("\n");
+
+                        // Gateway
+                        if (((NetConfigIP4) netConfig).getGateway() != null) {
+                            sb.append("GATEWAY=").append(((NetConfigIP4) netConfig).getGateway().getHostAddress())
+                                    .append("\n");
+                        }
+                    }
+
+                    // DEFROUTE
+                    if (((NetConfigIP4) netConfig).getStatus() == NetInterfaceStatus.netIPv4StatusEnabledWAN) {
+                        sb.append("DEFROUTE=yes\n");
+                    } else {
+                        sb.append("DEFROUTE=no\n");
+                    }
+
+                    // DNS
+                    List<? extends IPAddress> dnsAddresses = ((NetConfigIP4) netConfig).getDnsServers();
+                    if (dnsAddresses != null) {
+                        for (int i = 0; i < dnsAddresses.size(); i++) {
+                            IPAddress ipAddr = dnsAddresses.get(i);
+                            if (!(ipAddr.isLoopbackAddress() || ipAddr.isLinkLocalAddress()
+                                    || ipAddr.isMulticastAddress())) {
+                                sb.append("DNS").append(i + 1).append("=").append(ipAddr.getHostAddress()).append("\n");
+                            }
+                        }
+                    } else {
+                        logger.debug("no DNS entries");
+                    }
+
+                    allowWrite = true;
                 }
             } else {
                 logger.debug("writeRedhatConfig() :: netConfigs is null");
@@ -318,13 +313,15 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
                                     appendConfig = false;
                                     sb.append(debianWriteUtility(netInterfaceConfig, iName));
 
-                                    // remove old config lines from the scanner
+                                    // append Debian interface command options
                                     while (scanner.hasNextLine() && !(line = scanner.nextLine().trim()).isEmpty()) {
                                         if (isDebianInterfaceCommandOption(line)) {
                                             sb.append("\t").append(line).append("\n");
                                         }
                                     }
-                                    sb.append("\n");
+                                    if (!sb.toString().endsWith("\n\n")) {
+                                        sb.append("\n");
+                                    }
                                 } else {
                                     sb.append(noTrimLine + "\n");
                                 }
@@ -426,96 +423,98 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
             String interfaceName) {
         StringBuilder sb = new StringBuilder();
         List<NetConfig> netConfigs = ((AbstractNetInterface<?>) netInterfaceConfig).getNetConfigs();
-        if (netConfigs != null) {
-            for (NetConfig netConfig : netConfigs) {
-                if (netConfig instanceof NetConfigIP4) {
-                    logger.debug("Writing netconfig {} for {}", netConfig.getClass().toString(), interfaceName);
+        if (netConfigs == null) {
+            logger.debug("debianWriteUtility() :: netConfigs is null");
+            return sb.toString();
+        }
+        for (NetConfig netConfig : netConfigs) {
+            if (!(netConfig instanceof NetConfigIP4)) {
+                continue;
+            }
+            logger.debug("Writing netconfig {} for {}", netConfig.getClass().toString(), interfaceName);
 
-                    // ONBOOT
-                    if (((NetConfigIP4) netConfig).isAutoConnect()) {
-                        if (osVersion.equals(KuraConstants.Raspberry_Pi.getImageName())
-                                && netInterfaceConfig.getType() == NetInterfaceType.WIFI
-                                && ((NetConfigIP4) netConfig).isDhcp()) {
-                            sb.append("#!kura!auto " + interfaceName + "\n");
-                        } else {
-                            sb.append("auto " + interfaceName + "\n");
-                        }
-                    }
-
-                    // BOOTPROTO
-                    if (osVersion.equals(KuraConstants.Raspberry_Pi.getImageName())
-                            && netInterfaceConfig.getType() == NetInterfaceType.WIFI
-                            && ((NetConfigIP4) netConfig).isDhcp()) {
-                        sb.append("# Commented out to prevent wpa_supplicant from starting dhclient\n");
-                        sb.append("#!kura!iface " + interfaceName + " inet ");
-                    } else {
-                        sb.append("iface " + interfaceName + " inet ");
-                    }
-                    if (((NetConfigIP4) netConfig).isDhcp()) {
-                        logger.debug("new config is DHCP");
-                        sb.append("dhcp\n");
-                    } else {
-                        logger.debug("new config is STATIC");
-                        sb.append("static\n");
-                    }
-
-                    if (!((NetConfigIP4) netConfig).isDhcp()) {
-                        // IPADDR
-                        sb.append("\taddress ").append(((NetConfigIP4) netConfig).getAddress().getHostAddress())
-                                .append("\n");
-
-                        // NETMASK
-                        sb.append("\tnetmask ").append(((NetConfigIP4) netConfig).getSubnetMask().getHostAddress())
-                                .append("\n");
-
-                        // NETWORK
-                        // TODO: Handle Debian NETWORK value
-
-                        // Gateway
-                        if (((NetConfigIP4) netConfig).getGateway() != null) {
-                            sb.append("\tgateway ").append(((NetConfigIP4) netConfig).getGateway().getHostAddress())
-                                    .append("\n");
-                        }
-                    } else {
-                        // DEFROUTE
-                        if (((NetConfigIP4) netConfig).getStatus() == NetInterfaceStatus.netIPv4StatusEnabledLAN) {
-                            sb.append("\tpost-up route del default dev ");
-                            sb.append(interfaceName);
-                            sb.append("\n");
-                        }
-                    }
-
-                    // DNS
-                    List<? extends IPAddress> dnsAddresses = ((NetConfigIP4) netConfig).getDnsServers();
-                    boolean setDns = false;
-                    for (int i = 0; i < dnsAddresses.size(); i++) {
-                        if (!LOCALHOST.equals(dnsAddresses.get(i).getHostAddress())) {
-                            if (!setDns) {
-                                /*
-                                 * IAB:
-                                 * If DNS servers are listed, those entries will be appended to the
-                                 * /etc/resolv.conf
-                                 * file on every ifdown/ifup sequence resulting in multiple entries for the same
-                                 * servers.
-                                 * (Tested on 10-20, 10-10, and Raspberry Pi).
-                                 * Commenting out dns-nameservers in the /etc/network interfaces file allows DNS
-                                 * servers
-                                 * to be picked up by the IfcfgConfigReader and be displayed on the Web UI but
-                                 * the
-                                 * /etc/resolv.conf file will only be updated by Kura.
-                                 */
-                                sb.append("\t#dns-nameservers ");
-                                setDns = true;
-                            }
-                            sb.append(dnsAddresses.get(i).getHostAddress() + " ");
-                        }
-                    }
-                    sb.append("\n");
+            // ONBOOT
+            if (((NetConfigIP4) netConfig).isAutoConnect()) {
+                if (osVersion.equals(KuraConstants.Raspberry_Pi.getImageName())
+                        && netInterfaceConfig.getType() == NetInterfaceType.WIFI
+                        && ((NetConfigIP4) netConfig).isDhcp()) {
+                    sb.append("#!kura!auto " + interfaceName + "\n");
+                } else {
+                    sb.append("auto " + interfaceName + "\n");
                 }
             }
-        } else {
-            logger.debug("debianWriteUtility() :: netConfigs is null");
+
+            // BOOTPROTO
+            if (osVersion.equals(KuraConstants.Raspberry_Pi.getImageName())
+                    && netInterfaceConfig.getType() == NetInterfaceType.WIFI && ((NetConfigIP4) netConfig).isDhcp()) {
+                sb.append("# Commented out to prevent wpa_supplicant from starting dhclient\n");
+                sb.append("#!kura!iface " + interfaceName + " inet ");
+            } else {
+                sb.append("iface " + interfaceName + " inet ");
+            }
+            if (((NetConfigIP4) netConfig).isL2Only()) {
+                logger.debug("new config is Layer 2 Only foir {}", interfaceName);
+                sb.append("manual\n");
+            } else if (((NetConfigIP4) netConfig).isDhcp()) {
+                logger.debug("new config is DHCP for {}", interfaceName);
+                sb.append("dhcp\n");
+                if (((NetConfigIP4) netConfig).getStatus() == NetInterfaceStatus.netIPv4StatusEnabledLAN) {
+                    // delete default route if configured as LAN
+                    sb.append("\tpost-up route del default dev ");
+                    sb.append(interfaceName);
+                    sb.append("\n");
+                }
+            } else {
+                logger.debug("new config is STATIC for {}", interfaceName);
+                sb.append("static\n");
+                // IPADDR
+                sb.append("\taddress ").append(((NetConfigIP4) netConfig).getAddress().getHostAddress()).append("\n");
+
+                // NETMASK
+                sb.append("\tnetmask ").append(((NetConfigIP4) netConfig).getSubnetMask().getHostAddress())
+                        .append("\n");
+
+                // NETWORK
+                // TODO: Handle Debian NETWORK value
+
+                // Gateway
+                if (((NetConfigIP4) netConfig).getGateway() != null) {
+                    sb.append("\tgateway ").append(((NetConfigIP4) netConfig).getGateway().getHostAddress())
+                            .append("\n");
+                }
+            }
+
+            // DNS
+            List<? extends IPAddress> dnsAddresses = ((NetConfigIP4) netConfig).getDnsServers();
+            boolean setDns = false;
+            for (IPAddress dnsAddress : dnsAddresses) {
+                if (LOCALHOST.equals(dnsAddress.getHostAddress())) {
+                    continue;
+                }
+                if (!setDns) {
+                    /*
+                     * IAB:
+                     * If DNS servers are listed, those entries will be appended to the
+                     * /etc/resolv.conf
+                     * file on every ifdown/ifup sequence resulting in multiple entries for the same
+                     * servers.
+                     * (Tested on 10-20, 10-10, and Raspberry Pi).
+                     * Commenting out dns-nameservers in the /etc/network interfaces file allows DNS
+                     * servers
+                     * to be picked up by the IfcfgConfigReader and be displayed on the Web UI but
+                     * the
+                     * /etc/resolv.conf file will only be updated by Kura.
+                     */
+                    sb.append("\t#dns-nameservers ");
+                    setDns = true;
+                }
+                sb.append(dnsAddress.getHostAddress() + " ");
+            }
+            if (!"\n".equals(sb.toString().substring(sb.toString().length() - 1))) {
+                sb.append("\n");
+            }
         }
+
         return sb.toString();
     }
 
@@ -577,57 +576,59 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
 
         List<NetConfig> netConfigs = netInterfaceAddressConfig.getConfigs();
 
-        if (netConfigs != null) {
-            for (NetConfig netConfig : netConfigs) {
-                if (netConfig instanceof NetConfigIP4) {
-                    NetConfigIP4 netConfigIP4 = (NetConfigIP4) netConfig;
+        if (netConfigs == null) {
+            logger.debug("netConfigs is null");
+            return props;
+        }
+        for (NetConfig netConfig : netConfigs) {
+            if (!(netConfig instanceof NetConfigIP4)) {
+                continue;
+            }
+            NetConfigIP4 netConfigIP4 = (NetConfigIP4) netConfig;
 
-                    // ONBOOT
-                    props.setProperty("ONBOOT", netConfigIP4.isAutoConnect() ? "yes" : "no");
+            // ONBOOT
+            props.setProperty("ONBOOT", netConfigIP4.isAutoConnect() ? "yes" : "no");
 
-                    // BOOTPROTO
-                    props.setProperty("BOOTPROTO", netConfigIP4.isDhcp() ? "dhcp" : "static");
+            if (netConfigIP4.isL2Only()) {
+                props.setProperty("BOOTPROTO", "none");
+            } else if (netConfigIP4.isDhcp()) {
+                props.setProperty("BOOTPROTO", "dhcp");
+                if (((NetConfigIP4) netConfig).getStatus() == NetInterfaceStatus.netIPv4StatusEnabledWAN) {
+                    props.setProperty("DEFROUTE", "yes");
+                } else {
+                    props.setProperty("DEFROUTE", "no");
+                }
+            } else {
+                props.setProperty("BOOTPROTO", "static");
+                // IPADDR
+                if (netConfigIP4.getAddress() != null) {
+                    props.setProperty("IPADDR", netConfigIP4.getAddress().getHostAddress());
+                }
 
-                    if (!netConfigIP4.isDhcp()) {
-                        // IPADDR
-                        if (netConfigIP4.getAddress() != null) {
-                            props.setProperty("IPADDR", netConfigIP4.getAddress().getHostAddress());
-                        }
+                // NETMASK
+                if (netConfigIP4.getSubnetMask() != null) {
+                    props.setProperty("NETMASK", netConfigIP4.getSubnetMask().getHostAddress());
+                }
 
-                        // NETMASK
-                        if (netConfigIP4.getSubnetMask() != null) {
-                            props.setProperty("NETMASK", netConfigIP4.getSubnetMask().getHostAddress());
-                        }
+                // NETWORK
+                // TODO: Handle Debian NETWORK value
 
-                        // NETWORK
-                        // TODO: Handle Debian NETWORK value
-
-                        // GATEWAY
-                        if (netConfigIP4.getGateway() != null) {
-                            props.setProperty("GATEWAY", netConfigIP4.getGateway().getHostAddress());
-                            props.setProperty("DEFROUTE", "yes");
-                        } else {
-                            props.setProperty("DEFROUTE", "no");
-                        }
-                    } else {
-                        if (((NetConfigIP4) netConfig).getStatus() == NetInterfaceStatus.netIPv4StatusEnabledWAN) {
-                            props.setProperty("DEFROUTE", "yes");
-                        } else {
-                            props.setProperty("DEFROUTE", "no");
-                        }
-                    }
-
-                    // DNS
-                    List<? extends IPAddress> dnsAddresses = ((NetConfigIP4) netConfig).getDnsServers();
-                    for (int i = 0; i < dnsAddresses.size(); i++) {
-                        if (!LOCALHOST.equals(dnsAddresses.get(i).getHostAddress())) {
-                            props.setProperty("DNS" + Integer.toString(i + 1), dnsAddresses.get(i).getHostAddress());
-                        }
-                    }
+                // GATEWAY
+                if (netConfigIP4.getGateway() != null) {
+                    props.setProperty("GATEWAY", netConfigIP4.getGateway().getHostAddress());
+                    props.setProperty("DEFROUTE", "yes");
+                } else {
+                    props.setProperty("DEFROUTE", "no");
                 }
             }
-        } else {
-            logger.debug("netConfigs is null");
+
+            // DNS
+            List<? extends IPAddress> dnsAddresses = ((NetConfigIP4) netConfig).getDnsServers();
+            for (int i = 0; i < dnsAddresses.size(); i++) {
+                if (!LOCALHOST.equals(dnsAddresses.get(i).getHostAddress())) {
+                    props.setProperty("DNS" + Integer.toString(i + 1), dnsAddresses.get(i).getHostAddress());
+                }
+            }
         }
 
         return props;

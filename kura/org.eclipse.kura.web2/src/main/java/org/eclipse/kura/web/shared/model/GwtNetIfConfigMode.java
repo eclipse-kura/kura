@@ -16,6 +16,7 @@ import java.io.Serializable;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 public enum GwtNetIfConfigMode implements Serializable,IsSerializable {
+    netIPv4ConfigModeL2Only,
     netIPv4ConfigModeDHCP,
     netIPv4ConfigModeManual;
 }

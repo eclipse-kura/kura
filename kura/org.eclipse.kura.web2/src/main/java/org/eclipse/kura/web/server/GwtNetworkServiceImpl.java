@@ -188,7 +188,8 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                     gwtNetConfig.setHwUsbDevice("N/A");
                 }
 
-                NetInterfaceAddressConfig addressConfig = ((AbstractNetInterface<?>)netIfConfig).getNetInterfaceAddressConfig();
+                NetInterfaceAddressConfig addressConfig = ((AbstractNetInterface<?>) netIfConfig)
+                        .getNetInterfaceAddressConfig();
                 if (addressConfig != null) {
                     // current status - not configuration!
                     if (addressConfig.getAddress() != null) {
@@ -225,7 +226,9 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                                     gwtNetConfig.setStatus(GwtNetIfStatus.netIPv4StatusDisabled.name());
                                 }
 
-                                if (((NetConfigIP4) netConfig).isDhcp()) {
+                                if (((NetConfigIP4) netConfig).isL2Only()) {
+                                    gwtNetConfig.setConfigMode(GwtNetIfConfigMode.netIPv4ConfigModeL2Only.name());
+                                } else if (((NetConfigIP4) netConfig).isDhcp()) {
                                     gwtNetConfig.setConfigMode(GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name());
 
                                     // since DHCP - populate current data
@@ -764,7 +767,10 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                 logger.debug("config.getConfigMode(): {}", config.getConfigMode());
                 String regexp = "[\\s,;\\n\\t]+";
 
-                if (GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name().equals(config.getConfigMode())) {
+                if (GwtNetIfConfigMode.netIPv4ConfigModeL2Only.name().equals(config.getConfigMode())) {
+                    logger.debug("mode is L2Only");
+                    netConfig4.setL2Only(true);
+                } else if (GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name().equals(config.getConfigMode())) {
                     logger.debug("mode is DHCP");
                     netConfig4.setDhcp(true);
                 } else {
@@ -819,7 +825,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                 // TODO - add IPv6 support later...
 
                 // Set up DHCP and NAT
-                if (!GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name().equals(config.getConfigMode())) {
+                if (GwtNetIfConfigMode.netIPv4ConfigModeManual.name().equals(config.getConfigMode())) {
                     List<NetConfig> dhcpConfigs = getDhcpConfig(config); // <--
                     if (dhcpConfigs != null) {
                         logger.debug("Adding dhcp and/or nat configs to interface update config");

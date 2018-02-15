@@ -1172,6 +1172,7 @@ public class NetworkConfigurationTest {
         expected.put("net.interface.if2.config.autoconnect", true);
         expected.put("net.interface.if2.config.ip4.status", "netIPv4StatusEnabledLAN");
         expected.put("net.interface.if2.config.ip4.dnsServers", "");
+        expected.put("net.interface.if2.config.l2only.enabled", false);
         expected.put("net.interface.if2.config.dhcpClient4.enabled", true);
         expected.put("net.interface.if2.config.ip6.status", "netIPv6StatusEnabledLAN");
         expected.put("net.interface.if2.config.dhcpClient6.enabled", true);
@@ -2040,6 +2041,7 @@ public class NetworkConfigurationTest {
         expected.put("prefix.ip4.status", "netIPv4StatusEnabledLAN");
         expected.put("prefix.ip4.dnsServers", "10.0.0.1,10.0.0.2");
         expected.put("prefix.dhcpClient4.enabled", true);
+        expected.put("prefix.l2only.enabled", false);
 
         HashMap<String, Object> properties = new HashMap<>();
 
@@ -2071,6 +2073,7 @@ public class NetworkConfigurationTest {
         expected.put("prefix.ip4.status", "netIPv4StatusEnabledLAN");
         expected.put("prefix.ip4.dnsServers", "");
         expected.put("prefix.dhcpClient4.enabled", false);
+        expected.put("prefix.l2only.enabled", false);
         expected.put("prefix.ip4.address", "10.0.0.1");
         expected.put("prefix.ip4.prefix", (short) 24);
         expected.put("prefix.ip4.gateway", "10.0.0.2");

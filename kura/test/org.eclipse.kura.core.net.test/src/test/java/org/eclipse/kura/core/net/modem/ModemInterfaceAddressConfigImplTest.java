@@ -236,12 +236,12 @@ public class ModemInterfaceAddressConfigImplTest {
 		ModemInterfaceAddressConfigImpl value = createConfig();
 
 		String expected = "NetConfig: NetConfigIP4 [winsServers=[], super.toString()=NetConfigIP"
-				+ " [m_status=netIPv4StatusEnabledLAN, m_autoConnect=true, m_dhcp=false, m_address=null,"
-				+ " m_networkPrefixLength=-1, m_subnetMask=null, m_gateway=null, m_dnsServers=[], m_domains=[],"
-				+ " m_properties={}]] - NetConfig: NetConfigIP4 [winsServers=[], super.toString()=NetConfigIP"
-				+ " [m_status=netIPv4StatusEnabledWAN, m_autoConnect=false, m_dhcp=false, m_address=null,"
-				+ " m_networkPrefixLength=-1, m_subnetMask=null, m_gateway=null, m_dnsServers=[], m_domains=[],"
-				+ " m_properties={}]] - ";
+				+ " [status=netIPv4StatusEnabledLAN, autoConnect=true, l2only=false, dhcp=false, address=null,"
+				+ " networkPrefixLength=-1, subnetMask=null, gateway=null, dnsServers=[], domains=[],"
+				+ " properties={}]] - NetConfig: NetConfigIP4 [winsServers=[], super.toString()=NetConfigIP"
+				+ " [status=netIPv4StatusEnabledWAN, autoConnect=false, l2only=false, dhcp=false, address=null,"
+				+ " networkPrefixLength=-1, subnetMask=null, gateway=null, dnsServers=[], domains=[],"
+				+ " properties={}]] - ";
 
 		assertEquals(expected, value.toString());
 	}

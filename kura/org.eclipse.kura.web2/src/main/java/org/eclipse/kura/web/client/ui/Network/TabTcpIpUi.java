@@ -67,6 +67,8 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class TabTcpIpUi extends Composite implements NetworkTab {
 
+    private static final String IPV4_MODE_L2ONLY = GwtNetIfConfigMode.netIPv4ConfigModeL2Only.name();
+    private static final String IPV4_MODE_L2ONLY_MESSAGE = MessageUtils.get(IPV4_MODE_L2ONLY);
     private static final String IPV4_MODE_MANUAL = GwtNetIfConfigMode.netIPv4ConfigModeManual.name();
     private static final String IPV4_MODE_DHCP = GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name();
     private static final String IPV4_MODE_DHCP_MESSAGE = MessageUtils.get(IPV4_MODE_DHCP);
@@ -251,7 +253,9 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
                 updatedNetIf.setStatus(IPV4_STATUS_WAN);
             }
 
-            if (IPV4_MODE_DHCP_MESSAGE.equals(this.configure.getSelectedItemText())) {
+            if (IPV4_MODE_L2ONLY_MESSAGE.equals(this.configure.getSelectedItemText())) {
+                updatedNetIf.setConfigMode(IPV4_MODE_L2ONLY);
+            } else if (IPV4_MODE_DHCP_MESSAGE.equals(this.configure.getSelectedItemText())) {
                 updatedNetIf.setConfigMode(IPV4_MODE_DHCP);
             } else {
                 updatedNetIf.setConfigMode(IPV4_MODE_MANUAL);
@@ -329,10 +333,18 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
     public String getStatus() {
         return this.status.getSelectedValue();
     }
+    
+    public boolean isL2Only() {
+        if (this.configure == null) {
+            logger.log(Level.FINER, "TcpIpConfigTab.isDhcp() - this.configure is null");
+            return false;
+        }
+        return IPV4_MODE_L2ONLY_MESSAGE.equals(this.configure.getSelectedValue());
+    }
 
     public boolean isDhcp() {
         if (this.configure == null) {
-            logger.log(Level.FINER, "TcpIpConfigTab.isDhcp() - m_configureCombo is null");
+            logger.log(Level.FINER, "TcpIpConfigTab.isDhcp() - this.configure is null");
             return true;
         }
         return IPV4_MODE_DHCP_MESSAGE.equals(this.configure.getSelectedValue());
@@ -814,7 +826,14 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
             } else {
                 this.configure.setEnabled(true);
                 String configureValue = this.configure.getSelectedValue();
-                if (configureValue.equals(IPV4_MODE_DHCP_MESSAGE)) {
+                if (configureValue.equals(IPV4_MODE_L2ONLY_MESSAGE)) {
+                    this.ip.setEnabled(false);
+                    this.subnet.setEnabled(false);
+                    this.gateway.setEnabled(false);
+                    this.renew.setEnabled(false);
+                    this.dns.setEnabled(false);
+                    this.search.setEnabled(false);
+                } else if (configureValue.equals(IPV4_MODE_DHCP_MESSAGE)) {
                     this.ip.setEnabled(false);
                     this.subnet.setEnabled(false);
                     this.gateway.setEnabled(false);

@@ -45,7 +45,7 @@
               policy="static"/>
    <reference bind="setScrService" 
               cardinality="1..1"
-              interface="org.apache.felix.scr.ScrService"
+              interface="org.osgi.service.component.runtime.ServiceComponentRuntime"
               name="ScrService"
               policy="static"
               unbind="unsetScrService"/>

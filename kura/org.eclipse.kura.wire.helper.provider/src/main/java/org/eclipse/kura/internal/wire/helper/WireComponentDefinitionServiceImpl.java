@@ -15,8 +15,6 @@ package org.eclipse.kura.internal.wire.helper;
 import static java.util.function.Function.identity;
 
 import java.io.StringReader;
-import java.util.Arrays;
-import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,8 +23,6 @@ import java.util.Properties;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import org.apache.felix.scr.Component;
-import org.apache.felix.scr.ScrService;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.metatype.OCDService;
@@ -35,6 +31,8 @@ import org.eclipse.kura.wire.graph.WireComponentDefinitionService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.component.runtime.ServiceComponentRuntime;
+import org.osgi.service.component.runtime.dto.ComponentDescriptionDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,8 +45,8 @@ public class WireComponentDefinitionServiceImpl implements WireComponentDefiniti
     private static final String WIRE_EMITTER = "org.eclipse.kura.wire.WireEmitter";
     private static final String WIRE_RECEIVER = "org.eclipse.kura.wire.WireReceiver";
 
-    private static boolean implementsAnyService(Component component, String[] classes) {
-        final String[] services = component.getServices();
+    private static boolean implementsAnyService(ComponentDescriptionDTO component, String[] classes) {
+        final String[] services = component.serviceInterfaces;
         if (services == null) {
             return false;
         }
@@ -98,18 +96,20 @@ public class WireComponentDefinitionServiceImpl implements WireComponentDefiniti
         }
     }
 
-    private WireComponentDefinition getDefinition(Component component, ComponentConfiguration ocd) {
-        if (component.getProperties().get("input.cardinality.minimum") != null) {
-            return getDefinitionFromComponentProperties(component, ocd);
+    private WireComponentDefinition getDefinition(ComponentDescriptionDTO componentDescriptionDTO,
+            ComponentConfiguration ocd) {
+        if (componentDescriptionDTO.properties.get("input.cardinality.minimum") != null) {
+            return getDefinitionFromComponentProperties(componentDescriptionDTO, ocd);
         } else {
-            return getDefinitionLegacy(component, ocd);
+            return getDefinitionLegacy(componentDescriptionDTO, ocd);
         }
     }
 
-    private WireComponentDefinition getDefinitionLegacy(Component component, ComponentConfiguration ocd) {
+    private WireComponentDefinition getDefinitionLegacy(ComponentDescriptionDTO componentDescriptionDTO,
+            ComponentConfiguration ocd) {
         WireComponentDefinition wireComponentDefinition = new WireComponentDefinition();
-        wireComponentDefinition.setFactoryPid(component.getName());
-        for (String service : component.getServices()) {
+        wireComponentDefinition.setFactoryPid(componentDescriptionDTO.name);
+        for (String service : componentDescriptionDTO.serviceInterfaces) {
             if (WIRE_EMITTER.equals(service)) {
                 wireComponentDefinition.setMinOutputPorts(1);
                 wireComponentDefinition.setMaxOutputPorts(1);
@@ -125,12 +125,12 @@ public class WireComponentDefinitionServiceImpl implements WireComponentDefiniti
         return wireComponentDefinition;
     }
 
-    private WireComponentDefinition getDefinitionFromComponentProperties(Component component,
-            ComponentConfiguration ocd) {
-        final Dictionary<?, ?> componentProperties = component.getProperties();
+    private WireComponentDefinition getDefinitionFromComponentProperties(
+            ComponentDescriptionDTO componentDescriptionDTO, ComponentConfiguration ocd) {
+        final Map<?, ?> componentProperties = componentDescriptionDTO.properties;
         final WireComponentDefinition wireComponentDefinition = new WireComponentDefinition();
 
-        wireComponentDefinition.setFactoryPid(component.getName());
+        wireComponentDefinition.setFactoryPid(componentDescriptionDTO.name);
         wireComponentDefinition.setMinInputPorts((int) componentProperties.get("input.cardinality.minimum"));
         wireComponentDefinition.setMaxInputPorts((int) componentProperties.get("input.cardinality.maximum"));
         wireComponentDefinition.setDefaultInputPorts((int) componentProperties.get("input.cardinality.default"));
@@ -150,18 +150,19 @@ public class WireComponentDefinitionServiceImpl implements WireComponentDefiniti
     public List<WireComponentDefinition> getComponentDefinitions() throws KuraException {
 
         final BundleContext context = FrameworkUtil.getBundle(WireHelperServiceImpl.class).getBundleContext();
-        ServiceReference<ScrService> scrServiceRef = context.getServiceReference(ScrService.class);
+        ServiceReference<ServiceComponentRuntime> scrServiceRef = context
+                .getServiceReference(ServiceComponentRuntime.class);
         ServiceReference<OCDService> ocdServiceRef = context.getServiceReference(OCDService.class);
 
         try {
             final OCDService ocdService = context.getService(ocdServiceRef);
-            final ScrService scrService = context.getService(scrServiceRef);
+            final ServiceComponentRuntime scrService = context.getService(scrServiceRef);
 
             final String[] services = new String[] { WIRE_COMPONENT, WIRE_RECEIVER, WIRE_EMITTER };
 
-            final Map<String, Component> componentDefinitions = Arrays.stream(scrService.getComponents())
-                    .filter(component -> implementsAnyService(component, services))
-                    .collect(Collectors.toMap(Component::getName, identity(), (first, second) -> second));
+            final Map<Object, ComponentDescriptionDTO> componentDefinitions = scrService.getComponentDescriptionDTOs()
+                    .stream().filter(component -> implementsAnyService(component, services))
+                    .collect(Collectors.toMap(c -> c.name, identity(), (first, second) -> second));
 
             final Map<String, ComponentConfiguration> ocds = ocdService.getServiceProviderOCDs(services).stream()
                     .collect(Collectors.toMap(ComponentConfiguration::getPid, identity(), (first, second) -> second));

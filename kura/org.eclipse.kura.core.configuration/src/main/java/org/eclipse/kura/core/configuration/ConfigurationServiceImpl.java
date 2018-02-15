@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Dictionary;
@@ -39,8 +38,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.felix.scr.Component;
-import org.apache.felix.scr.ScrService;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraPartialSuccessException;
@@ -72,6 +69,8 @@ import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
+import org.osgi.service.component.runtime.ServiceComponentRuntime;
+import org.osgi.service.component.runtime.dto.ComponentDescriptionDTO;
 import org.osgi.service.metatype.AttributeDefinition;
 import org.osgi.service.metatype.MetaTypeService;
 import org.osgi.service.metatype.ObjectClassDefinition;
@@ -137,7 +136,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
     private ConfigurationAdmin configurationAdmin;
     private SystemService systemService;
     private CryptoService cryptoService;
-    private ScrService scrService;
+    private ServiceComponentRuntime scrService;
 
     // contains all the PIDs (aka kura.service.pid) - both of configurable and self configuring components
     private final Set<String> allActivatedPids;
@@ -198,11 +197,11 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         this.cryptoService = null;
     }
 
-    public void setScrService(ScrService scrService) {
+    public void setScrService(ServiceComponentRuntime scrService) {
         this.scrService = scrService;
     }
 
-    public void unsetScrService(ScrService scrService) {
+    public void unsetScrService(ServiceComponentRuntime scrService) {
         this.scrService = null;
     }
 
@@ -1743,8 +1742,8 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         return getComponentDefinition(factoryPid);
     }
 
-    private static boolean implementsAnyService(Component component, String[] classes) {
-        final String[] services = component.getServices();
+    private static boolean implementsAnyService(ComponentDescriptionDTO component, String[] classes) {
+        final String[] services = component.serviceInterfaces;
         if (services == null) {
             return false;
         }
@@ -1760,8 +1759,8 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
     @Override
     public List<ComponentConfiguration> getServiceProviderOCDs(String... classNames) {
-        return Arrays.stream(this.scrService.getComponents())
-                .filter(component -> implementsAnyService(component, classNames)).map(Component::getName)
+        return this.scrService.getComponentDescriptionDTOs().stream()
+                .filter(component -> implementsAnyService(component, classNames)).map(c -> c.name)
                 .map(this::getComponentDefinition).filter(Objects::nonNull).collect(Collectors.toList());
     }
 

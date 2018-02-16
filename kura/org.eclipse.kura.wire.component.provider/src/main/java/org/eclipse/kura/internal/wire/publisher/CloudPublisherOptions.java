@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -20,12 +20,16 @@ import java.util.Map;
 
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.WireMessages;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The Class CloudPublisherOptions is responsible to provide all the required
  * options for the Cloud Publisher Wire Component
  */
 final class CloudPublisherOptions {
+
+    private static final Logger logger = LoggerFactory.getLogger(CloudPublisherOptions.class);
 
     private static final WireMessages message = LocalizationAdapter.adapt(WireMessages.class);
 
@@ -46,6 +50,8 @@ final class CloudPublisherOptions {
 
     /** The Constant denoting MQTT topic. */
     private static final String CONF_TOPIC = "publish.topic";
+
+    private static final String CONF_POSITION = "publish.position";
 
     private static final String DEFAULT_CLOUD_SERVICE_PID = "org.eclipse.kura.cloud.CloudService";
 
@@ -169,9 +175,30 @@ final class CloudPublisherOptions {
     boolean isControlMessage() {
         boolean isControlMessage = DEFAULT_CONTROL_MESSAGE;
         final Object configurationIsControlMessage = this.properties.get(CONF_PUBLISH_CONTROL_MESSAGE);
-        if (configurationIsControlMessage != null && configurationIsControlMessage instanceof Boolean) {
+        if (nonNull(configurationIsControlMessage) && configurationIsControlMessage instanceof Boolean) {
             isControlMessage = (Boolean) configurationIsControlMessage;
         }
         return isControlMessage;
+    }
+
+    /**
+     * Returns if the messages have to be enriched with gateway's position and which type of position is needed
+     *
+     * @return true if messages have to be enriched with gateway's position
+     */
+    PositionType getPositionType() {
+        String positionTypeString = "";
+        final Object configurationPositionType = this.properties.get(CONF_POSITION);
+        if (nonNull(configurationPositionType) && configurationPositionType instanceof String) {
+            positionTypeString = (String) configurationPositionType;
+        }
+        
+        PositionType result = PositionType.NONE;
+        try {
+            result = PositionType.getEncoding(positionTypeString);
+        } catch (IllegalArgumentException e) {
+            logger.warn("Cannot parse the provided position type.", e);
+        }
+        return result;
     }
 }

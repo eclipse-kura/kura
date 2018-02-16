@@ -30,6 +30,9 @@ import org.eclipse.kura.cloud.CloudClient;
 import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.message.KuraPayload;
+import org.eclipse.kura.message.KuraPosition;
+import org.eclipse.kura.position.NmeaPosition;
+import org.eclipse.kura.position.PositionService;
 import org.eclipse.kura.type.StringValue;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.wire.WireEnvelope;
@@ -119,6 +122,7 @@ public class CloudPublisherTest {
                     KuraPayload payload = invocation.getArgumentAt(1, KuraPayload.class);
 
                     assertNull(payload.getBody());
+                    assertNull(payload.getPosition());
                     assertNotNull(payload.getTimestamp());
                     assertNotNull(payload.metrics());
                     assertEquals(2, payload.metrics().size());
@@ -130,6 +134,177 @@ public class CloudPublisherTest {
 
         TestUtil.setFieldValue(cp, "cloudService", cloudServiceMock);
         TestUtil.setFieldValue(cp, "cloudClient", cloudClientMock);
+
+        String emitterPid = "emitter";
+        List<WireRecord> wireRecords = new ArrayList<WireRecord>();
+        Map<String, TypedValue<?>> recordProps = new HashMap<String, TypedValue<?>>();
+        TypedValue<?> val = new StringValue("val");
+        recordProps.put("key", val);
+        val = new StringValue(topic);
+        recordProps.put("topic", val);
+        WireRecord record = new WireRecord(recordProps);
+        wireRecords.add(record);
+        WireEnvelope wireEnvelope = new WireEnvelope(emitterPid, wireRecords);
+
+        cp.onWireReceive(wireEnvelope);
+
+        verify(cloudClientMock, times(1)).publish(eq(topic), (KuraPayload) anyObject(), eq(qos), eq(retain), eq(prio));
+    }
+    
+    @Test
+    public void testOnWireReceiveWithBasicPosition() throws InvalidSyntaxException, NoSuchFieldException, KuraException {
+        // test publishing a normal message with topic replacement and position 
+
+        int prio = 1;
+        int qos = 0;
+        boolean retain = true;
+        String positionType = "basic";
+        String topic = "my test topic";
+
+        CloudPublisher cp = new CloudPublisher();
+
+        WireHelperService wireHelperServiceMock = mock(WireHelperService.class);
+        cp.bindWireHelperService(wireHelperServiceMock);
+
+        BundleContext bundleCtxMock = mock(BundleContext.class);
+        Filter filter = mock(Filter.class);
+        when(bundleCtxMock.createFilter(anyString())).thenReturn(filter);
+
+        ComponentContext ctxMock = mock(ComponentContext.class);
+        when(ctxMock.getBundleContext()).thenReturn(bundleCtxMock);
+
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("cloud.service.pid", "cspid");
+        properties.put("publish.priority", prio);
+        properties.put("publish.qos", qos);
+        properties.put("publish.retain", retain);
+        properties.put("publish.topic", "$topic");
+        properties.put("publish.position", positionType);
+
+        cp.activate(ctxMock, properties);
+
+        verify(ctxMock, times(1)).getBundleContext();
+        verify(bundleCtxMock, times(1))
+                .createFilter("(&(objectClass=org.eclipse.kura.cloud.CloudService)(kura.service.pid=cspid))");
+
+        CloudService cloudServiceMock = mock(CloudService.class);
+
+        CloudClient cloudClientMock = mock(CloudClient.class);
+        
+        PositionService positionServiceMock = mock(PositionService.class);
+        
+        when(positionServiceMock.getNmeaPosition()).thenReturn(new NmeaPosition(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+
+        when(cloudClientMock.publish(eq(topic), (KuraPayload) anyObject(), eq(qos), eq(retain), eq(prio)))
+                .thenAnswer(invocation -> {
+                    KuraPayload payload = invocation.getArgumentAt(1, KuraPayload.class);
+                    KuraPosition position = payload.getPosition();
+
+                    assertNull(payload.getBody());
+                    assertNotNull(position);
+                    assertNotNull(position.getAltitude());
+                    assertNotNull(position.getLatitude());
+                    assertNotNull(position.getLongitude());
+                    assertNull(position.getSatellites());
+                    assertNotNull(payload.getTimestamp());
+                    assertNotNull(payload.metrics());
+                    assertEquals(2, payload.metrics().size());
+                    assertEquals("val", payload.getMetric("key"));
+                    assertEquals(topic, payload.getMetric("topic"));
+
+                    return 1234;
+                });
+
+        TestUtil.setFieldValue(cp, "cloudService", cloudServiceMock);
+        TestUtil.setFieldValue(cp, "cloudClient", cloudClientMock);
+        TestUtil.setFieldValue(cp, "positionService", positionServiceMock);
+
+        String emitterPid = "emitter";
+        List<WireRecord> wireRecords = new ArrayList<WireRecord>();
+        Map<String, TypedValue<?>> recordProps = new HashMap<String, TypedValue<?>>();
+        TypedValue<?> val = new StringValue("val");
+        recordProps.put("key", val);
+        val = new StringValue(topic);
+        recordProps.put("topic", val);
+        WireRecord record = new WireRecord(recordProps);
+        wireRecords.add(record);
+        WireEnvelope wireEnvelope = new WireEnvelope(emitterPid, wireRecords);
+
+        cp.onWireReceive(wireEnvelope);
+
+        verify(cloudClientMock, times(1)).publish(eq(topic), (KuraPayload) anyObject(), eq(qos), eq(retain), eq(prio));
+    }
+    
+    @Test
+    public void testOnWireReceiveWithFullPosition() throws InvalidSyntaxException, NoSuchFieldException, KuraException {
+        // test publishing a normal message with topic replacement and position 
+
+        int prio = 1;
+        int qos = 0;
+        boolean retain = true;
+        String positionType = "full";
+        String topic = "my test topic";
+
+        CloudPublisher cp = new CloudPublisher();
+
+        WireHelperService wireHelperServiceMock = mock(WireHelperService.class);
+        cp.bindWireHelperService(wireHelperServiceMock);
+
+        BundleContext bundleCtxMock = mock(BundleContext.class);
+        Filter filter = mock(Filter.class);
+        when(bundleCtxMock.createFilter(anyString())).thenReturn(filter);
+
+        ComponentContext ctxMock = mock(ComponentContext.class);
+        when(ctxMock.getBundleContext()).thenReturn(bundleCtxMock);
+
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("cloud.service.pid", "cspid");
+        properties.put("publish.priority", prio);
+        properties.put("publish.qos", qos);
+        properties.put("publish.retain", retain);
+        properties.put("publish.topic", "$topic");
+        properties.put("publish.position", positionType);
+
+        cp.activate(ctxMock, properties);
+
+        verify(ctxMock, times(1)).getBundleContext();
+        verify(bundleCtxMock, times(1))
+                .createFilter("(&(objectClass=org.eclipse.kura.cloud.CloudService)(kura.service.pid=cspid))");
+
+        CloudService cloudServiceMock = mock(CloudService.class);
+
+        CloudClient cloudClientMock = mock(CloudClient.class);
+        
+        PositionService positionServiceMock = mock(PositionService.class);
+        
+        when(positionServiceMock.getNmeaPosition()).thenReturn(new NmeaPosition(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+
+        when(cloudClientMock.publish(eq(topic), (KuraPayload) anyObject(), eq(qos), eq(retain), eq(prio)))
+                .thenAnswer(invocation -> {
+                    KuraPayload payload = invocation.getArgumentAt(1, KuraPayload.class);
+                    KuraPosition position = payload.getPosition();
+
+                    assertNull(payload.getBody());
+                    assertNotNull(position);
+                    assertNotNull(position.getAltitude());
+                    assertNotNull(position.getLatitude());
+                    assertNotNull(position.getLongitude());
+                    assertNotNull(position.getHeading());
+                    assertNotNull(position.getPrecision());
+                    assertNotNull(position.getSpeed());
+                    assertNotNull(position.getSatellites());
+                    assertNotNull(payload.getTimestamp());
+                    assertNotNull(payload.metrics());
+                    assertEquals(2, payload.metrics().size());
+                    assertEquals("val", payload.getMetric("key"));
+                    assertEquals(topic, payload.getMetric("topic"));
+
+                    return 1234;
+                });
+
+        TestUtil.setFieldValue(cp, "cloudService", cloudServiceMock);
+        TestUtil.setFieldValue(cp, "cloudClient", cloudClientMock);
+        TestUtil.setFieldValue(cp, "positionService", positionServiceMock);
 
         String emitterPid = "emitter";
         List<WireRecord> wireRecords = new ArrayList<WireRecord>();

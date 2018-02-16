@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -32,6 +32,9 @@ import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.WireMessages;
 import org.eclipse.kura.message.KuraPayload;
+import org.eclipse.kura.message.KuraPosition;
+import org.eclipse.kura.position.NmeaPosition;
+import org.eclipse.kura.position.PositionService;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.wire.WireEnvelope;
 import org.eclipse.kura.wire.WireHelperService;
@@ -118,6 +121,7 @@ public final class CloudPublisher implements WireReceiver, CloudClientListener, 
     private CloudPublisherOptions cloudPublisherOptions;
 
     private volatile WireHelperService wireHelperService;
+    private PositionService positionService;
 
     private WireSupport wireSupport;
 
@@ -149,6 +153,14 @@ public final class CloudPublisher implements WireReceiver, CloudClientListener, 
         if (this.wireHelperService == wireHelperService) {
             this.wireHelperService = null;
         }
+    }
+
+    public void setPositionService(PositionService positionService) {
+        this.positionService = positionService;
+    }
+
+    public void unsetPositionService(PositionService positionService) {
+        this.positionService = null;
     }
 
     // ----------------------------------------------------------------
@@ -311,14 +323,37 @@ public final class CloudPublisher implements WireReceiver, CloudClientListener, 
     private KuraPayload buildKuraPayload(final WireRecord wireRecord) {
         requireNonNull(wireRecord, message.wireRecordNonNull());
         final KuraPayload kuraPayload = new KuraPayload();
-        
+
         kuraPayload.setTimestamp(new Date());
+
+        if (this.cloudPublisherOptions.getPositionType() != PositionType.NONE) {
+            KuraPosition kuraPosition = getPosition();
+            kuraPayload.setPosition(kuraPosition);
+        }
 
         for (final Entry<String, TypedValue<?>> entry : wireRecord.getProperties().entrySet()) {
             kuraPayload.addMetric(entry.getKey(), entry.getValue().getValue());
         }
 
         return kuraPayload;
+    }
+
+    private KuraPosition getPosition() {
+        NmeaPosition position = this.positionService.getNmeaPosition();
+
+        KuraPosition kuraPosition = new KuraPosition();
+        kuraPosition.setAltitude(position.getAltitude());
+        kuraPosition.setLatitude(position.getLatitude());
+        kuraPosition.setLongitude(position.getLongitude());
+
+        if (this.cloudPublisherOptions.getPositionType() == PositionType.FULL) {
+            kuraPosition.setHeading(position.getTrack());
+            kuraPosition.setPrecision(position.getDOP());
+            kuraPosition.setSpeed(position.getSpeed());
+            kuraPosition.setSatellites(position.getNrSatellites());
+        }
+
+        return kuraPosition;
     }
 
     /**

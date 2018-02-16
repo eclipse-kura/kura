@@ -41,7 +41,7 @@ Copyright (c) 2017 Eurotech and/or its affiliates and others
                     <argLine>${jacocoArgs}
                         -DbuildingWithTycho=true
                         -Dosgi.locking=none
-                        -Dequinox.ds.print=true
+                        -Dds.showtrace=true
                         -Djava.io.tmpdir=/tmp
                         -Dorg.osgi.framework.storage=/tmp/osgi/framework_storage
                         -Dosgi.clean=true

@@ -188,6 +188,8 @@ if [ -z "$KURA_RUNNING" ] ; then
         exec java -Xms${kura.mem.size} -Xmx${kura.mem.size} \
         -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/kura-heapdump.hprof \
         -XX:ErrorFile=/var/log/kura-error.log \
+        -XX:+IgnoreUnrecognizedVMOptions \
+        --add-modules=java.sql,java.xml,java.xml.bind \
         -Dkura.os.version=${kura.os.version} \
         -Dkura.arch=${kura.arch} \
         -Dtarget.device=${target.device} \
@@ -201,10 +203,10 @@ if [ -z "$KURA_RUNNING" ] ; then
         -Djava.security.policy=${DIR}/kura/jdk.dio.policy \
         -Djdk.dio.registry=${DIR}/kura/jdk.dio.properties \
         -Djdk.tls.trustNameService=true \
-        -jar ${DIR}/plugins/org.eclipse.osgi_3.12.50.v20170928-1321.jar \
-        -configuration  /tmp/.kura/configuration \
-        -console \
-        -consoleLog
+        -Dosgi.console \
+        -Declipse.consoleLog=true \
+        -jar ${DIR}/plugins/org.eclipse.equinox.launcher_${org.eclipse.equinox.launcher.version}.jar \
+        -configuration  /tmp/.kura/configuration
 else
 		echo "Failed to start Kura. It is already running ..."
 fi]]>
@@ -229,6 +231,8 @@ if [ -z "$KURA_RUNNING" ] ; then
         -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=100M \
         -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/kura-heapdump.hprof \
         -XX:ErrorFile=/var/log/kura-error.log \
+        -XX:+IgnoreUnrecognizedVMOptions \
+        --add-modules=java.sql,java.xml,java.xml.bind \
         -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000,suspend=n \
         -Dkura.os.version=${kura.os.version} \
         -Dkura.arch=${kura.arch} \
@@ -243,10 +247,10 @@ if [ -z "$KURA_RUNNING" ] ; then
         -Djava.security.policy=${DIR}/kura/jdk.dio.policy \
         -Djdk.dio.registry=${DIR}/kura/jdk.dio.properties \
         -Djdk.tls.trustNameService=true \
-        -jar ${DIR}/plugins/org.eclipse.osgi_3.12.50.v20170928-1321.jar \
-        -configuration  /tmp/.kura/configuration \
-        -console \
-        -consoleLog
+        -Dosgi.console \
+        -Declipse.consoleLog=true \
+        -jar ${DIR}/plugins/org.eclipse.equinox.launcher_${org.eclipse.equinox.launcher.version}.jar \
+        -configuration  /tmp/.kura/configuration
 else
 		echo "Failed to start Kura. It is already running ..."
 fi]]>
@@ -270,6 +274,8 @@ if [ -z "$KURA_RUNNING" ] ; then
   nohup java -Xms${kura.mem.size} -Xmx${kura.mem.size} \
         -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/kura-heapdump.hprof \
         -XX:ErrorFile=/var/log/kura-error.log \
+        -XX:+IgnoreUnrecognizedVMOptions \
+        --add-modules=java.sql,java.xml,java.xml.bind \
         -Dkura.os.version=${kura.os.version} \
         -Dkura.arch=${kura.arch} \
         -Dtarget.device=${target.device} \
@@ -283,10 +289,10 @@ if [ -z "$KURA_RUNNING" ] ; then
         -Djava.security.policy=${DIR}/kura/jdk.dio.policy \
         -Djdk.dio.registry=${DIR}/kura/jdk.dio.properties \
         -Djdk.tls.trustNameService=true \
-        -jar ${DIR}/plugins/org.eclipse.osgi_3.12.50.v20170928-1321.jar \
-        -configuration  /tmp/.kura/configuration \
-        -console 5002 \
-        -consoleLog >> /var/log/kura-console.log 2>> /var/log/kura-console.log &
+        -Dosgi.console=5002 \
+        -Declipse.consoleLog=true >> /var/log/kura-console.log 2>> /var/log/kura-console.log \
+        -jar ${DIR}/plugins/org.eclipse.equinox.launcher_${org.eclipse.equinox.launcher.version}.jar \
+        -configuration /tmp/.kura/configuration &
 
     #Save the PID
     KURA_PID=$!

@@ -158,15 +158,24 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
         final Set<String> wireComponentsInGraph = new HashSet<>();
 
         result.setWireComponentConfigurations(
-                wireGraphConfiguration.getWireComponentConfigurations().stream().map(config -> {
+                wireGraphConfiguration.getWireComponentConfigurations().stream().map(wireComponentConfig -> {
+                    final ComponentConfiguration config = wireComponentConfig.getConfiguration();
+                    if (config == null) {
+                        return null;
+                    }
+                    final String pid = config.getPid();
                     final GwtWireComponentConfiguration gwtWireComponentConfig = new GwtWireComponentConfiguration();
-                    final GwtConfigComponent gwtConfig = GwtServerUtil.toGwtConfigComponent(config.getConfiguration());
+                    GwtConfigComponent gwtConfig = GwtServerUtil.toGwtConfigComponent(config);
+                    if (gwtConfig == null) {
+                        gwtConfig = new GwtConfigComponent();
+                        gwtConfig.setComponentId(pid);
+                    }
                     gwtConfig.setIsWireComponent(true);
                     gwtWireComponentConfig.setConfiguration(gwtConfig);
-                    fillGwtRenderingProperties(gwtWireComponentConfig, config.getProperties());
-                    wireComponentsInGraph.add(gwtConfig.getComponentId());
+                    fillGwtRenderingProperties(gwtWireComponentConfig, wireComponentConfig.getProperties());
+                    wireComponentsInGraph.add(pid);
                     return gwtWireComponentConfig;
-                }).collect(Collectors.toList()));
+                }).filter(Objects::nonNull).collect(Collectors.toList()));
 
         result.setWires(wireGraphConfiguration.getWireConfigurations().stream().map(config -> {
             final GwtWireConfiguration gwtConfig = new GwtWireConfiguration();

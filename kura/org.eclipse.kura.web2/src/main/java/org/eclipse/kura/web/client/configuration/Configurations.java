@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -202,6 +202,13 @@ public class Configurations {
         return currentConfigurations.containsKey(pid) || allActivePids.contains(pid);
     }
 
+    public void invalidateConfiguration(String pid) {
+        final HasConfiguration config = this.currentConfigurations.get(pid);
+        if (config != null) {
+            this.currentConfigurations.put(pid, new InvalidConfigurationWrapper(config));
+        }
+    }
+
     private class ConfigurationWrapper implements HasConfiguration {
 
         private boolean isDirty;
@@ -223,7 +230,7 @@ public class Configurations {
 
         @Override
         public boolean isValid() {
-            return true;
+            return configuration != null && configuration.isValid();
         }
 
         @Override
@@ -238,6 +245,45 @@ public class Configurations {
 
         @Override
         public void setListener(Listener listener) {
+        }
+    }
+
+    private class InvalidConfigurationWrapper implements HasConfiguration {
+
+        final HasConfiguration wrapped;
+
+        public InvalidConfigurationWrapper(HasConfiguration wrapped) {
+            this.wrapped = wrapped;
+        }
+
+        @Override
+        public GwtConfigComponent getConfiguration() {
+            return wrapped.getConfiguration();
+        }
+
+        @Override
+        public void clearDirtyState() {
+            wrapped.clearDirtyState();
+        }
+
+        @Override
+        public boolean isValid() {
+            return false;
+        }
+
+        @Override
+        public boolean isDirty() {
+            return wrapped.isDirty();
+        }
+
+        @Override
+        public void markAsDirty() {
+            wrapped.markAsDirty();
+        }
+
+        @Override
+        public void setListener(Listener listener) {
+            wrapped.setListener(listener);
         }
     }
 }

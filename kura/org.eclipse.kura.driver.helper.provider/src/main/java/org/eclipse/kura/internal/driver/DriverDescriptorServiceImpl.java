@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2018 Eurotech and/or its affiliates and others
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ *******************************************************************************/
+
 package org.eclipse.kura.internal.driver;
 
 import static java.util.Objects.requireNonNull;
@@ -17,9 +27,12 @@ import org.eclipse.kura.util.service.ServiceUtil;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class DriverDescriptorServiceImpl implements DriverDescriptorService{
-    
+public class DriverDescriptorServiceImpl implements DriverDescriptorService {
+
+    private static final Logger logger = LoggerFactory.getLogger(DriverDescriptorServiceImpl.class);
     private static final AssetMessages message = LocalizationAdapter.adapt(AssetMessages.class);
 
     private BundleContext bundleContext;
@@ -69,7 +82,12 @@ public class DriverDescriptorServiceImpl implements DriverDescriptorService{
     }
 
     private DriverDescriptor newDriverDescriptor(String driverPid, String factoryPid, Driver driver) {
-        Object channelDescriptorObj = driver.getChannelDescriptor().getDescriptor();
+        Object channelDescriptorObj = null;
+        try {
+            channelDescriptorObj = driver.getChannelDescriptor().getDescriptor();
+        } catch (Exception e) {
+            logger.warn("Failed to get driver descriptor for pid: {}", driverPid, e);
+        }
         return new DriverDescriptor(driverPid, factoryPid, channelDescriptorObj);
     }
 

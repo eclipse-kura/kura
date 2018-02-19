@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -457,14 +457,20 @@ public final class GwtServerUtil {
         return gwtConfig;
     }
 
-    @SuppressWarnings("unchecked")
     public static GwtConfigComponent toGwtConfigComponent(String pid, Object descriptor) {
-        final List<Tad> ads = (List<Tad>) descriptor;
+        if (!(descriptor instanceof List<?>)) {
+            return null;
+        }
+
+        final List<?> ads = (List<?>) descriptor;
 
         final Tocd ocd = new Tocd();
         ocd.setId(pid);
-        for (final Tad ad : ads) {
-            ocd.addAD(ad);
+        for (final Object ad : ads) {
+            if (!(ad instanceof Tad)) {
+                return null;
+            }
+            ocd.addAD((Tad) ad);
         }
 
         return GwtServerUtil.toGwtConfigComponent(new ComponentConfigurationImpl(pid, ocd, null));
@@ -511,6 +517,10 @@ public final class GwtServerUtil {
     }
 
     public static GwtConfigComponent toGwtConfigComponent(DriverDescriptor descriptor) {
-        return toGwtConfigComponent(descriptor.getPid(), descriptor.getChannelDescriptor());
+        final Object channelDescriptor = descriptor.getChannelDescriptor();
+        if (channelDescriptor == null) {
+            return null;
+        }
+        return toGwtConfigComponent(descriptor.getPid(), channelDescriptor);
     }
 }

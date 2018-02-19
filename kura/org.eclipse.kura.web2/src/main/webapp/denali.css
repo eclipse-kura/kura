@@ -1,6 +1,6 @@
 /**
  *
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates and others
  *
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
@@ -246,9 +246,16 @@ Upload panel END
 Channel Table Validation START
 ***********************/
 
-.asset-read-error, .asset-read-error * {
-	pointer-events: none;
+.cell-not-valid:not(.active), .cell-not-valid:not(.active) *{
+	background-color: rgb(239, 214, 214) !important;
+}
+
+.cell-not-valid, .cell-not-valid *{
 	color: red !important;
+}
+
+.cell-readonly .cell-readonly * {
+	pointer-events: none;
 }
 
 .error-text-box {
@@ -737,10 +744,6 @@ img.x-tree3-node-icon {
 	background: transparent;
 }
 
-#wires-graph svg .link {
-	z-index: 2;
-}
-
 /* elements */
 .devs text {
 	font-weight: 800;
@@ -788,6 +791,38 @@ img.x-tree3-node-icon {
 
 .devs.Atomic .label {
 	fill: #F39C12;
+}
+
+.devs.Atomic.invalid .body {
+	stroke: red;
+}
+
+.devs.Atomic.invalid .label, .devs.Atomic.invalid .port-label, .devs.Atomic.invalid circle {
+	fill: red;
+}
+
+.port {
+	position: relative;
+}
+
+.port-label {
+	opacity: 0;
+	transition: opacity 0.25s;
+	transform: translateY(5px)
+}
+
+.port:hover .port-label, .port.connecting .port-label {
+	opacity: 1;
+}
+
+.port .port-body {
+	transition: transform 0.25s;
+	transition: fill 0.25s;
+}
+
+.port:hover .port-body, .port.connecting .port-body {
+	transform: scale(1.05);
+	fill: #ff7e5d;
 }
 
 /* links */

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates and others
  * 
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0 which
@@ -147,31 +147,16 @@ var WireComposer = function (element) {
 		self.deselectWireComponent()
 	});
 	
-	var portHighlighter = V('circle', {
-		'r' : 14,
-		'stroke' : '#ff7e5d',
-		'stroke-width' : '6px',
-		'fill' : 'transparent',
-		'pointer-events' : 'none'
-	});
-
 	this.paper.off('cell:highlight cell:unhighlight').on({
 		'cell:highlight' : function(cellView, el, opt) {
-			var bbox = V(el).bbox(false, self.paper.viewport);
-
 			if (opt.connecting) {
-				portHighlighter.attr(bbox);
-				portHighlighter.translate(bbox.x + 10, bbox.y + 10, {
-					absolute : true
-				});
-				self.viewport.append(portHighlighter);
+				V(el.parentNode).addClass('connecting')
 			}
 		},
 
 		'cell:unhighlight' : function(cellView, el, opt) {
-
 			if (opt.connecting) {
-				portHighlighter.remove();
+				V(el.parentNode).removeClass('connecting')
 			}
 		}
 	});
@@ -238,8 +223,6 @@ WireComposer.prototype.addWireComponent = function (component) {
 		outPorts : outputPorts,
 		wireComponent: component
 	})
-
-	console.log(componentCell)
 	
 	componentCell.on('change:position', function(cellView) {
 		self.fillRenderingProperties(cellView)
@@ -251,6 +234,9 @@ WireComposer.prototype.addWireComponent = function (component) {
 	}
 	
 	this.graph.addCells([ componentCell ])
+	
+	component.v = this.paper.findViewByModel(componentCell).vel
+	
 	this.dispatchWireComponentCreated(component)
 }
 
@@ -533,6 +519,18 @@ WireComponent.prototype.getPortIndex = function (portName, direction) {
 	}
 
 	return parseInt(this.portNameRegex.exec(portName)[2])
+}
+
+WireComponent.prototype.setValid = function (isValid) {
+	if (!this.v) {
+		return
+	}
+
+	if (isValid) {
+		this.v.removeClass('invalid')
+	} else {
+		this.v.addClass('invalid')
+	}
 }
 
 WireComponent.prototype.getPortName = function (portIndex, direction) {

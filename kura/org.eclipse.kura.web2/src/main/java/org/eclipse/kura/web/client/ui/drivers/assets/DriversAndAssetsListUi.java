@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -13,7 +13,10 @@ package org.eclipse.kura.web.client.ui.drivers.assets;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.kura.web.client.configuration.Configurations;
 import org.eclipse.kura.web.client.configuration.HasConfiguration;
@@ -21,11 +24,14 @@ import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.ConfigurableComponentUi;
 import org.eclipse.kura.web.shared.AssetConstants;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
+import org.gwtbootstrap3.client.ui.Alert;
 import org.gwtbootstrap3.client.ui.Panel;
 import org.gwtbootstrap3.client.ui.PanelHeader;
 import org.gwtbootstrap3.client.ui.Well;
+import org.gwtbootstrap3.client.ui.constants.AlertType;
 import org.gwtbootstrap3.client.ui.gwt.CellTable;
 
+import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -97,29 +103,46 @@ public class DriversAndAssetsListUi extends Composite {
                     return;
                 }
 
-                HasConfiguration hasConfiguration = configurations.getConfiguration(selectedInstanceEntry.getPid());
+                final String pid = selectedInstanceEntry.getPid();
+
+                HasConfiguration hasConfiguration = configurations.getConfiguration(pid);
 
                 if (hasConfiguration == null) {
-                    return;
-                }
-
-                if (!selectedInstanceEntry.isAsset) {
-                    ConfigurableComponentUi driverUi = new ConfigurableComponentUi(hasConfiguration.getConfiguration());
-                    ConfigurationUiButtons buttonBar = createDriverConfigButtonBar(driverUi);
-                    driverUi.renderForm();
-                    driverConfigUi = driverUi;
-                    contentPanelHeader.setText(MSGS.driverLabel(selectedInstanceEntry.getPid()));
-                    driversAndAssetsMgmtPanel.add(buttonBar);
-                    driversAndAssetsMgmtPanel.add(driverConfigUi);
+                    showWarning(selectedInstanceEntry.getPid(), MSGS.errorComponentConfigurationMissing(pid));
                 } else {
-                    final AssetMgmtUi assetUi = new AssetMgmtUi(hasConfiguration, configurations);
-                    assetMgmtUi = assetUi;
-                    contentPanelHeader.setText(MSGS.assetLabel(selectedInstanceEntry.getPid()));
-                    driversAndAssetsMgmtPanel.add(assetMgmtUi);
+
+                    if (!selectedInstanceEntry.isAsset()) {
+                        ConfigurableComponentUi driverUi = new ConfigurableComponentUi(
+                                hasConfiguration.getConfiguration());
+                        ConfigurationUiButtons buttonBar = createDriverConfigButtonBar(driverUi);
+                        driverUi.renderForm();
+                        driverConfigUi = driverUi;
+                        contentPanelHeader.setText(MSGS.driverLabel(selectedInstanceEntry.getPid()));
+                        driversAndAssetsMgmtPanel.add(buttonBar);
+                        if (selectedInstanceEntry.getChannelDescriptor() == null) {
+                            showWarning(null, MSGS.errorDriverDescriptorMissing(pid));
+                        }
+                        driversAndAssetsMgmtPanel.add(driverConfigUi);
+                    } else if (selectedInstanceEntry.getChannelDescriptor() != null) {
+                        final AssetMgmtUi assetUi = new AssetMgmtUi(hasConfiguration, configurations);
+                        assetMgmtUi = assetUi;
+                        contentPanelHeader.setText(MSGS.assetLabel(selectedInstanceEntry.getPid()));
+                        driversAndAssetsMgmtPanel.add(assetMgmtUi);
+                    } else {
+                        showWarning(MSGS.assetLabel(selectedInstanceEntry.getPid()),
+                                MSGS.errorDriverDescriptorMissingForAsset(pid, selectedInstanceEntry.getDriverPid()));
+                    }
                 }
                 configurationArea.setVisible(true);
             }
         });
+    }
+
+    private void showWarning(String caption, String message) {
+        if (caption != null) {
+            contentPanelHeader.setText(caption);
+        }
+        driversAndAssetsMgmtPanel.add(new Alert(message, AlertType.DANGER));
     }
 
     public void setConfigurations(Configurations configurations) {
@@ -133,8 +156,13 @@ public class DriversAndAssetsListUi extends Composite {
         final Column<DriverAssetInfo, String> c2 = new Column<DriverAssetInfo, String>(new TextCell()) {
 
             @Override
+            public String getCellStyleNames(Context context, DriverAssetInfo object) {
+                return object.isValid() ? null : "cell-not-valid";
+            }
+
+            @Override
             public String getValue(final DriverAssetInfo object) {
-                return object.isAsset ? " -> " + object.pid : object.pid;
+                return object.isAsset() ? " -> " + object.pid : object.pid;
             }
         };
 
@@ -143,8 +171,13 @@ public class DriversAndAssetsListUi extends Composite {
         final Column<DriverAssetInfo, String> c3 = new Column<DriverAssetInfo, String>(new TextCell()) {
 
             @Override
+            public String getCellStyleNames(Context context, DriverAssetInfo object) {
+                return object.isValid() ? null : "cell-not-valid";
+            }
+
+            @Override
             public String getValue(final DriverAssetInfo object) {
-                return object.isAsset ? "Asset" : "Driver";
+                return object.isAsset() ? "Asset" : "Driver";
             }
         };
 
@@ -153,37 +186,65 @@ public class DriversAndAssetsListUi extends Composite {
         final Column<DriverAssetInfo, String> c4 = new Column<DriverAssetInfo, String>(new TextCell()) {
 
             @Override
+            public String getCellStyleNames(Context context, DriverAssetInfo object) {
+                return object.isValid() ? null : "cell-not-valid";
+            }
+
+            @Override
             public String getValue(final DriverAssetInfo object) {
-                return object.factoryPid;
+                final String factoryPid = object.getFactoryPid();
+                return factoryPid != null ? factoryPid : "Unknown";
             }
         };
 
         this.driversAssetsListTable.addColumn(c4, new TextHeader(MSGS.factoryPidLabel()));
     }
 
-    private void fillAssetEntries(String driverPid, Collection<HasConfiguration> configs,
-            List<DriverAssetInfo> result) {
-        for (HasConfiguration config : configs) {
-            final GwtConfigComponent gwtConfig = config.getConfiguration();
-            final String configDriverPid = gwtConfig.getParameterValue(AssetConstants.ASSET_DRIVER_PROP.value());
-            if (driverPid.equals(configDriverPid)) {
-                result.add(new DriverAssetInfo(gwtConfig.getComponentId(), gwtConfig.getFactoryId(), true));
-            }
+    private List<DriverAssetInfo> getAssetsForDriver(final Map<String, List<DriverAssetInfo>> map,
+            final String driverPid) {
+        List<DriverAssetInfo> result = map.get(driverPid);
+        if (result == null) {
+            result = new ArrayList<>();
+            map.put(driverPid, result);
+        }
+        return result;
+    }
+
+    private DriverAssetInfo getDriverEntry(String driverPid) {
+        final HasConfiguration driverConfig = configurations.getConfiguration(driverPid);
+        if (driverConfig == null) {
+            return new DriverAssetInfo(driverPid);
+        } else {
+            return new DriverAssetInfo(driverConfig);
         }
     }
 
-    public void refresh() {
-        final List<DriverAssetInfo> tableList = new ArrayList<>();
+    private List<DriverAssetInfo> buildTableList() {
+        final List<DriverAssetInfo> result = new ArrayList<>();
+        final Map<String, List<DriverAssetInfo>> grouped = new HashMap<>();
+
         final Collection<HasConfiguration> configs = configurations.getConfigurations();
 
         for (HasConfiguration config : configs) {
-            final GwtConfigComponent gwtConfig = config.getConfiguration();
-            if (gwtConfig.isDriver()) {
-                final String driverPid = gwtConfig.getComponentId();
-                tableList.add(new DriverAssetInfo(driverPid, gwtConfig.getFactoryId(), false));
-                fillAssetEntries(driverPid, configs, tableList);
+            final DriverAssetInfo entry = new DriverAssetInfo(config);
+
+            if (entry.isAsset()) {
+                getAssetsForDriver(grouped, entry.getDriverPid()).add(entry);
+            } else if (config.getConfiguration().isDriver()) {
+                getAssetsForDriver(grouped, entry.getPid());
             }
         }
+
+        for (Entry<String, List<DriverAssetInfo>> e : grouped.entrySet()) {
+            result.add(getDriverEntry(e.getKey()));
+            result.addAll(e.getValue());
+        }
+
+        return result;
+    }
+
+    public void refresh() {
+        final List<DriverAssetInfo> tableList = buildTableList();
 
         if (tableList.isEmpty()) {
             this.emptyListLabel.setVisible(true);
@@ -282,16 +343,25 @@ public class DriversAndAssetsListUi extends Composite {
         public void onSelectionChanged(DriverAssetInfo info);
     }
 
-    public static class DriverAssetInfo {
+    public class DriverAssetInfo {
 
-        private String pid;
-        private String factoryPid;
-        private boolean isAsset;
+        private final String pid;
+        private final String factoryPid;
+        private final String driverPid;
+        private GwtConfigComponent channelDescriptor;
 
-        public DriverAssetInfo(String pid, String factoryPid, boolean isAsset) {
+        public DriverAssetInfo(final String pid) {
             this.pid = pid;
-            this.factoryPid = factoryPid;
-            this.isAsset = isAsset;
+            this.factoryPid = null;
+            this.driverPid = null;
+        }
+
+        public DriverAssetInfo(final HasConfiguration hasConfig) {
+            final GwtConfigComponent config = hasConfig.getConfiguration();
+            this.pid = config.getComponentId();
+            this.factoryPid = config.getComponentId();
+            this.driverPid = config.getParameterValue(AssetConstants.ASSET_DRIVER_PROP.value());
+            this.channelDescriptor = configurations.getChannelDescriptor(isAsset() ? getDriverPid() : pid);
         }
 
         public String getPid() {
@@ -302,8 +372,20 @@ public class DriversAndAssetsListUi extends Composite {
             return factoryPid;
         }
 
+        public String getDriverPid() {
+            return driverPid;
+        }
+
         public boolean isAsset() {
-            return isAsset;
+            return driverPid != null;
+        }
+
+        public GwtConfigComponent getChannelDescriptor() {
+            return channelDescriptor;
+        }
+
+        public boolean isValid() {
+            return this.factoryPid != null && this.channelDescriptor != null;
         }
     }
 

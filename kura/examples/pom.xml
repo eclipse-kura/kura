@@ -37,6 +37,7 @@
         <skip.can.example>true</skip.can.example>
 
         <osgi-dp-plugin-version>0.3.0</osgi-dp-plugin-version>
+        <check.plugins.exist.remote>false</check.plugins.exist.remote>
     </properties>
 
     <distributionManagement>
@@ -156,6 +157,12 @@
             <modules>
                 <module>org.eclipse.kura.example.can</module>
             </modules>
+        </profile>
+        <profile>
+         	<id>check-exists-plugin</id>
+            <properties>
+             	<check.plugins.exist.remote>true</check.plugins.exist.remote>
+            </properties>
         </profile>
     </profiles>
 
@@ -441,6 +448,22 @@
                         <goals>
                             <goal>build</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.honton.chas</groupId>
+                <artifactId>exists-maven-plugin</artifactId>
+                <version>0.0.3</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>remote</goal>
+                        </goals>
+                        <configuration>
+                            <skipIfSnapshot>true</skipIfSnapshot>
+                            <failIfExists>${check.plugins.exist.remote}</failIfExists>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

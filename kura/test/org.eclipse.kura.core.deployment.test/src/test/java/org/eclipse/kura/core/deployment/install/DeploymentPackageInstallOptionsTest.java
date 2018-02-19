@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates and others
  *
  *   All rights reserved. This program and the accompanying materials
  *   are made available under the terms of the Eclipse Public License v1.0
@@ -19,6 +19,48 @@ import org.eclipse.kura.message.KuraRequestPayload;
 import org.junit.Test;
 
 public class DeploymentPackageInstallOptionsTest {
+
+
+    @Test
+    public void testCreateOKJobId() throws KuraException {
+        final DeploymentHookManager deploymentHookManager = new DeploymentHookManager();
+
+        KuraPayload request = new KuraPayload();
+        request.addMetric(DeploymentPackageOptions.METRIC_DP_NAME, "name");
+        request.addMetric(DeploymentPackageOptions.METRIC_DP_VERSION, "ver");
+        request.addMetric(DeploymentPackageInstallOptions.METRIC_DP_INSTALL_SYSTEM_UPDATE, false);
+        request.addMetric(DeploymentPackageOptions.METRIC_JOB_ID, 123L);
+
+        DeploymentPackageInstallOptions options = new DeploymentPackageInstallOptions(request, deploymentHookManager,
+                "/tmp");
+
+        assertEquals(123L, (long) options.getJobId());
+    }
+
+    @Test(expected = KuraInvalidMessageException.class)
+    public void testCreateNullJobId() throws KuraException {
+        final DeploymentHookManager deploymentHookManager = new DeploymentHookManager();
+
+        KuraPayload request = new KuraPayload();
+        request.addMetric(DeploymentPackageOptions.METRIC_DP_NAME, "name");
+        request.addMetric(DeploymentPackageOptions.METRIC_DP_VERSION, "ver");
+        request.addMetric(DeploymentPackageInstallOptions.METRIC_DP_INSTALL_SYSTEM_UPDATE, false);
+        request.addMetric(DeploymentPackageOptions.METRIC_JOB_ID, null);
+
+        new DeploymentPackageInstallOptions(request, deploymentHookManager, "/tmp");
+    }
+
+    @Test(expected = KuraInvalidMessageException.class)
+    public void testCreateNoJobId() throws KuraException {
+        final DeploymentHookManager deploymentHookManager = new DeploymentHookManager();
+
+        KuraPayload request = new KuraPayload();
+        request.addMetric(DeploymentPackageOptions.METRIC_DP_NAME, "name");
+        request.addMetric(DeploymentPackageOptions.METRIC_DP_VERSION, "ver");
+        request.addMetric(DeploymentPackageInstallOptions.METRIC_DP_INSTALL_SYSTEM_UPDATE, false);
+
+        new DeploymentPackageInstallOptions(request, deploymentHookManager, "/tmp");
+    }
 
     @Test
     public void testConstructorOK() throws KuraException {
@@ -100,7 +142,7 @@ public class DeploymentPackageInstallOptionsTest {
                 "/tmp");
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test(expected = KuraInvalidMessageException.class)
     public void testConstructorErrorJob() throws KuraException {
         final DeploymentHookManager deploymentHookManager = new DeploymentHookManager();
 

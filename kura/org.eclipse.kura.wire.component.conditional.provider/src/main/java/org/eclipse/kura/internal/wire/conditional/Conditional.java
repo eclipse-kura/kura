@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -15,19 +15,18 @@ package org.eclipse.kura.internal.wire.conditional;
 import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.script.Bindings;
+import javax.script.Compilable;
 import javax.script.CompiledScript;
+import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
-import org.eclipse.kura.localization.LocalizationAdapter;
-import org.eclipse.kura.localization.resources.WireMessages;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireEnvelope;
 import org.eclipse.kura.wire.WireHelperService;
@@ -41,6 +40,8 @@ import org.osgi.service.wireadmin.Wire;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
+
 /**
  * The Class Conditional is a specific Wire Component to apply a condition
  * on the received {@link WireEnvelope}
@@ -48,10 +49,6 @@ import org.slf4j.LoggerFactory;
 public final class Conditional implements WireReceiver, WireEmitter, ConfigurableComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(Conditional.class);
-
-    private static final WireMessages message = LocalizationAdapter.adapt(WireMessages.class);
-
-    private static final String LANGUAGE = "javascript";
 
     private volatile WireHelperService wireHelperService;
 
@@ -64,6 +61,7 @@ public final class Conditional implements WireReceiver, WireEmitter, Configurabl
     private Bindings bindings;
 
     private ConditionalOptions conditionalOptions;
+    private Optional<CompiledScript> script = Optional.empty();
 
     public void bindWireHelperService(final WireHelperService wireHelperService) {
         if (isNull(this.wireHelperService)) {
@@ -78,7 +76,7 @@ public final class Conditional implements WireReceiver, WireEmitter, Configurabl
     }
 
     protected void activate(final ComponentContext componentContext, final Map<String, Object> properties) {
-        logger.debug(message.activatingLogger());
+        logger.info("Activating Conditional component...");
         this.conditionalOptions = new ConditionalOptions(properties);
 
         this.wireSupport = (MultiportWireSupport) this.wireHelperService.newWireSupport(this);
@@ -86,60 +84,118 @@ public final class Conditional implements WireReceiver, WireEmitter, Configurabl
         this.thenPort = emitterPorts.get(0);
         this.elsePort = emitterPorts.get(1);
 
-        ScriptEngineManager engineManager = new ScriptEngineManager(null);
-        this.scriptEngine = engineManager.getEngineByName(LANGUAGE);
+        this.scriptEngine = createEngine();
+        this.bindings = createBindings();
 
         if (this.scriptEngine == null) {
             throw new ComponentException("Error Getting Conditional Script Engine");
         }
 
-        this.bindings = this.scriptEngine.createBindings();
-        this.bindings.put("logger", logger);
-
-        logger.debug(message.activatingLoggerDone());
+        updated(properties);
+        logger.info("Activating Conditional component...done");
     }
 
-    public void updated(final Map<String, Object> properties) {
-        logger.debug(message.updatingLogger());
+    public synchronized void updated(final Map<String, Object> properties) {
+        logger.info("Updating Conditional component...");
         this.conditionalOptions = new ConditionalOptions(properties);
-        logger.debug(message.updatingLoggerDone());
+        try {
+            this.script = Optional.of(tryCompileScript(this.conditionalOptions.getBooleanExpression()));
+        } catch (Exception e) {
+            logger.warn("Failed to compile boolean expression", e);
+            this.script = Optional.empty();
+        }
+        logger.info("Updating Conditional component...done");
     }
 
     protected void deactivate(final ComponentContext componentContext) {
-        logger.debug(message.deactivatingLogger());
+        logger.info("Deactivating Conditional component...");
         // remained for debugging purposes
-        logger.debug(message.deactivatingLoggerDone());
+        logger.info("Deactivating Conditional component...done");
     }
 
     /** {@inheritDoc} */
     @Override
-    public void onWireReceive(final WireEnvelope wireEnvelope) {
-        requireNonNull(wireEnvelope, message.wireEnvelopeNonNull());
+    public synchronized void onWireReceive(final WireEnvelope wireEnvelope) {
+        requireNonNull(wireEnvelope, "Wire Envelope cannot be null");
 
-        ConditionalScriptInterface scriptInterface = new ConditionalScriptInterface(wireEnvelope);
-        this.bindings.put("wire", scriptInterface);
-        Boolean decision;
         try {
-            CompiledScript compiledBooleanExpression = this.conditionalOptions
-                    .getCompiledBooleanExpression(this.scriptEngine);
-            decision = (Boolean) compiledBooleanExpression.eval(this.bindings);
 
-            final List<WireRecord> newWireRecords = new ArrayList<>();
-            newWireRecords.addAll(wireEnvelope.getRecords());
-            if (decision) {
-                this.thenPort.emit(this.wireSupport.createWireEnvelope(newWireRecords));
-            } else {
-                this.elsePort.emit(this.wireSupport.createWireEnvelope(newWireRecords));
+            if (!this.script.isPresent()) {
+                logger.warn(
+                        "The script compilation failed during component configuration update, please review the script.");
+                return;
             }
-        } catch (ScriptException e) {
-            logger.warn("Exception while performing decision.");
+
+            final List<WireRecord> inputRecords = wireEnvelope.getRecords();
+
+            final WireRecordListWrapper wireRecordList = new WireRecordListWrapper(inputRecords);
+            final String emitterPid = wireEnvelope.getEmitterPid();
+
+            this.bindings.put("input", new WireEnvelopeWrapper(wireRecordList, emitterPid));
+            this.bindings.put("records", wireRecordList);
+            this.bindings.put("emitterPid", emitterPid);
+
+            final Object decision = this.script.get().eval(this.bindings);
+
+            if (!(decision instanceof Boolean)) {
+                logger.warn("Expression result is not a boolean: {}", decision);
+                return;
+            }
+
+            final WireEnvelope outputEnvelope = this.wireSupport.createWireEnvelope(inputRecords);
+
+            if ((Boolean) decision) {
+                this.thenPort.emit(outputEnvelope);
+            } else {
+                this.elsePort.emit(outputEnvelope);
+            }
+        } catch (Exception e) {
+            logger.warn("Exception while performing decision.", e);
         }
+    }
+
+    private CompiledScript tryCompileScript(final String script) throws ScriptException {
+        final Compilable engine = ((Compilable) this.scriptEngine);
+        return engine.compile(script);
+    }
+
+    private ScriptEngine createEngine() {
+        NashornScriptEngineFactory factory = new NashornScriptEngineFactory();
+        ScriptEngine scriptEngine = factory.getScriptEngine(className -> false);
+
+        if (scriptEngine == null) {
+            throw new IllegalStateException("Failed to create script engine");
+        }
+
+        final Bindings engineScopeBindings = scriptEngine.getBindings(ScriptContext.ENGINE_SCOPE);
+        if (engineScopeBindings != null) {
+            engineScopeBindings.remove("exit");
+            engineScopeBindings.remove("quit");
+        }
+
+        final Bindings globalScopeBindings = scriptEngine.getBindings(ScriptContext.GLOBAL_SCOPE);
+        if (globalScopeBindings != null) {
+            globalScopeBindings.remove("exit");
+            globalScopeBindings.remove("quit");
+        }
+
+        return scriptEngine;
+    }
+
+    private Bindings createBindings() {
+        Bindings bindings = this.scriptEngine.createBindings();
+
+        bindings.put("logger", logger);
+
+        bindings.remove("exit");
+        bindings.remove("quit");
+
+        return bindings;
     }
 
     /** {@inheritDoc} */
     @Override
     public void producersConnected(final Wire[] wires) {
-        requireNonNull(wires, message.wiresNonNull());
         this.wireSupport.producersConnected(wires);
     }
 

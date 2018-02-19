@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -16,16 +16,13 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.Map;
 
-import javax.script.Compilable;
-import javax.script.CompiledScript;
-import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 
 public class ConditionalOptions {
 
     private static final String CONDITION_PROPERTY_KEY = "condition";
 
-    private static final String DEFAULT_CONDITION_PROPERTY_KEY = "wire.getInputRecord(0, \"TIMER\") > 10;";
+    private static final String DEFAULT_CONDITION = "records[0].TIMER !== null && records[0].TIMER.getValue() > 10 && records[0]['TIMER'].getValue() < 30;";
 
     private final Map<String, Object> properties;
 
@@ -34,11 +31,14 @@ public class ConditionalOptions {
         this.properties = properties;
     }
 
-    CompiledScript getCompiledBooleanExpression(ScriptEngine scriptEngine) throws ScriptException {
-        String booleanExpression = (String) this.properties.getOrDefault(CONDITION_PROPERTY_KEY,
-                DEFAULT_CONDITION_PROPERTY_KEY);
+    String getBooleanExpression() throws ScriptException {
+        final Object booleanExpression = this.properties.get(CONDITION_PROPERTY_KEY);
 
-        return ((Compilable) scriptEngine).compile(booleanExpression);
+        if (!(booleanExpression instanceof String)) {
+            return DEFAULT_CONDITION;
+        }
+
+        return (String) booleanExpression;
     }
 
 }

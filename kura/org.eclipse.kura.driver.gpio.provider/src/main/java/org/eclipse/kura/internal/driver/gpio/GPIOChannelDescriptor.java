@@ -12,10 +12,8 @@
 package org.eclipse.kura.internal.driver.gpio;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.eclipse.kura.configuration.metatype.Option;
 import org.eclipse.kura.core.configuration.metatype.Tad;
@@ -51,12 +49,12 @@ public final class GPIOChannelDescriptor implements ChannelDescriptor {
         this.gpioServices = gpioServices;
     }
 
-    private static void addResourceNames(Tad target, Map<Integer, String> values, String defaultValue) {
+    private static void addResourceNames(Tad target, List<String> values, String defaultValue) {
         final List<Option> options = target.getOption();
-        for (Entry<Integer, String> value : values.entrySet()) {
+        for (String value : values) {
             Toption option = new Toption();
-            option.setLabel(value.getValue());
-            option.setValue(value.getValue());
+            option.setLabel(value);
+            option.setValue(value);
             options.add(option);
         }
         if (defaultValue != null && !defaultValue.isEmpty()) {
@@ -87,9 +85,9 @@ public final class GPIOChannelDescriptor implements ChannelDescriptor {
     public Object getDescriptor() {
         final List<Tad> elements = new ArrayList<>();
 
-        Map<Integer, String> availablePins = new HashMap<>();
+        List<String> availablePins = new ArrayList<>();
         for (GPIOService service : this.gpioServices) {
-            availablePins.putAll(service.getAvailablePins());
+            availablePins.addAll(service.getAvailablePins().values());
         }
 
         final Tad resourceName = new Tad();

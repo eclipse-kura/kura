@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,19 +7,13 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  *******************************************************************************/
-package org.eclipse.kura.wire.script.filter.provider;
+package org.eclipse.kura.internal.wire.conditional;
 
 import java.util.List;
 
-import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.wire.WireRecord;
-import org.eclipse.kura.wire.script.filter.localization.ScriptFilterMessages;
 
-import jdk.nashorn.api.scripting.AbstractJSObject;
-
-class WireRecordListWrapper extends AbstractJSObject {
-
-    private static final ScriptFilterMessages messages = LocalizationAdapter.adapt(ScriptFilterMessages.class);
+class WireRecordListWrapper extends ImmutableJSObject {
 
     private static final String LENGTH_PROP_NAME = "length";
     private final List<WireRecord> records;
@@ -59,18 +53,4 @@ class WireRecordListWrapper extends AbstractJSObject {
         return new WireRecordWrapper(this.records.get(index).getProperties());
     }
 
-    @Override
-    public void setMember(String name, Object value) {
-        throw new UnsupportedOperationException(messages.errorObjectImmutable());
-    }
-
-    @Override
-    public void setSlot(int index, Object value) {
-        throw new UnsupportedOperationException(messages.errorObjectImmutable());
-    }
-
-    @Override
-    public void removeMember(String name) {
-        throw new UnsupportedOperationException(messages.errorObjectImmutable());
-    }
 }

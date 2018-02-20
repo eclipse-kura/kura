@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    Copyright (c) 2017 Eurotech and/or its affiliates and others
+    Copyright (c) 2017, 2018 Eurotech and/or its affiliates and others
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -8,20 +8,20 @@
      http://www.eclipse.org/legal/epl-v10.html
 -->
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
-    <OCD id="org.eclipse.kura.wire.Conditional" 
-         name="Conditional" 
-         description="A wire component which logs data as received from upstream connected Wire Components">
-         
+    <OCD id="org.eclipse.kura.wire.Conditional"
+         name="Conditional"
+         description="A wire component that allows to forward the received envelopes to different ports depending on a boolean condition">
+
          <AD id="condition"
             name="condition"
             type="String" cardinality="0"
             required="true"
-            default="wire.getInputRecord(0\, &quot;TIMER&quot;) &gt; 10;&#10;"
+            default="records[0].TIMER !== null &amp;&amp; records[0].TIMER.getValue() &gt; 10 &amp;&amp; records[0]['TIMER'].getValue() &lt; 30;&#10;"
             description="The boolean expression to be evaluated by this component when a wire envelope is
              received.">
         </AD>
     </OCD>
-    
+
     <Designate pid="org.eclipse.kura.wire.Conditional" factoryPid="org.eclipse.kura.wire.Conditional">
         <Object ocdref="org.eclipse.kura.wire.Conditional"/>
     </Designate>

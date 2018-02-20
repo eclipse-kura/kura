@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -66,7 +66,10 @@ public class DeploymentPackageInstallOptions extends DeploymentPackageOptions {
             throw new KuraInvalidMessageException("Missing deployment package version!");
         }
 
-        super.setJobId((Long) request.getMetric(METRIC_JOB_ID));
+        Long jobId = (Long) request.getMetric(METRIC_JOB_ID);
+        if (jobId != null) {
+            super.setJobId(jobId);
+        }
         if (super.getJobId() == null) {
             throw new KuraInvalidMessageException("Missing jobId!");
         }

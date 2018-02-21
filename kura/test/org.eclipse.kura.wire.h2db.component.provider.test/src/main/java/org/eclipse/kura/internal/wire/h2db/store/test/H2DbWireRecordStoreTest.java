@@ -35,6 +35,7 @@ import org.eclipse.kura.type.IntegerValue;
 import org.eclipse.kura.type.LongValue;
 import org.eclipse.kura.type.StringValue;
 import org.eclipse.kura.type.TypedValue;
+import org.eclipse.kura.wire.WireComponent;
 import org.eclipse.kura.wire.WireEnvelope;
 import org.eclipse.kura.wire.WireRecord;
 import org.junit.Before;
@@ -215,15 +216,15 @@ public class H2DbWireRecordStoreTest {
         assertEquals("Unexpected number of records", cleanupSize + 5L, count);
     }
 
-    public void bindDbstore(H2DbWireRecordStore dbstore) {
-        H2DbWireRecordStoreTest.dbstore = dbstore;
+    public void bindDbstore(WireComponent dbstore) {
+        H2DbWireRecordStoreTest.dbstore = (H2DbWireRecordStore) dbstore;
 
         synchronized (dbstoreLock) {
             dbstoreLock.notifyAll();
         }
     }
 
-    public void unbindDbstore(H2DbWireRecordStore dbstore) {
+    public void unbindDbstore(WireComponent dbstore) {
         H2DbWireRecordStoreTest.dbstore = null;
     }
 
@@ -241,7 +242,7 @@ public class H2DbWireRecordStoreTest {
         dependencyLatch.countDown();
     }
 
-    public void unbindDbSvc(H2DbService dbSvc) {
+    public void unbindDbSvc(WireComponent dbSvc) {
         H2DbWireRecordStoreTest.cfgsvc = null;
     }
 

@@ -68,30 +68,30 @@ public class H2DbServiceImplTest {
         cfgService.updateConfiguration(PID, properties);
     }
 
-    public static void bindCfgSvc(ConfigurationService cfgSvc) {
+    protected void bindCfgSvc(ConfigurationService cfgSvc) {
         cfgService = cfgSvc;
         dependencyLatch.countDown();
     }
 
-    public static void unbindCfgSvc(ConfigurationService cfgSvc) {
+    protected void unbindCfgSvc(ConfigurationService cfgSvc) {
         cfgService = null;
     }
 
-    public static void bindCryptoSvc(CryptoService cSvc) {
+    protected void bindCryptoSvc(CryptoService cSvc) {
         cryptoService = cSvc;
         dependencyLatch.countDown();
     }
 
-    public static void unbindCryptoSvc(CryptoService cSvc) {
+    protected void unbindCryptoSvc(CryptoService cSvc) {
         cryptoService = null;
     }
 
-    public static void bindDbSvc(H2DbService dbSvc) {
+    protected void bindDbSvc(H2DbService dbSvc) {
         dbService = dbSvc;
         dependencyLatch.countDown();
     }
 
-    public static void unbindDbSvc(H2DbService dbSvc) {
+    protected void unbindDbSvc(H2DbService dbSvc) {
         dbService = null;
     }
 

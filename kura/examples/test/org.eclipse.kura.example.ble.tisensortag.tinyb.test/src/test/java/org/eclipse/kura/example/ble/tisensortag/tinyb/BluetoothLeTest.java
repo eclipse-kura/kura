@@ -40,7 +40,6 @@ import org.eclipse.kura.message.KuraPayload;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
-
 public class BluetoothLeTest {
 
     @Test
@@ -80,7 +79,6 @@ public class BluetoothLeTest {
 
         verify(bluetoothLeAdapter, times(1)).stopDiscovery();
         verify(ccMock, times(1)).release();
-        verify(tistMock, times(1)).disableKeysNotifications();
         verify(tistMock, times(1)).disconnect();
         assertNull(TestUtil.getFieldValue(svc, "bluetoothLeAdapter"));
 

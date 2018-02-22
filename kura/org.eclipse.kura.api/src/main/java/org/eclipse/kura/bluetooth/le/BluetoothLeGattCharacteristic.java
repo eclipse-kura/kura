@@ -20,6 +20,8 @@ import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * BluetoothLeGattCharacteristic represents a GATT characteristic.
+ * If an application uses value notifications, it has to keep a reference to the corresponding GATT characteristic to
+ * avoid that the garbage collector deletes it and removes the associated consumer.
  *
  * @noimplement This interface is not intended to be implemented by clients.
  * @since 1.3
@@ -56,6 +58,8 @@ public interface BluetoothLeGattCharacteristic {
     /**
      * Enables notifications for the value and calls accept function of the Consumer
      * object. It enables notifications for this characteristic at BLE level.
+     * If an application uses value notifications, it has to keep a reference to the corresponding GATT characteristic
+     * to avoid that the garbage collector deletes it and removes the associated consumer.
      * 
      * @param callback
      *            A Consumer<byte[]> object. Its accept function will be called
@@ -67,7 +71,7 @@ public interface BluetoothLeGattCharacteristic {
 
     /**
      * Disables notifications of the value and unregisters the consumer object
-     * passed through the corresponding enable method. It disables notications
+     * passed through the corresponding enable method. It disables notifications
      * at BLE level for this characteristic.
      * 
      * @throws KuraBluetoothNotificationException

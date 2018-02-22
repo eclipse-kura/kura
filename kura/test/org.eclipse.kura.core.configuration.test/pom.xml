@@ -57,6 +57,11 @@ Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
                             <autoStart>true</autoStart>
                         </bundle>
                         <bundle>
+                            <id>org.apache.felix.scr</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
                             <id>org.eclipse.core.runtime</id>
                             <level>4</level>
                             <autoStart>true</autoStart>
@@ -196,6 +201,10 @@ Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
                         <dependency>
                             <type>p2-installable-unit</type>
                             <artifactId>org.eclipse.equinox.ds</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>org.apache.felix.scr</artifactId>
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>

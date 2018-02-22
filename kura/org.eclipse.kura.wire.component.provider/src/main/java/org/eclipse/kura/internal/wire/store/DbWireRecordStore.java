@@ -45,12 +45,14 @@ import org.eclipse.kura.type.LongValue;
 import org.eclipse.kura.type.StringValue;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.util.collection.CollectionUtil;
+import org.eclipse.kura.wire.WireComponent;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireEnvelope;
 import org.eclipse.kura.wire.WireHelperService;
 import org.eclipse.kura.wire.WireReceiver;
 import org.eclipse.kura.wire.WireRecord;
 import org.eclipse.kura.wire.WireSupport;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.wireadmin.Wire;
 import org.slf4j.Logger;
@@ -156,7 +158,8 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
         logger.debug("Activating DB Wire Record Store...");
         this.wireRecordStoreOptions = new DbWireRecordStoreOptions(properties);
         this.dbHelper = DbServiceHelper.of(this.dbService);
-        this.wireSupport = this.wireHelperService.newWireSupport(this);
+        this.wireSupport = this.wireHelperService.newWireSupport(this,
+                (ServiceReference<WireComponent>) componentContext.getServiceReference());
 
         final String tableName = this.wireRecordStoreOptions.getTableName();
         reconcileDB(tableName);

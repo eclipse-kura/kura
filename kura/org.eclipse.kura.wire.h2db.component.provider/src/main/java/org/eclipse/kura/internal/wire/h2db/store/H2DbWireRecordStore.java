@@ -46,6 +46,7 @@ import org.eclipse.kura.type.LongValue;
 import org.eclipse.kura.type.StringValue;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.util.collection.CollectionUtil;
+import org.eclipse.kura.wire.WireComponent;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireEnvelope;
 import org.eclipse.kura.wire.WireHelperService;
@@ -140,7 +141,8 @@ public class H2DbWireRecordStore implements WireEmitter, WireReceiver, Configura
         this.componentContext = componentContext;
         this.wireRecordStoreOptions = new H2DbWireRecordStoreOptions(properties);
 
-        this.wireSupport = this.wireHelperService.newWireSupport(this);
+        this.wireSupport = this.wireHelperService.newWireSupport(this,
+                (ServiceReference<WireComponent>) componentContext.getServiceReference());
 
         restartDbServiceTracker();
         logger.debug("Activating DB Wire Record Store... Done");

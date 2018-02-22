@@ -24,11 +24,14 @@ import java.util.function.Consumer;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.wire.WireComponent;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireEnvelope;
 import org.eclipse.kura.wire.WireHelperService;
 import org.eclipse.kura.wire.WireReceiver;
 import org.eclipse.kura.wire.WireSupport;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.component.ComponentContext;
 import org.osgi.service.wireadmin.Wire;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,9 +60,10 @@ public class Fifo implements WireEmitter, WireReceiver, ConfigurableComponent {
         }
     }
 
-    public void activate(final Map<String, Object> properties) {
+    public void activate(final Map<String, Object> properties, ComponentContext componentContext) {
         logger.info("Activating Fifo...");
-        wireSupport = this.wireHelperService.newWireSupport(this);
+        wireSupport = this.wireHelperService.newWireSupport(this,
+                (ServiceReference<WireComponent>) componentContext.getServiceReference());
         updated(properties);
         logger.info("Activating Fifo... Done");
     }

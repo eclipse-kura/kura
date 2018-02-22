@@ -31,6 +31,7 @@ import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
+import org.eclipse.kura.wire.WireComponent;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireEnvelope;
 import org.eclipse.kura.wire.WireHelperService;
@@ -169,7 +170,8 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
     protected void activate(final ComponentContext componentContext, final Map<String, Object> properties) {
         logger.debug("Activating Cloud Subscriber Wire Component...");
         this.bundleContext = componentContext.getBundleContext();
-        this.wireSupport = this.wireHelperService.newWireSupport(this);
+        this.wireSupport = this.wireHelperService.newWireSupport(this,
+                (ServiceReference<WireComponent>) componentContext.getServiceReference());
         this.cloudSubscriberOptions = new CloudSubscriberOptions(properties);
         this.applicationTopic = this.cloudSubscriberOptions.getSubscribingAppTopic();
         this.deviceId = this.cloudSubscriberOptions.getSubscribingDeviceId();

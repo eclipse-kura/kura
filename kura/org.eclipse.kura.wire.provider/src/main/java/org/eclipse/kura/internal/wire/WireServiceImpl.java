@@ -154,7 +154,8 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
     protected void deactivate(final ComponentContext componentContext) {
         logger.info("Deactivating Wire Service Component...");
         this.bundleContext = null;
-        this.wireComponentServiceTracker.close();
+        if(this.wireComponentServiceTracker != null)
+            this.wireComponentServiceTracker.close();
 
         deleteAllWires();
 

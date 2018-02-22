@@ -50,10 +50,7 @@
                         -Dkura.configuration=file:${kura.basedir}/emulator/org.eclipse.kura.emulator/src/main/resources/kura.properties
                         -Ddpa.configuration=/tmp/kura/dpa.properties
                         -Dlog4j.configuration=file:${kura.basedir}/emulator/org.eclipse.kura.emulator/src/main/resources/log4j.properties</argLine>
-<!--
-                       -Dosgi.noShutdown=true
                     <appArgLine>-consoleLog -console 1450</appArgLine>
--->
                     <bundleStartLevel>
                         <bundle>
                             <id>org.eclipse.equinox.ds</id>
@@ -291,6 +288,10 @@
                         <dependency>
                             <type>p2-installable-unit</type>
                             <artifactId>log4j.apache-log4j-extras</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>org.eclipse.kura.json.marshaller.unmarshaller.provider</artifactId>
                         </dependency>
                     </dependencies>
                 </configuration>

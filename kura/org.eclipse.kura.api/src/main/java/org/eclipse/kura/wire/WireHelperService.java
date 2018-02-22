@@ -14,6 +14,7 @@
 package org.eclipse.kura.wire;
 
 import org.osgi.annotation.versioning.ProviderType;
+import org.osgi.framework.ServiceReference;
 
 /**
  * The interface WireHelperService is an service utility API to provide quick
@@ -97,7 +98,23 @@ public interface WireHelperService {
      * @return the wire support instance
      * @throws NullPointerException
      *             if the argument is null
+     * 
+     * @deprecated As this way to create {@link WireSupport}s may result in circular service references, it is highly
+     *             recommended to use {@link WireHelperService#newWireSupport(WireComponent, ServiceReference)} instead.
      */
     public WireSupport newWireSupport(WireComponent wireComponent);
+
+    /**
+     * Returns a Wire Support instance of the provided wire component
+     *
+     * @param wireComponent
+     *            the wire component
+     * @param wireComponentRef
+     *            the {@link ServiceReference} that contains the metadata/configuration related to the wireComponent
+     * @return the wire support instance
+     * @throws NullPointerException
+     *             if the argument is null
+     */
+    public WireSupport newWireSupport(WireComponent wireComponent, ServiceReference<WireComponent> wireComponentRef);
 
 }

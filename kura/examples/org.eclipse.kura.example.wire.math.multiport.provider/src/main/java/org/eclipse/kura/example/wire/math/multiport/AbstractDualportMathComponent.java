@@ -17,6 +17,7 @@ import java.util.function.BiFunction;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.type.TypedValue;
+import org.eclipse.kura.wire.WireComponent;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireEnvelope;
 import org.eclipse.kura.wire.WireHelperService;
@@ -24,6 +25,7 @@ import org.eclipse.kura.wire.WireRecord;
 import org.eclipse.kura.wire.graph.MultiportWireSupport;
 import org.eclipse.kura.wire.multiport.MultiportWireReceiver;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.wireadmin.Wire;
 import org.slf4j.Logger;
@@ -48,7 +50,8 @@ public abstract class AbstractDualportMathComponent implements WireEmitter, Mult
     }
 
     public void activate(final Map<String, Object> properties, ComponentContext context) {
-        this.wireSupport = (MultiportWireSupport) this.wireHelperService.newWireSupport(this);
+        this.wireSupport = (MultiportWireSupport) this.wireHelperService.newWireSupport(this,
+                (ServiceReference<WireComponent>) context.getServiceReference());
         this.context = context.getBundleContext();
         updated(properties);
     }

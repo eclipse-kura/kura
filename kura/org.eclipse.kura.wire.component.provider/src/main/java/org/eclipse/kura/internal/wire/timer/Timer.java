@@ -21,10 +21,12 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
+import org.eclipse.kura.wire.WireComponent;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireHelperService;
 import org.eclipse.kura.wire.WireRecord;
 import org.eclipse.kura.wire.WireSupport;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.wireadmin.Wire;
 import org.quartz.CronScheduleBuilder;
@@ -101,7 +103,8 @@ public class Timer implements WireEmitter, ConfigurableComponent {
     protected void activate(final ComponentContext ctx, final Map<String, Object> properties) {
         logger.debug("Activating Timer...");
         instanceCount.incrementAndGet();
-        this.wireSupport = this.wireHelperService.newWireSupport(this);
+        this.wireSupport = this.wireHelperService.newWireSupport(this,
+                (ServiceReference<WireComponent>) ctx.getServiceReference());
         this.timerOptions = new TimerOptions(properties);
         try {
             doUpdate();

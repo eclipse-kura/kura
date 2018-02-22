@@ -34,6 +34,7 @@ import org.eclipse.kura.message.KuraPosition;
 import org.eclipse.kura.position.NmeaPosition;
 import org.eclipse.kura.position.PositionService;
 import org.eclipse.kura.type.TypedValue;
+import org.eclipse.kura.wire.WireComponent;
 import org.eclipse.kura.wire.WireEnvelope;
 import org.eclipse.kura.wire.WireHelperService;
 import org.eclipse.kura.wire.WireReceiver;
@@ -175,7 +176,8 @@ public final class CloudPublisher implements WireReceiver, CloudClientListener, 
      */
     protected void activate(final ComponentContext componentContext, final Map<String, Object> properties) {
         logger.debug("Activating Cloud Publisher Wire Component...");
-        this.wireSupport = this.wireHelperService.newWireSupport(this);
+        this.wireSupport = this.wireHelperService.newWireSupport(this,
+                (ServiceReference<WireComponent>) componentContext.getServiceReference());
         this.bundleContext = componentContext.getBundleContext();
 
         // Update properties

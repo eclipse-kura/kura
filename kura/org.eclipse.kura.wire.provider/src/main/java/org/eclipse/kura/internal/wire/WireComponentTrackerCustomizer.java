@@ -74,6 +74,6 @@ final class WireComponentTrackerCustomizer implements ServiceTrackerCustomizer<W
     /** {@inheritDoc} */
     @Override
     public void removedService(final ServiceReference<WireComponent> reference, final WireComponent service) {
-        // Not required
+        this.context.ungetService(reference);
     }
 }

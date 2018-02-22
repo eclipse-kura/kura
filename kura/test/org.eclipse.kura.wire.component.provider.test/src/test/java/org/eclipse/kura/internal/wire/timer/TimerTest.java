@@ -26,6 +26,7 @@ import org.eclipse.kura.wire.WireSupport;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
+import org.osgi.service.component.ComponentContext;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerContext;
@@ -53,7 +54,7 @@ public class TimerTest {
         timer.bindWireHelperService(mockWireHelperService);
 
         WireSupport mockWireSupport = mock(WireSupport.class);
-        when(mockWireHelperService.newWireSupport(timer)).thenReturn(mockWireSupport);
+        when(mockWireHelperService.newWireSupport(timer, null)).thenReturn(mockWireSupport);
 
         String expectedType = "SIMPLE";
         int expectedIntervalSeconds = 1;
@@ -80,7 +81,7 @@ public class TimerTest {
             return null;
         }).when(mockScheduler).scheduleJob(any(), any());
 
-        timer.activate(null, properties);
+        timer.activate(mock(ComponentContext.class), properties);
 
         assertEquals(mockWireSupport, TestUtil.getFieldValue(timer, "wireSupport"));
 
@@ -109,7 +110,7 @@ public class TimerTest {
         timer.bindWireHelperService(mockWireHelperService);
 
         WireSupport mockWireSupport = mock(WireSupport.class);
-        when(mockWireHelperService.newWireSupport(timer)).thenReturn(mockWireSupport);
+        when(mockWireHelperService.newWireSupport(timer, null)).thenReturn(mockWireSupport);
 
         SchedulerContext mockSchedulerContext = mock(SchedulerContext.class);
         when(mockScheduler.getContext()).thenReturn(mockSchedulerContext);
@@ -137,7 +138,7 @@ public class TimerTest {
             return null;
         }).when(mockScheduler).scheduleJob(any(), any());
 
-        timer.activate(null, properties);
+        timer.activate(mock(ComponentContext.class), properties);
 
         assertEquals(mockWireSupport, TestUtil.getFieldValue(timer, "wireSupport"));
 

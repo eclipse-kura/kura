@@ -27,6 +27,7 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
+import org.eclipse.kura.wire.WireComponent;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireEnvelope;
 import org.eclipse.kura.wire.WireHelperService;
@@ -34,6 +35,7 @@ import org.eclipse.kura.wire.WireReceiver;
 import org.eclipse.kura.wire.WireRecord;
 import org.eclipse.kura.wire.graph.EmitterPort;
 import org.eclipse.kura.wire.graph.MultiportWireSupport;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
 import org.osgi.service.wireadmin.Wire;
@@ -79,7 +81,8 @@ public final class Conditional implements WireReceiver, WireEmitter, Configurabl
         logger.info("Activating Conditional component...");
         this.conditionalOptions = new ConditionalOptions(properties);
 
-        this.wireSupport = (MultiportWireSupport) this.wireHelperService.newWireSupport(this);
+        this.wireSupport = (MultiportWireSupport) this.wireHelperService.newWireSupport(this,
+                (ServiceReference<WireComponent>) componentContext.getServiceReference());
         final List<EmitterPort> emitterPorts = this.wireSupport.getEmitterPorts();
         this.thenPort = emitterPorts.get(0);
         this.elsePort = emitterPorts.get(1);

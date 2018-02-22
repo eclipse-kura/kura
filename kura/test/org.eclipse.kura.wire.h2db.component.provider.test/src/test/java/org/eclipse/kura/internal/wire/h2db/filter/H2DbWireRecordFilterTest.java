@@ -32,6 +32,7 @@ import org.eclipse.kura.wire.WireEnvelope;
 import org.eclipse.kura.wire.WireHelperService;
 import org.eclipse.kura.wire.WireSupport;
 import org.junit.Test;
+import org.osgi.service.component.ComponentContext;
 import org.osgi.service.wireadmin.Wire;
 
 public class H2DbWireRecordFilterTest {
@@ -56,7 +57,7 @@ public class H2DbWireRecordFilterTest {
         filter.bindWireHelperService(mockWireHelperService);
 
         WireSupport mockWireSupport = mock(WireSupport.class);
-        when(mockWireHelperService.newWireSupport(filter)).thenReturn(mockWireSupport);
+        when(mockWireHelperService.newWireSupport(filter, null)).thenReturn(mockWireSupport);
 
         int expectedCacheExpirationInterval = 10;
         String expectedSqlView = "view";
@@ -64,7 +65,7 @@ public class H2DbWireRecordFilterTest {
         properties.put("cache.expiration.interval", expectedCacheExpirationInterval);
         properties.put("sql.view", expectedSqlView);
 
-        filter.activate(null, properties);
+        filter.activate(mock(ComponentContext.class), properties);
 
         assertEquals(1, resets.get());
 
@@ -77,7 +78,7 @@ public class H2DbWireRecordFilterTest {
         H2DbService dbService = (H2DbService) TestUtil.getFieldValue(dbHelper, "dbService");
         assertEquals(mockDbService, dbService);
 
-        verify(mockWireHelperService).newWireSupport(filter);
+        verify(mockWireHelperService).newWireSupport(filter, null);
         WireSupport wireSupport = (WireSupport) TestUtil.getFieldValue(filter, "wireSupport");
         assertEquals(mockWireSupport, wireSupport);
 
@@ -130,13 +131,13 @@ public class H2DbWireRecordFilterTest {
         filter.bindWireHelperService(mockWireHelperService);
 
         WireSupport mockWireSupport = mock(WireSupport.class);
-        when(mockWireHelperService.newWireSupport(filter)).thenReturn(mockWireSupport);
+        when(mockWireHelperService.newWireSupport(filter, null)).thenReturn(mockWireSupport);
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("cache.expiration.interval", 10);
         properties.put("sql.view", "view");
 
-        filter.activate(null, properties);
+        filter.activate(mock(ComponentContext.class), properties);
 
         Wire[] wires = new Wire[2];
         wires[0] = mock(Wire.class);
@@ -163,13 +164,13 @@ public class H2DbWireRecordFilterTest {
         filter.bindWireHelperService(mockWireHelperService);
 
         WireSupport mockWireSupport = mock(WireSupport.class);
-        when(mockWireHelperService.newWireSupport(filter)).thenReturn(mockWireSupport);
+        when(mockWireHelperService.newWireSupport(filter, null)).thenReturn(mockWireSupport);
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("cache.expiration.interval", 10);
         properties.put("sql.view", "sql command");
 
-        filter.activate(null, properties);
+        filter.activate(mock(ComponentContext.class), properties);
 
         ResultSetMetaData mockResultSetMetaData = mock(ResultSetMetaData.class);
         when(mockResultSetMetaData.getColumnCount()).thenReturn(1);
@@ -209,13 +210,13 @@ public class H2DbWireRecordFilterTest {
         filter.bindWireHelperService(mockWireHelperService);
 
         WireSupport mockWireSupport = mock(WireSupport.class);
-        when(mockWireHelperService.newWireSupport(filter)).thenReturn(mockWireSupport);
+        when(mockWireHelperService.newWireSupport(filter, null)).thenReturn(mockWireSupport);
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("cache.expiration.interval", 10);
         properties.put("sql.view", "view");
 
-        filter.activate(null, properties);
+        filter.activate(mock(ComponentContext.class), properties);
 
         Wire mockWire = mock(Wire.class);
         filter.polled(mockWire);
@@ -239,13 +240,13 @@ public class H2DbWireRecordFilterTest {
         filter.bindWireHelperService(mockWireHelperService);
 
         WireSupport mockWireSupport = mock(WireSupport.class);
-        when(mockWireHelperService.newWireSupport(filter)).thenReturn(mockWireSupport);
+        when(mockWireHelperService.newWireSupport(filter, null)).thenReturn(mockWireSupport);
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("cache.expiration.interval", 10);
         properties.put("sql.view", "view");
 
-        filter.activate(null, properties);
+        filter.activate(mock(ComponentContext.class), properties);
 
         Wire[] wires = new Wire[2];
         wires[0] = mock(Wire.class);
@@ -272,13 +273,13 @@ public class H2DbWireRecordFilterTest {
         filter.bindWireHelperService(mockWireHelperService);
 
         WireSupport mockWireSupport = mock(WireSupport.class);
-        when(mockWireHelperService.newWireSupport(filter)).thenReturn(mockWireSupport);
+        when(mockWireHelperService.newWireSupport(filter, null)).thenReturn(mockWireSupport);
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("cache.expiration.interval", 10);
         properties.put("sql.view", "view");
 
-        filter.activate(null, properties);
+        filter.activate(mock(ComponentContext.class), properties);
 
         Wire mockWire = mock(Wire.class);
         filter.updated(mockWire, 42);

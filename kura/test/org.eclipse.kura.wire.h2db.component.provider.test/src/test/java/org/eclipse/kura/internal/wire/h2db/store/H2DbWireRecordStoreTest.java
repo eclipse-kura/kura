@@ -80,7 +80,7 @@ public class H2DbWireRecordStoreTest {
 
         WireHelperService whsMock = mock(WireHelperService.class);
         WireSupport wireSupportMock = mock(WireSupport.class);
-        when(whsMock.newWireSupport(store)).thenReturn(wireSupportMock);
+        when(whsMock.newWireSupport(store, null)).thenReturn(wireSupportMock);
 
         store.bindWireHelperService(whsMock);
 
@@ -211,7 +211,7 @@ public class H2DbWireRecordStoreTest {
 
         WireHelperService whsMock = mock(WireHelperService.class);
         WireSupport wireSupportMock = mock(WireSupport.class);
-        when(whsMock.newWireSupport(store)).thenReturn(wireSupportMock);
+        when(whsMock.newWireSupport(store, null)).thenReturn(wireSupportMock);
 
         store.bindWireHelperService(whsMock);
 
@@ -290,7 +290,7 @@ public class H2DbWireRecordStoreTest {
 
         WireHelperService whsMock = mock(WireHelperService.class);
         WireSupport wireSupportMock = mock(WireSupport.class);
-        when(whsMock.newWireSupport(store)).thenReturn(wireSupportMock);
+        when(whsMock.newWireSupport(store, null)).thenReturn(wireSupportMock);
 
         store.bindWireHelperService(whsMock);
 
@@ -369,7 +369,7 @@ public class H2DbWireRecordStoreTest {
 
         WireHelperService whsMock = mock(WireHelperService.class);
         WireSupport wireSupportMock = mock(WireSupport.class);
-        when(whsMock.newWireSupport(store)).thenReturn(wireSupportMock);
+        when(whsMock.newWireSupport(store, null)).thenReturn(wireSupportMock);
 
         store.bindWireHelperService(whsMock);
 

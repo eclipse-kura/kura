@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -48,13 +48,13 @@ public enum SierraUsb598StatusCodes {
     PMODE_LPM(0x0000),    // Low Power Mode
     PMODE_ONLINE(0x0001); // Online
 
-    private int m_statusCode = 0;
+    private int statusCode = 0;
 
     private SierraUsb598StatusCodes(int statusCode) {
-        this.m_statusCode = statusCode;
+        this.statusCode = statusCode;
     }
 
     public int getStatusCode() {
-        return this.m_statusCode;
+        return this.statusCode;
     }
 }

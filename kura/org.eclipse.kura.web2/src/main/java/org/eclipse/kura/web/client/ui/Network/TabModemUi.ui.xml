@@ -40,6 +40,10 @@
     .help-body {
     	width: 275px;
     }
+    
+    .scrollable {
+		overflow-x: auto;
+	}
     </ui:style>
 
     <b:Container fluid="true">
@@ -102,8 +106,10 @@
                                     ui:field="dialHelp" />
                                 <b:TextBox b:id="dial"
                                     ui:field="dial" />
+                                <b:Button ui:field="buttonPdp"
+                                    icon="SEARCH" iconFixedWidth="true" />
                             </b:FormGroup>
-
+                            
                             <b:FormGroup ui:field="groupApn">
                                 <b:FormLabel for="apn"
                                     ui:field="labelApn" />
@@ -242,6 +248,28 @@
             </b:Column>
         </b:Column>
 
+		<!-- Modem (PDP) Modal -->
+        <b:Modal closable="true" dataKeyboard="true" ui:field="pdpModal" b:id="pdpModal">
+            <b:ModalBody>
+                <b:Panel>
+                    <b:PanelHeader ui:field="pdpTitle" />
+                    <b:PanelBody addStyleNames='{style.scrollable}'>
+                        <gwt:CellTable bordered="true"
+                            condensed="true" striped="true" hover="true"
+                            ui:field="pdpGrid" />
+                        <b:Alert type="INFO" ui:field="searching">
+                            <b.html:Text ui:field="searchingText" />
+                        </b:Alert>
+                        <b:Alert type="WARNING" ui:field="noPdp">
+                            <b.html:Text ui:field="noPdpText" />
+                        </b:Alert>
+                        <b:Alert type="DANGER" ui:field="pdpFail">
+                            <b.html:Text ui:field="pdpFailText" />
+                        </b:Alert>
+                    </b:PanelBody>
+                </b:Panel>
+            </b:ModalBody>
+        </b:Modal>
 
     </b:Container>
 </ui:UiBinder> 

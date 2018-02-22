@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -37,6 +37,7 @@ import org.eclipse.kura.net.admin.modem.sierra.CnsAppIDs;
 import org.eclipse.kura.net.admin.modem.sierra.CnsOpTypes;
 import org.eclipse.kura.net.modem.ModemCdmaServiceProvider;
 import org.eclipse.kura.net.modem.ModemDevice;
+import org.eclipse.kura.net.modem.ModemPdpContext;
 import org.eclipse.kura.net.modem.ModemRegistrationStatus;
 import org.eclipse.kura.net.modem.ModemTechnologyType;
 import org.eclipse.kura.net.modem.SerialModemDevice;
@@ -48,102 +49,84 @@ import org.slf4j.LoggerFactory;
 
 public class SierraUsb598 implements EvdoCellularModem {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(SierraUsb598.class);
+    private static final Logger logger = LoggerFactory.getLogger(SierraUsb598.class);
 
-    private static String[] s_topicsOfInterest = null;
-    // private static final int AT_PORT = 0;
+    protected static final String MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG = "Modem not available for AT commands";
+
+    private static String[] topicsOfInterest = null;
     private static final int HIP_PORT = 1;
+    private final Object atLock = new Object();
 
-    private ConnectionFactory m_connectionFactory = null;
-    private String m_model = null;
-    private String m_manufacturer = null;
-    private String m_esn = null;
-    private String m_revisionId = null;
-
-    private Object m_atLock = null;
-
-    private int m_callStatus = -1; // current call status
-
-    // private UsbModemDevice m_usbDevice = null;
-    private ModemDevice m_device = null;
-
-    // private NetInterfaceConfig<? extends NetInterfaceAddressConfig> m_netInterfaceConfig = null;
-    private List<NetConfig> m_netConfigs = null;
-
-    private CommConnection m_commHipConnection = null;
-
-    private ScheduledExecutorService m_executor = null;
-
-    private List<CnS> m_notifications = null;
-
-    private String m_mdn = null; // mobile directory number
-    private String m_min = null; // mobile identification number
-
-    private String m_firmwareVersion = "";
-    private String m_firmwareDate = "";
-    private int m_prlVersion = 0; // PRL version
+    private ConnectionFactory connectionFactory = null;
+    private String model = null;
+    private String manufacturer = null;
+    private String esn = null;
+    private String revisionId = null;
+    private int callStatus = -1; // current call status
+    private ModemDevice device = null;
+    private List<NetConfig> netConfigs = null;
+    private CommConnection commHipConnection = null;
+    private ScheduledExecutorService executor = null;
+    private List<CnS> notifications = null;
+    private String mdn = null; // mobile directory number
+    private String min = null; // mobile identification number
+    private String firmwareVersion = "";
+    private String firmwareDate = "";
+    private int prlVersion = 0; // PRL version
 
     /*
      * 'Received Signal Strength' (in dBm) and its lock
      */
-    private int m_rssi = 0;
-    private final Object m_rssiLock = new Object();
+    private int rssi = 0;
 
     /*
      * 'System ID' and its lock
      */
-    private int m_sid = -1;
-    private final Object m_sidLock = new Object();
+    private int sid = -1;
 
     /*
      * 'Network ID' and its lock
      */
-    private int m_nid = -1;
-    private final Object m_nidLock = new Object();
+    private int nid = -1;
 
     /*
      * 'Channel Number' and its lock
      */
-    private int m_channelNo = -1;
-    private final Object m_channelNoLock = new Object();
+    private int channelNo = -1;
+    private static Object channelNoLock = new Object();
 
     /*
      * 'Channel State' and its lock
      */
-    private int m_channelState = -1;
-    private final Object m_channelStateLock = new Object();
+    private int channelState = -1;
 
     /*
      * 'Current Band Class' and its lock
      */
-    private int m_bandClass = -1;
-    private final Object m_bandClassLock = new Object();
+    private int bandClass = -1;
+    private static Object bandClassLock = new Object();
 
-    private int m_activationStatus = -1; // activation status
+    private int activationStatus = -1; // activation status
 
-    private GregorianCalendar m_activationDate = null; // activation date
+    private GregorianCalendar activationDate = null; // activation date
 
     /*
      * 'Roaming Status' and its lock
      */
-    private int m_roamingStatus = -1;
-    private final Object m_roamingStatusLock = new Object();
+    private int roamingStatus = -1;
 
     /*
      * 'Service Type' and its lock
      */
-    private int m_serviceType = -1;
-    private final Object m_serviceTypeLock = new Object();
+    private int serviceType = -1;
 
-    private long m_txCount = -1L; // number of bytes transmitted during a call
-    private long m_rxCount = -1L; // number of bytes received during a call
-    private final Object m_byteCountLock = new Object(); // byte count lock
+    private long txCount = -1L; // number of bytes transmitted during a call
+    private long rxCount = -1L; // number of bytes received during a call
 
     /*
      * 'Power Mode' and its lock
      */
-    private int m_powerMode = -1;
-    private final Object m_powerModeLock = new Object();
+    private int powerMode = -1;
 
     /**
      * SierraUsb598 modem constructor
@@ -157,134 +140,121 @@ public class SierraUsb598 implements EvdoCellularModem {
      */
     public SierraUsb598(ModemDevice device, ConnectionFactory connectionFactory) {
 
-        this.m_device = device;
-        this.m_connectionFactory = connectionFactory;
-        this.m_atLock = new Object();
-        s_topicsOfInterest = generateSubscribeTopics();
+        this.device = device;
+        this.connectionFactory = connectionFactory;
+        topicsOfInterest = generateSubscribeTopics();
         // subscribe on specific topics of interest
         Dictionary d = new Hashtable();
-        d.put(EventConstants.EVENT_TOPIC, s_topicsOfInterest);
-        for (String element : s_topicsOfInterest) {
-            s_logger.debug("Subscribing for {}", element);
+        d.put(EventConstants.EVENT_TOPIC, topicsOfInterest);
+        for (String element : topicsOfInterest) {
+            logger.debug("Subscribing for {}", element);
         }
         // bundleContext.registerService(EventHandler.class.getName(), this, d);
 
-        this.m_notifications = new ArrayList();
+        this.notifications = new ArrayList();
 
         // define notification thread
-        this.m_executor = Executors.newSingleThreadScheduledExecutor();
+        this.executor = Executors.newSingleThreadScheduledExecutor();
     }
 
     public void bind() {
         try {
-            this.m_commHipConnection = openSerialPort(getHipPort());
-
-            this.m_executor.scheduleAtFixedRate(new Runnable() {
+            this.commHipConnection = openSerialPort(getHipPort());
+            this.executor.scheduleAtFixedRate(new Runnable() {
 
                 @Override
                 public void run() {
                     Thread.currentThread().setName("SierraUsb598");
-                    s_logger.debug("**** HIP Thread() run ");
-                    // if(notificationThread() == false) {
-                    // s_logger.debug("**** notificationThread() shut down");
-                    // m_executor.shutdown();
-                    // }
+                    logger.debug("**** HIP Thread() run ");
                 }
             }, 0, 1, TimeUnit.SECONDS);
         } catch (KuraException e) {
-            e.printStackTrace();
+            logger.error("bind() :: ", e);
         }
     }
 
     public void unbind() {
 
-        if (this.m_commHipConnection != null) {
+        if (this.commHipConnection != null) {
             try {
-                this.m_executor.shutdown();
-                closeSerialPort(this.m_commHipConnection);
+                this.executor.shutdown();
+                closeSerialPort(this.commHipConnection);
             } catch (KuraException e) {
-                e.printStackTrace();
+                logger.error("unbind() :: ", e);
             }
         }
     }
 
     @Override
     public String getModel() throws KuraException {
-        synchronized (this.m_atLock) {
-            if (this.m_model == null) {
-                s_logger.debug("sendCommand getModelNumber :: {}", SierraUsb598AtCommands.getModelNumber.getCommand());
-                byte[] reply = null;
+        synchronized (this.atLock) {
+            if (this.model == null) {
+                logger.debug("sendCommand getModelNumber :: {}", SierraUsb598AtCommands.getModelNumber.getCommand());
+                byte[] reply;
                 CommConnection commAtConnection = openSerialPort(getAtPort());
                 if (!isAtReachable(commAtConnection)) {
-                    throw new KuraException(KuraErrorCode.INTERNAL_ERROR,
-                            "Modem not available for AT commands: " + SierraUsb598.class.getName());
+                    throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
                 }
                 try {
                     reply = commAtConnection.sendCommand(SierraUsb598AtCommands.getModelNumber.getCommand().getBytes(),
                             500);
                 } catch (IOException e) {
-                    throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+                    throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
                 }
                 closeSerialPort(commAtConnection);
                 if (reply != null) {
-                    this.m_model = getResponseString(reply);
-                    reply = null;
+                    this.model = getResponseString(reply);
                 }
                 closeSerialPort(commAtConnection);
             }
         }
-        return this.m_model;
+        return this.model;
     }
 
     @Override
     public String getManufacturer() throws KuraException {
-        synchronized (this.m_atLock) {
-            if (this.m_manufacturer == null) {
-                s_logger.debug("sendCommand getManufacturer :: {}",
-                        SierraUsb598AtCommands.getManufacturer.getCommand());
-                byte[] reply = null;
+        synchronized (this.atLock) {
+            if (this.manufacturer == null) {
+                logger.debug("sendCommand getManufacturer :: {}", SierraUsb598AtCommands.getManufacturer.getCommand());
+                byte[] reply;
                 CommConnection commAtConnection = openSerialPort(getAtPort());
                 if (!isAtReachable(commAtConnection)) {
-                    throw new KuraException(KuraErrorCode.INTERNAL_ERROR,
-                            "Modem not available for AT commands: " + SierraUsb598.class.getName());
+                    throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
                 }
                 try {
                     reply = commAtConnection.sendCommand(SierraUsb598AtCommands.getManufacturer.getCommand().getBytes(),
                             500);
                 } catch (IOException e) {
-                    throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+                    throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
                 }
                 closeSerialPort(commAtConnection);
                 if (reply != null) {
-                    this.m_manufacturer = getResponseString(reply);
-                    reply = null;
+                    this.manufacturer = getResponseString(reply);
                 }
             }
         }
-        return this.m_manufacturer;
+        return this.manufacturer;
     }
 
     @Override
     public String getSerialNumber() throws KuraException {
-        synchronized (this.m_atLock) {
-            if (this.m_esn != null) {
-                s_logger.debug("sendCommand getSerialNumber :: {}",
-                        SierraUsb598AtCommands.getSerialNumber.getCommand());
-                byte[] reply = null;
+        synchronized (this.atLock) {
+            if (this.esn != null) {
+                logger.debug("sendCommand getSerialNumber :: {}", SierraUsb598AtCommands.getSerialNumber.getCommand());
+                byte[] reply;
                 CommConnection commAtConnection = openSerialPort(getAtPort());
                 if (!isAtReachable(commAtConnection)) {
-                    throw new KuraException(KuraErrorCode.INTERNAL_ERROR,
-                            "Modem not available for AT commands: " + SierraUsb598.class.getName());
+                    throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
                 }
                 try {
                     reply = commAtConnection.sendCommand(SierraUsb598AtCommands.getSerialNumber.getCommand().getBytes(),
                             500);
                 } catch (IOException e) {
-                    throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+                    throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
                 }
                 closeSerialPort(commAtConnection);
                 if (reply != null) {
-                    StringBuffer replySB = new StringBuffer();
+                    StringBuilder replySB = new StringBuilder();
                     replySB.append(new String(reply));
                     // if response is incomplete, try to get the rest
                     if (!replySB.toString().matches(".*OK\\s*$")) {
@@ -301,67 +271,66 @@ public class SierraUsb598 implements EvdoCellularModem {
 
                     String serialNum = getResponseString(replySB.toString());
                     if (serialNum != null && !serialNum.isEmpty()) {
-                        this.m_esn = serialNum;
+                        this.esn = serialNum;
                     }
                 }
             }
         }
-        return this.m_esn;
+        return this.esn;
     }
 
     @Override
     public String getMobileSubscriberIdentity() throws KuraException {
-        // TODO Auto-generated method stub
+        // not implemented
         return null;
     }
 
     @Override
     public String getIntegratedCirquitCardId() throws KuraException {
-        // TODO Auto-generated method stub
+        // not implemented
         return null;
     }
 
     @Override
     public String getRevisionID() throws KuraException {
-        synchronized (this.m_atLock) {
-            if (this.m_revisionId == null) {
-                byte[] reply = null;
+        synchronized (this.atLock) {
+            if (this.revisionId == null) {
+                byte[] reply;
                 CommConnection commAtConnection = openSerialPort(getAtPort());
                 if (!isAtReachable(commAtConnection)) {
-                    throw new KuraException(KuraErrorCode.INTERNAL_ERROR,
-                            "Modem not available for AT commands: " + SierraUsb598.class.getName());
+                    throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
                 }
                 try {
                     reply = commAtConnection.sendCommand(SierraUsb598AtCommands.getRevision.getCommand().getBytes(),
                             500);
                 } catch (IOException e) {
-                    throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+                    throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
                 }
                 closeSerialPort(commAtConnection);
                 if (reply != null) {
-                    this.m_revisionId = getResponseString(reply);
+                    this.revisionId = getResponseString(reply);
                 }
             }
         }
-        return this.m_revisionId;
+        return this.revisionId;
     }
 
     @Override
     public boolean isReachable() throws KuraException {
-        // TODO Auto-generated method stub
+        // not implemented
         return false;
     }
 
     @Override
     public boolean isPortReachable(String port) {
         boolean ret = false;
-        synchronized (this.m_atLock) {
+        synchronized (this.atLock) {
             try {
                 CommConnection commAtConnection = openSerialPort(port);
                 closeSerialPort(commAtConnection);
                 ret = true;
             } catch (KuraException e) {
-                s_logger.warn("isPortReachable() :: The {} is not reachable", port);
+                logger.warn("isPortReachable() :: The {} is not reachable", port, e);
             }
         }
         return ret;
@@ -369,7 +338,7 @@ public class SierraUsb598 implements EvdoCellularModem {
 
     @Override
     public void reset() throws KuraException {
-        s_logger.info("resetting modem ...");
+        logger.info("resetting modem ...");
         try {
             powerOff();
             sleep(15000);
@@ -382,63 +351,58 @@ public class SierraUsb598 implements EvdoCellularModem {
 
     @Override
     public int getSignalStrength() throws KuraException {
-        // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
     public ModemRegistrationStatus getRegistrationStatus() throws KuraException {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public long getCallTxCounter() throws KuraException {
-        // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
     public long getCallRxCounter() throws KuraException {
-        // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
     public String getServiceType() throws KuraException {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public ModemDevice getModemDevice() {
-        return this.m_device;
+        return this.device;
     }
 
     protected void setModemDevice(ModemDevice device) {
-        this.m_device = device;
+        this.device = device;
     }
 
     @Override
     public String getDataPort() throws KuraException {
 
         String port = null;
-        List<String> ports = this.m_device.getSerialPorts();
-        if (ports != null && ports.size() > 0) {
-            if (this.m_device instanceof UsbModemDevice) {
-                SupportedUsbModemInfo usbModemInfo = SupportedUsbModemsInfo.getModem((UsbModemDevice) this.m_device);
+        List<String> ports = this.device.getSerialPorts();
+        if (ports != null && !ports.isEmpty()) {
+            if (this.device instanceof UsbModemDevice) {
+                SupportedUsbModemInfo usbModemInfo = SupportedUsbModemsInfo.getModem((UsbModemDevice) this.device);
                 if (usbModemInfo != null) {
                     port = ports.get(usbModemInfo.getDataPort());
                 } else {
-                    throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "No PPP serial port available");
+                    throw new KuraException(KuraErrorCode.SERIAL_PORT_NOT_EXISTING, "No PPP serial port available");
                 }
-            } else if (this.m_device instanceof SerialModemDevice) {
+            } else if (this.device instanceof SerialModemDevice) {
                 // TODO
             } else {
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "Unsupported modem device");
+                throw new KuraException(KuraErrorCode.UNAVAILABLE_DEVICE, "Unsupported modem device");
             }
         } else {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "No serial ports available");
+            throw new KuraException(KuraErrorCode.SERIAL_PORT_NOT_EXISTING, "No serial ports available");
         }
         return port;
     }
@@ -447,98 +411,98 @@ public class SierraUsb598 implements EvdoCellularModem {
     public String getAtPort() throws KuraException {
 
         String port = null;
-        List<String> ports = this.m_device.getSerialPorts();
-        if (ports != null && ports.size() > 0) {
-            if (this.m_device instanceof UsbModemDevice) {
-                SupportedUsbModemInfo usbModemInfo = SupportedUsbModemsInfo.getModem((UsbModemDevice) this.m_device);
+        List<String> ports = this.device.getSerialPorts();
+        if (ports != null && !ports.isEmpty()) {
+            if (this.device instanceof UsbModemDevice) {
+                SupportedUsbModemInfo usbModemInfo = SupportedUsbModemsInfo.getModem((UsbModemDevice) this.device);
                 if (usbModemInfo != null) {
                     port = ports.get(usbModemInfo.getAtPort());
                 } else {
-                    throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "No AT serial port available");
+                    throw new KuraException(KuraErrorCode.SERIAL_PORT_NOT_EXISTING, "No AT serial port available");
                 }
-            } else if (this.m_device instanceof SerialModemDevice) {
+            } else if (this.device instanceof SerialModemDevice) {
                 // TODO
             } else {
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "Unsupported modem device");
+                throw new KuraException(KuraErrorCode.UNAVAILABLE_DEVICE, "Unsupported modem device");
             }
         } else {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "No serial ports available");
+            throw new KuraException(KuraErrorCode.SERIAL_PORT_NOT_EXISTING, "No serial ports available");
         }
         return port;
     }
 
     @Override
     public String getGpsPort() throws KuraException {
-        // TODO Auto-generated method stub
+        // not implemented
         return null;
     }
 
     @Override
     public boolean isGpsSupported() throws KuraException {
-        // TODO Auto-generated method stub
+        // not implemented
         return false;
     }
 
     @Override
     public void enableGps() throws KuraException {
-        // TODO Auto-generated method stub
+        // not implemented
     }
 
     @Override
     public void disableGps() throws KuraException {
-        // TODO Auto-generated method stub
+        // not implemented
     }
 
     @Override
     public boolean isProvisioned() throws KuraException {
-        // TODO Auto-generated method stub
+        // not implemented
         return false;
     }
 
     @Override
     public void provision() throws KuraException {
-        // TODO Auto-generated method stub
+        // not implemented
     }
 
     @Override
     public String getMobileDirectoryNumber() throws KuraException {
-        // TODO Auto-generated method stub
+        // not implemented
         return null;
     }
 
     @Override
     public String getMobileIdentificationNumber() throws KuraException {
-        // TODO Auto-generated method stub
+        // not implemented
         return null;
     }
 
     @Override
     public List<NetConfig> getConfiguration() {
-        return this.m_netConfigs;
+        return this.netConfigs;
     }
 
     @Override
     public void setConfiguration(List<NetConfig> netConfigs) {
-        this.m_netConfigs = netConfigs;
+        this.netConfigs = netConfigs;
     }
 
     @Override
     public List<ModemTechnologyType> getTechnologyTypes() throws KuraException {
 
-        List<ModemTechnologyType> modemTechnologyTypes = null;
+        List<ModemTechnologyType> modemTechnologyTypes;
         ModemDevice device = getModemDevice();
         if (device == null) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "No modem device");
+            throw new KuraException(KuraErrorCode.UNAVAILABLE_DEVICE, "No modem device");
         }
         if (device instanceof UsbModemDevice) {
             SupportedUsbModemInfo usbModemInfo = SupportedUsbModemsInfo.getModem((UsbModemDevice) device);
             if (usbModemInfo != null) {
                 modemTechnologyTypes = usbModemInfo.getTechnologyTypes();
             } else {
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "No usbModemInfo available");
+                throw new KuraException(KuraErrorCode.UNAVAILABLE_DEVICE, "No usbModemInfo available");
             }
         } else {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "Unsupported modem device");
+            throw new KuraException(KuraErrorCode.UNAVAILABLE_DEVICE, "Unsupported modem device");
         }
         return modemTechnologyTypes;
     }
@@ -549,28 +513,28 @@ public class SierraUsb598 implements EvdoCellularModem {
         ModemTechnologyType modemTechnologyType = null;
         try {
             List<ModemTechnologyType> modemTechnologyTypes = getTechnologyTypes();
-            if (modemTechnologyTypes != null && modemTechnologyTypes.size() > 0) {
+            if (modemTechnologyTypes != null && !modemTechnologyTypes.isEmpty()) {
                 modemTechnologyType = modemTechnologyTypes.get(0);
             }
         } catch (KuraException e) {
-            s_logger.error("Failed to obtain modem technology - {}", e);
+            logger.error("Failed to obtain modem technology - {}", e);
         }
         return modemTechnologyType;
     }
 
     private String getHipPort() throws KuraException {
-        String port = null;
+        String port;
 
-        if (this.m_device instanceof UsbModemDevice) {
-            UsbModemDevice usbModemDevice = (UsbModemDevice) this.m_device;
+        if (this.device instanceof UsbModemDevice) {
+            UsbModemDevice usbModemDevice = (UsbModemDevice) this.device;
             List<String> ports = usbModemDevice.getTtyDevs();
-            if (ports != null && ports.size() > 0) {
+            if (ports != null && !ports.isEmpty()) {
                 port = ports.get(HIP_PORT);
             } else {
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "No HIP serial port available");
+                throw new KuraException(KuraErrorCode.SERIAL_PORT_NOT_EXISTING, "No HIP serial port available");
             }
         } else {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "No HIP serial port available");
+            throw new KuraException(KuraErrorCode.SERIAL_PORT_NOT_EXISTING, "No HIP serial port available");
         }
 
         return port;
@@ -578,7 +542,7 @@ public class SierraUsb598 implements EvdoCellularModem {
 
     @Override
     public ModemCdmaServiceProvider getServiceProvider() {
-        // TODO
+        // not implemented
         return null;
     }
 
@@ -594,15 +558,15 @@ public class SierraUsb598 implements EvdoCellularModem {
             } else if (portType == SerialPortType.GPSPORT) {
                 port = getGpsPort();
             } else {
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "Invalid Port Type");
+                throw new KuraException(KuraErrorCode.SERIAL_PORT_INVALID_CONFIGURATION, "Invalid Port Type");
             }
             if (port != null) {
-                StringBuffer sb = new StringBuffer();
+                StringBuilder sb = new StringBuilder();
                 sb.append("comm:").append(port).append(";baudrate=115200;databits=8;stopbits=1;parity=0");
                 commURI = CommURI.parseString(sb.toString());
             }
         } catch (URISyntaxException e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "URI Syntax Exception");
+            throw new KuraException(KuraErrorCode.SERIAL_PORT_INVALID_CONFIGURATION, "URI Syntax Exception");
         }
         return commURI;
     }
@@ -612,18 +576,23 @@ public class SierraUsb598 implements EvdoCellularModem {
         return false;
     }
 
+    @Override
+    public List<ModemPdpContext> getPdpContextInfo() throws KuraException {
+        return new ArrayList<>();
+    }
+
     private CommConnection openSerialPort(String port) throws KuraException {
 
         CommConnection connection = null;
-        if (this.m_connectionFactory != null) {
+        if (this.connectionFactory != null) {
             String uri = new CommURI.Builder(port).withBaudRate(115200).withDataBits(8).withStopBits(1).withParity(0)
                     .withTimeout(2000).build().toString();
 
             try {
-                connection = (CommConnection) this.m_connectionFactory.createConnection(uri, 1, false);
+                connection = (CommConnection) this.connectionFactory.createConnection(uri, 1, false);
             } catch (Exception e) {
-                s_logger.debug("Exception creating connection: {}", e);
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+                logger.debug("Exception creating connection: {}", e);
+                throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
             }
         }
         return connection;
@@ -633,7 +602,7 @@ public class SierraUsb598 implements EvdoCellularModem {
         try {
             connection.close();
         } catch (IOException e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+            throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
         }
     }
 
@@ -648,7 +617,7 @@ public class SierraUsb598 implements EvdoCellularModem {
                 attemptNo++;
                 sleep(2000);
             }
-        } while (status == false && attemptNo < 3);
+        } while (!status && attemptNo < 3);
 
         return status;
     }
@@ -692,127 +661,26 @@ public class SierraUsb598 implements EvdoCellularModem {
      */
     private static String[] generateSubscribeTopics() {
 
-        StringBuffer buf = new StringBuffer(SierraUsb598.class.getName().replace('.', '/'));
+        StringBuilder buf = new StringBuilder(SierraUsb598.class.getName().replace('.', '/'));
         buf.append('/');
         buf.append('*');
         String[] topics = new String[1];
-        topics[0] = new String(buf.toString());
-
+        topics[0] = buf.toString();
         return topics;
     }
-
-    /*
-     * private boolean notificationThread() {
-     *
-     * s_logger.debug("notificationThread() - start");
-     * CnS notification = null;
-     * // check for notifications (unsolicited messages)
-     * s_logger.debug("notificationThread() - alNotifications.size(): " + m_notifications.size());
-     * while (m_notifications.size() > 0) {
-     * notification = m_notifications.remove(0);
-     * s_logger.debug("notificationThread() - first notification: " + notification);
-     * if (notification != null) {
-     *
-     * s_logger.debug("Notification ObjID: 0x" + Integer.toHexString(notification.getObjectId()));
-     * int objID = notification.getObjectId();
-     *
-     * switch (objID) {
-     * case CnsObjectIDs.OBJID_RSSI.getObjectID():
-     * synchronized (m_rssiLock) {
-     * this.setSignalStrengthInfo(notification);
-     * }
-     * break;
-     * case CnsObjectIDs.OBJID_SID_VALUE.getObjectID():
-     * synchronized (m_sidLock) {
-     * this.setSystemIdInfo(notification);
-     * }
-     * break;
-     * case CnsObjectIDs.OBJID_NID_VALUE.getObjectID():
-     * synchronized (m_nidLock) {
-     * this.setNetworkIdInfo(notification);
-     * }
-     * break;
-     * case CnsObjectIDs.OBJID_CHANNEL_NUMBER.getObjectID():
-     * synchronized (m_channelNoLock) {
-     * this.setChannelNumberInfo(notification);
-     * }
-     * break;
-     * case CnsObjectIDs.OBJID_CHANNEL_STATE.getObjectID():
-     * synchronized (m_channelStateLock) {
-     * this.setChannelStateInfo(notification);
-     * }
-     * break;
-     * case CnsObjectIDs.OBJID_CURRENT_BAND_CLASS.getObjectID():
-     * synchronized (m_bandClassLock) {
-     * this.setBandClassInfo(notification);
-     * }
-     * break;
-     * case CnsObjectIDs.OBJID_ROAMING_STATUS.getObjectID():
-     * synchronized (m_roamingStatusLock) {
-     * this.setRoamingStatusInfo(notification);
-     * }
-     * break;
-     * case CnsObjectIDs.OBJID_CALL_BYTE_CNT.getObjectID():
-     * synchronized (m_byteCountLock) {
-     * this.setCallTxCounterInfo(notification);
-     * this.setCallRxCounterInfo(notification);
-     * }
-     * break;
-     * case CnsObjectIDs.OBJID_SRVC_INDICATION.getObjectID():
-     * synchronized (m_serviceTypeLock) {
-     * this.setServiceTypeInfo(notification);
-     * }
-     * break;
-     * case CnsObjectIDs.OBJID_RADIO_PWR.getObjectID():
-     * synchronized (m_powerModeLock) {
-     * this.setPowerModeInfo(notification);
-     * }
-     * break;
-     * case CnsObjectIDs.OBJID_CALL_DISCONNECTED.getObjectID():
-     * // notification-only - no need to synchronize
-     * this.setCallStatusInfo(SierraUsb598StatusCodes.CALLSTAT_DISCONNECTED.getStatusCode());
-     * break;
-     * case CnsObjectIDs.OBJID_CALL_CONNECTING.getObjectID():
-     * // notification-only - no need to synchronize
-     * this.setCallStatusInfo(SierraUsb598StatusCodes.CALLSTAT_CONNECTING.getStatusCode());
-     * break;
-     * case CnsObjectIDs.OBJID_CALL_CONNECTED.getObjectID():
-     * // notification-only - no need to synchronize
-     * this.setCallStatusInfo(SierraUsb598StatusCodes.CALLSTAT_CONNECTED.getStatusCode());
-     * break;
-     * case CnsObjectIDs.OBJID_CALL_DORMANT.getObjectID():
-     * // notification-only - no need to synchronize
-     * this.setCallStatusInfo(SierraUsb598StatusCodes.CALLSTAT_DORMANT.getStatusCode());
-     * break;
-     *
-     *
-     * // Have not seen this happen case MC572xCnS.OBJID_CALL_ERROR:
-     * //
-     * // this.kuraLoggerService.logDebug (LABEL + "!!!!! --------> GOT CALL ERROR NOTIFICATION <------- !!!!!"); byte
-     * [] pl = notification.getPayload(); for (int i = 0; i <
-     * // notification.getPayloadLength(); i++) { System.out.print("0x" + Integer.toHexString(pl[i]) + " "); }
-     * System.out.println(); break;
-     *
-     * }
-     * notification = null; // release notification
-     * }
-     * }
-     * return true;
-     * }
-     */
 
     /*
      * This method enables notification on specified CnS object
      */
     private void enableNotification(int objID) throws Exception {
 
-        CnS cnsReply = null;
+        CnS cnsReply;
         CnS cnsCommand = new CnS(objID, CnsOpTypes.OPTYPE_NOTIF_ENB.getOpType(),
                 CnsAppIDs.USB598_APPLICATION_ID.getID());
 
         cnsReply = this.cnsExchange(cnsCommand, 500);
         if (cnsReply != null && cnsReply.getOperationType() == CnsOpTypes.OPTYPE_NOTIF_ENB_REP.getOpType()) {
-            s_logger.debug("Notification on objID=0x" + Integer.toHexString(objID) + " is enabled");
+            logger.debug("Notification on objID=0x" + Integer.toHexString(objID) + " is enabled");
         }
     }
 
@@ -820,62 +688,62 @@ public class SierraUsb598 implements EvdoCellularModem {
      * This method sets receive signal strength information.
      */
     private void setSignalStrengthInfo(CnS cnsReply) {
-        byte[] cnsPayload = null;
+        byte[] cnsPayload;
 
         if (cnsReply != null) {
             cnsPayload = cnsReply.getPayload();
             if (cnsPayload != null) {
-                this.m_rssi = 0 - (cnsPayload[0] << 8 & 0x0ffff | cnsPayload[1] & 0x0ff);
-                s_logger.debug("!!! RSS !!! : {} dBm", this.m_rssi);
+                this.rssi = 0 - (cnsPayload[0] << 8 & 0x0ffff | cnsPayload[1] & 0x0ff);
+                logger.debug("!!! RSS !!! : {} dBm", this.rssi);
             }
         }
     }
 
     private void setSystemIdInfo(CnS cnsReply) {
 
-        byte[] cnsPayload = null;
+        byte[] cnsPayload;
         if (cnsReply != null) {
             cnsPayload = cnsReply.getPayload();
             if (cnsPayload != null) {
-                this.m_sid = cnsPayload[0] << 8 & 0x0ffff | cnsPayload[1] & 0x0ff;
-                s_logger.debug("!!! SID !!! : {}", this.m_sid);
+                this.sid = cnsPayload[0] << 8 & 0x0ffff | cnsPayload[1] & 0x0ff;
+                logger.debug("!!! SID !!! : {}", this.sid);
             }
         }
     }
 
     private void setNetworkIdInfo(CnS cnsReply) {
 
-        byte[] cnsPayload = null;
+        byte[] cnsPayload;
         if (cnsReply != null) {
             cnsPayload = cnsReply.getPayload();
             if (cnsPayload != null) {
-                this.m_nid = cnsPayload[0] << 8 & 0x0ffff | cnsPayload[1] & 0x0ff;
-                s_logger.debug("!!! NID !!! : {}", this.m_nid);
+                this.nid = cnsPayload[0] << 8 & 0x0ffff | cnsPayload[1] & 0x0ff;
+                logger.debug("!!! NID !!! : {}", this.nid);
             }
         }
     }
 
     private void setChannelNumberInfo(CnS cnsReply) {
 
-        byte[] cnsPayload = null;
+        byte[] cnsPayload;
         if (cnsReply != null) {
             cnsPayload = cnsReply.getPayload();
             if (cnsPayload != null) {
-                this.m_channelNo = cnsPayload[0] << 8 & 0x0ffff | cnsPayload[1] & 0x0ff;
-                s_logger.debug("!!! Channel Number !!! : {}", this.m_channelNo);
+                this.channelNo = cnsPayload[0] << 8 & 0x0ffff | cnsPayload[1] & 0x0ff;
+                logger.debug("!!! Channel Number !!! : {}", this.channelNo);
             }
         }
     }
 
     private void setChannelStateInfo(CnS cnsReply) {
 
-        byte[] cnsPayload = null;
+        byte[] cnsPayload;
         if (cnsReply != null) {
             cnsPayload = cnsReply.getPayload();
             if (cnsPayload != null) {
-                this.m_channelState = cnsPayload[0] << 8 & 0x0ffff | cnsPayload[1] & 0x0ff;
+                this.channelState = cnsPayload[0] << 8 & 0x0ffff | cnsPayload[1] & 0x0ff;
 
-                s_logger.debug("!!! Channel State !!! : {}", this.m_channelState);
+                logger.debug("!!! Channel State !!! : {}", this.channelState);
             }
         }
     }
@@ -886,9 +754,9 @@ public class SierraUsb598 implements EvdoCellularModem {
         if (cnsReply != null) {
             cnsPayload = cnsReply.getPayload();
             if (cnsPayload != null) {
-                this.m_bandClass = cnsPayload[0] << 8 & 0x0ffff | cnsPayload[1] & 0x0ff;
+                this.bandClass = cnsPayload[0] << 8 & 0x0ffff | cnsPayload[1] & 0x0ff;
 
-                s_logger.debug("!!! Current Band Class !!! : {}", this.m_bandClass);
+                logger.debug("!!! Current Band Class !!! : {}", this.bandClass);
             }
         }
     }
@@ -898,11 +766,11 @@ public class SierraUsb598 implements EvdoCellularModem {
      */
     private void setFirmwareVersion(CnS cnsReply) {
 
-        byte[] cnsPayload = null;
+        byte[] cnsPayload;
         if (cnsReply != null) {
             cnsPayload = cnsReply.getPayload();
             if (cnsPayload != null) {
-                this.m_firmwareVersion = new String(cnsPayload);
+                this.firmwareVersion = new String(cnsPayload);
             }
         }
     }
@@ -912,11 +780,11 @@ public class SierraUsb598 implements EvdoCellularModem {
      */
     private void setFirmwareDate(CnS cnsReply) {
 
-        byte[] cnsPayload = null;
+        byte[] cnsPayload;
         if (cnsReply != null) {
             cnsPayload = cnsReply.getPayload();
             if (cnsPayload != null) {
-                this.m_firmwareDate = new String(cnsPayload);
+                this.firmwareDate = new String(cnsPayload);
             }
         }
     }
@@ -926,13 +794,13 @@ public class SierraUsb598 implements EvdoCellularModem {
      */
     private void setPrlVersionInfo(CnS cnsReply) {
 
-        byte[] cnsPayload = null;
+        byte[] cnsPayload;
         if (cnsReply != null) {
             cnsPayload = cnsReply.getPayload();
             if (cnsPayload != null) {
-                this.m_prlVersion = cnsPayload[0] << 8 & 0x0ffff | cnsPayload[1] & 0x0ff;
+                this.prlVersion = cnsPayload[0] << 8 & 0x0ffff | cnsPayload[1] & 0x0ff;
 
-                s_logger.debug("!!! PRL Version !!! : {}", this.m_prlVersion);
+                logger.debug("!!! PRL Version !!! : {}", this.prlVersion);
             }
         }
     }
@@ -942,13 +810,13 @@ public class SierraUsb598 implements EvdoCellularModem {
      */
     private void setActivationStatusInfo(CnS cnsReply) {
 
-        byte[] cnsPayload = null;
+        byte[] cnsPayload;
         if (cnsReply != null) {
             cnsPayload = cnsReply.getPayload();
             if (cnsPayload != null) {
-                this.m_activationStatus = cnsPayload[0] << 8 & 0x0ffff | cnsPayload[1] & 0x0ff;
+                this.activationStatus = cnsPayload[0] << 8 & 0x0ffff | cnsPayload[1] & 0x0ff;
 
-                s_logger.debug("!!! Activation Status !!! : " + Integer.toHexString(this.m_activationStatus));
+                logger.debug("!!! Activation Status !!! : " + Integer.toHexString(this.activationStatus));
             }
         }
     }
@@ -958,18 +826,18 @@ public class SierraUsb598 implements EvdoCellularModem {
      */
     private void setActivationDateInfo(CnS cnsReply) {
 
-        byte[] cnsPayload = null;
+        byte[] cnsPayload;
         if (cnsReply != null) {
             cnsPayload = cnsReply.getPayload();
             if (cnsPayload != null) {
                 String sdate = new String(cnsPayload, 2, 8);
-                s_logger.debug("!!! Activation Date !!! : " + sdate + " length=" + sdate.length());
+                logger.debug("!!! Activation Date !!! : " + sdate + " length=" + sdate.length());
 
                 SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
                 try {
-                    this.m_activationDate.setTime(df.parse(sdate));
+                    this.activationDate.setTime(df.parse(sdate));
                 } catch (ParseException e) {
-                    this.m_activationDate = null;
+                    this.activationDate = null;
                 }
             }
         }
@@ -980,76 +848,74 @@ public class SierraUsb598 implements EvdoCellularModem {
      */
     private void setRoamingStatusInfo(CnS cnsReply) {
 
-        byte[] cnsPayload = null;
+        byte[] cnsPayload;
         if (cnsReply != null) {
             cnsPayload = cnsReply.getPayload();
             if (cnsPayload != null) {
-                this.m_roamingStatus = cnsPayload[0] << 8 & 0x0ffff | cnsPayload[1] & 0x0ff;
-
-                s_logger.debug("!!! Roaming Status !!! : {}", this.m_roamingStatus);
+                this.roamingStatus = cnsPayload[0] << 8 & 0x0ffff | cnsPayload[1] & 0x0ff;
+                logger.debug("!!! Roaming Status !!! : {}", this.roamingStatus);
             }
         }
     }
 
     private void setMobileDirectoryNumberInfo(CnS cnsReply) {
 
-        byte[] cnsPayload = null;
+        byte[] cnsPayload;
         if (cnsReply != null) {
             cnsPayload = cnsReply.getPayload();
             if (cnsPayload != null) {
                 int len = cnsPayload[2] << 8 & 0x0ffff | cnsPayload[3] & 0x0ff;
-                StringBuffer mdn = new StringBuffer();
+                StringBuilder sbMdn = new StringBuilder();
                 int offset = 4;
                 for (int i = 0; i < len; i++) {
-                    mdn.append(cnsPayload[offset + i]);
+                    sbMdn.append(cnsPayload[offset + i]);
                 }
-                this.m_mdn = convertDecimalNumeralToString(mdn);
-                s_logger.debug("!!! MDN !!! : {}", this.m_mdn);
+                this.mdn = convertDecimalNumeralToString(sbMdn);
+                logger.debug("!!! MDN !!! : {}", this.mdn);
             }
         }
     }
 
     private void setMobileIdentificationNumberInfo(CnS cnsReply) {
 
-        byte[] cnsPayload = null;
+        byte[] cnsPayload;
         if (cnsReply != null) {
             cnsPayload = cnsReply.getPayload();
             if (cnsPayload != null) {
                 int len = cnsPayload[2] << 8 & 0x0ffff | cnsPayload[3] & 0x0ff;
-                StringBuffer min = new StringBuffer();
+                StringBuilder sbMin = new StringBuilder();
                 int offset = 4;
                 for (int i = 0; i < len; i++) {
-                    min.append(cnsPayload[offset + i]);
+                    sbMin.append(cnsPayload[offset + i]);
                 }
-                this.m_min = convertDecimalNumeralToString(min);
-                s_logger.debug("!!! MIN !!! : {}", this.m_min);
+                this.min = convertDecimalNumeralToString(sbMin);
+                logger.debug("!!! MIN !!! : {}", this.min);
             }
         }
     }
 
     private void setServiceTypeInfo(CnS cnsReply) {
 
-        byte[] cnsPayload = null;
+        byte[] cnsPayload;
         if (cnsReply != null) {
             cnsPayload = cnsReply.getPayload();
             if (cnsPayload != null) {
-                this.m_serviceType = cnsPayload[0] << 8 & 0x0ffff | cnsPayload[1] & 0x0ff;
+                this.serviceType = cnsPayload[0] << 8 & 0x0ffff | cnsPayload[1] & 0x0ff;
 
-                s_logger.debug("!!! Service Type !!! : " + SierraUsb598Status.getServiceIndication(this.m_serviceType));
+                logger.debug("!!! Service Type !!! : " + SierraUsb598Status.getServiceIndication(this.serviceType));
             }
         }
     }
 
     private void setPowerModeInfo(CnS cnsReply) {
 
-        byte[] cnsPayload = null;
+        byte[] cnsPayload;
         if (cnsReply != null) {
             cnsPayload = cnsReply.getPayload();
             if (cnsPayload != null) {
-                this.m_powerMode = cnsPayload[2] << 8 & 0x0ffff | cnsPayload[3] & 0x0ff;
+                this.powerMode = cnsPayload[2] << 8 & 0x0ffff | cnsPayload[3] & 0x0ff;
 
-                s_logger.debug("!!! Power Mode !!! : " + SierraUsb598Status.getPowerMode(this.m_powerMode));
-
+                logger.debug("!!! Power Mode !!! : " + SierraUsb598Status.getPowerMode(this.powerMode));
             }
         }
     }
@@ -1059,13 +925,13 @@ public class SierraUsb598 implements EvdoCellularModem {
      */
     private void setCallTxCounterInfo(CnS cnsReply) {
 
-        byte[] cnsPayload = null;
+        byte[] cnsPayload;
         if (cnsReply != null) {
             cnsPayload = cnsReply.getPayload();
             if (cnsPayload != null) {
-                this.m_txCount = (cnsPayload[0] << 24 & 0x0ffffffff | cnsPayload[1] << 16 & 0x0ffffff
+                this.txCount = (cnsPayload[0] << 24 & 0x0ffffffff | cnsPayload[1] << 16 & 0x0ffffff
                         | cnsPayload[2] << 8 & 0x0ffff | cnsPayload[3] & 0x0ff) & 0x0ffffffffL;
-                s_logger.debug("!!! TX Count !!! :{}", this.m_txCount);
+                logger.debug("!!! TX Count !!! :{}", this.txCount);
             }
         }
     }
@@ -1075,37 +941,28 @@ public class SierraUsb598 implements EvdoCellularModem {
      */
     private void setCallRxCounterInfo(CnS cnsReply) {
 
-        byte[] cnsPayload = null;
+        byte[] cnsPayload;
         if (cnsReply != null) {
             cnsPayload = cnsReply.getPayload();
             if (cnsPayload != null) {
-                this.m_rxCount = (cnsPayload[4] << 24 & 0x0ffffffff | cnsPayload[5] << 16 & 0x0ffffff
+                this.rxCount = (cnsPayload[4] << 24 & 0x0ffffffff | cnsPayload[5] << 16 & 0x0ffffff
                         | cnsPayload[6] << 8 & 0x0ffff | cnsPayload[7] & 0x0ff) & 0x0ffffffffL;
-                s_logger.debug("!!! RX Count !!! :{}", this.m_rxCount);
+                logger.debug("!!! RX Count !!! :{}", this.rxCount);
             }
         }
     }
 
     private void setCallStatusInfo(int callStatus) {
-        this.m_callStatus = callStatus;
-        /*
-         * if ((this.callStatus == Usb598Status.CALLSTAT_CONNECTED) ||
-         * (this.callStatus == Usb598Status.CALLSTAT_DORMANT)) {
-         * this.connected = true;
-         * } else {
-         * this.connected = false;
-         * }
-         */
+        this.callStatus = callStatus;
     }
 
     /*
      * This method converts supplied string buffer of decimal numerals to string
      */
-    private String convertDecimalNumeralToString(StringBuffer buf) {
+    private String convertDecimalNumeralToString(StringBuilder buf) {
 
-        StringBuffer ret = new StringBuffer();
-        int num = 0;
-
+        StringBuilder ret = new StringBuilder();
+        int num;
         for (int i = 0; i < buf.length(); i = i + 2) {
             num = Character.digit(buf.charAt(i), 10) * 10 + Character.digit(buf.charAt(i + 1), 10) - 0x30;
             ret.append(num);
@@ -1118,19 +975,12 @@ public class SierraUsb598 implements EvdoCellularModem {
      */
     private CnS cnsExchange(CnS cnsCommand, int tout) throws Exception {
         CnS cnsReply = null;
-        // ModemCommand modemCommand = new ModemCommand(cnsCommand);
-        s_logger.debug("cnsExchange() start");
+        logger.debug("cnsExchange() start");
         try {
-            cnsReply = new CnS(this.m_commHipConnection.sendCommand(cnsCommand.getRequest(), tout));
+            cnsReply = new CnS(this.commHipConnection.sendCommand(cnsCommand.getRequest(), tout));
         } catch (Exception e) {
-            s_logger.debug("Failed to send command: {}", e);
+            logger.debug("Failed to send command: {}", e);
         }
-        // ModemReply modemReply =
-        // this.modemChannelService.sendCommand(this.getHIPport(), modemCommand,
-        // tout);
-        // if (modemReply != null) {
-        // cnsReply = modemReply.getCnsReply();
-        // }
         return cnsReply;
     }
 
@@ -1139,7 +989,6 @@ public class SierraUsb598 implements EvdoCellularModem {
      * timeout is set to 500 msec
      */
     private CnS cnsExchange(CnS cnsCommand) throws Exception {
-
         return this.cnsExchange(cnsCommand, 500);
     }
 }

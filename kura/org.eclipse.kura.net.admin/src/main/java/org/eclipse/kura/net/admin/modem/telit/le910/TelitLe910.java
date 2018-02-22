@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -38,30 +38,23 @@ public class TelitLe910 extends TelitHe910 implements HspaCellularModem {
         super(device, platform, connectionFactory);
     }
 
-    /*
-     * Don't need this since we can now use AT$GPSP=1
-     * public void enableGps() throws KuraException {
-     * enableGps(TelitLe910AtCommands.gpsPowerUp.getCommand());
-     * }
-     */
-
     @Override
     public List<ModemTechnologyType> getTechnologyTypes() throws KuraException {
 
-        List<ModemTechnologyType> modemTechnologyTypes = null;
+        List<ModemTechnologyType> modemTechnologyTypes;
         ModemDevice device = getModemDevice();
         if (device == null) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "No modem device");
+            throw new KuraException(KuraErrorCode.UNAVAILABLE_DEVICE, "No modem device");
         }
         if (device instanceof UsbModemDevice) {
             SupportedUsbModemInfo usbModemInfo = SupportedUsbModemsInfo.getModem((UsbModemDevice) device);
             if (usbModemInfo != null) {
                 modemTechnologyTypes = usbModemInfo.getTechnologyTypes();
             } else {
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "No usbModemInfo available");
+                throw new KuraException(KuraErrorCode.UNAVAILABLE_DEVICE, "No usbModemInfo available");
             }
         } else {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "Unsupported modem device");
+            throw new KuraException(KuraErrorCode.UNAVAILABLE_DEVICE, "Unsupported modem device");
         }
         return modemTechnologyTypes;
     }
@@ -78,7 +71,7 @@ public class TelitLe910 extends TelitHe910 implements HspaCellularModem {
             port = getAtPort();
         }
 
-        synchronized (s_atLock) {
+        synchronized (this.atLock) {
             s_logger.debug("sendCommand getSimStatus :: {} command to port {}",
                     TelitHe910AtCommands.getSimStatus.getCommand(), port);
             byte[] reply = null;
@@ -87,8 +80,7 @@ public class TelitLe910 extends TelitHe910 implements HspaCellularModem {
 
                 commAtConnection = openSerialPort(port);
                 if (!isAtReachable(commAtConnection)) {
-                    throw new KuraException(KuraErrorCode.NOT_CONNECTED,
-                            "Modem not available for AT commands: " + TelitHe910.class.getName());
+                    throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
                 }
 
                 reply = commAtConnection.sendCommand(TelitHe910AtCommands.getSimStatus.getCommand().getBytes(), 1000,
@@ -101,7 +93,7 @@ public class TelitLe910 extends TelitHe910 implements HspaCellularModem {
                     }
                 }
             } catch (IOException e) {
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+                throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
             } catch (KuraException e) {
                 throw e;
             } finally {

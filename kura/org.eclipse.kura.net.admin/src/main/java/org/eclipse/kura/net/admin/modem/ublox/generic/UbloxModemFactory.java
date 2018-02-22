@@ -31,42 +31,42 @@ import org.osgi.util.tracker.ServiceTracker;
  */
 public class UbloxModemFactory implements CellularModemFactory {
 
-    private static UbloxModemFactory s_factoryInstance = null;
+    private static UbloxModemFactory factoryInstance = null;
 
-    private static ModemTechnologyType s_type = ModemTechnologyType.HSPA;
+    private static ModemTechnologyType type = ModemTechnologyType.HSPA;
 
-    private BundleContext s_bundleContext = null;
-    private Hashtable<String, UbloxModem> m_modemServices = null;
+    private BundleContext bundleContext = null;
+    private Hashtable<String, UbloxModem> modemServices = null;
 
-    private ConnectionFactory m_connectionFactory = null;
+    private ConnectionFactory connectionFactory = null;
 
     private UbloxModemFactory() {
-        this.s_bundleContext = FrameworkUtil.getBundle(NetworkConfigurationService.class).getBundleContext();
+        this.bundleContext = FrameworkUtil.getBundle(NetworkConfigurationService.class).getBundleContext();
 
-        ServiceTracker<ConnectionFactory, ConnectionFactory> serviceTracker = new ServiceTracker<>(
-                this.s_bundleContext, ConnectionFactory.class, null);
+        ServiceTracker<ConnectionFactory, ConnectionFactory> serviceTracker = new ServiceTracker<>(this.bundleContext,
+                ConnectionFactory.class, null);
         serviceTracker.open(true);
-        this.m_connectionFactory = serviceTracker.getService();
+        this.connectionFactory = serviceTracker.getService();
 
-        this.m_modemServices = new Hashtable<>();
+        this.modemServices = new Hashtable<>();
     }
 
     public static UbloxModemFactory getInstance() {
-        if (s_factoryInstance == null) {
-            s_factoryInstance = new UbloxModemFactory();
+        if (factoryInstance == null) {
+            factoryInstance = new UbloxModemFactory();
         }
-        return s_factoryInstance;
+        return factoryInstance;
     }
 
     @Override
     public CellularModem obtainCellularModemService(ModemDevice modemDevice, String platform) throws Exception {
 
         String key = modemDevice.getProductName();
-        UbloxModem ubloxModem = this.m_modemServices.get(key);
+        UbloxModem ubloxModem = this.modemServices.get(key);
 
         if (ubloxModem == null) {
-            ubloxModem = new UbloxModem(modemDevice, platform, this.m_connectionFactory);
-            this.m_modemServices.put(key, ubloxModem);
+            ubloxModem = new UbloxModem(modemDevice, platform, this.connectionFactory);
+            this.modemServices.put(key, ubloxModem);
         } else {
             ubloxModem.setModemDevice(modemDevice);
         }
@@ -76,17 +76,17 @@ public class UbloxModemFactory implements CellularModemFactory {
 
     @Override
     public Hashtable<String, ? extends CellularModem> getModemServices() {
-        return this.m_modemServices;
+        return this.modemServices;
     }
 
     @Override
     public void releaseModemService(String usbPortAddress) {
-        this.m_modemServices.remove(usbPortAddress);
+        this.modemServices.remove(usbPortAddress);
     }
 
     @Override
     @Deprecated
     public ModemTechnologyType getType() {
-        return s_type;
+        return type;
     }
 }

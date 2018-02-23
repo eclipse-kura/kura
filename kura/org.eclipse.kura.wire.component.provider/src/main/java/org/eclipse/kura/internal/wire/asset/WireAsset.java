@@ -326,7 +326,6 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
         final ChannelStatus channelStatus = channelRecord.getChannelStatus();
         if (channelStatus.getChannelFlag() == ChannelFlag.FAILURE) {
             final String errorMessage = getErrorMessage(channelStatus);
-            logger.warn(errorMessage);
             wireRecordProperties.put(channelName + WireAssetConstants.PROP_SUFFIX_ERROR.value(),
                     TypedValues.newStringValue(errorMessage));
         } else {

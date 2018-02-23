@@ -520,7 +520,7 @@ public class NetworkConfigurationServiceimplTest {
 
         List<AD> ads = ocd.getAD();
         assertNotNull(ads);
-        assertEquals(62, ads.size());
+        assertEquals(60, ads.size());
 
         int adsConfigured = 0;
         for (AD ad : ads) {
@@ -531,13 +531,6 @@ public class NetworkConfigurationServiceimplTest {
                 adsConfigured++;
             }
             
-            if ("net.interface.eth2.config.l2only.enabled".equals(ad.getId())) {
-                assertEquals("net.interface.eth2.config.l2only.enabled", ad.getName());
-                assertEquals("BOOLEAN", ad.getType().name());
-                assertTrue(ad.isRequired());
-                adsConfigured++;
-            }
-
             if ("net.interface.eth2.config.dhcpClient4.enabled".equals(ad.getId())) {
                 assertEquals("net.interface.eth2.config.dhcpClient4.enabled", ad.getName());
                 assertEquals("BOOLEAN", ad.getType().name());
@@ -685,13 +678,6 @@ public class NetworkConfigurationServiceimplTest {
                 adsConfigured++;
             }
             
-            if ("net.interface.wlan1.config.l2only.enabled".equals(ad.getId())) {
-                assertEquals("net.interface.wlan1.config.l2only.enabled", ad.getName());
-                assertEquals("BOOLEAN", ad.getType().name());
-                assertTrue(ad.isRequired());
-                adsConfigured++;
-            }
-
             if ("net.interface.wlan1.config.dhcpClient4.enabled".equals(ad.getId())) {
                 assertEquals("net.interface.wlan1.config.dhcpClient4.enabled", ad.getName());
                 assertEquals("BOOLEAN", ad.getType().name());
@@ -958,7 +944,7 @@ public class NetworkConfigurationServiceimplTest {
                 adsConfigured++;
             }
         }
-        assertEquals(62, adsConfigured);
+        assertEquals(60, adsConfigured);
     }
 
 }

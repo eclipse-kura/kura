@@ -245,8 +245,9 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
                 // (String interfaceName, boolean up, boolean link, IPAddress ipAddress)
                 // It will save a call to determine the iface type and it will keep InterfaceState
                 // as a state object as it should be. Maybe introduce an InterfaceStateBuilder.
-                currentInterfaceState = getEthernetInterfaceState(interfaceName,
-                        ((AbstractNetInterface<?>) currentInterfaceConfig).getIP4config().isL2Only());
+                boolean isL2Only = ((AbstractNetInterface<?>) currentInterfaceConfig).getIP4config()
+                        .getStatus() == NetInterfaceStatus.netIPv4StatusL2Only ? true : false;
+                currentInterfaceState = getEthernetInterfaceState(interfaceName, isL2Only);
                 if (!currentInterfaceState.equals(prevInterfaceState)) {
                     postStatusChangeEvent = true;
                 }
@@ -312,8 +313,9 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
                 // Get the status after all ifdowns and ifups
                 // FIXME: reload the configuration IFF one of above enable/disable happened
                 if (interfaceStateChanged) {
-                    currentInterfaceState = getEthernetInterfaceState(interfaceName,
-                            ((AbstractNetInterface<?>) currentInterfaceConfig).getIP4config().isL2Only());
+                    isL2Only = ((AbstractNetInterface<?>) currentInterfaceConfig).getIP4config()
+                            .getStatus() == NetInterfaceStatus.netIPv4StatusL2Only ? true : false;
+                    currentInterfaceState = getEthernetInterfaceState(interfaceName, isL2Only);
                 }
 
                 // Manage the DHCP server and validate routes

@@ -277,8 +277,10 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                         // Update the current wifi state
                         this.interfaceStatuses.remove(interfaceName);
                         NetConfigIP4 netConfig = ((AbstractNetInterface<?>) wifiInterfaceConfig).getIP4config();
+                        boolean isL2Only = netConfig.getStatus() == NetInterfaceStatus.netIPv4StatusL2Only ? true
+                                : false;
                         this.interfaceStatuses.put(interfaceName,
-                                new InterfaceState(NetInterfaceType.WIFI, interfaceName, netConfig.isL2Only()));
+                                new InterfaceState(NetInterfaceType.WIFI, interfaceName, isL2Only));
                     }
 
                     // Get current state
@@ -967,9 +969,10 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                 continue;
             }
             WifiConfig wifiConfig = getWifiConfig(wifiInterfaceConfig);
+            boolean isL2Only = ((AbstractNetInterface<?>) wifiInterfaceConfig).getIP4config()
+                    .getStatus() == NetInterfaceStatus.netIPv4StatusL2Only ? true : false;
             if (wifiConfig != null) {
-                statuses.put(interfaceName, new WifiInterfaceState(interfaceName, wifiConfig.getMode(),
-                        ((AbstractNetInterface<?>) wifiInterfaceConfig).getIP4config().isL2Only()));
+                statuses.put(interfaceName, new WifiInterfaceState(interfaceName, wifiConfig.getMode(), isL2Only));
             }
         }
         return statuses;

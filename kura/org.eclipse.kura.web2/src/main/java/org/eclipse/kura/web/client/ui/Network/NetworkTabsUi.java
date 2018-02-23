@@ -193,7 +193,7 @@ public class NetworkTabsUi extends Composite {
     // Add/remove tabs based on the selected settings in the various tabs
     public void adjustInterfaceTabs() {
         String netIfStatus = this.tcpIp.getStatus();
-        boolean includeDhcpNat = !(this.tcpIp.isDhcp() || this.tcpIp.isL2Only()) && netIfStatus.equals(IPV4_STATUS_ENABLED_LAN_MESSAGE);
+        boolean includeDhcpNat = !this.tcpIp.isDhcp() && netIfStatus.equals(IPV4_STATUS_ENABLED_LAN_MESSAGE);
 
         if (this.netIfConfig instanceof GwtWifiNetInterfaceConfig) {
             removeTab(this.modemTab);

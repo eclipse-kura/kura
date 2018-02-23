@@ -236,10 +236,10 @@ public class ModemInterfaceAddressConfigImplTest {
 		ModemInterfaceAddressConfigImpl value = createConfig();
 
 		String expected = "NetConfig: NetConfigIP4 [winsServers=[], super.toString()=NetConfigIP"
-				+ " [status=netIPv4StatusEnabledLAN, autoConnect=true, l2only=false, dhcp=false, address=null,"
+				+ " [status=netIPv4StatusEnabledLAN, autoConnect=true, dhcp=false, address=null,"
 				+ " networkPrefixLength=-1, subnetMask=null, gateway=null, dnsServers=[], domains=[],"
 				+ " properties={}]] - NetConfig: NetConfigIP4 [winsServers=[], super.toString()=NetConfigIP"
-				+ " [status=netIPv4StatusEnabledWAN, autoConnect=false, l2only=false, dhcp=false, address=null,"
+				+ " [status=netIPv4StatusEnabledWAN, autoConnect=false, dhcp=false, address=null,"
 				+ " networkPrefixLength=-1, subnetMask=null, gateway=null, dnsServers=[], domains=[],"
 				+ " properties={}]] - ";
 

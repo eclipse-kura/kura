@@ -154,7 +154,7 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
                         sb.append("no");
                     }
                     sb.append("\n");
-                    if (((NetConfigIP4) netConfig).isL2Only()) {
+                    if (((NetConfigIP4) netConfig).getStatus() == NetInterfaceStatus.netIPv4StatusL2Only) {
                         logger.debug("new config is Layer 2 Only");
                         sb.append("BOOTPROTO=none\n");
                     } else if (((NetConfigIP4) netConfig).isDhcp()) {
@@ -452,7 +452,7 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
             } else {
                 sb.append("iface " + interfaceName + " inet ");
             }
-            if (((NetConfigIP4) netConfig).isL2Only()) {
+            if (((NetConfigIP4) netConfig).getStatus() == NetInterfaceStatus.netIPv4StatusL2Only) {
                 logger.debug("new config is Layer 2 Only foir {}", interfaceName);
                 sb.append("manual\n");
             } else if (((NetConfigIP4) netConfig).isDhcp()) {
@@ -589,7 +589,7 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
             // ONBOOT
             props.setProperty("ONBOOT", netConfigIP4.isAutoConnect() ? "yes" : "no");
 
-            if (netConfigIP4.isL2Only()) {
+            if (netConfigIP4.getStatus() == NetInterfaceStatus.netIPv4StatusL2Only) {
                 props.setProperty("BOOTPROTO", "none");
             } else if (netConfigIP4.isDhcp()) {
                 props.setProperty("BOOTPROTO", "dhcp");

@@ -601,19 +601,6 @@ public class NetworkConfigurationServiceImpl
                     tocd.addAD(tad);
 
                     tad = objectFactory.createTad();
-                    tad.setId(new StringBuffer().append(prefix).append(ifaceName).append(".config.l2only.enabled")
-                            .toString());
-                    tad.setName(new StringBuffer().append(prefix).append(ifaceName).append(".config.l2only.enabled")
-                            .toString());
-                    tad.setType(Tscalar.BOOLEAN);
-                    tad.setCardinality(0);
-                    tad.setRequired(true);
-                    tad.setDefault("");
-                    tad.setDescription(NetworkAdminConfigurationMessages
-                            .getMessage(NetworkAdminConfiguration.CONFIG_IPV4_L2ONLY_ENABLED));
-                    tocd.addAD(tad);
-
-                    tad = objectFactory.createTad();
                     tad.setId(new StringBuffer().append(prefix).append(ifaceName).append(".config.dhcpClient4.enabled")
                             .toString());
                     tad.setName(new StringBuffer().append(prefix).append(ifaceName)

@@ -231,26 +231,13 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
                 String currentAddress = gwtNetInterfaceConfig.getIpAddress();
                 String currentSubnetMask = gwtNetInterfaceConfig.getSubnetMask();
 
-                String currentStatus;
-                if (gwtNetInterfaceConfig.getStatusEnum() == GwtNetIfStatus.netIPv4StatusDisabled) {
-                    currentStatus = "Disabled";
-                } else if (gwtNetInterfaceConfig.getStatusEnum() == GwtNetIfStatus.netIPv4StatusEnabledLAN) {
-                    currentStatus = "LAN";
-                } else if (gwtNetInterfaceConfig.getStatusEnum() == GwtNetIfStatus.netIPv4StatusEnabledWAN) {
-                    currentStatus = "WAN";
-                } else {
-                    currentStatus = "Unmanaged";
-                }
-
                 String currentConfigMode;
-                if (gwtNetInterfaceConfig.getConfigModeEnum() == GwtNetIfConfigMode.netIPv4ConfigModeL2Only) {
-                    currentConfigMode = "L2Only";
-                } else if (gwtNetInterfaceConfig.getConfigModeEnum() == GwtNetIfConfigMode.netIPv4ConfigModeDHCP) {
+                if (gwtNetInterfaceConfig.getConfigModeEnum() == GwtNetIfConfigMode.netIPv4ConfigModeDHCP) {
                     currentConfigMode = "DHCP";
                 } else {
                     currentConfigMode = "Manual";
                 }
-                
+
                 String currentRouterMode;
                 if (gwtNetInterfaceConfig.getRouterModeEnum() == GwtNetRouterMode.netRouterDchp) {
                     currentRouterMode = "DHCPD";
@@ -263,14 +250,17 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
                 }
 
                 if (gwtNetInterfaceConfig.getHwTypeEnum() == GwtNetIfType.ETHERNET) {
-                    if (currentStatus.equals("Disabled") || currentStatus.equals("Unmanaged")) {
+                    if (gwtNetInterfaceConfig.getStatusEnum() == GwtNetIfStatus.netIPv4StatusDisabled
+                            || gwtNetInterfaceConfig.getStatusEnum() == GwtNetIfStatus.netIPv4StatusUnmanaged
+                            || gwtNetInterfaceConfig.getStatusEnum() == GwtNetIfStatus.netIPv4StatusL2Only) {
                         pairs.add(new GwtGroupedNVPair("networkStatusEthernet", gwtNetInterfaceConfig.getName(),
-                                currentStatus));
+                                gwtNetInterfaceConfig.getStatusEnum().getValue()));
                     } else {
                         pairs.add(new GwtGroupedNVPair("networkStatusEthernet", gwtNetInterfaceConfig.getName(),
                                 currentAddress + nl + tab + "Subnet Mask: " + currentSubnetMask + nl + tab + "Mode: "
-                                        + currentStatus + nl + tab + "IP Acquisition: " + currentConfigMode + nl + tab
-                                        + "Router Mode: " + currentRouterMode));
+                                        + gwtNetInterfaceConfig.getStatusEnum().getValue() + nl + tab
+                                        + "IP Acquisition: " + currentConfigMode + nl + tab + "Router Mode: "
+                                        + currentRouterMode));
                     }
                 } else if (gwtNetInterfaceConfig.getHwTypeEnum() == GwtNetIfType.WIFI
                         && !gwtNetInterfaceConfig.getName().startsWith("mon")) {
@@ -283,28 +273,34 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
                     if (gwtActiveWifiConfig != null) {
                         currentWifiSsid = gwtActiveWifiConfig.getWirelessSsid();
                     }
-                    if (currentStatus.equals("Disabled") || currentStatus.equals("Unmanaged")) {
+                    if (gwtNetInterfaceConfig.getStatusEnum() == GwtNetIfStatus.netIPv4StatusDisabled
+                            || gwtNetInterfaceConfig.getStatusEnum() == GwtNetIfStatus.netIPv4StatusUnmanaged
+                            || gwtNetInterfaceConfig.getStatusEnum() == GwtNetIfStatus.netIPv4StatusL2Only) {
                         pairs.add(new GwtGroupedNVPair("networkStatusWifi", gwtNetInterfaceConfig.getName(),
-                                currentStatus));
+                                gwtNetInterfaceConfig.getStatusEnum().getValue()));
                     } else {
                         pairs.add(new GwtGroupedNVPair("networkStatusWifi", gwtNetInterfaceConfig.getName(),
                                 currentAddress + nl + tab + "Subnet Mask: " + currentSubnetMask + nl + tab + "Mode: "
-                                        + currentStatus + nl + tab + "IP Acquisition: " + currentConfigMode + nl + tab
-                                        + "Router Mode: " + currentRouterMode + nl + tab + "Wireless Mode:"
-                                        + currentWifiMode + nl + tab + "SSID: " + currentWifiSsid + nl));
+                                        + gwtNetInterfaceConfig.getStatusEnum().getValue() + nl + tab
+                                        + "IP Acquisition: " + currentConfigMode + nl + tab + "Router Mode: "
+                                        + currentRouterMode + nl + tab + "Wireless Mode:" + currentWifiMode + nl + tab
+                                        + "SSID: " + currentWifiSsid + nl));
                     }
                 } else if (gwtNetInterfaceConfig.getHwTypeEnum() == GwtNetIfType.MODEM) {
                     String currentModemApn = ((GwtModemInterfaceConfig) gwtNetInterfaceConfig).getApn();
                     String currentModemPppNum = Integer
                             .toString(((GwtModemInterfaceConfig) gwtNetInterfaceConfig).getPppNum());
-                    if (currentStatus.equals("Disabled") || currentStatus.equals("Unmanaged")) {
+                    if (gwtNetInterfaceConfig.getStatusEnum() == GwtNetIfStatus.netIPv4StatusDisabled
+                            || gwtNetInterfaceConfig.getStatusEnum() == GwtNetIfStatus.netIPv4StatusUnmanaged
+                            || gwtNetInterfaceConfig.getStatusEnum() == GwtNetIfStatus.netIPv4StatusL2Only) {
                         pairs.add(new GwtGroupedNVPair("networkStatusModem", gwtNetInterfaceConfig.getName(),
-                                currentStatus));
+                                gwtNetInterfaceConfig.getStatusEnum().getValue()));
                     } else {
                         pairs.add(new GwtGroupedNVPair("networkStatusModem", gwtNetInterfaceConfig.getName(),
                                 currentAddress + nl + "Subnet Mask: " + currentSubnetMask + nl + tab + "Mode: "
-                                        + currentStatus + nl + tab + "IP Acquisition: " + currentConfigMode + nl + tab
-                                        + "APN: " + currentModemApn + nl + tab + "PPP: " + currentModemPppNum));
+                                        + gwtNetInterfaceConfig.getStatusEnum().getValue() + nl + tab
+                                        + "IP Acquisition: " + currentConfigMode + nl + tab + "APN: " + currentModemApn
+                                        + nl + tab + "PPP: " + currentModemPppNum));
                     }
                 }
             }

@@ -565,7 +565,6 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
                                     newNetConfigs.add(netConfig4);
                                     if (!netConfig.equals(netConfig4)) {
                                         logger.debug("updating NetConfig4 for {}", interfaceName);
-                                        logger.debug("Is new State L2Only? {}", netConfig4.isL2Only());
                                         logger.debug("Is new State DHCP? {}", netConfig4.isDhcp());
                                         configurationChanged = true;
                                         if (!modifiedInterfaceNames.contains(interfaceName)) {
@@ -970,7 +969,8 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
                 for (NetConfig netConfig : wifiInterfaceAddressConfig.getConfigs()) {
                     if (netConfig instanceof NetConfigIP4) {
                         status = ((NetConfigIP4) netConfig).getStatus();
-                        isL2Only = ((NetConfigIP4) netConfig).isL2Only();
+                        isL2Only = ((NetConfigIP4) netConfig).getStatus() == NetInterfaceStatus.netIPv4StatusL2Only
+                                ? true : false;
                         logger.debug("Interface status is set to {}", status);
                     } else if (netConfig instanceof WifiConfig && ((WifiConfig) netConfig).getMode() == wifiMode) {
                         wifiConfig = (WifiConfig) netConfig;

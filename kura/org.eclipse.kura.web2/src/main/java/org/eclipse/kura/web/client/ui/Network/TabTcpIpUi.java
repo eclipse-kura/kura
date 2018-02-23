@@ -67,8 +67,6 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class TabTcpIpUi extends Composite implements NetworkTab {
 
-    private static final String IPV4_MODE_L2ONLY = GwtNetIfConfigMode.netIPv4ConfigModeL2Only.name();
-    private static final String IPV4_MODE_L2ONLY_MESSAGE = MessageUtils.get(IPV4_MODE_L2ONLY);
     private static final String IPV4_MODE_MANUAL = GwtNetIfConfigMode.netIPv4ConfigModeManual.name();
     private static final String IPV4_MODE_DHCP = GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name();
     private static final String IPV4_MODE_DHCP_MESSAGE = MessageUtils.get(IPV4_MODE_DHCP);
@@ -78,6 +76,8 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
     private static final String IPV4_STATUS_LAN_MESSAGE = MessageUtils.get(IPV4_STATUS_LAN);
     private static final String IPV4_STATUS_UNMANAGED = GwtNetIfStatus.netIPv4StatusUnmanaged.name();
     private static final String IPV4_STATUS_UNMANAGED_MESSAGE = MessageUtils.get(IPV4_STATUS_UNMANAGED);
+    private static final String IPV4_STATUS_L2ONLY = GwtNetIfStatus.netIPv4StatusL2Only.name();
+    private static final String IPV4_STATUS_L2ONLY_MESSAGE = MessageUtils.get(IPV4_STATUS_L2ONLY);
     private static final String IPV4_STATUS_DISABLED = GwtNetIfStatus.netIPv4StatusDisabled.name();
     private static final String IPV4_STATUS_DISABLED_MESSAGE = MessageUtils.get(IPV4_STATUS_DISABLED);
 
@@ -94,7 +94,7 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
     }
 
     GwtSession session;
-    boolean m_dirty;
+    boolean dirty;
     GwtNetInterfaceConfig selectedNetIfConfig;
     NetworkTabsUi tabs;
 
@@ -199,12 +199,12 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
 
     @Override
     public void setDirty(boolean flag) {
-        this.m_dirty = flag;
+        this.dirty = flag;
     }
 
     @Override
     public boolean isDirty() {
-        return this.m_dirty;
+        return this.dirty;
     }
 
     @Override
@@ -234,6 +234,7 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
                 this.status.clear();
                 this.status.addItem(MessageUtils.get("netIPv4StatusDisabled"));
                 this.status.addItem(MessageUtils.get("netIPv4StatusUnmanaged"));
+                this.status.addItem(MessageUtils.get("netIPv4StatusL2Only"));
                 this.status.addItem(MessageUtils.get("netIPv4StatusEnabledLAN"));
                 this.status.addItem(MessageUtils.get("netIPv4StatusEnabledWAN"));
             }
@@ -243,19 +244,20 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
     @Override
     public void getUpdatedNetInterface(GwtNetInterfaceConfig updatedNetIf) {
         if (this.form != null) {
-            if (this.status.getSelectedItemText().equals(MessageUtils.get("netIPv4StatusDisabled"))) {
-                updatedNetIf.setStatus(IPV4_STATUS_DISABLED);
-            } else if (this.status.getSelectedItemText().equals(MessageUtils.get("netIPv4StatusUnmanaged"))) {
+
+            if (this.status.getSelectedItemText().equals(MessageUtils.get("netIPv4StatusUnmanaged"))) {
                 updatedNetIf.setStatus(IPV4_STATUS_UNMANAGED);
+            } else if (this.status.getSelectedItemText().equals(MessageUtils.get("netIPv4StatusL2Only"))) {
+                updatedNetIf.setStatus(IPV4_STATUS_L2ONLY);
             } else if (this.status.getSelectedItemText().equals(MessageUtils.get("netIPv4StatusEnabledLAN"))) {
                 updatedNetIf.setStatus(IPV4_STATUS_LAN);
-            } else {
+            } else if (this.status.getSelectedItemText().equals(MessageUtils.get("netIPv4StatusEnabledWAN"))) {
                 updatedNetIf.setStatus(IPV4_STATUS_WAN);
+            } else {
+                updatedNetIf.setStatus(IPV4_STATUS_DISABLED);
             }
 
-            if (IPV4_MODE_L2ONLY_MESSAGE.equals(this.configure.getSelectedItemText())) {
-                updatedNetIf.setConfigMode(IPV4_MODE_L2ONLY);
-            } else if (IPV4_MODE_DHCP_MESSAGE.equals(this.configure.getSelectedItemText())) {
+            if (IPV4_MODE_DHCP_MESSAGE.equals(this.configure.getSelectedItemText())) {
                 updatedNetIf.setConfigMode(IPV4_MODE_DHCP);
             } else {
                 updatedNetIf.setConfigMode(IPV4_MODE_MANUAL);
@@ -333,14 +335,6 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
     public String getStatus() {
         return this.status.getSelectedValue();
     }
-    
-    public boolean isL2Only() {
-        if (this.configure == null) {
-            logger.log(Level.FINER, "TcpIpConfigTab.isDhcp() - this.configure is null");
-            return false;
-        }
-        return IPV4_MODE_L2ONLY_MESSAGE.equals(this.configure.getSelectedValue());
-    }
 
     public boolean isDhcp() {
         if (this.configure == null) {
@@ -402,6 +396,7 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
                 this.status.clear();
                 this.status.addItem(MessageUtils.get("netIPv4StatusDisabled"));
                 this.status.addItem(MessageUtils.get("netIPv4StatusUnmanaged"));
+                this.status.addItem(MessageUtils.get("netIPv4StatusL2Only"));
                 this.status.addItem(MessageUtils.get("netIPv4StatusEnabledLAN"));
                 this.status.addItem(MessageUtils.get("netIPv4StatusEnabledWAN"));
             }
@@ -809,7 +804,8 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
             this.configure.setSelectedIndex(this.configure.getItemText(0).equals(IPV4_MODE_DHCP_MESSAGE) ? 0 : 1);
         } else {
             if (VMSGS.netIPv4StatusDisabled().equals(this.status.getSelectedValue())
-                    || VMSGS.netIPv4StatusUnmanaged().equals(this.status.getSelectedValue())) {
+                    || VMSGS.netIPv4StatusUnmanaged().equals(this.status.getSelectedValue())
+                    || VMSGS.netIPv4StatusL2Only().equals(this.status.getSelectedValue())) {
                 String configureVal = this.configure.getItemText(0);
                 this.configure.setSelectedIndex(configureVal.equals(IPV4_MODE_DHCP_MESSAGE) ? 0 : 1);
                 this.ip.setText("");
@@ -826,14 +822,7 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
             } else {
                 this.configure.setEnabled(true);
                 String configureValue = this.configure.getSelectedValue();
-                if (configureValue.equals(IPV4_MODE_L2ONLY_MESSAGE)) {
-                    this.ip.setEnabled(false);
-                    this.subnet.setEnabled(false);
-                    this.gateway.setEnabled(false);
-                    this.renew.setEnabled(false);
-                    this.dns.setEnabled(false);
-                    this.search.setEnabled(false);
-                } else if (configureValue.equals(IPV4_MODE_DHCP_MESSAGE)) {
+                if (configureValue.equals(IPV4_MODE_DHCP_MESSAGE)) {
                     this.ip.setEnabled(false);
                     this.subnet.setEnabled(false);
                     this.gateway.setEnabled(false);
@@ -848,7 +837,6 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
                 } else {
                     this.ip.setEnabled(true);
                     this.subnet.setEnabled(true);
-                    // this.gateway.setEnabled(true);
 
                     if (this.status.getSelectedValue().equals(IPV4_STATUS_WAN_MESSAGE)) {
                         this.gateway.setEnabled(true);
@@ -862,10 +850,6 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
                     }
                     this.renew.setEnabled(false);
                 }
-                /*
-                 * this.dns.setEnabled(true);
-                 * this.search.setEnabled(true);
-                 */
             }
         }
 

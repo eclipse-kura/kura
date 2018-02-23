@@ -1361,14 +1361,9 @@ public class NetworkConfiguration {
         }
         properties.put(netIfConfigPrefix + "ip4.dnsServers", sbDnsAddresses.toString());
 
-        if (nc.isL2Only()) {
-            properties.put(netIfConfigPrefix + "l2only.enabled", true);
-            properties.put(netIfConfigPrefix + "dhcpClient4.enabled", false);
-        } else if (nc.isDhcp()) {
-            properties.put(netIfConfigPrefix + "l2only.enabled", false);
+        if (nc.isDhcp()) {
             properties.put(netIfConfigPrefix + "dhcpClient4.enabled", true);
         } else {
-            properties.put(netIfConfigPrefix + "l2only.enabled", false);
             properties.put(netIfConfigPrefix + "dhcpClient4.enabled", false);
 
             if (nc.getAddress() != null) {
@@ -1901,16 +1896,9 @@ public class NetworkConfiguration {
             }
 
             // POPULATE NetConfigs
-            String configL2Only = "net.interface." + interfaceName + ".config.l2only.enabled";
-            boolean l2OnlyEnabled = false;
-            if (props.containsKey(configL2Only)) {
-                l2OnlyEnabled = (Boolean) props.get(configL2Only);
-                logger.trace("DHCP 4 enabled? {}", l2OnlyEnabled);
-            }
-
             // dhcp4
             String configDhcp4 = "net.interface." + interfaceName + ".config.dhcpClient4.enabled";
-            NetConfigIP4 netConfigIP4 = null;
+            NetConfigIP4 netConfigIP4;
             boolean dhcpEnabled = false;
             if (props.containsKey(configDhcp4)) {
                 dhcpEnabled = (Boolean) props.get(configDhcp4);
@@ -1919,9 +1907,8 @@ public class NetworkConfiguration {
 
             netConfigIP4 = new NetConfigIP4(NetInterfaceStatus.valueOf(configStatus4), autoConnect);
             netConfigs.add(netConfigIP4);
-            if (l2OnlyEnabled) {
-                netConfigIP4.setL2Only(true);
-            } else if (dhcpEnabled) {
+
+            if (dhcpEnabled) {
                 netConfigIP4.setDhcp(true);
             } else {
                 // NetConfigIP4
@@ -2130,7 +2117,7 @@ public class NetworkConfiguration {
                         netConfigs.add(new DhcpServerConfigIP4(dhcpServerCfg, dhcpServerCfgIP4));
                     } catch (KuraException e) {
                         logger.warn("This invalid DhcpServerCfgIP4 configuration is ignored - {}, {}", dhcpServerCfg,
-                                dhcpServerCfgIP4);
+                                dhcpServerCfgIP4, e);
                     }
                 } else {
                     StringBuilder sb = new StringBuilder("Not including DhcpServerConfig - router: ");

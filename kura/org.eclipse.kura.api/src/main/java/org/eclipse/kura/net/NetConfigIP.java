@@ -38,7 +38,6 @@ public abstract class NetConfigIP<T extends IPAddress> implements NetConfig {
 
     private NetInterfaceStatus status;
     private boolean autoConnect;
-    private boolean l2only;
     private boolean dhcp;
     private T address;
     private short networkPrefixLength;
@@ -51,7 +50,6 @@ public abstract class NetConfigIP<T extends IPAddress> implements NetConfig {
     NetConfigIP(NetInterfaceStatus status, boolean autoConnect) {
         this.status = status;
         this.autoConnect = autoConnect;
-        this.l2only = false;
         this.dhcp = false;
         this.address = null;
         this.networkPrefixLength = -1;
@@ -65,7 +63,6 @@ public abstract class NetConfigIP<T extends IPAddress> implements NetConfig {
     NetConfigIP(NetInterfaceStatus status, boolean autoConnect, boolean dhcp) {
         this.status = status;
         this.autoConnect = autoConnect;
-        this.l2only = false;
         this.dhcp = dhcp;
         this.address = null;
         this.networkPrefixLength = -1;
@@ -80,7 +77,6 @@ public abstract class NetConfigIP<T extends IPAddress> implements NetConfig {
             throws KuraException {
         this.status = status;
         this.autoConnect = autoConnect;
-        this.l2only = false;
         this.dhcp = false;
         this.address = address;
         this.networkPrefixLength = networkPrefixLength;
@@ -95,7 +91,6 @@ public abstract class NetConfigIP<T extends IPAddress> implements NetConfig {
             throws KuraException {
         this.status = status;
         this.autoConnect = autoConnect;
-        this.l2only = false;
         this.dhcp = false;
         this.address = address;
         this.networkPrefixLength = calculateNetworkPrefixFromNetmask(subnetMask.getHostAddress());
@@ -130,14 +125,6 @@ public abstract class NetConfigIP<T extends IPAddress> implements NetConfig {
 
     public void setAutoConnect(boolean autoConnect) {
         this.autoConnect = autoConnect;
-    }
-    
-    public boolean isL2Only() {
-        return this.l2only;
-    }
-    
-    public void setL2Only(boolean l2only) {
-        this.l2only = l2only;
     }
 
     public boolean isDhcp() {
@@ -303,7 +290,6 @@ public abstract class NetConfigIP<T extends IPAddress> implements NetConfig {
         int result = 1;
         result = prime * result + (this.address == null ? 0 : this.address.hashCode());
         result = prime * result + (this.autoConnect ? 1231 : 1237);
-        result = prime * result + (this.l2only ? 1231 : 1237);
         result = prime * result + (this.dhcp ? 1231 : 1237);
         result = prime * result + (this.dnsServers == null ? 0 : this.dnsServers.hashCode());
         result = prime * result + (this.domains == null ? 0 : this.domains.hashCode());
@@ -336,9 +322,6 @@ public abstract class NetConfigIP<T extends IPAddress> implements NetConfig {
             return false;
         }
         if (this.autoConnect != other.autoConnect) {
-            return false;
-        }
-        if (this.l2only != other.l2only) {
             return false;
         }
         if (this.dhcp != other.dhcp) {
@@ -391,7 +374,7 @@ public abstract class NetConfigIP<T extends IPAddress> implements NetConfig {
     @Override
     public boolean isValid() {
         // FIXME
-        if (this.l2only || this.dhcp)  {
+        if (this.dhcp) {
             return true;
         } else {
             try {
@@ -420,8 +403,6 @@ public abstract class NetConfigIP<T extends IPAddress> implements NetConfig {
         builder.append(this.status);
         builder.append(", autoConnect=");
         builder.append(this.autoConnect);
-        builder.append(", l2only=");
-        builder.append(this.l2only);
         builder.append(", dhcp=");
         builder.append(this.dhcp);
         builder.append(", address=");

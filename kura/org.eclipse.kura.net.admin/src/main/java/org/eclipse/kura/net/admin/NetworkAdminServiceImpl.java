@@ -947,7 +947,6 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 
     @Override
     public void enableInterface(String interfaceName, boolean dhcp) throws KuraException {
-
         try {
             NetInterfaceType type = LinuxNetworkUtil.getType(interfaceName);
 
@@ -1006,7 +1005,6 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
         }
-
     }
 
     private WifiInterfaceAddressConfig getWifiAddressConfig(
@@ -1444,15 +1442,15 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         HostapdManager.stop(ifaceName);
         WpaSupplicantManager.stop(ifaceName);
 
-        if (status == NetInterfaceStatus.netIPv4StatusEnabledLAN && wifiMode.equals(WifiMode.MASTER)) {
-
+        boolean enStatusAp = status == NetInterfaceStatus.netIPv4StatusL2Only
+                || status == NetInterfaceStatus.netIPv4StatusEnabledLAN ? true : false;
+        boolean enStatusInfra = status == NetInterfaceStatus.netIPv4StatusL2Only
+                || status == NetInterfaceStatus.netIPv4StatusEnabledLAN
+                || status == NetInterfaceStatus.netIPv4StatusEnabledWAN ? true : false;
+        if (enStatusAp && wifiMode == WifiMode.MASTER) {
             logger.debug("Starting hostapd");
             HostapdManager.start(ifaceName);
-
-        } else if ((status == NetInterfaceStatus.netIPv4StatusEnabledLAN
-                || status == NetInterfaceStatus.netIPv4StatusEnabledWAN)
-                && (wifiMode.equals(WifiMode.INFRA) || wifiMode.equals(WifiMode.ADHOC))) {
-
+        } else if (enStatusInfra && (wifiMode == WifiMode.INFRA || wifiMode == WifiMode.ADHOC)) {
             if (wifiConfig != null) {
                 logger.debug("Starting wpa_supplicant");
                 logger.warn("enableWifiInterface() :: Starting wpa_supplicant ... driver={}", wifiConfig.getDriver());

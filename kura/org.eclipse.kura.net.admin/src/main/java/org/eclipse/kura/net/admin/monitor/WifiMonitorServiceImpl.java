@@ -550,9 +550,10 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
         WifiMode wifiMode = getWifiInterfaceMode(wifiInterfaceConfig);
         NetInterfaceStatus status = ((AbstractNetInterface<?>) wifiInterfaceConfig).getInterfaceStatus();
 
-        boolean statusEnabled = status.equals(NetInterfaceStatus.netIPv4StatusEnabledLAN)
-                || status.equals(NetInterfaceStatus.netIPv4StatusEnabledWAN);
-        boolean wifiEnabled = wifiMode.equals(WifiMode.INFRA) || wifiMode.equals(WifiMode.MASTER);
+        boolean statusEnabled = status == NetInterfaceStatus.netIPv4StatusL2Only
+                || status == NetInterfaceStatus.netIPv4StatusEnabledLAN
+                || status == NetInterfaceStatus.netIPv4StatusEnabledWAN ? true : false;
+        boolean wifiEnabled = wifiMode == WifiMode.INFRA || wifiMode == WifiMode.MASTER ? true : false;
 
         logger.debug("isWifiEnabled() :: {} interface - status: {}", wifiInterfaceConfig.getName(), statusEnabled);
         logger.debug("isWifiEnabled() :: {} interface - WiFi Mode: {}", wifiInterfaceConfig.getName(), wifiEnabled);
@@ -610,13 +611,12 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
         logger.debug("enableInterface: {}", netInterfaceConfig);
         WifiInterfaceConfigImpl wifiInterfaceConfig;
 
-        if (netInterfaceConfig instanceof WifiInterfaceConfigImpl) {
-            wifiInterfaceConfig = (WifiInterfaceConfigImpl) netInterfaceConfig;
-        } else {
+        if (!(netInterfaceConfig instanceof WifiInterfaceConfigImpl)) {
             return;
         }
+        wifiInterfaceConfig = (WifiInterfaceConfigImpl) netInterfaceConfig;
         String interfaceName = wifiInterfaceConfig.getName();
-        WifiMode wifiMode = WifiMode.UNKNOWN;
+        WifiMode wifiMode;
         NetInterfaceStatus status = NetInterfaceStatus.netIPv4StatusUnknown;
         boolean isDhcpClient = false;
         boolean enableDhcpServer = false;
@@ -633,10 +633,11 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                 enableDhcpServer = ((DhcpServerConfig4) netConfig).isEnabled();
             }
         }
-
-        if ((status.equals(NetInterfaceStatus.netIPv4StatusEnabledLAN)
-                || status.equals(NetInterfaceStatus.netIPv4StatusEnabledWAN))
-                && (wifiMode.equals(WifiMode.INFRA) || wifiMode.equals(WifiMode.MASTER))) {
+        boolean enStatus = status == NetInterfaceStatus.netIPv4StatusL2Only
+                || status == NetInterfaceStatus.netIPv4StatusEnabledLAN
+                || status == NetInterfaceStatus.netIPv4StatusEnabledWAN ? true : false;
+        boolean enWifiMode = wifiMode == WifiMode.INFRA || wifiMode == WifiMode.MASTER ? true : false;
+        if (enStatus && enWifiMode) {
             this.netAdminService.enableInterface(interfaceName, isDhcpClient);
             if (enableDhcpServer) {
                 this.netAdminService.manageDhcpServer(interfaceName, true);

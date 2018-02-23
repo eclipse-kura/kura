@@ -355,7 +355,7 @@ public abstract class AbstractNetInterface<T extends NetInterfaceAddress> implem
 
     /**
      * Returns a list of network configurations
-     * 
+     *
      * @return list of network configurations as {@link List<NetConfig>}
      */
     public List<NetConfig> getNetConfigs() {
@@ -373,7 +373,7 @@ public abstract class AbstractNetInterface<T extends NetInterfaceAddress> implem
 
     /**
      * Reports interface status
-     * 
+     *
      * @return interface status as {@link NetInterfaceStatus}
      */
     public NetInterfaceStatus getInterfaceStatus() {
@@ -393,7 +393,7 @@ public abstract class AbstractNetInterface<T extends NetInterfaceAddress> implem
 
     /**
      * Reports IPv4 configuration
-     * 
+     *
      * @return IPv4 configuration as {@link NetConfigIP4}
      */
     public NetConfigIP4 getIP4config() {
@@ -410,22 +410,22 @@ public abstract class AbstractNetInterface<T extends NetInterfaceAddress> implem
 
     /**
      * Reports if interface is managed by the NetAdmin
-     * 
+     *
      * @return boolean
      */
     public boolean isInterfaceManaged() {
         NetInterfaceStatus status = getInterfaceStatus();
-        return !status.equals(NetInterfaceStatus.netIPv4StatusUnmanaged);
+        return status != NetInterfaceStatus.netIPv4StatusUnmanaged ? true : false;
     }
 
     /**
      * Reports if interface is enabled in configuration
-     * 
+     *
      * @return boolean
      */
     public boolean isInterfaceEnabled() {
         NetInterfaceStatus status = getInterfaceStatus();
-        return status.equals(NetInterfaceStatus.netIPv4StatusEnabledLAN)
-                || status.equals(NetInterfaceStatus.netIPv4StatusEnabledWAN);
+        return status == NetInterfaceStatus.netIPv4StatusL2Only || status == NetInterfaceStatus.netIPv4StatusEnabledLAN
+                || status == NetInterfaceStatus.netIPv4StatusEnabledWAN ? true : false;
     }
 }

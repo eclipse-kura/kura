@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -73,16 +73,20 @@ public class TelitLe910v2ConfigGenerator implements ModemPppConfigGenerator {
          * cause issues with some 4G operators (see section 4.1.40.1. of
          * http://www.telit.com/fileadmin/user_upload/products/Downloads/3G/Telit_Modules_Software_User_Guide_2G3G4G_r19
          * .pdf).
-         * The dial string is hardcoded to use context 2, dial string entered by the user
-         * in the Web UI will be ignored.
          */
-        final int pdpPid = 2;
-        final String dialString = "atd*99***2#";
+        int pdpPid = 2;
+        String dialString = "";
 
         String apn = "";
 
         if (modemConfig != null) {
             apn = modemConfig.getApn();
+            dialString = modemConfig.getDialString();
+            pdpPid = getPdpContextNumber(dialString);
+            if (pdpPid < 2) {
+                dialString = "atd*99***2#";
+                pdpPid = 2;
+            }
         }
 
         ModemXchangeScript modemXchange = new ModemXchangeScript();
@@ -117,11 +121,15 @@ public class TelitLe910v2ConfigGenerator implements ModemPppConfigGenerator {
         return modemXchange;
     }
 
+    private int getPdpContextNumber(String dialString) {
+        return Integer.parseInt(dialString.substring("atd*99***".length(), dialString.length() - 1));
+    }
+
     /*
      * This method forms dial string
      */
     private String formDialString(String dialString) {
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         buf.append('"');
         if (dialString != null) {
             buf.append(dialString);
@@ -136,7 +144,7 @@ public class TelitLe910v2ConfigGenerator implements ModemPppConfigGenerator {
      */
     private String formPDPcontext(int pdpPid, PdpType pdpType, String apn) {
 
-        StringBuffer pdpcontext = new StringBuffer(TelitHe910AtCommands.pdpContext.getCommand());
+        StringBuilder pdpcontext = new StringBuilder(TelitHe910AtCommands.pdpContext.getCommand());
         pdpcontext.append('=');
         pdpcontext.append(pdpPid);
         pdpcontext.append(',');

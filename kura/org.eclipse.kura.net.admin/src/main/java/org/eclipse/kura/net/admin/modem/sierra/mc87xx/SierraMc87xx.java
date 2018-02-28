@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -13,7 +13,9 @@ package org.eclipse.kura.net.admin.modem.sierra.mc87xx;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -25,6 +27,8 @@ import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.admin.modem.HspaCellularModem;
 import org.eclipse.kura.net.admin.modem.telit.he910.TelitHe910;
 import org.eclipse.kura.net.modem.ModemDevice;
+import org.eclipse.kura.net.modem.ModemPdpContext;
+import org.eclipse.kura.net.modem.ModemPdpContextType;
 import org.eclipse.kura.net.modem.ModemRegistrationStatus;
 import org.eclipse.kura.net.modem.ModemTechnologyType;
 import org.eclipse.kura.usb.UsbModemDevice;
@@ -36,143 +40,136 @@ public class SierraMc87xx implements HspaCellularModem {
 
     private static final Logger s_logger = LoggerFactory.getLogger(SierraMc87xx.class);
 
-    private ConnectionFactory m_connectionFactory = null;
+    protected static final String MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG = "Modem not available for AT commands";
 
-    private String m_model = null;
-    private String m_manufacturer = null;
-    private String m_serialNumber = null;
-    private String m_revisionId = null;
+    private ConnectionFactory connectionFactory = null;
 
-    private Object m_atLock = null;
+    private String model = null;
+    private String manufacturer = null;
+    private String serialNumber = null;
+    private String revisionId = null;
 
-    private ModemDevice m_device = null;
-    private List<NetConfig> m_netConfigs = null;
+    private final Object atLock = new Object();
+
+    private ModemDevice device = null;
+    private List<NetConfig> netConfigs = null;
 
     public SierraMc87xx(ModemDevice device, ConnectionFactory connectionFactory) {
 
-        this.m_device = device;
-        this.m_connectionFactory = connectionFactory;
-        this.m_atLock = new Object();
+        this.device = device;
+        this.connectionFactory = connectionFactory;
     }
 
     @Override
     public String getModel() throws KuraException {
-        synchronized (this.m_atLock) {
-            if (this.m_model == null) {
+        synchronized (this.atLock) {
+            if (this.model == null) {
                 s_logger.debug("sendCommand getModelNumber :: {}", SierraMc87xxAtCommands.getModelNumber.getCommand());
-                byte[] reply = null;
+                byte[] reply;
                 CommConnection commAtConnection = openSerialPort(getAtPort());
                 if (!isAtReachable(commAtConnection)) {
                     closeSerialPort(commAtConnection);
-                    throw new KuraException(KuraErrorCode.NOT_CONNECTED,
-                            "Modem not available for AT commands: " + TelitHe910.class.getName());
+                    throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
                 }
                 try {
                     reply = commAtConnection.sendCommand(SierraMc87xxAtCommands.getModelNumber.getCommand().getBytes(),
                             1000, 100);
                 } catch (IOException e) {
                     closeSerialPort(commAtConnection);
-                    throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+                    throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
                 }
                 closeSerialPort(commAtConnection);
                 if (reply != null) {
-                    this.m_model = getResponseString(reply);
-                    reply = null;
+                    this.model = getResponseString(reply);
                 }
             }
         }
-        return this.m_model;
+        return this.model;
     }
 
     @Override
     public String getManufacturer() throws KuraException {
-        synchronized (this.m_atLock) {
-            if (this.m_manufacturer == null) {
+        synchronized (this.atLock) {
+            if (this.manufacturer == null) {
                 s_logger.debug("sendCommand getManufacturer :: {}",
                         SierraMc87xxAtCommands.getManufacturer.getCommand());
-                byte[] reply = null;
+                byte[] reply;
                 CommConnection commAtConnection = openSerialPort(getAtPort());
                 if (!isAtReachable(commAtConnection)) {
                     closeSerialPort(commAtConnection);
-                    throw new KuraException(KuraErrorCode.NOT_CONNECTED,
-                            "Modem not available for AT commands: " + TelitHe910.class.getName());
+                    throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
                 }
                 try {
                     reply = commAtConnection.sendCommand(SierraMc87xxAtCommands.getManufacturer.getCommand().getBytes(),
                             1000, 100);
                 } catch (IOException e) {
                     closeSerialPort(commAtConnection);
-                    throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+                    throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
                 }
                 closeSerialPort(commAtConnection);
                 if (reply != null) {
-                    this.m_manufacturer = getResponseString(reply);
-                    reply = null;
+                    this.manufacturer = getResponseString(reply);
                 }
             }
         }
-        return this.m_manufacturer;
+        return this.manufacturer;
     }
 
     @Override
     public String getSerialNumber() throws KuraException {
-        synchronized (this.m_atLock) {
-            if (this.m_serialNumber == null) {
+        synchronized (this.atLock) {
+            if (this.serialNumber == null) {
                 s_logger.debug("sendCommand getSerialNumber :: {}",
                         SierraMc87xxAtCommands.getSerialNumber.getCommand());
-                byte[] reply = null;
+                byte[] reply;
                 CommConnection commAtConnection = openSerialPort(getAtPort());
                 if (!isAtReachable(commAtConnection)) {
                     closeSerialPort(commAtConnection);
-                    throw new KuraException(KuraErrorCode.NOT_CONNECTED,
-                            "Modem not available for AT commands: " + TelitHe910.class.getName());
+                    throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
                 }
                 try {
                     reply = commAtConnection.sendCommand(SierraMc87xxAtCommands.getSerialNumber.getCommand().getBytes(),
                             1000, 100);
                 } catch (IOException e) {
                     closeSerialPort(commAtConnection);
-                    throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+                    throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
                 }
                 closeSerialPort(commAtConnection);
                 if (reply != null) {
-                    this.m_serialNumber = getResponseString(reply);
+                    this.serialNumber = getResponseString(reply);
                 }
             }
         }
-        return this.m_serialNumber;
+        return this.serialNumber;
     }
 
     @Override
     public String getMobileSubscriberIdentity() throws KuraException {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public String getIntegratedCirquitCardId() throws KuraException {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public String getRevisionID() throws KuraException {
-        synchronized (this.m_atLock) {
-            if (this.m_revisionId == null) {
+        synchronized (this.atLock) {
+            if (this.revisionId == null) {
                 s_logger.debug("sendCommand getRevision :: {}", SierraMc87xxAtCommands.getFirmwareVersion.getCommand());
-                byte[] reply = null;
+                byte[] reply;
                 CommConnection commAtConnection = openSerialPort(getAtPort());
                 if (!isAtReachable(commAtConnection)) {
                     closeSerialPort(commAtConnection);
-                    throw new KuraException(KuraErrorCode.NOT_CONNECTED,
-                            "Modem not available for AT commands: " + TelitHe910.class.getName());
+                    throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
                 }
                 try {
                     reply = commAtConnection
                             .sendCommand(SierraMc87xxAtCommands.getFirmwareVersion.getCommand().getBytes(), 1000, 100);
                 } catch (IOException e) {
                     closeSerialPort(commAtConnection);
-                    throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+                    throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
                 }
                 closeSerialPort(commAtConnection);
                 if (reply != null) {
@@ -180,18 +177,18 @@ public class SierraMc87xx implements HspaCellularModem {
                     if (firmwareVersion.startsWith("!GVER:")) {
                         firmwareVersion = firmwareVersion.substring("!GVER:".length()).trim();
                         String[] aFirmwareVersion = firmwareVersion.split(" ");
-                        this.m_revisionId = aFirmwareVersion[0];
+                        this.revisionId = aFirmwareVersion[0];
                     }
                 }
             }
         }
-        return this.m_revisionId;
+        return this.revisionId;
     }
 
     @Override
     public boolean isReachable() throws KuraException {
-        boolean ret = false;
-        synchronized (this.m_atLock) {
+        boolean ret;
+        synchronized (this.atLock) {
             CommConnection commAtConnection = openSerialPort(getAtPort());
             ret = isAtReachable(commAtConnection);
             closeSerialPort(commAtConnection);
@@ -202,7 +199,7 @@ public class SierraMc87xx implements HspaCellularModem {
     @Override
     public boolean isPortReachable(String port) {
         boolean ret = false;
-        synchronized (this.m_atLock) {
+        synchronized (this.atLock) {
             try {
                 CommConnection commAtConnection = openSerialPort(port);
                 closeSerialPort(commAtConnection);
@@ -216,7 +213,6 @@ public class SierraMc87xx implements HspaCellularModem {
 
     @Override
     public void reset() throws KuraException {
-        // TODO
         // not supported
     }
 
@@ -224,26 +220,25 @@ public class SierraMc87xx implements HspaCellularModem {
     public int getSignalStrength() throws KuraException {
 
         int rssi = -113;
-        synchronized (this.m_atLock) {
+        synchronized (this.atLock) {
             s_logger.debug("sendCommand getSignalStrength :: {}",
                     SierraMc87xxAtCommands.getSignalStrength.getCommand());
-            byte[] reply = null;
+            byte[] reply;
             CommConnection commAtConnection = openSerialPort(getAtPort());
             if (!isAtReachable(commAtConnection)) {
                 closeSerialPort(commAtConnection);
-                throw new KuraException(KuraErrorCode.NOT_CONNECTED,
-                        "Modem not available for AT commands: " + TelitHe910.class.getName());
+                throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
             }
             try {
                 reply = commAtConnection.sendCommand(SierraMc87xxAtCommands.getSignalStrength.getCommand().getBytes(),
                         1000, 100);
             } catch (IOException e) {
                 closeSerialPort(commAtConnection);
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+                throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
             }
             closeSerialPort(commAtConnection);
             if (reply != null) {
-                String[] asCsq = null;
+                String[] asCsq;
                 String sCsq = this.getResponseString(reply);
                 if (sCsq.startsWith("+CSQ:")) {
                     sCsq = sCsq.substring("+CSQ:".length()).trim();
@@ -253,7 +248,6 @@ public class SierraMc87xx implements HspaCellularModem {
 
                     }
                 }
-                reply = null;
             }
         }
         return rssi;
@@ -263,21 +257,20 @@ public class SierraMc87xx implements HspaCellularModem {
     public ModemRegistrationStatus getRegistrationStatus() throws KuraException {
 
         ModemRegistrationStatus modemRegistrationStatus = ModemRegistrationStatus.UNKNOWN;
-        synchronized (this.m_atLock) {
+        synchronized (this.atLock) {
             s_logger.debug("sendCommand getSystemInfo :: {}", SierraMc87xxAtCommands.getSystemInfo.getCommand());
-            byte[] reply = null;
+            byte[] reply;
             CommConnection commAtConnection = openSerialPort(getAtPort());
             if (!isAtReachable(commAtConnection)) {
                 closeSerialPort(commAtConnection);
-                throw new KuraException(KuraErrorCode.NOT_CONNECTED,
-                        "Modem not available for AT commands: " + TelitHe910.class.getName());
+                throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
             }
             try {
                 reply = commAtConnection.sendCommand(SierraMc87xxAtCommands.getSystemInfo.getCommand().getBytes(), 1000,
                         100);
             } catch (IOException e) {
                 closeSerialPort(commAtConnection);
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+                throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
             }
             closeSerialPort(commAtConnection);
             if (reply != null) {
@@ -311,14 +304,12 @@ public class SierraMc87xx implements HspaCellularModem {
 
     @Override
     public long getCallTxCounter() throws KuraException {
-        // TODO
         // Not supported via AT interface need to use HIP/CnS
         return 0;
     }
 
     @Override
     public long getCallRxCounter() throws KuraException {
-        // TODO
         // Not supported via AT interface need to use HIP/CnS
         return 0;
     }
@@ -327,10 +318,10 @@ public class SierraMc87xx implements HspaCellularModem {
     public String getServiceType() throws KuraException {
 
         String serviceType = null;
-        synchronized (this.m_atLock) {
+        synchronized (this.atLock) {
             s_logger.debug("sendCommand getMobileStationClass :: {}",
                     SierraMc87xxAtCommands.getMobileStationClass.getCommand());
-            byte[] reply = null;
+            byte[] reply;
             CommConnection commAtConnection = openSerialPort(getAtPort());
             if (!isAtReachable(commAtConnection)) {
                 closeSerialPort(commAtConnection);
@@ -342,24 +333,23 @@ public class SierraMc87xx implements HspaCellularModem {
                         .sendCommand(SierraMc87xxAtCommands.getMobileStationClass.getCommand().getBytes(), 1000, 100);
             } catch (IOException e) {
                 closeSerialPort(commAtConnection);
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+                throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
             }
             closeSerialPort(commAtConnection);
             if (reply != null) {
                 String sCgclass = this.getResponseString(reply);
                 if (sCgclass.startsWith("+CGCLASS:")) {
                     sCgclass = sCgclass.substring("+CGCLASS:".length()).trim();
-                    if (sCgclass.equals("\"A\"")) {
+                    if ("\"A\"".equals(sCgclass)) {
                         serviceType = "UMTS";
-                    } else if (sCgclass.equals("\"B\"")) {
+                    } else if ("\"B\"".equals(sCgclass)) {
                         serviceType = "GSM/GPRS";
-                    } else if (sCgclass.equals("\"CG\"")) {
+                    } else if ("\"CG\"".equals(sCgclass)) {
                         serviceType = "GPRS";
-                    } else if (sCgclass.equals("\"CC\"")) {
+                    } else if ("\"CC\"".equals(sCgclass)) {
                         serviceType = "GSM";
                     }
                 }
-                reply = null;
             }
         }
 
@@ -368,30 +358,30 @@ public class SierraMc87xx implements HspaCellularModem {
 
     @Override
     public ModemDevice getModemDevice() {
-        return this.m_device;
+        return this.device;
     }
 
     protected void setModemDevice(ModemDevice device) {
-        this.m_device = device;
+        this.device = device;
     }
 
     @Override
     public String getDataPort() throws KuraException {
-        String port = null;
-        List<String> ports = this.m_device.getSerialPorts();
-        if (ports != null && ports.size() > 0) {
-            if (this.m_device instanceof UsbModemDevice) {
-                SupportedUsbModemInfo usbModemInfo = SupportedUsbModemsInfo.getModem((UsbModemDevice) this.m_device);
+        String port;
+        List<String> ports = this.device.getSerialPorts();
+        if (ports != null && !ports.isEmpty()) {
+            if (this.device instanceof UsbModemDevice) {
+                SupportedUsbModemInfo usbModemInfo = SupportedUsbModemsInfo.getModem((UsbModemDevice) this.device);
                 if (usbModemInfo != null) {
                     port = ports.get(usbModemInfo.getDataPort());
                 } else {
-                    throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "No PPP serial port available");
+                    throw new KuraException(KuraErrorCode.SERIAL_PORT_NOT_EXISTING, "No PPP serial port available");
                 }
             } else {
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "Unsupported modem device");
+                throw new KuraException(KuraErrorCode.UNAVAILABLE_DEVICE, "Unsupported modem device");
             }
         } else {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "No serial ports available");
+            throw new KuraException(KuraErrorCode.SERIAL_PORT_NOT_EXISTING, "No serial ports available");
         }
 
         return port;
@@ -399,21 +389,21 @@ public class SierraMc87xx implements HspaCellularModem {
 
     @Override
     public String getAtPort() throws KuraException {
-        String port = null;
-        List<String> ports = this.m_device.getSerialPorts();
-        if (ports != null && ports.size() > 0) {
-            if (this.m_device instanceof UsbModemDevice) {
-                SupportedUsbModemInfo usbModemInfo = SupportedUsbModemsInfo.getModem((UsbModemDevice) this.m_device);
+        String port;
+        List<String> ports = this.device.getSerialPorts();
+        if (ports != null && !ports.isEmpty()) {
+            if (this.device instanceof UsbModemDevice) {
+                SupportedUsbModemInfo usbModemInfo = SupportedUsbModemsInfo.getModem((UsbModemDevice) this.device);
                 if (usbModemInfo != null) {
                     port = ports.get(usbModemInfo.getAtPort());
                 } else {
-                    throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "No AT serial port available");
+                    throw new KuraException(KuraErrorCode.SERIAL_PORT_NOT_EXISTING, "No AT serial port available");
                 }
             } else {
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "Unsupported modem device");
+                throw new KuraException(KuraErrorCode.UNAVAILABLE_DEVICE, "Unsupported modem device");
             }
         } else {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "No serial ports available");
+            throw new KuraException(KuraErrorCode.SERIAL_PORT_NOT_EXISTING, "No serial ports available");
         }
 
         return port;
@@ -421,53 +411,51 @@ public class SierraMc87xx implements HspaCellularModem {
 
     @Override
     public String getGpsPort() throws KuraException {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public boolean isGpsSupported() throws KuraException {
-        // TODO Auto-generated method stub
         return false;
     }
 
     @Override
     public void enableGps() throws KuraException {
-        // TODO Auto-generated method stub
+        // TODO
     }
 
     @Override
     public void disableGps() throws KuraException {
-        // TODO Auto-generated method stub
+        // TODO
     }
 
     @Override
     public List<NetConfig> getConfiguration() {
-        return this.m_netConfigs;
+        return this.netConfigs;
     }
 
     @Override
     public void setConfiguration(List<NetConfig> netConfigs) {
-        this.m_netConfigs = netConfigs;
+        this.netConfigs = netConfigs;
     }
 
     @Override
     public List<ModemTechnologyType> getTechnologyTypes() throws KuraException {
 
-        List<ModemTechnologyType> modemTechnologyTypes = null;
-        ModemDevice device = getModemDevice();
-        if (device == null) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "No modem device");
+        List<ModemTechnologyType> modemTechnologyTypes;
+        ModemDevice modemDevice = getModemDevice();
+        if (modemDevice == null) {
+            throw new KuraException(KuraErrorCode.UNAVAILABLE_DEVICE, "No modem device");
         }
-        if (device instanceof UsbModemDevice) {
-            SupportedUsbModemInfo usbModemInfo = SupportedUsbModemsInfo.getModem((UsbModemDevice) device);
+        if (modemDevice instanceof UsbModemDevice) {
+            SupportedUsbModemInfo usbModemInfo = SupportedUsbModemsInfo.getModem((UsbModemDevice) modemDevice);
             if (usbModemInfo != null) {
                 modemTechnologyTypes = usbModemInfo.getTechnologyTypes();
             } else {
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "No usbModemInfo available");
+                throw new KuraException(KuraErrorCode.UNAVAILABLE_DEVICE, "No usbModemInfo available");
             }
         } else {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "Unsupported modem device");
+            throw new KuraException(KuraErrorCode.UNAVAILABLE_DEVICE, "Unsupported modem device");
         }
         return modemTechnologyTypes;
     }
@@ -478,7 +466,7 @@ public class SierraMc87xx implements HspaCellularModem {
         ModemTechnologyType modemTechnologyType = null;
         try {
             List<ModemTechnologyType> modemTechnologyTypes = getTechnologyTypes();
-            if (modemTechnologyTypes != null && modemTechnologyTypes.size() > 0) {
+            if (modemTechnologyTypes != null && !modemTechnologyTypes.isEmpty()) {
                 modemTechnologyType = modemTechnologyTypes.get(0);
             }
         } catch (KuraException e) {
@@ -491,9 +479,9 @@ public class SierraMc87xx implements HspaCellularModem {
     public boolean isSimCardReady() throws KuraException {
 
         boolean simReady = false;
-        synchronized (this.m_atLock) {
+        synchronized (this.atLock) {
             s_logger.debug("sendCommand getSystemInfo :: {}", SierraMc87xxAtCommands.getSystemInfo.getCommand());
-            byte[] reply = null;
+            byte[] reply;
             CommConnection commAtConnection = openSerialPort(getAtPort());
             if (!isAtReachable(commAtConnection)) {
                 closeSerialPort(commAtConnection);
@@ -505,7 +493,7 @@ public class SierraMc87xx implements HspaCellularModem {
                         100);
             } catch (IOException e) {
                 closeSerialPort(commAtConnection);
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+                throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
             }
             closeSerialPort(commAtConnection);
             if (reply != null) {
@@ -536,15 +524,15 @@ public class SierraMc87xx implements HspaCellularModem {
             } else if (portType == SerialPortType.GPSPORT) {
                 port = getGpsPort();
             } else {
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "Invalid Port Type");
+                throw new KuraException(KuraErrorCode.SERIAL_PORT_INVALID_CONFIGURATION, "Invalid Port Type");
             }
             if (port != null) {
-                StringBuffer sb = new StringBuffer();
+                StringBuilder sb = new StringBuilder();
                 sb.append("comm:").append(port).append(";baudrate=115200;databits=8;stopbits=1;parity=0");
                 commURI = CommURI.parseString(sb.toString());
             }
         } catch (URISyntaxException e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "URI Syntax Exception");
+            throw new KuraException(KuraErrorCode.SERIAL_PORT_INVALID_CONFIGURATION, "URI Syntax Exception");
         }
         return commURI;
     }
@@ -554,15 +542,54 @@ public class SierraMc87xx implements HspaCellularModem {
         return false;
     }
 
+    @Override
+    public List<ModemPdpContext> getPdpContextInfo() throws KuraException {
+        List<ModemPdpContext> pdpContextInfo = new ArrayList<>();
+        synchronized (this.atLock) {
+            byte[] reply;
+            CommConnection commAtConnection = openSerialPort(getAtPort());
+            if (!isAtReachable(commAtConnection)) {
+                closeSerialPort(commAtConnection);
+                throw new KuraException(KuraErrorCode.NOT_CONNECTED,
+                        MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG + TelitHe910.class.getName());
+            }
+            try {
+                reply = commAtConnection.sendCommand(formGetPdpContextAtCommand().getBytes(), 1000, 100);
+            } catch (IOException e) {
+                closeSerialPort(commAtConnection);
+                throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
+            }
+            closeSerialPort(commAtConnection);
+            if (reply != null) {
+                String sreply = this.getResponseString(reply);
+                Scanner scanner = new Scanner(sreply);
+                while (scanner.hasNextLine()) {
+                    String[] tokens = scanner.nextLine().split(",");
+                    if (!tokens[0].startsWith("+CGDCONT:")) {
+                        continue;
+                    }
+                    int contextNo = Integer.parseInt(tokens[0].substring("+CGDCONT:".length()).trim());
+                    ModemPdpContextType pdpType = ModemPdpContextType
+                            .getContextType(tokens[1].substring(1, tokens[1].length() - 1));
+                    String apn = tokens[2].substring(1, tokens[2].length() - 1);
+                    ModemPdpContext modemPdpContext = new ModemPdpContext(contextNo, pdpType, apn);
+                    pdpContextInfo.add(modemPdpContext);
+                }
+                scanner.close();
+            }
+        }
+        return pdpContextInfo;
+    }
+
     private CommConnection openSerialPort(String port) throws KuraException {
 
         CommConnection connection = null;
-        if (this.m_connectionFactory != null) {
+        if (this.connectionFactory != null) {
             String uri = new CommURI.Builder(port).withBaudRate(115200).withDataBits(8).withStopBits(1).withParity(0)
                     .withTimeout(2000).build().toString();
 
             try {
-                connection = (CommConnection) this.m_connectionFactory.createConnection(uri, 1, false);
+                connection = (CommConnection) this.connectionFactory.createConnection(uri, 1, false);
             } catch (Exception e) {
                 s_logger.debug("Exception creating connection: {}", e);
                 throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
@@ -575,7 +602,7 @@ public class SierraMc87xx implements HspaCellularModem {
         try {
             connection.close();
         } catch (IOException e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+            throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
         }
     }
 
@@ -590,7 +617,7 @@ public class SierraMc87xx implements HspaCellularModem {
                 attemptNo++;
                 sleep(2000);
             }
-        } while (status == false && attemptNo < 3);
+        } while (!status && attemptNo < 3);
 
         return status;
     }
@@ -619,5 +646,11 @@ public class SierraMc87xx implements HspaCellularModem {
         } catch (InterruptedException e) {
             // ignore
         }
+    }
+
+    private String formGetPdpContextAtCommand() {
+        StringBuilder sb = new StringBuilder(SierraMc87xxAtCommands.pdpContext.getCommand());
+        sb.append("?\r\n");
+        return sb.toString();
     }
 }

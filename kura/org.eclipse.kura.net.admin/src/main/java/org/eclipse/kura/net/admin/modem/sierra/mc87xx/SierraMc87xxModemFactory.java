@@ -31,42 +31,42 @@ import org.osgi.util.tracker.ServiceTracker;
  */
 public class SierraMc87xxModemFactory implements CellularModemFactory {
 
-    private static SierraMc87xxModemFactory s_factoryInstance = null;
+    private static SierraMc87xxModemFactory factoryInstance = null;
 
-    private static ModemTechnologyType s_type = ModemTechnologyType.HSDPA;
+    private static ModemTechnologyType type = ModemTechnologyType.HSDPA;
 
-    private BundleContext s_bundleContext = null;
-    private Hashtable<String, SierraMc87xx> m_modemServices = null;
+    private BundleContext bundleContext = null;
+    private Hashtable<String, SierraMc87xx> modemServices = null;
 
-    private ConnectionFactory m_connectionFactory = null;
+    private ConnectionFactory connectionFactory = null;
 
     private SierraMc87xxModemFactory() {
-        this.s_bundleContext = FrameworkUtil.getBundle(NetworkConfigurationService.class).getBundleContext();
+        this.bundleContext = FrameworkUtil.getBundle(NetworkConfigurationService.class).getBundleContext();
 
-        ServiceTracker<ConnectionFactory, ConnectionFactory> serviceTracker = new ServiceTracker<>(
-                this.s_bundleContext, ConnectionFactory.class, null);
+        ServiceTracker<ConnectionFactory, ConnectionFactory> serviceTracker = new ServiceTracker<>(this.bundleContext,
+                ConnectionFactory.class, null);
         serviceTracker.open(true);
-        this.m_connectionFactory = serviceTracker.getService();
+        this.connectionFactory = serviceTracker.getService();
 
-        this.m_modemServices = new Hashtable<>();
+        this.modemServices = new Hashtable<>();
     }
 
     public static SierraMc87xxModemFactory getInstance() {
-        if (s_factoryInstance == null) {
-            s_factoryInstance = new SierraMc87xxModemFactory();
+        if (factoryInstance == null) {
+            factoryInstance = new SierraMc87xxModemFactory();
         }
-        return s_factoryInstance;
+        return factoryInstance;
     }
 
     @Override
     public CellularModem obtainCellularModemService(ModemDevice modemDevice, String platform) throws Exception {
 
         String key = modemDevice.getProductName();
-        SierraMc87xx sierraMc87xx = this.m_modemServices.get(key);
+        SierraMc87xx sierraMc87xx = this.modemServices.get(key);
 
         if (sierraMc87xx == null) {
-            sierraMc87xx = new SierraMc87xx(modemDevice, this.m_connectionFactory);
-            this.m_modemServices.put(key, sierraMc87xx);
+            sierraMc87xx = new SierraMc87xx(modemDevice, this.connectionFactory);
+            this.modemServices.put(key, sierraMc87xx);
         } else {
             sierraMc87xx.setModemDevice(modemDevice);
         }
@@ -76,17 +76,17 @@ public class SierraMc87xxModemFactory implements CellularModemFactory {
 
     @Override
     public Hashtable<String, ? extends CellularModem> getModemServices() {
-        return this.m_modemServices;
+        return this.modemServices;
     }
 
     @Override
     public void releaseModemService(String usbPortAddress) {
-        this.m_modemServices.remove(usbPortAddress);
+        this.modemServices.remove(usbPortAddress);
     }
 
     @Override
     @Deprecated
     public ModemTechnologyType getType() {
-        return s_type;
+        return type;
     }
 }

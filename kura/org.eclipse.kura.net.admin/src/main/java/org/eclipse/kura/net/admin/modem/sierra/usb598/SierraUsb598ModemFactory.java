@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -25,39 +25,39 @@ import org.osgi.util.tracker.ServiceTracker;
 
 public class SierraUsb598ModemFactory implements CellularModemFactory {
 
-    private static SierraUsb598ModemFactory s_factoryInstance = null;
-    private static ModemTechnologyType s_type = ModemTechnologyType.EVDO;
-    private BundleContext s_bundleContext = null;
-    private Hashtable<String, SierraUsb598> m_modemServices = null;
-    private ConnectionFactory m_connectionFactory = null;
+    private static SierraUsb598ModemFactory factoryInstance = null;
+    private static ModemTechnologyType type = ModemTechnologyType.EVDO;
+    private BundleContext bundleContext = null;
+    private Hashtable<String, SierraUsb598> modemServices = null;
+    private ConnectionFactory connectionFactory = null;
 
     private SierraUsb598ModemFactory() {
-        this.s_bundleContext = FrameworkUtil.getBundle(NetworkConfigurationService.class).getBundleContext();
+        this.bundleContext = FrameworkUtil.getBundle(NetworkConfigurationService.class).getBundleContext();
 
-        ServiceTracker<ConnectionFactory, ConnectionFactory> serviceTracker = new ServiceTracker<ConnectionFactory, ConnectionFactory>(
-                this.s_bundleContext, ConnectionFactory.class, null);
+        ServiceTracker<ConnectionFactory, ConnectionFactory> serviceTracker = new ServiceTracker<>(this.bundleContext,
+                ConnectionFactory.class, null);
         serviceTracker.open(true);
-        this.m_connectionFactory = serviceTracker.getService();
+        this.connectionFactory = serviceTracker.getService();
 
-        this.m_modemServices = new Hashtable<String, SierraUsb598>();
+        this.modemServices = new Hashtable<>();
     }
 
     public static SierraUsb598ModemFactory getInstance() {
-        if (s_factoryInstance == null) {
-            s_factoryInstance = new SierraUsb598ModemFactory();
+        if (factoryInstance == null) {
+            factoryInstance = new SierraUsb598ModemFactory();
         }
-        return s_factoryInstance;
+        return factoryInstance;
     }
 
     @Override
     public CellularModem obtainCellularModemService(ModemDevice modemDevice, String platform) throws Exception {
         String key = modemDevice.getProductName();
-        SierraUsb598 sierraUsb598 = this.m_modemServices.get(key);
+        SierraUsb598 sierraUsb598 = this.modemServices.get(key);
 
         if (sierraUsb598 == null) {
-            sierraUsb598 = new SierraUsb598(modemDevice, this.m_connectionFactory);
+            sierraUsb598 = new SierraUsb598(modemDevice, this.connectionFactory);
             sierraUsb598.bind();
-            this.m_modemServices.put(key, sierraUsb598);
+            this.modemServices.put(key, sierraUsb598);
         } else {
             sierraUsb598.setModemDevice(modemDevice);
         }
@@ -67,18 +67,18 @@ public class SierraUsb598ModemFactory implements CellularModemFactory {
 
     @Override
     public Hashtable<String, ? extends CellularModem> getModemServices() {
-        return this.m_modemServices;
+        return this.modemServices;
     }
 
     @Override
     public void releaseModemService(String usbPortAddress) {
-        SierraUsb598 sierraUsb598 = this.m_modemServices.remove(usbPortAddress);
+        SierraUsb598 sierraUsb598 = this.modemServices.remove(usbPortAddress);
         sierraUsb598.unbind();
     }
 
     @Override
     @Deprecated
     public ModemTechnologyType getType() {
-        return s_type;
+        return type;
     }
 }

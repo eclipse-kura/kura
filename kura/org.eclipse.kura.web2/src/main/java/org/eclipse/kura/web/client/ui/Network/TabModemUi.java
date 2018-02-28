@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -16,13 +16,22 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.kura.web.client.messages.Messages;
+import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.util.HelpButton;
 import org.eclipse.kura.web.client.util.HelpButton.HelpTextProvider;
 import org.eclipse.kura.web.client.util.MessageUtils;
 import org.eclipse.kura.web.shared.model.GwtModemAuthType;
 import org.eclipse.kura.web.shared.model.GwtModemInterfaceConfig;
+import org.eclipse.kura.web.shared.model.GwtModemPdpEntry;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtSession;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
+import org.eclipse.kura.web.shared.service.GwtNetworkService;
+import org.eclipse.kura.web.shared.service.GwtNetworkServiceAsync;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
+import org.gwtbootstrap3.client.ui.Alert;
+import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.FieldSet;
 import org.gwtbootstrap3.client.ui.FormControlStatic;
 import org.gwtbootstrap3.client.ui.FormGroup;
@@ -31,16 +40,21 @@ import org.gwtbootstrap3.client.ui.HelpBlock;
 import org.gwtbootstrap3.client.ui.InlineRadio;
 import org.gwtbootstrap3.client.ui.Input;
 import org.gwtbootstrap3.client.ui.ListBox;
+import org.gwtbootstrap3.client.ui.Modal;
 import org.gwtbootstrap3.client.ui.PanelHeader;
 import org.gwtbootstrap3.client.ui.TextBox;
 import org.gwtbootstrap3.client.ui.constants.ValidationState;
+import org.gwtbootstrap3.client.ui.gwt.CellTable;
 import org.gwtbootstrap3.client.ui.html.Span;
+import org.gwtbootstrap3.client.ui.html.Text;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.MouseOutEvent;
 import com.google.gwt.event.dom.client.MouseOutHandler;
 import com.google.gwt.event.dom.client.MouseOverEvent;
@@ -49,9 +63,14 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.ListDataProvider;
+import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SingleSelectionModel;
 
 public class TabModemUi extends Composite implements NetworkTab {
 
@@ -70,6 +89,14 @@ public class TabModemUi extends Composite implements NetworkTab {
     private GwtModemInterfaceConfig selectedNetIfConfig;
     private final Map<String, String> defaultDialString = new HashMap<>();
     private String dialString;
+
+    private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
+    private final GwtNetworkServiceAsync gwtNetworkService = GWT.create(GwtNetworkService.class);
+
+    private final ListDataProvider<GwtModemPdpEntry> pdpDataProvider = new ListDataProvider<>();
+    private final SingleSelectionModel<GwtModemPdpEntry> pdpSelectionModel = new SingleSelectionModel<>();
+
+    private boolean pdpInit;
 
     @UiField
     FormGroup groupReset;
@@ -148,6 +175,8 @@ public class TabModemUi extends Composite implements NetworkTab {
     @UiField
     TextBox dial;
     @UiField
+    Button buttonPdp;
+    @UiField
     TextBox apn;
     @UiField
     TextBox username;
@@ -163,6 +192,29 @@ public class TabModemUi extends Composite implements NetworkTab {
     TextBox interval;
     @UiField
     TextBox failure;
+
+    @UiField
+    Modal pdpModal;
+
+    @UiField
+    PanelHeader pdpTitle;
+
+    @UiField
+    CellTable<GwtModemPdpEntry> pdpGrid = new CellTable<>();
+
+    @UiField
+    Alert searching;
+    @UiField
+    Alert noPdp;
+    @UiField
+    Alert pdpFail;
+
+    @UiField
+    Text searchingText;
+    @UiField
+    Text noPdpText;
+    @UiField
+    Text pdpFailText;
 
     @UiField
     FormControlStatic model;
@@ -218,6 +270,7 @@ public class TabModemUi extends Composite implements NetworkTab {
     HelpButton failureHelp;
 
     public TabModemUi(GwtSession currentSession, TabTcpIpUi tcp) {
+        this.pdpInit = false;
         initWidget(uiBinder.createAndBindUi(this));
         this.session = currentSession;
         this.tcpTab = tcp;
@@ -501,13 +554,13 @@ public class TabModemUi extends Composite implements NetworkTab {
             }
         });
         this.dialString = "";
-        String model = "";
+        String modemModel;
         if (this.selectedNetIfConfig != null) {
-            model = this.selectedNetIfConfig.getModel();
-            if (model != null && model.length() > 0) {
-                if (model.contains("HE910")) {
+            modemModel = this.selectedNetIfConfig.getModel();
+            if (modemModel != null && !modemModel.isEmpty()) {
+                if (modemModel.contains("HE910")) {
                     this.dialString = this.defaultDialString.get("HE910");
-                } else if (model.contains("DE910")) {
+                } else if (modemModel.contains("DE910")) {
                     this.dialString = this.defaultDialString.get("DE910");
                 } else {
                     this.dialString = "";
@@ -539,6 +592,23 @@ public class TabModemUi extends Composite implements NetworkTab {
                 } else {
                     TabModemUi.this.groupDial.setValidationState(ValidationState.NONE);
                 }
+            }
+        });
+
+        this.buttonPdp.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                if (!TabModemUi.this.pdpInit) {
+                    initPdp();
+                    TabModemUi.this.pdpDataProvider.getList().clear();
+                    TabModemUi.this.searching.setVisible(true);
+                    TabModemUi.this.noPdp.setVisible(false);
+                    TabModemUi.this.pdpGrid.setVisible(false);
+                    TabModemUi.this.pdpFail.setVisible(false);
+                }
+                initModal();
+                loadPdpData();
             }
         });
 
@@ -1008,6 +1078,7 @@ public class TabModemUi extends Composite implements NetworkTab {
         this.modem.setEnabled(true);
         this.number.setEnabled(true);
         this.dial.setEnabled(true);
+        this.buttonPdp.setEnabled(true);
         this.apn.setEnabled(true);
         this.auth.setEnabled(true);
         this.username.setEnabled(true);
@@ -1031,23 +1102,14 @@ public class TabModemUi extends Composite implements NetworkTab {
             this.password.setEnabled(true);
         }
 
-        /*
-         * if (selectedNetIfConfig.isGpsSupported()) {
-         * radio1.setEnabled(true);
-         * radio2.setEnabled(true);
-         * } else {
-         * radio1.setEnabled(false);
-         * radio2.setEnabled(false);
-         * }
-         */
-
         if (this.selectedNetIfConfig != null) {
             for (String techType : this.selectedNetIfConfig.getNetworkTechnology()) {
-                if (techType.equals("EVDO") || techType.equals("CDMA")) {
+                if ("EVDO".equals(techType) || "CDMA".equals(techType)) {
                     this.apn.setEnabled(false);
                     this.auth.setEnabled(false);
                     this.username.setEnabled(false);
                     this.password.setEnabled(false);
+                    this.buttonPdp.setEnabled(false);
                 }
             }
         }
@@ -1073,5 +1135,131 @@ public class TabModemUi extends Composite implements NetworkTab {
         this.interval.setText(null);
         this.failure.setText(null);
         update();
+    }
+
+    private void initModal() {
+        this.pdpModal.setTitle("PDP Context Information");
+        this.pdpTitle.setText("Available PDP Profiles");
+        this.pdpModal.show();
+
+        this.searchingText.setText(MSGS.netModemAlertObtainingPdpInfo());
+        this.noPdpText.setText(MSGS.netModemAlertNoPdp());
+        this.pdpFailText.setText(MSGS.netModemAlertObtainPdpInfoFail());
+    }
+
+    private void initPdp() {
+        this.pdpInit = true;
+        TextColumn<GwtModemPdpEntry> col1 = new TextColumn<GwtModemPdpEntry>() {
+
+            @Override
+            public String getValue(GwtModemPdpEntry object) {
+                return String.valueOf(object.getContextNumber());
+            }
+        };
+        col1.setCellStyleNames("status-table-row");
+        this.pdpGrid.addColumn(col1, "Context Number");
+        this.pdpGrid.setColumnWidth(col1, "70px");
+
+        TextColumn<GwtModemPdpEntry> col2 = new TextColumn<GwtModemPdpEntry>() {
+
+            @Override
+            public String getValue(GwtModemPdpEntry object) {
+                return object.getPdpType();
+            }
+        };
+        col2.setCellStyleNames("status-table-row");
+        this.pdpGrid.addColumn(col2, "PDP Type");
+        this.pdpGrid.setColumnWidth(col2, "85px");
+
+        TextColumn<GwtModemPdpEntry> col3 = new TextColumn<GwtModemPdpEntry>() {
+
+            @Override
+            public String getValue(GwtModemPdpEntry object) {
+                return object.getApn();
+            }
+        };
+        col3.setCellStyleNames("status-table-row");
+        this.pdpGrid.addColumn(col3, "Access Point Name (APN)");
+        this.pdpGrid.setColumnWidth(col3, "400px");
+
+        this.pdpDataProvider.addDataDisplay(this.pdpGrid);
+        this.pdpGrid.setSelectionModel(this.pdpSelectionModel);
+
+        this.pdpSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                GwtModemPdpEntry modemPdpEntry = TabModemUi.this.pdpSelectionModel.getSelectedObject();
+                if (modemPdpEntry != null) {
+                    TabModemUi.this.dial.setValue(formDialString(modemPdpEntry.getContextNumber()));
+                    if (!modemPdpEntry.getApn().contains("new PDP context")) {
+                        TabModemUi.this.apn.setValue(modemPdpEntry.getApn());
+                    } else {
+                        TabModemUi.this.apn.setValue("");
+                    }
+                    TabModemUi.this.pdpModal.hide();
+                }
+            }
+        });
+    }
+
+    private String formDialString(int pdpContextNo) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("atd*99***");
+        sb.append(pdpContextNo);
+        sb.append("#");
+        return sb.toString();
+    }
+
+    private void loadPdpData() {
+        this.pdpDataProvider.getList().clear();
+        this.searching.setVisible(true);
+        this.noPdp.setVisible(false);
+        this.pdpGrid.setVisible(false);
+        this.pdpFail.setVisible(false);
+
+        this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+
+            @Override
+            public void onFailure(Throwable ex) {
+                FailureHandler.handle(ex);
+            }
+
+            @Override
+            public void onSuccess(GwtXSRFToken token) {
+                TabModemUi.this.gwtNetworkService.findPdpContextInfo(token,
+                        TabModemUi.this.selectedNetIfConfig.getName(), new AsyncCallback<List<GwtModemPdpEntry>>() {
+
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                TabModemUi.this.searching.setVisible(false);
+                                TabModemUi.this.noPdp.setVisible(false);
+                                TabModemUi.this.pdpGrid.setVisible(false);
+                                TabModemUi.this.pdpFail.setVisible(true);
+                            }
+
+                            @Override
+                            public void onSuccess(List<GwtModemPdpEntry> result) {
+                                for (GwtModemPdpEntry pair : result) {
+                                    TabModemUi.this.pdpDataProvider.getList().add(pair);
+                                }
+                                TabModemUi.this.pdpDataProvider.flush();
+                                if (!TabModemUi.this.pdpDataProvider.getList().isEmpty()) {
+                                    TabModemUi.this.searching.setVisible(false);
+                                    TabModemUi.this.noPdp.setVisible(false);
+                                    int size = TabModemUi.this.pdpDataProvider.getList().size();
+                                    TabModemUi.this.pdpGrid.setVisibleRange(0, size);
+                                    TabModemUi.this.pdpGrid.setVisible(true);
+                                    TabModemUi.this.pdpFail.setVisible(false);
+                                } else {
+                                    TabModemUi.this.searching.setVisible(false);
+                                    TabModemUi.this.noPdp.setVisible(true);
+                                    TabModemUi.this.pdpGrid.setVisible(false);
+                                    TabModemUi.this.pdpFail.setVisible(false);
+                                }
+                            }
+                        });
+            }
+        });
     }
 }

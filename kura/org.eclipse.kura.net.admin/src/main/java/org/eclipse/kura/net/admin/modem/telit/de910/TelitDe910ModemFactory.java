@@ -25,38 +25,38 @@ import org.osgi.util.tracker.ServiceTracker;
 
 public class TelitDe910ModemFactory implements CellularModemFactory {
 
-    private static TelitDe910ModemFactory s_factoryInstance = null;
-    private static ModemTechnologyType s_type = ModemTechnologyType.EVDO;
-    private BundleContext s_bundleContext = null;
-    private Hashtable<String, TelitDe910> m_modemServices = null;
-    private ConnectionFactory m_connectionFactory = null;
+    private static TelitDe910ModemFactory factoryInstance = null;
+    private static ModemTechnologyType type = ModemTechnologyType.EVDO;
+    private BundleContext bundleContext = null;
+    private Hashtable<String, TelitDe910> modemServices = null;
+    private ConnectionFactory connectionFactory = null;
 
     private TelitDe910ModemFactory() {
-        this.s_bundleContext = FrameworkUtil.getBundle(NetworkConfigurationService.class).getBundleContext();
+        this.bundleContext = FrameworkUtil.getBundle(NetworkConfigurationService.class).getBundleContext();
 
-        ServiceTracker<ConnectionFactory, ConnectionFactory> serviceTracker = new ServiceTracker<>(
-                this.s_bundleContext, ConnectionFactory.class, null);
+        ServiceTracker<ConnectionFactory, ConnectionFactory> serviceTracker = new ServiceTracker<>(this.bundleContext,
+                ConnectionFactory.class, null);
         serviceTracker.open(true);
-        this.m_connectionFactory = serviceTracker.getService();
+        this.connectionFactory = serviceTracker.getService();
 
-        this.m_modemServices = new Hashtable<>();
+        this.modemServices = new Hashtable<>();
     }
 
     public static TelitDe910ModemFactory getInstance() {
-        if (s_factoryInstance == null) {
-            s_factoryInstance = new TelitDe910ModemFactory();
+        if (factoryInstance == null) {
+            factoryInstance = new TelitDe910ModemFactory();
         }
-        return s_factoryInstance;
+        return factoryInstance;
     }
 
     @Override
     public CellularModem obtainCellularModemService(ModemDevice modemDevice, String platform) throws Exception {
         String key = modemDevice.getProductName();
-        TelitDe910 telitDe910 = this.m_modemServices.get(key);
+        TelitDe910 telitDe910 = this.modemServices.get(key);
 
         if (telitDe910 == null) {
-            telitDe910 = new TelitDe910(modemDevice, platform, this.m_connectionFactory);
-            this.m_modemServices.put(key, telitDe910);
+            telitDe910 = new TelitDe910(modemDevice, platform, this.connectionFactory);
+            this.modemServices.put(key, telitDe910);
         } else {
             telitDe910.setModemDevice(modemDevice);
         }
@@ -66,17 +66,17 @@ public class TelitDe910ModemFactory implements CellularModemFactory {
 
     @Override
     public Hashtable<String, ? extends CellularModem> getModemServices() {
-        return this.m_modemServices;
+        return this.modemServices;
     }
 
     @Override
     public void releaseModemService(String usbPortAddress) {
-        this.m_modemServices.remove(usbPortAddress);
+        this.modemServices.remove(usbPortAddress);
     }
 
     @Override
     @Deprecated
     public ModemTechnologyType getType() {
-        return s_type;
+        return type;
     }
 }

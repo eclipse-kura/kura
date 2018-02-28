@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 
 public class UbloxModem extends HspaModem {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(UbloxModem.class);
+    private static final Logger logger = LoggerFactory.getLogger(UbloxModem.class);
 
     public UbloxModem(ModemDevice device, String platform, ConnectionFactory connectionFactory) {
         super(device, platform, connectionFactory);
@@ -37,7 +37,7 @@ public class UbloxModem extends HspaModem {
     public void reset() throws KuraException {
         ModemDriver modemDriver = getModemDriver();
         if (!modemDriver.resetModem()) {
-            s_logger.warn("Modem reset failed");
+            logger.warn("Modem reset failed");
         }
     }
 
@@ -45,14 +45,14 @@ public class UbloxModem extends HspaModem {
     public long getCallTxCounter() throws KuraException {
 
         long txCnt = 0;
-        synchronized (s_atLock) {
-            s_logger.debug("sendCommand getGprsSessionDataVolume :: {}",
+        synchronized (this.atLock) {
+            logger.debug("sendCommand getGprsSessionDataVolume :: {}",
                     UbloxModemAtCommands.getGprsSessionDataVolume.getCommand());
-            byte[] reply = null;
+            byte[] reply;
             CommConnection commAtConnection = openSerialPort(getAtPort());
             if (!isAtReachable(commAtConnection)) {
                 closeSerialPort(commAtConnection);
-                throw new KuraException(KuraErrorCode.NOT_CONNECTED, "Modem not available for AT commands");
+                throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
             }
             try {
                 reply = commAtConnection
@@ -63,8 +63,8 @@ public class UbloxModem extends HspaModem {
             }
             closeSerialPort(commAtConnection);
             if (reply != null) {
-                String[] splitPdp = null;
-                String[] splitData = null;
+                String[] splitPdp;
+                String[] splitData;
                 String sDataVolume = this.getResponseString(reply);
                 splitPdp = sDataVolume.split("+UGCNTRD:");
                 if (splitPdp.length > 1) {
@@ -73,14 +73,13 @@ public class UbloxModem extends HspaModem {
                             splitData = pdp.trim().split(",");
                             if (splitData.length >= 5) {
                                 int pdpNo = Integer.parseInt(splitData[0]);
-                                if (pdpNo == this.m_pdpContext) {
+                                if (pdpNo == this.pdpContext) {
                                     txCnt = Integer.parseInt(splitData[1]);
                                 }
                             }
                         }
                     }
                 }
-                reply = null;
             }
         }
         return txCnt;
@@ -89,14 +88,14 @@ public class UbloxModem extends HspaModem {
     @Override
     public long getCallRxCounter() throws KuraException {
         long rxCnt = 0;
-        synchronized (s_atLock) {
-            s_logger.debug("sendCommand getGprsSessionDataVolume :: {}",
+        synchronized (this.atLock) {
+            logger.debug("sendCommand getGprsSessionDataVolume :: {}",
                     UbloxModemAtCommands.getGprsSessionDataVolume.getCommand());
-            byte[] reply = null;
+            byte[] reply;
             CommConnection commAtConnection = openSerialPort(getAtPort());
             if (!isAtReachable(commAtConnection)) {
                 closeSerialPort(commAtConnection);
-                throw new KuraException(KuraErrorCode.NOT_CONNECTED, "Modem not available for AT commands");
+                throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
             }
             try {
                 reply = commAtConnection
@@ -107,8 +106,8 @@ public class UbloxModem extends HspaModem {
             }
             closeSerialPort(commAtConnection);
             if (reply != null) {
-                String[] splitPdp = null;
-                String[] splitData = null;
+                String[] splitPdp;
+                String[] splitData;
                 String sDataVolume = this.getResponseString(reply);
                 splitPdp = sDataVolume.split("+UGCNTRD:");
                 if (splitPdp.length > 1) {
@@ -117,14 +116,13 @@ public class UbloxModem extends HspaModem {
                             splitData = pdp.trim().split(",");
                             if (splitData.length >= 4) {
                                 int pdpNo = Integer.parseInt(splitData[0]);
-                                if (pdpNo == this.m_pdpContext) {
+                                if (pdpNo == this.pdpContext) {
                                     rxCnt = Integer.parseInt(splitData[2]);
                                 }
                             }
                         }
                     }
                 }
-                reply = null;
             }
         }
         return rxCnt;

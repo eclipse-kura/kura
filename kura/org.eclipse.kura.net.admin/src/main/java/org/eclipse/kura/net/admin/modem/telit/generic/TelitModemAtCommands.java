@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -29,13 +29,13 @@ public enum TelitModemAtCommands {
     gpsEnableNMEA("AT$GPSNMUN="),
     gpsDisableNMEA("+++");
 
-    private String m_command;
+    private String command;
 
     private TelitModemAtCommands(String atCommand) {
-        this.m_command = atCommand;
+        this.command = atCommand;
     }
 
     public String getCommand() {
-        return this.m_command;
+        return this.command;
     }
 }

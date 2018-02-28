@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -75,6 +75,7 @@ public class TelitHe910ConfigGenerator implements ModemPppConfigGenerator {
         if (modemConfig != null) {
             apn = modemConfig.getApn();
             dialString = modemConfig.getDialString();
+            pdpPid = getPdpContextNumber(dialString);
         }
 
         ModemXchangeScript modemXchange = new ModemXchangeScript();
@@ -109,11 +110,15 @@ public class TelitHe910ConfigGenerator implements ModemPppConfigGenerator {
         return modemXchange;
     }
 
+    private int getPdpContextNumber(String dialString) {
+        return Integer.parseInt(dialString.substring("atd*99***".length(), dialString.length() - 1));
+    }
+
     /*
      * This method forms dial string
      */
     private String formDialString(String dialString) {
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         buf.append('"');
         if (dialString != null) {
             buf.append(dialString);
@@ -128,7 +133,7 @@ public class TelitHe910ConfigGenerator implements ModemPppConfigGenerator {
      */
     private String formPDPcontext(int pdpPid, PdpType pdpType, String apn) {
 
-        StringBuffer pdpcontext = new StringBuffer(TelitHe910AtCommands.pdpContext.getCommand());
+        StringBuilder pdpcontext = new StringBuilder(TelitHe910AtCommands.pdpContext.getCommand());
         pdpcontext.append('=');
         pdpcontext.append(pdpPid);
         pdpcontext.append(',');

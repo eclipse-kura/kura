@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -12,6 +12,7 @@
 package org.eclipse.kura.net.admin.modem.telit.de910;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.kura.KuraErrorCode;
@@ -23,6 +24,7 @@ import org.eclipse.kura.net.admin.modem.EvdoCellularModem;
 import org.eclipse.kura.net.admin.modem.telit.generic.TelitModem;
 import org.eclipse.kura.net.modem.ModemCdmaServiceProvider;
 import org.eclipse.kura.net.modem.ModemDevice;
+import org.eclipse.kura.net.modem.ModemPdpContext;
 import org.eclipse.kura.net.modem.ModemRegistrationStatus;
 import org.eclipse.kura.net.modem.ModemTechnologyType;
 import org.eclipse.kura.usb.UsbModemDevice;
@@ -32,7 +34,7 @@ import org.slf4j.LoggerFactory;
 
 public class TelitDe910 extends TelitModem implements EvdoCellularModem {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(TelitDe910.class);
+    private static final Logger logger = LoggerFactory.getLogger(TelitDe910.class);
 
     /**
      * TelitDe910 modem constructor
@@ -51,29 +53,27 @@ public class TelitDe910 extends TelitModem implements EvdoCellularModem {
         try {
             String atPort = getAtPort();
             String gpsPort = getGpsPort();
-            if (atPort != null) {
-                if (atPort.equals(getDataPort()) || atPort.equals(gpsPort)) {
-                    this.m_serialNumber = getSerialNumber();
-                    this.m_imsi = getMobileSubscriberIdentity();
-                    this.m_iccid = getIntegratedCirquitCardId();
-                    this.m_model = getModel();
-                    this.m_manufacturer = getManufacturer();
-                    this.m_revisionId = getRevisionID();
-                    this.m_gpsSupported = isGpsSupported();
-                    this.m_rssi = getSignalStrength();
+            if (atPort != null && (atPort.equals(getDataPort()) || atPort.equals(gpsPort))) {
+                this.serialNumber = getSerialNumber();
+                this.imsi = getMobileSubscriberIdentity();
+                this.iccid = getIntegratedCirquitCardId();
+                this.model = getModel();
+                this.manufacturer = getManufacturer();
+                this.revisionId = getRevisionID();
+                this.gpsSupported = isGpsSupported();
+                this.rssi = getSignalStrength();
 
-                    s_logger.trace("TelitDe910() :: Serial Number={}", this.m_serialNumber);
-                    s_logger.trace("TelitDe910() :: IMSI={}", this.m_imsi);
-                    s_logger.trace("TelitDe910() :: ICCID={}", this.m_iccid);
-                    s_logger.trace("TelitDe910() :: Model={}", this.m_model);
-                    s_logger.trace("TelitDe910() :: Manufacturer={}", this.m_manufacturer);
-                    s_logger.trace("TelitDe910() :: Revision ID={}", this.m_revisionId);
-                    s_logger.trace("TelitDe910() :: GPS Supported={}", this.m_gpsSupported);
-                    s_logger.trace("TelitDe910() :: RSSI={}", this.m_rssi);
-                }
+                logger.trace("TelitDe910() :: Serial Number={}", this.serialNumber);
+                logger.trace("TelitDe910() :: IMSI={}", this.imsi);
+                logger.trace("TelitDe910() :: ICCID={}", this.iccid);
+                logger.trace("TelitDe910() :: Model={}", this.model);
+                logger.trace("TelitDe910() :: Manufacturer={}", this.manufacturer);
+                logger.trace("TelitDe910() :: Revision ID={}", this.revisionId);
+                logger.trace("TelitDe910() :: GPS Supported={}", this.gpsSupported);
+                logger.trace("TelitDe910() :: RSSI={}", this.rssi);
             }
         } catch (KuraException e) {
-            e.printStackTrace();
+            logger.error("Failed to initialize TelitDe910", e);
         }
     }
 
@@ -85,22 +85,21 @@ public class TelitDe910 extends TelitModem implements EvdoCellularModem {
     @Override
     public ModemRegistrationStatus getRegistrationStatus() throws KuraException {
         ModemRegistrationStatus modemRegistrationStatus = ModemRegistrationStatus.UNKNOWN;
-        synchronized (s_atLock) {
-            s_logger.debug("sendCommand getRegistrationStatus :: {}",
+        synchronized (this.atLock) {
+            logger.debug("sendCommand getRegistrationStatus :: {}",
                     TelitDe910AtCommands.getNetRegistrationStatus.getCommand());
-            byte[] reply = null;
+            byte[] reply;
             CommConnection commAtConnection = openSerialPort(getAtPort());
             if (!isAtReachable(commAtConnection)) {
                 closeSerialPort(commAtConnection);
-                throw new KuraException(KuraErrorCode.NOT_CONNECTED,
-                        "Modem not available for AT commands: " + TelitDe910.class.getName());
+                throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
             }
             try {
                 reply = commAtConnection
                         .sendCommand(TelitDe910AtCommands.getNetRegistrationStatus.getCommand().getBytes(), 1000, 100);
             } catch (IOException e) {
                 closeSerialPort(commAtConnection);
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+                throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
             }
             closeSerialPort(commAtConnection);
             if (reply != null) {
@@ -124,6 +123,8 @@ public class TelitDe910 extends TelitModem implements EvdoCellularModem {
                     case 5:
                         modemRegistrationStatus = ModemRegistrationStatus.REGISTERED_ROAMING;
                         break;
+                    default:
+                        break;
                     }
                 }
             }
@@ -134,27 +135,26 @@ public class TelitDe910 extends TelitModem implements EvdoCellularModem {
     @Override
     public long getCallTxCounter() throws KuraException {
         long txCnt = 0;
-        synchronized (s_atLock) {
-            s_logger.debug("sendCommand getGprsSessionDataVolume :: {}",
+        synchronized (this.atLock) {
+            logger.debug("sendCommand getGprsSessionDataVolume :: {}",
                     TelitDe910AtCommands.getSessionDataVolume.getCommand());
-            byte[] reply = null;
+            byte[] reply;
             CommConnection commAtConnection = openSerialPort(getAtPort());
             if (!isAtReachable(commAtConnection)) {
                 closeSerialPort(commAtConnection);
-                throw new KuraException(KuraErrorCode.NOT_CONNECTED,
-                        "Modem not available for AT commands: " + TelitDe910.class.getName());
+                throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
             }
             try {
                 reply = commAtConnection.sendCommand(TelitDe910AtCommands.getSessionDataVolume.getCommand().getBytes(),
                         1000, 100);
             } catch (IOException e) {
                 closeSerialPort(commAtConnection);
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+                throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
             }
             closeSerialPort(commAtConnection);
             if (reply != null) {
-                String[] splitPdp = null;
-                String[] splitData = null;
+                String[] splitPdp;
+                String[] splitData;
                 String sDataVolume = this.getResponseString(reply);
                 splitPdp = sDataVolume.split("#GDATAVOL:");
                 if (splitPdp.length > 1) {
@@ -168,7 +168,6 @@ public class TelitDe910 extends TelitModem implements EvdoCellularModem {
                         }
                     }
                 }
-                reply = null;
             }
         }
         return txCnt;
@@ -177,27 +176,26 @@ public class TelitDe910 extends TelitModem implements EvdoCellularModem {
     @Override
     public long getCallRxCounter() throws KuraException {
         long rxCnt = 0;
-        synchronized (s_atLock) {
-            s_logger.debug("sendCommand getGprsSessionDataVolume :: {}",
+        synchronized (this.atLock) {
+            logger.debug("sendCommand getGprsSessionDataVolume :: {}",
                     TelitDe910AtCommands.getSessionDataVolume.getCommand());
-            byte[] reply = null;
+            byte[] reply;
             CommConnection commAtConnection = openSerialPort(getAtPort());
             if (!isAtReachable(commAtConnection)) {
                 closeSerialPort(commAtConnection);
-                throw new KuraException(KuraErrorCode.NOT_CONNECTED,
-                        "Modem not available for AT commands: " + TelitDe910.class.getName());
+                throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
             }
             try {
                 reply = commAtConnection.sendCommand(TelitDe910AtCommands.getSessionDataVolume.getCommand().getBytes(),
                         1000, 100);
             } catch (IOException e) {
                 closeSerialPort(commAtConnection);
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+                throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
             }
             closeSerialPort(commAtConnection);
             if (reply != null) {
-                String[] splitPdp = null;
-                String[] splitData = null;
+                String[] splitPdp;
+                String[] splitData;
                 String sDataVolume = this.getResponseString(reply);
                 splitPdp = sDataVolume.split("#GDATAVOL:");
                 if (splitPdp.length > 1) {
@@ -211,7 +209,6 @@ public class TelitDe910 extends TelitModem implements EvdoCellularModem {
                         }
                     }
                 }
-                reply = null;
             }
         }
         return rxCnt;
@@ -220,21 +217,20 @@ public class TelitDe910 extends TelitModem implements EvdoCellularModem {
     @Override
     public String getServiceType() throws KuraException {
         String serviceType = null;
-        synchronized (s_atLock) {
-            s_logger.debug("sendCommand getServiceType :: {}", TelitDe910AtCommands.getServiceType.getCommand());
-            byte[] reply = null;
+        synchronized (this.atLock) {
+            logger.debug("sendCommand getServiceType :: {}", TelitDe910AtCommands.getServiceType.getCommand());
+            byte[] reply;
             CommConnection commAtConnection = openSerialPort(getAtPort());
             if (!isAtReachable(commAtConnection)) {
                 closeSerialPort(commAtConnection);
-                throw new KuraException(KuraErrorCode.NOT_CONNECTED,
-                        "Modem not available for AT commands: " + TelitDe910.class.getName());
+                throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
             }
             try {
                 reply = commAtConnection.sendCommand(TelitDe910AtCommands.getServiceType.getCommand().getBytes(), 1000,
                         100);
             } catch (IOException e) {
                 closeSerialPort(commAtConnection);
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+                throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
             }
             closeSerialPort(commAtConnection);
             if (reply != null) {
@@ -258,6 +254,8 @@ public class TelitDe910 extends TelitModem implements EvdoCellularModem {
                     case 4:
                         serviceType = "GPRS";
                         break;
+                    default:
+                        break;
                     }
                 }
             }
@@ -269,20 +267,19 @@ public class TelitDe910 extends TelitModem implements EvdoCellularModem {
     public String getMobileDirectoryNumber() throws KuraException {
 
         String sMdn = null;
-        synchronized (s_atLock) {
-            s_logger.debug("sendCommand getMdn :: {}", TelitDe910AtCommands.getMdn.getCommand());
-            byte[] reply = null;
+        synchronized (this.atLock) {
+            logger.debug("sendCommand getMdn :: {}", TelitDe910AtCommands.getMdn.getCommand());
+            byte[] reply;
             CommConnection commAtConnection = openSerialPort(getAtPort());
             if (!isAtReachable(commAtConnection)) {
                 closeSerialPort(commAtConnection);
-                throw new KuraException(KuraErrorCode.NOT_CONNECTED,
-                        "Modem not available for AT commands: " + TelitDe910.class.getName());
+                throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
             }
             try {
                 reply = commAtConnection.sendCommand(TelitDe910AtCommands.getMdn.getCommand().getBytes(), 1000, 100);
             } catch (IOException e) {
                 closeSerialPort(commAtConnection);
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+                throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
             }
             closeSerialPort(commAtConnection);
             if (reply != null) {
@@ -299,20 +296,19 @@ public class TelitDe910 extends TelitModem implements EvdoCellularModem {
     public String getMobileIdentificationNumber() throws KuraException {
 
         String sMsid = null;
-        synchronized (s_atLock) {
-            s_logger.debug("sendCommand getMsid :: {}", TelitDe910AtCommands.getMsid.getCommand());
-            byte[] reply = null;
+        synchronized (this.atLock) {
+            logger.debug("sendCommand getMsid :: {}", TelitDe910AtCommands.getMsid.getCommand());
+            byte[] reply;
             CommConnection commAtConnection = openSerialPort(getAtPort());
             if (!isAtReachable(commAtConnection)) {
                 closeSerialPort(commAtConnection);
-                throw new KuraException(KuraErrorCode.NOT_CONNECTED,
-                        "Modem not available for AT commands: " + TelitDe910.class.getName());
+                throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
             }
             try {
                 reply = commAtConnection.sendCommand(TelitDe910AtCommands.getMsid.getCommand().getBytes(), 1000, 100);
             } catch (IOException e) {
                 closeSerialPort(commAtConnection);
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+                throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
             }
             closeSerialPort(commAtConnection);
             if (reply != null) {
@@ -329,11 +325,11 @@ public class TelitDe910 extends TelitModem implements EvdoCellularModem {
     public ModemCdmaServiceProvider getServiceProvider() throws KuraException {
 
         ModemCdmaServiceProvider cdmaSerciceProvider = ModemCdmaServiceProvider.UNKNOWN;
-        if (this.m_revisionId == null) {
+        if (this.revisionId == null) {
             getRevisionID();
         }
-        if (this.m_revisionId != null && this.m_revisionId.length() >= 9) {
-            int provider = Integer.parseInt(this.m_revisionId.substring(7, 8));
+        if (this.revisionId != null && this.revisionId.length() >= 9) {
+            int provider = Integer.parseInt(this.revisionId.substring(7, 8));
 
             if (provider == TelitDe910ServiceProviders.SPRINT.getProvider()) {
                 cdmaSerciceProvider = ModemCdmaServiceProvider.SPRINT;
@@ -350,10 +346,8 @@ public class TelitDe910 extends TelitModem implements EvdoCellularModem {
     public boolean isProvisioned() throws KuraException {
         boolean ret = false;
         String mdn = getMobileDirectoryNumber();
-        if (mdn != null && mdn.length() > 4) {
-            if (!mdn.startsWith("0000")) {
-                ret = true;
-            }
+        if (mdn != null && mdn.length() > 4 && !mdn.startsWith("0000")) {
+            ret = true;
         }
         return ret;
     }
@@ -363,41 +357,40 @@ public class TelitDe910 extends TelitModem implements EvdoCellularModem {
 
         if (getServiceProvider() == ModemCdmaServiceProvider.VERIZON) {
 
-            s_logger.info("will make an attempt to provision DE910-DUAL modem on VERIZON network");
+            logger.info("will make an attempt to provision DE910-DUAL modem on VERIZON network");
 
             boolean startOTASPsession = false;
             ModemRegistrationStatus regStatus = getRegistrationStatus();
             if (regStatus == ModemRegistrationStatus.REGISTERED_ROAMING) {
-                s_logger.warn("The DE910-DUAL cannot typically be fully provisioned while roaming");
+                logger.warn("The DE910-DUAL cannot typically be fully provisioned while roaming");
                 startOTASPsession = true;
             } else if (regStatus == ModemRegistrationStatus.REGISTERED_HOME) {
-                s_logger.info("The DE910-DUAL is registered on the network");
+                logger.info("The DE910-DUAL is registered on the network");
                 startOTASPsession = true;
             } else if (regStatus == ModemRegistrationStatus.NOT_REGISTERED) {
-                s_logger.warn("The DE910-DUAL is not registered on the network, provision session aborted");
+                logger.warn("The DE910-DUAL is not registered on the network, provision session aborted");
             } else {
-                s_logger.error("Unsupported network registration status, provision session aborted");
+                logger.error("Unsupported network registration status, provision session aborted");
             }
 
             if (startOTASPsession) {
-                s_logger.info("Starting 'OTASP' provision session");
+                logger.info("Starting 'OTASP' provision session");
                 CommConnection commAtConnection = openSerialPort(getAtPort());
                 if (!isAtReachable(commAtConnection)) {
                     closeSerialPort(commAtConnection);
-                    throw new KuraException(KuraErrorCode.NOT_CONNECTED,
-                            "Modem not available for AT commands: " + TelitDe910.class.getName());
+                    throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
                 }
                 try {
                     commAtConnection.sendCommand(TelitDe910AtCommands.provisionVerizon.getCommand().getBytes(), 1000,
                             100);
                 } catch (IOException e) {
                     closeSerialPort(commAtConnection);
-                    throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+                    throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
                 }
                 closeSerialPort(commAtConnection);
             }
 
-            s_logger.info("waiting for OTASP session to complete ...");
+            logger.info("waiting for OTASP session to complete ...");
             sleep(180000);
         }
     }
@@ -410,20 +403,20 @@ public class TelitDe910 extends TelitModem implements EvdoCellularModem {
     @Override
     public List<ModemTechnologyType> getTechnologyTypes() throws KuraException {
 
-        List<ModemTechnologyType> modemTechnologyTypes = null;
+        List<ModemTechnologyType> modemTechnologyTypes;
         ModemDevice device = getModemDevice();
         if (device == null) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "No modem device");
+            throw new KuraException(KuraErrorCode.UNAVAILABLE_DEVICE, "No modem device");
         }
         if (device instanceof UsbModemDevice) {
             SupportedUsbModemInfo usbModemInfo = SupportedUsbModemsInfo.getModem((UsbModemDevice) device);
             if (usbModemInfo != null) {
                 modemTechnologyTypes = usbModemInfo.getTechnologyTypes();
             } else {
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "No usbModemInfo available");
+                throw new KuraException(KuraErrorCode.UNAVAILABLE_DEVICE, "No usbModemInfo available");
             }
         } else {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "Unsupported modem device");
+            throw new KuraException(KuraErrorCode.UNAVAILABLE_DEVICE, "Unsupported modem device");
         }
         return modemTechnologyTypes;
     }
@@ -434,12 +427,17 @@ public class TelitDe910 extends TelitModem implements EvdoCellularModem {
         ModemTechnologyType modemTechnologyType = null;
         try {
             List<ModemTechnologyType> modemTechnologyTypes = getTechnologyTypes();
-            if (modemTechnologyTypes != null && modemTechnologyTypes.size() > 0) {
+            if (modemTechnologyTypes != null && !modemTechnologyTypes.isEmpty()) {
                 modemTechnologyType = modemTechnologyTypes.get(0);
             }
         } catch (KuraException e) {
-            s_logger.error("Failed to obtain modem technology - {}", e);
+            logger.error("Failed to obtain modem technology - {}", e);
         }
         return modemTechnologyType;
+    }
+
+    @Override
+    public List<ModemPdpContext> getPdpContextInfo() throws KuraException {
+        return new ArrayList<>();
     }
 }

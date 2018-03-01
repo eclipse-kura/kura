@@ -14,6 +14,7 @@ package org.eclipse.kura.net.admin.monitor;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.eclipse.kura.linux.net.wifi.HostapdManager;
+import org.eclipse.kura.linux.net.wifi.WpaSupplicantManager;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.slf4j.Logger;
@@ -54,13 +55,25 @@ public class WifiInterfaceState extends InterfaceState {
     }
 
     private void setWifiLinkState(String interfaceName, WifiMode wifiMode) throws KuraException {
-        if (WifiMode.MASTER.equals(wifiMode) && this.link) {
-            boolean isHostapdRunning = HostapdManager.isRunning(interfaceName);
-            boolean isIfaceInApMode = WifiMode.MASTER.equals(LinuxNetworkUtil.getWifiMode(interfaceName));
-            if (!isHostapdRunning || !isIfaceInApMode) {
-                logger.warn("setWifiLinkState() :: !! Link is down for the " + interfaceName
-                        + " interface. isHostapdRunning? " + isHostapdRunning + " isIfaceInApMode? " + isIfaceInApMode);
-                this.link = false;
+        if (this.link) {
+            if (WifiMode.MASTER.equals(wifiMode)) {
+                boolean isHostapdRunning = HostapdManager.isRunning(interfaceName);
+                boolean isIfaceInApMode = WifiMode.MASTER.equals(LinuxNetworkUtil.getWifiMode(interfaceName));
+                if (!isHostapdRunning || !isIfaceInApMode) {
+                    logger.warn("setWifiLinkState() :: !! Link is down for the " + interfaceName
+                            + " interface. isHostapdRunning? " + isHostapdRunning + " isIfaceInApMode? "
+                            + isIfaceInApMode);
+                    this.link = false;
+                }
+            } else if (WifiMode.INFRA.equals(wifiMode)) {
+                boolean isSupplicantRunning = WpaSupplicantManager.isRunning(interfaceName);
+                boolean isIfaceInManagedMode = WifiMode.INFRA.equals(LinuxNetworkUtil.getWifiMode(interfaceName));
+                if (!isSupplicantRunning || !isIfaceInManagedMode) {
+                    logger.warn("setWifiLinkState() :: !! Link is down for the " + interfaceName
+                            + " interface. isSupplicantRunning? " + isSupplicantRunning + " isIfaceInManagedMode? "
+                            + isIfaceInManagedMode);
+                    this.link = false;
+                }
             }
         }
     }

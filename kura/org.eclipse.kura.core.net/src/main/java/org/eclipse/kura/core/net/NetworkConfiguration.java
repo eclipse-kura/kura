@@ -2117,7 +2117,7 @@ public class NetworkConfiguration {
                         netConfigs.add(new DhcpServerConfigIP4(dhcpServerCfg, dhcpServerCfgIP4));
                     } catch (KuraException e) {
                         logger.warn("This invalid DhcpServerCfgIP4 configuration is ignored - {}, {}", dhcpServerCfg,
-                                dhcpServerCfgIP4, e);
+                                dhcpServerCfgIP4);
                     }
                 } else {
                     StringBuilder sb = new StringBuilder("Not including DhcpServerConfig - router: ");

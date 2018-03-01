@@ -272,7 +272,10 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
                                                     interfaceName, netInterfaceStatus);
                                         }
                                     } else if (netConfig instanceof NetConfigIP4) {
-                                        isDhcpClient = ((NetConfigIP4) netConfig).isDhcp();
+                                        if (!NetInterfaceStatus.netIPv4StatusL2Only
+                                                .equals(((NetConfigIP4) netConfig).getStatus())) {
+                                            isDhcpClient = ((NetConfigIP4) netConfig).isDhcp();
+                                        }
                                         staticGateway = ((NetConfigIP4) netConfig).getGateway();
                                     }
                                 }
@@ -281,8 +284,6 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
                     } else {
                         logger.debug("No current net interface addresses for {}", interfaceName);
                     }
-                } else {
-                    logger.debug("Current interface config is null for {}", interfaceName);
                 }
 
                 // Enable/disable based on configuration and current status

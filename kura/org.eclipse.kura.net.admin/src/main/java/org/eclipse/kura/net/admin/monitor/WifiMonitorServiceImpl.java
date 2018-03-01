@@ -292,7 +292,59 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
 
                     // This flag is changed if the interface is disabled intentionally by the code below
                     boolean up = wifiState.isUp();
-                    if (up) {
+                    boolean linkUp = wifiState.isLinkUp();
+                    logger.debug("monitor() :: interfaceName={}, wifiState.isLinkUp()={}", interfaceName,
+                            wifiState.isLinkUp());
+                    logger.debug("monitor() :: interfaceName={}, wifiState.isUp()={}", interfaceName, wifiState.isUp());
+                    if (!up || !linkUp) {
+                        // Either initially down or initially up and we disabled it explicitly
+                        // * Check if the interface is being reconfigured and
+                        // reload the kernel module (this may be ignored by the platform)
+                        // * Infrastructure (Station) mode:
+                        // * Configured to ignore SSID: just enable interface. Otherwise:
+                        // * enable interface only if Access Point is available
+                        //
+                        // * Master (Access Point) mode:
+                        // * just enable interface
+                        // Some interfaces may require reloading the kernel module
+                        // accordingly to the desired WifiMode.
+                        // FIXME ideally we only need to this if the WifiMode changes.
+                        // FIXME if reloading fails it won't be retried.
+                        if (interfacesToReconfigure.contains(interfaceName)) {
+                            try {
+                                logger.info("monitor() :: reload {} kernel module for WiFi mode {}", interfaceName,
+                                        wifiConfig.getMode());
+                                reloadKernelModule(interfaceName, wifiConfig.getMode());
+                            } catch (KuraException e) {
+                                logger.warn("monitor() :: failed to reload {} kernel module.", interfaceName, e);
+                                continue;
+                            }
+                        }
+                        try {
+                            if (WifiMode.MASTER.equals(wifiConfig.getMode())) {
+                                logger.debug("monitor() :: enable {} in master mode", interfaceName);
+                                enableInterface(wifiInterfaceConfig);
+                            } else if (WifiMode.INFRA.equals(wifiConfig.getMode())) {
+                                if (wifiConfig.ignoreSSID()) {
+                                    logger.info("monitor() :: enable {} in infra mode", interfaceName);
+                                    enableInterface(wifiInterfaceConfig);
+                                } else {
+                                    if (isAccessPointAvailable(interfaceName, wifiConfig.getSSID())) {
+                                        logger.info("monitor() :: found access point - enable {} in infra mode",
+                                                interfaceName);
+                                        enableInterface(wifiInterfaceConfig);
+                                    } else {
+                                        logger.warn("monitor() :: {} - access point is not available",
+                                                wifiConfig.getSSID());
+                                    }
+                                }
+                            }
+                        } catch (KuraException e) {
+                            logger.error("monitor() :: Error enabling {} interface, will try to reset wifi",
+                                    interfaceName, e);
+                            resetWifiDevice(interfaceName);
+                        }
+                    } else {
                         // Infrastructure (Station) mode:
                         // * Notify RSSI to listeners
                         // * Detect interface link down: disable the interface
@@ -367,57 +419,6 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                                     interfaceName);
                             disableInterface(interfaceName);
                             enableInterface(wifiInterfaceConfig);
-                        }
-                    }
-
-                    // Either initially down or initially up and we disabled it explicitly
-                    // * Check if the interface is being reconfigured and
-                    // reload the kernel module (this may be ignored by the platform)
-                    // * Infrastructure (Station) mode:
-                    // * Configured to ignore SSID: just enable interface. Otherwise:
-                    // * enable interface only if Access Point is available
-                    //
-                    // * Master (Access Point) mode:
-                    // * just enable interface
-                    if (!up) {
-                        // Some interfaces may require reloading the kernel module
-                        // accordingly to the desired WifiMode.
-                        // FIXME ideally we only need to this if the WifiMode changes.
-                        // FIXME if reloading fails it won't be retried.
-                        if (interfacesToReconfigure.contains(interfaceName)) {
-                            try {
-                                logger.info("monitor() :: reload {} kernel module for WiFi mode {}", interfaceName,
-                                        wifiConfig.getMode());
-                                reloadKernelModule(interfaceName, wifiConfig.getMode());
-                            } catch (KuraException e) {
-                                logger.warn("monitor() :: failed to reload {} kernel module.", interfaceName, e);
-                                continue;
-                            }
-                        }
-
-                        try {
-                            if (WifiMode.MASTER.equals(wifiConfig.getMode())) {
-                                logger.debug("monitor() :: enable {} in master mode", interfaceName);
-                                enableInterface(wifiInterfaceConfig);
-                            } else if (WifiMode.INFRA.equals(wifiConfig.getMode())) {
-                                if (wifiConfig.ignoreSSID()) {
-                                    logger.info("monitor() :: enable {} in infra mode", interfaceName);
-                                    enableInterface(wifiInterfaceConfig);
-                                } else {
-                                    if (isAccessPointAvailable(interfaceName, wifiConfig.getSSID())) {
-                                        logger.info("monitor() :: found access point - enable {} in infra mode",
-                                                interfaceName);
-                                        enableInterface(wifiInterfaceConfig);
-                                    } else {
-                                        logger.warn("monitor() :: {} - access point is not available",
-                                                wifiConfig.getSSID());
-                                    }
-                                }
-                            }
-                        } catch (KuraException e) {
-                            logger.error("monitor() :: Error enabling {} interface, will try to reset wifi",
-                                    interfaceName, e);
-                            resetWifiDevice(interfaceName);
                         }
                     }
                 }
@@ -632,6 +633,9 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
             } else if (netConfig instanceof DhcpServerConfig4) {
                 enableDhcpServer = ((DhcpServerConfig4) netConfig).isEnabled();
             }
+        }
+        if (status == NetInterfaceStatus.netIPv4StatusL2Only) {
+            isDhcpClient = false;
         }
         boolean enStatus = status == NetInterfaceStatus.netIPv4StatusL2Only
                 || status == NetInterfaceStatus.netIPv4StatusEnabledLAN
@@ -896,6 +900,10 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
     @Override
     public int getSignalLevel(String interfaceName, String ssid) throws KuraException {
         int rssi;
+        if (!LinuxNetworkUtil.isKernelModuleLoadedForMode(interfaceName, WifiMode.INFRA)) {
+            logger.info("getSignalLevel() :: reload {} kernel module for WiFi mode {}", interfaceName, WifiMode.INFRA);
+            reloadKernelModule(interfaceName, WifiMode.INFRA);
+        }
         if ((rssi = getSignalLevelWithLinkTool(interfaceName, ssid)) != 0) {
             return rssi;
         }

@@ -1429,7 +1429,6 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
     // TODO: simplify method signature. Probably we could take the mode from the wifiConfig.
     private void enableWifiInterface(String ifaceName, NetInterfaceStatus status, WifiMode wifiMode,
             WifiConfig wifiConfig) throws KuraException {
-
         // ignore mon.* interface
         // ignore redpine vlan interface
         if (ifaceName.startsWith("mon.") || ifaceName.startsWith("rpine")) {
@@ -1539,9 +1538,12 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
     }
 
     private void reloadKernelModule(String interfaceName, WifiMode wifiMode) throws KuraException {
-        logger.info("monitor() :: reload {} using kernel module for WiFi mode {}", interfaceName, wifiMode);
-        LinuxNetworkUtil.unloadKernelModule(interfaceName);
-        LinuxNetworkUtil.loadKernelModule(interfaceName, wifiMode);
+        if (!LinuxNetworkUtil.isKernelModuleLoadedForMode(interfaceName, wifiMode)) {
+            logger.info("reloadKernelModule() :: reload {} using kernel module for WiFi mode {}", interfaceName,
+                    wifiMode);
+            LinuxNetworkUtil.unloadKernelModule(interfaceName);
+            LinuxNetworkUtil.loadKernelModule(interfaceName, wifiMode);
+        }
     }
 
     private boolean isHotspotInList(int channel, String ssid, List<WifiHotspotInfo> wifiHotspotInfoList) {

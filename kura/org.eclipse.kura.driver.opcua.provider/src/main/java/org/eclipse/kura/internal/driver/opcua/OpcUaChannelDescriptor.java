@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
  *
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
@@ -23,6 +23,7 @@ import org.eclipse.kura.core.configuration.metatype.Toption;
 import org.eclipse.kura.core.configuration.metatype.Tscalar;
 import org.eclipse.kura.driver.ChannelDescriptor;
 import org.eclipse.kura.util.collection.CollectionUtil;
+import org.eclipse.milo.opcua.stack.core.AttributeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.ByteString;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 
@@ -38,10 +39,23 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
  */
 public final class OpcUaChannelDescriptor implements ChannelDescriptor {
 
-    private static final String NODE_ID = "node.id";
-    private static final String NODE_NAMESPACE_INDEX = "node.namespace.index";
-    private static final String OPCUA_TYPE = "opcua.type";
-    private static final String NODE_ID_TYPE = "node.id.type";
+    private static final String NODE_ID_PROP_NAME = "node.id";
+    private static final String NODE_NAMESPACE_INDEX_PROP_NAME = "node.namespace.index";
+    private static final String OPCUA_TYPE_PROP_NAME = "opcua.type";
+    private static final String NODE_ID_TYPE_PROP_NAME = "node.id.type";
+    private static final String ATTRIBUTE_PROP_NAME = "attribute";
+    private static final String LISTEN_SAMPLING_INTERVAL_PROP_NAME = "listen.sampling.interval";
+    private static final String LISTEN_QUEUE_SIZE_PROP_NAME = "listen.queue.size";
+    private static final String LISTEN_DISCARD_OLDEST_PROP_NAME = "listen.discard.oldest";
+
+    private static final String NODE_ID_DEFAULT = "MyNode";
+    private static final String NODE_NAMESPACE_INDEX_DEFAULT = "2";
+    private static final String OPCUA_TYPE_DEFAULT = VariableType.DEFINED_BY_JAVA_TYPE.name();
+    private static final String NODE_ID_TYPE_DEFAULT = NodeIdType.STRING.name();
+    private static final String ATTRIBUTE_DEFAULT = AttributeId.Value.name();
+    private static final String LISTEN_SAMPLING_INTERVAL_DEFAULT = "1000";
+    private static final String LISTEN_QUEUE_SIZE_DEFAULT = "10";
+    private static final String LISTEN_DISCARD_OLDEST_DEFAULT = "true";
 
     private static void addOptions(Tad target, Enum<?>[] values) {
         final List<Option> options = target.getOption();
@@ -59,66 +73,109 @@ public final class OpcUaChannelDescriptor implements ChannelDescriptor {
         final List<Tad> elements = CollectionUtil.newArrayList();
 
         final Tad nodeId = new Tad();
-        nodeId.setName(NODE_ID);
-        nodeId.setId(NODE_ID);
-        nodeId.setDescription(NODE_ID);
+        nodeId.setName(NODE_ID_PROP_NAME);
+        nodeId.setId(NODE_ID_PROP_NAME);
+        nodeId.setDescription(NODE_ID_PROP_NAME);
         nodeId.setType(Tscalar.STRING);
         nodeId.setRequired(true);
-        nodeId.setDefault("MyNode");
+        nodeId.setDefault(NODE_ID_DEFAULT);
         elements.add(nodeId);
 
         final Tad namespaceIndex = new Tad();
-        namespaceIndex.setName(NODE_NAMESPACE_INDEX);
-        namespaceIndex.setId(NODE_NAMESPACE_INDEX);
-        namespaceIndex.setDescription(NODE_NAMESPACE_INDEX);
+        namespaceIndex.setName(NODE_NAMESPACE_INDEX_PROP_NAME);
+        namespaceIndex.setId(NODE_NAMESPACE_INDEX_PROP_NAME);
+        namespaceIndex.setDescription(NODE_NAMESPACE_INDEX_PROP_NAME);
         namespaceIndex.setType(Tscalar.INTEGER);
         namespaceIndex.setRequired(true);
-        namespaceIndex.setDefault("2");
+        namespaceIndex.setDefault(NODE_NAMESPACE_INDEX_DEFAULT);
 
         elements.add(namespaceIndex);
 
         final Tad opcuaType = new Tad();
-        opcuaType.setName(OPCUA_TYPE);
-        opcuaType.setId(OPCUA_TYPE);
-        opcuaType.setDescription(OPCUA_TYPE);
+        opcuaType.setName(OPCUA_TYPE_PROP_NAME);
+        opcuaType.setId(OPCUA_TYPE_PROP_NAME);
+        opcuaType.setDescription(OPCUA_TYPE_PROP_NAME);
         opcuaType.setType(Tscalar.STRING);
         opcuaType.setRequired(true);
-        opcuaType.setDefault(VariableType.DEFINED_BY_JAVA_TYPE.name());
+        opcuaType.setDefault(OPCUA_TYPE_DEFAULT);
 
         addOptions(opcuaType, VariableType.values());
 
         elements.add(opcuaType);
 
         final Tad nodeIdType = new Tad();
-        nodeIdType.setName(NODE_ID_TYPE);
-        nodeIdType.setId(NODE_ID_TYPE);
-        nodeIdType.setDescription(NODE_ID_TYPE);
+        nodeIdType.setName(NODE_ID_TYPE_PROP_NAME);
+        nodeIdType.setId(NODE_ID_TYPE_PROP_NAME);
+        nodeIdType.setDescription(NODE_ID_TYPE_PROP_NAME);
         nodeIdType.setType(Tscalar.STRING);
         nodeIdType.setRequired(true);
-        nodeIdType.setDefault(NodeIdType.STRING.name());
+        nodeIdType.setDefault(NODE_ID_TYPE_DEFAULT);
 
         addOptions(nodeIdType, NodeIdType.values());
 
         elements.add(nodeIdType);
+
+        final Tad attribute = new Tad();
+        attribute.setName(ATTRIBUTE_PROP_NAME);
+        attribute.setId(ATTRIBUTE_PROP_NAME);
+        attribute.setDescription(ATTRIBUTE_PROP_NAME);
+        attribute.setType(Tscalar.STRING);
+        attribute.setRequired(true);
+        attribute.setDefault(ATTRIBUTE_DEFAULT);
+
+        addOptions(attribute, AttributeId.values());
+
+        elements.add(attribute);
+
+        final Tad samplingInterval = new Tad();
+        samplingInterval.setName(LISTEN_SAMPLING_INTERVAL_PROP_NAME);
+        samplingInterval.setId(LISTEN_SAMPLING_INTERVAL_PROP_NAME);
+        samplingInterval.setDescription(LISTEN_SAMPLING_INTERVAL_PROP_NAME);
+        samplingInterval.setType(Tscalar.DOUBLE);
+        samplingInterval.setRequired(true);
+        samplingInterval.setDefault(LISTEN_SAMPLING_INTERVAL_DEFAULT);
+
+        elements.add(samplingInterval);
+
+        final Tad queueSize = new Tad();
+        queueSize.setName(LISTEN_QUEUE_SIZE_PROP_NAME);
+        queueSize.setId(LISTEN_QUEUE_SIZE_PROP_NAME);
+        queueSize.setDescription(LISTEN_QUEUE_SIZE_PROP_NAME);
+        queueSize.setType(Tscalar.LONG);
+        queueSize.setRequired(true);
+        queueSize.setDefault(LISTEN_QUEUE_SIZE_DEFAULT);
+
+        elements.add(queueSize);
+
+        final Tad discardOldest = new Tad();
+        discardOldest.setName(LISTEN_DISCARD_OLDEST_PROP_NAME);
+        discardOldest.setId(LISTEN_DISCARD_OLDEST_PROP_NAME);
+        discardOldest.setDescription(LISTEN_DISCARD_OLDEST_PROP_NAME);
+        discardOldest.setType(Tscalar.BOOLEAN);
+        discardOldest.setRequired(true);
+        discardOldest.setDefault(LISTEN_DISCARD_OLDEST_DEFAULT);
+
+        elements.add(discardOldest);
+
         return elements;
     }
 
-    static int getNodeNamespaceIndex(Map<String, Object> properties) {
-        return Integer.parseInt((String) properties.get(NODE_NAMESPACE_INDEX));
+    public static int getNodeNamespaceIndex(Map<String, Object> properties) {
+        return Integer.parseInt(properties.get(NODE_NAMESPACE_INDEX_PROP_NAME).toString());
     }
 
-    static NodeIdType getNodeIdType(Map<String, Object> properties) {
-        String nodeIdType = (String) properties.get(NODE_ID_TYPE);
+    public static NodeIdType getNodeIdType(Map<String, Object> properties) {
+        String nodeIdType = (String) properties.get(NODE_ID_TYPE_PROP_NAME).toString();
         return NodeIdType.valueOf(nodeIdType);
     }
 
-    static VariableType getOpcuaType(Map<String, Object> properties) {
-        String variableType = (String) properties.get(OPCUA_TYPE);
+    public static VariableType getOpcuaType(Map<String, Object> properties) {
+        String variableType = properties.get(OPCUA_TYPE_PROP_NAME).toString();
         return VariableType.valueOf(variableType);
     }
 
-    static NodeId getNodeId(Map<String, Object> properties, int nodeNamespaceIndex, NodeIdType nodeIdType) {
-        String nodeIdString = (String) properties.get(NODE_ID);
+    public static NodeId getNodeId(Map<String, Object> properties, int nodeNamespaceIndex, NodeIdType nodeIdType) {
+        String nodeIdString = properties.get(NODE_ID_PROP_NAME).toString();
         switch (nodeIdType) {
         case NUMERIC:
             return new NodeId(nodeNamespaceIndex, Integer.parseInt(nodeIdString));
@@ -131,5 +188,25 @@ public final class OpcUaChannelDescriptor implements ChannelDescriptor {
         default:
             throw new IllegalArgumentException();
         }
+    }
+
+    public static AttributeId getAttributeId(Map<String, Object> properties) {
+        String attributeId = properties.get(ATTRIBUTE_PROP_NAME).toString();
+        return AttributeId.valueOf(attributeId);
+    }
+
+    public static Double getSamplingInterval(Map<String, Object> properties) {
+        String samplingInterval = properties.get(LISTEN_SAMPLING_INTERVAL_PROP_NAME).toString();
+        return Double.parseDouble(samplingInterval);
+    }
+
+    public static Long getQueueSize(Map<String, Object> properties) {
+        String queueSize = properties.get(LISTEN_QUEUE_SIZE_PROP_NAME).toString();
+        return Long.valueOf(queueSize);
+    }
+
+    public static Boolean getDiscardOldest(Map<String, Object> properties) {
+        String discardOldest = properties.get(LISTEN_DISCARD_OLDEST_PROP_NAME).toString();
+        return Boolean.valueOf(discardOldest);
     }
 }

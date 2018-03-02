@@ -23,6 +23,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import org.eclipse.kura.internal.driver.opcua.ListenerRegistrations.Dispatcher;
 import org.eclipse.kura.internal.driver.opcua.request.ListenParams;
 import org.eclipse.milo.opcua.sdk.client.OpcUaClient;
 import org.eclipse.milo.opcua.sdk.client.api.subscriptions.UaMonitoredItem;
@@ -219,7 +220,7 @@ public class SubscriptionManager implements SubscriptionListener, ListenerRegist
                     final MonitoredItemHandler handler = handlers.get(i);
                     handler.setMonitoredItem(monitoredItems.get(i));
                     synchronized (SubscriptionManager.this) {
-                        monitoredItemHandlers.put(handler.params, handler);
+                        monitoredItemHandlers.put(handler.getParams(), handler);
                     }
                 }
             });
@@ -240,7 +241,7 @@ public class SubscriptionManager implements SubscriptionListener, ListenerRegist
                         synchronized (SubscriptionManager.this) {
                             for (final MonitoredItemHandler handler : handlers) {
                                 handler.close();
-                                monitoredItemHandlers.remove(handler.params);
+                                monitoredItemHandlers.remove(handler.getParams());
                             }
                         }
                     }));
@@ -290,13 +291,14 @@ public class SubscriptionManager implements SubscriptionListener, ListenerRegist
     private class MonitoredItemHandler {
 
         Optional<UaMonitoredItem> monitoredItem = Optional.empty();
-        final ListenParams params;
+        final Dispatcher dispatcher;
 
         public MonitoredItemHandler(final ListenParams params) {
-            this.params = params;
+            this.dispatcher = registrations.getDispatcher(params);
         }
 
         public MonitoredItemCreateRequest getMonitoredItemCreateRequest(final UInteger requestHandle) {
+            final ListenParams params = dispatcher.getParams();
             final ReadValueId readValueId = params.getReadValueId();
             final boolean isEventNotifier = AttributeId.EventNotifier.uid().equals(readValueId.getAttributeId());
             final MonitoringParameters monitoringParams = new MonitoringParameters(requestHandle,
@@ -310,7 +312,7 @@ public class SubscriptionManager implements SubscriptionListener, ListenerRegist
         }
 
         public ListenParams getParams() {
-            return params;
+            return dispatcher.getParams();
         }
 
         public boolean isValid() {
@@ -329,7 +331,7 @@ public class SubscriptionManager implements SubscriptionListener, ListenerRegist
         }
 
         public void dispatchEvent(final Variant[] values) {
-            registrations.dispatchEvent(params, record -> {
+            dispatcher.dispatch(record -> {
                 fill(values[1], record);
 
                 try {
@@ -341,7 +343,7 @@ public class SubscriptionManager implements SubscriptionListener, ListenerRegist
         }
 
         public void dispatchValue(final DataValue value) {
-            registrations.dispatchEvent(params, record -> {
+            dispatcher.dispatch(record -> {
                 fill(value, record);
             });
         }

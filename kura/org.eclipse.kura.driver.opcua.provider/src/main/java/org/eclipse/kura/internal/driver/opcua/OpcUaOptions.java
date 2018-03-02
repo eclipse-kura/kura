@@ -410,7 +410,7 @@ final class OpcUaOptions {
         return username;
     }
 
-    Long getSubsciptionPublishInterval() {
+    long getSubsciptionPublishInterval() {
         final Object publishInterval = this.properties.get(SUBSCRIPTION_PUBLISH_INTERVAL);
         if (publishInterval instanceof Long) {
             return (Long) publishInterval;

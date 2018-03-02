@@ -165,13 +165,19 @@ public final class OpcUaChannelDescriptor implements ChannelDescriptor {
     }
 
     public static NodeIdType getNodeIdType(Map<String, Object> properties) {
-        String nodeIdType = (String) properties.get(NODE_ID_TYPE_PROP_NAME).toString();
-        return NodeIdType.valueOf(nodeIdType);
+        Object nodeIdType = properties.get(NODE_ID_TYPE_PROP_NAME).toString();
+        if (nodeIdType == null) {
+            return NodeIdType.STRING;
+        }
+        return NodeIdType.valueOf((String) nodeIdType);
     }
 
     public static VariableType getOpcuaType(Map<String, Object> properties) {
-        String variableType = properties.get(OPCUA_TYPE_PROP_NAME).toString();
-        return VariableType.valueOf(variableType);
+        Object variableType = properties.get(OPCUA_TYPE_PROP_NAME).toString();
+        if (variableType == null) {
+            return VariableType.DEFINED_BY_JAVA_TYPE;
+        }
+        return VariableType.valueOf((String) variableType);
     }
 
     public static NodeId getNodeId(Map<String, Object> properties, int nodeNamespaceIndex, NodeIdType nodeIdType) {
@@ -191,21 +197,24 @@ public final class OpcUaChannelDescriptor implements ChannelDescriptor {
     }
 
     public static AttributeId getAttributeId(Map<String, Object> properties) {
-        String attributeId = properties.get(ATTRIBUTE_PROP_NAME).toString();
-        return AttributeId.valueOf(attributeId);
+        Object attributeId = properties.get(ATTRIBUTE_PROP_NAME).toString();
+        if (attributeId == null) {
+            return AttributeId.Value;
+        }
+        return AttributeId.valueOf((String) attributeId);
     }
 
-    public static Double getSamplingInterval(Map<String, Object> properties) {
+    public static double getSamplingInterval(Map<String, Object> properties) {
         String samplingInterval = properties.get(LISTEN_SAMPLING_INTERVAL_PROP_NAME).toString();
         return Double.parseDouble(samplingInterval);
     }
 
-    public static Long getQueueSize(Map<String, Object> properties) {
+    public static long getQueueSize(Map<String, Object> properties) {
         String queueSize = properties.get(LISTEN_QUEUE_SIZE_PROP_NAME).toString();
         return Long.valueOf(queueSize);
     }
 
-    public static Boolean getDiscardOldest(Map<String, Object> properties) {
+    public static boolean getDiscardOldest(Map<String, Object> properties) {
         String discardOldest = properties.get(LISTEN_DISCARD_OLDEST_PROP_NAME).toString();
         return Boolean.valueOf(discardOldest);
     }

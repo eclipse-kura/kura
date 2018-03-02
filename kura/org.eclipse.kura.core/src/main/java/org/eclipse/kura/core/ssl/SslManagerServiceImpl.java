@@ -617,7 +617,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
         return result;
     }
 
-    private boolean changeKeyStorePassword() {
+    private void changeKeyStorePassword() {
         String password = this.options.getSslKeystorePassword();
         char[] oldPassword = this.cryptoService.getKeyStorePassword(this.options.getSslKeyStore());
         char[] newPassword = oldPassword;
@@ -629,27 +629,20 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
             }
         }
 
-        if (oldPassword == null) {
-            logger.warn("null old password");
-            return false;
-        }
-
-        if (!Arrays.equals(oldPassword, newPassword)) {
+        if (oldPassword != null && newPassword != null && !Arrays.equals(oldPassword, newPassword)) {
             try {
                 if (isKeyStoreAccessible(this.options.getSslKeyStore(), oldPassword)) {
                     changeKeyStorePassword(this.options.getSslKeyStore(), oldPassword, newPassword);
                 } else if (isKeyStoreAccessible(this.options.getSslKeyStore(), newPassword)) {
                     changeKeyStorePassword(this.options.getSslKeyStore(), newPassword, newPassword);
                 } else {
-                    return false;
+                    throw new KeyStoreException("Keystore not accessible!");
                 }
                 this.cryptoService.setKeyStorePassword(this.options.getSslKeyStore(), newPassword);
-                return true;
             } catch (Exception e) {
                 logger.warn("Failed to change keystore password", e);
             }
         }
-        return false;
     }
 
     private void changeKeyStorePassword(String location, char[] oldPassword, char[] newPassword) throws IOException,

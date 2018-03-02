@@ -130,7 +130,7 @@
 
         <osgi-dp-plugin-version>0.3.0</osgi-dp-plugin-version>
 
-        <check.plugins.exist.remote>true</check.plugins.exist.remote>
+        <check.plugins.exist.remote>false</check.plugins.exist.remote>
     </properties>
 
     <distributionManagement>
@@ -270,9 +270,9 @@
             </modules>
         </profile>
         <profile>
-            <id>skip-exists-plugin</id>
+            <id>check-exists-plugin</id>
             <properties>
-            	<check.plugins.exist.remote>false</check.plugins.exist.remote>
+            	<check.plugins.exist.remote>true</check.plugins.exist.remote>
             </properties>
         </profile>
     </profiles>

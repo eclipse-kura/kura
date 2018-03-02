@@ -185,15 +185,6 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
      */
     protected void deactivate(final ComponentContext context) {
         logger.debug(message.deactivating());
-        synchronized (this) {
-            if (this.driver != null) {
-                try {
-                    this.driver.disconnect();
-                } catch (final ConnectionException e) {
-                    logger.error(message.errorDriverDisconnection(), e);
-                }
-            }
-        }
         if (this.driverServiceTracker != null) {
             this.driverServiceTracker.close();
         }

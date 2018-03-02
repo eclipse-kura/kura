@@ -11,7 +11,6 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -93,29 +92,26 @@ public class denali implements EntryPoint {
 
             @Override
             public void onSuccess(GwtXSRFToken token) {
-                denali.this.gwtDeviceService.findSystemProperties(token,
-                        new AsyncCallback<ArrayList<GwtGroupedNVPair>>() {
+                denali.this.gwtDeviceService.findSystemProperties(token, new AsyncCallback<List<GwtGroupedNVPair>>() {
 
                     @Override
-                    public void onSuccess(ArrayList<GwtGroupedNVPair> results) {
+                    public void onSuccess(List<GwtGroupedNVPair> results) {
 
                         final GwtSession gwtSession = new GwtSession();
 
                         if (results != null) {
                             List<GwtGroupedNVPair> pairs = results;
-                            if (pairs != null) {
-                                for (GwtGroupedNVPair pair : pairs) {
-                                    String name = pair.getName();
-                                    if ("kura.have.net.admin".equals(name)) {
-                                        Boolean value = Boolean.valueOf(pair.getValue());
-                                        gwtSession.setNetAdminAvailable(value);
-                                    }
-                                    if ("kura.version".equals(name)) {
-                                        gwtSession.setKuraVersion(pair.getValue());
-                                    }
-                                    if ("kura.os.version".equals(name)) {
-                                        gwtSession.setOsVersion(pair.getValue());
-                                    }
+                            for (GwtGroupedNVPair pair : pairs) {
+                                String name = pair.getName();
+                                if ("kura.have.net.admin".equals(name)) {
+                                    Boolean value = Boolean.valueOf(pair.getValue());
+                                    gwtSession.setNetAdminAvailable(value);
+                                }
+                                if ("kura.version".equals(name)) {
+                                    gwtSession.setKuraVersion(pair.getValue());
+                                }
+                                if ("kura.os.version".equals(name)) {
+                                    gwtSession.setOsVersion(pair.getValue());
                                 }
                             }
                         }

@@ -74,6 +74,7 @@ import org.eclipse.kura.net.wifi.WifiAccessPoint;
 import org.eclipse.kura.net.wifi.WifiInterfaceAddress;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
+import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.usb.AbstractUsbDevice;
 import org.eclipse.kura.usb.UsbBlockDevice;
 import org.eclipse.kura.usb.UsbDevice;
@@ -116,6 +117,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 
     private EventAdmin eventAdmin;
     private UsbService usbService;
+    private SystemService systemService;
 
     private Map<String, UsbModemDevice> usbModems;
     private SerialModemDevice serialModem;
@@ -146,6 +148,14 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 
     public void unsetUsbService(UsbService usbService) {
         this.usbService = null;
+    }
+    
+    public void setSystemService(SystemService systemService) {
+        this.systemService = systemService;
+    }
+
+    public void unsetSystemService(SystemService systemService) {
+        this.systemService = null;
     }
 
     // ----------------------------------------------------------------
@@ -328,8 +338,11 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
     public List<String> getAllNetworkInterfaceNames() throws KuraException {
         ArrayList<String> interfaceNames = new ArrayList<>();
         List<String> allInterfaceNames = LinuxNetworkUtil.getAllInterfaceNames();
-        if (allInterfaceNames != null) {
-            interfaceNames.addAll(allInterfaceNames);
+        List<String> blacklistedInterfaces = this.systemService.getBlacklistedNetworkInterfaces();
+        for (String iface : allInterfaceNames) {
+            if (!blacklistedInterfaces.contains(iface)) {
+                interfaceNames.add(iface);
+            }
         }
 
         // include non-connected ppp interfaces and usb port numbers for non-configured modems

@@ -46,6 +46,10 @@ public interface SystemService {
     public static final String KEY_KURA_NAME = "kura.name";
     public static final String KEY_KURA_VERSION = "kura.version";
     /**
+     * @since 1.4
+     */
+    public static final String KEY_KURA_NET_INTERFACE_BLACKLIST = "kura.net.admin.interface.blacklist";
+    /**
      * @since 1.3
      */
     public static final String KEY_KURA_MARKETPLACE_COMPATIBILITY_VERSION = "kura.marketplace.compatibility.version";
@@ -317,6 +321,13 @@ public interface SystemService {
      * @return The Kura version string as denoted in kura.version property of the kura.properties file.
      */
     public String getKuraVersion();
+
+    /**
+     * Gets blacklisted network interfaces
+     * 
+     * @return list of network interfaces that are not managed by the net.admin
+     */
+    public List<String> getBlacklistedNetworkInterfaces();
 
     /**
      * Gets the Eclipse Marketplace compatibility product version for this unit.

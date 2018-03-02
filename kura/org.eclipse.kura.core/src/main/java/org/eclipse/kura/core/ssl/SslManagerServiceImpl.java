@@ -528,7 +528,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 
             boolean isDefaultFromUser = false;
             char[] kuraPropertiesKeystorePassword = this.systemService.getJavaKeyStorePassword();
-            if (kuraPropertiesKeystorePassword != null) {
+            if (kuraPropertiesKeystorePassword.length > 0) {
                 isDefaultFromUser = isKeyStoreAccessible(this.options.getSslKeyStore(), kuraPropertiesKeystorePassword);
             }
 
@@ -625,7 +625,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
             try {
                 newPassword = this.cryptoService.decryptAes(password.toCharArray());
             } catch (KuraException e) {
-                logger.warn("Failed to decrypt keystore password");
+                logger.warn("Failed to decrypt keystore password", e);
             }
         }
 

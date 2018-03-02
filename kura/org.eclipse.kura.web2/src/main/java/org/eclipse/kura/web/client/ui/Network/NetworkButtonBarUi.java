@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -62,7 +62,9 @@ public class NetworkButtonBarUi extends Composite {
     NetworkTabsUi tabs;
 
     @UiField
-    AnchorButton apply, refresh;
+    AnchorButton apply;
+    @UiField
+    AnchorButton refresh;
 
     @UiField
     Modal incompleteFieldsModal;
@@ -82,6 +84,36 @@ public class NetworkButtonBarUi extends Composite {
 
     private void initButtons() {
 
+        initApplyButton();
+        initRefreshButton();
+
+        this.table.interfacesGrid.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                NetworkButtonBarUi.this.apply.setEnabled(true);
+            }
+        });
+
+        // TODO ?? how to detect changes
+    }
+
+    protected void initRefreshButton() {
+        // Refresh Button
+        this.refresh.setText(MSGS.refresh());
+        this.refresh.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                NetworkButtonBarUi.this.table.refresh();
+                NetworkButtonBarUi.this.tabs.setDirty(false);
+                NetworkButtonBarUi.this.tabs.refresh();
+                NetworkButtonBarUi.this.tabs.adjustInterfaceTabs();
+            }
+        });
+    }
+
+    protected void initApplyButton() {
         // Apply Button
         this.apply.setText(MSGS.apply());
         this.apply.addClickHandler(new ClickHandler() {
@@ -101,31 +133,51 @@ public class NetworkButtonBarUi extends Composite {
                         String prevNetwork = null;
                         try {
                             newNetwork = calculateNetwork(updatedNetIf.getIpAddress(), updatedNetIf.getSubnetMask());
-                            // prevNetwork = Window.Location.getHost();
                             prevNetwork = calculateNetwork(Window.Location.getHost(), updatedNetIf.getSubnetMask());
                         } catch (Exception e) {
 
                         }
 
-                        if (newNetwork != null) {
-                            // if a static ip assigned, re-direct to the new
-                            // location
-                            if (updatedNetIf.getConfigMode().equals(IPV4_MODE_MANUAL_NAME)
-                                    && newNetwork.equals(prevNetwork)
-                                    && Window.Location.getHost().equals(prevNetIf.getIpAddress())) {
-                                Timer t = new Timer() {
-
-                                    @Override
-                                    public void run() {
-                                        Window.Location.replace("http://" + updatedNetIf.getIpAddress());
-                                    }
-                                };
-                                t.schedule(500);
-                            }
-                        }
+                        scheduleRefresh(prevNetIf, updatedNetIf, newNetwork, prevNetwork);
 
                         EntryClassUi.showWaitModal();
-                        NetworkButtonBarUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+                        updateNetConfiguration(updatedNetIf);
+                    }
+                } else {
+                    logger.log(Level.FINER, MSGS.information() + ": " + MSGS.deviceConfigError());
+                    NetworkButtonBarUi.this.incompleteFieldsModal.show();
+                }
+            }
+        });
+    }
+    
+    private void scheduleRefresh(GwtNetInterfaceConfig prevNetIf, final GwtNetInterfaceConfig updatedNetIf,
+            String newNetwork, String prevNetwork) {
+        if (isRefreshNeeded(prevNetIf, updatedNetIf, newNetwork, prevNetwork)) {
+            Timer t = new Timer() {
+
+                @Override
+                public void run() {
+                    Window.Location.replace("http://" + updatedNetIf.getIpAddress());
+                }
+            };
+            t.schedule(500);
+        }
+    }
+    
+    private void updateNetConfiguration(final GwtNetInterfaceConfig updatedNetIf) {
+        NetworkButtonBarUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+
+            @Override
+            public void onFailure(Throwable ex) {
+                EntryClassUi.hideWaitModal();
+                FailureHandler.handle(ex, NetworkButtonBarUi.class.getSimpleName());
+            }
+
+            @Override
+            public void onSuccess(GwtXSRFToken token) {
+                NetworkButtonBarUi.this.gwtNetworkService.updateNetInterfaceConfigurations(token, updatedNetIf,
+                        new AsyncCallback<Void>() {
 
                             @Override
                             public void onFailure(Throwable ex) {
@@ -134,60 +186,18 @@ public class NetworkButtonBarUi extends Composite {
                             }
 
                             @Override
-                            public void onSuccess(GwtXSRFToken token) {
-                                NetworkButtonBarUi.this.gwtNetworkService.updateNetInterfaceConfigurations(token,
-                                        updatedNetIf, new AsyncCallback<Void>() {
-
-                                    @Override
-                                    public void onFailure(Throwable ex) {
-                                        EntryClassUi.hideWaitModal();
-                                        FailureHandler.handle(ex, NetworkButtonBarUi.class.getSimpleName());
-                                    }
-
-                                    @Override
-                                    public void onSuccess(Void result) {
-                                        EntryClassUi.hideWaitModal();
-                                        NetworkButtonBarUi.this.tabs.setDirty(false);
-                                        NetworkButtonBarUi.this.table.refresh();
-                                        NetworkButtonBarUi.this.tabs.refresh();
-                                        NetworkButtonBarUi.this.apply.setEnabled(false);
-                                    }
-
-                                });
+                            public void onSuccess(Void result) {
+                                EntryClassUi.hideWaitModal();
+                                NetworkButtonBarUi.this.tabs.setDirty(false);
+                                NetworkButtonBarUi.this.table.refresh();
+                                NetworkButtonBarUi.this.tabs.refresh();
+                                NetworkButtonBarUi.this.apply.setEnabled(false);
                             }
 
                         });
-                    }
-                } else {
-                    logger.log(Level.FINER, MSGS.information() + ": " + MSGS.deviceConfigError());
-                    NetworkButtonBarUi.this.incompleteFieldsModal.show();
-                }
             }
 
         });
-
-        // Refresh Button
-        this.refresh.setText(MSGS.refresh());
-        this.refresh.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                NetworkButtonBarUi.this.table.refresh();
-                NetworkButtonBarUi.this.tabs.setDirty(false);
-                NetworkButtonBarUi.this.tabs.refresh();
-                NetworkButtonBarUi.this.tabs.adjustInterfaceTabs();
-            }
-        });
-
-        this.table.interfacesGrid.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-
-            @Override
-            public void onSelectionChange(SelectionChangeEvent event) {
-                NetworkButtonBarUi.this.apply.setEnabled(true);
-            }
-        });
-
-        // TODO ?? how to detect changes
     }
 
     private String calculateNetwork(String ipAddress, String netmask) {
@@ -220,7 +230,7 @@ public class NetworkButtonBarUi extends Composite {
     }
 
     private String dottedQuad(int ip) {
-        StringBuffer sb = new StringBuffer(15);
+        StringBuilder sb = new StringBuilder(15);
         for (int shift = 24; shift > 0; shift -= 8) {
             // process 3 bytes, from high order byte down.
             sb.append(Integer.toString(ip >>> shift & 0xff));
@@ -232,12 +242,12 @@ public class NetworkButtonBarUi extends Composite {
 
     private String[] splitIp(String ip) {
 
-        String sIp = new String(ip);
+        String sIp = ip;
         String[] ret = new String[4];
 
         int ind = 0;
         for (int i = 0; i < 3; i++) {
-            if ((ind = sIp.indexOf(".")) >= 0) {
+            if ((ind = sIp.indexOf('.')) >= 0) {
                 ret[i] = sIp.substring(0, ind);
                 sIp = sIp.substring(ind + 1);
                 if (i == 2) {
@@ -251,6 +261,12 @@ public class NetworkButtonBarUi extends Composite {
     private void initModal() {
         this.incompleteFieldsModal.setTitle(MSGS.warning());
         this.incompleteFieldsText.setText(MSGS.formWithErrorsOrIncomplete());
+    }
+
+    private boolean isRefreshNeeded(GwtNetInterfaceConfig prevNetIf, final GwtNetInterfaceConfig updatedNetIf,
+            String newNetwork, String prevNetwork) {
+        return newNetwork != null && prevNetIf != null && updatedNetIf.getConfigMode().equals(IPV4_MODE_MANUAL_NAME)
+                && newNetwork.equals(prevNetwork) && Window.Location.getHost().equals(prevNetIf.getIpAddress());
     }
 
 }

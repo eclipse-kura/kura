@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -34,7 +34,7 @@ public class KuraRemoteServiceServlet extends RemoteServiceServlet {
      *
      */
     private static final long serialVersionUID = 3473193315046407200L;
-    private static Logger s_logger = LoggerFactory.getLogger(KuraRemoteServiceServlet.class);
+    private static Logger logger = LoggerFactory.getLogger(KuraRemoteServiceServlet.class);
 
     /**
      *
@@ -57,22 +57,24 @@ public class KuraRemoteServiceServlet extends RemoteServiceServlet {
      * @param req
      * @param userToken
      */
-    static private void performXSRFTokenValidation(HttpServletRequest req, GwtXSRFToken userToken)
+    private static void performXSRFTokenValidation(HttpServletRequest req, GwtXSRFToken userToken)
             throws GwtKuraException {
         HttpSession session = req.getSession();
 
         if (!isValidXSRFToken(session, userToken)) {
-            if (session != null) {
-                s_logger.info("XSRF token is NOT VALID - Token={}", userToken.getToken());
-                s_logger.debug("\tSender IP: {}", req.getRemoteAddr());
-                s_logger.debug("\tSender Host: {}", req.getRemoteHost());
-                s_logger.debug("\tSender Port: {}", req.getRemotePort());
-                s_logger.debug("\tFull Request URL\n {}?{}\n\n", req.getRequestURL().toString(), req.getQueryString());
+            logger.info("XSRF token is NOT VALID");
+
+            if (userToken != null) {
+                logger.info("Invalid User Token={}", userToken.getToken());
             }
+            logger.debug("\tSender IP: {}", req.getRemoteAddr());
+            logger.debug("\tSender Host: {}", req.getRemoteHost());
+            logger.debug("\tSender Port: {}", req.getRemotePort());
+            logger.debug("\tFull Request URL\n {}?{}\n\n", req.getRequestURL().toString(), req.getQueryString());
 
             // forcing the console log out
             session.invalidate();
-            s_logger.debug("Session invalidated.");
+            logger.debug("Session invalidated.");
 
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, null, "Invalid XSRF token");
         }
@@ -89,11 +91,11 @@ public class KuraRemoteServiceServlet extends RemoteServiceServlet {
      * @param userToken
      * @return boolean
      */
-    static public boolean isValidXSRFToken(HttpSession session, GwtXSRFToken userToken) {
-        s_logger.debug("Starting XSRF Token validation...'");
+    public static boolean isValidXSRFToken(HttpSession session, GwtXSRFToken userToken) {
+        logger.debug("Starting XSRF Token validation...'");
 
         if (userToken == null) {
-            s_logger.debug("XSRF Token is NOT VALID -> NULL TOKEN");
+            logger.debug("XSRF Token is NOT VALID -> NULL TOKEN");
             return false;
         }
 
@@ -103,26 +105,23 @@ public class KuraRemoteServiceServlet extends RemoteServiceServlet {
             String serverToken = serverXSRFToken.getToken();
 
             // Checking the XSRF validity on the serverToken
-            if (isValidStringToken(serverToken)) {
-                if (isValidStringToken(userToken.getToken())) {
-                    if (serverToken.equals(userToken.getToken())) {
-                        // Checking expire date
-                        if (new Date().before(userToken.getExpiresOn())) {
-                            s_logger.debug("XSRF Token is VALID - {}", userToken.getToken());
+            if (isValidStringToken(serverToken) && isValidStringToken(userToken.getToken())
+                    && serverToken.equals(userToken.getToken())) {
+                // Checking expire date
+                if (new Date().before(userToken.getExpiresOn())) {
+                    logger.debug("XSRF Token is VALID - {}", userToken.getToken());
 
-                            // Reset used token
-                            session.setAttribute(GwtSecurityTokenServiceImpl.XSRF_TOKEN_KEY, null);
-                            return true;
-                        } else {
-                            session.setAttribute(GwtSecurityTokenServiceImpl.XSRF_TOKEN_KEY, null);
-                            s_logger.error("XSRF Token is EXPIRED - {}", userToken.getToken());
-                        }
-                    }
+                    // Reset used token
+                    session.setAttribute(GwtSecurityTokenServiceImpl.XSRF_TOKEN_KEY, null);
+                    return true;
+                } else {
+                    session.setAttribute(GwtSecurityTokenServiceImpl.XSRF_TOKEN_KEY, null);
+                    logger.error("XSRF Token is EXPIRED - {}", userToken.getToken());
                 }
             }
         }
 
-        s_logger.debug("XSRF Token is NOT VALID - {}", userToken.getToken());
+        logger.debug("XSRF Token is NOT VALID - {}", userToken.getToken());
         return false;
     }
 
@@ -133,13 +132,12 @@ public class KuraRemoteServiceServlet extends RemoteServiceServlet {
      * @param token
      * @return boolean
      */
-    static private boolean isValidStringToken(String token) {
-        if (token != null) {
-            if (!token.isEmpty()) {
-                return true;
-            }
+    private static boolean isValidStringToken(String token) {
+        boolean result = false;
+        if (token != null && !token.isEmpty()) {
+            result = true;
         }
-        return false;
+        return result;
     }
 
     /**
@@ -152,8 +150,7 @@ public class KuraRemoteServiceServlet extends RemoteServiceServlet {
      * @return String
      * @throws Exception
      */
-    @SuppressWarnings("unchecked")
-    static public String getFieldFromMultiPartForm(HttpServletRequest req, String fieldName) throws Exception {
+    public static String getFieldFromMultiPartForm(HttpServletRequest req, String fieldName) throws Exception {
         String fieldValue = null;
 
         ServletFileUpload upload = new ServletFileUpload();
@@ -168,7 +165,7 @@ public class KuraRemoteServiceServlet extends RemoteServiceServlet {
 
                 if (name.equals(fieldName)) {
                     fieldValue = item.getString();
-                    s_logger.debug("Found field name '{}' with value: {}", name, fieldValue);
+                    logger.debug("Found field name '{}' with value: {}", name, fieldValue);
                 }
             }
         }
@@ -176,7 +173,7 @@ public class KuraRemoteServiceServlet extends RemoteServiceServlet {
         return fieldValue;
     }
 
-    static public void checkXSRFToken(HttpServletRequest req, GwtXSRFToken token) throws Exception {
+    public static void checkXSRFToken(HttpServletRequest req, GwtXSRFToken token) throws Exception {
         performXSRFTokenValidation(req, token);
     }
 
@@ -188,7 +185,7 @@ public class KuraRemoteServiceServlet extends RemoteServiceServlet {
      * @param req
      * @throws Exception
      */
-    static public void checkXSRFTokenMultiPart(HttpServletRequest req, GwtXSRFToken token) throws Exception {
+    public static void checkXSRFTokenMultiPart(HttpServletRequest req, GwtXSRFToken token) throws Exception {
         performXSRFTokenValidation(req, token);
     }
 

@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.function.BiConsumer;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.asset.Asset;
@@ -109,8 +108,6 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
 
     private WireAssetOptions options = new WireAssetOptions();
 
-    private BiConsumer<ChannelRecord, Map<String, TypedValue<?>>> recordFiller = this::fillRecordWithoutErrors;
-
     /**
      * Binds the Wire Helper Service.
      *
@@ -162,8 +159,6 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
         logger.debug(message.updatingWireAsset());
         this.options = new WireAssetOptions(properties);
         super.updated(properties);
-
-        this.recordFiller = this.options.emitErrors() ? this::fillRecordWithErrors : this::fillRecordWithoutErrors;
         logger.debug(message.updatingWireAssetDone());
     }
 
@@ -297,10 +292,14 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
         }
 
         final TimestampFiller timestampFiller = this.options.getTimestampMode().createFiller(wireRecordProperties);
+        final boolean emitErrors = this.options.emitErrors();
 
         for (final ChannelRecord channelRecord : channelRecords) {
-            this.recordFiller.accept(channelRecord, wireRecordProperties);
-            timestampFiller.processRecord(channelRecord);
+            if (emitErrors) {
+                this.fillRecordWithErrors(channelRecord, wireRecordProperties, timestampFiller);
+            } else {
+                this.fillRecordWithoutErrors(channelRecord, wireRecordProperties, timestampFiller);
+            }
         }
 
         timestampFiller.fillSingleTimestamp();
@@ -309,7 +308,7 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
     }
 
     private void fillRecordWithoutErrors(final ChannelRecord channelRecord,
-            final Map<String, TypedValue<?>> wireRecordProperties) {
+            final Map<String, TypedValue<?>> wireRecordProperties, final TimestampFiller timestampFiller) {
         final String channelName = channelRecord.getChannelName();
         final ChannelStatus channelStatus = channelRecord.getChannelStatus();
         if (channelStatus.getChannelFlag() == ChannelFlag.FAILURE) {
@@ -318,10 +317,11 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
         }
 
         wireRecordProperties.put(channelName, channelRecord.getValue());
+        timestampFiller.processRecord(channelRecord);
     }
 
     private void fillRecordWithErrors(final ChannelRecord channelRecord,
-            final Map<String, TypedValue<?>> wireRecordProperties) {
+            final Map<String, TypedValue<?>> wireRecordProperties, final TimestampFiller timestampFiller) {
         final String channelName = channelRecord.getChannelName();
         final ChannelStatus channelStatus = channelRecord.getChannelStatus();
         if (channelStatus.getChannelFlag() == ChannelFlag.FAILURE) {
@@ -333,6 +333,7 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
                     TypedValues.newStringValue(WireAssetConstants.PROP_VALUE_NO_ERROR.value()));
             wireRecordProperties.put(channelName, channelRecord.getValue());
         }
+        timestampFiller.processRecord(channelRecord);
     }
 
     private String getErrorMessage(final ChannelStatus channelStatus) {

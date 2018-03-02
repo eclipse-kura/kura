@@ -75,7 +75,6 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
     private static final String IPV4_STATUS_LAN = GwtNetIfStatus.netIPv4StatusEnabledLAN.name();
     private static final String IPV4_STATUS_LAN_MESSAGE = MessageUtils.get(IPV4_STATUS_LAN);
     private static final String IPV4_STATUS_UNMANAGED = GwtNetIfStatus.netIPv4StatusUnmanaged.name();
-    private static final String IPV4_STATUS_UNMANAGED_MESSAGE = MessageUtils.get(IPV4_STATUS_UNMANAGED);
     private static final String IPV4_STATUS_L2ONLY = GwtNetIfStatus.netIPv4StatusL2Only.name();
     private static final String IPV4_STATUS_L2ONLY_MESSAGE = MessageUtils.get(IPV4_STATUS_L2ONLY);
     private static final String IPV4_STATUS_DISABLED = GwtNetIfStatus.netIPv4StatusDisabled.name();
@@ -224,7 +223,8 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
         if (this.selectedNetIfConfig != null && this.selectedNetIfConfig.getHwTypeEnum() == GwtNetIfType.MODEM) {
             if (this.status != null) {
                 for (int i = 0; i < this.status.getItemCount(); i++) {
-                    if (this.status.getItemText(i).equals(IPV4_STATUS_LAN_MESSAGE)) {
+                    if (IPV4_STATUS_L2ONLY_MESSAGE.equals(this.status.getItemText(i))
+                            || IPV4_STATUS_LAN_MESSAGE.equals(this.status.getItemText(i))) {
                         this.status.removeItem(i);
                     }
                 }

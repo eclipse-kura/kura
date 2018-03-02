@@ -14,33 +14,29 @@ import static org.eclipse.kura.internal.driver.opcua.Utils.tryExtract;
 
 import java.util.Map;
 
-import org.eclipse.kura.driver.opcua.localization.OpcUaMessages;
 import org.eclipse.kura.internal.driver.opcua.NodeIdType;
 import org.eclipse.kura.internal.driver.opcua.OpcUaChannelDescriptor;
 import org.eclipse.kura.internal.driver.opcua.Utils;
-import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.milo.opcua.stack.core.AttributeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.structured.ReadValueId;
 
 public class ReadParams {
 
-    private static final OpcUaMessages message = LocalizationAdapter.adapt(OpcUaMessages.class);
-
     private final ReadValueId readValueId;
 
     public ReadParams(final Map<String, Object> channelConfig) {
         final int nodeNamespaceIndex = Utils.tryExtract(channelConfig, OpcUaChannelDescriptor::getNodeNamespaceIndex,
-                message.errorRetrievingNodeNamespace());
+                "Error while retrieving Node Namespace index");
         final NodeIdType nodeIdType = tryExtract(channelConfig, OpcUaChannelDescriptor::getNodeIdType,
-                message.errorRetrievingNodeIdType());
+                "Error while retrieving Node ID type");
 
         final NodeId nodeId = tryExtract(channelConfig,
                 config -> OpcUaChannelDescriptor.getNodeId(config, nodeNamespaceIndex, nodeIdType),
-                message.errorRetrievingNodeId());
+                "Error while retrieving Node ID");
 
         final AttributeId attributeId = tryExtract(channelConfig, OpcUaChannelDescriptor::getAttributeId,
-                message.errorRetrievingAttributeId());
+                "Error while retrieving Attribute ID");
 
         this.readValueId = new ReadValueId(nodeId, attributeId.uid(), null, null);
     }

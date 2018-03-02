@@ -21,11 +21,9 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 
-import org.eclipse.kura.driver.opcua.localization.OpcUaMessages;
 import org.eclipse.kura.internal.driver.opcua.request.ReadParams;
 import org.eclipse.kura.internal.driver.opcua.request.Request;
 import org.eclipse.kura.internal.driver.opcua.request.WriteParams;
-import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.milo.opcua.sdk.client.OpcUaClient;
 import org.eclipse.milo.opcua.sdk.client.api.UaClient;
 import org.eclipse.milo.opcua.sdk.client.api.config.OpcUaClientConfig;
@@ -48,7 +46,6 @@ import io.netty.util.internal.StringUtil;
 
 public class ConnectionManager {
 
-    private static final OpcUaMessages message = LocalizationAdapter.adapt(OpcUaMessages.class);
     private static final Logger logger = LoggerFactory.getLogger(ConnectionManager.class);
 
     private final OpcUaClient client;
@@ -71,7 +68,7 @@ public class ConnectionManager {
     public static CompletableFuture<ConnectionManager> connect(final OpcUaOptions options,
             final BiConsumer<ConnectionManager, Throwable> failureHandler, final ListenerRegistrations registrations) {
 
-        logger.info(message.connecting());
+        logger.info("Connecting to OPC-UA...");
 
         final String endpointString = getEndpointString(options);
 
@@ -82,7 +79,7 @@ public class ConnectionManager {
                     if (client == null || ex != null) {
                         throw new RuntimeException(ex);
                     }
-                    logger.info(message.connectingDone());
+                    logger.info("Connecting to OPC-UA...Done");
                     return new ConnectionManager((OpcUaClient) client, options, failureHandler, registrations);
                 });
     };
@@ -149,12 +146,12 @@ public class ConnectionManager {
 
     public synchronized void close() {
 
-        logger.info(message.disconnecting());
+        logger.info("Disconnecting from OPC-UA...");
         queue.close(() -> subscriptionManager.close().thenCompose(ok -> client.disconnect()).handle((ok, err) -> {
             if (err == null) {
-                logger.info(message.disconnectingDone());
+                logger.info("Disconnecting from OPC-UA...Done");
             } else {
-                logger.info(message.disconnectionProblem());
+                logger.info("Unable to Disconnect...");
             }
             return (Void) null;
         }));
@@ -185,7 +182,7 @@ public class ConnectionManager {
                 .findFirst();
 
         if (!endpoint.isPresent()) {
-            throw new RuntimeException(message.connectionProblem());
+            throw new RuntimeException("Unable to Connect...No desired Endpoints returned");
         }
 
         logger.debug("Connecting to endpoint: {}", endpoint.get());
@@ -204,7 +201,7 @@ public class ConnectionManager {
                 .setCertificate(loader.getClientCertificate()).build();
 
         final OpcUaClient client = new OpcUaClient(clientConfigBuilder.build());
-        logger.info(message.connectingDone());
+        logger.info("Connecting to OPC-UA...Done");
         return client.connect();
     }
 }

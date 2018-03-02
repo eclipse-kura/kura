@@ -29,11 +29,9 @@ import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.driver.ChannelDescriptor;
 import org.eclipse.kura.driver.Driver;
 import org.eclipse.kura.driver.PreparedRead;
-import org.eclipse.kura.driver.opcua.localization.OpcUaMessages;
 import org.eclipse.kura.internal.driver.opcua.request.ListenRequest;
 import org.eclipse.kura.internal.driver.opcua.request.ReadParams;
 import org.eclipse.kura.internal.driver.opcua.request.Request;
-import org.eclipse.kura.localization.LocalizationAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,8 +58,6 @@ import org.slf4j.LoggerFactory;
 public final class OpcUaDriver implements Driver, ConfigurableComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(OpcUaDriver.class);
-
-    private static final OpcUaMessages message = LocalizationAdapter.adapt(OpcUaMessages.class);
 
     private Optional<ConnectionManager> connectionManager = Optional.empty();
     private Optional<CompletableFuture<Void>> connectTask = Optional.empty();
@@ -115,7 +111,7 @@ public final class OpcUaDriver implements Driver, ConfigurableComponent {
             }
             connectTask.get(this.options.getRequestTimeout(), TimeUnit.SECONDS);
         } catch (final Exception e) {
-            logger.debug(message.connectionProblem(), e);
+            logger.debug("Unable to Connect...No desired Endpoints returned", e);
             throw new ConnectionException(e);
         }
     }
@@ -125,7 +121,7 @@ public final class OpcUaDriver implements Driver, ConfigurableComponent {
         try {
             this.disconnect();
         } catch (final ConnectionException e) {
-            logger.error(message.errorDisconnecting(), e);
+            logger.error("Error while disconnecting....", e);
         }
         logger.debug("Deactivating OPC-UA Driver... Done");
     }
@@ -144,7 +140,7 @@ public final class OpcUaDriver implements Driver, ConfigurableComponent {
     }
 
     private void extractProperties(final Map<String, Object> properties) {
-        requireNonNull(properties, message.propertiesNonNull());
+        requireNonNull(properties, "Properties cannot be null");
         this.options = new OpcUaOptions(properties, this.cryptoService);
     }
 
@@ -206,7 +202,7 @@ public final class OpcUaDriver implements Driver, ConfigurableComponent {
                 this.connectAsync();
             }
         } catch (ConnectionException e) {
-            logger.warn(message.disconnectionProblem());
+            logger.warn("Unable to Disconnect...");
         }
 
         logger.debug("Updating OPC-UA Driver... Done");
@@ -220,7 +216,7 @@ public final class OpcUaDriver implements Driver, ConfigurableComponent {
                     this.disconnect();
                 }
             } catch (ConnectionException e) {
-                logger.warn(message.disconnectionProblem());
+                logger.warn("Unable to Disconnect...");
             }
         } else {
             logger.debug("Ignoring failure from old connection: {}", ex);
@@ -233,21 +229,21 @@ public final class OpcUaDriver implements Driver, ConfigurableComponent {
             if (manager != null) {
                 manager.close();
             }
-            throw new RuntimeException(message.connectionProblem());
+            throw new RuntimeException("Unable to Connect...No desired Endpoints returned");
         } else {
             this.connectTask = Optional.empty();
             if (manager != null) {
                 manager.start();
                 this.connectionManager = Optional.of(manager);
             } else {
-                throw new RuntimeException(message.connectionProblem());
+                throw new RuntimeException("Unable to Connect...No desired Endpoints returned");
             }
         }
     }
 
     @Override
     public PreparedRead prepareRead(List<ChannelRecord> channelRecords) {
-        requireNonNull(channelRecords, message.recordListNonNull());
+        requireNonNull(channelRecords, "Channel Record list cannot be null");
 
         return new OpcUaPreparedRead(Request.extractReadRequests(channelRecords), channelRecords);
     }

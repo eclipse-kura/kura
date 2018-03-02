@@ -14,14 +14,10 @@ import java.util.Map;
 
 import org.eclipse.kura.channel.ChannelRecord;
 import org.eclipse.kura.channel.listener.ChannelListener;
-import org.eclipse.kura.driver.opcua.localization.OpcUaMessages;
 import org.eclipse.kura.internal.driver.opcua.Utils;
-import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.type.DataType;
 
 public class ListenRequest extends Request<ListenParams> {
-
-    private static final OpcUaMessages message = LocalizationAdapter.adapt(OpcUaMessages.class);
 
     private final ChannelListener listener;
 
@@ -33,9 +29,9 @@ public class ListenRequest extends Request<ListenParams> {
     public static ListenRequest extractListenRequest(final Map<String, Object> channelConfig,
             final ChannelListener listener) {
         final String channelName = Utils.tryExtract(channelConfig, config -> (String) config.get("+name"),
-                message.errorRetrievingChannelName());
+                "Error while retrieving Channel Name");
         final DataType valueType = Utils.tryExtract(channelConfig,
-                config -> DataType.valueOf((String) config.get("+value.type")), message.errorRetrievingValueType());
+                config -> DataType.valueOf((String) config.get("+value.type")), "Error while retrieving value type");
 
         final ListenParams params = new ListenParams(channelConfig);
         return new ListenRequest(params, ChannelRecord.createReadRecord(channelName, valueType), listener);

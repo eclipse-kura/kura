@@ -24,8 +24,6 @@ import java.util.Map;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.crypto.CryptoService;
-import org.eclipse.kura.driver.opcua.localization.OpcUaMessages;
-import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.util.base.StringUtil;
 import org.eclipse.milo.opcua.sdk.client.api.identity.AnonymousProvider;
 import org.eclipse.milo.opcua.sdk.client.api.identity.IdentityProvider;
@@ -102,9 +100,6 @@ final class OpcUaOptions {
     /** The Logger instance. */
     private static final Logger logger = LoggerFactory.getLogger(OpcUaOptions.class);
 
-    /** Localization Resource. */
-    private static final OpcUaMessages message = LocalizationAdapter.adapt(OpcUaMessages.class);
-
     /**
      * Configurable Property to OPC-UA server password
      */
@@ -155,8 +150,8 @@ final class OpcUaOptions {
      *             if any of the arguments is null
      */
     OpcUaOptions(final Map<String, Object> properties, final CryptoService cryptoService) {
-        requireNonNull(properties, message.propertiesNonNull());
-        requireNonNull(cryptoService, message.cryptoServiceNonNull());
+        requireNonNull(properties, "Properties cannot be null");
+        requireNonNull(cryptoService, "Crypto Service cannot be null");
 
         this.properties = properties;
         this.cryptoService = cryptoService;

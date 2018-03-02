@@ -84,7 +84,7 @@
 			cardinality="0" 
 			required="true" 
 			default="1000"
-			description="The publish interval in milliseconds for the subscripton created by the driver.">
+			description="The publish interval in milliseconds for the subscription created by the driver.">
 		</AD>
 			
 		<AD id="certificate.location" 
@@ -165,7 +165,7 @@
 			type="Integer" 
 			cardinality="0" 
 			required="true" 
-			default="10"
+			default="200"
 			description="Maximum number of items that will be included in a single request to the server." />
         
     </OCD>

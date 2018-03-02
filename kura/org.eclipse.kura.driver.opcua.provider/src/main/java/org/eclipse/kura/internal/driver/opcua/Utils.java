@@ -23,8 +23,6 @@ import java.util.function.Function;
 import org.eclipse.kura.channel.ChannelFlag;
 import org.eclipse.kura.channel.ChannelRecord;
 import org.eclipse.kura.channel.ChannelStatus;
-import org.eclipse.kura.driver.opcua.localization.OpcUaMessages;
-import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DateTime;
 import org.eclipse.milo.opcua.stack.core.types.builtin.StatusCode;
@@ -35,7 +33,6 @@ import org.slf4j.LoggerFactory;
 public final class Utils {
 
     private static final Logger logger = LoggerFactory.getLogger(OpcUaDriver.class);
-    private static final OpcUaMessages message = LocalizationAdapter.adapt(OpcUaMessages.class);
 
     private Utils() {
     }
@@ -66,7 +63,8 @@ public final class Utils {
             record.setValue(DataTypeMapper.map(variant.getValue(), record.getValueType()));
             record.setChannelStatus(new ChannelStatus(ChannelFlag.SUCCESS));
         } catch (Exception e) {
-            record.setChannelStatus(new ChannelStatus(FAILURE, message.errorValueTypeConversion(), null));
+            record.setChannelStatus(new ChannelStatus(FAILURE,
+                    "Error while converting the retrieved value to the defined typed", null));
         }
         record.setTimestamp(System.currentTimeMillis());
     }
@@ -74,7 +72,7 @@ public final class Utils {
     public static void checkStatus(final StatusCode status, final ChannelRecord record) {
         try {
             if (status == null) {
-                throw new IOException(message.errorNullStatus());
+                throw new IOException("Operation Result Status cannot be null");
             }
             if (status.isBad()) {
                 throw new IOException(status.toString());
@@ -89,7 +87,7 @@ public final class Utils {
     public static void fill(final DataValue value, final ChannelRecord record) {
         try {
             if (value == null) {
-                throw new IOException(message.errorNullResult());
+                throw new IOException("Operation Result cannot be null");
             }
             final StatusCode status = value.getStatusCode();
             if (status.isBad()) {

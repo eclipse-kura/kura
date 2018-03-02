@@ -11,8 +11,6 @@
  */
 package org.eclipse.kura.internal.driver.opcua;
 
-import org.eclipse.kura.driver.opcua.localization.OpcUaMessages;
-import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
@@ -25,8 +23,6 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.ULong;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UShort;
 
 public final class DataTypeMapper {
-
-    private static final OpcUaMessages message = LocalizationAdapter.adapt(OpcUaMessages.class);
 
     private DataTypeMapper() {
     }
@@ -47,8 +43,8 @@ public final class DataTypeMapper {
             }
             return new Variant(array);
         }
-        throw new IllegalArgumentException(
-                message.errorValueTypeConversion() + javaValue.getClass() + " " + opcuaType.name());
+        throw new IllegalArgumentException("Error while converting the retrieved value to the defined typed "
+                + javaValue.getClass() + " " + opcuaType.name());
     }
 
     public static Variant map(final Object value, final VariableType targetType) {
@@ -112,8 +108,8 @@ public final class DataTypeMapper {
                 return new Variant(stringValue);
             }
         }
-        throw new IllegalArgumentException(
-                message.errorValueTypeConversion() + value.getClass() + " " + targetType.name());
+        throw new IllegalArgumentException("Error while converting the retrieved value to the defined typed "
+                + value.getClass() + " " + targetType.name());
     }
 
     private static byte[] toByteArray(Object calue) {

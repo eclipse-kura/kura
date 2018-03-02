@@ -48,7 +48,7 @@
     </organization>
     <inceptionYear>2017</inceptionYear>
     <description>Kura is a Java/OSGI-based framework for IoT gateways. Kura APIs offer access to the underlying hardware (serial ports, GPS, watchdog, GPIOs, I2C, etc.), management of network configurations, communications with M2M/IoT Integration Platforms, and gateway management.</description>
-    
+
     <repositories>
         <repository>
             <id>kura_releases</id>
@@ -394,11 +394,6 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>org.eclipse.kura.driver.opcua.localization</artifactId>
-                                    <version>${org.eclipse.kura.driver.opcua.localization.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.driver.opcua.provider</artifactId>
                                     <version>${org.eclipse.kura.driver.opcua.provider.version}</version>
                                 </artifactItem>
@@ -650,8 +645,6 @@
                                     tofile="target/plugins/org.eclipse.kura.wire.helper.provider_${org.eclipse.kura.wire.helper.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.wire.provider.jar"
                                     tofile="target/plugins/org.eclipse.kura.wire.provider_${org.eclipse.kura.wire.provider.version}.jar" />
-                                <move file="target/plugins/org.eclipse.kura.driver.opcua.localization.jar"
-                                    tofile="target/plugins/org.eclipse.kura.driver.opcua.localization_${org.eclipse.kura.driver.opcua.localization.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.driver.opcua.provider.jar"
                                     tofile="target/plugins/org.eclipse.kura.driver.opcua.provider_${org.eclipse.kura.driver.opcua.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.driver.s7plc.localization.jar"
@@ -2009,7 +2002,7 @@
                         <artifactId>rpm</artifactId>
                         <version>0.8.0</version>
                         <executions>
-                            <execution> 
+                            <execution>
                                 <id>fedora-rpm</id>
                                 <phase>package</phase>
                                 <goals>
@@ -2165,7 +2158,7 @@
                         <artifactId>rpm</artifactId>
                         <version>0.8.0</version>
                         <executions>
-                            <execution> 
+                            <execution>
                                 <id>fedora-nn-rpm</id>
                                 <phase>package</phase>
                                 <goals>
@@ -2524,14 +2517,14 @@
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.broker.artemis.xml_${org.eclipse.kura.broker.artemis.xml.version}.jar"
                                             todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
-                                        
+
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.wire.component.conditional.provider_${org.eclipse.kura.wire.component.conditional.provider.version}.jar"
                                             todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.wire.component.join.provider_${org.eclipse.kura.wire.component.join.provider.version}.jar"
                                             todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
-                                            
+
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.json.marshaller.unmarshaller.provider_${org.eclipse.kura.json.marshaller.unmarshaller.provider.version}.jar"
                                             todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />

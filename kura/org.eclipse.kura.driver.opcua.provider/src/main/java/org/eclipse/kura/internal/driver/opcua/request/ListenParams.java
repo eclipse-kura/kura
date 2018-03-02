@@ -14,13 +14,9 @@ import static org.eclipse.kura.internal.driver.opcua.Utils.tryExtract;
 
 import java.util.Map;
 
-import org.eclipse.kura.driver.opcua.localization.OpcUaMessages;
 import org.eclipse.kura.internal.driver.opcua.OpcUaChannelDescriptor;
-import org.eclipse.kura.localization.LocalizationAdapter;
 
 public class ListenParams extends ReadParams {
-
-    private static final OpcUaMessages message = LocalizationAdapter.adapt(OpcUaMessages.class);
 
     private final double samplingInterval;
     private final long queueSize;
@@ -29,11 +25,11 @@ public class ListenParams extends ReadParams {
     public ListenParams(Map<String, Object> channelConfig) {
         super(channelConfig);
         this.samplingInterval = tryExtract(channelConfig, OpcUaChannelDescriptor::getSamplingInterval,
-                message.errorRetrievingSamplingInterval());
+                "Error while retrieving Sampling Interval");
         this.queueSize = tryExtract(channelConfig, OpcUaChannelDescriptor::getQueueSize,
-                message.errorRetrievingQueueSize());
+                "Error while retrieving Queue Size");
         this.discardOldest = tryExtract(channelConfig, OpcUaChannelDescriptor::getDiscardOldest,
-                message.errorRetrievingDiscardOldest());
+                "Error while retrieving Discard Oldest parameter");
     }
 
     public double getSamplingInterval() {

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates
  *
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
@@ -29,10 +29,8 @@ import org.eclipse.kura.driver.block.task.AbstractBlockDriver;
 import org.eclipse.kura.driver.block.task.BlockTask;
 import org.eclipse.kura.driver.block.task.Mode;
 import org.eclipse.kura.driver.block.task.ToplevelBlockTask;
-import org.eclipse.kura.driver.s7plc.localization.S7PlcMessages;
 import org.eclipse.kura.internal.driver.s7plc.task.S7PlcTaskBuilder;
 import org.eclipse.kura.internal.driver.s7plc.task.S7PlcToplevelBlockTask;
-import org.eclipse.kura.localization.LocalizationAdapter;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,8 +59,6 @@ public final class S7PlcDriver extends AbstractBlockDriver<S7PlcDomain> implemen
 
     private static final Logger logger = LoggerFactory.getLogger(S7PlcDriver.class);
 
-    private static final S7PlcMessages messages = LocalizationAdapter.adapt(S7PlcMessages.class);
-
     private S7Client client = new S7Client();
 
     private S7PlcOptions options;
@@ -79,35 +75,36 @@ public final class S7PlcDriver extends AbstractBlockDriver<S7PlcDomain> implemen
 
     protected synchronized void activate(final ComponentContext componentContext,
             final Map<String, Object> properties) {
-        logger.debug(messages.activating());
-        requireNonNull(properties, messages.propertiesNonNull());
-        logger.debug(messages.activatingDone());
+        logger.debug("Activating S7 PLC Driver.....");
+        requireNonNull(properties, "Properties cannot be null");
+        updated(properties);
+        logger.debug("Activating S7 PLC Driver.....Done");
     }
 
     protected synchronized void deactivate(final ComponentContext componentContext) {
-        logger.debug(messages.deactivating());
+        logger.debug("Deactivating S7 PLC Driver.....");
         try {
             this.disconnect();
         } catch (final ConnectionException e) {
-            logger.error(messages.errorDisconnecting(), e);
+            logger.error("Error while disconnecting....", e);
         }
-        logger.debug(messages.deactivatingDone());
+        logger.debug("Deactivating S7 PLC Driver.....Done");
     }
 
     public synchronized void updated(final Map<String, Object> properties) {
-        logger.debug(messages.updating());
-        requireNonNull(properties, messages.propertiesNonNull());
+        logger.debug("Updating S7 PLC Driver.....");
+        requireNonNull(properties, "Properties cannot be null");
         this.options = new S7PlcOptions(properties);
         if (client.Connected) {
             try {
-                logger.info(messages.reconnectingAfterConfigurationUpdate());
+                logger.info("Reconnecting after configuration update...");
                 disconnect();
                 connect();
             } catch (ConnectionException e) {
-                logger.warn(messages.errorReconnectFailed(), e);
+                logger.warn("Failed to reset connection after update", e);
             }
         }
-        logger.debug(messages.updatingDone());
+        logger.debug("Updating S7 PLC Driver.....Done");
     }
 
     private String decryptPassword(char[] encryptedPassword) throws KuraException {
@@ -116,7 +113,7 @@ public final class S7PlcDriver extends AbstractBlockDriver<S7PlcDomain> implemen
     }
 
     private void authenticate() throws ConnectionException {
-        logger.debug(messages.authenticating());
+        logger.debug("Authenticating");
         int code;
         try {
             code = this.client.SetSessionPassword(decryptPassword(this.options.getPassword().toCharArray()));
@@ -124,7 +121,7 @@ public final class S7PlcDriver extends AbstractBlockDriver<S7PlcDomain> implemen
             throw new ConnectionException(e);
         }
         if (code != 0) {
-            throw new ConnectionException(messages.errorAuthenticating() + code);
+            throw new ConnectionException("Authentication failed, SetSessionPassword() failed with code: " + code);
         }
     }
 
@@ -132,28 +129,28 @@ public final class S7PlcDriver extends AbstractBlockDriver<S7PlcDomain> implemen
     public synchronized void connect() throws ConnectionException {
         try {
             if (!this.client.Connected) {
-                logger.debug(messages.connecting());
+                logger.debug("Connecting to S7 PLC...");
                 client.SetConnectionType(S7.OP);
                 int code = this.client.ConnectTo(this.options.getIp(), this.options.getRack(), this.options.getSlot());
                 if (code != 0) {
-                    throw new ConnectionException(messages.errorConnectToFailed() + code);
+                    throw new ConnectionException("Failed to connect to PLC, ConnectTo() failed with code: " + code);
                 }
                 if (this.options.shouldAuthenticate()) {
                     authenticate();
                 }
-                logger.debug(messages.connectingDone());
+                logger.debug("Connecting to S7 PLC...Done");
             }
         } catch (Exception e) {
-            throw new ConnectionException(messages.errorUnexpectedConnectionException(), e);
+            throw new ConnectionException("Connection failed, unexpected exception", e);
         }
     }
 
     @Override
     public synchronized void disconnect() throws ConnectionException {
         if (this.client.Connected) {
-            logger.debug(messages.disconnecting());
+            logger.debug("Disconnecting from S7 PLC...");
             this.client.Disconnect();
-            logger.debug(messages.disconnectingDone());
+            logger.debug("Disconnecting from S7 PLC...Done");
         }
     }
 
@@ -184,18 +181,18 @@ public final class S7PlcDriver extends AbstractBlockDriver<S7PlcDomain> implemen
         } catch (Moka7Exception e) {
             handleMoka7IOException(e);
         } catch (Exception e) {
-            logger.warn(messages.errorUnexpectedException(), e);
+            logger.warn("Unexpected exception", e);
         }
     }
 
     private void handleMoka7IOException(Moka7Exception e) {
-        logger.warn(messages.errorIOFailed(), e);
+        logger.warn("Operation failed due to IO error", e);
         if (e.getStatusCode() <= S7Client.errTCPConnectionReset) {
-            logger.warn(messages.connectionProblemsDetected());
+            logger.warn("Connection problems detected, disconnecting, will attempt to reconnect at next read/write");
             try {
                 disconnect();
             } catch (ConnectionException e1) {
-                logger.warn(messages.disconnectionProblem(), e1);
+                logger.warn("Unable to Disconnect...", e1);
             }
         }
     }

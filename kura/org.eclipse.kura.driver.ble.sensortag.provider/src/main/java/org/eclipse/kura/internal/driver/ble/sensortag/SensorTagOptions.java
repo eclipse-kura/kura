@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates and others
  *
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
@@ -16,9 +16,6 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.Map;
 
-import org.eclipse.kura.driver.ble.sensortag.localization.SensorTagMessages;
-import org.eclipse.kura.localization.LocalizationAdapter;
-
 /**
  * The Class {@link SensorTagOptions} is responsible to provide all the required
  * configurable options for the BLE SensorTag Driver.<br/>
@@ -32,7 +29,6 @@ import org.eclipse.kura.localization.LocalizationAdapter;
 final class SensorTagOptions {
 
     private static final String INAME = "iname";
-    private static final SensorTagMessages message = LocalizationAdapter.adapt(SensorTagMessages.class);
     private final Map<String, Object> properties;
 
     /**
@@ -44,7 +40,7 @@ final class SensorTagOptions {
      *             if any of the arguments is null
      */
     SensorTagOptions(final Map<String, Object> properties) {
-        requireNonNull(properties, message.propertiesNonNull());
+        requireNonNull(properties, "Properties cannot be null");
 
         this.properties = properties;
     }

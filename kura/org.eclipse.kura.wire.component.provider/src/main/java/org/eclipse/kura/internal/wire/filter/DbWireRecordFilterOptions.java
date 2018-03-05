@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -13,21 +13,16 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.filter;
 
-import static java.util.Objects.requireNonNull;
 import static java.util.Objects.nonNull;
+import static java.util.Objects.requireNonNull;
 
 import java.util.Map;
-
-import org.eclipse.kura.localization.LocalizationAdapter;
-import org.eclipse.kura.localization.resources.WireMessages;
 
 /**
  * The Class DbWireRecordFilterOptions is responsible to contain all the Db Wire
  * Record related filter options
  */
 final class DbWireRecordFilterOptions {
-
-    private static final WireMessages message = LocalizationAdapter.adapt(WireMessages.class);
 
     private static final String CONF_CACHE_EXPIRATION_INTERVAL = "cache.expiration.interval";
 
@@ -42,7 +37,7 @@ final class DbWireRecordFilterOptions {
      *            the provided properties
      */
     DbWireRecordFilterOptions(final Map<String, Object> properties) {
-        requireNonNull(properties, message.propertiesNonNull());
+        requireNonNull(properties, "Properties cannot be null");
         this.properties = properties;
     }
 

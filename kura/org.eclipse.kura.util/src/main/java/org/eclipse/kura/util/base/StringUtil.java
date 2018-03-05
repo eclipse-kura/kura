@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -14,17 +14,12 @@ import static java.util.Objects.requireNonNull;
 import java.util.Iterator;
 
 import org.eclipse.kura.annotation.Nullable;
-import org.eclipse.kura.localization.LocalizationAdapter;
-import org.eclipse.kura.localization.resources.UtilMessages;
 
 /**
  * The Class StringUtil contains all necessary static factory methods for
  * manipulating String instances
  */
 public final class StringUtil {
-
-    /** Localization Resource. */
-    private static final UtilMessages s_message = LocalizationAdapter.adapt(UtilMessages.class);
 
     /** Constructor */
     private StringUtil() {
@@ -52,8 +47,8 @@ public final class StringUtil {
      *             if any of the arguments is null
      */
     public static String join(final CharSequence delimiter, final Iterable<?> tokens) {
-        requireNonNull(delimiter, s_message.delimiterNonNull());
-        requireNonNull(tokens, s_message.iterableNonNull());
+        requireNonNull(delimiter, "Delimiter cannot be null.");
+        requireNonNull(tokens, "Iterable elements cannot be null.");
 
         final StringBuilder sb = new StringBuilder();
         final Iterator<?> it = tokens.iterator();

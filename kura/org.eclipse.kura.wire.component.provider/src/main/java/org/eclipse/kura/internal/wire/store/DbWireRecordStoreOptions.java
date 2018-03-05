@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -18,9 +18,6 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.Map;
 
-import org.eclipse.kura.localization.LocalizationAdapter;
-import org.eclipse.kura.localization.resources.WireMessages;
-
 /**
  * The Class DbWireRecordStoreOptions is responsible to contain all the DB Wire
  * Record Store related options
@@ -28,8 +25,6 @@ import org.eclipse.kura.localization.resources.WireMessages;
 final class DbWireRecordStoreOptions {
 
     private static final int DEFAULT_MAXIMUM_TABLE_SIZE = 10000;
-
-    private static final WireMessages message = LocalizationAdapter.adapt(WireMessages.class);
 
     private static final String MAXIMUM_TABLE_SIZE = "maximum.table.size";
 
@@ -46,7 +41,7 @@ final class DbWireRecordStoreOptions {
      *            the configured properties
      */
     DbWireRecordStoreOptions(final Map<String, Object> properties) {
-        requireNonNull(properties, message.propertiesNonNull());
+        requireNonNull(properties, "Properties cannot be null");
         this.properties = properties;
     }
 

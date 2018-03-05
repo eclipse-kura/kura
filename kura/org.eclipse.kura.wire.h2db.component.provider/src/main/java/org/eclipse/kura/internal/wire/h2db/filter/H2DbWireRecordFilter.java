@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -34,8 +34,6 @@ import java.util.Map;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.db.H2DbService;
 import org.eclipse.kura.internal.wire.h2db.common.H2DbServiceHelper;
-import org.eclipse.kura.localization.LocalizationAdapter;
-import org.eclipse.kura.localization.resources.WireMessages;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
 import org.eclipse.kura.wire.WireEmitter;
@@ -64,8 +62,6 @@ import org.slf4j.LoggerFactory;
 public class H2DbWireRecordFilter implements WireEmitter, WireReceiver, ConfigurableComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(H2DbWireRecordFilter.class);
-
-    private static final WireMessages message = LocalizationAdapter.adapt(WireMessages.class);
 
     private List<WireRecord> lastRecords;
 
@@ -126,7 +122,7 @@ public class H2DbWireRecordFilter implements WireEmitter, WireReceiver, Configur
      *            the properties
      */
     protected void activate(final ComponentContext componentContext, final Map<String, Object> properties) {
-        logger.debug(message.activatingFilter());
+        logger.debug("Activating DB Wire Record Filter...");
         this.componentContext = componentContext;
         this.options = new H2DbWireRecordFilterOptions(properties);
         this.wireSupport = this.wireHelperService.newWireSupport(this);
@@ -137,7 +133,7 @@ public class H2DbWireRecordFilter implements WireEmitter, WireReceiver, Configur
         this.lastRefreshedTime = Calendar.getInstance();
         this.lastRefreshedTime.add(Calendar.SECOND, -this.cacheExpirationInterval);
         restartDbServiceTracker();
-        logger.debug(message.activatingFilterDone());
+        logger.debug("Activating DB Wire Record Filter...Done");
     }
 
     /**
@@ -147,7 +143,7 @@ public class H2DbWireRecordFilter implements WireEmitter, WireReceiver, Configur
      *            the updated properties
      */
     public void updated(final Map<String, Object> properties) {
-        logger.debug(message.updatingFilter() + properties);
+        logger.debug("Updating DB Wire Record Filter... {}", properties);
         final String oldDbServicePid = this.options.getDbServiceInstancePid();
 
         this.options = new H2DbWireRecordFilterOptions(properties);
@@ -162,7 +158,7 @@ public class H2DbWireRecordFilter implements WireEmitter, WireReceiver, Configur
         // expired
         this.lastRefreshedTime = Calendar.getInstance();
         this.lastRefreshedTime.add(Calendar.SECOND, -this.cacheExpirationInterval);
-        logger.debug(message.updatingFilterDone());
+        logger.debug("Updating DB Wire Record Filter...Done");
     }
 
     /**
@@ -172,8 +168,8 @@ public class H2DbWireRecordFilter implements WireEmitter, WireReceiver, Configur
      *            the component context
      */
     protected void deactivate(final ComponentContext componentContext) {
-        logger.debug(message.deactivatingFilter());
-        logger.debug(message.deactivatingFilterDone());
+        logger.debug("Dectivating DB Wire Record Filter...");
+        logger.debug("Dectivating DB Wire Record Filter...Done");
     }
 
     /** {@inheritDoc} */
@@ -199,7 +195,7 @@ public class H2DbWireRecordFilter implements WireEmitter, WireReceiver, Configur
                 dataRecords.add(wireRecord);
             }
 
-            logger.debug(message.refreshed());
+            logger.debug("Refreshed typed values");
         } catch (final SQLException e) {
             throw e;
         } finally {
@@ -249,7 +245,7 @@ public class H2DbWireRecordFilter implements WireEmitter, WireReceiver, Configur
      */
     @Override
     public synchronized void onWireReceive(final WireEnvelope wireEnvelope) {
-        requireNonNull(wireEnvelope, message.wireEnvelopeNonNull());
+        requireNonNull(wireEnvelope, "Wire Envelope cannot be null");
 
         if (this.dbHelper == null) {
             logger.warn("H2DbService instance not attached");
@@ -278,7 +274,7 @@ public class H2DbWireRecordFilter implements WireEmitter, WireReceiver, Configur
             this.lastRecords = tmpWireRecords;
             this.lastRefreshedTime = Calendar.getInstance(this.lastRefreshedTime.getTimeZone());
         } catch (SQLException e) {
-            logger.error(message.errorFiltering(), e);
+            logger.error("Error while filtering Wire Records...", e);
         }
     }
 

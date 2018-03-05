@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -24,8 +24,6 @@ import java.util.Arrays;
 
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.db.DbService;
-import org.eclipse.kura.localization.LocalizationAdapter;
-import org.eclipse.kura.localization.resources.WireMessages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,8 +34,6 @@ import org.slf4j.LoggerFactory;
 public final class DbServiceHelper {
 
     private static final Logger logger = LoggerFactory.getLogger(DbServiceHelper.class);
-
-    private static final WireMessages message = LocalizationAdapter.adapt(WireMessages.class);
 
     private final DbService dbService;
 
@@ -50,7 +46,7 @@ public final class DbServiceHelper {
      *             if argument is null
      */
     private DbServiceHelper(final DbService dbService) {
-        requireNonNull(dbService, message.dbServiceNonNull());
+        requireNonNull(dbService, "DB Service cannot be null");
         this.dbService = dbService;
     }
 
@@ -74,9 +70,9 @@ public final class DbServiceHelper {
      *            the connection instance to be closed
      */
     public void close(final Connection conn) {
-        logger.debug(message.closingConnection() + conn);
+        logger.debug("Closing connection instance... {}", conn);
         this.dbService.close(conn);
-        logger.debug(message.closingConnectionDone());
+        logger.debug("Closing connection instance...Done");
     }
 
     /**
@@ -86,9 +82,11 @@ public final class DbServiceHelper {
      *            the result sets
      */
     public void close(final ResultSet... rss) {
-        logger.debug(message.closingResultSet() + Arrays.toString(rss));
+        if (logger.isDebugEnabled()) {
+            logger.debug("Closing all result sets... {}", Arrays.toString(rss));
+        }
         this.dbService.close(rss);
-        logger.debug(message.closingResultSetDone());
+        logger.debug("Closing all result sets...Done");
     }
 
     /**
@@ -98,9 +96,11 @@ public final class DbServiceHelper {
      *            the SQL statements
      */
     public void close(final Statement... stmts) {
-        logger.debug(message.closingStatement() + Arrays.toString(stmts));
+        if (logger.isDebugEnabled()) {
+            logger.debug("Closing all statements... {}", Arrays.toString(stmts));
+        }
         this.dbService.close(stmts);
-        logger.debug(message.closingStatementDone());
+        logger.debug("Closing all statements...Done");
     }
 
     /**
@@ -116,8 +116,8 @@ public final class DbServiceHelper {
      *             if SQL query argument is null
      */
     public synchronized void execute(final String sql, final Integer... params) throws SQLException {
-        requireNonNull(sql, message.sqlQueryNonNull());
-        logger.debug(message.execSql() + sql);
+        requireNonNull(sql, "SQL query cannot be null");
+        logger.debug("Executing SQL query... {}", sql);
         Connection conn = null;
         PreparedStatement stmt = null;
         try {
@@ -135,7 +135,7 @@ public final class DbServiceHelper {
             this.close(stmt);
             this.close(conn);
         }
-        logger.debug(message.execSqlDone());
+        logger.debug("Executing SQL query...Done");
     }
 
     /**
@@ -158,10 +158,12 @@ public final class DbServiceHelper {
      *             if argument is null
      */
     public void rollback(final Connection conn) {
-        requireNonNull(conn, message.connectionNonNull());
-        logger.debug(message.rollback() + conn);
+        requireNonNull(conn, "Connection instance cannnot be null");
+        if (logger.isDebugEnabled()) {
+            logger.debug("Rolling back the connection instance... {}", conn);
+        }
         this.dbService.rollback(conn);
-        logger.debug(message.rollbackDone());
+        logger.debug("Rolling back the connection instance...Done");
     }
 
     /**
@@ -175,8 +177,8 @@ public final class DbServiceHelper {
      *             if argument is null
      */
     public String sanitizeSqlTableAndColumnName(final String string) {
-        requireNonNull(string, message.stringNonNull());
-        logger.debug(message.sanitize() + string);
+        requireNonNull(string, "Provided string cannot be null");
+        logger.debug("Sanitizing the provided string... {}", string);
         final String sanitizedName = string.replaceAll("\"", "\"\"");
         return "\"" + sanitizedName + "\"";
     }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -16,8 +16,6 @@ import java.util.Map;
 
 import org.eclipse.kura.asset.Asset;
 import org.eclipse.kura.asset.AssetService;
-import org.eclipse.kura.localization.LocalizationAdapter;
-import org.eclipse.kura.localization.resources.AssetCloudletMessages;
 import org.eclipse.kura.util.collection.CollectionUtil;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
@@ -34,9 +32,6 @@ final class AssetTrackerCustomizer implements ServiceTrackerCustomizer<Asset, As
 
     /** The Logger instance. */
     private static final Logger s_logger = LoggerFactory.getLogger(AssetTrackerCustomizer.class);
-
-    /** Localization Resource */
-    private static final AssetCloudletMessages s_message = LocalizationAdapter.adapt(AssetCloudletMessages.class);
 
     /** The map of assets present in the OSGi service registry. */
     private final Map<String, Asset> assets;
@@ -58,8 +53,8 @@ final class AssetTrackerCustomizer implements ServiceTrackerCustomizer<Asset, As
      *             if any of the arguments is null
      */
     AssetTrackerCustomizer(final BundleContext context, final AssetService assetService) throws InvalidSyntaxException {
-        requireNonNull(context, s_message.bundleContextNonNull());
-        requireNonNull(context, s_message.assetServiceNonNull());
+        requireNonNull(context, "Bundle context cannot be null");
+        requireNonNull(context, "Asset service instance cannot be null");
 
         this.assets = CollectionUtil.newConcurrentHashMap();
         this.context = context;
@@ -70,7 +65,7 @@ final class AssetTrackerCustomizer implements ServiceTrackerCustomizer<Asset, As
     @Override
     public Asset addingService(final ServiceReference<Asset> reference) {
         final Asset service = this.context.getService(reference);
-        s_logger.info(s_message.assetFoundAdding());
+        s_logger.info("Asset has been found by Asset Cloudlet Tracker....==> adding service");
         if (service != null) {
             return this.addService(service);
         }
@@ -87,7 +82,7 @@ final class AssetTrackerCustomizer implements ServiceTrackerCustomizer<Asset, As
      * @return Asset service instance
      */
     private Asset addService(final Asset service) {
-        requireNonNull(service, s_message.assetServiceNonNull());
+        requireNonNull(service, "Asset service instance cannot be null");
         final String assetPid = this.assetService.getAssetPid(service);
         this.assets.put(assetPid, service);
         return service;
@@ -117,7 +112,7 @@ final class AssetTrackerCustomizer implements ServiceTrackerCustomizer<Asset, As
         if ((assetPid != null) && this.assets.containsKey(assetPid)) {
             this.assets.remove(assetPid);
         }
-        s_logger.info(s_message.assetRemoved() + service);
+        s_logger.info("Asset has been removed by Asset Cloudlet Tracker.... {}", service);
     }
 
 }

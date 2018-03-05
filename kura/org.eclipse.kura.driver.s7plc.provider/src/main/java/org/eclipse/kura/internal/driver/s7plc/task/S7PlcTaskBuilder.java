@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -30,23 +30,19 @@ import org.eclipse.kura.driver.block.task.BlockTask;
 import org.eclipse.kura.driver.block.task.ByteArrayTask;
 import org.eclipse.kura.driver.block.task.Mode;
 import org.eclipse.kura.driver.block.task.StringTask;
-import org.eclipse.kura.driver.s7plc.localization.S7PlcMessages;
 import org.eclipse.kura.internal.driver.s7plc.S7PlcChannelDescriptor;
 import org.eclipse.kura.internal.driver.s7plc.S7PlcDataType;
 import org.eclipse.kura.internal.driver.s7plc.S7PlcDomain;
-import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.type.DataType;
 
 public final class S7PlcTaskBuilder {
-
-    private static final S7PlcMessages messages = LocalizationAdapter.adapt(S7PlcMessages.class);
 
     private S7PlcTaskBuilder() {
     }
 
     private static int getAreaNo(ChannelRecord record) throws KuraException {
         try {
-            return getIntProperty(record, S7PlcChannelDescriptor.DATA_BLOCK_NO_ID, messages.errorRetrievingAreaNo());
+            return getIntProperty(record, S7PlcChannelDescriptor.DATA_BLOCK_NO_ID, "Error while retrieving Area No");
         } catch (KuraException e) {
             record.setChannelStatus(new ChannelStatus(ChannelFlag.FAILURE, e.getMessage(), e));
             record.setTimestamp(System.currentTimeMillis());
@@ -65,7 +61,7 @@ public final class S7PlcTaskBuilder {
 
     private static void assertChannelType(ChannelRecord record, DataType channelType) throws KuraException {
         if (channelType != record.getValueType()) {
-            throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, messages.errorConvertingType() + channelType);
+            throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, "Channel Value Type must be " + channelType);
         }
     }
 
@@ -75,13 +71,13 @@ public final class S7PlcTaskBuilder {
 
         DataType type = record.getValueType();
 
-        int offset = getIntProperty(record, S7PlcChannelDescriptor.OFFSET_ID, messages.errorRetrievingAreaOffset());
+        int offset = getIntProperty(record, S7PlcChannelDescriptor.OFFSET_ID, "Error while retrieving Area Offset");
         String s7DataTypeId = (String) channelConfig.get(S7PlcChannelDescriptor.S7_ELEMENT_TYPE_ID);
 
         if (type == DataType.BYTE_ARRAY) {
 
             int byteCount = getIntProperty(record, S7PlcChannelDescriptor.BYTE_COUNT_ID,
-                    messages.errorRetrievingByteCount());
+                    "Error while retrieving Byte Count");
             return new ByteArrayTask(record, offset, offset + byteCount, mode);
 
         } else if (S7PlcDataType.INT.name().equals(s7DataTypeId)) {
@@ -96,7 +92,7 @@ public final class S7PlcTaskBuilder {
 
             assertChannelType(record, DataType.BOOLEAN);
             int bitIndex = getIntProperty(record, S7PlcChannelDescriptor.BIT_INDEX_ID,
-                    messages.errorRetrievingBitIndex());
+                    "Error while retreiving bit index");
             return new BitTask(record, offset, bitIndex, mode == Mode.WRITE ? Mode.UPDATE : Mode.READ);
 
         } else if (S7PlcDataType.WORD.name().equals(s7DataTypeId)) {
@@ -115,7 +111,7 @@ public final class S7PlcTaskBuilder {
 
             assertChannelType(record, DataType.STRING);
             int byteCount = getIntProperty(record, S7PlcChannelDescriptor.BYTE_COUNT_ID,
-                    messages.errorRetrievingByteCount());
+                    "Error while retrieving Byte Count");
             return new StringTask(record, offset, offset + byteCount, mode);
 
         } else if (S7PlcDataType.REAL.name().equals(s7DataTypeId)) {
@@ -124,7 +120,7 @@ public final class S7PlcTaskBuilder {
 
         }
 
-        throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, messages.errorUnknownOperation());
+        throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, "Unable to determine operation");
 
     }
 

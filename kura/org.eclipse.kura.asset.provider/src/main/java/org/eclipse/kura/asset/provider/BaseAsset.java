@@ -10,7 +10,7 @@
  *     Eurotech
  *     Amit Kumar Mondal
  *     Red Hat Inc
- *     
+ *
  *******************************************************************************/
 package org.eclipse.kura.asset.provider;
 
@@ -56,8 +56,6 @@ import org.eclipse.kura.driver.Driver.ConnectionException;
 import org.eclipse.kura.driver.PreparedRead;
 import org.eclipse.kura.internal.asset.provider.AssetOptions;
 import org.eclipse.kura.internal.asset.provider.DriverTrackerCustomizer;
-import org.eclipse.kura.localization.LocalizationAdapter;
-import org.eclipse.kura.localization.resources.AssetMessages;
 import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.util.collection.CollectionUtil;
 import org.osgi.framework.InvalidSyntaxException;
@@ -68,7 +66,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The Class BaseAsset is basic implementation of {@code Asset}.
- * 
+ *
  * BaseAsset persists the AssetConfguration using the {@code ConfigurationService}.
  *
  * The configuration properites must conform to the following
@@ -97,14 +95,14 @@ import org.slf4j.LoggerFactory;
  * </ul>
  * For example, the property keys above for a channel named channel1 would be encoded as channel1#+type and
  * channel1#+value.type<br>
- * 
+ *
  * The values of the <b>+value.type</b> and <b>+type</b> properties must me mappable
  * respectively to a {@link DataType} and {@code ChannelType} instance.
  * <br>
  * The value of these property can be either an instance of the corresponding type,
  * or a string representation that equals the value returned by calling the {@code toString()} method
  * on one of the enum variants of that type.
- * 
+ *
  * <br>
  * Driver specific properties are defined by the driver, their keys cannot begin with a '+' character.
  * For example, valid driver specific properties can be channel1#modbus.register,
@@ -121,8 +119,6 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
     protected static final String CONF_PID = "org.eclipse.kura.asset";
 
     private static final Logger logger = LoggerFactory.getLogger(BaseAsset.class);
-
-    private static final AssetMessages message = LocalizationAdapter.adapt(AssetMessages.class);
 
     /** The provided asset configuration wrapper instance. */
     private AssetConfiguration assetConfiguration;
@@ -156,10 +152,10 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
      *            the service properties
      */
     protected void activate(final ComponentContext componentContext, final Map<String, Object> properties) {
-        logger.debug(message.activating());
+        logger.debug("Activating Asset...");
         this.context = componentContext;
         updated(properties);
-        logger.debug(message.activatingDone());
+        logger.debug("Activating Asset...Done");
     }
 
     /**
@@ -169,12 +165,12 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
      *            the service properties
      */
     public void updated(final Map<String, Object> properties) {
-        logger.debug(message.updating());
+        logger.debug("Initializing Asset Configurations...");
         this.properties = properties;
         this.kuraServicePid = (String) this.properties.get(ConfigurationService.KURA_SERVICE_PID);
         retrieveConfigurationsFromProperties(properties);
         attachDriver(this.assetConfiguration.getDriverPid());
-        logger.debug(message.updatingDone());
+        logger.debug("Initializing Asset Configurations...Done");
     }
 
     /**
@@ -184,11 +180,12 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
      *            the component context
      */
     protected void deactivate(final ComponentContext context) {
-        logger.debug(message.deactivating());
+        logger.debug("Release Asset Resources...");
+        
         if (this.driverServiceTracker != null) {
             this.driverServiceTracker.close();
         }
-        logger.debug(message.deactivatingDone());
+        logger.debug("Release Asset Resources...Done");
     }
 
     /**
@@ -201,8 +198,8 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
      *             if driver id provided is null
      */
     private synchronized void attachDriver(final String driverId) {
-        requireNonNull(driverId, message.driverPidNonNull());
-        logger.debug(message.driverAttach());
+        requireNonNull(driverId, "Driver PID cannot be null");
+        logger.debug("Attaching driver instance...");
         try {
             if (this.driverServiceTracker != null) {
                 this.driverServiceTracker.close();
@@ -214,9 +211,9 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
                     driverTrackerCustomizer);
             this.driverServiceTracker.open();
         } catch (final InvalidSyntaxException e) {
-            logger.error(message.errorDriverTracking(), e);
+            logger.error("Error while trying to track driver instances.", e);
         }
-        logger.debug(message.driverAttachDone());
+        logger.debug("Attaching driver instance...Done");
     }
 
     /**
@@ -232,8 +229,8 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
      *             if any of the provided arguments is null
      */
     private Tad cloneAd(final Tad oldAd, final String channelName) {
-        requireNonNull(oldAd, message.oldAdNonNull());
-        requireNonNull(channelName, message.channelNameNonNull());
+        requireNonNull(oldAd, "Old Attribute Definition cannot be null");
+        requireNonNull(channelName, "Channel name cannot be null");
 
         final String oldAdId = oldAd.getId();
         String prefix = channelName + AssetConstants.CHANNEL_PROPERTY_SEPARATOR.value();
@@ -270,7 +267,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
             try {
                 updateExistingProperties(driver);
             } catch (KuraException e) {
-                logger.warn(message.errorUpdatingAssetConfiguration(), e);
+                logger.warn("Failed to update current configuration from Driver Descriptor", e);
             }
             List<ChannelRecord> readRecords = getAllReadRecords();
             hasReadChannels = !readRecords.isEmpty();
@@ -292,7 +289,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
     /** {@inheritDoc} */
     @Override
     public ComponentConfiguration getConfiguration() throws KuraException {
-        requireNonNull(this.properties, message.propertiesNonNull());
+        requireNonNull(this.properties, "Properties cannot be null");
         final String componentName = this.properties.get(ConfigurationService.KURA_SERVICE_PID).toString();
 
         final Tocd mainOcd = getOCD();
@@ -324,7 +321,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
     /**
      * Fills the {@code mainOcd} with the driver specific configuration provided by
      * {@code driverSpecificChannelConfiguration}
-     * 
+     *
      * @param mainOcd
      *            a {@link Tocd} object.
      * @param driverSpecificChannelConfiguration
@@ -433,8 +430,8 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
     /** {@inheritDoc} */
     @Override
     public List<ChannelRecord> readAllChannels() throws KuraException {
-        requireNonNull(this.driver, message.driverNonNull());
-        logger.debug(message.readingChannels());
+        requireNonNull(this.driver, "Driver cannot be null");
+        logger.debug("Reading asset channels...");
 
         final List<ChannelRecord> channelRecords;
 
@@ -451,26 +448,26 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
             }
         }
 
-        logger.debug(message.readingChannelsDone());
+        logger.debug("Reading asset channels...Done");
         return channelRecords;
     }
 
     private void validateChannel(final Channel channel, final EnumSet<ChannelType> allowedTypes,
             final String typeNotAllowedMessage) {
         if (channel == null) {
-            throw new IllegalArgumentException(message.channelUnavailable());
+            throw new IllegalArgumentException("Channel not available");
         } else if (!allowedTypes.contains(channel.getType())) {
             throw new IllegalArgumentException(typeNotAllowedMessage);
         } else if (!channel.isEnabled()) {
-            throw new IllegalArgumentException(message.channelNotEnabled());
+            throw new IllegalArgumentException("Channel is not enabled");
         }
     }
 
     /** {@inheritDoc} */
     @Override
     public List<ChannelRecord> read(final Set<String> channelNames) throws KuraException {
-        requireNonNull(this.driver, message.driverNonNull());
-        logger.debug(message.readingChannels());
+        requireNonNull(this.driver, "Driver cannot be null");
+        logger.debug("Reading asset channels...");
 
         final List<ChannelRecord> channelRecords = new ArrayList<>(channelNames.size());
         final List<ChannelRecord> validRecords = new ArrayList<>(channelNames.size());
@@ -481,7 +478,8 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
 
             final Channel channel = channels.get(name);
             try {
-                validateChannel(channel, EnumSet.of(READ, READ_WRITE), message.channelTypeNotReadable());
+                validateChannel(channel, EnumSet.of(READ, READ_WRITE),
+                        "Channel type not within expected types (READ or READ_WRITE)");
             } catch (Exception e) {
                 final ChannelRecord record = ChannelRecord.createStatusRecord(name,
                         new ChannelStatus(FAILURE, e.getMessage(), e));
@@ -504,7 +502,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
                 }
             }
         }
-        logger.debug(message.readingChannelsDone());
+        logger.debug("Reading asset channels...Done");
         return channelRecords;
     }
 
@@ -516,16 +514,16 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
     @Override
     public synchronized void registerChannelListener(final String channelName, final ChannelListener channelListener)
             throws KuraException {
-        requireNonNull(channelName, message.channelNameNonNull());
-        requireNonNull(channelListener, message.listenerNonNull());
+        requireNonNull(channelName, "Channel name cannot be null");
+        requireNonNull(channelListener, "Asset Listener cannot be null");
 
-        logger.debug(message.registeringListener());
+        logger.debug("Registering Channel Listener for monitoring...");
         final Map<String, Channel> channels = this.assetConfiguration.getAssetChannels();
 
         final Channel channel = channels.get(channelName);
 
         if (channel == null) {
-            throw new IllegalArgumentException(message.channelNameNotFound());
+            throw new IllegalArgumentException("Channel not found");
         }
 
         final ChannelListenerRegistration reg = new ChannelListenerRegistration(channel.getName(), channelListener);
@@ -548,7 +546,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
      *            the properties containing the asset specific configuration
      */
     private void retrieveConfigurationsFromProperties(final Map<String, Object> properties) {
-        logger.debug(message.retrievingConf());
+        logger.debug("Retrieving configurations from the properties...");
         if (this.assetOptions == null) {
             this.assetOptions = new AssetOptions(properties);
         } else {
@@ -557,7 +555,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         if (this.assetOptions != null) {
             this.assetConfiguration = this.assetOptions.getAssetConfiguration();
         }
-        logger.debug(message.retrievingConfDone());
+        logger.debug("Retrieving configurations from the properties...Done");
     }
 
     /** {@inheritDoc} */
@@ -569,7 +567,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
     /** {@inheritDoc} */
     @Override
     public synchronized void unregisterChannelListener(final ChannelListener channelListener) throws KuraException {
-        requireNonNull(channelListener, message.listenerNonNull());
+        requireNonNull(channelListener, "Asset Listener cannot be null");
 
         final Iterator<ChannelListenerRegistration> i = this.channelListeners.iterator();
 
@@ -592,7 +590,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
             try {
                 this.preparedRead.close();
             } catch (Exception e) {
-                logger.warn(message.errorClosingPreparingRead(), e);
+                logger.warn("Failed to close prepared read", e);
             }
             this.preparedRead = null;
         }
@@ -605,8 +603,8 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
     /** {@inheritDoc} */
     @Override
     public void write(final List<ChannelRecord> channelRecords) throws KuraException {
-        requireNonNull(this.driver, message.driverNonNull());
-        logger.debug(message.writing());
+        requireNonNull(this.driver, "Driver cannot be null");
+        logger.debug("Writing to channels...");
 
         final List<ChannelRecord> validRecords = new ArrayList<>(channelRecords.size());
 
@@ -617,7 +615,8 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
 
             final Channel channel = channels.get(channelName);
             try {
-                validateChannel(channel, EnumSet.of(WRITE, READ_WRITE), message.channelTypeNotWritable());
+                validateChannel(channel, EnumSet.of(WRITE, READ_WRITE),
+                        "Channel type not within expected types (WRITE or READ_WRITE)");
             } catch (Exception e) {
                 channelRecord.setChannelStatus(new ChannelStatus(FAILURE, e.getMessage(), e));
                 channelRecord.setTimestamp(System.currentTimeMillis());
@@ -637,7 +636,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
                 }
             }
         }
-        logger.debug(message.writingDone());
+        logger.debug("Writing to channels...Done");
     }
 
     private void tryClosePreparedRead() {
@@ -645,7 +644,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
             try {
                 preparedRead.close();
             } catch (Exception e) {
-                logger.warn(message.errorClosingPreparingRead(), e);
+                logger.warn("Failed to close prepared read", e);
             }
             preparedRead = null;
         }
@@ -653,21 +652,21 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
 
     protected void tryAttachListener(Channel channel, ChannelListenerRegistration registration) {
         try {
-            logger.debug(message.registeringListener());
+            logger.debug("Registering Channel Listener for monitoring...");
             this.driver.registerChannelListener(channel.getConfiguration(), registration.listener);
-            logger.debug(message.registeringListenerDone());
+            logger.debug("Registering Channel Listener for monitoring...Done");
         } catch (Exception e) {
-            logger.warn(message.errorRegisteringChannelListener(), e);
+            logger.warn("Failed to register channel listener", e);
         }
     }
 
     protected void tryDetachListener(ChannelListenerRegistration registration) {
         try {
-            logger.debug(message.unregisteringListener());
+            logger.debug("Unregistering Asset Listener...");
             this.driver.unregisterChannelListener(registration.listener);
-            logger.debug(message.unregisteringListenerDone());
+            logger.debug("Unregistering Asset Listener...Done");
         } catch (Exception e) {
-            logger.warn(message.errorUnregisteringChannelListener(), e);
+            logger.warn("Failed to unregister channel listener", e);
         }
     }
 

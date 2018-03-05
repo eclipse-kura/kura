@@ -26,8 +26,6 @@ import org.eclipse.kura.core.configuration.metatype.Tad;
 import org.eclipse.kura.core.configuration.metatype.Toption;
 import org.eclipse.kura.core.configuration.metatype.Tscalar;
 import org.eclipse.kura.driver.ChannelDescriptor;
-import org.eclipse.kura.localization.LocalizationAdapter;
-import org.eclipse.kura.localization.resources.AssetMessages;
 import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.util.collection.CollectionUtil;
 
@@ -65,7 +63,6 @@ import org.eclipse.kura.util.collection.CollectionUtil;
  */
 public class BaseChannelDescriptor implements ChannelDescriptor {
 
-    private static final AssetMessages messages = LocalizationAdapter.adapt(AssetMessages.class);
     private static final BaseChannelDescriptor instance = new BaseChannelDescriptor();
 
     protected final List<Tad> defaultElements;
@@ -92,7 +89,7 @@ public class BaseChannelDescriptor implements ChannelDescriptor {
         enabled.setName(AssetConstants.ENABLED.value().substring(1));
         enabled.setType(Tscalar.BOOLEAN);
         enabled.setDefault("true");
-        enabled.setDescription(messages.enabledDescription());
+        enabled.setDescription("Determines if the channel is enabled or not");
         enabled.setCardinality(0);
         enabled.setRequired(true);
 
@@ -102,8 +99,8 @@ public class BaseChannelDescriptor implements ChannelDescriptor {
         name.setId(NAME.value());
         name.setName(NAME.value().substring(1));
         name.setType(Tscalar.STRING);
-        name.setDefault(messages.string());
-        name.setDescription(messages.channelNameDesc());
+        name.setDefault("Channel-1");
+        name.setDescription("Name of the Channel");
         name.setCardinality(0);
         name.setRequired(true);
 
@@ -112,7 +109,7 @@ public class BaseChannelDescriptor implements ChannelDescriptor {
         final Tad type = new Tad();
         type.setName(TYPE.value().substring(1));
         type.setId(TYPE.value());
-        type.setDescription(messages.type());
+        type.setDescription("Type of the channel");
         type.setType(Tscalar.STRING);
         type.setRequired(true);
         type.setDefault(ChannelType.READ.name());
@@ -124,7 +121,7 @@ public class BaseChannelDescriptor implements ChannelDescriptor {
         final Tad valueType = new Tad();
         valueType.setName(VALUE_TYPE.value().substring(1));
         valueType.setId(VALUE_TYPE.value());
-        valueType.setDescription(messages.typeChannel());
+        valueType.setDescription("Value type of the channel");
         valueType.setType(Tscalar.STRING);
         valueType.setRequired(true);
         valueType.setDefault(DataType.INTEGER.name());

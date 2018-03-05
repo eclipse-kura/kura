@@ -21,8 +21,6 @@ import java.util.Optional;
 import org.eclipse.kura.driver.Driver;
 import org.eclipse.kura.driver.descriptor.DriverDescriptor;
 import org.eclipse.kura.driver.descriptor.DriverDescriptorService;
-import org.eclipse.kura.localization.LocalizationAdapter;
-import org.eclipse.kura.localization.resources.AssetMessages;
 import org.eclipse.kura.util.service.ServiceUtil;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -33,7 +31,6 @@ import org.slf4j.LoggerFactory;
 public class DriverDescriptorServiceImpl implements DriverDescriptorService {
 
     private static final Logger logger = LoggerFactory.getLogger(DriverDescriptorServiceImpl.class);
-    private static final AssetMessages message = LocalizationAdapter.adapt(AssetMessages.class);
 
     private BundleContext bundleContext;
 
@@ -43,7 +40,7 @@ public class DriverDescriptorServiceImpl implements DriverDescriptorService {
 
     @Override
     public Optional<DriverDescriptor> getDriverDescriptor(String driverPid) {
-        requireNonNull(driverPid, message.driverPidNonNull());
+        requireNonNull(driverPid, "Driver PID cannot be null");
         DriverDescriptor driverDescriptor = null;
 
         String filterString = String.format("(&(kura.service.pid=%s))", driverPid);

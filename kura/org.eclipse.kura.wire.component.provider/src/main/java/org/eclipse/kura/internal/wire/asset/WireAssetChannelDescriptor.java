@@ -15,12 +15,9 @@ import static org.eclipse.kura.internal.wire.asset.WireAssetConstants.LISTEN_PRO
 import org.eclipse.kura.asset.provider.BaseChannelDescriptor;
 import org.eclipse.kura.core.configuration.metatype.Tad;
 import org.eclipse.kura.core.configuration.metatype.Tscalar;
-import org.eclipse.kura.localization.LocalizationAdapter;
-import org.eclipse.kura.localization.resources.WireMessages;
 
 public class WireAssetChannelDescriptor extends BaseChannelDescriptor {
 
-    private static final WireMessages messages = LocalizationAdapter.adapt(WireMessages.class);
     private static final WireAssetChannelDescriptor instance = new WireAssetChannelDescriptor();
 
     protected WireAssetChannelDescriptor() {
@@ -29,7 +26,7 @@ public class WireAssetChannelDescriptor extends BaseChannelDescriptor {
         final Tad listen = new Tad();
         listen.setName(LISTEN_PROP_NAME.value().substring(1));
         listen.setId(LISTEN_PROP_NAME.value());
-        listen.setDescription(messages.listen());
+        listen.setDescription("Specifies if WireAsset should emit envelopes on Channel events");
         listen.setType(Tscalar.BOOLEAN);
         listen.setRequired(true);
         listen.setDefault("false");

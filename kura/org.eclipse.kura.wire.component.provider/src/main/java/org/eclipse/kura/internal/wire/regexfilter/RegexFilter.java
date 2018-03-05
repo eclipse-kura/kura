@@ -1,16 +1,19 @@
 /*******************************************************************************
- * Copyright (c) 2017 Amit Kumar Mondal
+ * Copyright (c) 2017, 2018 Amit Kumar Mondal and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * Contributors:
+ *      Amit Kumar Mondal
+ *      Eurotech
  *
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.regexfilter;
 
 import static java.util.Collections.unmodifiableMap;
-import static java.util.Locale.ENGLISH;
 import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.collectingAndThen;
@@ -33,8 +36,6 @@ import java.util.regex.PatternSyntaxException;
 import java.util.stream.Stream;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
-import org.eclipse.kura.localization.LocalizationAdapter;
-import org.eclipse.kura.localization.resources.WireMessages;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.wire.WireComponent;
 import org.eclipse.kura.wire.WireEmitter;
@@ -56,9 +57,6 @@ public final class RegexFilter implements WireEmitter, WireReceiver, Configurabl
 
     /** Logger instance */
     private static final Logger logger = LoggerFactory.getLogger(RegexFilter.class);
-
-    /** Localization Adapter instance */
-    private static final WireMessages message = LocalizationAdapter.adapt(WireMessages.class, ENGLISH);
 
     /** Regular Expression Metatype Attribute Definition Property Key */
     private static final String REGEX_PROP = "regex.filter";
@@ -112,12 +110,12 @@ public final class RegexFilter implements WireEmitter, WireReceiver, Configurabl
      *            the configured properties
      */
     protected synchronized void activate(final Map<String, Object> properties) {
-        logger.debug(message.activatingRegexFilter());
+        logger.debug("Activating Regex Filter...");
         this.filter = String.valueOf(properties.getOrDefault(REGEX_PROP, ""));
         this.componentPid = String.valueOf(properties.get(KURA_SERVICE_PID));
         this.filterType = getType(properties);
         this.wireSupport = this.wireHelperService.newWireSupport(this);
-        logger.debug(message.activatingRegexFilterDone());
+        logger.debug("Activating Regex Filter...Done");
     }
 
     /**
@@ -127,10 +125,10 @@ public final class RegexFilter implements WireEmitter, WireReceiver, Configurabl
      *            the updated properties
      */
     protected synchronized void updated(final Map<String, Object> properties) {
-        logger.debug(message.updatingRegexFilter());
+        logger.debug("Updating Regex Filter...");
         this.filter = String.valueOf(properties.getOrDefault(REGEX_PROP, ""));
         this.filterType = getType(properties);
-        logger.debug(message.updatingRegexFilterDone());
+        logger.debug("Updating Regex Filter...Done");
     }
 
     /** {@inheritDoc} */
@@ -166,11 +164,9 @@ public final class RegexFilter implements WireEmitter, WireReceiver, Configurabl
             this.wireSupport.emit(receivedRecords);
             return;
         }
-        // invoke filter mechanism
-        logger.debug(message.regexFilteringStarted(this.componentPid));
+
         final WireEnvelope filteredWireEnvelope = getFilteredWireEnvelope(receivedRecords, wireEnvelope);
         this.wireSupport.emit(filteredWireEnvelope.getRecords());
-        logger.debug(message.regexFilteringDone(this.componentPid));
     }
 
     /**
@@ -195,7 +191,7 @@ public final class RegexFilter implements WireEmitter, WireReceiver, Configurabl
         } catch (final Exception ex) {
             // if any exception occurs while filtering, just emit the not filtered
             // Wire Records
-            logger.warn(message.errorFilteringRegex(), ex);
+            logger.warn("Error while filtering using provided Regular Expression...", ex);
             filteredWireEnvelope = nonFilteredWireEnvelope;
         }
         return filteredWireEnvelope;
@@ -219,8 +215,8 @@ public final class RegexFilter implements WireEmitter, WireReceiver, Configurabl
      */
     private static List<WireRecord> filter(final List<WireRecord> wireRecords, final String filter,
             final FilterType type) {
-        requireNonNull(wireRecords, message.wireRecordsNonNull());
-        requireNonNull(filter, message.filterNonNull());
+        requireNonNull(wireRecords, "Wire Records cannot be null");
+        requireNonNull(filter, "Filter cannot be null");
 
         final List<WireRecord> filteredWireRecords = newArrayList();
         for (final WireRecord wireRecord : wireRecords) {
@@ -271,9 +267,7 @@ public final class RegexFilter implements WireEmitter, WireReceiver, Configurabl
             return type == RETAIN ? map : unmodifiableMap(newHashMap());
         }
         return streamSupplier.get().filter(matches(pattern, type))
-                                   .collect(collectingAndThen(
-                                               toMap(Entry::getKey, Entry::getValue), 
-                                               Collections::unmodifiableMap));
+                .collect(collectingAndThen(toMap(Entry::getKey, Entry::getValue), Collections::unmodifiableMap));
     }
 
     /**

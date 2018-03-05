@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -35,8 +35,6 @@ import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.db.DbService;
 import org.eclipse.kura.internal.wire.common.DbServiceHelper;
 import org.eclipse.kura.internal.wire.store.DbDataTypeMapper.JdbcType;
-import org.eclipse.kura.localization.LocalizationAdapter;
-import org.eclipse.kura.localization.resources.WireMessages;
 import org.eclipse.kura.type.BooleanValue;
 import org.eclipse.kura.type.ByteArrayValue;
 import org.eclipse.kura.type.DataType;
@@ -69,8 +67,6 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
     private static final String DATA_TYPE = "DATA_TYPE";
 
     private static final Logger logger = LoggerFactory.getLogger(DbWireRecordStore.class);
-
-    private static final WireMessages message = LocalizationAdapter.adapt(WireMessages.class);
 
     private static final String SQL_ADD_COLUMN = "ALTER TABLE {0} ADD COLUMN {1} {2};";
 
@@ -157,14 +153,14 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
      *            the properties
      */
     protected void activate(final ComponentContext componentContext, final Map<String, Object> properties) {
-        logger.debug(message.activatingStore());
+        logger.debug("Activating DB Wire Record Store...");
         this.wireRecordStoreOptions = new DbWireRecordStoreOptions(properties);
         this.dbHelper = DbServiceHelper.of(this.dbService);
         this.wireSupport = this.wireHelperService.newWireSupport(this);
 
         final String tableName = this.wireRecordStoreOptions.getTableName();
         reconcileDB(tableName);
-        logger.debug(message.activatingStoreDone());
+        logger.debug("Activating DB Wire Record Store...Done");
     }
 
     /**
@@ -174,12 +170,12 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
      *            the updated service component properties
      */
     public void updated(final Map<String, Object> properties) {
-        logger.debug(message.updatingStore());
+        logger.debug("Updating DB Wire Record Store...");
         this.wireRecordStoreOptions = new DbWireRecordStoreOptions(properties);
 
         final String tableName = this.wireRecordStoreOptions.getTableName();
         reconcileDB(tableName);
-        logger.debug(message.updatingStoreDone());
+        logger.debug("Updating DB Wire Record Store...Done");
     }
 
     /**
@@ -189,8 +185,8 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
      *            the component context
      */
     protected void deactivate(final ComponentContext componentContext) {
-        logger.debug(message.deactivatingStore());
-        logger.debug(message.deactivatingStoreDone());
+        logger.debug("Deactivating DB Wire Record Store...");
+        logger.debug("Deactivating DB Wire Record Store...Done");
     }
 
     /**
@@ -222,16 +218,16 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
             if (rsTbls.next()) {
                 // table does exist, truncate it
                 if (noOfRecordsToKeep == 0) {
-                    logger.info(message.truncatingTable(sqlTableName));
+                    logger.info("Truncating table {}...", sqlTableName);
                     this.dbHelper.execute(MessageFormat.format(SQL_TRUNCATE_TABLE, sqlTableName));
                 } else {
-                    logger.info(message.partiallyEmptyingTable(sqlTableName));
+                    logger.info("Partially emptying table {}", sqlTableName);
                     this.dbHelper.execute(MessageFormat.format(SQL_DELETE_RANGE_TABLE, sqlTableName,
                             Integer.toString(noOfRecordsToKeep)));
                 }
             }
         } catch (final SQLException sqlException) {
-            logger.error(message.errorTruncatingTable(sqlTableName), sqlException);
+            logger.error("Error in truncating the table {}....", sqlTableName, sqlException);
         } finally {
             this.dbHelper.close(rsTbls);
             this.dbHelper.close(conn);
@@ -274,8 +270,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
     /** {@inheritDoc} */
     @Override
     public synchronized void onWireReceive(final WireEnvelope wireEvelope) {
-        requireNonNull(wireEvelope, message.wireEnvelopeNonNull());
-        logger.debug(message.wireEnvelopeReceived() + this.wireSupport);
+        requireNonNull(wireEvelope, "Wire Envelope cannot be null");
 
         try {
             if (getTableSize() >= this.wireRecordStoreOptions.getMaximumTableSize()) {
@@ -303,7 +298,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
      *             if the provided argument is null
      */
     private void store(final WireRecord wireRecord) {
-        requireNonNull(wireRecord, message.wireRecordNonNull());
+        requireNonNull(wireRecord, "Wire Record cannot be null");
         int retryCount = 0;
         final String tableName = this.wireRecordStoreOptions.getTableName();
         do {
@@ -311,7 +306,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
                 insertDataRecord(tableName, wireRecord);
                 break;
             } catch (final SQLException e) {
-                logger.error(message.insertionFailed(), e);
+                logger.error("Insertion failed. Reconciling Table and Columns...", e);
                 reconcileDB(wireRecord, tableName);
                 retryCount++;
             }
@@ -333,7 +328,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
                 reconcileColumns(tableName, wireRecord);
             }
         } catch (final SQLException ee) {
-            logger.error(message.errorStoring(), ee);
+            logger.error("Error while storing Wire Records...", ee);
         }
     }
 
@@ -349,7 +344,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
                 reconcileTable(tableName);
             }
         } catch (final SQLException ee) {
-            logger.error(message.errorStoring(), ee);
+            logger.error("Error while storing Wire Records...", ee);
         }
     }
 
@@ -364,7 +359,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
      *             if the provided argument is null
      */
     private void reconcileTable(final String tableName) throws SQLException {
-        requireNonNull(tableName, message.tableNameNonNull());
+        requireNonNull(tableName, "Table name cannot be null");
         final String sqlTableName = this.dbHelper.sanitizeSqlTableAndColumnName(tableName);
         final Connection conn = this.dbHelper.getConnection();
         ResultSet rsTbls = null;
@@ -375,7 +370,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
             rsTbls = dbMetaData.getTables(catalog, null, this.wireRecordStoreOptions.getTableName(), TABLE_TYPE);
             if (!rsTbls.next()) {
                 // table does not exist, create it
-                logger.info(message.creatingTable(sqlTableName));
+                logger.info("Creating table {}...", sqlTableName);
                 this.dbHelper.execute(MessageFormat.format(SQL_CREATE_TABLE, sqlTableName));
                 createIndex(sqlTableName + "_TIMESTAMP", sqlTableName, "(TIMESTAMP DESC)");
             }
@@ -418,8 +413,8 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
      *             if any of the provided arguments is null
      */
     private void reconcileColumns(final String tableName, final WireRecord wireRecord) throws SQLException {
-        requireNonNull(tableName, message.tableNameNonNull());
-        requireNonNull(wireRecord, message.wireRecordNonNull());
+        requireNonNull(tableName, "Table name cannot be null");
+        requireNonNull(wireRecord, "Wire Record cannot be null");
 
         Connection conn = null;
         ResultSet rsColumns = null;
@@ -473,8 +468,8 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
      *             if any of the provided arguments is null
      */
     private void insertDataRecord(final String tableName, final WireRecord wireRecord) throws SQLException {
-        requireNonNull(tableName, message.tableNameNonNull());
-        requireNonNull(wireRecord, message.wireRecordNonNull());
+        requireNonNull(tableName, "Table name cannot be null");
+        requireNonNull(wireRecord, "Wire Record cannot be null");
 
         final Map<String, TypedValue<?>> wireRecordProperties = wireRecord.getProperties();
 
@@ -485,7 +480,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
             stmt = prepareStatement(connection, tableName, wireRecordProperties, new Date().getTime());
             stmt.execute();
             connection.commit();
-            logger.debug(message.stored());
+            logger.debug("Stored typed value");
         } catch (final SQLException e) {
             this.dbHelper.rollback(connection);
             throw e;
@@ -513,7 +508,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
             sbVals.append(", ?");
         }
 
-        logger.debug(message.storingRecord(sqlTableName));
+        logger.debug("Storing data into table {}...", sqlTableName);
         final String sqlInsert = MessageFormat.format(SQL_INSERT_RECORD, sqlTableName, sbCols.toString(),
                 sbVals.toString());
         final PreparedStatement stmt = connection.prepareStatement(sqlInsert);

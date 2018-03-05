@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -29,8 +29,6 @@ import org.eclipse.kura.cloud.CloudClient;
 import org.eclipse.kura.cloud.CloudClientListener;
 import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.configuration.ConfigurableComponent;
-import org.eclipse.kura.localization.LocalizationAdapter;
-import org.eclipse.kura.localization.resources.WireMessages;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
@@ -80,7 +78,7 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
                 setupCloudClient();
                 subscribeTopic();
             } catch (final KuraException e) {
-                logger.error(wireMessages.cloudClientSetupProblem(), e);
+                logger.error("Cannot setup CloudClient...", e);
             }
             return CloudSubscriber.this.cloudService;
         }
@@ -93,7 +91,7 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
                 setupCloudClient();
                 subscribeTopic();
             } catch (final KuraException e) {
-                logger.error(wireMessages.cloudClientSetupProblem(), e);
+                logger.error("Cannot setup CloudClient...", e);
             }
         }
 
@@ -104,8 +102,6 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
     }
 
     private static final Logger logger = LoggerFactory.getLogger(CloudSubscriber.class);
-
-    private static final WireMessages wireMessages = LocalizationAdapter.adapt(WireMessages.class);
 
     private BundleContext bundleContext;
 
@@ -172,7 +168,7 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
      *            the properties
      */
     protected void activate(final ComponentContext componentContext, final Map<String, Object> properties) {
-        logger.debug(wireMessages.activatingCloudSubscriber());
+        logger.debug("Activating Cloud Subscriber Wire Component...");
         this.bundleContext = componentContext.getBundleContext();
         this.wireSupport = this.wireHelperService.newWireSupport(this);
         this.cloudSubscriberOptions = new CloudSubscriberOptions(properties);
@@ -181,7 +177,7 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
 
         this.cloudServiceTrackerCustomizer = new CloudSubscriberServiceTrackerCustomizer();
         initCloudServiceTracking();
-        logger.debug(wireMessages.activatingCloudSubscriberDone());
+        logger.debug("Activating Cloud Subscriber Wire Component...Done");
     }
 
     /**
@@ -191,12 +187,12 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
      *            the updated properties
      */
     public void updated(final Map<String, Object> properties) {
-        logger.debug(wireMessages.updatingCloudSubscriber());
+        logger.debug("Updating Cloud Subscriber Wire Component...");
         // recreate the Cloud Client
         try {
             unsubsribe();
         } catch (final KuraException e) {
-            logger.error(wireMessages.errorUnsubscribing(), e);
+            logger.error("Error unsubscribing...", e);
         }
         // Update properties
         this.cloudSubscriberOptions = new CloudSubscriberOptions(properties);
@@ -206,7 +202,7 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
         }
         initCloudServiceTracking();
 
-        logger.debug(wireMessages.updatingCloudSubscriberDone());
+        logger.debug("Updating Cloud Subscriber Wire Component...Done");
     }
 
     /**
@@ -216,19 +212,19 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
      *            the component context
      */
     protected void deactivate(final ComponentContext componentContext) {
-        logger.debug(wireMessages.deactivatingCloudSubscriber());
+        logger.debug("Deactivating Cloud Subscriber Wire Component...");
 
         try {
             unsubsribe();
         } catch (final KuraException e) {
-            logger.error(wireMessages.errorUnsubscribing(), e);
+            logger.error("Error unsubscribing...", e);
         }
         closeCloudClient();
 
         if (nonNull(this.cloudServiceTracker)) {
             this.cloudServiceTracker.close();
         }
-        logger.debug(wireMessages.deactivatingCloudSubscriberDone());
+        logger.debug("Deactivating Cloud Subscriber Wire Component...Done");
     }
 
     /** {@inheritDoc} */
@@ -245,7 +241,7 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
                 subscribeTopic();
             }
         } catch (final KuraException e) {
-            logger.error(wireMessages.errorCreatingCloudClinet() + e);
+            logger.error("Error in creating cloud client", e);
         }
     }
 
@@ -281,7 +277,7 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
                 List<WireRecord> records = buildWireRecord(msg);
                 this.wireSupport.emit(records);
             } catch (final IOException e) {
-                logger.error(wireMessages.errorBuildingWireRecords(), e);
+                logger.error("Error while building Wire Records.", e);
             }
         }
     }
@@ -322,7 +318,7 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
         try {
             filter = this.bundleContext.createFilter(filterString);
         } catch (InvalidSyntaxException e) {
-            logger.error(wireMessages.errorBuildingBundleContextFilter(), e);
+            logger.error("Error while building a Bundle Context filter.", e);
         }
         this.cloudServiceTracker = new ServiceTracker<>(this.bundleContext, filter, this.cloudServiceTrackerCustomizer);
         this.cloudServiceTracker.open();
@@ -365,7 +361,7 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
      *             if the payload provided is null
      */
     private List<WireRecord> buildWireRecord(final KuraPayload payload) throws IOException {
-        requireNonNull(payload, wireMessages.payloadNonNull());
+        requireNonNull(payload, "Payload cannot be null");
 
         final Map<String, Object> kuraPayloadProperties = payload.metrics();
         final Map<String, TypedValue<?>> wireProperties = new HashMap<>();

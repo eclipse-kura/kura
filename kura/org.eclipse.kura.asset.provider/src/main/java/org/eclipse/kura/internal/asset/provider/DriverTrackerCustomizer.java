@@ -17,8 +17,6 @@ import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_P
 
 import org.eclipse.kura.asset.provider.BaseAsset;
 import org.eclipse.kura.driver.Driver;
-import org.eclipse.kura.localization.LocalizationAdapter;
-import org.eclipse.kura.localization.resources.AssetMessages;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -34,8 +32,6 @@ import org.slf4j.LoggerFactory;
 public final class DriverTrackerCustomizer implements ServiceTrackerCustomizer<Driver, Driver> {
 
     private static final Logger logger = LoggerFactory.getLogger(DriverTrackerCustomizer.class);
-
-    private static final AssetMessages message = LocalizationAdapter.adapt(AssetMessages.class);
 
     private final BaseAsset baseAsset;
 
@@ -59,9 +55,9 @@ public final class DriverTrackerCustomizer implements ServiceTrackerCustomizer<D
      */
     public DriverTrackerCustomizer(final BundleContext context, final BaseAsset baseAsset, final String driverId)
             throws InvalidSyntaxException {
-        requireNonNull(context, message.bundleContextNonNull());
-        requireNonNull(baseAsset, message.assetNonNull());
-        requireNonNull(driverId, message.driverPidNonNull());
+        requireNonNull(context, "Bundle context cannot be null");
+        requireNonNull(baseAsset, "Asset cannot be null");
+        requireNonNull(driverId, "Driver PID cannot be null");
 
         this.driverId = driverId;
         this.baseAsset = baseAsset;
@@ -73,7 +69,7 @@ public final class DriverTrackerCustomizer implements ServiceTrackerCustomizer<D
     public Driver addingService(final ServiceReference<Driver> reference) {
         final Driver driver = this.context.getService(reference);
         if (reference.getProperty(KURA_SERVICE_PID).equals(this.driverId)) {
-            logger.info(message.driverFoundAdding());
+            logger.info("Driver has been found by the driver tracker....==> adding service");
             this.baseAsset.setDriver(driver);
         }
         return driver;
@@ -91,7 +87,7 @@ public final class DriverTrackerCustomizer implements ServiceTrackerCustomizer<D
     public void removedService(final ServiceReference<Driver> reference, final Driver service) {
         this.context.ungetService(reference);
         if (reference.getProperty(KURA_SERVICE_PID).equals(this.driverId)) {
-            logger.info(message.driverRemoved() + service);
+            logger.info("Driver has been removed by the driver tracker... {}", service);
             this.baseAsset.unsetDriver();
         }
     }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -20,8 +20,6 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.annotation.Nullable;
-import org.eclipse.kura.localization.LocalizationAdapter;
-import org.eclipse.kura.localization.resources.UtilMessages;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkUtil;
@@ -34,8 +32,6 @@ import org.osgi.util.tracker.ServiceTracker;
  * with OSGi services
  */
 public final class ServiceUtil {
-
-    private static final UtilMessages message = LocalizationAdapter.adapt(UtilMessages.class);
 
     private ServiceUtil() {
         // Static Factory Methods container. No need to instantiate.
@@ -60,8 +56,8 @@ public final class ServiceUtil {
     @SuppressWarnings("unchecked")
     public static <T> ServiceReference<T>[] getServiceReferences(final BundleContext bundleContext,
             final Class<T> clazz, @Nullable final String filter) {
-        requireNonNull(bundleContext, message.bundleContextNonNull());
-        requireNonNull(clazz, message.clazzNonNull());
+        requireNonNull(bundleContext, "Bundle context cannot be null.");
+        requireNonNull(clazz, "Class intance name cannot be null.");
 
         try {
             final Collection<ServiceReference<T>> refs = bundleContext.getServiceReferences(clazz, filter);
@@ -85,8 +81,8 @@ public final class ServiceUtil {
      *             if any of the arguments is {@code null}
      */
     public static void ungetServiceReferences(final BundleContext bundleContext, final ServiceReference<?>[] refs) {
-        requireNonNull(bundleContext, message.bundleContextNonNull());
-        requireNonNull(refs, message.referencesNonNull());
+        requireNonNull(bundleContext, "Bundle context cannot be null.");
+        requireNonNull(refs, "Service References cannot be null.");
 
         for (final ServiceReference<?> ref : refs) {
             bundleContext.ungetService(ref);
@@ -115,10 +111,10 @@ public final class ServiceUtil {
      */
     public static Optional<Object> waitForService(final String filter, final long timeout, final TimeUnit timeunit)
             throws InterruptedException, InvalidSyntaxException {
-        requireNonNull(filter, message.filterNonNull());
-        requireNonNull(timeunit, message.timeunitNonNull());
+        requireNonNull(filter, "Filter cannot be null.");
+        requireNonNull(timeunit, "TimeUnit cannot be null");
         if (timeout <= 0) {
-            throw new IllegalArgumentException(message.timeoutError());
+            throw new IllegalArgumentException("Timeout period cannot be zero or negative");
         }
 
         final long timeoutInMillis = timeunit.toMillis(timeout);

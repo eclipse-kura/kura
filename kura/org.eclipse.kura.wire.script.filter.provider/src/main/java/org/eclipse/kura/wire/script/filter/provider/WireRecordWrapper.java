@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -16,15 +16,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.type.TypedValue;
-import org.eclipse.kura.wire.script.filter.localization.ScriptFilterMessages;
 
 import jdk.nashorn.api.scripting.AbstractJSObject;
 
 class WireRecordWrapper extends AbstractJSObject {
 
-    private static final ScriptFilterMessages messages = LocalizationAdapter.adapt(ScriptFilterMessages.class);
     Map<String, TypedValue<?>> properties;
 
     public WireRecordWrapper() {
@@ -62,7 +59,7 @@ class WireRecordWrapper extends AbstractJSObject {
             return;
         }
         if (!(value instanceof TypedValue)) {
-            throw new IllegalArgumentException(messages.errorMustBeTypedValue());
+            throw new IllegalArgumentException("WireRecord properties must be instances of TypedValue");
         }
         this.properties.put(name, (TypedValue<?>) value);
     }

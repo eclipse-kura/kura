@@ -20,8 +20,6 @@ import java.util.List;
 
 import org.eclipse.kura.asset.Asset;
 import org.eclipse.kura.asset.AssetService;
-import org.eclipse.kura.localization.LocalizationAdapter;
-import org.eclipse.kura.localization.resources.AssetMessages;
 import org.eclipse.kura.util.collection.CollectionUtil;
 import org.eclipse.kura.util.service.ServiceUtil;
 import org.osgi.framework.BundleContext;
@@ -34,12 +32,10 @@ import org.osgi.framework.ServiceReference;
  */
 public class AssetServiceImpl implements AssetService {
 
-    private static final AssetMessages message = LocalizationAdapter.adapt(AssetMessages.class);
-
     /** {@inheritDoc} */
     @Override
     public Asset getAsset(final String assetPid) {
-        requireNonNull(assetPid, message.assetPidNonNull());
+        requireNonNull(assetPid, "Asset PID cannot be null");
         final BundleContext context = getBundleContext();
         final ServiceReference<Asset>[] refs = getAssetServiceReferences(context);
         try {
@@ -57,7 +53,7 @@ public class AssetServiceImpl implements AssetService {
     /** {@inheritDoc} */
     @Override
     public String getAssetPid(final Asset asset) {
-        requireNonNull(asset, message.assetNonNull());
+        requireNonNull(asset, "Asset cannot be null");
         final BundleContext context = getBundleContext();
         final ServiceReference<Asset>[] refs = getAssetServiceReferences(context);
         try {

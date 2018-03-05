@@ -219,7 +219,7 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
             return;
         }
 
-        if (config.getSubnetMask() != null && config.getSubnetMask().equals("255.255.255.255")) {
+        if (config.getSubnetMask() != null && "255.255.255.255".equals(config.getSubnetMask())) {
             config.setSubnetMask("");
         }
 
@@ -603,7 +603,7 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
             public void onBlur(BlurEvent event) {
                 setDirty(true);
                 if (!TabTcpIpUi.this.ip.getText().trim().matches(FieldType.IPv4_ADDRESS.getRegex())
-                        || !(TabTcpIpUi.this.ip.getText().trim().length() > 0)) {
+                        || TabTcpIpUi.this.ip.getText().trim().length() <= 0) {
                     TabTcpIpUi.this.groupIp.setValidationState(ValidationState.ERROR);
                     TabTcpIpUi.this.helpIp.setText(MSGS.netIPv4InvalidAddress());
                 } else {

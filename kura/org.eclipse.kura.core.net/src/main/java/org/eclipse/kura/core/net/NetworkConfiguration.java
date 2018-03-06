@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -117,7 +117,7 @@ public class NetworkConfiguration {
         if (availableInterfaces != null) {
             logger.debug("There are {} interfaces to add to the new configuration", availableInterfaces.length);
             for (String currentNetInterface : availableInterfaces) {
-                StringBuffer keyBuffer = new StringBuffer();
+                StringBuilder keyBuffer = new StringBuilder();
                 keyBuffer.append("net.interface.").append(currentNetInterface).append(".type");
                 NetInterfaceType type = NetInterfaceType.UNKNOWN;
                 if (properties.get(keyBuffer.toString()) != null) {
@@ -197,7 +197,7 @@ public class NetworkConfiguration {
 
     @Override
     public String toString() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
 
         Iterator<String> it = this.netInterfaceConfigs.keySet().iterator();
         while (it.hasNext()) {
@@ -576,7 +576,7 @@ public class NetworkConfiguration {
                 }
 
                 // technology types
-                StringBuffer techTypesBuf = new StringBuffer();
+                StringBuilder techTypesBuf = new StringBuilder();
                 List<ModemTechnologyType> techTypes = ((ModemInterface<?>) netInterfaceConfig).getTechnologyTypes();
                 if (techTypes != null) {
                     delim = null;
@@ -723,7 +723,7 @@ public class NetworkConfiguration {
                 .append(mode.toString().toLowerCase());
 
         int[] channels = wifiConfig.getChannels();
-        StringBuffer sbChannel = new StringBuffer();
+        StringBuilder sbChannel = new StringBuilder();
         if (channels != null) {
             for (int i = 0; i < channels.length; i++) {
                 sbChannel.append(channels[i]);
@@ -1513,7 +1513,7 @@ public class NetworkConfiguration {
 
     private void populateNetInterfaceConfiguration(
             AbstractNetInterface<? extends NetInterfaceAddressConfig> netInterfaceConfig, Map<String, Object> props)
-                    throws UnknownHostException, KuraException {
+            throws UnknownHostException, KuraException {
         String interfaceName = netInterfaceConfig.getName();
 
         StringBuilder keyBuffer = new StringBuilder();
@@ -1807,7 +1807,7 @@ public class NetworkConfiguration {
 
                 key = "net.interface." + interfaceName + addressType + ".dnsServers";
                 if (props.containsKey(key)) {
-                    List<IPAddress> dnsServers = new ArrayList<IPAddress>();
+                    List<IPAddress> dnsServers = new ArrayList<>();
                     String dnsServersString = (String) props.get(key);
                     logger.trace("got {}: {}", key, dnsServersString);
                     for (String dnsServer : dnsServersString.split(",")) {
@@ -1896,20 +1896,21 @@ public class NetworkConfiguration {
             }
 
             // POPULATE NetConfigs
-
             // dhcp4
             String configDhcp4 = "net.interface." + interfaceName + ".config.dhcpClient4.enabled";
-            NetConfigIP4 netConfigIP4 = null;
+            NetConfigIP4 netConfigIP4;
             boolean dhcpEnabled = false;
             if (props.containsKey(configDhcp4)) {
                 dhcpEnabled = (Boolean) props.get(configDhcp4);
                 logger.trace("DHCP 4 enabled? {}", dhcpEnabled);
             }
 
-            netConfigIP4 = new NetConfigIP4(NetInterfaceStatus.valueOf(configStatus4), autoConnect, dhcpEnabled);
+            netConfigIP4 = new NetConfigIP4(NetInterfaceStatus.valueOf(configStatus4), autoConnect);
             netConfigs.add(netConfigIP4);
 
-            if (!dhcpEnabled) {
+            if (dhcpEnabled) {
+                netConfigIP4.setDhcp(true);
+            } else {
                 // NetConfigIP4
                 String configIp4 = "net.interface." + interfaceName + ".config.ip4.address";
                 if (props.containsKey(configIp4)) {

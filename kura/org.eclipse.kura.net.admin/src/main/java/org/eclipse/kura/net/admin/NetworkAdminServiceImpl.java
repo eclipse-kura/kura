@@ -947,7 +947,6 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 
     @Override
     public void enableInterface(String interfaceName, boolean dhcp) throws KuraException {
-
         try {
             NetInterfaceType type = LinuxNetworkUtil.getType(interfaceName);
 
@@ -965,16 +964,18 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
                         wifiNetInterfaceAddressConfigs);
 
                 wifiMode = wifiInterfaceAddressConfig.getMode();
-                wifiInterfaceState = new WifiInterfaceState(interfaceName, wifiMode);
-
+                boolean isL2Only = false;
                 for (NetConfig netConfig : wifiInterfaceAddressConfig.getConfigs()) {
                     if (netConfig instanceof NetConfigIP4) {
                         status = ((NetConfigIP4) netConfig).getStatus();
+                        isL2Only = ((NetConfigIP4) netConfig).getStatus() == NetInterfaceStatus.netIPv4StatusL2Only
+                                ? true : false;
                         logger.debug("Interface status is set to {}", status);
                     } else if (netConfig instanceof WifiConfig && ((WifiConfig) netConfig).getMode() == wifiMode) {
                         wifiConfig = (WifiConfig) netConfig;
                     }
                 }
+                wifiInterfaceState = new WifiInterfaceState(interfaceName, wifiMode, isL2Only);
             }
 
             if (!LinuxNetworkUtil.hasAddress(interfaceName)
@@ -1004,7 +1005,6 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
         }
-
     }
 
     private WifiInterfaceAddressConfig getWifiAddressConfig(
@@ -1047,30 +1047,23 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 
     @Override
     public void disableInterface(String interfaceName) throws KuraException {
+        if ("lo".equals(interfaceName)) {
+            return;
+        }
+        manageDhcpClient(interfaceName, false);
+        manageDhcpServer(interfaceName, false);
 
-        if (!"lo".equals(interfaceName)) {
-            try {
-                if (LinuxNetworkUtil.hasAddress(interfaceName)) {
-                    logger.info("bringing interface {} down", interfaceName);
-                    manageDhcpClient(interfaceName, false);
-                    manageDhcpServer(interfaceName, false);
-
-                    // FIXME: can we avoid getting the interface type again and ask for the caller to pass it in?
-                    NetInterfaceType type = LinuxNetworkUtil.getType(interfaceName);
-                    if (type == NetInterfaceType.WIFI) {
-                        disableWifiInterface(interfaceName);
-                    }
-
-                    LinuxNetworkUtil.disableInterface(interfaceName);
-
-                } else {
-                    logger.info("not bringing interface {} down because it is already down", interfaceName);
-                    manageDhcpClient(interfaceName, false);
-                    manageDhcpServer(interfaceName, false);
-                }
-            } catch (Exception e) {
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+        NetInterfaceType type = LinuxNetworkUtil.getType(interfaceName);
+        if (type == NetInterfaceType.WIFI) {
+            disableWifiInterface(interfaceName);
+        }
+        try {
+            if (LinuxNetworkUtil.hasAddress(interfaceName)) {
+                logger.info("bringing interface {} down", interfaceName);
+                LinuxNetworkUtil.disableInterface(interfaceName);
             }
+        } catch (Exception e) {
+            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
         }
     }
 
@@ -1436,7 +1429,6 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
     // TODO: simplify method signature. Probably we could take the mode from the wifiConfig.
     private void enableWifiInterface(String ifaceName, NetInterfaceStatus status, WifiMode wifiMode,
             WifiConfig wifiConfig) throws KuraException {
-
         // ignore mon.* interface
         // ignore redpine vlan interface
         if (ifaceName.startsWith("mon.") || ifaceName.startsWith("rpine")) {
@@ -1449,15 +1441,15 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         HostapdManager.stop(ifaceName);
         WpaSupplicantManager.stop(ifaceName);
 
-        if (status == NetInterfaceStatus.netIPv4StatusEnabledLAN && wifiMode.equals(WifiMode.MASTER)) {
-
+        boolean enStatusAp = status == NetInterfaceStatus.netIPv4StatusL2Only
+                || status == NetInterfaceStatus.netIPv4StatusEnabledLAN ? true : false;
+        boolean enStatusInfra = status == NetInterfaceStatus.netIPv4StatusL2Only
+                || status == NetInterfaceStatus.netIPv4StatusEnabledLAN
+                || status == NetInterfaceStatus.netIPv4StatusEnabledWAN ? true : false;
+        if (enStatusAp && wifiMode == WifiMode.MASTER) {
             logger.debug("Starting hostapd");
             HostapdManager.start(ifaceName);
-
-        } else if ((status == NetInterfaceStatus.netIPv4StatusEnabledLAN
-                || status == NetInterfaceStatus.netIPv4StatusEnabledWAN)
-                && (wifiMode.equals(WifiMode.INFRA) || wifiMode.equals(WifiMode.ADHOC))) {
-
+        } else if (enStatusInfra && (wifiMode == WifiMode.INFRA || wifiMode == WifiMode.ADHOC)) {
             if (wifiConfig != null) {
                 logger.debug("Starting wpa_supplicant");
                 logger.warn("enableWifiInterface() :: Starting wpa_supplicant ... driver={}", wifiConfig.getDriver());
@@ -1546,9 +1538,12 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
     }
 
     private void reloadKernelModule(String interfaceName, WifiMode wifiMode) throws KuraException {
-        logger.info("monitor() :: reload {} using kernel module for WiFi mode {}", interfaceName, wifiMode);
-        LinuxNetworkUtil.unloadKernelModule(interfaceName);
-        LinuxNetworkUtil.loadKernelModule(interfaceName, wifiMode);
+        if (!LinuxNetworkUtil.isKernelModuleLoadedForMode(interfaceName, wifiMode)) {
+            logger.info("reloadKernelModule() :: reload {} using kernel module for WiFi mode {}", interfaceName,
+                    wifiMode);
+            LinuxNetworkUtil.unloadKernelModule(interfaceName);
+            LinuxNetworkUtil.loadKernelModule(interfaceName, wifiMode);
+        }
     }
 
     private boolean isHotspotInList(int channel, String ssid, List<WifiHotspotInfo> wifiHotspotInfoList) {

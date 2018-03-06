@@ -174,8 +174,8 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
         }
     }
 
-    protected InterfaceState getEthernetInterfaceState(String interfaceName) throws KuraException {
-        return new InterfaceState(NetInterfaceType.ETHERNET, interfaceName);
+    protected InterfaceState getEthernetInterfaceState(String interfaceName, boolean isL2Only) throws KuraException {
+        return new InterfaceState(NetInterfaceType.ETHERNET, interfaceName, isL2Only);
     }
 
     protected void startInterfaceIfDown(String interfaceName) throws KuraException {
@@ -245,7 +245,9 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
                 // (String interfaceName, boolean up, boolean link, IPAddress ipAddress)
                 // It will save a call to determine the iface type and it will keep InterfaceState
                 // as a state object as it should be. Maybe introduce an InterfaceStateBuilder.
-                currentInterfaceState = getEthernetInterfaceState(interfaceName);
+                boolean isL2Only = ((AbstractNetInterface<?>) currentInterfaceConfig).getIP4config()
+                        .getStatus() == NetInterfaceStatus.netIPv4StatusL2Only ? true : false;
+                currentInterfaceState = getEthernetInterfaceState(interfaceName, isL2Only);
                 if (!currentInterfaceState.equals(prevInterfaceState)) {
                     postStatusChangeEvent = true;
                 }
@@ -270,7 +272,10 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
                                                     interfaceName, netInterfaceStatus);
                                         }
                                     } else if (netConfig instanceof NetConfigIP4) {
-                                        isDhcpClient = ((NetConfigIP4) netConfig).isDhcp();
+                                        if (!NetInterfaceStatus.netIPv4StatusL2Only
+                                                .equals(((NetConfigIP4) netConfig).getStatus())) {
+                                            isDhcpClient = ((NetConfigIP4) netConfig).isDhcp();
+                                        }
                                         staticGateway = ((NetConfigIP4) netConfig).getGateway();
                                     }
                                 }
@@ -279,8 +284,6 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
                     } else {
                         logger.debug("No current net interface addresses for {}", interfaceName);
                     }
-                } else {
-                    logger.debug("Current interface config is null for {}", interfaceName);
                 }
 
                 // Enable/disable based on configuration and current status
@@ -311,7 +314,9 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
                 // Get the status after all ifdowns and ifups
                 // FIXME: reload the configuration IFF one of above enable/disable happened
                 if (interfaceStateChanged) {
-                    currentInterfaceState = getEthernetInterfaceState(interfaceName);
+                    isL2Only = ((AbstractNetInterface<?>) currentInterfaceConfig).getIP4config()
+                            .getStatus() == NetInterfaceStatus.netIPv4StatusL2Only ? true : false;
+                    currentInterfaceState = getEthernetInterfaceState(interfaceName, isL2Only);
                 }
 
                 // Manage the DHCP server and validate routes

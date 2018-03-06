@@ -2398,7 +2398,7 @@ public class NetworkConfigurationTest {
         properties.put("net.interface.if1.revisionId", "rev1,rev2");
         properties.put("net.interface.if1.serialNum", "serialNumber");
         properties.put("net.interface.if1.technologyTypes", "CDMA,EVDO");
-        properties.put("net.interface.if1.config.password", new Password((String)null));
+        properties.put("net.interface.if1.config.password", new Password((String) null));
         properties.put("net.interface.if1.config.identifier", "modemId");
         properties.put("net.interface.if1.config.powerMode", "LOW_POWER");
         properties.put("net.interface.if1.config.pppNum", 100);
@@ -2440,7 +2440,7 @@ public class NetworkConfigurationTest {
         netConfig1.setPdpType(PdpType.UNKNOWN);
         netConfig1.setApn(null);
         netConfig1.setUsername(null);
-        netConfig1.setPassword((String)null);
+        netConfig1.setPassword((String) null);
         netConfig1.setPppNumber(100);
         netConfigs.add(netConfig1);
 

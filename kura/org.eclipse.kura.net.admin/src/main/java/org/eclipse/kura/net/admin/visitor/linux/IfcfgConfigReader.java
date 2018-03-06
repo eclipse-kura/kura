@@ -108,7 +108,6 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
             logger.debug("Setting NetInterfaceStatus to {} for {}", netInterfaceStatus, netInterfaceConfig.getName());
 
             boolean autoConnect = false;
-            // int mtu = -1; // MTU is not currently used
             boolean dhcp = false;
             IP4Address address = null;
             String ipAddress = null;
@@ -137,25 +136,6 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
                         autoConnect = false;
                     }
 
-                    // override MTU with what is in config if it is present
-                    /*
-                     * IAB: MTU is not currently used
-                     * String stringMtu = kuraProps.getProperty("MTU");
-                     * if (stringMtu == null) {
-                     * try {
-                     * mtu = LinuxNetworkUtil.getCurrentMtu(interfaceName);
-                     * } catch (KuraException e) {
-                     * // just assume ???
-                     * if (interfaceName.equals("lo")) {
-                     * mtu = 16436;
-                     * } else {
-                     * mtu = 1500;
-                     * }
-                     * }
-                     * } else {
-                     * mtu = Short.parseShort(stringMtu);
-                     * }
-                     */
                     // get the bootproto
                     String bootproto = kuraProps.getProperty("BOOTPROTO");
                     if (bootproto == null) {
@@ -182,10 +162,6 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
 
                     // check for dhcp or static configuration
                     try {
-                        ipAddress = kuraProps.getProperty("IPADDR");
-                        prefixString = kuraProps.getProperty("PREFIX");
-                        netmask = kuraProps.getProperty("NETMASK");
-                        kuraProps.getProperty("BROADCAST");
                         try {
                             gateway = kuraProps.getProperty("GATEWAY");
                             logger.debug("got gateway for {}: {}", interfaceName, gateway);
@@ -194,13 +170,15 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
                         }
 
                         if ("dhcp".equals(bootproto)) {
-                            logger.debug("currently set for DHCP");
+                            logger.debug("Interface configuration mode is currently set for DHCP");
                             dhcp = true;
-                            ipAddress = null;
-                            netmask = null;
+                        } else if ("static".equals(bootproto)) {
+                            logger.debug("Interface configuration mode is currently set for static IP address");
+                            ipAddress = kuraProps.getProperty("IPADDR");
+                            prefixString = kuraProps.getProperty("PREFIX");
+                            netmask = kuraProps.getProperty("NETMASK");
                         } else {
-                            logger.debug("currently set for static address");
-                            dhcp = false;
+                            netInterfaceStatus = NetInterfaceStatus.netIPv4StatusL2Only;
                         }
                     } catch (Exception e) {
                         throw new KuraException(KuraErrorCode.INTERNAL_ERROR,
@@ -216,7 +194,8 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
                     }
 
                     // make sure at least prefix or netmask is present if static
-                    if (autoConnect && !dhcp && prefixString == null && netmask == null) {
+                    if (autoConnect && !dhcp && netInterfaceStatus != NetInterfaceStatus.netIPv4StatusL2Only
+                            && prefixString == null && netmask == null) {
                         throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "malformatted config file: "
                                 + ifcfgFile.toString() + " must contain NETMASK and/or PREFIX");
                     }
@@ -275,7 +254,7 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
                 }
 
                 NetConfigIP4 netConfig = new NetConfigIP4(netInterfaceStatus, autoConnect);
-                setNetConfigIP4(netConfig, autoConnect, dhcp, address, gateway, prefixString, netmask, kuraProps);
+                setNetConfigIP4(netConfig, dhcp, address, gateway, prefixString, netmask, kuraProps);
                 logger.debug("NetConfig: {}", netConfig);
                 netConfigs.add(netConfig);
             }
@@ -440,8 +419,8 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
         return kuraProps;
     }
 
-    private static void setNetConfigIP4(NetConfigIP4 netConfig, boolean autoConnect, boolean dhcp, IP4Address address,
-            String gateway, String prefixString, String netmask, Properties kuraProps) throws KuraException {
+    private static void setNetConfigIP4(NetConfigIP4 netConfig, boolean dhcp, IP4Address address, String gateway,
+            String prefixString, String netmask, Properties kuraProps) throws KuraException {
 
         netConfig.setDhcp(dhcp);
         if (kuraProps != null) {

@@ -18,9 +18,19 @@ public enum NetInterfaceStatus {
     /** IPv4 configuration is disabled **/
     netIPv4StatusDisabled,
 
-    /** IPv4 configuration is not managed by Kura 
-     * @since 1.4**/
+    /**
+     * IPv4 configuration is not managed by Kura
+     * 
+     * @since 1.4
+     **/
     netIPv4StatusUnmanaged,
+
+    /**
+     * IPv4 configuration only at Layer 2 of the OSI model
+     * 
+     * @since 1.4
+     **/
+    netIPv4StatusL2Only,
 
     /** IPv4 configuration is enabled as a LAN interface **/
     netIPv4StatusEnabledLAN,
@@ -34,9 +44,19 @@ public enum NetInterfaceStatus {
     /** IPv6 configuration is disabled **/
     netIPv6StatusDisabled,
 
-    /** IPv6 configuration is not managed by Kura 
-     * @since 1.4**/
+    /**
+     * IPv6 configuration is not managed by Kura
+     * 
+     * @since 1.4
+     **/
     netIPv6StatusUnmanaged,
+
+    /**
+     * IPv6 configuration only at Layer 2 of the OSI model
+     * 
+     * @since 1.4
+     **/
+    netIPv6StatusL2Only,
 
     /** IPv6 configuration is enabled as a LAN interface **/
     netIPv6StatusEnabledLAN,

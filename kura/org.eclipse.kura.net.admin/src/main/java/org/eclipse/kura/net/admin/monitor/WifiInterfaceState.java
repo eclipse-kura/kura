@@ -14,6 +14,7 @@ package org.eclipse.kura.net.admin.monitor;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.eclipse.kura.linux.net.wifi.HostapdManager;
+import org.eclipse.kura.linux.net.wifi.WpaSupplicantManager;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.slf4j.Logger;
@@ -21,7 +22,7 @@ import org.slf4j.LoggerFactory;
 
 public class WifiInterfaceState extends InterfaceState {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(WifiInterfaceState.class);
+    private static final Logger logger = LoggerFactory.getLogger(WifiInterfaceState.class);
 
     /**
      * WifiInterfaceState
@@ -34,15 +35,44 @@ public class WifiInterfaceState extends InterfaceState {
      */
     public WifiInterfaceState(String interfaceName, WifiMode wifiMode) throws KuraException {
         super(NetInterfaceType.WIFI, interfaceName);
-        if (WifiMode.MASTER.equals(wifiMode)) {
-            if (this.m_link) {
+        setWifiLinkState(interfaceName, wifiMode);
+    }
+
+    /**
+     * WifiInterfaceState
+     *
+     * @param interfaceName
+     *            - interface name as {@link String}
+     * @param wifiMode
+     *            - configured wifi mode as {@link WifiMode}
+     * @param isL2OnlyInterface
+     *            - is Layer 2 only interface
+     * @throws KuraException
+     */
+    public WifiInterfaceState(String interfaceName, WifiMode wifiMode, boolean isL2OnlyInterface) throws KuraException {
+        super(NetInterfaceType.WIFI, interfaceName, isL2OnlyInterface);
+        setWifiLinkState(interfaceName, wifiMode);
+    }
+
+    private void setWifiLinkState(String interfaceName, WifiMode wifiMode) throws KuraException {
+        if (this.link) {
+            if (WifiMode.MASTER.equals(wifiMode)) {
                 boolean isHostapdRunning = HostapdManager.isRunning(interfaceName);
                 boolean isIfaceInApMode = WifiMode.MASTER.equals(LinuxNetworkUtil.getWifiMode(interfaceName));
                 if (!isHostapdRunning || !isIfaceInApMode) {
-                    s_logger.warn("WifiInterfaceState() :: !! Link is down for the " + interfaceName
+                    logger.warn("setWifiLinkState() :: !! Link is down for the " + interfaceName
                             + " interface. isHostapdRunning? " + isHostapdRunning + " isIfaceInApMode? "
                             + isIfaceInApMode);
-                    this.m_link = false;
+                    this.link = false;
+                }
+            } else if (WifiMode.INFRA.equals(wifiMode)) {
+                boolean isSupplicantRunning = WpaSupplicantManager.isRunning(interfaceName);
+                boolean isIfaceInManagedMode = WifiMode.INFRA.equals(LinuxNetworkUtil.getWifiMode(interfaceName));
+                if (!isSupplicantRunning || !isIfaceInManagedMode) {
+                    logger.warn("setWifiLinkState() :: !! Link is down for the " + interfaceName
+                            + " interface. isSupplicantRunning? " + isSupplicantRunning + " isIfaceInManagedMode? "
+                            + isIfaceInManagedMode);
+                    this.link = false;
                 }
             }
         }

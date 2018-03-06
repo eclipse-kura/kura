@@ -108,8 +108,9 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
     }
 
     private boolean isInterfaceEnabled(NetInterfaceStatus status) {
-        return status.equals(NetInterfaceStatus.netIPv4StatusEnabledLAN)
-                || status.equals(NetInterfaceStatus.netIPv4StatusEnabledWAN);
+        return NetInterfaceStatus.netIPv4StatusL2Only.equals(status)
+                || NetInterfaceStatus.netIPv4StatusEnabledLAN.equals(status)
+                || NetInterfaceStatus.netIPv4StatusEnabledWAN.equals(status);
     }
 
     private WifiConfig getAccessPointConfig(List<NetConfig> netConfigs) {

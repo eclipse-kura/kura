@@ -225,6 +225,9 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                                 } else if (((NetConfigIP4) netConfig)
                                         .getStatus() == NetInterfaceStatus.netIPv4StatusUnmanaged) {
                                     gwtNetConfig.setStatus(GwtNetIfStatus.netIPv4StatusUnmanaged.name());
+                                } else if (((NetConfigIP4) netConfig)
+                                        .getStatus() == NetInterfaceStatus.netIPv4StatusL2Only) {
+                                    gwtNetConfig.setStatus(GwtNetIfStatus.netIPv4StatusL2Only.name());
                                 } else {
                                     gwtNetConfig.setStatus(GwtNetIfStatus.netIPv4StatusDisabled.name());
                                 }
@@ -744,15 +747,17 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 
         try {
             // Interface status
-            NetInterfaceStatus netInterfaceStatus = null;
-            if (config.getStatus().equals(GwtNetIfStatus.netIPv4StatusDisabled.name())) {
-                netInterfaceStatus = NetInterfaceStatus.netIPv4StatusDisabled;
-            } else if (config.getStatus().equals(GwtNetIfStatus.netIPv4StatusUnmanaged.name())) {
+            NetInterfaceStatus netInterfaceStatus;
+            if (config.getStatus().equals(GwtNetIfStatus.netIPv4StatusUnmanaged.name())) {
                 netInterfaceStatus = NetInterfaceStatus.netIPv4StatusUnmanaged;
+            } else if (config.getStatus().equals(GwtNetIfStatus.netIPv4StatusL2Only.name())) {
+                netInterfaceStatus = NetInterfaceStatus.netIPv4StatusL2Only;
             } else if (config.getStatus().equals(GwtNetIfStatus.netIPv4StatusEnabledLAN.name())) {
                 netInterfaceStatus = NetInterfaceStatus.netIPv4StatusEnabledLAN;
             } else if (config.getStatus().equals(GwtNetIfStatus.netIPv4StatusEnabledWAN.name())) {
                 netInterfaceStatus = NetInterfaceStatus.netIPv4StatusEnabledWAN;
+            } else {
+                netInterfaceStatus = NetInterfaceStatus.netIPv4StatusDisabled;
             }
 
             // Set up configs
@@ -767,7 +772,6 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 
                 logger.debug("config.getConfigMode(): {}", config.getConfigMode());
                 String regexp = "[\\s,;\\n\\t]+";
-
                 if (GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name().equals(config.getConfigMode())) {
                     logger.debug("mode is DHCP");
                     netConfig4.setDhcp(true);
@@ -823,7 +827,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                 // TODO - add IPv6 support later...
 
                 // Set up DHCP and NAT
-                if (!GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name().equals(config.getConfigMode())) {
+                if (GwtNetIfConfigMode.netIPv4ConfigModeManual.name().equals(config.getConfigMode())) {
                     List<NetConfig> dhcpConfigs = getDhcpConfig(config); // <--
                     if (dhcpConfigs != null) {
                         logger.debug("Adding dhcp and/or nat configs to interface update config");

@@ -530,7 +530,7 @@ public class NetworkConfigurationServiceimplTest {
                 assertTrue(ad.isRequired());
                 adsConfigured++;
             }
-
+            
             if ("net.interface.eth2.config.dhcpClient4.enabled".equals(ad.getId())) {
                 assertEquals("net.interface.eth2.config.dhcpClient4.enabled", ad.getName());
                 assertEquals("BOOLEAN", ad.getType().name());
@@ -677,7 +677,7 @@ public class NetworkConfigurationServiceimplTest {
                 assertTrue(ad.isRequired());
                 adsConfigured++;
             }
-
+            
             if ("net.interface.wlan1.config.dhcpClient4.enabled".equals(ad.getId())) {
                 assertEquals("net.interface.wlan1.config.dhcpClient4.enabled", ad.getName());
                 assertEquals("BOOLEAN", ad.getType().name());
@@ -944,9 +944,7 @@ public class NetworkConfigurationServiceimplTest {
                 adsConfigured++;
             }
         }
-
         assertEquals(60, adsConfigured);
-
     }
 
 }

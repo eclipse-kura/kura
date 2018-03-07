@@ -55,7 +55,7 @@ public class SubscriptionManager implements SubscriptionListener, ListenerRegist
 
     private static final Logger logger = LoggerFactory.getLogger(SubscriptionManager.class);
 
-    private static ExtensionObject DEFAULT_EVENT_FILTER = ExtensionObject
+    private static ExtensionObject defaultEventFilter = ExtensionObject
             .encode(new EventFilter(new SimpleAttributeOperand[] {
                     new SimpleAttributeOperand(Identifiers.BaseEventType,
                             new QualifiedName[] { BaseEventType.TIME.getBrowseName() }, AttributeId.Value.uid(), null),
@@ -135,7 +135,7 @@ public class SubscriptionManager implements SubscriptionListener, ListenerRegist
                 handler.close();
             }
             monitoredItemHandlers.clear();
-            return manager.deleteSubscription(subscription.getSubscriptionId()).handle((subscription, e) -> {
+            return manager.deleteSubscription(subscription.getSubscriptionId()).handle((ok, e) -> {
                 if (e != null) {
                     logger.debug("Failed to delete subscription", e);
                 }
@@ -173,7 +173,7 @@ public class SubscriptionManager implements SubscriptionListener, ListenerRegist
                         item -> toBeCreated.add(new MonitoredItemHandler(item)),
                         item -> toBeDeleted.add(monitoredItemHandlers.get(item)));
 
-                if (toBeCreated.size() == 0 && toBeDeleted.size() == monitoredItemHandlers.size()) {
+                if (toBeCreated.isEmpty() && toBeDeleted.size() == monitoredItemHandlers.size()) {
                     return state.unsubscribe().thenAccept(onCompletion);
                 }
 
@@ -202,10 +202,9 @@ public class SubscriptionManager implements SubscriptionListener, ListenerRegist
             if (!requests.isEmpty()) {
                 final ArrayList<CompletableFuture<?>> tasks = new ArrayList<>();
 
-                forEachChunk(options.getMaxItemCountPerRequest(), requests.size(), (start, end) -> {
-                    tasks.add(createMonitoredItems(subscription, requests.subList(start, end),
-                            handlers.subList(start, end)));
-                });
+                forEachChunk(options.getMaxItemCountPerRequest(), requests.size(),
+                        (start, end) -> tasks.add(createMonitoredItems(subscription, requests.subList(start, end),
+                                handlers.subList(start, end))));
 
                 return CompletableFuture.allOf(tasks.toArray(new CompletableFuture<?>[tasks.size()]));
             } else {
@@ -236,16 +235,15 @@ public class SubscriptionManager implements SubscriptionListener, ListenerRegist
             if (!requests.isEmpty()) {
                 final ArrayList<CompletableFuture<?>> tasks = new ArrayList<>();
 
-                forEachChunk(options.getMaxItemCountPerRequest(), requests.size(), (start, end) -> {
-                    tasks.add(subscription.deleteMonitoredItems(requests.subList(start, end)).thenAccept(ok -> {
-                        synchronized (SubscriptionManager.this) {
-                            for (final MonitoredItemHandler handler : handlers) {
-                                handler.close();
-                                monitoredItemHandlers.remove(handler.getParams());
+                forEachChunk(options.getMaxItemCountPerRequest(), requests.size(), (start, end) -> tasks
+                        .add(subscription.deleteMonitoredItems(requests.subList(start, end)).thenAccept(ok -> {
+                            synchronized (SubscriptionManager.this) {
+                                for (final MonitoredItemHandler handler : handlers) {
+                                    handler.close();
+                                    monitoredItemHandlers.remove(handler.getParams());
+                                }
                             }
-                        }
-                    }));
-                });
+                        })));
 
                 return CompletableFuture.allOf(tasks.toArray(new CompletableFuture<?>[tasks.size()]));
             } else {
@@ -302,7 +300,7 @@ public class SubscriptionManager implements SubscriptionListener, ListenerRegist
             final ReadValueId readValueId = params.getReadValueId();
             final boolean isEventNotifier = AttributeId.EventNotifier.uid().equals(readValueId.getAttributeId());
             final MonitoringParameters monitoringParams = new MonitoringParameters(requestHandle,
-                    isEventNotifier ? 0.0 : params.getSamplingInterval(), isEventNotifier ? DEFAULT_EVENT_FILTER : null,
+                    isEventNotifier ? 0.0 : params.getSamplingInterval(), isEventNotifier ? defaultEventFilter : null,
                     UInteger.valueOf(params.getQueueSize()), params.getDiscardOldest());
             return new MonitoredItemCreateRequest(params.getReadValueId(), MonitoringMode.Reporting, monitoringParams);
         }
@@ -343,9 +341,7 @@ public class SubscriptionManager implements SubscriptionListener, ListenerRegist
         }
 
         public void dispatchValue(final DataValue value) {
-            dispatcher.dispatch(record -> {
-                fill(value, record);
-            });
+            dispatcher.dispatch(record -> fill(value, record));
         }
 
         public void close() {

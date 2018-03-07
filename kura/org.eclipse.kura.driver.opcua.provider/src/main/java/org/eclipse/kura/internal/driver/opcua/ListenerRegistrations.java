@@ -42,10 +42,8 @@ public class ListenerRegistrations {
             registeredListeners.put(params, listeners);
             notifyChanged();
         } else {
-            if (listeners.stream()
-                    .filter(req -> req.getChannelListener() == request.getChannelListener()
-                            && req.getRecord().getChannelName() == request.getRecord().getChannelName())
-                    .findAny().isPresent()) {
+            if (listeners.stream().anyMatch(req -> req.getChannelListener() == request.getChannelListener()
+                    && req.getRecord().getChannelName() == request.getRecord().getChannelName())) {
                 return;
             }
             listeners.add(request);
@@ -54,12 +52,9 @@ public class ListenerRegistrations {
 
     public synchronized void unregisterListener(final ChannelListener listener) {
         final boolean removed = registeredListeners.entrySet().removeIf(e -> {
-            final Collection<ListenRequest> registeredListeners = e.getValue();
-            registeredListeners.removeIf(req -> req.getChannelListener() == listener);
-            if (registeredListeners.isEmpty()) {
-                return true;
-            }
-            return false;
+            final Collection<ListenRequest> listeners = e.getValue();
+            listeners.removeIf(req -> req.getChannelListener() == listener);
+            return listeners.isEmpty();
         });
         if (removed) {
             notifyChanged();
@@ -68,7 +63,7 @@ public class ListenerRegistrations {
 
     private void notifyChanged() {
         state = Math.max(0, state + 1);
-        itemListeners.forEach(l -> l.onRegistrationsChanged());
+        itemListeners.forEach(Listener::onRegistrationsChanged);
     }
 
     public synchronized void computeDifferences(final Set<ListenParams> other, final Consumer<ListenParams> toBeCreated,

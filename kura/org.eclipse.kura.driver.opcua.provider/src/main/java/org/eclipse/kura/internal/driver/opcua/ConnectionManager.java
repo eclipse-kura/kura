@@ -75,14 +75,11 @@ public class ConnectionManager {
         logger.debug("Connecting to endpoint: {}", endpointString);
 
         return UaTcpStackClient.getEndpoints(endpointString)
-                .thenCompose(endpoints -> connectToEndpoint(options, endpoints)).handle((client, ex) -> {
-                    if (client == null || ex != null) {
-                        throw new RuntimeException(ex);
-                    }
+                .thenCompose(endpoints -> connectToEndpoint(options, endpoints)).thenApply(client -> {
                     logger.info("Connecting to OPC-UA...Done");
                     return new ConnectionManager((OpcUaClient) client, options, failureHandler, registrations);
                 });
-    };
+    }
 
     public synchronized void start() {
         this.subscriptionManager.onRegistrationsChanged();
@@ -141,7 +138,7 @@ public class ConnectionManager {
             checkStatus(results[i], requests.get(i).getRecord());
         }
 
-        logger.debug("Read Successful");
+        logger.debug("Write Successful");
     }
 
     public synchronized void close() {
@@ -179,7 +176,7 @@ public class ConnectionManager {
 
         final Optional<EndpointDescription> endpoint = Arrays.stream(availableEndpoints)
                 .filter(e -> e.getSecurityPolicyUri().equals(options.getSecurityPolicy().getSecurityPolicyUri()))
-                .findFirst();
+                .findAny();
 
         if (!endpoint.isPresent()) {
             throw new RuntimeException("Unable to Connect...No desired Endpoints returned");

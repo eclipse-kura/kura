@@ -50,6 +50,7 @@ public class ModemDriver {
 
     private static final String BOLTGATE_20_25_PCIEX_SLOT3_POWER_GPIO_VALUE = "/dev/pciex_slot3_power/value";
     private static final String BOLTGATE_20_25_PCIEX_W_DISABLE3_GPIO_VALUE = "/dev/pciex_w_disable3/value";
+    private static final String BOLTGATE_20_25_J18__POWER_GPIO_VALUE = "/dev/usb_j18_conn_power/value";
 
     private static final String GPIO_DIRECTION = "out";
 
@@ -188,6 +189,8 @@ public class ModemDriver {
 
                 turnOffGpio(BOLTGATE_20_25_PCIEX_SLOT3_POWER_GPIO_VALUE);
 
+            } else if (TARGET_NAME.startsWith(KuraConstants.BoltGATE_20_25.getTargetName())) {
+                turnOffGpio(BOLTGATE_20_25_J18__POWER_GPIO_VALUE);
             } else {
                 logger.warn("turnModemOff() :: modem turnOff operation is not supported for the {} platform",
                         TARGET_NAME);
@@ -268,6 +271,8 @@ public class ModemDriver {
 
                 toggleGpio(BOLTGATE_20_25_PCIEX_W_DISABLE3_GPIO_VALUE);
 
+            }  else if (TARGET_NAME.startsWith(KuraConstants.BoltGATE_20_25.getTargetName())) {
+                turnOnGpio(BOLTGATE_20_25_J18__POWER_GPIO_VALUE);
             } else {
                 logger.warn("turnModemOn() :: modem turnOn operation is not supported for the {} platform",
                         TARGET_NAME);

@@ -210,7 +210,7 @@ public final class OpcUaDriver implements Driver, ConfigurableComponent {
 
     private synchronized void onFailure(final ConnectionManager manager, final Throwable ex) {
         if (connectionManager.isPresent() && connectionManager.get() == manager) {
-            logger.debug("Unrecoverable failure, forcing disconnect: {}", ex);
+            logger.debug("Unrecoverable failure, forcing disconnect", ex);
             try {
                 if (connectionManager.isPresent()) {
                     this.disconnect();
@@ -219,7 +219,7 @@ public final class OpcUaDriver implements Driver, ConfigurableComponent {
                 logger.warn("Unable to Disconnect...");
             }
         } else {
-            logger.debug("Ignoring failure from old connection: {}", ex);
+            logger.debug("Ignoring failure from old connection", ex);
         }
     }
 

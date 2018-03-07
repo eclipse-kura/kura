@@ -198,7 +198,6 @@ public class ConnectionManager {
                 .setCertificate(loader.getClientCertificate()).build();
 
         final OpcUaClient client = new OpcUaClient(clientConfigBuilder.build());
-        logger.info("Connecting to OPC-UA...Done");
         return client.connect();
     }
 }

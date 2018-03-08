@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates
  *
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
@@ -18,8 +18,6 @@ import org.eclipse.kura.core.configuration.metatype.Tad;
 import org.eclipse.kura.core.configuration.metatype.Toption;
 import org.eclipse.kura.core.configuration.metatype.Tscalar;
 import org.eclipse.kura.driver.ChannelDescriptor;
-import org.eclipse.kura.driver.s7plc.localization.S7PlcMessages;
-import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.util.collection.CollectionUtil;
 
 /**
@@ -40,9 +38,6 @@ public final class S7PlcChannelDescriptor implements ChannelDescriptor {
     public static final String OFFSET_ID = "offset";
     public static final String BIT_INDEX_ID = "bit.index";
 
-    /** Localization Resource. */
-    private static final S7PlcMessages s_message = LocalizationAdapter.adapt(S7PlcMessages.class);
-
     private Toption generateOption(S7PlcDataType type) {
         Toption option = new Toption();
         option.setLabel(type.name());
@@ -58,7 +53,7 @@ public final class S7PlcChannelDescriptor implements ChannelDescriptor {
         final Tad s7ElementType = new Tad();
         s7ElementType.setName(S7_ELEMENT_TYPE_ID);
         s7ElementType.setId(S7_ELEMENT_TYPE_ID);
-        s7ElementType.setDescription(s_message.s7DataTypeDesc());
+        s7ElementType.setDescription("S7 Data Type");
         s7ElementType.setType(Tscalar.STRING);
         s7ElementType.setRequired(true);
         s7ElementType.setDefault(S7PlcDataType.INT.name());
@@ -72,7 +67,7 @@ public final class S7PlcChannelDescriptor implements ChannelDescriptor {
         final Tad areaNo = new Tad();
         areaNo.setName(DATA_BLOCK_NO_ID);
         areaNo.setId(DATA_BLOCK_NO_ID);
-        areaNo.setDescription(s_message.areaNo());
+        areaNo.setDescription("DB number");
         areaNo.setType(Tscalar.INTEGER);
         areaNo.setRequired(true);
         areaNo.setDefault("0");
@@ -82,7 +77,7 @@ public final class S7PlcChannelDescriptor implements ChannelDescriptor {
         final Tad offset = new Tad();
         offset.setName(OFFSET_ID);
         offset.setId(OFFSET_ID);
-        offset.setDescription(s_message.offset());
+        offset.setDescription("offset");
         offset.setType(Tscalar.INTEGER);
         offset.setRequired(true);
         offset.setDefault("0");
@@ -92,7 +87,7 @@ public final class S7PlcChannelDescriptor implements ChannelDescriptor {
         final Tad byteCount = new Tad();
         byteCount.setName(BYTE_COUNT_ID);
         byteCount.setId(BYTE_COUNT_ID);
-        byteCount.setDescription(s_message.byteCountDesc());
+        byteCount.setDescription("Byte Count");
         byteCount.setType(Tscalar.INTEGER);
         byteCount.setRequired(true);
         byteCount.setDefault("0");
@@ -102,7 +97,7 @@ public final class S7PlcChannelDescriptor implements ChannelDescriptor {
         final Tad bitIndex = new Tad();
         bitIndex.setName(BIT_INDEX_ID);
         bitIndex.setId(BIT_INDEX_ID);
-        bitIndex.setDescription(s_message.bitIndexDesc());
+        bitIndex.setDescription("Bit Index");
         bitIndex.setType(Tscalar.INTEGER);
         bitIndex.setRequired(true);
         bitIndex.setMin("0");

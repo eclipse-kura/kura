@@ -20,14 +20,6 @@
    </license>
 
    <plugin
-         id="org.eclipse.kura.driver.gpio.localization"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
          id="org.eclipse.kura.driver.gpio.provider"
          download-size="0"
          install-size="0"

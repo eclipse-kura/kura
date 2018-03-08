@@ -18,24 +18,20 @@ import static org.eclipse.kura.asset.provider.AssetConstants.ASSET_DRIVER_PROP;
 import org.eclipse.kura.core.configuration.metatype.Tad;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
 import org.eclipse.kura.core.configuration.metatype.Tscalar;
-import org.eclipse.kura.localization.LocalizationAdapter;
-import org.eclipse.kura.localization.resources.AssetMessages;
 
 public class BaseAssetOCD extends Tocd {
 
-    private static final AssetMessages message = LocalizationAdapter.adapt(AssetMessages.class);
-
     public BaseAssetOCD() {
         setId(BaseAsset.CONF_PID);
-        setName(message.ocdName());
-        setDescription(message.ocdDescription());
+        setName("WireAsset");
+        setDescription("Configure Wire Asset Instance");
 
         final Tad assetDescriptionAd = new Tad();
         assetDescriptionAd.setId(ASSET_DESC_PROP.value());
         assetDescriptionAd.setName(ASSET_DESC_PROP.value());
         assetDescriptionAd.setCardinality(0);
         assetDescriptionAd.setType(Tscalar.STRING);
-        assetDescriptionAd.setDescription(message.description());
+        assetDescriptionAd.setDescription("Asset Description");
         assetDescriptionAd.setRequired(false);
 
         final Tad driverNameAd = new Tad();
@@ -43,7 +39,7 @@ public class BaseAssetOCD extends Tocd {
         driverNameAd.setName(ASSET_DRIVER_PROP.value());
         driverNameAd.setCardinality(0);
         driverNameAd.setType(Tscalar.STRING);
-        driverNameAd.setDescription(message.driverName());
+        driverNameAd.setDescription("Driver Name");
         driverNameAd.setRequired(true);
 
         addAD(assetDescriptionAd);

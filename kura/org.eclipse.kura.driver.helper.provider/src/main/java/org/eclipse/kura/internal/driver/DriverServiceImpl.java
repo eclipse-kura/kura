@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -20,8 +20,6 @@ import java.util.List;
 
 import org.eclipse.kura.driver.Driver;
 import org.eclipse.kura.driver.DriverService;
-import org.eclipse.kura.localization.LocalizationAdapter;
-import org.eclipse.kura.localization.resources.AssetMessages;
 import org.eclipse.kura.util.service.ServiceUtil;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -33,8 +31,6 @@ import org.osgi.service.component.ComponentContext;
  */
 public class DriverServiceImpl implements DriverService {
 
-    private static final AssetMessages message = LocalizationAdapter.adapt(AssetMessages.class);
-
     private BundleContext bundleContext;
 
     public void activate(ComponentContext componentContext) {
@@ -44,7 +40,7 @@ public class DriverServiceImpl implements DriverService {
     /** {@inheritDoc} */
     @Override
     public Driver getDriver(final String driverPid) {
-        requireNonNull(driverPid, message.driverPidNonNull());
+        requireNonNull(driverPid, "Driver PID cannot be null");
 
         Driver driver = null;
 
@@ -63,7 +59,7 @@ public class DriverServiceImpl implements DriverService {
     /** {@inheritDoc} */
     @Override
     public String getDriverPid(final Driver driver) {
-        requireNonNull(driver, message.driverNonNull());
+        requireNonNull(driver, "Driver PID cannot be null");
         final ServiceReference<Driver>[] refs = getDriverServiceReferences(null);
         try {
             for (final ServiceReference<Driver> ref : refs) {

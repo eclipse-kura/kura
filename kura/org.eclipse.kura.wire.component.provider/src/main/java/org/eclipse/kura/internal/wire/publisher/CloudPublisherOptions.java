@@ -18,8 +18,6 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.Map;
 
-import org.eclipse.kura.localization.LocalizationAdapter;
-import org.eclipse.kura.localization.resources.WireMessages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,8 +28,6 @@ import org.slf4j.LoggerFactory;
 final class CloudPublisherOptions {
 
     private static final Logger logger = LoggerFactory.getLogger(CloudPublisherOptions.class);
-
-    private static final WireMessages message = LocalizationAdapter.adapt(WireMessages.class);
 
     private static final String CLOUD_SERVICE_PID = "cloud.service.pid";
 
@@ -79,7 +75,7 @@ final class CloudPublisherOptions {
      *            the properties
      */
     CloudPublisherOptions(final Map<String, Object> properties) {
-        requireNonNull(properties, message.propertiesNonNull());
+        requireNonNull(properties, "Properties cannot be null");
         this.properties = properties;
     }
 
@@ -192,7 +188,7 @@ final class CloudPublisherOptions {
         if (nonNull(configurationPositionType) && configurationPositionType instanceof String) {
             positionTypeString = (String) configurationPositionType;
         }
-        
+
         PositionType result = PositionType.NONE;
         try {
             result = PositionType.getEncoding(positionTypeString);

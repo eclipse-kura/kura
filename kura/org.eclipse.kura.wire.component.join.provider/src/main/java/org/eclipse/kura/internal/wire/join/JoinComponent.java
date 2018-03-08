@@ -13,7 +13,6 @@
 package org.eclipse.kura.internal.wire.join;
 
 import static java.util.Objects.isNull;
-import static java.util.Objects.requireNonNull;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,8 +23,6 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
-import org.eclipse.kura.localization.LocalizationAdapter;
-import org.eclipse.kura.localization.resources.WireMessages;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireEnvelope;
@@ -41,7 +38,6 @@ import org.slf4j.LoggerFactory;
 public final class JoinComponent implements MultiportWireReceiver, WireEmitter, ConfigurableComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(JoinComponent.class);
-    private static final WireMessages message = LocalizationAdapter.adapt(WireMessages.class);
 
     private volatile WireHelperService wireHelperService;
 
@@ -62,23 +58,23 @@ public final class JoinComponent implements MultiportWireReceiver, WireEmitter, 
     }
 
     protected void activate(final ComponentContext componentContext, final Map<String, Object> properties) {
-        logger.debug(message.activatingLogger());
+        logger.debug("Activating Join Wire Component...");
         this.context = componentContext;
         this.wireSupport = (MultiportWireSupport) this.wireHelperService.newWireSupport(this);
 
         updated(properties);
 
-        logger.debug(message.activatingLoggerDone());
+        logger.debug("Activating Join Wire Component... Done");
     }
 
     public void updated(final Map<String, Object> properties) {
-        logger.debug(message.updatingLogger());
+        logger.debug("Updating Join Wire Component...");
         this.joinComponentOptions = new JoinComponentOptions(properties, context.getBundleContext());
 
         this.joinComponentOptions.getPortAggregatorFactory().build(wireSupport.getReceiverPorts())
                 .onWireReceive(this::onWireReceive);
 
-        logger.debug(message.updatingLoggerDone());
+        logger.debug("Updating Join Wire Component... Done");
     }
 
     private void onWireReceive(List<WireEnvelope> envelopes) {
@@ -114,15 +110,14 @@ public final class JoinComponent implements MultiportWireReceiver, WireEmitter, 
     }
 
     protected void deactivate(final ComponentContext componentContext) {
-        logger.debug(message.deactivatingLogger());
+        logger.debug("Deactivating Join Wire Component...");
         // remained for debugging purposes
-        logger.debug(message.deactivatingLoggerDone());
+        logger.debug("Deactivating Join Wire Component... Done");
     }
 
     /** {@inheritDoc} */
     @Override
     public void producersConnected(final Wire[] wires) {
-        requireNonNull(wires, message.wiresNonNull());
         this.wireSupport.producersConnected(wires);
     }
 

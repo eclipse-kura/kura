@@ -36,7 +36,6 @@ import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.driver.ChannelDescriptor;
 import org.eclipse.kura.driver.Driver;
 import org.eclipse.kura.driver.PreparedRead;
-import org.eclipse.kura.driver.gpio.localization.GPIOMessages;
 import org.eclipse.kura.gpio.GPIOService;
 import org.eclipse.kura.gpio.KuraClosedDeviceException;
 import org.eclipse.kura.gpio.KuraGPIODeviceException;
@@ -46,7 +45,6 @@ import org.eclipse.kura.gpio.KuraGPIOPin;
 import org.eclipse.kura.gpio.KuraGPIOTrigger;
 import org.eclipse.kura.gpio.KuraUnavailableDeviceException;
 import org.eclipse.kura.gpio.PinStatusListener;
-import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
@@ -72,9 +70,8 @@ import org.slf4j.LoggerFactory;
 public final class GPIODriver implements Driver, ConfigurableComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(GPIODriver.class);
-    private static final GPIOMessages message = LocalizationAdapter.adapt(GPIOMessages.class);
-    private static final String WRITE_FAILED_MESSAGE = message.writeFailed();
-    private static final String READ_FAILED_MESSAGE = message.readFailed();
+    private static final String WRITE_FAILED_MESSAGE = "GPIO write operation failed";
+    private static final String READ_FAILED_MESSAGE = "GPIO read operation failed";
 
     private Set<String> gpioNames;
     private Set<GPIOListener> gpioListeners;
@@ -114,7 +111,7 @@ public final class GPIODriver implements Driver, ConfigurableComponent {
             try {
                 pin.removePinStatusListener(gpioListener);
             } catch (KuraClosedDeviceException | IOException e) {
-                logger.error(message.errorRemovingListener(pin.getName()), e);
+                logger.error("Unable to unset listener for pin {}", pin.getName(), e);
             }
         }
         this.gpioListeners.clear();
@@ -126,7 +123,7 @@ public final class GPIODriver implements Driver, ConfigurableComponent {
                     try {
                         pin.close();
                     } catch (IOException e) {
-                        logger.error(message.errorClosingResource(pin.getName()), e);
+                        logger.error("Unable to close GPIO resource {}", pin.getName(), e);
                     }
                 }
             }
@@ -169,7 +166,7 @@ public final class GPIODriver implements Driver, ConfigurableComponent {
 
     @Override
     public synchronized PreparedRead prepareRead(List<ChannelRecord> channelRecords) {
-        requireNonNull(channelRecords, message.recordListNonNull());
+        requireNonNull(channelRecords, "Channel Record list cannot be null");
 
         GPIOPreparedRead preparedRead = new GPIOPreparedRead();
         preparedRead.channelRecords = channelRecords;
@@ -206,7 +203,7 @@ public final class GPIODriver implements Driver, ConfigurableComponent {
                 try {
                     pin.addPinStatusListener(gpioListener);
                 } catch (KuraClosedDeviceException | IOException e) {
-                    logger.error(message.errorSettingListener(name), e);
+                    logger.error("Unable to set listener for pin {}", name, e);
                 }
             }
         }
@@ -222,7 +219,7 @@ public final class GPIODriver implements Driver, ConfigurableComponent {
                     gpioListener.getPin().removePinStatusListener(gpioListener);
                     iterator.remove();
                 } catch (KuraClosedDeviceException | IOException e) {
-                    logger.error(message.errorRemovingListener(gpioListener.getPin().getName()), e);
+                    logger.error("Unable to unset listener for pin {}", gpioListener.getPin().getName(), e);
                 }
             }
         }
@@ -266,7 +263,7 @@ public final class GPIODriver implements Driver, ConfigurableComponent {
                     try {
                         pin.open();
                     } catch (KuraGPIODeviceException | KuraUnavailableDeviceException | IOException e) {
-                        logger.error(message.errorOpeningResource(pin.getName()), e);
+                        logger.error("Unable to open GPIO resource {}", pin.getName(), e);
                     }
                 }
                 break;
@@ -298,7 +295,7 @@ public final class GPIODriver implements Driver, ConfigurableComponent {
                 return Optional.empty();
             }
         } catch (final Exception ex) {
-            logger.error(message.errorValueTypeConversion(), ex);
+            logger.error("Error while converting the retrieved value to the defined typed", ex);
             return Optional.empty();
         }
     }
@@ -333,7 +330,7 @@ public final class GPIODriver implements Driver, ConfigurableComponent {
                 return TypedValues.newBooleanValue(false);
             }
         } catch (final Exception ex) {
-            logger.error(message.errorValueTypeConversion(), ex);
+            logger.error("Error while converting the retrieved value to the defined typed", ex);
             return TypedValues.newBooleanValue(false);
         }
     }
@@ -349,7 +346,8 @@ public final class GPIODriver implements Driver, ConfigurableComponent {
                     Boolean value = pin.getValue();
                     final Optional<TypedValue<?>> typedValue = getTypedValue(requestInfo.dataType, value);
                     if (!typedValue.isPresent()) {
-                        record.setChannelStatus(new ChannelStatus(FAILURE, message.errorValueTypeConversion(), null));
+                        record.setChannelStatus(new ChannelStatus(FAILURE,
+                                "Error while converting the retrieved value to the defined typed", null));
                         record.setTimestamp(System.currentTimeMillis());
                         return;
                     }
@@ -390,7 +388,7 @@ public final class GPIODriver implements Driver, ConfigurableComponent {
             final DataType dataType = record.getValueType();
 
             if (isNull(dataType)) {
-                fail(record, message.errorRetrievingValueType());
+                fail(record, "Error while retrieving value type");
                 return Optional.empty();
             }
 
@@ -460,7 +458,8 @@ public final class GPIODriver implements Driver, ConfigurableComponent {
             ChannelRecord record = ChannelRecord.createReadRecord(this.channelName, this.dataType);
             final Optional<TypedValue<?>> typedValue = getTypedValue(this.dataType, value);
             if (!typedValue.isPresent()) {
-                record.setChannelStatus(new ChannelStatus(FAILURE, message.errorValueTypeConversion(), null));
+                record.setChannelStatus(new ChannelStatus(FAILURE,
+                        "Error while converting the retrieved value to the defined typed", null));
                 record.setTimestamp(System.currentTimeMillis());
                 return;
             }

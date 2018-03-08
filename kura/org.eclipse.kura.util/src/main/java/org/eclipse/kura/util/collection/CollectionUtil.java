@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -27,17 +27,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.eclipse.kura.localization.LocalizationAdapter;
-import org.eclipse.kura.localization.resources.UtilMessages;
-
 /**
  * The Class CollectionUtil contains all necessary static factory methods to
  * deal with different collection instances
  */
 public final class CollectionUtil {
-
-    /** Localization Resource. */
-    private static final UtilMessages s_message = LocalizationAdapter.adapt(UtilMessages.class);
 
     /** Constructor */
     private CollectionUtil() {
@@ -55,7 +49,7 @@ public final class CollectionUtil {
      *         from the {@link Dictionary}
      */
     public static <K, V> Map<K, V> dictionaryToMap(final Dictionary<K, V> dictionary) {
-        requireNonNull(dictionary, s_message.dictionaryNonNull());
+        requireNonNull(dictionary, "Dictionary cannot be null.");
         final Map<K, V> map = new HashMap<K, V>(dictionary.size());
         final Enumeration<K> keys = dictionary.keys();
         while (keys.hasMoreElements()) {
@@ -91,7 +85,7 @@ public final class CollectionUtil {
      */
     public static <E> List<E> newArrayListWithCapacity(final int initialArraySize) {
         if (initialArraySize < 0) {
-            throw new IllegalArgumentException(s_message.initialArraySize());
+            throw new IllegalArgumentException("Initial Array size must not be less than 0.");
         }
         return new ArrayList<E>(initialArraySize);
     }
@@ -123,7 +117,7 @@ public final class CollectionUtil {
      *             if argument is null
      */
     public static <K, V> ConcurrentMap<K, V> newConcurrentHashMap(final Map<K, V> map) {
-        requireNonNull(map, s_message.mapNonNull());
+        requireNonNull(map, "Map cannot be null.");
         return new ConcurrentHashMap<K, V>(map);
     }
 
@@ -166,7 +160,7 @@ public final class CollectionUtil {
      *             if argument is null
      */
     public static <K, V> Map<K, V> newHashMap(final Map<? extends K, ? extends V> map) {
-        requireNonNull(map, s_message.mapNonNull());
+        requireNonNull(map, "Map cannot be null.");
         return new HashMap<K, V>(map);
     }
 
@@ -194,7 +188,7 @@ public final class CollectionUtil {
      *             if argument is null
      */
     public static <E> Set<E> newHashSet(final Collection<? extends E> collection) {
-        requireNonNull(collection, s_message.collectionNonNull());
+        requireNonNull(collection, "Collection cannot be null.");
         return new HashSet<E>(collection);
     }
 

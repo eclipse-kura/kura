@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -32,11 +32,8 @@ import org.eclipse.kura.internal.asset.cloudlet.serialization.request.ReadReques
 import org.eclipse.kura.internal.asset.cloudlet.serialization.request.WriteRequest;
 import org.eclipse.kura.internal.asset.cloudlet.serialization.response.ChannelOperationResponse;
 import org.eclipse.kura.internal.asset.cloudlet.serialization.response.MetadataResponse;
-import org.eclipse.kura.localization.LocalizationAdapter;
-import org.eclipse.kura.localization.resources.AssetCloudletMessages;
 import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
-import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
@@ -54,8 +51,6 @@ public final class AssetCloudlet extends Cloudlet {
     private static final String APP_ID = "ASSET-V1";
 
     private static final Logger logger = LoggerFactory.getLogger(AssetCloudlet.class);
-
-    private static final AssetCloudletMessages message = LocalizationAdapter.adapt(AssetCloudletMessages.class);
 
     private Map<String, Asset> assets;
 
@@ -76,7 +71,7 @@ public final class AssetCloudlet extends Cloudlet {
     }
 
     protected synchronized void bindCloudService(final CloudService cloudService) {
-        if (this.getCloudService() == null) {
+        if (getCloudService() == null) {
             super.setCloudService(cloudService);
         }
     }
@@ -88,33 +83,30 @@ public final class AssetCloudlet extends Cloudlet {
     }
 
     protected synchronized void unbindCloudService(final CloudService cloudService) {
-        if (this.getCloudService() == cloudService) {
+        if (getCloudService() == cloudService) {
             super.unsetCloudService(cloudService);
         }
     }
 
     @Override
     protected synchronized void activate(final ComponentContext componentContext) {
-        logger.debug(message.activating());
+        logger.debug("Activating Asset Cloudlet...");
         super.activate(componentContext);
-        try {
-            this.assetTrackerCustomizer = new AssetTrackerCustomizer(componentContext.getBundleContext(),
-                    this.assetService);
-            this.assetServiceTracker = new ServiceTracker<Asset, Asset>(componentContext.getBundleContext(),
-                    Asset.class.getName(), this.assetTrackerCustomizer);
-            this.assetServiceTracker.open();
-        } catch (final InvalidSyntaxException e) {
-            logger.error(message.activationFailed(e));
-        }
-        logger.debug(message.activatingDone());
+
+        this.assetTrackerCustomizer = new AssetTrackerCustomizer(componentContext.getBundleContext(),
+                this.assetService);
+        this.assetServiceTracker = new ServiceTracker<>(componentContext.getBundleContext(),
+                Asset.class.getName(), this.assetTrackerCustomizer);
+        this.assetServiceTracker.open();
+        logger.debug("Activating Asset Cloudlet...Done");
     }
 
     @Override
     protected synchronized void deactivate(final ComponentContext componentContext) {
-        logger.debug(message.deactivating());
+        logger.debug("Deactivating Asset Cloudlet...");
         super.deactivate(componentContext);
         this.assetServiceTracker.close();
-        logger.debug(message.deactivatingDone());
+        logger.debug("Deactivating Asset Cloudlet...Done");
     }
 
     private void findAssets() {
@@ -148,14 +140,14 @@ public final class AssetCloudlet extends Cloudlet {
             final KuraResponsePayload respPayload) {
         final String[] resources = reqTopic.getResources();
 
-        logger.info(message.cloudGETReqReceived());
+        logger.info("Cloudlet GET Request received on the Asset Cloudlet...");
 
         if (resources.length != 1 || !ASSET_TOPIC_RESOURCE.equals(resources[0])) {
             respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
             return;
         }
 
-        this.findAssets();
+        findAssets();
 
         JsonArray request;
 
@@ -185,7 +177,7 @@ public final class AssetCloudlet extends Cloudlet {
     @Override
     protected void doExec(final CloudletTopic reqTopic, final KuraRequestPayload reqPayload,
             final KuraResponsePayload respPayload) {
-        logger.info(message.cloudEXECReqReceived());
+        logger.info("Cloudlet EXEC Request received on the Asset Cloudlet...");
         final String[] resources = reqTopic.getResources();
 
         if (resources.length != 1) {
@@ -217,7 +209,7 @@ public final class AssetCloudlet extends Cloudlet {
             }
         } catch (Exception e) {
             response.reportAllFailed(assetName, channelNames.iterator(),
-                    Optional.ofNullable(e.getMessage()).orElse(message.unknownError()));
+                    Optional.ofNullable(e.getMessage()).orElse("Unknown error"));
         }
     }
 
@@ -231,14 +223,14 @@ public final class AssetCloudlet extends Cloudlet {
             } catch (Exception e) {
                 response.reportAllFailed(assetName,
                         asset.getAssetConfiguration().getAssetChannels().keySet().iterator(),
-                        Optional.ofNullable(e.getMessage()).orElse(message.unknownError()));
+                        Optional.ofNullable(e.getMessage()).orElse("Unknown error"));
             }
         }
         return response;
     }
 
     private void read(final KuraRequestPayload reqPayload, final KuraResponsePayload respPayload) {
-        this.findAssets();
+        findAssets();
 
         JsonArray request;
 
@@ -285,12 +277,12 @@ public final class AssetCloudlet extends Cloudlet {
         } catch (Exception e) {
             response.reportAllFailed(assetName,
                     channelRecords.stream().map((record) -> record.getChannelName()).iterator(),
-                    Optional.ofNullable(e.getMessage()).orElse(message.unknownError()));
+                    Optional.ofNullable(e.getMessage()).orElse("Unknown error"));
         }
     }
 
     private void write(final KuraRequestPayload reqPayload, final KuraResponsePayload respPayload) {
-        this.findAssets();
+        findAssets();
 
         List<WriteRequest> writeRequests;
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates and others
  *
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
@@ -41,8 +41,6 @@ import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.driver.ChannelDescriptor;
 import org.eclipse.kura.driver.Driver;
 import org.eclipse.kura.driver.PreparedRead;
-import org.eclipse.kura.driver.ble.sensortag.localization.SensorTagMessages;
-import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
@@ -72,7 +70,6 @@ import org.slf4j.LoggerFactory;
 public final class SensorTagDriver implements Driver, ConfigurableComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(SensorTagDriver.class);
-    private static final SensorTagMessages message = LocalizationAdapter.adapt(SensorTagMessages.class);
 
     private static final int TIMEOUT = 5;
 
@@ -118,7 +115,7 @@ public final class SensorTagDriver implements Driver, ConfigurableComponent {
             try {
                 this.bluetoothLeAdapter.stopDiscovery();
             } catch (KuraException e) {
-                logger.error(message.errorStopDiscovery(), e);
+                logger.error("Failed to stop discovery", e);
             }
         }
 
@@ -219,7 +216,7 @@ public final class SensorTagDriver implements Driver, ConfigurableComponent {
     }
 
     private void extractProperties(final Map<String, Object> properties) {
-        requireNonNull(properties, message.propertiesNonNull());
+        requireNonNull(properties, "Properties cannot be null");
         this.options = new SensorTagOptions(properties);
     }
 
@@ -249,7 +246,7 @@ public final class SensorTagDriver implements Driver, ConfigurableComponent {
                 return Optional.empty();
             }
         } catch (final Exception ex) {
-            logger.error(message.errorValueTypeConversion(), ex);
+            logger.error("Error while converting the retrieved value to the defined typed", ex);
             return Optional.empty();
         }
     }
@@ -262,7 +259,8 @@ public final class SensorTagDriver implements Driver, ConfigurableComponent {
             Object readResult = getReadResult(requestInfo.sensorName, sensorTag);
             final Optional<TypedValue<?>> typedValue = getTypedValue(requestInfo.dataType, readResult);
             if (!typedValue.isPresent()) {
-                record.setChannelStatus(new ChannelStatus(FAILURE, message.errorValueTypeConversion(), null));
+                record.setChannelStatus(new ChannelStatus(FAILURE,
+                        "Error while converting the retrieved value to the defined typed", null));
                 record.setTimestamp(System.currentTimeMillis());
                 return;
             }
@@ -270,9 +268,9 @@ public final class SensorTagDriver implements Driver, ConfigurableComponent {
             record.setChannelStatus(new ChannelStatus(SUCCESS));
             record.setTimestamp(System.currentTimeMillis());
         } catch (KuraException e) {
-            record.setChannelStatus(new ChannelStatus(ChannelFlag.FAILURE, message.readFailed(), null));
+            record.setChannelStatus(new ChannelStatus(ChannelFlag.FAILURE, "SensortTag Read Operation Failed", null));
             record.setTimestamp(System.currentTimeMillis());
-            logger.warn(message.readFailed());
+            logger.warn("SensortTag Read Operation Failed");
             return;
         }
     }
@@ -362,14 +360,14 @@ public final class SensorTagDriver implements Driver, ConfigurableComponent {
         try {
             sensorTag = getSensorTag(requestInfo);
         } catch (KuraBluetoothIOException e) {
-            record.setChannelStatus(new ChannelStatus(FAILURE, message.writeFailed(), null));
+            record.setChannelStatus(new ChannelStatus(FAILURE, "SensortTag Write Operation Failed", null));
             logger.error("IO Exception encountered while connecting.");
             return;
         }
 
         final TypedValue<?> value = record.getValue();
         if (!value.getType().equals(DataType.BOOLEAN)) {
-            record.setChannelStatus(new ChannelStatus(FAILURE, message.writeFailed(), null));
+            record.setChannelStatus(new ChannelStatus(FAILURE, "SensortTag Write Operation Failed", null));
             logger.error("Only boolean types are allowed for this asset");
             return;
         }
@@ -437,7 +435,7 @@ public final class SensorTagDriver implements Driver, ConfigurableComponent {
             try {
                 sensorTagAddress = SensorTagChannelDescriptor.getsensorTagAddress(channelConfig);
             } catch (final Exception e) {
-                fail(record, message.errorRetrievingAddress());
+                fail(record, "Error while retrieving SensortTag address");
                 logger.error("Error retrieving SensorTag Address", e);
                 return Optional.empty();
             }
@@ -445,7 +443,7 @@ public final class SensorTagDriver implements Driver, ConfigurableComponent {
             try {
                 sensorName = SensorTagChannelDescriptor.getSensorName(channelConfig);
             } catch (final Exception e) {
-                fail(record, message.errorRetrievingSensorName());
+                fail(record, "Error while retrieving sensor name");
                 logger.error("Error retrieving Sensor name", e);
                 return Optional.empty();
             }
@@ -453,7 +451,7 @@ public final class SensorTagDriver implements Driver, ConfigurableComponent {
             final DataType dataType = record.getValueType();
 
             if (isNull(dataType)) {
-                fail(record, message.errorRetrievingValueType());
+                fail(record, "Error while retrieving value type");
                 return Optional.empty();
             }
 
@@ -463,7 +461,7 @@ public final class SensorTagDriver implements Driver, ConfigurableComponent {
 
     @Override
     public PreparedRead prepareRead(List<ChannelRecord> channelRecords) {
-        requireNonNull(channelRecords, message.recordListNonNull());
+        requireNonNull(channelRecords, "Channel Record list cannot be null");
 
         SensorTagPreparedRead preparedRead = new SensorTagPreparedRead();
         preparedRead.channelRecords = channelRecords;

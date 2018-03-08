@@ -26,8 +26,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-import org.eclipse.kura.localization.LocalizationAdapter;
-import org.eclipse.kura.localization.resources.WireMessages;
 import org.eclipse.kura.util.collection.CollectionUtil;
 import org.eclipse.kura.wire.WireComponent;
 import org.eclipse.kura.wire.WireEnvelope;
@@ -51,8 +49,6 @@ final class WireSupportImpl implements WireSupport, MultiportWireSupport {
 
     private static final Logger logger = LoggerFactory.getLogger(WireSupportImpl.class);
 
-    private static final WireMessages message = LocalizationAdapter.adapt(WireMessages.class);
-
     private final EventAdmin eventAdmin;
 
     private final List<ReceiverPort> receiverPorts;
@@ -71,8 +67,8 @@ final class WireSupportImpl implements WireSupport, MultiportWireSupport {
 
     WireSupportImpl(final WireComponent wireComponent, final String servicePid, final String kuraServicePid,
             final EventAdmin eventAdmin, int inputPortCount, int outputPortCount) {
-        requireNonNull(wireComponent, message.wireSupportedComponentNonNull());
-        requireNonNull(eventAdmin, message.eventAdminNonNull());
+        requireNonNull(wireComponent, "Wire component cannot be null");
+        requireNonNull(eventAdmin, "Event Admin cannot be null");
         requireNonNull(servicePid, "service pid cannot be null");
         requireNonNull(kuraServicePid, "kura service pid cannot be null");
 
@@ -140,7 +136,7 @@ final class WireSupportImpl implements WireSupport, MultiportWireSupport {
     /** {@inheritDoc} */
     @Override
     public synchronized void emit(final List<WireRecord> wireRecords) {
-        requireNonNull(wireRecords, message.wireRecordsNonNull());
+        requireNonNull(wireRecords, "Wire Records cannot be null");
         final WireEnvelope envelope = createWireEnvelope(wireRecords);
         for (EmitterPort emitterPort : this.emitterPorts) {
             emitterPort.emit(envelope);
@@ -176,7 +172,7 @@ final class WireSupportImpl implements WireSupport, MultiportWireSupport {
     @Override
     public void updated(final Wire wire, final Object value) {
         if (wire == null) {
-            logger.warn("{}", message.wireNonNull());
+            logger.warn("Wire cannot be null");
             return;
         }
         this.updateFunc.accept(wire, (WireEnvelope) value);

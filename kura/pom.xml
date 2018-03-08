@@ -53,11 +53,8 @@
         <module>org.eclipse.kura.driver.opcua.localization</module>
         <module>org.eclipse.kura.driver.opcua.provider</module>
         <module>org.eclipse.kura.driver.block</module>
-        <module>org.eclipse.kura.driver.s7plc.localization</module>
         <module>org.eclipse.kura.driver.s7plc.provider</module>
-        <module>org.eclipse.kura.driver.ble.sensortag.localization</module>
         <module>org.eclipse.kura.driver.ble.sensortag.provider</module>
-        <module>org.eclipse.kura.driver.gpio.localization</module>
         <module>org.eclipse.kura.driver.gpio.provider</module>
         <module>org.eclipse.kura.linux.bluetooth</module>
         <module>org.eclipse.kura.ble.provider</module>
@@ -79,7 +76,6 @@
         <module>org.eclipse.kura.protocol.modbus</module>
         <module>org.eclipse.kura.stress</module>
         <module>org.eclipse.kura.util</module>
-        <module>org.eclipse.kura.wire.script.filter.localization</module>
         <module>org.eclipse.kura.wire.script.filter.provider</module>
         <module>org.eclipse.kura.wire.h2db.component.provider</module>
         <module>org.eclipse.kura.wire.component.provider</module>

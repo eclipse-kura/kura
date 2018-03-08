@@ -9,8 +9,6 @@ Bundle-Category: Kura Wires
 Import-Package: org.eclipse.kura;version="[1.2,2.0)",
  org.eclipse.kura.configuration;version="[1.1,2.0)",
  org.eclipse.kura.db;version="[1.1,2.0)",
- org.eclipse.kura.localization;version="1.0.0",
- org.eclipse.kura.localization.resources;version="1.1.0",
  org.eclipse.kura.type;version="[1.0,2.0)",
  org.eclipse.kura.util.collection;version="[1.0,2.0)",
  org.eclipse.kura.wire;version="[1.0,1.1)",

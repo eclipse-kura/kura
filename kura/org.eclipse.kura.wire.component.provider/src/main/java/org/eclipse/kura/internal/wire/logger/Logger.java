@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -16,15 +16,13 @@ package org.eclipse.kura.internal.wire.logger;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
-import static org.eclipse.kura.internal.wire.logger.LoggingVerbosity.VERBOSE;
 import static org.eclipse.kura.internal.wire.logger.LoggingVerbosity.QUIET;
+import static org.eclipse.kura.internal.wire.logger.LoggingVerbosity.VERBOSE;
 
 import java.util.Map;
 import java.util.Map.Entry;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
-import org.eclipse.kura.localization.LocalizationAdapter;
-import org.eclipse.kura.localization.resources.WireMessages;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.wire.WireEnvelope;
 import org.eclipse.kura.wire.WireHelperService;
@@ -42,8 +40,6 @@ import org.slf4j.LoggerFactory;
 public final class Logger implements WireReceiver, ConfigurableComponent {
 
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(Logger.class);
-
-    private static final WireMessages message = LocalizationAdapter.adapt(WireMessages.class);
 
     private static final String DEFAULT_LOG_LEVEL = QUIET.name();
 
@@ -88,10 +84,10 @@ public final class Logger implements WireReceiver, ConfigurableComponent {
      *            the properties
      */
     protected void activate(final ComponentContext componentContext, final Map<String, Object> properties) {
-        logger.debug(message.activatingLogger());
+        logger.debug("Activating Logger Wire Component...");
         this.properties = properties;
         this.wireSupport = this.wireHelperService.newWireSupport(this);
-        logger.debug(message.activatingLoggerDone());
+        logger.debug("Activating Logger Wire Component... Done");
     }
 
     /**
@@ -101,9 +97,9 @@ public final class Logger implements WireReceiver, ConfigurableComponent {
      *            the updated properties
      */
     public void updated(final Map<String, Object> properties) {
-        logger.debug(message.updatingLogger());
+        logger.debug("Updating Logger Wire Component...");
         this.properties = properties;
-        logger.debug(message.updatingLoggerDone());
+        logger.debug("Updating Logger Wire Component... Done");
     }
 
     /**
@@ -113,16 +109,16 @@ public final class Logger implements WireReceiver, ConfigurableComponent {
      *            the component context
      */
     protected void deactivate(final ComponentContext componentContext) {
-        logger.debug(message.deactivatingLogger());
+        logger.debug("Deactivating Logger Wire Component...");
         // remained for debugging purposes
-        logger.debug(message.deactivatingLoggerDone());
+        logger.debug("Deactivating Logger Wire Component... Done");
     }
 
     /** {@inheritDoc} */
     @Override
     public void onWireReceive(final WireEnvelope wireEnvelope) {
-        requireNonNull(wireEnvelope, message.wireEnvelopeNonNull());
-        logger.info(message.wireEnvelopeReceived(wireEnvelope.getEmitterPid()));
+        requireNonNull(wireEnvelope, "Wire Envelope cannot be null");
+        logger.info("Received WireEnvelope from {}", wireEnvelope.getEmitterPid());
 
         if (VERBOSE.name().equals(getLoggingLevel())) {
             logger.info("Record List content: ");
@@ -149,7 +145,7 @@ public final class Logger implements WireReceiver, ConfigurableComponent {
     /** {@inheritDoc} */
     @Override
     public void producersConnected(final Wire[] wires) {
-        requireNonNull(wires, message.wiresNonNull());
+        requireNonNull(wires, "Wires cannot be null");
         this.wireSupport.producersConnected(wires);
     }
 

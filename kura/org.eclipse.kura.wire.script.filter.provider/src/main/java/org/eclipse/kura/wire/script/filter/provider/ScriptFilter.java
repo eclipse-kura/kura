@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -22,7 +22,6 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
-import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
@@ -32,7 +31,6 @@ import org.eclipse.kura.wire.WireHelperService;
 import org.eclipse.kura.wire.WireReceiver;
 import org.eclipse.kura.wire.WireRecord;
 import org.eclipse.kura.wire.WireSupport;
-import org.eclipse.kura.wire.script.filter.localization.ScriptFilterMessages;
 import org.osgi.service.component.ComponentException;
 import org.osgi.service.wireadmin.Wire;
 import org.slf4j.Logger;
@@ -43,7 +41,6 @@ import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 public class ScriptFilter implements WireEmitter, WireReceiver, ConfigurableComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(ScriptFilter.class);
-    private static final ScriptFilterMessages message = LocalizationAdapter.adapt(ScriptFilterMessages.class);
 
     private static final String SCRIPT_PROPERTY_KEY = "script";
     private static final String SCRIPT_CONTEXT_DROP_PROPERTY_KEY = "script.context.drop";
@@ -69,7 +66,7 @@ public class ScriptFilter implements WireEmitter, WireReceiver, ConfigurableComp
     }
 
     public void activate(final Map<String, Object> properties) throws ComponentException {
-        logger.info(message.activating());
+        logger.info("Activating Script Filter...");
         this.wireSupport = this.wireHelperService.newWireSupport(this);
 
         this.scriptEngine = createEngine();
@@ -77,21 +74,21 @@ public class ScriptFilter implements WireEmitter, WireReceiver, ConfigurableComp
 
         updated(properties);
 
-        logger.info(message.activatingDone());
+        logger.info("ActivatingScript Filter... Done");
     }
 
     public void deactivate() {
-        logger.info(message.deactivating());
-        logger.info(message.deactivatingDone());
+        logger.info("Deactivating Script Filter...");
+        logger.info("Deactivating Script Filter... Done");
     }
 
     public synchronized void updated(final Map<String, Object> properties) {
-        logger.info(message.updating());
+        logger.info("Updating Script Filter...");
 
         final String scriptSource = (String) properties.get(SCRIPT_PROPERTY_KEY);
 
         if (scriptSource == null) {
-            logger.warn(message.errorScriptSourceNull());
+            logger.warn("Script source is null");
             return;
         }
 
@@ -99,20 +96,20 @@ public class ScriptFilter implements WireEmitter, WireReceiver, ConfigurableComp
         try {
             this.script = ((Compilable) this.scriptEngine).compile(scriptSource);
         } catch (ScriptException e) {
-            logger.warn(message.errorScriptCompileFalied(), e);
+            logger.warn("Failed to compile script", e);
         }
 
         if (this.bindings == null || (Boolean) properties.getOrDefault(SCRIPT_CONTEXT_DROP_PROPERTY_KEY, false)) {
             this.bindings = createBindings();
         }
 
-        logger.info(message.updatingDone());
+        logger.info("Updating Script Filter... Done");
     }
 
     @Override
     public synchronized void onWireReceive(WireEnvelope wireEnvelope) {
         if (this.script == null) {
-            logger.warn(message.errorScriptCompileFalied());
+            logger.warn("Failed to compile script");
             return;
         }
 
@@ -132,7 +129,7 @@ public class ScriptFilter implements WireEmitter, WireReceiver, ConfigurableComp
                 this.wireSupport.emit(result);
             }
         } catch (Exception e) {
-            logger.warn(message.errorExecutingScript(), e);
+            logger.warn("Failed to execute script", e);
         }
     }
 
@@ -141,7 +138,7 @@ public class ScriptFilter implements WireEmitter, WireReceiver, ConfigurableComp
         ScriptEngine scriptEngine = factory.getScriptEngine(className -> false);
 
         if (scriptEngine == null) {
-            throw new IllegalStateException(message.errorGettingScriptEngine());
+            throw new IllegalStateException("Failed to get script engine");
         }
 
         final Bindings engineScopeBindings = scriptEngine.getBindings(ScriptContext.ENGINE_SCOPE);

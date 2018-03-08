@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -15,17 +15,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 
-import org.eclipse.kura.localization.LocalizationAdapter;
-import org.eclipse.kura.localization.resources.UtilMessages;
-
 /**
  * The Class TypeUtil contains all necessary static factory methods for
  * manipulating java type instances
  */
 public final class TypeUtil {
-
-    /** Localization Resource. */
-    private static final UtilMessages s_message = LocalizationAdapter.adapt(UtilMessages.class);
 
     /** Constructor */
     private TypeUtil() {
@@ -59,7 +53,7 @@ public final class TypeUtil {
      *             if the argument is null
      */
     public static byte[] objectToByteArray(final Object value) throws IOException {
-        requireNonNull(value, s_message.valueNonNull());
+        requireNonNull(value, "Value cannot be null.");
         final ByteArrayOutputStream b = new ByteArrayOutputStream();
         final ObjectOutputStream o = new ObjectOutputStream(b);
         o.writeObject(value);

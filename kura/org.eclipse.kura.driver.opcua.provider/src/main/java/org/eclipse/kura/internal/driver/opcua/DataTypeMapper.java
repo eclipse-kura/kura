@@ -112,20 +112,20 @@ public final class DataTypeMapper {
                 + value.getClass() + " " + targetType.name());
     }
 
-    private static byte[] toByteArray(Object calue) {
-        if (calue instanceof byte[]) {
-            return (byte[]) calue;
-        } else if (calue instanceof ByteString) {
-            return ((ByteString) calue).bytesOrEmpty();
-        } else if (calue instanceof Byte[]) {
-            final Byte[] value = (Byte[]) calue;
+    private static byte[] toByteArray(Object objectValue) {
+        if (objectValue instanceof byte[]) {
+            return (byte[]) objectValue;
+        } else if (objectValue instanceof ByteString) {
+            return ((ByteString) objectValue).bytesOrEmpty();
+        } else if (objectValue instanceof Byte[]) {
+            final Byte[] value = (Byte[]) objectValue;
             final byte[] result = new byte[value.length];
             for (int i = 0; i < value.length; i++) {
                 result[i] = value[i];
             }
             return result;
-        } else if (calue instanceof UByte[]) {
-            final UByte[] value = (UByte[]) calue;
+        } else if (objectValue instanceof UByte[]) {
+            final UByte[] value = (UByte[]) objectValue;
             final byte[] result = new byte[value.length];
             for (int i = 0; i < value.length; i++) {
                 result[i] = (byte) (value[i].intValue() & 0xff);

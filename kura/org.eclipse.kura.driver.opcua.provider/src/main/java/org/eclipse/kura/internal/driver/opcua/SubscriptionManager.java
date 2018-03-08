@@ -128,7 +128,7 @@ public class SubscriptionManager implements SubscriptionListener, ListenerRegist
 
         @Override
         public CompletableFuture<Void> unsubscribe() {
-            logger.debug("Unsubscrbing..");
+            logger.debug("Unsubscribing..");
             final OpcUaSubscriptionManager manager = client.getSubscriptionManager();
             manager.removeSubscriptionListener(SubscriptionManager.this);
             for (final MonitoredItemHandler handler : monitoredItemHandlers.values()) {
@@ -139,7 +139,7 @@ public class SubscriptionManager implements SubscriptionListener, ListenerRegist
                 if (e != null) {
                     logger.debug("Failed to delete subscription", e);
                 }
-                logger.debug("Unsubscrbing..done");
+                logger.debug("Unsubscribing..done");
                 synchronized (SubscriptionManager.this) {
                     state = new Unsubscribed();
                 }

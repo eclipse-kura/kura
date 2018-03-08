@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc
  *******************************************************************************/
 package org.eclipse.kura.core.configuration.upgrade;
 
@@ -66,8 +67,13 @@ public class ConfigurationUpgrade {
     private static final String SEPARATOR = ".";
     private static final String PATTERN = "%s.";
 
-    public static XmlComponentConfigurations upgrade(XmlComponentConfigurations xmlConfigs,
-            BundleContext bundleContext) {
+    public static XmlComponentConfigurations upgrade(final XmlComponentConfigurations xmlConfigs,
+            final BundleContext bundleContext) {
+
+        if (xmlConfigs == null) {
+            return null;
+        }
+
         List<ComponentConfiguration> result = new ArrayList<>();
 
         for (ComponentConfiguration config : xmlConfigs.getConfigurations()) {

@@ -116,11 +116,11 @@ public class DbDataStore implements DataStore {
         this.sqlDropAllInFlightMessages = "UPDATE " + this.table
                 + " SET droppedOn = ? WHERE publishedOn IS NOT NULL AND qos > 0 AND confirmedOn IS NULL;";
         this.sqlDeleteDroppedMessages = "DELETE FROM " + this.table
-                + " WHERE droppedOn <= DATEADD('ss', -?, NOW()) AND droppedOn IS NOT NULL;";
+                + " WHERE droppedOn <= DATEADD('ss', -?, ?) AND droppedOn IS NOT NULL;";
         this.sqlDeleteConfirmedMessages = "DELETE FROM " + this.table
-                + " WHERE confirmedOn <= DATEADD('ss', -?, NOW()) AND confirmedOn IS NOT NULL;";
+                + " WHERE confirmedOn <= DATEADD('ss', -?, ?) AND confirmedOn IS NOT NULL;";
         this.sqlDeletePublishedMessages = "DELETE FROM " + this.table
-                + " WHERE qos = 0 AND publishedOn <= DATEADD('ss', -?, NOW()) AND publishedOn IS NOT NULL;";
+                + " WHERE qos = 0 AND publishedOn <= DATEADD('ss', -?, ?) AND publishedOn IS NOT NULL;";
         this.sqlDuplicateCount = "SELECT count(*) FROM (SELECT id, COUNT(id) FROM " + this.table
                 + " GROUP BY id HAVING (COUNT(id) > 1)) dups;";
         this.sqlDropPrimaryKey = "ALTER TABLE " + this.table + " DROP PRIMARY KEY;";
@@ -451,14 +451,15 @@ public class DbDataStore implements DataStore {
 
     @Override
     public synchronized void deleteStaleMessages(int purgeAge) throws KuraStoreException {
+        final Timestamp now = new Timestamp(System.currentTimeMillis());
         // Delete dropped messages (published with QoS > 0)
-        execute(this.sqlDeleteDroppedMessages, purgeAge);
+        executeDeleteMessagesQuery(this.sqlDeleteDroppedMessages, now, purgeAge);
 
         // Delete stale confirmed messages (published with QoS > 0)
-        execute(this.sqlDeleteConfirmedMessages, purgeAge);
+        executeDeleteMessagesQuery(this.sqlDeleteConfirmedMessages, now, purgeAge);
 
         // Delete stale published messages with QoS == 0
-        execute(this.sqlDeletePublishedMessages, purgeAge);
+        executeDeleteMessagesQuery(this.sqlDeletePublishedMessages, now, purgeAge);
     }
 
     @Override
@@ -588,6 +589,28 @@ public class DbDataStore implements DataStore {
             for (int i = 0; i < params.length; i++) {
                 stmt.setInt(1 + i, params[i]);
             }
+            stmt.execute();
+            conn.commit();
+        } catch (SQLException e) {
+            rollback(conn);
+            throw new KuraStoreException(e, "Cannot execute query");
+        } finally {
+            close(stmt);
+            close(conn);
+        }
+    }
+
+    private synchronized void executeDeleteMessagesQuery(String sql, Timestamp timestamp, int purgeAge)
+            throws KuraStoreException {
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        try {
+
+            conn = getConnection();
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, purgeAge);
+            stmt.setTimestamp(2, timestamp, this.utcCalendar);
+
             stmt.execute();
             conn.commit();
         } catch (SQLException e) {

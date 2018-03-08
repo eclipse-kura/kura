@@ -17,7 +17,6 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -177,7 +176,7 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
 
         this.cloudServiceTrackerCustomizer = new CloudSubscriberServiceTrackerCustomizer();
         initCloudServiceTracking();
-        logger.debug("Activating Cloud Subscriber Wire Component...Done");
+        logger.debug("Activating Cloud Subscriber Wire Component... Done");
     }
 
     /**
@@ -202,7 +201,7 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
         }
         initCloudServiceTracking();
 
-        logger.debug("Updating Cloud Subscriber Wire Component...Done");
+        logger.debug("Updating Cloud Subscriber Wire Component... Done");
     }
 
     /**
@@ -224,7 +223,7 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
         if (nonNull(this.cloudServiceTracker)) {
             this.cloudServiceTracker.close();
         }
-        logger.debug("Deactivating Cloud Subscriber Wire Component...Done");
+        logger.debug("Deactivating Cloud Subscriber Wire Component... Done");
     }
 
     /** {@inheritDoc} */
@@ -273,12 +272,8 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
     @Override
     public void onMessageArrived(String deviceId, String appTopic, KuraPayload msg, int qos, boolean retain) {
         if (nonNull(msg)) {
-            try {
-                List<WireRecord> records = buildWireRecord(msg);
-                this.wireSupport.emit(records);
-            } catch (final IOException e) {
-                logger.error("Error while building Wire Records.", e);
-            }
+            List<WireRecord> records = buildWireRecord(msg);
+            this.wireSupport.emit(records);
         }
     }
 
@@ -355,12 +350,10 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
      * @param payload
      *            the payload
      * @return a List of {@link WireRecord}s
-     * @throws IOException
-     *             if the byte array conversion fails
      * @throws NullPointerException
      *             if the payload provided is null
      */
-    private List<WireRecord> buildWireRecord(final KuraPayload payload) throws IOException {
+    private List<WireRecord> buildWireRecord(final KuraPayload payload) {
         requireNonNull(payload, "Payload cannot be null");
 
         final Map<String, Object> kuraPayloadProperties = payload.metrics();

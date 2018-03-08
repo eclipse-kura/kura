@@ -143,7 +143,7 @@ public class H2DbWireRecordStore implements WireEmitter, WireReceiver, Configura
         this.wireSupport = this.wireHelperService.newWireSupport(this);
 
         restartDbServiceTracker();
-        logger.debug("Activating DB Wire Record Store...Done");
+        logger.debug("Activating DB Wire Record Store... Done");
     }
 
     /**
@@ -166,7 +166,7 @@ public class H2DbWireRecordStore implements WireEmitter, WireReceiver, Configura
             restartDbServiceTracker();
         }
 
-        logger.debug("Updating DB Wire Record Store...Done");
+        logger.debug("Updating DB Wire Record Store... Done");
     }
 
     /**
@@ -178,7 +178,7 @@ public class H2DbWireRecordStore implements WireEmitter, WireReceiver, Configura
     protected void deactivate(final ComponentContext componentContext) {
         logger.debug("Deactivating DB Wire Record Store...");
         stopDbServiceTracker();
-        logger.debug("Deactivating DB Wire Record Store...Done");
+        logger.debug("Deactivating DB Wire Record Store... Done");
     }
 
     /**
@@ -219,7 +219,7 @@ public class H2DbWireRecordStore implements WireEmitter, WireReceiver, Configura
                 }
             }
         } catch (final SQLException sqlException) {
-            logger.error("Error in truncating the table {}....", sqlTableName, sqlException);
+            logger.error("Error in truncating the table {}...", sqlTableName, sqlException);
         } finally {
             this.dbHelper.close(rsTbls);
             this.dbHelper.close(conn);
@@ -543,9 +543,9 @@ public class H2DbWireRecordStore implements WireEmitter, WireReceiver, Configura
                         @Override
                         public H2DbService addingService(ServiceReference<H2DbService> reference) {
                             logger.info("H2DbService instance found");
-                            H2DbService H2DbService = componentContext.getBundleContext().getService(reference);
-                            bindDbService(H2DbService);
-                            return H2DbService;
+                            H2DbService h2DbService = componentContext.getBundleContext().getService(reference);
+                            bindDbService(h2DbService);
+                            return h2DbService;
                         }
 
                         @Override

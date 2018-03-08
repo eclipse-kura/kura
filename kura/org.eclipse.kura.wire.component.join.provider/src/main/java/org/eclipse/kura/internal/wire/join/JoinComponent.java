@@ -64,7 +64,7 @@ public final class JoinComponent implements MultiportWireReceiver, WireEmitter, 
 
         updated(properties);
 
-        logger.debug("Activating Join Wire Component...Done");
+        logger.debug("Activating Join Wire Component... Done");
     }
 
     public void updated(final Map<String, Object> properties) {
@@ -74,7 +74,7 @@ public final class JoinComponent implements MultiportWireReceiver, WireEmitter, 
         this.joinComponentOptions.getPortAggregatorFactory().build(wireSupport.getReceiverPorts())
                 .onWireReceive(this::onWireReceive);
 
-        logger.debug("Updating Join Wire Component...Done");
+        logger.debug("Updating Join Wire Component... Done");
     }
 
     private void onWireReceive(List<WireEnvelope> envelopes) {
@@ -112,7 +112,7 @@ public final class JoinComponent implements MultiportWireReceiver, WireEmitter, 
     protected void deactivate(final ComponentContext componentContext) {
         logger.debug("Deactivating Join Wire Component...");
         // remained for debugging purposes
-        logger.debug("Deactivating Join Wire Component...done");
+        logger.debug("Deactivating Join Wire Component... Done");
     }
 
     /** {@inheritDoc} */

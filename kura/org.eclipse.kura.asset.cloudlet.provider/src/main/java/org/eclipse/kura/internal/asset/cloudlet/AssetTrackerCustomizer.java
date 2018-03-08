@@ -18,7 +18,6 @@ import org.eclipse.kura.asset.Asset;
 import org.eclipse.kura.asset.AssetService;
 import org.eclipse.kura.util.collection.CollectionUtil;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
@@ -31,7 +30,7 @@ import org.slf4j.LoggerFactory;
 final class AssetTrackerCustomizer implements ServiceTrackerCustomizer<Asset, Asset> {
 
     /** The Logger instance. */
-    private static final Logger s_logger = LoggerFactory.getLogger(AssetTrackerCustomizer.class);
+    private static final Logger logger = LoggerFactory.getLogger(AssetTrackerCustomizer.class);
 
     /** The map of assets present in the OSGi service registry. */
     private final Map<String, Asset> assets;
@@ -47,12 +46,10 @@ final class AssetTrackerCustomizer implements ServiceTrackerCustomizer<Asset, As
      *
      * @param context
      *            the bundle context
-     * @throws InvalidSyntaxException
-     *             the invalid syntax exception
      * @throws NullPointerException
      *             if any of the arguments is null
      */
-    AssetTrackerCustomizer(final BundleContext context, final AssetService assetService) throws InvalidSyntaxException {
+    AssetTrackerCustomizer(final BundleContext context, final AssetService assetService) {
         requireNonNull(context, "Bundle context cannot be null");
         requireNonNull(context, "Asset service instance cannot be null");
 
@@ -65,9 +62,9 @@ final class AssetTrackerCustomizer implements ServiceTrackerCustomizer<Asset, As
     @Override
     public Asset addingService(final ServiceReference<Asset> reference) {
         final Asset service = this.context.getService(reference);
-        s_logger.info("Asset has been found by Asset Cloudlet Tracker....==> adding service");
+        logger.info("Asset has been found by Asset Cloudlet Tracker... ==> adding service");
         if (service != null) {
-            return this.addService(service);
+            return addService(service);
         }
         return null;
     }
@@ -100,8 +97,8 @@ final class AssetTrackerCustomizer implements ServiceTrackerCustomizer<Asset, As
     /** {@inheritDoc} */
     @Override
     public void modifiedService(final ServiceReference<Asset> reference, final Asset service) {
-        this.removedService(reference, service);
-        this.addingService(reference);
+        removedService(reference, service);
+        addingService(reference);
     }
 
     /** {@inheritDoc} */
@@ -109,10 +106,10 @@ final class AssetTrackerCustomizer implements ServiceTrackerCustomizer<Asset, As
     public void removedService(final ServiceReference<Asset> reference, final Asset service) {
         final String assetPid = String.valueOf(reference.getProperty(KURA_SERVICE_PID));
         this.context.ungetService(reference);
-        if ((assetPid != null) && this.assets.containsKey(assetPid)) {
+        if (assetPid != null && this.assets.containsKey(assetPid)) {
             this.assets.remove(assetPid);
         }
-        s_logger.info("Asset has been removed by Asset Cloudlet Tracker.... {}", service);
+        logger.info("Asset has been removed by Asset Cloudlet Tracker... {}", service);
     }
 
 }

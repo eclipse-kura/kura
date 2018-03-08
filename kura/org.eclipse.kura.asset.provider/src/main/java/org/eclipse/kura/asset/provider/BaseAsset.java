@@ -58,7 +58,6 @@ import org.eclipse.kura.internal.asset.provider.AssetOptions;
 import org.eclipse.kura.internal.asset.provider.DriverTrackerCustomizer;
 import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.util.collection.CollectionUtil;
-import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
@@ -181,7 +180,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
      */
     protected void deactivate(final ComponentContext context) {
         logger.debug("Release Asset Resources...");
-        
+
         if (this.driverServiceTracker != null) {
             this.driverServiceTracker.close();
         }
@@ -200,19 +199,17 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
     private synchronized void attachDriver(final String driverId) {
         requireNonNull(driverId, "Driver PID cannot be null");
         logger.debug("Attaching driver instance...");
-        try {
-            if (this.driverServiceTracker != null) {
-                this.driverServiceTracker.close();
-                this.driverServiceTracker = null;
-            }
-            final DriverTrackerCustomizer driverTrackerCustomizer = new DriverTrackerCustomizer(
-                    this.context.getBundleContext(), this, driverId);
-            this.driverServiceTracker = new ServiceTracker<>(this.context.getBundleContext(), Driver.class.getName(),
-                    driverTrackerCustomizer);
-            this.driverServiceTracker.open();
-        } catch (final InvalidSyntaxException e) {
-            logger.error("Error while trying to track driver instances.", e);
+
+        if (this.driverServiceTracker != null) {
+            this.driverServiceTracker.close();
+            this.driverServiceTracker = null;
         }
+        final DriverTrackerCustomizer driverTrackerCustomizer = new DriverTrackerCustomizer(
+                this.context.getBundleContext(), this, driverId);
+        this.driverServiceTracker = new ServiceTracker<>(this.context.getBundleContext(), Driver.class.getName(),
+                driverTrackerCustomizer);
+        this.driverServiceTracker.open();
+
         logger.debug("Attaching driver instance...Done");
     }
 
@@ -270,7 +267,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
                 logger.warn("Failed to update current configuration from Driver Descriptor", e);
             }
             List<ChannelRecord> readRecords = getAllReadRecords();
-            hasReadChannels = !readRecords.isEmpty();
+            this.hasReadChannels = !readRecords.isEmpty();
             tryPrepareRead(readRecords);
             tryAttachChannelListeners();
         }
@@ -348,7 +345,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
 
     @SuppressWarnings("unchecked")
     private void updateExistingProperties(final Driver driver) throws KuraException {
-        if (driver == null || properties == null || assetConfiguration == null) {
+        if (driver == null || this.properties == null || this.assetConfiguration == null) {
             return;
         }
         Object driverDescriptor = null;
@@ -370,7 +367,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         final Tocd tempOcd = new Tocd();
         driverSpecificChannelConfiguration.forEach(tempOcd::addAD);
         final Map<String, Object> defaultValues = ComponentUtil.getDefaultProperties(tempOcd, this.context);
-        final Map<String, Channel> channels = this.getAssetConfiguration().getAssetChannels();
+        final Map<String, Channel> channels = getAssetConfiguration().getAssetChannels();
         for (Tad tad : driverSpecificChannelConfiguration) {
             if (!tad.isRequired()) {
                 continue;
@@ -381,7 +378,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
                 if (config.get(id) == null) {
                     if (newConfiguration == null) {
                         newConfiguration = CollectionUtil.newHashMap();
-                        newConfiguration.putAll(properties);
+                        newConfiguration.putAll(this.properties);
                     }
                     final Object defaultValue = defaultValues.get(id);
                     newConfiguration.put(channel.getName() + AssetConstants.CHANNEL_PROPERTY_SEPARATOR.value() + id,
@@ -405,17 +402,17 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
     }
 
     protected String getKuraServicePid() throws KuraException {
-        if (kuraServicePid == null) {
+        if (this.kuraServicePid == null) {
             throw new KuraException(KuraErrorCode.CONFIGURATION_REQUIRED_ATTRIBUTE_MISSING);
         }
-        return kuraServicePid;
+        return this.kuraServicePid;
     }
 
     private List<ChannelRecord> getAllReadRecords() {
         List<ChannelRecord> readRecords = new ArrayList<>();
 
         if (this.assetConfiguration != null) {
-            for (Entry<String, Channel> e : assetConfiguration.getAssetChannels().entrySet()) {
+            for (Entry<String, Channel> e : this.assetConfiguration.getAssetChannels().entrySet()) {
                 final Channel channel = e.getValue();
                 if (channel.isEnabled()
                         && (channel.getType() == ChannelType.READ || channel.getType() == ChannelType.READ_WRITE)) {
@@ -437,11 +434,11 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
 
         synchronized (this) {
             try {
-                if (preparedRead != null) {
-                    channelRecords = preparedRead.execute();
+                if (this.preparedRead != null) {
+                    channelRecords = this.preparedRead.execute();
                 } else {
                     channelRecords = getAllReadRecords();
-                    driver.read(channelRecords);
+                    this.driver.read(channelRecords);
                 }
             } catch (final ConnectionException ce) {
                 throw new KuraException(KuraErrorCode.CONNECTION_FAILED, ce);
@@ -507,7 +504,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
     }
 
     public boolean hasReadChannels() {
-        return hasReadChannels;
+        return this.hasReadChannels;
     }
 
     /** {@inheritDoc} */
@@ -528,7 +525,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
 
         final ChannelListenerRegistration reg = new ChannelListenerRegistration(channel.getName(), channelListener);
 
-        if (channelListeners.contains(reg)) {
+        if (this.channelListeners.contains(reg)) {
             return;
         }
 
@@ -595,8 +592,8 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
             this.preparedRead = null;
         }
 
-        if (!readRecords.isEmpty() && driver != null) {
-            this.preparedRead = driver.prepareRead(readRecords);
+        if (!readRecords.isEmpty() && this.driver != null) {
+            this.preparedRead = this.driver.prepareRead(readRecords);
         }
     }
 
@@ -640,13 +637,13 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
     }
 
     private void tryClosePreparedRead() {
-        if (preparedRead != null) {
+        if (this.preparedRead != null) {
             try {
-                preparedRead.close();
+                this.preparedRead.close();
             } catch (Exception e) {
                 logger.warn("Failed to close prepared read", e);
             }
-            preparedRead = null;
+            this.preparedRead = null;
         }
     }
 
@@ -671,7 +668,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
     }
 
     protected void detachAllListeners() {
-        final Iterator<ChannelListenerRegistration> i = channelListeners.iterator();
+        final Iterator<ChannelListenerRegistration> i = this.channelListeners.iterator();
         while (i.hasNext()) {
             tryDetachListener(i.next());
         }
@@ -720,37 +717,42 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + ((channelName == null) ? 0 : channelName.hashCode());
-            result = prime * result + ((listener == null) ? 0 : listener.hashCode());
+            result = prime * result + (this.channelName == null ? 0 : this.channelName.hashCode());
+            result = prime * result + (this.listener == null ? 0 : this.listener.hashCode());
             return result;
         }
 
         public String getChannelName() {
-            return channelName;
+            return this.channelName;
         }
 
         public ChannelListener getChannelListener() {
-            return listener;
+            return this.listener;
         }
 
         public boolean isValid() {
-            return isValid;
+            return this.isValid;
         }
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj)
+            if (this == obj) {
                 return true;
-            if (obj == null)
+            }
+            if (obj == null) {
                 return false;
-            if (getClass() != obj.getClass())
+            }
+            if (getClass() != obj.getClass()) {
                 return false;
+            }
             ChannelListenerRegistration other = (ChannelListenerRegistration) obj;
-            if (channelName == null) {
-                if (other.channelName != null)
+            if (this.channelName == null) {
+                if (other.channelName != null) {
                     return false;
-            } else if (!channelName.equals(other.channelName))
+                }
+            } else if (!this.channelName.equals(other.channelName)) {
                 return false;
+            }
             return other.listener == this.listener;
         }
     }

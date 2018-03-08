@@ -108,7 +108,7 @@ public class Timer implements WireEmitter, ConfigurableComponent {
         } catch (final SchedulerException e) {
             logger.error("Scheduler exception.", e);
         }
-        logger.debug("Activating Timer...Done");
+        logger.debug("Activating Timer... Done");
     }
 
     /**
@@ -125,7 +125,7 @@ public class Timer implements WireEmitter, ConfigurableComponent {
         } catch (final SchedulerException e) {
             logger.error("Scheduler exception.", e);
         }
-        logger.debug("Updating Timer...Done");
+        logger.debug("Updating Timer... Done");
     }
 
     /**
@@ -149,7 +149,7 @@ public class Timer implements WireEmitter, ConfigurableComponent {
             }
         }
 
-        logger.debug("Dectivating Timer...Done");
+        logger.debug("Dectivating Timer... Done");
     }
 
     protected Scheduler getScheduler() throws SchedulerException {

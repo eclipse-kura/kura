@@ -160,7 +160,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 
         final String tableName = this.wireRecordStoreOptions.getTableName();
         reconcileDB(tableName);
-        logger.debug("Activating DB Wire Record Store...Done");
+        logger.debug("Activating DB Wire Record Store... Done");
     }
 
     /**
@@ -175,7 +175,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 
         final String tableName = this.wireRecordStoreOptions.getTableName();
         reconcileDB(tableName);
-        logger.debug("Updating DB Wire Record Store...Done");
+        logger.debug("Updating DB Wire Record Store... Done");
     }
 
     /**
@@ -186,7 +186,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
      */
     protected void deactivate(final ComponentContext componentContext) {
         logger.debug("Deactivating DB Wire Record Store...");
-        logger.debug("Deactivating DB Wire Record Store...Done");
+        logger.debug("Deactivating DB Wire Record Store... Done");
     }
 
     /**
@@ -227,7 +227,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
                 }
             }
         } catch (final SQLException sqlException) {
-            logger.error("Error in truncating the table {}....", sqlTableName, sqlException);
+            logger.error("Error in truncating the table {}...", sqlTableName, sqlException);
         } finally {
             this.dbHelper.close(rsTbls);
             this.dbHelper.close(conn);
@@ -250,8 +250,6 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 
             rset.next();
             size = rset.getInt(1);
-        } catch (final SQLException e) {
-            throw e;
         } finally {
             this.dbHelper.close(rset);
             this.dbHelper.close(stmt);

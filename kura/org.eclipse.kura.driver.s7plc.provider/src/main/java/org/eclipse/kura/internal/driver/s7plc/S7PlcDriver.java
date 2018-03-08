@@ -75,24 +75,24 @@ public final class S7PlcDriver extends AbstractBlockDriver<S7PlcDomain> implemen
 
     protected synchronized void activate(final ComponentContext componentContext,
             final Map<String, Object> properties) {
-        logger.debug("Activating S7 PLC Driver.....");
+        logger.debug("Activating S7 PLC Driver...");
         requireNonNull(properties, "Properties cannot be null");
         updated(properties);
-        logger.debug("Activating S7 PLC Driver.....Done");
+        logger.debug("Activating S7 PLC Driver... Done");
     }
 
     protected synchronized void deactivate(final ComponentContext componentContext) {
-        logger.debug("Deactivating S7 PLC Driver.....");
+        logger.debug("Deactivating S7 PLC Driver...");
         try {
             this.disconnect();
         } catch (final ConnectionException e) {
-            logger.error("Error while disconnecting....", e);
+            logger.error("Error while disconnecting...", e);
         }
         logger.debug("Deactivating S7 PLC Driver.....Done");
     }
 
     public synchronized void updated(final Map<String, Object> properties) {
-        logger.debug("Updating S7 PLC Driver.....");
+        logger.debug("Updating S7 PLC Driver...");
         requireNonNull(properties, "Properties cannot be null");
         this.options = new S7PlcOptions(properties);
         if (client.Connected) {
@@ -104,7 +104,7 @@ public final class S7PlcDriver extends AbstractBlockDriver<S7PlcDomain> implemen
                 logger.warn("Failed to reset connection after update", e);
             }
         }
-        logger.debug("Updating S7 PLC Driver.....Done");
+        logger.debug("Updating S7 PLC Driver... Done");
     }
 
     private String decryptPassword(char[] encryptedPassword) throws KuraException {
@@ -138,7 +138,7 @@ public final class S7PlcDriver extends AbstractBlockDriver<S7PlcDomain> implemen
                 if (this.options.shouldAuthenticate()) {
                     authenticate();
                 }
-                logger.debug("Connecting to S7 PLC...Done");
+                logger.debug("Connecting to S7 PLC... Done");
             }
         } catch (Exception e) {
             throw new ConnectionException("Connection failed, unexpected exception", e);
@@ -150,7 +150,7 @@ public final class S7PlcDriver extends AbstractBlockDriver<S7PlcDomain> implemen
         if (this.client.Connected) {
             logger.debug("Disconnecting from S7 PLC...");
             this.client.Disconnect();
-            logger.debug("Disconnecting from S7 PLC...Done");
+            logger.debug("Disconnecting from S7 PLC... Done");
         }
     }
 
@@ -216,7 +216,7 @@ public final class S7PlcDriver extends AbstractBlockDriver<S7PlcDomain> implemen
     @SuppressWarnings("serial")
     private class Moka7Exception extends IOException {
 
-        private int statusCode;
+        private final int statusCode;
 
         public Moka7Exception(String message, int statusCode) {
             super(message);

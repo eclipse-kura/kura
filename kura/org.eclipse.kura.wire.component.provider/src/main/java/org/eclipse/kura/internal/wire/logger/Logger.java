@@ -87,7 +87,7 @@ public final class Logger implements WireReceiver, ConfigurableComponent {
         logger.debug("Activating Logger Wire Component...");
         this.properties = properties;
         this.wireSupport = this.wireHelperService.newWireSupport(this);
-        logger.debug("Activating Logger Wire Component...Done");
+        logger.debug("Activating Logger Wire Component... Done");
     }
 
     /**
@@ -99,7 +99,7 @@ public final class Logger implements WireReceiver, ConfigurableComponent {
     public void updated(final Map<String, Object> properties) {
         logger.debug("Updating Logger Wire Component...");
         this.properties = properties;
-        logger.debug("Updating Logger Wire Component...Done");
+        logger.debug("Updating Logger Wire Component... Done");
     }
 
     /**
@@ -111,7 +111,7 @@ public final class Logger implements WireReceiver, ConfigurableComponent {
     protected void deactivate(final ComponentContext componentContext) {
         logger.debug("Deactivating Logger Wire Component...");
         // remained for debugging purposes
-        logger.debug("Deactivating Logger Wire Component...Done");
+        logger.debug("Deactivating Logger Wire Component... Done");
     }
 
     /** {@inheritDoc} */

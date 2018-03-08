@@ -184,7 +184,7 @@ public final class CloudPublisher implements WireReceiver, CloudClientListener, 
         this.cloudServiceTrackerCustomizer = new CloudPublisherServiceTrackerCustomizer();
         initCloudServiceTracking();
 
-        logger.debug("Activating Cloud Publisher Wire Component...Done");
+        logger.debug("Activating Cloud Publisher Wire Component... Done");
     }
 
     /**
@@ -203,7 +203,7 @@ public final class CloudPublisher implements WireReceiver, CloudClientListener, 
         }
         initCloudServiceTracking();
 
-        logger.debug("Updating Cloud Publisher Wire Component...Done");
+        logger.debug("Updating Cloud Publisher Wire Component... Done");
     }
 
     /**
@@ -220,7 +220,7 @@ public final class CloudPublisher implements WireReceiver, CloudClientListener, 
         if (nonNull(this.cloudServiceTracker)) {
             this.cloudServiceTracker.close();
         }
-        logger.debug("Deactivating Cloud Publisher Wire Component...Done");
+        logger.debug("Deactivating Cloud Publisher Wire Component... Done");
     }
 
     /** {@inheritDoc} */

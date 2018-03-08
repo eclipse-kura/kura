@@ -34,7 +34,6 @@ import org.eclipse.kura.internal.asset.cloudlet.serialization.response.ChannelOp
 import org.eclipse.kura.internal.asset.cloudlet.serialization.response.MetadataResponse;
 import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
-import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
@@ -72,7 +71,7 @@ public final class AssetCloudlet extends Cloudlet {
     }
 
     protected synchronized void bindCloudService(final CloudService cloudService) {
-        if (this.getCloudService() == null) {
+        if (getCloudService() == null) {
             super.setCloudService(cloudService);
         }
     }
@@ -84,7 +83,7 @@ public final class AssetCloudlet extends Cloudlet {
     }
 
     protected synchronized void unbindCloudService(final CloudService cloudService) {
-        if (this.getCloudService() == cloudService) {
+        if (getCloudService() == cloudService) {
             super.unsetCloudService(cloudService);
         }
     }
@@ -93,15 +92,12 @@ public final class AssetCloudlet extends Cloudlet {
     protected synchronized void activate(final ComponentContext componentContext) {
         logger.debug("Activating Asset Cloudlet...");
         super.activate(componentContext);
-        try {
-            this.assetTrackerCustomizer = new AssetTrackerCustomizer(componentContext.getBundleContext(),
-                    this.assetService);
-            this.assetServiceTracker = new ServiceTracker<Asset, Asset>(componentContext.getBundleContext(),
-                    Asset.class.getName(), this.assetTrackerCustomizer);
-            this.assetServiceTracker.open();
-        } catch (final InvalidSyntaxException e) {
-            logger.error("AssetCloudlet activation failed", e);
-        }
+
+        this.assetTrackerCustomizer = new AssetTrackerCustomizer(componentContext.getBundleContext(),
+                this.assetService);
+        this.assetServiceTracker = new ServiceTracker<>(componentContext.getBundleContext(),
+                Asset.class.getName(), this.assetTrackerCustomizer);
+        this.assetServiceTracker.open();
         logger.debug("Activating Asset Cloudlet...Done");
     }
 
@@ -151,7 +147,7 @@ public final class AssetCloudlet extends Cloudlet {
             return;
         }
 
-        this.findAssets();
+        findAssets();
 
         JsonArray request;
 
@@ -234,7 +230,7 @@ public final class AssetCloudlet extends Cloudlet {
     }
 
     private void read(final KuraRequestPayload reqPayload, final KuraResponsePayload respPayload) {
-        this.findAssets();
+        findAssets();
 
         JsonArray request;
 
@@ -286,7 +282,7 @@ public final class AssetCloudlet extends Cloudlet {
     }
 
     private void write(final KuraRequestPayload reqPayload, final KuraResponsePayload respPayload) {
-        this.findAssets();
+        findAssets();
 
         List<WriteRequest> writeRequests;
 

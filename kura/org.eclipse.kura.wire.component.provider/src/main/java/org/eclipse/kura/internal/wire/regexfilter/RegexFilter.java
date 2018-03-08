@@ -115,7 +115,7 @@ public final class RegexFilter implements WireEmitter, WireReceiver, Configurabl
         this.componentPid = String.valueOf(properties.get(KURA_SERVICE_PID));
         this.filterType = getType(properties);
         this.wireSupport = this.wireHelperService.newWireSupport(this);
-        logger.debug("Activating Regex Filter...Done");
+        logger.debug("Activating Regex Filter... Done");
     }
 
     /**
@@ -128,7 +128,7 @@ public final class RegexFilter implements WireEmitter, WireReceiver, Configurabl
         logger.debug("Updating Regex Filter...");
         this.filter = String.valueOf(properties.getOrDefault(REGEX_PROP, ""));
         this.filterType = getType(properties);
-        logger.debug("Updating Regex Filter...Done");
+        logger.debug("Updating Regex Filter... Done");
     }
 
     /** {@inheritDoc} */

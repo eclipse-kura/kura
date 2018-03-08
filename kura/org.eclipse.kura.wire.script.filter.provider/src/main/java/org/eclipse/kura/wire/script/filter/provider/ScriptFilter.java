@@ -66,7 +66,7 @@ public class ScriptFilter implements WireEmitter, WireReceiver, ConfigurableComp
     }
 
     public void activate(final Map<String, Object> properties) throws ComponentException {
-        logger.info("Activating Script Filter.....");
+        logger.info("Activating Script Filter...");
         this.wireSupport = this.wireHelperService.newWireSupport(this);
 
         this.scriptEngine = createEngine();
@@ -74,16 +74,16 @@ public class ScriptFilter implements WireEmitter, WireReceiver, ConfigurableComp
 
         updated(properties);
 
-        logger.info("ActivatingScript Filter.....Done");
+        logger.info("ActivatingScript Filter... Done");
     }
 
     public void deactivate() {
-        logger.info("Deactivating Script Filter.....");
-        logger.info("Deactivating Script Filter.....Done");
+        logger.info("Deactivating Script Filter...");
+        logger.info("Deactivating Script Filter... Done");
     }
 
     public synchronized void updated(final Map<String, Object> properties) {
-        logger.info("Updating Script Filter.....");
+        logger.info("Updating Script Filter...");
 
         final String scriptSource = (String) properties.get(SCRIPT_PROPERTY_KEY);
 
@@ -103,7 +103,7 @@ public class ScriptFilter implements WireEmitter, WireReceiver, ConfigurableComp
             this.bindings = createBindings();
         }
 
-        logger.info("Updating Script Filter.....Done");
+        logger.info("Updating Script Filter... Done");
     }
 
     @Override

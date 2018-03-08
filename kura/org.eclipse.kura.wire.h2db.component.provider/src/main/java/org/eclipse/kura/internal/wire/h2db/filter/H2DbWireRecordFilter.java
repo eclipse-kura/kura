@@ -133,7 +133,7 @@ public class H2DbWireRecordFilter implements WireEmitter, WireReceiver, Configur
         this.lastRefreshedTime = Calendar.getInstance();
         this.lastRefreshedTime.add(Calendar.SECOND, -this.cacheExpirationInterval);
         restartDbServiceTracker();
-        logger.debug("Activating DB Wire Record Filter...Done");
+        logger.debug("Activating DB Wire Record Filter... Done");
     }
 
     /**
@@ -158,7 +158,7 @@ public class H2DbWireRecordFilter implements WireEmitter, WireReceiver, Configur
         // expired
         this.lastRefreshedTime = Calendar.getInstance();
         this.lastRefreshedTime.add(Calendar.SECOND, -this.cacheExpirationInterval);
-        logger.debug("Updating DB Wire Record Filter...Done");
+        logger.debug("Updating DB Wire Record Filter... Done");
     }
 
     /**
@@ -169,7 +169,7 @@ public class H2DbWireRecordFilter implements WireEmitter, WireReceiver, Configur
      */
     protected void deactivate(final ComponentContext componentContext) {
         logger.debug("Dectivating DB Wire Record Filter...");
-        logger.debug("Dectivating DB Wire Record Filter...Done");
+        logger.debug("Dectivating DB Wire Record Filter... Done");
     }
 
     /** {@inheritDoc} */

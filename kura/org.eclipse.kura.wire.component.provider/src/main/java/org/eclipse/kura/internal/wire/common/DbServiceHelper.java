@@ -72,7 +72,7 @@ public final class DbServiceHelper {
     public void close(final Connection conn) {
         logger.debug("Closing connection instance... {}", conn);
         this.dbService.close(conn);
-        logger.debug("Closing connection instance...Done");
+        logger.debug("Closing connection instance... Done");
     }
 
     /**
@@ -86,7 +86,7 @@ public final class DbServiceHelper {
             logger.debug("Closing all result sets... {}", Arrays.toString(rss));
         }
         this.dbService.close(rss);
-        logger.debug("Closing all result sets...Done");
+        logger.debug("Closing all result sets... Done");
     }
 
     /**
@@ -100,7 +100,7 @@ public final class DbServiceHelper {
             logger.debug("Closing all statements... {}", Arrays.toString(stmts));
         }
         this.dbService.close(stmts);
-        logger.debug("Closing all statements...Done");
+        logger.debug("Closing all statements... Done");
     }
 
     /**
@@ -135,7 +135,7 @@ public final class DbServiceHelper {
             this.close(stmt);
             this.close(conn);
         }
-        logger.debug("Executing SQL query...Done");
+        logger.debug("Executing SQL query... Done");
     }
 
     /**
@@ -163,7 +163,7 @@ public final class DbServiceHelper {
             logger.debug("Rolling back the connection instance... {}", conn);
         }
         this.dbService.rollback(conn);
-        logger.debug("Rolling back the connection instance...Done");
+        logger.debug("Rolling back the connection instance... Done");
     }
 
     /**

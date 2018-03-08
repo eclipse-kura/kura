@@ -18,7 +18,6 @@ import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_P
 import org.eclipse.kura.asset.provider.BaseAsset;
 import org.eclipse.kura.driver.Driver;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
@@ -48,13 +47,10 @@ public final class DriverTrackerCustomizer implements ServiceTrackerCustomizer<D
      *            the asset
      * @param driverId
      *            the driver id
-     * @throws InvalidSyntaxException
-     *             the invalid syntax exception
      * @throws NullPointerException
      *             if any of the arguments is null
      */
-    public DriverTrackerCustomizer(final BundleContext context, final BaseAsset baseAsset, final String driverId)
-            throws InvalidSyntaxException {
+    public DriverTrackerCustomizer(final BundleContext context, final BaseAsset baseAsset, final String driverId) {
         requireNonNull(context, "Bundle context cannot be null");
         requireNonNull(baseAsset, "Asset cannot be null");
         requireNonNull(driverId, "Driver PID cannot be null");
@@ -69,7 +65,7 @@ public final class DriverTrackerCustomizer implements ServiceTrackerCustomizer<D
     public Driver addingService(final ServiceReference<Driver> reference) {
         final Driver driver = this.context.getService(reference);
         if (reference.getProperty(KURA_SERVICE_PID).equals(this.driverId)) {
-            logger.info("Driver has been found by the driver tracker....==> adding service");
+            logger.info("Driver has been found by the driver tracker... ==> adding service");
             this.baseAsset.setDriver(driver);
         }
         return driver;

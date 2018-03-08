@@ -61,13 +61,13 @@ public class Fifo implements WireEmitter, WireReceiver, ConfigurableComponent {
         logger.info("Activating Fifo...");
         wireSupport = this.wireHelperService.newWireSupport(this);
         updated(properties);
-        logger.info("Activating Fifo...Done");
+        logger.info("Activating Fifo... Done");
     }
 
     public void deactivate() {
         logger.info("Dectivating Fifo...");
         stopEmitterThread();
-        logger.info("Dectivating Fifo...Done");
+        logger.info("Dectivating Fifo... Done");
     }
 
     public void updated(final Map<String, Object> properties) {
@@ -80,7 +80,7 @@ public class Fifo implements WireEmitter, WireReceiver, ConfigurableComponent {
 
         restartEmitterThread(threadName, queueCapacity, discardEnvelopes);
 
-        logger.info("Updating Fifo...Done");
+        logger.info("Updating Fifo... Done");
     }
 
     private synchronized void stopEmitterThread() {
@@ -141,7 +141,7 @@ public class Fifo implements WireEmitter, WireReceiver, ConfigurableComponent {
         private Consumer<WireEnvelope> submitter;
 
         public FifoEmitterThread(String threadName, int queueCapacity, boolean discardEnvelopes) {
-            this.queue = new ArrayList<WireEnvelope>();
+            this.queue = new ArrayList<>();
             this.queueCapacity = queueCapacity;
             setName(threadName);
             if (discardEnvelopes) {

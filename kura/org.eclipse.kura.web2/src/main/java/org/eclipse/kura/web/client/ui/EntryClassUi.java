@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -47,6 +47,7 @@ import org.gwtbootstrap3.client.ui.AnchorListItem;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.Column;
 import org.gwtbootstrap3.client.ui.FormLabel;
+import org.gwtbootstrap3.client.ui.Heading;
 import org.gwtbootstrap3.client.ui.Icon;
 import org.gwtbootstrap3.client.ui.ListBox;
 import org.gwtbootstrap3.client.ui.Modal;
@@ -56,7 +57,6 @@ import org.gwtbootstrap3.client.ui.ModalHeader;
 import org.gwtbootstrap3.client.ui.NavPills;
 import org.gwtbootstrap3.client.ui.Panel;
 import org.gwtbootstrap3.client.ui.PanelBody;
-import org.gwtbootstrap3.client.ui.PanelHeader;
 import org.gwtbootstrap3.client.ui.Row;
 import org.gwtbootstrap3.client.ui.TabListItem;
 import org.gwtbootstrap3.client.ui.TextBox;
@@ -102,7 +102,7 @@ public class EntryClassUi extends Composite {
     @UiField
     Strong errorAlertText;
     @UiField
-    PanelHeader contentPanelHeader;
+    Heading contentHeading;
     @UiField
     PanelBody contentPanelBody;
     @UiField
@@ -161,8 +161,6 @@ public class EntryClassUi extends Composite {
     Column sidenav;
     @UiField
     Panel sidenavOverlay;
-    @UiField
-    Label serviceDescription;
 
     private static final Messages MSGS = GWT.create(Messages.class);
     private static final Logger logger = Logger.getLogger(EntryClassUi.class.getSimpleName());
@@ -221,7 +219,7 @@ public class EntryClassUi extends Composite {
         initWaitModal();
         initNewComponentErrorModal();
         initExceptionReportModal();
-        contentPanelHeader.setId("contentPanelHeader");
+        contentHeading.setId("contentHeading");
 
         Date now = new Date();
         @SuppressWarnings("deprecation")
@@ -525,7 +523,7 @@ public class EntryClassUi extends Composite {
                         }
                         EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.driversAndAssetsServices);
                         EntryClassUi.this.contentPanel.setVisible(true);
-                        EntryClassUi.this.contentPanelHeader.setText(MSGS.driversAndAssetsServices());
+                        setContentTitle(MSGS.driversAndAssetsServices(), "");
                         EntryClassUi.this.contentPanelBody.clear();
                         EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.driversAndTwinsBinder);
                         EntryClassUi.this.driversAndTwinsBinder.refresh();
@@ -642,6 +640,11 @@ public class EntryClassUi extends Composite {
         });
     }
 
+    private void setContentTitle(final String title, final String subTitle) {
+        this.contentHeading.setText(title == null ? "" : title);
+        this.contentHeading.setSubText(subTitle == null ? "" : subTitle);
+    }
+
     private void initServicesTree() {
         // Keypress handler
         this.textSearch.addKeyUpHandler(this.searchBoxChangeHandler);
@@ -739,8 +742,8 @@ public class EntryClassUi extends Composite {
     }
 
     private void setHeader(final String title, final String subTitle) {
-        this.contentPanelHeader.setText(title);
-        this.serviceDescription.setText(subTitle != null ? subTitle : "");
+        this.contentHeading.setText(title != null ? title : "");
+        this.contentHeading.setSubText(subTitle != null ? subTitle : "");
     }
 
     public void render(GwtConfigComponent item) {
@@ -946,7 +949,7 @@ public class EntryClassUi extends Composite {
     private void showStatusPanel() {
         this.setSelectedAnchorListItem(this.status);
         this.contentPanel.setVisible(true);
-        this.contentPanelHeader.setText("Status");
+        setContentTitle("Status", null);
         this.contentPanelBody.clear();
         this.contentPanelBody.add(EntryClassUi.this.statusBinder);
         this.statusBinder.setSession(EntryClassUi.this.currentSession);

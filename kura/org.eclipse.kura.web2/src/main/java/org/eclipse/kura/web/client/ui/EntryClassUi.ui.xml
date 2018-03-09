@@ -2,7 +2,7 @@
 
 <!--
 
-    Copyright (c) 2011, 2017 Eurotech and/or its affiliates and others
+    Copyright (c) 2011, 2018 Eurotech and/or its affiliates and others
 
     All rights reserved. This program and the accompanying materials
     are made available under the terms of the Eclipse Public License v1.0
@@ -215,10 +215,9 @@
                             <b:Row addStyleNames='content-wrapper'>
                                 <b:Column size="MD_10">
                                     <b:Panel ui:field="contentPanel" addStyleNames="content-panel">
-                                        <b:PanelHeader ui:field="contentPanelHeader" addStyleNames="{style.content-panel-header}" />
-                                        <b:Row>
-                                             <g:Label ui:field="serviceDescription" />
-                                        </b:Row>
+                                        <b:PanelHeader addStyleNames="{style.content-panel-header}">
+                                            <b:Heading size="H3" ui:field="contentHeading"/>
+                                        </b:PanelHeader>
                                         <b:PanelBody ui:field="contentPanelBody" addStyleNames="{style.content-panel-body}">
                                         </b:PanelBody>
                                     </b:Panel>

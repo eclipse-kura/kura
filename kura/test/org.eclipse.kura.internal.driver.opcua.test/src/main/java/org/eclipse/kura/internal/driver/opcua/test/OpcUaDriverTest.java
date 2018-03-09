@@ -199,6 +199,7 @@ public class OpcUaDriverTest {
         channelConfig.put("node.id.type", "STRING");
         channelConfig.put("opcua.type", VariableType.DEFINED_BY_JAVA_TYPE.name());
         channelConfig.put("node.id", nodeId);
+        channelConfig.put("attribute", "Value");
         record.setChannelConfig(channelConfig);
         return record;
     }
@@ -210,6 +211,7 @@ public class OpcUaDriverTest {
         channelConfig.put("node.id.type", "STRING");
         channelConfig.put("opcua.type", opcuaType.name());
         channelConfig.put("node.id", nodeId);
+        channelConfig.put("attribute", "Value");
         record.setChannelConfig(channelConfig);
         return record;
     }

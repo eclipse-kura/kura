@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
  *
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
@@ -24,8 +24,6 @@ import java.util.Map;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.crypto.CryptoService;
-import org.eclipse.kura.driver.opcua.localization.OpcUaMessages;
-import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.util.base.StringUtil;
 import org.eclipse.milo.opcua.sdk.client.api.identity.AnonymousProvider;
 import org.eclipse.milo.opcua.sdk.client.api.identity.IdentityProvider;
@@ -102,9 +100,6 @@ final class OpcUaOptions {
     /** The Logger instance. */
     private static final Logger logger = LoggerFactory.getLogger(OpcUaOptions.class);
 
-    /** Localization Resource. */
-    private static final OpcUaMessages message = LocalizationAdapter.adapt(OpcUaMessages.class);
-
     /**
      * Configurable Property to OPC-UA server password
      */
@@ -136,6 +131,10 @@ final class OpcUaOptions {
      */
     private static final String USERNAME = "username";
 
+    private static final String SUBSCRIPTION_PUBLISH_INTERVAL = "subscription.publish.interval";
+
+    private static final String MAX_REQUEST_ITEMS = "max.request.items";
+
     /** The Crypto Service dependency. */
     private final CryptoService cryptoService;
 
@@ -151,8 +150,8 @@ final class OpcUaOptions {
      *             if any of the arguments is null
      */
     OpcUaOptions(final Map<String, Object> properties, final CryptoService cryptoService) {
-        requireNonNull(properties, message.propertiesNonNull());
-        requireNonNull(cryptoService, message.cryptoServiceNonNull());
+        requireNonNull(properties, "Properties cannot be null");
+        requireNonNull(cryptoService, "Crypto Service cannot be null");
 
         this.properties = properties;
         this.cryptoService = cryptoService;
@@ -406,4 +405,19 @@ final class OpcUaOptions {
         return username;
     }
 
+    long getSubsciptionPublishInterval() {
+        final Object publishInterval = this.properties.get(SUBSCRIPTION_PUBLISH_INTERVAL);
+        if (publishInterval instanceof Long) {
+            return (Long) publishInterval;
+        }
+        return 1000L;
+    }
+
+    int getMaxItemCountPerRequest() {
+        final Object maxRequestItems = this.properties.get(MAX_REQUEST_ITEMS);
+        if (maxRequestItems instanceof Integer) {
+            return (Integer) maxRequestItems;
+        }
+        return 10;
+    }
 }

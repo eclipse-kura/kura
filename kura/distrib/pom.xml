@@ -394,11 +394,6 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>org.eclipse.kura.driver.opcua.localization</artifactId>
-                                    <version>${org.eclipse.kura.driver.opcua.localization.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.driver.opcua.provider</artifactId>
                                     <version>${org.eclipse.kura.driver.opcua.provider.version}</version>
                                 </artifactItem>
@@ -635,8 +630,6 @@
                                     tofile="target/plugins/org.eclipse.kura.wire.helper.provider_${org.eclipse.kura.wire.helper.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.wire.provider.jar"
                                     tofile="target/plugins/org.eclipse.kura.wire.provider_${org.eclipse.kura.wire.provider.version}.jar" />
-                                <move file="target/plugins/org.eclipse.kura.driver.opcua.localization.jar"
-                                    tofile="target/plugins/org.eclipse.kura.driver.opcua.localization_${org.eclipse.kura.driver.opcua.localization.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.driver.opcua.provider.jar"
                                     tofile="target/plugins/org.eclipse.kura.driver.opcua.provider_${org.eclipse.kura.driver.opcua.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.driver.s7plc.provider.jar"

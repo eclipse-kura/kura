@@ -9,8 +9,6 @@
 package org.eclipse.kura.internal.driver.opcua;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.doAnswer;
@@ -26,7 +24,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.channel.ChannelFlag;
@@ -39,14 +36,16 @@ import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.milo.opcua.sdk.client.OpcUaClient;
 import org.eclipse.milo.opcua.sdk.client.api.AddressSpace;
-import org.eclipse.milo.opcua.sdk.client.api.nodes.VariableNode;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.StatusCode;
 import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 import org.eclipse.milo.opcua.stack.core.types.enumerated.IdType;
+import org.eclipse.milo.opcua.stack.core.types.enumerated.TimestampsToReturn;
+import org.eclipse.milo.opcua.stack.core.types.structured.ReadResponse;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 public class OpcUaDriverTest {
 
@@ -55,72 +54,60 @@ public class OpcUaDriverTest {
     public void testGetTypedValue() throws Throwable {
         // test getTypedValue
 
-        String methodName = "getTypedValue";
-
-        OpcUaDriver svc = new OpcUaDriver();
-
         DataType expectedValueType = DataType.BOOLEAN;
         Object containedValue = true;
 
-        Optional<TypedValue<?>> value = (Optional<TypedValue<?>>) TestUtil.invokePrivate(svc, methodName,
-                expectedValueType, containedValue);
+        TypedValue<?> value = DataTypeMapper.map(containedValue, expectedValueType);
 
-        assertTrue(value.isPresent());
-        assertEquals(expectedValueType, value.get().getType());
-        assertEquals(containedValue, value.get().getValue());
+        assertEquals(expectedValueType, value.getType());
+        assertEquals(containedValue, value.getValue());
 
         expectedValueType = DataType.INTEGER;
         containedValue = 10;
 
-        value = (Optional<TypedValue<?>>) TestUtil.invokePrivate(svc, methodName, expectedValueType, containedValue);
+        value = DataTypeMapper.map(containedValue, expectedValueType);
 
-        assertTrue(value.isPresent());
-        assertEquals(expectedValueType, value.get().getType());
-        assertEquals(containedValue, value.get().getValue());
+        assertEquals(expectedValueType, value.getType());
+        assertEquals(containedValue, value.getValue());
 
         expectedValueType = DataType.LONG;
         containedValue = 123456789123456L;
 
-        value = (Optional<TypedValue<?>>) TestUtil.invokePrivate(svc, methodName, expectedValueType, containedValue);
+        value = DataTypeMapper.map(containedValue, expectedValueType);
 
-        assertTrue(value.isPresent());
-        assertEquals(expectedValueType, value.get().getType());
-        assertEquals(containedValue, value.get().getValue());
+        assertEquals(expectedValueType, value.getType());
+        assertEquals(containedValue, value.getValue());
 
         expectedValueType = DataType.FLOAT;
         containedValue = 12.3f;
 
-        value = (Optional<TypedValue<?>>) TestUtil.invokePrivate(svc, methodName, expectedValueType, containedValue);
+        value = DataTypeMapper.map(containedValue, expectedValueType);
 
-        assertTrue(value.isPresent());
-        assertEquals(expectedValueType, value.get().getType());
-        assertEquals(containedValue, value.get().getValue());
+        assertEquals(expectedValueType, value.getType());
+        assertEquals(containedValue, value.getValue());
 
         expectedValueType = DataType.DOUBLE;
         containedValue = 123.4;
 
-        value = (Optional<TypedValue<?>>) TestUtil.invokePrivate(svc, methodName, expectedValueType, containedValue);
+        value = DataTypeMapper.map(containedValue, expectedValueType);
 
-        assertTrue(value.isPresent());
-        assertEquals(expectedValueType, value.get().getType());
-        assertEquals(containedValue, value.get().getValue());
+        assertEquals(expectedValueType, value.getType());
+        assertEquals(containedValue, value.getValue());
 
         expectedValueType = DataType.STRING;
         containedValue = "test";
 
-        value = (Optional<TypedValue<?>>) TestUtil.invokePrivate(svc, methodName, expectedValueType, containedValue);
+        value = DataTypeMapper.map(containedValue, expectedValueType);
 
-        assertTrue(value.isPresent());
-        assertEquals(expectedValueType, value.get().getType());
-        assertEquals(containedValue, value.get().getValue());
+        assertEquals(expectedValueType, value.getType());
+        assertEquals(containedValue, value.getValue());
 
         expectedValueType = DataType.BYTE_ARRAY;
         containedValue = "test".getBytes("utf8");
 
-        value = (Optional<TypedValue<?>>) TestUtil.invokePrivate(svc, methodName, expectedValueType, containedValue);
+        value = DataTypeMapper.map(containedValue, expectedValueType);
 
-        assertTrue(value.isPresent());
-        assertEquals(expectedValueType, value.get().getType());
+        assertEquals(expectedValueType, value.getType());
 
         // FIXME check if this serialization is really OK in case of byte[] on the input
         // assertArrayEquals((byte[]) containedValue, (byte[]) value.get().getValue());
@@ -129,16 +116,23 @@ public class OpcUaDriverTest {
         expectedValueType = null;
         containedValue = "test";
 
-        value = (Optional<TypedValue<?>>) TestUtil.invokePrivate(svc, methodName, expectedValueType, containedValue);
-
-        assertFalse(value.isPresent());
+        try {
+            DataTypeMapper.map(containedValue, expectedValueType);
+            fail("Expected exception");
+        } catch (Exception e) {
+            // ok
+        }
 
         expectedValueType = DataType.INTEGER;
         containedValue = "test";
 
-        value = (Optional<TypedValue<?>>) TestUtil.invokePrivate(svc, methodName, expectedValueType, containedValue);
+        try {
+            DataTypeMapper.map(containedValue, expectedValueType);
+            fail("Expected exception");
+        } catch (Exception e) {
+            // ok
+        }
 
-        assertFalse(value.isPresent());
     }
 
     @Test
@@ -146,9 +140,20 @@ public class OpcUaDriverTest {
         // test read with a missing node exception
 
         OpcUaDriver svc = new OpcUaDriver();
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("request.timeout", 1);
+        CryptoService csMock = mock(CryptoService.class);
+        OpcUaOptions options = new OpcUaOptions(properties, csMock);
+
+        // needed for runSafe()
+        TestUtil.setFieldValue(svc, "options", options);
 
         OpcUaClient clientMock = mock(OpcUaClient.class);
-        TestUtil.setFieldValue(svc, "client", clientMock);
+
+        ConnectionManager manager = new ConnectionManager(clientMock, options, (a, b) -> {
+        }, new ListenerRegistrations());
+
+        TestUtil.setFieldValue(svc, "connectionManager", Optional.of(manager));
 
         AddressSpace asMock = mock(AddressSpace.class);
         when(clientMock.getAddressSpace()).thenReturn(asMock);
@@ -218,6 +223,7 @@ public class OpcUaDriverTest {
         channelConfig.put("node.id.type", "NUMERIC");
         channelConfig.put("opcua.type", "DEFINED_BY_JAVA_TYPE");
         channelConfig.put("node.id", "1");
+        channelConfig.put("attribute", "Value");
         record.setChannelConfig(channelConfig);
         records.add(record);
 
@@ -234,32 +240,28 @@ public class OpcUaDriverTest {
         properties.put("request.timeout", 1);
         CryptoService csMock = mock(CryptoService.class);
         OpcUaOptions options = new OpcUaOptions(properties, csMock);
-        TestUtil.setFieldValue(svc, "options", options); // needed for runSafe()
+
+        // needed for runSafe()
+        TestUtil.setFieldValue(svc, "options", options);
 
         OpcUaClient clientMock = mock(OpcUaClient.class);
-        TestUtil.setFieldValue(svc, "client", clientMock);
 
-        AddressSpace asMock = mock(AddressSpace.class);
-        when(clientMock.getAddressSpace()).thenReturn(asMock);
+        ConnectionManager manager = new ConnectionManager(clientMock, options, (a, b) -> {
+        }, new ListenerRegistrations());
+
+        TestUtil.setFieldValue(svc, "connectionManager", Optional.of(manager));
 
         Variant variant = new Variant(val);
         DataValue value = new DataValue(variant, StatusCode.GOOD);
 
-        CompletableFuture<DataValue> futureValue = mock(CompletableFuture.class);
-        when(futureValue.get(1000, TimeUnit.MILLISECONDS)).thenReturn(value);
+        ReadResponse response = mock(ReadResponse.class);
+        when(response.getResults()).thenReturn(new DataValue[] { value });
 
-        VariableNode node = mock(VariableNode.class);
-        when(node.readValue()).thenReturn(futureValue);
+        CompletableFuture<ReadResponse> futureValue = mock(CompletableFuture.class);
+        when(futureValue.get(1000, TimeUnit.MILLISECONDS)).thenReturn(response);
 
-        doAnswer(invocation -> {
-            NodeId nodeId = invocation.getArgumentAt(0, NodeId.class);
-
-            assertEquals(1, ((UInteger) nodeId.getIdentifier()).intValue());
-            assertEquals(1, nodeId.getNamespaceIndex().intValue());
-            assertEquals(IdType.Numeric, nodeId.getType());
-
-            return node;
-        }).when(asMock).createVariableNode(anyObject());
+        when(clientMock.read(Mockito.eq(0.0), Mockito.eq(TimestampsToReturn.Both), anyObject()))
+                .thenReturn(futureValue);
     }
 
     @Test
@@ -276,6 +278,7 @@ public class OpcUaDriverTest {
         channelConfig.put("opcua.type", "DEFINED_BY_JAVA_TYPE");
         channelConfig.put("node.id.type", "NUMERIC");
         channelConfig.put("node.id", "1");
+        channelConfig.put("attribute", "Value");
         record.setChannelConfig(channelConfig);
         records.add(record);
 
@@ -284,23 +287,10 @@ public class OpcUaDriverTest {
         assertEquals(1, preparedRead.getChannelRecords().size());
         assertEquals(record, preparedRead.getChannelRecords().get(0));
 
-        List<?> requestInfos = (List<?>) TestUtil.getFieldValue(preparedRead, "requestInfos");
+        List<?> requestInfos = (List<?>) TestUtil.getFieldValue(preparedRead, "requests");
         assertEquals(1, requestInfos.size());
 
-        // try to execute the read when the driver is busy
-        AtomicBoolean busy = (AtomicBoolean) TestUtil.getFieldValue(svc, "isBusy");
-
-        busy.set(true);
-
-        try {
-            preparedRead.execute();
-            fail("Exception was expected.");
-        } catch (ConnectionException e) {
-            // OK
-        }
-
         // now really execute the read, but everything needs to be prepared beforehand
-        busy.set(false);
         prepareForSuccessfulRead(svc, "123");
 
         List<ChannelRecord> result = preparedRead.execute();

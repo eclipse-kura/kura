@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and others
+ * Copyright (c) 2011, 2018 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -89,6 +89,7 @@ public class ComponentMetaTypeBundleTracker extends BundleTracker<Bundle> {
                     Designate designate = ComponentUtil.getDesignate(metadata, metatypePid);
                     if (designate.getFactoryPid() != null && !designate.getFactoryPid().isEmpty()) {
                         isFactory = true;
+                        metatypePid = designate.getFactoryPid();
                     }
 
                     // register the pid with the OCD and whether it is a factory

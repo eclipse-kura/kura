@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and others
+ * Copyright (c) 2011, 2018 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -104,13 +104,26 @@ public class ComponentUtil {
     /**
      * Returns the Designate for the given pid
      */
-    public static Designate getDesignate(Tmetadata metadata, String pid) {
-        List<Designate> designates = metadata.getDesignate();
-        for (Designate designate : designates) {
-            if (designate.getPid().equals(pid)) {
+    public static Designate getDesignate(final Tmetadata metadata, final String pid) {
+
+        if (metadata == null || pid == null) {
+            return null;
+        }
+
+        final List<Designate> designates = metadata.getDesignate();
+        if (designates == null) {
+            return null;
+        }
+
+        for (final Designate designate : designates) {
+            if (pid.equals(designate.getPid())) {
+                return designate;
+            }
+            if (pid.equals(designate.getFactoryPid())) {
                 return designate;
             }
         }
+
         return null;
     }
 

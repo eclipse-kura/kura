@@ -12,7 +12,6 @@ package org.eclipse.kura.internal.driver.opcua;
 
 import static org.eclipse.kura.channel.ChannelFlag.FAILURE;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -58,7 +57,7 @@ public final class Utils {
         }
     }
 
-    public static void fill(final Variant variant, final ChannelRecord record) {
+    public static void fillValue(final Variant variant, final ChannelRecord record) {
         try {
             record.setValue(DataTypeMapper.map(variant.getValue(), record.getValueType()));
             record.setChannelStatus(new ChannelStatus(ChannelFlag.SUCCESS));
@@ -66,36 +65,31 @@ public final class Utils {
             record.setChannelStatus(new ChannelStatus(FAILURE,
                     "Error while converting the retrieved value to the defined typed", null));
         }
-        record.setTimestamp(System.currentTimeMillis());
     }
 
-    public static void checkStatus(final StatusCode status, final ChannelRecord record) {
-        try {
-            if (status == null) {
-                throw new IOException("Operation Result Status cannot be null");
-            }
-            if (status.isBad()) {
-                throw new IOException(status.toString());
-            }
-            record.setChannelStatus(new ChannelStatus(ChannelFlag.SUCCESS));
-        } catch (Exception e) {
-            record.setChannelStatus(new ChannelStatus(FAILURE, e.getMessage(), e));
+    public static boolean fillStatus(final StatusCode status, final ChannelRecord record) {
+        if (status == null) {
+            record.setChannelStatus(new ChannelStatus(FAILURE, "Operation Result Status cannot be null", null));
+            return false;
         }
-        record.setTimestamp(System.currentTimeMillis());
+        if (status.isBad()) {
+            record.setChannelStatus(new ChannelStatus(FAILURE, "Got bad status: " + status.getValue(), null));
+            return false;
+        }
+        record.setChannelStatus(new ChannelStatus(ChannelFlag.SUCCESS));
+        return true;
     }
 
-    public static void fill(final DataValue value, final ChannelRecord record) {
-        try {
-            if (value == null) {
-                throw new IOException("Operation Result cannot be null");
-            }
-            final StatusCode status = value.getStatusCode();
-            if (status.isBad()) {
-                throw new IOException(status.toString());
-            }
-            fill(value.getValue(), record);
-        } catch (Exception e) {
-            record.setChannelStatus(new ChannelStatus(FAILURE, e.getMessage(), e));
+    public static void fillRecord(final DataValue value, final ChannelRecord record) {
+        record.setTimestamp(System.currentTimeMillis());
+
+        if (value == null) {
+            record.setChannelStatus(new ChannelStatus(FAILURE, "Operation Result cannot be null", null));
+            return;
+        }
+
+        if (fillStatus(value.getStatusCode(), record)) {
+            fillValue(value.getValue(), record);
         }
 
         final DateTime sourceTime = value.getSourceTime();
@@ -115,16 +109,15 @@ public final class Utils {
         }
 
         logger.debug("Server time not available, falling back to locally generated timestamp");
-
-        record.setTimestamp(System.currentTimeMillis());
     }
 
-    public static void forEachChunk(final int chunkSize, int size, final BiConsumer<Integer, Integer> consumer) {
-        final int chunkCount = size / chunkSize + (size % chunkSize == 0 ? 0 : 1);
+    public static void splitInMultipleRequests(final int itemsPerRequest, int totalItemCount,
+            final BiConsumer<Integer, Integer> consumer) {
+        final int requestCount = totalItemCount / itemsPerRequest + (totalItemCount % itemsPerRequest == 0 ? 0 : 1);
 
-        for (int i = 0; i < chunkCount; i++) {
-            final int start = i * chunkSize;
-            final int end = Math.min(start + chunkSize, size);
+        for (int i = 0; i < requestCount; i++) {
+            final int start = i * itemsPerRequest;
+            final int end = Math.min(start + itemsPerRequest, totalItemCount);
             consumer.accept(start, end);
         }
     }

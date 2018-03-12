@@ -10,8 +10,8 @@
 
 package org.eclipse.kura.internal.driver.opcua;
 
-import static org.eclipse.kura.internal.driver.opcua.Utils.checkStatus;
-import static org.eclipse.kura.internal.driver.opcua.Utils.fill;
+import static org.eclipse.kura.internal.driver.opcua.Utils.fillStatus;
+import static org.eclipse.kura.internal.driver.opcua.Utils.fillRecord;
 import static org.eclipse.kura.internal.driver.opcua.Utils.runSafe;
 
 import java.util.ArrayList;
@@ -21,6 +21,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 
+import org.eclipse.kura.channel.ChannelRecord;
 import org.eclipse.kura.internal.driver.opcua.request.ReadParams;
 import org.eclipse.kura.internal.driver.opcua.request.Request;
 import org.eclipse.kura.internal.driver.opcua.request.WriteParams;
@@ -117,7 +118,7 @@ public class ConnectionManager {
 
         final DataValue[] results = response.getResults();
         for (int i = 0; i < requests.size(); i++) {
-            fill(results[i], requests.get(i).getRecord());
+            fillRecord(results[i], requests.get(i).getRecord());
         }
 
         logger.debug("Read Successful");
@@ -135,7 +136,9 @@ public class ConnectionManager {
 
         final StatusCode[] results = response.getResults();
         for (int i = 0; i < requests.size(); i++) {
-            checkStatus(results[i], requests.get(i).getRecord());
+            final ChannelRecord record = requests.get(i).getRecord();
+            fillStatus(results[i], record);
+            record.setTimestamp(System.currentTimeMillis());
         }
 
         logger.debug("Write Successful");

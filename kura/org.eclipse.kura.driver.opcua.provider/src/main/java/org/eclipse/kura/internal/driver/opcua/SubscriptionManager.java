@@ -11,8 +11,9 @@
 package org.eclipse.kura.internal.driver.opcua;
 
 import static java.util.concurrent.CompletableFuture.completedFuture;
-import static org.eclipse.kura.internal.driver.opcua.Utils.fill;
-import static org.eclipse.kura.internal.driver.opcua.Utils.forEachChunk;
+import static org.eclipse.kura.internal.driver.opcua.Utils.fillRecord;
+import static org.eclipse.kura.internal.driver.opcua.Utils.fillValue;
+import static org.eclipse.kura.internal.driver.opcua.Utils.splitInMultipleRequests;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -202,7 +203,7 @@ public class SubscriptionManager implements SubscriptionListener, ListenerRegist
             if (!requests.isEmpty()) {
                 final ArrayList<CompletableFuture<?>> tasks = new ArrayList<>();
 
-                forEachChunk(options.getMaxItemCountPerRequest(), requests.size(),
+                splitInMultipleRequests(options.getMaxItemCountPerRequest(), requests.size(),
                         (start, end) -> tasks.add(createMonitoredItems(subscription, requests.subList(start, end),
                                 handlers.subList(start, end))));
 
@@ -235,7 +236,7 @@ public class SubscriptionManager implements SubscriptionListener, ListenerRegist
             if (!requests.isEmpty()) {
                 final ArrayList<CompletableFuture<?>> tasks = new ArrayList<>();
 
-                forEachChunk(options.getMaxItemCountPerRequest(), requests.size(), (start, end) -> tasks
+                splitInMultipleRequests(options.getMaxItemCountPerRequest(), requests.size(), (start, end) -> tasks
                         .add(subscription.deleteMonitoredItems(requests.subList(start, end)).thenAccept(ok -> {
                             synchronized (SubscriptionManager.this) {
                                 for (final MonitoredItemHandler handler : handlers) {
@@ -330,18 +331,19 @@ public class SubscriptionManager implements SubscriptionListener, ListenerRegist
 
         public void dispatchEvent(final Variant[] values) {
             dispatcher.dispatch(record -> {
-                fill(values[1], record);
+                fillValue(values[1], record);
 
                 try {
                     record.setTimestamp(((DateTime) values[0].getValue()).getJavaTime());
                 } catch (Exception e) {
                     logger.debug("Failed to extract event Time, using locally generated timestamp");
+                    record.setTimestamp(System.currentTimeMillis());
                 }
             });
         }
 
         public void dispatchValue(final DataValue value) {
-            dispatcher.dispatch(record -> fill(value, record));
+            dispatcher.dispatch(record -> fillRecord(value, record));
         }
 
         public void close() {

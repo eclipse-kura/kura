@@ -11,6 +11,9 @@
  *******************************************************************************/
 package org.eclipse.kura.net.modem;
 
+/**
+ * @since 1.4
+ */
 public enum ModemPdpContextType {
     IP("IP"),
     PPP("PPP"),

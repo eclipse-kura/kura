@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -24,6 +24,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.kura.KuraBluetoothConnectionException;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.bluetooth.le.BluetoothLeAdapter;
 import org.eclipse.kura.bluetooth.le.BluetoothLeDevice;
@@ -47,6 +48,7 @@ public class BluetoothLe implements ConfigurableComponent {
 
     private static final String INTERRUPTED_EX = "Interrupted Exception";
     private static final String DISCOVERY_STOP_EX = "Failed to stop discovery";
+    private static final String CONNECTION_ERROR_EX = "Cannot connect/disconnect to TI SensorTag {}.";
 
     private CloudService cloudService;
     private CloudClient cloudClient;
@@ -124,17 +126,6 @@ public class BluetoothLe implements ConfigurableComponent {
             }
         }
 
-        // disconnect SensorTags
-        for (TiSensorTag tiSensorTag : this.tiSensorTagList) {
-            if (tiSensorTag != null && tiSensorTag.isConnected()) {
-                if (this.options.isEnableButtons()) {
-                    tiSensorTag.disableKeysNotifications();
-                }
-                tiSensorTag.disconnect();
-            }
-        }
-        this.tiSensorTagList.clear();
-
         // cancel a current worker handle if one is active
         if (this.handle != null) {
             this.handle.cancel(true);
@@ -144,6 +135,18 @@ public class BluetoothLe implements ConfigurableComponent {
         if (this.worker != null) {
             this.worker.shutdown();
         }
+
+        // disconnect SensorTags
+        for (TiSensorTag tiSensorTag : this.tiSensorTagList) {
+            if (tiSensorTag != null && tiSensorTag.isConnected()) {
+                try {
+                    tiSensorTag.disconnect();
+                } catch (KuraBluetoothConnectionException e) {
+                    logger.error(CONNECTION_ERROR_EX, tiSensorTag.getBluetoothLeDevice().getAddress());
+                }
+            }
+        }
+        this.tiSensorTagList.clear();
 
         // cancel bluetoothAdapter
         this.bluetoothLeAdapter = null;
@@ -163,6 +166,7 @@ public class BluetoothLe implements ConfigurableComponent {
                 if (!this.bluetoothLeAdapter.isPowered()) {
                     logger.info("Enabling bluetooth adapter...");
                     this.bluetoothLeAdapter.setPowered(true);
+                    waitFor(1000);
                 }
                 logger.info("Bluetooth adapter address => {}", this.bluetoothLeAdapter.getAddress());
 
@@ -239,7 +243,7 @@ public class BluetoothLe implements ConfigurableComponent {
         for (BluetoothLeDevice bluetoothLeDevice : devices) {
             logger.info("Address {} Name {}", bluetoothLeDevice.getAddress(), bluetoothLeDevice.getName());
 
-            if (bluetoothLeDevice.getName().contains("SensorTag")
+            if (bluetoothLeDevice.getName().replace(" ", "").contains("SensorTag")
                     && !isSensorTagInList(bluetoothLeDevice.getAddress())) {
                 this.tiSensorTagList.add(new TiSensorTag(bluetoothLeDevice));
             }
@@ -249,12 +253,13 @@ public class BluetoothLe implements ConfigurableComponent {
     private void readSensorTags() {
         // connect to TiSensorTags
         for (TiSensorTag myTiSensorTag : this.tiSensorTagList) {
-            if (!myTiSensorTag.isConnected()) {
-                logger.info("Connecting to TiSensorTag {}...", myTiSensorTag.getBluetoothLeDevice().getAddress());
-                myTiSensorTag.connect();
-            }
+            try {
+                if (!myTiSensorTag.isConnected()) {
+                    logger.info("Connecting to TiSensorTag {}...", myTiSensorTag.getBluetoothLeDevice().getAddress());
+                    myTiSensorTag.connect();
+                }
+                myTiSensorTag.init();
 
-            if (myTiSensorTag.isConnected()) {
                 KuraPayload payload = new KuraPayload();
                 payload.setTimestamp(new Date());
                 if (myTiSensorTag.isCC2650()) {
@@ -298,7 +303,7 @@ public class BluetoothLe implements ConfigurableComponent {
                     readLight(myTiSensorTag, payload);
                 }
 
-                if (this.options.isEnableButtons() && !myTiSensorTag.isKeysNotificationEnabled()) {
+                if (this.options.isEnableButtons() && !myTiSensorTag.isKeysNotifying()) {
                     // For buttons only enable notifications
                     myTiSensorTag.enableKeysNotification(keys -> {
                         logger.info("Received key {}", keys);
@@ -328,19 +333,22 @@ public class BluetoothLe implements ConfigurableComponent {
 
                 // Publish only if there are metrics to be published!
                 if (!payload.metricNames().isEmpty()) {
-                    try {
-                        this.cloudClient.publish(
-                                this.options.getTopic() + "/" + myTiSensorTag.getBluetoothLeDevice().getAddress(),
-                                payload, 0, false);
-                    } catch (KuraException e) {
-                        logger.error("Publish message failed", e);
-                    }
+                    publish(myTiSensorTag, payload);
                 }
 
-            } else {
-                logger.warn("Cannot connect to TI SensorTag {}.", myTiSensorTag.getBluetoothLeDevice().getAddress());
+            } catch (KuraBluetoothConnectionException e) {
+                logger.error(CONNECTION_ERROR_EX, myTiSensorTag.getBluetoothLeDevice().getAddress());
             }
+        }
+    }
 
+    private void publish(TiSensorTag myTiSensorTag, KuraPayload payload) {
+        try {
+            this.cloudClient.publish(
+                    this.options.getTopic() + "/" + myTiSensorTag.getBluetoothLeDevice().getAddress(),
+                    payload, 0, false);
+        } catch (KuraException e) {
+            logger.error("Publish message failed", e);
         }
     }
 
@@ -451,7 +459,7 @@ public class BluetoothLe implements ConfigurableComponent {
         payload.addMetric("Target", temperatures[1]);
     }
 
-    private void waitFor(long millis) {
+    protected static void waitFor(long millis) {
         try {
             Thread.sleep(millis);
         } catch (InterruptedException e) {

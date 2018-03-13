@@ -13,23 +13,24 @@ package org.eclipse.kura.internal.driver.ble.sensortag;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
-import static org.eclipse.kura.KuraErrorCode.OPERATION_NOT_SUPPORTED;
 import static org.eclipse.kura.channel.ChannelFlag.FAILURE;
 import static org.eclipse.kura.channel.ChannelFlag.SUCCESS;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import org.eclipse.kura.KuraBluetoothIOException;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.bluetooth.le.BluetoothLeAdapter;
 import org.eclipse.kura.bluetooth.le.BluetoothLeDevice;
 import org.eclipse.kura.bluetooth.le.BluetoothLeService;
@@ -72,11 +73,13 @@ public final class SensorTagDriver implements Driver, ConfigurableComponent {
     private static final Logger logger = LoggerFactory.getLogger(SensorTagDriver.class);
 
     private static final int TIMEOUT = 5;
+    private static final String INTERRUPTED_EX = "Interrupted Exception";
 
     private SensorTagOptions options;
     private BluetoothLeService bluetoothLeService;
     private BluetoothLeAdapter bluetoothLeAdapter;
     private Map<String, TiSensorTag> tiSensorTagMap;
+    private Set<SensorListener> sensorListeners;
 
     protected synchronized void bindBluetoothLeService(final BluetoothLeService bluetoothLeService) {
         if (isNull(this.bluetoothLeService)) {
@@ -93,6 +96,7 @@ public final class SensorTagDriver implements Driver, ConfigurableComponent {
     protected synchronized void activate(final Map<String, Object> properties) {
         logger.debug("Activating BLE SensorTag Driver...");
         this.tiSensorTagMap = new HashMap<>();
+        this.sensorListeners = new HashSet<>();
         doUpdate(properties);
         logger.debug("Activating BLE SensorTag Driver... Done");
     }
@@ -122,7 +126,7 @@ public final class SensorTagDriver implements Driver, ConfigurableComponent {
         try {
             disconnect();
         } catch (ConnectionException e) {
-            logger.error("Disconnecrtion failed", e);
+            logger.error("Disconnection failed", e);
         }
 
         // cancel bluetoothAdapter
@@ -139,6 +143,7 @@ public final class SensorTagDriver implements Driver, ConfigurableComponent {
             if (!this.bluetoothLeAdapter.isPowered()) {
                 logger.info("Enabling bluetooth adapter...");
                 this.bluetoothLeAdapter.setPowered(true);
+                waitFor(1000);
             }
             logger.info("Bluetooth adapter address => {}", this.bluetoothLeAdapter.getAddress());
         } else {
@@ -156,9 +161,10 @@ public final class SensorTagDriver implements Driver, ConfigurableComponent {
         }
     }
 
-    private void connect(TiSensorTag sensorTag) {
+    private void connect(TiSensorTag sensorTag) throws ConnectionException {
         sensorTag.connect();
         if (sensorTag.isConnected()) {
+            sensorTag.init();
             sensorTag.enableTermometer();
 
             sensorTag.setAccelerometerPeriod(50);
@@ -225,7 +231,7 @@ public final class SensorTagDriver implements Driver, ConfigurableComponent {
         return new SensorTagChannelDescriptor();
     }
 
-    private Optional<TypedValue<?>> getTypedValue(final DataType expectedValueType, final Object containedValue) {
+    public static Optional<TypedValue<?>> getTypedValue(final DataType expectedValueType, final Object containedValue) {
         try {
             switch (expectedValueType) {
             case LONG:
@@ -255,27 +261,33 @@ public final class SensorTagDriver implements Driver, ConfigurableComponent {
 
         ChannelRecord record = requestInfo.channelRecord;
         try {
-            TiSensorTag sensorTag = getSensorTag(requestInfo);
-            Object readResult = getReadResult(requestInfo.sensorName, sensorTag);
-            final Optional<TypedValue<?>> typedValue = getTypedValue(requestInfo.dataType, readResult);
-            if (!typedValue.isPresent()) {
-                record.setChannelStatus(new ChannelStatus(FAILURE,
-                        "Error while converting the retrieved value to the defined typed", null));
+            TiSensorTag sensorTag = getSensorTag(requestInfo.sensorTagAddress);
+            if (sensorTag.isConnected()) {
+                Object readResult = getReadResult(requestInfo.sensorName, sensorTag);
+                final Optional<TypedValue<?>> typedValue = getTypedValue(requestInfo.dataType, readResult);
+                if (!typedValue.isPresent()) {
+                    record.setChannelStatus(new ChannelStatus(FAILURE,
+                            "Error while converting the retrieved value to the defined typed", null));
+                    record.setTimestamp(System.currentTimeMillis());
+                    return;
+                }
+                record.setValue(typedValue.get());
+                record.setChannelStatus(new ChannelStatus(SUCCESS));
+                record.setTimestamp(System.currentTimeMillis());
+            } else {
+                record.setChannelStatus(new ChannelStatus(FAILURE, "Unable to Connect...", null));
                 record.setTimestamp(System.currentTimeMillis());
                 return;
             }
-            record.setValue(typedValue.get());
-            record.setChannelStatus(new ChannelStatus(SUCCESS));
-            record.setTimestamp(System.currentTimeMillis());
-        } catch (KuraException e) {
+        } catch (KuraBluetoothIOException | ConnectionException e) {
             record.setChannelStatus(new ChannelStatus(ChannelFlag.FAILURE, "SensortTag Read Operation Failed", null));
             record.setTimestamp(System.currentTimeMillis());
-            logger.warn("SensortTag Read Operation Failed");
+            logger.warn(e.getMessage());
             return;
         }
     }
 
-    private Object getReadResult(SensorName sensorName, TiSensorTag sensorTag) throws KuraException {
+    private Object getReadResult(SensorName sensorName, TiSensorTag sensorTag) throws KuraBluetoothIOException {
         switch (sensorName) {
         case TEMP_AMBIENT:
             return sensorTag.readTemperature()[0];
@@ -310,27 +322,27 @@ public final class SensorTagDriver implements Driver, ConfigurableComponent {
         }
     }
 
-    private TiSensorTag getSensorTag(SensorTagRequestInfo requestInfo) throws KuraBluetoothIOException {
-        if (!this.tiSensorTagMap.containsKey(requestInfo.sensorTagAddress)) {
-            Future<BluetoothLeDevice> future = this.bluetoothLeAdapter.findDeviceByAddress(TIMEOUT,
-                    requestInfo.sensorTagAddress);
+    private TiSensorTag getSensorTag(String sensorTagAddress) throws KuraBluetoothIOException, ConnectionException {
+        requireNonNull(sensorTagAddress);
+        if (!this.tiSensorTagMap.containsKey(sensorTagAddress)) {
+            Future<BluetoothLeDevice> future = this.bluetoothLeAdapter.findDeviceByAddress(TIMEOUT, sensorTagAddress);
             BluetoothLeDevice device = null;
             try {
                 device = future.get();
             } catch (InterruptedException | ExecutionException e) {
-                logger.error("Get SensorTag {} failed", requestInfo.sensorTagAddress, e);
+                logger.error("Get SensorTag {} failed", sensorTagAddress, e);
             }
             if (device != null) {
-                this.tiSensorTagMap.put(requestInfo.sensorTagAddress, new TiSensorTag(device));
+                this.tiSensorTagMap.put(sensorTagAddress, new TiSensorTag(device));
+            } else {
+                throw new KuraBluetoothIOException("Resource unavailable");
             }
         }
-        TiSensorTag sensorTag = this.tiSensorTagMap.get(requestInfo.sensorTagAddress);
-        if (sensorTag == null) {
-            throw new KuraBluetoothIOException("Resource unavailable");
-        }
+        TiSensorTag sensorTag = this.tiSensorTagMap.get(sensorTagAddress);
         if (!sensorTag.isConnected()) {
             connect(sensorTag);
         }
+        sensorTag.init();
         return sensorTag;
     }
 
@@ -344,24 +356,53 @@ public final class SensorTagDriver implements Driver, ConfigurableComponent {
     @Override
     public void registerChannelListener(final Map<String, Object> channelConfig, final ChannelListener listener)
             throws ConnectionException {
-        throw new KuraRuntimeException(OPERATION_NOT_SUPPORTED);
+
+        try {
+            TiSensorTag sensorTag = getSensorTag(SensorTagChannelDescriptor.getSensorTagAddress(channelConfig));
+            if (sensorTag.isConnected()) {
+                SensorListener sensorListener = getSensorListener(sensorTag,
+                        SensorTagChannelDescriptor.getSensorName(channelConfig).toString().split("_")[0],
+                        SensorTagChannelDescriptor.getNotificationPeriod(channelConfig));
+                sensorListener.addChannelName((String) channelConfig.get("+name"));
+                sensorListener.addDataType(DataType.getDataType((String) channelConfig.get("+value.type")));
+                sensorListener.addListener(listener);
+                sensorListener.addSensorName(SensorTagChannelDescriptor.getSensorName(channelConfig));
+                registerNotification(sensorListener);
+            } else {
+                logger.warn("Listener registration failed: TiSensorTag not connected");
+            }
+        } catch (KuraBluetoothIOException | ConnectionException e) {
+            logger.error("Listener registration failed", e);
+        }
     }
 
     @Override
     public void unregisterChannelListener(final ChannelListener listener) throws ConnectionException {
-        throw new KuraRuntimeException(OPERATION_NOT_SUPPORTED);
+        Iterator<SensorListener> iterator = this.sensorListeners.iterator();
+        while (iterator.hasNext()) {
+            SensorListener sensorListener = iterator.next();
+            if (sensorListener.getListeners().contains(listener)) {
+                if (sensorListener.getListeners().size() == 1) {
+                    unregisterNotification(sensorListener);
+                    iterator.remove();
+                } else {
+                    int index = sensorListener.getListeners().indexOf(listener);
+                    sensorListener.removeAll(index);
+                }
+            }
+        }
     }
 
     private void runWriteRequest(SensorTagRequestInfo requestInfo) {
         ChannelRecord record = requestInfo.channelRecord;
         record.setTimestamp(System.currentTimeMillis());
 
-        TiSensorTag sensorTag;
+        TiSensorTag sensorTag = null;
         try {
-            sensorTag = getSensorTag(requestInfo);
-        } catch (KuraBluetoothIOException e) {
+            sensorTag = getSensorTag(requestInfo.sensorTagAddress);
+        } catch (KuraBluetoothIOException | ConnectionException e) {
             record.setChannelStatus(new ChannelStatus(FAILURE, "SensortTag Write Operation Failed", null));
-            logger.error("IO Exception encountered while connecting.");
+            logger.error("SensorTag {} not found", requestInfo.sensorTagAddress, e);
             return;
         }
 
@@ -433,7 +474,7 @@ public final class SensorTagDriver implements Driver, ConfigurableComponent {
             final SensorName sensorName;
 
             try {
-                sensorTagAddress = SensorTagChannelDescriptor.getsensorTagAddress(channelConfig);
+                sensorTagAddress = SensorTagChannelDescriptor.getSensorTagAddress(channelConfig);
             } catch (final Exception e) {
                 fail(record, "Error while retrieving SensortTag address");
                 logger.error("Error retrieving SensorTag Address", e);
@@ -472,6 +513,153 @@ public final class SensorTagDriver implements Driver, ConfigurableComponent {
         return preparedRead;
     }
 
+    private void registerNotification(SensorListener sensorListener) {
+        switch (sensorListener.getSensorType()) {
+        case "TEMP":
+            sensorListener.getSensorTag().setTermometerPeriod((int) (sensorListener.getPeriod() / 10));
+            unregisterTemperatureNotification(sensorListener);
+            sensorListener.getSensorTag()
+                    .enableTemperatureNotifications(SensorListener.getSensorConsumer(sensorListener));
+            break;
+        case "ACCELERATION":
+            sensorListener.getSensorTag().setAccelerometerPeriod((int) (sensorListener.getPeriod() / 10));
+            unregisterAccelerationNotification(sensorListener);
+            sensorListener.getSensorTag()
+                    .enableAccelerationNotifications(SensorListener.getSensorConsumer(sensorListener));
+            break;
+        case "GYROSCOPE":
+            sensorListener.getSensorTag().setGyroscopePeriod((int) (sensorListener.getPeriod() / 10));
+            unregisterGyroscopeNotification(sensorListener);
+            sensorListener.getSensorTag()
+                    .enableGyroscopeNotifications(SensorListener.getSensorConsumer(sensorListener));
+            break;
+        case "MAGNETIC":
+            sensorListener.getSensorTag().setMagnetometerPeriod((int) (sensorListener.getPeriod() / 10));
+            unregisterMagneticNotification(sensorListener);
+            sensorListener.getSensorTag()
+                    .enableMagneticFieldNotifications(SensorListener.getSensorConsumer(sensorListener));
+            break;
+        case "HUMIDITY":
+            sensorListener.getSensorTag().setHygrometerPeriod((int) (sensorListener.getPeriod() / 10));
+            unregisterHumidityNotification(sensorListener);
+            sensorListener.getSensorTag().enableHumidityNotifications(SensorListener.getSensorConsumer(sensorListener));
+            break;
+        case "LIGHT":
+            sensorListener.getSensorTag().setLuxometerPeriod((int) (sensorListener.getPeriod() / 10));
+            unregisterLightNotification(sensorListener);
+            sensorListener.getSensorTag().enableLightNotifications(SensorListener.getSensorConsumer(sensorListener));
+            break;
+        case "PRESSURE":
+            sensorListener.getSensorTag().setBarometerPeriod((int) (sensorListener.getPeriod() / 10));
+            unregisterPressureNotification(sensorListener);
+            sensorListener.getSensorTag().enablePressureNotifications(SensorListener.getSensorConsumer(sensorListener));
+            break;
+        case "KEYS":
+            // Register and unregister listeners for buttons too fast can cause problem on native library
+            unregisterKeysNotification(sensorListener);
+            waitFor(1000);
+            sensorListener.getSensorTag().enableKeysNotification(SensorListener.getSensorConsumer(sensorListener));
+            break;
+        case "BUZZER":
+        case "GREEN_LED":
+        case "RED_LED":
+            logger.info("Notifications not supported for buzzer and leds");
+            break;
+        default:
+
+        }
+    }
+
+    private void unregisterKeysNotification(SensorListener sensorListener) {
+        // Register and unregister listeners for buttons too fast can cause problem on native library
+        waitFor(1000);
+        if (sensorListener.getSensorTag().isKeysNotifying()) {
+            sensorListener.getSensorTag().disableKeysNotifications();
+        }
+    }
+
+    private void unregisterPressureNotification(SensorListener sensorListener) {
+        if (sensorListener.getSensorTag().isBarometerNotifying()) {
+            sensorListener.getSensorTag().disablePressureNotifications();
+        }
+    }
+
+    private void unregisterLightNotification(SensorListener sensorListener) {
+        if (sensorListener.getSensorTag().isLuxometerNotifying()) {
+            sensorListener.getSensorTag().disableLightNotifications();
+        }
+    }
+
+    private void unregisterHumidityNotification(SensorListener sensorListener) {
+        if (sensorListener.getSensorTag().isHygrometerNotifying()) {
+            sensorListener.getSensorTag().disableHumidityNotifications();
+        }
+    }
+
+    private void unregisterMagneticNotification(SensorListener sensorListener) {
+        if (sensorListener.getSensorTag().isMagnetometerNotifying()) {
+            sensorListener.getSensorTag().disableMagneticFieldNotifications();
+        }
+    }
+
+    private void unregisterGyroscopeNotification(SensorListener sensorListener) {
+        if (sensorListener.getSensorTag().isGyroscopeNotifying()) {
+            sensorListener.getSensorTag().disableGyroscopeNotifications();
+        }
+    }
+
+    private void unregisterAccelerationNotification(SensorListener sensorListener) {
+        if (sensorListener.getSensorTag().isAccelerometerNotifying()) {
+            sensorListener.getSensorTag().disableAccelerationNotifications();
+        }
+    }
+
+    private void unregisterTemperatureNotification(SensorListener sensorListener) {
+        if (sensorListener.getSensorTag().isTermometerNotifying()) {
+            sensorListener.getSensorTag().disableTemperatureNotifications();
+        }
+    }
+
+    private void unregisterNotification(SensorListener sensorListener) {
+        if (sensorListener.getSensorTag().isConnected()) {
+            switch (sensorListener.getSensorType()) {
+            case "TEMP":
+                unregisterTemperatureNotification(sensorListener);
+                break;
+            case "ACCELERATION":
+                unregisterAccelerationNotification(sensorListener);
+                break;
+            case "GYROSCOPE":
+                unregisterGyroscopeNotification(sensorListener);
+                break;
+            case "MAGNETIC":
+                unregisterMagneticNotification(sensorListener);
+                break;
+            case "HUMIDITY":
+                unregisterHumidityNotification(sensorListener);
+                break;
+            case "LIGHT":
+                unregisterLightNotification(sensorListener);
+                break;
+            case "PRESSURE":
+                unregisterPressureNotification(sensorListener);
+                break;
+            case "KEYS":
+                unregisterKeysNotification(sensorListener);
+                break;
+            case "BUZZER":
+            case "GREEN_LED":
+            case "RED_LED":
+                logger.info("Notifications not supported for buzzer and leds");
+                break;
+            default:
+
+            }
+        } else {
+            logger.info("Listener unregistation failed: TiSensorTag not connected");
+        }
+    }
+
     private class SensorTagPreparedRead implements PreparedRead {
 
         private final List<SensorTagRequestInfo> requestInfos = new ArrayList<>();
@@ -494,6 +682,26 @@ public final class SensorTagDriver implements Driver, ConfigurableComponent {
         @Override
         public void close() {
             // Method not supported
+        }
+    }
+
+    private SensorListener getSensorListener(TiSensorTag sensorTag, String sensorType, int period) {
+        for (SensorListener listener : this.sensorListeners) {
+            if (sensorTag == listener.getSensorTag() && sensorType.equals(listener.getSensorType())) {
+                return listener;
+            }
+        }
+        SensorListener sensorListener = new SensorListener(sensorTag, sensorType, period);
+        this.sensorListeners.add(sensorListener);
+        return sensorListener;
+    }
+
+    protected static void waitFor(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            logger.error(INTERRUPTED_EX, e);
         }
     }
 }

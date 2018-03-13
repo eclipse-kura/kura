@@ -43,21 +43,25 @@ public class TiSensorTagTest {
     private static final double EPS = 0.01;
 
     @Test
-    public void testConnectionFailure() throws KuraBluetoothConnectionException {
+    public void testConnectionFailure()
+            throws KuraBluetoothConnectionException, KuraBluetoothResourceNotFoundException {
 
-        BluetoothLeDevice deviceMock = mock(BluetoothLeDevice.class);
-        when(deviceMock.getName()).thenReturn("CC2650 SensorTag");
+        BluetoothLeGattService keysSvcMock = mock(BluetoothLeGattService.class);
+        BluetoothLeGattCharacteristic keysChrMock = mock(BluetoothLeGattCharacteristic.class);
+
+        TiSensorTagBuilder builder = new TiSensorTagBuilder(true, true)
+                .addService(TiSensorTagGatt.UUID_KEYS_SERVICE, keysSvcMock)
+                .addCharacteristic(TiSensorTagGatt.UUID_KEYS_SERVICE, TiSensorTagGatt.UUID_KEYS_STATUS, keysChrMock);
+        TiSensorTag tag = builder.build(true);
+
+        BluetoothLeDevice deviceMock = builder.getDevice();
 
         doThrow(new KuraBluetoothConnectionException(KuraErrorCode.BLE_IO_ERROR)).when(deviceMock).connect();
-        doThrow(new KuraBluetoothConnectionException(KuraErrorCode.BLE_IO_ERROR)).when(deviceMock).disconnect();
-
-        TiSensorTag tag = new TiSensorTag(deviceMock);
-
-        tag.connect();
 
         verify(deviceMock, times(1)).connect();
-        verify(deviceMock, times(1)).isConnected();
+        verify(deviceMock, times(2)).isConnected();
 
+        when(deviceMock.isConnected()).thenReturn(false);
         tag.disconnect();
 
         verify(deviceMock, times(1)).disconnect();
@@ -71,13 +75,13 @@ public class TiSensorTagTest {
 
         assertFalse(tag.isCC2650());
 
-        Map<String, BluetoothLeGattService> gattServices = (Map<String, BluetoothLeGattService>) TestUtil
-                .getFieldValue(tag, "gattServices");
+        Map<String, TiSensorTagGattResources> gattResources = (Map<String, TiSensorTagGattResources>) TestUtil
+                .getFieldValue(tag, "gattResources");
 
-        assertNotNull(gattServices);
-        assertEquals(8, gattServices.size());
-        assertTrue(gattServices.containsKey("devinfo"));
-        assertFalse(gattServices.containsKey("opto"));
+        assertNotNull(gattResources);
+        assertEquals(1, gattResources.size());
+        assertTrue(gattResources.containsKey("devinfo"));
+        assertFalse(gattResources.containsKey("opto"));
     }
 
     @Test
@@ -86,10 +90,17 @@ public class TiSensorTagTest {
 
         BluetoothLeGattService infoSvcMock = mock(BluetoothLeGattService.class);
         BluetoothLeGattService optoSvcMock = mock(BluetoothLeGattService.class);
+        BluetoothLeGattService keysSvcMock = mock(BluetoothLeGattService.class);
+        BluetoothLeGattCharacteristic keysChrMock = mock(BluetoothLeGattCharacteristic.class);
+        BluetoothLeGattCharacteristic optoChrMock = mock(BluetoothLeGattCharacteristic.class);
 
         TiSensorTagBuilder builder = new TiSensorTagBuilder(true, true)
                 .addService(TiSensorTagGatt.UUID_DEVINFO_SERVICE, infoSvcMock)
-                .addService(TiSensorTagGatt.UUID_OPTO_SENSOR_SERVICE, optoSvcMock);
+                .addService(TiSensorTagGatt.UUID_OPTO_SENSOR_SERVICE, optoSvcMock)
+                .addService(TiSensorTagGatt.UUID_KEYS_SERVICE, keysSvcMock)
+                .addCharacteristic(TiSensorTagGatt.UUID_KEYS_SERVICE, TiSensorTagGatt.UUID_KEYS_STATUS, keysChrMock)
+                .addCharacteristic(TiSensorTagGatt.UUID_OPTO_SENSOR_SERVICE, TiSensorTagGatt.UUID_OPTO_SENSOR_VALUE,
+                        optoChrMock);
         TiSensorTag tag = builder.build(true);
 
         assertTrue(tag.isCC2650());
@@ -97,14 +108,16 @@ public class TiSensorTagTest {
         BluetoothLeDevice deviceMock = tag.getBluetoothLeDevice();
         verify(deviceMock, times(1)).connect();
 
-        Map<String, BluetoothLeGattService> gattServices = (Map<String, BluetoothLeGattService>) TestUtil
-                .getFieldValue(tag, "gattServices");
+        Map<String, TiSensorTagGattResources> gattResources = (Map<String, TiSensorTagGattResources>) TestUtil
+                .getFieldValue(tag, "gattResources");
 
-        assertNotNull(gattServices);
-        assertEquals(8, gattServices.size());
-        assertEquals(infoSvcMock, gattServices.get("devinfo"));
-        assertEquals(optoSvcMock, gattServices.get("opto"));
+        assertNotNull(gattResources);
+        assertEquals(3, gattResources.size());
+        assertEquals(infoSvcMock, gattResources.get("devinfo").getGattService());
+        assertEquals(optoSvcMock, gattResources.get("opto").getGattService());
+        assertEquals(keysSvcMock, gattResources.get("keys").getGattService());
 
+        when(deviceMock.isConnected()).thenReturn(false);
         tag.disconnect();
 
         verify(deviceMock, times(1)).disconnect();
@@ -140,7 +153,7 @@ public class TiSensorTagTest {
     }
 
     @Test
-    public void testDiscoverServicesEmpty() throws KuraBluetoothResourceNotFoundException, KuraBluetoothIOException {
+    public void testGetCharacteristicsEmpty() throws KuraBluetoothResourceNotFoundException, KuraBluetoothIOException {
         TiSensorTagBuilder builder = new TiSensorTagBuilder(true, true)
                 .addService(TiSensorTagGatt.UUID_DEVINFO_SERVICE, mock(BluetoothLeGattService.class))
                 .addService(TiSensorTagGatt.UUID_TEMP_SENSOR_SERVICE, mock(BluetoothLeGattService.class))
@@ -158,7 +171,7 @@ public class TiSensorTagTest {
     }
 
     @Test
-    public void testDiscoverServices() throws KuraBluetoothResourceNotFoundException, KuraBluetoothIOException {
+    public void testGetCharacteristics() throws KuraBluetoothResourceNotFoundException, KuraBluetoothIOException {
         BluetoothLeGattService infoSvcMock = mock(BluetoothLeGattService.class);
         List<BluetoothLeGattCharacteristic> isChs = new ArrayList<>();
         isChs.add(mock(BluetoothLeGattCharacteristic.class));
@@ -183,6 +196,23 @@ public class TiSensorTagTest {
 
         List<BluetoothLeGattCharacteristic> characteristics = tag.getCharacteristics();
         assertEquals(3, characteristics.size());
+    }
+
+    @Test
+    public void testDiscoverServices() throws KuraBluetoothResourceNotFoundException, KuraBluetoothIOException {
+        TiSensorTagBuilder builder = new TiSensorTagBuilder(true, true)
+                .addService(TiSensorTagGatt.UUID_TEMP_SENSOR_SERVICE, mock(BluetoothLeGattService.class))
+                .addService(TiSensorTagGatt.UUID_HUM_SENSOR_SERVICE, mock(BluetoothLeGattService.class))
+                .addService(TiSensorTagGatt.UUID_PRE_SENSOR_SERVICE, mock(BluetoothLeGattService.class))
+                .addService(TiSensorTagGatt.UUID_KEYS_SERVICE, mock(BluetoothLeGattService.class))
+                .addService(TiSensorTagGatt.UUID_MOV_SENSOR_SERVICE, mock(BluetoothLeGattService.class))
+                .addService(TiSensorTagGatt.UUID_IO_SENSOR_SERVICE, mock(BluetoothLeGattService.class))
+                .addService(TiSensorTagGatt.UUID_DEVINFO_SERVICE, mock(BluetoothLeGattService.class))
+                .addService(TiSensorTagGatt.UUID_OPTO_SENSOR_SERVICE, mock(BluetoothLeGattService.class));
+        TiSensorTag tag = builder.build(true);
+
+        Map<String, BluetoothLeGattService> services = tag.discoverServices();
+        assertEquals(8, services.size());
     }
 
     @Test
@@ -230,13 +260,15 @@ public class TiSensorTagTest {
     }
 
     @Test
-    public void testReadTemperatureFail() throws KuraBluetoothResourceNotFoundException {
-        BluetoothLeGattService infoSvcMock = mock(BluetoothLeGattService.class);
-        doThrow(new KuraBluetoothResourceNotFoundException("test")).when(infoSvcMock)
-                .findCharacteristic(TiSensorTagGatt.UUID_TEMP_SENSOR_VALUE);
+    public void testReadTemperatureFail() throws KuraBluetoothResourceNotFoundException, KuraBluetoothIOException {
+        BluetoothLeGattService tempSvcMock = mock(BluetoothLeGattService.class);
+        BluetoothLeGattCharacteristic tempChrMock = mock(BluetoothLeGattCharacteristic.class);
+        doThrow(new KuraBluetoothIOException("test")).when(tempChrMock).readValue();
 
-        TiSensorTag tag = new TiSensorTagBuilder(true, true)
-                .addService(TiSensorTagGatt.UUID_TEMP_SENSOR_SERVICE, infoSvcMock).build(true);
+        TiSensorTagBuilder builder = new TiSensorTagBuilder(true, true)
+                .addService(TiSensorTagGatt.UUID_TEMP_SENSOR_SERVICE, tempSvcMock).addCharacteristic(
+                        TiSensorTagGatt.UUID_TEMP_SENSOR_SERVICE, TiSensorTagGatt.UUID_TEMP_SENSOR_VALUE, tempChrMock);
+        TiSensorTag tag = builder.build(true);
 
         assertArrayEquals(new double[2], tag.readTemperature(), EPS);
     }
@@ -1187,6 +1219,7 @@ class TiSensorTagBuilder {
         if (connected) {
             when(deviceMock.isConnected()).thenReturn(true);
         }
+
     }
 
     public TiSensorTagBuilder addService(UUID id, BluetoothLeGattService service)
@@ -1197,11 +1230,28 @@ class TiSensorTagBuilder {
         return this;
     }
 
+    public TiSensorTagBuilder addCharacteristic(UUID serviceId, UUID CharacteristicId,
+            BluetoothLeGattCharacteristic characteristic) throws KuraBluetoothResourceNotFoundException {
+
+        when(deviceMock.findService(serviceId).findCharacteristic(CharacteristicId)).thenReturn(characteristic);
+
+        return this;
+    }
+
+    public BluetoothLeDevice getDevice() {
+        return this.deviceMock;
+    }
+
     public TiSensorTag build(boolean connect) {
         TiSensorTag tag = new TiSensorTag(deviceMock);
 
-        if (connect) {
-            tag.connect();
+        try {
+            if (connect) {
+                tag.connect();
+            }
+            tag.init();
+        } catch (KuraBluetoothConnectionException e) {
+            // Do nothing
         }
 
         return tag;

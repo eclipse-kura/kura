@@ -19,8 +19,11 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -28,9 +31,7 @@ import org.eclipse.kura.KuraBluetoothConnectionException;
 import org.eclipse.kura.KuraBluetoothDiscoveryException;
 import org.eclipse.kura.KuraBluetoothIOException;
 import org.eclipse.kura.KuraBluetoothResourceNotFoundException;
-import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.bluetooth.le.BluetoothLeAdapter;
 import org.eclipse.kura.bluetooth.le.BluetoothLeDevice;
 import org.eclipse.kura.bluetooth.le.BluetoothLeGattCharacteristic;
@@ -38,6 +39,7 @@ import org.eclipse.kura.bluetooth.le.BluetoothLeGattService;
 import org.eclipse.kura.bluetooth.le.BluetoothLeService;
 import org.eclipse.kura.channel.ChannelFlag;
 import org.eclipse.kura.channel.ChannelRecord;
+import org.eclipse.kura.channel.listener.ChannelListener;
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.driver.Driver.ConnectionException;
 import org.eclipse.kura.type.BooleanValue;
@@ -83,7 +85,7 @@ public class SensorTagDriverTest {
 
         BluetoothLeDevice devMock = mock(BluetoothLeDevice.class);
         when(devMock.getName()).thenReturn("CC2451");
-        when(devMock.isConnected()).thenReturn(true);
+        when(devMock.isConnected()).thenReturn(true).thenReturn(false);
 
         Map<String, TiSensorTag> tiSensorTagMap = (Map<String, TiSensorTag>) TestUtil.getFieldValue(svc,
                 "tiSensorTagMap");
@@ -96,7 +98,7 @@ public class SensorTagDriverTest {
         verify(adapterMock, times(1)).isDiscovering();
         verify(adapterMock, times(1)).stopDiscovery();
 
-        verify(devMock, times(1)).isConnected();
+        verify(devMock, times(2)).isConnected();
         verify(devMock, times(1)).disconnect();
 
         assertEquals(0, tiSensorTagMap.size());
@@ -112,7 +114,8 @@ public class SensorTagDriverTest {
     }
 
     @Test
-    public void testConnectNotConnected() throws NoSuchFieldException, ConnectionException {
+    public void testConnectNotConnected()
+            throws NoSuchFieldException, ConnectionException, KuraBluetoothConnectionException {
         SensorTagDriver svc = new SensorTagDriver();
 
         Map<String, TiSensorTag> tiSensorTagMap = new HashMap<>();
@@ -131,7 +134,7 @@ public class SensorTagDriverTest {
     }
 
     @Test
-    public void testConnect() throws NoSuchFieldException, ConnectionException {
+    public void testConnect() throws NoSuchFieldException, ConnectionException, KuraBluetoothConnectionException {
         SensorTagDriver svc = new SensorTagDriver();
 
         Map<String, TiSensorTag> tiSensorTagMap = new HashMap<>();
@@ -171,7 +174,7 @@ public class SensorTagDriverTest {
     }
 
     @Test
-    public void testConnectCc2650() throws NoSuchFieldException, ConnectionException {
+    public void testConnectCc2650() throws NoSuchFieldException, ConnectionException, KuraBluetoothConnectionException {
         SensorTagDriver svc = new SensorTagDriver();
 
         Map<String, TiSensorTag> tiSensorTagMap = new HashMap<>();
@@ -198,22 +201,54 @@ public class SensorTagDriverTest {
     }
 
     @Test
-    public void testChannelListeners() throws ConnectionException {
+    public void testChannelListeners() throws ConnectionException, NoSuchFieldException, InterruptedException,
+            ExecutionException, KuraBluetoothResourceNotFoundException {
+        String tagAddress = "12:34:56:78:90:AC";
         SensorTagDriver svc = new SensorTagDriver();
 
-        try {
-            svc.registerChannelListener(null, null);
-            fail("Exception was expected");
-        } catch (KuraRuntimeException e) {
-            assertEquals(KuraErrorCode.OPERATION_NOT_SUPPORTED, e.getCode());
-        }
+        BluetoothLeAdapter bluetoothLeAdapter = mock(BluetoothLeAdapter.class);
+        TestUtil.setFieldValue(svc, "bluetoothLeAdapter", bluetoothLeAdapter);
 
-        try {
-            svc.unregisterChannelListener(null);
-            fail("Exception was expected");
-        } catch (KuraRuntimeException e) {
-            assertEquals(KuraErrorCode.OPERATION_NOT_SUPPORTED, e.getCode());
-        }
+        Map<String, TiSensorTag> tiSensorTagMap = new HashMap<>();
+        TestUtil.setFieldValue(svc, "tiSensorTagMap", tiSensorTagMap);
+
+        Set<SensorListener> sensorListeners = new HashSet<>();
+        TestUtil.setFieldValue(svc, "sensorListeners", sensorListeners);
+
+        BluetoothLeGattService preSvcMock = mock(BluetoothLeGattService.class);
+        BluetoothLeGattCharacteristic preChrMock = mock(BluetoothLeGattCharacteristic.class);
+        BluetoothLeGattCharacteristic prePeriodChrMock = mock(BluetoothLeGattCharacteristic.class);
+        when(preSvcMock.findCharacteristic(TiSensorTagGatt.UUID_PRE_SENSOR_VALUE)).thenReturn(preChrMock);
+        when(preChrMock.isNotifying()).thenReturn(false).thenReturn(true);
+
+        TiSensorTag tag = new TiSensorTagBuilder(true, true)
+                .addService(TiSensorTagGatt.UUID_PRE_SENSOR_SERVICE, preSvcMock)
+                .addCharacteristic(TiSensorTagGatt.UUID_PRE_SENSOR_SERVICE, TiSensorTagGatt.UUID_PRE_SENSOR_VALUE,
+                        preChrMock)
+                .addCharacteristic(TiSensorTagGatt.UUID_PRE_SENSOR_SERVICE, TiSensorTagGatt.UUID_PRE_SENSOR_PERIOD,
+                        prePeriodChrMock)
+                .build(true);
+        tiSensorTagMap.put(tagAddress, tag);
+
+        List<ChannelRecord> records = new ArrayList<>();
+        ChannelRecord record = ChannelRecord.createReadRecord("pressure", DataType.DOUBLE);
+        Map<String, Object> config = new HashMap<>();
+        config.put("sensortag.address", tagAddress);
+        config.put("sensor.name", "PRESSURE");
+        config.put("notification.period", "1000");
+        config.put("+name", "pressure");
+        config.put("+value.type", "double");
+
+        record.setChannelConfig(config);
+        records.add(record);
+        ChannelListener listener = event -> {
+        };
+
+        svc.registerChannelListener(config, listener);
+        assertEquals(1, sensorListeners.size());
+
+        svc.unregisterChannelListener(listener);
+        assertEquals(0, sensorListeners.size());
     }
 
     @Test
@@ -251,7 +286,7 @@ public class SensorTagDriverTest {
         when(bldFuture.get()).thenReturn(bldMock);
         when(bldMock.getName()).thenReturn("CC2650 SensorTag");
 
-        when(bldMock.isConnected()).thenReturn(false).thenReturn(true).thenReturn(false);
+        when(bldMock.isConnected()).thenReturn(true);
 
         // getGattServices
         BluetoothLeGattService gattSvcMock = mock(BluetoothLeGattService.class);
@@ -290,10 +325,13 @@ public class SensorTagDriverTest {
         Map<String, TiSensorTag> tiSensorTagMap = new HashMap<>();
         TestUtil.setFieldValue(svc, "tiSensorTagMap", tiSensorTagMap);
 
-        TiSensorTag tist = mock(TiSensorTag.class);
-        tiSensorTagMap.put(address, tist);
+        BluetoothLeGattService preSvcMock = mock(BluetoothLeGattService.class);
+        doThrow(new KuraBluetoothResourceNotFoundException("test")).when(preSvcMock)
+                .findCharacteristic(TiSensorTagGatt.UUID_PRE_SENSOR_VALUE);
 
-        doThrow(new KuraException(KuraErrorCode.BLE_COMMAND_ERROR)).when(tist).readPressure();
+        TiSensorTag tag = new TiSensorTagBuilder(true, true)
+                .addService(TiSensorTagGatt.UUID_PRE_SENSOR_SERVICE, preSvcMock).build(true);
+        tiSensorTagMap.put(address, tag);
 
         List<ChannelRecord> records = new ArrayList<>();
         ChannelRecord record = ChannelRecord.createReadRecord("pressure", DataType.DOUBLE);
@@ -374,8 +412,8 @@ public class SensorTagDriverTest {
     }
 
     @Test
-    public void testWriteDoubleFailure() throws NoSuchFieldException, InterruptedException, ExecutionException,
-            ConnectionException {
+    public void testWriteDoubleFailure()
+            throws NoSuchFieldException, InterruptedException, ExecutionException, ConnectionException {
 
         String address = "12:34:56:78:90:AC";
 
@@ -446,8 +484,8 @@ public class SensorTagDriverTest {
     }
 
     public void testWrite(String sensorName, byte[] writeOn, byte[] writeOff)
-            throws NoSuchFieldException, InterruptedException, ExecutionException,
-            KuraBluetoothIOException, KuraBluetoothResourceNotFoundException, ConnectionException {
+            throws NoSuchFieldException, InterruptedException, ExecutionException, KuraBluetoothIOException,
+            KuraBluetoothResourceNotFoundException, ConnectionException {
 
         String address = "12:34:56:78:90:AC";
 
@@ -463,7 +501,7 @@ public class SensorTagDriverTest {
         when(bldFuture.get()).thenReturn(bldMock);
         when(bldMock.getName()).thenReturn("CC2650 SensorTag");
 
-        when(bldMock.isConnected()).thenReturn(false).thenReturn(true).thenReturn(false);
+        when(bldMock.isConnected()).thenReturn(true);
 
         // getGattServices
         BluetoothLeGattService gattSvcMock = mock(BluetoothLeGattService.class);
@@ -499,5 +537,64 @@ public class SensorTagDriverTest {
         assertEquals(ChannelFlag.SUCCESS, record.getChannelStatus().getChannelFlag());
         verify(blgcMock, times(1)).writeValue(writeOn);
         verify(blgcMock, times(1)).writeValue(writeOff);
+    }
+
+    class TiSensorTagBuilder {
+
+        private BluetoothLeDevice deviceMock;
+
+        public TiSensorTagBuilder() {
+            this(true, false);
+        }
+
+        public TiSensorTagBuilder(boolean cc2650, boolean connected) {
+            deviceMock = mock(BluetoothLeDevice.class);
+
+            if (cc2650) {
+                when(deviceMock.getName()).thenReturn("CC2650 SensorTag");
+            } else {
+                when(deviceMock.getName()).thenReturn("CC2541");
+            }
+
+            if (connected) {
+                when(deviceMock.isConnected()).thenReturn(true);
+            }
+        }
+
+        public TiSensorTagBuilder addService(UUID id, BluetoothLeGattService service)
+                throws KuraBluetoothResourceNotFoundException {
+
+            when(deviceMock.findService(id)).thenReturn(service);
+
+            return this;
+        }
+
+        public TiSensorTagBuilder addCharacteristic(UUID serviceId, UUID CharacteristicId,
+                BluetoothLeGattCharacteristic characteristic) throws KuraBluetoothResourceNotFoundException {
+
+            when(deviceMock.findService(serviceId).findCharacteristic(CharacteristicId)).thenReturn(characteristic);
+
+            return this;
+        }
+
+        public BluetoothLeDevice getDevice() {
+            return this.deviceMock;
+        }
+
+        public TiSensorTag build(boolean connect) {
+            TiSensorTag tag = new TiSensorTag(deviceMock);
+
+            try {
+                if (connect) {
+                    tag.connect();
+                }
+                tag.init();
+            } catch (ConnectionException e) {
+                // Do nothing
+            }
+
+            return tag;
+        }
+
     }
 }

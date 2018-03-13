@@ -27,5 +27,6 @@ enum SensorName {
     PRESSURE,
     GREEN_LED,
     RED_LED,
-    BUZZER
+    BUZZER,
+    KEYS
 }

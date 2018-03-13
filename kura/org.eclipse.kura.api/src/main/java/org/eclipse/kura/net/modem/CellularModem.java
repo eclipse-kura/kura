@@ -169,6 +169,9 @@ public interface CellularModem {
 
     public List<ModemTechnologyType> getTechnologyTypes() throws KuraException;
 
+    /**
+     * @since 1.4
+     */
     public List<ModemPdpContext> getPdpContextInfo() throws KuraException;
 
     @Deprecated

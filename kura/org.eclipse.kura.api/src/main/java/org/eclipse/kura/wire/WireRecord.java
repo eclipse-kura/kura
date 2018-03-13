@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -9,6 +9,7 @@
  * Contributors:
  *  Eurotech
  *  Amit Kumar Mondal
+ *  Red Hat Inc
  *
  *******************************************************************************/
 package org.eclipse.kura.wire;
@@ -46,10 +47,10 @@ public class WireRecord {
      * @throws NullPointerException
      *             if any of the argument is null
      */
-    public WireRecord(Map<String, TypedValue<?>> properties) {
+    public WireRecord(final Map<String, TypedValue<?>> properties) {
         requireNonNull(properties, "Properties cannot be null");
 
-        this.properties = new HashMap<>(properties);
+        this.properties = Collections.unmodifiableMap(new HashMap<>(properties));
     }
 
     /**
@@ -58,6 +59,6 @@ public class WireRecord {
      * @return the fields
      */
     public Map<String, TypedValue<?>> getProperties() {
-        return Collections.unmodifiableMap(this.properties);
+        return this.properties;
     }
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -35,6 +35,7 @@ import org.eclipse.kura.web.client.ui.drivers.assets.DriversAndAssetsUi;
 import org.eclipse.kura.web.client.ui.wires.WiresPanelUi;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.util.FilterBuilder;
+import org.eclipse.kura.web.client.util.PidTextBox;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtSession;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
@@ -154,7 +155,7 @@ public class EntryClassUi extends Composite {
     @UiField
     Button factoriesButton;
     @UiField
-    TextBox componentName;
+    PidTextBox componentName;
     @UiField
     Button sidenavButton;
     @UiField
@@ -712,12 +713,16 @@ public class EntryClassUi extends Composite {
                     @Override
                     public void onSuccess(GwtXSRFToken token) {
                         String factoryPid = EntryClassUi.this.factoriesList.getSelectedValue();
-                        String pid = EntryClassUi.this.componentName.getValue();
+                        String pid = EntryClassUi.this.componentName.getPid();
+                        if (pid == null) {
+                            return;
+                        }
                         if (SELECT_COMPONENT.equalsIgnoreCase(factoryPid) || "".equals(pid)) {
                             EntryClassUi.this.errorAlertText.setText(MSGS.servicesComponentFactoryAlertNotSelected());
                             errorModal.show();
                             return;
                         }
+                        EntryClassUi.this.newFactoryComponentModal.hide();
                         EntryClassUi.this.gwtComponentService.createFactoryComponent(token, factoryPid, pid,
                                 new AsyncCallback<Void>() {
 

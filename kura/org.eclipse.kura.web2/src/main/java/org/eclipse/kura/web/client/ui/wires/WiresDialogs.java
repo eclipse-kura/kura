@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -12,6 +12,7 @@ package org.eclipse.kura.web.client.ui.wires;
 import java.util.List;
 
 import org.eclipse.kura.web.client.messages.Messages;
+import org.eclipse.kura.web.client.util.PidTextBox;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.FormLabel;
@@ -58,7 +59,7 @@ public class WiresDialogs extends Composite {
     @UiField
     Modal newAssetModal;
     @UiField
-    TextBox newAssetName;
+    PidTextBox newAssetName;
     @UiField
     TextBox newAssetDriverInstance;
     @UiField
@@ -68,7 +69,7 @@ public class WiresDialogs extends Composite {
     @UiField
     Modal newDriverModal;
     @UiField
-    TextBox newDriverName;
+    PidTextBox newDriverName;
     @UiField
     ListBox newDriverFactory;
     @UiField
@@ -88,7 +89,7 @@ public class WiresDialogs extends Composite {
     @UiField
     Button btnComponentModalNo;
     @UiField
-    TextBox componentName;
+    PidTextBox componentName;
 
     private Listener listener;
     private Callback pickCallback;
@@ -202,7 +203,10 @@ public class WiresDialogs extends Composite {
 
             @Override
             public void onClick(ClickEvent event) {
-                String wireAssetPid = WiresDialogs.this.newAssetName.getText();
+                String wireAssetPid = WiresDialogs.this.newAssetName.getPid();
+                if (wireAssetPid == null || !listener.onNewPidInserted(wireAssetPid)) {
+                    return;
+                }
                 String driverPid = WiresDialogs.this.newAssetDriverInstance.getText();
                 WiresDialogs.this.newAssetModal.hide();
                 if (pickCallback != null) {
@@ -228,10 +232,10 @@ public class WiresDialogs extends Composite {
 
             @Override
             public void onClick(ClickEvent event) {
-                if (!WiresDialogs.this.newDriverName.validate()) {
+                final String pid = WiresDialogs.this.newDriverName.getPid();
+                if (pid == null) {
                     return;
                 }
-                final String pid = WiresDialogs.this.newDriverName.getValue();
                 if (listener == null || !listener.onNewPidInserted(pid)) {
                     return;
                 }
@@ -270,8 +274,8 @@ public class WiresDialogs extends Composite {
 
             @Override
             public void onClick(ClickEvent event) {
-                String value = WiresDialogs.this.componentName.getValue();
-                if (value != null && !value.isEmpty()) {
+                String value = WiresDialogs.this.componentName.getPid();
+                if (value != null) {
                     if (listener == null || !listener.onNewPidInserted(value)) {
                         return;
                     }
@@ -279,8 +283,8 @@ public class WiresDialogs extends Composite {
                         pickCallback.onNewComponentCreated(value);
                     }
                     genericCompModal.hide();
+                    componentName.clear();
                 }
-                componentName.clear();
             }
         });
         this.btnComponentModalNo.addClickHandler(new ClickHandler() {
@@ -309,7 +313,9 @@ public class WiresDialogs extends Composite {
         } else {
             this.newAssetModalHeader.setTitle(MSGS.wiresComponentNew());
             this.componentNameLabel.setText(MSGS.wiresComponentName());
-
+            this.componentName.clear();
+            this.newAssetName.clear();
+            this.newDriverName.clear();
             this.genericCompModal.show();
         }
     }

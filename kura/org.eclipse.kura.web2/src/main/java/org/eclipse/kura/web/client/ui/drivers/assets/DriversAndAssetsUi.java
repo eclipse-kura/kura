@@ -19,6 +19,7 @@ import org.eclipse.kura.web.client.configuration.HasConfiguration;
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.AlertDialog;
 import org.eclipse.kura.web.client.ui.drivers.assets.DriversAndAssetsListUi.DriverAssetInfo;
+import org.eclipse.kura.web.client.util.PidTextBox;
 import org.eclipse.kura.web.shared.AssetConstants;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtWireComponentConfiguration;
@@ -64,7 +65,7 @@ public class DriversAndAssetsUi extends Composite implements DriversAndAssetsLis
     @UiField
     ListBox driverFactoriesList;
     @UiField
-    TextBox driverName;
+    PidTextBox driverName;
     @UiField
     Button buttonNewDriverCancel;
     @UiField
@@ -73,7 +74,7 @@ public class DriversAndAssetsUi extends Composite implements DriversAndAssetsLis
     @UiField
     Modal newAssetModal;
     @UiField
-    TextBox assetName;
+    PidTextBox assetName;
     @UiField
     TextBox driverPid;
     @UiField
@@ -256,7 +257,9 @@ public class DriversAndAssetsUi extends Composite implements DriversAndAssetsLis
 
             @Override
             public void onClick(ClickEvent event) {
-                if (!driverName.validate()) {
+                final String pid = DriversAndAssetsUi.this.driverName.getPid();
+
+                if (pid == null) {
                     return;
                 }
 
@@ -264,8 +267,6 @@ public class DriversAndAssetsUi extends Composite implements DriversAndAssetsLis
                     confirmDialog.show(MSGS.driversAssetsInvalidDriverFactory(), AlertDialog.Severity.ALERT, null);
                     return;
                 }
-
-                final String pid = DriversAndAssetsUi.this.driverName.getValue();
 
                 if (configurations.isPidExisting(pid)) {
                     confirmDialog.show(MSGS.wiresComponentNameAlreadyUsed(pid), AlertDialog.Severity.ALERT, null);
@@ -295,11 +296,11 @@ public class DriversAndAssetsUi extends Composite implements DriversAndAssetsLis
 
             @Override
             public void onClick(ClickEvent event) {
-                if (!assetName.validate()) {
+                final String pid = assetName.getPid();
+
+                if (pid == null) {
                     return;
                 }
-
-                final String pid = assetName.getValue();
 
                 if (configurations.isPidExisting(pid)) {
                     confirmDialog.show(MSGS.wiresComponentNameAlreadyUsed(pid), AlertDialog.Severity.ALERT, null);

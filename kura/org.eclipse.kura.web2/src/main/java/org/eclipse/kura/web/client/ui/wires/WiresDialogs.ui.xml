@@ -1,7 +1,7 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <!--
 
-    Copyright (c) 2017 Eurotech and/or its affiliates and others
+    Copyright (c) 2017, 2018 Eurotech and/or its affiliates and others
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -11,14 +11,14 @@
 -->
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:b="urn:import:org.gwtbootstrap3.client.ui"
     xmlns:b.html="urn:import:org.gwtbootstrap3.client.ui.html" xmlns:g="urn:import:com.google.gwt.user.client.ui"
-    xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt" xmlns:kura="urn:import:org.eclipse.kura.web.client.ui">
+    xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt" xmlns:kura="urn:import:org.eclipse.kura.web.client.ui" xmlns:kura.util="urn:import:org.eclipse.kura.web.client.util">
 
     <ui:with field="msgs" type="org.eclipse.kura.web.client.messages.Messages"></ui:with>
 
     <ui:style>
-    .asset-comp-modal-body {
-    	padding-bottom: 40px;
-    }
+       .newComponentName {
+           padding-top: 8px;
+       }
     </ui:style>
 
     <b:Container fluid="true">
@@ -68,8 +68,9 @@
                     <b:FieldSet>
                         <b:FormGroup>
                             <b:FormLabel for="newAssetName" ui:field="newAssetNameLabel" text="{msgs.assetName}"/>
-                            <b:TextBox ui:field="newAssetName" b:id="newAssetName" allowBlank="false"
-                                autoComplete="false" />
+                            <kura.util:PidTextBox ui:field="newAssetName" b:id="newAssetName"
+                            autoComplete="false" validateOnBlur="true"/>
+                            <b:HelpBlock iconType="EXCLAMATION_TRIANGLE"/>
                         </b:FormGroup>
                         <b:FormGroup>
                             <b:FormLabel for="newAssetDriverInstance" ui:field="newAssetDriverInstanceLabel" text="{msgs.driverName}"/>
@@ -96,8 +97,9 @@
                         </b:FormGroup>
                         <b:FormGroup>
                             <b:FormLabel for="newDriverName" ui:field="newDriverNameLabel" text="{msgs.driverName}"/>
-                            <b:TextBox ui:field="newDriverName" b:id="newDriverName" allowBlank="false"
-                                autoComplete="false" />
+                            <kura.util:PidTextBox ui:field="newDriverName" b:id="newDriverName"
+                            autoComplete="false" validateOnBlur="true"/>
+                            <b:HelpBlock iconType="EXCLAMATION_TRIANGLE"/>
                         </b:FormGroup>
                     </b:FieldSet>
                 </b:Form>
@@ -111,15 +113,18 @@
         <b:Modal closable="false" fade="true" dataBackdrop="STATIC" dataKeyboard="true" b:id="generic-comp-modal"
             ui:field="genericCompModal">
             <b:ModalHeader ui:field="newAssetModalHeader" />
-            <b:ModalBody addStyleNames="{style.asset-comp-modal-body}">
+            <b:ModalBody>
                 <b:Form>
-                    <b:FormGroup>
-                        <b:FormLabel for="componentName" addStyleNames="col-md-4" ui:field="componentNameLabel"/>
-                        <g:FlowPanel addStyleNames="col-md-8">
-                            <b:TextBox ui:field="componentName" b:id="componentName" allowBlank="false"
-                                autoComplete="false" placeholder="{msgs.wiresComponentNamePlaceholder}"/>
-                        </g:FlowPanel>
-                    </b:FormGroup>
+                    <b:FieldSet>
+                        <b:FormGroup>
+                            <b:FormLabel for="componentName" addStyleNames="col-md-4 {style.newComponentName}" ui:field="componentNameLabel"/>
+                            <g:FlowPanel addStyleNames="col-md-8">
+                                 <kura.util:PidTextBox ui:field="componentName" b:id="componentName" autoComplete="false" 
+                                 validateOnBlur="true" placeholder="{msgs.wiresComponentNamePlaceholder}"/>
+                            </g:FlowPanel>
+                            <b:HelpBlock iconType="EXCLAMATION_TRIANGLE"/>
+                        </b:FormGroup>
+                    </b:FieldSet>
                 </b:Form>
             </b:ModalBody>
             <b:ModalFooter>

@@ -17,7 +17,6 @@
    <service>
       <provide interface="org.eclipse.kura.net.EthernetMonitorService"/>
    </service>
-   <reference bind="setNetworkService" cardinality="1..1" interface="org.eclipse.kura.net.NetworkService" name="NetworkService" policy="static" unbind="unsetNetworkService"/>
    <reference bind="setEventAdmin" cardinality="1..1" interface="org.osgi.service.event.EventAdmin" name="EventAdmin" policy="static"  unbind="unsetEventAdmin" />
    <reference bind="setNetworkAdminService" cardinality="1..1" interface="org.eclipse.kura.net.NetworkAdminService" name="NetworkAdminService" policy="static" unbind="unsetNetworkAdminService"/>
    <reference bind="setNetworkConfigurationService" cardinality="1..1" interface="org.eclipse.kura.net.admin.NetworkConfigurationService" name="NetworkConfigurationService" policy="static" unbind="unsetNetworkConfigurationService"/>

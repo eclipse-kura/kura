@@ -41,7 +41,6 @@ import org.eclipse.kura.net.NetInterfaceConfig;
 import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.NetworkAdminService;
-import org.eclipse.kura.net.NetworkService;
 import org.eclipse.kura.net.admin.NetworkConfigurationService;
 import org.eclipse.kura.net.admin.event.NetworkConfigurationChangeEvent;
 import org.eclipse.kura.net.admin.event.NetworkStatusChangeEvent;
@@ -64,8 +63,6 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
     private static final String[] EVENT_TOPICS = new String[] {
             NetworkConfigurationChangeEvent.NETWORK_EVENT_CONFIG_CHANGE_TOPIC, };
     
-    private static final int DFLT_NUM_ETH_IFACES = 2;
-
     private static final long THREAD_INTERVAL = 30000;
     private static final long THREAD_TERMINATION_TOUT = 1; // in seconds
 
@@ -74,7 +71,6 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
     private static Map<String, Future<?>> tasks;
     private static Map<String, AtomicBoolean> stopThreads;
 
-    private NetworkService networkService;
     private EventAdmin eventAdmin;
     private NetworkAdminService netAdminService;
     private NetworkConfigurationService netConfigService;
@@ -91,14 +87,6 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
     //
     // ----------------------------------------------------------------
 
-    public void setNetworkService(NetworkService networkService) {
-        this.networkService = networkService;
-    }
-
-    public void unsetNetworkService(NetworkService networkService) {
-        this.networkService = null;
-    }
-    
     public void setEventAdmin(EventAdmin eventAdmin) {
         this.eventAdmin = eventAdmin;
     }
@@ -139,7 +127,7 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 
         this.routeService = RouteServiceImpl.getInstance();
 
-        this.executor = Executors.newFixedThreadPool(getNumberOfInterfacesToMonitor());
+        this.executor = Executors.newCachedThreadPool();
 
         // Get initial configurations
         try {
@@ -584,22 +572,5 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
                 o.wait(THREAD_INTERVAL);
             }
         }
-    }
-    
-    private int getNumberOfInterfacesToMonitor() {
-        int numIfacesToMonitor = 0;
-        try {
-            List<String> allNetworkInterfaces = this.networkService.getAllNetworkInterfaceNames();
-            for (String ifaceName : allNetworkInterfaces) {
-                if (ifaceName.startsWith("eth") || ifaceName.startsWith("tap")) {
-                    numIfacesToMonitor++;
-                }
-            }
-        } catch (KuraException e) {
-            logger.error("Failed to obtain a list of all network interfaces. Setting total number of monitored interfaces to {}", DFLT_NUM_ETH_IFACES, e);
-            numIfacesToMonitor = DFLT_NUM_ETH_IFACES;
-        }
-        logger.info("The EthernetMonitorService will monitor a total of {} Ethernet-like interfaces", numIfacesToMonitor);
-        return numIfacesToMonitor;
     }
 }

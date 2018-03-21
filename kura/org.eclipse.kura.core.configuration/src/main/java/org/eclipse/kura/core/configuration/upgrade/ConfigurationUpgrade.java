@@ -213,7 +213,7 @@ public class ConfigurationUpgrade {
     }
 
     private static ServiceReference<Marshaller>[] getJsonMarshallers(BundleContext bundleContext) {
-        String filterString = String.format("(&(kura.service.pid=%s))", "org.eclipse.kura.marshalling.json.provider");
+        String filterString = String.format("(&(kura.service.pid=%s))", "org.eclipse.kura.json.marshaller.unmarshaller.provider");
         return ServiceUtil.getServiceReferences(bundleContext, Marshaller.class, filterString);
     }
 

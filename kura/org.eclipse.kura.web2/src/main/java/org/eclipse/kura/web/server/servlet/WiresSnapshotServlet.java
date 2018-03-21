@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.eclipse.kura.asset.provider.AssetConstants;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.core.configuration.XmlComponentConfigurations;
 import org.eclipse.kura.marshalling.Marshaller;
 import org.eclipse.kura.web.server.GwtWireServiceImpl;
@@ -104,7 +105,8 @@ public class WiresSnapshotServlet extends HttpServlet {
 
             ServiceLocator.applyToServiceOptionally(WireGraphService.class, wireGraphService -> {
                 wireGraphService.get().getWireComponentConfigurations().stream()
-                        .map(WireComponentConfiguration::getConfiguration).forEach(result::add);
+                        .map(WireComponentConfiguration::getConfiguration).map(WiresSnapshotServlet::removeDefinition)
+                        .forEach(result::add);
                 return null;
             });
 
@@ -112,8 +114,9 @@ public class WiresSnapshotServlet extends HttpServlet {
 
             ServiceLocator.applyToServiceOptionally(ConfigurationService.class, configurationService -> {
                 configurationService.getComponentConfigurations().stream()
-                        .filter(config -> driverPids.contains(config.getPid())).forEach(result::add);
-                result.add(configurationService.getComponentConfiguration(WIRE_SERVICE_PID));
+                        .filter(config -> driverPids.contains(config.getPid()))
+                        .map(WiresSnapshotServlet::removeDefinition).forEach(result::add);
+                result.add(removeDefinition(configurationService.getComponentConfiguration(WIRE_SERVICE_PID)));
                 return null;
             });
 
@@ -137,4 +140,7 @@ public class WiresSnapshotServlet extends HttpServlet {
         }
     }
 
+    private static ComponentConfiguration removeDefinition(final ComponentConfiguration config) {
+        return new ComponentConfigurationImpl(config.getPid(), null, config.getConfigurationProperties());
+    }
 }

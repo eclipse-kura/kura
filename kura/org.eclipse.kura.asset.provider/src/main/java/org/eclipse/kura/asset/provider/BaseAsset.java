@@ -43,6 +43,7 @@ import org.eclipse.kura.channel.listener.ChannelListener;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.SelfConfiguringComponent;
+import org.eclipse.kura.configuration.metatype.AD;
 import org.eclipse.kura.configuration.metatype.Option;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.core.configuration.metatype.Tad;
@@ -348,14 +349,14 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         if (driver == null || this.properties == null || this.assetConfiguration == null) {
             return;
         }
-        Object driverDescriptor = null;
+        Object opaqueDriverDescriptor = null;
         try {
             final ChannelDescriptor channelDescriptor = driver.getChannelDescriptor();
             if (channelDescriptor == null) {
                 return;
             }
-            driverDescriptor = channelDescriptor.getDescriptor();
-            if (!(driverDescriptor instanceof List<?>)) {
+            opaqueDriverDescriptor = channelDescriptor.getDescriptor();
+            if (!(opaqueDriverDescriptor instanceof List<?>)) {
                 return;
             }
         } catch (Exception e) {
@@ -363,12 +364,13 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
             return;
         }
         Map<String, Object> newConfiguration = null;
-        final List<Tad> driverSpecificChannelConfiguration = (List<Tad>) driverDescriptor;
+        final List<Tad> driverDescriptor = (List<Tad>) opaqueDriverDescriptor;
         final Tocd tempOcd = new Tocd();
-        driverSpecificChannelConfiguration.forEach(tempOcd::addAD);
+        getAssetChannelDescriptor().forEach(tempOcd::addAD);
+        driverDescriptor.forEach(tempOcd::addAD);
         final Map<String, Object> defaultValues = ComponentUtil.getDefaultProperties(tempOcd, this.context);
         final Map<String, Channel> channels = getAssetConfiguration().getAssetChannels();
-        for (Tad tad : driverSpecificChannelConfiguration) {
+        for (AD tad : tempOcd.getAD()) {
             if (!tad.isRequired()) {
                 continue;
             }

@@ -32,7 +32,7 @@ public final class Constants {
     public static final String FACTORY_PREFIX = "com.oracle.dio.";
     public static final String FACTORY = "Factory";
     public static final String CONFIG = "Config";
-    public static final int INVALID_HANDLE = -1;
+    public static final long INVALID_HANDLE = -1;
     public static final String PATH = "deviceName";
     public static final String IMPL = ".impl.";
     public static final String TYPE = "type";

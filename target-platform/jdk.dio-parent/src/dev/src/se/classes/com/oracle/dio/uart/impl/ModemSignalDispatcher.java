@@ -71,23 +71,23 @@ class ModemSignalDispatcher implements EventHandler {
     private static class SerialContext {
 
         /** Serial signal context */
-        final int context;
+        final long context;
 
         /** Serial signal listeners */
         final List<SerialSignalListener> listeners = new ArrayList<SerialSignalListener>();
 
-        SerialContext(int context) {
+        SerialContext(long context) {
             this.context = context;
         }
     }
 
-    private Map<Integer, SerialContext> contextMap = new HashMap<Integer, SerialContext>();
+    private Map<Long, SerialContext> contextMap = new HashMap<Long, SerialContext>();
 
-    private List<SerialSignalListener> getListeners(int serialHandler) {
+    private List<SerialSignalListener> getListeners(long serialHandler) {
         return contextMap.get(serialHandler).listeners;
     }
 
-    private int getContext(int serialHandler) {
+    private long getContext(long serialHandler) {
         return contextMap.get(serialHandler).context;
     }
 
@@ -97,9 +97,9 @@ class ModemSignalDispatcher implements EventHandler {
      * @param serialHandler serial port handler
      * @param listener serial signal listener
      */
-    synchronized void addListener(int serialHandler, SerialSignalListener listener) {
+    synchronized void addListener(long serialHandler, SerialSignalListener listener) {
         if (! contextMap.containsKey(serialHandler)) {
-            int context = startListening(serialHandler);
+            long context = startListening(serialHandler);
             contextMap.put(serialHandler, new SerialContext(context));
         }
 
@@ -115,13 +115,13 @@ class ModemSignalDispatcher implements EventHandler {
      * @param serialHandler serial port handler
      * @param listener serial signal listener
      */
-    synchronized void removeListener(int serialHandler, SerialSignalListener listener) {
+    synchronized void removeListener(long serialHandler, SerialSignalListener listener) {
         if (contextMap.containsKey(serialHandler)) {
             List<SerialSignalListener> listeners = getListeners(serialHandler);
             listeners.remove(listener);
 
             if (listeners.isEmpty()) {
-                int context = getContext(serialHandler);
+                long context = getContext(serialHandler);
                 stopListening(context);
                 contextMap.remove(serialHandler);
             }
@@ -134,7 +134,7 @@ class ModemSignalDispatcher implements EventHandler {
      * @param serialHandler serial port handler
      * @return handler of serial signal context
      */
-    private int startListening(int serialHandler) {
+    private long startListening(long serialHandler) {
         return startListening0(serialHandler);
     }
 
@@ -143,28 +143,30 @@ class ModemSignalDispatcher implements EventHandler {
      *
      * @param context handler of serial signal context
      */
-    private void stopListening(int context) {
+    private void stopListening(long context) {
         if (context != Constants.INVALID_HANDLE) {
             stopListening0(context);
         }
     }
 
     private static class SignalEvent extends Event {
-        int getHandler() {
+        long getHandler() {
             byte[] payload = getPayload();
-            int handler = (((int)(0x00ff & payload[0])) << 24) | (((int)(0x00ff & payload[1])) << 16) |
-                          (((int)(0x00ff & payload[2])) << 8 ) | (((int)(0x00ff & payload[3])));
+            long handler = ((0xffL & payload[0]) << 56) | ((0xffL & payload[1]) << 48) |
+                           ((0xffL & payload[2]) << 40) | ((0xffL & payload[3]) << 32) |
+                           ((0xffL & payload[4]) << 24) | ((0xffL & payload[5]) << 16) |
+                           ((0xffL & payload[6]) << 8) | (0xffL & payload[7]);
             return handler;
         }
         int getLine() {
             byte[] payload = getPayload();
-            int line = (((int)(0x00ff & payload[4])) << 24) | (((int)(0x00ff & payload[5])) << 16) |
-                       (((int)(0x00ff & payload[6])) << 8 ) | (((int)(0x00ff & payload[7])));
+            int line = (((int)(0x00ff & payload[8])) << 24) | (((int)(0x00ff & payload[9])) << 16) |
+                       (((int)(0x00ff & payload[10])) << 8 ) | (((int)(0x00ff & payload[11])));
             return line;
         }
         boolean getState() {
             byte[] payload = getPayload();
-            boolean state =  payload[8] != 0;
+            boolean state =  payload[12] != 0;
             return state;
         }
     }
@@ -177,7 +179,7 @@ class ModemSignalDispatcher implements EventHandler {
     public boolean handleEvent(Event event) {
         SignalEvent e = (SignalEvent)event;
 
-        int serialHandler = e.getHandler();
+        long serialHandler = e.getHandler();
         int signalLine = e.getLine();
         boolean signalState = e.getState();
 
@@ -204,13 +206,13 @@ class ModemSignalDispatcher implements EventHandler {
      * @param serialHandler serial port handler
      * @return handler of serial signal context
      */
-    private native int startListening0(int serialHandler);
+    private native long startListening0(long serialHandler);
 
     /**
      * Stops serial signal listening
      *
      * @param context handler of serial signal context
      */
-    private native void stopListening0(int context);
+    private native void stopListening0(long context);
 
 }

@@ -819,6 +819,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
                 factoryPid = (String) properties.get(ConfigurationAdmin.SERVICE_FACTORYPID);
             }
             if (factoryPid != null && !this.allActivatedPids.contains(config.getPid())) {
+                ConfigurationUpgrade.upgrade(config, bundleContext);
                 String pid = config.getPid();
                 logger.info("Creating configuration with pid: {} and factory pid: {}", pid, factoryPid);
                 try {
@@ -1307,7 +1308,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
     private void loadLatestSnapshotInConfigAdmin() throws KuraException {
         //
         // save away initial configuration
-        List<ComponentConfiguration> configs = loadLatestSnapshotConfigurations();
+        List<ComponentConfiguration> configs = buildCurrentConfiguration(null);
         if (configs == null) {
             return;
         }
@@ -1436,7 +1437,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
             logger.warn("Error parsing xml", e);
         }
 
-        return ConfigurationUpgrade.upgrade(xmlConfigs, this.bundleContext);
+        return xmlConfigs;
     }
 
     private void updateConfigurationInternal(String pid, Map<String, Object> properties, boolean snapshotOnConfirmation)
@@ -1681,6 +1682,10 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
                     break;
                 }
             }
+        }
+
+        for (final ComponentConfiguration config : result) {
+            ConfigurationUpgrade.upgrade(config, bundleContext);
         }
 
         return result;

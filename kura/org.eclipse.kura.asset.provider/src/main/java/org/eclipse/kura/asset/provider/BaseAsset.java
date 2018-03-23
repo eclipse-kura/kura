@@ -21,7 +21,9 @@ import static org.eclipse.kura.channel.ChannelType.READ_WRITE;
 import static org.eclipse.kura.channel.ChannelType.WRITE;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -43,6 +45,7 @@ import org.eclipse.kura.channel.listener.ChannelListener;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.SelfConfiguringComponent;
+import org.eclipse.kura.configuration.metatype.AD;
 import org.eclipse.kura.configuration.metatype.Option;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.core.configuration.metatype.Tad;
@@ -133,6 +136,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
 
     /** The configurable properties of this service. */
     private Map<String, Object> properties;
+    private Tocd ocd;
 
     private ServiceTracker<Driver, Driver> driverServiceTracker;
 
@@ -165,6 +169,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
      */
     public void updated(final Map<String, Object> properties) {
         logger.debug("Initializing Asset Configurations...");
+        invalidateDefinition();
         this.properties = properties;
         this.kuraServicePid = (String) this.properties.get(ConfigurationService.KURA_SERVICE_PID);
         retrieveConfigurationsFromProperties(properties);
@@ -260,6 +265,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
     public synchronized void setDriver(Driver driver) {
         this.driver = driver;
         tryClosePreparedRead();
+        invalidateDefinition();
         if (driver != null) {
             try {
                 updateExistingProperties(driver);
@@ -276,6 +282,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
     public synchronized void unsetDriver() {
         tryClosePreparedRead();
         detachAllListeners();
+        invalidateDefinition();
         this.driver = null;
     }
 
@@ -285,62 +292,56 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
 
     /** {@inheritDoc} */
     @Override
-    public ComponentConfiguration getConfiguration() throws KuraException {
+    public synchronized ComponentConfiguration getConfiguration() throws KuraException {
         requireNonNull(this.properties, "Properties cannot be null");
         final String componentName = this.properties.get(ConfigurationService.KURA_SERVICE_PID).toString();
 
-        final Tocd mainOcd = getOCD();
-
-        final Map<String, Object> props = CollectionUtil.newHashMap();
-        for (final Map.Entry<String, Object> entry : this.properties.entrySet()) {
-            props.put(entry.getKey(), entry.getValue());
-        }
-        ChannelDescriptor channelDescriptor = null;
-        if (this.driver != null) {
-            try {
-                channelDescriptor = this.driver.getChannelDescriptor();
-            } catch (Exception e) {
-                logger.warn("Failed to get channel descriptor", e);
-            }
-        }
-        if (channelDescriptor != null) {
-            List<?> driverSpecificChannelConfiguration = null;
-            final Object descriptor = channelDescriptor.getDescriptor();
-            if (descriptor instanceof List<?>) {
-                driverSpecificChannelConfiguration = (List<?>) descriptor;
-            }
-
-            fillDriverSpecificChannelConfiguration(mainOcd, driverSpecificChannelConfiguration);
-        }
-        return new ComponentConfigurationImpl(componentName, mainOcd, props);
+        return new ComponentConfigurationImpl(componentName, getDefinition(), new HashMap<>(this.properties));
     }
 
-    /**
-     * Fills the {@code mainOcd} with the driver specific configuration provided by
-     * {@code driverSpecificChannelConfiguration}
-     *
-     * @param mainOcd
-     *            a {@link Tocd} object.
-     * @param driverSpecificChannelConfiguration
-     *            the driver specific configuration.
-     */
-    private void fillDriverSpecificChannelConfiguration(final Tocd mainOcd,
-            final List<?> driverSpecificChannelConfiguration) {
-        if (mainOcd == null || driverSpecificChannelConfiguration == null) {
-            return;
+    private List<?> getDriverDescriptor() {
+        try {
+            if (this.driver == null) {
+                return Collections.emptyList();
+            }
+
+            return (List<?>) this.driver.getChannelDescriptor().getDescriptor();
+        } catch (Exception e) {
+            logger.warn("Failed to get channel descriptor", e);
+            return Collections.emptyList();
+        }
+    }
+
+    private synchronized void invalidateDefinition() {
+        this.ocd = null;
+    }
+
+    private Tocd getDefinition() {
+        if (this.ocd != null) {
+            return this.ocd;
         }
 
-        Stream.concat(getAssetChannelDescriptor().stream(), driverSpecificChannelConfiguration.stream())
-                .forEach(attribute -> {
-                    for (final Entry<String, Channel> entry : this.assetConfiguration.getAssetChannels().entrySet()) {
-                        final String channelName = entry.getKey();
-                        if (!(attribute instanceof Tad)) {
-                            return;
-                        }
-                        final Tad newAttribute = cloneAd((Tad) attribute, channelName);
-                        mainOcd.addAD(newAttribute);
-                    }
-                });
+        final List<?> driverDescriptor = getDriverDescriptor();
+
+        if (driverDescriptor.isEmpty()) {
+            return null;
+        }
+
+        final Tocd newOcd = getOCD();
+
+        Stream.concat(getAssetChannelDescriptor().stream(), driverDescriptor.stream()).forEach(attribute -> {
+            for (final Entry<String, Channel> entry : this.assetConfiguration.getAssetChannels().entrySet()) {
+                final String channelName = entry.getKey();
+                if (!(attribute instanceof Tad)) {
+                    return;
+                }
+                final Tad newAttribute = cloneAd((Tad) attribute, channelName);
+                newOcd.addAD(newAttribute);
+            }
+        });
+
+        this.ocd = newOcd;
+        return newOcd;
     }
 
     @SuppressWarnings("unchecked")
@@ -348,14 +349,14 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         if (driver == null || this.properties == null || this.assetConfiguration == null) {
             return;
         }
-        Object driverDescriptor = null;
+        Object opaqueDriverDescriptor = null;
         try {
             final ChannelDescriptor channelDescriptor = driver.getChannelDescriptor();
             if (channelDescriptor == null) {
                 return;
             }
-            driverDescriptor = channelDescriptor.getDescriptor();
-            if (!(driverDescriptor instanceof List<?>)) {
+            opaqueDriverDescriptor = channelDescriptor.getDescriptor();
+            if (!(opaqueDriverDescriptor instanceof List<?>)) {
                 return;
             }
         } catch (Exception e) {
@@ -363,12 +364,13 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
             return;
         }
         Map<String, Object> newConfiguration = null;
-        final List<Tad> driverSpecificChannelConfiguration = (List<Tad>) driverDescriptor;
+        final List<Tad> driverDescriptor = (List<Tad>) opaqueDriverDescriptor;
         final Tocd tempOcd = new Tocd();
-        driverSpecificChannelConfiguration.forEach(tempOcd::addAD);
+        getAssetChannelDescriptor().forEach(tempOcd::addAD);
+        driverDescriptor.forEach(tempOcd::addAD);
         final Map<String, Object> defaultValues = ComponentUtil.getDefaultProperties(tempOcd, this.context);
         final Map<String, Channel> channels = getAssetConfiguration().getAssetChannels();
-        for (Tad tad : driverSpecificChannelConfiguration) {
+        for (AD tad : tempOcd.getAD()) {
             if (!tad.isRequired()) {
                 continue;
             }

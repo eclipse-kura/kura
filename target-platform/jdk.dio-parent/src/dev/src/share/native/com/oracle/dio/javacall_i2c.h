@@ -205,7 +205,7 @@ void javacall_i2c_close(const javacall_handle handle);
  * @retval JAVACALL_DIO_FAIL        if there was an error
  */
 javacall_dio_result javacall_i2c_get_group_id(const javacall_handle handle,
-        /*OUT*/ int* grpId);
+        /*OUT*/ long* grpId);
 
 
 /**

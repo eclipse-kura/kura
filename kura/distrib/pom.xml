@@ -2046,32 +2046,6 @@
                             </execution>
                         </executions>
                     </plugin>
-                    <plugin>
-                        <artifactId>maven-clean-plugin</artifactId>
-                        <version>2.5</version>
-                        <executions>
-                            <execution>
-                                <id>fedora-clean</id>
-                                <phase>install</phase>
-                                <goals>
-                                    <goal>clean</goal>
-                                </goals>
-                                <configuration>
-                                    <excludeDefaultDirectories>true</excludeDefaultDirectories>
-                                    <filesets>
-                                        <fileset>
-                                            <directory>${project.build.directory}</directory>
-                                            <includes>
-                                               <include>kura_${project.version}_fedora_installer.sh</include>
-                                               <include>kura_${project.version}_fedora_installer.sh.md5</include>
-                                               <include>kura_${project.version}_fedora_installer.sh.SHA-1</include>
-                                            </includes>
-                                        </fileset>
-                                    </filesets>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
                 </plugins>
             </build>
         </profile>
@@ -2185,32 +2159,6 @@
                                         <script>/tmp/kura_${project.version}_fedora-nn_installer.sh</script>
                                     </afterInstallation>
                                     <skipSigning>true</skipSigning>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <artifactId>maven-clean-plugin</artifactId>
-                        <version>2.5</version>
-                        <executions>
-                            <execution>
-                                <id>fedora-clean</id>
-                                <phase>install</phase>
-                                <goals>
-                                    <goal>clean</goal>
-                                </goals>
-                                <configuration>
-                                    <excludeDefaultDirectories>true</excludeDefaultDirectories>
-                                    <filesets>
-                                        <fileset>
-                                            <directory>${project.build.directory}</directory>
-                                            <includes>
-                                               <include>kura_${project.version}_fedora-nn_installer.sh</include>
-                                               <include>kura_${project.version}_fedora-nn_installer.sh.md5</include>
-                                               <include>kura_${project.version}_fedora-nn_installer.sh.SHA-1</include>
-                                            </includes>
-                                        </fileset>
-                                    </filesets>
                                 </configuration>
                             </execution>
                         </executions>

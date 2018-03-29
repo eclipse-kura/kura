@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and others
+ * Copyright (c) 2011, 2018 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -362,7 +362,7 @@ public class LinuxProcessUtil {
      *             Thrown if one of the executed operations generate an exception.
      * @since {@link org.eclipse.kura.core.linux.util} 1.1.0
      */
-    public static void stopAndKill(int pid) throws KuraException {
+    public static boolean stopAndKill(int pid) throws KuraException {
         try {
             if (pid >= 0) {
                 logger.info("stopping pid={}", pid);
@@ -386,8 +386,10 @@ public class LinuxProcessUtil {
 
                 if (exists) {
                     logger.warn("Failed to stop process with pid {}", pid);
+                    return false;
                 }
             }
+            return true;
         } catch (Exception e) {
             throw KuraException.internalError(e);
         }

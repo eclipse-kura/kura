@@ -156,8 +156,11 @@ Know Issues :
     in the WEB UI if the user attempts to enable more than one WAN interface
   * Web UI may hang when configuration snapshot is uploaded. This happens because HTTP connection is lost due to toggling of the network
     interface which happened even if network configuration hasn't been modified.
+  * #1999: Connection refresh sometimes causes duplicate entries
+  * #1995: Failed NET-WIFI-003 on Fedora
+  * #1993: NET-ETH0-003 failed
   * #1962: [Web] Broken form validation
-  * #1956: [Wires] Creating a component named \")\" is possible
+  * #1956: [Wires] Creating a component named ")" is possible
   * #1932: SystemAdminService.getUptime() returns SystemAdminService#UNKNOWN on MacOS when locale is not English
   * #1853: SensorTagDriver sometimes fails to connect to the SensorTag
   * #1788: Maven Archetype does not work - or can someone show me how to use it?

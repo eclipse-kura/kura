@@ -33,6 +33,7 @@ Target Environments:
 
 Bug Fixes :
   * Fixed github issues:
+    * #1997: Improve dhcpd shutdown logic
     * #1975: [Kura 3.2.0 QA] Warning logged uploading and old Asset snapshot
     * #1973: [Kura 3.2.0 QA] Wire graph snapshot includes the Meta Type OCD
     * #1971: EthernetMonitor can't monitor more than two ethernet interfaces
@@ -114,6 +115,9 @@ Bug Fixes :
 
 
   * Merged no issue-related Pull Requests:
+    * #1996: Added dp for gpio driver
+    * #1992: Re-enable plain Fedora installer in addition to RPMs
+    * #1988: Backport maintenance fixes
     * #1985: DIO: fix unsafe casts in native code for 64 bits architectures
     * #1984: Changed gpio bundle defaults, removing the hardcoded gpio 1.
     * #1974: Fixed wrong pid reference in configuration upgrade class.

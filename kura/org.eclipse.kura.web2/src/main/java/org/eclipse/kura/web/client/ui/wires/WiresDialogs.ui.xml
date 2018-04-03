@@ -3,32 +3,35 @@
 
     Copyright (c) 2017, 2018 Eurotech and/or its affiliates and others
 
-     All rights reserved. This program and the accompanying materials
-     are made available under the terms of the Eclipse Public License v1.0
-     which accompanies this distribution, and is available at
-     http://www.eclipse.org/legal/epl-v10.html
-     
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
 -->
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:b="urn:import:org.gwtbootstrap3.client.ui"
     xmlns:b.html="urn:import:org.gwtbootstrap3.client.ui.html" xmlns:g="urn:import:com.google.gwt.user.client.ui"
-    xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt" xmlns:kura="urn:import:org.eclipse.kura.web.client.ui" xmlns:kura.util="urn:import:org.eclipse.kura.web.client.util">
+    xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt" xmlns:kura="urn:import:org.eclipse.kura.web.client.ui"
+    xmlns:kura.util="urn:import:org.eclipse.kura.web.client.util">
 
     <ui:with field="msgs" type="org.eclipse.kura.web.client.messages.Messages"></ui:with>
 
     <ui:style>
-       .newComponentName {
-           padding-top: 8px;
-       }
+    .newComponentName {
+    	padding-top: 8px;
+    }
     </ui:style>
 
     <b:Container fluid="true">
-        <b:Modal closable="false" dataKeyboard="true" b:id="select-asset-modal" ui:field="selectAssetModal" title="{msgs.selectAssetLabel}">
+        <b:Modal closable="false" dataKeyboard="true" b:id="select-asset-modal" ui:field="selectAssetModal"
+            title="{msgs.selectAssetLabel}">
             <b:ModalBody>
                 <b.html:Paragraph text="{msgs.selectAssetIntroLabel}" />
                 <b:Form type="HORIZONTAL">
                     <b:FieldSet>
                         <b:FormGroup>
-                            <b:FormLabel for="assetInstance" ui:field="assetInstanceLabel" title="{msgs.assetName}"/>
+                            <b:FormLabel for="assetInstance" ui:field="assetInstanceLabel"
+                                title="{msgs.assetName}" />
                             <b:ListBox b:id="assetInstance" ui:field="assetInstance" />
                         </b:FormGroup>
                     </b:FieldSet>
@@ -36,44 +39,52 @@
             </b:ModalBody>
             <b:ModalFooter>
                 <b:Button addStyleNames="fa" b:id="btn-select-asset-cancel" type="PRIMARY" dataDismiss="MODAL"
-                    ui:field="buttonSelectAssetCancel" text="{msgs.cancelButton}"/>
-                <b:Button addStyleNames="fa" type="PRIMARY" ui:field="buttonNewAsset" text="{msgs.newAsset}"/>
-                <b:Button addStyleNames="fa" type="PRIMARY" ui:field="buttonSelectAssetOk" text="{msgs.okButton}"/>
+                    ui:field="buttonSelectAssetCancel" text="{msgs.cancelButton}" />
+                <b:Button addStyleNames="fa" type="PRIMARY" ui:field="buttonNewAsset" text="{msgs.newAsset}" />
+                <b:Button addStyleNames="fa" type="PRIMARY" ui:field="buttonSelectAssetOk"
+                    text="{msgs.okButton}" />
             </b:ModalFooter>
         </b:Modal>
 
-        <b:Modal closable="false" hideOtherModals="true" dataKeyboard="true" b:id="select-driver-modal" ui:field="selectDriverModal" title="{msgs.selectDriverLabel}">
+        <b:Modal closable="false" hideOtherModals="true" dataKeyboard="true" b:id="select-driver-modal"
+            ui:field="selectDriverModal" title="{msgs.selectDriverLabel}">
             <b:ModalBody>
                 <b.html:Paragraph text="{msgs.selectDriverIntroLabel}" />
                 <b:Form type="HORIZONTAL">
                     <b:FieldSet>
                         <b:FormGroup>
-                            <b:FormLabel for="driverInstance" ui:field="driverInstanceLabel" text="{msgs.driverName}"/>
+                            <b:FormLabel for="driverInstance" ui:field="driverInstanceLabel"
+                                text="{msgs.driverName}" />
                             <b:ListBox b:id="driverInstance" ui:field="driverInstance" />
                         </b:FormGroup>
                     </b:FieldSet>
                 </b:Form>
             </b:ModalBody>
             <b:ModalFooter>
-                <b:Button addStyleNames="fa" type="PRIMARY" dataDismiss="MODAL" ui:field="buttonSelectDriverCancel" text="{msgs.cancelButton}"/>
-                <b:Button addStyleNames="fa" type="PRIMARY" ui:field="buttonNewDriver" text="{msgs.newDriver}"/>
-                <b:Button addStyleNames="fa" type="PRIMARY" ui:field="buttonSelectDriverOk" text="{msgs.okButton}"/>
+                <b:Button addStyleNames="fa" type="PRIMARY" dataDismiss="MODAL"
+                    ui:field="buttonSelectDriverCancel" text="{msgs.cancelButton}" />
+                <b:Button addStyleNames="fa" type="PRIMARY" ui:field="buttonNewDriver" text="{msgs.newDriver}" />
+                <b:Button addStyleNames="fa" type="PRIMARY" ui:field="buttonSelectDriverOk"
+                    text="{msgs.okButton}" />
             </b:ModalFooter>
         </b:Modal>
 
-        <b:Modal closable="false" hideOtherModals="true" dataKeyboard="true" b:id="new-asset-modal" ui:field="newAssetModal" title="{msgs.newAsset}">
+        <b:Modal closable="false" hideOtherModals="true" dataKeyboard="true" b:id="new-asset-modal"
+            ui:field="newAssetModal" title="{msgs.newAsset}">
             <b:ModalBody>
                 <b.html:Paragraph text="{msgs.createNewAssetIntroLabel2}" />
                 <b:Form type="HORIZONTAL">
                     <b:FieldSet>
                         <b:FormGroup>
-                            <b:FormLabel for="newAssetName" ui:field="newAssetNameLabel" text="{msgs.assetName}"/>
+                            <b:FormLabel for="newAssetName" ui:field="newAssetNameLabel"
+                                text="{msgs.assetName}" />
+                            <b:HelpBlock iconType="EXCLAMATION_TRIANGLE" />
                             <kura.util:PidTextBox ui:field="newAssetName" b:id="newAssetName"
-                            autoComplete="false" validateOnBlur="true"/>
-                            <b:HelpBlock iconType="EXCLAMATION_TRIANGLE"/>
+                                autoComplete="false" validateOnBlur="true" />
                         </b:FormGroup>
                         <b:FormGroup>
-                            <b:FormLabel for="newAssetDriverInstance" ui:field="newAssetDriverInstanceLabel" text="{msgs.driverName}"/>
+                            <b:FormLabel for="newAssetDriverInstance" ui:field="newAssetDriverInstanceLabel"
+                                text="{msgs.driverName}" />
                             <b:TextBox ui:field="newAssetDriverInstance" b:id="newAssetDriverInstance"
                                 allowBlank="false" autoComplete="false" />
                         </b:FormGroup>
@@ -81,56 +92,62 @@
                 </b:Form>
             </b:ModalBody>
             <b:ModalFooter>
-                <b:Button addStyleNames="fa" type="PRIMARY" dataDismiss="MODAL" ui:field="newAssetCancel" text="{msgs.cancelButton}"/>
-                <b:Button addStyleNames="fa" type="PRIMARY" ui:field="newAssetOk" text="{msgs.okButton}"/>
+                <b:Button addStyleNames="fa" type="PRIMARY" dataDismiss="MODAL" ui:field="newAssetCancel"
+                    text="{msgs.cancelButton}" />
+                <b:Button addStyleNames="fa" type="PRIMARY" ui:field="newAssetOk" text="{msgs.okButton}" />
             </b:ModalFooter>
         </b:Modal>
 
-        <b:Modal closable="false" hideOtherModals="true" dataKeyboard="true" b:id="new-driver-modal" ui:field="newDriverModal" title="{msgs.newDriver}">
+        <b:Modal closable="false" hideOtherModals="true" dataKeyboard="true" b:id="new-driver-modal"
+            ui:field="newDriverModal" title="{msgs.newDriver}">
             <b:ModalBody>
                 <b.html:Paragraph text="{msgs.createNewDriverIntroLabel}" />
                 <b:Form type="HORIZONTAL">
                     <b:FieldSet>
                         <b:FormGroup>
-                            <b:FormLabel for="newDriverFactory" ui:field="newDriverFactoryLabel" text="{msgs.driverFactory}"/>
+                            <b:FormLabel for="newDriverFactory" ui:field="newDriverFactoryLabel"
+                                text="{msgs.driverFactory}" />
                             <b:ListBox ui:field="newDriverFactory" b:id="newDriverFactory" />
                         </b:FormGroup>
                         <b:FormGroup>
-                            <b:FormLabel for="newDriverName" ui:field="newDriverNameLabel" text="{msgs.driverName}"/>
+                            <b:FormLabel for="newDriverName" ui:field="newDriverNameLabel"
+                                text="{msgs.driverName}" />
+                            <b:HelpBlock iconType="EXCLAMATION_TRIANGLE" />
                             <kura.util:PidTextBox ui:field="newDriverName" b:id="newDriverName"
-                            autoComplete="false" validateOnBlur="true"/>
-                            <b:HelpBlock iconType="EXCLAMATION_TRIANGLE"/>
+                                autoComplete="false" validateOnBlur="true" />
                         </b:FormGroup>
                     </b:FieldSet>
                 </b:Form>
             </b:ModalBody>
             <b:ModalFooter>
-                <b:Button addStyleNames="fa" type="PRIMARY" dataDismiss="MODAL" ui:field="newDriverCancel" text="{msgs.cancelButton}"/>
-                <b:Button addStyleNames="fa" type="PRIMARY" ui:field="newDriverOk" text="{msgs.okButton}"/>
+                <b:Button addStyleNames="fa" type="PRIMARY" dataDismiss="MODAL" ui:field="newDriverCancel"
+                    text="{msgs.cancelButton}" />
+                <b:Button addStyleNames="fa" type="PRIMARY" ui:field="newDriverOk" text="{msgs.okButton}" />
             </b:ModalFooter>
         </b:Modal>
 
-        <b:Modal closable="false" fade="true" dataBackdrop="STATIC" dataKeyboard="true" b:id="generic-comp-modal"
-            ui:field="genericCompModal">
+        <b:Modal closable="false" fade="true" dataBackdrop="STATIC" dataKeyboard="true"
+            b:id="generic-comp-modal" ui:field="genericCompModal">
             <b:ModalHeader ui:field="newAssetModalHeader" />
             <b:ModalBody>
                 <b:Form>
                     <b:FieldSet>
                         <b:FormGroup>
-                            <b:FormLabel for="componentName" addStyleNames="col-md-4 {style.newComponentName}" ui:field="componentNameLabel"/>
-                            <g:FlowPanel addStyleNames="col-md-8">
-                                 <kura.util:PidTextBox ui:field="componentName" b:id="componentName" autoComplete="false" 
-                                 validateOnBlur="true" placeholder="{msgs.wiresComponentNamePlaceholder}"/>
-                            </g:FlowPanel>
-                            <b:HelpBlock iconType="EXCLAMATION_TRIANGLE"/>
+                            <b:FormLabel for="componentName" addStyleNames="{style.newComponentName}"
+                                ui:field="componentNameLabel" />
+                            <b:HelpBlock iconType="EXCLAMATION_TRIANGLE" />
+                            <kura.util:PidTextBox ui:field="componentName" b:id="componentName"
+                                autoComplete="false" validateOnBlur="true"
+                                placeholder="{msgs.wiresComponentNamePlaceholder}" />
                         </b:FormGroup>
                     </b:FieldSet>
                 </b:Form>
             </b:ModalBody>
             <b:ModalFooter>
                 <b:Button b:id="btn-create-comp-cancel" icon="REMOVE" type="PRIMARY" dataDismiss="MODAL"
-                    ui:field="btnComponentModalNo" text="{msgs.cancelButton}"/>
-                <b:Button icon="SAVE" type="PRIMARY" b:id="btn-create-comp" ui:field="btnComponentModalYes" text="{msgs.okButton}"/>
+                    ui:field="btnComponentModalNo" text="{msgs.cancelButton}" />
+                <b:Button icon="SAVE" type="PRIMARY" b:id="btn-create-comp" ui:field="btnComponentModalYes"
+                    text="{msgs.okButton}" />
             </b:ModalFooter>
         </b:Modal>
 

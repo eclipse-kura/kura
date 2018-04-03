@@ -46,9 +46,9 @@
                         </b:FormGroup>
                         <b:FormGroup>
                             <b:FormLabel for="driverName" text="{msgs.driverName}" />
+                            <b:HelpBlock iconType="EXCLAMATION_TRIANGLE"/>
                             <kura.util:PidTextBox b:id="driverName" ui:field="driverName" autoComplete="false" 
                                  validateOnBlur="true"/>
-                            <b:HelpBlock iconType="EXCLAMATION_TRIANGLE"/>
                         </b:FormGroup>
                     </b:FieldSet>
                 </b:Form>
@@ -67,9 +67,9 @@
                     <b:FieldSet>
                         <b:FormGroup>
                             <b:FormLabel for="assetName" text="{msgs.assetName}" />
+                            <b:HelpBlock iconType="EXCLAMATION_TRIANGLE" />
                             <kura.util:PidTextBox b:id="assetName" ui:field="assetName" autoComplete="false" 
                                  validateOnBlur="true"/>
-                            <b:HelpBlock iconType="EXCLAMATION_TRIANGLE" />
                         </b:FormGroup>
                         <b:FormGroup>
                             <b:FormLabel for="driverPid" text="{msgs.driverName}" />

@@ -99,12 +99,12 @@
                                 <b:TextBox b:id="dns" ui:field="dns" />
                                 <b:FormControlStatic b:id="dnsRead" ui:field="dnsRead" />
                             </b:FormGroup>
-
+<!-- IAB commented out for Kura 3.2 release
                             <b:FormGroup>
                                 <b:FormLabel for="search" ui:field="labelSearch"></b:FormLabel>
                                 <b:TextBox allowBlank="false" b:id="search" ui:field="search" />
                             </b:FormGroup>
-
+-->
                         </b:FieldSet>
                     </b:Form>
                 </g:ScrollPanel>

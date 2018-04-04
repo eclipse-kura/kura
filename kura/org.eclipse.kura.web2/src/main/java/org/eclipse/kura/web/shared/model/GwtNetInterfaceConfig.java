@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -101,13 +101,16 @@ public class GwtNetInterfaceConfig extends KuraBaseModel implements Serializable
         set("dnsReadOnlyServers", dnsServers);
     }
 
-    public String getSearchDomains() {
-        return get("searchDomains");
-    }
-
-    public void setSearchDomains(String searchDomains) {
-        set("searchDomains", searchDomains);
-    }
+    /*
+     * IAB: commented out for Kura 3.2 release
+     * public String getSearchDomains() {
+     * return get("searchDomains");
+     * }
+     * 
+     * public void setSearchDomains(String searchDomains) {
+     * set("searchDomains", searchDomains);
+     * }
+     */
 
     public void setHwState(String hwState) {
         set("hwState", hwState);

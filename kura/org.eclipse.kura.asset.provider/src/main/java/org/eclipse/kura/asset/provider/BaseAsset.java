@@ -323,11 +323,11 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
 
         final List<?> driverDescriptor = getDriverDescriptor();
 
-        if (driverDescriptor.isEmpty()) {
-            return null;
-        }
-
         final Tocd newOcd = getOCD();
+
+        if (driverDescriptor.isEmpty()) {
+            return newOcd;
+        }
 
         Stream.concat(getAssetChannelDescriptor().stream(), driverDescriptor.stream()).forEach(attribute -> {
             for (final Entry<String, Channel> entry : this.assetConfiguration.getAssetChannels().entrySet()) {

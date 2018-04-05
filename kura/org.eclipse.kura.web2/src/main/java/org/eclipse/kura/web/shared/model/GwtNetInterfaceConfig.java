@@ -101,17 +101,6 @@ public class GwtNetInterfaceConfig extends KuraBaseModel implements Serializable
         set("dnsReadOnlyServers", dnsServers);
     }
 
-    /*
-     * IAB: commented out for Kura 3.2 release
-     * public String getSearchDomains() {
-     * return get("searchDomains");
-     * }
-     * 
-     * public void setSearchDomains(String searchDomains) {
-     * set("searchDomains", searchDomains);
-     * }
-     */
-
     public void setHwState(String hwState) {
         set("hwState", hwState);
     }

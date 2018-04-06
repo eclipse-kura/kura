@@ -385,15 +385,16 @@ public class ExamplePublisher implements ConfigurableComponent, CloudClientListe
 
     private void subscribe() {
         try {
-            if (oldSubscriptionTopic != null) {
-                this.cloudClient.unsubscribe(oldSubscriptionTopic);
-            }
-            String newSubscriptionTopic = this.examplePublisherOptions.getSubscribeTopic();
-            if (this.cloudClient != null) {
+            if (this.cloudClient != null && this.cloudClient.isConnected()) {
+                if (oldSubscriptionTopic != null) {
+                    this.cloudClient.unsubscribe(oldSubscriptionTopic);
+                }
+
+                String newSubscriptionTopic = this.examplePublisherOptions.getSubscribeTopic();
                 logger.info("Subscribing to application topic {}", newSubscriptionTopic);
                 this.cloudClient.subscribe(newSubscriptionTopic, 0);
+                oldSubscriptionTopic = newSubscriptionTopic;
             }
-            oldSubscriptionTopic = newSubscriptionTopic;
         } catch (KuraStoreException e) {
             logger.warn("Failed to request device shadow", e);
         } catch (KuraException e) {

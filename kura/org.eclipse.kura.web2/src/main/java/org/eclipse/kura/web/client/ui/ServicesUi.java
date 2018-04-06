@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -48,6 +48,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -74,7 +75,11 @@ public class ServicesUi extends AbstractServicesUi {
     Modal modal;
 
     @UiField
-    Button apply, reset, delete;
+    Button apply;
+    @UiField
+    Button reset;
+    @UiField
+    Button delete;
     @UiField
     FieldSet fields;
     @UiField
@@ -252,6 +257,7 @@ public class ServicesUi extends AbstractServicesUi {
                             setDirty(false);
                             ServicesUi.this.entryClass.fetchAvailableServices(null);
                             EntryClassUi.hideWaitModal();
+                            Window.Location.reload();
                         }
                     });
                 }

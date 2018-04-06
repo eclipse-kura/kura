@@ -504,6 +504,8 @@ public abstract class AbstractServicesUi extends Composite {
 
         final List<EditorError> editorErrors = new ArrayList<>();
 
+        this.valid.put(param.getId(), true);
+
         int widgetCount = group.getWidgetCount();
         for (int i = 0; i < widgetCount; i++) {
             Widget widget = group.getWidget(i);
@@ -514,7 +516,6 @@ public abstract class AbstractServicesUi extends Composite {
             final TextBoxBase currentText = (TextBoxBase) widget;
 
             final String text = currentText.getText();
-            this.valid.put(param.getId(), true);
             validate(param, text, new ValidationErrorConsumer() {
 
                 @Override

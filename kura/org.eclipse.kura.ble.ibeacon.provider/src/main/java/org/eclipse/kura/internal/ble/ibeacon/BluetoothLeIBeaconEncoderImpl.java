@@ -60,9 +60,9 @@ public class BluetoothLeIBeaconEncoderImpl implements BluetoothLeIBeaconEncoder 
         data[8] = BEACON_ID[0];
         data[9] = BEACON_ID[1];
         System.arraycopy(getBytesFromUUID(beacon.getUuid()), 0, data, 10, 16);
-        data[26] = (byte) ((beacon.getMajor() >> 8) & 0xff);
+        data[26] = (byte) (beacon.getMajor() >> 8 & 0xff);
         data[27] = (byte) (beacon.getMajor() & 0xff);
-        data[28] = (byte) ((beacon.getMinor() >> 8) & 0xff);
+        data[28] = (byte) (beacon.getMinor() >> 8 & 0xff);
         data[29] = (byte) (beacon.getMinor() & 0xff);
         data[30] = (byte) (beacon.getTxPower() & 0xff);
         data[31] = 0x00;

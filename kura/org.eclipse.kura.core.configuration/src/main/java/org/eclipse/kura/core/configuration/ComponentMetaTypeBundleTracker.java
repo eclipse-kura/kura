@@ -60,6 +60,11 @@ public class ComponentMetaTypeBundleTracker extends BundleTracker<Bundle> {
         return bnd;
     }
 
+    @Override
+    public void removedBundle(Bundle bundle, BundleEvent event, Bundle object) {
+        super.removedBundle(bundle, event, object);
+        m_configurationService.onBundleRemoved(bundle);
+    }
     // ----------------------------------------------------------------
     //
     // Private APIs
@@ -94,7 +99,7 @@ public class ComponentMetaTypeBundleTracker extends BundleTracker<Bundle> {
 
                     // register the pid with the OCD and whether it is a factory
                     OCD ocd = ComponentUtil.getOCD(metadata, metatypePid);
-                    this.m_configurationService.registerComponentOCD(metatypePid, (Tocd) ocd, isFactory);
+                    this.m_configurationService.registerComponentOCD(metatypePid, (Tocd) ocd, isFactory, bundle);
                 }
             } catch (Exception e) {
                 s_logger.error("Error seeding configuration for pid: " + metatypePid, e);

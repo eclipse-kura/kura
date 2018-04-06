@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -26,7 +26,6 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -59,6 +58,8 @@ import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtComponentService;
 import org.eclipse.kura.web.shared.service.GwtWireService;
 import org.eclipse.kura.wire.WireHelperService;
+import org.eclipse.kura.wire.graph.WireComponentDefinition;
+import org.eclipse.kura.wire.graph.WireComponentDefinitionService;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
@@ -307,23 +308,9 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
     }
 
     private List<String> findWireComponents() throws GwtKuraException {
-        List<String> wireEmitterFpids = new ArrayList<>();
-        List<String> wireReceiverFpids = new ArrayList<>();
-        GwtServerUtil.fillFactoriesLists(wireEmitterFpids, wireReceiverFpids);
-        final List<String> onlyProducers = new ArrayList<>(wireEmitterFpids);
-        final List<String> onlyConsumers = new ArrayList<>(wireReceiverFpids);
-        final List<String> both = new LinkedList<>();
-        for (final String dto : wireEmitterFpids) {
-            if (wireReceiverFpids.contains(dto)) {
-                both.add(dto);
-            }
-        }
-        onlyProducers.removeAll(both);
-        onlyConsumers.removeAll(both);
-        List<String> allWireComponents = new ArrayList<>(onlyProducers);
-        allWireComponents.addAll(onlyConsumers);
-        allWireComponents.addAll(both);
-        return allWireComponents;
+        return ServiceLocator.applyToServiceOptionally(WireComponentDefinitionService.class,
+                wireComponentDefinitionService -> wireComponentDefinitionService.getComponentDefinitions().stream()
+                        .map(WireComponentDefinition::getFactoryPid).collect(Collectors.toList()));
     }
 
     private List<ComponentConfiguration> sortConfigurationsByName(List<ComponentConfiguration> configs) {

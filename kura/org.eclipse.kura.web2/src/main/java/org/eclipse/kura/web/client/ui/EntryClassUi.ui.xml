@@ -194,7 +194,7 @@
                                                     </b:Heading>
                                                 </b:Alert>
                                             </b:Panel>
-                                            <b:Panel>
+                                            <b:Panel ui:field="stackTraceContainer">
                                                 <b:PanelHeader>
                                                     <b:Heading size="H6">
                                                         <b:Anchor dataToggle="COLLAPSE" dataParent="#accordion"

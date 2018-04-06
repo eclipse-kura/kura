@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -11,13 +11,11 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.util;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.gwtbootstrap3.client.ui.Modal;
+import org.gwtbootstrap3.client.ui.Panel;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.StatusCodeException;
@@ -27,10 +25,10 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 public class FailureHandler {
 
     private static final Messages MSGS = GWT.create(Messages.class);
-    private static Logger logger = Logger.getLogger("ErrorLogger");
     private static Modal popup;
     private static Label errorMessageLabel;
     private static VerticalPanel errorStackTrace;
+    private static Panel stackTraceContainer;
 
     private FailureHandler() {
     }
@@ -41,6 +39,14 @@ public class FailureHandler {
 
     public static void handle(Throwable caught) {
         printMessage(caught, "");
+    }
+
+    public static void showErrorMessage(String message) {
+        errorMessageLabel.setText(message);
+
+        errorStackTrace.clear();
+        stackTraceContainer.setVisible(false);
+        popup.show();
     }
 
     private static void printMessage(Throwable caught, String name) {
@@ -55,35 +61,18 @@ public class FailureHandler {
             GwtKuraException gee = (GwtKuraException) caught;
             GwtKuraErrorCode code = gee.getCode();
 
-            switch (code) {
-            case DUPLICATE_NAME:
+            if (code == GwtKuraErrorCode.DUPLICATE_NAME) {
                 errorMessageBuilder.append(MSGS.duplicateNameError());
-                break;
-            case CONNECTION_FAILURE:
+            } else if (code == GwtKuraErrorCode.CONNECTION_FAILURE) {
                 errorMessageBuilder.append(MSGS.connectionFailure());
-                break;
-            case ILLEGAL_ARGUMENT:
+            } else if (code == GwtKuraErrorCode.ILLEGAL_ARGUMENT) {
                 errorMessageBuilder.append(MSGS.illegalArgumentError());
-                break;
-            case ILLEGAL_NULL_ARGUMENT:
+            } else if (code == GwtKuraErrorCode.ILLEGAL_NULL_ARGUMENT) {
                 errorMessageBuilder.append(MSGS.illegalNullArgumentError());
-                break;
-
-            case CANNOT_REMOVE_LAST_ADMIN:
-            case ILLEGAL_ACCESS:
-            case INVALID_USERNAME_PASSWORD:
-            case INVALID_RULE_QUERY:
-            case INTERNAL_ERROR:
-            case OVER_RULE_LIMIT:
-            case UNAUTHENTICATED:
-            case WARNING:
-            case CURRENT_ADMIN_PASSWORD_DOES_NOT_MATCH:
-            case OPERATION_NOT_SUPPORTED:
-            case SERVICE_NOT_ENABLED:
-            default:
+            } else {
                 errorMessageBuilder.append(MSGS.genericError());
-                break;
             }
+
         } else if (caught instanceof StatusCodeException && ((StatusCodeException) caught).getStatusCode() == 0) {
             // the current operation was interrupted as the user started a new one
             // or navigated away from the page.
@@ -99,7 +88,6 @@ public class FailureHandler {
             }
         }
 
-        logger.log(Level.INFO, errorMessageBuilder.toString(), caught);
         errorMessageLabel.setText(errorMessageBuilder.toString());
 
         errorStackTrace.clear();
@@ -108,13 +96,16 @@ public class FailureHandler {
             tempLabel.setText(element.toString());
             errorStackTrace.add(tempLabel);
         }
+        stackTraceContainer.setVisible(true);
 
         popup.show();
     }
 
-    public static void setPopup(Modal uiElement, Label errorMessage, VerticalPanel errorStackTraceArea) {
+    public static void setPopup(Modal uiElement, Label errorMessage, VerticalPanel errorStackTraceArea,
+            Panel stackTraceContainerArea) {
         popup = uiElement;
         errorMessageLabel = errorMessage;
         errorStackTrace = errorStackTraceArea;
+        stackTraceContainer = stackTraceContainerArea;
     }
 }

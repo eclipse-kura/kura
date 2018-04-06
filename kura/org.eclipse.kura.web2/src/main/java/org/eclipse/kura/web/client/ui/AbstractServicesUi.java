@@ -8,7 +8,7 @@
  *
  * Contributors:
  *     Eurotech
- *     Red Hat 
+ *     Red Hat
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui;
 
@@ -499,18 +499,32 @@ public abstract class AbstractServicesUi extends Composite {
 
     protected List<EditorError> validateTextBox(final GwtConfigParameter param, final TextBoxBase box,
             final FormGroup group) {
-        group.setValidationState(ValidationState.NONE);
-        final List<EditorError> editorErrors = new ArrayList<>();
-        final String text = box.getText();
-        this.valid.put(param.getId(), true);
-        validate(param, text, new ValidationErrorConsumer() {
 
-            @Override
-            public void addError(String errorDescription) {
-                AbstractServicesUi.this.valid.put(param.getId(), false);
-                editorErrors.add(new BasicEditorError(box, text, errorDescription));
+        group.setValidationState(ValidationState.NONE);
+
+        final List<EditorError> editorErrors = new ArrayList<>();
+
+        int widgetCount = group.getWidgetCount();
+        for (int i = 0; i < widgetCount; i++) {
+            Widget widget = group.getWidget(i);
+            if (!(widget instanceof TextBoxBase)) {
+                continue;
             }
-        });
+
+            final TextBoxBase currentText = (TextBoxBase) widget;
+
+            final String text = currentText.getText();
+            this.valid.put(param.getId(), true);
+            validate(param, text, new ValidationErrorConsumer() {
+
+                @Override
+                public void addError(String errorDescription) {
+                    AbstractServicesUi.this.valid.put(param.getId(), false);
+                    editorErrors.add(new BasicEditorError(currentText, text, errorDescription));
+                }
+            });
+        }
+
         return editorErrors;
     }
 

@@ -38,8 +38,6 @@ import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
-import org.eclipse.kura.localization.LocalizationAdapter;
-import org.eclipse.kura.localization.resources.WireMessages;
 import org.eclipse.kura.marshalling.Marshaller;
 import org.eclipse.kura.marshalling.Unmarshaller;
 import org.eclipse.kura.util.service.ServiceUtil;
@@ -74,8 +72,6 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
     private static final String CONF_PID = "org.eclipse.kura.wire.WireService";
 
     private static final Logger logger = LoggerFactory.getLogger(WireServiceImpl.class);
-
-    private static final WireMessages message = LocalizationAdapter.adapt(WireMessages.class);
 
     /** The service component properties. */
     private Map<String, Object> properties;
@@ -122,19 +118,19 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
     }
 
     protected void activate(final ComponentContext componentContext, final Map<String, Object> properties) {
-        logger.info(message.activatingWireService());
+        logger.info("Activating Wire Service...");
         this.bundleContext = componentContext.getBundleContext();
         this.properties = properties;
 
         updated(properties);
 
-        logger.info(message.activatingWireServiceDone());
+        logger.info("Activating Wire Service...Done");
     }
 
     public synchronized void updated(final Map<String, Object> properties) {
 
         try {
-            logger.info(message.updatingWireService());
+            logger.info("Updating Wire Service Component...");
             this.properties = properties;
 
             this.currentConfiguration = loadWireGraphConfiguration(properties);
@@ -151,7 +147,7 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
 
             createWires();
 
-            logger.info(message.updatingWireServiceDone());
+            logger.info("Updating Wire Service Component...Done");
         } catch (Exception e) {
             logger.warn("Failed to update WireServiceImpl", e);
         }
@@ -159,19 +155,19 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
     }
 
     protected void deactivate(final ComponentContext componentContext) {
-        logger.info(message.deactivatingWireService());
+        logger.info("Deactivating Wire Service Component...");
         this.bundleContext = null;
         this.wireComponentServiceTracker.close();
 
         deleteAllWires();
 
-        logger.info(message.deactivatingWireServiceDone());
+        logger.info("Deactivating Wire Service Component...Done");
     }
 
     private boolean checkWireExistence(final String emitterServicePid, final String receiverServicePid,
             final int emitterPort, final int receiverPort) throws InvalidSyntaxException {
-        requireNonNull(emitterServicePid, message.emitterServicePidNonNull());
-        requireNonNull(receiverServicePid, message.receiverServicePidNonNull());
+        requireNonNull(emitterServicePid, "Emitter Service PID cannot be null");
+        requireNonNull(receiverServicePid, "Receiver Service PID cannot be null");
         requireNonNull(emitterPort);
         requireNonNull(receiverPort);
 
@@ -199,7 +195,7 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
     }
 
     private void createConfiguration(final MultiportWireConfiguration conf) {
-        requireNonNull(conf, message.wireConfigurationNonNull());
+        requireNonNull(conf, "Wire Configuration cannot be null");
 
         String emitterPid = conf.getEmitterPid();
         String receiverPid = conf.getReceiverPid();
@@ -213,7 +209,7 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
                 final boolean found = checkWireExistence(emitterServicePid, receiverServicePid, emitterPort,
                         receiverPort);
                 if (!found) {
-                    logger.info(message.creatingWire(emitterPid, receiverPid));
+                    logger.info("Creating wire between {} and {}....", emitterPid, receiverPid);
                     final Dictionary<String, Object> properties = new Hashtable<>();
                     properties.put(Constants.WIRE_EMITTER_PORT_PROP_NAME.value(), emitterPort);
                     properties.put(Constants.WIRE_RECEIVER_PORT_PROP_NAME.value(), receiverPort);
@@ -221,23 +217,24 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
                     properties.put(Constants.RECEIVER_KURA_SERVICE_PID_PROP_NAME.value(), receiverPid);
                     final Wire wire = this.wireAdmin.createWire(emitterServicePid, receiverServicePid, properties);
                     conf.setWire(wire);
-                    logger.info(message.creatingWiresDone());
+                    logger.info("Creating wire.....Done");
                 }
             }
 
         } catch (final InvalidSyntaxException e) {
-            logger.error(message.errorCreatingWires(), e);
+            logger.error("Error while creating wires...", e);
         }
     }
 
     public MultiportWireConfiguration createWireConfigurationInternal(final String emitterPid, final String receiverPid,
             final int emitterPort, final int receiverPort) throws KuraException {
         if (!emitterPid.equals(receiverPid)) {
-            logger.info(message.creatingWire(emitterPid, receiverPid));
+            logger.info("Creating wire between {} and {}....", emitterPid, receiverPid);
             final String emitterServicePid = getServicePidByKuraServicePid(emitterPid);
             final String receiverServicePid = getServicePidByKuraServicePid(receiverPid);
             if (isNull(emitterServicePid) || isNull(receiverServicePid)) {
-                throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, message.componentPidsNull());
+                throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR,
+                        "Unable to retrieve Factory PIDs of one of the provided Wire Components");
             }
             MultiportWireConfiguration conf = new MultiportWireConfiguration(emitterPid, receiverPid, emitterPort,
                     receiverPort);
@@ -247,7 +244,7 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
             wireConfigurations.add(conf);
             update(new WireGraphConfiguration(wireGraphConfiguration.getWireComponentConfigurations(),
                     wireConfigurations));
-            logger.info(message.creatingWireDone(emitterPid, receiverPid));
+            logger.info("Creating wire between {} and {}....Done", emitterPid, receiverPid);
             return conf;
         }
         return null;
@@ -257,8 +254,8 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
     @Override
     public WireConfiguration createWireConfiguration(final String emitterPid, final String receiverPid)
             throws KuraException {
-        requireNonNull(emitterPid, message.emitterPidNonNull());
-        requireNonNull(receiverPid, message.receiverPidNonNull());
+        requireNonNull(emitterPid, "Emitter PID cannot be null");
+        requireNonNull(receiverPid, "Receiver PID cannot be null");
 
         return createWireConfigurationInternal(emitterPid, receiverPid, 0, 0);
     }
@@ -329,7 +326,7 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
     /** {@inheritDoc} */
     @Override
     public void deleteWireConfiguration(WireConfiguration wireConfiguration) {
-        requireNonNull(wireConfiguration, message.wireConfigurationNonNull());
+        requireNonNull(wireConfiguration, "Wire Configuration cannot be null");
 
         try {
             List<MultiportWireConfiguration> wireConfigurations = currentConfiguration.getWireConfigurations();
@@ -343,7 +340,7 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
                 actualWireConfiguration = wireConfiguration;
             }
 
-            if (!wireConfigurations.stream().filter(actualWireConfiguration::equals).findAny().isPresent()) {
+            if (!wireConfigurations.stream().anyMatch(actualWireConfiguration::equals)) {
                 return;
             }
 
@@ -356,7 +353,7 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
             throw new IllegalArgumentException(e);
         }
 
-        logger.info(message.removingWiresDone());
+        logger.info("Removing Wires...Done");
     }
 
     /** {@inheritDoc} */

@@ -359,7 +359,7 @@ public class DriversAndAssetsListUi extends Composite {
         public DriverAssetInfo(final HasConfiguration hasConfig) {
             final GwtConfigComponent config = hasConfig.getConfiguration();
             this.pid = config.getComponentId();
-            this.factoryPid = config.getComponentId();
+            this.factoryPid = config.getFactoryId();
             this.driverPid = config.getParameterValue(AssetConstants.ASSET_DRIVER_PROP.value());
             this.channelDescriptor = configurations.getChannelDescriptor(isAsset() ? getDriverPid() : pid);
         }

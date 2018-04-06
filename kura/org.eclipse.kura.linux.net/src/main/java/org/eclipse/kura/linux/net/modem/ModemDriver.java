@@ -50,7 +50,7 @@ public class ModemDriver {
     private static final String RELIAGATE_10_05_GSM_USB_PATH = "/sys/bus/usb/devices/usb2/authorized";
 
     private static final String BOLTGATE_20_25_PCIEX_SLOT3_POWER_GPIO_VALUE = "/dev/pciex_slot3_power/value";
-    private static final String BOLTGATE_20_25_PCIEX_W_DISABLE3_GPIO_VALUE = "/dev/pciex_w_disable3/value";
+    private static final String BOLTGATE_20_25_PCIEX_W_DISABLE3_GPIO_VALUE = "/dev/pciex_slot3_wdisable/value";
     private static final String BOLTGATE_20_25_J18__POWER_GPIO_VALUE = "/dev/usb_j18_conn_power/value";
 
     private static final String GPIO_DIRECTION = "out";

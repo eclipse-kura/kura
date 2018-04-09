@@ -251,12 +251,6 @@ public class ServicesUi extends AbstractServicesUi {
 
                         @Override
                         public void onSuccess(Void result) {
-                            ServicesUi.this.deleteModal.hide();
-                            ServicesUi.this.apply.setEnabled(false);
-                            ServicesUi.this.reset.setEnabled(false);
-                            setDirty(false);
-                            ServicesUi.this.entryClass.fetchAvailableServices(null);
-                            EntryClassUi.hideWaitModal();
                             Window.Location.reload();
                         }
                     });

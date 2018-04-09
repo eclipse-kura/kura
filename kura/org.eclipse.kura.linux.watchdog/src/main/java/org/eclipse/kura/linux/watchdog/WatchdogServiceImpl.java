@@ -67,9 +67,9 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
     public void updated(Map<String, Object> properties) {
         WatchdogServiceOptions newOptions = new WatchdogServiceOptions(properties);
 
-        cancelPollTask();
         this.pollExecutor.submit(() -> {
             Thread.currentThread().setName("WatchdogServiceImpl");
+            cancelPollTask();
             if (this.watchdogFileWriter != null) {
                 disableWatchdog();
             }

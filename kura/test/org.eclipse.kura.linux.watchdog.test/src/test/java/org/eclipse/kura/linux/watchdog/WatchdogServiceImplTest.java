@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates and others
  *
  *   All rights reserved. This program and the accompanying materials
  *   are made available under the terms of the Eclipse Public License v1.0
@@ -13,9 +13,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.watchdog.CriticalComponent;
@@ -43,19 +39,19 @@ public class WatchdogServiceImplTest {
         @Override
         public synchronized void write(String str) {
             super.write(str);
-            this.notify();
+            notify();
         }
 
         public synchronized boolean waitForData(int delayMs) { // waits for some data to be written since the last call
                                                                // to this method
-            if (this.toString().length() == lastLength) {
+            if (toString().length() == this.lastLength) {
                 try {
                     this.wait(delayMs);
                 } catch (InterruptedException e) {
                 }
             }
-            final int currentLength = this.toString().length();
-            final boolean result = currentLength != lastLength;
+            final int currentLength = toString().length();
+            final boolean result = currentLength != this.lastLength;
             this.lastLength = currentLength;
             return result;
         }
@@ -63,34 +59,42 @@ public class WatchdogServiceImplTest {
 
     public class TestWatchdogServiceImpl extends WatchdogServiceImpl {
 
-        private Writer testWriter;
+        private final Writer testWriter;
         private volatile boolean hasCheckedCriticalComponents;
 
         public TestWatchdogServiceImpl(Writer fileWriter) {
             this.testWriter = fileWriter;
         }
 
-        @Override
         protected Writer getWatchdogFileWriter() throws IOException {
-            return testWriter;
+            return this.testWriter;
         }
 
         @Override
         protected synchronized void checkCriticalComponents() {
-            // TODO Auto-generated method stub
             super.checkCriticalComponents();
             this.hasCheckedCriticalComponents = true;
-            this.notify();
+            notify();
+        }
+        
+        @Override
+        protected Writer getWatchdogDeviceWriter(String watchdogDevice) throws IOException {
+            return testWriter;
         }
 
+        @Override
+        protected boolean isWatchdogDeviceAvailable(String watchdogDevice) {
+            return true;
+        }
+        
         public synchronized boolean waitForCriticalComponentCheck(int delayMs) {
-            if (!hasCheckedCriticalComponents) {
+            if (!this.hasCheckedCriticalComponents) {
                 try {
                     this.wait(delayMs);
                 } catch (InterruptedException e) {
                 }
             }
-            return hasCheckedCriticalComponents;
+            return this.hasCheckedCriticalComponents;
         }
     }
 
@@ -107,7 +111,6 @@ public class WatchdogServiceImplTest {
         assertTrue(svc.waitForCriticalComponentCheck(10000));
         assertTrue(watchdogWriter.toString().startsWith("w")); // check that the watchdog has been kicked at least once
 
-        assertTrue((boolean) TestUtil.getFieldValue(svc, "enabled"));
         assertNotNull(TestUtil.getFieldValue(svc, "pollExecutor"));
 
         Future task = (Future) TestUtil.getFieldValue(svc, "pollTask");
@@ -149,7 +152,8 @@ public class WatchdogServiceImplTest {
 
         assertFalse(watchdogWriter.waitForData(1000));
 
-        assertFalse((boolean) TestUtil.getFieldValue(svc, "enabled"));
+        assertNull(TestUtil.getFieldValue(svc, "watchdogFileWriter"));
+        assertNull(TestUtil.getFieldValue(svc, "timedOutOn"));
 
         svc.deactivate();
 
@@ -165,19 +169,17 @@ public class WatchdogServiceImplTest {
 
         WatchdogServiceImpl svc = new TestWatchdogServiceImpl(watchdogWriter);
 
-        TestUtil.setFieldValue(svc, "enabled", true);
-
         Map<String, Object> properties = getProperties(false);
 
         WatchdogServiceOptions options = new WatchdogServiceOptions(properties);
         TestUtil.setFieldValue(svc, "options", options);
 
+        TestUtil.setFieldValue(svc, "watchdogFileWriter", watchdogWriter);
+
         TestUtil.invokePrivate(svc, "disableWatchdog");
 
         assertTrue(watchdogWriter.waitForData(10000));
         assertEquals("V", watchdogWriter.toString());
-
-        assertFalse((boolean) TestUtil.getFieldValue(svc, "enabled"));
 
         svc.deactivate();
     }
@@ -186,8 +188,8 @@ public class WatchdogServiceImplTest {
     public void testRegisterUnregisterGetCriticalComponent() throws NoSuchFieldException {
         WatchdogServiceImpl svc = new WatchdogServiceImpl();
 
-        List<CriticalComponentImpl> criticalComponentList = new CopyOnWriteArrayList<>();
-        TestUtil.setFieldValue(svc, "criticalComponentList", criticalComponentList);
+        List<CriticalComponentRegistration> criticalComponentRegistrations = new CopyOnWriteArrayList<>();
+        TestUtil.setFieldValue(svc, "criticalComponentRegistrations", criticalComponentRegistrations);
 
         CriticalComponent cc1 = new TestCC("1", 0);
         svc.registerCriticalComponent(cc1);
@@ -211,7 +213,7 @@ public class WatchdogServiceImplTest {
         components = svc.getCriticalComponents();
         assertEquals(2, components.size());
 
-        assertEquals(criticalComponentList.size(), components.size());
+        assertEquals(criticalComponentRegistrations.size(), components.size());
 
         // the deprecated method also does the same
         CriticalComponent cc3 = new TestCC("3", 1);
@@ -220,7 +222,7 @@ public class WatchdogServiceImplTest {
         components = svc.getCriticalComponents();
         assertEquals(3, components.size());
 
-        assertEquals(criticalComponentList.size(), components.size());
+        assertEquals(criticalComponentRegistrations.size(), components.size());
 
         assertEquals("1", components.get(0).getCriticalComponentName());
         assertEquals(0, components.get(0).getCriticalComponentTimeout());
@@ -269,8 +271,8 @@ public class WatchdogServiceImplTest {
     public void testCheckin() throws NoSuchFieldException {
         WatchdogServiceImpl svc = new WatchdogServiceImpl();
 
-        List<CriticalComponentImpl> criticalComponentList = new CopyOnWriteArrayList<>();
-        TestUtil.setFieldValue(svc, "criticalComponentList", criticalComponentList);
+        List<CriticalComponentRegistration> criticalComponentRegistrations = new CopyOnWriteArrayList<>();
+        TestUtil.setFieldValue(svc, "criticalComponentRegistrations", criticalComponentRegistrations);
 
         CriticalComponent cc1 = new TestCC("1", 1);
         svc.registerCriticalComponent(cc1);
@@ -278,7 +280,7 @@ public class WatchdogServiceImplTest {
         CriticalComponent cc2 = new TestCC("2", 2);
         svc.registerCriticalComponent(cc2);
 
-        CriticalComponentImpl cci2 = criticalComponentList.get(1);
+        CriticalComponentRegistration cci2 = criticalComponentRegistrations.get(1);
         TestUtil.setFieldValue(cci2, "updated", 12345);
 
         svc.checkin(cc2);
@@ -287,73 +289,25 @@ public class WatchdogServiceImplTest {
         assertTrue((long) TestUtil.getFieldValue(cci2, "updated") <= System.currentTimeMillis());
     }
 
-    @Test
-    public void testCheck() throws Throwable {
-        final WatchdogTestWriter watchdogWriter = new WatchdogTestWriter();
-
-        WatchdogServiceImpl svc = new TestWatchdogServiceImpl(watchdogWriter);
-
-        RebootCauseFileWriter causeWriterMock = mock(RebootCauseFileWriter.class);
-        TestUtil.setFieldValue(svc, "rebootCauseWriter", causeWriterMock);
-
-        List<CriticalComponentImpl> criticalComponentList = new CopyOnWriteArrayList<>();
-        TestUtil.setFieldValue(svc, "criticalComponentList", criticalComponentList);
-
-        TestUtil.setFieldValue(svc, "enabled", true);
-
-        TestUtil.setFieldValue(svc, "watchdogToStop", true); // prevent reboot
-
-        Map<String, Object> properties = getProperties(false);
-        WatchdogServiceOptions options = new WatchdogServiceOptions(properties);
-        TestUtil.setFieldValue(svc, "options", options);
-
-        CriticalComponent cc1 = new TestCC("1", 1);
-        svc.registerCriticalComponent(cc1);
-
-        CriticalComponent cc2 = new TestCC("2", 2000);
-        svc.registerCriticalComponent(cc2);
-
-        Thread.sleep(2); // wait for cc1 to time out
-
-        TestUtil.invokePrivate(svc, "checkCriticalComponents");
-
-        verify(causeWriterMock, times(1)).writeRebootCause("1");
-
-        // verify that reboot path was skipped
-        assertTrue(watchdogWriter.waitForData(10000));
-        assertTrue(watchdogWriter.toString().equals("w"));
-    }
-
-    @Test(expected = IOException.class)
-    public void testShouldThrowIfWatchdogFileDoesNotExist() throws Throwable {
+    public void testWatchdogFileDoesNotExist() throws Throwable {
         WatchdogServiceImpl svc = new WatchdogServiceImpl();
 
         Map<String, Object> properties = getProperties(true);
 
         svc.activate(properties);
 
-        TestUtil.invokePrivate(svc, "getWatchdogFileWriter");
+        assertNull(TestUtil.getFieldValue(svc, "pollTask"));
     }
 
     public void testShouldNotCreateWatchdogFile() throws InterruptedException {
-        final AtomicBoolean called = new AtomicBoolean(false);
-        WatchdogServiceImpl svc = new WatchdogServiceImpl() {
-
-            protected Writer getWatchdogFileWriter() throws IOException {
-                called.set(true);
-                called.notify();
-                return super.getWatchdogFileWriter();
-            }
-        };
+        WatchdogServiceImpl svc = new WatchdogServiceImpl();
 
         Map<String, Object> properties = getProperties(true);
 
         svc.activate(properties);
 
-        synchronized (called) {
-            called.wait(2000);
-        }
-        assertTrue(called.get());
+        Thread.sleep(2000);
+
         assertFalse(new File(WATCHDOG_TEST_DEVICE).exists());
 
         svc.deactivate();
@@ -365,8 +319,8 @@ public class WatchdogServiceImplTest {
 
 class TestCC implements CriticalComponent {
 
-    private String name;
-    private int timeout;
+    private final String name;
+    private final int timeout;
 
     public TestCC(String name, int timeout) {
         this.name = name;
@@ -375,12 +329,12 @@ class TestCC implements CriticalComponent {
 
     @Override
     public String getCriticalComponentName() {
-        return name;
+        return this.name;
     }
 
     @Override
     public int getCriticalComponentTimeout() {
-        return timeout;
+        return this.timeout;
     }
 
 }

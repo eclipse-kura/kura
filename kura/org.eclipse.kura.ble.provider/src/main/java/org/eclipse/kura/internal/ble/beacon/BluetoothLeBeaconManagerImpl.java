@@ -209,8 +209,8 @@ public class BluetoothLeBeaconManagerImpl
         logger.debug("Command response : {}", string);
         String[] lines = string.split("\n");
         if (!string.isEmpty() && lines.length >= 1) {
-            if ((lines[0].toLowerCase().contains("unknown"))
-                    || (lines.length >= 2 && lines[1].toLowerCase().contains("usage"))) {
+            if (lines[0].toLowerCase().contains("unknown")
+                    || lines.length >= 2 && lines[1].toLowerCase().contains("usage")) {
                 throw new KuraBluetoothCommandException("Command failed. Error in command syntax.");
             } else if (lines[0].toLowerCase().contains("invalid") || lines[0].toLowerCase().contains("error")) {
                 throw new KuraBluetoothCommandException("Command failed.");
@@ -240,14 +240,12 @@ public class BluetoothLeBeaconManagerImpl
             // The Unknown HCI Command error code indicates that the Controller does not understand the HCI
             // Command Packet OpCode that the Host sent.
             logger.debug("Command {} failed. Error: Unknown HCI Command (01)", command);
-            throw new KuraBluetoothCommandException(
-                    "Command " + command + " failed. Error: Unknown HCI Command (01)");
+            throw new KuraBluetoothCommandException("Command " + command + " failed. Error: Unknown HCI Command (01)");
         case "03":
             // The Hardware Failure error code indicates to the Host that something in the Controller has failed
             // in a manner that cannot be described with any other error code.
             logger.debug("Command {} failed. Error: Hardware Failure (03)", command);
-            throw new KuraBluetoothCommandException(
-                    "Command " + command + " failed. Error: Hardware Failure (03)");
+            throw new KuraBluetoothCommandException("Command " + command + " failed. Error: Hardware Failure (03)");
         case "0c":
             // The Command Disallowed error code indicates that the command requested cannot be executed because
             // the Controller is in a state where it cannot process this command at this time. This error code is
@@ -268,8 +266,7 @@ public class BluetoothLeBeaconManagerImpl
                     "Command " + command + " failed. Error: Invalid HCI Command Parameters (12)");
         default:
             logger.debug("Command {} failed. Error {}", command, exitCode);
-            throw new KuraBluetoothCommandException(
-                    "Command " + command + " failed. Error " + exitCode);
+            throw new KuraBluetoothCommandException("Command " + command + " failed. Error " + exitCode);
         }
     }
 

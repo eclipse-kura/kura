@@ -40,6 +40,20 @@ public interface BluetoothLeGattCharacteristic {
     public BluetoothLeGattDescriptor findDescriptor(UUID uuid) throws KuraBluetoothResourceNotFoundException;
 
     /**
+     * Find a BluetoothLeGattDescriptor specifying the UUID of the descriptor and the timeout in seconds.
+     * 
+     * @since 1.4
+     * @param uuid
+     *            The UUID of the GATT descriptor
+     * @param timeout
+     *            The timeout for retrieving the characteristic
+     * @return The BluetoothLeGattDescriptor
+     * @throws KuraBluetoothResourceNotFoundException
+     */
+    public BluetoothLeGattDescriptor findDescriptor(UUID uuid, long timeout)
+            throws KuraBluetoothResourceNotFoundException;
+
+    /**
      * Returns a list of BluetoothLeGattDescriptors available on this characteristic.
      * 
      * @return A list of BluetoothLeGattDescriptor

@@ -20,7 +20,7 @@ import tinyb.BluetoothGattDescriptor;
 
 public class BluetoothLeGattDescriptorImpl implements BluetoothLeGattDescriptor {
 
-    private BluetoothGattDescriptor descriptor;
+    private final BluetoothGattDescriptor descriptor;
 
     public BluetoothLeGattDescriptorImpl(BluetoothGattDescriptor descriptor) {
         this.descriptor = descriptor;

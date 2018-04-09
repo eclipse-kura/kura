@@ -51,7 +51,7 @@ public class BluetoothLeEddystone extends BluetoothLeBeacon {
     }
 
     public byte[] getNamespace() {
-        return namespace;
+        return this.namespace;
     }
 
     public void setNamespace(byte[] namespace) {
@@ -59,7 +59,7 @@ public class BluetoothLeEddystone extends BluetoothLeBeacon {
     }
 
     public byte[] getInstance() {
-        return instance;
+        return this.instance;
     }
 
     public void setInstance(byte[] instance) {
@@ -67,7 +67,7 @@ public class BluetoothLeEddystone extends BluetoothLeBeacon {
     }
 
     public String getUrlScheme() {
-        return urlScheme.getUrlScheme();
+        return this.urlScheme.getUrlScheme();
     }
 
     public void setUrlScheme(String urlScheme) {
@@ -75,7 +75,7 @@ public class BluetoothLeEddystone extends BluetoothLeBeacon {
     }
 
     public String getUrl() {
-        return url;
+        return this.url;
     }
 
     public void setUrl(String url) {
@@ -83,7 +83,7 @@ public class BluetoothLeEddystone extends BluetoothLeBeacon {
     }
 
     public short getTxPower() {
-        return txPower;
+        return this.txPower;
     }
 
     public void setTxPower(short txPower) {

@@ -185,6 +185,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
     }
 
     protected void checkCriticalComponents() {
+        logger.debug("Starting critical components check...");
         if (this.timedOutOn == null) {
             CriticalComponentRegistration ccr = getAnyTimedOutRegistration();
             if (ccr != null) {
@@ -196,6 +197,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
                 rebootCauseWriter.writeRebootCause(ccr.getCriticalComponentName());
 
                 try {
+                    logger.debug("Requesting debug.");
                     rebootSystem();
                 } catch (KuraException e) {
                     logger.error("System reboot failed. Watchdog will not be refreshed", e);
@@ -205,6 +207,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
         }
 
         if (this.timedOutOn == null || System.currentTimeMillis() - this.timedOutOn < GRACE_PERIOD) {
+            logger.debug("Refreshing watchdog.");
             refreshWatchdog();
         }
     }

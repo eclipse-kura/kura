@@ -16,6 +16,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -38,7 +39,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 
     private static final Logger logger = LoggerFactory.getLogger(WatchdogServiceImpl.class);
 
-    private static final long GRACE_PERIOD = 5 * 60 * 1000L;
+    private static final long GRACE_PERIOD = Duration.ofMinutes(5).toMillis();
 
     private Long timedOutOn;
     private List<CriticalComponentRegistration> criticalComponentRegistrations;
@@ -84,20 +85,22 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
         this.timedOutOn = null;
         this.watchdogFileWriter = null;
 
-        if (!new File(newOptions.getWatchdogDevice()).exists()) {
-            logger.error("Watchdog device '{}' does not exist", newOptions.getWatchdogDevice());
+        String watchdogDevice = newOptions.getWatchdogDevice();
+
+        if (!isWatchdogDeviceAvailable(watchdogDevice)) {
+            logger.error("Watchdog device '{}' does not exist", watchdogDevice);
             return;
         }
 
         try {
-            this.watchdogFileWriter = new FileWriter(new File(newOptions.getWatchdogDevice()));
+            this.watchdogFileWriter = getWatchdogDeviceWriter(watchdogDevice);
         } catch (IOException e) {
             logger.error("Failed to open watchdog device", e);
             return;
         }
 
         try (PrintWriter wdWriter = new PrintWriter(newOptions.getWatchdogEnabledTemporaryFilePath())) {
-            wdWriter.write(newOptions.getWatchdogDevice());
+            wdWriter.write(watchdogDevice);
         } catch (IOException e) {
             logger.warn("Unable to write watchdog enabled temporary file. Continuing anyway", e);
         }
@@ -108,6 +111,14 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
             Thread.currentThread().setName("WatchdogServiceImpl");
             checkCriticalComponents();
         }, 0, this.options.getPingInterval(), TimeUnit.MILLISECONDS);
+    }
+
+    protected Writer getWatchdogDeviceWriter(String watchdogDevice) throws IOException {
+        return new FileWriter(new File(watchdogDevice));
+    }
+
+    protected boolean isWatchdogDeviceAvailable(String watchdogDevice) {
+        return new File(watchdogDevice).exists();
     }
 
     @Override
@@ -156,7 +167,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 
     @Override
     public List<CriticalComponent> getCriticalComponents() {
-        ArrayList<CriticalComponent> result = new ArrayList<>();
+        List<CriticalComponent> result = new ArrayList<>();
         for (CriticalComponentRegistration ccr : this.criticalComponentRegistrations) {
             result.add(ccr.getCriticalComponent());
         }
@@ -258,6 +269,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
     private void closeWatchdogFileWriter() {
         try {
             this.watchdogFileWriter.close();
+            this.watchdogFileWriter = null;
         } catch (IOException e) {
             logger.error("Failed to close watchdog device '{}'", this.options.getWatchdogDevice(), e);
         }

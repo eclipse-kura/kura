@@ -4,7 +4,7 @@ title:  "TI SensorTag driver in Kura Wires"
 categories: [wires]
 ---
 
-Eclipse Kura provides a specific driver that can be used to interact with TI SensorTag devices. The driver is available only for gateways that support the new Kura BLE APIs.
+As presented in [TI SensorTag Driver](sensortag-driver.html), Eclipse Kura provides a specific driver that can be used to interact with TI SensorTag devices. The driver is available only for gateways that support the new Kura BLE APIs.
 
 This tutorial will explain how to configure a Wire graph that connects with a SensorTag, reads sensor values and publishes data to the cloud platform.
 
@@ -12,7 +12,7 @@ This tutorial will explain how to configure a Wire graph that connects with a Se
 
 ## Configure Kura Wires TI SensorTag application
 
-1. Install the TI SensorTag driver from the [Eclipse Kura Marketplace](https://marketplace.eclipse.org/content/???)
+1. Install the TI SensorTag driver from the [Eclipse Kura Marketplace](https://marketplace.eclipse.org/content/ti-sensortag-driver-eclipse-kura)
 2. On the Kura web interface, instantiate a SensorTag Driver:
   * Under "System", select "Drivers and Assets" and click on the "New Driver" button.
   * Select "org.eclipse.kura.driver.ble.sensortag" as "Driver Factory", type a name in to "Driver Name" and click "Apply": a new driver will be instantiated and shown up under the "Drivers and Assets" tab.
@@ -41,3 +41,5 @@ This tutorial will explain how to configure a Wire graph that connects with a Se
 10. Click on "Apply" and check on the logs and cloud platform that that data are correctly published.
 
 ![sensortag_wires]({{ site.baseurl }}/assets/images/wires/SensorTagWires.png)
+
+Please note that the driver supports also unsolicited inputs, setting up a notification for the given channel. In this case, it is sufficient to check the **listen** option for the chosen channel. The Timer is not needed because the SensorTag will automatically emit the values every **notification.period** milliseconds.

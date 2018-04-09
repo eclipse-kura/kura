@@ -26,7 +26,9 @@ Drivers will be provided as add-ons available in the [Eclipse IoT Marketplace](h
 Currently, supported drivers are:
 - [Modbus](https://marketplace.eclipse.org/content/esf-modbus-driver-community-edition);
 - [OPC-UA](https://marketplace.eclipse.org/content/opc-ua-driver-kura);
-- [S7](https://marketplace.eclipse.org/content/s7-driver-kura-developer-preview).
+- [S7](https://marketplace.eclipse.org/content/s7-driver-kura-developer-preview);
+- [TiSensorTag](https://marketplace.eclipse.org/content/ti-sensortag-driver-eclipse-kura);
+- [GPIO](https://marketplace.eclipse.org/content/???);
 
 ## Driver-Specific Optimizations
 

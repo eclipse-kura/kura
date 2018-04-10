@@ -641,6 +641,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
                                         logger.error("monitor() :: Failed to disable modem GPS");
                                     }
                                     modem.reset();
+                                    PppFactory.releasePppService(ifaceName);
                                     pppSt = PppState.NOT_CONNECTED;
                                     this.resetTimerStart = System.currentTimeMillis();
                                 } else {

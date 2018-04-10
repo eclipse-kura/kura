@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.linux.udev.LinuxUdevListener;
@@ -34,70 +33,69 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class LinuxUdevNative {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(LinuxUdevNative.class);
+    private static final Logger logger = LoggerFactory.getLogger(LinuxUdevNative.class);
 
     private static final String LIBRARY_NAME = "EurotechLinuxUdev";
 
-    private final static long THREAD_TERMINATION_TOUT = 1; // in seconds
+    private static final long THREAD_TERMINATION_TOUT = 1; // in seconds
+
+    private static final String UNABLE_TO_LOAD_ERROR = "Unable to load: ";
 
     static {
         try {
-            AccessController.doPrivileged(new PrivilegedAction() {
-
-                @Override
-                public Object run() {
-                    try {
-                        // privileged code goes here, for example:
-                        System.loadLibrary(LIBRARY_NAME);
-                        return null; // nothing to return
-                    } catch (Exception e) {
-                        System.out.println("Unable to load: " + LIBRARY_NAME);
-                        return null;
-                    }
+            AccessController.doPrivileged((PrivilegedAction) () -> {
+                try {
+                    // privileged code goes here, for example:
+                    System.loadLibrary(LIBRARY_NAME);
+                    return null; // nothing to return
+                } catch (Exception e) {
+                    logger.error(UNABLE_TO_LOAD_ERROR + LIBRARY_NAME);
+                    return null;
                 }
             });
         } catch (Exception e) {
-            System.out.println("Unable to load: " + LIBRARY_NAME);
+            logger.error(UNABLE_TO_LOAD_ERROR + LIBRARY_NAME);
         }
     }
 
     private static boolean started;
-    private static Future<?> s_task;
-    private ScheduledExecutorService m_executor;
+    private static Future<?> task;
+    private ScheduledExecutorService executor;
 
-    private LinuxUdevListener m_linuxUdevListener;
-    private LinuxUdevNative m_linuxUdevNative;
+    private LinuxUdevListener linuxUdevListener;
+    private LinuxUdevNative linuxUdevNativeInstance;
 
     /*
      * Devices by their device node (e.g. ttyACM3 or sdb1) or interface name (e.g. usb1).
      */
-    private static HashMap<String, UsbBlockDevice> m_blockDevices;
-    private static HashMap<String, UsbNetDevice> m_netDevices;
-    private static HashMap<String, UsbTtyDevice> m_ttyDevices;
+    private static HashMap<String, UsbBlockDevice> blockDevices = new HashMap<>();
+    private static HashMap<String, UsbNetDevice> netDevices = new HashMap<>();
+    private static HashMap<String, UsbTtyDevice> ttyDevices = new HashMap<>();
 
     public LinuxUdevNative(LinuxUdevListener linuxUdevListener) {
         if (!started) {
-            this.m_linuxUdevNative = this;
-            this.m_linuxUdevListener = linuxUdevListener;
-
-            m_blockDevices = new HashMap<String, UsbBlockDevice>();
-            m_netDevices = new HashMap<String, UsbNetDevice>();
-            m_ttyDevices = new HashMap<String, UsbTtyDevice>();
+            this.linuxUdevNativeInstance = this;
+            this.linuxUdevListener = linuxUdevListener;
 
             /* Assume we get some "good" devices here */
-            List<UsbBlockDevice> blockDevices = (List<UsbBlockDevice>) LinuxUdevNative.getUsbDevices("block");
-            for (UsbBlockDevice blockDevice : blockDevices) {
-                m_blockDevices.put(blockDevice.getDeviceNode(), blockDevice);
+            List<UsbBlockDevice> usbBlockDevices = (List<UsbBlockDevice>) LinuxUdevNative.getUsbDevices("block");
+            for (UsbBlockDevice blockDevice : usbBlockDevices) {
+                blockDevices.put(blockDevice.getDeviceNode(), blockDevice);
             }
 
-            List<UsbNetDevice> netDevices = (List<UsbNetDevice>) LinuxUdevNative.getUsbDevices("net");
-            for (UsbNetDevice netDevice : netDevices) {
-                m_netDevices.put(netDevice.getInterfaceName(), netDevice);
+            List<UsbNetDevice> usbNetDevices = (List<UsbNetDevice>) LinuxUdevNative.getUsbDevices("net");
+            for (UsbNetDevice netDevice : usbNetDevices) {
+                netDevices.put(netDevice.getInterfaceName(), netDevice);
             }
 
-            List<UsbTtyDevice> ttyDevices = (List<UsbTtyDevice>) LinuxUdevNative.getUsbDevices("tty");
-            for (UsbTtyDevice ttyDevice : ttyDevices) {
-                m_ttyDevices.put(ttyDevice.getDeviceNode(), ttyDevice);
+            List<UsbTtyDevice> usbTtyDevices = (List<UsbTtyDevice>) LinuxUdevNative.getUsbDevices("tty");
+            for (UsbTtyDevice ttyDevice : usbTtyDevices) {
+                Integer interfaceNumber = UsbTtyInterface.getInterfaceNumber(ttyDevice.getDeviceNode());
+                UsbTtyDevice ttyDeviceWithInterface = new UsbTtyDevice(ttyDevice.getVendorId(),
+                        ttyDevice.getProductId(), ttyDevice.getManufacturerName(), ttyDevice.getProductName(),
+                        ttyDevice.getUsbBusNumber(), ttyDevice.getUsbDevicePath(), ttyDevice.getDeviceNode(),
+                        interfaceNumber);
+                ttyDevices.put(ttyDevice.getDeviceNode(), ttyDeviceWithInterface);
             }
 
             start();
@@ -106,41 +104,42 @@ public class LinuxUdevNative {
     }
 
     public void unbind() {
-        if (s_task != null && !s_task.isDone()) {
-            s_logger.debug("Cancelling LinuxUdevNative task ...");
-            s_task.cancel(true);
-            s_logger.info("LinuxUdevNative task cancelled? = {}", s_task.isDone());
-            s_task = null;
+        if (task != null && !task.isDone()) {
+            logger.debug("Cancelling LinuxUdevNative task ...");
+            task.cancel(true);
+            logger.info("LinuxUdevNative task cancelled? = {}", task.isDone());
+            task = null;
         }
-        if (this.m_executor != null) {
-            s_logger.debug("Terminating LinuxUdevNative Thread ...");
-            this.m_executor.shutdownNow();
+        if (this.executor != null) {
+            logger.debug("Terminating LinuxUdevNative Thread ...");
+            this.executor.shutdownNow();
             try {
-                this.m_executor.awaitTermination(THREAD_TERMINATION_TOUT, TimeUnit.SECONDS);
+                this.executor.awaitTermination(THREAD_TERMINATION_TOUT, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
-                s_logger.warn("Interrupted", e);
+                Thread.currentThread().interrupt();
+                logger.warn("Interrupted", e);
             }
-            s_logger.info("LinuxUdevNative Thread terminated? - {}", this.m_executor.isTerminated());
-            this.m_executor = null;
+            logger.info("LinuxUdevNative Thread terminated? - {}", this.executor.isTerminated());
+            this.executor = null;
         }
         started = false;
     }
 
     public static List<UsbBlockDevice> getUsbBlockDevices() {
-        return new ArrayList<UsbBlockDevice>(m_blockDevices.values());
+        return new ArrayList<>(blockDevices.values());
     }
 
     public static List<UsbNetDevice> getUsbNetDevices() {
-        return new ArrayList<UsbNetDevice>(m_netDevices.values());
+        return new ArrayList<>(netDevices.values());
     }
 
     public static List<UsbTtyDevice> getUsbTtyDevices() {
-        return new ArrayList<UsbTtyDevice>(m_ttyDevices.values());
+        return new ArrayList<>(ttyDevices.values());
     }
 
-    private native static void nativeHotplugThread(LinuxUdevNative linuxUdevNative);
+    private static native void nativeHotplugThread(LinuxUdevNative linuxUdevNative);
 
-    private native static ArrayList<? extends UsbDevice> getUsbDevices(String deviceClass);
+    private static native ArrayList<? extends UsbDevice> getUsbDevices(String deviceClass);
 
     /*
      * WARNING
@@ -163,12 +162,12 @@ public class LinuxUdevNative {
      */
     private void callback(String type, UsbDevice usbDevice) {
 
-        s_logger.debug("TYPE: {}", usbDevice.getClass());
-        s_logger.debug("\tmanfufacturer name: {}", usbDevice.getManufacturerName());
-        s_logger.debug("\tproduct name: {}", usbDevice.getProductName());
-        s_logger.debug("\tvendor ID: {}", usbDevice.getVendorId());
-        s_logger.debug("\tproduct ID: {}", usbDevice.getProductId());
-        s_logger.debug("\tUSB Bus Number: {}", usbDevice.getUsbBusNumber());
+        logger.debug("TYPE: {}", usbDevice.getClass());
+        logger.debug("\tmanfufacturer name: {}", usbDevice.getManufacturerName());
+        logger.debug("\tproduct name: {}", usbDevice.getProductName());
+        logger.debug("\tvendor ID: {}", usbDevice.getVendorId());
+        logger.debug("\tproduct ID: {}", usbDevice.getProductId());
+        logger.debug("\tUSB Bus Number: {}", usbDevice.getUsbBusNumber());
 
         if (usbDevice instanceof UsbBlockDevice) {
             String name = ((UsbBlockDevice) usbDevice).getDeviceNode();
@@ -178,50 +177,56 @@ public class LinuxUdevNative {
                      * FIXME: does an already existing device, with the same name,
                      * need to be removed first?
                      */
-                    m_blockDevices.put(name, (UsbBlockDevice) usbDevice);
-                    this.m_linuxUdevListener.attached(usbDevice);
+                    blockDevices.put(name, (UsbBlockDevice) usbDevice);
+                    this.linuxUdevListener.attached(usbDevice);
                 } else if (type.compareTo(UdevEventType.DETACHED.name()) == 0) {
                     /*
                      * Due to the above limitations,
                      * the best we can do is to remove the device from the
                      * map of already known devices by its name.
                      */
-                    UsbBlockDevice removedDevice = m_blockDevices.remove(name);
+                    UsbBlockDevice removedDevice = blockDevices.remove(name);
                     if (removedDevice != null) {
-                        this.m_linuxUdevListener.detached(removedDevice);
+                        this.linuxUdevListener.detached(removedDevice);
                     }
                 } else {
-                    s_logger.debug("Unknown udev event: {}", type);
+                    logger.debug("Unknown udev event: {}", type);
                 }
             }
         } else if (usbDevice instanceof UsbNetDevice) {
             String name = ((UsbNetDevice) usbDevice).getInterfaceName();
             if (name != null) {
                 if (type.compareTo(UdevEventType.ATTACHED.name()) == 0) {
-                    m_netDevices.put(name, (UsbNetDevice) usbDevice);
-                    this.m_linuxUdevListener.attached(usbDevice);
+                    netDevices.put(name, (UsbNetDevice) usbDevice);
+                    this.linuxUdevListener.attached(usbDevice);
                 } else if (type.compareTo(UdevEventType.DETACHED.name()) == 0) {
-                    UsbNetDevice removedDevice = m_netDevices.remove(name);
+                    UsbNetDevice removedDevice = netDevices.remove(name);
                     if (removedDevice != null) {
-                        this.m_linuxUdevListener.detached(removedDevice);
+                        this.linuxUdevListener.detached(removedDevice);
                     }
                 } else {
-                    s_logger.debug("Unknown udev event: {}", type);
+                    logger.debug("Unknown udev event: {}", type);
                 }
             }
         } else if (usbDevice instanceof UsbTtyDevice) {
             String name = ((UsbTtyDevice) usbDevice).getDeviceNode();
             if (name != null) {
                 if (type.compareTo(UdevEventType.ATTACHED.name()) == 0) {
-                    m_ttyDevices.put(name, (UsbTtyDevice) usbDevice);
-                    this.m_linuxUdevListener.attached(usbDevice);
+                    UsbTtyDevice ttyDevice = (UsbTtyDevice) usbDevice;
+                    Integer interfaceNumber = UsbTtyInterface.getInterfaceNumber(ttyDevice.getDeviceNode());
+                    UsbTtyDevice ttyDeviceWithInterface = new UsbTtyDevice(ttyDevice.getVendorId(),
+                            ttyDevice.getProductId(), ttyDevice.getManufacturerName(), ttyDevice.getProductName(),
+                            ttyDevice.getUsbBusNumber(), ttyDevice.getUsbDevicePath(), ttyDevice.getDeviceNode(),
+                            interfaceNumber);
+                    ttyDevices.put(name, ttyDeviceWithInterface);
+                    this.linuxUdevListener.attached(ttyDeviceWithInterface);
                 } else if (type.compareTo(UdevEventType.DETACHED.name()) == 0) {
-                    UsbTtyDevice removedDevice = m_ttyDevices.remove(name);
+                    UsbTtyDevice removedDevice = ttyDevices.remove(name);
                     if (removedDevice != null) {
-                        this.m_linuxUdevListener.detached(removedDevice);
+                        this.linuxUdevListener.detached(removedDevice);
                     }
                 } else {
-                    s_logger.debug("Unknown udev event: {}", type);
+                    logger.debug("Unknown udev event: {}", type);
                 }
             }
         }
@@ -230,27 +235,19 @@ public class LinuxUdevNative {
     /** Start this Hotplug Thread. */
     private void start() {
 
-        this.m_executor = Executors.newSingleThreadScheduledExecutor(new ThreadFactory() {
-
-            @Override
-            public Thread newThread(Runnable r) {
-                Thread thread = new Thread(r, "UdevHotplugThread");
-                thread.setDaemon(true);
-                return thread;
-            }
+        this.executor = Executors.newSingleThreadScheduledExecutor(r -> {
+            Thread thread = new Thread(r, "UdevHotplugThread");
+            thread.setDaemon(true);
+            return thread;
         });
 
-        s_task = this.m_executor.submit(new Runnable() {
-
-            @Override
-            public void run() {
-                s_logger.info("Starting LinuxUdevNative Thread ...");
-                Thread.currentThread().setName("LinuxUdevNative");
-                try {
-                    LinuxUdevNative.nativeHotplugThread(LinuxUdevNative.this.m_linuxUdevNative);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+        task = this.executor.submit(() -> {
+            logger.info("Starting LinuxUdevNative Thread ...");
+            Thread.currentThread().setName("LinuxUdevNative");
+            try {
+                LinuxUdevNative.nativeHotplugThread(LinuxUdevNative.this.linuxUdevNativeInstance);
+            } catch (Exception e) {
+                logger.error("Starting LinuxUdevNative failed", e);
             }
         });
     }

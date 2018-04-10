@@ -37,6 +37,9 @@ import org.slf4j.LoggerFactory;
 
 public class WatchdogServiceImpl implements WatchdogService, ConfigurableComponent {
 
+    private static final String[] STOP_WATCHDOGD_COMMANDS = { "systemctl stop watchdog", "service watchdog stop",
+            "/etc/init.d/watchdog stop", "/etc/init.d/watchdog.sh stop" };
+
     private static final Logger logger = LoggerFactory.getLogger(WatchdogServiceImpl.class);
 
     private static final long GRACE_PERIOD = Duration.ofMinutes(5).toMillis();
@@ -77,6 +80,31 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
         });
     }
 
+    private void stopWatchdogd() {
+        for (final String stopCommand : STOP_WATCHDOGD_COMMANDS) {
+            try {
+                runCommand(stopCommand);
+                Thread.sleep(5000);
+                return;
+            } catch (Exception e) {
+                logger.debug("Command failed: {}", stopCommand, e);
+            }
+        }
+    }
+
+    private void openWatchdog(final String watchdogDevice, final boolean tryStopWatchdogd) throws IOException {
+        try {
+            this.watchdogFileWriter = getWatchdogDeviceWriter(watchdogDevice);
+        } catch (IOException e) {
+            if (tryStopWatchdogd) {
+                stopWatchdogd();
+                openWatchdog(watchdogDevice, false);
+            } else {
+                throw e;
+            }
+        }
+    }
+
     private void doUpdate(WatchdogServiceOptions newOptions) {
         if (!newOptions.isEnabled()) {
             return;
@@ -93,7 +121,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
         }
 
         try {
-            this.watchdogFileWriter = getWatchdogDeviceWriter(watchdogDevice);
+            openWatchdog(watchdogDevice, true);
         } catch (IOException e) {
             logger.error("Failed to open watchdog device", e);
             return;

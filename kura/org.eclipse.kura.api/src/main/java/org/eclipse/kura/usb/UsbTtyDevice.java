@@ -32,6 +32,9 @@ public class UsbTtyDevice extends AbstractUsbDevice {
         this.interfaceNumber = null;
     }
 
+    /**
+     * @since 1.4
+     */
     public UsbTtyDevice(String vendorId, String productId, String manufacturerName, String productName,
             String usbBusNumber, String usbDevicePath, String deviceNode, Integer interfaceNumber) {
         super(vendorId, productId, manufacturerName, productName, usbBusNumber, usbDevicePath);
@@ -39,10 +42,22 @@ public class UsbTtyDevice extends AbstractUsbDevice {
         this.interfaceNumber = interfaceNumber;
     }
 
+    /**
+     * Returns the tty device node name
+     * 
+     * @return the device node
+     */
     public String getDeviceNode() {
         return this.deviceNode;
     }
 
+    /**
+     * Returns the tty interface number
+     * 
+     * @since 1.4
+     * 
+     * @return the interface number
+     */
     public Integer getInterfaceNumber() {
         return this.interfaceNumber;
     }

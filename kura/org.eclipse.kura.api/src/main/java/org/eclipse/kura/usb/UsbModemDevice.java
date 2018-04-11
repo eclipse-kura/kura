@@ -82,6 +82,8 @@ public class UsbModemDevice extends AbstractUsbDevice implements ModemDevice {
      * Adds a tty device identified by its name and USB interface number (bInterfaceNumber).
      * The devices will be sorted by the interface number. If this is missing, the name will be used.
      *
+     * @since 1.4
+     *
      * @param ttyDev
      *            the name of the tty device
      * @param interfaceNumber

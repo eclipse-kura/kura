@@ -249,7 +249,7 @@ public class UsbModemDevice extends AbstractUsbDevice implements ModemDevice {
         }
     }
 
-    private class TtyDev {
+    private static class TtyDev {
 
         private final String portName;
         private Integer interfaceNumber;
@@ -271,20 +271,16 @@ public class UsbModemDevice extends AbstractUsbDevice implements ModemDevice {
             return this.interfaceNumber;
         }
 
-        private UsbModemDevice getOuterType() {
-            return UsbModemDevice.this;
-        }
-
         @Override
         public String toString() {
-            return "TtyDev [portName=" + this.portName + ", interfaceNumber=" + this.interfaceNumber + "]";
+            String number = this.interfaceNumber != null ? this.interfaceNumber.toString() : "null";
+            return "TtyDev [portName=" + this.portName + ", interfaceNumber=" + number + "]";
         }
 
         @Override
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + getOuterType().hashCode();
             result = prime * result + (this.portName == null ? 0 : this.portName.hashCode());
             return result;
         }
@@ -301,9 +297,6 @@ public class UsbModemDevice extends AbstractUsbDevice implements ModemDevice {
                 return false;
             }
             TtyDev other = (TtyDev) obj;
-            if (!getOuterType().equals(other.getOuterType())) {
-                return false;
-            }
             if (this.portName == null) {
                 if (other.portName != null) {
                     return false;
@@ -322,6 +315,8 @@ public class UsbModemDevice extends AbstractUsbDevice implements ModemDevice {
         /**
          * If the devices have an interface number, use it for comparing.
          * Otherwise use the port names.
+         * Note: this comparator imposes orderings that are inconsistent with equals. The comparison will be performed
+         * on the interface numbers if present, while the equals method is based only on the port names.
          */
         public int compare(TtyDev dev1, TtyDev dev2) {
             if (dev1.getInterfaceNumber() != null && dev2.getInterfaceNumber() != null) {

@@ -24,24 +24,18 @@ import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class UsbTtyInterface {
+public class LinuxUdevUtil {
 
-    private static final Logger logger = LoggerFactory.getLogger(UsbTtyInterface.class);
+    private static final Logger logger = LoggerFactory.getLogger(LinuxUdevUtil.class);
 
-    private UsbTtyInterface() {
+    private LinuxUdevUtil() {
         // Empty constructor
     }
 
-    public static Integer getInterfaceNumber(String deviceNode) {
-        Integer interfaceNumber = null;
+    public static Integer getInterfaceNumber(String deviceNode) throws IOException {
         String command = "udevadm info --query=property --name=" + deviceNode;
         logger.debug("Executing: {}", command);
-        try {
-            return parse(execute(command));
-        } catch (IOException e) {
-            logger.error("Failed to execute command {}", command, e);
-        }
-        return interfaceNumber;
+        return parse(execute(command));
     }
 
     private static Integer parse(List<String> output) {

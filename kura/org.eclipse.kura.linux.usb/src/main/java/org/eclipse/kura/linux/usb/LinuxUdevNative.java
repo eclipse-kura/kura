@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.eclipse.kura.linux.usb;
 
+import java.io.IOException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
@@ -90,7 +91,12 @@ public class LinuxUdevNative {
 
             List<UsbTtyDevice> usbTtyDevices = (List<UsbTtyDevice>) LinuxUdevNative.getUsbDevices("tty");
             for (UsbTtyDevice ttyDevice : usbTtyDevices) {
-                Integer interfaceNumber = UsbTtyInterface.getInterfaceNumber(ttyDevice.getDeviceNode());
+                Integer interfaceNumber = null;
+                try {
+                    interfaceNumber = LinuxUdevUtil.getInterfaceNumber(ttyDevice.getDeviceNode());
+                } catch (IOException e) {
+                    logger.error("Error fetching interface number", e);
+                }
                 UsbTtyDevice ttyDeviceWithInterface = new UsbTtyDevice(ttyDevice.getVendorId(),
                         ttyDevice.getProductId(), ttyDevice.getManufacturerName(), ttyDevice.getProductName(),
                         ttyDevice.getUsbBusNumber(), ttyDevice.getUsbDevicePath(), ttyDevice.getDeviceNode(),
@@ -213,7 +219,12 @@ public class LinuxUdevNative {
             if (name != null) {
                 if (type.compareTo(UdevEventType.ATTACHED.name()) == 0) {
                     UsbTtyDevice ttyDevice = (UsbTtyDevice) usbDevice;
-                    Integer interfaceNumber = UsbTtyInterface.getInterfaceNumber(ttyDevice.getDeviceNode());
+                    Integer interfaceNumber = null;
+                    try {
+                        interfaceNumber = LinuxUdevUtil.getInterfaceNumber(ttyDevice.getDeviceNode());
+                    } catch (IOException e) {
+                        logger.error("Error fetching interface number", e);
+                    }
                     UsbTtyDevice ttyDeviceWithInterface = new UsbTtyDevice(ttyDevice.getVendorId(),
                             ttyDevice.getProductId(), ttyDevice.getManufacturerName(), ttyDevice.getProductName(),
                             ttyDevice.getUsbBusNumber(), ttyDevice.getUsbDevicePath(), ttyDevice.getDeviceNode(),

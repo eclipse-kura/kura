@@ -102,11 +102,7 @@ public class UsbModemDevice extends AbstractUsbDevice implements ModemDevice {
      */
     @Deprecated
     public void addTtyDev(String ttyDev) {
-        TtyDev dev = new TtyDev(ttyDev);
-        if (!this.ttyDevs.contains(dev)) {
-            this.ttyDevs.add(new TtyDev(ttyDev));
-            Collections.sort(this.ttyDevs, new TtyDevComparator());
-        }
+        addTtyDev(ttyDev, null);
     }
 
     /**
@@ -255,6 +251,30 @@ public class UsbModemDevice extends AbstractUsbDevice implements ModemDevice {
 
     private class TtyDev {
 
+        private final String portName;
+        private Integer interfaceNumber;
+
+        public TtyDev(String portName) {
+            this.portName = portName;
+        }
+
+        public TtyDev(String portName, Integer interfaceNumber) {
+            this.portName = portName;
+            this.interfaceNumber = interfaceNumber;
+        }
+
+        public String getPortName() {
+            return this.portName;
+        }
+
+        public Integer getInterfaceNumber() {
+            return this.interfaceNumber;
+        }
+
+        private UsbModemDevice getOuterType() {
+            return UsbModemDevice.this;
+        }
+
         @Override
         public String toString() {
             return "TtyDev [portName=" + this.portName + ", interfaceNumber=" + this.interfaceNumber + "]";
@@ -292,30 +312,6 @@ public class UsbModemDevice extends AbstractUsbDevice implements ModemDevice {
                 return false;
             }
             return true;
-        }
-
-        private final String portName;
-        private Integer interfaceNumber;
-
-        public TtyDev(String portName) {
-            this.portName = portName;
-        }
-
-        public TtyDev(String portName, Integer interfaceNumber) {
-            this.portName = portName;
-            this.interfaceNumber = interfaceNumber;
-        }
-
-        public String getPortName() {
-            return this.portName;
-        }
-
-        public Integer getInterfaceNumber() {
-            return this.interfaceNumber;
-        }
-
-        private UsbModemDevice getOuterType() {
-            return UsbModemDevice.this;
         }
 
     }

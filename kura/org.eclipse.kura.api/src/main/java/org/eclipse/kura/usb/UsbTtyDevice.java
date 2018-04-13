@@ -94,10 +94,11 @@ public class UsbTtyDevice extends AbstractUsbDevice {
 
     @Override
     public String toString() {
+        String number = getInterfaceNumber() != null ? getInterfaceNumber().toString() : "null";
         return "UsbTtyDevice [getDeviceNode()=" + getDeviceNode() + ", getVendorId()=" + getVendorId()
                 + ", getProductId()=" + getProductId() + ", getManufacturerName()=" + getManufacturerName()
                 + ", getProductName()=" + getProductName() + ", getUsbBusNumber()=" + getUsbBusNumber()
                 + ", getUsbDevicePath()=" + getUsbDevicePath() + ", getUsbPort()=" + getUsbPort()
-                + ", getInterfaceNumber()=" + getInterfaceNumber() + "]";
+                + ", getInterfaceNumber()=" + number + "]";
     }
 }

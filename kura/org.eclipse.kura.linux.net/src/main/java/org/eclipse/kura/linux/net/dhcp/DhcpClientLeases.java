@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -36,6 +36,13 @@ public class DhcpClientLeases {
 
     private static DhcpClientLeases dhcpClientLeases;
 
+    public DhcpClientLeases() {
+        File leasesDirectory = new File(IFACE_DHCP_LEASES_DIR);
+        if (!leasesDirectory.exists() && !leasesDirectory.mkdirs()) {
+            logger.error("Failed to create {}", IFACE_DHCP_LEASES_DIR);
+        }
+    }
+
     public static synchronized DhcpClientLeases getInstance() {
         if (dhcpClientLeases == null) {
             dhcpClientLeases = new DhcpClientLeases();
@@ -53,7 +60,7 @@ public class DhcpClientLeases {
             return gateways;
         }
 
-        List<DhcpClientLeaseBlock> leaseBlocks = getLeaseBlocks(getDhclientFile(interfaceName));
+        List<DhcpClientLeaseBlock> leaseBlocks = getLeaseBlocks(getDhclientLeasesFile(interfaceName));
         for (DhcpClientLeaseBlock leaseBlock : leaseBlocks) {
             if (!leaseBlock.matches(interfaceName, address)) {
                 continue;
@@ -79,7 +86,7 @@ public class DhcpClientLeases {
             return servers;
         }
 
-        List<DhcpClientLeaseBlock> leaseBlocks = getLeaseBlocks(getDhclientFile(interfaceName));
+        List<DhcpClientLeaseBlock> leaseBlocks = getLeaseBlocks(getDhclientLeasesFile(interfaceName));
         for (DhcpClientLeaseBlock leaseBlock : leaseBlocks) {
             if (!leaseBlock.matches(interfaceName, address)) {
                 continue;
@@ -94,7 +101,11 @@ public class DhcpClientLeases {
         return servers;
     }
 
-    private File getDhclientFile(String interfaceName) throws KuraException {
+    public String getDhclientLeasesFilePath(String interfaceName) {
+        return formInterfaceDhclientLeasesFilename(interfaceName);
+    }
+
+    public File getDhclientLeasesFile(String interfaceName) throws KuraException {
         File ret;
         File globalDhClientFile = new File(formGlobalDhclientLeasesFilename());
         File interfaceDhClientFile = new File(formInterfaceDhclientLeasesFilename(interfaceName));

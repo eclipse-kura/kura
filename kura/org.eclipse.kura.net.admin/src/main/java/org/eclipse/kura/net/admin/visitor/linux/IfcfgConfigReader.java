@@ -177,8 +177,8 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
                             ipAddress = kuraProps.getProperty("IPADDR");
                             prefixString = kuraProps.getProperty("PREFIX");
                             netmask = kuraProps.getProperty("NETMASK");
-                        } else if (netInterfaceStatus != NetInterfaceStatus.netIPv4StatusUnmanaged) {
-                            netInterfaceStatus = NetInterfaceStatus.netIPv4StatusL2Only;
+                            // } else if (netInterfaceStatus != NetInterfaceStatus.netIPv4StatusUnmanaged) {
+                            // netInterfaceStatus = NetInterfaceStatus.netIPv4StatusL2Only;
                         }
                     } catch (Exception e) {
                         throw new KuraException(KuraErrorCode.INTERNAL_ERROR,

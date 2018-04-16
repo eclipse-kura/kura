@@ -33,8 +33,7 @@ Target Environments:
 
 Bug Fixes :
   * Fixed github issues:
-    * #2035: Fixed possible NPE in sensehat driver
-    * #2034: Added stop watchdogd step to WatchdogService
+    * #2042: Switching network interface status from 'L2Only' to 'Unmanaged' doesn't work.
     * #2022: Factories don't get removed from creation dialog
     * #2020: Wrong column content in assert/driver view
     * #2015: New Factory Component - drop-down-list item missing for a installed package
@@ -129,7 +128,11 @@ Bug Fixes :
 
 
   * Merged no issue-related Pull Requests:
+    * #2044: Fixed dhclient issue after Raspbian fresh install
+    * #2039: Fixed rotation issue in sensehat driver
     * #2036: Fix for modem serial ports detection and ppp
+    * #2035: Fixed possible NPE in sensehat driver
+    * #2034: Added stop watchdogd step to WatchdogService
     * #2028: Removed localisation from o.e.k.w.provider bundle
     * #2023: Removed 'Search Domains' field
     * #2016: Modified wrong reference to internal modem

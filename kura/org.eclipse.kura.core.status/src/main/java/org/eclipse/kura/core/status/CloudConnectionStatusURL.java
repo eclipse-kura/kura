@@ -25,6 +25,8 @@ public class CloudConnectionStatusURL {
     public static final String LOG = "log";
     public static final String NONE = "none";
 
+    public static final String INVERTED = ":inverted";
+    
     private static final String CCS_NOTIFICATION_URLS_SEPARATOR = ";";
 
     private CloudConnectionStatusURL() {
@@ -56,8 +58,18 @@ public class CloudConnectionStatusURL {
         Properties props = new Properties();
         if (urlImage.startsWith(LED)) {
             // Cloud Connection Status on LED
-            String ledString = urlImage.replace(LED, "");
+            String ledString = urlImage.replace(LED, "").trim();
             try {
+                if (ledString.endsWith(INVERTED)) {
+                    props.put("inverted", true);
+                } else {
+                    props.put("inverted", false);
+                }
+                
+                //in case of typo
+                if (ledString.contains(":")) {
+                    ledString = ledString.substring(0, ledString.indexOf(":"));
+                }
                 int ledPin = Integer.parseInt(ledString.trim());
                 props.put(NOTIFICATION_TYPE, StatusNotificationTypeEnum.LED);
                 props.put("led", ledPin);

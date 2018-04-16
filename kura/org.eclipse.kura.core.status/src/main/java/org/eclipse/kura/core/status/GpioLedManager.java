@@ -32,12 +32,18 @@ public class GpioLedManager implements LedManager {
 
     private int ledId;
     private GPIOService gpioService;
+    private boolean inverted;
 
     public GpioLedManager(GPIOService gpioService, int led) {
-        this.ledId = led;
-        this.gpioService = gpioService;
+        this(gpioService, led, false);
     }
 
+    public GpioLedManager(GPIOService gpioService, int led, boolean inverted) {
+        this.ledId = led;
+        this.gpioService = gpioService;
+        this.inverted = inverted;
+    }
+    
     public void writeLed(boolean enabled) throws KuraException {
         KuraGPIOPin notificationLED = this.gpioService.getPinByTerminal(ledId, KuraGPIODirection.OUTPUT,
                 KuraGPIOMode.OUTPUT_OPEN_DRAIN, KuraGPIOTrigger.NONE);
@@ -47,7 +53,7 @@ public class GpioLedManager implements LedManager {
                 notificationLED.open();
                 logger.info("CloudConnectionStatus active on LED {}.", ledId);
             }
-            notificationLED.setValue(enabled);
+            notificationLED.setValue(enabled ^ inverted);
 
         } catch (KuraGPIODeviceException | KuraUnavailableDeviceException | IOException e) {
             logger.error("Error activating CloudConnectionStatus LED!");

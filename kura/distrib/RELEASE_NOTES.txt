@@ -182,6 +182,7 @@ Know Issues :
     in the WEB UI if the user attempts to enable more than one WAN interface
   * Web UI may hang when configuration snapshot is uploaded. This happens because HTTP connection is lost due to toggling of the network
     interface which happened even if network configuration hasn't been modified.
+  * #2050: Modem monitor in Not connected state does not trigger reset
   * #2040: [Kura 3.2.0 QA] PositionService does not switch between GPS and static position
   * #2013: Unsaved changes dialog triggers incorrectly
   * #1999: Connection refresh sometimes causes duplicate entries

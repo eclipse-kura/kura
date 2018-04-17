@@ -55,12 +55,20 @@ following steps:
 
     <pre>sudo apt-get remove network-manager</pre>
 
-4.  Install the gdebi command line tool:
+    In the latest Raspbian releases, type the following command to disable the network manager:
+
+    <pre>sudo systemctl disable networking</pre>
+
+4.  In the latest raspbian releases, the wireless interface is disabled by default. Type the following command to enabled it:
+
+    <pre>sudo rfkill unblock all</pre>
+
+5.  Install the gdebi command line tool:
 
     <pre>sudo apt-get update
     sudo apt-get install gdebi-core</pre>
 
-5.  Make sure that Java 8 is installed with
+6.  Make sure that Java 8 is installed with
 
     <pre>java -version</pre>
 
@@ -68,23 +76,23 @@ following steps:
 
     <pre>sudo apt-get install openjdk-8-jre-headless</pre>
 
-6.  Download the Kura package with:
+7.  Download the Kura package with:
 
     <pre>wget http://download.eclipse.org/kura/releases/&lt;version&gt;/kura_&lt;version&gt;_raspberry-pi-2-3_installer.deb</pre>
 
     Note: replace \<version\> in the URL above with the version number of the latest release (e.g. 2.1.0).
 
-7.  Install Kura with: 
+8.  Install Kura with: 
 
     <pre>sudo gdebi kura_&lt;version&gt;_raspberry-pi-2-3_installer.deb</pre>
 
-8.  Reboot the Raspberry Pi with:
+9.  Reboot the Raspberry Pi with:
 
     <pre>sudo reboot</pre>
 
     Kura starts on the target platform after reboot.
 
-9.  Kura setups a local web ui that is available using a browser via:
+10.  Kura setups a local web ui that is available using a browser via:
 
     <pre>http://&lt;device-ip&gt;</pre>
 

@@ -59,9 +59,9 @@ public class SubscriptionManager implements SubscriptionListener, ListenerRegist
     private static ExtensionObject defaultEventFilter = ExtensionObject
             .encode(new EventFilter(new SimpleAttributeOperand[] {
                     new SimpleAttributeOperand(Identifiers.BaseEventType,
-                            new QualifiedName[] { BaseEventType.TIME.getBrowseName() }, AttributeId.Value.uid(), null),
+                            new QualifiedName[] { new QualifiedName(0, BaseEventType.TIME.getBrowseName()) }, AttributeId.Value.uid(), null),
                     new SimpleAttributeOperand(Identifiers.BaseEventType,
-                            new QualifiedName[] { BaseEventType.MESSAGE.getBrowseName() }, AttributeId.Value.uid(),
+                            new QualifiedName[] { new QualifiedName(0,BaseEventType.MESSAGE.getBrowseName()) }, AttributeId.Value.uid(),
                             null) },
                     new ContentFilter(null)));
 

@@ -1089,8 +1089,8 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         String xmlResult;
         try {
             xmlResult = marshal(conf);
-            if (xmlResult.trim().isEmpty()) {
-                throw new KuraException(KuraErrorCode.INVALID_PARAMETER, conf);
+            if (xmlResult == null || xmlResult.trim().isEmpty()) {
+                return;
             }
         } catch (Exception e1) {
             throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e1);
@@ -1807,6 +1807,9 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
     protected <T> T unmarshal(String string, Class<T> clazz) throws KuraException {
         T result = null;
         ServiceReference<Unmarshaller>[] unmarshallerSRs = getXmlUnmarshallers();
+        if (unmarshallerSRs == null) {
+            throw new KuraException(KuraErrorCode.DECODER_ERROR, "No XML unmarshallers found");
+        }
         try {
             for (final ServiceReference<Unmarshaller> unmarshallerSR : unmarshallerSRs) {
                 Unmarshaller unmarshaller = this.bundleContext.getService(unmarshallerSR);
@@ -1816,7 +1819,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
                 }
             }
         } catch (Exception e) {
-            logger.warn("Failed to extract persisted configuration.");
+            logger.warn("Failed to extract persisted configuration.", e);
         } finally {
             ungetServiceReferences(unmarshallerSRs);
         }
@@ -1829,6 +1832,9 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
     protected String marshal(Object object) {
         String result = null;
         ServiceReference<Marshaller>[] marshallerSRs = getXmlMarshallers();
+        if (marshallerSRs == null) {
+            logger.warn("Failed to marshal configuration. No XML marshallers found");
+        }
         try {
             for (final ServiceReference<Marshaller> marshallerSR : marshallerSRs) {
                 Marshaller marshaller = this.bundleContext.getService(marshallerSR);
@@ -1838,7 +1844,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
                 }
             }
         } catch (Exception e) {
-            logger.warn("Failed to marshal configuration.");
+            logger.warn("Failed to marshal configuration.", e);
         } finally {
             ungetServiceReferences(marshallerSRs);
         }

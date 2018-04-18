@@ -39,6 +39,19 @@ public interface BluetoothLeDevice {
     public BluetoothLeGattService findService(UUID uuid) throws KuraBluetoothResourceNotFoundException;
 
     /**
+     * Find a BluetoothLeGattService specifying the UUID of the service and the timeout in seconds.
+     *
+     * @since 1.4
+     * @param uuid
+     *            The UUID of the GATT service
+     * @param timeout
+     *            The timeout for retrieving the service
+     * @return The BluetoothLeGattService
+     * @throws KuraBluetoothResourceNotFoundException
+     */
+    public BluetoothLeGattService findService(UUID uuid, long timeout) throws KuraBluetoothResourceNotFoundException;
+
+    /**
      * Returns a list of BluetoothGattServices available on this device.
      *
      * @return A list of BluetoothLeGattService

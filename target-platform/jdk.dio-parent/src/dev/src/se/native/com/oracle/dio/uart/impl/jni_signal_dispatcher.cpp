@@ -55,11 +55,11 @@ JNIEXPORT void JNICALL Java_com_oracle_dio_uart_impl_ModemSignalDispatcher_setNa
 /*
  * Class:     com_oracle_dio_uart_impl_ModemSignalDispatcher
  * Method:    startListening0
- * Signature: (II)Z
+ * Signature: (J)J
  */
-JNIEXPORT jint JNICALL Java_com_oracle_dio_uart_impl_ModemSignalDispatcher_startListening0
-  (JNIEnv* env, jobject obj, jint serialHandler) {
-    javacall_handle handle = (javacall_handle)(jlong)serialHandler;
+JNIEXPORT jlong JNICALL Java_com_oracle_dio_uart_impl_ModemSignalDispatcher_startListening0
+  (JNIEnv* env, jobject obj, jlong serialHandler) {
+    javacall_handle handle = (javacall_handle)serialHandler;
     javacall_handle context;
     javacall_result result;
     result = javacall_serial_start_dce_signal_listening(handle,
@@ -68,19 +68,17 @@ JNIEXPORT jint JNICALL Java_com_oracle_dio_uart_impl_ModemSignalDispatcher_start
     if (JAVACALL_OK != result) {
         context = JAVACALL_INVALID_HANDLE;
     }
-#pragma message "!!!WARNING!!! UNSAFE cast to long to prevent the following error when building for x86_64:"
-#pragma message "error: cast from ‘javacall_handle {aka void*}’ to ‘jint {aka int}’ loses precision [-fpermissive]"
-    return (jint)(long)context;
+    return (jlong)context;
 }
 
 /*
  * Class:     com_oracle_dio_uart_impl_ModemSignalDispatcher
  * Method:    stopListening0
- * Signature: (I)V
+ * Signature: (J)V
  */
 JNIEXPORT void JNICALL Java_com_oracle_dio_uart_impl_ModemSignalDispatcher_stopListening0
-  (JNIEnv* env, jobject obj, jint context) {
-    if ((javacall_handle)(jlong)context != JAVACALL_INVALID_HANDLE) {
+  (JNIEnv* env, jobject obj, jlong context) {
+    if ((javacall_handle)context != JAVACALL_INVALID_HANDLE) {
         javacall_serial_stop_dce_signal_listening((javacall_handle)(jlong)context);
     }
 }

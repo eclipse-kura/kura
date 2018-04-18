@@ -33,7 +33,7 @@ public class BluetoothLeIBeacon extends BluetoothLeBeacon {
     }
 
     public UUID getUuid() {
-        return uuid;
+        return this.uuid;
     }
 
     public void setUuid(UUID uuid) {
@@ -41,7 +41,7 @@ public class BluetoothLeIBeacon extends BluetoothLeBeacon {
     }
 
     public short getMajor() {
-        return major;
+        return this.major;
     }
 
     public void setMajor(short major) {
@@ -49,7 +49,7 @@ public class BluetoothLeIBeacon extends BluetoothLeBeacon {
     }
 
     public short getMinor() {
-        return minor;
+        return this.minor;
     }
 
     public void setMinor(short minor) {
@@ -57,7 +57,7 @@ public class BluetoothLeIBeacon extends BluetoothLeBeacon {
     }
 
     public short getTxPower() {
-        return txPower;
+        return this.txPower;
     }
 
     public void setTxPower(short txPower) {

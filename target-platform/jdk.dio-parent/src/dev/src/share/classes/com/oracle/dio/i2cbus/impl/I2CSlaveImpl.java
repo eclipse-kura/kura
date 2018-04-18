@@ -339,7 +339,7 @@ class I2CSlaveImpl extends PowerManagedBase<I2CDevice> implements I2CDevice {
         }
     }
 
-    protected synchronized int getGrpID() {
+    protected synchronized long getGrpID() {
         return getGrpID0();
     }
 
@@ -360,5 +360,5 @@ class I2CSlaveImpl extends PowerManagedBase<I2CDevice> implements I2CDevice {
      */
     private native int transfer0(boolean write, ByteBuffer dst, int flag);
 
-    private native int getGrpID0();
+    private native long getGrpID0();
 }

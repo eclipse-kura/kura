@@ -316,22 +316,6 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                                     logger.debug("DNS Servers: [empty String]");
                                     gwtNetConfig.setDnsServers("");
                                 }
-
-                                // Search domains
-                                sb = new StringBuffer();
-                                List<IP4Address> winsServers = ((NetConfigIP4) netConfig).getWinsServers();
-                                if (winsServers != null && !winsServers.isEmpty()) {
-                                    for (IP4Address winServer : winsServers) {
-                                        sb.append(winServer.getHostAddress());
-                                        sb.append("\n");
-                                    }
-
-                                    logger.debug("Search Domains: {}", sb);
-                                    gwtNetConfig.setSearchDomains(sb.toString());
-                                } else {
-                                    logger.debug("Search Domains: [empty String]");
-                                    gwtNetConfig.setSearchDomains("");
-                                }
                             }
 
                             // The NetConfigIP4 section above should also apply for a wireless interface
@@ -791,20 +775,6 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                     if (config.getGateway() != null && !config.getGateway().isEmpty()) {
                         logger.debug("setting gateway: {}", config.getGateway());
                         netConfig4.setGateway((IP4Address) IPAddress.parseHostAddress(config.getGateway()));
-                    }
-
-                    String[] winServersString = config.getSearchDomains().split(regexp);
-                    if (winServersString != null && winServersString.length > 0) {
-                        IP4Address winServer;
-                        List<IP4Address> dnsServers = new ArrayList<>();
-                        for (String winsEntry : winServersString) {
-                            if (!winsEntry.trim().isEmpty()) {
-                                logger.debug("setting WINs: {}", winsEntry);
-                                winServer = (IP4Address) IPAddress.parseHostAddress(winsEntry);
-                                dnsServers.add(winServer);
-                            }
-                        }
-                        netConfig4.setDnsServers(dnsServers);
                     }
                 }
 

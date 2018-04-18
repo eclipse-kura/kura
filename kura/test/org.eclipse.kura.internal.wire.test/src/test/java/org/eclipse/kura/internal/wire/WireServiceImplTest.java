@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates and others
  *
  *   All rights reserved. This program and the accompanying materials
  *   are made available under the terms of the Eclipse Public License v1.0
@@ -28,7 +28,6 @@ import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.internal.json.marshaller.unmarshaller.JsonMarshallUnmarshallImpl;
-import org.eclipse.kura.localization.resources.WireMessages;
 import org.eclipse.kura.wire.WireComponent;
 import org.eclipse.kura.wire.WireConfiguration;
 import org.eclipse.kura.wire.WireService;
@@ -428,9 +427,6 @@ public class WireServiceImplTest {
     public void testCreateWireConfigurationNullArgs()
             throws InvalidSyntaxException, KuraException, NoSuchFieldException {
         WireService wireService = new WireServiceImpl();
-
-        WireMessages message = mock(WireMessages.class);
-        when(message.emitterPidNonNull()).thenReturn("Emitter pid not null");
 
         wireService.createWireConfiguration(null, null);
     }

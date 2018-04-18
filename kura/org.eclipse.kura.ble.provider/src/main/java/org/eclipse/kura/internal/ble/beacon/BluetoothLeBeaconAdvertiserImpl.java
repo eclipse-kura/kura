@@ -17,9 +17,9 @@ import org.eclipse.kura.bluetooth.le.beacon.BluetoothLeBeaconEncoder;
 
 public class BluetoothLeBeaconAdvertiserImpl<T extends BluetoothLeBeacon> implements BluetoothLeBeaconAdvertiser<T> {
 
-    private BluetoothLeAdapter adapter;
-    private BluetoothLeBeaconEncoder<T> encoder;
-    private BluetoothLeBeaconManagerImpl beaconManager;
+    private final BluetoothLeAdapter adapter;
+    private final BluetoothLeBeaconEncoder<T> encoder;
+    private final BluetoothLeBeaconManagerImpl beaconManager;
 
     public BluetoothLeBeaconAdvertiserImpl(BluetoothLeAdapter adapter, BluetoothLeBeaconEncoder<T> encoder,
             BluetoothLeBeaconManagerImpl beaconManager) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -128,7 +128,7 @@ public class ExamplePublisher implements ConfigurableComponent, CloudClientListe
     }
 
     protected void deactivate(ComponentContext componentContext) {
-        logger.debug("Deactivating ExamplePublisher...");
+        logger.info("Deactivating ExamplePublisher...");
 
         // shutting down the worker and cleaning up the properties
         this.worker.shutdown();
@@ -143,7 +143,7 @@ public class ExamplePublisher implements ConfigurableComponent, CloudClientListe
             this.cloudServiceTracker.close();
         }
 
-        logger.debug("Deactivating ExamplePublisher... Done.");
+        logger.info("Deactivating ExamplePublisher... Done.");
     }
 
     public void updated(Map<String, Object> properties) {
@@ -385,13 +385,16 @@ public class ExamplePublisher implements ConfigurableComponent, CloudClientListe
 
     private void subscribe() {
         try {
-            if (oldSubscriptionTopic != null) {
-                this.cloudClient.unsubscribe(oldSubscriptionTopic);
+            if (this.cloudClient != null && this.cloudClient.isConnected()) {
+                if (oldSubscriptionTopic != null) {
+                    this.cloudClient.unsubscribe(oldSubscriptionTopic);
+                }
+
+                String newSubscriptionTopic = this.examplePublisherOptions.getSubscribeTopic();
+                logger.info("Subscribing to application topic {}", newSubscriptionTopic);
+                this.cloudClient.subscribe(newSubscriptionTopic, 0);
+                oldSubscriptionTopic = newSubscriptionTopic;
             }
-            logger.info("Subscribing to application topic {}", this.examplePublisherOptions.getSubscribeTopic());
-            String newSubscriptionTopic = this.examplePublisherOptions.getSubscribeTopic();
-            this.cloudClient.subscribe(this.examplePublisherOptions.getSubscribeTopic(), 0);
-            oldSubscriptionTopic = newSubscriptionTopic;
         } catch (KuraStoreException e) {
             logger.warn("Failed to request device shadow", e);
         } catch (KuraException e) {

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: CloudService Relay (CloudService CAT)
 Bundle-SymbolicName: org.eclipse.kura.misc.cloudcat;singleton:=true
-Bundle-Version: 1.0.100.qualifier
+Bundle-Version: 1.0.100
 Bundle-Vendor: Eclipse Kura
 Bundle-License: Eclipse Public License v1.0
 Bundle-Category: Miscellaneous Applications and Services

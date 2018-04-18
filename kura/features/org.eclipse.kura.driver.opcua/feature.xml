@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.kura.driver.opcua"
       label="%featureName"
-      version="1.0.200.qualifier"
+      version="1.0.200"
       provider-name="%providerName"
       license-feature="org.eclipse.license"
       license-feature-version="0.0.0">

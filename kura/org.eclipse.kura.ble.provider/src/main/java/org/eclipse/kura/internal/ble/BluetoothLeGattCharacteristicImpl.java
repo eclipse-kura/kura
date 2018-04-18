@@ -29,9 +29,9 @@ import tinyb.BluetoothGattDescriptor;
 
 public class BluetoothLeGattCharacteristicImpl implements BluetoothLeGattCharacteristic {
 
-    private static final Duration TIMEOUT = Duration.ofSeconds(5);
+    private static final long TIMEOUT = 30;
 
-    private BluetoothGattCharacteristic characteristic;
+    private final BluetoothGattCharacteristic characteristic;
 
     public BluetoothLeGattCharacteristicImpl(BluetoothGattCharacteristic characteristic) {
         this.characteristic = characteristic;
@@ -39,8 +39,14 @@ public class BluetoothLeGattCharacteristicImpl implements BluetoothLeGattCharact
 
     @Override
     public BluetoothLeGattDescriptor findDescriptor(UUID uuid) throws KuraBluetoothResourceNotFoundException {
+        return findDescriptor(uuid, BluetoothLeGattCharacteristicImpl.TIMEOUT);
+    }
+
+    @Override
+    public BluetoothLeGattDescriptor findDescriptor(UUID uuid, long timeout)
+            throws KuraBluetoothResourceNotFoundException {
         BluetoothGattDescriptor descriptor;
-        descriptor = this.characteristic.find(uuid.toString(), BluetoothLeGattCharacteristicImpl.TIMEOUT);
+        descriptor = this.characteristic.find(uuid.toString(), Duration.ofSeconds(timeout));
         if (descriptor != null) {
             return new BluetoothLeGattDescriptorImpl(descriptor);
         } else {

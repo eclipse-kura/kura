@@ -440,9 +440,9 @@ void javacall_i2c_close(javacall_handle handle) {
  * See javacall_i2c.h for definition
  */
 javacall_dio_result javacall_i2c_get_group_id(const javacall_handle handle,
-        /*OUT*/ int* grpId) {
+        /*OUT*/ long* grpId) {
     i2c_slave *pDev = (i2c_slave*)handle;
-    *grpId = (int)pDev->bus;
+    *grpId = (long)pDev->bus;
     return JAVACALL_DIO_OK;
 }
 

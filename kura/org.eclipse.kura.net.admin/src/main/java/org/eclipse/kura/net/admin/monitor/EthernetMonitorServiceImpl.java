@@ -62,7 +62,7 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 
     private static final String[] EVENT_TOPICS = new String[] {
             NetworkConfigurationChangeEvent.NETWORK_EVENT_CONFIG_CHANGE_TOPIC, };
-
+    
     private static final long THREAD_INTERVAL = 30000;
     private static final long THREAD_TERMINATION_TOUT = 1; // in seconds
 
@@ -127,7 +127,7 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 
         this.routeService = RouteServiceImpl.getInstance();
 
-        this.executor = Executors.newFixedThreadPool(2);
+        this.executor = Executors.newCachedThreadPool();
 
         // Get initial configurations
         try {

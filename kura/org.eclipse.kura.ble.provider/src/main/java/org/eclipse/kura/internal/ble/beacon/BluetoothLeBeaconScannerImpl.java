@@ -18,9 +18,9 @@ import org.eclipse.kura.bluetooth.le.beacon.listener.BluetoothLeBeaconListener;
 
 public class BluetoothLeBeaconScannerImpl<T extends BluetoothLeBeacon> implements BluetoothLeBeaconScanner<T> {
 
-    private BluetoothLeAdapter adapter;
-    private BluetoothLeBeaconDecoder<T> decoder;
-    private BluetoothLeBeaconManagerImpl beaconManager;
+    private final BluetoothLeAdapter adapter;
+    private final BluetoothLeBeaconDecoder<T> decoder;
+    private final BluetoothLeBeaconManagerImpl beaconManager;
     private boolean isScanning;
 
     public BluetoothLeBeaconScannerImpl(BluetoothLeAdapter adapter, BluetoothLeBeaconDecoder<T> decoder,
@@ -47,7 +47,7 @@ public class BluetoothLeBeaconScannerImpl<T extends BluetoothLeBeacon> implement
             this.beaconManager.startBeaconScan(this.adapter.getInterfaceName());
             this.isScanning = true;
             long start = System.currentTimeMillis();
-            while ((System.currentTimeMillis() - start) < timeout) {
+            while (System.currentTimeMillis() - start < timeout) {
                 Thread.sleep(500);
             }
             stopBeaconScan();

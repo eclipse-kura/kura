@@ -149,7 +149,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
     private final Map<String, Tocd> ocds;
 
     // contains the service.factoryPid of all Factory Components
-    private final Set<String> factoryPids;
+    private final Set<TrackedComponentFactory> factoryPids;
 
     // maps the kura.service.pid to the associated service.factoryPid
     private final Map<String, String> factoryPidByPid;
@@ -400,7 +400,8 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
     // ----------------------------------------------------------------
     @Override
     public Set<String> getFactoryComponentPids() {
-        return Collections.unmodifiableSet(this.factoryPids);
+        return Collections.unmodifiableSet(
+                this.factoryPids.stream().map(TrackedComponentFactory::getFactoryPid).collect(Collectors.toSet()));
     }
 
     @Override
@@ -648,7 +649,8 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
     // Package APIs
     //
     // ----------------------------------------------------------------
-    synchronized void registerComponentOCD(String metatypePid, Tocd ocd, boolean isFactory) throws KuraException {
+    synchronized void registerComponentOCD(String metatypePid, Tocd ocd, boolean isFactory, final Bundle provider)
+            throws KuraException {
         // metatypePid is either the 'pid' or 'factoryPid' attribute of the MetaType Designate element
         // 'pid' matches a service.pid, not a kura.service.pid
         logger.info("Registering metatype pid: {} ...", metatypePid);
@@ -656,7 +658,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         this.ocds.put(metatypePid, ocd);
 
         if (isFactory) {
-            registerFactoryComponentOCD(metatypePid, ocd);
+            registerFactoryComponentOCD(metatypePid, ocd, provider);
         } else {
             try {
                 updateWithDefaultConfiguration(metatypePid, ocd);
@@ -664,6 +666,14 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
                 throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
             }
         }
+    }
+
+    synchronized void onBundleRemoved(final Bundle bundle) {
+        this.factoryPids.removeIf(factory -> {
+            final Bundle provider = factory.getProviderBundle();
+            return provider.getSymbolicName().equals(bundle.getSymbolicName())
+                    && provider.getVersion().equals(bundle.getVersion());
+        });
     }
 
     synchronized void registerComponentConfiguration(final String pid, final String servicePid,
@@ -819,6 +829,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
                 factoryPid = (String) properties.get(ConfigurationAdmin.SERVICE_FACTORYPID);
             }
             if (factoryPid != null && !this.allActivatedPids.contains(config.getPid())) {
+                ConfigurationUpgrade.upgrade(config, bundleContext);
                 String pid = config.getPid();
                 logger.info("Creating configuration with pid: {} and factory pid: {}", pid, factoryPid);
                 try {
@@ -897,8 +908,8 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         }
     }
 
-    private void registerFactoryComponentOCD(String metatypePid, Tocd ocd) throws KuraException {
-        this.factoryPids.add(metatypePid);
+    private void registerFactoryComponentOCD(String metatypePid, Tocd ocd, final Bundle provider) throws KuraException {
+        this.factoryPids.add(new TrackedComponentFactory(metatypePid, provider));
 
         for (Map.Entry<String, String> entry : this.factoryPidByPid.entrySet()) {
             if (entry.getValue().equals(metatypePid) && this.servicePidByPid.get(entry.getKey()) != null) {
@@ -1307,7 +1318,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
     private void loadLatestSnapshotInConfigAdmin() throws KuraException {
         //
         // save away initial configuration
-        List<ComponentConfiguration> configs = loadLatestSnapshotConfigurations();
+        List<ComponentConfiguration> configs = buildCurrentConfiguration(null);
         if (configs == null) {
             return;
         }
@@ -1436,7 +1447,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
             logger.warn("Error parsing xml", e);
         }
 
-        return ConfigurationUpgrade.upgrade(xmlConfigs, this.bundleContext);
+        return xmlConfigs;
     }
 
     private void updateConfigurationInternal(String pid, Map<String, Object> properties, boolean snapshotOnConfirmation)
@@ -1683,6 +1694,10 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
             }
         }
 
+        for (final ComponentConfiguration config : result) {
+            ConfigurationUpgrade.upgrade(config, bundleContext);
+        }
+
         return result;
 
     }
@@ -1714,9 +1729,10 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
     @Override
     public List<ComponentConfiguration> getFactoryComponentOCDs() {
-        return this.factoryPids.stream()
-                .map(pid -> new ComponentConfigurationImpl(pid, this.ocds.get(pid), new HashMap<>()))
-                .collect(Collectors.toList());
+        return this.factoryPids.stream().map(factory -> {
+            final String factoryPid = factory.getFactoryPid();
+            return new ComponentConfigurationImpl(factoryPid, this.ocds.get(factoryPid), new HashMap<>());
+        }).collect(Collectors.toList());
     }
 
     private ComponentConfiguration getComponentDefinition(String pid) {
@@ -1735,7 +1751,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
     @Override
     public ComponentConfiguration getFactoryComponentOCD(String factoryPid) {
-        if (!this.factoryPids.contains(factoryPid)) {
+        if (!this.factoryPids.contains(new TrackedComponentFactory(factoryPid, null))) {
             return null;
         }
         return getComponentDefinition(factoryPid);
@@ -1827,5 +1843,49 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
             ungetServiceReferences(marshallerSRs);
         }
         return result;
+    }
+
+    private static final class TrackedComponentFactory {
+
+        private final String factoryPid;
+        private final Bundle provider;
+
+        public TrackedComponentFactory(final String factoryPid, final Bundle provider) {
+            this.factoryPid = factoryPid;
+            this.provider = provider;
+        }
+
+        public String getFactoryPid() {
+            return factoryPid;
+        }
+
+        public Bundle getProviderBundle() {
+            return provider;
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((factoryPid == null) ? 0 : factoryPid.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            TrackedComponentFactory other = (TrackedComponentFactory) obj;
+            if (factoryPid == null) {
+                if (other.factoryPid != null)
+                    return false;
+            } else if (!factoryPid.equals(other.factoryPid))
+                return false;
+            return true;
+        }
     }
 }

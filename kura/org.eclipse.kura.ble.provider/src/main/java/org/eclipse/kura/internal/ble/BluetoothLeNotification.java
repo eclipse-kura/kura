@@ -15,7 +15,7 @@ import tinyb.BluetoothNotification;
 
 public class BluetoothLeNotification<T> implements BluetoothNotification<T> {
 
-    private Consumer<T> callback;
+    private final Consumer<T> callback;
 
     public BluetoothLeNotification(Consumer<T> callback) {
         this.callback = callback;

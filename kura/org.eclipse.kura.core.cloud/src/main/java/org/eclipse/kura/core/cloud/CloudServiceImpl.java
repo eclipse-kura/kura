@@ -11,8 +11,8 @@
  *******************************************************************************/
 package org.eclipse.kura.core.cloud;
 
-import static org.eclipse.kura.cloud.CloudPayloadEncoding.SIMPLE_JSON;
 import static org.eclipse.kura.cloud.CloudPayloadEncoding.KURA_PROTOBUF;
+import static org.eclipse.kura.cloud.CloudPayloadEncoding.SIMPLE_JSON;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -48,6 +48,7 @@ import org.eclipse.kura.position.PositionService;
 import org.eclipse.kura.system.SystemAdminService;
 import org.eclipse.kura.system.SystemService;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
@@ -89,6 +90,8 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
     private boolean birthPublished;
 
     private final AtomicInteger messageId;
+
+    private ServiceRegistration<?> cloudServiceRegistration;
 
     public CloudServiceImpl() {
         this.cloudClients = new CopyOnWriteArrayList<>();
@@ -185,11 +188,12 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 
         //
         // install event listener for GPS locked event
-        Dictionary<String, Object> props = new Hashtable<String, Object>();
+        Dictionary<String, Object> props = new Hashtable<>();
         String[] eventTopics = { PositionLockedEvent.POSITION_LOCKED_EVENT_TOPIC,
                 ModemReadyEvent.MODEM_EVENT_READY_TOPIC };
         props.put(EventConstants.EVENT_TOPIC, eventTopics);
-        this.ctx.getBundleContext().registerService(EventHandler.class.getName(), this, props);
+        this.cloudServiceRegistration = this.ctx.getBundleContext().registerService(EventHandler.class.getName(), this,
+                props);
 
         this.dataService.addDataServiceListener(this);
 
@@ -248,6 +252,8 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
         this.positionService = null;
         this.eventAdmin = null;
         this.certificatesService = null;
+        
+        this.cloudServiceRegistration.unregister();
     }
 
     @Override
@@ -314,7 +320,7 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 
     @Override
     public String[] getCloudApplicationIdentifiers() {
-        List<String> appIds = new ArrayList<String>();
+        List<String> appIds = new ArrayList<>();
         for (CloudClientImpl cloudClient : this.cloudClients) {
             appIds.add(cloudClient.getApplicationId());
         }

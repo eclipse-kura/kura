@@ -19,7 +19,6 @@ import static org.junit.Assert.fail;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Properties;
@@ -47,6 +46,7 @@ public class SystemServiceTest {
         try {
             dependencyLatch.await(10, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             fail("OSGi dependencies unfulfilled");
         }
     }
@@ -178,34 +178,18 @@ public class SystemServiceTest {
         StringBuilder sbOsVersion = new StringBuilder();
         sbOsVersion.append(osVersion);
 
-        BufferedReader in = null;
         File linuxKernelVersion = null;
-        FileReader fr = null;
-        try {
-            linuxKernelVersion = new File("/proc/sys/kernel/version");
-            if (linuxKernelVersion.exists()) {
-                StringBuilder kernelVersionData = new StringBuilder();
-                fr = new FileReader(linuxKernelVersion);
-                in = new BufferedReader(fr);
+        linuxKernelVersion = new File("/proc/sys/kernel/version");
+        if (linuxKernelVersion.exists()) {
+            StringBuilder kernelVersionData = new StringBuilder();
+            try (FileReader fr = new FileReader(linuxKernelVersion); BufferedReader in = new BufferedReader(fr)) {
                 String tempLine = null;
                 while ((tempLine = in.readLine()) != null) {
                     kernelVersionData.append(" ");
                     kernelVersionData.append(tempLine);
                 }
                 sbOsVersion.append(kernelVersionData.toString());
-            }
-        } catch (FileNotFoundException e) {
-        } catch (IOException e) {
-        } finally {
-            try {
-                if (fr != null) {
-                    fr.close();
-                }
-                if (in != null) {
-                    in.close();
-                }
             } catch (IOException e) {
-                e.printStackTrace();
             }
         }
 

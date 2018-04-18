@@ -46,6 +46,7 @@ public class CloudServiceTest extends TestCase implements CloudClientListener {
         try {
             dependencyLatch.await(5, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             fail("OSGi dependencies unfulfilled");
         }
     }

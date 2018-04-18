@@ -91,7 +91,7 @@ public class PppLinux {
             try {
                 Thread.sleep(timeout - dif);
             } catch (InterruptedException e) {
-                // ignore
+                Thread.currentThread().interrupt();
             }
 
             now = System.currentTimeMillis();

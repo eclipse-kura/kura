@@ -19,7 +19,7 @@ import org.eclipse.kura.net.NetInterfaceAddressConfig;
 
 public class NetInterfaceAddressConfigImpl extends NetInterfaceAddressImpl implements NetInterfaceAddressConfig {
 
-    private List<NetConfig> m_configs;
+    private List<NetConfig> configs;
 
     public NetInterfaceAddressConfigImpl() {
         super();
@@ -31,11 +31,11 @@ public class NetInterfaceAddressConfigImpl extends NetInterfaceAddressImpl imple
 
     @Override
     public List<NetConfig> getConfigs() {
-        return this.m_configs;
+        return this.configs;
     }
 
     public void setNetConfigs(List<NetConfig> configs) {
-        this.m_configs = configs;
+        this.configs = configs;
     }
 
     @Override
@@ -45,10 +45,10 @@ public class NetInterfaceAddressConfigImpl extends NetInterfaceAddressImpl imple
             return true;
         }
 
-		if (!super.equals(obj)) {
-			return false;
-		}
-        
+        if (!super.equals(obj)) {
+            return false;
+        }
+
         if (!(obj instanceof NetInterfaceAddressConfigImpl)) {
             return false;
         }
@@ -57,34 +57,32 @@ public class NetInterfaceAddressConfigImpl extends NetInterfaceAddressImpl imple
 
         List<NetConfig> thisNetConfigs = getConfigs();
         List<NetConfig> otherNetConfigs = other.getConfigs();
-        
+
         if ((thisNetConfigs == null) && (otherNetConfigs == null)) {
-        	// Both configurations are null
-        	return true;
-        }
-        else if ((thisNetConfigs == null) || (otherNetConfigs == null)) {
-        	// One configuration is null but the other one is not, so a null pointer exception would be thrown below!
+            // Both configurations are null
+            return true;
+        } else if ((thisNetConfigs == null) || (otherNetConfigs == null)) {
+            // One configuration is null but the other one is not, so a null pointer exception would be thrown below!
             return false;
         }
 
-        if (thisNetConfigs.size() != otherNetConfigs.size()) {
-            return false;
-        }
-        if (!thisNetConfigs.containsAll(otherNetConfigs)) {
-            return false;
-        }
-        if (!otherNetConfigs.containsAll(thisNetConfigs)) {
-            return false;
-        }
+        return thisNetConfigs.size() == otherNetConfigs.size() && thisNetConfigs.containsAll(otherNetConfigs)
+                && otherNetConfigs.containsAll(thisNetConfigs);
+    }
 
-        return true;
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((configs == null) ? 0 : configs.hashCode());
+        return result;
     }
 
     @Override
     public String toString() {
-        if (this.m_configs != null) {
-            StringBuffer sb = new StringBuffer();
-            for (NetConfig netConfig : this.m_configs) {
+        if (this.configs != null) {
+            StringBuilder sb = new StringBuilder();
+            for (NetConfig netConfig : this.configs) {
                 sb.append("NetConfig: ");
                 if (netConfig != null) {
                     sb.append(netConfig.toString());

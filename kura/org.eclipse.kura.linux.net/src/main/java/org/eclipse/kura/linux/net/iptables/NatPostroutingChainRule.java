@@ -170,24 +170,11 @@ public class NatPostroutingChainRule {
             return false;
         }
 
-        if (!compareObjects(this.rule, other.rule)) {
-            return false;
-        } else if (!compareObjects(this.dstNetwork, other.dstNetwork)) {
-            return false;
-        } else if (this.dstMask != other.dstMask) {
-            return false;
-        } else if (!compareObjects(this.srcNetwork, other.srcNetwork)) {
-            return false;
-        } else if (this.srcMask != other.srcMask) {
-            return false;
-        } else if (!compareObjects(this.dstInterface, other.dstInterface)) {
-            return false;
-        } else if (!compareObjects(this.protocol, other.protocol)) {
-            return false;
-        } else if (this.masquerade != other.masquerade) {
-            return false;
-        }
-        return true;
+        return compareObjects(this.rule, other.rule) && compareObjects(this.dstNetwork, other.dstNetwork)
+                && this.dstMask == other.dstMask && compareObjects(this.srcNetwork, other.srcNetwork)
+                && this.srcMask == other.srcMask && compareObjects(this.dstInterface, other.dstInterface)
+                && compareObjects(this.protocol, other.protocol) && this.masquerade == other.masquerade;
+
     }
 
     private boolean compareObjects(Object obj1, Object obj2) {

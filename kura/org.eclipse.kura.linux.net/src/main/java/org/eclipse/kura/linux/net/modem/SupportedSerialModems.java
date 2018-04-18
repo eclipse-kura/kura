@@ -59,7 +59,7 @@ public class SupportedSerialModems {
                         worker();
                         workerWait();
                     } catch (InterruptedException interruptedException) {
-                        Thread.interrupted();
+                        Thread.currentThread().interrupt();
                         logger.debug("{} interrupted - {}", SERIAL_MODEM_INIT_WORKER_THREAD_NAME, interruptedException);
                     } catch (Throwable t) {
                         logger.error("activate() :: Exception while monitoring cellular connection ", t);

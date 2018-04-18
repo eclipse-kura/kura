@@ -58,7 +58,7 @@ public class RouteFile {
         } catch (FileNotFoundException e) {
             logger.warn("File not found", e);
         } catch (IOException e) {
-        	logger.warn("Exception while reading file", e);
+            logger.warn("Exception while reading file", e);
         }
 
         newRoute = findRoute(routeProps, i);
@@ -105,7 +105,7 @@ public class RouteFile {
             route = new RouteConfigIP6((IP6Address) destination, (IP6Address) gateway, (IP6Address) netmask, ifaceName,
                     -1);
         }
-        if (routeIndex(route) != -1) {
+        if (route == null || routeIndex(route) != -1) {
             return false;
         }
         this.routes.add(route);
@@ -123,23 +123,27 @@ public class RouteFile {
                     this.interfaceName, -1);
         }
 
-        int index = routeIndex(route);
-        if (index != -1) {
-            this.routes.remove(index);
-            storeFile();
-            return true;
+        if (route != null) {
+            int index = routeIndex(route);
+            if (index != -1) {
+                this.routes.remove(index);
+                storeFile();
+                return true;
+            }
+            return false;
+        } else {
+            return false;
         }
-        return false;
     }
 
     private boolean createFile() {
         boolean ret = true;
-    	try {
+        try {
             ret = this.file.createNewFile();
         } catch (IOException e) {
             logger.warn("Exception while creating file", e);
         }
-    	return ret;
+        return ret;
     }
 
     public RouteConfig[] getRoutes() {

@@ -18,78 +18,78 @@ import org.eclipse.kura.net.NetInterfaceAddress;
 
 public class NetInterfaceAddressImpl implements NetInterfaceAddress {
 
-    private IPAddress m_address;
-    private short m_networkPrefixLength;
-    private IPAddress m_netmask;
-    private IPAddress m_gateway;
-    private IPAddress m_broadcast;
-    private List<? extends IPAddress> m_dnsAddresses;
+    private IPAddress address;
+    private short networkPrefixLength;
+    private IPAddress netmask;
+    private IPAddress gateway;
+    private IPAddress broadcast;
+    private List<? extends IPAddress> dnsAddresses;
 
     public NetInterfaceAddressImpl() {
     }
 
     public NetInterfaceAddressImpl(NetInterfaceAddress other) {
         super();
-        this.m_address = other.getAddress();
-        this.m_networkPrefixLength = other.getNetworkPrefixLength();
-        this.m_netmask = other.getNetmask();
-        this.m_gateway = other.getGateway();
-        this.m_broadcast = other.getBroadcast();
-        this.m_dnsAddresses = other.getDnsServers();
+        this.address = other.getAddress();
+        this.networkPrefixLength = other.getNetworkPrefixLength();
+        this.netmask = other.getNetmask();
+        this.gateway = other.getGateway();
+        this.broadcast = other.getBroadcast();
+        this.dnsAddresses = other.getDnsServers();
     }
 
     @Override
     public IPAddress getAddress() {
-        return this.m_address;
+        return this.address;
     }
 
     public void setAddress(IPAddress address) {
-        this.m_address = address;
+        this.address = address;
     }
 
     @Override
     public short getNetworkPrefixLength() {
-        return this.m_networkPrefixLength;
+        return this.networkPrefixLength;
     }
 
     public void setNetworkPrefixLength(short networkPrefixLength) {
-        this.m_networkPrefixLength = networkPrefixLength;
+        this.networkPrefixLength = networkPrefixLength;
     }
 
     @Override
     public IPAddress getNetmask() {
-        return this.m_netmask;
+        return this.netmask;
     }
 
     public void setNetmask(IPAddress netmask) {
-        this.m_netmask = netmask;
+        this.netmask = netmask;
     }
 
     @Override
     public IPAddress getGateway() {
-        return this.m_gateway;
+        return this.gateway;
     }
 
     public void setGateway(IPAddress gateway) {
-        this.m_gateway = gateway;
+        this.gateway = gateway;
     }
 
     @Override
     public IPAddress getBroadcast() {
-        return this.m_broadcast;
+        return this.broadcast;
     }
 
     public void setBroadcast(IPAddress broadcast) {
-        this.m_broadcast = broadcast;
+        this.broadcast = broadcast;
     }
 
     @Override
     public List<? extends IPAddress> getDnsServers() {
-        return this.m_dnsAddresses;
+        return this.dnsAddresses;
     }
 
     public void setDnsServers(List<? extends IPAddress> dnsAddresses) {
-        this.m_dnsAddresses = dnsAddresses;
+        this.dnsAddresses = dnsAddresses;
     }
 
     @Override
@@ -100,29 +100,26 @@ public class NetInterfaceAddressImpl implements NetInterfaceAddress {
 
         NetInterfaceAddress other = (NetInterfaceAddress) obj;
 
-        if (this.m_networkPrefixLength != other.getNetworkPrefixLength()) {
-            return false;
-        }
-        if (!compare(this.m_address, other.getAddress())) {
-            return false;
-        }
-        if (!compare(this.m_netmask, other.getNetmask())) {
-            return false;
-        }
-        if (!compare(this.m_gateway, other.getGateway())) {
-            return false;
-        }
-        if (!compare(this.m_broadcast, other.getBroadcast())) {
-            return false;
-        }
-        if (!compare(this.m_dnsAddresses, other.getDnsServers())) {
-            return false;
-        }
-
-        return true;
+        return this.networkPrefixLength == other.getNetworkPrefixLength() && compare(this.address, other.getAddress())
+                && compare(this.netmask, other.getNetmask()) && compare(this.gateway, other.getGateway())
+                && compare(this.broadcast, other.getBroadcast()) && compare(this.dnsAddresses, other.getDnsServers());
     }
 
     protected boolean compare(Object obj1, Object obj2) {
         return obj1 == null ? obj2 == null : obj1.equals(obj2);
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + (this.address == null ? 0 : this.address.hashCode());
+        result = prime * result + (this.broadcast == null ? 0 : this.broadcast.hashCode());
+        result = prime * result + (this.dnsAddresses == null ? 0 : this.dnsAddresses.hashCode());
+        result = prime * result + (this.gateway == null ? 0 : this.gateway.hashCode());
+        result = prime * result + (this.netmask == null ? 0 : this.netmask.hashCode());
+        result = prime * result + this.networkPrefixLength;
+        return result;
+    }
+
 }

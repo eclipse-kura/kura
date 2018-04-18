@@ -86,6 +86,7 @@ public class CloudDeploymentHandlerTest extends TestCase {
                 fail("Dependencies not resolved!");
             }
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             fail("OSGi dependencies unfulfilled");
         }
 

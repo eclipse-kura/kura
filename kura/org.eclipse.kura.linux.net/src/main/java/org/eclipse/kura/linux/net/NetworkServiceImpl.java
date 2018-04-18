@@ -216,7 +216,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
                         try {
                             toggleModem(modemInfo);
                         } catch (InterruptedException interruptedException) {
-                            Thread.interrupted();
+                            Thread.currentThread().interrupt();
                             logger.debug("activate() :: modem monitor interrupted - {}", interruptedException);
                         } catch (Throwable t) {
                             logger.error("activate() :: Exception while monitoring cellular connection ", t);
@@ -270,6 +270,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
             try {
                 this.executor.awaitTermination(TOOGLE_MODEM_THREAD_TERMINATION_TOUT, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
                 logger.warn("Interrupted", e);
             }
             logger.info("deactivate() :: {} Thread terminated? - {}", TOOGLE_MODEM_THREAD_NAME,
@@ -717,26 +718,27 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
                     this.addedModems.add(usbModem.getUsbPort());
 
                     if (OS_VERSION != null && TARGET_NAME != null
-                            && OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_"
-                                    + KuraConstants.Mini_Gateway.getImageVersion())
-                            && TARGET_NAME.equals(KuraConstants.Mini_Gateway.getTargetName())
-                            || OS_VERSION
-                                    .equals(KuraConstants.Reliagate_10_11.getImageName() + "_"
-                                            + KuraConstants.Reliagate_10_11.getImageVersion())
-                                    && TARGET_NAME.equals(KuraConstants.Reliagate_10_11.getTargetName())) {
-                        if (this.serialModem != null) {
-                            if (SupportedUsbModemInfo.Telit_HE910_D.getVendorId().equals(usbModem.getVendorId())
-                                    && SupportedUsbModemInfo.Telit_HE910_D.getProductId()
-                                            .equals(usbModem.getProductId())) {
-                                logger.info("handleEvent() :: Removing {} from addedModems",
-                                        this.serialModem.getProductName());
-                                this.addedModems.remove(this.serialModem.getProductName());
-                            }
+                            && ((OS_VERSION
+                                    .equals(KuraConstants.Mini_Gateway.getImageName() + "_"
+                                            + KuraConstants.Mini_Gateway.getImageVersion())
+                                    && TARGET_NAME.equals(KuraConstants.Mini_Gateway.getTargetName()))
+                                    || (OS_VERSION
+                                            .equals(KuraConstants.Reliagate_10_11.getImageName() + "_"
+                                                    + KuraConstants.Reliagate_10_11.getImageVersion())
+                                            && TARGET_NAME.equals(KuraConstants.Reliagate_10_11.getTargetName())))) {
+                        if (this.serialModem != null
+                                && SupportedUsbModemInfo.Telit_HE910_D.getVendorId().equals(usbModem.getVendorId())
+                                && SupportedUsbModemInfo.Telit_HE910_D.getProductId().equals(usbModem.getProductId())) {
+                            logger.info("handleEvent() :: Removing {} from addedModems",
+                                    this.serialModem.getProductName());
+                            this.addedModems.remove(this.serialModem.getProductName());
                         }
                     }
                 }
             }
-        } else if (topic.equals(UsbDeviceRemovedEvent.USB_EVENT_DEVICE_REMOVED_TOPIC)) {
+        } else if (topic.equals(UsbDeviceRemovedEvent.USB_EVENT_DEVICE_REMOVED_TOPIC))
+
+        {
             // validate mandatory properties
             if (event.getProperty(UsbDeviceEvent.USB_EVENT_VENDOR_ID_PROPERTY) == null) {
                 return;

@@ -95,6 +95,7 @@ public final class AssetTest {
             boolean ok = dependencyLatch.await(10, TimeUnit.SECONDS);
             assertTrue("Dependencies should be OK", ok);
         } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
             fail("OSGi dependencies unfulfilled");
         }
 

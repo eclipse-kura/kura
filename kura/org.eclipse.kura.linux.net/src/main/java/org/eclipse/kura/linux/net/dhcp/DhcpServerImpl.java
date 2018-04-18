@@ -236,13 +236,13 @@ public class DhcpServerImpl implements DhcpServer {
             this.dhcpServerConfig4 = dhcpServerConfig4;
             if (this.dhcpServerConfig4 == null) {
                 logger.warn("Set DHCP configuration to null");
-            }
-
-            if (dhcpServerConfig4.isEnabled()) {
-                enable();
             } else {
-                writeConfig();
-                disable();
+                if (dhcpServerConfig4.isEnabled()) {
+                    enable();
+                } else {
+                    writeConfig();
+                    disable();
+                }
             }
         } catch (Exception e) {
             logger.error("Error setting subnet config for {} ", this.interfaceName, e);

@@ -113,7 +113,7 @@ public class HttpDownloadCountingOutputStream extends GenericDownloadCountingOut
                     int bufferSize = getBufferSize();
 
                     if (bufferSize == 0 && getTotalBytes() > 0) {
-                        int newSize = Math.round(HttpDownloadCountingOutputStream.this.totalBytes / 100 + 1);
+                        int newSize = Math.round(HttpDownloadCountingOutputStream.this.totalBytes / 100F + 1F);
                         bufferSize = newSize;
                         setBufferSize(newSize);
                     } else if (bufferSize == 0) {
@@ -158,6 +158,7 @@ public class HttpDownloadCountingOutputStream extends GenericDownloadCountingOut
         } catch (ExecutionException ex) {
             throw new KuraException(KuraErrorCode.INTERNAL_ERROR, ex);
         } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
             throw new KuraException(KuraErrorCode.INTERNAL_ERROR, ex);
         }
     }

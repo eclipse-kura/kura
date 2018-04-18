@@ -19,7 +19,7 @@ import org.eclipse.kura.net.wifi.WifiInterfaceAddressConfig;
 
 public class WifiInterfaceAddressConfigImpl extends WifiInterfaceAddressImpl implements WifiInterfaceAddressConfig {
 
-    private List<NetConfig> m_configs;
+    private List<NetConfig> configs;
 
     public WifiInterfaceAddressConfigImpl() {
         super();
@@ -31,11 +31,11 @@ public class WifiInterfaceAddressConfigImpl extends WifiInterfaceAddressImpl imp
 
     @Override
     public List<NetConfig> getConfigs() {
-        return this.m_configs;
+        return this.configs;
     }
 
     public void setNetConfigs(List<NetConfig> configs) {
-        this.m_configs = configs;
+        this.configs = configs;
     }
 
     @Override
@@ -58,33 +58,23 @@ public class WifiInterfaceAddressConfigImpl extends WifiInterfaceAddressImpl imp
         List<NetConfig> thisNetConfigs = getConfigs();
         List<NetConfig> otherNetConfigs = other.getConfigs();
 
-        if ((thisNetConfigs == null) && (otherNetConfigs == null)) {
-        	// Both configurations are null
-        	return true;
-        }
-        else if ((thisNetConfigs == null) || (otherNetConfigs == null)) {
-        	// One configuration is null but the other one is not, so a null pointer exception would be thrown below!
+        if (thisNetConfigs == null && otherNetConfigs == null) {
+            // Both configurations are null
+            return true;
+        } else if (thisNetConfigs == null || otherNetConfigs == null) {
+            // One configuration is null but the other one is not, so a null pointer exception would be thrown below!
             return false;
         }
 
-        if (thisNetConfigs.size() != otherNetConfigs.size()) {
-            return false;
-        }
-        if (!thisNetConfigs.containsAll(otherNetConfigs)) {
-            return false;
-        }
-        if (!otherNetConfigs.containsAll(thisNetConfigs)) {
-            return false;
-        }
-
-        return true;
+        return thisNetConfigs.size() == otherNetConfigs.size() && thisNetConfigs.containsAll(otherNetConfigs)
+                && otherNetConfigs.containsAll(thisNetConfigs);
     }
 
     @Override
     public String toString() {
-        if (this.m_configs != null) {
-            StringBuffer sb = new StringBuffer();
-            for (NetConfig netConfig : this.m_configs) {
+        if (this.configs != null) {
+            StringBuilder sb = new StringBuilder();
+            for (NetConfig netConfig : this.configs) {
                 sb.append("NetConfig: ");
                 if (netConfig != null) {
                     sb.append(netConfig.toString());
@@ -99,4 +89,13 @@ public class WifiInterfaceAddressConfigImpl extends WifiInterfaceAddressImpl imp
             return "NetConfig: no configurations";
         }
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + (this.configs == null ? 0 : this.configs.hashCode());
+        return result;
+    }
+
 }

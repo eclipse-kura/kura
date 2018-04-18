@@ -504,13 +504,14 @@ public final class SensorTagDriver implements Driver, ConfigurableComponent {
     public PreparedRead prepareRead(List<ChannelRecord> channelRecords) {
         requireNonNull(channelRecords, "Channel Record list cannot be null");
 
-        SensorTagPreparedRead preparedRead = new SensorTagPreparedRead();
-        preparedRead.channelRecords = channelRecords;
+        try (SensorTagPreparedRead preparedRead = new SensorTagPreparedRead()) {
+            preparedRead.channelRecords = channelRecords;
 
-        for (ChannelRecord record : channelRecords) {
-            SensorTagRequestInfo.extract(record).ifPresent(preparedRead.requestInfos::add);
+            for (ChannelRecord record : channelRecords) {
+                SensorTagRequestInfo.extract(record).ifPresent(preparedRead.requestInfos::add);
+            }
+            return preparedRead;
         }
-        return preparedRead;
     }
 
     private void registerNotification(SensorListener sensorListener) {

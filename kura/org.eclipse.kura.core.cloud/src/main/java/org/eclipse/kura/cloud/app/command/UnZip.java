@@ -70,29 +70,29 @@ public class UnZip {
     }
 
     private static void unZipZipInputStream(ZipInputStream zis, String outFolder) throws IOException {
-        try {
-            String outputFolder = outFolder;
-            if (outputFolder == null) {
-                outputFolder = System.getProperty("user.dir");
-            }
+        String outputFolder = outFolder;
+        if (outputFolder == null) {
+            outputFolder = System.getProperty("user.dir");
+        }
 
-            // create output directory is not exists
-            File folder = new File(outputFolder);
-            if (!folder.exists()) {
-                folder.mkdirs();
-            }
+        // create output directory is not exists
+        File folder = new File(outputFolder);
+        if (!folder.exists()) {
+            folder.mkdirs();
+        }
 
-            int entries = 0;
-            long total = 0;
-            ZipEntry ze = zis.getNextEntry();
+        int entries = 0;
+        long total = 0;
+        ZipEntry ze = zis.getNextEntry();
 
-            while (ze != null) {
-                byte[] buffer = new byte[BUFFER];
-
+        while (ze != null) {
+            File newFile = null;
+            byte[] buffer = new byte[BUFFER];
+            try {
                 String expectedFilePath = new StringBuilder(folder.getPath()).append(File.separator)
                         .append(ze.getName()).toString();
                 String fileName = validateFileName(expectedFilePath, folder.getPath());
-                File newFile = new File(fileName);
+                newFile = new File(fileName);
 
                 if (newFile.isDirectory()) {
                     newFile.mkdirs();
@@ -104,9 +104,15 @@ public class UnZip {
                     File parent = new File(newFile.getParent());
                     parent.mkdirs();
                 }
+            } catch (KuraException e) {
+                throw new IOException("File is outside extraction target directory.");
+            } finally {
+                if (zis != null) {
+                    zis.close();
+                }
+            }
 
-                FileOutputStream fos = new FileOutputStream(newFile);
-
+            try (FileOutputStream fos = new FileOutputStream(newFile)) {
                 int len;
                 while (total + BUFFER <= tooBig && (len = zis.read(buffer)) > 0) {
                     fos.write(buffer, 0, len);
@@ -124,18 +130,14 @@ public class UnZip {
                 }
 
                 ze = zis.getNextEntry();
-            }
-
-            zis.closeEntry();
-        } catch (IOException e) {
-            throw e;
-        } catch (KuraException e) {
-            throw new IOException("File is outside extraction target directory.");
-        } finally {
-            if (zis != null) {
-                zis.close();
+            } finally {
+                if (zis != null) {
+                    zis.close();
+                }
             }
         }
+
+        zis.closeEntry();
     }
 
     private static String validateFileName(String zipFileName, String intendedDir) throws IOException, KuraException {
@@ -153,32 +155,13 @@ public class UnZip {
     }
 
     private static byte[] getFileBytes(File file) throws IOException {
-        ByteArrayOutputStream ous = null;
-        InputStream ios = null;
-        try {
+        try (ByteArrayOutputStream ous = new ByteArrayOutputStream(); InputStream ios = new FileInputStream(file)) {
             byte[] buffer = new byte[4096];
-            ous = new ByteArrayOutputStream();
-            ios = new FileInputStream(file);
             int read = 0;
             while ((read = ios.read(buffer)) != -1) {
                 ous.write(buffer, 0, read);
             }
-        } finally {
-            try {
-                if (ous != null) {
-                    ous.close();
-                }
-            } catch (IOException e) {
-                // swallow, since not that important
-            }
-            try {
-                if (ios != null) {
-                    ios.close();
-                }
-            } catch (IOException e) {
-                // swallow, since not that important
-            }
+            return ous.toByteArray();
         }
-        return ous.toByteArray();
     }
 }

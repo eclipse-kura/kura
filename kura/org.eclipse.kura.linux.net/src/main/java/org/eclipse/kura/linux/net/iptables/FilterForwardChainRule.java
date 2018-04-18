@@ -80,7 +80,7 @@ public class FilterForwardChainRule {
     }
 
     public List<String> toStrings() {
-        List<String> ret = new ArrayList<String>();
+        List<String> ret = new ArrayList<>();
         StringBuilder sb = new StringBuilder("-A FORWARD");
         if (this.srcNetwork != null) {
             sb.append(" -s ") //
@@ -163,26 +163,11 @@ public class FilterForwardChainRule {
             return false;
         }
 
-        if (!compareObjects(this.rule, other.rule)) {
-            return false;
-        } else if (!compareObjects(this.inputInterface, other.inputInterface)) {
-            return false;
-        } else if (!compareObjects(this.outputInterface, other.outputInterface)) {
-            return false;
-        } else if (!compareObjects(this.state, other.state)) {
-            return false;
-        } else if (!compareObjects(this.srcNetwork, other.srcNetwork)) {
-            return false;
-        } else if (this.srcMask != other.srcMask) {
-            return false;
-        } else if (!compareObjects(this.dstNetwork, other.dstNetwork)) {
-            return false;
-        } else if (this.dstMask != other.dstMask) {
-            return false;
-        } else if (!compareObjects(this.protocol, other.protocol)) {
-            return false;
-        }
-        return true;
+        return compareObjects(this.rule, other.rule) && compareObjects(this.inputInterface, other.inputInterface)
+                && compareObjects(this.outputInterface, other.outputInterface)
+                && compareObjects(this.state, other.state) && compareObjects(this.srcNetwork, other.srcNetwork)
+                && this.srcMask == other.srcMask && compareObjects(this.dstNetwork, other.dstNetwork)
+                && this.dstMask == other.dstMask && compareObjects(this.protocol, other.protocol);
     }
 
     private boolean compareObjects(Object obj1, Object obj2) {

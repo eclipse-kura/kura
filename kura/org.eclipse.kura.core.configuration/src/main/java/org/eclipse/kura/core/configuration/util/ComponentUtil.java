@@ -373,7 +373,7 @@ public class ComponentUtil {
 
             // convert string values into object values
             objectValues = getObjectValue(type, defaultValues, ctx);
-            if (cardinality == 0 || cardinality == 1 || cardinality == -1) {
+            if (objectValues != null && (cardinality == 0 || cardinality == 1 || cardinality == -1)) {
 
                 // return one single object
                 // if cardinality is 0 or abs(1)

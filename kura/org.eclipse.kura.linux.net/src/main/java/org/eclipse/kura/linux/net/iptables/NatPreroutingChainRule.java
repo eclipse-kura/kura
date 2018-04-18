@@ -135,30 +135,13 @@ public class NatPreroutingChainRule {
             return false;
         }
 
-        if (!compareObjects(this.rule, other.rule)) {
-            return false;
-        } else if (!compareObjects(this.inputInterface, other.inputInterface)) {
-            return false;
-        } else if (!compareObjects(this.protocol, other.protocol)) {
-            return false;
-        } else if (this.externalPort != other.externalPort) {
-            return false;
-        } else if (this.internalPort != other.internalPort) {
-            return false;
-        } else if (this.srcPortFirst != other.srcPortFirst) {
-            return false;
-        } else if (this.srcPortLast != other.srcPortLast) {
-            return false;
-        } else if (!compareObjects(this.dstIpAddress, other.dstIpAddress)) {
-            return false;
-        } else if (!compareObjects(this.permittedNetwork, other.permittedNetwork)) {
-            return false;
-        } else if (this.permittedNetworkMask != other.permittedNetworkMask) {
-            return false;
-        } else if (!compareObjects(this.permittedMacAddress, other.permittedMacAddress)) {
-            return false;
-        }
-        return true;
+        return compareObjects(this.rule, other.rule) && compareObjects(this.inputInterface, other.inputInterface)
+                && compareObjects(this.protocol, other.protocol) && this.externalPort == other.externalPort
+                && this.internalPort == other.internalPort && this.srcPortFirst == other.srcPortFirst
+                && this.srcPortLast == other.srcPortLast && compareObjects(this.dstIpAddress, other.dstIpAddress)
+                && compareObjects(this.permittedNetwork, other.permittedNetwork)
+                && this.permittedNetworkMask == other.permittedNetworkMask
+                && compareObjects(this.permittedMacAddress, other.permittedMacAddress);
     }
 
     private boolean compareObjects(Object obj1, Object obj2) {

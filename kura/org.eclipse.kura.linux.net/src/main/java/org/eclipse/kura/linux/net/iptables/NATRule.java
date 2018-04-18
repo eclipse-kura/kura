@@ -227,20 +227,11 @@ public class NATRule {
             return false;
         }
         NATRule other = (NATRule) o;
-        if (!compareObjects(this.sourceInterface, other.sourceInterface)) {
-            return false;
-        } else if (!compareObjects(this.destinationInterface, other.destinationInterface)) {
-            return false;
-        } else if (this.masquerade != other.masquerade) {
-            return false;
-        } else if (!compareObjects(this.protocol, other.protocol)) {
-            return false;
-        } else if (!compareObjects(this.source, other.source)) {
-            return false;
-        } else if (!compareObjects(this.destination, other.destination)) {
-            return false;
-        }
-        return true;
+
+        return compareObjects(this.sourceInterface, other.sourceInterface)
+                && compareObjects(this.destinationInterface, other.destinationInterface)
+                && this.masquerade == other.masquerade && compareObjects(this.protocol, other.protocol)
+                && compareObjects(this.source, other.source) && compareObjects(this.destination, other.destination);
     }
 
     private boolean compareObjects(Object obj1, Object obj2) {

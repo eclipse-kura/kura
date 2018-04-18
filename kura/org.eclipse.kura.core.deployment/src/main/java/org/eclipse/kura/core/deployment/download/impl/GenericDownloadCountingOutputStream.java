@@ -79,7 +79,7 @@ public class GenericDownloadCountingOutputStream extends CountingOutputStream {
     protected void afterWrite(int n) throws IOException {
         super.afterWrite(n);
         if (this.propResolution == 0 && getTotalBytes() > 0) {
-            this.propResolution = Math.round(this.totalBytes / 100 * 5);
+            this.propResolution = Math.round(this.totalBytes / 100F * 5F);
         } else if (this.propResolution == 0) {
             this.propResolution = 1024 * 256;
         }
@@ -93,6 +93,7 @@ public class GenericDownloadCountingOutputStream extends CountingOutputStream {
         try {
             Thread.sleep(this.propBlockDelay);
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             e.printStackTrace();
         }
     }

@@ -364,31 +364,14 @@ public class PortForwardRule {
 
         PortForwardRule other = (PortForwardRule) o;
 
-        if (!compareObjects(this.inboundIface, other.inboundIface)) {
-            return false;
-        } else if (!compareObjects(this.outboundIface, other.outboundIface)) {
-            return false;
-        } else if (!compareObjects(this.address, other.address)) {
-            return false;
-        } else if (!compareObjects(this.protocol, other.protocol)) {
-            return false;
-        } else if (this.inPort != other.inPort) {
-            return false;
-        } else if (this.outPort != other.outPort) {
-            return false;
-        } else if (this.masquerade != other.masquerade) {
-            return false;
-        } else if (!compareObjects(this.permittedNetwork, other.permittedNetwork)) {
-            return false;
-        } else if (this.permittedNetworkMask != other.permittedNetworkMask) {
-            return false;
-        } else if (!compareObjects(this.permittedMAC, other.permittedMAC)) {
-            return false;
-        } else if (!compareObjects(this.sourcePortRange, other.sourcePortRange)) {
-            return false;
-        }
-
-        return true;
+        return compareObjects(this.inboundIface, other.inboundIface)
+                && compareObjects(this.outboundIface, other.outboundIface)
+                && compareObjects(this.address, other.address) && compareObjects(this.protocol, other.protocol)
+                && this.inPort == other.inPort && this.outPort == other.outPort && this.masquerade == other.masquerade
+                && compareObjects(this.permittedNetwork, other.permittedNetwork)
+                && this.permittedNetworkMask == other.permittedNetworkMask
+                && compareObjects(this.permittedMAC, other.permittedMAC)
+                && compareObjects(this.sourcePortRange, other.sourcePortRange);
     }
 
     private boolean compareObjects(Object obj1, Object obj2) {

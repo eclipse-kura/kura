@@ -14,7 +14,6 @@ package org.eclipse.kura.core.system;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -519,6 +518,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
                         }
                     }
                 } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
                     logger.error("Exception while executing ifconfig!", e);
                 } finally {
                     if (br != null) {
@@ -656,36 +656,23 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
         StringBuilder sbOsVersion = new StringBuilder();
         sbOsVersion.append(System.getProperty(KEY_OS_VER));
         if (OS_LINUX.equals(getOsName())) {
-            BufferedReader in = null;
             File linuxKernelVersion = null;
-            FileReader fr = null;
-            try {
-                linuxKernelVersion = new File("/proc/sys/kernel/version");
-                if (linuxKernelVersion.exists()) {
-                    StringBuilder kernelVersionData = new StringBuilder();
-                    fr = new FileReader(linuxKernelVersion);
-                    in = new BufferedReader(fr);
+
+            linuxKernelVersion = new File("/proc/sys/kernel/version");
+            if (linuxKernelVersion.exists()) {
+                StringBuilder kernelVersionData = new StringBuilder();
+                try (FileReader fr = new FileReader(linuxKernelVersion); BufferedReader in = new BufferedReader(fr)) {
                     String tempLine = null;
                     while ((tempLine = in.readLine()) != null) {
                         kernelVersionData.append(" ");
                         kernelVersionData.append(tempLine);
                     }
                     sbOsVersion.append(kernelVersionData.toString());
-                }
-            } catch (FileNotFoundException e) {
-            } catch (IOException e) {
-            } finally {
-                try {
-                    if (fr != null) {
-                        fr.close();
-                    }
-                    if (in != null) {
-                        in.close();
-                    }
                 } catch (IOException e) {
-                    logger.error("Exception while closing resources!", e);
+                    logger.error("Failed to get OS version", e);
                 }
             }
+
         }
 
         return sbOsVersion.toString();

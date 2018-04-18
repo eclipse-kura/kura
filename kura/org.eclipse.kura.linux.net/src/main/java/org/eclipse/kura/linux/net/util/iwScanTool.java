@@ -148,6 +148,7 @@ public class iwScanTool extends ScanTool implements IScanTool {
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
                 }
             }
 
@@ -172,6 +173,7 @@ public class iwScanTool extends ScanTool implements IScanTool {
                 try {
                     executor.awaitTermination(2, TimeUnit.SECONDS);
                 } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
                     logger.warn("Interrupted", e);
                 }
                 logger.info("scan() :: 'iw scan' thread terminated? - {}", executor.isTerminated());

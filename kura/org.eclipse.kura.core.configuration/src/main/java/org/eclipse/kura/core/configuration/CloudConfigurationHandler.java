@@ -367,8 +367,7 @@ public class CloudConfigurationHandler extends Cloudlet {
 
         if (resources.length > 2) {
             logger.error("Bad request topic: {}", reqTopic.toString());
-            logger.error("Expected at most two resource(s) but found {}",
-                    resources != null ? resources.length : "none");
+            logger.error("Expected at most two resource(s) but found {}", resources.length);
             respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
             return;
         }
@@ -393,7 +392,7 @@ public class CloudConfigurationHandler extends Cloudlet {
 
         if (resources.length > 1) {
             logger.error("Bad request topic: {}", reqTopic.toString());
-            logger.error("Expected one resource(s) but found {}", resources != null ? resources.length : "none");
+            logger.error("Expected one resource(s) but found {}", resources.length);
             respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
             return;
         }
@@ -520,8 +519,7 @@ class UpdateConfigurationsCallable implements Callable<Void> {
         // update the configuration
         try {
             List<ComponentConfiguration> configImpls = this.m_xmlConfigurations != null
-                    ? this.m_xmlConfigurations.getConfigurations()
-                    : null;
+                    ? this.m_xmlConfigurations.getConfigurations() : null;
             if (configImpls == null) {
                 return null;
             }

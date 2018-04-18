@@ -237,7 +237,7 @@ public class BluetoothUtil {
                 proc.destroy();
             }
             try {
-                if (proc != null) {
+                if (br != null) {
                     br.close();
                 }
             } catch (IOException e) {

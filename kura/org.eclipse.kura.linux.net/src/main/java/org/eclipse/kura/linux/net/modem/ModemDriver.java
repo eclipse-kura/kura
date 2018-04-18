@@ -291,7 +291,7 @@ public class ModemDriver {
 
                 toggleGpio(BOLTGATE_20_25_PCIEX_W_DISABLE3_GPIO_VALUE);
 
-            }  else if (TARGET_NAME.startsWith(KuraConstants.BoltGATE_20_25.getTargetName())) {
+            } else if (TARGET_NAME.startsWith(KuraConstants.BoltGATE_20_25.getTargetName())) {
                 turnOnGpio(BOLTGATE_20_25_J18__POWER_GPIO_VALUE);
             } else {
                 logger.warn("turnModemOn() :: modem turnOn operation is not supported for the {} platform",
@@ -335,6 +335,7 @@ public class ModemDriver {
             } catch (KuraException e) {
                 logger.error("Failed to detect modem", e);
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
                 logger.error("Interrupted Exception during sleep", e);
             }
         } else {
@@ -347,7 +348,7 @@ public class ModemDriver {
         try {
             Thread.sleep(millis);
         } catch (InterruptedException e) {
-            // ignore
+            Thread.currentThread().interrupt();
         }
     }
 
@@ -504,7 +505,7 @@ public class ModemDriver {
         }
         return 5000;
     }
-    
+
     private long getTurnOnDelay() {
         final SupportedUsbModemInfo usbModemInfo = getSupportedUsbModemInfo();
         if (usbModemInfo != null) {

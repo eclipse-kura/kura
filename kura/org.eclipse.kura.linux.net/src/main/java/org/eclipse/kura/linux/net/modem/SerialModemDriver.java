@@ -77,13 +77,14 @@ public class SerialModemDriver extends ModemDriver {
             logger.info("{} modem is not reachable, installing driver ...", this.modemName);
             int retries = 3;
             if (OS_VERSION != null && TARGET_NAME != null
-                    && OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_"
-                            + KuraConstants.Mini_Gateway.getImageVersion())
-                    && TARGET_NAME.equals(KuraConstants.Mini_Gateway.getTargetName())
-                    || OS_VERSION
-                            .equals(KuraConstants.Reliagate_10_11.getImageName() + "_"
-                                    + KuraConstants.Reliagate_10_11.getImageVersion())
-                            && TARGET_NAME.equals(KuraConstants.Reliagate_10_11.getTargetName())) {
+                    && (OS_VERSION
+                            .equals(KuraConstants.Mini_Gateway.getImageName() + "_"
+                                    + KuraConstants.Mini_Gateway.getImageVersion())
+                            && TARGET_NAME.equals(KuraConstants.Mini_Gateway.getTargetName())
+                            || OS_VERSION
+                                    .equals(KuraConstants.Reliagate_10_11.getImageName() + "_"
+                                            + KuraConstants.Reliagate_10_11.getImageVersion())
+                                    && TARGET_NAME.equals(KuraConstants.Reliagate_10_11.getTargetName()))) {
                 try {
                     turnModemOn();
                     retries = 15;
@@ -124,13 +125,14 @@ public class SerialModemDriver extends ModemDriver {
         if (modemReachable) {
             int retries = 3;
             if (OS_VERSION != null && TARGET_NAME != null
-                    && OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_"
-                            + KuraConstants.Mini_Gateway.getImageVersion())
-                    && TARGET_NAME.equals(KuraConstants.Mini_Gateway.getTargetName())
-                    || OS_VERSION
-                            .equals(KuraConstants.Reliagate_10_11.getImageName() + "_"
-                                    + KuraConstants.Reliagate_10_11.getImageVersion())
-                            && TARGET_NAME.equals(KuraConstants.Reliagate_10_11.getTargetName())) {
+                    && (OS_VERSION
+                            .equals(KuraConstants.Mini_Gateway.getImageName() + "_"
+                                    + KuraConstants.Mini_Gateway.getImageVersion())
+                            && TARGET_NAME.equals(KuraConstants.Mini_Gateway.getTargetName())
+                            || OS_VERSION
+                                    .equals(KuraConstants.Reliagate_10_11.getImageName() + "_"
+                                            + KuraConstants.Reliagate_10_11.getImageVersion())
+                                    && TARGET_NAME.equals(KuraConstants.Reliagate_10_11.getTargetName()))) {
                 turnModemOff();
                 sleep(2000);
                 retries = 15;
@@ -199,27 +201,29 @@ public class SerialModemDriver extends ModemDriver {
     private boolean isAtReachable(int attempts, int retryInMsec) throws KuraException {
         boolean status = false;
         CommConnection connection = openSerialPort(2000);
-        int numAttempts = attempts;
-        do {
-            numAttempts--;
-            try {
-                status = connection.sendCommand("at\r\n".getBytes(), 500).length > 0;
-                if (status) {
-                    byte[] reply = connection.sendCommand(this.getModelAtCommand.getBytes(), 1000, 100);
-                    if (reply != null) {
-                        this.modemModel = getResponseString(reply);
+        if (connection != null) {
+            int numAttempts = attempts;
+            do {
+                numAttempts--;
+                try {
+                    status = connection.sendCommand("at\r\n".getBytes(), 500).length > 0;
+                    if (status) {
+                        byte[] reply = connection.sendCommand(this.getModelAtCommand.getBytes(), 1000, 100);
+                        if (reply != null) {
+                            this.modemModel = getResponseString(reply);
+                        }
+                    } else {
+                        if (numAttempts > 0) {
+                            sleep(retryInMsec);
+                        }
                     }
-                } else {
-                    if (numAttempts > 0) {
-                        sleep(retryInMsec);
-                    }
+                } catch (Exception e) {
+                    sleep(retryInMsec);
                 }
-            } catch (Exception e) {
-                sleep(retryInMsec);
-            }
-        } while (!status && numAttempts > 0);
+            } while (!status && numAttempts > 0);
 
-        closeSerialPort(connection);
+            closeSerialPort(connection);
+        }
         return status;
     }
 
@@ -247,22 +251,25 @@ public class SerialModemDriver extends ModemDriver {
         File fLockFile = new File("/var/lock/LCK.." + dataPort);
         if (fLockFile.exists()) {
             logger.warn("lock exists for the {} device", dataPort);
-            BufferedReader br = new BufferedReader(new FileReader(fLockFile));
-            int lockedPid = Integer.parseInt(br.readLine().trim());
-            br.close();
+            int lockedPid = -1;
+            try (FileReader fr = new FileReader(fLockFile); BufferedReader br = new BufferedReader(fr)) {
+                lockedPid = Integer.parseInt(br.readLine().trim());
+            }
 
             ProcessStats processStats = LinuxProcessUtil.startWithStats("pgrep pppd");
-            br = new BufferedReader(new InputStreamReader(processStats.getInputStream()));
-            String spid;
             int pidToKill = -1;
-            while ((spid = br.readLine()) != null) {
-                int pid = Integer.parseInt(spid);
-                if (pid == lockedPid) {
-                    pidToKill = pid;
-                    break;
+            try (InputStreamReader isr = new InputStreamReader(processStats.getInputStream());
+                    BufferedReader br = new BufferedReader(isr)) {
+                String spid;
+                while ((spid = br.readLine()) != null) {
+                    int pid = Integer.parseInt(spid);
+                    if (pid == lockedPid) {
+                        pidToKill = pid;
+                        break;
+                    }
                 }
             }
-            br.close();
+
             if (pidToKill > 0) {
                 logger.info("killing pppd that locks the {} device", dataPort);
                 int stat = LinuxProcessUtil.start("kill " + pidToKill, true);
@@ -281,13 +288,14 @@ public class SerialModemDriver extends ModemDriver {
         CommConnection connection = null;
         try {
             connection = openSerialPort(10000);
-
-            connection.sendCommand("AT#SIMDET=0\r\n".getBytes(), 500);
-            Thread.sleep(5000);
-            connection.sendCommand("AT#SIMDET=1\r\n".getBytes(), 500);
-            Thread.sleep(1000);
-            connection.sendCommand("AT#QSS?\r\n".getBytes(), 500);
-            Thread.sleep(1000);
+            if (connection != null) {
+                connection.sendCommand("AT#SIMDET=0\r\n".getBytes(), 500);
+                Thread.sleep(5000);
+                connection.sendCommand("AT#SIMDET=1\r\n".getBytes(), 500);
+                Thread.sleep(1000);
+                connection.sendCommand("AT#QSS?\r\n".getBytes(), 500);
+                Thread.sleep(1000);
+            }
         } catch (Exception e) {
             logger.error("Error in enabling SIM.", e);
         } finally {

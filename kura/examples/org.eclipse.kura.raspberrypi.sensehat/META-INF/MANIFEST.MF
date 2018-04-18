@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.raspberrypi.sensehat
 Bundle-SymbolicName: org.eclipse.kura.raspberrypi.sensehat;singleton:=true
-Bundle-Version: 1.0.300
+Bundle-Version: 1.0.400.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Service-Component: OSGI-INF/*.xml
 Import-Package: jdk.dio;version="[1.0.2,2.0.0)",

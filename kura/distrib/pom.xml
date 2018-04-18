@@ -23,7 +23,7 @@
 
     <groupId>org.eclipse.kura</groupId>
     <artifactId>distrib</artifactId>
-    <version>3.2.0</version>
+    <version>3.3.0-SNAPSHOT</version>
 
     <packaging>pom</packaging>
 

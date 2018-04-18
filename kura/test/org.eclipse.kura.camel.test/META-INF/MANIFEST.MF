@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Unit tests for 'org.eclipse.kura.camel'
 Bundle-SymbolicName: org.eclipse.kura.camel.test
-Bundle-Version: 3.2.0
+Bundle-Version: 3.3.0.qualifier
 Fragment-Host: org.eclipse.kura.camel;bundle-version="1.1.1"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: org.apache.camel.component.mock;version="[2.17.2,3.0.0)",

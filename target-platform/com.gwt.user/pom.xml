@@ -5,12 +5,12 @@
 	<parent>
 		<groupId>org.eclipse.kura</groupId>
 		<artifactId>target-platform</artifactId>
-		<version>3.2.0</version>
+		<version>3.3.0-SNAPSHOT</version>
 		<relativePath>..</relativePath>
 	</parent>
 
 	<artifactId>com.gwt.user</artifactId>
-	<version>1.0.300</version>
+	<version>1.0.400-SNAPSHOT</version>
 
 	<packaging>bundle</packaging>
 

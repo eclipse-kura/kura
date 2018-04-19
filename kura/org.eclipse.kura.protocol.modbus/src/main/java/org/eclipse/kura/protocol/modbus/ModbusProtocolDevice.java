@@ -832,7 +832,7 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
                                         minimumLength = 12;
                                     } else {
                                         // bytes count
-                                        minimumLength = response[8] + 9;
+                                        minimumLength = (response[8] & 0xff) + 9;
                                     }
                                 }
                             } else if (respIndex == minimumLength) {

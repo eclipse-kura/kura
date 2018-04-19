@@ -49,7 +49,7 @@
 						</goals>
 						<configuration>
 							<target>
-								<delete dir="src/mail/resources/archetype-resources/target-definition" />
+								<delete dir="src/main/resources/archetype-resources/target-definition" />
 								<copy todir="src/main/resources/archetype-resources/target-definition">
 									<fileset dir="../../../distrib/target/staging/target-definition" />
 								</copy>

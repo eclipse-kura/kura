@@ -39,7 +39,7 @@
       </includes>
     </fileSet>
     <fileSet filtered="true" encoding="UTF-8">
-      <directory>target-definition/equinox_3.8.1</directory>
+      <directory>target-definition/equinox_3.11.1</directory>
       <includes>
         <include>**/*.xml</include>
       </includes>
@@ -101,7 +101,7 @@
       </includes>
     </fileSet>
     <fileSet encoding="UTF-8">
-      <directory>target-definition/equinox_3.8.1</directory>
+      <directory>target-definition/equinox_3.11.1</directory>
       <includes>
         <include>**/*.jar</include>
       </includes>

@@ -15,12 +15,12 @@
 	<parent>
 		<groupId>org.eclipse.kura</groupId>
 		<artifactId>examples</artifactId>
-		<version>3.2.0-SNAPSHOT</version>
+		<version>3.3.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<artifactId>org.eclipse.kura.example.driver.sensehat</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>1.0.100-SNAPSHOT</version>
 	<packaging>eclipse-plugin</packaging>
 
 	<properties>

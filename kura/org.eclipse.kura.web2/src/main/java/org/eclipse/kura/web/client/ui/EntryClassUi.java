@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -20,8 +20,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.CloudServices.CloudServicesUi;
@@ -35,6 +33,7 @@ import org.eclipse.kura.web.client.ui.drivers.assets.DriversAndAssetsUi;
 import org.eclipse.kura.web.client.ui.wires.WiresPanelUi;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.util.FilterBuilder;
+import org.eclipse.kura.web.client.util.PidTextBox;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtSession;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
@@ -130,6 +129,8 @@ public class EntryClassUi extends Composite {
     @UiField
     NavPills servicesMenu;
     @UiField
+    Panel stackTraceContainer;
+    @UiField
     Anchor errorStackTraceAreaOneAnchor;
     @UiField
     VerticalPanel errorStackTraceAreaOne;
@@ -154,7 +155,7 @@ public class EntryClassUi extends Composite {
     @UiField
     Button factoriesButton;
     @UiField
-    TextBox componentName;
+    PidTextBox componentName;
     @UiField
     Button sidenavButton;
     @UiField
@@ -165,7 +166,6 @@ public class EntryClassUi extends Composite {
     Label serviceDescription;
 
     private static final Messages MSGS = GWT.create(Messages.class);
-    private static final Logger logger = Logger.getLogger(EntryClassUi.class.getSimpleName());
     private static final EntryClassUIUiBinder uiBinder = GWT.create(EntryClassUIUiBinder.class);
 
     private static final String SELECT_COMPONENT = MSGS.servicesComponentFactorySelectorIdle();
@@ -215,7 +215,6 @@ public class EntryClassUi extends Composite {
     private AnchorListItem selectedAnchorListItem;
 
     public EntryClassUi() {
-        logger.log(Level.FINER, "Initiating UiBinder");
         this.ui = this;
         initWidget(uiBinder.createAndBindUi(this));
         initWaitModal();
@@ -249,7 +248,8 @@ public class EntryClassUi extends Composite {
     private void initExceptionReportModal() {
         this.errorPopup.setTitle(MSGS.warning());
         this.errorStackTraceAreaOneAnchor.setText(MSGS.showStackTrace());
-        FailureHandler.setPopup(this.errorPopup, this.errorMessage, this.errorStackTraceAreaOne);
+        FailureHandler.setPopup(this.errorPopup, this.errorMessage, this.errorStackTraceAreaOne,
+                this.stackTraceContainer);
     }
 
     public void setSelectedAnchorListItem(AnchorListItem selected) {
@@ -615,7 +615,6 @@ public class EntryClassUi extends Composite {
 
                             @Override
                             public void onFailure(Throwable ex) {
-                                logger.log(Level.SEVERE, ex.getMessage(), ex);
                                 FailureHandler.handle(ex, EntryClassUi.class.getName());
                                 if (callback != null) {
                                     callback.onFailure(ex);
@@ -668,7 +667,6 @@ public class EntryClassUi extends Composite {
 
                                     @Override
                                     public void onFailure(Throwable ex) {
-                                        logger.log(Level.SEVERE, ex.getMessage(), ex);
                                         FailureHandler.handle(ex, EntryClassUi.class.getName());
                                     }
 
@@ -712,19 +710,22 @@ public class EntryClassUi extends Composite {
                     @Override
                     public void onSuccess(GwtXSRFToken token) {
                         String factoryPid = EntryClassUi.this.factoriesList.getSelectedValue();
-                        String pid = EntryClassUi.this.componentName.getValue();
+                        String pid = EntryClassUi.this.componentName.getPid();
+                        if (pid == null) {
+                            return;
+                        }
                         if (SELECT_COMPONENT.equalsIgnoreCase(factoryPid) || "".equals(pid)) {
                             EntryClassUi.this.errorAlertText.setText(MSGS.servicesComponentFactoryAlertNotSelected());
                             errorModal.show();
                             return;
                         }
+                        EntryClassUi.this.newFactoryComponentModal.hide();
                         EntryClassUi.this.gwtComponentService.createFactoryComponent(token, factoryPid, pid,
                                 new AsyncCallback<Void>() {
 
                                     @Override
                                     public void onFailure(Throwable ex) {
-                                        logger.log(Level.SEVERE, ex.getMessage(), ex);
-                                        FailureHandler.handle(ex, EntryClassUi.class.getName());
+                                        FailureHandler.showErrorMessage(MSGS.errorCreatingFactoryComponent());
                                     }
 
                                     @Override

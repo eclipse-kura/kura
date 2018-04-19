@@ -17,7 +17,6 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.function.IntBinaryOperator;
 
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -41,7 +40,6 @@ public class FrameBufferRaw {
     private RandomAccessFile raf;
 
     private Transform transform;
-    private IntBinaryOperator transformFunc;
 
     private AlphabetRaw alphabet;
 
@@ -262,7 +260,7 @@ public class FrameBufferRaw {
         for (int y = 0; y < 8; y++) {
             for (int x = 0; x < 8; x++) {
                 final int srcOffset = Transform.IDENTITY.apply(x, y) * 2;
-                final int dstOffset = this.transformFunc.applyAsInt(x, y) * 2;
+                final int dstOffset = this.transform.apply(x, y) * 2;
                 System.arraycopy(src, srcOffset, dst, dstOffset, 2);
             }
         }

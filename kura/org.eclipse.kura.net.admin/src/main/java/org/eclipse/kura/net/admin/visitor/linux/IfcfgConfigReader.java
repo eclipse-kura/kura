@@ -177,7 +177,7 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
                             ipAddress = kuraProps.getProperty("IPADDR");
                             prefixString = kuraProps.getProperty("PREFIX");
                             netmask = kuraProps.getProperty("NETMASK");
-                        } else {
+                        } else if (netInterfaceStatus != NetInterfaceStatus.netIPv4StatusUnmanaged) {
                             netInterfaceStatus = NetInterfaceStatus.netIPv4StatusL2Only;
                         }
                     } catch (Exception e) {
@@ -194,7 +194,9 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
                     }
 
                     // make sure at least prefix or netmask is present if static
-                    if (autoConnect && !dhcp && netInterfaceStatus != NetInterfaceStatus.netIPv4StatusL2Only
+                    if (autoConnect && !dhcp
+                            && !(netInterfaceStatus == NetInterfaceStatus.netIPv4StatusL2Only
+                                    || netInterfaceStatus == NetInterfaceStatus.netIPv4StatusUnmanaged)
                             && prefixString == null && netmask == null) {
                         throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "malformatted config file: "
                                 + ifcfgFile.toString() + " must contain NETMASK and/or PREFIX");

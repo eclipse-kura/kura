@@ -138,13 +138,11 @@ static javacall_dio_result saveDeviceReferenceToHandleObject(JNIEnv* env,
     if (deviceHandleClass == NULL) {
         return JAVACALL_DIO_FAIL;
     }
-    jfieldID deviceNativeHandleField = env->GetFieldID(deviceHandleClass, "device_reference", "I");
+    jfieldID deviceNativeHandleField = env->GetFieldID(deviceHandleClass, "device_reference", "J");
     if (deviceNativeHandleField == NULL) {
         return JAVACALL_DIO_FAIL;
     }
-#pragma message "!!!WARNING!!! UNSAFE cast to long to prevent the following error when building for x86_64:"
-#pragma message "error: cast from ‘device_reference {aka _device_reference*}’ to ‘jint {aka int}’ loses precision [-fpermissive]"
-    env->SetIntField(handleObj, deviceNativeHandleField, (jint)(long)device);
+    env->SetLongField(handleObj, deviceNativeHandleField, (jlong)device);
     return JAVACALL_DIO_OK;
 }
 
@@ -155,11 +153,11 @@ static device_reference getDeviceReferenceFromHandleObject(JNIEnv* env,
     if (deviceHandleClass == NULL) {
         return INVALID_DEVICE_REFERENCE;
     }
-    jfieldID deviceNativeHandleField = env->GetFieldID(deviceHandleClass, "device_reference", "I");
+    jfieldID deviceNativeHandleField = env->GetFieldID(deviceHandleClass, "device_reference", "J");
     if (deviceNativeHandleField == NULL) {
         return INVALID_DEVICE_REFERENCE;
     }
-    long value = env->GetIntField(handleObj, deviceNativeHandleField);
+    long value = env->GetLongField(handleObj, deviceNativeHandleField);
     return (device_reference)value;
 }
 

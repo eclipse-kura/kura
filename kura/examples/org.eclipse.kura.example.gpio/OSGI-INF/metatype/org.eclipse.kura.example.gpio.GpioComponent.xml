@@ -45,7 +45,7 @@
             type="String"
             cardinality="5" 
             required="false"
-            default="1"
+            default=""
             description="List of GPIO pins expressed as pin number or pin name (i.e. DOUT1, DIN1, ...)."/>
         
         <AD id="gpio.directions"

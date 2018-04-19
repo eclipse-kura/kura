@@ -23,7 +23,7 @@ public interface BTSnoopListener {
 
     /**
      * Process a BTSnoop error stream
-     * 
+     *
      * @param string
      */
     public void processBTSnoopErrorStream(String string);

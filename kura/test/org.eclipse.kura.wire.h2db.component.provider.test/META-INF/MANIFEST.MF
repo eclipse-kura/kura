@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.wire.h2db.component.provider.test
 Bundle-SymbolicName: org.eclipse.kura.wire.h2db.component.provider.test;singleton:=true
-Bundle-Version: 3.2.0.qualifier
+Bundle-Version: 3.3.0.qualifier
 Bundle-Vendor: Eclipse Kura
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .
@@ -15,4 +15,4 @@ Import-Package: org.eclipse.kura.core.testutil;version="1.0.0",
  org.mockito.invocation;version="1.10.19",
  org.mockito.stubbing;version="1.10.19",
  org.slf4j;version="1.6.4"
-Fragment-Host: org.eclipse.kura.wire.h2db.component.provider;bundle-version="1.0.100"
+Fragment-Host: org.eclipse.kura.wire.h2db.component.provider;bundle-version="1.0.200"

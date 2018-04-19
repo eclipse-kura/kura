@@ -30,7 +30,7 @@ final class GpioComponentOptions {
 
     private static final String DEFAULT_GPIO_SERVICE_PID = "org.eclipse.kura.gpio.GPIOService";
     private static final String DEFAULT_INPUT_READ_MODE = INPUT_READ_MODE_PIN_STATUS_LISTENER;
-    private static final String[] DEFAULT_GPIO_PINS = { "1" };
+    private static final String[] DEFAULT_GPIO_PINS = {};
     private static final Integer[] DEFAULT_GPIO_DIRECTIONS = { 3, 3, 3, 3, 3 };
     private static final Integer[] DEFAULT_GPIO_MODES = { -1, -1, -1, -1, -1 };
     private static final Integer[] DEFAULT_GPIO_TRIGGERS = { -1, -1, -1, -1, -1 };

@@ -33,11 +33,11 @@ import java.nio.Buffer;
 class UARTEventHandler implements EventHandler {
 
     private static class UARTHash {
-        final int port;
+        final long port;
         final int eventType;
         final int hash;
 
-        UARTHash(int port, int eventType) {
+        UARTHash(long port, int eventType) {
             this.port = port;
             this.eventType = eventType;
             long lHash = 17 + port;
@@ -79,7 +79,7 @@ class UARTEventHandler implements EventHandler {
         if (null == uart) {
             throw new NullPointerException("uart == null");
         }
-        int port = uart.getHandle().getNativeHandle();
+        long port = uart.getHandle().getNativeHandle();
         listenerRegistry.put(new UARTHash(port, eventType), uart);
     }
 
@@ -88,7 +88,7 @@ class UARTEventHandler implements EventHandler {
     }
 
     void removeEventListener(int eventType, UARTImpl uart) {
-        int port = uart.getHandle().getNativeHandle();
+        long port = uart.getHandle().getNativeHandle();
         listenerRegistry.remove(new UARTHash(port, eventType));
     }
 
@@ -121,10 +121,11 @@ class UARTEventHandler implements EventHandler {
         }
     }
 
-    public void sendTimeoutEvent(int handle) {
+    public void sendTimeoutEvent(long handle) {
         int type = jdk.dio.uart.UARTEvent.INPUT_DATA_AVAILABLE;
         int bytes = -1;
         byte[] payload = new byte[] {
+                (byte)(handle >> 56), (byte)(handle >> 48), (byte)(handle >> 40), (byte)(handle >> 32),
                 (byte)(handle >> 24), (byte)(handle >> 16), (byte)(handle >> 8), (byte)(handle),
                 (byte)(type >> 24), (byte)(type >> 16), (byte)(type >> 8), (byte)(type),
                 (byte)(bytes >> 24), (byte)(bytes >> 16), (byte)(bytes >> 8), (byte)(bytes),

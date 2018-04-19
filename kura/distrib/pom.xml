@@ -23,7 +23,7 @@
 
     <groupId>org.eclipse.kura</groupId>
     <artifactId>distrib</artifactId>
-    <version>3.2.0-SNAPSHOT</version>
+    <version>3.3.0-SNAPSHOT</version>
 
     <packaging>pom</packaging>
 
@@ -412,6 +412,11 @@
                                     <artifactId>org.eclipse.kura.wire.script.filter.provider</artifactId>
                                     <version>${org.eclipse.kura.wire.script.filter.provider.version}</version>
                                 </artifactItem>
+                               <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.driver.gpio.provider</artifactId>
+                                    <version>${org.eclipse.kura.driver.gpio.provider.version}</version>
+                                </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.linux.gpio</artifactId>
@@ -638,6 +643,8 @@
                                     tofile="target/plugins/org.eclipse.kura.driver.ble.sensortag.provider_${org.eclipse.kura.driver.ble.sensortag.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.wire.script.filter.provider.jar"
                                     tofile="target/plugins/org.eclipse.kura.wire.script.filter.provider_${org.eclipse.kura.wire.script.filter.provider.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.driver.gpio.provider.jar"
+                                    tofile="target/plugins/org.eclipse.kura.driver.gpio.provider_${org.eclipse.kura.driver.gpio.provider.version}.jar" />
                                 <move file="target/plugins/org.moka7.jar"
                                     tofile="target/plugins/org.moka7_${org.moka7.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.rest.provider.jar"
@@ -2046,32 +2053,6 @@
                             </execution>
                         </executions>
                     </plugin>
-                    <plugin>
-                        <artifactId>maven-clean-plugin</artifactId>
-                        <version>2.5</version>
-                        <executions>
-                            <execution>
-                                <id>fedora-clean</id>
-                                <phase>install</phase>
-                                <goals>
-                                    <goal>clean</goal>
-                                </goals>
-                                <configuration>
-                                    <excludeDefaultDirectories>true</excludeDefaultDirectories>
-                                    <filesets>
-                                        <fileset>
-                                            <directory>${project.build.directory}</directory>
-                                            <includes>
-                                               <include>kura_${project.version}_fedora_installer.sh</include>
-                                               <include>kura_${project.version}_fedora_installer.sh.md5</include>
-                                               <include>kura_${project.version}_fedora_installer.sh.SHA-1</include>
-                                            </includes>
-                                        </fileset>
-                                    </filesets>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
                 </plugins>
             </build>
         </profile>
@@ -2185,32 +2166,6 @@
                                         <script>/tmp/kura_${project.version}_fedora-nn_installer.sh</script>
                                     </afterInstallation>
                                     <skipSigning>true</skipSigning>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <artifactId>maven-clean-plugin</artifactId>
-                        <version>2.5</version>
-                        <executions>
-                            <execution>
-                                <id>fedora-clean</id>
-                                <phase>install</phase>
-                                <goals>
-                                    <goal>clean</goal>
-                                </goals>
-                                <configuration>
-                                    <excludeDefaultDirectories>true</excludeDefaultDirectories>
-                                    <filesets>
-                                        <fileset>
-                                            <directory>${project.build.directory}</directory>
-                                            <includes>
-                                               <include>kura_${project.version}_fedora-nn_installer.sh</include>
-                                               <include>kura_${project.version}_fedora-nn_installer.sh.md5</include>
-                                               <include>kura_${project.version}_fedora-nn_installer.sh.SHA-1</include>
-                                            </includes>
-                                        </fileset>
-                                    </filesets>
                                 </configuration>
                             </execution>
                         </executions>
@@ -2836,6 +2791,12 @@
                             <groupId>org.eclipse.kura.feature</groupId>
                             <artifactId>org.eclipse.kura.wire.script.filter</artifactId>
                             <version>${org.eclipse.kura.wire.script.filter.version}</version>
+                            <type>dp</type>
+                          </artifactItem>
+                          <artifactItem>
+                            <groupId>org.eclipse.kura.feature</groupId>
+                            <artifactId>org.eclipse.kura.driver.gpio</artifactId>
+                            <version>${org.eclipse.kura.driver.gpio.version}</version>
                             <type>dp</type>
                           </artifactItem>
                         </artifactItems>

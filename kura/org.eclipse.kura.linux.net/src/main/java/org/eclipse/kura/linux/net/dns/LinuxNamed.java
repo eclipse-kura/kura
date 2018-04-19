@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and others
+ * Copyright (c) 2011, 2018 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -41,7 +41,6 @@ public class LinuxNamed {
 
     private static LinuxNamed linuxNamed = null;
     private static String persistentConfigFileName = null;
-    private static String logFileName = null;
     private static String rfc1912ZonesFilename = null;
     private static String procString = null;
 
@@ -55,28 +54,23 @@ public class LinuxNamed {
             persistentConfigFileName = "/etc/bind/named.conf";
             procString = "/usr/sbin/named";
             if (TARGET_NAME.equals(KuraConstants.ReliaGATE_15_10.getTargetName())) {
-                logFileName = "/var/named.log";
                 rfc1912ZonesFilename = "/etc/bind/named.rfc1912.zones";
             } else {
-                logFileName = "/var/log/named.log";
                 rfc1912ZonesFilename = "/etc/named.rfc1912.zones";
             }
         } else if (OS_VERSION.equals(KuraConstants.ReliaGATE_50_21_Ubuntu.getImageName() + "_"
                 + KuraConstants.ReliaGATE_50_21_Ubuntu.getImageVersion())) {
             persistentConfigFileName = "/etc/bind/named.conf";
             procString = "/usr/sbin/named";
-            logFileName = "/var/log/named.log";
             rfc1912ZonesFilename = "/etc/bind/named.rfc1912.zones";
         } else if (OS_VERSION.equals(KuraConstants.Fedora_Pi.getImageName()) || OS_VERSION.equals(
                 KuraConstants.Reliagate_20_26.getImageName() + "_" + KuraConstants.Reliagate_20_26.getImageVersion())) {
             persistentConfigFileName = "/etc/named.conf";
             procString = "named -u named -t";
-            logFileName = "/var/named/data/named.run";
             rfc1912ZonesFilename = "/etc/named.rfc1912.zones";
         } else {
             persistentConfigFileName = "/etc/named.conf";
             procString = "named -u named -t";
-            logFileName = "/var/log/named.log";
             rfc1912ZonesFilename = "/etc/named.rfc1912.zones";
         }
 
@@ -356,20 +350,6 @@ public class LinuxNamed {
         sb.append("\tmax-cache-ttl 30;\n");
         sb.append("\tmax-ncache-ttl 30;\n");
         sb.append("};\n") //
-                .append("logging{\n") //
-                .append("\tchannel named_log {\n") //
-                .append("\t\tfile \"") //
-                .append(logFileName) //
-                .append("\" versions 3;\n") //
-                .append("\t\tseverity info;\n") //
-                .append("\t\tprint-severity yes;\n") //
-                .append("\t\tprint-time yes;\n") //
-                .append("\t\tprint-category yes;\n") //
-                .append("\t};\n") //
-                .append("\tcategory default{\n") //
-                .append("\t\tnamed_log;\n") //
-                .append("\t};\n") //
-                .append("};\n") //
                 .append("zone \".\" IN {\n") //
                 .append("\ttype hint;\n") //
                 .append("\tfile \"named.ca\";\n") //
@@ -409,13 +389,6 @@ public class LinuxNamed {
                 .append("\n") //
                 .append("\t/* Path to ISC DLV key */\n") //
                 .append("\nbindkeys-file \"/etc/named.iscdlv.key\";\n") //
-                .append("};\n") //
-                .append("\n") //
-                .append("logging {\n") //
-                .append("\tchannel default_debug {\n") //
-                .append("\t\tfile \"data/named.run\";\n") //
-                .append("\t\tseverity dynamic;\n") //
-                .append("\t};\n") //
                 .append("};\n") //
                 .append("\n") //
                 .append("zone \".\" IN {\n") //

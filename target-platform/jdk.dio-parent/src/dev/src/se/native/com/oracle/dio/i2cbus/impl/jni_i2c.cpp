@@ -206,9 +206,9 @@ JNIEXPORT jint JNICALL Java_com_oracle_dio_i2cbus_impl_I2CSlaveImpl_transfer0
  * Class:     com_oracle_dio_i2cbus_impl_I2CSlaveImpl
  * Method:    getGrpID0
  */
-JNIEXPORT jint JNICALL Java_com_oracle_dio_i2cbus_impl_I2CSlaveImpl_getGrpID0
+JNIEXPORT jlong JNICALL Java_com_oracle_dio_i2cbus_impl_I2CSlaveImpl_getGrpID0
   (JNIEnv* env, jobject obj) {
-    jint grpId = 0;
+    long grpId = 0;
     device_reference device = getDeviceReferenceFromDeviceObject(env, obj);
     javacall_dio_result result;
     result = javacall_i2c_get_group_id(getDeviceHandle(device), &grpId);

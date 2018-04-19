@@ -24,9 +24,9 @@ import tinyb.BluetoothGattService;
 
 public class BluetoothLeGattServiceImpl implements BluetoothLeGattService {
 
-    private static final Duration TIMEOUT = Duration.ofSeconds(5);
+    private static final long TIMEOUT = 30;
 
-    private BluetoothGattService service;
+    private final BluetoothGattService service;
 
     public BluetoothLeGattServiceImpl(BluetoothGattService service) {
         this.service = service;
@@ -34,8 +34,14 @@ public class BluetoothLeGattServiceImpl implements BluetoothLeGattService {
 
     @Override
     public BluetoothLeGattCharacteristic findCharacteristic(UUID uuid) throws KuraBluetoothResourceNotFoundException {
+        return findCharacteristic(uuid, BluetoothLeGattServiceImpl.TIMEOUT);
+    }
+
+    @Override
+    public BluetoothLeGattCharacteristic findCharacteristic(UUID uuid, long timeout)
+            throws KuraBluetoothResourceNotFoundException {
         BluetoothGattCharacteristic characteristic;
-        characteristic = this.service.find(uuid.toString(), BluetoothLeGattServiceImpl.TIMEOUT);
+        characteristic = this.service.find(uuid.toString(), Duration.ofSeconds(timeout));
         if (characteristic != null) {
             return new BluetoothLeGattCharacteristicImpl(characteristic);
         } else {

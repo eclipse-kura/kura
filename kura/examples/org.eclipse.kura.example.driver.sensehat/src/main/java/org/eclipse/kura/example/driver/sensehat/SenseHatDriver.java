@@ -312,12 +312,7 @@ public class SenseHatDriver implements Driver, ConfigurableComponent, JoystickEv
     }
 
     private Set<ChannelListenerRegistration> getListenersForResource(Resource resource) {
-        Set<ChannelListenerRegistration> listeners = this.channelListeners.get(resource);
-        if (listeners == null) {
-            listeners = new CopyOnWriteArraySet<>();
-            this.channelListeners.put(resource, listeners);
-        }
-        return listeners;
+        return this.channelListeners.computeIfAbsent(resource, res -> new CopyOnWriteArraySet<>());
     }
 
     private String getChannelName(Map<String, Object> properties) {
@@ -331,7 +326,11 @@ public class SenseHatDriver implements Driver, ConfigurableComponent, JoystickEv
     @Override
     public void onJoystickEvent(Resource event, long timestamp) {
         final TypedValue<?> value = TypedValues.newLongValue(timestamp);
-        channelListeners.get(event).forEach(reg -> {
+        final Set<ChannelListenerRegistration> listeners = channelListeners.get(event);
+        if (listeners == null) {
+            return;
+        }
+        listeners.forEach(reg -> {
             final ChannelRecord record = ChannelRecord.createReadRecord(reg.channelName, DataType.LONG);
             record.setValue(value);
             record.setChannelStatus(CHANNEL_STATUS_OK);

@@ -32,7 +32,7 @@ import com.oracle.dio.utils.Constants;
 public class Handle {
 
     /** Device native handle */
-    protected int device_reference = Constants.INVALID_HANDLE;
+    protected long device_reference = Constants.INVALID_HANDLE;
 
     /** Closes the device */
     public native void close();
@@ -44,7 +44,7 @@ public class Handle {
     public native void unlock();
 
     /** Returns the device handle */
-    public final int getNativeHandle() {
+    public final long getNativeHandle() {
         return device_reference;
     }
 
@@ -56,6 +56,6 @@ public class Handle {
     /** Returns a hash code value for the object. */
     @Override
     public int hashCode() {
-        return device_reference;
+        return Long.hashCode(device_reference);
     }
 }

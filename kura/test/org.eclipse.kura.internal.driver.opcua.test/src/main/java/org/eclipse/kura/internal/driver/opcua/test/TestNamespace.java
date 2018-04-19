@@ -25,7 +25,6 @@ import static org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.Unsigned.
 import java.lang.reflect.Array;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -72,6 +71,7 @@ import com.google.common.collect.Lists;
 public class TestNamespace implements Namespace {
 
     public static final String NAMESPACE_URI = "urn:eclipse:milo:hello-world";
+    public static final String IDENTIFIER_HELLO_WORLD = "HelloWorld";
 
     private static final Object[][] STATIC_SCALAR_NODES = new Object[][] {
             { "Boolean", Identifiers.Boolean, new Variant(false) },
@@ -108,11 +108,9 @@ public class TestNamespace implements Namespace {
             { "XmlElementArray", Identifiers.XmlElement, new Variant(new XmlElement("<a>hello</a>")) },
             { "LocalizedTextArray", Identifiers.LocalizedText, new Variant(LocalizedText.english("localized text")) },
             { "QualifiedNameArray", Identifiers.QualifiedName, new Variant(new QualifiedName(1234, "defg")) },
-            { "NodeIdArray", Identifiers.NodeId, new Variant(new NodeId(1234, "abcd")) } };
-
+            { "NodeIdArray", Identifiers.NodeId, new Variant(new NodeId(1234, "abcd")) } };  
+    
     private final Logger logger = LoggerFactory.getLogger(getClass());
-
-    private final Random random = new Random();
 
     private final SubscriptionModel subscriptionModel;
 
@@ -127,10 +125,10 @@ public class TestNamespace implements Namespace {
 
         try {
             // Create a "HelloWorld" folder and add it to the node manager
-            NodeId folderNodeId = new NodeId(namespaceIndex, "HelloWorld");
+            NodeId folderNodeId = new NodeId(namespaceIndex, IDENTIFIER_HELLO_WORLD);
 
             UaFolderNode folderNode = new UaFolderNode(server.getNodeMap(), folderNodeId,
-                    new QualifiedName(namespaceIndex, "HelloWorld"), LocalizedText.english("HelloWorld"));
+                    new QualifiedName(namespaceIndex, IDENTIFIER_HELLO_WORLD), LocalizedText.english(IDENTIFIER_HELLO_WORLD));
 
             server.getNodeMap().addNode(folderNode);
 
@@ -244,7 +242,7 @@ public class TestNamespace implements Namespace {
 
             if (node != null) {
                 DataValue value = node.readAttribute(new AttributeContext(context), readValueId.getAttributeId(),
-                        timestamps, readValueId.getIndexRange());
+                        timestamps, readValueId.getIndexRange(), readValueId.getDataEncoding());
 
                 results.add(value);
             } else {

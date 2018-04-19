@@ -6,10 +6,10 @@ Bundle-Version: 3.3.0.qualifier
 Bundle-Vendor: Eclipse Kura
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .,
-                  lib/sdk-core-0.1.0.jar,
-                  lib/sdk-server-0.1.0.jar,
-                  lib/stack-core-0.1.0.jar,
-                  lib/stack-server-0.1.0.jar,
+                  lib/sdk-core-0.2.1.jar,
+                  lib/sdk-server-0.2.1.jar,
+                  lib/stack-core-0.2.1.jar,
+                  lib/stack-server-0.2.1.jar,
                   lib/metrics-core-3.2.2.jar
 Bundle-ActivationPolicy: lazy
 Fragment-Host: org.eclipse.kura.driver.opcua.provider

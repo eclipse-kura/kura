@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2016, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -15,8 +15,13 @@ import java.util.Iterator;
 import java.util.logging.Level;
 
 import org.eclipse.kura.web.client.ui.AbstractServicesUi;
+import org.eclipse.kura.web.client.ui.AlertDialog;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.util.FailureHandler;
+import org.eclipse.kura.web.client.util.request.Request;
+import org.eclipse.kura.web.client.util.request.RequestContext;
+import org.eclipse.kura.web.client.util.request.RequestQueue;
+import org.eclipse.kura.web.client.util.request.SuccessCallback;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
@@ -24,25 +29,16 @@ import org.eclipse.kura.web.shared.service.GwtComponentService;
 import org.eclipse.kura.web.shared.service.GwtComponentServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
-import org.gwtbootstrap3.client.ui.Alert;
 import org.gwtbootstrap3.client.ui.Button;
-import org.gwtbootstrap3.client.ui.ButtonGroup;
 import org.gwtbootstrap3.client.ui.FieldSet;
 import org.gwtbootstrap3.client.ui.Form;
 import org.gwtbootstrap3.client.ui.FormGroup;
-import org.gwtbootstrap3.client.ui.Modal;
-import org.gwtbootstrap3.client.ui.ModalBody;
-import org.gwtbootstrap3.client.ui.ModalFooter;
-import org.gwtbootstrap3.client.ui.ModalHeader;
-import org.gwtbootstrap3.client.ui.html.Span;
-import org.gwtbootstrap3.client.ui.html.Text;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
 
 public class CloudServiceConfigurationUi extends AbstractServicesUi {
@@ -58,7 +54,6 @@ public class CloudServiceConfigurationUi extends AbstractServicesUi {
     interface ServiceConfigurationUiUiBinder extends UiBinder<Widget, CloudServiceConfigurationUi> {
     }
 
-    private Modal modal;
     private GwtConfigComponent originalConfig;
 
     @UiField
@@ -70,11 +65,7 @@ public class CloudServiceConfigurationUi extends AbstractServicesUi {
     @UiField
     Form connectionEditField;
     @UiField
-    Modal incompleteFieldsModal;
-    @UiField
-    Alert incompleteFields;
-    @UiField
-    Text incompleteFieldsText;
+    AlertDialog alertDialog;
 
     public CloudServiceConfigurationUi(final GwtConfigComponent addedItem) {
         initWidget(uiBinder.createAndBindUi(this));
@@ -104,8 +95,6 @@ public class CloudServiceConfigurationUi extends AbstractServicesUi {
         setDirty(false);
         this.applyConnectionEdit.setEnabled(false);
         this.resetConnectionEdit.setEnabled(false);
-
-        initInvalidDataModal();
     }
 
     @Override
@@ -125,7 +114,13 @@ public class CloudServiceConfigurationUi extends AbstractServicesUi {
     @Override
     protected void reset() {
         if (isDirty()) {
-            showDirtyModal();
+            alertDialog.show(MSGS.deviceConfigDirty(), new AlertDialog.Listener() {
+
+                @Override
+                public void onConfirm() {
+                    resetVisualization();
+                }
+            });
         }
     }
 
@@ -170,97 +165,57 @@ public class CloudServiceConfigurationUi extends AbstractServicesUi {
     private void apply() {
         if (isValid()) {
             if (isDirty()) {
-                // TODO ask for confirmation first
-                this.modal = new Modal();
-                this.modal.setId("confirmationModal");
-
-                ModalHeader header = new ModalHeader();
-                header.setTitle(MSGS.confirm());
-                this.modal.add(header);
-
-                ModalBody body = new ModalBody();
-                body.add(new Span(MSGS.deviceConfigConfirmation(this.configurableComponent.getComponentName())));
-                this.modal.add(body);
-
-                ModalFooter footer = new ModalFooter();
-                ButtonGroup group = new ButtonGroup();
-                Button no = new Button();
-                no.setText(MSGS.noButton());
-                no.addStyleName("fa fa-times");
-                no.addClickHandler(new ClickHandler() {
-
-                    @Override
-                    public void onClick(ClickEvent event) {
-                        CloudServiceConfigurationUi.this.modal.hide();
-                    }
-                });
-                group.add(no);
-
-                Button yes = new Button();
-                yes.setText(MSGS.yesButton());
-                yes.addStyleName("fa fa-check");
-                yes.addClickHandler(new ClickHandler() {
-
-                    @Override
-                    public void onClick(ClickEvent event) {
-                        EntryClassUi.showWaitModal();
-                        try {
-                            getUpdatedConfiguration();
-                        } catch (Exception ex) {
-                            EntryClassUi.hideWaitModal();
-                            FailureHandler.handle(ex);
-                            return;
-                        }
-                        CloudServiceConfigurationUi.this.gwtXSRFService
-                                .generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+                alertDialog.show(MSGS.deviceConfigConfirmation(this.configurableComponent.getComponentName()),
+                        new AlertDialog.Listener() {
 
                             @Override
-                            public void onFailure(Throwable ex) {
-                                EntryClassUi.hideWaitModal();
-                                FailureHandler.handle(ex);
-                            }
-
-                            @Override
-                            public void onSuccess(GwtXSRFToken token) {
-                                CloudServiceConfigurationUi.this.gwtComponentService.updateComponentConfiguration(token,
-                                        CloudServiceConfigurationUi.this.configurableComponent,
-                                        new AsyncCallback<Void>() {
-
-                                    @Override
-                                    public void onFailure(Throwable caught) {
-                                        EntryClassUi.hideWaitModal();
-                                        FailureHandler.handle(caught);
-                                        errorLogger.log(
-                                                Level.SEVERE, caught.getLocalizedMessage() != null
-                                                        ? caught.getLocalizedMessage() : caught.getClass().getName(),
-                                                caught);
-                                    }
+                            public void onConfirm() {
+                                try {
+                                    getUpdatedConfiguration();
+                                } catch (Exception ex) {
+                                    EntryClassUi.hideWaitModal();
+                                    FailureHandler.handle(ex);
+                                    return;
+                                }
+                                RequestQueue.submit(new Request() {
 
                                     @Override
-                                    public void onSuccess(Void result) {
-                                        CloudServiceConfigurationUi.this.modal.hide();
-                                        logger.info(MSGS.info() + ": " + MSGS.deviceConfigApplied());
-                                        CloudServiceConfigurationUi.this.applyConnectionEdit.setEnabled(false);
-                                        CloudServiceConfigurationUi.this.resetConnectionEdit.setEnabled(false);
-                                        setDirty(false);
-                                        originalConfig = CloudServiceConfigurationUi.this.configurableComponent;
-                                        EntryClassUi.hideWaitModal();
+                                    public void run(final RequestContext context) {
+                                        CloudServiceConfigurationUi.this.gwtXSRFService.generateSecurityToken(
+                                                context.callback(new SuccessCallback<GwtXSRFToken>() {
+
+                                                    @Override
+                                                    public void onSuccess(GwtXSRFToken token) {
+                                                        CloudServiceConfigurationUi.this.gwtComponentService
+                                                                .updateComponentConfiguration(token,
+                                                                        CloudServiceConfigurationUi.this.configurableComponent,
+                                                                        context.callback(new SuccessCallback<Void>() {
+
+                                                                            @Override
+                                                                            public void onSuccess(Void result) {
+                                                                                logger.info(MSGS.info() + ": "
+                                                                                        + MSGS.deviceConfigApplied());
+                                                                                CloudServiceConfigurationUi.this.applyConnectionEdit
+                                                                                        .setEnabled(false);
+                                                                                CloudServiceConfigurationUi.this.resetConnectionEdit
+                                                                                        .setEnabled(false);
+                                                                                setDirty(false);
+                                                                                originalConfig = CloudServiceConfigurationUi.this.configurableComponent;
+                                                                                EntryClassUi.hideWaitModal();
+                                                                            }
+                                                                        }));
+
+                                                    }
+                                                }));
                                     }
                                 });
-
                             }
+
                         });
-                    }
-                });
-                group.add(yes);
-                footer.add(group);
-                this.modal.add(footer);
-                this.modal.show();
-                no.setFocus(true);
             }
         } else {
             errorLogger.log(Level.SEVERE, "Device configuration error!");
-            this.incompleteFieldsModal.show();
+            alertDialog.show(MSGS.formWithErrorsOrIncomplete(), AlertDialog.Severity.ALERT, null);
         }
     }
 
@@ -276,60 +231,11 @@ public class CloudServiceConfigurationUi extends AbstractServicesUi {
         return this.configurableComponent;
     }
 
-    private void showDirtyModal() {
-        this.modal = new Modal();
-
-        ModalHeader header = new ModalHeader();
-        header.setTitle(MSGS.confirm());
-        this.modal.add(header);
-
-        ModalBody body = new ModalBody();
-        body.add(new Span(MSGS.deviceConfigDirty()));
-        this.modal.add(body);
-
-        ModalFooter footer = new ModalFooter();
-        ButtonGroup group = new ButtonGroup();
-
-        Button no = new Button();
-        no.setText(MSGS.noButton());
-        no.addStyleName("fa fa-times");
-        no.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                CloudServiceConfigurationUi.this.modal.hide();
-            }
-        });
-        group.add(no);
-
-        Button yes = new Button();
-        yes.setText(MSGS.yesButton());
-        yes.addStyleName("fa fa-check");
-        yes.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                CloudServiceConfigurationUi.this.modal.hide();
-                resetVisualization();
-            }
-        });
-        group.add(yes);
-        footer.add(group);
-        this.modal.add(footer);
-        this.modal.show();
-        no.setFocus(true);
-    }
-
     protected void resetVisualization() {
         restoreConfiguration(this.originalConfig);
         renderForm();
         this.applyConnectionEdit.setEnabled(false);
         this.resetConnectionEdit.setEnabled(false);
         setDirty(false);
-    }
-
-    private void initInvalidDataModal() {
-        this.incompleteFieldsModal.setTitle(MSGS.warning());
-        this.incompleteFieldsText.setText(MSGS.formWithErrorsOrIncomplete());
     }
 }

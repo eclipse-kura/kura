@@ -24,8 +24,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
-import org.eclipse.kura.core.configuration.XmlComponentConfigurations;
-import org.eclipse.kura.core.configuration.metatype.Tocd;
 import org.eclipse.kura.marshalling.Marshaller;
 import org.eclipse.kura.util.service.ServiceUtil;
 import org.eclipse.kura.wire.graph.MultiportWireConfiguration;
@@ -67,44 +65,41 @@ public class ConfigurationUpgrade {
     private static final String SEPARATOR = ".";
     private static final String PATTERN = "%s.";
 
-    public static XmlComponentConfigurations upgrade(final XmlComponentConfigurations xmlConfigs,
-            final BundleContext bundleContext) {
+    public static void upgrade(final ComponentConfiguration config, final BundleContext bundleContext) {
 
-        if (xmlConfigs == null) {
-            return null;
+        if (config == null) {
+            return;
         }
 
-        List<ComponentConfiguration> result = new ArrayList<>();
+        String pid = config.getPid();
+        final Map<String, Object> props = config.getConfigurationProperties();
 
-        for (ComponentConfiguration config : xmlConfigs.getConfigurations()) {
-            String pid = config.getPid();
-            Map<String, Object> props = new HashMap<>(config.getConfigurationProperties());
-            ComponentConfigurationImpl cc = new ComponentConfigurationImpl(pid, (Tocd) config.getDefinition(), props);
-            result.add(cc);
-
-            if (CLOUD_SERVICE_PID.equals(pid)) {
-                props.put(ConfigurationAdmin.SERVICE_FACTORYPID, CLOUD_SERVICE_FACTORY_PID);
-                String name = DATA_SERVICE_REFERENCE_NAME + ComponentConstants.REFERENCE_TARGET_SUFFIX;
-                props.put(name, String.format(REFERENCE_TARGET_VALUE_FORMAT, DATA_SERVICE_PID));
-                props.put(KURA_CLOUD_SERVICE_FACTORY_PID, FACTORY_PID);
-            } else if (DATA_SERVICE_PID.equals(pid)) {
-                props.put(ConfigurationAdmin.SERVICE_FACTORYPID, DATA_SERVICE_FACTORY_PID);
-                String name = DATA_TRANSPORT_SERVICE_REFERENCE_NAME + ComponentConstants.REFERENCE_TARGET_SUFFIX;
-                props.put(name, String.format(REFERENCE_TARGET_VALUE_FORMAT, DATA_TRANSPORT_SERVICE_PID));
-                props.put(KURA_CLOUD_SERVICE_FACTORY_PID, FACTORY_PID);
-            } else if (DATA_TRANSPORT_SERVICE_PID.equals(pid)) {
-                props.put(ConfigurationAdmin.SERVICE_FACTORYPID, DATA_TRANSPORT_SERVICE_FACTORY_PID);
-                props.put(KURA_CLOUD_SERVICE_FACTORY_PID, FACTORY_PID);
-            } else if (WIRE_SERVICE_PID.equals(pid)) {
-                Map<String, Object> convertedProps = new HashMap<>(convertToNewWiresJsonFormat(props, bundleContext));
-                props.clear();
-                props.putAll(convertedProps);
-            }
+        if (props == null) {
+            return;
         }
 
-        XmlComponentConfigurations xmlConfigurations = new XmlComponentConfigurations();
-        xmlConfigurations.setConfigurations(result);
-        return xmlConfigurations;
+        final Object factoryPid = props.get(ConfigurationAdmin.SERVICE_FACTORYPID);
+
+        if (CLOUD_SERVICE_PID.equals(pid)) {
+            props.put(ConfigurationAdmin.SERVICE_FACTORYPID, CLOUD_SERVICE_FACTORY_PID);
+            String name = DATA_SERVICE_REFERENCE_NAME + ComponentConstants.REFERENCE_TARGET_SUFFIX;
+            props.put(name, String.format(REFERENCE_TARGET_VALUE_FORMAT, DATA_SERVICE_PID));
+            props.put(KURA_CLOUD_SERVICE_FACTORY_PID, FACTORY_PID);
+        } else if (DATA_SERVICE_PID.equals(pid)) {
+            props.put(ConfigurationAdmin.SERVICE_FACTORYPID, DATA_SERVICE_FACTORY_PID);
+            String name = DATA_TRANSPORT_SERVICE_REFERENCE_NAME + ComponentConstants.REFERENCE_TARGET_SUFFIX;
+            props.put(name, String.format(REFERENCE_TARGET_VALUE_FORMAT, DATA_TRANSPORT_SERVICE_PID));
+            props.put(KURA_CLOUD_SERVICE_FACTORY_PID, FACTORY_PID);
+        } else if (DATA_TRANSPORT_SERVICE_PID.equals(pid)) {
+            props.put(ConfigurationAdmin.SERVICE_FACTORYPID, DATA_TRANSPORT_SERVICE_FACTORY_PID);
+            props.put(KURA_CLOUD_SERVICE_FACTORY_PID, FACTORY_PID);
+        } else if (WIRE_SERVICE_PID.equals(pid)) {
+            Map<String, Object> convertedProps = new HashMap<>(convertToNewWiresJsonFormat(props, bundleContext));
+            props.clear();
+            props.putAll(convertedProps);
+        } else if (WireAssetConfigurationUpgrade.WIRE_ASSET_FACTORY_PID.equals(factoryPid)) {
+            WireAssetConfigurationUpgrade.upgrade(props);
+        }
     }
 
     private static Map<String, Object> convertToNewWiresJsonFormat(Map<String, Object> oldProperties,
@@ -213,7 +208,8 @@ public class ConfigurationUpgrade {
     }
 
     private static ServiceReference<Marshaller>[] getJsonMarshallers(BundleContext bundleContext) {
-        String filterString = String.format("(&(kura.service.pid=%s))", "org.eclipse.kura.marshalling.json.provider");
+        String filterString = String.format("(&(kura.service.pid=%s))",
+                "org.eclipse.kura.json.marshaller.unmarshaller.provider");
         return ServiceUtil.getServiceReferences(bundleContext, Marshaller.class, filterString);
     }
 

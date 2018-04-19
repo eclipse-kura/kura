@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -87,15 +87,10 @@ public class DhcpServerManager {
             int pid = LinuxProcessUtil.getPid(DhcpServerManager.formDhcpdCommand(interfaceName));
             if (pid > -1) {
                 // If so, kill it.
-                if (LinuxProcessUtil.stop(pid)) {
+                if (LinuxProcessUtil.stopAndKill(pid)) {
                     DhcpServerManager.removePidFile(interfaceName);
                 } else {
-                    logger.debug("Failed to stop process...try to kill");
-                    if (LinuxProcessUtil.kill(pid)) {
-                        DhcpServerManager.removePidFile(interfaceName);
-                    } else {
-                        throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "error killing process, pid=" + pid);
-                    }
+                    throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "error killing process, pid=" + pid);
                 }
             } else {
                 logger.debug("tried to kill DHCP server for interface but it is not running");

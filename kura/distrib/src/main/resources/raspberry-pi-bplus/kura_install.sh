@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+# Copyright (c) 2011, 2018 Eurotech and/or its affiliates
 #
 #  All rights reserved. This program and the accompanying materials
 #  are made available under the terms of the Eclipse Public License v1.0
@@ -71,8 +71,6 @@ cp ${INSTALL_DIR}/kura/install/kuranet.conf ${INSTALL_DIR}/kura/.data/kuranet.co
 cp ${INSTALL_DIR}/kura/install/named.conf /etc/bind/named.conf
 mkdir -p /var/named
 chown -R bind /var/named
-touch /var/log/named.log
-chown -R bind /var/log/named.log
 cp ${INSTALL_DIR}/kura/install/named.ca /var/named/
 cp ${INSTALL_DIR}/kura/install/named.rfc1912.zones /etc/
 cp ${INSTALL_DIR}/kura/install/usr.sbin.named /etc/apparmor.d/
@@ -95,7 +93,7 @@ cp ${INSTALL_DIR}/kura/install/logrotate.conf /etc/logrotate.conf
 cp ${INSTALL_DIR}/kura/install/kura.logrotate /etc/logrotate.d/kura
 
 # execute patch_sysctl.sh from installer install folder
-chmod 700 ${INSTALL_DIR}/kura/install/patch_sysctl.sh 
+chmod 700 ${INSTALL_DIR}/kura/install/patch_sysctl.sh
 ${INSTALL_DIR}/kura/install/patch_sysctl.sh ${INSTALL_DIR}/kura/install/sysctl.kura.conf /etc/sysctl.conf
 
 if ! [ -d /sys/class/net ]

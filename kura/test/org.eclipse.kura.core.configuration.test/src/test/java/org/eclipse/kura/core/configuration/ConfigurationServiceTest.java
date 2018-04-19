@@ -70,16 +70,16 @@ import org.osgi.service.component.ComponentContext;
 public class ConfigurationServiceTest {
 
     @Test
-    public void testGetFactoryComponentPids() throws NoSuchFieldException {
+    public void testGetFactoryComponentPids() throws NoSuchFieldException, KuraException {
         // test that the returned PIDs are the same as in the service and that they cannot be modified
 
         String[] expectedPIDs = { "pid1", "pid2", "pid3" };
 
-        ConfigurationService cs = new ConfigurationServiceImpl();
+        ConfigurationServiceImpl cs = new ConfigurationServiceImpl();
 
-        @SuppressWarnings("unchecked")
-        Set<String> s = (Set<String>) TestUtil.getFieldValue(cs, "factoryPids");
-        s.addAll(Arrays.asList(expectedPIDs));
+        for (final String pid : expectedPIDs) {
+            cs.registerComponentOCD(pid, null, true, null);
+        }
 
         Set<String> factoryComponentPids = cs.getFactoryComponentPids();
 
@@ -3088,16 +3088,9 @@ public class ConfigurationServiceTest {
         return result;
     }
 
-    private Map<String, Tocd> getOcdsMap(List<String> registeredFactories, List<Tocd> registeredOcds) {
-        final Map<String, Tocd> result = new HashMap<>();
-        for (int i = 0; i < registeredFactories.size(); i++) {
-            result.put(registeredFactories.get(i), registeredOcds.get(i));
-        }
-        return result;
-    }
-
     private OCDService createMockConfigurationServiceForOCDTests(List<String> registeredFactories,
-            List<Tocd> registeredOcds, List<Component> registeredComponents) throws NoSuchFieldException {
+            List<Tocd> registeredOcds, List<Component> registeredComponents)
+            throws NoSuchFieldException, KuraException {
 
         assertEquals(registeredFactories.size(), registeredOcds.size());
         ScrService scrService = mock(ScrService.class);
@@ -3106,8 +3099,9 @@ public class ConfigurationServiceTest {
 
         final ConfigurationServiceImpl result = new ConfigurationServiceImpl();
         result.setScrService(scrService);
-        TestUtil.setFieldValue(result, "factoryPids", new HashSet<>(registeredFactories));
-        TestUtil.setFieldValue(result, "ocds", getOcdsMap(registeredFactories, registeredOcds));
+        for (int i = 0; i < registeredOcds.size(); i++) {
+            result.registerComponentOCD(registeredFactories.get(i), registeredOcds.get(i), true, null);
+        }
 
         return result;
     }
@@ -3117,7 +3111,7 @@ public class ConfigurationServiceTest {
     }
 
     @Test
-    public void testShouldReturnEmptyFactoryOCDList() throws NoSuchFieldException {
+    public void testShouldReturnEmptyFactoryOCDList() throws NoSuchFieldException, KuraException {
         final OCDService ocdService = createMockConfigurationServiceForOCDTests(Arrays.asList(), Arrays.asList(),
                 Arrays.asList());
         final List<ComponentConfiguration> configs = ocdService.getFactoryComponentOCDs();
@@ -3125,7 +3119,7 @@ public class ConfigurationServiceTest {
     }
 
     @Test
-    public void testGetShouldFactoryOCDList() throws NoSuchFieldException {
+    public void testShouldGetFactoryOCDList() throws NoSuchFieldException, KuraException {
         final Tocd ocd1 = mock(Tocd.class);
         final Tocd ocd2 = mock(Tocd.class);
         final Tocd ocd3 = mock(Tocd.class);
@@ -3139,7 +3133,7 @@ public class ConfigurationServiceTest {
     }
 
     @Test
-    public void testShouldReturnNullFactoryOCD() throws NoSuchFieldException {
+    public void testShouldReturnNullFactoryOCD() throws NoSuchFieldException, KuraException {
         final OCDService ocdService = createMockConfigurationServiceForOCDTests(Arrays.asList(), Arrays.asList(),
                 Arrays.asList());
         assertNull(ocdService.getFactoryComponentOCD("bar"));
@@ -3147,7 +3141,7 @@ public class ConfigurationServiceTest {
     }
 
     @Test
-    public void testShouldGetSingleFactoryOCD() throws NoSuchFieldException {
+    public void testShouldGetSingleFactoryOCD() throws NoSuchFieldException, KuraException {
         final Tocd ocd1 = mock(Tocd.class);
         final Tocd ocd2 = mock(Tocd.class);
         final Tocd ocd3 = mock(Tocd.class);
@@ -3161,7 +3155,7 @@ public class ConfigurationServiceTest {
     }
 
     @Test
-    public void testShouldReturnEmptyFactoryOCDListForServiceProvider() throws NoSuchFieldException {
+    public void testShouldReturnEmptyFactoryOCDListForServiceProvider() throws NoSuchFieldException, KuraException {
         final OCDService ocdService = createMockConfigurationServiceForOCDTests(Arrays.asList(), Arrays.asList(),
                 Arrays.asList());
         assertTrue(ocdService.getServiceProviderOCDs(new Class<?>[0]).isEmpty());
@@ -3169,7 +3163,7 @@ public class ConfigurationServiceTest {
     }
 
     @Test
-    public void testShouldReturnFactoryOCDListForServiceProvider() throws NoSuchFieldException {
+    public void testShouldReturnFactoryOCDListForServiceProvider() throws NoSuchFieldException, KuraException {
         final Tocd fooOcd = mock(Tocd.class);
         final Tocd barOcd = mock(Tocd.class);
         final Tocd bazOcd = mock(Tocd.class);

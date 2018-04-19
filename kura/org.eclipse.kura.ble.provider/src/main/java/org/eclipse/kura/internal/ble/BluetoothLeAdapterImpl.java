@@ -32,9 +32,9 @@ import tinyb.BluetoothException;
 public class BluetoothLeAdapterImpl implements BluetoothLeAdapter {
 
     private static final Logger logger = LoggerFactory.getLogger(BluetoothLeAdapterImpl.class);
-    private static final Duration TIMEOUT = Duration.ofSeconds(5);
+    private static final long TIMEOUT = 30;
 
-    private tinyb.BluetoothAdapter adapter;
+    private final tinyb.BluetoothAdapter adapter;
 
     public BluetoothLeAdapterImpl(tinyb.BluetoothAdapter adapter) {
         this.adapter = adapter;
@@ -102,7 +102,7 @@ public class BluetoothLeAdapterImpl implements BluetoothLeAdapter {
 
     @Override
     public void setDiscoverableTimout(long value) {
-        this.setDiscoverableTimout(value);
+        setDiscoverableTimout(value);
     }
 
     @Override
@@ -184,7 +184,7 @@ public class BluetoothLeAdapterImpl implements BluetoothLeAdapter {
 
     public class BluetoothFuture<T> extends CompletableFuture<T> implements Runnable {
 
-        private long internalTimeout;
+        private final long internalTimeout;
         private String name;
         private String address;
         private Consumer<T> consumer;
@@ -228,7 +228,7 @@ public class BluetoothLeAdapterImpl implements BluetoothLeAdapter {
         @Override
         public void run() {
             if (BluetoothLeAdapterImpl.this.adapter.getDiscovering()) {
-                this.completeExceptionally(
+                completeExceptionally(
                         new KuraBluetoothDiscoveryException("The BLE adapter has already been discovering..."));
             }
             try {
@@ -237,12 +237,12 @@ public class BluetoothLeAdapterImpl implements BluetoothLeAdapter {
                 logger.error("Start discovery failed", e);
             }
             long start = System.currentTimeMillis();
-            while ((System.currentTimeMillis() - start) <= this.internalTimeout) {
+            while (System.currentTimeMillis() - start <= this.internalTimeout) {
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
-                    this.completeExceptionally(e);
+                    completeExceptionally(e);
                 }
             }
             try {
@@ -252,11 +252,12 @@ public class BluetoothLeAdapterImpl implements BluetoothLeAdapter {
             }
 
             if (this.name != null || this.address != null) {
-                BluetoothDevice leDevice = BluetoothLeAdapterImpl.this.adapter.find(name, address, TIMEOUT);
+                BluetoothDevice leDevice = BluetoothLeAdapterImpl.this.adapter.find(this.name, this.address,
+                        Duration.ofSeconds(TIMEOUT));
                 if (leDevice == null) {
-                    this.complete((T) null);
+                    complete((T) null);
                 } else {
-                    this.complete((T) new BluetoothLeDeviceImpl(leDevice));
+                    complete((T) new BluetoothLeDeviceImpl(leDevice));
                 }
                 if (leDevice != null && this.consumer != null) {
                     this.consumer.accept((T) new BluetoothLeDeviceImpl(leDevice));
@@ -266,7 +267,7 @@ public class BluetoothLeAdapterImpl implements BluetoothLeAdapter {
                 for (BluetoothDevice device : BluetoothLeAdapterImpl.this.adapter.getDevices()) {
                     devices.add(new BluetoothLeDeviceImpl(device));
                 }
-                this.complete((T) devices);
+                complete((T) devices);
                 if (this.consumer != null) {
                     this.consumer.accept((T) devices);
                 }

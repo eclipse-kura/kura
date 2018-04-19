@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -15,8 +15,6 @@ package org.eclipse.kura.internal.wire;
 
 import static java.util.Objects.requireNonNull;
 
-import org.eclipse.kura.localization.LocalizationAdapter;
-import org.eclipse.kura.localization.resources.WireMessages;
 import org.eclipse.kura.wire.WireComponent;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -31,8 +29,6 @@ import org.slf4j.LoggerFactory;
 final class WireComponentTrackerCustomizer implements ServiceTrackerCustomizer<WireComponent, WireComponent> {
 
     private static final Logger logger = LoggerFactory.getLogger(WireComponentTrackerCustomizer.class);
-
-    private static final WireMessages message = LocalizationAdapter.adapt(WireMessages.class);
 
     private final BundleContext context;
 
@@ -49,8 +45,8 @@ final class WireComponentTrackerCustomizer implements ServiceTrackerCustomizer<W
      *             if any of the arguments is null
      */
     WireComponentTrackerCustomizer(final BundleContext context, final WireServiceImpl wireService) {
-        requireNonNull(context, message.bundleContextNonNull());
-        requireNonNull(wireService, message.wireServiceNonNull());
+        requireNonNull(context, "Bundle context cannot be null");
+        requireNonNull(wireService, "Wire Service cannot be null");
 
         this.wireService = wireService;
         this.context = context;
@@ -61,11 +57,11 @@ final class WireComponentTrackerCustomizer implements ServiceTrackerCustomizer<W
     @Override
     public WireComponent addingService(final ServiceReference<WireComponent> reference) {
         final WireComponent service = this.context.getService(reference);
-        logger.debug(message.addingWireComponent());
+        logger.debug("Adding Wire Components....");
 
         this.wireService.createWires();
 
-        logger.debug(message.addingWireComponentDone());
+        logger.debug("Adding Wire Components....Done");
         return service;
     }
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -21,80 +21,131 @@ import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Representation of USB modem devices
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 @ProviderType
 public class UsbModemDevice extends AbstractUsbDevice implements ModemDevice {
 
     /** The TTY devices associated with modem **/
-    private final ArrayList<String> m_ttyDevs;
+    private final ArrayList<TtyDev> ttyDevs;
 
     /** The block devices associated with the modem **/
-    private final ArrayList<String> m_blockDevs;
+    private final ArrayList<String> blockDevs;
 
     public UsbModemDevice(String vendorId, String productId, String manufacturerName, String productName,
             String usbBusNumber, String usbDevicePath) {
         super(vendorId, productId, manufacturerName, productName, usbBusNumber, usbDevicePath);
 
-        this.m_ttyDevs = new ArrayList<String>();
-        this.m_blockDevs = new ArrayList<String>();
+        this.ttyDevs = new ArrayList<>();
+        this.blockDevs = new ArrayList<>();
     }
 
     public UsbModemDevice(AbstractUsbDevice usbDevice) {
         super(usbDevice);
 
-        this.m_ttyDevs = new ArrayList<String>();
-        this.m_blockDevs = new ArrayList<String>();
+        this.ttyDevs = new ArrayList<>();
+        this.blockDevs = new ArrayList<>();
     }
 
     @Override
     public List<String> getSerialPorts() {
-        return Collections.unmodifiableList(this.m_ttyDevs);
+        List<String> serialPorts = new ArrayList<>();
+        for (TtyDev dev : this.ttyDevs) {
+            serialPorts.add(dev.getPortName());
+        }
+        return serialPorts;
     }
 
     /**
-     * @return sorted list of tty devs
+     * Return a list of tty devices, sorted in a way to facilitate the client code identifying dedicated devices,
+     * e.g. for AT commands, PPP link or NMEA sentences, based on their position in the list.
+     * Originally, only the tty name was used for the comparison. This proved to be wrong as a tty name does reliably
+     * identify the USB interface number (bInterfaceNumber) of the tty device.
+     * To preserve the API contract, the tty devices can be added specifying the USB interface number and this will be
+     * used to sort the list.
+     *
+     * @return sorted list of tty devices
      */
     public List<String> getTtyDevs() {
-        return Collections.unmodifiableList(this.m_ttyDevs);
+        return getSerialPorts();
     }
 
     /**
-     * @return sorted list of block devs
+     * @return sorted list of block devices
      */
     public List<String> getBlockDevs() {
-        return Collections.unmodifiableList(this.m_blockDevs);
+        return Collections.unmodifiableList(this.blockDevs);
     }
 
+    /**
+     * Adds a tty device identified by its name and USB interface number (bInterfaceNumber).
+     * The devices will be sorted by the interface number. If this is missing, the name will be used.
+     *
+     * @since 1.4
+     *
+     * @param ttyDev
+     *            the name of the tty device
+     * @param interfaceNumber
+     *            the number of the interface as described by the bInterfaceNumber property
+     */
+    public void addTtyDev(String ttyDev, Integer interfaceNumber) {
+        TtyDev dev = new TtyDev(ttyDev, interfaceNumber);
+        if (!this.ttyDevs.contains(dev)) {
+            this.ttyDevs.add(new TtyDev(ttyDev, interfaceNumber));
+            Collections.sort(this.ttyDevs, new TtyDevComparator());
+        }
+    }
+
+    /**
+     * @deprecated this method is deprecated in favor of addTtyDev(String ttyDev, Integer interfaceNumber)
+     */
+    @Deprecated
     public void addTtyDev(String ttyDev) {
-        if (!this.m_ttyDevs.contains(ttyDev)) {
-            this.m_ttyDevs.add(ttyDev);
-            Collections.sort(this.m_ttyDevs, new DevNameComparator());
-        }
+        addTtyDev(ttyDev, null);
     }
 
+    /**
+     * Adds a block device identified by its name. The block devices will be sorted by the name.
+     *
+     * @param blockDev
+     *            the name of the block device
+     */
     public void addBlockDev(String blockDev) {
-        if (!this.m_blockDevs.contains(blockDev)) {
-            this.m_blockDevs.add(blockDev);
-            Collections.sort(this.m_blockDevs, new DevNameComparator());
+        if (!this.blockDevs.contains(blockDev)) {
+            this.blockDevs.add(blockDev);
+            Collections.sort(this.blockDevs, new DevNameComparator());
         }
     }
 
+    /**
+     * Remove a tty device form the list.
+     *
+     * @param ttyDev
+     *            the name of the tty device
+     * @return true if the list contained the specified device
+     */
     public boolean removeTtyDev(String ttyDev) {
-        return this.m_ttyDevs.remove(ttyDev);
+        return this.ttyDevs.remove(new TtyDev(ttyDev));
     }
 
+    /**
+     * Remove a block device form the list.
+     *
+     * @param blockDev
+     *            the name of the block device
+     * @return true if the list contained the specified device
+     */
     public boolean removeBlockDev(String blockDev) {
-        return this.m_blockDevs.remove(blockDev);
+        return this.blockDevs.remove(blockDev);
     }
 
     @Override
     public int hashCode() {
         final int prime = 37;
         int result = super.hashCode();
-        result = prime * result + (this.m_ttyDevs == null ? 0 : this.m_ttyDevs.hashCode());
-        result = prime * result + (this.m_blockDevs == null ? 0 : this.m_blockDevs.hashCode());
+        result = prime * result + (this.ttyDevs == null ? 0 : this.ttyDevs.hashCode());
+        result = prime * result + (this.blockDevs == null ? 0 : this.blockDevs.hashCode());
         return result;
     }
 
@@ -110,18 +161,18 @@ public class UsbModemDevice extends AbstractUsbDevice implements ModemDevice {
             return false;
         }
         UsbModemDevice other = (UsbModemDevice) obj;
-        if (this.m_ttyDevs == null) {
-            if (other.m_ttyDevs != null) {
+        if (this.ttyDevs == null) {
+            if (other.ttyDevs != null) {
                 return false;
             }
-        } else if (!this.m_ttyDevs.equals(other.m_ttyDevs)) {
+        } else if (!this.ttyDevs.equals(other.ttyDevs)) {
             return false;
         }
-        if (this.m_blockDevs == null) {
-            if (other.m_blockDevs != null) {
+        if (this.blockDevs == null) {
+            if (other.blockDevs != null) {
                 return false;
             }
-        } else if (!this.m_blockDevs.equals(other.m_blockDevs)) {
+        } else if (!this.blockDevs.equals(other.blockDevs)) {
             return false;
         }
         return true;
@@ -129,15 +180,15 @@ public class UsbModemDevice extends AbstractUsbDevice implements ModemDevice {
 
     @Override
     public String toString() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append("UsbModem [");
         sb.append("vendorId=").append(getVendorId());
         sb.append(", productId=").append(getProductId());
         sb.append(", manufName=").append(getManufacturerName());
         sb.append(", productName=").append(getProductName());
         sb.append(", usbPort=").append(getUsbPort());
-        sb.append(", ttyDevs=").append(this.m_ttyDevs.toString());
-        sb.append(", blockDevs=").append(this.m_blockDevs.toString());
+        sb.append(", ttyDevs=").append(this.ttyDevs.toString());
+        sb.append(", blockDevs=").append(this.blockDevs.toString());
         sb.append("]");
 
         return sb.toString();
@@ -195,6 +246,84 @@ public class UsbModemDevice extends AbstractUsbDevice implements ModemDevice {
             }
 
             return pos;
+        }
+    }
+
+    private static class TtyDev {
+
+        private final String portName;
+        private Integer interfaceNumber;
+
+        public TtyDev(String portName) {
+            this.portName = portName;
+        }
+
+        public TtyDev(String portName, Integer interfaceNumber) {
+            this.portName = portName;
+            this.interfaceNumber = interfaceNumber;
+        }
+
+        public String getPortName() {
+            return this.portName;
+        }
+
+        public Integer getInterfaceNumber() {
+            return this.interfaceNumber;
+        }
+
+        @Override
+        public String toString() {
+            String number = this.interfaceNumber != null ? this.interfaceNumber.toString() : "null";
+            return "TtyDev [portName=" + this.portName + ", interfaceNumber=" + number + "]";
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + (this.portName == null ? 0 : this.portName.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            TtyDev other = (TtyDev) obj;
+            if (this.portName == null) {
+                if (other.portName != null) {
+                    return false;
+                }
+            } else if (!this.portName.equals(other.portName)) {
+                return false;
+            }
+            return true;
+        }
+
+    }
+
+    private class TtyDevComparator implements Comparator<TtyDev> {
+
+        @Override
+        /**
+         * If the devices have an interface number, use it for comparing.
+         * Otherwise use the port names.
+         * Note: this comparator imposes orderings that are inconsistent with equals. The comparison will be performed
+         * on the interface numbers if present, while the equals method is based only on the port names.
+         */
+        public int compare(TtyDev dev1, TtyDev dev2) {
+            if (dev1.getInterfaceNumber() != null && dev2.getInterfaceNumber() != null) {
+                return dev1.getInterfaceNumber().compareTo(dev2.getInterfaceNumber());
+            } else {
+                return new DevNameComparator().compare(dev1.getPortName(), dev2.getPortName());
+            }
         }
     }
 }

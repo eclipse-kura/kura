@@ -124,9 +124,6 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
     @UiField
     FormLabel labelDns;
     @UiField
-    FormLabel labelSearch;
-
-    @UiField
     HelpBlock helpIp;
     @UiField
     HelpBlock helpSubnet;
@@ -143,9 +140,6 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
     TextBox gateway;
     @UiField
     TextBox dns;
-    @UiField
-    TextBox search;
-
     @UiField
     ListBox status;
     @UiField
@@ -285,11 +279,6 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
             } else {
                 updatedNetIf.setDnsServers("");
             }
-            if (this.search.getValue() != null && !"".equals(this.search.getValue().trim())) {
-                updatedNetIf.setSearchDomains(this.search.getValue());
-            } else {
-                updatedNetIf.setSearchDomains("");
-            }
         }
     }
 
@@ -379,7 +368,6 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
         this.labelSubnet.setText(MSGS.netIPv4SubnetMask());
         this.labelGateway.setText(MSGS.netIPv4Gateway());
         this.labelDns.setText(MSGS.netIPv4DNSServers());
-        this.labelSearch.setText(MSGS.netIPv4SearchDomains());
 
         for (GwtNetIfConfigMode mode : GwtNetIfConfigMode.values()) {
             this.configure.addItem(MessageUtils.get(mode.name()));
@@ -769,13 +757,6 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
             } else {
                 this.dns.setVisible(false);
             }
-
-            if (this.selectedNetIfConfig.getSearchDomains() != null) {
-                this.search.setText(this.selectedNetIfConfig.getSearchDomains());
-            } else {
-                this.search.setText("");
-            }
-
             refreshForm();
         }
     }
@@ -793,7 +774,6 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
             } else {
                 this.dns.setEnabled(true);
             }
-            this.search.setEnabled(false);
             this.configure.setSelectedIndex(this.configure.getItemText(0).equals(IPV4_MODE_DHCP_MESSAGE) ? 0 : 1);
         } else {
             if (VMSGS.netIPv4StatusDisabled().equals(this.status.getSelectedValue())
@@ -807,11 +787,9 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
                 this.subnet.setEnabled(false);
                 this.gateway.setEnabled(false);
                 this.dns.setEnabled(false);
-                this.search.setEnabled(false);
                 this.subnet.setText("");
                 this.gateway.setText("");
                 this.dns.setText("");
-                this.search.setText("");
             } else {
                 this.configure.setEnabled(true);
                 String configureValue = this.configure.getSelectedValue();
@@ -822,10 +800,8 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
                     this.renew.setEnabled(true);
                     if (this.status.getSelectedValue().equals(IPV4_STATUS_WAN_MESSAGE)) {
                         this.dns.setEnabled(true);
-                        this.search.setEnabled(true);
                     } else {
                         this.dns.setEnabled(false);
-                        this.search.setEnabled(false);
                     }
                 } else {
                     this.ip.setEnabled(true);
@@ -834,12 +810,10 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
                     if (this.status.getSelectedValue().equals(IPV4_STATUS_WAN_MESSAGE)) {
                         this.gateway.setEnabled(true);
                         this.dns.setEnabled(true);
-                        this.search.setEnabled(true);
                     } else {
                         this.gateway.setText("");
                         this.gateway.setEnabled(false);
                         this.dns.setEnabled(false);
-                        this.search.setEnabled(false);
                     }
                     this.renew.setEnabled(false);
                 }
@@ -865,7 +839,6 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
         this.subnet.setText("");
         this.gateway.setText("");
         this.dns.setText("");
-        this.search.setText("");
         update();
     }
 

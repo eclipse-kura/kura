@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Kura Wires Topology Management
 Bundle-SymbolicName: org.eclipse.kura.wire.provider;singleton:=true
-Bundle-Version: 1.0.200.qualifier
+Bundle-Version: 1.0.300.qualifier
 Bundle-Vendor: Eclipse Kura
 Bundle-License: Eclipse Public License v1.0
 Bundle-Category: Kura Wires
@@ -14,8 +14,6 @@ Import-Package: com.eclipsesource.json;version="0.9.4",
  org.eclipse.kura.configuration.metatype;version="[1.1,2.0)",
  org.eclipse.kura.core.configuration;version="[2.0,3.0)",
  org.eclipse.kura.core.configuration.metatype;version="[1.0,2.0)",
- org.eclipse.kura.localization;version="[1.0,2.0)",
- org.eclipse.kura.localization.resources;version="[1.0,2.0)",
  org.eclipse.kura.marshalling;version="1.0.0",
  org.eclipse.kura.type;version="[1.0,2.0)",
  org.eclipse.kura.util.base;version="[1.0,2.0)",

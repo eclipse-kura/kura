@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -26,13 +26,8 @@ public class DhcpClientManager {
 
     private static DhcpClientTool dhcpClientTool = DhcpClientTool.NONE;
     private static final String PID_FILE_DIR = "/var/run";
-    private static final String LEASES_DIR = "/var/lib/dhclient";
 
     static {
-        File leasesDirectory = new File(LEASES_DIR);
-        if (!leasesDirectory.exists()) {
-            leasesDirectory.mkdirs();
-        }
         dhcpClientTool = getTool();
     }
 
@@ -194,12 +189,7 @@ public class DhcpClientManager {
 
         StringBuilder sb = new StringBuilder();
         sb.append("-lf ");
-        sb.append(LEASES_DIR);
-        sb.append('/');
-        sb.append(DhcpClientTool.DHCLIENT.getValue());
-        sb.append('.');
-        sb.append(interfaceName);
-        sb.append(".leases");
+        sb.append(DhcpClientLeases.getInstance().getDhclientLeasesFilePath(interfaceName));
         return sb.toString();
     }
 }

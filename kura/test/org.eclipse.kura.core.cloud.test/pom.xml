@@ -20,12 +20,12 @@
 	<parent>
 		<groupId>org.eclipse.kura</groupId>
 		<artifactId>test</artifactId>
-		<version>3.2.0-SNAPSHOT</version>
+		<version>3.3.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>org.eclipse.kura.core.cloud.test</artifactId>
 	<packaging>eclipse-test-plugin</packaging>
-	<version>3.2.0-SNAPSHOT</version>
+	<version>3.3.0-SNAPSHOT</version>
 	
 	<properties>
 		<kura.basedir>${project.basedir}/../..</kura.basedir>

@@ -30,8 +30,8 @@ import tinyb.BluetoothGattService;
 
 public class BluetoothLeDeviceImpl implements BluetoothLeDevice {
 
-    private static final Duration TIMEOUT = Duration.ofSeconds(5);
-    private BluetoothDevice device;
+    private static final long TIMEOUT = 30;
+    private final BluetoothDevice device;
 
     public BluetoothLeDeviceImpl(tinyb.BluetoothDevice device) {
         this.device = device;
@@ -39,7 +39,12 @@ public class BluetoothLeDeviceImpl implements BluetoothLeDevice {
 
     @Override
     public BluetoothLeGattService findService(UUID uuid) throws KuraBluetoothResourceNotFoundException {
-        BluetoothGattService service = this.device.find(uuid.toString(), BluetoothLeDeviceImpl.TIMEOUT);
+        return findService(uuid, BluetoothLeDeviceImpl.TIMEOUT);
+    }
+
+    @Override
+    public BluetoothLeGattService findService(UUID uuid, long timeout) throws KuraBluetoothResourceNotFoundException {
+        BluetoothGattService service = this.device.find(uuid.toString(), Duration.ofSeconds(timeout));
         if (service != null) {
             return new BluetoothLeGattServiceImpl(service);
         } else {

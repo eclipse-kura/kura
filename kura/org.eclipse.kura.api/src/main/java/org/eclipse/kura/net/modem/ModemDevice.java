@@ -21,6 +21,11 @@ import org.osgi.annotation.versioning.ProviderType;
 @ProviderType
 public interface ModemDevice {
 
+    /**
+     * The list of serial ports available on the device
+     *
+     * @return a list of serial ports names
+     */
     public List<String> getSerialPorts();
 
     /**

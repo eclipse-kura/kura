@@ -95,7 +95,7 @@ public class BluetoothLeIBeaconDecoderImpl implements BluetoothLeIBeaconDecoder 
                 int minorh = b[minorPtr] & 0xFF;
                 beacon.setMajor((short) (majorh << 8 | majorl));
                 beacon.setMinor((short) (minorh << 8 | minorl));
-                beacon.setTxPower((short) b[minorPtr + 2]);
+                beacon.setTxPower(b[minorPtr + 2]);
                 return beacon;
             }
 

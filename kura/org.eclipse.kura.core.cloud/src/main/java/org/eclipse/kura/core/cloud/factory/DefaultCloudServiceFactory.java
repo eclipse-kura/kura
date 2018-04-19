@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -18,6 +18,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -172,6 +173,9 @@ public class DefaultCloudServiceFactory implements CloudServiceFactory {
 
     private static final String REFERENCE_TARGET_VALUE_FORMAT = "(" + ConfigurationService.KURA_SERVICE_PID + "=%s)";
 
+    private static final Pattern MANAGED_CLOUD_SERVICE_PID_PATTERN = Pattern
+            .compile("^org\\.eclipse\\.kura\\.cloud\\.CloudService(-[a-zA-Z0-9]+)?$");
+
     private ConfigurationService configurationService;
 
     protected void setConfigurationService(ConfigurationService configurationService) {
@@ -280,14 +284,22 @@ public class DefaultCloudServiceFactory implements CloudServiceFactory {
 
     @Override
     public Set<String> getManagedCloudServicePids() throws KuraException {
-        Set<String> result = new HashSet<>();
+        final Set<String> cloudServicePids = new HashSet<>();
 
         for (ComponentConfiguration cc : this.configurationService.getComponentConfigurations()) {
-            if (cc.getDefinition() != null && CLOUD_SERVICE_PID.equals(cc.getDefinition().getId())) {
-                result.add(cc.getPid());
+            if (cc.getDefinition() == null) {
+                continue;
+            }
+
+            final String pid = cc.getPid();
+            final String factoryPid = cc.getDefinition().getId();
+
+            if (CLOUD_SERVICE_FACTORY_PID.equals(factoryPid) && MANAGED_CLOUD_SERVICE_PID_PATTERN.matcher(pid).matches()
+                    && FACTORY_PID.equals(cc.getConfigurationProperties().get(KURA_CLOUD_SERVICE_FACTORY_PID))) {
+                cloudServicePids.add(pid);
             }
         }
 
-        return result;
+        return cloudServicePids;
     }
 }

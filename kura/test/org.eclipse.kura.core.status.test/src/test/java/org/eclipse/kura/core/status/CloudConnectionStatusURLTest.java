@@ -4,7 +4,6 @@ import static org.eclipse.kura.core.status.CloudConnectionStatusURL.NOTIFICATION
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-
 import java.util.Properties;
 
 import org.junit.Before;
@@ -16,6 +15,7 @@ public class CloudConnectionStatusURLTest {
     private static final String LINUX_LED_LED1_GREEN = "linux_led:" + LINUX_LED_LED1_GREEN_PATH;
     private static final String LED_44 = "led:44";
     private static final String CCS_PREFIX = "ccs:";
+    private static final String INVERTED = ":inverted";
 
     @Before
     public void setUp() throws Exception {
@@ -60,9 +60,20 @@ public class CloudConnectionStatusURLTest {
         assertNotNull(props);
         assertEquals(StatusNotificationTypeEnum.LED, props.get(NOTIFICATION_TYPE));
         assertEquals(44, props.get("led"));
-        assertEquals(3, props.size());
+        assertEquals(false, props.get("inverted"));
+        assertEquals(4, props.size());
     }
 
+    @Test
+    public void testParseUrlCcsGpioLedInverted() {
+        Properties props = CloudConnectionStatusURL.parseURL(CCS_PREFIX + LED_44 + INVERTED);
+        assertNotNull(props);
+        assertEquals(StatusNotificationTypeEnum.LED, props.get(NOTIFICATION_TYPE));
+        assertEquals(44, props.get("led"));
+        assertEquals(4, props.size());
+        assertEquals(true, props.get("inverted"));
+    }
+    
     @Test
     public void testParseUrlCcsLinuxLed() {
         Properties props = CloudConnectionStatusURL.parseURL(CCS_PREFIX + LINUX_LED_LED1_GREEN);
@@ -81,9 +92,10 @@ public class CloudConnectionStatusURLTest {
         assertEquals(StatusNotificationTypeEnum.LED, props.get(NOTIFICATION_TYPE));
         assertEquals(44, props.get("led"));
         assertEquals(LINUX_LED_LED1_GREEN_PATH, props.get("linux_led"));
-        assertEquals(4, props.size());
+        assertEquals(false, props.get("inverted"));
+        assertEquals(5, props.size());
     }
-
+    
     @Test
     public void testParseUrlCcsLinuxWrongGpioLed() {
         Properties props = CloudConnectionStatusURL
@@ -91,7 +103,7 @@ public class CloudConnectionStatusURLTest {
         assertNotNull(props);
         assertEquals(StatusNotificationTypeEnum.LED, props.get(NOTIFICATION_TYPE));
         assertEquals(LINUX_LED_LED1_GREEN_PATH, props.get("linux_led"));
-        assertEquals(3, props.size());
+        assertEquals(4, props.size());
     }
 
     @Test
@@ -102,6 +114,7 @@ public class CloudConnectionStatusURLTest {
         assertEquals(StatusNotificationTypeEnum.LED, props.get(NOTIFICATION_TYPE));
         assertEquals(44, props.get("led"));
         assertEquals(LINUX_LED_LED1_GREEN_PATH, props.get("linux_led"));
-        assertEquals(4, props.size());
+        assertEquals(false, props.get("inverted"));
+        assertEquals(5, props.size());
     }
 }

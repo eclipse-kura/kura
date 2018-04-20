@@ -217,7 +217,8 @@ public class CloudConnectionStatusServiceImpl implements CloudConnectionStatusSe
 
     private Runnable getGpioStatusWorker(CloudConnectionStatusEnum status) {
         int gpioLed = (Integer) this.properties.get("led");
-        LedManager gpioLedManager = new GpioLedManager(this.gpioService, gpioLed);
+        boolean inverted = (Boolean) this.properties.get("inverted");
+        LedManager gpioLedManager = new GpioLedManager(this.gpioService, gpioLed, inverted);
 
         return createLedRunnable(status, gpioLedManager);
     }

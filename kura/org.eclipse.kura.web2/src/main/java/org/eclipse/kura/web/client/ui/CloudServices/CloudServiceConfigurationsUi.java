@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -13,11 +13,11 @@
 package org.eclipse.kura.web.client.ui.CloudServices;
 
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import org.eclipse.kura.web.client.ui.EntryClassUi;
-import org.eclipse.kura.web.client.util.FailureHandler;
+import org.eclipse.kura.web.client.util.request.Request;
+import org.eclipse.kura.web.client.util.request.RequestContext;
+import org.eclipse.kura.web.client.util.request.RequestQueue;
+import org.eclipse.kura.web.client.util.request.SuccessCallback;
 import org.eclipse.kura.web.shared.model.GwtCloudConnectionEntry;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
@@ -38,13 +38,10 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 
 public class CloudServiceConfigurationsUi extends Composite {
-
-    private static final Logger logger = Logger.getLogger(CloudServiceConfigurationsUi.class.getSimpleName());
 
     private static CloudServiceConfigurationsUiUiBinder uiBinder = GWT
             .create(CloudServiceConfigurationsUiUiBinder.class);
@@ -128,53 +125,45 @@ public class CloudServiceConfigurationsUi extends Composite {
         this.currentlySelectedTab = tabListItem;
     }
 
-    private void getCloudStackConfigurations(String factoryPid, String cloudServicePid) {
+    private void getCloudStackConfigurations(final String factoryPid, final String cloudServicePid) {
 
-        this.gwtCloudService.findStackPidsByFactory(factoryPid, cloudServicePid, new AsyncCallback<List<String>>() {
-
-            @Override
-            public void onFailure(Throwable ex) {
-                logger.log(Level.SEVERE, ex.getMessage(), ex);
-                FailureHandler.handle(ex, EntryClassUi.class.getName());
-            }
+        RequestQueue.submit(new Request() {
 
             @Override
-            public void onSuccess(List<String> result) {
-                final List<String> pidsResult = result;
-
-                CloudServiceConfigurationsUi.this.gwtXSRFService
-                        .generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+            public void run(final RequestContext context) {
+                gwtCloudService.findStackPidsByFactory(factoryPid, cloudServicePid,
+                        context.callback(new SuccessCallback<List<String>>() {
 
                             @Override
-                            public void onFailure(Throwable ex) {
-                                FailureHandler.handle(ex, EntryClassUi.class.getName());
+                            public void onSuccess(final List<String> pidsResult) {
+
+                                CloudServiceConfigurationsUi.this.gwtXSRFService
+                                        .generateSecurityToken(context.callback(new SuccessCallback<GwtXSRFToken>() {
+
+                                            @Override
+                                            public void onSuccess(final GwtXSRFToken token) {
+                                                CloudServiceConfigurationsUi.this.gwtComponentService
+                                                        .findFilteredComponentConfigurations(token, context.callback(
+                                                                new SuccessCallback<List<GwtConfigComponent>>() {
+
+                                                                    @Override
+                                                                    public void onSuccess(
+                                                                            List<GwtConfigComponent> result) {
+                                                                        boolean isFirstEntry = true;
+                                                                        connectionNavtabs.clear();
+                                                                        for (GwtConfigComponent pair : result) {
+                                                                            if (pidsResult
+                                                                                    .contains(pair.getComponentId())) {
+                                                                                renderTabs(pair, isFirstEntry);
+                                                                                isFirstEntry = false;
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }));
+                                            }
+                                        }));
                             }
-
-                            @Override
-                            public void onSuccess(GwtXSRFToken token) {
-                                CloudServiceConfigurationsUi.this.gwtComponentService
-                                        .findFilteredComponentConfigurations(token,
-                                                new AsyncCallback<List<GwtConfigComponent>>() {
-
-                                                    @Override
-                                                    public void onFailure(Throwable ex) {
-                                                        logger.log(Level.SEVERE, ex.getMessage(), ex);
-                                                        FailureHandler.handle(ex, EntryClassUi.class.getName());
-                                                    }
-
-                                                    @Override
-                                                    public void onSuccess(List<GwtConfigComponent> result) {
-                                                        boolean isFirstEntry = true;
-                                                        for (GwtConfigComponent pair : result) {
-                                                            if (pidsResult.contains(pair.getComponentId())) {
-                                                                renderTabs(pair, isFirstEntry);
-                                                                isFirstEntry = false;
-                                                            }
-                                                        }
-                                                    }
-                                                });
-                            }
-                        });
+                        }));
             }
         });
     }

@@ -17,6 +17,7 @@
     xmlns:b.html="urn:import:org.gwtbootstrap3.client.ui.html" xmlns:g="urn:import:com.google.gwt.user.client.ui"
     xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt" xmlns:kura.util="urn:import:org.eclipse.kura.web.client.util">
 
+    <ui:with field="msgs" type="org.eclipse.kura.web.client.messages.Messages"/>
 
     <ui:style>
     .important {
@@ -40,6 +41,10 @@
     .drivers-list {
     	padding-bottom: 30px;
     }
+    
+    .spinner {
+    	margin-left: 0.2cm;
+    }
     </ui:style>
 
     <b:Container fluid="true">
@@ -47,11 +52,11 @@
             <b:Row b:id="buttonBar">
                 <b:Panel>
                     <b:ButtonGroup size="SMALL">
-                        <b:Button ui:field="newConnection" addStyleNames="fa fa-plus"></b:Button>
-                        <b:Button ui:field="deleteConnection" addStyleNames="fa fa-trash"></b:Button>
-                        <b:Button ui:field="statusConnect" addStyleNames="fa fa-toggle-on"></b:Button>
-                        <b:Button ui:field="statusDisconnect" addStyleNames="fa fa-toggle-off"></b:Button>
-                        <b:Button ui:field="connectionRefresh" addStyleNames="fa fa-refresh"></b:Button>
+                        <b:Button ui:field="newConnection" addStyleNames="fa fa-plus" text="{msgs.newButton}"></b:Button>
+                        <b:Button ui:field="deleteConnection" addStyleNames="fa fa-trash" text="{msgs.deleteButton}"></b:Button>
+                        <b:Button ui:field="statusConnect" addStyleNames="fa fa-toggle-on" text="{msgs.connectButton}"></b:Button>
+                        <b:Button ui:field="statusDisconnect" addStyleNames="fa fa-toggle-off" text="{msgs.disconnectButton}"></b:Button>
+                        <b:Button ui:field="connectionRefresh" addStyleNames="fa fa-refresh" text="{msgs.refresh}"></b:Button>
                     </b:ButtonGroup>
                 </b:Panel>
             </b:Row>
@@ -61,27 +66,28 @@
                         width="100%" ui:field="connectionsGrid" />
                 </b:Well>
             </b:Row>
-            <b:Modal ui:field="newConnectionModal" b:id="newConnectionModal">
+            <b:Modal ui:field="newConnectionModal" b:id="newConnectionModal" title="{msgs.newCloudService}">
                 <b:ModalBody addStyleNames="{style.asset-comp-modal-body}">
                     <b:Form>
                         <b:FormGroup ui:field="newCloudServiceForm" addStyleNames="{style.drivers-list}">
-                            <b:FormLabel for="cloudFactoriesPid" ui:field="cloudFactoriesPidLabel" />
+                            <b:FormLabel for="cloudFactoriesPid" ui:field="cloudFactoriesPidLabel" text="{msgs.availableCloudFactories}"/>
                             <g:FlowPanel>
                                 <b:ListBox ui:field="cloudFactoriesPids" b:id="cloudFactoriesPids">
                                 </b:ListBox>
                             </g:FlowPanel>
                         </b:FormGroup>
                         <b:FormGroup>
-                            <b:FormLabel for="cloudServicePid" ui:field="cloudServicePidLabel" />
+                            <b:FormLabel for="cloudServicePid" ui:field="cloudServicePidLabel" text="{msgs.newCloudServicePid}"/>
                             <b:HelpBlock iconType="EXCLAMATION_TRIANGLE"/>
+                            <b:Icon type="COG" ui:field="cloudServicePidSpinner" spin="true" visible="false" addStyleNames="{style.spinner}"/>
                             <kura.util:PidTextBox ui:field="cloudServicePid" b:id="cloudServicePid" allowBlank="false"
                                 autoComplete="false" validateOnBlur="true"/>
                         </b:FormGroup>
                     </b:Form>
                 </b:ModalBody>
                 <b:ModalFooter>
-                    <b:Button type="PRIMARY" dataDismiss="MODAL" ui:field="btnCancel"/>
-                    <b:Button type="PRIMARY" b:id="btn-create-comp" ui:field="btnCreateComp"/>
+                    <b:Button type="PRIMARY" dataDismiss="MODAL" ui:field="btnCancel" text="{msgs.cancelButton}"/>
+                    <b:Button type="PRIMARY" b:id="btn-create-comp" ui:field="btnCreateComp" text="{msgs.apply}"/>
                 </b:ModalFooter>
             </b:Modal>
         </b:Column>

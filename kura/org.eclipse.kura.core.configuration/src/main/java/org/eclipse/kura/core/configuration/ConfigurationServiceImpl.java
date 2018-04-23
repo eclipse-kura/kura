@@ -1089,11 +1089,13 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         String xmlResult;
         try {
             xmlResult = marshal(conf);
-            if (xmlResult.trim().isEmpty()) {
+            if (xmlResult == null || xmlResult.trim().isEmpty()) {
                 throw new KuraException(KuraErrorCode.INVALID_PARAMETER, conf);
             }
-        } catch (Exception e1) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e1);
+        } catch (KuraException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
         }
 
         // Encrypt the XML
@@ -1800,25 +1802,23 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         return ServiceUtil.getServiceReferences(this.bundleContext, Unmarshaller.class, filterString);
     }
 
-    private void ungetServiceReferences(final ServiceReference<?>[] refs) {
-        ServiceUtil.ungetServiceReferences(this.bundleContext, refs);
-    }
-
-    protected <T> T unmarshal(String string, Class<T> clazz) throws KuraException {
+    protected <T> T unmarshal(final String string, final Class<T> clazz) throws KuraException {
         T result = null;
         ServiceReference<Unmarshaller>[] unmarshallerSRs = getXmlUnmarshallers();
         try {
             for (final ServiceReference<Unmarshaller> unmarshallerSR : unmarshallerSRs) {
                 Unmarshaller unmarshaller = this.bundleContext.getService(unmarshallerSR);
-                result = unmarshaller.unmarshal(string, clazz);
-                if (result != null) {
-                    break;
+                try {
+                    result = unmarshaller.unmarshal(string, clazz);
+                    if (result != null) {
+                        break;
+                    }
+                } finally {
+                    bundleContext.ungetService(unmarshallerSR);
                 }
             }
         } catch (Exception e) {
             logger.warn("Failed to extract persisted configuration.");
-        } finally {
-            ungetServiceReferences(unmarshallerSRs);
         }
         if (result == null) {
             throw new KuraException(KuraErrorCode.DECODER_ERROR);
@@ -1826,21 +1826,26 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         return result;
     }
 
-    protected String marshal(Object object) {
+    protected String marshal(final Object object) throws KuraException {
         String result = null;
         ServiceReference<Marshaller>[] marshallerSRs = getXmlMarshallers();
         try {
             for (final ServiceReference<Marshaller> marshallerSR : marshallerSRs) {
                 Marshaller marshaller = this.bundleContext.getService(marshallerSR);
-                result = marshaller.marshal(object);
-                if (result != null) {
-                    break;
+                try {
+                    result = marshaller.marshal(object);
+                    if (result != null) {
+                        break;
+                    }
+                } finally {
+                    bundleContext.ungetService(marshallerSR);
                 }
             }
         } catch (Exception e) {
             logger.warn("Failed to marshal configuration.");
-        } finally {
-            ungetServiceReferences(marshallerSRs);
+        }
+        if (result == null) {
+            throw new KuraException(KuraErrorCode.ENCODE_ERROR, "Unable to find marshaller");
         }
         return result;
     }

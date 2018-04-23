@@ -22,21 +22,21 @@
 	.important {
 		font-weight: bold;
 	}
-	
+
 	.asset-comp-modal-header {
 		display: none;
 	}
-	
+
 	.asset-comp-modal-body {
 		padding-bottom: 40px;
 	}
-	
+
 	.center-panel {
 		height: 100%;
 		padding: 5px;
 		border: none;
 	}
-	
+
 	.drivers-list {
 		padding-bottom: 30px;
 	}
@@ -63,6 +63,6 @@
 				</b:Well>
 			</b:Row>
 		</b:Column>
-		<kura:AlertDialog ui:field="alertDialog"/>
+		<kura:AlertDialog ui:field="alertDialog" b:id="cloud-services-confirm-dialog"/>
 	</b:Container>
-</ui:UiBinder> 
+</ui:UiBinder>

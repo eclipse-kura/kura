@@ -2,7 +2,7 @@
 
 <!--
 
-    Copyright (c) 2017 Eurotech and/or its affiliates
+    Copyright (c) 2017, 2018 Eurotech and/or its affiliates
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -25,6 +25,6 @@
              <b:Button icon="CHECK" ui:field="btnApply" text="{msgs.apply}"></b:Button>
              <b:Button icon="TIMES" ui:field="btnReset" text="{msgs.reset}"></b:Button>
         </b:ButtonGroup>
-        <kura:AlertDialog ui:field="confirmDialog"></kura:AlertDialog>
+        <kura:AlertDialog ui:field="confirmDialog" b:id="asset-button-bar-confirm-dialog"/>
     </b:Container>
-</ui:UiBinder> 
+</ui:UiBinder>

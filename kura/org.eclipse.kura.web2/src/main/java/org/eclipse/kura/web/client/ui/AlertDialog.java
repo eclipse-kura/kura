@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -15,6 +15,7 @@ import org.gwtbootstrap3.client.ui.Alert;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.Modal;
 import org.gwtbootstrap3.client.ui.ModalFooter;
+import org.gwtbootstrap3.client.ui.base.HasId;
 import org.gwtbootstrap3.client.ui.html.Span;
 import org.gwtbootstrap3.client.ui.html.Strong;
 
@@ -26,7 +27,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 
-public class AlertDialog extends Composite {
+public class AlertDialog extends Composite implements HasId {
 
     private static AlertDialogUiBinder uiBinder = GWT.create(AlertDialogUiBinder.class);
 
@@ -116,6 +117,16 @@ public class AlertDialog extends Composite {
             this.alertBody.setVisible(true);
             this.messageText.setVisible(false);
         }
+    }
+
+    @Override
+    public String getId() {
+        return this.modal.getId();
+    }
+
+    @Override
+    public void setId(final String id) {
+        this.modal.setId(id);
     }
 
     @Override

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2018 Eurotech and/or its affiliates
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Eurotech
+
+-->
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" enabled="true" immediate="false" name="GpsDeviceTracker">
+   <implementation class="org.eclipse.kura.linux.position.GpsDeviceTracker"/>
+   <service>
+      <provide interface="org.osgi.service.event.EventHandler"/>
+      <provide interface="org.eclipse.kura.linux.position.GpsDeviceTracker"/>
+   </service>
+   <property name="service.pid" value="org.eclipse.kura.position.PositionService"/>
+   <property name="event.topics" type="String">org/eclipse/kura/usb/NetworkEvent/device/ADDED
+org/eclipse/kura/usb/NetworkEvent/device/REMOVED
+   </property>
+   <reference bind="setUsbService" cardinality="1..1" interface="org.eclipse.kura.usb.UsbService" name="UsbService" policy="static" unbind="unsetUsbService"/>
+</scr:component>

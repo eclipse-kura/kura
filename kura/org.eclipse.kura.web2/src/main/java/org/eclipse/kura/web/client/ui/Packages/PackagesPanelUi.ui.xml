@@ -2,7 +2,7 @@
 
 <!--
 
-    Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+    Copyright (c) 2011, 2018 Eurotech and/or its affiliates
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -24,13 +24,13 @@
     .important {
     	font-weight: bold;
     }
-    
+
     .center-panel {
     	margin: auto;
     	font-size: 11px;
     	font-weight: normal;
     }
-    
+
     .upload-label {
     font-weight: initial;
     }
@@ -150,7 +150,7 @@
                 <b:Button icon="THUMBS_UP" dataDismiss="MODAL" type="PRIMARY" ui:field="btnConfirmMarketplaceInstall" />
             </b:ModalFooter>
         </b:Modal>
-        
-        <kura:AlertDialog ui:field="confirmDialog"/>
+
+        <kura:AlertDialog ui:field="confirmDialog" b:id="packages-confirm-dialog"/>
     </b:Container>
-</ui:UiBinder> 
+</ui:UiBinder>

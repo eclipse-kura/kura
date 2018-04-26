@@ -63,6 +63,6 @@
 				</b:Well>
 			</b:Row>
 		</b:Column>
-		<kura:AlertDialog ui:field="alertDialog" b:id="cloud-services-confirm-dialog"/>
+		<kura:AlertDialog ui:field="alertDialog"/>
 	</b:Container>
 </ui:UiBinder>

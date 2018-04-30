@@ -2,7 +2,7 @@
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
     <OCD id="org.eclipse.kura.camel.xml.XmlRouterComponent"
          name="Camel XML router" description="Configurable Camel-based XML router">
-        
+
         <Icon resource="OSGI-INF/logo.png" size="32" />
 
         <AD id="xml.data" name="Router XML"
@@ -53,7 +53,7 @@
 
     </OCD>
 
-    <Designate pid="org.eclipse.kura.camel.xml.XmlRouterComponent">
+    <Designate pid="org.eclipse.kura.camel.xml.XmlRouterComponent" factoryPid="org.eclipse.kura.camel.xml.XmlRouterComponent">
         <Object ocdref="org.eclipse.kura.camel.xml.XmlRouterComponent"/>
     </Designate>
 </MetaData>

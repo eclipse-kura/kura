@@ -1045,21 +1045,42 @@ fi]]>
 	<target name="camel-config">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
-				   value=", reference:file:${kura.install.dir}/kura/plugins/org.eclipse.kura.camel.sun.misc_${org.eclipse.kura.camel.sun.misc.version}.jar@3" />
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.eclipse.kura.camel.sun.misc_${org.eclipse.kura.camel.sun.misc.version}.jar@3" />
 			<entry key="osgi.bundles" operation="+"
-				   value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.camel.camel-core_${org.apache.camel.camel-core.version}.jar@3:start" />
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.camel.camel-amqp_${org.apache.camel.camel-amqp.version}.jar@4:start" />
 			<entry key="osgi.bundles" operation="+"
-				   value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.camel.camel-core-osgi_${org.apache.camel.camel-core-osgi.version}.jar@3:start" />
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.camel.camel-core_${org.apache.camel.camel-core.version}.jar@3:start" />
 			<entry key="osgi.bundles" operation="+"
-			       value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.camel.camel-kura_${org.apache.camel.camel-kura.version}.jar@3:start" />
-            <entry key="osgi.bundles" operation="+"
-                   value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.camel.camel-stream_${org.apache.camel.camel-stream.version}.jar@3:start" />
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.camel.camel-core-osgi_${org.apache.camel.camel-core-osgi.version}.jar@3:start" />
 			<entry key="osgi.bundles" operation="+"
-                   value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.camel_${org.eclipse.kura.camel.version}.jar@4:start" />
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.camel.camel-jms_${org.apache.camel.camel-jms.version}.jar@4:start" />
 			<entry key="osgi.bundles" operation="+"
-                   value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.camel.cloud.factory_${org.eclipse.kura.camel.cloud.factory.version}.jar@5:start" />
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.camel.camel-script_${org.apache.camel.camel-script.version}.jar@3:start" />
 			<entry key="osgi.bundles" operation="+"
-                   value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.camel.xml_${org.eclipse.kura.camel.xml.version}.jar@5:start" />
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.camel.camel-stream_${org.apache.camel.camel-stream.version}.jar@3:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.camel_${org.eclipse.kura.camel.version}.jar@4:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.camel.cloud.factory_${org.eclipse.kura.camel.cloud.factory.version}.jar@5:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.camel.xml_${org.eclipse.kura.camel.xml.version}.jar@5:start" />
+
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.qpid.jms.client_${apache-qpid-jms-client.version}.jar@3:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.qpid.proton-j_${apache-qpid-proton-j.version}.jar@3:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.servicemix.bundles.spring-beans_${spring.version}.jar@3:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.servicemix.bundles.spring-context_${spring.version}.jar@3:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.servicemix.bundles.spring-core_${spring.version}.jar@3:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.servicemix.bundles.spring-expression_${spring.version}.jar@3:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.servicemix.bundles.spring-jms_${spring.version}.jar@3:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.servicemix.bundles.spring-tx_${spring.version}.jar@3:start" />
 		</propertyfile>
 	</target>
 

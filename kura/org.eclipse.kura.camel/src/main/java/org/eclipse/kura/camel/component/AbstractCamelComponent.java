@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
  * This class intended to be subclasses and customized according to needs.
  * </p>
  */
-public abstract class AbstractCamelComponent {
+public abstract class AbstractCamelComponent implements CamelContextWorker {
 
     static final String PROP_DISABLE_JMX = "org.eclipse.kura.camel.component.disableJmx";
 

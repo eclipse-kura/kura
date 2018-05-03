@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,7 +8,6 @@
  *
  * Contributors:
  *     Eurotech
- *     Benjamin Cabé - fix for GH issue #299
  *******************************************************************************/
 
 package org.eclipse.kura.net.admin.visitor.linux.util;
@@ -38,6 +37,9 @@ public abstract class IfcfgConfig {
     protected static final String PREFIX_PROP_NAME = "PREFIX";
     protected static final String GATEWAY_PROP_NAME = "GATEWAY";
     protected static final String DEFROUTE_PROP_NAME = "DEFROUTE";
+    protected static final String DEVICE_PROP_NAME = "DEVICE";
+    protected static final String NAME_PROP_NAME = "NAME";
+    protected static final String TYPE_PROP_NAME = "TYPE";
 
     protected static final String LOCALHOST = "127.0.0.1";
     protected static final String CLASS_A_NETMASK = "255.0.0.0";
@@ -54,6 +56,25 @@ public abstract class IfcfgConfig {
                                 + "_" + KuraConstants.Intel_Edison.getTargetName())
                 || osVersion.equals(KuraConstants.ReliaGATE_50_21_Ubuntu.getImageName() + "_"
                         + KuraConstants.ReliaGATE_50_21_Ubuntu.getImageVersion());
+    }
+
+    public Properties parseRedhatConfigFile(File ifcfgFile, String interfaceName) {
+        Properties kuraProps = new Properties();
+        try (FileInputStream fis = new FileInputStream(ifcfgFile)) {
+            kuraProps.load(fis);
+            // Values in the config file may be surrounded with double quotes or single quotes.
+            for (String key : kuraProps.stringPropertyNames()) {
+                String value = kuraProps.getProperty(key);
+                if (value.length() >= 2 && (value.startsWith("'") && value.endsWith("'")
+                        || value.startsWith("\"") && value.endsWith("\""))) {
+                    value = value.substring(1, value.length() - 1);
+                    kuraProps.put(key, value);
+                }
+            }
+        } catch (Exception e) {
+            logger.error("Could not get configuration for " + interfaceName, e);
+        }
+        return kuraProps;
     }
 
     public Properties parseDebianConfigFile(File ifcfgFile, String interfaceName) throws KuraException {

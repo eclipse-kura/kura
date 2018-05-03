@@ -30,7 +30,6 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.net.AbstractNetInterface;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
-import org.eclipse.kura.linux.net.util.KuraConstants;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetConfigIP4;
@@ -49,11 +48,8 @@ public class IfcfgConfigWriter extends IfcfgConfig implements NetworkConfigurati
 
     private static final Logger logger = LoggerFactory.getLogger(IfcfgConfigWriter.class);
 
-    private static final String REDHAT_NET_CONFIGURATION_DIRECTORY = "/etc/sysconfig/network-scripts/";
     private static final String DEBIAN_NET_CONFIGURATION_FILE = "/etc/network/interfaces";
     private static final String DEBIAN_TMP_NET_CONFIGURATION_FILE = "/etc/network/interfaces.tmp";
-
-    private static String osVersion = System.getProperty("kura.os.version");
 
     private static IfcfgConfigWriter instance;
 
@@ -115,13 +111,13 @@ public class IfcfgConfigWriter extends IfcfgConfig implements NetworkConfigurati
         sb.append("# Networking Interface\n");
 
         // DEVICE
-        sb.append("DEVICE=").append(netInterfaceConfig.getName()).append("\n");
+        sb.append(DEVICE_PROP_NAME).append('=').append(netInterfaceConfig.getName()).append("\n");
 
         // NAME
-        sb.append("NAME=").append(netInterfaceConfig.getName()).append("\n");
+        sb.append(NAME_PROP_NAME).append('=').append(netInterfaceConfig.getName()).append("\n");
 
         // TYPE
-        sb.append("TYPE=").append(netInterfaceConfig.getType()).append("\n");
+        sb.append(TYPE_PROP_NAME).append('=').append(netInterfaceConfig.getType()).append("\n");
 
         NetInterfaceAddressConfig netInterfaceAddressConfig = ((AbstractNetInterface<?>) netInterfaceConfig)
                 .getNetInterfaceAddressConfig();
@@ -133,7 +129,7 @@ public class IfcfgConfigWriter extends IfcfgConfig implements NetworkConfigurati
                     continue;
                 }
                 // ONBOOT
-                sb.append("ONBOOT=");
+                sb.append(ONBOOT_PROP_NAME).append('=');
                 if (((NetConfigIP4) netConfig).isAutoConnect()) {
                     sb.append("yes");
                 } else {
@@ -142,32 +138,34 @@ public class IfcfgConfigWriter extends IfcfgConfig implements NetworkConfigurati
                 sb.append("\n");
                 if (((NetConfigIP4) netConfig).getStatus() == NetInterfaceStatus.netIPv4StatusL2Only) {
                     logger.debug("new config is Layer 2 Only");
-                    sb.append("BOOTPROTO=none\n");
+                    sb.append(BOOTPROTO_PROP_NAME).append("=none\n");
                 } else if (((NetConfigIP4) netConfig).isDhcp()) {
                     logger.debug("new config is DHCP");
-                    sb.append("BOOTPROTO=dhcp\n");
+                    sb.append(BOOTPROTO_PROP_NAME).append("=dhcp\n");
                 } else {
                     logger.debug("new config is STATIC");
-                    sb.append("BOOTPROTO=static\n");
+                    sb.append(BOOTPROTO_PROP_NAME).append("=static\n");
 
                     // IPADDR
-                    sb.append("IPADDR=").append(((NetConfigIP4) netConfig).getAddress().getHostAddress()).append("\n");
+                    sb.append(IPADDR_PROP_NAME).append('=')
+                            .append(((NetConfigIP4) netConfig).getAddress().getHostAddress()).append("\n");
 
                     // PREFIX
-                    sb.append("PREFIX=").append(((NetConfigIP4) netConfig).getNetworkPrefixLength()).append("\n");
+                    sb.append(PREFIX_PROP_NAME).append('=').append(((NetConfigIP4) netConfig).getNetworkPrefixLength())
+                            .append("\n");
 
                     // Gateway
                     if (((NetConfigIP4) netConfig).getGateway() != null) {
-                        sb.append("GATEWAY=").append(((NetConfigIP4) netConfig).getGateway().getHostAddress())
-                                .append("\n");
+                        sb.append(GATEWAY_PROP_NAME).append('=')
+                                .append(((NetConfigIP4) netConfig).getGateway().getHostAddress()).append("\n");
                     }
                 }
 
                 // DEFROUTE
                 if (((NetConfigIP4) netConfig).getStatus() == NetInterfaceStatus.netIPv4StatusEnabledWAN) {
-                    sb.append("DEFROUTE=yes\n");
+                    sb.append(DEFROUTE_PROP_NAME).append("=yes\n");
                 } else {
-                    sb.append("DEFROUTE=no\n");
+                    sb.append(DEFROUTE_PROP_NAME).append("=no\n");
                 }
 
                 // DNS

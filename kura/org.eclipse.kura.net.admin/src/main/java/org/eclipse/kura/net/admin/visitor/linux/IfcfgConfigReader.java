@@ -13,7 +13,6 @@
 package org.eclipse.kura.net.admin.visitor.linux;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
@@ -65,31 +64,31 @@ public class IfcfgConfigReader extends IfcfgConfig implements NetworkConfigurati
         }
 
         public NetInterfaceStatus getNetInterfaceStatus() {
-            return netInterfaceStatus;
+            return this.netInterfaceStatus;
         }
 
         public boolean isAutoConnect() {
-            return autoConnect;
+            return this.autoConnect;
         }
 
         public boolean isDhcp() {
-            return dhcp;
+            return this.dhcp;
         }
 
         public IP4Address getAddress() {
-            return address;
+            return this.address;
         }
 
         public String getPrefixString() {
-            return prefixString;
+            return this.prefixString;
         }
 
         public String getNetmask() {
-            return netmask;
+            return this.netmask;
         }
 
         public String getGateway() {
-            return gateway;
+            return this.gateway;
         }
     }
 
@@ -124,7 +123,6 @@ public class IfcfgConfigReader extends IfcfgConfig implements NetworkConfigurati
         if (isDebian()) {
             return DEBIAN_NET_CONFIGURATION_DIRECTORY;
         }
-
         return REDHAT_NET_CONFIGURATION_DIRECTORY;
     }
 
@@ -277,61 +275,49 @@ public class IfcfgConfigReader extends IfcfgConfig implements NetworkConfigurati
         return props;
     }
 
-    private Properties parseRedhatConfigFile(File ifcfgFile, String interfaceName) {
-        Properties kuraProps = new Properties();
-        try (FileInputStream fis = new FileInputStream(ifcfgFile)) {
-            kuraProps.load(fis);
-            // Values in the config file may be surrounded with double quotes or single quotes.
-            for (String key : kuraProps.stringPropertyNames()) {
-                String value = kuraProps.getProperty(key);
-                if (value.length() >= 2 && (value.startsWith("'") && value.endsWith("'")
-                        || value.startsWith("\"") && value.endsWith("\""))) {
-                    value = value.substring(1, value.length() - 1);
-                    kuraProps.put(key, value);
-                }
-            }
-        } catch (Exception e) {
-            logger.error("Could not get configuration for " + interfaceName, e);
-        }
-        return kuraProps;
-    }
-
     private void setNetInterfaceAddressConfigs(String interfaceName, boolean dhcp, List<NetConfig> netConfigs,
             NetInterfaceAddressConfig netInterfaceAddressConfig) {
         if (netInterfaceAddressConfig instanceof NetInterfaceAddressConfigImpl) {
-            ((NetInterfaceAddressConfigImpl) netInterfaceAddressConfig).setNetConfigs(netConfigs);
-            if (dhcp) {
-                // obtain gateway provided by DHCP server
-                List<? extends IPAddress> dhcpRouters = getDhcpRouters(interfaceName,
-                        netInterfaceAddressConfig.getAddress());
-                if (!dhcpRouters.isEmpty()) {
-                    ((NetInterfaceAddressConfigImpl) netInterfaceAddressConfig).setGateway(dhcpRouters.get(0));
-                }
-
-                // Replace with DNS provided by DHCP server (displayed as read-only in Denali)
-                List<? extends IPAddress> dhcpDnsServers = getDhcpDnsServers(interfaceName,
-                        netInterfaceAddressConfig.getAddress());
-                if (!dhcpDnsServers.isEmpty()) {
-                    ((NetInterfaceAddressConfigImpl) netInterfaceAddressConfig).setDnsServers(dhcpDnsServers);
-                }
-            }
+            setNetInterfaceAddressConfigs(interfaceName, netConfigs, netInterfaceAddressConfig, dhcp);
         } else if (netInterfaceAddressConfig instanceof WifiInterfaceAddressConfigImpl) {
-            ((WifiInterfaceAddressConfigImpl) netInterfaceAddressConfig).setNetConfigs(netConfigs);
-            if (dhcp) {
-                // obtain gateway provided by DHCP server
-                List<? extends IPAddress> dhcpRouters = getDhcpRouters(interfaceName,
-                        netInterfaceAddressConfig.getAddress());
-                if (!dhcpRouters.isEmpty()) {
-                    ((WifiInterfaceAddressConfigImpl) netInterfaceAddressConfig).setGateway(dhcpRouters.get(0));
-                }
+            setWifiNetInterfaceAddressConfigs(interfaceName, netConfigs, netInterfaceAddressConfig, dhcp);
+        }
+    }
 
-                // Replace with DNS provided by DHCP server
-                // (displayed as read-only in Denali)
-                List<? extends IPAddress> dhcpDnsServers = getDhcpDnsServers(interfaceName,
-                        netInterfaceAddressConfig.getAddress());
-                if (!dhcpDnsServers.isEmpty()) {
-                    ((WifiInterfaceAddressConfigImpl) netInterfaceAddressConfig).setDnsServers(dhcpDnsServers);
-                }
+    private void setNetInterfaceAddressConfigs(String interfaceName, List<NetConfig> netConfigs,
+            NetInterfaceAddressConfig netInterfaceAddressConfig, boolean dhcp) {
+        ((NetInterfaceAddressConfigImpl) netInterfaceAddressConfig).setNetConfigs(netConfigs);
+        if (dhcp) {
+            // obtain gateway provided by DHCP server
+            List<? extends IPAddress> dhcpRouters = getDhcpRouters(interfaceName,
+                    netInterfaceAddressConfig.getAddress());
+            if (!dhcpRouters.isEmpty()) {
+                ((NetInterfaceAddressConfigImpl) netInterfaceAddressConfig).setGateway(dhcpRouters.get(0));
+            }
+            // Replace with DNS provided by DHCP server (displayed as read-only in Denali)
+            List<? extends IPAddress> dhcpDnsServers = getDhcpDnsServers(interfaceName,
+                    netInterfaceAddressConfig.getAddress());
+            if (!dhcpDnsServers.isEmpty()) {
+                ((NetInterfaceAddressConfigImpl) netInterfaceAddressConfig).setDnsServers(dhcpDnsServers);
+            }
+        }
+    }
+
+    private void setWifiNetInterfaceAddressConfigs(String interfaceName, List<NetConfig> netConfigs,
+            NetInterfaceAddressConfig netInterfaceAddressConfig, boolean dhcp) {
+        ((WifiInterfaceAddressConfigImpl) netInterfaceAddressConfig).setNetConfigs(netConfigs);
+        if (dhcp) {
+            // obtain gateway provided by DHCP server
+            List<? extends IPAddress> dhcpRouters = getDhcpRouters(interfaceName,
+                    netInterfaceAddressConfig.getAddress());
+            if (!dhcpRouters.isEmpty()) {
+                ((WifiInterfaceAddressConfigImpl) netInterfaceAddressConfig).setGateway(dhcpRouters.get(0));
+            }
+            // Replace with DNS provided by DHCP server (displayed as read-only in Denali)
+            List<? extends IPAddress> dhcpDnsServers = getDhcpDnsServers(interfaceName,
+                    netInterfaceAddressConfig.getAddress());
+            if (!dhcpDnsServers.isEmpty()) {
+                ((WifiInterfaceAddressConfigImpl) netInterfaceAddressConfig).setDnsServers(dhcpDnsServers);
             }
         }
     }

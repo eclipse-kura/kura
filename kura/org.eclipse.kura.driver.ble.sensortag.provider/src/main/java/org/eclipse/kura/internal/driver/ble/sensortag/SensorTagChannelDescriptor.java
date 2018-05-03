@@ -29,6 +29,7 @@ import org.eclipse.kura.util.collection.CollectionUtil;
  * <li>sensor.name</li> denotes the BLE SensorTag sensor name
  * <li>sensortag.address</li> denotes the BLE SensorTag BD address
  * index.
+ * <li>notification.period</li> is the time interval between two notifications.
  * </ul>
  */
 public final class SensorTagChannelDescriptor implements ChannelDescriptor {

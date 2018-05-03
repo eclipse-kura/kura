@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Copyright (c) 2018 Eurotech and/or its affiliates
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Eurotech
+-->
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" 
+               name="org.eclipse.kura.driver.eddystone"
+               activate="activate" 
+               deactivate="deactivate" 
+               modified="updated"
+               enabled="true" 
+               configuration-policy="require"> 
+   <implementation class="org.eclipse.kura.internal.driver.eddystone.EddystoneDriver"/>
+   <property name="service.pid" value="org.eclipse.kura.driver.eddystone"/>
+   <service>
+      <provide interface="org.eclipse.kura.driver.Driver"/>
+      <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
+   </service>
+   <reference bind="bindBluetoothLeService" cardinality="1..1" interface="org.eclipse.kura.bluetooth.le.BluetoothLeService" name="BluetoothLeService" policy="static" unbind="unbindBluetoothLeService"/>
+   <reference bind="bindBluetoothLeEddystoneService" cardinality="1..1" interface="org.eclipse.kura.ble.eddystone.BluetoothLeEddystoneService" name="BluetoothLeEddystoneService" policy="static" unbind="unbindBluetoothLeEddystoneService"/>
+</scr:component>

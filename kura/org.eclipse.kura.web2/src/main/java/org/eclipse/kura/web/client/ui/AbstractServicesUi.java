@@ -226,9 +226,8 @@ public abstract class AbstractServicesUi extends Composite {
 
             @Override
             public void onKeyUp(KeyUpEvent event) {
-                if (textBox.validate(true)) {
-                    setDirty(true);
-                }
+                textBox.validate(true);
+                setDirty(true);
             }
         });
     }
@@ -350,9 +349,6 @@ public abstract class AbstractServicesUi extends Composite {
                     AbstractServicesUi.this.valid.put(param.getId(), true);
                 }
 
-                if (result.isEmpty()) {
-                    setDirty(true);
-                }
                 return result;
             }
 
@@ -366,9 +362,8 @@ public abstract class AbstractServicesUi extends Composite {
 
             @Override
             public void onKeyUp(KeyUpEvent event) {
-                if (input.validate(true)) {
-                    setDirty(true);
-                }
+                input.validate(true);
+                setDirty(true);
             }
         });
 

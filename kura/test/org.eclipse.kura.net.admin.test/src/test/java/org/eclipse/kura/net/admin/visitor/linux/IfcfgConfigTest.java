@@ -50,6 +50,7 @@ public class IfcfgConfigTest {
         TestUtil.setFieldValue(IfcfgConfigReader.getInstance(), "osVersion", os);
 
         TestUtil.setFieldValue(IfcfgConfigWriter.getInstance(), "osVersion", os);
+
     }
 
     @Test
@@ -180,8 +181,9 @@ public class IfcfgConfigTest {
             fw.write(" post-up route del default dev " + interfaceName + "\n");
             fw.write("auto eth1\n");
         }
-
-        Properties result = IfcfgConfigReader.parseDebianConfigFile(file, interfaceName);
+        
+        IfcfgConfigReader ifcfgConfigReader = new IfcfgConfigReader();
+        Properties result = ifcfgConfigReader.parseDebianConfigFile(file, interfaceName);
         file.delete();
 
         assertNotNull(result);
@@ -218,7 +220,8 @@ public class IfcfgConfigTest {
             fw.write("auto eth1\n");
         }
 
-        Properties result = IfcfgConfigReader.parseDebianConfigFile(file, interfaceName);
+        IfcfgConfigReader ifcfgConfigReader = new IfcfgConfigReader();
+        Properties result = ifcfgConfigReader.parseDebianConfigFile(file, interfaceName);
         file.delete();
 
         assertNotNull(result);

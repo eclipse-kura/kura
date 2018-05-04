@@ -628,6 +628,7 @@ public class WiresPanelUi extends Composite
 
     @Override
     public void onDirtyStateChanged(HasConfiguration hasConfiguration) {
+        updateDirtyState();
     }
 
 }

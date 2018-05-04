@@ -57,17 +57,11 @@ public class ConfigurableComponentUi extends AbstractServicesUi implements HasCo
         setDirty(false);
     }
 
-    private native void log(Object o)
-    /*-{
-        console.log(o)
-    }-*/;
-
     @Override
     public void setDirty(final boolean flag) {
         boolean isDirtyStateChanged = flag != this.dirty;
         this.dirty = flag;
         if (listener != null) {
-            log("dirty state changed " + isDirtyStateChanged);
             if (isDirtyStateChanged) {
                 listener.onDirtyStateChanged(this);
             }

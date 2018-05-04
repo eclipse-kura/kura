@@ -22,7 +22,7 @@ public class PositionServiceOptions {
     private static final Property<Double> STATIC_LATITUDE = new Property<>("latitude", 0.0d);
     private static final Property<Double> STATIC_LONGITUDE = new Property<>("longitude", 0.0d);
     private static final Property<Double> STATIC_ALTITUDE = new Property<>("altitude", 0.0d);
-    private static final Property<String> PORT = new Property<>("port", "/dev/ttyACM0");
+    private static final Property<String> PORT = new Property<>("port", "");
     private static final Property<Integer> BAUD_RATE = new Property<>("baudRate", 115200);
     private static final Property<Integer> BITS_PER_WORD = new Property<>("bitsPerWord", 8);
     private static final Property<Integer> STOP_BITS = new Property<>("stopBits", 1);
@@ -75,6 +75,9 @@ public class PositionServiceOptions {
     }
 
     public CommURI getGpsDeviceUri() {
+        if (getPort().isEmpty()) {
+            return null;
+        }
 
         return new CommURI.Builder(getPort()).withBaudRate(getBaudRate()).withDataBits(getBitsPerWord())
                 .withStopBits(getStopBits()).withParity(getParity()).build();

@@ -231,6 +231,46 @@ public class PositionServiceTest {
     }
 
     @Test
+    public void testActivateWithEmptyGPSPort() throws IOException {
+        final PositionServiceTestFixture fixture = new PositionServiceTestFixture();
+
+        final Map<String, Object> properties = getDefaultProperties();
+        properties.put("port", "");
+
+        fixture.ps.activate(properties);
+
+        assertFalse(fixture.ps.isLocked());
+        assertNotNull(fixture.ps.getPosition());
+        assertEquals(0.0, fixture.ps.getPosition().getLatitude().getValue(), EPS);
+        assertEquals(0.0, fixture.ps.getPosition().getLongitude().getValue(), EPS);
+        assertEquals(0.0, fixture.ps.getPosition().getAltitude().getValue(), EPS);
+
+        assertNull(fixture.ps.getGpsDevice());
+
+        fixture.ps.deactivate();
+    }
+
+    @Test
+    public void testActivateWithNullGPSPort() throws IOException {
+        final PositionServiceTestFixture fixture = new PositionServiceTestFixture();
+
+        final Map<String, Object> properties = getDefaultProperties();
+        properties.put("port", null);
+
+        fixture.ps.activate(properties);
+
+        assertFalse(fixture.ps.isLocked());
+        assertNotNull(fixture.ps.getPosition());
+        assertEquals(0.0, fixture.ps.getPosition().getLatitude().getValue(), EPS);
+        assertEquals(0.0, fixture.ps.getPosition().getLongitude().getValue(), EPS);
+        assertEquals(0.0, fixture.ps.getPosition().getAltitude().getValue(), EPS);
+
+        assertNull(fixture.ps.getGpsDevice());
+
+        fixture.ps.deactivate();
+    }
+
+    @Test
     public void testUpdateWithSameConfig() throws IOException {
         final PositionServiceTestFixture fixture = new PositionServiceTestFixture();
 

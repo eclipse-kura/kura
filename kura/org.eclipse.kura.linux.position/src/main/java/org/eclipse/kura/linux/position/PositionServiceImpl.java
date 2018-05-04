@@ -301,6 +301,8 @@ public class PositionServiceImpl
 
         if (device != null) {
             logger.info("Opened GPS device from configuration");
+        } else {
+            logger.info("GPS device not available");
         }
 
         return device;

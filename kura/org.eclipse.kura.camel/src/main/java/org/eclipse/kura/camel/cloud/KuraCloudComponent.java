@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Red Hat and others
+ * Copyright (c) 2011, 2017 Red Hat and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -15,7 +15,7 @@ import java.util.Map;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.Endpoint;
-import org.apache.camel.impl.UriEndpointComponent;
+import org.apache.camel.impl.DefaultComponent;
 import org.eclipse.kura.camel.internal.cloud.CloudClientCache;
 import org.eclipse.kura.camel.internal.cloud.CloudClientCacheImpl;
 import org.eclipse.kura.cloud.CloudService;
@@ -23,7 +23,7 @@ import org.eclipse.kura.cloud.CloudService;
 /**
  * The Camel component for providing "kura-cloud"
  */
-public class KuraCloudComponent extends UriEndpointComponent {
+public class KuraCloudComponent extends DefaultComponent {
 
     public static final String DEFAULT_NAME = "kura-cloud";
 
@@ -31,17 +31,17 @@ public class KuraCloudComponent extends UriEndpointComponent {
     private CloudClientCache cache;
 
     public KuraCloudComponent() {
-        super(KuraCloudEndpoint.class);
+        super();
     }
 
     // Constructors
 
     public KuraCloudComponent(final CamelContext context) {
-        super(context, KuraCloudEndpoint.class);
+        super(context);
     }
 
     public KuraCloudComponent(final CamelContext context, final CloudService cloudService) {
-        super(context, KuraCloudEndpoint.class);
+        super(context);
         this.cloudService = cloudService;
     }
 

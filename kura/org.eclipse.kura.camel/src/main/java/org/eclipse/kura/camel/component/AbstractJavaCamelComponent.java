@@ -22,8 +22,6 @@ import org.eclipse.kura.camel.runner.ContextFactory;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Deactivate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +51,6 @@ public abstract class AbstractJavaCamelComponent extends RouteBuilder implements
 
     protected CamelRunner runner;
 
-    @Activate
     protected void start() throws Exception {
         logger.info("Starting camel router");
 
@@ -74,7 +71,6 @@ public abstract class AbstractJavaCamelComponent extends RouteBuilder implements
         this.runner.start();
     }
 
-    @Deactivate
     protected void stop() throws Exception {
         logger.info("Stopping camel router");
 

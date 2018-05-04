@@ -379,6 +379,11 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.wire.camel</artifactId>
+                                    <version>${org.eclipse.kura.wire.camel.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.wire.component.provider</artifactId>
                                     <version>${org.eclipse.kura.wire.component.provider.version}</version>
                                 </artifactItem>
@@ -639,6 +644,8 @@
                                     tofile="target/plugins/org.eclipse.kura.emulator.watchdog_${org.eclipse.kura.emulator.watchdog.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.wire.h2db.component.provider.jar"
                                     tofile="target/plugins/org.eclipse.kura.wire.h2db.component.provider_${org.eclipse.kura.wire.h2db.component.provider.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.wire.camel.jar"
+                                    tofile="target/plugins/org.eclipse.kura.wire.camel_${org.eclipse.kura.wire.camel.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.wire.component.provider.jar"
                                     tofile="target/plugins/org.eclipse.kura.wire.component.provider_${org.eclipse.kura.wire.component.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.wire.helper.provider.jar"
@@ -2627,6 +2634,9 @@
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.util_${org.eclipse.kura.util.version}.jar"
                                             todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
+                                        <copy
+                                            file="${project.build.directory}/plugins/org.eclipse.kura.wire.camel_${org.eclipse.kura.wire.camel.version}.jar"
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.wire.component.provider_${org.eclipse.kura.wire.component.provider.version}.jar"
                                             todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />

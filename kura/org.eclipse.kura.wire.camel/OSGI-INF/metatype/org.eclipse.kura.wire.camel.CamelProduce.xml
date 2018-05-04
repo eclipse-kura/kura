@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metatype:MetaData xmlns:metatype="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+
+  <OCD id="org.eclipse.kura.wire.camel.CamelProduce" name="Camel Producer" description="Produce an exchange using a Camel endpoint">
+    <AD id="id" type="String" name="ID" description="The ID of the Camel Context"/>
+    <AD id="endpointUri" type="String" name="Endpoint URI" description="The URI to the Camel endpoint the component will produce."/>
+  </OCD>
+
+  <Designate factoryPid="org.eclipse.kura.wire.camel.CamelProduce">
+    <Object ocdref="org.eclipse.kura.wire.camel.CamelProduce"/>
+  </Designate>
+
+</metatype:MetaData>

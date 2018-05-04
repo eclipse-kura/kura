@@ -1066,6 +1066,9 @@ fi]]>
 				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.camel.xml_${org.eclipse.kura.camel.xml.version}.jar@5:start" />
 
 			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.wire.camel_${org.eclipse.kura.wire.camel.version}.jar@5:start" />
+
+			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.qpid.jms.client_${apache-qpid-jms-client.version}.jar@3:start" />
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.qpid.proton-j_${apache-qpid-proton-j.version}.jar@3:start" />
@@ -1155,6 +1158,9 @@ fi]]>
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.camel.cloud.factory_${org.eclipse.kura.camel.cloud.factory.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.camel.xml_${org.eclipse.kura.camel.xml.version}.jar"
+                        prefix="${build.output.name}/kura/plugins" />
+
+			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.wire.camel_${org.eclipse.kura.wire.camel.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
 
 		</zip>
@@ -1280,6 +1286,8 @@ fi]]>
     	<copy file="${project.build.directory}/plugins/org.eclipse.kura.camel.cloud.factory_${org.eclipse.kura.camel.cloud.factory.version}.jar"
     	    todir="${build.install.dir.kura}/kura/plugins" />
         <copy file="${project.build.directory}/plugins/org.eclipse.kura.camel.xml_${org.eclipse.kura.camel.xml.version}.jar"
+            todir="${build.install.dir.kura}/kura/plugins" />
+        <copy file="${project.build.directory}/plugins/org.eclipse.kura.wire.camel_${org.eclipse.kura.wire.camel.version}.jar"
             todir="${build.install.dir.kura}/kura/plugins" />
     </target>
 

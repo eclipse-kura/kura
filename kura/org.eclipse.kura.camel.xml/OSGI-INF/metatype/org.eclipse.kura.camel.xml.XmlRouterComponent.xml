@@ -19,29 +19,35 @@
 &lt;/routes&gt;'/>
 
         <AD id="component.prereqs" name="Required Camel Components"
-            description="A comma separated list of Camel components which are required in order to start up this setup"
+            description="A comma separated list of Camel components which are required in order to start up this setup (e.g. amqp, stream)"
             type="String"
             cardinality="1"
             required="false"
             max="2147483647"
-            default="kura-cloud"
             />
-        
+
+        <AD id="language.prereqs" name="Required Camel Languages"
+            description="A comma separated list of Camel languages which are required in order to start up this setup (e.g. javaScript)"
+            type="String"
+            cardinality="1"
+            required="false"
+            max="2147483647"
+            />
+
         <AD id="cloudService.prereqs" name="Cloud Service Mappings"
-            description="A comma separated list of entries in the format filter=name or kura-pid=name, mapping cloud service instances to component names"
+            description="A comma separated list of entries in the format name=filter or name=kura-pid, mapping cloud service instances to component names. (e.g. cloud=org.eclipse.kura.cloud.CloudService)"
             type="String"
             cardinality="1"
             required="false"
             max="2147483647"
-            default="cloud=org.eclipse.kura.cloud.CloudService"
             />
-            
+
         <AD id="initCode"
             name="JavaScript init code"
             type="String"
             cardinality="1"
             required="false"
-            description="JavaScript code which is called when the router is initialized first. The camel context is avaiable in the variable 'camelContext'.|TextArea"/>
+            description="JavaScript code which is called when the router is initialized first. The camel context is available in the variable 'camelContext'.|TextArea"/>
 
         <AD id="disableJmx"
             name="Disable JMX"

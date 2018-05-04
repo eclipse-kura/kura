@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -11,24 +11,18 @@
  *******************************************************************************/
 package org.eclipse.kura.linux.position;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collection;
-import java.util.Properties;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 
-import org.eclipse.kura.KuraConnectionStatus;
 import org.eclipse.kura.comm.CommConnection;
 import org.eclipse.kura.comm.CommURI;
+import org.eclipse.kura.linux.position.NMEAParser.Code;
+import org.eclipse.kura.linux.position.NMEAParser.ParseException;
 import org.eclipse.kura.position.NmeaPosition;
 import org.eclipse.kura.position.PositionException;
 import org.eclipse.kura.position.PositionListener;
 import org.osgi.service.io.ConnectionFactory;
-import org.osgi.util.measurement.Measurement;
-import org.osgi.util.measurement.Unit;
 import org.osgi.util.position.Position;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,125 +36,60 @@ public class GpsDevice {
 
     private static final Logger logger = LoggerFactory.getLogger(GpsDevice.class);
 
-    private static Object lock = new Object();
-    static final String PROTOCOL_NAME = "position";
+    private static final int SERIAL_TIMEOUT_MS = 2000;
+    private static final int TERMINATION_TIMEOUT_MS = SERIAL_TIMEOUT_MS + 1000;
 
-    // private String unitName = PROTOCOL_NAME;
-    private SerialCommunicate comm;
-    private boolean connConfigd = false;
-    private boolean validPosition = false;
+    private final CommURI uri;
+
+    private final SerialCommunicate commThread;
     private String lastSentence;
 
-    private Measurement latitude = null;
-    private Measurement longitude = null;
-    private Measurement altitude = null;
-    private Measurement speed = null;
-    private Measurement track = null;
-    private double latitudeNmea = 0;
-    private double longitudeNmea = 0;
-    private double altitudeNmea = 0;
-    private double speedNmea = 0;
-    private double trackNmea = 0;
-    private int fixQuality = 0;
-    private int nrSatellites = 0;
-    private double dop = 0;
-    private double pdop = 0;
-    private double hdop = 0;
-    private double vdop = 0;
-    private int fix3D = 0;
-    private String dateNmea = "";
-    private String timeNmea = "";
-    private Collection<PositionListener> listeners;
+    private Listener listener;
 
-    public GpsDevice() {
-        this.latitude = new Measurement(java.lang.Math.toRadians(0), Unit.rad);
-        this.longitude = new Measurement(java.lang.Math.toRadians(0), Unit.rad);
-        this.altitude = new Measurement(0, Unit.m);
-        this.speed = new Measurement(0, Unit.m_s);
-        this.track = new Measurement(java.lang.Math.toRadians(0), Unit.rad);
-    }
+    private final NMEAParser nmeaParser = new NMEAParser();
 
-    public String getProtocolName() {
-        return "position";
-    }
-
-    public String getUnitAddress() {
-        return null;
-    }
-
-    public void configureProtocol(Properties protocolConfig) throws PositionException {
-        // TODO Auto-generated method stub
-
-    }
-
-    public void configureConnection(ConnectionFactory connFactory, Properties connectionConfig)
+    public GpsDevice(final ConnectionFactory connFactory, final CommURI commURI, final Listener listener)
             throws PositionException {
-
-        if (this.connConfigd) {
-            this.comm.disconnect();
-            this.comm = null;
-            this.connConfigd = false;
-        }
-
-        try {
-            this.comm = new SerialCommunicate(connFactory, connectionConfig);
-        } catch (PositionException e) {
-            throw e;
-        }
-        this.connConfigd = true;
+        this.uri = commURI;
+        this.listener = listener;
+        this.commThread = new SerialCommunicate(connFactory, commURI);
     }
 
-    public int getConnectStatus() {
-        if (!this.connConfigd) {
-            return KuraConnectionStatus.NEVERCONNECTED;
-        }
-        return this.comm.getConnectStatus();
+    public CommURI getCommURI() {
+        return this.uri;
     }
 
-    public Properties getConnectConfig() {
-        if (!this.connConfigd) {
-            return null;
-        }
-        return this.comm.getConnectConfig();
+    public synchronized Position getPosition() {
+        return this.nmeaParser.getPosition();
     }
 
-    public Position getPosition() {
-        return new Position(this.latitude, this.longitude, this.altitude, this.speed, this.track);
+    public synchronized NmeaPosition getNmeaPosition() {
+        return this.nmeaParser.getNmeaPosition();
     }
 
-    public NmeaPosition getNmeaPosition() {
-        return new NmeaPosition(this.latitudeNmea, this.longitudeNmea, this.altitudeNmea, this.speedNmea,
-                this.trackNmea, this.fixQuality, this.nrSatellites, this.dop, this.pdop, this.hdop, this.vdop,
-                this.fix3D);
+    public synchronized boolean isValidPosition() {
+        return this.nmeaParser.isValidPosition();
     }
 
-    public boolean isValidPosition() {
-        return this.validPosition;
+    public synchronized String getDateNmea() {
+        return this.nmeaParser.getDateNmea();
     }
 
-    public String getDateNmea() {
-        return this.dateNmea;
-    }
-
-    public String getTimeNmea() {
-        return this.timeNmea;
-    }
-
-    public void connect() throws PositionException {
-        if (!this.connConfigd) {
-            throw new PositionException("Invalid serial port configuration");
-        }
-        this.comm.connect();
+    public synchronized String getTimeNmea() {
+        return this.nmeaParser.getTimeNmea();
     }
 
     public void disconnect() {
-        if (this.connConfigd && this.comm != null) {
-            this.comm.disconnect();
-        }
+        this.listener = null;
+        this.commThread.disconnect();
     }
 
     public String getLastSentence() {
         return this.lastSentence;
+    }
+
+    public boolean isConnected() {
+        return this.commThread.isAlive();
     }
 
     /**
@@ -173,318 +102,132 @@ public class GpsDevice {
      * see {@link org.eclipse.kura.comm.CommConnection CommConnection} package for more
      * detail.
      */
-    private final class SerialCommunicate {
+    private final class SerialCommunicate extends Thread {
 
-        private final static long THREAD_TERMINATION_TOUT = 1; // in seconds
+        private final InputStream in;
+        private final CommConnection conn;
+        private boolean run = true;
 
-        private ScheduledExecutorService executor;
-        private ScheduledFuture<?> task;
-
-        InputStream in;
-        CommConnection conn = null;
-        Properties connConfig = null;
-
-        public SerialCommunicate(ConnectionFactory connFactory, Properties connectionConfig) throws PositionException {
-            logger.debug("Configure serial connection");
-
-            this.connConfig = connectionConfig;
-
-            String sPort;
-            String sBaud;
-            String sStop;
-            String sParity;
-            String sBits;
-
-            if ((sPort = connectionConfig.getProperty("port")) == null
-                    || (sBaud = connectionConfig.getProperty("baudRate")) == null
-                    || (sStop = connectionConfig.getProperty("stopBits")) == null
-                    || (sParity = connectionConfig.getProperty("parity")) == null
-                    || (sBits = connectionConfig.getProperty("bitsPerWord")) == null) {
-                throw new PositionException("Invalid serial port configuration");
-            }
-
-            int baud = Integer.valueOf(sBaud).intValue();
-            int stop = Integer.valueOf(sStop).intValue();
-            int parity = Integer.valueOf(sParity).intValue();
-            int bits = Integer.valueOf(sBits).intValue();
-
-            String uri = new CommURI.Builder(sPort).withBaudRate(baud).withDataBits(bits).withStopBits(stop)
-                    .withParity(parity).withTimeout(2000).build().toString();
-
+        public SerialCommunicate(final ConnectionFactory connFactory, final CommURI commURI) throws PositionException {
             try {
-                this.conn = (CommConnection) connFactory.createConnection(uri, 1, false);
-            } catch (IOException e1) {
-                throw new PositionException("Invalid GPS serial Port", e1);
-            }
-
-            // get the streams
-            try {
-                this.in = this.conn.openInputStream();
-                this.conn.openOutputStream();
-            } catch (Exception e) {
-                throw new PositionException("input stream", e);
-            }
-
-            // clean up if this is not our first run
-            if (this.task != null && !this.task.isDone()) {
-                logger.debug("SerialCommunicate() :: Cancelling GpsSerialCommunicate task ...");
-                this.task.cancel(true);
-                logger.info("SerialCommunicate() :: GpsSerialCommunicate task cancelled? = {}", this.task.isDone());
-                this.task = null;
-            }
-
-            this.executor = Executors.newSingleThreadScheduledExecutor();
-
-            this.task = this.executor.scheduleAtFixedRate(new Runnable() {
-
-                @Override
-                public void run() {
-                    Thread.currentThread().setName("GpsSerialCommunicate");
-                    if (!doPollWork()) {
-                        logger.info("The doPollWork() method returned 'false' - disconnecting ...");
-                        disconnect();
-                    }
+                this.conn = (CommConnection) connFactory.createConnection(enableTimeouts(commURI).toString(), 1, false);
+                final InputStream connIn = conn.openInputStream();
+                if (connIn == null) {
+                    throw new IOException("Serial input stream is null");
                 }
-            }, 0, 20, TimeUnit.MILLISECONDS);
+                this.in = new BufferedInputStream(connIn);
+            } catch (Exception e) {
+                throw new PositionException("Failed to open connection", e);
+            }
+
+            this.start();
         }
 
-        public void connect() {
-            /*
-             * always connected
-             */
+        @Override
+        public void run() {
+            while (true) {
+                if (!doPollWork()) {
+                    closeSerialPort();
+                    return;
+                }
+            }
         }
 
         public void disconnect() {
-            synchronized (lock) {
-                if (this.task != null && !this.task.isDone()) {
-                    logger.debug("disconnect() :: Cancelling GpsSerialCommunicate task ...");
-                    this.task.cancel(true);
-                    logger.info("disconnect() :: GpsSerialCommunicate task cancelled? = {}", this.task.isDone());
-                    this.task = null;
-                }
+            run = false;
+            this.interrupt();
+            try {
+                this.join(TERMINATION_TIMEOUT_MS);
+            } catch (InterruptedException e) {
+                logger.warn("Interrupted while waiting for thread termination");
+                Thread.currentThread().interrupt();
+            }
 
-                if (this.executor != null) {
-                    logger.debug("disconnect() :: Terminating GpsSerialCommunicate Thread ...");
-                    this.executor.shutdownNow();
-                    try {
-                        this.executor.awaitTermination(THREAD_TERMINATION_TOUT, TimeUnit.SECONDS);
-                    } catch (InterruptedException e) {
-                        logger.warn("Interrupted - {}", e);
-                    }
-                    logger.info("disconnect() :: GpsSerialCommunicate Thread terminated? - {}",
-                            this.executor.isTerminated());
-                    this.executor = null;
-                }
-
-                if (this.conn != null) {
-                    try {
-                        if (this.in != null) {
-                            this.in.close();
-                            this.in = null;
-                        }
-                        this.conn.close();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    this.conn = null;
-                }
+            if (this.isAlive()) {
+                logger.warn("GPS receiver thread did not terminate after {} milliseconds", TERMINATION_TIMEOUT_MS);
+                closeSerialPort();
             }
         }
 
-        public int getConnectStatus() {
-            return KuraConnectionStatus.CONNECTED;
-        }
-
-        public Properties getConnectConfig() {
-            return this.connConfig;
-        }
-
-        public boolean doPollWork() {
+        private void closeSerialPort() {
             try {
-                StringBuffer readBuffer = new StringBuffer();
-                int c = -1;
-                if (this.in != null) {
-                    while (c != 10) {
-                        try {
-                            c = this.in.read();
-                        } catch (Exception e) {
-                            logger.error("Exception in gps read - {}", e);
-                            try {
-                                Thread.sleep(1000);
-                            } catch (InterruptedException e1) {
-                                logger.warn("Interrupted - {}", e1);
-                            }
-                            return false;
-                        }
-                        if (c != 13 && c != -1) {
-                            readBuffer.append((char) c);
-                        }
-                    }
-                    try {
-                        if (readBuffer.length() > 0) {
-                            logger.debug("GPS RAW: {}", readBuffer.toString());
-                            if (GpsDevice.this.listeners != null && !GpsDevice.this.listeners.isEmpty()) {
-                                for (PositionListener listener : GpsDevice.this.listeners) {
-                                    listener.newNmeaSentence(readBuffer.toString());
-                                }
-                            }
-                            parseNmeaSentence(readBuffer.toString());
-                        }
-                    } catch (Exception e) {
-                        logger.error("Exception in parseNmeaSentence - {}", e);
-                    }
-                } else {
-                    logger.debug("GPS InputStream is null");
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                    }
-                }
+                logger.debug("closing serial port...");
+                this.in.close();
+                this.conn.close();
+                logger.debug("closing serial port...done");
             } catch (Exception e) {
-                logger.error("Exception in Gps doPollWork");
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e1) {
+                logger.warn("Failed to close port, {}", e);
+            }
+        }
+
+        private boolean doPollWork() {
+            final StringBuilder readBuffer = new StringBuilder();
+            int c = -1;
+            while (c != 10) {
+                if (!run) {
+                    logger.debug("Shutdown requested, exiting");
+                    return false;
                 }
+                try {
+                    c = this.in.read();
+                } catch (Exception e) {
+                    logger.error("Exception in gps read - {}", e);
+                    return false;
+                }
+                if (c == -1) {
+                    logger.debug("Read timed out");
+                } else if (c != 13) {
+                    readBuffer.append((char) c);
+                }
+            }
+            if (readBuffer.length() > 0) {
+                final String sentence = readBuffer.toString();
+                logger.debug("GPS RAW: {}", sentence);
+                handleNmeaSentence(sentence);
             }
             return true;
         }
 
-        private void parseNmeaSentence(String scannedInput) {
+        private void handleNmeaSentence(final String sentence) {
 
-            double lon, lat, speed, alt, track;
-
-            // got a message... do a cksum
-            if (!NmeaCksum(scannedInput)) {
-                logger.error("NMEA checksum not valid");
-                return;
-            }
-            // s_logger.info(scannedInput);
-            GpsDevice.this.lastSentence = scannedInput;
-            NMEAParser gpsParser = new NMEAParser();
-
-            gpsParser.parseSentence(scannedInput);
-            GpsDevice.this.validPosition = gpsParser.isValidPosition();
-            // s_logger.debug("Parse : "+scannedInput+" position valid = "+m_validPosition);
-
-            if (!GpsDevice.this.validPosition) {
-                return;
+            if (GpsDevice.this.listener != null) {
+                GpsDevice.this.listener.newNmeaSentence(sentence);
             }
 
-            if (!scannedInput.startsWith("$G")) {
-                // Invalid NMEA String. Return.
-                logger.warn("Invalid NMEA sentence: " + scannedInput);
-                return;
-            }
-            // Remove the first 3 characters from the input string in order to normalize the commands
-            scannedInput = scannedInput.substring(3);
+            final boolean isLastPositionValid = nmeaParser.isValidPosition();
 
-            if (scannedInput.startsWith("TXT")) {
-                logger.debug("U-Blox init message: {}", scannedInput);
-            } else if (scannedInput.startsWith("GGA")) {
-                try {
-                    lon = gpsParser.getLongNmea();
-                    lat = gpsParser.getLatNmea();
-                    alt = gpsParser.getAltNmea();
-                    GpsDevice.this.fixQuality = gpsParser.getFixQuality();
-                    GpsDevice.this.latitude = new Measurement(java.lang.Math.toRadians(lat), Unit.rad);
-                    GpsDevice.this.longitude = new Measurement(java.lang.Math.toRadians(lon), Unit.rad);
-                    GpsDevice.this.altitude = new Measurement(alt, Unit.m);
-                    GpsDevice.this.latitudeNmea = lat;
-                    GpsDevice.this.longitudeNmea = lon;
-                    GpsDevice.this.altitudeNmea = alt;
-                    GpsDevice.this.dop = gpsParser.getDOPNmea();
-                    GpsDevice.this.nrSatellites = gpsParser.getNrSatellites();
-                    GpsDevice.this.timeNmea = gpsParser.getTimeNmea();
-                } catch (Exception e) {
-                    GpsDevice.this.latitude = null;
-                    GpsDevice.this.longitude = null;
-                    GpsDevice.this.altitude = null;
-                    GpsDevice.this.latitudeNmea = 0;
-                    GpsDevice.this.longitudeNmea = 0;
-                    GpsDevice.this.altitudeNmea = 0;
+            try {
+                final boolean isValid;
+
+                synchronized (this) {
+                    isValid = nmeaParser.parseSentence(sentence);
+                    GpsDevice.this.lastSentence = sentence;
                 }
-            } else if (scannedInput.startsWith("GLL")) {
-                try {
-                    lon = gpsParser.getLongNmea();
-                    lat = gpsParser.getLatNmea();
-                    GpsDevice.this.latitude = new Measurement(java.lang.Math.toRadians(lat), Unit.rad);
-                    GpsDevice.this.longitude = new Measurement(java.lang.Math.toRadians(lon), Unit.rad);
-                    GpsDevice.this.latitudeNmea = lat;
-                    GpsDevice.this.longitudeNmea = lon;
-                } catch (Exception e) {
-                    GpsDevice.this.latitude = null;
-                    GpsDevice.this.longitude = null;
-                    GpsDevice.this.latitudeNmea = 0;
-                    GpsDevice.this.longitudeNmea = 0;
+
+                if (isValid != isLastPositionValid && GpsDevice.this.listener != null) {
+                    listener.onLockStatusChanged(isValid);
+                    logger.info("{}", GpsDevice.this);
                 }
-            } else if (scannedInput.startsWith("GSA")) {
-                try {
-                    GpsDevice.this.pdop = gpsParser.getPDOPNmea();
-                    GpsDevice.this.hdop = gpsParser.getHDOPNmea();
-                    GpsDevice.this.vdop = gpsParser.getVDOPNmea();
-                    GpsDevice.this.fix3D = gpsParser.getFix3DNmea();
-                    // System.out.println("PDOP = "+pdop+" HDOP = "+hdop+" VDOP = "+vdop+" fix3D = "+fix3D);
-                } catch (Exception e) {
-                    GpsDevice.this.pdop = 0;
-                    GpsDevice.this.hdop = 0;
-                    GpsDevice.this.vdop = 0;
-                    GpsDevice.this.fix3D = 0;
+
+            } catch (ParseException e) {
+                final Code code = e.getCode();
+                if (code == Code.BAD_CHECKSUM) {
+                    logger.warn("NMEA checksum not valid");
+                } else if (code == Code.INVALID) {
+                    logger.warn("Invalid NMEA sentence: {}", sentence);
+                } else {
+                    logger.warn("Unrecognized NMEA sentence: {}", sentence);
                 }
-            } else if (scannedInput.startsWith("GSV")) {
-            } else if (scannedInput.startsWith("RMC")) {
-                try {
-                    lon = gpsParser.getLongNmea();
-                    lat = gpsParser.getLatNmea();
-                    speed = gpsParser.getSpeedNmea();
-                    track = gpsParser.getTrackNmea();
-                    GpsDevice.this.latitude = new Measurement(java.lang.Math.toRadians(lat), Unit.rad);
-                    GpsDevice.this.longitude = new Measurement(java.lang.Math.toRadians(lon), Unit.rad);
-                    GpsDevice.this.speed = new Measurement(speed, Unit.m_s);
-                    GpsDevice.this.track = new Measurement(java.lang.Math.toRadians(track), Unit.rad);
-                    GpsDevice.this.latitudeNmea = lat;
-                    GpsDevice.this.longitudeNmea = lon;
-                    GpsDevice.this.speedNmea = speed;
-                    GpsDevice.this.trackNmea = track;
-                    GpsDevice.this.dateNmea = gpsParser.getDateNmea();
-                } catch (Exception e) {
-                    GpsDevice.this.latitude = null;
-                    GpsDevice.this.longitude = null;
-                    GpsDevice.this.speed = null;
-                    GpsDevice.this.latitudeNmea = 0;
-                    GpsDevice.this.longitudeNmea = 0;
-                    GpsDevice.this.speedNmea = 0;
-                    GpsDevice.this.trackNmea = 0;
-                }
-            } else if (scannedInput.startsWith("VTG")) {
-                try {
-                    speed = gpsParser.getSpeedNmea();
-                    GpsDevice.this.speed = new Measurement(speed, Unit.m_s);
-                    GpsDevice.this.speedNmea = speed;
-                } catch (Exception e) {
-                    GpsDevice.this.speed = null;
-                    GpsDevice.this.speedNmea = 0;
-                }
-            } else if (scannedInput.indexOf("FOM") != -1) {
-                // FOM = scannedInput;
-            } else if (scannedInput.indexOf("PPS") != -1) {
-                // PPS = scannedInput;
-            } else {
-                logger.warn("Unrecognized NMEA sentence: " + scannedInput);
+            } catch (Exception e) {
+                logger.warn("Unexpected exception parsing NMEA sentence", e);
             }
         }
 
-        private boolean NmeaCksum(String nmeaMessageIn) {
-            int starpos = nmeaMessageIn.indexOf('*');
-            String s_Cksum = nmeaMessageIn.substring(starpos + 1, nmeaMessageIn.length() - 1);
-            int i_Cksum = Integer.parseInt(s_Cksum, 16); // Check sum is coded in hex string
-
-            int i_newCksum = 0;
-            for (int i = 1; i < starpos; i++) {
-                i_newCksum ^= nmeaMessageIn.charAt(i);
-            }
-
-            return i_newCksum == i_Cksum;
+        private CommURI enableTimeouts(final CommURI original) {
+            return new CommURI.Builder(original.getPort()).withBaudRate(original.getBaudRate())
+                    .withDataBits(original.getDataBits()).withStopBits(original.getStopBits())
+                    .withFlowControl(original.getFlowControl()).withParity(original.getParity())
+                    .withOpenTimeout(SERIAL_TIMEOUT_MS).withReceiveTimeout(SERIAL_TIMEOUT_MS).build();
         }
     }
 
@@ -492,27 +235,28 @@ public class GpsDevice {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(" longitude=");
-        sb.append(this.longitudeNmea);
+        sb.append(this.nmeaParser.getLongNmea());
         sb.append("\n latitude=");
-        sb.append(this.latitudeNmea);
+        sb.append(this.nmeaParser.getLatNmea());
         sb.append("\n altitude=");
-        sb.append(this.altitudeNmea);
+        sb.append(this.nmeaParser.getAltNmea());
         sb.append("\n speed=");
-        sb.append(this.speedNmea);
+        sb.append(this.nmeaParser.getSpeedNmea());
         sb.append("\n date=");
-        sb.append(this.dateNmea);
+        sb.append(this.nmeaParser.getDateNmea());
         sb.append("   time=");
-        sb.append(this.timeNmea);
+        sb.append(this.nmeaParser.getTimeNmea());
         sb.append("\n DOP=");
-        sb.append(this.dop);
+        sb.append(this.nmeaParser.getDOPNmea());
         sb.append("\n 3Dfix=");
-        sb.append(this.fix3D);
+        sb.append(this.nmeaParser.getFix3DNmea());
         sb.append("\n fixQuality=");
-        sb.append(this.fixQuality);
+        sb.append(this.nmeaParser.getFixQuality());
         return sb.toString();
     }
 
-    public void setListeners(Collection<PositionListener> listeners) {
-        this.listeners = listeners;
+    interface Listener extends PositionListener {
+
+        public void onLockStatusChanged(final boolean hasLock);
     }
 }

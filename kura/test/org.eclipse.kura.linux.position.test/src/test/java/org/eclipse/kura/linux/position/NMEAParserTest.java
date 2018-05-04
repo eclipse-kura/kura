@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates and others
  *
  *   All rights reserved. This program and the accompanying materials
  *   are made available under the terms of the Eclipse Public License v1.0
@@ -11,9 +11,10 @@ package org.eclipse.kura.linux.position;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
+import org.eclipse.kura.linux.position.NMEAParser.ParseException;
 import org.junit.Test;
-
 
 public class NMEAParserTest {
 
@@ -141,10 +142,10 @@ public class NMEAParserTest {
     }
 
     @Test
-    public void testParseSentenceGGA() {
+    public void testParseSentenceGGA() throws ParseException {
         NMEAParser parser = new NMEAParser();
 
-        parser.parseSentence("$GPGGA,121041.000,4655.3772,N,01513.6390,E,1,06,1.7,478.3,M,44.7,M,,0000*5d");
+        parser.parseSentence("$GPGGA,121041.000,4655.3772,N,01513.6390,E,1,06,1.7,478.3,M,44.7,M,,0000*5d\n");
 
         assertTrue(parser.isValidPosition());
         assertEquals("121041.000", parser.getTimeNmea());
@@ -157,10 +158,10 @@ public class NMEAParserTest {
     }
 
     @Test
-    public void testParseSentenceGGAInvPos() {
+    public void testParseSentenceGGAInvPos() throws ParseException {
         NMEAParser parser = new NMEAParser();
 
-        parser.parseSentence("$GPGGA,121041.000,4655.3772,N,01513.6390,E,0,06,1.7,478.3,M,44.7,M,,0000*5d");
+        parser.parseSentence("$GPGGA,121041.000,4655.3772,N,01513.6390,E,0,06,1.7,478.3,M,44.7,M,,0000*5c\n");
 
         assertFalse(parser.isValidPosition());
         assertEquals("121041.000", parser.getTimeNmea());
@@ -173,10 +174,10 @@ public class NMEAParserTest {
     }
 
     @Test
-    public void testParseSentenceGLL() {
+    public void testParseSentenceGLL() throws ParseException {
         NMEAParser parser = new NMEAParser();
 
-        parser.parseSentence("$GPGLL,4655.3772,N,01513.6390,E,121041.000,A,*0");
+        parser.parseSentence("$GPGLL,4655.3772,N,01513.6390,E,121041.000,A,*16\n");
 
         assertTrue(parser.isValidPosition());
         assertEquals("121041.000", parser.getTimeNmea());
@@ -185,10 +186,10 @@ public class NMEAParserTest {
     }
 
     @Test
-    public void testParseSentenceGSA() {
+    public void testParseSentenceGSA() throws ParseException {
         NMEAParser parser = new NMEAParser();
 
-        parser.parseSentence("$GPGSA,A,3,25,23,07,27,20,04,,,,,,,4.9,1.7,4.6*39");
+        parser.parseSentence("$GPGSA,A,3,25,23,07,27,20,04,,,,,,,4.9,1.7,4.6*39\n");
 
         assertTrue(parser.isValidPosition());
         assertEquals(3, parser.getFix3DNmea());
@@ -198,20 +199,20 @@ public class NMEAParserTest {
     }
 
     @Test
-    public void testParseSentenceGSAInvalidPos() {
+    public void testParseSentenceGSAInvalidPos() throws ParseException {
         NMEAParser parser = new NMEAParser();
 
-        parser.parseSentence("$GPGSA,A,1,25,23,07,27,20,04,,,,,,,4.9,1.7,4.6*39");
+        parser.parseSentence("$GPGSA,A,1,25,23,07,27,20,04,,,,,,,4.9,1.7,4.6*3B\n");
 
         assertFalse(parser.isValidPosition());
         assertEquals(1, parser.getFix3DNmea());
     }
 
     @Test
-    public void testParseSentenceRMC() {
+    public void testParseSentenceRMC() throws ParseException {
         NMEAParser parser = new NMEAParser();
 
-        parser.parseSentence("$GPRMC,121041.000,A,4655.3772,N,01513.6390,E,0.31,319.55,220517,,*7");
+        parser.parseSentence("$GPRMC,121041.000,A,4655.3772,N,01513.6390,E,0.31,319.55,220517,,*7\n");
 
         assertTrue(parser.isValidPosition());
         assertEquals("121041.000", parser.getTimeNmea());
@@ -223,10 +224,10 @@ public class NMEAParserTest {
     }
 
     @Test
-    public void testParseSentenceRMCInvalidStatus() {
+    public void testParseSentenceRMCInvalidStatus() throws ParseException {
         NMEAParser parser = new NMEAParser();
 
-        parser.parseSentence("$GPRMC,121041.000,V,4655.3772,N,01513.6390,E,0.31,319.55,220517,,*7");
+        parser.parseSentence("$GPRMC,121041.000,V,4655.3772,N,01513.6390,E,0.31,319.55,220517,,*10\n");
 
         assertFalse(parser.isValidPosition());
         assertEquals("121041.000", parser.getTimeNmea());
@@ -239,12 +240,50 @@ public class NMEAParserTest {
     }
 
     @Test
-    public void testParseSentenceVTG() {
+    public void testParseSentenceVTG() throws ParseException {
         NMEAParser parser = new NMEAParser();
 
-        parser.parseSentence("$GNVTG,,,,,,,12.34,,,,*4a");
+        parser.parseSentence("$GNVTG,,,,,,,12.34,,,,*4a\n");
 
         assertEquals(12.34 / 3.6, parser.getSpeedNmea(), EPS);
     }
 
+    @Test
+    public void testBadChecksum() {
+        NMEAParser parser = new NMEAParser();
+
+        try {
+            parser.parseSentence("$GNVTG,,,,,,,12.34,,,,*4b\n");
+        } catch (ParseException e) {
+            assertEquals(NMEAParser.Code.BAD_CHECKSUM, e.getCode());
+            return;
+        }
+        fail("Exception expected");
+    }
+
+    @Test
+    public void testInvalidSentence() {
+        NMEAParser parser = new NMEAParser();
+
+        try {
+            parser.parseSentence("$INVALID,,,,,,,12.34,,,,*57\n");
+        } catch (ParseException e) {
+            assertEquals(NMEAParser.Code.INVALID, e.getCode());
+            return;
+        }
+        fail("Exception expected");
+    }
+
+    @Test
+    public void testUnrecognizedSentence() {
+        NMEAParser parser = new NMEAParser();
+
+        try {
+            parser.parseSentence("$GGG,,,,,,,12.34,,,,*41\n");
+        } catch (ParseException e) {
+            assertEquals(NMEAParser.Code.UNRECOGNIZED, e.getCode());
+            return;
+        }
+        fail("Exception expected");
+    }
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc
  *******************************************************************************/
 package org.eclipse.kura.web.server.servlet;
 
@@ -48,7 +49,6 @@ import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.core.configuration.XmlComponentConfigurations;
 import org.eclipse.kura.deployment.agent.DeploymentAgentService;
-import org.eclipse.kura.marshalling.Marshaller;
 import org.eclipse.kura.marshalling.Unmarshaller;
 import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.util.service.ServiceUtil;
@@ -178,7 +178,7 @@ public class FileServlet extends HttpServlet {
         try {
             pairs = parseQueryString(queryString);
         } catch (UnsupportedEncodingException e) {
-            logger.error("Error parsing query string.");
+            logger.error("Error parsing query string.", e);
             throw new ServletException("Error parsing query string: " + e.getLocalizedMessage());
         }
 
@@ -188,47 +188,53 @@ public class FileServlet extends HttpServlet {
             throw new ServletException("Error parsing query string.");
         }
 
-        String pid = pairs.get("pid");
+        final boolean factories;
+        final String pid;
+        if (pairs.containsKey("factoryId")) {
+            factories = true;
+            pid = pairs.get("factoryId");
+        } else {
+            factories = false;
+            pid = pairs.get("pid");
+        }
+
         if (pid != null && pid.length() > 0) {
             BundleContext ctx = Console.getBundleContext();
             Bundle[] bundles = ctx.getBundles();
             ServiceLocator locator = ServiceLocator.getInstance();
 
+            final MetaTypeService mts;
+            try {
+                mts = locator.getService(MetaTypeService.class);
+            } catch (GwtKuraException e) {
+                logger.error("Error getting MetaTypeService", e);
+                throw new ServletException("Error getting MetaTypeService", e);
+            }
+
             // Iterate over bundles to find PID
             for (Bundle b : bundles) {
-                MetaTypeService mts;
-                try {
-                    mts = locator.getService(MetaTypeService.class);
-                } catch (GwtKuraException e1) {
-                    logger.error("Error parsing query string.");
-                    throw new ServletException("Error parsing query string.");
-                }
                 MetaTypeInformation mti = mts.getMetaTypeInformation(b);
 
                 if (mti == null) {
                     continue;
                 }
 
-                for (String p : mti.getPids()) {
+                final String[] ids = factories ? mti.getFactoryPids() : mti.getPids();
+
+                for (String p : ids) {
                     if (p.equals(pid)) {
-                        try {
-                            InputStream is = mti.getObjectClassDefinition(pid, null).getIcon(32);
+                        try (InputStream is = mti.getObjectClassDefinition(pid, null).getIcon(32)) {
                             if (is == null) {
                                 logger.error("Error reading icon file.");
                                 throw new ServletException("Error reading icon file.");
                             }
-                            OutputStream os = resp.getOutputStream();
-                            byte[] buffer = new byte[1024];
-                            for (int length = 0; (length = is.read(buffer)) > 0;) {
-                                os.write(buffer, 0, length);
+                            try (OutputStream os = resp.getOutputStream()) {
+                                IOUtils.copy(is, os);
                             }
-                            is.close();
-                            os.close();
-
-                        } catch (IOException e) {
-                            logger.error("Error reading icon file.");
-                            throw new IOException("Error reading icon file.");
                         }
+
+                        // break for loop ... only send one icon
+                        break;
                     }
                 }
             }
@@ -679,7 +685,8 @@ public class FileServlet extends HttpServlet {
     private ServiceReference<Unmarshaller>[] getXmlUnmarshallers() {
         String filterString = String.format("(&(kura.service.pid=%s))",
                 "org.eclipse.kura.xml.marshaller.unmarshaller.provider");
-        return ServiceUtil.getServiceReferences(FrameworkUtil.getBundle(FileServlet.class).getBundleContext(), Unmarshaller.class, filterString);
+        return ServiceUtil.getServiceReferences(FrameworkUtil.getBundle(FileServlet.class).getBundleContext(),
+                Unmarshaller.class, filterString);
     }
 
     private void ungetServiceReferences(final ServiceReference<?>[] refs) {
@@ -691,7 +698,8 @@ public class FileServlet extends HttpServlet {
         ServiceReference<Unmarshaller>[] unmarshallerSRs = getXmlUnmarshallers();
         try {
             for (final ServiceReference<Unmarshaller> unmarshallerSR : unmarshallerSRs) {
-                Unmarshaller unmarshaller = FrameworkUtil.getBundle(FileServlet.class).getBundleContext().getService(unmarshallerSR);
+                Unmarshaller unmarshaller = FrameworkUtil.getBundle(FileServlet.class).getBundleContext()
+                        .getService(unmarshallerSR);
                 result = unmarshaller.unmarshal(xmlString, clazz);
             }
         } catch (Exception e) {
@@ -720,7 +728,6 @@ class UploadRequest extends ServletFileUpload {
         this.fileItems = new ArrayList<>();
     }
 
-    @SuppressWarnings("unchecked")
     public void parse(HttpServletRequest req) throws FileUploadException {
 
         s_logger.debug("upload.getFileSizeMax(): {}", getFileSizeMax());

@@ -9,6 +9,7 @@
  * Contributors:
  *  Eurotech
  *  Amit Kumar Mondal
+ *  Red Hat Inc
  *
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.wires;
@@ -31,6 +32,7 @@ import org.eclipse.kura.web.client.ui.wires.composer.Wire;
 import org.eclipse.kura.web.client.ui.wires.composer.WireComponent;
 import org.eclipse.kura.web.client.ui.wires.composer.WireComposer;
 import org.eclipse.kura.web.shared.AssetConstants;
+import org.eclipse.kura.web.shared.IdHelper;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtWireComponentConfiguration;
 import org.eclipse.kura.web.shared.model.GwtWireComponentDescriptor;
@@ -291,9 +293,8 @@ public class WiresPanelUi extends Composite
         });
 
         for (GwtWireComponentDescriptor descriptor : sortedDescriptors) {
-            final WireComponentsAnchorListItem item = new WireComponentsAnchorListItem(
-                    getFormattedPid(descriptor.getFactoryPid()), descriptor.getFactoryPid(),
-                    descriptor.getMinInputPorts() > 0, descriptor.getMinOutputPorts() > 0);
+            final WireComponentsAnchorListItem item = new WireComponentsAnchorListItem(getComponentLabel(descriptor),
+                    descriptor.getFactoryPid(), descriptor.getMinInputPorts() > 0, descriptor.getMinOutputPorts() > 0);
             item.setListener(listener);
             this.wireComponentsMenu.add(item);
         }
@@ -407,29 +408,18 @@ public class WiresPanelUi extends Composite
 
     }
 
-    public static String getFormattedPid(final String pid) {
-        String[] split;
-        if (pid.contains(".")) {
-            split = pid.split("\\.");
-            final String lastString = split[split.length - 1];
-            if ("WireAsset".equalsIgnoreCase(lastString)) {
-                return MSGS.wiresComponentAsset();
-            } else if ("CloudPublisher".equalsIgnoreCase(lastString)) {
-                return MSGS.wiresComponentPublisher();
-            } else if ("CloudSubscriber".equalsIgnoreCase(lastString)) {
-                return MSGS.wiresComponentSubscriber();
-            } else if ("DbWireRecordStore".equalsIgnoreCase(lastString)) {
-                return MSGS.wiresComponentDBStore();
-            } else if ("DbWireRecordFilter".equalsIgnoreCase(lastString)) {
-                return MSGS.wiresComponentDBFilter();
-            } else if ("H2DbWireRecordStore".equalsIgnoreCase(lastString)) {
-                return MSGS.wiresComponentH2DBStore();
-            } else if ("H2DbWireRecordFilter".equalsIgnoreCase(lastString)) {
-                return MSGS.wiresComponentH2DBFilter();
-            }
-            return lastString;
+    public static String getComponentLabel(final GwtConfigComponent config) {
+        if (config.getComponentName() != null) {
+            return config.getComponentName();
         }
-        return pid;
+        return IdHelper.getLastIdComponent(config.getFactoryId());
+    }
+
+    public static String getComponentLabel(final GwtWireComponentDescriptor descriptor) {
+        if (descriptor.getName() != null) {
+            return descriptor.getName();
+        }
+        return IdHelper.getLastIdComponent(descriptor.getFactoryPid());
     }
 
     private WireComponent createAsset(String pid, String driverPid) {

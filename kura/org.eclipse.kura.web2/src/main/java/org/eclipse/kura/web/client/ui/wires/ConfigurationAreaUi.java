@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,6 +8,7 @@
  *
  * Contributors:
  *  Eurotech
+ *  Red Hat Inc
  *
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.wires;
@@ -101,13 +102,13 @@ public class ConfigurationAreaUi extends Composite {
                     configurations.getChannelDescriptor(driverPid), configurations.getBaseChannelDescriptor());
 
             this.assetWireComponentUi = new AssetConfigurationUi(assetModel, this.genericWireComponentUi);
-            this.assetWireComponentUi.setTitle(WiresPanelUi.getFormattedPid(configuration.getFactoryId()) + " - "
-                    + configuration.getComponentId());
+            this.assetWireComponentUi
+                    .setTitle(WiresPanelUi.getComponentLabel(configuration) + " - " + configuration.getComponentId());
             this.assetWireComponentUi.renderForm();
         } else {
             this.genericWireComponentUi = new ConfigurableComponentUi(hasConfiguration.getConfiguration());
-            this.genericWireComponentUi.setTitle(WiresPanelUi.getFormattedPid(configuration.getFactoryId()) + " - "
-                    + configuration.getComponentId());
+            this.genericWireComponentUi
+                    .setTitle(WiresPanelUi.getComponentLabel(configuration) + " - " + configuration.getComponentId());
             this.genericWireComponentUi.renderForm();
         }
     }

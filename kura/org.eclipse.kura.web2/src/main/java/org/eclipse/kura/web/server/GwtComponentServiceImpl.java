@@ -276,7 +276,6 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
         GwtConfigComponent comp = null;
         try {
             ComponentConfiguration conf = cs.getComponentConfiguration(pid);
-            boolean checkIfWireComponentIsDeleted = false;
             if (conf == null) {
                 conf = cs.getDefaultComponentConfiguration(factoryPid);
                 if (conf != null) {
@@ -540,7 +539,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
             Object value = entry.getValue();
 
             // this could be an array value
-            if (value != null && value instanceof Object[]) {
+            if (value instanceof Object[]) {
                 Object[] objValues = (Object[]) value;
                 List<String> strValues = new ArrayList<>();
                 for (Object v : objValues) {

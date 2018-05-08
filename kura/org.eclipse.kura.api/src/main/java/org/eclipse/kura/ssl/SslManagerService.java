@@ -160,12 +160,4 @@ public interface SslManagerService {
      */
     public void installPrivateKey(String alias, PrivateKey privateKey, char[] password, Certificate[] publicCerts)
             throws GeneralSecurityException, IOException;
-
-    /**
-     * Returns the SSL service configuration.
-     *
-     * @return the SslManagerServiceOprions object that contains the desired configuration.
-     *
-     */
-    public SslManagerServiceOptions getConfigurationOptions() throws GeneralSecurityException, IOException;
 }

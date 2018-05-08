@@ -26,18 +26,12 @@ import java.net.SocketException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.security.AccessController;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.util.IOUtil;
@@ -809,7 +803,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
     @Override
     public String getKuraMarketplaceCompatibilityVersion() {
-        String marketplaceCompatibilityVersion = (String) this.kuraProperties
+        String marketplaceCompatibilityVersion = this.kuraProperties
                 .getProperty(KEY_KURA_MARKETPLACE_COMPATIBILITY_VERSION);
         if (marketplaceCompatibilityVersion == null) {
             marketplaceCompatibilityVersion = getKuraVersion();
@@ -1070,23 +1064,21 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
     }
 
     @Override
-    public char[] getJavaKeyStorePassword() throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {
+    public char[] getJavaKeyStorePassword() {
         String keyStorePwd = this.kuraProperties.getProperty(KEY_KURA_KEY_STORE_PWD);
         if (keyStorePwd != null) {
             return keyStorePwd.toCharArray();
         }
-        return null;
+        return new char[0];
     }
 
     @Override
-    public char[] getJavaTrustStorePassword() throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {
+    public char[] getJavaTrustStorePassword() {
         String trustStorePwd = this.kuraProperties.getProperty(KEY_KURA_TRUST_STORE_PWD);
         if (trustStorePwd != null) {
             return trustStorePwd.toCharArray();
         }
-        return null;
+        return new char[0];
     }
 
     @Override
@@ -1103,7 +1095,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
         if (servicesToIgnore != null && !servicesToIgnore.trim().isEmpty()) {
             String[] servicesArray = servicesToIgnore.split(",");
             if (servicesArray != null && servicesArray.length > 0) {
-                List<String> services = new ArrayList<String>();
+                List<String> services = new ArrayList<>();
                 for (String service : servicesArray) {
                     services.add(service);
                 }

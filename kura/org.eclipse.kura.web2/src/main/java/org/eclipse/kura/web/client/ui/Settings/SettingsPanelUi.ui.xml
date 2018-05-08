@@ -41,7 +41,7 @@
 
         <b:Row>
             <b:Well size="SMALL">
-                <b:NavTabs>
+                <b:NavTabs ui:field="navTabs">
                     <b:TabListItem dataTarget="#snapshotsPanel" text="Snapshots"
                         ui:field="snapshots" active="true"/>
                     <b:TabListItem dataTarget="#appCertPanel" text="Application Certificate"
@@ -55,7 +55,7 @@
                     <b:TabListItem dataTarget="#securityPanel" text="Security Policies"
                         ui:field="security" visible="false"/>
                 </b:NavTabs>
-                <b:TabContent>
+                <b:TabContent ui:field="tabContent">
                     <b:TabPane b:id="snapshotsPanel" active="true">
                         <settings:SnapshotsTabUi ui:field="snapshotsPanel"></settings:SnapshotsTabUi >
                     </b:TabPane>

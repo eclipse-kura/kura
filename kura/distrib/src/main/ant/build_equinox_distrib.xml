@@ -81,6 +81,9 @@
               tofile="${project.build.directory}/${build.output.name}/jdk.dio.properties" />
 		<copy file="src/main/resources/common/jdk.dio.policy"
               tofile="${project.build.directory}/${build.output.name}/jdk.dio.policy" />
+              
+    	<copy file="src/main/resources/common/cacerts.ks" tofile="${project.build.directory}/${build.output.name}/cacerts.ks" />
+
 
         <!-- Populate config.ini with correct OSGi packages -->
 		<antcall target="osgi-base-config" />
@@ -333,6 +336,8 @@ fi]]>
 
 			<zipfileset file="${project.build.directory}/${build.output.name}/jdk.dio.properties"
                         prefix="${build.output.name}/kura/" />
+                        
+            <zipfileset file="${project.build.directory}/${build.output.name}/cacerts.ks" prefix="${build.output.name}/security/" />
 
 			<zipfileset file="src/main/resources/common/kura_custom.properties"
                         prefix="${build.output.name}/kura/" />

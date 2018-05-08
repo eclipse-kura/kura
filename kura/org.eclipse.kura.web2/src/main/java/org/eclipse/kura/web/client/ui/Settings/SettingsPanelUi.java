@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -19,10 +19,13 @@ import org.eclipse.kura.web.client.ui.Tab;
 import org.eclipse.kura.web.shared.model.GwtSession;
 import org.eclipse.kura.web.shared.service.GwtSecurityService;
 import org.eclipse.kura.web.shared.service.GwtSecurityServiceAsync;
+import org.gwtbootstrap3.client.ui.NavTabs;
 import org.gwtbootstrap3.client.ui.TabListItem;
 import org.gwtbootstrap3.client.ui.html.Paragraph;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -75,6 +78,9 @@ public class SettingsPanelUi extends Composite {
     TabListItem security;
 
     @UiField
+    NavTabs navTabs;
+
+    @UiField
     HTMLPanel settingsIntro;
 
     public SettingsPanelUi() {
@@ -104,7 +110,13 @@ public class SettingsPanelUi extends Composite {
         this.gwtSecurityService.isSecurityServiceAvailable(callback);
 
         this.snapshots.addClickHandler(new Tab.RefreshHandler(this.snapshotsPanel));
-        this.sslConfig.addClickHandler(new Tab.RefreshHandler(this.sslConfigPanel));
+        this.sslConfig.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                SettingsPanelUi.this.sslConfigPanel.load();
+            }
+        });
         this.serverCert.addClickHandler(new Tab.RefreshHandler(this.serverCertPanel));
         this.deviceCert.addClickHandler(new Tab.RefreshHandler(this.deviceCertPanel));
         this.security.addClickHandler(new Tab.RefreshHandler(this.securityPanel));

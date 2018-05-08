@@ -20,9 +20,9 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.Password;
+import org.eclipse.kura.core.ssl.SslManagerServiceOptions;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.ssl.SslManagerService;
-import org.eclipse.kura.ssl.SslManagerServiceOptions;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
@@ -92,15 +92,11 @@ public class GwtSslServiceImpl extends OsgiRemoteServiceServlet implements GwtSs
     }
 
     private SslManagerServiceOptions getSslConfiguration() throws KuraException {
-        SslManagerServiceOptions options;
+        SslManagerServiceOptions options=null;
         try {
             SslManagerService sslService = ServiceLocator.getInstance().getService(SslManagerService.class);
-            options = sslService.getConfigurationOptions();
+            //TODO: options = sslService.getConfigurationOptions();
             return options;
-        } catch (GeneralSecurityException e) {
-            throw new KuraException(KuraErrorCode.SECURITY_EXCEPTION);
-        } catch (IOException e) {
-            throw new KuraException(KuraErrorCode.SECURITY_EXCEPTION);
         } catch (GwtKuraException e) {
             throw new KuraException(KuraErrorCode.SECURITY_EXCEPTION);
         }

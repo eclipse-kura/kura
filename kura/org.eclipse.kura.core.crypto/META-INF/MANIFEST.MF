@@ -13,3 +13,4 @@ Import-Package: javax.crypto,
  org.slf4j;version="1.6.0"
 Service-Component: OSGI-INF/*.xml
 Bundle-ActivationPolicy: lazy
+Export-Package: org.eclipse.kura.core.crypto

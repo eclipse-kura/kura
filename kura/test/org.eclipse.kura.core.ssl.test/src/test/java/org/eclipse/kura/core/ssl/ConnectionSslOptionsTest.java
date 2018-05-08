@@ -11,7 +11,6 @@ package org.eclipse.kura.core.ssl;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-import org.eclipse.kura.ssl.SslManagerServiceOptions;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;

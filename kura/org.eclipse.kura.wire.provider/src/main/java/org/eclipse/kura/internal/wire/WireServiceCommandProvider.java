@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -98,8 +98,8 @@ public final class WireServiceCommandProvider {
         final Set<WireConfiguration> configs = this.wireService.getWireConfigurations();
         int i = 0;
         for (final WireConfiguration config : configs) {
-            System.out.format("%d. Emitter PID ===> %s  Receiver PID ===> %s%n", i, config.getEmitterPid(),
-                    config.getReceiverPid());
+            System.out.format("%03d.[%s] Emitter PID ===> %s  Receiver PID ===> %s%n", i,
+                    config.getWire() != null ? "X" : " ", config.getEmitterPid(), config.getReceiverPid());
             i++;
         }
         System.out.println("===========================================================");

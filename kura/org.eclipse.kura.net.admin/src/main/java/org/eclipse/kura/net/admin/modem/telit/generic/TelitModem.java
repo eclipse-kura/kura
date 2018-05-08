@@ -409,11 +409,13 @@ public abstract class TelitModem {
                 if (atPort.equals(gpsPort) && !isAtReachable(commAtConnection)) {
                     int numAttempts = 3;
                     while (numAttempts > 0) {
-                        logger.debug("disableGps() :: sendCommand gpsDisableNMEA {}",
-                                TelitModemAtCommands.gpsDisableNMEA.getCommand());
+                        logger.debug("disableGps() :: sendCommand escapeSequence {}",
+                                TelitModemAtCommands.escapeSequence.getCommand());
 
+                        sleep(1000); // do not send anything for 1 second before the escape sequence
                         byte[] reply = commAtConnection
-                                .sendCommand(TelitModemAtCommands.gpsDisableNMEA.getCommand().getBytes(), 1000, 100);
+                                .sendCommand(TelitModemAtCommands.escapeSequence.getCommand().getBytes(), 1000, 1100);
+
                         if (reply != null && reply.length > 0) {
                             logger.trace("disableGps() :: reply={}", new String(reply));
                             String sReply = new String(reply);

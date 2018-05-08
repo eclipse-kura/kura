@@ -1,0 +1,19 @@
+#!/bin/bash
+# iptables-restore script
+iptables_config_file=/etc/sysconfig/iptables
+ipforward_file=/proc/sys/net/ipv4/ip_forward
+enable_ipforwarding=false;
+iptables-restore < $iptables_config_file
+while IFS='' read -r line || [[ -n "$line" ]]; do
+    if [[ $line =~ "-A FORWARD" ]]; then
+	enable_ipforwarding=true
+	break
+    fi
+done < $iptables_config_file
+if [ $enable_ipforwarding = true ]; then
+    echo "1" > $ipforward_file
+else
+    echo "0" > $ipforward_file
+fi
+# source a custom firewall script
+source /etc/init.d/firewall_cust 2> /dev/null

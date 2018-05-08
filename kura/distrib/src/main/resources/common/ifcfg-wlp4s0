@@ -1,0 +1,12 @@
+# Networking Interface
+DEVICE=wlp4s0
+NAME=wlp4s0
+TYPE=WIFI
+ONBOOT=yes
+BOOTPROTO=static
+IPADDR=172.16.1.1
+PREFIX=24
+DEFROUTE=no
+
+#Wireless configuration
+MODE=Master

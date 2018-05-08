@@ -567,6 +567,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
                 return;
             }
             for (Map.Entry<String, CellularModem> modemEntry : this.modems.entrySet()) {
+                boolean modemReset = false;
                 CellularModem modem = modemEntry.getValue();
                 // get signal strength only if somebody needs it
                 if (this.listeners != null && !this.listeners.isEmpty()) {
@@ -644,6 +645,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
                                     PppFactory.releasePppService(ifaceName);
                                     pppSt = PppState.NOT_CONNECTED;
                                     this.resetTimerStart = System.currentTimeMillis();
+                                    modemReset = true;
                                 } else {
                                     int timeTillReset = (int) (modemResetTout - timeElapsed) / 1000;
                                     logger.info(
@@ -663,7 +665,11 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
                         newInterfaceStatuses.put(ifaceName, interfaceState);
                     }
 
-                    if (modem.isGpsSupported() && isGpsEnabledInConfig(modem.getConfiguration())) {
+                    // If the modem has been reset in this iteration of the monitor,
+                    // do not immediately enable GPS to avoid concurrency issues due to asynchronous events
+                    // (possible serial port contention between the PositionService and the trackModem() method),
+                    // GPS will be eventually enabled by trackModem() or in the next iteration of the monitor.
+                    if (!modemReset && modem.isGpsSupported() && isGpsEnabledInConfig(modem.getConfiguration())) {
                         if (modem instanceof HspaCellularModem && !modem.isGpsEnabled()) {
                             modem.enableGps();
                         }

@@ -11,11 +11,8 @@
  *******************************************************************************/
 package org.eclipse.kura.net.admin.modem.telit.he910;
 
-import java.util.Hashtable;
-
 import org.eclipse.kura.net.admin.NetworkConfigurationService;
-import org.eclipse.kura.net.admin.modem.CellularModemFactory;
-import org.eclipse.kura.net.modem.CellularModem;
+import org.eclipse.kura.net.admin.util.AbstractCellularModemFactory;
 import org.eclipse.kura.net.modem.ModemDevice;
 import org.eclipse.kura.net.modem.ModemTechnologyType;
 import org.osgi.framework.BundleContext;
@@ -29,26 +26,19 @@ import org.osgi.util.tracker.ServiceTracker;
  * @author ilya.binshtok
  *
  */
-public class TelitHe910ModemFactory implements CellularModemFactory {
+public class TelitHe910ModemFactory extends AbstractCellularModemFactory<TelitHe910> {
 
     private static TelitHe910ModemFactory factoryInstance = null;
-
-    private static ModemTechnologyType type = ModemTechnologyType.HSDPA;
-
-    private BundleContext bundleContext = null;
-    private Hashtable<String, TelitHe910> modemServices = null;
-
     private ConnectionFactory connectionFactory = null;
 
     private TelitHe910ModemFactory() {
-        this.bundleContext = FrameworkUtil.getBundle(NetworkConfigurationService.class).getBundleContext();
+        final BundleContext bundleContext = FrameworkUtil.getBundle(NetworkConfigurationService.class)
+                .getBundleContext();
 
-        ServiceTracker<ConnectionFactory, ConnectionFactory> serviceTracker = new ServiceTracker<>(this.bundleContext,
+        ServiceTracker<ConnectionFactory, ConnectionFactory> serviceTracker = new ServiceTracker<>(bundleContext,
                 ConnectionFactory.class, null);
         serviceTracker.open(true);
         this.connectionFactory = serviceTracker.getService();
-
-        this.modemServices = new Hashtable<>();
     }
 
     public static TelitHe910ModemFactory getInstance() {
@@ -59,34 +49,13 @@ public class TelitHe910ModemFactory implements CellularModemFactory {
     }
 
     @Override
-    public CellularModem obtainCellularModemService(ModemDevice modemDevice, String platform) throws Exception {
-
-        String key = modemDevice.getProductName();
-        TelitHe910 telitHe910 = this.modemServices.get(key);
-
-        if (telitHe910 == null) {
-            telitHe910 = new TelitHe910(modemDevice, platform, this.connectionFactory);
-            this.modemServices.put(key, telitHe910);
-        } else {
-            telitHe910.setModemDevice(modemDevice);
-        }
-
-        return telitHe910;
-    }
-
-    @Override
-    public Hashtable<String, ? extends CellularModem> getModemServices() {
-        return this.modemServices;
-    }
-
-    @Override
-    public void releaseModemService(String usbPortAddress) {
-        this.modemServices.remove(usbPortAddress);
-    }
-
-    @Override
     @Deprecated
     public ModemTechnologyType getType() {
-        return type;
+        return ModemTechnologyType.HSDPA;
+    }
+
+    @Override
+    protected TelitHe910 createCellularModem(ModemDevice modemDevice, String platform) throws Exception {
+        return new TelitHe910(modemDevice, platform, this.connectionFactory);
     }
 }

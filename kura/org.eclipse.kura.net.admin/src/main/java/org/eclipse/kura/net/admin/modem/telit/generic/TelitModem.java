@@ -78,6 +78,7 @@ public abstract class TelitModem {
             try {
                 status = turnOff();
                 if (status) {
+                    gpsEnabled = false;
                     sleep(offOnDelay);
                     status = turnOn();
                     if (!status && isOnGpio()) {

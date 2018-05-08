@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.eclipse.kura.net.admin.monitor;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -105,7 +106,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 
     private List<ModemMonitorListener> listeners;
 
-    private ExecutorService executor;
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     private Map<String, CellularModem> modems;
     private Map<String, InterfaceState> interfaceStatuses;
@@ -164,9 +165,6 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 
         stopThread = new AtomicBoolean();
 
-        // must be initialized before trackModem() is called; risk of NPE otherwise
-        this.executor = Executors.newSingleThreadExecutor();
-
         // track currently installed modems
         try {
             this.networkConfig = this.netConfigService.getNetworkConfiguration();
@@ -191,13 +189,8 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
         stopThread.set(false);
 
         // is task already prepared?
-        if (task != null) {
+        if (task != null && !task.isDone()) {
             return task;
-        }
-
-        // is executor ready?
-        if (this.executor == null) {
-            return null;
         }
 
         task = this.executor.submit(() -> {
@@ -229,17 +222,15 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
             task = null;
         }
 
-        if (this.executor != null) {
-            logger.debug("Terminating ModemMonitor Thread ...");
-            this.executor.shutdownNow();
-            try {
-                this.executor.awaitTermination(THREAD_TERMINATION_TOUT, TimeUnit.SECONDS);
-            } catch (InterruptedException e) {
-                logger.warn("Interrupted", e);
-            }
-            logger.info("ModemMonitor Thread terminated? - {}", this.executor.isTerminated());
-            this.executor = null;
+        logger.debug("Terminating ModemMonitor Thread ...");
+        this.executor.shutdownNow();
+        try {
+            this.executor.awaitTermination(THREAD_TERMINATION_TOUT, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            logger.warn("Interrupted", e);
         }
+        logger.info("ModemMonitor Thread terminated? - {}", this.executor.isTerminated());
+
         this.serviceActivated = false;
 
         this.networkConfig = null;
@@ -279,7 +270,17 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
         } else if (topic.equals(ModemRemovedEvent.MODEM_EVENT_REMOVED_TOPIC)) {
             ModemRemovedEvent modemRemovedEvent = (ModemRemovedEvent) event;
             String usbPort = (String) modemRemovedEvent.getProperty(UsbDeviceEvent.USB_EVENT_USB_PORT_PROPERTY);
-            this.modems.remove(usbPort);
+            final CellularModem modem = this.modems.remove(usbPort);
+            if (modem != null) {
+                try {
+                    logger.debug("Releasing modem device from factory...");
+                    final CellularModemFactory factory = getCellularModemFactory(modem.getModemDevice());
+                    factory.releaseModemService(modem);
+                    logger.debug("Releasing modem device from factory...done");
+                } catch (Exception e) {
+                    logger.warn("Failed to release modem device from factory", e);
+                }
+            }
         }
     }
 
@@ -682,12 +683,8 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
                         this.pppState = pppSt;
                     }
 
-                    try {
-                        if (modem.isGpsEnabled() && !disableModemGps(modem)) {
-                            logger.error("monitor() :: Failed to disable modem GPS");
-                        }
-                    } catch (KuraException e1) {
-                        logger.error("monitor() :: Exception disableModemGps", e1);
+                    if (modem.isGpsEnabled() && !disableModemGps(modem)) {
+                        logger.error("monitor() :: Failed to disable modem GPS");
                     }
 
                     try {
@@ -739,23 +736,9 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
     }
 
     private void trackModem(ModemDevice modemDevice) {
-        Class<? extends CellularModemFactory> modemFactoryClass = getModemFactoryClass(modemDevice);
-
-        if (modemFactoryClass != null) {
-            CellularModemFactory modemFactoryService = null;
+        synchronized (lock) {
             try {
-                try {
-                    Method getInstanceMethod = modemFactoryClass.getDeclaredMethod("getInstance", (Class<?>[]) null);
-                    getInstanceMethod.setAccessible(true);
-                    modemFactoryService = (CellularModemFactory) getInstanceMethod.invoke(null, (Object[]) null);
-                } catch (Exception e) {
-                    logger.error("Error calling getInstance() method on {}", modemFactoryClass.getName(), e);
-                }
-
-                // if unsuccessful in calling getInstance()
-                if (modemFactoryService == null) {
-                    modemFactoryService = modemFactoryClass.newInstance();
-                }
+                final CellularModemFactory modemFactoryService = getCellularModemFactory(modemDevice);
 
                 String platform = null;
                 if (this.systemService != null) {
@@ -842,6 +825,28 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
         }
     }
 
+    protected CellularModemFactory getCellularModemFactory(final ModemDevice modemDevice)
+            throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+        final Class<? extends CellularModemFactory> modemFactoryClass = getModemFactoryClass(modemDevice);
+
+        if (modemFactoryClass == null) {
+            throw new IllegalArgumentException("No ModemFactory associated with specified modemDevice");
+        }
+
+        CellularModemFactory modemFactoryService;
+
+        Method getInstanceMethod = modemFactoryClass.getDeclaredMethod("getInstance", (Class<?>[]) null);
+        getInstanceMethod.setAccessible(true);
+        modemFactoryService = (CellularModemFactory) getInstanceMethod.invoke(null, (Object[]) null);
+
+        // if unsuccessful in calling getInstance()
+        if (modemFactoryService == null) {
+            modemFactoryService = modemFactoryClass.newInstance();
+        }
+
+        return modemFactoryService;
+    }
+
     protected Class<? extends CellularModemFactory> getModemFactoryClass(ModemDevice modemDevice) {
         Class<? extends CellularModemFactory> modemFactoryClass = null;
 
@@ -860,40 +865,38 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 
     }
 
-    private boolean disableModemGps(CellularModem modem) throws KuraException {
+    private boolean disableModemGps(CellularModem modem) {
 
-        postModemGpsEvent(modem, false);
-
-        boolean portIsReachable = false;
-        long startTimer = System.currentTimeMillis();
-        do {
-            try {
-                Thread.sleep(3000);
-                if (modem.isPortReachable(modem.getAtPort())) {
-                    logger.debug("disableModemGps() modem is now reachable ...");
-                    portIsReachable = true;
-                    break;
-                } else {
-                    logger.debug("disableModemGps() waiting for PositionService to release serial port ...");
-                }
-            } catch (Exception e) {
-                logger.debug("disableModemGps() waiting for PositionService to release serial port ", e);
-            }
-        } while (System.currentTimeMillis() - startTimer < 20000L);
-
-        modem.disableGps();
         try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-        }
+            postModemGpsEvent(modem, false);
 
-        boolean ret = false;
-        if (portIsReachable && !modem.isGpsEnabled()) {
-            logger.error("disableModemGps() :: Modem GPS is disabled :: portIsReachable={}, modem.isGpsEnabled()={}",
-                    portIsReachable, modem.isGpsEnabled());
-            ret = true;
+            long startTimer = System.currentTimeMillis();
+            do {
+                try {
+                    Thread.sleep(3000);
+                    if (modem.isPortReachable(modem.getAtPort())) {
+                        logger.debug("disableModemGps() modem is now reachable ...");
+
+                        modem.disableGps();
+                        final boolean isGpsEnabled = modem.isGpsEnabled();
+
+                        logger.debug("disableModemGps() modem.isGpsEnabled()={} ...", isGpsEnabled);
+                        return !isGpsEnabled;
+                    } else {
+                        logger.debug("disableModemGps() waiting for PositionService to release serial port ...");
+                    }
+                } catch (Exception e) {
+                    logger.debug("disableModemGps() waiting for PositionService to release serial port ", e);
+                }
+            } while (System.currentTimeMillis() - startTimer < 20000L);
+
+            logger.error("disableModemGps() :: portIsReachable=false");
+            return false;
+
+        } catch (Exception e) {
+            logger.error("disableModemGps() :: failed due to excetpion", e);
+            return false;
         }
-        return ret;
     }
 
     private void postModemGpsEvent(CellularModem modem, boolean enabled) throws KuraException {

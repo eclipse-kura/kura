@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -24,25 +24,25 @@ public class Ppp implements IModemLinkService {
 
     private static final Logger s_logger = LoggerFactory.getLogger(Ppp.class);
 
-    private static Object s_lock = new Object();
-    private final String m_iface;
-    private final String m_port;
+    private static final Object lock = new Object();
+    private final String iface;
+    private final String port;
 
     public Ppp(String iface, String port) {
-        this.m_iface = iface;
-        this.m_port = port;
+        this.iface = iface;
+        this.port = port;
     }
 
     @Override
     public void connect() throws KuraException {
-        PppLinux.connect(this.m_iface, this.m_port);
+        PppLinux.connect(this.iface, this.port);
     }
 
     @Override
     public void disconnect() throws KuraException {
 
         s_logger.info("disconnecting :: stopping PPP monitor ...");
-        PppLinux.disconnect(this.m_iface, this.m_port);
+        PppLinux.disconnect(this.iface, this.port);
 
         try {
             LinuxDns linuxDns = LinuxDns.getInstance();
@@ -57,7 +57,7 @@ public class Ppp implements IModemLinkService {
     @Override
     public String getIPaddress() throws KuraException {
         String ipAddress = null;
-        LinuxIfconfig ifconfig = LinuxNetworkUtil.getInterfaceConfiguration(this.m_iface);
+        LinuxIfconfig ifconfig = LinuxNetworkUtil.getInterfaceConfiguration(this.iface);
         if (ifconfig != null) {
             ipAddress = ifconfig.getInetAddress();
         }
@@ -66,25 +66,24 @@ public class Ppp implements IModemLinkService {
 
     @Override
     public String getIfaceName() {
-        return this.m_iface;
+        return this.iface;
     }
 
     @Override
     public PppState getPppState() throws KuraException {
-
-        PppState pppState = PppState.NOT_CONNECTED;
-        synchronized (s_lock) {
-            boolean pppdRunning = PppLinux.isPppProcessRunning(this.m_iface, this.m_port);
-            String ip = getIPaddress();
+        synchronized (lock) {
+            final PppState pppState;
+            final boolean pppdRunning = PppLinux.isPppProcessRunning(this.iface, this.port);
+            final String ip = getIPaddress();
 
             if (pppdRunning && ip != null) {
                 pppState = PppState.CONNECTED;
-            } else if (pppdRunning && ip == null) {
+            } else if (pppdRunning) {
                 pppState = PppState.IN_PROGRESS;
             } else {
                 pppState = PppState.NOT_CONNECTED;
             }
+            return pppState;
         }
-        return pppState;
     }
 }

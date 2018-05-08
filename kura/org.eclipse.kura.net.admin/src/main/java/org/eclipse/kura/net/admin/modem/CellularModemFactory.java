@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -12,6 +12,7 @@
 package org.eclipse.kura.net.admin.modem;
 
 import java.util.Hashtable;
+import java.util.Map;
 
 import org.eclipse.kura.net.modem.CellularModem;
 import org.eclipse.kura.net.modem.ModemDevice;
@@ -32,19 +33,19 @@ public interface CellularModemFactory {
     public CellularModem obtainCellularModemService(ModemDevice modemDevice, String platform) throws Exception;
 
     /**
+     * Releases a modem service created by this factory instance
+     *
+     * @param usbPortAddress
+     */
+    public void releaseModemService(CellularModem modem);
+
+    /**
      * Reports modem services available
      *
      * @return list of modem services as <code>Hashtable<String, CellularModemService></code>
      *         with the usb port as the key
      */
-    public Hashtable<String, ? extends CellularModem> getModemServices();
-
-    /**
-     * Releases modem service specified by its USB address
-     *
-     * @param usbPortAddress
-     */
-    public void releaseModemService(String usbPortAddress);
+    public Map<ModemDevice, CellularModem> getAllModemServices();
 
     /**
      * Reports type of modem service
@@ -53,4 +54,21 @@ public interface CellularModemFactory {
      */
     @Deprecated
     public ModemTechnologyType getType();
+
+    /**
+     * Reports modem services available
+     *
+     * @return list of modem services as <code>Hashtable<String, CellularModemService></code>
+     *         with the usb port as the key
+     */
+    @Deprecated
+    public Hashtable<String, ? extends CellularModem> getModemServices();
+
+    /**
+     * Releases modem service specified by its USB address
+     *
+     * @param usbPortAddress
+     */
+    @Deprecated
+    public void releaseModemService(String usbPortAddress);
 }

@@ -9,6 +9,7 @@
  * Contributors:
  *  Eurotech
  *  Amit Kumar Mondal
+ *  Red Hat Inc
  *
  *******************************************************************************/
 package org.eclipse.kura.internal.wire;
@@ -23,6 +24,7 @@ import static org.osgi.service.wireadmin.WireConstants.WIREADMIN_CONSUMER_PID;
 import static org.osgi.service.wireadmin.WireConstants.WIREADMIN_PRODUCER_PID;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -73,9 +75,6 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
 
     private static final Logger logger = LoggerFactory.getLogger(WireServiceImpl.class);
 
-    /** The service component properties. */
-    private Map<String, Object> properties;
-
     private volatile WireAdmin wireAdmin;
 
     private ServiceTracker<WireComponent, WireComponent> wireComponentServiceTracker;
@@ -120,7 +119,6 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
     protected void activate(final ComponentContext componentContext, final Map<String, Object> properties) {
         logger.info("Activating Wire Service...");
         this.bundleContext = componentContext.getBundleContext();
-        this.properties = properties;
 
         updated(properties);
 
@@ -131,7 +129,6 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
 
         try {
             logger.info("Updating Wire Service Component...");
-            this.properties = properties;
 
             this.currentConfiguration = loadWireGraphConfiguration(properties);
 
@@ -168,10 +165,7 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
             final int emitterPort, final int receiverPort) throws InvalidSyntaxException {
         requireNonNull(emitterServicePid, "Emitter Service PID cannot be null");
         requireNonNull(receiverServicePid, "Receiver Service PID cannot be null");
-        requireNonNull(emitterPort);
-        requireNonNull(receiverPort);
 
-        boolean found = false;
         final Wire[] wires = this.wireAdmin.getWires(null);
         if (nonNull(wires)) {
             for (final Wire w : wires) {
@@ -182,15 +176,14 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
                             && receiverServicePid.equals(props.get(WIREADMIN_CONSUMER_PID))
                             && emitterPort == (Integer) props.get(Constants.WIRE_EMITTER_PORT_PROP_NAME.value())
                             && receiverPort == (Integer) props.get(Constants.WIRE_RECEIVER_PORT_PROP_NAME.value())) {
-                        found = true;
-                        break;
+                        return true;
                     }
                 } catch (Exception e) {
                     continue;
                 }
             }
         }
-        return found;
+        return false;
 
     }
 
@@ -204,12 +197,12 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
             final String receiverServicePid = getServicePidByKuraServicePid(receiverPid);
             final int emitterPort = conf.getEmitterPort();
             final int receiverPort = conf.getReceiverPort();
-            if (nonNull(emitterServicePid) && nonNull(receiverServicePid) && nonNull(emitterPort)
-                    && nonNull(receiverPort)) {
+            if (nonNull(emitterServicePid) && nonNull(receiverServicePid)) {
                 final boolean found = checkWireExistence(emitterServicePid, receiverServicePid, emitterPort,
                         receiverPort);
                 if (!found) {
-                    logger.info("Creating wire between {} and {}....", emitterPid, receiverPid);
+                    logger.info("Creating wire between {}/{} and {}/{}...", emitterPid, emitterPort, receiverPid,
+                            receiverPort);
                     final Dictionary<String, Object> properties = new Hashtable<>();
                     properties.put(Constants.WIRE_EMITTER_PORT_PROP_NAME.value(), emitterPort);
                     properties.put(Constants.WIRE_RECEIVER_PORT_PROP_NAME.value(), receiverPort);
@@ -271,7 +264,7 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
     }
 
     private static MultiportWireConfiguration toWireConfiguration(Wire wire) {
-        final Dictionary wireProps = wire.getProperties();
+        final Dictionary<?, ?> wireProps = wire.getProperties();
 
         final String emitterKuraServicePid = (String) wireProps
                 .get(Constants.EMITTER_KURA_SERVICE_PID_PROP_NAME.value());
@@ -333,7 +326,7 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
 
             final WireConfiguration actualWireConfiguration;
 
-            if (wireConfiguration.getClass() == WireConfiguration.class) {
+            if (wireConfiguration.getClass().equals(WireConfiguration.class)) {
                 actualWireConfiguration = new MultiportWireConfiguration(wireConfiguration.getEmitterPid(),
                         wireConfiguration.getReceiverPid(), 0, 0);
             } else {
@@ -359,14 +352,19 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
     /** {@inheritDoc} */
     @Override
     public Set<WireConfiguration> getWireConfigurations() {
-        return currentConfiguration.getWireConfigurations().stream().collect(Collectors.toSet());
+        if (this.currentConfiguration == null) {
+            return Collections.emptySet();
+        }
+        return new HashSet<>(this.currentConfiguration.getWireConfigurations());
     }
 
     @Override
     public synchronized void update(WireGraphConfiguration newConfiguration) throws KuraException {
         logger.info("Closing Wire Component Service tracker...");
-        this.wireComponentServiceTracker.close();
-        this.wireComponentServiceTracker = null;
+        if (this.wireComponentServiceTracker != null) {
+            this.wireComponentServiceTracker.close();
+            this.wireComponentServiceTracker = null;
+        }
         logger.info("Closing Wire Component Service tracker...done");
 
         final WireGraphConfiguration currentGraphConfiguration = get();
@@ -583,36 +581,32 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
     }
 
     private ServiceReference<Marshaller>[] getJsonMarshallers() {
-        String filterString = String.format("(&(kura.service.pid=%s))",
-                "org.eclipse.kura.json.marshaller.unmarshaller.provider");
-        return ServiceUtil.getServiceReferences(this.bundleContext, Marshaller.class, filterString);
+        return ServiceUtil.getServiceReferences(this.bundleContext, Marshaller.class,
+                "(kura.service.pid=org.eclipse.kura.json.marshaller.unmarshaller.provider)");
     }
 
     private ServiceReference<Unmarshaller>[] getJsonUnmarshallers() {
-        String filterString = String.format("(&(kura.service.pid=%s))",
-                "org.eclipse.kura.json.marshaller.unmarshaller.provider");
-        return ServiceUtil.getServiceReferences(this.bundleContext, Unmarshaller.class, filterString);
-    }
-
-    private void ungetServiceReferences(final ServiceReference<?>[] refs) {
-        ServiceUtil.ungetServiceReferences(this.bundleContext, refs);
+        return ServiceUtil.getServiceReferences(this.bundleContext, Unmarshaller.class,
+                "(kura.service.pid=org.eclipse.kura.json.marshaller.unmarshaller.provider)");
     }
 
     protected <T> T unmarshal(String string, Class<T> clazz) throws KuraException {
         T result = null;
-        ServiceReference<Unmarshaller>[] unmarshallerSRs = getJsonUnmarshallers();
+        final ServiceReference<Unmarshaller>[] unmarshallerSRs = getJsonUnmarshallers();
         try {
             for (final ServiceReference<Unmarshaller> unmarshallerSR : unmarshallerSRs) {
-                Unmarshaller unmarshaller = this.bundleContext.getService(unmarshallerSR);
-                result = unmarshaller.unmarshal(string, clazz);
-                if (result != null) {
-                    break;
+                final Unmarshaller unmarshaller = this.bundleContext.getService(unmarshallerSR);
+                try {
+                    result = unmarshaller.unmarshal(string, clazz);
+                    if (result != null) {
+                        break;
+                    }
+                } finally {
+                    this.bundleContext.ungetService(unmarshallerSR);
                 }
             }
         } catch (Exception e) {
-            logger.warn("Failed to extract persisted configuration.");
-        } finally {
-            ungetServiceReferences(unmarshallerSRs);
+            logger.warn("Failed to extract persisted configuration.", e);
         }
         if (result == null) {
             throw new KuraException(KuraErrorCode.DECODER_ERROR);
@@ -622,19 +616,21 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
 
     protected String marshal(Object object) {
         String result = null;
-        ServiceReference<Marshaller>[] marshallerSRs = getJsonMarshallers();
+        final ServiceReference<Marshaller>[] marshallerSRs = getJsonMarshallers();
         try {
             for (final ServiceReference<Marshaller> marshallerSR : marshallerSRs) {
-                Marshaller marshaller = this.bundleContext.getService(marshallerSR);
-                result = marshaller.marshal(object);
-                if (result != null) {
-                    break;
+                final Marshaller marshaller = this.bundleContext.getService(marshallerSR);
+                try {
+                    result = marshaller.marshal(object);
+                    if (result != null) {
+                        break;
+                    }
+                } finally {
+                    this.bundleContext.ungetService(marshallerSR);
                 }
             }
         } catch (Exception e) {
-            logger.warn("Failed to marshal configuration.");
-        } finally {
-            ungetServiceReferences(marshallerSRs);
+            logger.warn("Failed to marshal configuration.", e);
         }
         return result;
     }
@@ -650,7 +646,7 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
     }
 
     private WireGraphConfiguration loadWireGraphConfiguration(Map<String, Object> properties) throws KuraException {
-        String jsonWireGraph = (String) this.properties.get(NEW_WIRE_GRAPH_PROPERTY);
+        String jsonWireGraph = (String) properties.get(NEW_WIRE_GRAPH_PROPERTY);
         return unmarshal(jsonWireGraph, WireGraphConfiguration.class);
     }
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,13 +8,14 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc
  *******************************************************************************/
 package org.eclipse.kura.net.admin.visitor.linux;
 
+import static org.eclipse.kura.net.admin.visitor.linux.WriterHelper.copyFile;
+
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.List;
 import java.util.regex.Matcher;
 
@@ -25,8 +26,6 @@ import org.eclipse.kura.core.net.AbstractNetInterface;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
 import org.eclipse.kura.core.util.IOUtil;
-import org.eclipse.kura.core.util.ProcessUtil;
-import org.eclipse.kura.core.util.SafeProcess;
 import org.eclipse.kura.linux.net.wifi.HostapdManager;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetConfigIP4;
@@ -178,12 +177,10 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 
         fileAsString = updateIgnoreBroadcastSsid(wifiConfig, fileAsString);
 
-        fileAsString = fileAsString.replaceAll("\r\n", "\n");
-
         File outputFile = getTemporaryFile();
 
         // everything is set and we haven't failed - write the file
-        copyFile(fileAsString, outputFile);
+        copyFile(fileAsString, outputFile.toPath());
 
         // move the file if we made it this far
         moveFile(interfaceName);
@@ -381,21 +378,6 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
         return new File(HOSTAPD_TMP_CONFIG_FILE);
     }
 
-    /*
-     * This method copies supplied String to a file
-     */
-    private void copyFile(String data, File destination) throws KuraException {
-
-        try (FileOutputStream fos = new FileOutputStream(destination); PrintWriter pw = new PrintWriter(fos)) {
-            pw.write(data);
-            pw.flush();
-            fos.getFD().sync();
-            setPermissions(destination.toString());
-        } catch (IOException e) {
-            throw KuraException.internalError(e);
-        }
-    }
-
     private void moveFile(String ifaceName) throws KuraException, IOException {
         File tmpFile = getTemporaryFile();
         File file = getFinalFile(ifaceName);
@@ -409,38 +391,6 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
             }
         } else {
             logger.info("Not rewriting hostapd.conf file because it is the same");
-        }
-    }
-
-    /*
-     * This method sets permissions to hostapd configuration file
-     */
-    private void setPermissions(String fileName) throws KuraException {
-        SafeProcess procDos = null;
-        SafeProcess procChmod = null;
-        try {
-            procChmod = ProcessUtil.exec("chmod 600 " + fileName);
-            procChmod.waitFor();
-
-            try {
-                procDos = ProcessUtil.exec("dos2unix " + fileName);
-                procDos.waitFor();
-            } catch (Exception e) {
-                // dos2unix may not exist on the target system resulting in
-                // java.io.IOException: Cannot run program "dos2unix": error=2, No such file or directory
-                if (!e.getMessage().contains("dos2unix")) {
-                    throw e;
-                }
-            }
-        } catch (Exception e) {
-            throw KuraException.internalError(e);
-        } finally {
-            if (procChmod != null) {
-                ProcessUtil.destroy(procChmod);
-            }
-            if (procDos != null) {
-                ProcessUtil.destroy(procDos);
-            }
         }
     }
 

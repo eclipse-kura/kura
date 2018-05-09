@@ -17,9 +17,9 @@ import org.eclipse.kura.net.wifi.WifiMode;
 
 public class WifiInterfaceAddressImpl extends NetInterfaceAddressImpl implements WifiInterfaceAddress {
 
-    private WifiMode m_mode;
-    private long m_bitrate;
-    private WifiAccessPoint m_wifiAccessPoint;
+    private WifiMode mode;
+    private long bitrate;
+    private WifiAccessPoint wifiAccessPoint;
 
     public WifiInterfaceAddressImpl() {
         super();
@@ -27,36 +27,46 @@ public class WifiInterfaceAddressImpl extends NetInterfaceAddressImpl implements
 
     public WifiInterfaceAddressImpl(WifiInterfaceAddress other) {
         super(other);
-        this.m_mode = other.getMode();
-        this.m_bitrate = other.getBitrate();
-        this.m_wifiAccessPoint = other.getWifiAccessPoint();
+        this.mode = other.getMode();
+        this.bitrate = other.getBitrate();
+        this.wifiAccessPoint = other.getWifiAccessPoint();
     }
 
     @Override
     public WifiMode getMode() {
-        return this.m_mode;
+        return this.mode;
     }
 
     public void setMode(WifiMode mode) {
-        this.m_mode = mode;
+        this.mode = mode;
     }
 
     @Override
     public long getBitrate() {
-        return this.m_bitrate;
+        return this.bitrate;
     }
 
     public void setBitrate(long bitrate) {
-        this.m_bitrate = bitrate;
+        this.bitrate = bitrate;
     }
 
     @Override
     public WifiAccessPoint getWifiAccessPoint() {
-        return this.m_wifiAccessPoint;
+        return this.wifiAccessPoint;
     }
 
     public void setWifiAccessPoint(WifiAccessPoint wifiAccessPoint) {
-        this.m_wifiAccessPoint = wifiAccessPoint;
+        this.wifiAccessPoint = wifiAccessPoint;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + (int) (this.bitrate ^ this.bitrate >>> 32);
+        result = prime * result + (this.mode == null ? 0 : this.mode.hashCode());
+        result = prime * result + (this.wifiAccessPoint == null ? 0 : this.wifiAccessPoint.hashCode());
+        return result;
     }
 
     @Override
@@ -71,16 +81,7 @@ public class WifiInterfaceAddressImpl extends NetInterfaceAddressImpl implements
 
         WifiInterfaceAddress other = (WifiInterfaceAddress) obj;
 
-        if (!compare(this.m_mode, other.getMode())) {
-            return false;
-        }
-        if (!compare(this.m_bitrate, other.getBitrate())) {
-            return false;
-        }
-        if (!compare(this.m_wifiAccessPoint, other.getWifiAccessPoint())) {
-            return false;
-        }
-
-        return true;
+        return compare(this.mode, other.getMode()) && compare(this.bitrate, other.getBitrate())
+                && compare(this.wifiAccessPoint, other.getWifiAccessPoint());
     }
 }

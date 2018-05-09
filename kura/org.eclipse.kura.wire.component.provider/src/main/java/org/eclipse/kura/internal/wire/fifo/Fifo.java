@@ -183,6 +183,7 @@ public class Fifo implements WireEmitter, WireReceiver, ConfigurableComponent {
                     producer.signal();
                     logger.debug("envelope submitted");
                 } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
                     logger.warn("Interrupted while adding new envelope to queue", e);
                 } finally {
                     lock.unlock();

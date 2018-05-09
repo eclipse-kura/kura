@@ -208,24 +208,16 @@ public class DbDataStore implements DataStore {
     // ----------------------------------------------------------
 
     private synchronized int getMessageCount() throws KuraStoreException {
-        ResultSet rs = null;
-        Connection conn = null;
-        PreparedStatement stmt = null;
         int count = -1;
-        try {
+        try (Connection conn = getConnection();
+                PreparedStatement stmt = conn.prepareStatement(this.sqlMessageCount);
+                ResultSet rs = stmt.executeQuery()) {
 
-            conn = getConnection();
-            stmt = conn.prepareStatement(this.sqlMessageCount);
-            rs = stmt.executeQuery();
             if (rs.next()) {
                 count = rs.getInt(1);
             }
         } catch (Exception e) {
             throw new KuraStoreException(e, "Cannot get message count");
-        } finally {
-            close(rs);
-            close(stmt);
-            close(conn);
         }
 
         return count;
@@ -292,34 +284,33 @@ public class DbDataStore implements DataStore {
         Timestamp now = new Timestamp(new Date().getTime());
 
         int messageId = -1;
-        ResultSet rs = null;
         Connection conn = null;
-        PreparedStatement pstmt = null;
-        PreparedStatement cstmt = null;
         try {
 
             conn = getConnection();
 
             // store message
-            pstmt = conn.prepareStatement(this.sqlStore);
-            pstmt.setString(1, topic);				// topic
-            pstmt.setInt(2, qos);				// qos
-            pstmt.setBoolean(3, retain);				// retain
-            pstmt.setTimestamp(4, now, this.utcCalendar); // createdOn
-            pstmt.setTimestamp(5, null);				// publishedOn
-            pstmt.setInt(6, -1);                 // publishedMessageId
-            pstmt.setTimestamp(7, null);				// confirmedOn
-            pstmt.setBytes(8, payload);			// payload
-            pstmt.setInt(9, priority);            // priority
-            pstmt.setString(10, null);               // sessionId
-            pstmt.setTimestamp(11, null);				// droppedOn
-            pstmt.execute();
+            try (PreparedStatement pstmt = conn.prepareStatement(this.sqlStore)) {
+                pstmt.setString(1, topic);              // topic
+                pstmt.setInt(2, qos);               // qos
+                pstmt.setBoolean(3, retain);                // retain
+                pstmt.setTimestamp(4, now, this.utcCalendar); // createdOn
+                pstmt.setTimestamp(5, null);                // publishedOn
+                pstmt.setInt(6, -1);                 // publishedMessageId
+                pstmt.setTimestamp(7, null);                // confirmedOn
+                pstmt.setBytes(8, payload);         // payload
+                pstmt.setInt(9, priority);            // priority
+                pstmt.setString(10, null);               // sessionId
+                pstmt.setTimestamp(11, null);               // droppedOn
+                pstmt.execute();
+            }
 
             // retrieve message id
-            cstmt = conn.prepareStatement("CALL IDENTITY();");
-            rs = cstmt.executeQuery();
-            if (rs != null && rs.next()) {
-                messageId = rs.getInt(1);
+            try (PreparedStatement cstmt = conn.prepareStatement("CALL IDENTITY();");
+                    ResultSet rs = cstmt.executeQuery()) {
+                if (rs != null && rs.next()) {
+                    messageId = rs.getInt(1);
+                }
             }
 
             conn.commit();
@@ -328,9 +319,6 @@ public class DbDataStore implements DataStore {
             logger.error("SQL error code: {}", e.getErrorCode());
             throw new KuraStoreException(e, "Cannot store message");
         } finally {
-            close(rs);
-            close(cstmt);
-            close(pstmt);
             close(conn);
         }
         return get(messageId);
@@ -341,21 +329,20 @@ public class DbDataStore implements DataStore {
         DataMessage msg = null;
         ResultSet rs = null;
         Connection conn = null;
-        PreparedStatement stmt = null;
         try {
 
             conn = getConnection();
-            stmt = conn.prepareStatement(this.sqlGetMessage);
-            stmt.setInt(1, msgId);
-            rs = stmt.executeQuery();
-            if (rs.next()) {
-                msg = buildDataMessage(rs);
+            try (PreparedStatement stmt = conn.prepareStatement(this.sqlGetMessage)) {
+                stmt.setInt(1, msgId);
+                rs = stmt.executeQuery();
+                if (rs.next()) {
+                    msg = buildDataMessage(rs);
+                }
             }
         } catch (Exception e) {
             throw new KuraStoreException(e, "Cannot get message by ID: " + msgId);
         } finally {
             close(rs);
-            close(stmt);
             close(conn);
         }
         return msg;
@@ -364,22 +351,19 @@ public class DbDataStore implements DataStore {
     @Override
     public synchronized DataMessage getNextMessage() throws KuraStoreException {
         DataMessage msg = null;
-        ResultSet rs = null;
         Connection conn = null;
-        PreparedStatement stmt = null;
         try {
 
             conn = getConnection();
-            stmt = conn.prepareStatement(this.sqlGetNextMessage);
-            rs = stmt.executeQuery();
-            if (rs != null && rs.next()) {
-                msg = buildDataMessage(rs);
+            try (PreparedStatement stmt = conn.prepareStatement(this.sqlGetNextMessage);
+                    ResultSet rs = stmt.executeQuery()) {
+                if (rs != null && rs.next()) {
+                    msg = buildDataMessage(rs);
+                }
             }
         } catch (Exception e) {
             throw new KuraStoreException(e, "Cannot get message next message");
         } finally {
-            close(rs);
-            close(stmt);
             close(conn);
         }
         return msg;
@@ -466,21 +450,18 @@ public class DbDataStore implements DataStore {
     public synchronized void repair() throws KuraStoreException {
         // See:
         // https://sourceforge.net/p/hsqldb/discussion/73674/thread/a08046eb/#7960
-        ResultSet rs = null;
         Connection conn = null;
-        PreparedStatement pstmt = null;
-        Statement stmt = null;
         int count = -1;
         try {
 
             conn = getConnection();
             // Get the count of IDs for which duplicates exist
-            pstmt = conn.prepareStatement(this.sqlDuplicateCount);
-            rs = pstmt.executeQuery();
-            if (rs.next()) {
-                count = rs.getInt(1);
+            try (PreparedStatement pstmt = conn.prepareStatement(this.sqlDuplicateCount);
+                    ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    count = rs.getInt(1);
+                }
             }
-
             if (count <= 0) {
                 return;
             }
@@ -489,29 +470,28 @@ public class DbDataStore implements DataStore {
                     "Found messages with duplicate ID. Count of IDs for which duplicates exist: {}. Attempting to repair...",
                     count);
 
-            stmt = conn.createStatement();
+            try (Statement stmt = conn.createStatement()) {
 
-            stmt.execute(this.sqlDropPrimaryKey);
-            logger.info("Primary key dropped");
+                stmt.execute(this.sqlDropPrimaryKey);
+                logger.info("Primary key dropped");
 
-            stmt.execute(this.sqlDeleteDuplicates);
-            logger.info("Duplicate messages deleted");
+                stmt.execute(this.sqlDeleteDuplicates);
+                logger.info("Duplicate messages deleted");
 
-            stmt.execute(this.sqlCreatePrimaryKey);
-            logger.info("Primary key created");
+                stmt.execute(this.sqlCreatePrimaryKey);
+                logger.info("Primary key created");
 
+            }
             conn.commit();
 
             execute("CHECKPOINT");
             logger.info("Checkpoint");
+
             conn.commit();
         } catch (SQLException e) {
             rollback(conn);
             throw new KuraStoreException(e, "Cannot repair database");
         } finally {
-            close(rs);
-            close(pstmt);
-            close(stmt);
             close(conn);
         }
     }
@@ -548,28 +528,27 @@ public class DbDataStore implements DataStore {
     }
 
     private synchronized List<DataMessage> listMessages(String sql, Integer... params) throws KuraStoreException {
-        List<DataMessage> msgs = new ArrayList<DataMessage>();
+        List<DataMessage> msgs = new ArrayList<>();
 
         ResultSet rs = null;
         Connection conn = null;
-        PreparedStatement stmt = null;
         try {
 
             conn = getConnection();
-            stmt = conn.prepareStatement(sql);
-            if (params != null) {
-                for (int i = 0; i < params.length; i++) {
-                    stmt.setInt(2 + i, params[i]);  // timeInterval
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                if (params != null) {
+                    for (int i = 0; i < params.length; i++) {
+                        stmt.setInt(2 + i, params[i]);  // timeInterval
+                    }
                 }
-            }
 
-            rs = stmt.executeQuery();
-            msgs = buildDataMessagesNoPayload(rs);
+                rs = stmt.executeQuery();
+                msgs = buildDataMessagesNoPayload(rs);
+            }
         } catch (Exception e) {
             throw new KuraStoreException(e, "Cannot list messages");
         } finally {
             close(rs);
-            close(stmt);
             close(conn);
         }
 

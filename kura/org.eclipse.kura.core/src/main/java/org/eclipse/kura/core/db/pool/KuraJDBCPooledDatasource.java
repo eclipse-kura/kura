@@ -99,16 +99,18 @@ public class KuraJDBCPooledDatasource implements ConnectionPoolDataSource, Commo
 
         this.connectionProps = props == null ? new Properties() : (Properties) props.clone();
 
-        if (this.user != null) {
-            props.setProperty("user", this.user);
-        }
+        if (props != null) {
+            if (this.user != null) {
+                props.setProperty("user", this.user);
+            }
 
-        if (this.password != null) {
-            props.setProperty("password", new String(this.password));
-        }
+            if (this.password != null) {
+                props.setProperty("password", new String(this.password));
+            }
 
-        if (this.loginTimeout != 0) {
-            props.setProperty("loginTimeout", Integer.toString(this.loginTimeout));
+            if (this.loginTimeout != 0) {
+                props.setProperty("loginTimeout", Integer.toString(this.loginTimeout));
+            }
         }
     }
 

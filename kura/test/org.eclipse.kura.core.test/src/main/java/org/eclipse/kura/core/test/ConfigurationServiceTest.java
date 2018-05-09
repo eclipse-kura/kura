@@ -12,7 +12,6 @@
 package org.eclipse.kura.core.test;
 
 import java.io.StringReader;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
@@ -43,7 +42,6 @@ import org.eclipse.kura.message.KuraResponsePayload;
 import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.test.annotation.TestTarget;
 import org.eclipse.kura.util.service.ServiceUtil;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
@@ -79,6 +77,7 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
                 fail("Dependencies not resolved!");
             }
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             fail("OSGi dependencies unfulfilled");
         }
     }
@@ -343,12 +342,13 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
         newccs.add(ccnew);
         newConfigs.setConfigurations(newccs);
 
-        
-        //TODO: solve this
+        // TODO: solve this
         String result = marshalXml(newConfigs);
-        
+
         KuraPayload payload = new KuraPayload();
-        payload.setBody(result.getBytes());
+        if (result != null) {
+            payload.setBody(result.getBytes());
+        }
 
         sb = new StringBuilder(CloudletTopic.Method.PUT.toString()).append("/")
                 .append(CloudConfigurationHandler.RESOURCE_CONFIGURATIONS).append("/").append(pid);
@@ -380,12 +380,9 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
         s = new String(resp.getBody(), "UTF-8");
         System.err.println(s);
 
-        xmlConfigs = unmarshalXml(s, XmlComponentConfigurations.class); 
-        
+        xmlConfigs = unmarshalXml(s, XmlComponentConfigurations.class);
+
         s_logger.info("validating modified configuration");
-        if (xmlConfigs == null) {
-            s_logger.info("ERROR: xmlConfigs is null");
-        }
         assertNotNull(xmlConfigs);
         ComponentConfiguration ccmod = xmlConfigs.getConfigurations().get(0);
         s_logger.info("Checking these are equal: " + ccmod.getConfigurationProperties().get("prop.string") + " AND "
@@ -463,7 +460,7 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
         Byte[] byteValues = new Byte[] { (byte) 7, (byte) 8, (byte) 9 };
         assertTrue(Arrays.equals(byteValues, (Byte[]) properties.get("prop.byte.array")));
     }
-    
+
     private ServiceReference<Marshaller>[] getXmlMarshallers() {
         String filterString = String.format("(&(kura.service.pid=%s))",
                 "org.eclipse.kura.xml.marshaller.unmarshaller.provider");

@@ -47,6 +47,7 @@ public class LinuxProcessUtil {
                 try {
                     proc.waitFor();
                 } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
                     logger.warn("Interrupted exception - ", e);
                 }
 
@@ -101,6 +102,7 @@ public class LinuxProcessUtil {
                 int exitVal = proc.waitFor();
                 logger.info(command + " returned with exit value:" + exitVal);
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
                 logger.error("error executing " + command + " command" + e);
             }
 
@@ -127,6 +129,7 @@ public class LinuxProcessUtil {
                 int exitVal = proc.waitFor();
                 logger.debug("{} returned with exit value:{}", cmdBuilder, +exitVal);
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
                 logger.error("error executing " + command + " command" + e);
             }
 
@@ -255,10 +258,9 @@ public class LinuxProcessUtil {
         int pid = -1;
         File kuraPidFile = new File("/var/run/kura.pid");
         if (kuraPidFile.exists()) {
-            BufferedReader br;
-            br = new BufferedReader(new FileReader(kuraPidFile));
-            pid = Integer.parseInt(br.readLine());
-            br.close();
+            try (BufferedReader br = new BufferedReader(new FileReader(kuraPidFile))) {
+                pid = Integer.parseInt(br.readLine());
+            }
         }
         return pid;
     }
@@ -331,8 +333,7 @@ public class LinuxProcessUtil {
 
             // get the output
             br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-            br.readLine(); // skip first line: PID TTY STAT TIME COMMAND
-            String line = null;
+            String line = br.readLine(); // skip first line: PID TTY STAT TIME COMMAND
             while ((line = br.readLine()) != null) {
                 if (parsePid(line) == pid) {
                     isRunning = true;
@@ -341,6 +342,7 @@ public class LinuxProcessUtil {
             }
             return isRunning;
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new IOException(e);
         } finally {
             if (br != null) {

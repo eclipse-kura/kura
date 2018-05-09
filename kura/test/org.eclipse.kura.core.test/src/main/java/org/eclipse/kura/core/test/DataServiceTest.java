@@ -38,7 +38,7 @@ import org.junit.Test;
 public class DataServiceTest implements DataServiceListener {
 
     private static CountDownLatch s_dependencyLatch = new CountDownLatch(1);	// initialize with number of
-	// dependencies
+    // dependencies
     private static DataService s_dataService;
 
     private static Set<Integer> s_qos0MsgIds = new HashSet<Integer>();
@@ -70,6 +70,7 @@ public class DataServiceTest implements DataServiceListener {
         try {
             s_dependencyLatch.await(5, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             fail("OSGi dependencies unfulfilled");
         }
     }

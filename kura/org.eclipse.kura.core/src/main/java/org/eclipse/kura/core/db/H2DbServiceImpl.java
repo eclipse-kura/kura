@@ -392,6 +392,7 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
                     }
                 }
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
                 // stop if interrupted
             }
             logger.info("checkpoint task exiting");

@@ -164,8 +164,8 @@ public class ProcessUtilTest {
         // Then destroy it
         ProcessUtil.destroy(process);
 
-        assertNull(TestUtil.getFieldValue(process, "m_inBytes"));
-        assertNull(TestUtil.getFieldValue(process, "m_errBytes"));
-        assertNull(TestUtil.getFieldValue(process, "m_process"));
+        assertNull(TestUtil.getFieldValue(process, "inBytes"));
+        assertNull(TestUtil.getFieldValue(process, "errBytes"));
+        assertNull(TestUtil.getFieldValue(process, "process"));
     }
 }

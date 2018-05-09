@@ -418,6 +418,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
                 logger.warn("Sleep Interrupted!");
             }
 

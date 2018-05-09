@@ -77,7 +77,7 @@ public class ProcessMonitorThread extends Thread {
             if (this.procTout > 0) {
                 timer = new Timer(true);
                 InterruptTimerTask interrupter = new InterruptTimerTask(Thread.currentThread());
-                timer.schedule(interrupter, this.procTout /* seconds */ * 1000 /* milliseconds per second */);
+                timer.schedule(interrupter, this.procTout /* seconds */ * 1000L /* milliseconds per second */);
             }
 
             is = this.proc.getInputStream();

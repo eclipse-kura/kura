@@ -71,6 +71,7 @@ public class OpcUaDriverTest {
             boolean ok = dependencyLatch.await(10, TimeUnit.SECONDS);
             assertTrue(ok);
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             fail("Dependencies should have been injected.");
         }
     }

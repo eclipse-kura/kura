@@ -98,6 +98,7 @@ public class LinuxNetworkUtil {
             // get the output
             return getAllInterfaceNamesInternalParse(cmd, proc);
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formInterruptedCommandMessage(cmd));
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
@@ -159,6 +160,7 @@ public class LinuxNetworkUtil {
             // get the output
             ipAddress = getCurrentIpAddressInternalParse(ifaceName, cmd, proc);
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formInterruptedCommandMessage(cmd));
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
@@ -448,7 +450,8 @@ public class LinuxNetworkUtil {
             ifconfigs.put(ifaceName, config);
             return config;
         } catch (KuraException e) {
-            if ((e.getCode() == KuraErrorCode.OS_COMMAND_ERROR) || (e.getCode() == KuraErrorCode.PROCESS_EXECUTION_ERROR)) {
+            if ((e.getCode() == KuraErrorCode.OS_COMMAND_ERROR)
+                    || (e.getCode() == KuraErrorCode.PROCESS_EXECUTION_ERROR)) {
                 // Assuming ifconfig fails because a PPP link went down and its interface cannot be found
                 if (ifaceName.matches(PPP_IFACE_REGEX)) {
                     File pppFile = new File(NetworkServiceImpl.PPP_PEERS_DIR + ifaceName);
@@ -495,6 +498,7 @@ public class LinuxNetworkUtil {
                 }
             }
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formInterruptedCommandMessage(cmd));
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
@@ -583,6 +587,7 @@ public class LinuxNetworkUtil {
         } catch (IOException e) {
             throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formInterruptedCommandMessage(cmd));
         } finally {
             if (proc != null) {
@@ -787,6 +792,7 @@ public class LinuxNetworkUtil {
                 getEthernetDriverParse(ethtoolCmd, driver, procEthtool);
             }
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e,
                     formInterruptedCommandMessage(ethtoolCmd));
         } catch (Exception e) {
@@ -842,6 +848,7 @@ public class LinuxNetworkUtil {
             // get the output
             getWifiCapabilitiesParse(cmd, capabilities, proc);
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formInterruptedCommandMessage(cmd));
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
@@ -919,6 +926,7 @@ public class LinuxNetworkUtil {
                 mode = getWifiModeParseIwconfig(cmd, procIw);
             }
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formInterruptedCommandMessage(cmd));
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
@@ -1025,6 +1033,7 @@ public class LinuxNetworkUtil {
                 bitRate = getWifiBitrateParseIwconfig(cmd, procIw);
             }
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formInterruptedCommandMessage(cmd));
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
@@ -1135,6 +1144,7 @@ public class LinuxNetworkUtil {
                 ssid = getSSIDParseIwconfig(cmd, procIwConfig);
             }
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formInterruptedCommandMessage(cmd));
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
@@ -1313,6 +1323,7 @@ public class LinuxNetworkUtil {
         } catch (IOException e) {
             throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formInterruptedCommandMessage(cmd));
         } finally {
             if (proc != null) {
@@ -1342,6 +1353,7 @@ public class LinuxNetworkUtil {
                 return;
             }
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formInterruptedCommandMessage(cmd));
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
@@ -1363,6 +1375,7 @@ public class LinuxNetworkUtil {
         } catch (IOException e) {
             throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formInterruptedCommandMessage(cmd));
         } finally {
             ProcessUtil.destroy(proc);
@@ -1424,6 +1437,7 @@ public class LinuxNetworkUtil {
             // get the output
             result = isEthernetControllerPoweredInternalParse(interfaceName, cmd, proc);
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formInterruptedCommandMessage(cmd));
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
@@ -1477,6 +1491,7 @@ public class LinuxNetworkUtil {
                 // get the output
                 result = isKernelModuleLoadedParse(cmd, proc);
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
                 throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formInterruptedCommandMessage(cmd));
             } catch (Exception e) {
                 throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
@@ -1521,6 +1536,7 @@ public class LinuxNetworkUtil {
             } catch (IOException e) {
                 throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
                 throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formInterruptedCommandMessage(cmd));
             } finally {
                 if (proc != null) {
@@ -1556,6 +1572,7 @@ public class LinuxNetworkUtil {
             } catch (IOException e) {
                 throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
                 throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formInterruptedCommandMessage(cmd));
             } finally {
                 if (proc != null) {
@@ -1583,6 +1600,7 @@ public class LinuxNetworkUtil {
                 // get the output
                 result = isKernelModuleLoadedForModeParse(cmd, wifiMode, proc);
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
                 throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formInterruptedCommandMessage(cmd));
             } catch (Exception e) {
                 throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
@@ -1638,9 +1656,9 @@ public class LinuxNetworkUtil {
         // FIXME Assume for now the interface name does not change
         if (KuraConstants.Reliagate_10_20.getTargetName().equals(TARGET_NAME) && "wlan0".equals(interfaceName)) {
             logger.info("Turning Wifi device ON ...");
-            FileWriter fw = new FileWriter("/sys/bus/pci/rescan");
-            fw.write("1");
-            fw.close();
+            try (FileWriter fw = new FileWriter("/sys/bus/pci/rescan")) {
+                fw.write("1");
+            }
         }
     }
 
@@ -1648,9 +1666,9 @@ public class LinuxNetworkUtil {
         // FIXME Assume for now the interface name does not change
         if (KuraConstants.Reliagate_10_20.getTargetName().equals(TARGET_NAME) && "wlan0".equals(interfaceName)) {
             logger.info("Turning Wifi device OFF ...");
-            FileWriter fw = new FileWriter("/sys/bus/pci/devices/0000:01:00.0/remove");
-            fw.write("1");
-            fw.close();
+            try (FileWriter fw = new FileWriter("/sys/bus/pci/devices/0000:01:00.0/remove")) {
+                fw.write("1");
+            }
         }
     }
 

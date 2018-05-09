@@ -281,7 +281,7 @@ public class CommConnectionImpl implements CommConnection, Closeable {
             try {
                 Thread.sleep(10);
             } catch (InterruptedException e) {
-                // ignore
+                Thread.currentThread().interrupt();
             }
         }
 
@@ -303,6 +303,7 @@ public class CommConnectionImpl implements CommConnection, Closeable {
             try {
                 Thread.sleep(10);
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
         }
 
@@ -326,9 +327,9 @@ public class CommConnectionImpl implements CommConnection, Closeable {
         }
 
         StringJoiner sj = new StringJoiner(" ");
-        
+
         for (byte b : bytes) {
-        	sj.add(String.format("%02X", b));
+            sj.add(String.format("%02X", b));
         }
 
         return sj.toString();

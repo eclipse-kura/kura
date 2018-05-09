@@ -168,17 +168,18 @@ public final class GPIODriver implements Driver, ConfigurableComponent {
     public synchronized PreparedRead prepareRead(List<ChannelRecord> channelRecords) {
         requireNonNull(channelRecords, "Channel Record list cannot be null");
 
-        GPIOPreparedRead preparedRead = new GPIOPreparedRead();
-        preparedRead.channelRecords = channelRecords;
+        try (GPIOPreparedRead preparedRead = new GPIOPreparedRead()) {
+            preparedRead.channelRecords = channelRecords;
 
-        for (ChannelRecord record : channelRecords) {
-            Optional<GPIORequestInfo> requestInfo = GPIORequestInfo.extract(record);
-            if (requestInfo.isPresent()) {
-                preparedRead.requestInfos.add(requestInfo.get());
-                this.gpioNames.add(requestInfo.get().resourceName);
+            for (ChannelRecord record : channelRecords) {
+                Optional<GPIORequestInfo> requestInfo = GPIORequestInfo.extract(record);
+                if (requestInfo.isPresent()) {
+                    preparedRead.requestInfos.add(requestInfo.get());
+                    this.gpioNames.add(requestInfo.get().resourceName);
+                }
             }
+            return preparedRead;
         }
-        return preparedRead;
     }
 
     @Override

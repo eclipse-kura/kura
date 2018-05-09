@@ -260,12 +260,13 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
         // Await termination of the publisher executor tasks
         try {
             // Waits to publish latest messages e.g. disconnect message
-            Thread.sleep(TRANSPORT_TASK_TIMEOUT * 1000);
+            Thread.sleep(TRANSPORT_TASK_TIMEOUT * 1000L);
 
             // Clean publisher thread shutdown
             this.publisherEnabled.set(false);
             signalPublisher();
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             logger.info("Interrupted", e);
         }
         this.publisherExecutor.shutdownNow();
@@ -853,7 +854,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
                 }
                 DataServiceImpl.this.notifyPending = false;
             } catch (InterruptedException e) {
-
+                Thread.currentThread().interrupt();
             } finally {
                 DataServiceImpl.this.lock.unlock();
             }

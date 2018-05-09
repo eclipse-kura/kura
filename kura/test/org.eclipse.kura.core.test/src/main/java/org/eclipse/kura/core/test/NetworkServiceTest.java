@@ -38,6 +38,7 @@ public class NetworkServiceTest extends TestCase {
         try {
             dependencyLatch.await(5, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             fail("OSGi dependencies unfulfilled");
         }
     }

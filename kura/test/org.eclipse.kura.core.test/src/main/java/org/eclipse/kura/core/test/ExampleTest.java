@@ -70,7 +70,7 @@ public class ExampleTest implements DataServiceListener {
     // http://stackoverflow.com/questions/7161338/using-osgi-declarative-services-in-the-context-of-a-junit-test
     private static DataService s_dataService;
     private static CountDownLatch s_dependencyLatch = new CountDownLatch(1);	// initialize with number of
-	// dependencies
+    // dependencies
 
     private static Lock s_lock = new ReentrantLock();
     private static Condition s_condition = s_lock.newCondition();
@@ -116,6 +116,7 @@ public class ExampleTest implements DataServiceListener {
         try {
             s_dependencyLatch.await(5, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             fail("OSGi dependencies unfulfilled");
         }
     }

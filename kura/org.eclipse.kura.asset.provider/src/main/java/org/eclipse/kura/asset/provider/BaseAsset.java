@@ -122,6 +122,8 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(BaseAsset.class);
 
+    private static final String DRIVER_NOT_NULL_MSG = "Driver cannot be null";
+
     /** The provided asset configuration wrapper instance. */
     private AssetConfiguration assetConfiguration;
 
@@ -286,7 +288,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         this.driver = null;
     }
 
-    public Driver getDriver() {
+    public synchronized Driver getDriver() {
         return this.driver;
     }
 
@@ -429,7 +431,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
     /** {@inheritDoc} */
     @Override
     public List<ChannelRecord> readAllChannels() throws KuraException {
-        requireNonNull(this.driver, "Driver cannot be null");
+        requireNonNull(this.driver, DRIVER_NOT_NULL_MSG);
         logger.debug("Reading asset channels...");
 
         final List<ChannelRecord> channelRecords;
@@ -465,7 +467,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
     /** {@inheritDoc} */
     @Override
     public List<ChannelRecord> read(final Set<String> channelNames) throws KuraException {
-        requireNonNull(this.driver, "Driver cannot be null");
+        requireNonNull(this.driver, DRIVER_NOT_NULL_MSG);
         logger.debug("Reading asset channels...");
 
         final List<ChannelRecord> channelRecords = new ArrayList<>(channelNames.size());
@@ -551,9 +553,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         } else {
             this.assetOptions.update(properties);
         }
-        if (this.assetOptions != null) {
-            this.assetConfiguration = this.assetOptions.getAssetConfiguration();
-        }
+        this.assetConfiguration = this.assetOptions.getAssetConfiguration();
         logger.debug("Retrieving configurations from the properties...Done");
     }
 
@@ -602,7 +602,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
     /** {@inheritDoc} */
     @Override
     public void write(final List<ChannelRecord> channelRecords) throws KuraException {
-        requireNonNull(this.driver, "Driver cannot be null");
+        requireNonNull(this.driver, DRIVER_NOT_NULL_MSG);
         logger.debug("Writing to channels...");
 
         final List<ChannelRecord> validRecords = new ArrayList<>(channelRecords.size());

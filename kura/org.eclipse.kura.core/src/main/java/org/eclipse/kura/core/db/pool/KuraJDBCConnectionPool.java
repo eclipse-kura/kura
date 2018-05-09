@@ -81,6 +81,7 @@ public class KuraJDBCConnectionPool implements ConnectionEventListener, Statemen
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
         }
 
@@ -158,8 +159,9 @@ public class KuraJDBCConnectionPool implements ConnectionEventListener, Statemen
         this.closed = true;
 
         try {
-            Thread.sleep(1000 * wait);
-        } catch (Throwable t) {
+            Thread.sleep(1000L * wait);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
 
         for (PooledConnection connection : this.connections) {

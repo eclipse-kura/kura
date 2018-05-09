@@ -83,6 +83,7 @@ public class AllCoreTests {
         try {
             dependencyLatch.await(10, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new Exception("OSGi dependencies unfulfilled", e);
         }
 

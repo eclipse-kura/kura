@@ -530,6 +530,7 @@ public class H2DbWireRecordStore implements WireEmitter, WireReceiver, Configura
             i++;
         }
         return stmt;
+
     }
 
     protected void restartDbServiceTracker() {

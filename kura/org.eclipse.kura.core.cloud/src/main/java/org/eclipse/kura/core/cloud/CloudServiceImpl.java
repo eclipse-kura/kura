@@ -466,9 +466,8 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
                                 }
                             }
                             boolean validMessage = false;
-                            if (this.certificatesService == null) {
-                                validMessage = true;
-                            } else if (this.certificatesService.verifySignature(kuraTopic, kuraPayload)) {
+                            if (this.certificatesService == null
+                                    || this.certificatesService.verifySignature(kuraTopic, kuraPayload)) {
                                 validMessage = true;
                             }
 
@@ -685,6 +684,7 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
             try {
                 this.messageId.wait(1000);
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
                 logger.info("Interrupted while waiting for the message to be published", e);
             }
         }

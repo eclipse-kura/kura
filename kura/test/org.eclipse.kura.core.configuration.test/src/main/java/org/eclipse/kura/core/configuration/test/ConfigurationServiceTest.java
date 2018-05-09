@@ -102,6 +102,7 @@ public class ConfigurationServiceTest {
 
             assertTrue("Dependencies OK", ok);
         } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
             fail("OSGi dependencies unfulfilled");
         }
     }
@@ -461,7 +462,7 @@ public class ConfigurationServiceTest {
 
         int size2 = configurableComponentPids2.size();
 
-        assertEquals("Should have additional PID", size1 + 1, size2);
+        assertEquals("Should have additional PID", size1 + 1L, size2);
         assertTrue("Should contain our service PID", configurableComponentPids2.contains(servicePid));
     }
 
@@ -479,7 +480,7 @@ public class ConfigurationServiceTest {
 
         List<ComponentConfiguration> configurationsAfter = configurationService.getComponentConfigurations();
 
-        assertEquals("Should contain one more configuration", configurations.size() + 1, configurationsAfter.size());
+        assertEquals("Should contain one more configuration", configurations.size() + 1L, configurationsAfter.size());
         configurationsAfter.removeAll(configurations);
 
         boolean found = false;
@@ -643,7 +644,7 @@ public class ConfigurationServiceTest {
 
         snapshots = configurationService.getSnapshots();
         int size2 = snapshots.size();
-        assertEquals("Should contain one more snapshot", size1 + 1, size2);
+        assertEquals("Should contain one more snapshot", size1 + 1L, size2);
     }
 
     static String loadConfigsXml() throws Exception, IOException {
@@ -740,7 +741,7 @@ public class ConfigurationServiceTest {
 
         snapshots = configurationService.getSnapshots();
         int size2 = snapshots.size();
-        assertEquals("There should be one more snapshot", size1 + 1, size2);
+        assertEquals("There should be one more snapshot", size1 + 1L, size2);
     }
 
     @Test
@@ -871,9 +872,9 @@ public class ConfigurationServiceTest {
         f1.createNewFile();
         f1.deleteOnExit();
 
-        FileWriter fw = new FileWriter(f1);
-        fw.append(cfgxml);
-        fw.close();
+        try (FileWriter fw = new FileWriter(f1)) {
+            fw.append(cfgxml);
+        }
 
         long snapshotId = configurationService.snapshot();
 
@@ -882,14 +883,13 @@ public class ConfigurationServiceTest {
         assertTrue(snapshots.contains(123456L));
         assertTrue(snapshots.contains(snapshotId));
 
-        FileReader fr = new FileReader(f1);
-        char[] chars = new char[100];
-        fr.read(chars);
-        fr.close();
+        try (FileReader fr = new FileReader(f1)) {
+            char[] chars = new char[100];
+            fr.read(chars);
 
-        String s = new String(chars);
-
-        assertTrue("Snapshot should be encrypted", s.startsWith("encrypted"));
+            String s = new String(chars);
+            assertTrue("Snapshot should be encrypted", s.startsWith("encrypted"));
+        }
     }
 
     private void assertContainsWireComponentsDefinitions(List<ComponentConfiguration> configs, boolean includesAsset) {
@@ -917,9 +917,8 @@ public class ConfigurationServiceTest {
 
     @Test
     public void testShouldGetServiceProviderDefinitions() {
-        List<ComponentConfiguration> configs = ocdService.getServiceProviderOCDs(
-                "org.eclipse.kura.wire.WireEmitter", "org.eclipse.kura.wire.WireReceiver",
-                "org.eclipse.kura.wire.WireComponent");
+        List<ComponentConfiguration> configs = ocdService.getServiceProviderOCDs("org.eclipse.kura.wire.WireEmitter",
+                "org.eclipse.kura.wire.WireReceiver", "org.eclipse.kura.wire.WireComponent");
         assertFalse(configs.isEmpty());
         assertContainsWireComponentsDefinitions(configs, true);
     }
@@ -986,7 +985,8 @@ class MultiStepCSValidator implements CSValidator {
         }
 
         if (this.configs == null) { // first pass
-            assertTrue("At least one configuration expected", configurations.getConfigurations().size() >= 1);
+            assertTrue("At least one configuration expected",
+                    configurations != null ? (configurations.getConfigurations().size() >= 1) : false);
             boolean found = false;
             for (ComponentConfiguration cfg : configurations.getConfigurations()) {
                 if (this.pid.compareTo(cfg.getPid()) == 0) {

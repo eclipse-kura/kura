@@ -54,28 +54,28 @@ public class CloudConfigurationHandler extends Cloudlet {
     public static final String RESOURCE_SNAPSHOT = "snapshot";
     public static final String RESOURCE_ROLLBACK = "rollback";
 
-    private SystemService m_systemService;
-    private ConfigurationService m_configurationService;
+    private SystemService systemService;
+    private ConfigurationService configurationService;
 
-    private ComponentContext m_ctx;
+    private ComponentContext ctx;
     private BundleContext bundleContext;
 
-    private ScheduledExecutorService m_executor;
+    private ScheduledExecutorService executor;
 
     protected void setConfigurationService(ConfigurationService configurationService) {
-        this.m_configurationService = configurationService;
+        this.configurationService = configurationService;
     }
 
     protected void unsetConfigurationService(ConfigurationService configurationService) {
-        this.m_configurationService = null;
+        this.configurationService = null;
     }
 
     protected void setSystemService(SystemService systemService) {
-        this.m_systemService = systemService;
+        this.systemService = systemService;
     }
 
     protected void unsetSystemService(SystemService systemService) {
-        this.m_systemService = null;
+        this.systemService = null;
     }
 
     // The dependency on the CloudService is optional so we might be activated
@@ -83,12 +83,12 @@ public class CloudConfigurationHandler extends Cloudlet {
     @Override
     public void setCloudService(CloudService cloudService) {
         super.setCloudService(cloudService);
-        super.activate(this.m_ctx);
+        super.activate(this.ctx);
     }
 
     @Override
     public void unsetCloudService(CloudService cloudService) {
-        super.deactivate(this.m_ctx);
+        super.deactivate(this.ctx);
         super.unsetCloudService(cloudService);
     }
 
@@ -98,14 +98,14 @@ public class CloudConfigurationHandler extends Cloudlet {
 
     @Override
     protected void activate(ComponentContext componentContext) {
-        this.m_ctx = componentContext;
+        this.ctx = componentContext;
         this.bundleContext = componentContext.getBundleContext();
-        this.m_executor = Executors.newSingleThreadScheduledExecutor();
+        this.executor = Executors.newSingleThreadScheduledExecutor();
     }
 
     @Override
     protected void deactivate(ComponentContext componentContext) {
-        this.m_executor.shutdownNow();
+        this.executor.shutdownNow();
     }
 
     @Override
@@ -197,7 +197,7 @@ public class CloudConfigurationHandler extends Cloudlet {
 
         if (snapshotId != null) {
             long sid = Long.parseLong(snapshotId);
-            XmlComponentConfigurations xmlConfigs = ((ConfigurationServiceImpl) this.m_configurationService)
+            XmlComponentConfigurations xmlConfigs = ((ConfigurationServiceImpl) this.configurationService)
                     .loadEncryptedSnapshotFileContent(sid);
             //
             // marshall the response
@@ -206,7 +206,7 @@ public class CloudConfigurationHandler extends Cloudlet {
             for (ComponentConfiguration config : configs) {
                 if (config != null) {
                     try {
-                        ((ConfigurationServiceImpl) this.m_configurationService)
+                        ((ConfigurationServiceImpl) this.configurationService)
                                 .decryptConfigurationProperties(config.getConfigurationProperties());
                     } catch (Throwable t) {
                         logger.warn("Error during snapshot password decryption");
@@ -223,7 +223,7 @@ public class CloudConfigurationHandler extends Cloudlet {
             // get the list of snapshot IDs and put them into a response object
             Set<Long> sids = null;
             try {
-                sids = this.m_configurationService.getSnapshots();
+                sids = this.configurationService.getSnapshots();
             } catch (KuraException e) {
                 logger.error("Error listing snapshots: {}", e);
                 throw new KuraException(KuraErrorCode.CONFIGURATION_SNAPSHOT_LISTING, e);
@@ -259,10 +259,10 @@ public class CloudConfigurationHandler extends Cloudlet {
         try {
 
             if (pid == null) {
-                List<String> pidsToIgnore = this.m_systemService.getDeviceManagementServiceIgnore();
+                List<String> pidsToIgnore = this.systemService.getDeviceManagementServiceIgnore();
 
                 // the configuration for all components has been requested
-                Set<String> componentPids = this.m_configurationService.getConfigurableComponentPids();
+                Set<String> componentPids = this.configurationService.getConfigurableComponentPids();
                 for (String componentPid : componentPids) {
                     boolean skip = false;
                     if (pidsToIgnore != null && !pidsToIgnore.isEmpty()) {
@@ -277,7 +277,7 @@ public class CloudConfigurationHandler extends Cloudlet {
                         continue;
                     }
 
-                    ComponentConfiguration cc = this.m_configurationService.getComponentConfiguration(componentPid);
+                    ComponentConfiguration cc = this.configurationService.getComponentConfiguration(componentPid);
 
                     // TODO: define a validate method for ComponentConfiguration
                     if (cc == null) {
@@ -303,7 +303,7 @@ public class CloudConfigurationHandler extends Cloudlet {
             } else {
 
                 // the configuration for a specific component has been requested.
-                ComponentConfiguration cc = this.m_configurationService.getComponentConfiguration(pid);
+                ComponentConfiguration cc = this.configurationService.getComponentConfiguration(pid);
                 if (cc != null) {
                     configs.add(cc);
                 }
@@ -356,7 +356,7 @@ public class CloudConfigurationHandler extends Cloudlet {
             return;
         }
 
-        this.m_executor.schedule(new UpdateConfigurationsCallable(pid, xmlConfigs, this.m_configurationService), 1000,
+        this.executor.schedule(new UpdateConfigurationsCallable(pid, xmlConfigs, this.configurationService), 1000,
                 TimeUnit.MILLISECONDS);
     }
 
@@ -367,8 +367,7 @@ public class CloudConfigurationHandler extends Cloudlet {
 
         if (resources.length > 2) {
             logger.error("Bad request topic: {}", reqTopic.toString());
-            logger.error("Expected at most two resource(s) but found {}",
-                    resources != null ? resources.length : "none");
+            logger.error("Expected at most two resource(s) but found {}", resources.length);
             respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
             return;
         }
@@ -383,7 +382,7 @@ public class CloudConfigurationHandler extends Cloudlet {
             return;
         }
 
-        this.m_executor.schedule(new RollbackCallable(sid, this.m_configurationService), 1000, TimeUnit.MILLISECONDS);
+        this.executor.schedule(new RollbackCallable(sid, this.configurationService), 1000, TimeUnit.MILLISECONDS);
     }
 
     private void doExecSnapshot(CloudletTopic reqTopic, KuraPayload reqPayload, KuraResponsePayload respPayload)
@@ -393,7 +392,7 @@ public class CloudConfigurationHandler extends Cloudlet {
 
         if (resources.length > 1) {
             logger.error("Bad request topic: {}", reqTopic.toString());
-            logger.error("Expected one resource(s) but found {}", resources != null ? resources.length : "none");
+            logger.error("Expected one resource(s) but found {}", resources.length);
             respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
             return;
         }
@@ -401,7 +400,7 @@ public class CloudConfigurationHandler extends Cloudlet {
         // take a new snapshot and get the id
         long snapshotId;
         try {
-            snapshotId = this.m_configurationService.snapshot();
+            snapshotId = this.configurationService.snapshot();
         } catch (KuraException e) {
             logger.error("Error taking snapshot: {}", e);
             throw new KuraException(KuraErrorCode.CONFIGURATION_SNAPSHOT_TAKING, e);
@@ -498,30 +497,29 @@ public class CloudConfigurationHandler extends Cloudlet {
 
 class UpdateConfigurationsCallable implements Callable<Void> {
 
-    private static Logger s_logger = LoggerFactory.getLogger(UpdateConfigurationsCallable.class);
+    private static Logger logger = LoggerFactory.getLogger(UpdateConfigurationsCallable.class);
 
-    private final String m_pid;
-    private final XmlComponentConfigurations m_xmlConfigurations;
-    private final ConfigurationService m_configurationService;
+    private final String pid;
+    private final XmlComponentConfigurations xmlConfigurations;
+    private final ConfigurationService configurationService;
 
     public UpdateConfigurationsCallable(String pid, XmlComponentConfigurations xmlConfigurations,
             ConfigurationService configurationService) {
-        this.m_pid = pid;
-        this.m_xmlConfigurations = xmlConfigurations;
-        this.m_configurationService = configurationService;
+        this.pid = pid;
+        this.xmlConfigurations = xmlConfigurations;
+        this.configurationService = configurationService;
     }
 
     @Override
     public Void call() throws Exception {
 
-        s_logger.info("Updating configurations");
+        logger.info("Updating configurations");
         Thread.currentThread().setName(getClass().getSimpleName());
         //
         // update the configuration
         try {
-            List<ComponentConfiguration> configImpls = this.m_xmlConfigurations != null
-                    ? this.m_xmlConfigurations.getConfigurations()
-                    : null;
+            List<ComponentConfiguration> configImpls = this.xmlConfigurations != null
+                    ? this.xmlConfigurations.getConfigurations() : null;
             if (configImpls == null) {
                 return null;
             }
@@ -529,20 +527,20 @@ class UpdateConfigurationsCallable implements Callable<Void> {
             List<ComponentConfiguration> configs = new ArrayList<>();
             configs.addAll(configImpls);
 
-            if (this.m_pid == null) {
+            if (this.pid == null) {
                 // update all the configurations provided
-                this.m_configurationService.updateConfigurations(configs);
+                this.configurationService.updateConfigurations(configs);
             } else {
                 // update only the configuration with the provided id
                 for (ComponentConfiguration config : configs) {
-                    if (this.m_pid.equals(config.getPid())) {
-                        this.m_configurationService.updateConfiguration(this.m_pid,
+                    if (this.pid.equals(config.getPid())) {
+                        this.configurationService.updateConfiguration(this.pid,
                                 config.getConfigurationProperties());
                     }
                 }
             }
         } catch (KuraException e) {
-            s_logger.error("Error updating configurations: {}", e);
+            logger.error("Error updating configurations: {}", e);
             throw new KuraException(KuraErrorCode.CONFIGURATION_UPDATE, e);
         }
 
@@ -552,15 +550,15 @@ class UpdateConfigurationsCallable implements Callable<Void> {
 
 class RollbackCallable implements Callable<Void> {
 
-    private static Logger s_logger = LoggerFactory.getLogger(RollbackCallable.class);
+    private static Logger logger = LoggerFactory.getLogger(RollbackCallable.class);
 
-    private final Long m_snapshotId;
-    private final ConfigurationService m_configurationService;
+    private final Long snapshotId;
+    private final ConfigurationService configurationService;
 
     public RollbackCallable(Long snapshotId, ConfigurationService configurationService) {
         super();
-        this.m_snapshotId = snapshotId;
-        this.m_configurationService = configurationService;
+        this.snapshotId = snapshotId;
+        this.configurationService = configurationService;
     }
 
     @Override
@@ -568,13 +566,13 @@ class RollbackCallable implements Callable<Void> {
         Thread.currentThread().setName(getClass().getSimpleName());
         // rollback to the specified snapshot if any
         try {
-            if (this.m_snapshotId == null) {
-                this.m_configurationService.rollback();
+            if (this.snapshotId == null) {
+                this.configurationService.rollback();
             } else {
-                this.m_configurationService.rollback(this.m_snapshotId);
+                this.configurationService.rollback(this.snapshotId);
             }
         } catch (KuraException e) {
-            s_logger.error("Error rolling back to snapshot: {}", e);
+            logger.error("Error rolling back to snapshot: {}", e);
             throw new KuraException(KuraErrorCode.CONFIGURATION_ROLLBACK, e);
         }
 

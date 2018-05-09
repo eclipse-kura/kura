@@ -195,6 +195,7 @@ public class DeploymentAgent implements DeploymentAgentService {
             try {
                 this.installerExecutor.awaitTermination(THREAD_TERMINATION_TOUT, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
                 logger.warn("Interrupted", e);
             }
             logger.info("DeploymentAgent Thread terminated? - {}", this.installerExecutor.isTerminated());
@@ -214,6 +215,7 @@ public class DeploymentAgent implements DeploymentAgentService {
             try {
                 this.uninstallerExecutor.awaitTermination(THREAD_TERMINATION_TOUT, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
                 logger.warn("Interrupted", e);
             }
             logger.info("DeploymentAgent:Uninstall Thread terminated? - {}", this.uninstallerExecutor.isTerminated());
@@ -318,7 +320,7 @@ public class DeploymentAgent implements DeploymentAgentService {
                 }
             } catch (InterruptedException e) {
                 logger.info("Exiting...");
-                Thread.interrupted();
+                Thread.currentThread().interrupt();
                 return;
             } catch (Throwable t) {
                 logger.error("Unexpected throwable", t);
@@ -367,7 +369,7 @@ public class DeploymentAgent implements DeploymentAgentService {
                 }
             } catch (InterruptedException e) {
                 logger.info("Exiting...");
-                Thread.interrupted();
+                Thread.currentThread().interrupt();
                 return;
             } catch (Throwable t) {
                 logger.error("Unexpected throwable", t);

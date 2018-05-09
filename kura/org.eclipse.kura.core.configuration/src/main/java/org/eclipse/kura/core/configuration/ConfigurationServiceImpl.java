@@ -1403,15 +1403,12 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
     XmlComponentConfigurations loadEncryptedSnapshotFileContent(long snapshotID) throws KuraException {
         File fSnapshot = getSnapshotFile(snapshotID);
         if (fSnapshot == null || !fSnapshot.exists()) {
-            throw new KuraException(KuraErrorCode.CONFIGURATION_SNAPSHOT_NOT_FOUND, fSnapshot.getAbsolutePath());
+            throw new KuraException(KuraErrorCode.CONFIGURATION_SNAPSHOT_NOT_FOUND,
+                    fSnapshot != null ? fSnapshot.getAbsolutePath() : "null");
         }
 
-        FileReader fr = null;
-        BufferedReader br = null;
         StringBuilder entireFile = new StringBuilder();
-        try {
-            fr = new FileReader(fSnapshot);
-            br = new BufferedReader(fr);
+        try (FileReader fr = new FileReader(fSnapshot); BufferedReader br = new BufferedReader(fr)) {
             String line = "";
             while ((line = br.readLine()) != null) {
                 entireFile.append(line);
@@ -1419,19 +1416,6 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         } catch (IOException e) {
             logger.error("Error loading file from disk", e);
             return null;
-        } finally {
-            try {
-                if (br != null) {
-                    br.close();
-                }
-            } catch (IOException e) {
-            }
-            try {
-                if (fr != null) {
-                    fr.close();
-                }
-            } catch (IOException e) {
-            }
         }
 
         // File loaded, try to decrypt and unmarshall

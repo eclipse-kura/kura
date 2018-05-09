@@ -138,7 +138,7 @@ public class CloudCallServiceImpl implements CloudCallService, DataServiceListen
             } catch (InterruptedException e) {
                 // Avoid re-throwing this exception which should not normally happen
                 s_logger.warn("Interrupted while waiting for the response");
-                Thread.interrupted();
+                Thread.currentThread().interrupt();
             } finally {
                 try {
                     this.m_dataService.unsubscribe(this.m_respTopic);

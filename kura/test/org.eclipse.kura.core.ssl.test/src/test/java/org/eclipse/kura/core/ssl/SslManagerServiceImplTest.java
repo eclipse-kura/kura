@@ -615,6 +615,7 @@ public class SslManagerServiceImplTest {
         store.getKey(alias, newPass);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void testGetSSLSocketFactory()
             throws KuraException, NoSuchFieldException, GeneralSecurityException, IOException {
@@ -646,24 +647,34 @@ public class SslManagerServiceImplTest {
             }
         };
 
-        TestUtil.setFieldValue(svc, "sslServiceListeners", listener);
+        ComponentContext ccMock = mock(ComponentContext.class);
 
-        Map<ConnectionSslOptions, SSLSocketFactory> sslFactories = new ConcurrentHashMap<>();
-        TestUtil.setFieldValue(svc, "sslSocketFactories", sslFactories);
-
+        BundleContext bcMock = mock(BundleContext.class);
+        when(ccMock.getBundleContext()).thenReturn(bcMock);
+        
         Map<String, Object> properties = new HashMap<>();
         properties.put("ssl.default.protocol", "TLSv1");
         properties.put("ssl.default.trustStore", KEY_STORE_PATH);
         properties.put("ssl.hostname.verification", "true");
         properties.put("ssl.keystore.password", "pass");
+        
+        svc.activate(ccMock, properties);
+        
+        TestUtil.setFieldValue(svc, "sslServiceListeners", listener);
+
+        SSLSocketFactory factory = svc.getSSLSocketFactory();
+        
+        Map<ConnectionSslOptions, SSLSocketFactory> sslSocketFactories = (Map<ConnectionSslOptions, SSLSocketFactory>) TestUtil.getFieldValue(svc, "sslSocketFactories");
+        
+        assertNotNull(factory);
+        assertEquals(1, sslSocketFactories.size());
+        assertEquals(factory, sslSocketFactories.values().iterator().next());
 
         svc.updated(properties);
 
-        SSLSocketFactory factory = svc.getSSLSocketFactory();
-
-        assertNotNull(factory);
-        assertEquals(1, sslFactories.size());
-        assertEquals(factory, sslFactories.values().iterator().next());
+        Map<ConnectionSslOptions, SSLSocketFactory> updatedSslSocketFactories = (Map<ConnectionSslOptions, SSLSocketFactory>) TestUtil.getFieldValue(svc, "sslSocketFactories");
+        assertNotNull(updatedSslSocketFactories);
+        assertEquals(0, updatedSslSocketFactories.size());
     }
 
     @Test

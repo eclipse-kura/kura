@@ -34,10 +34,7 @@ import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
@@ -140,6 +137,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 
         this.properties = properties;
         this.options = new SslManagerServiceOptions(properties);
+        this.sslSocketFactories = new ConcurrentHashMap<>();
 
         accessKeystore();
 

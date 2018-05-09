@@ -19,15 +19,19 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import org.eclipse.kura.KuraBluetoothDiscoveryException;
+import org.eclipse.kura.KuraBluetoothRemoveException;
 import org.eclipse.kura.bluetooth.le.BluetoothLeAdapter;
 import org.eclipse.kura.bluetooth.le.BluetoothLeDevice;
+import org.eclipse.kura.bluetooth.le.BluetoothTransportType;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
 import tinyb.BluetoothDevice;
 import tinyb.BluetoothException;
+import tinyb.TransportType;
 
 public class BluetoothLeAdapterImpl implements BluetoothLeAdapter {
 
@@ -236,6 +240,36 @@ public class BluetoothLeAdapterImpl implements BluetoothLeAdapter {
             } catch (BluetoothException e) {
                 logger.error("Start discovery failed", e);
             }
+            waitForStop();
+            try {
+                if (this.name != null || this.address != null) {
+                    BluetoothDevice leDevice = BluetoothLeAdapterImpl.this.adapter.find(this.name, this.address,
+                            Duration.ofSeconds(TIMEOUT));
+                    if (leDevice == null || leDevice.getRSSI() == 0) {
+                        complete((T) null);
+                    } else {
+                        complete((T) new BluetoothLeDeviceImpl(leDevice));
+                    }
+                    if (leDevice != null && this.consumer != null) {
+                        this.consumer.accept((T) new BluetoothLeDeviceImpl(leDevice));
+                    }
+                } else {
+                    List<BluetoothLeDevice> devices = BluetoothLeAdapterImpl.this.adapter.getDevices().stream()
+                            .filter(device -> device.getRSSI() != 0).map(BluetoothLeDeviceImpl::new)
+                            .collect(Collectors.toList());
+                    complete((T) devices);
+                    if (this.consumer != null) {
+                        this.consumer.accept((T) devices);
+                    }
+                }
+
+                BluetoothLeAdapterImpl.this.adapter.stopDiscovery();
+            } catch (BluetoothException e) {
+                logger.error("Stop discovery failed", e);
+            }
+        }
+
+        private void waitForStop() {
             long start = System.currentTimeMillis();
             while (System.currentTimeMillis() - start <= this.internalTimeout) {
                 try {
@@ -245,34 +279,40 @@ public class BluetoothLeAdapterImpl implements BluetoothLeAdapter {
                     completeExceptionally(e);
                 }
             }
-            try {
-                BluetoothLeAdapterImpl.this.adapter.stopDiscovery();
-            } catch (BluetoothException e) {
-                logger.error("Stop discovery failed", e);
-            }
-
-            if (this.name != null || this.address != null) {
-                BluetoothDevice leDevice = BluetoothLeAdapterImpl.this.adapter.find(this.name, this.address,
-                        Duration.ofSeconds(TIMEOUT));
-                if (leDevice == null) {
-                    complete((T) null);
-                } else {
-                    complete((T) new BluetoothLeDeviceImpl(leDevice));
-                }
-                if (leDevice != null && this.consumer != null) {
-                    this.consumer.accept((T) new BluetoothLeDeviceImpl(leDevice));
-                }
-            } else {
-                List<BluetoothLeDevice> devices = new ArrayList<>();
-                for (BluetoothDevice device : BluetoothLeAdapterImpl.this.adapter.getDevices()) {
-                    devices.add(new BluetoothLeDeviceImpl(device));
-                }
-                complete((T) devices);
-                if (this.consumer != null) {
-                    this.consumer.accept((T) devices);
-                }
-            }
         }
     }
 
+    @Override
+    public int removeDevices() throws KuraBluetoothRemoveException {
+        int removedDevices = 0;
+        try {
+            removedDevices = this.adapter.removeDevices();
+        } catch (BluetoothException e) {
+            throw new KuraBluetoothRemoveException(e, "Failed to remove devices");
+        }
+        return removedDevices;
+    }
+
+    @Override
+    public void setDiscoveryFilter(List<UUID> uuids, int rssi, int pathloss, BluetoothTransportType transportType) {
+        this.adapter.setDiscoveryFilter(uuids, rssi, pathloss, toTransportType(transportType));
+    }
+
+    @Override
+    public void setRssiDiscoveryFilter(int rssi) {
+        this.adapter.setRssiDiscoveryFilter(rssi);
+    }
+
+    private TransportType toTransportType(BluetoothTransportType type) {
+        switch (type) {
+        case AUTO:
+            return TransportType.AUTO;
+        case BREDR:
+            return TransportType.BREDR;
+        case LE:
+            return TransportType.LE;
+        default:
+            return TransportType.AUTO;
+        }
+    }
 }

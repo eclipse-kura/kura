@@ -30,7 +30,7 @@
         <dependency>
             <groupId>tinyb</groupId>
             <artifactId>tinyb</artifactId>
-            <version>1.0.0</version>
+            <version>1.0.100</version>
             <scope>runtime</scope>
         </dependency>
     </dependencies>
@@ -45,13 +45,9 @@
 						<Export-Package>tinyb.*</Export-Package>
 						<Import-Package></Import-Package>
 						<Embed-Dependency>
-                            tinyb;groupId=tinyb;artifactId=tinyb;version=1.0.0
+                            tinyb;groupId=tinyb;artifactId=tinyb;version=1.0.100
                         </Embed-Dependency>
-                        <!-- The specification version is used by tinyb to validate the native libraries and jars.
-                        It is generated using "git describe" command and appending twice the result with a dot. 
-                        i.e. if git describe outputs 0.5.0-9-g58593d5 the specification version will be 
-                        0.5.0-9-g58593d5.0.5.0-9-g58593d5 -->
-                        <Specification-Version>0.5.0-11-g76c0e10.0.5.0-11-g76c0e10</Specification-Version>
+                        <Specification-Version>0.5</Specification-Version>
                         <Include-Resource>
                             ${project.basedir}/about.html,
                             about_files=${project.basedir}/about_files/,

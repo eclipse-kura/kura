@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -19,6 +19,7 @@ import java.util.UUID;
 
 import org.eclipse.kura.KuraBluetoothConnectionException;
 import org.eclipse.kura.KuraBluetoothPairException;
+import org.eclipse.kura.KuraBluetoothRemoveException;
 import org.eclipse.kura.KuraBluetoothResourceNotFoundException;
 import org.eclipse.kura.bluetooth.le.BluetoothLeAdapter;
 import org.eclipse.kura.bluetooth.le.BluetoothLeDevice;
@@ -231,9 +232,23 @@ public class BluetoothLeDeviceImpl implements BluetoothLeDevice {
 
     @Override
     public short getTxPower() {
-        // return this.device.getTxPower();
-        // It throws an unsatisfiedLinkError on getTxPower
-        return 0;
+        return this.device.getTxPower();
+    }
+
+    @Override
+    public boolean isServicesResolved() {
+        return this.device.getServicesResolved();
+    }
+
+    @Override
+    public boolean remove() throws KuraBluetoothRemoveException {
+        boolean result = false;
+        try {
+            result = this.device.remove();
+        } catch (BluetoothException e) {
+            throw new KuraBluetoothRemoveException(e, "Failed to remove the device");
+        }
+        return result;
     }
 
 }

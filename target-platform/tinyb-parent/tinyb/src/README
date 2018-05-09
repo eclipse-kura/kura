@@ -12,7 +12,7 @@ TinyB requires CMake 3.1+ and GLib/GIO 2.40+ for building. It also requires Blue
     cd tinyb
 
 3. Checkout to kura branch
-    git checkout kura
+    git checkout v0.5.1
     
 4. Set up variables for java. Change the paths according to your installation:
     export JAVA_HOME=/usr/lib/jvm/jdk-8-oracle-arm32-vfp-hflt

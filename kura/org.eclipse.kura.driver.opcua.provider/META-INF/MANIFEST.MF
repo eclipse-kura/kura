@@ -9,19 +9,21 @@ Bundle-Category: Asset-Driver Management
 Bundle-ActivationPolicy: lazy
 Import-Package: javax.security.cert,
  javax.xml,
+ javax.xml.bind,
  javax.xml.stream,
  org.eclipse.kura;version="[1.2,2.0)",
  org.eclipse.kura.channel;version="[1.0,2.0)",
+ org.eclipse.kura.channel.listener;version="[1.0,1.1)",
  org.eclipse.kura.configuration;version="[1.1,2.0)",
  org.eclipse.kura.configuration.metatype;version="[1.0,2.0)",
  org.eclipse.kura.core.configuration.metatype;version="[1.0,2.0)",
  org.eclipse.kura.crypto;version="[1.0,2.0)",
  org.eclipse.kura.driver;version="[1.0,1.1)",
- org.eclipse.kura.channel.listener;version="[1.0,1.1)",
  org.eclipse.kura.type;version="[1.0,2.0)",
  org.eclipse.kura.util.base;version="[1.0,2.0)",
  org.eclipse.kura.util.collection;version="[1.0,2.0)",
- org.slf4j;version="1.6.4"
+ org.slf4j;version="1.6.4",
+ org.xml.sax
 Service-Component: OSGI-INF/*.xml
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .,
@@ -29,9 +31,11 @@ Bundle-ClassPath: .,
  lib/jool-0.9.10.jar,
  lib/jsr305-3.0.1.jar,
  lib/protonpack-1.8.jar,
- lib/sdk-client-0.1.0.jar,
- lib/sdk-core-0.1.0.jar,
- lib/stack-client-0.1.0.jar,
- lib/stack-core-0.1.0.jar,
+ lib/sdk-client-0.2.1.jar,
+ lib/sdk-core-0.2.1.jar,
+ lib/stack-client-0.2.1.jar,
+ lib/stack-core-0.2.1.jar,
+ lib/bsd-parser-core-0.2.1.jar,
+ lib/bsd-parser-gson-0.2.1.jar,
  lib/netty-all-4.0.36.Final.jar
 

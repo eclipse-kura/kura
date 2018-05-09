@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates and others
  *
  *   All rights reserved. This program and the accompanying materials
  *   are made available under the terms of the Eclipse Public License v1.0
@@ -47,9 +47,6 @@ import org.eclipse.milo.opcua.stack.core.application.CertificateValidator;
 import org.eclipse.milo.opcua.stack.core.application.DefaultCertificateManager;
 import org.eclipse.milo.opcua.stack.core.application.DefaultCertificateValidator;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
-import org.eclipse.milo.opcua.stack.core.types.structured.ResponseHeader;
-import org.eclipse.milo.opcua.stack.core.types.structured.TestStackRequest;
-import org.eclipse.milo.opcua.stack.core.types.structured.TestStackResponse;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -91,14 +88,6 @@ public class OpcUaDriverTest {
         server = new OpcUaServer(config);
         server.getNamespaceManager().registerAndAdd(TestNamespace.NAMESPACE_URI, idx -> new TestNamespace(server, idx));
         server.startup();
-
-        server.getServer().addRequestHandler(TestStackRequest.class, service -> {
-            TestStackRequest request = service.getRequest();
-
-            ResponseHeader header = service.createResponseHeader();
-
-            service.setResponse(new TestStackResponse(header, request.getInput()));
-        });
     }
 
     @AfterClass

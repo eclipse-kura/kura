@@ -48,11 +48,6 @@ Copyright (c) 2017 Eurotech and/or its affiliates and others
                         -Dlog4j.configuration=file:${kura.basedir}/emulator/org.eclipse.kura.emulator/src/main/resources/log4j.properties</argLine>
                     <bundleStartLevel>
                         <bundle>
-                            <id>org.eclipse.equinox.ds</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
                             <id>org.apache.felix.scr</id>
                             <level>4</level>
                             <autoStart>true</autoStart>

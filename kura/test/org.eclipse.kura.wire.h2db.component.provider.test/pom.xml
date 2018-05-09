@@ -48,37 +48,12 @@ Copyright (c) 2017 Eurotech and/or its affiliates and others
                         -Dlog4j.configuration=file:${kura.basedir}/emulator/org.eclipse.kura.emulator/src/main/resources/log4j.properties</argLine>
                     <bundleStartLevel>
                         <bundle>
-                            <id>org.eclipse.equinox.ds</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
                             <id>org.apache.felix.scr</id>
                             <level>4</level>
                             <autoStart>true</autoStart>
                         </bundle>
                         <bundle>
-                            <id>org.eclipse.core.runtime</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
-                            <id>org.eclipse.equinox.io</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
-                            <id>org.eclipse.equinox.app</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
                             <id>org.eclipse.equinox.cm</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
-                            <id>org.eclipse.equinox.common</id>
                             <level>4</level>
                             <autoStart>true</autoStart>
                         </bundle>
@@ -93,72 +68,12 @@ Copyright (c) 2017 Eurotech and/or its affiliates and others
                             <autoStart>true</autoStart>
                         </bundle>
                         <bundle>
-                            <id>org.eclipse.equinox.preferences</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
                             <id>org.eclipse.equinox.registry</id>
                             <level>4</level>
                             <autoStart>true</autoStart>
                         </bundle>
                         <bundle>
-                            <id>org.eclipse.equinox.util</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
-                            <id>org.eclipse.osgi.services</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
-                            <id>org.eclipse.osgi.util</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
-                            <id>org.hamcrest.core</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
-                            <id>osgi.cmpn</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
-                            <id>org.eclipse.equinox.launcher</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
-                            <id>slf4j.api</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
-                            <id>mqtt-client</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
                             <id>org.hsqldb.hsqldb</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
-                            <id>org.junit</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
-                            <id>org.apache.commons.io</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
-                            <id>org.eclipse.kura.api</id>
                             <level>4</level>
                             <autoStart>true</autoStart>
                         </bundle>
@@ -182,17 +97,8 @@ Copyright (c) 2017 Eurotech and/or its affiliates and others
                             <level>4</level>
                             <autoStart>true</autoStart>
                         </bundle>
-                        <bundle>
-                            <id>org.eclipse.kura.wire.helper.provider</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
                     </bundleStartLevel>
                     <dependencies>
-                        <dependency>
-                            <type>p2-installable-unit</type>
-                            <artifactId>org.eclipse.equinox.ds</artifactId>
-                        </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>
                             <artifactId>org.apache.felix.scr</artifactId>
@@ -200,14 +106,6 @@ Copyright (c) 2017 Eurotech and/or its affiliates and others
                         <dependency>
                             <type>p2-installable-unit</type>
                             <artifactId>org.eclipse.core.runtime</artifactId>
-                        </dependency>
-                        <dependency>
-                            <type>p2-installable-unit</type>
-                            <artifactId>org.eclipse.equinox.io</artifactId>
-                        </dependency>
-                        <dependency>
-                            <type>p2-installable-unit</type>
-                            <artifactId>org.eclipse.equinox.app</artifactId>
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>
@@ -224,10 +122,6 @@ Copyright (c) 2017 Eurotech and/or its affiliates and others
                         <dependency>
                             <type>p2-installable-unit</type>
                             <artifactId>org.eclipse.equinox.metatype</artifactId>
-                        </dependency>
-                        <dependency>
-                            <type>p2-installable-unit</type>
-                            <artifactId>org.eclipse.equinox.preferences</artifactId>
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>

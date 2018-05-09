@@ -53,11 +53,6 @@
 -->
                     <bundleStartLevel>
                         <bundle>
-                            <id>org.eclipse.equinox.ds</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
                             <id>org.apache.felix.scr</id>
                             <level>4</level>
                             <autoStart>true</autoStart>
@@ -196,10 +191,6 @@
                         <dependency>
                             <type>p2-installable-unit</type>
                             <artifactId>org.eclipse.equinox.console</artifactId>
-                        </dependency>
-                        <dependency>
-                            <type>p2-installable-unit</type>
-                            <artifactId>org.eclipse.equinox.ds</artifactId>
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>

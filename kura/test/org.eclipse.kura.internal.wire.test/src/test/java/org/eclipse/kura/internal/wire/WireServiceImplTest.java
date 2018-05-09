@@ -10,7 +10,7 @@ package org.eclipse.kura.internal.wire;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
@@ -72,7 +73,6 @@ public class WireServiceImplTest {
 
         Map<String, Object> properties = new HashMap<>();
         properties.put(WIRE_GRAPH_PROPERTY_NAME, SIMPLE_GRAPH);
-        TestUtil.setFieldValue(wsi, "properties", properties);
 
         wsi.activate(mock(ComponentContext.class), properties);
     }
@@ -85,8 +85,6 @@ public class WireServiceImplTest {
 
         Map<String, Object> properties = new HashMap<>();
         properties.put(WIRE_GRAPH_PROPERTY_NAME, SIMPLE_GRAPH);
-
-        TestUtil.setFieldValue(wsi, "properties", properties);
 
         String emitterPid = "emitterPid";
         String receiverPid = "receiverPid";
@@ -115,12 +113,13 @@ public class WireServiceImplTest {
         ServiceTracker<WireComponent, WireComponent> wireComponentServiceTracker = mock(ServiceTracker.class);
         TestUtil.setFieldValue(wsi, "wireComponentServiceTracker", wireComponentServiceTracker);
 
-        assertNull(TestUtil.getFieldValue(wsi, "properties"));
-
         Map<String, Object> properties = new HashMap<>();
         wsi.updated(properties);
 
-        assertEquals(properties, TestUtil.getFieldValue(wsi, "properties"));
+        Set<WireConfiguration> cfg = wsi.getWireConfigurations();
+
+        assertNotNull(cfg);
+        assertTrue(cfg.isEmpty());
     }
 
     @Test

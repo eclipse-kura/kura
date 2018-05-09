@@ -78,9 +78,6 @@ public class SettingsPanelUi extends Composite {
     TabListItem security;
 
     @UiField
-    NavTabs navTabs;
-
-    @UiField
     HTMLPanel settingsIntro;
 
     public SettingsPanelUi() {

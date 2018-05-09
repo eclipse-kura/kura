@@ -344,7 +344,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
                     && SslManagerServiceImpl.this.configurationService.getComponentConfiguration(pid) != null) {
                 SslManagerServiceImpl.this.configurationService.updateConfiguration(pid, props);
             } else {
-                logger.info("No service or configuration available yet. Sleeping...");
+                logger.info("No service or configuration available yet.");
             }
         } catch (KuraException e) {
             logger.warn("Cannot get/update configuration for pid: {}", pid, e);

@@ -145,16 +145,6 @@ public class SslManagerServiceImplTest {
         BundleContext bcMock = mock(BundleContext.class);
         when(ccMock.getBundleContext()).thenReturn(bcMock);
 
-        final Object lock = new Object();
-
-        doAnswer(invocation -> {
-            synchronized (lock) {
-                lock.notifyAll();
-            }
-
-            throw new NullPointerException("test"); // break the scheduler loop
-        }).when(ccMock).getServiceReference(); // called during changeDefaultKeystorePassword()
-
         Map<String, Object> properties = new HashMap<>();
         properties.put("ssl.default.protocol", "TLSv1");
         properties.put("ssl.default.trustStore", KEY_STORE_PATH);
@@ -162,10 +152,6 @@ public class SslManagerServiceImplTest {
         properties.put("ssl.keystore.password", "changeit");
 
         svc.activate(ccMock, properties);
-
-        synchronized (lock) {
-            lock.wait(20000);
-        }
 
         verify(ccMock, times(1)).getServiceReference();
 
@@ -203,16 +189,6 @@ public class SslManagerServiceImplTest {
         BundleContext bcMock = mock(BundleContext.class);
         when(ccMock.getBundleContext()).thenReturn(bcMock);
 
-        final Object lock = new Object();
-
-        doAnswer(invocation -> {
-            synchronized (lock) {
-                lock.notifyAll();
-            }
-
-            throw new NullPointerException("test"); // break the scheduler loop
-        }).when(ccMock).getServiceReference(); // called during changeDefaultKeystorePassword()
-
         Map<String, Object> properties = new HashMap<>();
         properties.put("ssl.default.protocol", "TLSv1");
         properties.put("ssl.default.trustStore", KEY_STORE_PATH);
@@ -220,10 +196,6 @@ public class SslManagerServiceImplTest {
         properties.put("ssl.keystore.password", "changeit");
 
         svc.activate(ccMock, properties);
-
-        synchronized (lock) {
-            lock.wait(20000);
-        }
 
         verify(ccMock, times(1)).getServiceReference();
 
@@ -264,16 +236,6 @@ public class SslManagerServiceImplTest {
         BundleContext bcMock = mock(BundleContext.class);
         when(ccMock.getBundleContext()).thenReturn(bcMock);
 
-        final Object lock = new Object();
-
-        doAnswer(invocation -> {
-            synchronized (lock) {
-                lock.notifyAll();
-            }
-
-            throw new NullPointerException("test"); // break the scheduler loop
-        }).when(ccMock).getServiceReference(); // called during changeDefaultKeystorePassword()
-
         Map<String, Object> properties = new HashMap<>();
         properties.put("ssl.default.protocol", "TLSv1");
         properties.put("ssl.default.trustStore", KEY_STORE_PATH);
@@ -281,10 +243,6 @@ public class SslManagerServiceImplTest {
         properties.put("ssl.keystore.password", "changeit");
 
         svc.activate(ccMock, properties);
-
-        synchronized (lock) {
-            lock.wait(20000);
-        }
 
         verify(ccMock, times(1)).getServiceReference();
 
@@ -325,16 +283,6 @@ public class SslManagerServiceImplTest {
         BundleContext bcMock = mock(BundleContext.class);
         when(ccMock.getBundleContext()).thenReturn(bcMock);
 
-        final Object lock = new Object();
-
-        doAnswer(invocation -> {
-            synchronized (lock) {
-                lock.notifyAll();
-            }
-
-            throw new NullPointerException("test"); // break the scheduler loop
-        }).when(ccMock).getServiceReference(); // called during changeDefaultKeystorePassword()
-
         Map<String, Object> properties = new HashMap<>();
         properties.put("ssl.default.protocol", "TLSv1");
         properties.put("ssl.default.trustStore", KEY_STORE_PATH);
@@ -342,10 +290,6 @@ public class SslManagerServiceImplTest {
         properties.put("ssl.keystore.password", "changeit");
 
         svc.activate(ccMock, properties);
-
-        synchronized (lock) {
-            lock.wait(20000);
-        }
 
         verify(ccMock, times(1)).getServiceReference();
 

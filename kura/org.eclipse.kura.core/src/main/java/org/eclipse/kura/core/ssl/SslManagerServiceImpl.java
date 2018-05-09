@@ -73,9 +73,6 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
     private CryptoService cryptoService;
     private ConfigurationService configurationService;
 
-    private Timer timer = new Timer(true);
-    private final AtomicBoolean configurationServiceUpdated = new AtomicBoolean();
-
     private Map<ConnectionSslOptions, SSLSocketFactory> sslSocketFactories;
 
     private SystemService systemService;
@@ -152,9 +149,6 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 
     protected void deactivate(ComponentContext componentContext) {
         logger.info("deactivate...");
-        if (this.timer != null) {
-            this.timer.cancel();
-        }
         this.sslServiceListeners.close();
     }
 
@@ -300,7 +294,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
             } catch (KuraException e) {
                 logger.warn("Failed to decrypt keystore password");
             }
-            if (!Arrays.equals(oldPassword, newPassword) && this.configurationServiceUpdated.get()) {
+            if (!Arrays.equals(oldPassword, newPassword)) {
                 updateKeystorePassword(oldPassword, newPassword);
             }
         }
@@ -346,26 +340,17 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 
         Map<String, Object> props = new HashMap<>(this.properties);
         props.put(SslManagerServiceOptions.PROP_TRUST_PASSWORD, new Password(newPassword));
-        final Map<String, Object> theProperties = props;
 
-        this.timer.scheduleAtFixedRate(new TimerTask() {
-
-            @Override
-            public void run() {
-                try {
-                    if (SslManagerServiceImpl.this.ctx.getServiceReference() != null
-                            && SslManagerServiceImpl.this.configurationService.getComponentConfiguration(pid) != null) {
-                        SslManagerServiceImpl.this.configurationService.updateConfiguration(pid, theProperties);
-                        SslManagerServiceImpl.this.configurationServiceUpdated.set(true);
-                        SslManagerServiceImpl.this.timer.cancel();
-                    } else {
-                        logger.info("No service or configuration available yet. Sleeping...");
-                    }
-                } catch (KuraException e) {
-                    logger.warn("Cannot get/update configuration for pid: {}", pid, e);
-                }
+        try {
+            if (SslManagerServiceImpl.this.ctx.getServiceReference() != null
+                    && SslManagerServiceImpl.this.configurationService.getComponentConfiguration(pid) != null) {
+                SslManagerServiceImpl.this.configurationService.updateConfiguration(pid, props);
+            } else {
+                logger.info("No service or configuration available yet. Sleeping...");
             }
-        }, 1000, 1000);
+        } catch (KuraException e) {
+            logger.warn("Cannot get/update configuration for pid: {}", pid, e);
+        }
     }
 
     private boolean isFirstBoot() {

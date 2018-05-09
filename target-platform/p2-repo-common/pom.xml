@@ -328,12 +328,12 @@
 								<artifactItem>
 									<groupId>org.apache.activemq</groupId>
 									<artifactId>artemis-mqtt-protocol</artifactId>
-									<version>${org.apache.activemq.artemis.version}</version>
+									<version>${org.apache.activemq.artemis.upstream.version}</version>
 								</artifactItem>
 								<dependency>
 									<groupId>org.apache.activemq</groupId>
 									<artifactId>artemis-native</artifactId>
-									<version>${org.apache.activemq.artemis.version}</version>
+									<version>${org.apache.activemq.artemis.upstream.version}</version>
 								</dependency>
 
 								<artifactItem>
@@ -508,8 +508,8 @@
 								
 								<!-- Artemis Broker -->
 								<move file="target/source/plugins/guava.jar" tofile="target/source/plugins/guava_${guava.version}.jar"/>
-								<move file="target/source/plugins/artemis-mqtt-protocol.jar" tofile="target/source/plugins/artemis-mqtt-protocol_${org.apache.activemq.artemis.version}.jar"/>
-								<move file="target/source/plugins/artemis-native.jar" tofile="target/source/plugins/artemis-native_${org.apache.activemq.artemis.version}.jar"/>
+								<move file="target/source/plugins/artemis-mqtt-protocol.jar" tofile="target/source/plugins/artemis-mqtt-protocol_${org.apache.activemq.artemis.upstream.version}.jar"/>
+								<move file="target/source/plugins/artemis-native.jar" tofile="target/source/plugins/artemis-native_${org.apache.activemq.artemis.upstream.version}.jar"/>
 								<move file="target/source/plugins/netty-buffer.jar" tofile="target/source/plugins/netty-buffer_${io.netty.version}.jar"/>
 								<move file="target/source/plugins/netty-codec.jar" tofile="target/source/plugins/netty-codec_${io.netty.version}.jar"/>
 								<move file="target/source/plugins/netty-common.jar" tofile="target/source/plugins/netty-common_${io.netty.version}.jar"/>

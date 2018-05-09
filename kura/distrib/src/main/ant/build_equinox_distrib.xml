@@ -1424,9 +1424,9 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 				value=", reference:file:${kura.install.dir}/kura/plugins/io.netty.transport-native-unix-common_${io.netty.version}.jar@3" />
 
 			<entry key="osgi.bundles" operation="+"
-				value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.activemq.artemis-mqtt-protocol_${org.apache.activemq.artemis.version}.jar@3:start" />
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.activemq.artemis-mqtt-protocol_${org.apache.activemq.artemis.upstream.version}.jar@3:start" />
 			<entry key="osgi.bundles" operation="+"
-				value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.activemq.artemis-native_${org.apache.activemq.artemis.version}.jar@3" />
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.activemq.artemis-native_${org.apache.activemq.artemis.upstream.version}.jar@3" />
 
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.commons.beanutils_${commons-beanutils.version}.jar@3" />

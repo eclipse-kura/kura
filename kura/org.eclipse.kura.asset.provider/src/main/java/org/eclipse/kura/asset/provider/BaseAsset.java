@@ -21,7 +21,6 @@ import static org.eclipse.kura.channel.ChannelType.READ_WRITE;
 import static org.eclipse.kura.channel.ChannelType.WRITE;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -302,16 +301,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
     }
 
     private List<?> getDriverDescriptor() {
-        try {
-            if (this.driver == null) {
-                return Collections.emptyList();
-            }
-
-            return (List<?>) this.driver.getChannelDescriptor().getDescriptor();
-        } catch (Exception e) {
-            logger.warn("Failed to get channel descriptor", e);
-            return Collections.emptyList();
-        }
+        return (List<?>) this.driver.getChannelDescriptor().getDescriptor();
     }
 
     private synchronized void invalidateDefinition() {
@@ -323,11 +313,14 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
             return this.ocd;
         }
 
-        final List<?> driverDescriptor = getDriverDescriptor();
+        final List<?> driverDescriptor;
 
         final Tocd newOcd = getOCD();
 
-        if (driverDescriptor.isEmpty()) {
+        try {
+            driverDescriptor = getDriverDescriptor();
+        } catch (Exception e) {
+            logger.warn("Failed to get Driver descriptor", e);
             return newOcd;
         }
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates and others
  *
  *   All rights reserved. This program and the accompanying materials
  *   are made available under the terms of the Eclipse Public License v1.0
@@ -10,22 +10,20 @@ package org.eclipse.kura.net.admin.monitor;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Matchers.isA;
+import static org.mockito.Matchers.anyLong;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -56,6 +54,7 @@ import org.eclipse.kura.net.admin.modem.EvdoCellularModem;
 import org.eclipse.kura.net.admin.modem.IModemLinkService;
 import org.eclipse.kura.net.admin.modem.PppFactory;
 import org.eclipse.kura.net.admin.modem.PppState;
+import org.eclipse.kura.net.admin.util.AbstractCellularModemFactory;
 import org.eclipse.kura.net.modem.CellularModem;
 import org.eclipse.kura.net.modem.CellularModem.SerialPortType;
 import org.eclipse.kura.net.modem.ModemAddedEvent;
@@ -420,7 +419,7 @@ public class ModemMonitorServiceImplTest {
         NetConfig nc = new ModemConfig(1, PdpType.PPP, "apn", IPAddress.parseHostAddress("10.10.10.10"), 1, 2);
         netConfigs.add(nc);
 
-        NetConfigIP4 result = (NetConfigIP4)TestUtil.invokePrivate(svc, "getNetConfigIp4", netConfigs);
+        NetConfigIP4 result = (NetConfigIP4) TestUtil.invokePrivate(svc, "getNetConfigIp4", netConfigs);
         assertNotNull(result);
         assertEquals(result.getStatus(), NetInterfaceStatus.netIPv4StatusUnknown);
     }
@@ -810,7 +809,7 @@ public class ModemMonitorServiceImplTest {
 
 }
 
-class TestModemFactory implements CellularModemFactory {
+class TestModemFactory extends AbstractCellularModemFactory<CellularModem> {
 
     private static TestModemFactory instance;
 
@@ -824,24 +823,10 @@ class TestModemFactory implements CellularModemFactory {
     }
 
     @Override
-    public CellularModem obtainCellularModemService(ModemDevice modemDevice, String platform) throws Exception {
+    protected CellularModem createCellularModem(ModemDevice modemDevice, String platform) throws Exception {
         assertEquals("testPlatform", platform);
 
         return this.modem;
-    }
-
-    @Override
-    public Hashtable<String, ? extends CellularModem> getModemServices() {
-        return null;
-    }
-
-    @Override
-    public void releaseModemService(String usbPortAddress) {
-    }
-
-    @Override
-    public ModemTechnologyType getType() {
-        return null;
     }
 
     public CellularModem getModem() {
@@ -852,4 +837,8 @@ class TestModemFactory implements CellularModemFactory {
         this.modem = modem;
     }
 
+    @Override
+    public ModemTechnologyType getType() {
+        return null;
+    }
 }

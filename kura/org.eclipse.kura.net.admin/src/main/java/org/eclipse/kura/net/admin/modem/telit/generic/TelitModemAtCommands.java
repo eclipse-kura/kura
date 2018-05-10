@@ -27,7 +27,7 @@ public enum TelitModemAtCommands {
     gpsPowerDown("at$GPSP=0\r\n"),
     // gpsEnableNMEA("AT$GPSNMUN=3,1,1,1,1,1,1\r\n"),
     gpsEnableNMEA("AT$GPSNMUN="),
-    gpsDisableNMEA("+++");
+    escapeSequence("+++");
 
     private String command;
 

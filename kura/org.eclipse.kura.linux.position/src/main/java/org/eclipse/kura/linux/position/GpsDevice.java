@@ -11,8 +11,9 @@
  *******************************************************************************/
 package org.eclipse.kura.linux.position;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.BufferedInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 
 import org.eclipse.kura.comm.CommConnection;
@@ -104,20 +105,17 @@ public class GpsDevice {
      */
     private final class SerialCommunicate extends Thread {
 
-        private final InputStream in;
-        private final CommConnection conn;
+        private InputStream in = null;
+        private CommConnection conn = null;
         private boolean run = true;
 
         public SerialCommunicate(final ConnectionFactory connFactory, final CommURI commURI) throws PositionException {
             try {
                 this.conn = (CommConnection) connFactory.createConnection(enableTimeouts(commURI).toString(), 1, false);
-                final InputStream connIn = conn.openInputStream();
-                if (connIn == null) {
-                    throw new IOException("Serial input stream is null");
-                }
-                this.in = new BufferedInputStream(connIn);
+                this.in = new BufferedInputStream(requireNonNull(this.conn.openInputStream()));
             } catch (Exception e) {
-                throw new PositionException("Failed to open connection", e);
+                closeSerialPort();
+                throw new PositionException("Failed to open serial port", e);
             }
 
             this.start();
@@ -150,14 +148,25 @@ public class GpsDevice {
         }
 
         private void closeSerialPort() {
+            logger.debug("closing serial port...");
+
             try {
-                logger.debug("closing serial port...");
-                this.in.close();
-                this.conn.close();
-                logger.debug("closing serial port...done");
+                if (this.in != null) {
+                    this.in.close();
+                }
             } catch (Exception e) {
-                logger.warn("Failed to close port, {}", e);
+                logger.warn("Failed to close serial port InputStream", e);
             }
+
+            try {
+                if (this.conn != null) {
+                    this.conn.close();
+                }
+            } catch (Exception e) {
+                logger.warn("Failed to close serial port connection", e);
+            }
+
+            logger.debug("closing serial port...done");
         }
 
         private boolean doPollWork() {

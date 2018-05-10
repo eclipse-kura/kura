@@ -219,7 +219,7 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
         if (hasReadChannels()) {
             try {
                 emitChannelRecords(readAllChannels());
-            } catch (final KuraException e) {
+            } catch (final Exception e) {
                 logger.error("Error while performing read from the Wire Asset...", e);
             }
         }

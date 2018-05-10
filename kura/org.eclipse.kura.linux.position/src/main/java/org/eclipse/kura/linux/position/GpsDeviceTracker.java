@@ -36,7 +36,7 @@ public class GpsDeviceTracker implements EventHandler {
         this.usbService = usbService;
     }
 
-    public void unsetUsbService() {
+    public void unsetUsbService(final UsbService usbService) {
         this.usbService = null;
     }
 

@@ -27,10 +27,11 @@ import org.gwtbootstrap3.client.ui.html.Span;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.http.client.URL;
 
 public class ServicesAnchorListItem extends AnchorListItem {
 
-    private static final String SERVLET_URL = "/" + GWT.getModuleName() + "/file/icon?pid=";
+    private static final String SERVLET_URL = "/" + GWT.getModuleName() + "/file/icon?";
 
     EntryClassUi ui;
     GwtConfigComponent item;
@@ -186,16 +187,36 @@ public class ServicesAnchorListItem extends AnchorListItem {
     }
 
     private String getImagePath() {
-        String icon = this.item.getComponentIcon();
-        String componentId = this.item.getComponentId();
-        if (icon != null && (icon.toLowerCase().startsWith("http://") || icon.toLowerCase().startsWith("https://"))
-                && isImagePath(icon)) {
-            return icon;
-        } else if (icon != null && isImagePath(icon)) {
-            return SERVLET_URL + componentId;
-        } else {
+        final String icon = this.item.getComponentIcon();
+
+        if (icon == null) {
             return null;
         }
+
+        if (!isImagePath(icon)) {
+            return null;
+        }
+
+        if ((icon.toLowerCase().startsWith("http://") || icon.toLowerCase().startsWith("https://"))) {
+
+            return icon;
+
+        } else {
+
+            final String factoryId = item.getFactoryId();
+            if (factoryId != null) {
+                return SERVLET_URL + "factoryId=" + URL.encodeQueryString(factoryId);
+            }
+
+            String componentId = this.item.getComponentId();
+
+            if (componentId != null) {
+                return SERVLET_URL + "pid=" + URL.encodeQueryString(componentId);
+            }
+
+        }
+
+        return null;
     }
 
     private boolean isImagePath(String icon) {

@@ -414,6 +414,11 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.driver.ibeacon.provider</artifactId>
+                                    <version>${org.eclipse.kura.driver.ibeacon.provider.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.wire.script.filter.provider</artifactId>
                                     <version>${org.eclipse.kura.wire.script.filter.provider.version}</version>
                                 </artifactItem>
@@ -648,6 +653,8 @@
                                     tofile="target/plugins/org.eclipse.kura.driver.ble.sensortag.provider_${org.eclipse.kura.driver.ble.sensortag.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.driver.eddystone.provider.jar"
                                     tofile="target/plugins/org.eclipse.kura.driver.eddystone.provider_${org.eclipse.kura.driver.eddystone.provider.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.driver.ibeacon.provider.jar"
+                                    tofile="target/plugins/org.eclipse.kura.driver.ibeacon.provider_${org.eclipse.kura.driver.ibeacon.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.wire.script.filter.provider.jar"
                                     tofile="target/plugins/org.eclipse.kura.wire.script.filter.provider_${org.eclipse.kura.wire.script.filter.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.driver.gpio.provider.jar"
@@ -2798,6 +2805,12 @@
                             <groupId>org.eclipse.kura.feature</groupId>
                             <artifactId>org.eclipse.kura.driver.eddystone</artifactId>
                             <version>${org.eclipse.kura.driver.eddystone.version}</version>
+                            <type>dp</type>
+                          </artifactItem>
+                          <artifactItem>
+                            <groupId>org.eclipse.kura.feature</groupId>
+                            <artifactId>org.eclipse.kura.driver.ibeacon</artifactId>
+                            <version>${org.eclipse.kura.driver.ibeacon.version}</version>
                             <type>dp</type>
                           </artifactItem>
                           <artifactItem>

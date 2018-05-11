@@ -595,7 +595,11 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         }
 
         if (!readRecords.isEmpty() && this.driver != null) {
-            this.preparedRead = this.driver.prepareRead(readRecords);
+            try {
+                this.preparedRead = this.driver.prepareRead(readRecords);
+            } catch (Exception e) {
+                logger.warn("Failed to get prepared read", e);
+            }
         }
     }
 

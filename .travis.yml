@@ -10,7 +10,7 @@ cache:
   - $HOME/.m2
   - kura/target-definition
   - target-platform/p2-repo-common/target
-  - target-platform/p2-repo-equinox_3.11.1/target
+  - target-platform/p2-repo-equinox_3.12.50/target
   - target-platform/p2-repo-test-deps/target
 
 before_script:

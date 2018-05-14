@@ -224,6 +224,10 @@ public final class GwtServerUtil {
      * @return the string
      */
     public static String stripPidPrefix(final String pid) {
+        if (pid == null) {
+            return null;
+        }
+
         final int start = pid.lastIndexOf('.');
         if (start < 0) {
             return pid;
@@ -346,19 +350,25 @@ public final class GwtServerUtil {
             }
 
             if (props != null && props.get(ConfigurationAdmin.SERVICE_FACTORYPID) != null) {
-                String pid = stripPidPrefix(config.getPid());
-                gwtConfig.setComponentName(pid);
                 gwtConfig.setFactoryComponent(true);
                 gwtConfig.setFactoryPid(String.valueOf(props.get(ConfigurationAdmin.SERVICE_FACTORYPID)));
             } else {
-                gwtConfig.setComponentName(ocd.getName());
                 gwtConfig.setFactoryComponent(false);
+            }
+
+            if (ocd.getName() != null) {
+                gwtConfig.setComponentName(ocd.getName());
             }
 
             gwtConfig.setComponentDescription(ocd.getDescription());
             if (ocd.getIcon() != null && !ocd.getIcon().isEmpty()) {
                 Icon icon = ocd.getIcon().get(0);
                 gwtConfig.setComponentIcon(icon.getResource());
+            }
+
+            if (gwtConfig.getComponentName() == null) {
+                // set a fallback name
+                gwtConfig.setComponentName(stripPidPrefix(config.getPid()));
             }
 
             List<GwtConfigParameter> gwtParams = new ArrayList<>();

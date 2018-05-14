@@ -6,10 +6,14 @@
      are made available under the terms of the Eclipse Public License v1.0
      which accompanies this distribution, and is available at
      http://www.eclipse.org/legal/epl-v10.html
+
+     Contributors:
+       Eurotech
+       Red Hat Inc 
 -->
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
     <OCD id="org.eclipse.kura.wire.DbWireRecordFilter"
-         name="DB Filter" 
+         name="HSQL DB Filter (Deprecated)" 
          description="A wire component that provides filtering and aggregation for Wire Records stored by the DbWireRecordStores. This component is deprecated.">
 
         <AD id="sql.view"

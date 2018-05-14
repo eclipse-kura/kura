@@ -9,6 +9,7 @@
  * Contributors:
  *  Eurotech
  *  Amit Kumar Mondal
+ *  Red Hat Inc
  *
  *******************************************************************************/
 package org.eclipse.kura.web.server;
@@ -37,6 +38,7 @@ import org.eclipse.kura.web.server.util.GwtServerUtil;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
+import org.eclipse.kura.web.shared.IdHelper;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter.GwtConfigParameterType;
@@ -54,8 +56,6 @@ import org.eclipse.kura.wire.graph.WireComponentDefinitionService;
 import org.eclipse.kura.wire.graph.WireGraphConfiguration;
 import org.eclipse.kura.wire.graph.WireGraphService;
 import org.osgi.service.cm.ConfigurationAdmin;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The class GwtWireServiceImpl implements {@link GwtWireService}
@@ -68,7 +68,6 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
     private static final GwtConfigComponent WIRE_ASSET_CHANNEL_DESCRIPTOR = GwtServerUtil.toGwtConfigComponent(null,
             WireAssetChannelDescriptor.get().getDescriptor());
 
-    private static final Logger logger = LoggerFactory.getLogger(GwtWireServiceImpl.class);
     private static final long serialVersionUID = -6577843865830245755L;
 
     @Override
@@ -285,8 +284,8 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
                     for (WireComponentDefinition wireComponentDefinition : wireComponentDefinitionService
                             .getComponentDefinitions()) {
                         final GwtWireComponentDescriptor result = new GwtWireComponentDescriptor(
-                                wireComponentDefinition.getFactoryPid(), wireComponentDefinition.getMinInputPorts(),
-                                wireComponentDefinition.getMaxInputPorts(),
+                                toComponentName(wireComponentDefinition), wireComponentDefinition.getFactoryPid(),
+                                wireComponentDefinition.getMinInputPorts(), wireComponentDefinition.getMaxInputPorts(),
                                 wireComponentDefinition.getDefaultInputPorts(),
                                 wireComponentDefinition.getMinOutputPorts(),
                                 wireComponentDefinition.getMaxOutputPorts(),
@@ -305,6 +304,22 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
                     resultDefinitions.add(getWireAssetDefinition());
                     return (Void) null;
                 });
+    }
+
+    private String toComponentName(WireComponentDefinition wireComponentDefinition) {
+        if (wireComponentDefinition.getComponentOCD() == null) {
+            return IdHelper.getLastIdComponent(wireComponentDefinition.getFactoryPid());
+        }
+
+        if (wireComponentDefinition.getComponentOCD().getDefinition() == null) {
+            return IdHelper.getLastIdComponent(wireComponentDefinition.getFactoryPid());
+        }
+
+        if (wireComponentDefinition.getComponentOCD().getDefinition().getName() == null) {
+            return IdHelper.getLastIdComponent(wireComponentDefinition.getFactoryPid());
+        }
+
+        return wireComponentDefinition.getComponentOCD().getDefinition().getName();
     }
 
     private void fillDriverDefinitions(List<GwtConfigComponent> resultDefinitions) throws GwtKuraException {

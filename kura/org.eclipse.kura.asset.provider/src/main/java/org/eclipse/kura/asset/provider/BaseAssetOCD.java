@@ -23,7 +23,7 @@ public class BaseAssetOCD extends Tocd {
 
     public BaseAssetOCD() {
         setId(BaseAsset.CONF_PID);
-        setName("WireAsset");
+        setName("Wire Asset");
         setDescription("Configure Wire Asset Instance");
 
         final Tad assetDescriptionAd = new Tad();

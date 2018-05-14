@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and others
+ * Copyright (c) 2011, 2018 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,7 +8,7 @@
  *
  * Contributors:
  *     Eurotech
- *     Red Hat Inc - Fix build warnings
+ *     Red Hat Inc
  *******************************************************************************/
 package org.eclipse.kura.core.test;
 
@@ -17,8 +17,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.HashSet;
-import java.util.Random;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
@@ -57,8 +57,8 @@ public class DataServiceTest implements DataServiceListener {
     static final int ALL_CONFIRMED_QOS2_TIMEOUT = 120;
     static final int DFLT_MSG_PRIORITY = 5;
     static final int HIGH_MSG_PRIORITY = 0;
-    static final String MSG_SEMATIC_TOPIC1 = "data/service/test/" + new Random();
-    static final String MSG_SEMATIC_TOPIC2 = "data/service/test/" + new Random();
+    static final String MSG_SEMATIC_TOPIC1 = "data/service/test/" + UUID.randomUUID().toString();
+    static final String MSG_SEMATIC_TOPIC2 = "data/service/test/" + UUID.randomUUID().toString();
     static final String MSG_TOPIC1 = "#account-name/#client-id/" + MSG_SEMATIC_TOPIC1;
     static final String MSG_TOPIC2 = "#account-name/#client-id/" + MSG_SEMATIC_TOPIC2;
     static final String MSG_PAYLOAD = "Lorem ipsum dolor sit amet";

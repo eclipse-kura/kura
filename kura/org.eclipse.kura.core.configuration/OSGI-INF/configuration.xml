@@ -49,4 +49,16 @@
               name="ScrService"
               policy="static"
               unbind="unsetScrService"/>
+   <reference bind="addConfigurableComponent" 
+              cardinality="0..n"
+              interface="org.eclipse.kura.configuration.ConfigurableComponent"
+              name="ConfigurableComponent"
+              policy="dynamic"
+              unbind="removeConfigurableComponent"/>
+   <reference bind="addSelfConfiguringComponent" 
+              cardinality="0..n"
+              interface="org.eclipse.kura.configuration.SelfConfiguringComponent"
+              name="SelfConfiguringComponent"
+              policy="dynamic"
+              unbind="removeSelfConfiguringComponent"/>
 </scr:component>

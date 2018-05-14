@@ -82,6 +82,7 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
     private static final String IPV4_STATUS_LAN_MESSAGE = MessageUtils.get(IPV4_STATUS_LAN);
     private static final String IPV4_STATUS_UNMANAGED = GwtNetIfStatus.netIPv4StatusUnmanaged.name();
     private static final String IPV4_STATUS_L2ONLY = GwtNetIfStatus.netIPv4StatusL2Only.name();
+
     private static final String IPV4_STATUS_DISABLED = GwtNetIfStatus.netIPv4StatusDisabled.name();
     private static final String IPV4_STATUS_DISABLED_MESSAGE = MessageUtils.get(IPV4_STATUS_DISABLED);
 
@@ -208,7 +209,6 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
     @Override
     public void setNetInterface(GwtNetInterfaceConfig config) {
         setDirty(true);
-
         if (config == null) {
             return;
         }
@@ -386,7 +386,6 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
         initDnsServersField();
 
         initDHCPLeaseField();
-
     }
 
     private void initDHCPLeaseField() {

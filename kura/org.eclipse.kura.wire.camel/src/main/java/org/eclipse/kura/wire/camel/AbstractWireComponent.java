@@ -17,6 +17,8 @@ import org.eclipse.kura.wire.WireComponent;
 import org.eclipse.kura.wire.WireEnvelope;
 import org.eclipse.kura.wire.WireHelperService;
 import org.eclipse.kura.wire.WireSupport;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.component.ComponentContext;
 import org.osgi.service.wireadmin.Wire;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,13 +38,16 @@ public abstract class AbstractWireComponent implements WireComponent, Configurab
         this.wireHelperService = wireHelperService;
     }
 
-    protected synchronized void activate(final Map<String, ?> properties) throws Exception {
+    @SuppressWarnings("unchecked")
+    protected synchronized void activate(final ComponentContext componentContext, final Map<String, ?> properties)
+            throws Exception {
         if (this.wireSupport == null) {
-            this.wireSupport = this.wireHelperService.newWireSupport(this);
+            this.wireSupport = this.wireHelperService.newWireSupport(this,
+                    (ServiceReference<WireComponent>) componentContext.getServiceReference());
         }
     }
 
-    protected void modified(final Map<String, ?> properties) throws Exception {
+    protected void modified(final ComponentContext componentContext, final Map<String, ?> properties) throws Exception {
     }
 
     protected synchronized void deactivate() {

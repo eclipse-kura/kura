@@ -14,6 +14,8 @@ import static org.eclipse.kura.camel.component.Configuration.asString;
 
 import java.util.Map;
 
+import org.osgi.service.component.ComponentContext;
+
 public abstract class AbstractEndpointWireComponent extends AbstractCamelWireComponent {
 
     protected volatile String endpointUri;
@@ -23,9 +25,9 @@ public abstract class AbstractEndpointWireComponent extends AbstractCamelWireCom
     }
 
     @Override
-    protected void activate(Map<String, ?> properties) throws Exception {
+    protected void activate(final ComponentContext componentContext, Map<String, ?> properties) throws Exception {
         setEndpointUri(asString(properties, "endpointUri"));
-        super.activate(properties);
+        super.activate(componentContext, properties);
     }
 
     @Override

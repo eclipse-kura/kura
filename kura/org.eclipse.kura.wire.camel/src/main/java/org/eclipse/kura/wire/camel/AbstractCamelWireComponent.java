@@ -21,6 +21,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,18 +67,18 @@ public abstract class AbstractCamelWireComponent extends AbstractWireComponent {
     }
 
     @Override
-    protected void activate(final Map<String, ?> properties) throws Exception {
+    protected void activate(final ComponentContext componentContext, final Map<String, ?> properties) throws Exception {
 
-        super.activate(properties);
+        super.activate(componentContext, properties);
 
         this.contextId = Configuration.asString(properties, "id");
         openContextTracker(this.contextId);
     }
 
     @Override
-    protected void modified(final Map<String, ?> properties) throws Exception {
+    protected void modified(final ComponentContext componentContext, Map<String, ?> properties) throws Exception {
         deactivate();
-        activate(properties);
+        activate(componentContext, properties);
     }
 
     @Override

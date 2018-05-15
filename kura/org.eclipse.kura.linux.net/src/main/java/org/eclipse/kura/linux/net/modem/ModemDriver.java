@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -20,8 +20,6 @@ import java.io.IOException;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.core.util.ProcessUtil;
-import org.eclipse.kura.core.util.SafeProcess;
 import org.eclipse.kura.linux.net.util.KuraConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,20 +36,16 @@ public class ModemDriver {
     private static final String GPIO_VALUE_SUFFIX_PATH = "/value";
 
     private static final String GPIO_INDEX_60 = "60";
-    private static final String GPIO_INDEX_65 = "65";
     private static final String GPIO_INDEX_73 = "73";
 
     private static final String RELIAGATE_10_20_GPIO_PATH = "/sys/class/gpio/usb-rear-pwr/value";
-    private static final String RELIAGATE_50_21_GPIO_11_0_CMD = "/usr/sbin/vector-j21-gpio 11 0";
-    private static final String RELIAGATE_50_21_GPIO_11_1_CMD = "/usr/sbin/vector-j21-gpio 11 1";
-    private static final String RELIAGATE_50_21_GPIO_6_CMD = "/usr/sbin/vector-j21-gpio 6";
 
     private static final String RELIAGATE_10_05_GSM_RESET_GPIO_NUM = "252";
     private static final String RELIAGATE_10_05_GSM_USB_PATH = "/sys/bus/usb/devices/usb2/authorized";
 
     private static final String BOLTGATE_20_25_PCIEX_SLOT3_POWER_GPIO_VALUE = "/dev/pciex_slot3_power/value";
     private static final String BOLTGATE_20_25_PCIEX_W_DISABLE3_GPIO_VALUE = "/dev/pciex_slot3_wdisable/value";
-    private static final String BOLTGATE_20_25_J18__POWER_GPIO_VALUE = "/dev/usb_j18_conn_power/value";
+    private static final String BOLTGATE_20_25_J18_POWER_GPIO_VALUE = "/dev/usb_j18_conn_power/value";
 
     private static final String GPIO_DIRECTION = "out";
 
@@ -60,17 +54,7 @@ public class ModemDriver {
     private static int baseGpio;
 
     static {
-        if (TARGET_NAME.equals(KuraConstants.Mini_Gateway.getTargetName())) {
-            String gpioIndex = GPIO_INDEX_65;
-            String gpioPath = BASE_GPIO_PATH + gpioIndex;
-            String gpioDirectionPath = gpioPath + GPIO_DIRECTION_SUFFIX_PATH;
-            try {
-                exportGpio(gpioIndex, gpioPath); // Prepare gpios
-                setGpioDirection(gpioDirectionPath, GPIO_DIRECTION);
-            } catch (IOException e) {
-                logger.warn(FAILED_INITIALIZE_GPIO_MSG, gpioIndex, e);
-            }
-        } else if (TARGET_NAME.equals(KuraConstants.Reliagate_10_11.getTargetName())) {
+        if (TARGET_NAME.equals(KuraConstants.Reliagate_10_11.getTargetName())) {
             String gpioIndex = GPIO_INDEX_60;
             String gpioPath = BASE_GPIO_PATH + gpioIndex;
             String gpioDirectionPath = gpioPath + GPIO_DIRECTION_SUFFIX_PATH;
@@ -154,9 +138,7 @@ public class ModemDriver {
                 break;
             }
             logger.info("turnModemOff() :: turning modem OFF ... attempts left: {}", remainingAttempts);
-            if (TARGET_NAME.equals(KuraConstants.Mini_Gateway.getTargetName())) {
-                invertGpioValue(BASE_GPIO_PATH + GPIO_INDEX_65 + GPIO_VALUE_SUFFIX_PATH);
-            } else if (TARGET_NAME.equals(KuraConstants.Reliagate_10_11.getTargetName())) {
+            if (TARGET_NAME.equals(KuraConstants.Reliagate_10_11.getTargetName())) {
                 invertGpioValue(BASE_GPIO_PATH + GPIO_INDEX_60 + GPIO_VALUE_SUFFIX_PATH);
             } else if (TARGET_NAME.equals(KuraConstants.Reliagate_10_12.getTargetName())) {
                 invertGpioValue(BASE_GPIO_PATH + GPIO_INDEX_60 + GPIO_VALUE_SUFFIX_PATH);
@@ -165,24 +147,6 @@ public class ModemDriver {
                 invertGpioValue(BASE_GPIO_PATH + GPIO_INDEX_73 + GPIO_VALUE_SUFFIX_PATH);
             } else if (TARGET_NAME.equals(KuraConstants.Reliagate_10_20.getTargetName())) {
                 disable1020Gpio();
-            } else if (TARGET_NAME.equals(KuraConstants.ReliaGATE_50_21_Ubuntu.getTargetName())) {
-                int status = exec5021Gpio110();
-                logger.info("turnModemOff() :: '{}' returned {}", RELIAGATE_50_21_GPIO_11_0_CMD, status);
-                if (status != 0) {
-                    continue;
-                }
-                sleep(1000);
-
-                status = exec5021Gpio111();
-                logger.info("turnModemOff() :: '{}' returned {}", RELIAGATE_50_21_GPIO_11_1_CMD, status);
-                if (status != 0) {
-                    continue;
-                }
-                sleep(3000);
-
-                status = exec5021Gpio110();
-                logger.info("turnModemOff() :: '{}' returned {}", RELIAGATE_50_21_GPIO_11_0_CMD, status);
-                retVal = status == 0 ? true : false;
             } else if (TARGET_NAME.equals(KuraConstants.Reliagate_20_25.getTargetName())) {
                 // TODO: make resets more smart, based on the effective modem
                 // that has to be stopped/started
@@ -211,7 +175,7 @@ public class ModemDriver {
                 turnOffGpio(BOLTGATE_20_25_PCIEX_SLOT3_POWER_GPIO_VALUE);
 
             } else if (TARGET_NAME.startsWith(KuraConstants.BoltGATE_20_25.getTargetName())) {
-                turnOffGpio(BOLTGATE_20_25_J18__POWER_GPIO_VALUE);
+                turnOffGpio(BOLTGATE_20_25_J18_POWER_GPIO_VALUE);
             } else {
                 logger.warn("turnModemOff() :: modem turnOff operation is not supported for the {} platform",
                         TARGET_NAME);
@@ -240,9 +204,7 @@ public class ModemDriver {
                 break;
             }
             logger.info("turnModemOn() :: turning modem ON ... attempts left: {}", remainingAttempts);
-            if (TARGET_NAME.equals(KuraConstants.Mini_Gateway.getTargetName())) {
-                invertGpioValue(BASE_GPIO_PATH + GPIO_INDEX_65 + GPIO_VALUE_SUFFIX_PATH);
-            } else if (TARGET_NAME.equals(KuraConstants.Reliagate_10_11.getTargetName())) {
+            if (TARGET_NAME.equals(KuraConstants.Reliagate_10_11.getTargetName())) {
                 invertGpioValue(BASE_GPIO_PATH + GPIO_INDEX_60 + GPIO_VALUE_SUFFIX_PATH);
                 sleep(5000);
             } else if (TARGET_NAME.equals(KuraConstants.Reliagate_10_12.getTargetName())) {
@@ -252,17 +214,6 @@ public class ModemDriver {
                 invertGpioValue(BASE_GPIO_PATH + GPIO_INDEX_73 + GPIO_VALUE_SUFFIX_PATH);
             } else if (TARGET_NAME.equals(KuraConstants.Reliagate_10_20.getTargetName())) {
                 enable1020Gpio();
-            } else if (TARGET_NAME.equals(KuraConstants.ReliaGATE_50_21_Ubuntu.getTargetName())) {
-                int status = exec5021Gpio111();
-                logger.info("turnModemOn() :: '{}' returned {}", RELIAGATE_50_21_GPIO_11_1_CMD, status);
-                if (status != 0) {
-                    continue;
-                }
-                sleep(1000);
-
-                status = exec5021Gpio6();
-                logger.info("turnModemOn() :: '{}' returned {}", RELIAGATE_50_21_GPIO_6_CMD, status);
-                retVal = status == 0 ? true : false;
             } else if (TARGET_NAME.equals(KuraConstants.Reliagate_20_25.getTargetName())) {
                 if (baseGpio != -1) {
                     // invert gpio value for internal modem. (Modem Power)
@@ -292,7 +243,7 @@ public class ModemDriver {
                 toggleGpio(BOLTGATE_20_25_PCIEX_W_DISABLE3_GPIO_VALUE);
 
             } else if (TARGET_NAME.startsWith(KuraConstants.BoltGATE_20_25.getTargetName())) {
-                turnOnGpio(BOLTGATE_20_25_J18__POWER_GPIO_VALUE);
+                turnOnGpio(BOLTGATE_20_25_J18_POWER_GPIO_VALUE);
             } else {
                 logger.warn("turnModemOn() :: modem turnOn operation is not supported for the {} platform",
                         TARGET_NAME);
@@ -524,9 +475,6 @@ public class ModemDriver {
             } catch (IOException e) {
                 throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, "Error executing lsusb command");
             }
-        } else if (this instanceof SerialModemDriver) {
-            isModemOn = ((SerialModemDriver) this).isReachable();
-            logger.info("isOn() :: Serial modem reachable? {}", isModemOn);
         } else {
             throw new KuraException(KuraErrorCode.UNAVAILABLE_DEVICE, "Unsupported modem device");
         }
@@ -557,48 +505,6 @@ public class ModemDriver {
         try (FileWriter fw = new FileWriter(RELIAGATE_10_20_GPIO_PATH)) {
             fw.write("1");
         }
-    }
-
-    private static int exec5021Gpio110() throws IOException, InterruptedException {
-        int status;
-        SafeProcess pr = null;
-        try {
-            pr = ProcessUtil.exec(RELIAGATE_50_21_GPIO_11_0_CMD);
-            status = pr.waitFor();
-        } finally {
-            if (pr != null) {
-                ProcessUtil.destroy(pr);
-            }
-        }
-        return status;
-    }
-
-    private static int exec5021Gpio111() throws IOException, InterruptedException {
-        int status;
-        SafeProcess pr = null;
-        try {
-            pr = ProcessUtil.exec(RELIAGATE_50_21_GPIO_11_1_CMD);
-            status = pr.waitFor();
-        } finally {
-            if (pr != null) {
-                ProcessUtil.destroy(pr);
-            }
-        }
-        return status;
-    }
-
-    private static int exec5021Gpio6() throws IOException, InterruptedException {
-        int status;
-        SafeProcess pr = null;
-        try {
-            pr = ProcessUtil.exec(RELIAGATE_50_21_GPIO_6_CMD);
-            status = pr.waitFor();
-        } finally {
-            if (pr != null) {
-                ProcessUtil.destroy(pr);
-            }
-        }
-        return status;
     }
 
     private static int getBaseGpio() throws KuraException {

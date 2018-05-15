@@ -24,7 +24,7 @@ import java.util.StringTokenizer;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.linux.util.LinuxProcessUtil;
-import org.eclipse.kura.linux.net.util.KuraConstants;
+import org.eclipse.kura.linux.net.util.KuraSupportedPlatforms;
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetworkPair;
@@ -37,44 +37,25 @@ public class LinuxNamed {
     private static final Logger logger = LoggerFactory.getLogger(LinuxNamed.class);
 
     private static final String OS_VERSION = System.getProperty("kura.os.version");
-    private static final String TARGET_NAME = System.getProperty("target.device");
 
     private static LinuxNamed linuxNamed = null;
-    private static String persistentConfigFileName = null;
-    private static String rfc1912ZonesFilename = null;
-    private static String procString = null;
+    private String persistentConfigFileName = null;
+    private String rfc1912ZonesFilename = null;
+    private String procString = null;
 
     private DnsServerConfigIP4 dnsServerConfigIP4;
 
     private LinuxNamed() throws KuraException {
-        if (OS_VERSION
-                .equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion())
-                || OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName())
-                || OS_VERSION.equals(KuraConstants.Intel_Up2_Ubuntu.getImageName())
-                || OS_VERSION.equals(KuraConstants.BeagleBone.getImageName())) {
-            persistentConfigFileName = "/etc/bind/named.conf";
-            procString = "/usr/sbin/named";
-            if (TARGET_NAME.equals(KuraConstants.ReliaGATE_15_10.getTargetName())) {
-                rfc1912ZonesFilename = "/etc/bind/named.rfc1912.zones";
-            } else {
-                rfc1912ZonesFilename = "/etc/named.rfc1912.zones";
-            }
-        } else if (OS_VERSION.equals(KuraConstants.ReliaGATE_50_21_Ubuntu.getImageName() + "_"
-                + KuraConstants.ReliaGATE_50_21_Ubuntu.getImageVersion())) {
-            persistentConfigFileName = "/etc/bind/named.conf";
-            procString = "/usr/sbin/named";
-            rfc1912ZonesFilename = "/etc/bind/named.rfc1912.zones";
-        } else if (OS_VERSION.equals(KuraConstants.Fedora_Pi.getImageName())
-                || OS_VERSION.equals(KuraConstants.Intel_Up2.getImageName())
-                || OS_VERSION.equals(KuraConstants.Reliagate_20_26.getImageName() + "_"
-                        + KuraConstants.Reliagate_20_26.getImageVersion())) {
-            persistentConfigFileName = "/etc/named.conf";
-            procString = "named -u named -t";
-            rfc1912ZonesFilename = "/etc/named.rfc1912.zones";
+        if (OS_VERSION.equals(KuraSupportedPlatforms.RASPBIAN_100.getImageName())
+                || OS_VERSION.equals(KuraSupportedPlatforms.UBUNTU_16.getImageName())
+                || OS_VERSION.equals(KuraSupportedPlatforms.DEBIAN_100.getImageName())) {
+            this.persistentConfigFileName = "/etc/bind/named.conf";
+            this.procString = "/usr/sbin/named";
+            this.rfc1912ZonesFilename = "/etc/named.rfc1912.zones";
         } else {
-            persistentConfigFileName = "/etc/named.conf";
-            procString = "named -u named -t";
-            rfc1912ZonesFilename = "/etc/named.rfc1912.zones";
+            this.persistentConfigFileName = "/etc/named.conf";
+            this.procString = "named -u named -t";
+            this.rfc1912ZonesFilename = "/etc/named.rfc1912.zones";
         }
 
         // initialize the configuration
@@ -96,7 +77,7 @@ public class LinuxNamed {
     }
 
     private void init() throws KuraException {
-        File configFile = new File(persistentConfigFileName);
+        File configFile = new File(this.persistentConfigFileName);
         if (!configFile.exists() || !isForwardOnlyConfiguration(configFile)) {
             logger.debug("There is no current DNS server configuration that allows forwarding");
             return;
@@ -130,7 +111,7 @@ public class LinuxNamed {
                             String allowedNetwork = st2.nextToken();
                             if (allowedNetwork != null && !"".equals(allowedNetwork.trim())) {
                                 String[] splitNetwork = allowedNetwork.split("/");
-                                allowedNetworks.add(new NetworkPair<IP4Address>(
+                                allowedNetworks.add(new NetworkPair<>(
                                         (IP4Address) IPAddress.parseHostAddress(splitNetwork[0]),
                                         Short.parseShort(splitNetwork[1])));
                             }
@@ -168,7 +149,7 @@ public class LinuxNamed {
     public boolean isEnabled() throws KuraException {
         try {
             // Check if named is running
-            int pid = LinuxProcessUtil.getPid(procString);
+            int pid = LinuxProcessUtil.getPid(this.procString);
             return pid > -1;
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
@@ -179,7 +160,7 @@ public class LinuxNamed {
         // write config happened during 'set config' step
         try {
             // Check if named is running
-            int pid = LinuxProcessUtil.getPid(procString);
+            int pid = LinuxProcessUtil.getPid(this.procString);
             if (pid > -1) {
                 // If so, disable it
                 logger.error("DNS server is already running, bringing it down...");
@@ -187,24 +168,19 @@ public class LinuxNamed {
             }
             // Start named
             int result;
-            if (OS_VERSION.equals(
-                    KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion())
-                    || OS_VERSION.equals(KuraConstants.ReliaGATE_10_05.getImageName() + "_"
-                            + KuraConstants.ReliaGATE_10_05.getImageVersion())
-                    || OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_"
-                            + KuraConstants.Intel_Edison.getImageVersion() + "_"
-                            + KuraConstants.Intel_Edison.getTargetName())) {
+            if (OS_VERSION
+                    .startsWith(KuraSupportedPlatforms.YOCTO_121.getImageName() + "_")
+                    || OS_VERSION.startsWith(KuraSupportedPlatforms.YOCTO_161.getImageName() + "_"
+                            + KuraSupportedPlatforms.YOCTO_161.getImageVersion() + "_")) {
                 result = LinuxProcessUtil.start("/etc/init.d/bind start");
-            } else if (OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName())
-                    || OS_VERSION.equals(KuraConstants.Intel_Up2_Ubuntu.getImageName())
-                    || OS_VERSION.equals(KuraConstants.BeagleBone.getImageName())
-                    || OS_VERSION.equals(KuraConstants.ReliaGATE_50_21_Ubuntu.getImageName() + "_"
-                            + KuraConstants.ReliaGATE_50_21_Ubuntu.getImageVersion())) {
+            } else if (OS_VERSION.equals(KuraSupportedPlatforms.RASPBIAN_100.getImageName())
+                    || OS_VERSION.equals(KuraSupportedPlatforms.DEBIAN_100.getImageName())
+                    || OS_VERSION.equals(KuraSupportedPlatforms.UBUNTU_16.getImageName())) {
                 result = LinuxProcessUtil.start("/etc/init.d/bind9 start");
-            } else if (OS_VERSION.equals(KuraConstants.Fedora_Pi.getImageName())
-                    || OS_VERSION.equals(KuraConstants.Intel_Up2.getImageName())
-                    || OS_VERSION.equals(KuraConstants.Reliagate_20_26.getImageName() + "_"
-                            + KuraConstants.Reliagate_20_26.getImageVersion())) {
+            } else if (OS_VERSION.equals(KuraSupportedPlatforms.FEDORA_2X.getImageName())
+                    || OS_VERSION.equals(KuraSupportedPlatforms.CENTOS_7.getImageName())
+                    || OS_VERSION.equals(KuraSupportedPlatforms.RHEL_73.getImageName() + "_"
+                            + KuraSupportedPlatforms.RHEL_73.getImageVersion())) {
                 result = LinuxProcessUtil.start("/bin/systemctl start named");
             } else {
                 logger.info("Linux named enable fallback");
@@ -212,7 +188,7 @@ public class LinuxNamed {
             }
             if (result == 0) {
                 logger.debug("DNS server started.");
-                logger.trace(this.dnsServerConfigIP4.toString());
+                logger.trace("{}", this.dnsServerConfigIP4);
                 return true;
             }
         } catch (Exception e) {
@@ -226,24 +202,19 @@ public class LinuxNamed {
         try {
             int result;
             // If so, stop it.
-            if (OS_VERSION.equals(
-                    KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion())
-                    || OS_VERSION.equals(KuraConstants.ReliaGATE_10_05.getImageName() + "_"
-                            + KuraConstants.ReliaGATE_10_05.getImageVersion())
-                    || OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_"
-                            + KuraConstants.Intel_Edison.getImageVersion() + "_"
-                            + KuraConstants.Intel_Edison.getTargetName())) {
+            if (OS_VERSION
+                    .startsWith(KuraSupportedPlatforms.YOCTO_121.getImageName() + "_")
+                    || OS_VERSION.startsWith(KuraSupportedPlatforms.YOCTO_161.getImageName() + "_"
+                            + KuraSupportedPlatforms.YOCTO_161.getImageVersion() + "_")) {
                 result = LinuxProcessUtil.start("/etc/init.d/bind stop");
-            } else if (OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName())
-                    || OS_VERSION.equals(KuraConstants.Intel_Up2_Ubuntu.getImageName())
-                    || OS_VERSION.equals(KuraConstants.BeagleBone.getImageName())
-                    || OS_VERSION.equals(KuraConstants.ReliaGATE_50_21_Ubuntu.getImageName() + "_"
-                            + KuraConstants.ReliaGATE_50_21_Ubuntu.getImageVersion())) {
+            } else if (OS_VERSION.equals(KuraSupportedPlatforms.RASPBIAN_100.getImageName())
+                    || OS_VERSION.equals(KuraSupportedPlatforms.UBUNTU_16.getImageName())
+                    || OS_VERSION.equals(KuraSupportedPlatforms.DEBIAN_100.getImageName())) {
                 result = LinuxProcessUtil.start("/etc/init.d/bind9 stop");
-            } else if (OS_VERSION.equals(KuraConstants.Fedora_Pi.getImageName())
-                    || OS_VERSION.equals(KuraConstants.Intel_Up2.getImageName())
-                    || OS_VERSION.equals(KuraConstants.Reliagate_20_26.getImageName() + "_"
-                            + KuraConstants.Reliagate_20_26.getImageVersion())) {
+            } else if (OS_VERSION.equals(KuraSupportedPlatforms.FEDORA_2X.getImageName())
+                    || OS_VERSION.equals(KuraSupportedPlatforms.CENTOS_7.getImageName())
+                    || OS_VERSION.equals(KuraSupportedPlatforms.RHEL_73.getImageName() + "_"
+                            + KuraSupportedPlatforms.RHEL_73.getImageVersion())) {
                 result = LinuxProcessUtil.start("/bin/systemctl stop named");
             } else {
                 result = LinuxProcessUtil.start("/etc/init.d/named stop");
@@ -251,7 +222,7 @@ public class LinuxNamed {
 
             if (result == 0) {
                 logger.debug("DNS server stopped.");
-                logger.trace(this.dnsServerConfigIP4.toString());
+                logger.trace("{}", this.dnsServerConfigIP4);
                 return true;
             } else {
                 logger.debug("tried to kill DNS server for interface but it is not running");
@@ -278,12 +249,12 @@ public class LinuxNamed {
     }
 
     public boolean isConfigured() {
-        if ((this.dnsServerConfigIP4 == null) || (this.dnsServerConfigIP4.getForwarders() == null)
-                || (this.dnsServerConfigIP4.getAllowedNetworks() == null)) {
+        if (this.dnsServerConfigIP4 == null || this.dnsServerConfigIP4.getForwarders() == null
+                || this.dnsServerConfigIP4.getAllowedNetworks() == null) {
             return false;
         }
-        return (this.dnsServerConfigIP4.getForwarders().isEmpty()
-                || this.dnsServerConfigIP4.getAllowedNetworks().isEmpty()) ? false : true;
+        return this.dnsServerConfigIP4.getForwarders().isEmpty()
+                || this.dnsServerConfigIP4.getAllowedNetworks().isEmpty() ? false : true;
     }
 
     public void setConfig(DnsServerConfigIP4 dnsServerConfigIP4) throws KuraException {
@@ -304,20 +275,20 @@ public class LinuxNamed {
     }
 
     public String getConfigFilename() {
-        return persistentConfigFileName;
+        return this.persistentConfigFileName;
     }
 
     private void writeConfig() throws KuraException {
-        try (FileOutputStream fos = new FileOutputStream(persistentConfigFileName);
+        try (FileOutputStream fos = new FileOutputStream(this.persistentConfigFileName);
                 PrintWriter pw = new PrintWriter(fos);) {
             // build up the file
             if (isConfigured()) {
-                logger.debug("writing custom named.conf to {} with: {}", persistentConfigFileName,
-                        this.dnsServerConfigIP4.toString());
+                logger.debug("writing custom named.conf to {} with: {}", this.persistentConfigFileName,
+                        this.dnsServerConfigIP4);
                 pw.print(getForwardingNamedFile());
             } else {
-                logger.debug("writing default named.conf to {} with: {}", persistentConfigFileName,
-                        this.dnsServerConfigIP4.toString());
+                logger.debug("writing default named.conf to {} with: {}", this.persistentConfigFileName,
+                        this.dnsServerConfigIP4);
                 pw.print(getDefaultNamedFile());
             }
             pw.flush();
@@ -362,13 +333,13 @@ public class LinuxNamed {
                 .append("\tfile \"named.ca\";\n") //
                 .append("};\n") //
                 .append("include \"") //
-                .append(rfc1912ZonesFilename) //
+                .append(this.rfc1912ZonesFilename) //
                 .append("\";\n");
 
         return sb.toString();
     }
 
-    private static final String getDefaultNamedFile() {
+    private String getDefaultNamedFile() {
         StringBuilder sb = new StringBuilder().append("//\n") //
                 .append("// named.conf\n") //
                 .append("//\n") //
@@ -404,7 +375,7 @@ public class LinuxNamed {
                 .append("};\n") //
                 .append("\n") //
                 .append("include \"") //
-                .append(rfc1912ZonesFilename) //
+                .append(this.rfc1912ZonesFilename) //
                 .append("\";\n"); //
         return sb.toString();
     }

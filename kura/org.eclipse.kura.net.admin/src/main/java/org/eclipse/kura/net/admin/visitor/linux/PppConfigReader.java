@@ -30,8 +30,6 @@ import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
 import org.eclipse.kura.core.net.modem.ModemInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.modem.ModemInterfaceConfigImpl;
 import org.eclipse.kura.linux.net.dns.LinuxDns;
-import org.eclipse.kura.linux.net.modem.SupportedSerialModemInfo;
-import org.eclipse.kura.linux.net.modem.SupportedSerialModemsInfo;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemInfo;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemsInfo;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
@@ -361,21 +359,11 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
 
     private Properties loadPeerFileProperties(String peerFilename) throws KuraException {
         Properties props = new Properties();
-        FileInputStream fis = null;
-        try {
-            fis = new FileInputStream(peerFilename);
+        try (FileInputStream fis = new FileInputStream(peerFilename);){
             props.load(fis);
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "Error getting modem config", e);
-        } finally {
-            if (null != fis) {
-                try {
-                    fis.close();
-                } catch (IOException e) {
-                    throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "Error getting modem config", e);
-                }
-            }
-        }
+        } 
 
         return props;
     }
@@ -444,12 +432,6 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
             SupportedUsbModemInfo usbModemInfo = SupportedUsbModemsInfo.getModem(usbDevice);
             if (usbModemInfo != null) {
                 technologyTypes = usbModemInfo.getTechnologyTypes();
-
-            }
-        } else {
-            SupportedSerialModemInfo serialModemInfo = SupportedSerialModemsInfo.getModem();
-            if (serialModemInfo != null) {
-                technologyTypes = serialModemInfo.getTechnologyTypes();
             }
         }
         return technologyTypes;
@@ -464,7 +446,7 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
         if (statusString != null && !statusString.isEmpty()) {
             netInterfaceStatus = NetInterfaceStatus.valueOf(statusString);
         }
-        logger.debug("Setting NetInterfaceStatus to " + netInterfaceStatus + " for " + interfaceName);
+        logger.debug("Setting NetInterfaceStatus to {} for {}", netInterfaceStatus, interfaceName);
 
         NetConfigIP4 netConfigIP4 = new NetConfigIP4(netInterfaceStatus, true, true);
 

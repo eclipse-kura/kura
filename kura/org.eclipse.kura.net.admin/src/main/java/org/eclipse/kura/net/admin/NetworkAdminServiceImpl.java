@@ -42,7 +42,7 @@ import org.eclipse.kura.linux.net.dns.LinuxNamed;
 import org.eclipse.kura.linux.net.iptables.LinuxFirewall;
 import org.eclipse.kura.linux.net.iptables.NATRule;
 import org.eclipse.kura.linux.net.util.IScanTool;
-import org.eclipse.kura.linux.net.util.KuraConstants;
+import org.eclipse.kura.linux.net.util.KuraSupportedPlatforms;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.eclipse.kura.linux.net.util.ScanTool;
 import org.eclipse.kura.linux.net.wifi.HostapdManager;
@@ -969,7 +969,8 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
                     if (netConfig instanceof NetConfigIP4) {
                         status = ((NetConfigIP4) netConfig).getStatus();
                         isL2Only = ((NetConfigIP4) netConfig).getStatus() == NetInterfaceStatus.netIPv4StatusL2Only
-                                ? true : false;
+                                ? true
+                                : false;
                         logger.debug("Interface status is set to {}", status);
                     } else if (netConfig instanceof WifiConfig && ((WifiConfig) netConfig).getMode() == wifiMode) {
                         wifiConfig = (WifiConfig) netConfig;
@@ -1278,8 +1279,8 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         rollbackItems
                 .add(new NetworkRollbackItem(srcDataDirectory + "/kuranet.conf", dstDataDirectory + "/kuranet.conf"));
 
-        if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_"
-                + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
+        if (OS_VERSION.startsWith(KuraSupportedPlatforms.YOCTO_161.getImageName() + "_"
+                + KuraSupportedPlatforms.YOCTO_161.getImageVersion() + "_")) {
             rollbackItems.add(new NetworkRollbackItem(srcDataDirectory + "/hostapd.conf", "/etc/hostapd/hostapd.conf"));
             rollbackItems.add(new NetworkRollbackItem(srcDataDirectory + "/dhcpd-eth0.conf", "/etc/udhcpd-usb0.conf"));
             rollbackItems
@@ -1290,14 +1291,11 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
             rollbackItems.add(new NetworkRollbackItem(srcDataDirectory + "/dhcpd-wlan0.conf", "/etc/dhcpd-wlan0.conf"));
         }
 
-        if (OS_VERSION
-                .equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion())
-                || OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName())
-                || OS_VERSION.equals(KuraConstants.Intel_Up2_Ubuntu.getImageName())
-                || OS_VERSION.equals(KuraConstants.BeagleBone.getImageName())
-                || OS_VERSION.equals(
-                        KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion()
-                                + "_" + KuraConstants.Intel_Edison.getTargetName())) {
+        if (OS_VERSION.equals(KuraSupportedPlatforms.RASPBIAN_100.getImageName())
+                || OS_VERSION.equals(KuraSupportedPlatforms.DEBIAN_100.getImageName())
+                || OS_VERSION.equals(KuraSupportedPlatforms.UBUNTU_16.getImageName())
+                || OS_VERSION.startsWith(KuraSupportedPlatforms.YOCTO_161.getImageName() + "_"
+                        + KuraSupportedPlatforms.YOCTO_161.getImageVersion() + "_")) {
             // restore Debian interface configuration
             rollbackItems.add(new NetworkRollbackItem(srcDataDirectory + "/interfaces", "/etc/network/interfaces"));
         } else {

@@ -28,7 +28,9 @@ import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
 import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.util.IOUtil;
-import org.eclipse.kura.linux.net.util.KuraConstants;
+import org.eclipse.kura.core.util.ProcessUtil;
+import org.eclipse.kura.core.util.SafeProcess;
+import org.eclipse.kura.linux.net.util.KuraSupportedPlatforms;
 import org.eclipse.kura.linux.net.wifi.WpaSupplicantManager;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetConfigIP4;
@@ -356,7 +358,7 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
         String result = fileAsString;
 
         // Remove the 'wheel' group assignment for Yocto image on Raspberry_Pi
-        if (OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName())) {
+        if (OS_VERSION.equals(KuraSupportedPlatforms.RASPBIAN_100.getImageName())) {
             result = result.replaceFirst("ctrl_interface_group=wheel", "#ctrl_interface_group=wheel");
         }
 

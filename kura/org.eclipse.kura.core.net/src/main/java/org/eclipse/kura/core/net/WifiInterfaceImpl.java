@@ -14,6 +14,7 @@ package org.eclipse.kura.core.net;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.wifi.WifiInterface;
@@ -22,7 +23,7 @@ import org.eclipse.kura.net.wifi.WifiInterfaceAddress;
 public class WifiInterfaceImpl<T extends WifiInterfaceAddress> extends AbstractNetInterface<T>
         implements WifiInterface<T> {
 
-    private EnumSet<Capability> capabilities = null;
+    private Set<Capability> capabilities = null;
 
     public WifiInterfaceImpl(String name) {
         super(name);
@@ -53,7 +54,7 @@ public class WifiInterfaceImpl<T extends WifiInterfaceAddress> extends AbstractN
     }
 
     @Override
-    public EnumSet<Capability> getCapabilities() {
+    public Set<Capability> getCapabilities() {
         if (this.capabilities != null) {
             return EnumSet.copyOf(this.capabilities);
         }
@@ -61,7 +62,7 @@ public class WifiInterfaceImpl<T extends WifiInterfaceAddress> extends AbstractN
         return null;
     }
 
-    public void setCapabilities(EnumSet<Capability> capabilities) {
+    public void setCapabilities(Set<Capability> capabilities) {
         this.capabilities = capabilities;
     }
 

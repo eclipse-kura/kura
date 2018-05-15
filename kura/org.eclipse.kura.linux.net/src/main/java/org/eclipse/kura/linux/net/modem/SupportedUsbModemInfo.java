@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -14,7 +14,6 @@ package org.eclipse.kura.linux.net.modem;
 import java.util.Arrays;
 import java.util.List;
 
-import org.eclipse.kura.linux.net.util.KuraConstants;
 import org.eclipse.kura.net.modem.ModemTechnologyType;
 
 public enum SupportedUsbModemInfo {
@@ -44,8 +43,6 @@ public enum SupportedUsbModemInfo {
             .asList(new UsbModemDriver("sierra", "1199", "0025")), ""),
     Ublox_SARA_U2("SARA-U2", "1546", "1102", 7, 0, 1, 0, -1, 5000, 10000, Arrays
             .asList(ModemTechnologyType.HSPA), Arrays.asList(new UsbModemDriver("cdc_acm", "1546", "1102")), "");
-
-    private static final String TARGET_NAME = System.getProperty("target.device");
 
     private String deviceName;
     private String vendorId;
@@ -99,14 +96,7 @@ public enum SupportedUsbModemInfo {
     }
 
     public int getNumTtyDevs() {
-        int ret = this.numTtyDevs;
-        if (TARGET_NAME != null
-                && (TARGET_NAME.equals(KuraConstants.ReliaGATE_15_10.getTargetName())
-                        || TARGET_NAME.equals(KuraConstants.ReliaGATE_50_21_Ubuntu.getTargetName()))
-                && this.deviceName.equals(Telit_LE910.deviceName)) {
-            ret = this.numTtyDevs + 2;
-        }
-        return ret;
+        return this.numTtyDevs;
     }
 
     public int getNumBlockDevs() {
@@ -114,36 +104,15 @@ public enum SupportedUsbModemInfo {
     }
 
     public int getAtPort() {
-        int ret = this.atPort;
-        if (TARGET_NAME != null
-                && (TARGET_NAME.equals(KuraConstants.ReliaGATE_15_10.getTargetName())
-                        || TARGET_NAME.equals(KuraConstants.ReliaGATE_50_21_Ubuntu.getTargetName()))
-                && this.deviceName.equals(Telit_LE910.deviceName)) {
-            ret = this.atPort + 2;
-        }
-        return ret;
+        return this.atPort;
     }
 
     public int getDataPort() {
-        int ret = this.dataPort;
-        if (TARGET_NAME != null
-                && (TARGET_NAME.equals(KuraConstants.ReliaGATE_15_10.getTargetName())
-                        || TARGET_NAME.equals(KuraConstants.ReliaGATE_50_21_Ubuntu.getTargetName()))
-                && this.deviceName.equals(Telit_LE910.deviceName)) {
-            ret = this.dataPort + 2;
-        }
-        return ret;
+        return this.dataPort;
     }
 
     public int getGpsPort() {
-        int ret = this.gpsPort;
-        if (TARGET_NAME != null
-                && (TARGET_NAME.equals(KuraConstants.ReliaGATE_15_10.getTargetName())
-                        || TARGET_NAME.equals(KuraConstants.ReliaGATE_50_21_Ubuntu.getTargetName()))
-                && this.deviceName.equals(Telit_LE910.deviceName)) {
-            ret = this.gpsPort + 2;
-        }
-        return ret;
+        return this.gpsPort;
     }
 
     public List<ModemTechnologyType> getTechnologyTypes() {
@@ -155,10 +124,10 @@ public enum SupportedUsbModemInfo {
     }
 
     public long getTurnOffDelay() {
-        return turnOffDelay;
+        return this.turnOffDelay;
     }
 
     public long getTurnOnDelay() {
-        return turnOnDelay;
+        return this.turnOnDelay;
     }
 }

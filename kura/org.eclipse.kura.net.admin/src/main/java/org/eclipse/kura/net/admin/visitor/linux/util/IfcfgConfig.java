@@ -20,7 +20,7 @@ import java.util.Scanner;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.linux.net.util.KuraConstants;
+import org.eclipse.kura.linux.net.util.KuraSupportedPlatforms;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,16 +47,12 @@ public abstract class IfcfgConfig {
     private static String osVersion = System.getProperty("kura.os.version");
 
     protected boolean isDebian() {
-        return osVersion
-                .equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion())
-                || osVersion.equals(KuraConstants.Raspberry_Pi.getImageName())
-                || osVersion.equals(KuraConstants.Intel_Up2_Ubuntu.getImageName())
-                || osVersion.equals(KuraConstants.BeagleBone.getImageName())
-                || osVersion.equals(
-                        KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion()
-                                + "_" + KuraConstants.Intel_Edison.getTargetName())
-                || osVersion.equals(KuraConstants.ReliaGATE_50_21_Ubuntu.getImageName() + "_"
-                        + KuraConstants.ReliaGATE_50_21_Ubuntu.getImageVersion());
+        return osVersion.startsWith(KuraSupportedPlatforms.YOCTO_121.getImageName())
+                || osVersion.equals(KuraSupportedPlatforms.RASPBIAN_100.getImageName())
+                || osVersion.equals(KuraSupportedPlatforms.RASPBIAN_100.getImageName())
+                || osVersion.equals(KuraSupportedPlatforms.UBUNTU_16.getImageName())
+                || osVersion.startsWith(
+                        KuraSupportedPlatforms.YOCTO_161.getImageName() + "_" + KuraSupportedPlatforms.YOCTO_161.getImageVersion());
     }
 
     public Properties parseRedhatConfigFile(File ifcfgFile, String interfaceName) {

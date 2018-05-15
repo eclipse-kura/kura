@@ -22,8 +22,6 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.comm.CommConnection;
 import org.eclipse.kura.comm.CommURI;
 import org.eclipse.kura.linux.net.modem.ModemDriver;
-import org.eclipse.kura.linux.net.modem.SupportedSerialModemInfo;
-import org.eclipse.kura.linux.net.modem.SupportedSerialModemsInfo;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemInfo;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemsInfo;
 import org.eclipse.kura.linux.net.modem.UsbModemDriver;
@@ -31,7 +29,6 @@ import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.admin.modem.telit.he910.TelitHe910;
 import org.eclipse.kura.net.modem.CellularModem.SerialPortType;
 import org.eclipse.kura.net.modem.ModemDevice;
-import org.eclipse.kura.net.modem.SerialModemDevice;
 import org.eclipse.kura.usb.UsbModemDevice;
 import org.osgi.service.io.ConnectionFactory;
 import org.slf4j.Logger;
@@ -78,7 +75,7 @@ public abstract class TelitModem {
             try {
                 status = turnOff();
                 if (status) {
-                    gpsEnabled = false;
+                    this.gpsEnabled = false;
                     sleep(offOnDelay);
                     status = turnOn();
                     if (!status && isOnGpio()) {
@@ -548,13 +545,6 @@ public abstract class TelitModem {
                 } else {
                     throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "No PPP serial port available");
                 }
-            } else if (this.device instanceof SerialModemDevice) {
-                SupportedSerialModemInfo serialModemInfo = SupportedSerialModemsInfo.getModem();
-                if (serialModemInfo != null) {
-                    port = serialModemInfo.getDriver().getComm().getDataPort();
-                } else {
-                    throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "No PPP serial port available");
-                }
             } else {
                 throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "Unsupported modem device");
             }
@@ -572,13 +562,6 @@ public abstract class TelitModem {
                 SupportedUsbModemInfo usbModemInfo = SupportedUsbModemsInfo.getModem((UsbModemDevice) this.device);
                 if (usbModemInfo != null) {
                     port = ports.get(usbModemInfo.getAtPort());
-                } else {
-                    throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "No AT serial port available");
-                }
-            } else if (this.device instanceof SerialModemDevice) {
-                SupportedSerialModemInfo serialModemInfo = SupportedSerialModemsInfo.getModem();
-                if (serialModemInfo != null) {
-                    port = serialModemInfo.getDriver().getComm().getAtPort();
                 } else {
                     throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "No AT serial port available");
                 }
@@ -602,13 +585,6 @@ public abstract class TelitModem {
                     if (gpsPort >= 0) {
                         port = ports.get(gpsPort);
                     }
-                } else {
-                    throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "No GPS serial port available");
-                }
-            } else if (this.device instanceof SerialModemDevice) {
-                SupportedSerialModemInfo serialModemInfo = SupportedSerialModemsInfo.getModem();
-                if (serialModemInfo != null) {
-                    port = serialModemInfo.getDriver().getComm().getGpsPort();
                 } else {
                     throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "No GPS serial port available");
                 }
@@ -817,11 +793,6 @@ public abstract class TelitModem {
                 if (usbDeviceDrivers != null && !usbDeviceDrivers.isEmpty()) {
                     modemDriver = usbDeviceDrivers.get(0);
                 }
-            }
-        } else if (this.device instanceof SerialModemDevice) {
-            SupportedSerialModemInfo serialModemInfo = SupportedSerialModemsInfo.getModem();
-            if (serialModemInfo != null) {
-                modemDriver = serialModemInfo.getDriver();
             }
         }
         return modemDriver;

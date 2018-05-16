@@ -70,6 +70,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <check.plugins.exist.remote>false</check.plugins.exist.remote>
+        <tycho.version>1.2.0</tycho.version>
     </properties>
     
     <profiles>
@@ -152,6 +153,11 @@
                     <groupId>org.apache.felix</groupId>
                     <artifactId>maven-bundle-plugin</artifactId>
                     <version>3.2.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.eclipse.tycho.extras</groupId>
+                    <artifactId>tycho-p2-extras-plugin</artifactId>
+                    <version>${tycho.version}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.eclipse.m2e</groupId>

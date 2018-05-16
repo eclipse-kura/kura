@@ -24,7 +24,6 @@
 
     <artifactId>org.eclipse.kura.wire.component.provider.test</artifactId>
     <packaging>eclipse-test-plugin</packaging>
-    <version>3.3.0-SNAPSHOT</version>
 
     <properties>
         <kura.basedir>${project.basedir}/../..</kura.basedir>
@@ -187,6 +186,11 @@
                             <level>4</level>
                             <autoStart>true</autoStart>
                         </bundle>
+                        <bundle>
+                            <id>org.eclipse.kura.json.marshaller.unmarshaller.provider</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
                     </bundleStartLevel>
                     <dependencies>
                         <dependency>
@@ -288,10 +292,6 @@
                         <dependency>
                             <type>p2-installable-unit</type>
                             <artifactId>log4j.apache-log4j-extras</artifactId>
-                        </dependency>
-                        <dependency>
-                            <type>p2-installable-unit</type>
-                            <artifactId>org.eclipse.kura.json.marshaller.unmarshaller.provider</artifactId>
                         </dependency>
                     </dependencies>
                 </configuration>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Copyright (c) 2018 Eurotech and/or its affiliates and others
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+     
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.wire.devel.delay.Delay" 
+         name="Delay" 
+         description="A wire component that introduces a configurable delay">
+
+        <AD id="delay.average"
+            name="delay.average"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="1000"
+            description="The average delay in milliseconds">
+        </AD>
+        
+        <AD id="delay.std.dev"
+            name="delay.std.dev"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="100"
+            description="The standard deviation of the delay in milliseconds">
+        </AD>
+        
+    </OCD>
+    
+    <Designate pid="org.eclipse.kura.wire.devel.delay.Delay" factoryPid="org.eclipse.kura.wire.devel.delay.Delay">
+        <Object ocdref="org.eclipse.kura.wire.devel.delay.Delay"/>
+    </Designate>
+</MetaData>

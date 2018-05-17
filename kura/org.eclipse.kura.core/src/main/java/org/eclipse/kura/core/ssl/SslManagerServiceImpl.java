@@ -353,24 +353,29 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 
     private boolean isFirstBoot() {
         boolean result = false;
-        if (isDefaultFromUser() || isDefaultFromCrypto()) {
+        if (isSnapshotPasswordDefault() && (isDefaultFromUser() || isDefaultFromCrypto())) {
             result = true;
         }
         return result;
     }
 
-    private boolean isDefaultFromCrypto() {
-
-        char[] cryptoPassword = this.cryptoService.getKeyStorePassword(this.options.getSslKeyStore());
-        char[] snapshotPassword;
+    private boolean isSnapshotPasswordDefault() {
+        boolean result = false;
         try {
-            snapshotPassword = this.cryptoService.decryptAes(this.options.getSslKeystorePassword().toCharArray());
+            char[] snapshotPassword = this.cryptoService
+                    .decryptAes(this.options.getSslKeystorePassword().toCharArray());
             if (Arrays.equals(SslManagerServiceOptions.PROP_DEFAULT_TRUST_PASSWORD.toCharArray(), snapshotPassword)) {
-                return isKeyStoreAccessible(this.options.getSslKeyStore(), cryptoPassword);
+                result = true;
             }
         } catch (KuraException e) {
         }
-        return false;
+        return result;
+    }
+
+    private boolean isDefaultFromCrypto() {
+        char[] cryptoPassword = this.cryptoService.getKeyStorePassword(this.options.getSslKeyStore());
+
+        return isKeyStoreAccessible(this.options.getSslKeyStore(), cryptoPassword);
     }
 
     private boolean isDefaultFromUser() {
@@ -396,7 +401,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 
             TrustManager[] tms = getTrustManagers(options.getTrustStore());
 
-            if (tms == null) {
+            if (tms.length == 0) {
                 throw new GeneralSecurityException("SSL keystore tampered!");
             }
 

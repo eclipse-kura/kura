@@ -204,7 +204,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
     public X509Certificate[] getTrustCertificates() throws GeneralSecurityException, IOException {
         X509Certificate[] cacerts = null;
         String trustStore = this.options.getSslKeyStore();
-        TrustManager[] tms = getTrustManagers(trustStore);
+        TrustManager[] tms = getTrustManagers(trustStore, this.options.getSslKeystorePassword().toCharArray());
         for (TrustManager tm : tms) {
             if (tm instanceof X509TrustManager) {
                 X509TrustManager x509tm = (X509TrustManager) tm;
@@ -399,11 +399,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
         if (factory == null) {
             logger.info("Creating a new SSLSocketFactory instance");
 
-            TrustManager[] tms = getTrustManagers(options.getTrustStore());
-
-            if (tms.length == 0) {
-                throw new GeneralSecurityException("SSL keystore tampered!");
-            }
+            TrustManager[] tms = getTrustManagers(options.getTrustStore(), options.getKeyStorePassword());
 
             KeyManager[] kms = getKeyManagers(options.getKeyStore(), options.getKeyStorePassword(), options.getAlias());
 
@@ -433,7 +429,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
         return new SSLSocketFactoryWrapper(sslSocketFactory, ciphers, hostnameVerification);
     }
 
-    private static TrustManager[] getTrustManagers(String trustStore)
+    private static TrustManager[] getTrustManagers(String trustStore, char[] keyStorePassword)
             throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
         TrustManager[] result = new TrustManager[0];
         TrustManagerFactory tmf = null;
@@ -445,7 +441,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 
                 KeyStore ts = KeyStore.getInstance(KeyStore.getDefaultType());
                 InputStream tsReadStream = new FileInputStream(trustStore);
-                ts.load(tsReadStream, null);
+                ts.load(tsReadStream, keyStorePassword);
                 tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
                 tmf.init(ts);
                 result = tmf.getTrustManagers();

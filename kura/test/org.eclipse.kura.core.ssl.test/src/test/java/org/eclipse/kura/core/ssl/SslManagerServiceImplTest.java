@@ -207,7 +207,7 @@ public class SslManagerServiceImplTest {
         assertTrue(Arrays.equals("updatedPassword".toCharArray(), cs.getKeyStorePassword(KEY_STORE_PATH)));
     }
 
-    @Test(expected = KeyStoreException.class)
+    @Test(expected = IOException.class)
     public void testActivateFirstBootDefaultFromKuraPropsAndUpdateFailPersistCryptoService() throws Throwable {
 
         char[] keystorePassword = "testPassword".toCharArray();
@@ -299,7 +299,7 @@ public class SslManagerServiceImplTest {
         svc.deactivate(ccMock);
     }
 
-    @Test(expected = KeyStoreException.class)
+    @Test(expected = IOException.class)
     public void testActivateFirstBootDefaultInvalid() throws Throwable {
 
         char[] keystorePassword = "wrongPassword".toCharArray();

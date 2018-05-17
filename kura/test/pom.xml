@@ -150,6 +150,8 @@ Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
         <module>org.eclipse.kura.internal.ble.eddystone.test</module>
         <module>org.eclipse.kura.internal.ble.ibeacon.test</module>
         <module>org.eclipse.kura.internal.driver.ble.sensortag.test</module>
+        <module>org.eclipse.kura.internal.driver.eddystone.test</module>
+        <module>org.eclipse.kura.internal.driver.ibeacon.test</module>
         <module>org.eclipse.kura.internal.driver.opcua.test</module>
         <module>org.eclipse.kura.internal.driver.s7plc.test</module>
         <module>org.eclipse.kura.internal.wire.test</module>

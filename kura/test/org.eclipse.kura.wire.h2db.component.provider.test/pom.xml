@@ -97,6 +97,11 @@ Copyright (c) 2017 Eurotech and/or its affiliates and others
                             <level>4</level>
                             <autoStart>true</autoStart>
                         </bundle>
+                        <bundle>
+                            <id>org.eclipse.kura.json.marshaller.unmarshaller.provider</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
                     </bundleStartLevel>
                     <dependencies>
                         <dependency>
@@ -178,10 +183,6 @@ Copyright (c) 2017 Eurotech and/or its affiliates and others
                         <dependency>
                             <type>p2-installable-unit</type>
                             <artifactId>log4j.apache-log4j-extras</artifactId>
-                        </dependency>
-                        <dependency>
-                            <type>p2-installable-unit</type>
-                            <artifactId>org.eclipse.kura.json.marshaller.unmarshaller.provider</artifactId>
                         </dependency>
                     </dependencies>
                 </configuration>

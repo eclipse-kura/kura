@@ -158,16 +158,25 @@ public final class WireHelperServiceImpl implements WireHelperService {
             final boolean matches = context.getService(ref) == wireComponent;
             context.ungetService(ref);
             return matches;
-        }).map(ref -> {
-            final String servicePid = (String) ref.getProperty(SERVICE_PID);
-            final String kuraServicePid = (String) ref.getProperty(KURA_SERVICE_PID);
-            int receiverPortCount = getIntOrDefault(ref.getProperty(RECEIVER_PORT_COUNT_PROP_NAME.value()),
-                    wireComponent instanceof WireReceiver ? 1 : 0);
-            int emitterPortCount = getIntOrDefault(ref.getProperty(EMITTER_PORT_COUNT_PROP_NAME.value()),
-                    wireComponent instanceof WireEmitter ? 1 : 0);
+        }).map(ref -> newWireSupport(wireComponent, ref)).findAny().orElse(null);
+    }
 
-            return new WireSupportImpl(wireComponent, servicePid, kuraServicePid, this.eventAdmin, receiverPortCount,
-                    emitterPortCount);
-        }).findAny().orElse(null);
+    /** {@inheritDoc} */
+    @Override
+    public WireSupport newWireSupport(final WireComponent wireComponent,
+            ServiceReference<WireComponent> wireComponentRef) {
+        if (wireComponentRef == null) {
+            return null;
+        }
+
+        final String servicePid = (String) wireComponentRef.getProperty(SERVICE_PID);
+        final String kuraServicePid = (String) wireComponentRef.getProperty(KURA_SERVICE_PID);
+        int receiverPortCount = getIntOrDefault(wireComponentRef.getProperty(RECEIVER_PORT_COUNT_PROP_NAME.value()),
+                wireComponent instanceof WireReceiver ? 1 : 0);
+        int emitterPortCount = getIntOrDefault(wireComponentRef.getProperty(EMITTER_PORT_COUNT_PROP_NAME.value()),
+                wireComponent instanceof WireEmitter ? 1 : 0);
+
+        return new WireSupportImpl(wireComponent, servicePid, kuraServicePid, this.eventAdmin, receiverPortCount,
+                emitterPortCount);
     }
 }

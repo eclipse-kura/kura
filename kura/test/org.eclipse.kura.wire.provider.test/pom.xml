@@ -45,7 +45,7 @@
                     <useUnlimitedThreads>true</useUnlimitedThreads>
                     <argLine>${jacocoArgs}
                         -DbuildingWithTycho=true -Dosgi.locking=none
-                        -Dequinox.ds.print=true
+                        -Dds.showtrace=true
                         -Djava.io.tmpdir=/tmp
                         -Dorg.osgi.framework.storage=/tmp/osgi/framework_storage
                         -Dosgi.clean=true

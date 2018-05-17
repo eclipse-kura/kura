@@ -24,11 +24,13 @@ import java.util.Map.Entry;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.type.TypedValue;
+import org.eclipse.kura.wire.WireComponent;
 import org.eclipse.kura.wire.WireEnvelope;
 import org.eclipse.kura.wire.WireHelperService;
 import org.eclipse.kura.wire.WireReceiver;
 import org.eclipse.kura.wire.WireRecord;
 import org.eclipse.kura.wire.WireSupport;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.wireadmin.Wire;
 import org.slf4j.LoggerFactory;
@@ -86,7 +88,8 @@ public final class Logger implements WireReceiver, ConfigurableComponent {
     protected void activate(final ComponentContext componentContext, final Map<String, Object> properties) {
         logger.debug("Activating Logger Wire Component...");
         this.properties = properties;
-        this.wireSupport = this.wireHelperService.newWireSupport(this);
+        this.wireSupport = this.wireHelperService.newWireSupport(this,
+                (ServiceReference<WireComponent>) componentContext.getServiceReference());
         logger.debug("Activating Logger Wire Component... Done");
     }
 

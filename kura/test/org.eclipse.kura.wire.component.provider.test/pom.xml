@@ -24,7 +24,6 @@
 
     <artifactId>org.eclipse.kura.wire.component.provider.test</artifactId>
     <packaging>eclipse-test-plugin</packaging>
-    <version>3.3.0-SNAPSHOT</version>
 
     <properties>
         <kura.basedir>${project.basedir}/../..</kura.basedir>
@@ -42,7 +41,7 @@
                     <useUnlimitedThreads>false</useUnlimitedThreads>
                     <argLine>${jacocoArgs}
                         -DbuildingWithTycho=true -Dosgi.locking=none
-                        -Dequinox.ds.print=true -Djava.io.tmpdir=/tmp
+                        -Dds.showtrace=true -Djava.io.tmpdir=/tmp
                         -Dorg.osgi.framework.storage=/tmp/osgi/framework_storage
                         -Dosgi.clean=true
                         -Dorg.eclipse.kura.mode=emulator
@@ -50,10 +49,7 @@
                         -Dkura.configuration=file:${kura.basedir}/emulator/org.eclipse.kura.emulator/src/main/resources/kura.properties
                         -Ddpa.configuration=/tmp/kura/dpa.properties
                         -Dlog4j.configuration=file:${kura.basedir}/emulator/org.eclipse.kura.emulator/src/main/resources/log4j.properties</argLine>
-<!--
-                       -Dosgi.noShutdown=true
                     <appArgLine>-consoleLog -console 1450</appArgLine>
--->
                     <bundleStartLevel>
                         <bundle>
                             <id>org.eclipse.equinox.ds</id>
@@ -187,6 +183,11 @@
                         </bundle>
                         <bundle>
                             <id>org.eclipse.kura.wire.helper.provider</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.eclipse.kura.json.marshaller.unmarshaller.provider</id>
                             <level>4</level>
                             <autoStart>true</autoStart>
                         </bundle>

@@ -36,6 +36,7 @@ import org.eclipse.kura.db.H2DbService;
 import org.eclipse.kura.internal.wire.h2db.common.H2DbServiceHelper;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
+import org.eclipse.kura.wire.WireComponent;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireEnvelope;
 import org.eclipse.kura.wire.WireHelperService;
@@ -125,7 +126,10 @@ public class H2DbWireRecordFilter implements WireEmitter, WireReceiver, Configur
         logger.debug("Activating DB Wire Record Filter...");
         this.componentContext = componentContext;
         this.options = new H2DbWireRecordFilterOptions(properties);
-        this.wireSupport = this.wireHelperService.newWireSupport(this);
+
+        this.wireSupport = this.wireHelperService.newWireSupport(this,
+                (ServiceReference<WireComponent>) componentContext.getServiceReference());
+
         this.cacheExpirationInterval = this.options.getCacheExpirationInterval();
 
         // Initialize the lastRefreshTime and remove the cacheExpirationInterval in order to immediately have the cache

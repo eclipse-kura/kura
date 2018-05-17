@@ -29,10 +29,10 @@ import org.eclipse.kura.wire.WireHelperService;
 import org.eclipse.kura.wire.WireRecord;
 import org.eclipse.kura.wire.WireSupport;
 import org.junit.Test;
+import org.osgi.service.component.ComponentContext;
 import org.osgi.service.wireadmin.Wire;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 public class FifoTest {
 
@@ -92,13 +92,13 @@ public class FifoTest {
                 wiresLatch.countDown();
             }
         };
-        when(wireHelperServiceMock.newWireSupport(fifo)).thenReturn(wireSupportMock);
+        when(wireHelperServiceMock.newWireSupport(fifo, null)).thenReturn(wireSupportMock);
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("discard.envelopes", false);
         properties.put("queue.capacity", 5);
 
-        fifo.activate(properties);
+        fifo.activate(properties, mock(ComponentContext.class));
 
         for (int i = 0; i < 10; i++) {
             WireEnvelope wireEnvelope = createWireEnvelope();
@@ -165,13 +165,13 @@ public class FifoTest {
                 wiresLatch.countDown();
             }
         };
-        when(wireHelperServiceMock.newWireSupport(fifo)).thenReturn(wireSupportMock);
+        when(wireHelperServiceMock.newWireSupport(fifo, null)).thenReturn(wireSupportMock);
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("discard.envelopes", true);
         properties.put("queue.capacity", 5);
 
-        fifo.activate(properties);
+        fifo.activate(properties, mock(ComponentContext.class));
 
         for (int i = 0; i < 10; i++) {
             WireEnvelope wireEnvelope = createWireEnvelope();

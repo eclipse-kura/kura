@@ -24,12 +24,14 @@ import java.util.function.BiConsumer;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.type.TypedValue;
+import org.eclipse.kura.wire.WireComponent;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireEnvelope;
 import org.eclipse.kura.wire.WireHelperService;
 import org.eclipse.kura.wire.WireRecord;
 import org.eclipse.kura.wire.graph.MultiportWireSupport;
 import org.eclipse.kura.wire.multiport.MultiportWireReceiver;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.wireadmin.Wire;
 import org.slf4j.Logger;
@@ -60,7 +62,8 @@ public final class JoinComponent implements MultiportWireReceiver, WireEmitter, 
     protected void activate(final ComponentContext componentContext, final Map<String, Object> properties) {
         logger.debug("Activating Join Wire Component...");
         this.context = componentContext;
-        this.wireSupport = (MultiportWireSupport) this.wireHelperService.newWireSupport(this);
+        this.wireSupport = (MultiportWireSupport) this.wireHelperService.newWireSupport(this,
+                (ServiceReference<WireComponent>) componentContext.getServiceReference());
 
         updated(properties);
 

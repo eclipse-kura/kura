@@ -32,6 +32,7 @@ import org.eclipse.kura.wire.WireRecord;
 import org.eclipse.kura.wire.WireSupport;
 import org.junit.Test;
 import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.service.component.ComponentContext;
 
 public class RegexFilterTest {
 
@@ -52,7 +53,7 @@ public class RegexFilterTest {
         properties.put("regex.filter", filter);
         properties.put("filter.type", filterType);
 
-        rf.activate(properties);
+        rf.activate(properties, mock(ComponentContext.class));
 
         assertEquals(filter, TestUtil.getFieldValue(rf, "filter"));
         assertEquals(FilterType.RETAIN, TestUtil.getFieldValue(rf, "filterType"));
@@ -71,13 +72,13 @@ public class RegexFilterTest {
         rf.bindWireHelperService(wireHelperServiceMock);
 
         WireSupport wsMock = mock(WireSupport.class);
-        when(wireHelperServiceMock.newWireSupport(rf)).thenReturn(wsMock);
+        when(wireHelperServiceMock.newWireSupport(rf, null)).thenReturn(wsMock);
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("kura.service.pid", "spid");
         properties.put("filter.type", filterType);
 
-        rf.activate(properties);
+        rf.activate(properties, mock(ComponentContext.class));
 
         String topic = "topic";
         String emitterPid = "emitter";
@@ -109,14 +110,14 @@ public class RegexFilterTest {
         rf.bindWireHelperService(wireHelperServiceMock);
 
         WireSupport wsMock = mock(WireSupport.class);
-        when(wireHelperServiceMock.newWireSupport(rf)).thenReturn(wsMock);
+        when(wireHelperServiceMock.newWireSupport(rf, null)).thenReturn(wsMock);
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("kura.service.pid", "spid");
         properties.put("regex.filter", filter);
         properties.put("filter.type", filterType);
 
-        rf.activate(properties);
+        rf.activate(properties, mock(ComponentContext.class));
 
         String topic = "topic";
         String emitterPid = "emitter";
@@ -148,14 +149,14 @@ public class RegexFilterTest {
         rf.bindWireHelperService(wireHelperServiceMock);
 
         WireSupport wsMock = mock(WireSupport.class);
-        when(wireHelperServiceMock.newWireSupport(rf)).thenReturn(wsMock);
+        when(wireHelperServiceMock.newWireSupport(rf, null)).thenReturn(wsMock);
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("kura.service.pid", "spid");
         properties.put("regex.filter", filter);
         properties.put("filter.type", filterType);
 
-        rf.activate(properties);
+        rf.activate(properties, mock(ComponentContext.class));
 
         String topic = "topic";
         String emitterPid = "emitter";
@@ -199,14 +200,14 @@ public class RegexFilterTest {
         rf.bindWireHelperService(wireHelperServiceMock);
 
         WireSupport wsMock = mock(WireSupport.class);
-        when(wireHelperServiceMock.newWireSupport(rf)).thenReturn(wsMock);
+        when(wireHelperServiceMock.newWireSupport(rf, null)).thenReturn(wsMock);
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("kura.service.pid", "spid");
         properties.put("regex.filter", filter);
         properties.put("filter.type", filterType);
 
-        rf.activate(properties);
+        rf.activate(properties, mock(ComponentContext.class));
 
         String topic = "topic";
         String emitterPid = "emitter";
@@ -251,14 +252,14 @@ public class RegexFilterTest {
         rf.bindWireHelperService(wireHelperServiceMock);
 
         WireSupport wsMock = mock(WireSupport.class);
-        when(wireHelperServiceMock.newWireSupport(rf)).thenReturn(wsMock);
+        when(wireHelperServiceMock.newWireSupport(rf, null)).thenReturn(wsMock);
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("kura.service.pid", "spid");
         properties.put("regex.filter", filter);
         properties.put("filter.type", filterType);
 
-        rf.activate(properties);
+        rf.activate(properties, mock(ComponentContext.class));
 
         String topic = "topic";
         String emitterPid = "emitter";
@@ -336,14 +337,14 @@ public class RegexFilterTest {
         rf.bindWireHelperService(wireHelperServiceMock);
 
         WireSupport wsMock = mock(WireSupport.class);
-        when(wireHelperServiceMock.newWireSupport(rf)).thenReturn(wsMock);
+        when(wireHelperServiceMock.newWireSupport(rf, null)).thenReturn(wsMock);
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("kura.service.pid", "spid");
         properties.put("regex.filter", filter);
         properties.put("filter.type", filterType);
 
-        rf.activate(properties);
+        rf.activate(properties, mock(ComponentContext.class));
 
         String topic = "topic";
         String emitterPid = "emitter";

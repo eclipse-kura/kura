@@ -38,8 +38,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.apache.felix.scr.Component;
-import org.apache.felix.scr.ScrService;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraPartialSuccessException;
@@ -66,6 +64,8 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.runtime.ServiceComponentRuntime;
+import org.osgi.service.component.runtime.dto.ComponentDescriptionDTO;
 
 public class ConfigurationServiceTest {
 
@@ -3081,21 +3081,21 @@ public class ConfigurationServiceTest {
         assertEquals(expect, new String(chars));
     }
 
-    private Component createMockComponent(final String pid, final String... implementedServices) {
-        final Component result = mock(Component.class);
-        when(result.getName()).thenReturn(pid);
-        when(result.getServices()).thenReturn(implementedServices);
+    private ComponentDescriptionDTO createMockComponent(final String pid, final String... implementedServices) {
+        final ComponentDescriptionDTO result = mock(ComponentDescriptionDTO.class);
+        result.name = pid;
+        result.serviceInterfaces = implementedServices;
+
         return result;
     }
 
     private OCDService createMockConfigurationServiceForOCDTests(List<String> registeredFactories,
-            List<Tocd> registeredOcds, List<Component> registeredComponents)
+            List<Tocd> registeredOcds, List<ComponentDescriptionDTO> registeredComponents) 
             throws NoSuchFieldException, KuraException {
 
         assertEquals(registeredFactories.size(), registeredOcds.size());
-        ScrService scrService = mock(ScrService.class);
-        when(scrService.getComponents())
-                .thenReturn(registeredComponents.toArray(new Component[registeredComponents.size()]));
+        ServiceComponentRuntime scrService = mock(ServiceComponentRuntime.class);
+        when(scrService.getComponentDescriptionDTOs()).thenReturn(registeredComponents);
 
         final ConfigurationServiceImpl result = new ConfigurationServiceImpl();
         result.setScrService(scrService);
@@ -3169,10 +3169,10 @@ public class ConfigurationServiceTest {
         final Tocd bazOcd = mock(Tocd.class);
         final Tocd otherOcd = mock(Tocd.class);
 
-        final Component comp1 = createMockComponent("foo", "java.lang.String", "java.lang.Integer");
-        final Component comp2 = createMockComponent("bar", "java.lang.Double", "java.lang.Long");
-        final Component comp3 = createMockComponent("baz", "java.lang.Double", "java.lang.Integer");
-        final Component comp4 = createMockComponent("other");
+        final ComponentDescriptionDTO comp1 = createMockComponent("foo", "java.lang.String", "java.lang.Integer");
+        final ComponentDescriptionDTO comp2 = createMockComponent("bar", "java.lang.Double", "java.lang.Long");
+        final ComponentDescriptionDTO comp3 = createMockComponent("baz", "java.lang.Double", "java.lang.Integer");
+        final ComponentDescriptionDTO comp4 = createMockComponent("other");
 
         final OCDService ocdService = createMockConfigurationServiceForOCDTests(
                 Arrays.asList("foo", "bar", "baz", "other"), Arrays.asList(fooOcd, barOcd, bazOcd, otherOcd),

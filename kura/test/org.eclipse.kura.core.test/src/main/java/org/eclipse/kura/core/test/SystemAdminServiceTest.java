@@ -27,7 +27,7 @@ public class SystemAdminServiceTest extends TestCase {
     public void setUp() {
     }
 
-    public static void setSystemAdminService(SystemAdminService sas) {
+    protected void setSystemAdminService(SystemAdminService sas) {
         sysAdminService = sas;
     }
 

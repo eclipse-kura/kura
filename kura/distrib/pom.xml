@@ -758,26 +758,26 @@
                                 </exec>
                                 <move file="RELEASE_INFO/${project.version}/p2-repo-common/pom_.xml" tofile="RELEASE_INFO/${project.version}/p2-repo-common/pom.xml" />
 
-								<!-- Copy target-platform/p2-repo-equinox_3.11.1/pom.xml in distrib/RELEASE_INFO/${project.version}/p2-repo-equinox_3.11.1/pom.xml -->
-                                <copy file="${kura.basedir}/../../target-platform/p2-repo-equinox_3.11.1/pom.xml"
-                                    tofile="RELEASE_INFO/${project.version}/p2-repo-equinox_3.11.1/pom.xml" overwrite="true" />
+								<!-- Copy target-platform/p2-repo-equinox_3.12.50/pom.xml in distrib/RELEASE_INFO/${project.version}/p2-repo-equinox_3.12.50/pom.xml -->
+                                <copy file="${kura.basedir}/../../target-platform/p2-repo-equinox_3.12.50/pom.xml"
+                                    tofile="RELEASE_INFO/${project.version}/p2-repo-equinox_3.12.50/pom.xml" overwrite="true" />
 								<!-- replace artifactId -->
                                 <replace token="&lt;artifactId&gt;target-platform&lt;/artifactId&gt;" value="&lt;artifactId&gt;target-platform-previous&lt;/artifactId&gt;"
-                                    dir="RELEASE_INFO/${project.version}/p2-repo-equinox_3.11.1">
+                                    dir="RELEASE_INFO/${project.version}/p2-repo-equinox_3.12.50">
                                     <include name="pom.xml" />
                                 </replace>
 								<!-- Add strip version -->
                                 <replace token="&lt;/artifactItems&gt;"
-                                    value="&lt;/artifactItems&gt;&lt;stripVersion&gt;true&lt;/stripVersion&gt;" dir="RELEASE_INFO/${project.version}/p2-repo-equinox_3.11.1">
+                                    value="&lt;/artifactItems&gt;&lt;stripVersion&gt;true&lt;/stripVersion&gt;" dir="RELEASE_INFO/${project.version}/p2-repo-equinox_3.12.50">
                                     <include name="pom.xml" />
                                 </replace>
 								<!-- execute script to add artifacts to pom file - need to have different input/output files (Win) -->
-                                <exec executable="bash" output="RELEASE_INFO/${project.version}/p2-repo-equinox_3.11.1/pom_.xml">
+                                <exec executable="bash" output="RELEASE_INFO/${project.version}/p2-repo-equinox_3.12.50/pom_.xml">
                                     <arg value="src/main/sh/generate_p2_repo_pom.sh" />
-                                    <arg value="RELEASE_INFO/${project.version}/p2-repo-equinox_3.11.1/pom.xml" />
+                                    <arg value="RELEASE_INFO/${project.version}/p2-repo-equinox_3.12.50/pom.xml" />
                                 </exec>
-                                <move file="RELEASE_INFO/${project.version}/p2-repo-equinox_3.11.1/pom_.xml"
-                                    tofile="RELEASE_INFO/${project.version}/p2-repo-equinox_3.11.1/pom.xml" />
+                                <move file="RELEASE_INFO/${project.version}/p2-repo-equinox_3.12.50/pom_.xml"
+                                    tofile="RELEASE_INFO/${project.version}/p2-repo-equinox_3.12.50/pom.xml" />
                             </target>
                         </configuration>
                     </execution>
@@ -2288,9 +2288,9 @@
                         </executions>
                         <configuration>
                             <compress>false</compress>
-                            <sourceLocation>${project.build.directory}/staging/target-definition/equinox_3.11.1/repository</sourceLocation>
-                            <artifactRepositoryLocation>${project.build.directory}/staging/target-definition/equinox_3.11.1/repository</artifactRepositoryLocation>
-                            <metadataRepositoryLocation>${project.build.directory}/staging/target-definition/equinox_3.11.1/repository</metadataRepositoryLocation>
+                            <sourceLocation>${project.build.directory}/staging/target-definition/equinox_3.12.50/repository</sourceLocation>
+                            <artifactRepositoryLocation>${project.build.directory}/staging/target-definition/equinox_3.12.50/repository</artifactRepositoryLocation>
+                            <metadataRepositoryLocation>${project.build.directory}/staging/target-definition/equinox_3.12.50/repository</metadataRepositoryLocation>
                         </configuration>
                     </plugin>
                     <plugin>
@@ -2322,163 +2322,163 @@
 										<!-- Add individual emulator bundles-->
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.emulator.clock_${org.eclipse.kura.emulator.clock.version}.jar"
-                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.emulator.gpio_${org.eclipse.kura.emulator.gpio.version}.jar"
-                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.emulator.net_${org.eclipse.kura.emulator.net.version}.jar"
-                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.emulator.position_${org.eclipse.kura.emulator.position.version}.jar"
-                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.emulator.usb_${org.eclipse.kura.emulator.usb.version}.jar"
-                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.emulator.watchdog_${org.eclipse.kura.emulator.watchdog.version}.jar"
-                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
 
                                         <delete file="${project.build.directory}/staging/target-definition/pom.xml" />
                                         <delete dir="${project.build.directory}/staging/target-definition/common/source" />
                                         <delete
-                                            file="${project.build.directory}/staging/target-definition/kura-equinox_3.11.1.target" />
+                                            file="${project.build.directory}/staging/target-definition/kura-equinox_3.12.50.target" />
                                         <delete
-                                            dir="${project.build.directory}/staging/target-definition/equinox_3.11.1/source" />
+                                            dir="${project.build.directory}/staging/target-definition/equinox_3.12.50/source" />
                                         <delete
-                                            file="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/artifacts.xml" />
+                                            file="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/artifacts.xml" />
                                         <delete
-                                            file="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/content.xml" />
+                                            file="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/content.xml" />
                                         <delete dir="${project.build.directory}/staging/target-definition/target" />
 
                                         <copy overwrite="true"
                                             file="src/main/resources/common/projects/target_definition.project" tofile="${project.build.directory}/staging/target-definition/.project" />
-                                        <copy file="src/main/resources/common/kura-equinox_3.11.1.target" todir="${project.build.directory}/staging/target-definition" />
+                                        <copy file="src/main/resources/common/kura-equinox_3.12.50.target" todir="${project.build.directory}/staging/target-definition" />
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.api_${org.eclipse.kura.api.version}.jar"
-                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.camel_${org.eclipse.kura.camel.version}.jar"
-                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.camel.cloud.factory_${org.eclipse.kura.camel.cloud.factory.version}.jar"
-                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.camel.xml_${org.eclipse.kura.camel.xml.version}.jar"
-                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.core_${org.eclipse.kura.core.version}.jar"
-                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.core.certificates_${org.eclipse.kura.core.certificates.version}.jar"
-                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.core.cloud_${org.eclipse.kura.core.cloud.version}.jar"
-                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.core.comm_${org.eclipse.kura.core.comm.version}.jar"
-                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.core.configuration_${org.eclipse.kura.core.configuration.version}.jar"
-                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.core.crypto_${org.eclipse.kura.core.crypto.version}.jar"
-                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.core.deployment_${org.eclipse.kura.core.deployment.version}.jar"
-                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.core.log_${org.eclipse.kura.core.log.version}.jar"
-                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.core.net_${org.eclipse.kura.core.net.version}.jar"
-                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.deployment.agent_${org.eclipse.kura.deployment.agent.version}.jar"
-                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.core.status_${org.eclipse.kura.core.status.version}.jar"
-                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.linux.bluetooth_${org.eclipse.kura.linux.bluetooth.version}.jar"
-                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.ble.provider_${org.eclipse.kura.ble.provider.version}.jar"
-                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.ble.ibeacon.provider_${org.eclipse.kura.ble.ibeacon.provider.version}.jar"
-                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.ble.eddystone.provider_${org.eclipse.kura.ble.eddystone.provider.version}.jar"
-                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.asset.provider_${org.eclipse.kura.asset.provider.version}.jar"
-                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.asset.cloudlet.provider_${org.eclipse.kura.asset.cloudlet.provider.version}.jar"
-                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.asset.helper.provider_${org.eclipse.kura.asset.helper.provider.version}.jar"
-                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.driver.helper.provider_${org.eclipse.kura.driver.helper.provider.version}.jar"
-                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.localization_${org.eclipse.kura.localization.version}.jar"
-                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.localization.resources_${org.eclipse.kura.localization.resources.version}.jar"
-                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.util_${org.eclipse.kura.util.version}.jar"
-                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.wire.component.provider_${org.eclipse.kura.wire.component.provider.version}.jar"
-                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.wire.h2db.component.provider_${org.eclipse.kura.wire.h2db.component.provider.version}.jar"
-                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.wire.helper.provider_${org.eclipse.kura.wire.helper.provider.version}.jar"
-                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.wire.provider_${org.eclipse.kura.wire.provider.version}.jar"
-                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.web2_${org.eclipse.kura.web2.version}.jar"
-                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins"
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins"
                                             failonerror="false" />
                                         <!-- Add REST bundles-->
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.rest.provider_${org.eclipse.kura.rest.provider.version}.jar"
-                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.rest.asset.provider_${org.eclipse.kura.rest.asset.provider.version}.jar"
-                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
                                         <!-- Add Artemis bundles-->
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.broker.artemis.core_${org.eclipse.kura.broker.artemis.core.version}.jar"
-                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.broker.artemis.simple.mqtt_${org.eclipse.kura.broker.artemis.simple.mqtt.version}.jar"
-                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.broker.artemis.xml_${org.eclipse.kura.broker.artemis.xml.version}.jar"
-                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
-
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
+                                        
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.wire.component.conditional.provider_${org.eclipse.kura.wire.component.conditional.provider.version}.jar"
-                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.wire.component.join.provider_${org.eclipse.kura.wire.component.join.provider.version}.jar"
-                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
-
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
+                                            
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.json.marshaller.unmarshaller.provider_${org.eclipse.kura.json.marshaller.unmarshaller.provider.version}.jar"
-                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.xml.marshaller.unmarshaller.provider_${org.eclipse.kura.xml.marshaller.unmarshaller.provider.version}.jar"
-                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
                                     </target>
                                 </configuration>
                             </execution>

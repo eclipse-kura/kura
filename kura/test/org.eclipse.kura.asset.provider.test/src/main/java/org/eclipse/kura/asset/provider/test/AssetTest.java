@@ -604,7 +604,7 @@ public final class AssetTest {
         initt();
     }
 
-    public static void bindAsset(Asset asset) {
+    public void bindAsset(Asset asset) {
         AssetTest.asset = asset;
 
         synchronized (assetLock) {
@@ -612,7 +612,7 @@ public final class AssetTest {
         }
     }
 
-    public static void unbindAsset(Asset asset) {
+    public void unbindAsset(Asset asset) {
         AssetTest.asset = null;
     }
 

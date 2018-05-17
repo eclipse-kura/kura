@@ -31,6 +31,7 @@ import org.eclipse.kura.wire.WireHelperService;
 import org.eclipse.kura.wire.WireRecord;
 import org.eclipse.kura.wire.WireSupport;
 import org.junit.Test;
+import org.osgi.service.component.ComponentContext;
 
 public class ScriptFilterTest {
 
@@ -44,7 +45,7 @@ public class ScriptFilterTest {
         svc.bindWireHelperService(whsMock);
 
         WireSupport wsMock = mock(WireSupport.class);
-        when(whsMock.newWireSupport(svc)).thenReturn(wsMock);
+        when(whsMock.newWireSupport(svc, null)).thenReturn(wsMock);
 
         doAnswer(invocation -> {
             List<WireRecord> records = invocation.getArgumentAt(0, List.class);
@@ -66,7 +67,7 @@ public class ScriptFilterTest {
                 + "var five = newIntegerValue(5);\n logger.info(five);\n" // prepare and add a new wire record
                 + "var rec = newWireRecord();\n rec.five = five;\n output.add(rec);";
         properties.put("script", script);
-        svc.activate(properties);
+        svc.activate(mock(ComponentContext.class), properties);
 
         assertNotNull(TestUtil.getFieldValue(svc, "scriptEngine"));
         assertNotNull(TestUtil.getFieldValue(svc, "bindings"));
@@ -109,7 +110,7 @@ public class ScriptFilterTest {
         svc.bindWireHelperService(whsMock);
 
         Map<String, Object> properties = new HashMap<>();
-        svc.activate(properties);
+        svc.activate(mock(ComponentContext.class), properties);
 
         assertNotNull(TestUtil.getFieldValue(svc, "scriptEngine"));
         assertNotNull(TestUtil.getFieldValue(svc, "bindings"));

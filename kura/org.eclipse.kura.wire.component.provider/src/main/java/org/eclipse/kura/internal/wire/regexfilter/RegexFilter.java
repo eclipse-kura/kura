@@ -44,6 +44,8 @@ import org.eclipse.kura.wire.WireHelperService;
 import org.eclipse.kura.wire.WireReceiver;
 import org.eclipse.kura.wire.WireRecord;
 import org.eclipse.kura.wire.WireSupport;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.component.ComponentContext;
 import org.osgi.service.wireadmin.Wire;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -108,13 +110,15 @@ public final class RegexFilter implements WireEmitter, WireReceiver, Configurabl
      *
      * @param properties
      *            the configured properties
+     * @param componentContext
      */
-    protected synchronized void activate(final Map<String, Object> properties) {
+    protected synchronized void activate(final Map<String, Object> properties, ComponentContext componentContext) {
         logger.debug("Activating Regex Filter...");
         this.filter = String.valueOf(properties.getOrDefault(REGEX_PROP, ""));
         this.componentPid = String.valueOf(properties.get(KURA_SERVICE_PID));
         this.filterType = getType(properties);
-        this.wireSupport = this.wireHelperService.newWireSupport(this);
+        this.wireSupport = this.wireHelperService.newWireSupport(this,
+                (ServiceReference<WireComponent>) componentContext.getServiceReference());
         logger.debug("Activating Regex Filter... Done");
     }
 

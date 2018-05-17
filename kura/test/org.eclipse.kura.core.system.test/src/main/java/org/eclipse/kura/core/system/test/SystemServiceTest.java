@@ -51,7 +51,7 @@ public class SystemServiceTest {
         }
     }
 
-    public static void setSystemService(SystemService sms) {
+    protected void setSystemService(SystemService sms) {
         systemService = sms;
         onCloudbees = systemService.getOsName().contains("Cloudbees");
         dependencyLatch.countDown();

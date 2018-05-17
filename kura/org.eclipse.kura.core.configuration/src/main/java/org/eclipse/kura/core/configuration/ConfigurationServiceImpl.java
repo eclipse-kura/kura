@@ -39,8 +39,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.felix.scr.Component;
-import org.apache.felix.scr.ScrService;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraPartialSuccessException;
@@ -72,11 +70,12 @@ import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
+import org.osgi.service.component.runtime.ServiceComponentRuntime;
+import org.osgi.service.component.runtime.dto.ComponentDescriptionDTO;
 import org.osgi.service.metatype.AttributeDefinition;
 import org.osgi.service.metatype.MetaTypeService;
 import org.osgi.service.metatype.ObjectClassDefinition;
 import org.osgi.util.tracker.BundleTracker;
-import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,48 +86,8 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
     private static final Logger logger = LoggerFactory.getLogger(ConfigurationServiceImpl.class);
 
-    private static final boolean TRACK_ONLY_RELEVANT_SERVICES = !Boolean
-            .getBoolean("org.eclipse.kura.core.configuration.legacyServiceTracking");
-
-    private interface ServiceHandler {
-
-        void add(String servicePid, String kuraPid, String factoryPid);
-
-        void remove(String servicePid, String kuraPid);
-    }
-
-    private final ServiceHandler trackerHandler1 = new ServiceHandler() {
-
-        @Override
-        public void add(String servicePid, String kuraPid, String factoryPid) {
-            registerComponentConfiguration(kuraPid, servicePid, factoryPid);
-        }
-
-        @Override
-        public void remove(String servicePid, String kuraPid) {
-            unregisterComponentConfiguration(kuraPid);
-        }
-    };
-
-    private final ServiceHandler trackerHandler2 = new ServiceHandler() {
-
-        @Override
-        public void add(String servicePid, String kuraPid, String factoryPid) {
-            registerSelfConfiguringComponent(kuraPid, servicePid);
-        }
-
-        @Override
-        public void remove(String servicePid, String kuraPid) {
-            unregisterComponentConfiguration(servicePid);
-        }
-    };
-
     private ComponentContext ctx;
     private BundleContext bundleContext;
-
-    private ServiceTracker<ConfigurableComponent, ConfigurableComponent> serviceTracker1;
-    private ServiceTracker<SelfConfiguringComponent, SelfConfiguringComponent> serviceTracker2;
-    private ConfigurableComponentTracker anyTracker;
 
     private BundleTracker<Bundle> bundleTracker;
 
@@ -137,7 +96,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
     private ConfigurationAdmin configurationAdmin;
     private SystemService systemService;
     private CryptoService cryptoService;
-    private ScrService scrService;
+    private ServiceComponentRuntime scrService;
 
     // contains all the PIDs (aka kura.service.pid) - both of configurable and self configuring components
     private final Set<String> allActivatedPids;
@@ -198,11 +157,11 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         this.cryptoService = null;
     }
 
-    public void setScrService(ScrService scrService) {
+    public void setScrService(ServiceComponentRuntime scrService) {
         this.scrService = scrService;
     }
 
-    public void unsetScrService(ScrService scrService) {
+    public void unsetScrService(ServiceComponentRuntime scrService) {
         this.scrService = null;
     }
 
@@ -236,93 +195,67 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
             throw new ComponentException("Error loading latest snapshot", e);
         }
 
-        //
-        // start the trackers
-        logger.info("Trackers being opened...");
-
-        if (TRACK_ONLY_RELEVANT_SERVICES) {
-            logger.info("Only tracking relevant services");
-            this.serviceTracker1 = createTracker(ConfigurableComponent.class, this.trackerHandler1);
-            this.serviceTracker2 = createTracker(SelfConfiguringComponent.class, this.trackerHandler2);
-
-            this.serviceTracker1.open();
-            this.serviceTracker2.open();
-        } else {
-            logger.info("Tracking all services");
-            this.anyTracker = new ConfigurableComponentTracker(this.ctx.getBundleContext(), this);
-            this.anyTracker.open(true);
-        }
-
         this.bundleTracker = new ComponentMetaTypeBundleTracker(this.ctx.getBundleContext(), this);
         this.bundleTracker.open();
     }
 
-    private <T> ServiceTracker<T, T> createTracker(final Class<T> clazz, final ServiceHandler handler) {
-        return new ServiceTracker<T, T>(this.ctx.getBundleContext(), clazz, null) {
+    protected void addConfigurableComponent(final ServiceReference<ConfigurableComponent> reference) {
 
-            @Override
-            public T addingService(ServiceReference<T> reference) {
-                logger.debug("addingService - ref: {}", reference);
+        final String servicePid = makeString(reference.getProperty(Constants.SERVICE_PID));
 
-                String servicePid = makeString(reference.getProperty(Constants.SERVICE_PID));
-                String kuraPid = makeString(reference.getProperty(ConfigurationService.KURA_SERVICE_PID));
-                String factoryPid = makeString(reference.getProperty(ConfigurationAdmin.SERVICE_FACTORYPID));
+        if (servicePid == null) {
+            return;
+        }
 
-                if (servicePid == null) {
-                    logger.debug("No servicePid found");
-                    return null;
-                }
+        final String kuraPid = makeString(reference.getProperty(ConfigurationService.KURA_SERVICE_PID));
+        final String factoryPid = makeString(reference.getProperty(ConfigurationAdmin.SERVICE_FACTORYPID));
 
-                T service = super.addingService(reference);
+        registerComponentConfiguration(kuraPid, servicePid, factoryPid);
+    }
 
-                logger.debug("Adding service: {}", service);
+    protected void removeConfigurableComponent(final ServiceReference<ConfigurableComponent> reference) {
 
-                handler.add(servicePid, kuraPid, factoryPid);
+        final String servicePid = makeString(reference.getProperty(Constants.SERVICE_PID));
 
-                return service;
-            }
+        if (servicePid == null) {
+            return;
+        }
 
-            @Override
-            public void removedService(ServiceReference<T> reference, T service) {
-                logger.debug("removedService - ref: {}", reference);
+        final String kuraPid = makeString(reference.getProperty(ConfigurationService.KURA_SERVICE_PID));
 
-                String servicePid = makeString(reference.getProperty(Constants.SERVICE_PID));
-                String kuraPid = makeString(reference.getProperty(ConfigurationService.KURA_SERVICE_PID));
+        unregisterComponentConfiguration(kuraPid);
+    }
 
-                if (servicePid == null) {
-                    logger.debug("No servicePid found");
-                    return;
-                }
+    protected void addSelfConfiguringComponent(final ServiceReference<SelfConfiguringComponent> reference) {
 
-                logger.debug("remove - servicePid: {}, kuraPid: {}, service: {}",
-                        new Object[] { servicePid, kuraPid, service });
+        final String servicePid = makeString(reference.getProperty(Constants.SERVICE_PID));
 
-                handler.remove(servicePid, kuraPid);
+        if (servicePid == null) {
+            return;
+        }
 
-                super.removedService(reference, service);
-            }
-        };
+        final String kuraPid = makeString(reference.getProperty(ConfigurationService.KURA_SERVICE_PID));
+
+        registerSelfConfiguringComponent(kuraPid, servicePid);
+    }
+
+    protected void removeSelfConfiguringComponent(final ServiceReference<SelfConfiguringComponent> reference) {
+
+        final String servicePid = makeString(reference.getProperty(Constants.SERVICE_PID));
+
+        if (servicePid == null) {
+            return;
+        }
+
+        final String kuraPid = makeString(reference.getProperty(ConfigurationService.KURA_SERVICE_PID));
+
+        unregisterComponentConfiguration(kuraPid);
+
     }
 
     protected void deactivate(ComponentContext componentContext) {
         logger.info("deactivate...");
 
-        //
-        // stop the trackers
-        //
-
-        if (this.anyTracker != null) {
-            this.anyTracker.close();
-            this.anyTracker = null;
-        }
-        if (this.serviceTracker2 != null) {
-            this.serviceTracker2.close();
-            this.serviceTracker2 = null;
-        }
-        if (this.serviceTracker1 != null) {
-            this.serviceTracker1.close();
-            this.serviceTracker1 = null;
-        }
         if (this.bundleTracker != null) {
             this.bundleTracker.close();
             this.bundleTracker = null;
@@ -1743,8 +1676,8 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         return getComponentDefinition(factoryPid);
     }
 
-    private static boolean implementsAnyService(Component component, String[] classes) {
-        final String[] services = component.getServices();
+    private static boolean implementsAnyService(ComponentDescriptionDTO component, String[] classes) {
+        final String[] services = component.serviceInterfaces;
         if (services == null) {
             return false;
         }
@@ -1760,8 +1693,8 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
     @Override
     public List<ComponentConfiguration> getServiceProviderOCDs(String... classNames) {
-        return Arrays.stream(this.scrService.getComponents())
-                .filter(component -> implementsAnyService(component, classNames)).map(Component::getName)
+        return this.scrService.getComponentDescriptionDTOs().stream()
+                .filter(component -> implementsAnyService(component, classNames)).map(c -> c.name)
                 .map(this::getComponentDefinition).filter(Objects::nonNull).collect(Collectors.toList());
     }
 

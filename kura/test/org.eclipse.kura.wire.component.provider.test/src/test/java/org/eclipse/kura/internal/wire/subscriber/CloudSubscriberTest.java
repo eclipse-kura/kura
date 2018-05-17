@@ -102,7 +102,7 @@ public class CloudSubscriberTest {
         cs.bindWireHelperService(wireHelperServiceMock);
 
         WireSupport wsMock = mock(WireSupport.class);
-        when(wireHelperServiceMock.newWireSupport(anyObject())).thenReturn(wsMock);
+        when(wireHelperServiceMock.newWireSupport(cs, null)).thenReturn(wsMock);
 
         doAnswer(invocation -> {
             List<?> wireRecords = invocation.getArgumentAt(0, List.class);
@@ -173,7 +173,7 @@ public class CloudSubscriberTest {
         cs.bindWireHelperService(wireHelperServiceMock);
 
         WireSupport wsMock = mock(WireSupport.class);
-        when(wireHelperServiceMock.newWireSupport(anyObject())).thenReturn(wsMock);
+        when(wireHelperServiceMock.newWireSupport(cs, null)).thenReturn(wsMock);
 
         BundleContext bundleCtxMock = mock(BundleContext.class);
         Filter filter = mock(Filter.class);

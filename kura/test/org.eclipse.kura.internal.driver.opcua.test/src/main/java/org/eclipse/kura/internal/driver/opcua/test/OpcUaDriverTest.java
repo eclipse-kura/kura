@@ -428,7 +428,7 @@ public class OpcUaDriverTest {
         OpcUaDriverTest.cfgsvc = null;
     }
 
-    public void bindDriver(Driver driver) {
+    protected void bindDriver(Driver driver) {
         OpcUaDriverTest.driver = driver;
 
         synchronized (driverLock) {
@@ -436,7 +436,7 @@ public class OpcUaDriverTest {
         }
     }
 
-    public void unbindDriver(Driver driver) {
+    protected void unbindDriver(Driver driver) {
         OpcUaDriverTest.driver = null;
     }
 

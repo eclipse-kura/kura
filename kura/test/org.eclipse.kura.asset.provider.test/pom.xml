@@ -38,7 +38,7 @@
                     <useUnlimitedThreads>false</useUnlimitedThreads>
                     <argLine>${jacocoArgs}
                         -DbuildingWithTycho=true -Dosgi.locking=none
-                        -Dequinox.ds.print=true
+                        -Dds.showtrace=true
                         -Djava.io.tmpdir=/tmp
                         -Dorg.osgi.framework.storage=/tmp/osgi/framework_storage
                         -Dosgi.clean=true
@@ -53,7 +53,7 @@
 -->
                     <bundleStartLevel>
                         <bundle>
-                            <id>org.eclipse.equinox.ds</id>
+                            <id>org.apache.felix.scr</id>
                             <level>4</level>
                             <autoStart>true</autoStart>
                         </bundle>
@@ -194,7 +194,7 @@
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>
-                            <artifactId>org.eclipse.equinox.ds</artifactId>
+                            <artifactId>org.apache.felix.scr</artifactId>
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>

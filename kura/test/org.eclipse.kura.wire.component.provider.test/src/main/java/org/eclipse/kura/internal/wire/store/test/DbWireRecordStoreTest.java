@@ -35,6 +35,7 @@ import org.eclipse.kura.type.IntegerValue;
 import org.eclipse.kura.type.LongValue;
 import org.eclipse.kura.type.StringValue;
 import org.eclipse.kura.type.TypedValue;
+import org.eclipse.kura.wire.WireComponent;
 import org.eclipse.kura.wire.WireEnvelope;
 import org.eclipse.kura.wire.WireRecord;
 import org.junit.BeforeClass;
@@ -216,12 +217,12 @@ public class DbWireRecordStoreTest {
         assertEquals("Unexpected number of records", cleanupSize + 5L, count);
     }
 
-    public void bindDbstore(DbWireRecordStore dbstore) {
+    public void bindDbstore(WireComponent dbstore) {
         System.out.println(dbstore);
-        DbWireRecordStoreTest.dbstore = dbstore;
+        DbWireRecordStoreTest.dbstore = (DbWireRecordStore) dbstore;
     }
 
-    public void unbindDbstore(DbWireRecordStore dbstore) {
+    public void unbindDbstore(WireComponent dbstore) {
         DbWireRecordStoreTest.dbstore = null;
     }
 

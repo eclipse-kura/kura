@@ -190,7 +190,7 @@ public class BeaconScannerExample implements ConfigurableComponent, BluetoothBea
             kp.addMetric("minor", beaconData.minor);
             kp.addMetric("distance", calculateDistance(beaconData.rssi, beaconData.txpower));
             try {
-                this.cloudClient.publish(this.topicPrefix + "/" + beaconData.address, kp, 2, false);
+                this.cloudClient.publish(this.topicPrefix + "/" + beaconData.address, kp, 0, false);
             } catch (KuraException e) {
                 logger.error("Unable to publish", e);
             }

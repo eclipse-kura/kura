@@ -253,6 +253,61 @@ public class SslManagerServiceImplTest {
 
         svc.getSSLSocketFactory();
     }
+    
+    @Test(expected = IOException.class)
+    public void testActivateFirstBootDefaultFromKuraPropsFailIfKeystoreChanged() throws Throwable {
+
+        char[] keystorePassword = "testPassword".toCharArray();
+
+        KeyStore store = KeyStore.getInstance("jks");
+
+        store.load(null, null);
+
+        try (OutputStream os = new FileOutputStream(KEY_STORE_PATH)) {
+            store.store(os, keystorePassword);
+        }
+
+        // activation and deactivation
+
+        SslManagerServiceImpl svc = new SslManagerServiceImpl();
+
+        CryptoService cs = getBasicCryptoServiceImpl();
+        svc.setCryptoService(cs);
+
+        SystemService ssMock = mock(SystemService.class);
+        svc.setSystemService(ssMock);
+        when(ssMock.getJavaKeyStorePassword()).thenReturn(keystorePassword);
+
+        ComponentContext ccMock = mock(ComponentContext.class);
+
+        BundleContext bcMock = mock(BundleContext.class);
+        when(ccMock.getBundleContext()).thenReturn(bcMock);
+
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("ssl.default.protocol", "TLSv1");
+        properties.put("ssl.default.trustStore", KEY_STORE_PATH);
+        properties.put("ssl.hostname.verification", "true");
+        properties.put("ssl.keystore.password", "changeit");
+
+        svc.activate(ccMock, properties);
+
+        verify(ccMock, times(1)).getServiceReference();
+
+        assertFalse(Arrays.equals("changeit".toCharArray(), cs.getKeyStorePassword(KEY_STORE_PATH)));
+
+        svc.deactivate(ccMock);
+        
+        store.load(null, null);
+
+        try (OutputStream os = new FileOutputStream(KEY_STORE_PATH)) {
+            store.store(os, keystorePassword);
+        }
+        
+        properties.put("ssl.keystore.password", new String(cs.getKeyStorePassword(KEY_STORE_PATH)));
+        svc.activate(ccMock, properties);
+        
+        svc.getSSLSocketFactory();
+    }
 
     @Test
     public void testActivateFirstBootDefaultFromCrypto() throws Throwable {

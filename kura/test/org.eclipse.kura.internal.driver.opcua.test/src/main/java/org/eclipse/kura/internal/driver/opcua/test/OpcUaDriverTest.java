@@ -80,9 +80,13 @@ public class OpcUaDriverTest {
         CertificateManager certificateManager = new DefaultCertificateManager();
         CertificateValidator certificateValidator = new DefaultCertificateValidator(new File("/tmp"));
         List<String> bindAddresses = new ArrayList<>();
-        bindAddresses.add("0.0.0.0");
+        bindAddresses.add("localhost");
+        List<String> endpointAddresses = new ArrayList<>();
+        endpointAddresses.add("localhost");
         OpcUaServerConfig config = new OpcUaServerConfigBuilder().setBindPort(12685).setApplicationUri("opcsvr")
-                .setBindAddresses(bindAddresses).setServerName("opcsvr")
+                .setBindAddresses(bindAddresses)
+                .setEndpointAddresses(endpointAddresses)
+                .setServerName("opcsvr")
                 .setApplicationName(LocalizedText.english("opcsvr")).setCertificateManager(certificateManager)
                 .setCertificateValidator(certificateValidator)
                 .setUserTokenPolicies(Arrays.asList(OpcUaServerConfig.USER_TOKEN_POLICY_ANONYMOUS)).build();

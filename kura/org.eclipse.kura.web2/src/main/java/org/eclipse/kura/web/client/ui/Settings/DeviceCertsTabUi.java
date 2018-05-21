@@ -26,8 +26,6 @@ import org.gwtbootstrap3.client.ui.FormGroup;
 import org.gwtbootstrap3.client.ui.FormLabel;
 import org.gwtbootstrap3.client.ui.Input;
 import org.gwtbootstrap3.client.ui.TextArea;
-import org.gwtbootstrap3.client.ui.base.form.AbstractForm.SubmitCompleteEvent;
-import org.gwtbootstrap3.client.ui.base.form.AbstractForm.SubmitCompleteHandler;
 import org.gwtbootstrap3.client.ui.constants.ValidationState;
 import org.gwtbootstrap3.client.ui.html.Span;
 
@@ -51,8 +49,6 @@ public class DeviceCertsTabUi extends Composite implements Tab {
     }
 
     private static final Messages MSGS = GWT.create(Messages.class);
-
-    private final static String SERVLET_URL = "/" + GWT.getModuleName() + "/file/certificate";
 
     private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
     private final GwtCertificatesServiceAsync gwtCertificatesService = GWT.create(GwtCertificatesService.class);
@@ -125,9 +121,6 @@ public class DeviceCertsTabUi extends Composite implements Tab {
     }
 
     private void initForm() {
-        this.deviceSslCertsForm.setAction(SERVLET_URL);
-        this.deviceSslCertsForm.setEncoding(com.google.gwt.user.client.ui.FormPanel.ENCODING_MULTIPART);
-        this.deviceSslCertsForm.setMethod(com.google.gwt.user.client.ui.FormPanel.METHOD_POST);
         StringBuilder title = new StringBuilder();
         title.append("<p>");
         title.append(MSGS.settingsMAuthDescription1());
@@ -135,44 +128,6 @@ public class DeviceCertsTabUi extends Composite implements Tab {
         title.append(MSGS.settingsMAuthDescription2());
         title.append("</p>");
         this.description.add(new Span(title.toString()));
-        this.deviceSslCertsForm.addSubmitCompleteHandler(new SubmitCompleteHandler() {
-
-            @Override
-            public void onSubmitComplete(SubmitCompleteEvent event) {
-                DeviceCertsTabUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-
-                    @Override
-                    public void onFailure(Throwable ex) {
-                        FailureHandler.handle(ex);
-                        EntryClassUi.hideWaitModal();
-                    }
-
-                    @Override
-                    public void onSuccess(GwtXSRFToken token) {
-                        DeviceCertsTabUi.this.gwtCertificatesService.storePublicPrivateKeys(token,
-                                DeviceCertsTabUi.this.privateKeyInput.getValue(),
-                                DeviceCertsTabUi.this.certificateInput.getValue(), null,
-                                DeviceCertsTabUi.this.storageAliasInput.getValue(), new AsyncCallback<Integer>() {
-
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                FailureHandler.handle(caught);
-                                EntryClassUi.hideWaitModal();
-                            }
-
-                            @Override
-                            public void onSuccess(Integer certsStored) {
-                                reset();
-                                setDirty(false);
-                                DeviceCertsTabUi.this.apply.setEnabled(false);
-                                DeviceCertsTabUi.this.reset.setEnabled(false);
-                                EntryClassUi.hideWaitModal();
-                            }
-                        });
-                    }
-                });
-            }
-        });
 
         this.storageAliasLabel.setText(MSGS.settingsStorageAliasLabel());
         this.storageAliasInput.addChangeHandler(new ChangeHandler() {
@@ -231,7 +186,38 @@ public class DeviceCertsTabUi extends Composite implements Tab {
             public void onClick(ClickEvent event) {
                 if (isValid()) {
                     EntryClassUi.showWaitModal();
-                    DeviceCertsTabUi.this.deviceSslCertsForm.submit();
+                    DeviceCertsTabUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+
+                        @Override
+                        public void onFailure(Throwable ex) {
+                            FailureHandler.handle(ex);
+                            EntryClassUi.hideWaitModal();
+                        }
+
+                        @Override
+                        public void onSuccess(GwtXSRFToken token) {
+                            DeviceCertsTabUi.this.gwtCertificatesService.storePublicPrivateKeys(token,
+                                    DeviceCertsTabUi.this.privateKeyInput.getValue(),
+                                    DeviceCertsTabUi.this.certificateInput.getValue(), null,
+                                    DeviceCertsTabUi.this.storageAliasInput.getValue(), new AsyncCallback<Integer>() {
+
+                                        @Override
+                                        public void onFailure(Throwable caught) {
+                                            FailureHandler.handle(caught);
+                                            EntryClassUi.hideWaitModal();
+                                        }
+
+                                        @Override
+                                        public void onSuccess(Integer certsStored) {
+                                            reset();
+                                            setDirty(false);
+                                            DeviceCertsTabUi.this.apply.setEnabled(false);
+                                            DeviceCertsTabUi.this.reset.setEnabled(false);
+                                            EntryClassUi.hideWaitModal();
+                                        }
+                                    });
+                        }
+                    });
                 }
             }
         });

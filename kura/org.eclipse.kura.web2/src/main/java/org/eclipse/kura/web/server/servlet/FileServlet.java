@@ -157,8 +157,6 @@ public class FileServlet extends HttpServlet {
             doPostConfigurationSnapshot(req, resp);
         } else if (reqPathInfo.equals("/command")) {
             doPostCommand(req, resp);
-        } else if (reqPathInfo.equals("/certificate")) {
-            return;
         } else {
             logger.error("Unknown request path info: " + reqPathInfo);
             throw new ServletException("Unknown request path info: " + reqPathInfo);

@@ -267,6 +267,14 @@ Channel Table Validation START
 	padding-left: 15px !important;
 }
 
+.assets-status-icon {
+	padding: 5px;
+}
+
+.cell-clickable {
+	cursor: pointer;
+}
+
 /**********************
 Channel Table Validation END
 ***********************/
@@ -1047,4 +1055,8 @@ div.headerLogo {
    		display: inline-block !important;
 	}
 
+}
+
+.failure-handler-stack-trace-container {
+	max-height: 50vh;
 }

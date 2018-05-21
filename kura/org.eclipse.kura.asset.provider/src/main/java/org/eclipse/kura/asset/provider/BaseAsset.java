@@ -438,7 +438,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
                     this.driver.read(channelRecords);
                 }
             } catch (final ConnectionException ce) {
-                throw new KuraException(KuraErrorCode.CONNECTION_FAILED, ce);
+                throw new KuraException(KuraErrorCode.CONNECTION_FAILED, ce, ce.getMessage());
             }
         }
 
@@ -492,7 +492,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
                 try {
                     this.driver.read(validRecords);
                 } catch (final ConnectionException ce) {
-                    throw new KuraException(KuraErrorCode.CONNECTION_FAILED, ce);
+                    throw new KuraException(KuraErrorCode.CONNECTION_FAILED, ce, ce.getMessage());
                 }
             }
         }
@@ -628,7 +628,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
                 try {
                     this.driver.write(validRecords);
                 } catch (final ConnectionException ce) {
-                    throw new KuraException(KuraErrorCode.CONNECTION_FAILED, ce);
+                    throw new KuraException(KuraErrorCode.CONNECTION_FAILED, ce, ce.getMessage());
                 }
             }
         }

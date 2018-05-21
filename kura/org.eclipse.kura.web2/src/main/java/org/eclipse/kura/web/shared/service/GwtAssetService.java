@@ -12,10 +12,10 @@
 package org.eclipse.kura.web.shared.service;
 
 import java.util.List;
-import java.util.Set;
 
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtChannelRecord;
+import org.eclipse.kura.web.shared.model.GwtChannelOperationResult;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 
 import com.google.gwt.user.client.rpc.RemoteService;
@@ -29,12 +29,9 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RemoteServiceRelativePath("assetservices")
 public interface GwtAssetService extends RemoteService {
 
-    public List<GwtChannelRecord> read(GwtXSRFToken xsrfToken, String assetPid, Set<String> channelNames)
-            throws GwtKuraException;
+    public GwtChannelOperationResult readAllChannels(GwtXSRFToken xsrfToken, String assetPid) throws GwtKuraException;
 
-    public List<GwtChannelRecord> readAllChannels(GwtXSRFToken xsrfToken, String assetPid) throws GwtKuraException;
-
-    public void write(GwtXSRFToken xsrfToken, String assetPid, List<GwtChannelRecord> channelRecords)
+    public GwtChannelOperationResult write(GwtXSRFToken xsrfToken, String assetPid, List<GwtChannelRecord> channelRecords)
             throws GwtKuraException;
 
 }

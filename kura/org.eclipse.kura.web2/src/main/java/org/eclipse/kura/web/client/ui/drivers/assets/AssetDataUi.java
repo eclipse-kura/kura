@@ -13,14 +13,18 @@ package org.eclipse.kura.web.client.ui.drivers.assets;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.AlertDialog;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.ui.drivers.assets.AssetModel.ChannelModel;
+import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.AssetConstants;
+import org.eclipse.kura.web.shared.model.GwtChannelOperationResult;
 import org.eclipse.kura.web.shared.model.GwtChannelRecord;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.PanelBody;
@@ -31,11 +35,14 @@ import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.cell.client.TextInputCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.Column;
@@ -62,9 +69,10 @@ public class AssetDataUi extends Composite {
     private final SingleSelectionModel<AssetModel.ChannelModel> selectionModel = new SingleSelectionModel<>();
 
     private AssetModel model;
-    private Map<String, GwtChannelRecord> channelValues = new HashMap<>();
 
-    private boolean dirty;
+    private final Map<String, GwtChannelRecord> channelValues = new HashMap<>();
+    private final Set<String> modifiedWriteChannels = new HashSet<>();
+    private final TextInputCell valuesCell = new TextInputCell();
 
     @UiField
     PanelBody configurationPanelBody;
@@ -120,39 +128,54 @@ public class AssetDataUi extends Composite {
         this.assetDataTable.setHeaderBuilder(
                 new DefaultHeaderOrFooterBuilder<AssetModel.ChannelModel>(this.assetDataTable, false));
 
-        final Column<AssetModel.ChannelModel, String> c = new Column<AssetModel.ChannelModel, String>(new TextCell()) {
+        this.assetDataTable.addColumn(new StaticColumn(AssetConstants.NAME.value()),
+                new TextHeader(MSGS.wiresChannelName()));
+        this.assetDataTable.addColumn(new StaticColumn(AssetConstants.TYPE.value()),
+                new TextHeader(MSGS.wiresChannelOperation()));
+        this.assetDataTable.addColumn(new StaticColumn(AssetConstants.VALUE_TYPE.value()),
+                new TextHeader(MSGS.wiresChannelValueType()));
+
+        final Column<AssetModel.ChannelModel, String> statusColumn = new Column<AssetModel.ChannelModel, String>(
+                new StatusCell()) {
+
+            @Override
+            public void onBrowserEvent(Context context, Element elem, ChannelModel object, NativeEvent event) {
+                if (getChannelStatus(object) == ChannelStatus.FAILURE) {
+                    final GwtChannelRecord record = channelValues.get(object.getChannelName());
+                    showFailureDetails(record);
+                }
+            }
 
             @Override
             public String getValue(final AssetModel.ChannelModel object) {
-                return object.getChannelName();
+                return getChannelStatus(object).getLabel();
             }
-
-        };
-
-        this.assetDataTable.addColumn(c, new TextHeader(MSGS.wiresChannelName()));
-
-        final Column<AssetModel.ChannelModel, String> c2 = new Column<AssetModel.ChannelModel, String>(new TextCell()) {
 
             @Override
-            public String getValue(final AssetModel.ChannelModel object) {
-                return object.getValue(AssetConstants.TYPE.value());
+            public String getCellStyleNames(Context context, ChannelModel object) {
+                return getChannelStatus(object).getCellStyle();
             }
-        };
 
-        this.assetDataTable.addColumn(c2, new TextHeader(MSGS.wiresChannelOperation()));
-
-        final Column<AssetModel.ChannelModel, String> c3 = new Column<AssetModel.ChannelModel, String>(new TextCell()) {
-
+            @SuppressWarnings("serial")
             @Override
-            public String getValue(final AssetModel.ChannelModel object) {
-                return object.getValue(AssetConstants.VALUE_TYPE.value());
+            public void render(final Context context, final ChannelModel object, final SafeHtmlBuilder sb) {
+                final ChannelStatus status = getChannelStatus(object);
+
+                sb.append(new SafeHtml() {
+
+                    @Override
+                    public String asString() {
+                        return "<i class=\"fa assets-status-icon " + status.getIconStyle() + "\"></i><span>"
+                                + SafeHtmlUtils.htmlEscape(getValue(object)) + "</span>";
+                    }
+                });
             }
         };
 
-        this.assetDataTable.addColumn(c3, new TextHeader(MSGS.wiresChannelValueType()));
+        this.assetDataTable.addColumn(statusColumn, new TextHeader(MSGS.wiresChannelStatus()));
 
-        final TextInputCell cell = new TextInputCell();
-        final Column<AssetModel.ChannelModel, String> c4 = new Column<AssetModel.ChannelModel, String>(cell) {
+        final Column<AssetModel.ChannelModel, String> valueColumn = new Column<AssetModel.ChannelModel, String>(
+                valuesCell) {
 
             @Override
             public void onBrowserEvent(Context context, Element elem, ChannelModel object, NativeEvent event) {
@@ -163,58 +186,64 @@ public class AssetDataUi extends Composite {
 
             @Override
             public String getCellStyleNames(Context context, ChannelModel object) {
-                final GwtChannelRecord result = channelValues.get(object.getChannelName());
-                if (result == null) {
-                    return null;
-                }
-                final String value = result.getValue();
-                if (value == null) {
-                    return "cell-not-valid cell-readonly";
+                if (getChannelStatus(object) == ChannelStatus.FAILURE) {
+                    return "cell-readonly";
                 }
                 return null;
             }
 
             @Override
-            public void render(Context context, AssetModel.ChannelModel object, SafeHtmlBuilder sb) {
-                if ("false".equals(object.getValue(AssetConstants.ENABLED.value()))) {
-                    sb.appendEscaped("This channel is disabled");
-                } else if ("READ".equals(object.getValue(AssetConstants.TYPE.value()))) {
-                    sb.appendEscaped(getValue(object));
-                } else {
-                    super.render(context, object, sb);
+            public String getValue(final AssetModel.ChannelModel object) {
+                if (getChannelStatus(object) == ChannelStatus.SUCCESS) {
+                    final GwtChannelRecord result = channelValues.get(object.getChannelName());
+                    return result.getValue();
                 }
+                return "Not available";
             }
 
             @Override
-            public String getValue(final AssetModel.ChannelModel object) {
-                final GwtChannelRecord result = channelValues.get(object.getChannelName());
-                if (result == null) {
-                    return "";
+            public void render(Context context, ChannelModel object, SafeHtmlBuilder sb) {
+                if ("READ".equals(object.getValue(AssetConstants.TYPE.value()))) {
+                    sb.appendEscaped(getValue(object));
+                    return;
                 }
-                final String value = result.getValue();
-                if (value == null) {
-                    return "Read Error!";
+                if (!isDirty(object.getChannelName())) {
+                    valuesCell.clearViewData(context.getKey());
                 }
-                return value;
+                super.render(context, object, sb);
             }
         };
 
-        c4.setFieldUpdater(new FieldUpdater<AssetModel.ChannelModel, String>() {
+        valueColumn.setFieldUpdater(new FieldUpdater<AssetModel.ChannelModel, String>() {
 
             @Override
             public void update(final int index, final AssetModel.ChannelModel object, final String value) {
-                setDirty(true);
-                GwtChannelRecord result = channelValues.get(object.getChannelName());
-                if (result == null) {
-                    result = createWriteRecord(object);
-                    channelValues.put(object.getChannelName(), result);
-                }
+                final String channelName = object.getChannelName();
+
+                GwtChannelRecord result = createWriteRecord(object);
                 result.setValue(value);
+                channelValues.put(channelName, result);
+
+                markAsDirty(channelName);
+
                 AssetDataUi.this.assetDataTable.redraw();
             }
         });
 
-        this.assetDataTable.addColumn(c4, new TextHeader(MSGS.devicePropValue()));
+        this.assetDataTable.addColumn(valueColumn, new TextHeader(MSGS.devicePropValue()));
+    }
+
+    private static void showFailureDetails(final GwtChannelRecord record) {
+        record.setUnescaped(true);
+        String reason = record.getExceptionMessage();
+        record.setUnescaped(false);
+
+        if (reason == null || reason.trim().isEmpty()) {
+            reason = "unknown";
+        }
+
+        FailureHandler.showErrorMessage("Channel failure details", "Reason: " + reason,
+                record.getExceptionStackTrace());
     }
 
     private GwtChannelRecord createWriteRecord(AssetModel.ChannelModel channel) {
@@ -225,76 +254,180 @@ public class AssetDataUi extends Composite {
     }
 
     private void write() {
-        if (isDirty()) {
-
-            final ArrayList<GwtChannelRecord> writeRecords = new ArrayList<>();
-            for (AssetModel.ChannelModel channel : model.getChannels()) {
-                if (channel.getValue(AssetConstants.TYPE.value()).contains("WRITE")) {
-                    final GwtChannelRecord record = channelValues.get(channel.getChannelName());
-                    if (record == null) {
-                        continue;
-                    }
-                    writeRecords.add(record);
-                }
-            }
-
-            if (writeRecords.isEmpty()) {
-                return;
-            }
-
-            alertDialog.show(MSGS.deviceConfigConfirmation(model.getAssetPid()), new AlertDialog.Listener() {
-
-                @Override
-                public void onConfirm() {
-                    DriversAndAssetsRPC.write(model.getAssetPid(), writeRecords,
-                            new DriversAndAssetsRPC.Callback<Void>() {
-
-                                @Override
-                                public void onSuccess(Void result) {
-                                    AssetDataUi.this.setDirty(false);
-                                }
-
-                            });
-                }
-            });
+        if (!isDirty()) {
+            return;
         }
+
+        final ArrayList<GwtChannelRecord> writeRecords = new ArrayList<>();
+
+        for (final String channelName : modifiedWriteChannels) {
+            final GwtChannelRecord record = channelValues.get(channelName);
+            if (record == null) {
+                continue;
+            }
+            writeRecords.add(record);
+        }
+
+        if (writeRecords.isEmpty()) {
+            return;
+        }
+
+        alertDialog.show(MSGS.driversAssetsWriteConfirm(model.getAssetPid()), new AlertDialog.Listener() {
+
+            @Override
+            public void onConfirm() {
+                DriversAndAssetsRPC.write(model.getAssetPid(), writeRecords,
+                        new DriversAndAssetsRPC.Callback<GwtChannelOperationResult>() {
+
+                            @Override
+                            public void onSuccess(final GwtChannelOperationResult result) {
+                                final List<GwtChannelRecord> records = result.getRecords();
+
+                                if (records != null) {
+                                    AssetDataUi.this.setDirty(false);
+                                    for (GwtChannelRecord channelRecord : records) {
+                                        channelValues.put(channelRecord.getName(), channelRecord);
+                                    }
+                                    AssetDataUi.this.channelsDataProvider.refresh();
+                                    AssetDataUi.this.assetDataTable.redraw();
+                                } else {
+                                    FailureHandler.showErrorMessage("Channel operation failed",
+                                            result.getExceptionMessage(), result.getStackTrace());
+                                }
+                            }
+
+                        });
+            }
+        });
+    }
+
+    private boolean isDirty(final String channelName) {
+        return modifiedWriteChannels.contains(channelName);
+    }
+
+    private void markAsDirty(final String channelName) {
+        AssetDataUi.this.modifiedWriteChannels.add(channelName);
+        AssetDataUi.this.applyDataChanges.setEnabled(true);
     }
 
     public void setDirty(boolean flag) {
-        this.dirty = flag;
-        if (this.dirty) {
+        if (!flag) {
+            this.modifiedWriteChannels.clear();
+        }
+        if (this.isDirty()) {
             this.applyDataChanges.setEnabled(true);
         }
     }
 
     public boolean isDirty() {
-        return this.dirty;
+        return !this.modifiedWriteChannels.isEmpty();
     }
 
     public void renderForm() {
-        AssetDataUi.this.channelsDataProvider.getList().clear();
+
+        this.setDirty(false);
+        this.channelValues.clear();
+        this.applyDataChanges.setEnabled(false);
+        this.channelsDataProvider.getList().clear();
+        this.channelsDataProvider.refresh();
+
         EntryClassUi.showWaitModal();
         DriversAndAssetsRPC.readAllChannels(model.getAssetPid(),
-                new DriversAndAssetsRPC.Callback<List<GwtChannelRecord>>() {
+                new DriversAndAssetsRPC.Callback<GwtChannelOperationResult>() {
 
                     @Override
-                    public void onSuccess(List<GwtChannelRecord> result) {
-                        channelValues.clear();
+                    public void onSuccess(final GwtChannelOperationResult result) {
+                        final List<GwtChannelRecord> records = result.getRecords();
 
-                        for (GwtChannelRecord channelValue : result) {
-                            channelValues.put(channelValue.getName(), channelValue);
+                        if (records != null) {
+                            for (final GwtChannelRecord record : records) {
+                                channelValues.put(record.getName(), record);
+                            }
+                            AssetDataUi.this.channelsDataProvider.getList().addAll(model.getChannels());
+                            AssetDataUi.this.channelsDataProvider.refresh();
+
+                            int size = AssetDataUi.this.channelsDataProvider.getList().size();
+                            AssetDataUi.this.assetDataTable.setVisibleRange(0, size);
+
+                            AssetDataUi.this.assetDataTable.redraw();
+                        } else {
+                            FailureHandler.showErrorMessage("Channel operation failed", result.getExceptionMessage(),
+                                    result.getStackTrace());
                         }
-
-                        AssetDataUi.this.channelsDataProvider.getList().addAll(model.getChannels());
-                        AssetDataUi.this.channelsDataProvider.refresh();
-
-                        int size = AssetDataUi.this.channelsDataProvider.getList().size();
-                        AssetDataUi.this.assetDataTable.setVisibleRange(0, size);
-                        AssetDataUi.this.assetDataTable.redraw();
-
-                        AssetDataUi.this.applyDataChanges.setEnabled(false);
                     }
                 });
     }
 
+    private ChannelStatus getChannelStatus(final ChannelModel model) {
+        final String channelName = model.getChannelName();
+        final GwtChannelRecord record = channelValues.get(model.getChannelName());
+
+        if ("false".equals(model.getValue(AssetConstants.ENABLED.value()))) {
+            return ChannelStatus.DISABLED;
+        } else if (modifiedWriteChannels.contains(channelName)) {
+            return ChannelStatus.DIRTY;
+        } else if (record == null) {
+            return ChannelStatus.UNKNOWN;
+        } else if (record.getValue() == null) {
+            return ChannelStatus.FAILURE;
+        } else {
+            return ChannelStatus.SUCCESS;
+        }
+    }
+
+    private static final class StaticColumn extends Column<AssetModel.ChannelModel, String> {
+
+        private final String key;
+
+        public StaticColumn(final String key) {
+            super(new TextCell());
+            this.key = key;
+        }
+
+        @Override
+        public String getValue(final AssetModel.ChannelModel object) {
+            return object.getValue(key);
+        }
+    }
+
+    private static final class StatusCell extends TextCell {
+
+        @Override
+        public Set<String> getConsumedEvents() {
+            final HashSet<String> set = new HashSet<String>();
+            set.add(BrowserEvents.CLICK);
+            return set;
+        }
+    }
+
+    private enum ChannelStatus {
+
+        UNKNOWN("Unknown", "fa-times text-danger", "text-danger"),
+        SUCCESS("Success", "fa-check text-success", "text-success"),
+        FAILURE("Failure - click for details", "fa-times text-danger", "text-danger cell-clickable"),
+        DIRTY("Modified", "fa-pencil", ""),
+        DISABLED("Disabled", "", "");
+
+        private String label;
+        private String iconStyle;
+        private String cellStyle;
+
+        private ChannelStatus(final String label, final String iconStyle, final String cellStyle) {
+            this.label = label;
+            this.iconStyle = iconStyle;
+            this.cellStyle = cellStyle;
+        }
+
+        public String getLabel() {
+            return label;
+        }
+
+        public String getIconStyle() {
+            return iconStyle;
+        }
+
+        public String getCellStyle() {
+            return cellStyle;
+        }
+    }
 }

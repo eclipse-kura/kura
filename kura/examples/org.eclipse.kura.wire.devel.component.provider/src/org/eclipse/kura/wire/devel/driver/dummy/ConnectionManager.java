@@ -28,7 +28,7 @@ public class ConnectionManager {
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     private Future<?> connectionAttempt = CompletableFuture.completedFuture(null);
-    private int connectionDelay = 0;
+    private DummyDriverOptions options;
 
     public Future<?> connectAsync() {
         synchronized (this) {
@@ -38,9 +38,10 @@ public class ConnectionManager {
 
             this.connectionAttempt = this.executor.submit(() -> {
                 if (isShuttingDown.get()) {
-                    return;
+                    return (Void) null;
                 }
                 this.connectInternal();
+                return (Void) null;
             });
             return this.connectionAttempt;
         }
@@ -80,11 +81,19 @@ public class ConnectionManager {
         }
     }
 
-    private void connectInternal() {
+    private void connectInternal() throws ConnectionException {
         if (isConnected.get()) {
             logger.debug("already connected");
             return;
         }
+
+        final ConnectionIssue issue = this.options.getConnectionIssues();
+
+        if (issue == ConnectionIssue.THROW) {
+            throw new ConnectionException("Simulated connection exception");
+        }
+
+        final int connectionDelay = this.options.getConnectionDelay();
 
         logger.info("connecting...");
 
@@ -109,6 +118,8 @@ public class ConnectionManager {
         logger.info("disconnecting...");
         isConnected.set(false);
 
+        final int connectionDelay = this.options.getConnectionDelay();
+
         if (connectionDelay > 0) {
             try {
                 Thread.sleep(connectionDelay);
@@ -128,8 +139,8 @@ public class ConnectionManager {
         return !this.connectionAttempt.isDone();
     }
 
-    public void setConnectionDelay(final int connectionDelay) {
-        this.connectionDelay = connectionDelay;
+    public void setOptions(final DummyDriverOptions options) {
+        this.options = options;
     }
 
     public void shutdown() {

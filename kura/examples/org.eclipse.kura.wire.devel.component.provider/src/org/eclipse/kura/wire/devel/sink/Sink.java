@@ -15,10 +15,13 @@ import java.util.Map;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.wire.WireComponent;
 import org.eclipse.kura.wire.WireEnvelope;
 import org.eclipse.kura.wire.WireHelperService;
 import org.eclipse.kura.wire.WireReceiver;
 import org.eclipse.kura.wire.WireSupport;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.component.ComponentContext;
 import org.osgi.service.wireadmin.Wire;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,11 +38,13 @@ public class Sink implements WireReceiver, ConfigurableComponent {
 
     private String kuraServicePid;
 
-    public void activate(final Map<String, Object> properties) {
+    @SuppressWarnings("unchecked")
+    public void activate(final ComponentContext context, final Map<String, Object> properties) {
         logger.info("activating...");
 
         this.kuraServicePid = (String) properties.get(ConfigurationService.KURA_SERVICE_PID);
-        this.wireSupport = wireHelperService.newWireSupport(this);
+        this.wireSupport = wireHelperService.newWireSupport(this,
+                (ServiceReference<WireComponent>) context.getServiceReference());
         updated(properties);
 
         logger.info("activating...done");

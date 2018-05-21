@@ -13,11 +13,14 @@ import java.util.Map;
 import java.util.Random;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
+import org.eclipse.kura.wire.WireComponent;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireEnvelope;
 import org.eclipse.kura.wire.WireHelperService;
 import org.eclipse.kura.wire.WireReceiver;
 import org.eclipse.kura.wire.WireSupport;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.component.ComponentContext;
 import org.osgi.service.wireadmin.Wire;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,10 +44,12 @@ public class Delay implements WireEmitter, WireReceiver, ConfigurableComponent {
         this.wireHelperService = null;
     }
 
-    public void activate(final Map<String, Object> properties) {
+    @SuppressWarnings("unchecked")
+    public void activate(final ComponentContext context, final Map<String, Object> properties) {
         logger.info("acitvating..");
 
-        wireSupport = this.wireHelperService.newWireSupport(this);
+        wireSupport = this.wireHelperService.newWireSupport(this,
+                (ServiceReference<WireComponent>) context.getServiceReference());
 
         updated(properties);
 

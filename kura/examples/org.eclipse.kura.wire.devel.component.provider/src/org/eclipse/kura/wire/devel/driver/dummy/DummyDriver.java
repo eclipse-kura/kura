@@ -68,7 +68,7 @@ public class DummyDriver implements Driver, ConfigurableComponent {
         values.clear();
         this.options = new DummyDriverOptions(properties);
 
-        this.connectionManager.setConnectionDelay(this.options.getConnectionDelay());
+        this.connectionManager.setOptions(options);
 
         // some drivers might need to reconnect due to changes to connection parameters
         // in configuration, driver should not block the configuration update thread

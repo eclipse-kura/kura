@@ -20,6 +20,8 @@ public class DummyDriverOptions {
             ChannelDescriptorIssue.NONE.name());
     private static final Property<String> PREPARED_READ_ISSUES = new Property<>("prepared.read.issues",
             PreparedReadIssue.NONE.name());
+    private static final Property<String> CONNECTION_ISSUES = new Property<>("connection.issues",
+            ConnectionIssue.NONE.name());
 
     private final Map<String, Object> properties;
 
@@ -44,6 +46,14 @@ public class DummyDriverOptions {
             return PreparedReadIssue.valueOf(PREPARED_READ_ISSUES.get(properties));
         } catch (Exception e) {
             return PreparedReadIssue.NONE;
+        }
+    }
+
+    public ConnectionIssue getConnectionIssues() {
+        try {
+            return ConnectionIssue.valueOf(CONNECTION_ISSUES.get(properties));
+        } catch (Exception e) {
+            return ConnectionIssue.NONE;
         }
     }
 }

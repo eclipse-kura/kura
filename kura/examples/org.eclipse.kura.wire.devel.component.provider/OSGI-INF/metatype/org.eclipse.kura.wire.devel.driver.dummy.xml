@@ -46,6 +46,17 @@
             <Option label="THROW" value="THROW" />
             <Option label="RETURN_NULL" value="RETURN_NULL" />
          </AD>
+         
+         <AD id="connection.issues"
+            name="connection.issues"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="NONE"
+            description="Allows to simulate connection issues">
+            <Option label="NONE" value="NONE" />
+            <Option label="THROW" value="THROW" />
+         </AD>
     
     </OCD>
     <Designate pid="org.eclipse.kura.wire.devel.driver.dummy" factoryPid="org.eclipse.kura.wire.devel.driver.dummy">

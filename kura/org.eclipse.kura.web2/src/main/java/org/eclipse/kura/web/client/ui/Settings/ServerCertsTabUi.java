@@ -26,8 +26,6 @@ import org.gwtbootstrap3.client.ui.FormGroup;
 import org.gwtbootstrap3.client.ui.FormLabel;
 import org.gwtbootstrap3.client.ui.Input;
 import org.gwtbootstrap3.client.ui.TextArea;
-import org.gwtbootstrap3.client.ui.base.form.AbstractForm.SubmitCompleteEvent;
-import org.gwtbootstrap3.client.ui.base.form.AbstractForm.SubmitCompleteHandler;
 import org.gwtbootstrap3.client.ui.constants.ValidationState;
 import org.gwtbootstrap3.client.ui.html.Span;
 
@@ -51,8 +49,6 @@ public class ServerCertsTabUi extends Composite implements Tab {
     }
 
     private static final Messages MSGS = GWT.create(Messages.class);
-
-    private static final String SERVLET_URL = "/" + GWT.getModuleName() + "/file/certificate";
 
     private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
     private final GwtCertificatesServiceAsync gwtCertificatesService = GWT.create(GwtCertificatesService.class);
@@ -119,9 +115,6 @@ public class ServerCertsTabUi extends Composite implements Tab {
     }
 
     private void initForm() {
-        this.serverSslCertsForm.setAction(SERVLET_URL);
-        this.serverSslCertsForm.setEncoding(com.google.gwt.user.client.ui.FormPanel.ENCODING_MULTIPART);
-        this.serverSslCertsForm.setMethod(com.google.gwt.user.client.ui.FormPanel.METHOD_POST);
         StringBuilder title = new StringBuilder();
         title.append("<p>");
         title.append(MSGS.settingsAddCertDescription1());
@@ -129,43 +122,6 @@ public class ServerCertsTabUi extends Composite implements Tab {
         title.append(MSGS.settingsAddCertDescription2());
         title.append("</p>");
         this.description.add(new Span(title.toString()));
-        this.serverSslCertsForm.addSubmitCompleteHandler(new SubmitCompleteHandler() {
-
-            @Override
-            public void onSubmitComplete(SubmitCompleteEvent event) {
-                ServerCertsTabUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-
-                    @Override
-                    public void onFailure(Throwable ex) {
-                        FailureHandler.handle(ex);
-                        EntryClassUi.hideWaitModal();
-                    }
-
-                    @Override
-                    public void onSuccess(GwtXSRFToken token) {
-                        ServerCertsTabUi.this.gwtCertificatesService.storeSSLPublicChain(token,
-                                ServerCertsTabUi.this.certificateInput.getValue(),
-                                ServerCertsTabUi.this.storageAliasInput.getValue(), new AsyncCallback<Integer>() {
-
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                FailureHandler.handle(caught);
-                                EntryClassUi.hideWaitModal();
-                            }
-
-                            @Override
-                            public void onSuccess(Integer certsStored) {
-                                reset();
-                                setDirty(false);
-                                ServerCertsTabUi.this.apply.setEnabled(false);
-                                ServerCertsTabUi.this.reset.setEnabled(false);
-                                EntryClassUi.hideWaitModal();
-                            }
-                        });
-                    }
-                });
-            }
-        });
 
         this.storageAliasLabel.setText(MSGS.settingsStorageAliasLabel());
         this.storageAliasInput.addChangeHandler(new ChangeHandler() {
@@ -211,7 +167,37 @@ public class ServerCertsTabUi extends Composite implements Tab {
             public void onClick(ClickEvent event) {
                 if (isValid()) {
                     EntryClassUi.showWaitModal();
-                    ServerCertsTabUi.this.serverSslCertsForm.submit();
+                    ServerCertsTabUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+
+                        @Override
+                        public void onFailure(Throwable ex) {
+                            FailureHandler.handle(ex);
+                            EntryClassUi.hideWaitModal();
+                        }
+
+                        @Override
+                        public void onSuccess(GwtXSRFToken token) {
+                            ServerCertsTabUi.this.gwtCertificatesService.storeSSLPublicChain(token,
+                                    ServerCertsTabUi.this.certificateInput.getValue(),
+                                    ServerCertsTabUi.this.storageAliasInput.getValue(), new AsyncCallback<Integer>() {
+
+                                        @Override
+                                        public void onFailure(Throwable caught) {
+                                            FailureHandler.handle(caught);
+                                            EntryClassUi.hideWaitModal();
+                                        }
+
+                                        @Override
+                                        public void onSuccess(Integer certsStored) {
+                                            reset();
+                                            setDirty(false);
+                                            ServerCertsTabUi.this.apply.setEnabled(false);
+                                            ServerCertsTabUi.this.reset.setEnabled(false);
+                                            EntryClassUi.hideWaitModal();
+                                        }
+                                    });
+                        }
+                    });
                 }
             }
         });

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -15,36 +15,57 @@
  resource. It can be used for anyone for
  any reason, including embedding into
  a commercial product.
- 
+
  The document describing this file, and
  updated versions can be found at:
     http://www.signal11.us/oss/udev/
 
  Alan Ott
  Signal 11 Software
-*******************************************/
+ *******************************************/
 
 #include "LinuxUdev.h"
+
+jobject get_interface_number(JNIEnv *env, struct udev_device *dev_interface) {
+	jclass integerClass;
+	jmethodID integerConstructorID;
+	jobject interfaceNumber = NULL;
+	int interfaceNumberInt;
+
+	integerClass = (*env)->FindClass(env, "java/lang/Integer");
+	if (integerClass == NULL) return NULL;
+	integerConstructorID = (*env)->GetMethodID(env, integerClass, "<init>", "(I)V");
+	if (integerConstructorID == NULL) return NULL;
+
+	const char* interfaceNumberString = udev_device_get_sysattr_value(dev_interface, "bInterfaceNumber");
+	if (interfaceNumberString) {
+		interfaceNumberInt = (int) strtol(interfaceNumberString,NULL,16);
+		interfaceNumber = (*env)->NewObject(env, integerClass, integerConstructorID, interfaceNumberInt);
+	}
+
+	return interfaceNumber;
+
+}
 
 JNIEXPORT jobject JNICALL Java_org_eclipse_kura_linux_usb_LinuxUdevNative_getUsbDevices(JNIEnv *env, jclass LinuxUdevNative, jstring deviceClass) {
 	struct udev *udev;
 	struct udev_enumerate *enumerate;
 	struct udev_list_entry *devices, *dev_list_entry;
-	struct udev_device *dev;
+	struct udev_device *dev, *dev_parent;
 
 	const char *nativeDeviceClass = (*env)->GetStringUTFChars(env, deviceClass, 0);
-	jclass UsbDeviceClass;
-	jmethodID UsbDeviceConstructor;
-	jobject UsbDeviceObject;
+	jclass UsbDeviceClass = NULL;
+	jmethodID UsbDeviceConstructor = NULL;
+	jobject UsbDeviceObject = NULL;
 
 	//specifics for BLOCK devices
-	jstring blockDeviceNode;
+	jstring blockDeviceNode = NULL;
 
 	//specifics for NET devices
-	jstring interfaceName;
+	jstring interfaceName = NULL;
 
 	//specifics for TTY devices
-	jstring ttyDeviceNode;
+	jstring ttyDeviceNode = NULL;
 
 	//initialize the ArrayList for the return
 	jclass arrayClass = (*env)->FindClass(env, "java/util/ArrayList");
@@ -59,20 +80,27 @@ JNIEXPORT jobject JNICALL Java_org_eclipse_kura_linux_usb_LinuxUdevNative_getUsb
 	//set up our specific device type constructor
 	if(strcmp(nativeDeviceClass,"block")==0) {
 		UsbDeviceClass = (*env)->FindClass(env, "org/eclipse/kura/usb/UsbBlockDevice");
+		if (UsbDeviceClass == NULL) return NULL;
 		UsbDeviceConstructor = (*env)->GetMethodID(env, UsbDeviceClass, "<init>", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
+		if (UsbDeviceConstructor == NULL) return NULL;
 	} else if(strcmp(nativeDeviceClass,"net")==0) {
 		UsbDeviceClass = (*env)->FindClass(env, "org/eclipse/kura/usb/UsbNetDevice");
+		if (UsbDeviceClass == NULL) return NULL;
 		UsbDeviceConstructor = (*env)->GetMethodID(env, UsbDeviceClass, "<init>", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
+		if (UsbDeviceConstructor == NULL) return NULL;
 	} else if(strcmp(nativeDeviceClass,"tty")==0) {
 		UsbDeviceClass = (*env)->FindClass(env, "org/eclipse/kura/usb/UsbTtyDevice");
-		UsbDeviceConstructor = (*env)->GetMethodID(env, UsbDeviceClass, "<init>", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
+		if (UsbDeviceClass == NULL) return NULL;
+		UsbDeviceConstructor = (*env)->GetMethodID(env, UsbDeviceClass, "<init>", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;)V");
+		if (UsbDeviceConstructor == NULL) return NULL;
 	}
 
 	/* Create the udev object */
 	udev = udev_new();
 	if (!udev) {
 		printf("Can't create udev\n");
-		exit(1);
+		jclass Exception = (*env)->FindClass(env, "java/lang/IOException");
+		(*env)->ThrowNew(env, Exception,"Can't create udev object.");
 	}
 
 	/* Create a list of the devices in the '/sys/class/' subsystem. */
@@ -93,7 +121,6 @@ JNIEXPORT jobject JNICALL Java_org_eclipse_kura_linux_usb_LinuxUdevNative_getUsb
 
 		/* usb_device_get_devnode() returns the path to the device node
 		   itself in /dev - save this for TTY devices */
-		//printf("Device Node Path: %s\n", udev_device_get_devnode(dev));
 		if(strcmp(nativeDeviceClass,"block")==0) {
 			blockDeviceNode = (*env)->NewStringUTF(env, udev_device_get_devnode(dev));
 		} else if(strcmp(nativeDeviceClass,"net")==0) {
@@ -108,38 +135,58 @@ JNIEXPORT jobject JNICALL Java_org_eclipse_kura_linux_usb_LinuxUdevNative_getUsb
 		   subsystem/devtype pair of "usb"/"usb_device". This will
 		   be several levels up the tree, but the function will find
 		   it.*/
-		dev = udev_device_get_parent_with_subsystem_devtype(
-		       dev,
-		       "usb",
-		       "usb_device");
-		if (dev) {
+		dev_parent = udev_device_get_parent_with_subsystem_devtype(
+				dev,
+				"usb",
+				"usb_device");
+
+		if (dev_parent) {
 			if(strcmp(nativeDeviceClass,"block")==0) {
 				UsbDeviceObject = (*env)->NewObject(env, UsbDeviceClass, UsbDeviceConstructor,
-										(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev, "idVendor")),
-										(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev, "idProduct")),
-										(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev, "manufacturer")),
-										(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev, "product")),
-										(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev, "busnum")),
-										(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev, "devpath")),
-										blockDeviceNode);
+						(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev_parent, "idVendor")),
+						(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev_parent, "idProduct")),
+						(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev_parent, "manufacturer")),
+						(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev_parent, "product")),
+						(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev_parent, "busnum")),
+						(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev_parent, "devpath")),
+						blockDeviceNode);
 			} else if(strcmp(nativeDeviceClass,"net")==0) {
 				UsbDeviceObject = (*env)->NewObject(env, UsbDeviceClass, UsbDeviceConstructor,
-										(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev, "idVendor")),
-										(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev, "idProduct")),
-										(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev, "manufacturer")),
-										(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev, "product")),
-										(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev, "busnum")),
-										(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev, "devpath")),
-										interfaceName);
+						(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev_parent, "idVendor")),
+						(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev_parent, "idProduct")),
+						(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev_parent, "manufacturer")),
+						(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev_parent, "product")),
+						(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev_parent, "busnum")),
+						(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev_parent, "devpath")),
+						interfaceName);
 			} else if(strcmp(nativeDeviceClass,"tty")==0) {
-				UsbDeviceObject = (*env)->NewObject(env, UsbDeviceClass, UsbDeviceConstructor,
-										(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev, "idVendor")),
-										(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev, "idProduct")),
-										(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev, "manufacturer")),
-										(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev, "product")),
-										(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev, "busnum")),
-										(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev, "devpath")),
-										ttyDeviceNode);
+
+				/* Get the parent with usb_interface devtype to retrieve the tty interface number */
+				struct udev_device *dev_interface = udev_device_get_parent_with_subsystem_devtype(
+						dev,
+						"usb",
+						"usb_interface");
+
+				if (dev_interface) {
+					const jobject interfaceNumber = get_interface_number(env, dev_interface);
+					if (interfaceNumber == NULL) {
+						udev_device_unref(dev);
+						udev_enumerate_unref(enumerate);
+						udev_unref(udev);
+						(*env)->ReleaseStringUTFChars(env, deviceClass, nativeDeviceClass);
+
+						return NULL;
+					}
+					UsbDeviceObject = (*env)->NewObject(env, UsbDeviceClass, UsbDeviceConstructor,
+							(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev_parent, "idVendor")),
+							(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev_parent, "idProduct")),
+							(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev_parent, "manufacturer")),
+							(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev_parent, "product")),
+							(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev_parent, "busnum")),
+							(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev_parent, "devpath")),
+							ttyDeviceNode,
+							interfaceNumber);
+				}
 			}
 
 			//add it to the ArrayList
@@ -153,7 +200,7 @@ JNIEXPORT jobject JNICALL Java_org_eclipse_kura_linux_usb_LinuxUdevNative_getUsb
 				udev_unref(udev);
 				(*env)->ReleaseStringUTFChars(env, deviceClass, nativeDeviceClass);
 
-				return NULL;
+				return objArr;
 			}
 
 			udev_device_unref(dev);
@@ -172,21 +219,21 @@ JNIEXPORT jobject JNICALL Java_org_eclipse_kura_linux_usb_LinuxUdevNative_getUsb
 
 JNIEXPORT void JNICALL Java_org_eclipse_kura_linux_usb_LinuxUdevNative_nativeHotplugThread(JNIEnv *env, jclass LinuxUdevNative, jobject linuxUdevNative) {
 
-	jclass UsbDeviceClass;
-	jmethodID UsbDeviceConstructor;
-	jobject UsbDeviceObject;
+	jclass UsbDeviceClass = NULL;
+	jmethodID UsbDeviceConstructor = NULL;
+	jobject UsbDeviceObject = NULL;
 
 	//event type enum for return
-	jstring eventType;
+	jstring eventType = NULL;
 
 	//specifics for BLOCK devices
-	jstring blockDeviceNode;
+	jstring blockDeviceNode = NULL;
 
 	//specifics for NET devices
-	jstring interfaceName;
+	jstring interfaceName = NULL;
 
 	//specifics for TTY devices
-	jstring ttyDeviceNode;
+	jstring ttyDeviceNode = NULL;
 
 	struct udev *udev;
 
@@ -194,7 +241,8 @@ JNIEXPORT void JNICALL Java_org_eclipse_kura_linux_usb_LinuxUdevNative_nativeHot
 	udev = udev_new();
 	if (!udev) {
 		printf("Can't create udev\n");
-		return;
+		jclass Exception = (*env)->FindClass(env, "java/lang/IOException");
+		(*env)->ThrowNew(env, Exception,"Can't create udev object.");
 	}
 
 	/* Set up a monitor to monitor selected USB devices */
@@ -229,7 +277,6 @@ JNIEXPORT void JNICALL Java_org_eclipse_kura_linux_usb_LinuxUdevNative_nativeHot
 
 		/* Check if our file descriptor has received data. */
 		if (ret > 0 && FD_ISSET(fd, &fds)) {
-			//printf("\nselect() says there should be data\n");
 
 			/* Make the call to receive the device.
 			   select() ensured that this will not block. */
@@ -245,15 +292,6 @@ JNIEXPORT void JNICALL Java_org_eclipse_kura_linux_usb_LinuxUdevNative_nativeHot
 					ttyDeviceNode = (*env)->NewStringUTF(env, udev_device_get_devnode(dev));
 				}
 
-/*
-				printf("Got Device\n");
-				printf("   Node: %s\n", udev_device_get_devnode(dev));
-				printf("   Subsystem: %s\n", udev_device_get_subsystem(dev));
-				printf("   Devtype: %s\n", udev_device_get_devtype(dev));
-
-				printf("   Action: %s\n",udev_device_get_action(dev));
-*/
-
 				//get the event type
 				const char *action = udev_device_get_action(dev);
 				if(strcmp("add",action)==0) {
@@ -262,58 +300,118 @@ JNIEXPORT void JNICALL Java_org_eclipse_kura_linux_usb_LinuxUdevNative_nativeHot
 					eventType = (*env)->NewStringUTF(env, "DETACHED");
 				}
 
-				dev = udev_device_get_parent_with_subsystem_devtype(
-						       dev,
-						       "usb",
-						       "usb_device");
-				if (dev) {
+				struct udev_device *dev_parent = udev_device_get_parent_with_subsystem_devtype(
+						dev,
+						"usb",
+						"usb_device");
+
+				if (dev_parent) {
 					if(strcmp(subsystem,"block")==0) {
 						UsbDeviceClass = (*env)->FindClass(env, "org/eclipse/kura/usb/UsbBlockDevice");
+						if (UsbDeviceClass == NULL) {
+							udev_device_unref(dev);
+							break;
+						}
 						UsbDeviceConstructor = (*env)->GetMethodID(env, UsbDeviceClass, "<init>", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
+						if (UsbDeviceConstructor == NULL) {
+							udev_device_unref(dev);
+							break;
+						}
 
 						UsbDeviceObject = (*env)->NewObject(env, UsbDeviceClass, UsbDeviceConstructor,
-										(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev, "idVendor")),
-										(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev, "idProduct")),
-										(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev, "manufacturer")),
-										(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev, "product")),
-										(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev, "busnum")),
-										(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev, "devpath")),
-										blockDeviceNode);
+								(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev_parent, "idVendor")),
+								(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev_parent, "idProduct")),
+								(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev_parent, "manufacturer")),
+								(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev_parent, "product")),
+								(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev_parent, "busnum")),
+								(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev_parent, "devpath")),
+								blockDeviceNode);
 
 						jmethodID LinuxUdevNativeCallback = (*env)->GetMethodID(env, LinuxUdevNative, "callback", "(Ljava/lang/String;Lorg/eclipse/kura/usb/UsbDevice;)V");
 						(*env)->CallVoidMethod(env, linuxUdevNative, LinuxUdevNativeCallback, eventType, UsbDeviceObject);
 					} else if(strcmp(subsystem,"net")==0) {
 						UsbDeviceClass = (*env)->FindClass(env, "org/eclipse/kura/usb/UsbNetDevice");
+						if (UsbDeviceClass == NULL) {
+							udev_device_unref(dev);
+							break;
+						}
 						UsbDeviceConstructor = (*env)->GetMethodID(env, UsbDeviceClass, "<init>", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
+						if (UsbDeviceConstructor == NULL) {
+							udev_device_unref(dev);
+							break;
+						}
 
 						UsbDeviceObject = (*env)->NewObject(env, UsbDeviceClass, UsbDeviceConstructor,
-										(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev, "idVendor")),
-										(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev, "idProduct")),
-										(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev, "manufacturer")),
-										(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev, "product")),
-										(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev, "busnum")),
-										(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev, "devpath")),
-										interfaceName);
+								(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev_parent, "idVendor")),
+								(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev_parent, "idProduct")),
+								(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev_parent, "manufacturer")),
+								(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev_parent, "product")),
+								(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev_parent, "busnum")),
+								(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev_parent, "devpath")),
+								interfaceName);
 
 						jmethodID LinuxUdevNativeCallback = (*env)->GetMethodID(env, LinuxUdevNative, "callback", "(Ljava/lang/String;Lorg/eclipse/kura/usb/UsbDevice;)V");
 						(*env)->CallVoidMethod(env, linuxUdevNative, LinuxUdevNativeCallback, eventType, UsbDeviceObject);
 					} else if(strcmp(subsystem,"tty")==0) {
 						UsbDeviceClass = (*env)->FindClass(env, "org/eclipse/kura/usb/UsbTtyDevice");
-						UsbDeviceConstructor = (*env)->GetMethodID(env, UsbDeviceClass, "<init>", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
+						if (UsbDeviceClass == NULL) {
+							udev_device_unref(dev);
+							break;
+						}
 
-						UsbDeviceObject = (*env)->NewObject(env, UsbDeviceClass, UsbDeviceConstructor,
-										(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev, "idVendor")),
-										(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev, "idProduct")),
-										(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev, "manufacturer")),
-										(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev, "product")),
-										(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev, "busnum")),
-										(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev, "devpath")),
-										ttyDeviceNode);
+						/* Get the parent with usb_interface devtype to retrieve the tty interface number */
+						struct udev_device *dev_interface = udev_device_get_parent_with_subsystem_devtype(
+								dev,
+								"usb",
+								"usb_interface");
 
-						jmethodID LinuxUdevNativeCallback = (*env)->GetMethodID(env, LinuxUdevNative, "callback", "(Ljava/lang/String;Lorg/eclipse/kura/usb/UsbDevice;)V");
-						(*env)->CallVoidMethod(env, linuxUdevNative, LinuxUdevNativeCallback, eventType, UsbDeviceObject);
+						if (dev_interface) {
+							UsbDeviceConstructor = (*env)->GetMethodID(env, UsbDeviceClass, "<init>", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;)V");
+							if (UsbDeviceConstructor == NULL) {
+								udev_device_unref(dev);
+								break;
+							}
+
+							const jobject interfaceNumber = get_interface_number(env, dev_interface);
+							if (interfaceNumber == NULL) {
+								udev_device_unref(dev);
+								break;
+							}
+
+							UsbDeviceObject = (*env)->NewObject(env, UsbDeviceClass, UsbDeviceConstructor,
+									(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev_parent, "idVendor")),
+									(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev_parent, "idProduct")),
+									(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev_parent, "manufacturer")),
+									(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev_parent, "product")),
+									(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev_parent, "busnum")),
+									(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev_parent, "devpath")),
+									ttyDeviceNode,
+									interfaceNumber);
+
+							jmethodID LinuxUdevNativeCallback = (*env)->GetMethodID(env, LinuxUdevNative, "callback", "(Ljava/lang/String;Lorg/eclipse/kura/usb/UsbDevice;)V");
+							(*env)->CallVoidMethod(env, linuxUdevNative, LinuxUdevNativeCallback, eventType, UsbDeviceObject);
+
+						} else {
+							/* During detaching the usb_interface dev does not exists...*/
+							UsbDeviceConstructor = (*env)->GetMethodID(env, UsbDeviceClass, "<init>", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
+							if (UsbDeviceConstructor == NULL) {
+								udev_device_unref(dev);
+								break;
+							}
+
+							UsbDeviceObject = (*env)->NewObject(env, UsbDeviceClass, UsbDeviceConstructor,
+									(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev_parent, "idVendor")),
+									(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev_parent, "idProduct")),
+									(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev_parent, "manufacturer")),
+									(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev_parent, "product")),
+									(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev_parent, "busnum")),
+									(*env)->NewStringUTF(env, udev_device_get_sysattr_value(dev_parent, "devpath")),
+									ttyDeviceNode);
+
+							jmethodID LinuxUdevNativeCallback = (*env)->GetMethodID(env, LinuxUdevNative, "callback", "(Ljava/lang/String;Lorg/eclipse/kura/usb/UsbDevice;)V");
+							(*env)->CallVoidMethod(env, linuxUdevNative, LinuxUdevNativeCallback, eventType, UsbDeviceObject);
+						}
 					}
-
 					udev_device_unref(dev);
 				}
 			}
@@ -322,7 +420,6 @@ JNIEXPORT void JNICALL Java_org_eclipse_kura_linux_usb_LinuxUdevNative_nativeHot
 			}
 		}
 		usleep(250*1000);
-		//printf(".");
-		fflush(stdout);
 	}
+
 }

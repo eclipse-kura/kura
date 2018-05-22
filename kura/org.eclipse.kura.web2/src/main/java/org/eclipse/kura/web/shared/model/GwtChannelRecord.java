@@ -17,6 +17,7 @@ public class GwtChannelRecord extends KuraBaseModel implements Serializable {
 
     /** Serialization UUID */
     private static final long serialVersionUID = 2188123225288791202L;
+    private StackTraceElement[] stackTrace;
 
     public String getName() {
         return super.get("name");
@@ -40,5 +41,21 @@ public class GwtChannelRecord extends KuraBaseModel implements Serializable {
 
     public void setValue(final String value) {
         super.set("value", value);
+    }
+
+    public void setExceptionMessage(final String exceptionMessage) {
+        super.set("exceptionMessage", exceptionMessage);
+    }
+
+    public String getExceptionMessage() {
+        return super.get("exceptionMessage");
+    }
+
+    public void setExceptionStackTrace(final StackTraceElement[] stackTrace) {
+        this.stackTrace = stackTrace;
+    }
+
+    public StackTraceElement[] getExceptionStackTrace() {
+        return stackTrace;
     }
 }

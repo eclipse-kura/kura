@@ -206,7 +206,7 @@
                                                     ui:field="errorStackTraceAreaOneCollapse">
                                                     <b:PanelBody>
                                                         <b:Well>
-                                                            <b:Container fluid="true">
+                                                            <b:Container fluid="true" addStyleNames="failure-handler-stack-trace-container">
                                                                 <g:VerticalPanel
                                                                     ui:field="errorStackTraceAreaOne">
                                                                 </g:VerticalPanel>

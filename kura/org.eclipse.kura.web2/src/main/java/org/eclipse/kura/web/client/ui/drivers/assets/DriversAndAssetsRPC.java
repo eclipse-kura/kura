@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.util.FailureHandler;
+import org.eclipse.kura.web.shared.model.GwtChannelOperationResult;
 import org.eclipse.kura.web.shared.model.GwtChannelRecord;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtWireComposerStaticInfo;
@@ -194,7 +195,7 @@ public final class DriversAndAssetsRPC {
         });
     }
 
-    public static void readAllChannels(final String assetPid, final Callback<List<GwtChannelRecord>> callback) {
+    public static void readAllChannels(final String assetPid, final Callback<GwtChannelOperationResult> callback) {
         EntryClassUi.showWaitModal();
         gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
@@ -206,7 +207,7 @@ public final class DriversAndAssetsRPC {
 
             @Override
             public void onSuccess(GwtXSRFToken result) {
-                gwtAssetService.readAllChannels(result, assetPid, new AsyncCallback<List<GwtChannelRecord>>() {
+                gwtAssetService.readAllChannels(result, assetPid, new AsyncCallback<GwtChannelOperationResult>() {
 
                     @Override
                     public void onFailure(Throwable ex) {
@@ -215,7 +216,7 @@ public final class DriversAndAssetsRPC {
                     }
 
                     @Override
-                    public void onSuccess(List<GwtChannelRecord> result) {
+                    public void onSuccess(GwtChannelOperationResult result) {
                         EntryClassUi.hideWaitModal();
                         callback.onSuccess(result);
                     }
@@ -281,7 +282,7 @@ public final class DriversAndAssetsRPC {
     }
 
     public static void write(final String assetPid, final List<GwtChannelRecord> records,
-            final Callback<Void> callback) {
+            final Callback<GwtChannelOperationResult> callback) {
         EntryClassUi.showWaitModal();
         gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
@@ -293,7 +294,7 @@ public final class DriversAndAssetsRPC {
 
             @Override
             public void onSuccess(GwtXSRFToken result) {
-                gwtAssetService.write(result, assetPid, records, new AsyncCallback<Void>() {
+                gwtAssetService.write(result, assetPid, records, new AsyncCallback<GwtChannelOperationResult>() {
 
                     @Override
                     public void onFailure(Throwable ex) {
@@ -302,7 +303,7 @@ public final class DriversAndAssetsRPC {
                     }
 
                     @Override
-                    public void onSuccess(Void result) {
+                    public void onSuccess(final GwtChannelOperationResult result) {
                         EntryClassUi.hideWaitModal();
                         callback.onSuccess(result);
                     }

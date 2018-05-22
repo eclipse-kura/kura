@@ -18,22 +18,28 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Base64.Decoder;
 import java.util.Base64.Encoder;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 import org.eclipse.kura.asset.Asset;
 import org.eclipse.kura.channel.ChannelFlag;
 import org.eclipse.kura.channel.ChannelRecord;
+import org.eclipse.kura.channel.ChannelStatus;
 import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.server.util.ServiceLocator.ServiceConsumer;
-import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
+import org.eclipse.kura.web.shared.model.GwtChannelOperationResult;
 import org.eclipse.kura.web.shared.model.GwtChannelRecord;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtAssetService;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.ServiceReference;
 
 public class GwtAssetServiceImpl extends OsgiRemoteServiceServlet implements GwtAssetService {
 
@@ -43,76 +49,126 @@ public class GwtAssetServiceImpl extends OsgiRemoteServiceServlet implements Gwt
     private static final Encoder BASE64_ENCODER = Base64.getEncoder();
 
     @Override
-    public List<GwtChannelRecord> read(GwtXSRFToken xsrfToken, String assetPid, final Set<String> channelNames)
-            throws GwtKuraException {
+    public GwtChannelOperationResult readAllChannels(GwtXSRFToken xsrfToken, String assetPid) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
-        List<GwtChannelRecord> result = new ArrayList<>();
-        final String filter = format("(%s=%s)", KURA_SERVICE_PID, assetPid);
-        ServiceLocator.withAllServices(Asset.class, filter, new ServiceConsumer<Asset>() {
 
-            @Override
-            public void consume(final Asset asset) throws Exception {
-                List<ChannelRecord> assetData = asset.read(channelNames);
-                for (ChannelRecord channelRecord : assetData) {
-                    GwtChannelRecord channelData = new GwtChannelRecord();
-                    channelData.setName(channelRecord.getChannelName());
-                    channelData.setValue(typedValueToString(channelRecord.getValue()));
-                    result.add(channelData);
-                }
-            }
-        });
-        return result;
-    }
+        try {
+            List<GwtChannelRecord> result = new ArrayList<>();
 
-    @Override
-    public List<GwtChannelRecord> readAllChannels(GwtXSRFToken xsrfToken, String assetPid) throws GwtKuraException {
-        checkXSRFToken(xsrfToken);
-        List<GwtChannelRecord> result = new ArrayList<>();
-        final String filter = format("(%s=%s)", KURA_SERVICE_PID, assetPid);
-        ServiceLocator.withAllServices(Asset.class, filter, new ServiceConsumer<Asset>() {
-
-            @Override
-            public void consume(final Asset asset) throws Exception {
+            withAsset(assetPid, asset -> {
                 List<ChannelRecord> assetData = asset.readAllChannels();
                 for (ChannelRecord channelRecord : assetData) {
-                    GwtChannelRecord channelData = new GwtChannelRecord();
-                    channelData.setName(channelRecord.getChannelName());
-                    channelData.setValueType(channelRecord.getValueType().name());
-                    if (ChannelFlag.SUCCESS.equals(channelRecord.getChannelStatus().getChannelFlag())) {
-                        channelData.setValue(typedValueToString(channelRecord.getValue()));
-                    }
-                    result.add(channelData);
+                    result.add(toGwt(channelRecord));
                 }
-            }
-        });
-        return result;
+            });
+
+            return new GwtChannelOperationResult(result);
+        } catch (Exception e) {
+            return getFailureResult(e);
+        }
     }
 
     @Override
-    public void write(GwtXSRFToken xsrfToken, String assetPid, List<GwtChannelRecord> gwtChannelRecords)
-            throws GwtKuraException {
+    public GwtChannelOperationResult write(GwtXSRFToken xsrfToken, String assetPid,
+            List<GwtChannelRecord> gwtChannelRecords) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
-        List<ChannelRecord> channelRecords = new ArrayList<>();
 
-        for (GwtChannelRecord gwtChannelData : gwtChannelRecords) {
-            String channelName = gwtChannelData.getName();
-            String typedValue = gwtChannelData.getValueType();
-            String value = gwtChannelData.getValue();
-            try {
-                channelRecords.add(ChannelRecord.createWriteRecord(channelName, parseTypedValue(value, typedValue)));
-            } catch (IllegalArgumentException e) {
-                throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
+        try {
+            final Map<String, GwtChannelRecord> groupedRecords = new HashMap<>(gwtChannelRecords.size());
+
+            for (final GwtChannelRecord record : gwtChannelRecords) {
+                groupedRecords.put(record.getName(), record);
             }
+
+            final List<ChannelRecord> channelRecords = new ArrayList<>();
+
+            for (GwtChannelRecord gwtChannelData : gwtChannelRecords) {
+                String channelName = gwtChannelData.getName();
+                String typedValue = gwtChannelData.getValueType();
+                String value = gwtChannelData.getValue();
+                try {
+                    channelRecords
+                            .add(ChannelRecord.createWriteRecord(channelName, parseTypedValue(value, typedValue)));
+                } catch (Exception e) {
+                    gwtChannelData.setValue(null);
+                    gwtChannelData.setExceptionMessage(e.getMessage());
+                    gwtChannelData.setExceptionStackTrace(e.getStackTrace());
+                }
+            }
+
+            withAsset(assetPid, asset -> asset.write(channelRecords));
+
+            for (final ChannelRecord record : channelRecords) {
+                final GwtChannelRecord gwtChannelRecord = groupedRecords.get(record.getChannelName());
+                final ChannelStatus status = record.getChannelStatus();
+
+                if (status.getChannelFlag() == ChannelFlag.FAILURE) {
+                    fillErrorData(status, gwtChannelRecord);
+                }
+            }
+
+            return new GwtChannelOperationResult(gwtChannelRecords);
+        } catch (Exception e) {
+            return getFailureResult(e);
+        }
+    }
+
+    private GwtChannelOperationResult getFailureResult(final Throwable e) {
+        final Throwable rootCause = e.getCause();
+        if (rootCause != null) {
+            // e is likely a not so interesting KuraException thrown by BaseAsset.
+            // Since the FailureHandler widget is not able to display the
+            // stack traces of the whole exception stack, forward the root
+            // exception generated by the Driver if available.
+            // TODO modify FailureHandler to display the whole exception stack
+            return new GwtChannelOperationResult(rootCause);
+        }
+        return new GwtChannelOperationResult(e);
+    }
+
+    private void withAsset(final String kuraServicePid, final ServiceConsumer<Asset> consumer) throws Exception {
+        final BundleContext ctx = FrameworkUtil.getBundle(ServiceLocator.class).getBundleContext();
+
+        final String filter = format("(%s=%s)", KURA_SERVICE_PID, kuraServicePid);
+        final Collection<ServiceReference<Asset>> refs = ctx.getServiceReferences(Asset.class, filter);
+
+        if (refs == null || refs.isEmpty()) {
+            return;
         }
 
-        final String filter = format("(%s=%s)", KURA_SERVICE_PID, assetPid);
-        ServiceLocator.withAllServices(Asset.class, filter, new ServiceConsumer<Asset>() {
+        final ServiceReference<Asset> assetRef = refs.iterator().next();
 
-            @Override
-            public void consume(final Asset asset) throws Exception {
-                asset.write(channelRecords);
-            }
-        });
+        try {
+            consumer.consume(ctx.getService(assetRef));
+        } finally {
+            ctx.ungetService(assetRef);
+        }
+    }
+
+    private static GwtChannelRecord toGwt(final ChannelRecord channelRecord) {
+        GwtChannelRecord channelData = new GwtChannelRecord();
+        channelData.setName(channelRecord.getChannelName());
+        channelData.setValueType(channelRecord.getValueType().toString());
+
+        final ChannelStatus status = channelRecord.getChannelStatus();
+
+        if (ChannelFlag.SUCCESS.equals(status.getChannelFlag())) {
+            channelData.setValue(typedValueToString(channelRecord.getValue()));
+        } else {
+            fillErrorData(status, channelData);
+        }
+        return channelData;
+    }
+
+    private static void fillErrorData(final ChannelStatus status, final GwtChannelRecord record) {
+        record.setValue(null);
+        record.setExceptionMessage(status.getExceptionMessage());
+
+        final Exception e = status.getException();
+
+        if (e != null) {
+            record.setExceptionStackTrace(e.getStackTrace());
+        }
     }
 
     private static TypedValue<?> parseTypedValue(final String userValue, final String userType) {
@@ -143,7 +199,7 @@ public class GwtAssetServiceImpl extends OsgiRemoteServiceServlet implements Gwt
         throw new IllegalArgumentException();
     }
 
-    private String typedValueToString(TypedValue<?> typedValue) {
+    private static String typedValueToString(TypedValue<?> typedValue) {
         if (typedValue.getType() == DataType.BYTE_ARRAY) {
             return BASE64_ENCODER.encodeToString((byte[]) typedValue.getValue());
         }

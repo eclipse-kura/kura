@@ -42,10 +42,32 @@ public class FailureHandler {
     }
 
     public static void showErrorMessage(String message) {
+        showErrorMessage("Warning", message, null);
+    }
+
+    public static void showErrorMessage(final String message, final StackTraceElement[] stackTrace) {
+        showErrorMessage("Warning", message, stackTrace);
+    }
+
+    public static void showErrorMessage(final String title, final String message,
+            final StackTraceElement[] stackTrace) {
+        popup.setTitle(title);
+
         errorMessageLabel.setText(message);
 
+        if (stackTrace == null) {
+            stackTraceContainer.setVisible(false);
+            return;
+        }
+
         errorStackTrace.clear();
-        stackTraceContainer.setVisible(false);
+
+        for (StackTraceElement element : stackTrace) {
+            Label tempLabel = new Label();
+            tempLabel.setText(element.toString());
+            errorStackTrace.add(tempLabel);
+        }
+        stackTraceContainer.setVisible(true);
         popup.show();
     }
 
@@ -88,17 +110,7 @@ public class FailureHandler {
             }
         }
 
-        errorMessageLabel.setText(errorMessageBuilder.toString());
-
-        errorStackTrace.clear();
-        for (StackTraceElement element : caught.getStackTrace()) {
-            Label tempLabel = new Label();
-            tempLabel.setText(element.toString());
-            errorStackTrace.add(tempLabel);
-        }
-        stackTraceContainer.setVisible(true);
-
-        popup.show();
+        showErrorMessage(errorMessageBuilder.toString(), caught.getStackTrace());
     }
 
     public static void setPopup(Modal uiElement, Label errorMessage, VerticalPanel errorStackTraceArea,

@@ -284,7 +284,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
         if (isFirstBoot()) {
             changeDefaultKeystorePassword();
         } else {
-            char[] oldPassword = this.cryptoService.getKeyStorePassword(keystorePath);
+            char[] oldPassword = getOldKeystorePassword(keystorePath);
 
             char[] newPassword = null;
             try {
@@ -296,6 +296,18 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
                 updateKeystorePassword(oldPassword, newPassword);
             }
         }
+    }
+
+    private char[] getOldKeystorePassword(String keystorePath) {
+        char[] password = this.cryptoService.getKeyStorePassword(keystorePath);
+        if (password == null) {
+            try {
+                password = this.cryptoService.decryptAes(this.options.getSslKeystorePassword().toCharArray());
+            } catch (KuraException e) {
+                password = new char[0];
+            }
+        }
+        return password;
     }
 
     private void updateKeystorePassword(char[] oldPassword, char[] newPassword) {

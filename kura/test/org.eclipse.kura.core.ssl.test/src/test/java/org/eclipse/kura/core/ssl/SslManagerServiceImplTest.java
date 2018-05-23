@@ -71,6 +71,7 @@ public class SslManagerServiceImplTest {
 
     private static final String CERT_FILE_PATH = "target/test-classes/cert";
     private static final String KEY_STORE_PATH = "target/key.store";
+    private static final String KEY_STORE_2_PATH = "target/key2.store";
     private static final char[] KEY_STORE_PASS = "pass".toCharArray();
 
     private void setupDefaultKeystore()
@@ -144,6 +145,16 @@ public class SslManagerServiceImplTest {
 
         BundleContext bcMock = mock(BundleContext.class);
         when(ccMock.getBundleContext()).thenReturn(bcMock);
+        
+        final Object lock = new Object();
+
+        doAnswer(invocation -> {
+            synchronized (lock) {
+                lock.notifyAll();
+            }
+
+            throw new NullPointerException("test"); // break the scheduler loop
+        }).when(ccMock).getServiceReference(); // called during changeDefaultKeystorePassword()
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("ssl.default.protocol", "TLSv1");
@@ -152,6 +163,10 @@ public class SslManagerServiceImplTest {
         properties.put("ssl.keystore.password", "changeit");
 
         svc.activate(ccMock, properties);
+        
+        synchronized (lock) {
+            lock.wait(20000);
+        }
 
         verify(ccMock, times(1)).getServiceReference();
 
@@ -188,6 +203,16 @@ public class SslManagerServiceImplTest {
 
         BundleContext bcMock = mock(BundleContext.class);
         when(ccMock.getBundleContext()).thenReturn(bcMock);
+        
+        final Object lock = new Object();
+
+        doAnswer(invocation -> {
+            synchronized (lock) {
+                lock.notifyAll();
+            }
+
+            throw new NullPointerException("test"); // break the scheduler loop
+        }).when(ccMock).getServiceReference(); // called during changeDefaultKeystorePassword()
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("ssl.default.protocol", "TLSv1");
@@ -196,6 +221,10 @@ public class SslManagerServiceImplTest {
         properties.put("ssl.keystore.password", "changeit");
 
         svc.activate(ccMock, properties);
+        
+        synchronized (lock) {
+            lock.wait(20000);
+        }
 
         verify(ccMock, times(1)).getServiceReference();
 
@@ -235,6 +264,16 @@ public class SslManagerServiceImplTest {
 
         BundleContext bcMock = mock(BundleContext.class);
         when(ccMock.getBundleContext()).thenReturn(bcMock);
+        
+        final Object lock = new Object();
+
+        doAnswer(invocation -> {
+            synchronized (lock) {
+                lock.notifyAll();
+            }
+
+            throw new NullPointerException("test"); // break the scheduler loop
+        }).when(ccMock).getServiceReference(); // called during changeDefaultKeystorePassword()
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("ssl.default.protocol", "TLSv1");
@@ -243,6 +282,10 @@ public class SslManagerServiceImplTest {
         properties.put("ssl.keystore.password", "changeit");
 
         svc.activate(ccMock, properties);
+        
+        synchronized (lock) {
+            lock.wait(20000);
+        }
 
         verify(ccMock, times(1)).getServiceReference();
 
@@ -253,7 +296,7 @@ public class SslManagerServiceImplTest {
 
         svc.getSSLSocketFactory();
     }
-    
+
     @Test(expected = IOException.class)
     public void testActivateFirstBootDefaultFromKuraPropsFailIfKeystoreChanged() throws Throwable {
 
@@ -282,6 +325,16 @@ public class SslManagerServiceImplTest {
 
         BundleContext bcMock = mock(BundleContext.class);
         when(ccMock.getBundleContext()).thenReturn(bcMock);
+        
+        final Object lock = new Object();
+
+        doAnswer(invocation -> {
+            synchronized (lock) {
+                lock.notifyAll();
+            }
+
+            throw new NullPointerException("test"); // break the scheduler loop
+        }).when(ccMock).getServiceReference(); // called during changeDefaultKeystorePassword()
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("ssl.default.protocol", "TLSv1");
@@ -290,22 +343,26 @@ public class SslManagerServiceImplTest {
         properties.put("ssl.keystore.password", "changeit");
 
         svc.activate(ccMock, properties);
+        
+        synchronized (lock) {
+            lock.wait(20000);
+        }
 
         verify(ccMock, times(1)).getServiceReference();
 
         assertFalse(Arrays.equals("changeit".toCharArray(), cs.getKeyStorePassword(KEY_STORE_PATH)));
 
         svc.deactivate(ccMock);
-        
+
         store.load(null, null);
 
         try (OutputStream os = new FileOutputStream(KEY_STORE_PATH)) {
             store.store(os, keystorePassword);
         }
-        
+
         properties.put("ssl.keystore.password", new String(cs.getKeyStorePassword(KEY_STORE_PATH)));
         svc.activate(ccMock, properties);
-        
+
         svc.getSSLSocketFactory();
     }
 
@@ -337,6 +394,16 @@ public class SslManagerServiceImplTest {
 
         BundleContext bcMock = mock(BundleContext.class);
         when(ccMock.getBundleContext()).thenReturn(bcMock);
+        
+        final Object lock = new Object();
+
+        doAnswer(invocation -> {
+            synchronized (lock) {
+                lock.notifyAll();
+            }
+
+            throw new NullPointerException("test"); // break the scheduler loop
+        }).when(ccMock).getServiceReference(); // called during changeDefaultKeystorePassword()
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("ssl.default.protocol", "TLSv1");
@@ -346,6 +413,10 @@ public class SslManagerServiceImplTest {
 
         svc.activate(ccMock, properties);
 
+        synchronized (lock) {
+            lock.wait(20000);
+        }
+        
         verify(ccMock, times(1)).getServiceReference();
 
         assertFalse(Arrays.equals("changeit".toCharArray(), cs.getKeyStorePassword(KEY_STORE_PATH)));
@@ -407,8 +478,8 @@ public class SslManagerServiceImplTest {
         svc.getSSLSocketFactory();
     }
 
-    private CryptoService getBasicCryptoServiceImpl() {
-        return new CryptoService() {
+    private CryptoService getBasicCryptoServiceImpl() throws KuraException {
+        CryptoService result = new CryptoService() {
 
             private final Properties props = new Properties();
 
@@ -437,11 +508,12 @@ public class SslManagerServiceImplTest {
 
             @Override
             public char[] getKeyStorePassword(String keyStorePath) {
-                String propsPassword = this.props.getProperty(keyStorePath);
-                if (propsPassword == null) {
-                    return "cryptoPassword".toCharArray();
+                String persistedPassword = this.props.getProperty(keyStorePath);
+                if (persistedPassword != null) {
+                    return persistedPassword.toCharArray();
                 }
-                return this.props.getProperty(keyStorePath).toCharArray();
+
+                return null;
             }
 
             @Override
@@ -478,6 +550,9 @@ public class SslManagerServiceImplTest {
                 throw new UnsupportedOperationException();
             }
         };
+        
+        result.setKeyStorePassword(KEY_STORE_PATH, "cryptoPassword".toCharArray());
+        return result;
     }
 
     @Test
@@ -622,6 +697,62 @@ public class SslManagerServiceImplTest {
     }
 
     @Test
+    public void testUpdateKeystorePathAndPassword() throws Throwable {
+
+        char[] keystorePassword = "cryptoPassword".toCharArray();
+
+        KeyStore store = KeyStore.getInstance("jks");
+
+        store.load(null, null);
+
+        try (OutputStream os = new FileOutputStream(KEY_STORE_PATH)) {
+            store.store(os, keystorePassword);
+        }
+
+        // activation
+
+        SslManagerServiceImpl svc = new SslManagerServiceImpl();
+
+        CryptoService cs = getBasicCryptoServiceImpl();
+        svc.setCryptoService(cs);
+
+        SystemService ssMock = mock(SystemService.class);
+        svc.setSystemService(ssMock);
+        when(ssMock.getJavaKeyStorePassword()).thenReturn(new char[0]);
+
+        ComponentContext ccMock = mock(ComponentContext.class);
+
+        BundleContext bcMock = mock(BundleContext.class);
+        when(ccMock.getBundleContext()).thenReturn(bcMock);
+
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("ssl.default.protocol", "TLSv1");
+        properties.put("ssl.default.trustStore", KEY_STORE_PATH);
+        properties.put("ssl.hostname.verification", "true");
+        properties.put("ssl.keystore.password", "changeit");
+
+        svc.activate(ccMock, properties);
+
+        char[] keystorePassword2 = "userPassword".toCharArray();
+
+        KeyStore store2 = KeyStore.getInstance("jks");
+
+        store2.load(null, null);
+
+        try (OutputStream os = new FileOutputStream(KEY_STORE_2_PATH)) {
+            store2.store(os, keystorePassword);
+        }
+
+        properties.put("ssl.default.trustStore", KEY_STORE_2_PATH);
+        properties.put("ssl.keystore.password", new String(keystorePassword2));
+
+        svc.updated(properties);
+
+        assertNotNull(svc.getSSLSocketFactory());
+
+    }
+
+    @Test
     public void testUpdateKeyEntiesPasswords() throws Throwable {
         // test keystore password update
         setupDefaultKeystore();
@@ -706,28 +837,30 @@ public class SslManagerServiceImplTest {
 
         BundleContext bcMock = mock(BundleContext.class);
         when(ccMock.getBundleContext()).thenReturn(bcMock);
-        
+
         Map<String, Object> properties = new HashMap<>();
         properties.put("ssl.default.protocol", "TLSv1");
         properties.put("ssl.default.trustStore", KEY_STORE_PATH);
         properties.put("ssl.hostname.verification", "true");
         properties.put("ssl.keystore.password", "pass");
-        
+
         svc.activate(ccMock, properties);
-        
+
         TestUtil.setFieldValue(svc, "sslServiceListeners", listener);
 
         SSLSocketFactory factory = svc.getSSLSocketFactory();
-        
-        Map<ConnectionSslOptions, SSLSocketFactory> sslSocketFactories = (Map<ConnectionSslOptions, SSLSocketFactory>) TestUtil.getFieldValue(svc, "sslSocketFactories");
-        
+
+        Map<ConnectionSslOptions, SSLSocketFactory> sslSocketFactories = (Map<ConnectionSslOptions, SSLSocketFactory>) TestUtil
+                .getFieldValue(svc, "sslSocketFactories");
+
         assertNotNull(factory);
         assertEquals(1, sslSocketFactories.size());
         assertEquals(factory, sslSocketFactories.values().iterator().next());
 
         svc.updated(properties);
 
-        Map<ConnectionSslOptions, SSLSocketFactory> updatedSslSocketFactories = (Map<ConnectionSslOptions, SSLSocketFactory>) TestUtil.getFieldValue(svc, "sslSocketFactories");
+        Map<ConnectionSslOptions, SSLSocketFactory> updatedSslSocketFactories = (Map<ConnectionSslOptions, SSLSocketFactory>) TestUtil
+                .getFieldValue(svc, "sslSocketFactories");
         assertNotNull(updatedSslSocketFactories);
         assertEquals(0, updatedSslSocketFactories.size());
     }

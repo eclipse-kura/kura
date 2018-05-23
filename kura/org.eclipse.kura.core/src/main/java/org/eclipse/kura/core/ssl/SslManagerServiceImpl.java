@@ -35,6 +35,10 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
@@ -69,6 +73,9 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 
     private CryptoService cryptoService;
     private ConfigurationService configurationService;
+
+    private ScheduledExecutorService selfUpdaterExecutor;
+    private ScheduledFuture<?> selfUpdaterFuture;
 
     private Map<ConnectionSslOptions, SSLSocketFactory> sslSocketFactories;
 
@@ -120,6 +127,8 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
         this.options = new SslManagerServiceOptions(properties);
         this.sslSocketFactories = new ConcurrentHashMap<>();
 
+        this.selfUpdaterExecutor = Executors.newSingleThreadScheduledExecutor();
+
         ServiceTracker<SslServiceListener, SslServiceListener> listenersTracker = new ServiceTracker<>(
                 componentContext.getBundleContext(), SslServiceListener.class, null);
 
@@ -148,6 +157,12 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
     protected void deactivate(ComponentContext componentContext) {
         logger.info("deactivate...");
         this.sslServiceListeners.close();
+        if (this.selfUpdaterFuture != null && !this.selfUpdaterFuture.isDone()) {
+
+            logger.info("Self updater task running. Stopping it");
+
+            this.selfUpdaterFuture.cancel(true);
+        }
     }
 
     // ----------------------------------------------------------------
@@ -300,13 +315,16 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 
     private char[] getOldKeystorePassword(String keystorePath) {
         char[] password = this.cryptoService.getKeyStorePassword(keystorePath);
-        if (password == null) {
-            try {
-                password = this.cryptoService.decryptAes(this.options.getSslKeystorePassword().toCharArray());
-            } catch (KuraException e) {
-                password = new char[0];
-            }
+        if (password != null && isKeyStoreAccessible(this.options.getSslKeyStore(), password)) {
+            return password;
         }
+
+        try {
+            password = this.cryptoService.decryptAes(this.options.getSslKeystorePassword().toCharArray());
+        } catch (KuraException e) {
+            password = new char[0];
+        }
+
         return password;
     }
 
@@ -351,16 +369,23 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
         Map<String, Object> props = new HashMap<>(this.properties);
         props.put(SslManagerServiceOptions.PROP_TRUST_PASSWORD, new Password(newPassword));
 
-        try {
-            if (SslManagerServiceImpl.this.ctx.getServiceReference() != null
-                    && SslManagerServiceImpl.this.configurationService.getComponentConfiguration(pid) != null) {
-                SslManagerServiceImpl.this.configurationService.updateConfiguration(pid, props);
-            } else {
-                logger.info("No service or configuration available yet.");
+        this.selfUpdaterFuture = this.selfUpdaterExecutor.scheduleAtFixedRate(new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    if (SslManagerServiceImpl.this.ctx.getServiceReference() != null
+                            && SslManagerServiceImpl.this.configurationService.getComponentConfiguration(pid) != null) {
+                        SslManagerServiceImpl.this.configurationService.updateConfiguration(pid, props);
+                        throw new RuntimeException("Updated. The task will be terminated.");
+                    } else {
+                        logger.info("No service or configuration available yet.");
+                    }
+                } catch (KuraException e) {
+                    logger.warn("Cannot get/update configuration for pid: {}", pid, e);
+                }
             }
-        } catch (KuraException e) {
-            logger.warn("Cannot get/update configuration for pid: {}", pid, e);
-        }
+        }, 1000, 1000, TimeUnit.MILLISECONDS);
     }
 
     private boolean isFirstBoot() {

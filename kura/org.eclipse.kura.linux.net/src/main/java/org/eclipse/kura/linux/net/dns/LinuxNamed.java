@@ -63,8 +63,10 @@ public class LinuxNamed {
             persistentConfigFileName = "/etc/bind/named.conf";
             procString = "/usr/sbin/named";
             rfc1912ZonesFilename = "/etc/bind/named.rfc1912.zones";
-        } else if (OS_VERSION.equals(KuraConstants.Fedora_Pi.getImageName()) || OS_VERSION.equals(
-                KuraConstants.Reliagate_20_26.getImageName() + "_" + KuraConstants.Reliagate_20_26.getImageVersion())) {
+        } else if (OS_VERSION.equals(KuraConstants.Fedora_Pi.getImageName())
+                || OS_VERSION.equals(KuraConstants.Intel_Up2.getImageName())
+                || OS_VERSION.equals(KuraConstants.Reliagate_20_26.getImageName() + "_"
+                        + KuraConstants.Reliagate_20_26.getImageVersion())) {
             persistentConfigFileName = "/etc/named.conf";
             procString = "named -u named -t";
             rfc1912ZonesFilename = "/etc/named.rfc1912.zones";
@@ -198,6 +200,7 @@ public class LinuxNamed {
                             + KuraConstants.ReliaGATE_50_21_Ubuntu.getImageVersion())) {
                 result = LinuxProcessUtil.start("/etc/init.d/bind9 start");
             } else if (OS_VERSION.equals(KuraConstants.Fedora_Pi.getImageName())
+                    || OS_VERSION.equals(KuraConstants.Intel_Up2.getImageName())
                     || OS_VERSION.equals(KuraConstants.Reliagate_20_26.getImageName() + "_"
                             + KuraConstants.Reliagate_20_26.getImageVersion())) {
                 result = LinuxProcessUtil.start("/bin/systemctl start named");
@@ -235,6 +238,7 @@ public class LinuxNamed {
                             + KuraConstants.ReliaGATE_50_21_Ubuntu.getImageVersion())) {
                 result = LinuxProcessUtil.start("/etc/init.d/bind9 stop");
             } else if (OS_VERSION.equals(KuraConstants.Fedora_Pi.getImageName())
+                    || OS_VERSION.equals(KuraConstants.Intel_Up2.getImageName())
                     || OS_VERSION.equals(KuraConstants.Reliagate_20_26.getImageName() + "_"
                             + KuraConstants.Reliagate_20_26.getImageVersion())) {
                 result = LinuxProcessUtil.start("/bin/systemctl stop named");

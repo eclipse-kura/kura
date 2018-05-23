@@ -109,7 +109,7 @@ The following steps should be performed on the device, this guide is based on Ku
         Change the settings in the form to match the screen above, **set Default protocol to TLSv1.2**, enter `changeit` as **Keystore Password** (or the password defined at step 7).
 
         > **Warning**: steps from 8.2 to 8.6 will not work on Kura 3.2.0 due to a [known issue](https://github.com/eclipse/kura/issues/2125). On this version,
-        private key and device certificate need to be manually added to the keystore using the command line.
+        private key and device certificate need to be manually added to the keystore using the command line. If you are running Kura 3.2.0, proceed with step 8.7.
 
     2.  Open the Kura Web Console and enter select the **Settings** entry in the left side menu and then click on **Device SSL Certificate**, you should see this screen:
 
@@ -134,6 +134,36 @@ The following steps should be performed on the device, this guide is based on Ku
         ![keys_config]({{ site.baseurl }}/assets/images/aws/keys_config.png)
 
     6. Click the **Apply** button to confirm.
+
+    7. **Kura 3.2.0 only** - manually import device certificate and private key into keystore.
+
+        On the host machine, open a terminal window in the folder containing the files downloaded at step 5 and execute the following command:
+
+        ```
+        openssl pkcs12 -export -in xxxxxxxxxx-certificate.pem.crt -inkey xxxxxxxxxx-private.pem.key -name aws-ssl -out aws-ssl.p12
+        ```
+
+        where `xxxxxxxxxx-certificate.pem.crt` is the original certificate downloaded from AWS and `xxxxxxxxxx-private.pem.key ` is the private key.
+
+        The command will ask for a password, define a new password.
+
+        Copy the obtained `aws-ssl.p12` file to the device into the `/tmp` folder using scp:
+
+        ```
+        scp ./aws-ssl.p12 pi@<device-address>:/tmp
+        ```
+
+        Replacing `<device-address>` with the hostname or ip address of the device.
+
+        Open a ssh connection to the device and enter the following command:
+
+        ```
+        sudo keytool -importkeystore -deststorepass changeit -destkeystore /opt/eurotech/esf/security/cacerts.ks -srckeystore /tmp/aws-ssl.p12 -srcstoretype PKCS12
+        ```
+
+        The command will ask for a password, enter the password defined when creating the `aws-ssl.p12` file.
+
+        Restart Kura to reload the keystore.
 
 9.  Click on **Cloud Services** in the left panel, you should see this screen:
 

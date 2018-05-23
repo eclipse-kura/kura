@@ -27,41 +27,13 @@ The first step involves the registration of the new device on AWS, this operatio
 
 1. Access the AWS IoT management console.
 
-    This can be done by logging in the AWS console and selecting **AWS IoT** from the services list. You should the following screen:
+    This can be done by logging in the AWS console and selecting **IoT Core** from the services list, in the **Internet of Things** section.
 
-    ![welcome_screen]({{ site.baseurl }}/assets/images/aws/welcome_screen.png)
+2. Create a default policy for the device.
 
-    Click on the **Get Started** button in order to access the actual console.
+    This step involves creating a default policy for the new device, skip if an existing policy is already available.
 
-2. Register a new device.
-
-    Devices on the AWS IoT platform are called *things*, in order to register a new thing select **Registry** -> **Things** from the left side menu and then press the **Create** button.
-
-    ![new_thing]({{ site.baseurl }}/assets/images/aws/new_thing.png)
-
-    Enter a name for the new device and then press the **Create thing** button, from now on `kura-gateway` will be used as the device name.
-
-3. Access to the device configuration.
-
-    The configuration of the newly created device can be accessed by selecting **Registry** -> **Things** in the left side panel of the main screen and then clicking on the device name:
-
-    ![device_config]({{ site.baseurl }}/assets/images/aws/device_config.png)
-
-4. Download the device SSL keys.
-
-    The AWS IoT platform uses SSL mutual authentication, for this reason it is necessary to download a public/private key pair for the device and a server certificate. In order to download the keys access the device configuration, select **Security** on the left menu and the press the **Create certificate** button.
-
-    You should see a screen like the following:
-
-    ![keys.png]({{ site.baseurl }}/assets/images/aws/keys.png)
-
-    Download the 3 files listed in the table and store them in a safe place, they will be needed later, also copy the link to the root CA for AWS IoT in order to be able to retrieve it later from the device.
-
-    Press the **Activate** button.
-
-5. Create a default policy for the device.
-
-    Return to the main screen of the console and select **Security** -> **Policies** from the left side menu and then press the **Create a policy** button.
+    Access the main screen of the console and select **Secure** -> **Policies** from the left side menu and then press the **Create** button, in the top right area of the screen.
 
     Fill the form as follows and then press the **Create** button:
 
@@ -71,16 +43,44 @@ The first step involves the registration of the new device on AWS, this operatio
 
     This will create a policy that allows a device to connect to the platform, publish/subscribe on any topic and manage its *thing shadow*.
 
+3. Register a new device.
+
+    Devices on the AWS IoT platform are called *things*, in order to register a new thing select **Manage** -> **Things** from the left side menu and then press the **Create** button, in the top right section of the screen. Select **Create a single thing**.
+
+    ![new_thing]({{ site.baseurl }}/assets/images/aws/new_thing.png)
+
+    Enter a name for the new device and then press the **Next** button, from now on `kura-gateway` will be used as the device name.
+
+4. Create a new certificate for the device.
+
+    The AWS IoT platform uses SSL mutual authentication, for this reason it is necessary to download a public/private key pair for the device and a server certificate. Click on **Create certificate** to quickly generate a new certificate for the new device.
+
+    Certificates can be managed later on by clicking on **Secure** -> **Certificates**, in the left part of the console.
+
+5. Download the device SSL keys.
+
+    You should see a screen like the following:
+
+    ![keys.png]({{ site.baseurl }}/assets/images/aws/keys.png)
+
+    Download the 3 files listed in the table and store them in a safe place, they will be needed later, also copy the link to the root CA for AWS IoT in order to be able to retrieve it later from the device.
+
+    Press the **Activate** button, and then on **Attach a policy**.
+
 6. Assign the default policy to the device.
 
-    Enter the device configuration section, click on **Security** on the left panel and then click on the certificate entry (it is identified by an hex code), select **Policies** in the left menu, you should see this screen:
+    Select the desired policy and then click on **Register thing**.
+
+    A policy can also be attached to a certificate later on perforiming the following steps:
+
+    Enter the device configuration section, by clicking on **Manage** -> **Things** and then clicking on the newly created device. Click on **Security** on the left panel and then click on the certificate entry (it is identified by an hex code), select **Policies** in the left menu, you should see this screen:
      ![policies]({{ site.baseurl }}/assets/images/aws/policies.png)
 
     Click on **Actions** in the top left section of the page and then click on **Attach policy**, select the default policy previously created and then press the **Attach** button.
 
 ## Device configuration
 
-The following steps should be performed on the device, this guide is based on Kura 2.1.0 version and has been tested on a Raspberry PI 3.
+The following steps should be performed on the device, this guide is based on Kura 3.1.0 version and has been tested on a Raspberry PI 3.
 
 {:start="7"}
 7.  Create a Java keystore on the device.
@@ -88,10 +88,10 @@ The following steps should be performed on the device, this guide is based on Ku
     The first step for using the device keys obtained at the previous step is to create a new Java keystore containing the Root Certificate used by the Amazon IoT platform, this can be done executing the following commands on the device:
 
     ```
-    sudo mkdir /opt/eclipse/security
-    cd /opt/eclipse/security
+    sudo mkdir /opt/eclipse/kura/security
+    cd /opt/eclipse/kura/security
     curl https://www.symantec.com/content/en/us/enterprise/verisign/roots/VeriSign-Class%203-Public-Primary-Certification-Authority-G5.pem > /tmp/root-CA.pem
-    sudo keytool -import -trustcacerts -alias verisign -file /tmp/root-CA.pem -keystore cacerts -storepass changeit
+    sudo keytool -import -trustcacerts -alias verisign -file /tmp/root-CA.pem -keystore cacerts.ks -storepass changeit
     ```
 
     If the last command reports that the certificate already exist in the system-wide store type `yes` to proceed.
@@ -104,7 +104,12 @@ The following steps should be performed on the device, this guide is based on Ku
 
         ![ssl_config]({{ site.baseurl }}/assets/images/aws/ssl_config.png)
 
+        Change the **Keystore path** parameter to `/opt/eclipse/kura/security/cacerts.ks` if needed.
+
         Change the settings in the form to match the screen above, **set Default protocol to TLSv1.2**, enter `changeit` as **Keystore Password** (or the password defined at step 7).
+
+        > **Warning**: steps from 8.2 to 8.6 will not work on Kura 3.2.0 due to a [known issue](https://github.com/eclipse/kura/issues/2125). On this version,
+        private key and device certificate need to be manually added to the keystore using the command line.
 
     2.  Open the Kura Web Console and enter select the **Settings** entry in the left side menu and then click on **Device SSL Certificate**, you should see this screen:
 

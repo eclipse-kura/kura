@@ -381,6 +381,8 @@ fi]]>
                         prefix="${build.output.name}/install" />
 			<zipfileset file="src/main/resources/common/dhcpd-wlan0.conf"
                         prefix="${build.output.name}/install" />
+			<zipfileset file="src/main/resources/common/dhcpd-enp2s0.conf"
+                        prefix="${build.output.name}/install" />
 			<!-- <intel-edison> -->
 			<zipfileset file="src/main/resources/${build.name}/udhcpd-for-hostapd.service"
                         prefix="${build.output.name}/install" />
@@ -409,6 +411,8 @@ fi]]>
 			<zipfileset file="src/main/resources/common/network.interfaces"
                         prefix="${build.output.name}/install" />
 			<zipfileset file="src/main/resources/common/network.interfaces.raspbian"
+                        prefix="${build.output.name}/install" />
+			<zipfileset file="src/main/resources/common/network.interfaces.ubuntu"
                         prefix="${build.output.name}/install" />
 			<zipfileset file="src/main/resources/common/ifdown-local"
                         prefix="${build.output.name}/install" />

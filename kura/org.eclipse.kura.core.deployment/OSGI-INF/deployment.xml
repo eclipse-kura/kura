@@ -21,13 +21,12 @@
               bind="setDeploymentAdmin"
               unbind="unsetDeploymentAdmin"
               interface="org.osgi.service.deploymentadmin.DeploymentAdmin"/>
-   <reference name="CloudService"
-              policy="static"
-              cardinality="1..1"
-              bind="setCloudService"
-              unbind="unsetCloudService"
-              target="(kura.service.pid=org.eclipse.kura.cloud.CloudService)"
-              interface="org.eclipse.kura.cloud.CloudService"/>
+   <reference name="RequestHandlerRegistry"
+              policy="dynamic"
+              cardinality="0..n" 
+              bind="setRequestHandlerRegistry"
+              unbind="unsetRequestHandlerRegistry"
+              interface="org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry"/>
    <reference name="SslManagerService"
               policy="static"
               cardinality="1..1"

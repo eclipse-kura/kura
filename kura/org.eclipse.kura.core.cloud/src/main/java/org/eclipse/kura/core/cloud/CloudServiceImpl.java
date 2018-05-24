@@ -11,19 +11,36 @@
  *******************************************************************************/
 package org.eclipse.kura.core.cloud;
 
+import static java.util.Objects.isNull;
 import static org.eclipse.kura.cloud.CloudPayloadEncoding.KURA_PROTOBUF;
 import static org.eclipse.kura.cloud.CloudPayloadEncoding.SIMPLE_JSON;
+import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_PID;
+import static org.eclipse.kura.core.message.MessageConstants.APP_ID;
+import static org.eclipse.kura.core.message.MessageConstants.APP_TOPIC;
+import static org.eclipse.kura.core.message.MessageConstants.CONTROL;
+import static org.eclipse.kura.core.message.MessageConstants.PRIORITY;
+import static org.eclipse.kura.core.message.MessageConstants.QOS;
+import static org.eclipse.kura.core.message.MessageConstants.RETAIN;
+import static org.osgi.framework.Constants.SERVICE_PID;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Dictionary;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
+import org.eclipse.kura.KuraConnectException;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraInvalidMessageException;
@@ -35,8 +52,19 @@ import org.eclipse.kura.cloud.CloudPayloadEncoding;
 import org.eclipse.kura.cloud.CloudPayloadProtoBufDecoder;
 import org.eclipse.kura.cloud.CloudPayloadProtoBufEncoder;
 import org.eclipse.kura.cloud.CloudService;
+import org.eclipse.kura.cloudconnection.CloudConnectionManager;
+import org.eclipse.kura.cloudconnection.CloudEndpoint;
+import org.eclipse.kura.cloudconnection.listener.CloudConnectionListener;
+import org.eclipse.kura.cloudconnection.message.KuraMessage;
+import org.eclipse.kura.cloudconnection.publisher.CloudNotificationPublisher;
+import org.eclipse.kura.cloudconnection.request.RequestHandler;
+import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
+import org.eclipse.kura.cloudconnection.subscriber.listener.CloudSubscriberListener;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.core.cloud.publisher.NotificationPublisherImpl;
+import org.eclipse.kura.core.cloud.subscriber.CloudSubscriptionRecord;
+import org.eclipse.kura.core.data.DataServiceImpl;
 import org.eclipse.kura.data.DataService;
 import org.eclipse.kura.data.listener.DataServiceListener;
 import org.eclipse.kura.message.KuraPayload;
@@ -57,8 +85,11 @@ import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CloudServiceImpl implements CloudService, DataServiceListener, ConfigurableComponent, EventHandler,
-        CloudPayloadProtoBufEncoder, CloudPayloadProtoBufDecoder {
+public class CloudServiceImpl
+        implements CloudService, DataServiceListener, ConfigurableComponent, EventHandler, CloudPayloadProtoBufEncoder,
+        CloudPayloadProtoBufDecoder, RequestHandlerRegistry, CloudConnectionManager, CloudEndpoint {
+
+    private static final String NOTIFICATION_PUBLISHER_PID = "org.eclipse.kura.cloud.publisher.CloudNotificationPublisher";
 
     private static final Logger logger = LoggerFactory.getLogger(CloudServiceImpl.class);
 
@@ -66,6 +97,10 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
     private static final String TOPIC_MQTT_APP = "MQTT";
 
     private static final String CONNECTION_EVENT_PID_PROPERTY_KEY = "cloud.service.pid";
+
+    private static final int NUM_CONCURRENT_CALLBACKS = 2;
+
+    private static ExecutorService callbackExecutor = Executors.newFixedThreadPool(NUM_CONCURRENT_CALLBACKS);
 
     private ComponentContext ctx;
 
@@ -81,6 +116,8 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 
     // use a synchronized implementation for the list
     private final List<CloudClientImpl> cloudClients;
+    private final Set<CloudConnectionListener> registeredCloudConnectionListeners;
+    private final Set<CloudPublisherDeliveryListener> registeredCloudPublisherDeliveryListeners;
 
     // package visibility for LyfeCyclePayloadBuilder
     String imei;
@@ -95,9 +132,21 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 
     private ServiceRegistration<?> cloudServiceRegistration;
 
+    private final Map<String, RequestHandler> registeredRequestHandlers;
+
+    private final Map<String, CloudSubscriptionRecord> registeredSubscribers;
+
+    private ServiceRegistration<?> notificationPublisherRegistration;
+    private final CloudNotificationPublisher notificationPublisher;
+
     public CloudServiceImpl() {
         this.cloudClients = new CopyOnWriteArrayList<>();
         this.messageId = new AtomicInteger();
+        this.registeredRequestHandlers = new HashMap<>();
+        this.registeredSubscribers = new HashMap<>();
+        this.registeredCloudConnectionListeners = new CopyOnWriteArraySet<>();
+        this.registeredCloudPublisherDeliveryListeners = new CopyOnWriteArraySet<>();
+        this.notificationPublisher = new NotificationPublisherImpl(this);
     }
 
     // ----------------------------------------------------------------
@@ -198,6 +247,12 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 
         this.dataService.addDataServiceListener(this);
 
+        Dictionary<String, Object> notificationPublisherProps = new Hashtable<>();
+        notificationPublisherProps.put(KURA_SERVICE_PID, NOTIFICATION_PUBLISHER_PID);
+        notificationPublisherProps.put(SERVICE_PID, NOTIFICATION_PUBLISHER_PID);
+        this.notificationPublisherRegistration = this.ctx.getBundleContext().registerService(
+                CloudNotificationPublisher.class.getName(), this.notificationPublisher, notificationPublisherProps);
+
         //
         // Usually the cloud connection is setup in the
         // onConnectionEstablished callback.
@@ -255,6 +310,7 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
         this.certificatesService = null;
 
         this.cloudServiceRegistration.unregister();
+        this.notificationPublisherRegistration.unregister();
     }
 
     @Override
@@ -325,6 +381,10 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
         for (CloudClientImpl cloudClient : this.cloudClients) {
             appIds.add(cloudClient.getApplicationId());
         }
+
+        for (Entry<String, RequestHandler> entry : this.registeredRequestHandlers.entrySet()) {
+            appIds.add(entry.getKey());
+        }
         return appIds.toArray(new String[0]);
     }
 
@@ -357,8 +417,8 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
         }
     }
 
-    byte[] encodePayload(KuraPayload payload) throws KuraException {
-        byte[] bytes = new byte[0];
+    public byte[] encodePayload(KuraPayload payload) throws KuraException {
+        byte[] bytes;
         CloudPayloadEncoding preferencesEncoding = this.options.getPayloadEncoding();
 
         if (preferencesEncoding == KURA_PROTOBUF) {
@@ -385,12 +445,13 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
             logger.warn("Cannot setup cloud service connection");
         }
 
-        this.postConnectionStateChangeEvent(true);
+        this.registeredSubscribers.values().forEach(subscriptionRecord -> subscribe(subscriptionRecord));
 
-        // notify listeners
-        for (CloudClientImpl cloudClient : this.cloudClients) {
-            cloudClient.onConnectionEstablished();
-        }
+        postConnectionStateChangeEvent(true);
+
+        this.cloudClients.forEach(CloudClientImpl::onConnectionEstablished);
+
+        this.registeredCloudConnectionListeners.forEach(CloudConnectionListener::onConnectionEstablished);
     }
 
     private void setupDeviceSubscriptions(boolean subscribe) throws KuraException {
@@ -424,6 +485,8 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
     public void onDisconnected() {
         // raise event
         postConnectionStateChangeEvent(false);
+
+        this.registeredCloudConnectionListeners.forEach(CloudConnectionListener::onDisconnected);
     }
 
     @Override
@@ -431,10 +494,9 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
         // raise event
         postConnectionStateChangeEvent(false);
 
-        // notify listeners
-        for (CloudClientImpl cloudClient : this.cloudClients) {
-            cloudClient.onConnectionLost();
-        }
+        this.cloudClients.forEach(CloudClientImpl::onConnectionLost);
+
+        this.registeredCloudConnectionListeners.forEach(CloudConnectionListener::onConnectionLost);
     }
 
     @Override
@@ -454,40 +516,88 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
                 kuraPayload = createKuraPayloadFromProtoBuf(topic, payload);
             }
 
-            for (CloudClientImpl cloudClient : this.cloudClients) {
-                if (cloudClient.getApplicationId().equals(kuraTopic.getApplicationId())) {
-                    try {
-                        if (this.options.getTopicControlPrefix().equals(kuraTopic.getPrefix())) {
-                            if (this.certificatesService == null) {
-                                ServiceReference<CertificatesService> sr = this.ctx.getBundleContext()
-                                        .getServiceReference(CertificatesService.class);
-                                if (sr != null) {
-                                    this.certificatesService = this.ctx.getBundleContext().getService(sr);
-                                }
-                            }
-                            boolean validMessage = false;
-                            if (this.certificatesService == null
-                                    || this.certificatesService.verifySignature(kuraTopic, kuraPayload)) {
-                                validMessage = true;
-                            }
+            try {
+                if (this.options.getTopicControlPrefix().equals(kuraTopic.getPrefix())) {
+                    boolean validMessage = isValidMessage(kuraTopic, kuraPayload);
 
-                            if (validMessage) {
-                                cloudClient.onControlMessageArrived(kuraTopic.getDeviceId(),
-                                        kuraTopic.getApplicationTopic(), kuraPayload, qos, retained);
-                            } else {
-                                logger.warn("Message verification failed! Not valid signature or message not signed.");
-                            }
-                        } else {
-                            cloudClient.onMessageArrived(kuraTopic.getDeviceId(), kuraTopic.getApplicationTopic(),
-                                    kuraPayload, qos, retained);
-                        }
-                    } catch (Exception e) {
-                        logger.error("Error during CloudClientListener notification.", e);
+                    if (validMessage) {
+                        dispatchControlMessage(qos, retained, kuraTopic, kuraPayload);
+                    } else {
+                        logger.warn("Message verification failed! Not valid signature or message not signed.");
                     }
+                } else {
+                    dispatchDataMessage(qos, retained, kuraTopic, kuraPayload);
                 }
-
+            } catch (Exception e) {
+                logger.error("Error during CloudClientListener notification.", e);
             }
         }
+
+    }
+
+    private void dispatchControlMessage(int qos, boolean retained, KuraTopic kuraTopic, KuraPayload kuraPayload) {
+        String applicationId = kuraTopic.getApplicationId();
+
+        RequestHandler cloudlet = this.registeredRequestHandlers.get(applicationId);
+        if (cloudlet != null) {
+            StringBuilder sb = new StringBuilder(applicationId).append("/").append("REPLY");
+
+            if (kuraTopic.getApplicationTopic().startsWith(sb.toString())) {
+                // Ignore replies
+                return;
+            }
+
+            callbackExecutor.submit(new MessageHandlerCallable(cloudlet, applicationId, kuraTopic.getApplicationTopic(),
+                    kuraPayload, this));
+        }
+        this.cloudClients.stream()
+                .filter(cloudClient -> cloudClient.getApplicationId().equals(kuraTopic.getApplicationId()))
+                .forEach(cloudClient -> cloudClient.onControlMessageArrived(kuraTopic.getDeviceId(),
+                        kuraTopic.getApplicationTopic(), kuraPayload, qos, retained));
+
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("deviceId", kuraTopic.getDeviceId());
+        properties.put("appTopic", kuraTopic.getApplicationTopic());
+
+        KuraMessage receivedMessage = new KuraMessage(kuraPayload, properties);
+
+        this.registeredSubscribers.entrySet().stream()
+                .filter(cloudSubscriberEntry -> cloudSubscriberEntry.getKey().equals(kuraTopic.getApplicationId()))
+                .forEach(cloudSubscriberEntry -> cloudSubscriberEntry.getValue().getSubscriber()
+                        .onMessageArrived(receivedMessage));
+    }
+
+    private void dispatchDataMessage(int qos, boolean retained, KuraTopic kuraTopic, KuraPayload kuraPayload) {
+        this.cloudClients.stream()
+                .filter(cloudClient -> cloudClient.getApplicationId().equals(kuraTopic.getApplicationId()))
+                .forEach(cloudClient -> cloudClient.onMessageArrived(kuraTopic.getDeviceId(),
+                        kuraTopic.getApplicationTopic(), kuraPayload, qos, retained));
+
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("deviceId", kuraTopic.getDeviceId());
+        properties.put("appTopic", kuraTopic.getApplicationTopic());
+
+        KuraMessage receivedMessage = new KuraMessage(kuraPayload, properties);
+
+        this.registeredSubscribers.entrySet().stream()
+                .filter(cloudSubscriberEntry -> cloudSubscriberEntry.getKey().equals(kuraTopic.getApplicationId()))
+                .forEach(cloudSubscriberEntry -> cloudSubscriberEntry.getValue().getSubscriber()
+                        .onMessageArrived(receivedMessage));
+    }
+
+    private boolean isValidMessage(KuraTopic kuraTopic, KuraPayload kuraPayload) {
+        if (this.certificatesService == null) {
+            ServiceReference<CertificatesService> sr = this.ctx.getBundleContext()
+                    .getServiceReference(CertificatesService.class);
+            if (sr != null) {
+                this.certificatesService = this.ctx.getBundleContext().getService(sr);
+            }
+        }
+        boolean validMessage = false;
+        if (this.certificatesService == null || this.certificatesService.verifySignature(kuraTopic, kuraPayload)) {
+            validMessage = true;
+        }
+        return validMessage;
     }
 
     @Override
@@ -504,11 +614,10 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 
         // notify listeners
         KuraTopic kuraTopic = new KuraTopic(topic, this.options.getTopicControlPrefix());
-        for (CloudClientImpl cloudClient : this.cloudClients) {
-            if (cloudClient.getApplicationId().equals(kuraTopic.getApplicationId())) {
-                cloudClient.onMessagePublished(messageId, kuraTopic.getApplicationTopic());
-            }
-        }
+        this.cloudClients.stream()
+                .filter(cloudClient -> cloudClient.getApplicationId().equals(kuraTopic.getApplicationId()))
+                .collect(Collectors.toList())
+                .forEach(cloudClient -> cloudClient.onMessagePublished(messageId, kuraTopic.getApplicationTopic()));
     }
 
     @Override
@@ -523,11 +632,13 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 
         // notify listeners
         KuraTopic kuraTopic = new KuraTopic(topic, this.options.getTopicControlPrefix());
-        for (CloudClientImpl cloudClient : this.cloudClients) {
-            if (cloudClient.getApplicationId().equals(kuraTopic.getApplicationId())) {
-                cloudClient.onMessageConfirmed(messageId, kuraTopic.getApplicationTopic());
-            }
-        }
+        this.cloudClients.stream()
+                .filter(cloudClient -> cloudClient.getApplicationId().equals(kuraTopic.getApplicationId()))
+                .collect(Collectors.toList())
+                .forEach(cloudClient -> cloudClient.onMessageConfirmed(messageId, kuraTopic.getApplicationTopic()));
+
+        this.registeredCloudPublisherDeliveryListeners
+                .forEach(deliveryListener -> deliveryListener.onMessageConfirmed(String.valueOf(messageId), topic));
     }
 
     // ----------------------------------------------------------------
@@ -566,9 +677,7 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
         try {
             kuraPayload = encoder.buildFromByteArray();
             return kuraPayload;
-        } catch (KuraInvalidMessageException e) {
-            throw new KuraException(KuraErrorCode.DECODER_ERROR, e);
-        } catch (IOException e) {
+        } catch (KuraInvalidMessageException | IOException e) {
             throw new KuraException(KuraErrorCode.DECODER_ERROR, e);
         }
     }
@@ -735,10 +844,169 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
     private void postConnectionStateChangeEvent(final boolean isConnected) {
 
         final Map<String, Object> eventProperties = Collections.singletonMap(CONNECTION_EVENT_PID_PROPERTY_KEY,
-                (String) ctx.getProperties().get(ConfigurationService.KURA_SERVICE_PID));
+                (String) this.ctx.getProperties().get(ConfigurationService.KURA_SERVICE_PID));
 
         final Event event = isConnected ? new CloudConnectionEstablishedEvent(eventProperties)
                 : new CloudConnectionLostEvent(eventProperties);
         this.eventAdmin.postEvent(event);
+    }
+
+    @Override
+    public void registerRequestHandler(String appId, RequestHandler requestHandler) {
+        this.registeredRequestHandlers.put(appId, requestHandler);
+        if (isConnected()) {
+            try {
+                publishAppCertificate();
+            } catch (KuraException e) {
+                logger.warn("Unable to publish updated App Certificate");
+            }
+        }
+    }
+
+    @Override
+    public void unregister(String appId) {
+        this.registeredRequestHandlers.remove(appId);
+        if (isConnected()) {
+            try {
+                publishAppCertificate();
+            } catch (KuraException e) {
+                logger.warn("Unable to publish updated App Certificate");
+            }
+        }
+    }
+
+    @Override
+    public void connect() throws KuraConnectException {
+        if (this.dataService != null) {
+            this.dataService.connect();
+        }
+    }
+
+    @Override
+    public void disconnect() {
+        if (this.dataService != null) {
+            this.dataService.disconnect(10);
+        }
+    }
+
+    @Override
+    public Map<String, String> getInfo() {
+        DataServiceImpl dataServiceImpl = (DataServiceImpl) this.dataService;
+        return dataServiceImpl.getConnectionInfo();
+    }
+
+    public String getNotificationPublisherPid() {
+        return NOTIFICATION_PUBLISHER_PID;
+    }
+
+    public CloudNotificationPublisher getNotificationPublisher() {
+        return this.notificationPublisher;
+    }
+
+    @Override
+    public void registerCloudConnectionListener(CloudConnectionListener cloudConnectionListener) {
+        this.registeredCloudConnectionListeners.add(cloudConnectionListener);
+    }
+
+    @Override
+    public void unregisterCloudConnectionListener(CloudConnectionListener cloudConnectionListener) {
+        this.registeredCloudConnectionListeners.remove(cloudConnectionListener);
+    }
+
+    public void registerCloudPublisherDeliveryListener(CloudPublisherDeliveryListener cloudPublisherDeliveryListener) {
+        this.registeredCloudPublisherDeliveryListeners.add(cloudPublisherDeliveryListener);
+    }
+
+    public void unregisterCloudPublisherDeliveryListener(
+            CloudPublisherDeliveryListener cloudPublisherDeliveryListener) {
+        this.registeredCloudPublisherDeliveryListeners.remove(cloudPublisherDeliveryListener);
+    }
+
+    @Override
+    public String publish(KuraMessage message) throws KuraException {
+        Map<String, Object> messageProps = message.getProperties();
+        String appId = (String) messageProps.get(APP_ID.name());
+        String appTopic = (String) messageProps.get(APP_TOPIC.name());
+        int qos = (Integer) messageProps.get(QOS.name());
+        boolean retain = (Boolean) messageProps.get(RETAIN.name());
+        int priority = (Integer) messageProps.get(PRIORITY.name());
+        boolean isControl = (Boolean) messageProps.get(CONTROL.name());
+
+        String deviceId = this.options.getTopicClientIdToken();
+
+        String fullTopic = encodeTopic(appId, deviceId, appTopic, isControl);
+        byte[] appPayload = encodePayload(message.getPayload());
+
+        int id = this.dataService.publish(fullTopic, appPayload, qos, retain, priority);
+
+        if (qos == 0) {
+            return null;
+        }
+        return String.valueOf(id);
+    }
+
+    @Override
+    public void registerSubscriber(Map<String, Object> subscriptionProperties, CloudSubscriberListener subscriber) {
+        String appId = (String) subscriptionProperties.get(APP_ID.name());
+        String appTopic = (String) subscriptionProperties.get(APP_TOPIC.name());
+        int qos = (Integer) subscriptionProperties.get(QOS.name());
+        boolean isControl = (Boolean) subscriptionProperties.get(CONTROL.name());
+
+        if (isNull(appId) || isNull(appTopic)) {
+            return;
+        }
+
+        String fullTopic = encodeTopic(appId, this.options.getTopicClientIdToken(), appTopic, isControl);
+        CloudSubscriptionRecord subscriptionRecord = new CloudSubscriptionRecord(fullTopic, qos, subscriber);
+        this.registeredSubscribers.put(appId, subscriptionRecord);
+        subscribe(subscriptionRecord);
+    }
+
+    @Override
+    public void unregisterSubscriber(Map<String, Object> subscriptionProperties) {
+        String appId = (String) subscriptionProperties.get(APP_ID.name());
+        if (appId != null) {
+            CloudSubscriptionRecord subscriptionRecord = this.registeredSubscribers.get(appId);
+            unsubscribe(subscriptionRecord);
+            this.registeredSubscribers.remove(appId);
+        }
+    }
+
+    private synchronized void subscribe(CloudSubscriptionRecord subscriptionRecord) {
+        String fullTopic = subscriptionRecord.getTopic();
+
+        int qos = subscriptionRecord.getQos();
+
+        try {
+            this.dataService.subscribe(fullTopic, qos);
+        } catch (KuraException e) {
+            logger.info("Failed to subscribe");
+        }
+    }
+
+    private synchronized void unsubscribe(CloudSubscriptionRecord subscriptionRecord) {
+        String fullTopic = subscriptionRecord.getTopic();
+
+        try {
+            this.dataService.unsubscribe(fullTopic);
+        } catch (KuraException e) {
+            logger.info("Failed to unsubscribe");
+        }
+    }
+
+    private String encodeTopic(String appId, String deviceId, String appTopic, boolean isControl) {
+        StringBuilder sb = new StringBuilder();
+        if (isControl) {
+            sb.append(this.options.getTopicControlPrefix()).append(this.options.getTopicSeparator());
+        }
+
+        sb.append(this.options.getTopicAccountToken()).append(this.options.getTopicSeparator()).append(deviceId)
+                .append(this.options.getTopicSeparator()).append(appId);
+
+        if (appTopic != null && !appTopic.isEmpty()) {
+            sb.append(this.options.getTopicSeparator()).append(appTopic);
+        }
+
+        return sb.toString();
     }
 }

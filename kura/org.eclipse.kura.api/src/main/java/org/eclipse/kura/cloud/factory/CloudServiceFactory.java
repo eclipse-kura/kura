@@ -17,8 +17,9 @@ import java.util.Set;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.CloudService;
+import org.eclipse.kura.cloudconnection.publisher.CloudPublisher;
+import org.eclipse.kura.cloudconnection.subscriber.CloudSubscriber;
 import org.eclipse.kura.configuration.ConfigurationService;
-import org.eclipse.kura.data.DataService;
 import org.eclipse.kura.data.DataTransportService;
 import org.osgi.annotation.versioning.ProviderType;
 import org.osgi.service.component.ComponentContext;
@@ -48,7 +49,7 @@ import org.osgi.service.component.ComponentContext;
  * an implementation of CloudServiceFactory could create new configurations
  * for all the stack layers thus constructing a new whole stack instance.
  * <br>
- * The Kura {@link CloudService}/{@link DataService}/{@link DataTransportService}
+ * The Kura {@link CloudService}/{@link CloudService}/{@link DataTransportService}
  * cloud stack represents an example of the above architecture
  * and can serve as a reference implementation for alternative Cloud stacks.
  * <br>
@@ -57,10 +58,13 @@ import org.osgi.service.component.ComponentContext;
  * to create component configurations.
  *
  * @since 1.0.8
- * 
+ *
  * @noimplement This interface is not intended to be implemented by clients.
+ * 
+ * @deprecated Please consider using {@link CloudConnectionFactory}
  */
 @ProviderType
+@Deprecated
 public interface CloudServiceFactory {
 
     /**
@@ -161,7 +165,7 @@ public interface CloudServiceFactory {
      * <br>
      * The IDs returned by this method must not necessarily point to registered OSGi services. But if they do, they must
      * point only to instances of the {@link CloudService}.
-     * 
+     *
      * @return the set of services, never returns {@code null}
      * @throws KuraException
      *

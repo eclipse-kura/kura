@@ -24,9 +24,20 @@ import java.util.logging.Logger;
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.util.LabelComparator;
 import org.eclipse.kura.web.client.util.MessageUtils;
+import org.eclipse.kura.web.client.util.request.RequestQueue;
+import org.eclipse.kura.web.shared.model.GwtCloudEntry;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter.GwtConfigParameterType;
+import org.eclipse.kura.web.shared.service.GwtComponentService;
+import org.eclipse.kura.web.shared.service.GwtComponentServiceAsync;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
+import org.gwtbootstrap3.client.ui.Anchor;
+import org.gwtbootstrap3.client.ui.AnchorListItem;
+import org.gwtbootstrap3.client.ui.DropDown;
+import org.gwtbootstrap3.client.ui.DropDownHeader;
+import org.gwtbootstrap3.client.ui.DropDownMenu;
 import org.gwtbootstrap3.client.ui.FormGroup;
 import org.gwtbootstrap3.client.ui.FormLabel;
 import org.gwtbootstrap3.client.ui.HelpBlock;
@@ -39,6 +50,7 @@ import org.gwtbootstrap3.client.ui.TextBox;
 import org.gwtbootstrap3.client.ui.base.TextBoxBase;
 import org.gwtbootstrap3.client.ui.constants.IconType;
 import org.gwtbootstrap3.client.ui.constants.InputType;
+import org.gwtbootstrap3.client.ui.constants.Toggle;
 import org.gwtbootstrap3.client.ui.constants.ValidationState;
 import org.gwtbootstrap3.client.ui.form.error.BasicEditorError;
 import org.gwtbootstrap3.client.ui.form.validator.Validator;
@@ -53,6 +65,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 public abstract class AbstractServicesUi extends Composite {
 
+    private static final String TARGET_SUFFIX = ".target";
     private static final String CONFIG_MAX_VALUE = "configMaxValue";
     private static final String CONFIG_MIN_VALUE = "configMinValue";
     private static final String INVALID_VALUE = "invalidValue";
@@ -62,6 +75,11 @@ public abstract class AbstractServicesUi extends Composite {
 
     protected static final Messages MSGS = GWT.create(Messages.class);
     protected static final LabelComparator<String> DROPDOWN_LABEL_COMPARATOR = new LabelComparator<>();
+
+    private final GwtComponentServiceAsync gwtComponentService = GWT.create(GwtComponentService.class);
+    private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
+
+    protected List<GwtCloudEntry> cloudInstancesBinder;
 
     protected GwtConfigComponent configurableComponent;
 
@@ -220,6 +238,54 @@ public abstract class AbstractServicesUi extends Composite {
             textBox.validate(true);
             setDirty(true);
         });
+
+        if (param.getId().endsWith(TARGET_SUFFIX)) {
+            String targetedService = param.getId().split(TARGET_SUFFIX)[0];
+
+            DropDown dropDown = new DropDown();
+            Anchor dropDownAnchor = new Anchor();
+            dropDownAnchor.setText(MSGS.selectAvailableTargets());
+            dropDownAnchor.setDataToggle(Toggle.DROPDOWN);
+
+            dropDown.add(dropDownAnchor);
+
+            final DropDownMenu dropDownMenu = new DropDownMenu();
+            dropDownMenu.addStyleName("drop-down");
+
+            DropDownHeader dropDownHeader = new DropDownHeader();
+            dropDownHeader.setVisible(false);
+            dropDownMenu.add(dropDownHeader);
+
+            dropDown.add(dropDownMenu);
+
+            RequestQueue.submit(context -> this.gwtXSRFService.generateSecurityToken(
+                    context.callback(token -> AbstractServicesUi.this.gwtComponentService.getPidsFromTarget(token,
+                            this.configurableComponent.getComponentId(), targetedService, context.callback(data -> {
+                                if (data.isEmpty()) {
+                                    dropDownHeader.setText(MSGS.noTargetsAvailable());
+                                } else {
+                                    dropDownHeader.setText(MSGS.targetsAvailable());
+                                    data.forEach(targetEntry -> {
+                                        AnchorListItem listItem = createListItem(textBox, targetEntry);
+                                        dropDownMenu.add(listItem);
+                                    });
+                                }
+                                dropDownHeader.setVisible(true);
+                            })))));
+
+            formGroup.add(dropDown);
+        }
+    }
+
+    private AnchorListItem createListItem(final TextBoxBase textBox, String targetEntry) {
+        AnchorListItem listItem = new AnchorListItem();
+        listItem.setText("(kura.service.pid=" + targetEntry + ")");
+        listItem.addClickHandler(event -> {
+            Anchor eventGenerator = (Anchor) event.getSource();
+            textBox.setText(eventGenerator.getText());
+            setDirty(true);
+        });
+        return listItem;
     }
 
     private TextBoxBase createTextBox(final GwtConfigParameter param) {

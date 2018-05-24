@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates and others
  *
  *   All rights reserved. This program and the accompanying materials
  *   are made available under the terms of the Eclipse Public License v1.0
@@ -8,38 +8,44 @@
  ******************************************************************************/
 package org.eclipse.kura.cloud.app.command;
 
+import static org.eclipse.kura.cloudconnection.request.RequestHandlerConstants.ARGS_KEY;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.CloudClient;
 import org.eclipse.kura.cloud.CloudService;
-import org.eclipse.kura.cloud.CloudletTopic;
+import org.eclipse.kura.cloudconnection.message.KuraMessage;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.crypto.CryptoService;
+import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.junit.Test;
 import org.osgi.service.component.ComponentException;
 
 public class CommandCloudAppTest {
+
+    public static final String METRIC_RESPONSE_CODE = "response.code";
 
     @Test
     public void testUpdatedDecryptException() throws KuraException, NoSuchFieldException {
@@ -48,7 +54,7 @@ public class CommandCloudAppTest {
 
         CommandCloudApp cca = new CommandCloudApp();
 
-        Map<String, Object> properties = new HashMap<String, Object>();
+        Map<String, Object> properties = new HashMap<>();
         properties.put(passKey, new String(password));
         properties.put("key", "value");
         properties.put("command.enable", false);
@@ -73,7 +79,7 @@ public class CommandCloudAppTest {
         CryptoService csMock = mock(CryptoService.class);
         when(csMock.decryptAes(password)).thenReturn(decpass);
 
-        Map<String, Object> properties = new HashMap<String, Object>();
+        Map<String, Object> properties = new HashMap<>();
         properties.put(passKey, new String(password));
         properties.put("key", "value");
         properties.put("command.enable", true);
@@ -83,12 +89,13 @@ public class CommandCloudAppTest {
 
         CommandCloudApp cca = new CommandCloudApp();
         cca.setCryptoService(csMock);
-        TestUtil.setFieldValue(cca, "m_cloudService", clsMock);
 
         try {
             cca.updated(properties);
         } catch (ComponentException e) {
         }
+
+        TestUtil.setFieldValue(cca, "currentStatus", true);
 
         Map<String, Object> props = (Map<String, Object>) TestUtil.getFieldValue(cca, "properties");
 
@@ -109,7 +116,7 @@ public class CommandCloudAppTest {
         CryptoService csMock = mock(CryptoService.class);
         when(csMock.decryptAes(password)).thenReturn(decpass);
 
-        Map<String, Object> properties = new HashMap<String, Object>();
+        Map<String, Object> properties = new HashMap<>();
         properties.put(passKey, new String(password));
         properties.put("key", "value");
         properties.put("command.enable", true);
@@ -120,8 +127,8 @@ public class CommandCloudAppTest {
         when(clsMock.newCloudClient(anyString())).thenReturn(ccMock);
 
         CommandCloudApp cca = new CommandCloudApp();
+        TestUtil.setFieldValue(cca, "currentStatus", true);
         cca.setCryptoService(csMock);
-        TestUtil.setFieldValue(cca, "m_cloudService", clsMock);
 
         try {
             cca.updated(properties);
@@ -147,16 +154,13 @@ public class CommandCloudAppTest {
         CryptoService csMock = mock(CryptoService.class);
         when(csMock.decryptAes(password)).thenReturn(decpass);
 
-        Map<String, Object> properties = new HashMap<String, Object>();
+        Map<String, Object> properties = new HashMap<>();
         properties.put(passKey, new String(password));
         properties.put("key", "value");
         properties.put("command.enable", false);
 
-        CloudClient ccMock = mock(CloudClient.class);
-
         CommandCloudApp cca = new CommandCloudApp();
         cca.setCryptoService(csMock);
-        TestUtil.setFieldValue(cca, "m_cloudClient", ccMock);
         TestUtil.setFieldValue(cca, "currentStatus", true);
 
         cca.updated(properties);
@@ -168,13 +172,11 @@ public class CommandCloudAppTest {
         assertEquals(false, props.get("command.enable"));
         assertTrue(props.get(passKey) instanceof Password);
         assertArrayEquals(decpass, ((Password) props.get(passKey)).getPassword());
-
-        verify(ccMock, times(1)).release();
     }
 
     @Test
     public void testGetDefaultWorkDirSystem() throws Throwable {
-        Map<String, Object> properties = new HashMap<String, Object>();
+        Map<String, Object> properties = new HashMap<>();
 
         CommandCloudApp cca = new CommandCloudApp();
         TestUtil.setFieldValue(cca, "properties", properties);
@@ -186,7 +188,7 @@ public class CommandCloudAppTest {
 
     @Test
     public void testGetDefaultWorkDirConfigured() throws Throwable {
-        Map<String, Object> properties = new HashMap<String, Object>();
+        Map<String, Object> properties = new HashMap<>();
         String wd = "/wd";
         properties.put("command.working.directory", wd);
 
@@ -200,7 +202,7 @@ public class CommandCloudAppTest {
 
     @Test
     public void testGetDefaultTimeout() throws Throwable {
-        Map<String, Object> properties = new HashMap<String, Object>();
+        Map<String, Object> properties = new HashMap<>();
         int timeout = 10;
         properties.put("command.timeout", timeout);
 
@@ -214,7 +216,7 @@ public class CommandCloudAppTest {
 
     @Test
     public void testGetTimeoutDefault() throws Throwable {
-        Map<String, Object> properties = new HashMap<String, Object>();
+        Map<String, Object> properties = new HashMap<>();
         int timeout = 10;
         properties.put("command.timeout", timeout);
 
@@ -229,7 +231,7 @@ public class CommandCloudAppTest {
 
     @Test
     public void testGetTimeoutFromPayload() throws Throwable {
-        Map<String, Object> properties = new HashMap<String, Object>();
+        Map<String, Object> properties = new HashMap<>();
         int timeout = 10;
         properties.put("command.timeout", timeout);
 
@@ -245,7 +247,7 @@ public class CommandCloudAppTest {
 
     @Test
     public void testGetDefaultEnvironmentNull() throws Throwable {
-        Map<String, Object> properties = new HashMap<String, Object>();
+        Map<String, Object> properties = new HashMap<>();
 
         CommandCloudApp cca = new CommandCloudApp();
         TestUtil.setFieldValue(cca, "properties", properties);
@@ -257,7 +259,7 @@ public class CommandCloudAppTest {
 
     @Test
     public void testGetDefaultEnvironment() throws Throwable {
-        Map<String, Object> properties = new HashMap<String, Object>();
+        Map<String, Object> properties = new HashMap<>();
         String env = "e1 e2 e3";
         properties.put("command.environment", env);
 
@@ -271,7 +273,7 @@ public class CommandCloudAppTest {
 
     @Test
     public void testGetEnvironmentDefault() throws Throwable {
-        Map<String, Object> properties = new HashMap<String, Object>();
+        Map<String, Object> properties = new HashMap<>();
         String env = "e1 e2 e3";
         properties.put("command.environment", env);
 
@@ -286,7 +288,7 @@ public class CommandCloudAppTest {
 
     @Test
     public void testGetEnvironmentFromPayload() throws Throwable {
-        Map<String, Object> properties = new HashMap<String, Object>();
+        Map<String, Object> properties = new HashMap<>();
         String env = "e1 e2 e3";
         properties.put("command.environment", env);
 
@@ -362,7 +364,7 @@ public class CommandCloudAppTest {
 
         CommandCloudApp cca = new CommandCloudApp();
 
-        String[] result = (String[]) TestUtil.invokePrivate(cca, "prepareResponseNoTimeout", resp, pmtMock);
+        TestUtil.invokePrivate(cca, "prepareResponseNoTimeout", resp, pmtMock);
 
         assertEquals("Response expected not to be changed", KuraResponsePayload.RESPONSE_CODE_OK,
                 resp.getResponseCode());
@@ -389,7 +391,7 @@ public class CommandCloudAppTest {
 
         CommandCloudApp cca = new CommandCloudApp();
 
-        String[] result = (String[]) TestUtil.invokePrivate(cca, "prepareResponseNoTimeout", resp, pmtMock);
+        TestUtil.invokePrivate(cca, "prepareResponseNoTimeout", resp, pmtMock);
 
         assertEquals("Response expected to be changed", KuraResponsePayload.RESPONSE_CODE_ERROR,
                 resp.getResponseCode());
@@ -410,7 +412,7 @@ public class CommandCloudAppTest {
 
         CommandCloudApp cca = new CommandCloudApp();
 
-        String[] result = (String[]) TestUtil.invokePrivate(cca, "prepareTimeoutResponse", resp, pmtMock);
+        TestUtil.invokePrivate(cca, "prepareTimeoutResponse", resp, pmtMock);
 
         assertEquals("Response expected not to be changed", KuraResponsePayload.RESPONSE_CODE_OK,
                 resp.getResponseCode());
@@ -432,78 +434,88 @@ public class CommandCloudAppTest {
         assertArrayEquals(new String[] { "cmd", "arg1", "arg2" }, result);
     }
 
-    @Test
+    @Test(expected = KuraException.class)
     public void testDoExecNoResources() throws Throwable {
         CommandCloudApp cca = new CommandCloudApp();
+        TestUtil.setFieldValue(cca, "currentStatus", true);
 
-        String appTopic = "EXEC";
-        CloudletTopic reqTopic = CloudletTopic.parseAppTopic(appTopic);
+        List<String> resources = Collections.emptyList();
+        Map<String, Object> reqResources = new HashMap<>();
+        reqResources.put(ARGS_KEY.value(), resources);
         KuraRequestPayload reqPayload = null;
-        KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_ERROR);
+        KuraMessage message = new KuraMessage(reqPayload, reqResources);
 
-        cca.doExec(reqTopic, reqPayload, respPayload);
-
-        assertEquals(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST, respPayload.getResponseCode());
+        cca.doExec(null, message);
     }
 
-    @Test
+    @Test(expected = KuraException.class)
     public void testDoExecTooManyResources() throws Throwable {
         CommandCloudApp cca = new CommandCloudApp();
 
-        String appTopic = "EXEC/command/test";
-        CloudletTopic reqTopic = CloudletTopic.parseAppTopic(appTopic);
+        TestUtil.setFieldValue(cca, "currentStatus", true);
+
+        List<String> resources = new ArrayList<>();
+        resources.add("command");
+        resources.add("test");
+        Map<String, Object> reqResources = new HashMap<>();
+        reqResources.put(ARGS_KEY.value(), resources);
+
         KuraRequestPayload reqPayload = null;
-        KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_ERROR);
 
-        cca.doExec(reqTopic, reqPayload, respPayload);
+        KuraMessage message = new KuraMessage(reqPayload, reqResources);
 
-        assertEquals(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST, respPayload.getResponseCode());
+        cca.doExec(null, message);
     }
 
-    @Test
+    @Test(expected = KuraException.class)
     public void testDoExecWrongCommand() throws Throwable {
         CommandCloudApp cca = new CommandCloudApp();
 
-        String appTopic = "EXEC/cmd";
-        CloudletTopic reqTopic = CloudletTopic.parseAppTopic(appTopic);
+        List<String> resources = new ArrayList<>();
+        resources.add("cmd");
+        Map<String, Object> reqResources = new HashMap<>();
+        reqResources.put(ARGS_KEY.value(), resources);
         KuraRequestPayload reqPayload = null;
-        KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_ERROR);
+        KuraMessage message = new KuraMessage(reqPayload, reqResources);
 
-        cca.doExec(reqTopic, reqPayload, respPayload);
-
-        assertEquals(KuraResponsePayload.RESPONSE_CODE_NOTFOUND, respPayload.getResponseCode());
+        cca.doExec(null, message);
     }
 
     @Test
     public void testDoExec() throws Throwable {
-        KuraCommandResponsePayload kcrp = new KuraCommandResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+        KuraPayload kcrp = new KuraCommandResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
         byte[] body = "testbody".getBytes();
         kcrp.setBody(body);
 
         CommandCloudApp cca = new CommandCloudApp() {
 
             @Override
-            public KuraCommandResponsePayload execute(KuraRequestPayload reqPayload) {
+            public KuraPayload execute(KuraPayload reqPayload) {
                 return kcrp;
             }
         };
 
-        String appTopic = "EXEC/command";
-        CloudletTopic reqTopic = CloudletTopic.parseAppTopic(appTopic);
+        TestUtil.setFieldValue(cca, "currentStatus", true);
+
+        List<String> resources = new ArrayList<>();
+        resources.add("command");
+        Map<String, Object> reqResources = new HashMap<>();
+        reqResources.put(ARGS_KEY.value(), resources);
         KuraRequestPayload reqPayload = null;
-        KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_ERROR);
 
-        cca.doExec(reqTopic, reqPayload, respPayload);
+        KuraMessage message = new KuraMessage(reqPayload, reqResources);
 
-        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, respPayload.getResponseCode());
-        assertArrayEquals(body, respPayload.getBody());
+        KuraMessage response = cca.doExec(null, message);
+
+        assertNotNull(response);
+        assertArrayEquals(body, response.getPayload().getBody());
     }
 
     @Test
     public void testExecuteDisabled() throws KuraException {
         CommandCloudApp cca = new CommandCloudApp();
 
-        Map<String, Object> properties = new HashMap<String, Object>();
+        Map<String, Object> properties = new HashMap<>();
         properties.put("command.enable", false);
 
         cca.updated(properties);
@@ -533,7 +545,7 @@ public class CommandCloudAppTest {
 
         CommandCloudApp cca = new CommandCloudApp();
 
-        Map<String, Object> properties = new HashMap<String, Object>();
+        Map<String, Object> properties = new HashMap<>();
         properties.put("command.password.value", "pass");
         properties.put("command.enable", true);
         properties.put("command.working.directory", wd);
@@ -573,7 +585,7 @@ public class CommandCloudAppTest {
 
         CommandCloudApp cca = new CommandCloudApp();
 
-        Map<String, Object> properties = new HashMap<String, Object>();
+        Map<String, Object> properties = new HashMap<>();
         properties.put("command.password.value", "pass");
         properties.put("command.enable", true);
         properties.put("command.working.directory", wd);
@@ -599,13 +611,13 @@ public class CommandCloudAppTest {
         assertEquals("NOK", out.trim());
     }
 
-    @Test
+    @Test(expected = KuraException.class)
     public void testExecutePayloadNoCommand() throws KuraException, IOException {
         String wd = "/tmp";
 
         CommandCloudApp cca = new CommandCloudApp();
 
-        Map<String, Object> properties = new HashMap<String, Object>();
+        Map<String, Object> properties = new HashMap<>();
         properties.put("command.password.value", "pass");
         properties.put("command.enable", true);
         properties.put("command.working.directory", wd);
@@ -617,22 +629,20 @@ public class CommandCloudAppTest {
             // ignore the expected exception
         }
 
-        KuraRequestPayload payload = new KuraRequestPayload();
+        KuraPayload payload = new KuraPayload();
         payload.addMetric("command.password", "pass");
         payload.addMetric("command.command", "");
 
-        KuraCommandResponsePayload response = cca.execute(payload);
-
-        assertEquals(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST, response.getResponseCode());
+        cca.execute(payload);
     }
 
-    @Test
+    @Test(expected = KuraException.class)
     public void testExecutePayloadPasswordError() throws KuraException, IOException {
         String wd = "/tmp";
 
         CommandCloudApp cca = new CommandCloudApp();
 
-        Map<String, Object> properties = new HashMap<String, Object>();
+        Map<String, Object> properties = new HashMap<>();
         properties.put("command.password.value", "pass");
         properties.put("command.enable", true);
         properties.put("command.working.directory", wd);
@@ -643,21 +653,17 @@ public class CommandCloudAppTest {
             // ignore the expected exception
         }
 
-        KuraRequestPayload payload = new KuraRequestPayload();
+        KuraPayload payload = new KuraPayload();
         payload.addMetric("command.password", "pss");
         payload.addMetric("command.command", "sleep");
 
-        KuraCommandResponsePayload response = cca.execute(payload);
-
-        assertEquals(KuraResponsePayload.RESPONSE_CODE_ERROR, response.getResponseCode());
-        assertEquals("Password missing or not correct", response.getExceptionMessage());
+        cca.execute(payload);
     }
 
     @Test
     public void testExecutePayload() throws KuraException, IOException {
         String wd = "/tmp";
         String cmd = wd + "/command_payload";
-        String pass = "pass";
 
         if (System.getProperty("os.name").contains("Windows")) {
             cmd += ".bat";
@@ -667,7 +673,7 @@ public class CommandCloudAppTest {
 
         CommandCloudApp cca = new CommandCloudApp();
 
-        Map<String, Object> properties = new HashMap<String, Object>();
+        Map<String, Object> properties = new HashMap<>();
         properties.put("command.password.value", "pass");
         properties.put("command.enable", true);
         properties.put("command.working.directory", wd);
@@ -688,14 +694,13 @@ public class CommandCloudAppTest {
         fw.write("sleep 1\necho OK");
         fw.close();
 
-        KuraRequestPayload payload = new KuraRequestPayload();
+        KuraPayload payload = new KuraPayload();
         payload.addMetric("command.password", "pass");
         payload.addMetric("command.command", cmd);
         payload.setBody("zip".getBytes()); // try unzip for good measure...
 
-        KuraCommandResponsePayload response = cca.execute(payload);
+        KuraPayload response = cca.execute(payload);
 
-        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, response.getResponseCode());
-        assertTrue(response.getStdout().trim().endsWith("OK"));
+        assertNotNull(response);
     }
 }

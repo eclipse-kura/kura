@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
+    Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -12,53 +12,15 @@
          name="Subscriber" 
          description="A wire component which subscribes data from the cloud platform">
 
-        <AD id="cloud.service.pid"
-            name="cloud.service.pid"
+        <AD id="CloudSubscriber.target"
+            name="CloudSubscriber Target Filter"
             type="String"
-            cardinality="0"
-            required="true"
-            default="org.eclipse.kura.cloud.CloudService"
-            description="Specify the pid of the Cloud Service where the subscription will be performed.">
-        </AD>
-
-        <AD id="subscribe.deviceId"
-            name="subscribe.deviceId"
-            type="String"
-            cardinality="0"
-            required="true"
-            default="DEVICE_ID"
-            description="Subscription deviceId. It will be used to compose the final topic.">
-        </AD>
-        
-        <AD id="subscribe.application"
-            name="subscribe.application"
-            type="String"
-            cardinality="0"
-            required="true"
-            default="APP"
-            description="Application topic prefix to be used when subscribing.">
-        </AD>
-        
-        <AD id="subscribe.appTopic"
-            name="subscribe.appTopic"
-            type="String"
-            cardinality="0"
-            required="true"
-            default="EVENT"
-            description="Subscription topic to be used when subscribing for messages.">
-        </AD>
-
-        <AD id="subscribe.qos"
-            name="subscribe.qos"
-            type="Integer"
             cardinality="0"
             required="false"
-            default="1"
-            description="An integer specifying the quality of service the message to be subscribed.">
-            <Option label="0" value="0"/>
-            <Option label="1" value="1"/>
-            <Option label="2" value="2"/>
+            default="(kura.service.pid=changeme)"
+            description="Specifies, as an OSGi target filter, the pid of the Cloud Subscriber used to receive messages from the cloud platform.">
         </AD>
+
     </OCD>
     
     <Designate pid="org.eclipse.kura.wire.CloudSubscriber" factoryPid="org.eclipse.kura.wire.CloudSubscriber">

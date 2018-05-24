@@ -22,13 +22,13 @@ import java.util.Date;
 import java.util.List;
 
 import org.eclipse.kura.web.client.messages.Messages;
-import org.eclipse.kura.web.client.ui.CloudServices.CloudServicesUi;
 import org.eclipse.kura.web.client.ui.Device.DevicePanelUi;
 import org.eclipse.kura.web.client.ui.Firewall.FirewallPanelUi;
 import org.eclipse.kura.web.client.ui.Network.NetworkPanelUi;
 import org.eclipse.kura.web.client.ui.Packages.PackagesPanelUi;
 import org.eclipse.kura.web.client.ui.Settings.SettingsPanelUi;
 import org.eclipse.kura.web.client.ui.Status.StatusPanelUi;
+import org.eclipse.kura.web.client.ui.cloudconnection.CloudConnectionsUi;
 import org.eclipse.kura.web.client.ui.drivers.assets.DriversAndAssetsUi;
 import org.eclipse.kura.web.client.ui.wires.WiresPanelUi;
 import org.eclipse.kura.web.client.util.FailureHandler;
@@ -186,7 +186,7 @@ public class EntryClassUi extends Composite {
     private final SettingsPanelUi settingsBinder = GWT.create(SettingsPanelUi.class);
     private final FirewallPanelUi firewallBinder = GWT.create(FirewallPanelUi.class);
     private final NetworkPanelUi networkBinder = GWT.create(NetworkPanelUi.class);
-    private final CloudServicesUi cloudServicesBinder = GWT.create(CloudServicesUi.class);
+    private final CloudConnectionsUi cloudServicesBinder = GWT.create(CloudConnectionsUi.class);
     private final WiresPanelUi wiresBinder = GWT.create(WiresPanelUi.class);
     private final DriversAndAssetsUi driversAndTwinsBinder = GWT.create(DriversAndAssetsUi.class);
 

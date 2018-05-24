@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -17,15 +17,15 @@ import org.eclipse.kura.core.util.GZipUtil;
 
 public class CloudPayloadGZipEncoder implements CloudPayloadEncoder {
 
-    private final CloudPayloadEncoder m_decorated;
+    private final CloudPayloadEncoder decorated;
 
     public CloudPayloadGZipEncoder(CloudPayloadEncoder decorated) {
-        this.m_decorated = decorated;
+        this.decorated = decorated;
     }
 
     @Override
     public byte[] getBytes() throws IOException {
-        byte[] source = this.m_decorated.getBytes();
+        byte[] source = this.decorated.getBytes();
         byte[] compressed = GZipUtil.compress(source);
 
         // Return gzip compressed data only if shorter than uncompressed one

@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.asset.cloudlet;
 
+import static org.eclipse.kura.cloudconnection.request.RequestHandlerConstants.ARGS_KEY;
+
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.List;
@@ -21,18 +23,21 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 
+import org.eclipse.kura.KuraErrorCode;
+import org.eclipse.kura.KuraException;
 import org.eclipse.kura.asset.Asset;
 import org.eclipse.kura.asset.AssetService;
 import org.eclipse.kura.channel.ChannelRecord;
-import org.eclipse.kura.cloud.CloudService;
-import org.eclipse.kura.cloud.Cloudlet;
-import org.eclipse.kura.cloud.CloudletTopic;
+import org.eclipse.kura.cloudconnection.message.KuraMessage;
+import org.eclipse.kura.cloudconnection.request.RequestHandler;
+import org.eclipse.kura.cloudconnection.request.RequestHandlerContext;
+import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
 import org.eclipse.kura.internal.asset.cloudlet.serialization.request.MetadataRequest;
 import org.eclipse.kura.internal.asset.cloudlet.serialization.request.ReadRequest;
 import org.eclipse.kura.internal.asset.cloudlet.serialization.request.WriteRequest;
 import org.eclipse.kura.internal.asset.cloudlet.serialization.response.ChannelOperationResponse;
 import org.eclipse.kura.internal.asset.cloudlet.serialization.response.MetadataResponse;
-import org.eclipse.kura.message.KuraRequestPayload;
+import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.util.tracker.ServiceTracker;
@@ -42,8 +47,9 @@ import org.slf4j.LoggerFactory;
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonArray;
 
-public final class AssetCloudlet extends Cloudlet {
+public final class AssetCloudlet implements RequestHandler {
 
+    private static final String UNKNOWN_ERROR_MESSAGE = "Unknown error";
     private static final String ASSET_TOPIC_RESOURCE = "assets";
     private static final String READ_TOPIC_RESOURCE = "read";
     private static final String WRITE_TOPIC_RESOURCE = "write";
@@ -60,19 +66,9 @@ public final class AssetCloudlet extends Cloudlet {
 
     private ServiceTracker<Asset, Asset> assetServiceTracker;
 
-    public AssetCloudlet() {
-        super(APP_ID);
-    }
-
     protected synchronized void bindAssetService(final AssetService assetService) {
         if (this.assetService == null) {
             this.assetService = assetService;
-        }
-    }
-
-    protected synchronized void bindCloudService(final CloudService cloudService) {
-        if (getCloudService() == null) {
-            super.setCloudService(cloudService);
         }
     }
 
@@ -82,29 +78,35 @@ public final class AssetCloudlet extends Cloudlet {
         }
     }
 
-    protected synchronized void unbindCloudService(final CloudService cloudService) {
-        if (getCloudService() == cloudService) {
-            super.unsetCloudService(cloudService);
+    public void setRequestHandlerRegistry(RequestHandlerRegistry requestHandlerRegistry) {
+        try {
+            requestHandlerRegistry.registerRequestHandler(APP_ID, this);
+        } catch (KuraException e) {
+            logger.info("Unable to register cloudlet {} in {}", APP_ID, requestHandlerRegistry.getClass().getName());
         }
     }
 
-    @Override
+    public void unsetRequestHandlerRegistry(RequestHandlerRegistry requestHandlerRegistry) {
+        try {
+            requestHandlerRegistry.unregister(APP_ID);
+        } catch (KuraException e) {
+            logger.info("Unable to register cloudlet {} in {}", APP_ID, requestHandlerRegistry.getClass().getName());
+        }
+    }
+
     protected synchronized void activate(final ComponentContext componentContext) {
         logger.debug("Activating Asset Cloudlet...");
-        super.activate(componentContext);
 
         this.assetTrackerCustomizer = new AssetTrackerCustomizer(componentContext.getBundleContext(),
                 this.assetService);
-        this.assetServiceTracker = new ServiceTracker<>(componentContext.getBundleContext(),
-                Asset.class.getName(), this.assetTrackerCustomizer);
+        this.assetServiceTracker = new ServiceTracker<>(componentContext.getBundleContext(), Asset.class.getName(),
+                this.assetTrackerCustomizer);
         this.assetServiceTracker.open();
         logger.debug("Activating Asset Cloudlet...Done");
     }
 
-    @Override
     protected synchronized void deactivate(final ComponentContext componentContext) {
         logger.debug("Deactivating Asset Cloudlet...");
-        super.deactivate(componentContext);
         this.assetServiceTracker.close();
         logger.debug("Deactivating Asset Cloudlet...Done");
     }
@@ -113,7 +115,7 @@ public final class AssetCloudlet extends Cloudlet {
         this.assets = this.assetTrackerCustomizer.getRegisteredAssets();
     }
 
-    private JsonArray parseRequest(KuraRequestPayload reqPayload) {
+    private JsonArray parseRequest(KuraPayload reqPayload) {
         final byte[] rawBody = reqPayload.getBody();
         if (rawBody == null) {
             return null;
@@ -121,9 +123,11 @@ public final class AssetCloudlet extends Cloudlet {
         return Json.parse(new String(rawBody, StandardCharsets.UTF_8)).asArray();
     }
 
-    private void getAssetMetadata(final KuraResponsePayload respPayload, final Iterator<String> assetNames) {
+    private KuraPayload getAssetMetadata(final Iterator<String> assetNames) {
+        KuraResponsePayload responsePayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+
         MetadataResponse response = new MetadataResponse();
-        assetNames.forEachRemaining((assetName) -> {
+        assetNames.forEachRemaining(assetName -> {
             final Asset asset = this.assets.get(assetName);
             if (asset == null) {
                 response.reportAssetNotFound(assetName);
@@ -131,20 +135,18 @@ public final class AssetCloudlet extends Cloudlet {
                 response.addAssetMetadata(assetName, asset);
             }
         });
-        respPayload.setBody(response.serialize());
-        respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
+        responsePayload.setBody(response.serialize());
+        return responsePayload;
     }
 
     @Override
-    protected void doGet(final CloudletTopic reqTopic, final KuraRequestPayload reqPayload,
-            final KuraResponsePayload respPayload) {
-        final String[] resources = reqTopic.getResources();
-
+    public KuraMessage doGet(RequestHandlerContext requestContext, KuraMessage reqMessage) throws KuraException {
         logger.info("Cloudlet GET Request received on the Asset Cloudlet...");
 
-        if (resources.length != 1 || !ASSET_TOPIC_RESOURCE.equals(resources[0])) {
-            respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
-            return;
+        List<String> resources = getRequestResources(reqMessage);
+
+        if (resources.size() != 1 || !ASSET_TOPIC_RESOURCE.equals(resources.get(0))) {
+            throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
 
         findAssets();
@@ -152,47 +154,61 @@ public final class AssetCloudlet extends Cloudlet {
         JsonArray request;
 
         try {
-            request = parseRequest(reqPayload);
+            request = parseRequest(reqMessage.getPayload());
         } catch (Exception e) {
-            respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
-            return;
+            throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
 
+        KuraPayload responsePayload;
         if (request == null || request.isEmpty()) {
-            getAssetMetadata(respPayload, this.assets.keySet().iterator());
-            return;
+            responsePayload = getAssetMetadata(this.assets.keySet().iterator());
+        } else {
+            MetadataRequest parsedRequest;
+            try {
+                parsedRequest = new MetadataRequest(request);
+            } catch (Exception e) {
+                throw new KuraException(KuraErrorCode.BAD_REQUEST);
+            }
+
+            responsePayload = getAssetMetadata(parsedRequest.getAssetNames().iterator());
         }
 
-        MetadataRequest parsedRequest;
-        try {
-            parsedRequest = new MetadataRequest(request);
-        } catch (Exception e) {
-            respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
-            return;
-        }
+        return new KuraMessage(responsePayload);
+    }
 
-        getAssetMetadata(respPayload, parsedRequest.getAssetNames().iterator());
+    @SuppressWarnings("unchecked")
+    private List<String> getRequestResources(KuraMessage reqMessage) throws KuraException {
+        Object requestObject = reqMessage.getProperties().get(ARGS_KEY.value());
+        List<String> resources;
+        if (requestObject instanceof List) {
+            resources = (List<String>) requestObject;
+        } else {
+            throw new KuraException(KuraErrorCode.BAD_REQUEST);
+        }
+        return resources;
     }
 
     @Override
-    protected void doExec(final CloudletTopic reqTopic, final KuraRequestPayload reqPayload,
-            final KuraResponsePayload respPayload) {
+    public KuraMessage doExec(RequestHandlerContext requestContext, KuraMessage reqMessage) throws KuraException {
         logger.info("Cloudlet EXEC Request received on the Asset Cloudlet...");
-        final String[] resources = reqTopic.getResources();
 
-        if (resources.length != 1) {
-            respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
-            return;
+        List<String> resources = getRequestResources(reqMessage);
+
+        if (resources.size() != 1) {
+            logger.error("Bad request topic: {}", resources);
+            throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
 
-        if (READ_TOPIC_RESOURCE.equals(resources[0])) {
-            read(reqPayload, respPayload);
-        } else if (WRITE_TOPIC_RESOURCE.equals(resources[0])) {
-            write(reqPayload, respPayload);
+        KuraPayload resPayload;
+        if (READ_TOPIC_RESOURCE.equals(resources.get(0))) {
+            resPayload = read(reqMessage.getPayload());
+        } else if (WRITE_TOPIC_RESOURCE.equals(resources.get(0))) {
+            resPayload = write(reqMessage.getPayload());
         } else {
-            respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
-            return;
+            throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
+
+        return new KuraMessage(resPayload);
     }
 
     private void readAsset(String assetName, Set<String> channelNames, ChannelOperationResponse response) {
@@ -209,11 +225,11 @@ public final class AssetCloudlet extends Cloudlet {
             }
         } catch (Exception e) {
             response.reportAllFailed(assetName, channelNames.iterator(),
-                    Optional.ofNullable(e.getMessage()).orElse("Unknown error"));
+                    Optional.ofNullable(e.getMessage()).orElse(UNKNOWN_ERROR_MESSAGE));
         }
     }
 
-    private ChannelOperationResponse readAllAssets(final KuraResponsePayload respPayload) {
+    private ChannelOperationResponse readAllAssets() {
         ChannelOperationResponse response = new ChannelOperationResponse();
         for (Entry<String, Asset> entry : this.assets.entrySet()) {
             final String assetName = entry.getKey();
@@ -223,35 +239,32 @@ public final class AssetCloudlet extends Cloudlet {
             } catch (Exception e) {
                 response.reportAllFailed(assetName,
                         asset.getAssetConfiguration().getAssetChannels().keySet().iterator(),
-                        Optional.ofNullable(e.getMessage()).orElse("Unknown error"));
+                        Optional.ofNullable(e.getMessage()).orElse(UNKNOWN_ERROR_MESSAGE));
             }
         }
         return response;
     }
 
-    private void read(final KuraRequestPayload reqPayload, final KuraResponsePayload respPayload) {
+    private KuraPayload read(final KuraPayload reqPayload) throws KuraException {
         findAssets();
 
         JsonArray request;
-
         try {
             request = parseRequest(reqPayload);
         } catch (Exception e) {
-            respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
-            return;
+            throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
 
         ChannelOperationResponse response;
 
         if (request == null || request.isEmpty()) {
-            response = readAllAssets(respPayload);
+            response = readAllAssets();
         } else {
             List<ReadRequest> readRequests;
             try {
                 readRequests = ReadRequest.parseAll(request);
             } catch (Exception e) {
-                respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
-                return;
+                throw new KuraException(KuraErrorCode.BAD_REQUEST);
             }
             response = new ChannelOperationResponse();
             for (ReadRequest readRequest : readRequests) {
@@ -259,8 +272,9 @@ public final class AssetCloudlet extends Cloudlet {
             }
         }
 
-        respPayload.setBody(response.serialize());
-        respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
+        KuraResponsePayload responsePayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+        responsePayload.setBody(response.serialize());
+        return responsePayload;
     }
 
     private void writeAsset(String assetName, List<ChannelRecord> channelRecords, ChannelOperationResponse response) {
@@ -275,13 +289,12 @@ public final class AssetCloudlet extends Cloudlet {
             }
             response.reportResult(assetName, channelRecords);
         } catch (Exception e) {
-            response.reportAllFailed(assetName,
-                    channelRecords.stream().map((record) -> record.getChannelName()).iterator(),
-                    Optional.ofNullable(e.getMessage()).orElse("Unknown error"));
+            response.reportAllFailed(assetName, channelRecords.stream().map(ChannelRecord::getChannelName).iterator(),
+                    Optional.ofNullable(e.getMessage()).orElse(UNKNOWN_ERROR_MESSAGE));
         }
     }
 
-    private void write(final KuraRequestPayload reqPayload, final KuraResponsePayload respPayload) {
+    private KuraPayload write(final KuraPayload reqPayload) throws KuraException {
         findAssets();
 
         List<WriteRequest> writeRequests;
@@ -289,8 +302,7 @@ public final class AssetCloudlet extends Cloudlet {
         try {
             writeRequests = WriteRequest.parseAll(parseRequest(reqPayload));
         } catch (Exception e) {
-            respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
-            return;
+            throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
 
         ChannelOperationResponse response = new ChannelOperationResponse();
@@ -298,7 +310,8 @@ public final class AssetCloudlet extends Cloudlet {
             writeAsset(writeRequest.getAssetName(), writeRequest.getChannelRecords(), response);
         }
 
-        respPayload.setBody(response.serialize());
-        respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
+        KuraResponsePayload responsePayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+        responsePayload.setBody(response.serialize());
+        return responsePayload;
     }
 }

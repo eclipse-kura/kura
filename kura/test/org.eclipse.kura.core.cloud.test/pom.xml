@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2011, 2017 Eurotech and others
+    Copyright (c) 2011, 2018 Eurotech and others
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -10,7 +10,7 @@
 
     Contributors:
       Eurotech
-      Red Hat Inc - fix issue #603
+      Red Hat Inc
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -25,7 +25,6 @@
 
 	<artifactId>org.eclipse.kura.core.cloud.test</artifactId>
 	<packaging>eclipse-test-plugin</packaging>
-	<version>3.3.0-SNAPSHOT</version>
 	
 	<properties>
 		<kura.basedir>${project.basedir}/../..</kura.basedir>
@@ -37,7 +36,258 @@
                 <groupId>org.eclipse.tycho</groupId>
                 <artifactId>tycho-surefire-plugin</artifactId>
                 <version>${tycho-version}</version>
+                <configuration>
+                    <failIfNoTests>false</failIfNoTests>
+                    <providerHint>junit4</providerHint>
+                    <useUnlimitedThreads>false</useUnlimitedThreads>
+                    <argLine>${jacocoArgs}
+                        -DbuildingWithTycho=true -Dosgi.locking=none
+                        -Dds.showtrace=true -Djava.io.tmpdir=/tmp
+                        -Dorg.osgi.framework.storage=/tmp/osgi/framework_storage
+                        -Dosgi.clean=true
+                        -Dorg.eclipse.kura.mode=emulator
+                        -Dkura.snapshots=${project.basedir}/target/
+                        -Dkura.configuration=file:${kura.basedir}/emulator/org.eclipse.kura.emulator/src/main/resources/kura.properties
+                        -Ddpa.configuration=/tmp/kura/dpa.properties
+                        -Dlog4j.configuration=file:${kura.basedir}/emulator/org.eclipse.kura.emulator/src/main/resources/log4j.properties</argLine>
+                    <!--<appArgLine>-consoleLog -console 5002 -noExit</appArgLine>-->
+                    <bundleStartLevel>
+                        <bundle>
+                            <id>org.apache.felix.scr</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.eclipse.equinox.cm</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.eclipse.equinox.event</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.eclipse.equinox.metatype</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.eclipse.equinox.registry</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.hsqldb.hsqldb</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.eclipse.kura.core.configuration</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.eclipse.kura.core.crypto</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.eclipse.kura.emulator</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.eclipse.kura.emulator.net</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.eclipse.kura.json.marshaller.unmarshaller.provider</id>
+                            <level>3</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.eclipse.kura.xml.marshaller.unmarshaller.provider</id>
+                            <level>3</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.eclipse.kura.emulator.gpio</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.eclipse.kura.core.status</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.eclipse.kura.emulator.watchdog</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                    </bundleStartLevel>
+                    <dependencies>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>org.apache.felix.scr</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>org.eclipse.core.runtime</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>org.eclipse.equinox.cm</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>org.eclipse.equinox.common</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>org.eclipse.equinox.event</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>org.eclipse.equinox.metatype</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>org.eclipse.equinox.registry</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>org.eclipse.equinox.util</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>org.eclipse.osgi</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>org.eclipse.osgi.services</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>org.eclipse.osgi.util</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>org.hamcrest.core</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>osgi.cmpn</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>org.eclipse.equinox.launcher</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>slf4j.api</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>org.hsqldb.hsqldb</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>org.junit</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>org.apache.commons.io</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>log4j</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>log4j.apache-log4j-extras</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>org.eclipse.equinox.console</artifactId>
+                        </dependency>
+                    </dependencies>
+                </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.eclipse.tycho</groupId>
+                <artifactId>target-platform-configuration</artifactId>
+                <version>${tycho-version}</version>
+                <configuration>
+                    <dependency-resolution>
+                        <extraRequirements>
+                            <requirement>
+                                <type>eclipse-plugin</type>
+                                <id>org.hamcrest</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>eclipse-plugin</type>
+                                <id>org.eclipse.kura.api</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>eclipse-plugin</type>
+                                <id>org.eclipse.kura.core.configuration</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>eclipse-plugin</type>
+                                <id>org.eclipse.kura.core.crypto</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>eclipse-plugin</type>
+                                <id>org.eclipse.kura.emulator</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>eclipse-plugin</type>
+                                <id>org.eclipse.kura.emulator.net</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>eclipse-plugin</type>
+                                <id>org.eclipse.kura.wire.helper.provider</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>eclipse-plugin</type>
+                                <id>org.eclipse.kura.json.marshaller.unmarshaller.provider</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>eclipse-plugin</type>
+                                <id>org.eclipse.kura.xml.marshaller.unmarshaller.provider</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>eclipse-plugin</type>
+                                <id>org.eclipse.kura.emulator.gpio</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>eclipse-plugin</type>
+                                <id>org.eclipse.kura.core.status</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>eclipse-plugin</type>
+                                <id>org.eclipse.kura.emulator.watchdog</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                        </extraRequirements>
+                    </dependency-resolution>
+                </configuration>
+            </plugin>
+
         </plugins>
     </build>
 </project>

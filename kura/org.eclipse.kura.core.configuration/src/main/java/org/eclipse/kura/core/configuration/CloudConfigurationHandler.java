@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -11,6 +11,8 @@
  *******************************************************************************/
 package org.eclipse.kura.core.configuration;
 
+import static org.eclipse.kura.cloudconnection.request.RequestHandlerConstants.ARGS_KEY;
+
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,18 +21,20 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.cloud.CloudService;
-import org.eclipse.kura.cloud.Cloudlet;
-import org.eclipse.kura.cloud.CloudletTopic;
+import org.eclipse.kura.cloudconnection.message.KuraMessage;
+import org.eclipse.kura.cloudconnection.request.RequestHandler;
+import org.eclipse.kura.cloudconnection.request.RequestHandlerContext;
+import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.marshalling.Marshaller;
 import org.eclipse.kura.marshalling.Unmarshaller;
 import org.eclipse.kura.message.KuraPayload;
-import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.util.service.ServiceUtil;
@@ -40,7 +44,15 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CloudConfigurationHandler extends Cloudlet {
+public class CloudConfigurationHandler implements RequestHandler {
+
+    private static final String EXPECTED_ONE_RESOURCE_BUT_FOUND_NONE_MESSAGE = "Expected one resource but found none";
+
+    private static final String EXPECTED_AT_MOST_TWO_RESOURCES_BUT_FOUND_MESSAGE = "Expected at most two resource(s) but found {}";
+
+    private static final String CANNOT_FIND_RESOURCE_WITH_NAME_MESSAGE = "Cannot find resource with name: {}";
+
+    private static final String BAD_REQUEST_TOPIC_MESSAGE = "Bad request topic: {}";
 
     private static Logger logger = LoggerFactory.getLogger(CloudConfigurationHandler.class);
 
@@ -57,7 +69,6 @@ public class CloudConfigurationHandler extends Cloudlet {
     private SystemService systemService;
     private ConfigurationService configurationService;
 
-    private ComponentContext ctx;
     private BundleContext bundleContext;
 
     private ScheduledExecutorService executor;
@@ -78,122 +89,115 @@ public class CloudConfigurationHandler extends Cloudlet {
         this.systemService = null;
     }
 
-    // The dependency on the CloudService is optional so we might be activated
-    // before we have the CloudService.
-    @Override
-    public void setCloudService(CloudService cloudService) {
-        super.setCloudService(cloudService);
-        super.activate(this.ctx);
+    public void setRequestHandlerRegistry(RequestHandlerRegistry requestHandlerRegistry) {
+        try {
+            requestHandlerRegistry.registerRequestHandler(APP_ID, this);
+        } catch (KuraException e) {
+            logger.info("Unable to register cloudlet {} in {}", APP_ID, requestHandlerRegistry.getClass().getName());
+        }
     }
 
-    @Override
-    public void unsetCloudService(CloudService cloudService) {
-        super.deactivate(this.ctx);
-        super.unsetCloudService(cloudService);
+    public void unsetRequestHandlerRegistry(RequestHandlerRegistry requestHandlerRegistry) {
+        try {
+            requestHandlerRegistry.unregister(APP_ID);
+        } catch (KuraException e) {
+            logger.info("Unable to register cloudlet {} in {}", APP_ID, requestHandlerRegistry.getClass().getName());
+        }
     }
 
-    public CloudConfigurationHandler() {
-        super(APP_ID);
-    }
-
-    @Override
     protected void activate(ComponentContext componentContext) {
-        this.ctx = componentContext;
         this.bundleContext = componentContext.getBundleContext();
         this.executor = Executors.newSingleThreadScheduledExecutor();
     }
 
-    @Override
     protected void deactivate(ComponentContext componentContext) {
         this.executor.shutdownNow();
     }
 
     @Override
-    protected void doGet(CloudletTopic reqTopic, KuraRequestPayload reqPayload, KuraResponsePayload respPayload)
-            throws KuraException {
+    public KuraMessage doGet(RequestHandlerContext requestContext, KuraMessage reqMessage) throws KuraException {
 
-        String resources[] = reqTopic.getResources();
+        List<String> resources = getRequestResources(reqMessage);
 
-        if (resources == null || resources.length == 0) {
-            logger.error("Bad request topic: {}", reqTopic.toString());
-            logger.error("Expected one resource but found {}", resources != null ? resources.length : "none");
-            respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
-            return;
+        if (resources.isEmpty()) {
+            logger.error(BAD_REQUEST_TOPIC_MESSAGE, resources);
+            logger.error(EXPECTED_ONE_RESOURCE_BUT_FOUND_NONE_MESSAGE);
+            throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
 
-        if (resources[0].equals(RESOURCE_CONFIGURATIONS)) {
-            doGetConfigurations(reqTopic, reqPayload, respPayload);
-        } else if (resources[0].equals(RESOURCE_SNAPSHOTS)) {
-            doGetSnapshots(reqTopic, reqPayload, respPayload);
+        KuraPayload payload;
+        if (resources.get(0).equals(RESOURCE_CONFIGURATIONS)) {
+            payload = doGetConfigurations(resources);
+        } else if (resources.get(0).equals(RESOURCE_SNAPSHOTS)) {
+            payload = doGetSnapshots(resources);
         } else {
-            logger.error("Bad request topic: {}", reqTopic.toString());
-            logger.error("Cannot find resource with name: {}", resources[0]);
-            respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_NOTFOUND);
-            return;
+            logger.error(BAD_REQUEST_TOPIC_MESSAGE, resources);
+            logger.error(CANNOT_FIND_RESOURCE_WITH_NAME_MESSAGE, resources.get(0));
+            throw new KuraException(KuraErrorCode.NOT_FOUND);
         }
+
+        return new KuraMessage(payload);
     }
 
     @Override
-    protected void doPut(CloudletTopic reqTopic, KuraRequestPayload reqPayload, KuraResponsePayload respPayload)
-            throws KuraException {
+    public KuraMessage doPut(RequestHandlerContext requestContext, KuraMessage reqMessage) throws KuraException {
 
-        String resources[] = reqTopic.getResources();
+        List<String> resources = getRequestResources(reqMessage);
 
-        if (resources == null || resources.length == 0) {
-            logger.error("Bad request topic: {}", reqTopic.toString());
-            logger.error("Expected one resource but found {}", resources != null ? resources.length : "none");
-            respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
-            return;
+        if (resources.isEmpty()) {
+            logger.error(BAD_REQUEST_TOPIC_MESSAGE, resources);
+            logger.error(EXPECTED_ONE_RESOURCE_BUT_FOUND_NONE_MESSAGE);
+            throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
 
-        if (resources[0].equals(RESOURCE_CONFIGURATIONS)) {
-            doPutConfigurations(reqTopic, reqPayload, respPayload);
+        KuraPayload payload;
+        if (resources.get(0).equals(RESOURCE_CONFIGURATIONS)) {
+            payload = doPutConfigurations(resources, reqMessage.getPayload());
         } else {
-            logger.error("Bad request topic: {}", reqTopic.toString());
-            logger.error("Cannot find resource with name: {}", resources[0]);
-            respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_NOTFOUND);
-            return;
+            logger.error(BAD_REQUEST_TOPIC_MESSAGE, resources);
+            logger.error(CANNOT_FIND_RESOURCE_WITH_NAME_MESSAGE, resources.get(0));
+            throw new KuraException(KuraErrorCode.NOT_FOUND);
         }
+
+        return new KuraMessage(payload);
     }
 
     @Override
-    protected void doExec(CloudletTopic reqTopic, KuraRequestPayload reqPayload, KuraResponsePayload respPayload)
-            throws KuraException {
+    public KuraMessage doExec(RequestHandlerContext requestContext, KuraMessage reqMessage) throws KuraException {
 
-        String[] resources = reqTopic.getResources();
+        List<String> resources = getRequestResources(reqMessage);
 
-        if (resources == null || resources.length == 0) {
-            logger.error("Bad request topic: {}", reqTopic.toString());
-            logger.error("Expected one resource but found {}", resources != null ? resources.length : "none");
-            respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
-            return;
+        if (resources.isEmpty()) {
+            logger.error(BAD_REQUEST_TOPIC_MESSAGE, resources);
+            logger.error(EXPECTED_ONE_RESOURCE_BUT_FOUND_NONE_MESSAGE);
+            throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
 
-        if (resources[0].equals(RESOURCE_SNAPSHOT)) {
-            doExecSnapshot(reqTopic, reqPayload, respPayload);
-        } else if (resources[0].equals(RESOURCE_ROLLBACK)) {
-            doExecRollback(reqTopic, reqPayload, respPayload);
+        KuraPayload payload;
+        if (resources.get(0).equals(RESOURCE_SNAPSHOT)) {
+            payload = doExecSnapshot(resources);
+        } else if (resources.get(0).equals(RESOURCE_ROLLBACK)) {
+            payload = doExecRollback(resources);
         } else {
-            logger.error("Bad request topic: {}", reqTopic.toString());
-            logger.error("Cannot find resource with name: {}", resources[0]);
-            respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_NOTFOUND);
-            return;
+            logger.error(BAD_REQUEST_TOPIC_MESSAGE, resources);
+            logger.error(CANNOT_FIND_RESOURCE_WITH_NAME_MESSAGE, resources.get(0));
+            throw new KuraException(KuraErrorCode.NOT_FOUND);
         }
+
+        return new KuraMessage(payload);
     }
 
-    private void doGetSnapshots(CloudletTopic reqTopic, KuraPayload reqPayload, KuraResponsePayload respPayload)
-            throws KuraException {
+    private KuraPayload doGetSnapshots(List<String> resources) throws KuraException {
 
-        String[] resources = reqTopic.getResources();
+        KuraResponsePayload responsePayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
 
-        if (resources.length > 2) {
-            logger.error("Bad request topic: {}", reqTopic.toString());
-            logger.error("Expected one or two resource(s) but found {}", resources.length);
-            respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
-            return;
+        if (resources.size() > 2) {
+            logger.error(BAD_REQUEST_TOPIC_MESSAGE, resources);
+            logger.error("Expected one or two resource(s) but found {}", resources.size());
+            throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
 
-        String snapshotId = resources.length == 2 ? resources[1] : null;
+        String snapshotId = resources.size() == 2 ? resources.get(1) : null;
 
         if (snapshotId != null) {
             long sid = Long.parseLong(snapshotId);
@@ -203,22 +207,14 @@ public class CloudConfigurationHandler extends Cloudlet {
             // marshall the response
 
             List<ComponentConfiguration> configs = xmlConfigs.getConfigurations();
-            for (ComponentConfiguration config : configs) {
-                if (config != null) {
-                    try {
-                        ((ConfigurationServiceImpl) this.configurationService)
-                                .decryptConfigurationProperties(config.getConfigurationProperties());
-                    } catch (Throwable t) {
-                        logger.warn("Error during snapshot password decryption");
-                    }
-                }
-            }
+            configs.forEach(config -> ((ConfigurationServiceImpl) this.configurationService)
+                    .decryptConfigurationProperties(config.getConfigurationProperties()));
 
             byte[] body = toResponseBody(xmlConfigs);
 
             //
             // Build payload
-            respPayload.setBody(body);
+            responsePayload.setBody(body);
         } else {
             // get the list of snapshot IDs and put them into a response object
             Set<Long> sids = null;
@@ -238,79 +234,43 @@ public class CloudConfigurationHandler extends Cloudlet {
 
             //
             // Build payload
-            respPayload.setBody(body);
+            responsePayload.setBody(body);
         }
+        return responsePayload;
     }
 
-    private void doGetConfigurations(CloudletTopic reqTopic, KuraPayload reqPayload, KuraResponsePayload respPayload)
-            throws KuraException {
-        String[] resources = reqTopic.getResources();
-        if (resources.length > 2) {
-            logger.error("Bad request topic: {}", reqTopic.toString());
-            logger.error("Expected at most two resource(s) but found {}", resources.length);
-            respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
-            return;
+    @SuppressWarnings("unchecked")
+    private List<String> getRequestResources(KuraMessage reqMessage) throws KuraException {
+        Object requestObject = reqMessage.getProperties().get(ARGS_KEY.value());
+        List<String> resources;
+        if (requestObject instanceof List) {
+            resources = (List<String>) requestObject;
+        } else {
+            throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
-        String pid = resources.length == 2 ? resources[1] : null;
+        return resources;
+    }
+
+    private KuraPayload doGetConfigurations(List<String> resources) throws KuraException {
+        if (resources.size() > 2) {
+            logger.error(BAD_REQUEST_TOPIC_MESSAGE, resources);
+            logger.error(EXPECTED_AT_MOST_TWO_RESOURCES_BUT_FOUND_MESSAGE, resources.size());
+            throw new KuraException(KuraErrorCode.BAD_REQUEST);
+        }
+        String pid = resources.size() == 2 ? resources.get(1) : null;
 
         //
         // get current configuration with descriptors
         List<ComponentConfiguration> configs = new ArrayList<>();
         try {
-
             if (pid == null) {
-                List<String> pidsToIgnore = this.systemService.getDeviceManagementServiceIgnore();
-
-                // the configuration for all components has been requested
-                Set<String> componentPids = this.configurationService.getConfigurableComponentPids();
-                for (String componentPid : componentPids) {
-                    boolean skip = false;
-                    if (pidsToIgnore != null && !pidsToIgnore.isEmpty()) {
-                        for (String pidToIgnore : pidsToIgnore) {
-                            if (componentPid.equals(pidToIgnore)) {
-                                skip = true;
-                                break;
-                            }
-                        }
-                    }
-                    if (skip) {
-                        continue;
-                    }
-
-                    ComponentConfiguration cc = this.configurationService.getComponentConfiguration(componentPid);
-
-                    // TODO: define a validate method for ComponentConfiguration
-                    if (cc == null) {
-                        logger.error("null ComponentConfiguration");
-                        continue;
-                    }
-                    if (cc.getPid() == null || cc.getPid().isEmpty()) {
-                        logger.error("null or empty ComponentConfiguration PID");
-                        continue;
-                    }
-                    if (cc.getDefinition() == null) {
-                        logger.error("null OCD for ComponentConfiguration PID {}", cc.getPid());
-                        continue;
-                    }
-                    if (cc.getDefinition().getId() == null || cc.getDefinition().getId().isEmpty()) {
-
-                        logger.error("null or empty OCD ID for ComponentConfiguration PID {}. OCD ID: {}", cc.getPid(),
-                                cc.getDefinition().getId());
-                        continue;
-                    }
-                    configs.add(cc);
-                }
+                configs = getAllConfigurations();
             } else {
-
-                // the configuration for a specific component has been requested.
-                ComponentConfiguration cc = this.configurationService.getComponentConfiguration(pid);
-                if (cc != null) {
-                    configs.add(cc);
-                }
+                configs = getConfiguration(pid);
             }
         } catch (KuraException e) {
             logger.error("Error getting component configurations: {}", e);
-            throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, e, "Error getting component configurations");
+            throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
 
         XmlComponentConfigurations xmlConfigs = new XmlComponentConfigurations();
@@ -322,20 +282,73 @@ public class CloudConfigurationHandler extends Cloudlet {
 
         //
         // Build response payload
-        respPayload.setBody(body);
+        KuraResponsePayload response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+        response.setBody(body);
+        return response;
     }
 
-    private void doPutConfigurations(CloudletTopic reqTopic, KuraPayload reqPayload, KuraResponsePayload respPayload) {
-        String[] resources = reqTopic.getResources();
+    private List<ComponentConfiguration> getConfiguration(String pid) throws KuraException {
+        List<ComponentConfiguration> configs = new ArrayList<>();
+        ComponentConfiguration cc = this.configurationService.getComponentConfiguration(pid);
+        if (cc != null) {
+            configs.add(cc);
+        }
+        return configs;
+    }
 
-        if (resources.length > 2) {
-            logger.error("Bad request topic: {}", reqTopic.toString());
-            logger.error("Expected at most two resource(s) but found {}", resources.length);
-            respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
-            return;
+    private List<ComponentConfiguration> getAllConfigurations() {
+
+        List<ComponentConfiguration> configs = new ArrayList<>();
+        List<String> pidsToIgnore = this.systemService.getDeviceManagementServiceIgnore();
+
+        // the configuration for all components has been requested
+        Set<String> componentPids = this.configurationService.getConfigurableComponentPids();
+        if (pidsToIgnore != null) {
+            Set<String> filteredComponentPids = componentPids.stream()
+                    .filter(((Predicate<String>) pidsToIgnore::contains).negate()).collect(Collectors.toSet());
+            filteredComponentPids.forEach(componentPid -> {
+                ComponentConfiguration cc;
+                try {
+                    cc = this.configurationService.getComponentConfiguration(componentPid);
+
+                    // TODO: define a validate method for ComponentConfiguration
+                    if (cc == null) {
+                        logger.error("null ComponentConfiguration");
+                        return;
+                    }
+                    if (cc.getPid() == null || cc.getPid().isEmpty()) {
+                        logger.error("null or empty ComponentConfiguration PID");
+                        return;
+                    }
+                    if (cc.getDefinition() == null) {
+                        logger.error("null OCD for ComponentConfiguration PID {}", cc.getPid());
+                        return;
+                    }
+                    if (cc.getDefinition().getId() == null || cc.getDefinition().getId().isEmpty()) {
+
+                        logger.error("null or empty OCD ID for ComponentConfiguration PID {}. OCD ID: {}", cc.getPid(),
+                                cc.getDefinition().getId());
+                        return;
+                    }
+                    configs.add(cc);
+                } catch (KuraException e) {
+                    // Nothing needed here
+                }
+
+            });
+        }
+        return configs;
+    }
+
+    private KuraPayload doPutConfigurations(List<String> resources, KuraPayload reqPayload) throws KuraException {
+
+        if (resources.size() > 2) {
+            logger.error(BAD_REQUEST_TOPIC_MESSAGE, resources);
+            logger.error(EXPECTED_AT_MOST_TWO_RESOURCES_BUT_FOUND_MESSAGE, resources.size());
+            throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
 
-        String pid = resources.length == 2 ? resources[1] : null;
+        String pid = resources.size() == 2 ? resources.get(1) : null;
 
         XmlComponentConfigurations xmlConfigs = null;
         try {
@@ -351,50 +364,42 @@ public class CloudConfigurationHandler extends Cloudlet {
             xmlConfigs = unmarshal(s, XmlComponentConfigurations.class);
         } catch (Exception e) {
             logger.error("Error unmarshalling the request body: {}", e);
-            respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
-            respPayload.setException(e);
-            return;
+            throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
 
         this.executor.schedule(new UpdateConfigurationsCallable(pid, xmlConfigs, this.configurationService), 1000,
                 TimeUnit.MILLISECONDS);
+
+        return new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
     }
 
-    private void doExecRollback(CloudletTopic reqTopic, KuraPayload reqPayload, KuraResponsePayload respPayload)
-            throws KuraException {
-
-        String[] resources = reqTopic.getResources();
-
-        if (resources.length > 2) {
-            logger.error("Bad request topic: {}", reqTopic.toString());
-            logger.error("Expected at most two resource(s) but found {}", resources.length);
-            respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
-            return;
+    private KuraPayload doExecRollback(List<String> resources) throws KuraException {
+        if (resources.size() > 2) {
+            logger.error(BAD_REQUEST_TOPIC_MESSAGE, resources);
+            logger.error(EXPECTED_AT_MOST_TWO_RESOURCES_BUT_FOUND_MESSAGE, resources.size());
+            throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
 
-        String snapshotId = resources.length == 2 ? resources[1] : null;
+        String snapshotId = resources.size() == 2 ? resources.get(1) : null;
         Long sid;
         try {
             sid = snapshotId != null ? Long.parseLong(snapshotId) : null;
         } catch (NumberFormatException e) {
             logger.error("Bad numeric numeric format for snapshot ID: {}", snapshotId);
-            respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
-            return;
+            throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
 
         this.executor.schedule(new RollbackCallable(sid, this.configurationService), 1000, TimeUnit.MILLISECONDS);
+
+        return new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
     }
 
-    private void doExecSnapshot(CloudletTopic reqTopic, KuraPayload reqPayload, KuraResponsePayload respPayload)
-            throws KuraException {
+    private KuraPayload doExecSnapshot(List<String> resources) throws KuraException {
 
-        String[] resources = reqTopic.getResources();
-
-        if (resources.length > 1) {
-            logger.error("Bad request topic: {}", reqTopic.toString());
-            logger.error("Expected one resource(s) but found {}", resources.length);
-            respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
-            return;
+        if (resources.size() > 1) {
+            logger.error(BAD_REQUEST_TOPIC_MESSAGE, resources);
+            logger.error("Expected one resource(s) but found {}", resources.size());
+            throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
 
         // take a new snapshot and get the id
@@ -412,7 +417,9 @@ public class CloudConfigurationHandler extends Cloudlet {
 
         byte[] body = toResponseBody(xmlResult);
 
-        respPayload.setBody(body);
+        KuraResponsePayload responsePayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+        responsePayload.setBody(body);
+        return responsePayload;
     }
 
     private byte[] toResponseBody(Object o) throws KuraException {
@@ -519,7 +526,8 @@ class UpdateConfigurationsCallable implements Callable<Void> {
         // update the configuration
         try {
             List<ComponentConfiguration> configImpls = this.xmlConfigurations != null
-                    ? this.xmlConfigurations.getConfigurations() : null;
+                    ? this.xmlConfigurations.getConfigurations()
+                    : null;
             if (configImpls == null) {
                 return null;
             }
@@ -534,8 +542,7 @@ class UpdateConfigurationsCallable implements Callable<Void> {
                 // update only the configuration with the provided id
                 for (ComponentConfiguration config : configs) {
                     if (this.pid.equals(config.getPid())) {
-                        this.configurationService.updateConfiguration(this.pid,
-                                config.getConfigurationProperties());
+                        this.configurationService.updateConfiguration(this.pid, config.getConfigurationProperties());
                     }
                 }
             }

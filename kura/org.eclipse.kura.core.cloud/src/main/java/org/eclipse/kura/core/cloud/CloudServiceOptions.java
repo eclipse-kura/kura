@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -14,14 +14,9 @@ package org.eclipse.kura.core.cloud;
 import static org.eclipse.kura.core.cloud.CloudServiceLifecycleCertsPolicy.DISABLE_PUBLISHING;
 import static org.eclipse.kura.core.cloud.CloudServiceLifecycleCertsPolicy.PUBLISH_BIRTH_CONNECT_RECONNECT;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.Map;
 
 import org.eclipse.kura.cloud.CloudPayloadEncoding;
-import org.eclipse.kura.core.util.ProcessUtil;
-import org.eclipse.kura.core.util.SafeProcess;
 import org.eclipse.kura.system.SystemService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +51,7 @@ public class CloudServiceOptions {
     private final Map<String, Object> properties;
     private final SystemService systemService;
 
-    CloudServiceOptions(Map<String, Object> properties, SystemService systemService) {
+    public CloudServiceOptions(Map<String, Object> properties, SystemService systemService) {
         this.properties = properties;
         this.systemService = systemService;
     }
@@ -68,45 +63,28 @@ public class CloudServiceOptions {
      */
     public String getDeviceDisplayName() {
         String displayName = "";
-        if (this.properties != null) {
-            String deviceDisplayNameOption = (String) this.properties.get(DEVICE_DISPLAY_NAME);
+        if (this.properties == null) {
+            return displayName;
+        }
+        String deviceDisplayNameOption = (String) this.properties.get(DEVICE_DISPLAY_NAME);
 
-            // Use the device name from SystemService. This should be kura.device.name from
-            // the properties file.
-            if (deviceDisplayNameOption.equals("device-name")) {
-                displayName = this.systemService.getDeviceName();
-                return displayName;
-            }
-            // Try to get the device hostname
-            else if (deviceDisplayNameOption.equals("hostname")) {
-                displayName = "UNKNOWN";
-                if (SystemService.OS_MAC_OSX.equals(this.systemService.getOsName())) {
-                    String displayTmp = getHostname("scutil --get ComputerName");
-                    if (displayTmp.length() > 0) {
-                        displayName = displayTmp;
-                    }
-                } else if (SystemService.OS_LINUX.equals(this.systemService.getOsName())
-                        || SystemService.OS_CLOUDBEES.equals(this.systemService.getOsName())) {
-                    String displayTmp = getHostname("hostname");
-                    if (displayTmp.length() > 0) {
-                        displayName = displayTmp;
-                    }
-                }
-                return displayName;
-            }
-            // Return the custom field defined by the user
-            else if (deviceDisplayNameOption.equals("custom")) {
-                if (this.properties.get(DEVICE_CUSTOM_NAME) != null
-                        && this.properties.get(DEVICE_CUSTOM_NAME) instanceof String) {
-                    displayName = (String) this.properties.get(DEVICE_CUSTOM_NAME);
-                }
-                return displayName;
-            }
-            // Return empty string to the server
-            else if (deviceDisplayNameOption.equals("server")) {
-                displayName = "";
-                return displayName;
-            }
+        // Use the device name from SystemService. This should be kura.device.name from
+        // the properties file.
+        if ("device-name".equals(deviceDisplayNameOption)) {
+            displayName = this.systemService.getDeviceName();
+        }
+        // Try to get the device hostname
+        else if ("hostname".equals(deviceDisplayNameOption)) {
+            displayName = this.systemService.getHostname();
+        }
+        // Return the custom field defined by the user
+        else if ("custom".equals(deviceDisplayNameOption)
+                && this.properties.get(DEVICE_CUSTOM_NAME) instanceof String) {
+            displayName = (String) this.properties.get(DEVICE_CUSTOM_NAME);
+        }
+        // Return empty string to the server
+        else if ("server".equals(deviceDisplayNameOption)) {
+            displayName = "";
         }
 
         return displayName;
@@ -120,8 +98,7 @@ public class CloudServiceOptions {
      */
     public boolean getEncodeGzip() {
         boolean encodeGzip = false;
-        if (this.properties != null && this.properties.get(ENCODE_GZIP) != null
-                && this.properties.get(ENCODE_GZIP) instanceof Boolean) {
+        if (this.properties != null && this.properties.get(ENCODE_GZIP) instanceof Boolean) {
             encodeGzip = (Boolean) this.properties.get(ENCODE_GZIP);
         }
         return encodeGzip;
@@ -136,8 +113,7 @@ public class CloudServiceOptions {
      */
     public boolean getRepubBirthCertOnGpsLock() {
         boolean repubBirth = false;
-        if (this.properties != null && this.properties.get(REPUB_BIRTH_ON_GPS_LOCK) != null
-                && this.properties.get(REPUB_BIRTH_ON_GPS_LOCK) instanceof Boolean) {
+        if (this.properties != null && this.properties.get(REPUB_BIRTH_ON_GPS_LOCK) instanceof Boolean) {
             repubBirth = (Boolean) this.properties.get(REPUB_BIRTH_ON_GPS_LOCK);
         }
         return repubBirth;
@@ -152,8 +128,7 @@ public class CloudServiceOptions {
      */
     public boolean getRepubBirthCertOnModemDetection() {
         boolean repubBirth = false;
-        if (this.properties != null && this.properties.get(REPUB_BIRTH_ON_MODEM_DETECT) != null
-                && this.properties.get(REPUB_BIRTH_ON_MODEM_DETECT) instanceof Boolean) {
+        if (this.properties != null && this.properties.get(REPUB_BIRTH_ON_MODEM_DETECT) instanceof Boolean) {
             repubBirth = (Boolean) this.properties.get(REPUB_BIRTH_ON_MODEM_DETECT);
         }
         return repubBirth;
@@ -166,8 +141,7 @@ public class CloudServiceOptions {
      */
     public String getTopicControlPrefix() {
         String prefix = TOPIC_CONTROL_PREFIX_DEFAULT;
-        if (this.properties != null && this.properties.get(TOPIC_CONTROL_PREFIX) != null
-                && this.properties.get(TOPIC_CONTROL_PREFIX) instanceof String) {
+        if (this.properties != null && this.properties.get(TOPIC_CONTROL_PREFIX) instanceof String) {
             prefix = (String) this.properties.get(TOPIC_CONTROL_PREFIX);
         }
         return prefix;
@@ -181,8 +155,7 @@ public class CloudServiceOptions {
      */
     public boolean getEnableDefaultSubscriptions() {
         boolean enable = true;
-        if (this.properties != null && this.properties.get(ENABLE_DFLT_SUBSCRIPTIONS) != null
-                && this.properties.get(ENABLE_DFLT_SUBSCRIPTIONS) instanceof Boolean) {
+        if (this.properties != null && this.properties.get(ENABLE_DFLT_SUBSCRIPTIONS) instanceof Boolean) {
             enable = (Boolean) this.properties.get(ENABLE_DFLT_SUBSCRIPTIONS);
         }
         return enable;
@@ -197,8 +170,7 @@ public class CloudServiceOptions {
     public boolean isLifecycleCertsDisabled() {
         boolean birthPubDisabled = false;
         String birthPubPolicy = "";
-        if (this.properties != null && this.properties.get(BIRTH_CERT_POLICY) != null
-                && this.properties.get(BIRTH_CERT_POLICY) instanceof String) {
+        if (this.properties != null && this.properties.get(BIRTH_CERT_POLICY) instanceof String) {
             birthPubPolicy = (String) this.properties.get(BIRTH_CERT_POLICY);
         }
         if (DISABLE_PUBLISHING.getValue().equals(birthPubPolicy)) {
@@ -217,8 +189,7 @@ public class CloudServiceOptions {
     public boolean getRepubBirthCertOnReconnect() {
         boolean republishBirt = true;
         String birthPubPolicy = "";
-        if (this.properties != null && this.properties.get(BIRTH_CERT_POLICY) != null
-                && this.properties.get(BIRTH_CERT_POLICY) instanceof String) {
+        if (this.properties != null && this.properties.get(BIRTH_CERT_POLICY) instanceof String) {
             birthPubPolicy = (String) this.properties.get(BIRTH_CERT_POLICY);
         }
         if (!PUBLISH_BIRTH_CONNECT_RECONNECT.getValue().equals(birthPubPolicy)) {
@@ -287,37 +258,5 @@ public class CloudServiceOptions {
 
     public boolean getLifeCycleMessageRetain() {
         return LIFECYCLE_RETAIN;
-    }
-
-    private String getHostname(String command) {
-        StringBuffer response = new StringBuffer();
-        SafeProcess proc = null;
-        BufferedReader br = null;
-        try {
-            proc = ProcessUtil.exec(command);
-            proc.waitFor();
-            br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-            String line = null;
-            String newLine = "";
-            while ((line = br.readLine()) != null) {
-                response.append(newLine);
-                response.append(line);
-                newLine = "\n";
-            }
-        } catch (Exception e) {
-            logger.error("failed to run commands " + command, e);
-        } finally {
-            if (br != null) {
-                try {
-                    br.close();
-                } catch (IOException ex) {
-                    logger.error("I/O Exception while closing BufferedReader!");
-                }
-            }
-            if (proc != null) {
-                ProcessUtil.destroy(proc);
-            }
-        }
-        return response.toString();
     }
 }

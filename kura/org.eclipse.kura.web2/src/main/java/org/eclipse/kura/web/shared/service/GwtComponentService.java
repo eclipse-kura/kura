@@ -166,4 +166,5 @@ public interface GwtComponentService extends RemoteService {
      */
     public List<String> getDriverFactoriesList(GwtXSRFToken xsrfToken) throws GwtKuraException;
 
+    public List<String> getPidsFromTarget(GwtXSRFToken xsrfToken, String pid, String targetRef) throws GwtKuraException;
 }

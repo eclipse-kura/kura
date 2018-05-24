@@ -40,13 +40,7 @@ public class CloudDeploymentHandlerOptions {
         if (packagesPath == null || packagesPath.isEmpty()) {
             throw new ComponentException("The value of '" + PACKAGES_PATH_PROPNAME + "' is not defined");
         }
-
-        // TODO Check why this snippet was needed
-        // if (properties.getProperty(PACKAGES_PATH_PROPNAME) != null
-        // && "kura/packages".equals(properties.getProperty(PACKAGES_PATH_PROPNAME).trim())) {
-        // properties.setProperty(PACKAGES_PATH_PROPNAME, "/opt/eclipse/kura/kura/packages");
-        // packagesPath = properties.getProperty(PACKAGES_PATH_PROPNAME);
-        // }
+        
         return packagesPath;
     }
 

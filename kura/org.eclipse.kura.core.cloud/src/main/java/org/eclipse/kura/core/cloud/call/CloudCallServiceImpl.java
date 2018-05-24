@@ -88,13 +88,13 @@ public class CloudCallServiceImpl implements CloudCallService, DataServiceListen
 
     @Override
     public synchronized KuraResponsePayload call(String appId, String appTopic, KuraPayload appPayload, int timeout)
-            throws KuraConnectException, KuraTimeoutException, KuraStoreException, KuraException {
+            throws KuraException {
         return call(CLIENT_ID_VAR_NAME, appId, appTopic, appPayload, timeout);
     }
 
     @Override
     public synchronized KuraResponsePayload call(String deviceId, String appId, String appTopic, KuraPayload appPayload,
-            int timeout) throws KuraConnectException, KuraTimeoutException, KuraStoreException, KuraException {
+            int timeout) throws KuraException {
         // Generate the request ID
         String requestId = s_generator.next();
 

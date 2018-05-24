@@ -477,6 +477,11 @@
                                     <artifactId>org.eclipse.kura.wire.component.join.provider</artifactId>
                                     <version>${org.eclipse.kura.wire.component.join.provider.version}</version>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider</artifactId>
+                                    <version>${org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider.version}</version>
+                                </artifactItem>
                             </artifactItems>
                             <stripVersion>true</stripVersion>
                             <outputDirectory>${project.basedir}/target/plugins</outputDirectory>
@@ -677,6 +682,8 @@
                                     tofile="target/plugins/org.eclipse.kura.wire.component.conditional.provider_${org.eclipse.kura.wire.component.conditional.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.wire.component.join.provider.jar"
                                     tofile="target/plugins/org.eclipse.kura.wire.component.join.provider_${org.eclipse.kura.wire.component.join.provider.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider.jar"
+                                    tofile="target/plugins/org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider_${org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider.version}.jar" />
                             </tasks>
                         </configuration>
                     </execution>
@@ -2766,6 +2773,10 @@
                                             todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.xml.marshaller.unmarshaller.provider_${org.eclipse.kura.xml.marshaller.unmarshaller.provider.version}.jar"
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
+                                            
+                                        <copy
+                                            file="${project.build.directory}/plugins/org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider_${org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider.version}.jar"
                                             todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
                                     </target>
                                 </configuration>

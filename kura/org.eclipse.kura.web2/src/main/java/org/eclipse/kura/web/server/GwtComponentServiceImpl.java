@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -67,6 +66,8 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.component.runtime.ServiceComponentRuntime;
+import org.osgi.service.component.runtime.dto.ReferenceDTO;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -111,7 +112,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
                     .applyToServiceOptionally(ConfigurationService.class,
                             configurationService -> configurationService.getComponentConfigurations().stream()
                                     .filter(config -> matchingPids.contains(config.getPid())))
-                    .map(config -> createMetatypeOnlyGwtComponentConfigurationInternal(config)).filter(Objects::nonNull)
+                    .map(this::createMetatypeOnlyGwtComponentConfigurationInternal).filter(Objects::nonNull)
                     .collect(Collectors.toList());
         } catch (InvalidSyntaxException e) {
             throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
@@ -238,6 +239,10 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
         // are only shown in Kura Wires UI
         List<String> allWireComponents = findWireComponents();
 
+        // find components that declare the
+        // kura.ui.factory.hide component property
+        List<String> hiddenFactories = findFactoryHideComponents();
+
         // finding services with kura.service.ui.hide property
         fillServicesToHideList(servicesToBeHidden);
 
@@ -248,6 +253,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
         // are shown in different UI
         result.removeAll(allWireComponents);
         result.removeAll(servicesToBeHidden);
+        result.removeAll(hiddenFactories);
         return result;
     }
 
@@ -312,30 +318,33 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
                         .map(WireComponentDefinition::getFactoryPid).collect(Collectors.toList()));
     }
 
+    private List<String> findFactoryHideComponents() throws GwtKuraException {
+        return ServiceLocator.applyToServiceOptionally(ServiceComponentRuntime.class,
+                scr -> scr.getComponentDescriptionDTOs().stream()
+                        .filter(dto -> dto.properties.containsKey("kura.ui.factory.hide"))
+                        .map(dto -> (String) dto.name).collect(Collectors.toList()));
+    }
+
     private List<ComponentConfiguration> sortConfigurationsByName(List<ComponentConfiguration> configs) {
-        Collections.sort(configs, new Comparator<ComponentConfiguration>() {
-
-            @Override
-            public int compare(ComponentConfiguration arg0, ComponentConfiguration arg1) {
-                String name0;
-                int start = arg0.getPid().lastIndexOf('.');
-                int substringIndex = start + 1;
-                if (start != -1 && substringIndex < arg0.getPid().length()) {
-                    name0 = arg0.getPid().substring(substringIndex);
-                } else {
-                    name0 = arg0.getPid();
-                }
-
-                String name1;
-                start = arg1.getPid().lastIndexOf('.');
-                substringIndex = start + 1;
-                if (start != -1 && substringIndex < arg1.getPid().length()) {
-                    name1 = arg1.getPid().substring(substringIndex);
-                } else {
-                    name1 = arg1.getPid();
-                }
-                return name0.compareTo(name1);
+        Collections.sort(configs, (arg0, arg1) -> {
+            String name0;
+            int start = arg0.getPid().lastIndexOf('.');
+            int substringIndex = start + 1;
+            if (start != -1 && substringIndex < arg0.getPid().length()) {
+                name0 = arg0.getPid().substring(substringIndex);
+            } else {
+                name0 = arg0.getPid();
             }
+
+            String name1;
+            start = arg1.getPid().lastIndexOf('.');
+            substringIndex = start + 1;
+            if (start != -1 && substringIndex < arg1.getPid().length()) {
+                name1 = arg1.getPid().substring(substringIndex);
+            } else {
+                name1 = arg1.getPid();
+            }
+            return name0.compareTo(name1);
         });
         return configs;
     }
@@ -389,8 +398,8 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
                     gwtConfigs.add(gwtConfigComponent);
                 }
             }
-        } catch (Throwable t) {
-            KuraExceptionHandler.handle(t);
+        } catch (Exception e) {
+            KuraExceptionHandler.handle(e);
         }
         return gwtConfigs;
     }
@@ -411,8 +420,8 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
             if (fullGwtConfigComponent != null) {
                 gwtConfigs.add(fullGwtConfigComponent);
             }
-        } catch (Throwable t) {
-            KuraExceptionHandler.handle(t);
+        } catch (Exception e) {
+            KuraExceptionHandler.handle(e);
         }
         return gwtConfigs;
     }
@@ -428,8 +437,8 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
                 GwtConfigComponent gwtConfigComponent = createMetatypeOnlyGwtComponentConfiguration(config);
                 gwtConfigs.add(gwtConfigComponent);
             }
-        } catch (Throwable t) {
-            KuraExceptionHandler.handle(t);
+        } catch (Exception e) {
+            KuraExceptionHandler.handle(e);
         }
         return gwtConfigs;
     }
@@ -474,8 +483,8 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
                 GwtConfigComponent gwtConfigComponent = createMetatypeOnlyGwtComponentConfiguration(config);
                 gwtConfigs.add(gwtConfigComponent);
             }
-        } catch (Throwable t) {
-            KuraExceptionHandler.handle(t);
+        } catch (Exception e) {
+            KuraExceptionHandler.handle(e);
         }
         return gwtConfigs;
     }
@@ -656,9 +665,8 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
             if (enumeration != null) {
                 while (enumeration.hasMoreElements()) {
                     final URL entry = enumeration.nextElement();
-                    BufferedReader reader = null;
-                    try {
-                        reader = new BufferedReader(new InputStreamReader(entry.openConnection().getInputStream()));
+                    try (InputStreamReader inputStream = new InputStreamReader(entry.openConnection().getInputStream());
+                            BufferedReader reader= new BufferedReader(inputStream);){
                         final StringBuilder contents = new StringBuilder();
                         String line;
                         while ((line = reader.readLine()) != null) {
@@ -688,18 +696,59 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
                         }
                     } catch (final Exception ex) {
                         throw new GwtKuraException(GwtKuraErrorCode.RESOURCE_FETCHING_FAILURE);
-                    } finally {
-                        try {
-                            if (reader != null) {
-                                reader.close();
-                            }
-                        } catch (final IOException e) {
-                            throw new GwtKuraException(GwtKuraErrorCode.FAILURE_CLOSING_RESOURCES);
-                        }
                     }
                 }
             }
         }
         return driverFactoriesPids;
     }
+
+    @Override
+    public List<String> getPidsFromTarget(GwtXSRFToken xsrfToken, String pid, String targetRef)
+            throws GwtKuraException {
+        this.checkXSRFToken(xsrfToken);
+
+        List<String> result = new ArrayList<>();
+
+        final BundleContext context = FrameworkUtil.getBundle(GwtWireService.class).getBundleContext();
+        ServiceReference<ServiceComponentRuntime> scrServiceRef = context
+                .getServiceReference(ServiceComponentRuntime.class);
+        try {
+            final ServiceComponentRuntime scrService = context.getService(scrServiceRef);
+
+            final Set<String> referenceInterfaces = scrService.getComponentDescriptionDTOs().stream()
+                    .map(component -> {
+                        ReferenceDTO[] references = component.references;
+                        for (ReferenceDTO reference : references) {
+                            if (targetRef.equals(reference.name)) {
+                                return reference.interfaceName;
+                            }
+                        }
+                        return null;
+                    }).filter(Objects::nonNull).collect(Collectors.toSet());
+
+            referenceInterfaces.forEach(reference -> {
+                try {
+                    Class<?> t = Class.forName(reference);
+                    Collection<?> cloudServiceReferences = ServiceLocator.getInstance().getServiceReferences(t, null);
+
+                    for (Object cloudServiceReferenceObject : cloudServiceReferences) {
+                        if (cloudServiceReferenceObject instanceof ServiceReference) {
+                            ServiceReference<?> cloudServiceReference = (ServiceReference<?>) cloudServiceReferenceObject;
+                            String cloudServicePid = (String) cloudServiceReference.getProperty(KURA_SERVICE_PID);
+                            result.add(cloudServicePid);
+                            ServiceLocator.getInstance().ungetService(cloudServiceReference);
+                        }
+                    }
+                } catch (ClassNotFoundException | GwtKuraException e) {
+
+                }
+            });
+
+        } finally {
+            context.ungetService(scrServiceRef);
+        }
+        return result;
+    }
+
 }

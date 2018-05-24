@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -11,26 +11,31 @@
  *******************************************************************************/
 package org.eclipse.kura.cloud.app.command;
 
+import static org.eclipse.kura.cloudconnection.request.RequestHandlerConstants.ARGS_KEY;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.cloud.Cloudlet;
-import org.eclipse.kura.cloud.CloudletTopic;
+import org.eclipse.kura.cloudconnection.message.KuraMessage;
+import org.eclipse.kura.cloudconnection.request.RequestHandler;
+import org.eclipse.kura.cloudconnection.request.RequestHandlerContext;
+import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
 import org.eclipse.kura.command.PasswordCommandService;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.crypto.CryptoService;
-import org.eclipse.kura.message.KuraRequestPayload;
+import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CommandCloudApp extends Cloudlet implements ConfigurableComponent, PasswordCommandService {
+public class CommandCloudApp implements ConfigurableComponent, PasswordCommandService, RequestHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(CommandCloudApp.class);
     private static final String EDC_PASSWORD_METRIC_NAME = "command.password";
@@ -44,17 +49,12 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent, 
 
     private Map<String, Object> properties;
 
-    private ComponentContext compCtx;
     private CryptoService cryptoService;
 
     private boolean currentStatus;
 
     /* EXEC */
     public static final String RESOURCE_COMMAND = "command";
-
-    public CommandCloudApp() {
-        super(APP_ID);
-    }
 
     // ----------------------------------------------------------------
     //
@@ -73,6 +73,22 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent, 
         this.cryptoService = null;
     }
 
+    public void setRequestHandlerRegistry(RequestHandlerRegistry requestHandlerRegistry) {
+        try {
+            requestHandlerRegistry.registerRequestHandler(APP_ID, this);
+        } catch (KuraException e) {
+            logger.info("Unable to register cloudlet {} in {}", APP_ID, requestHandlerRegistry.getClass().getName());
+        }
+    }
+
+    public void unsetRequestHandlerRegistry(RequestHandlerRegistry requestHandlerRegistry) {
+        try {
+            requestHandlerRegistry.unregister(APP_ID);
+        } catch (KuraException e) {
+            logger.info("Unable to register cloudlet {} in {}", APP_ID, requestHandlerRegistry.getClass().getName());
+        }
+    }
+
     // ----------------------------------------------------------------
     //
     // Activation APIs
@@ -81,20 +97,18 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent, 
 
     // This component inherits the activation methods from the parent
     // class CloudApp.
-    protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
+    protected void activate(Map<String, Object> properties) {
         logger.info("Cloudlet {} has started with config!", APP_ID);
-        this.compCtx = componentContext;
-        this.currentStatus = (Boolean) properties.get(COMMAND_ENABLED_ID);
-        if (this.currentStatus) {
-            super.activate(this.compCtx);
-        }
+
         updated(properties);
     }
 
     public void updated(Map<String, Object> properties) {
         logger.info("updated...: {}", properties);
 
-        this.properties = new HashMap<String, Object>();
+        this.currentStatus = (Boolean) properties.get(COMMAND_ENABLED_ID);
+
+        this.properties = new HashMap<>();
 
         for (Map.Entry<String, Object> entry : properties.entrySet()) {
             String key = entry.getKey();
@@ -111,61 +125,50 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent, 
                 this.properties.put(key, value);
             }
         }
-
-        boolean newStatus = (Boolean) properties.get(COMMAND_ENABLED_ID);
-        boolean stateChanged = this.currentStatus != newStatus;
-        if (stateChanged) {
-            this.currentStatus = newStatus;
-            if (!this.currentStatus && getCloudApplicationClient() != null) {
-                super.deactivate(this.compCtx);
-            }
-            if (this.currentStatus) {
-                super.activate(this.compCtx);
-            }
-        }
     }
 
-    @Override
     protected void deactivate(ComponentContext componentContext) {
         logger.info("Cloudlet {} is deactivating!", APP_ID);
-        if (getCloudApplicationClient() != null) {
-            super.deactivate(this.compCtx);
-        }
+
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    protected void doExec(CloudletTopic reqTopic, KuraRequestPayload reqPayload, KuraResponsePayload respPayload)
-            throws KuraException {
+    public KuraMessage doExec(RequestHandlerContext requestContext, KuraMessage reqMessage) throws KuraException {
 
-        String[] resources = reqTopic.getResources();
-
-        if (resources == null || resources.length != 1) {
-            logger.error("Bad request topic: {}", reqTopic);
-            logger.error("Expected one resource but found {}", resources != null ? resources.length : "none");
-            respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
-            return;
+        if (!this.currentStatus) {
+            throw new KuraException(KuraErrorCode.NOT_FOUND);
         }
 
-        if (!resources[0].equals(RESOURCE_COMMAND)) {
-            logger.error("Bad request topic: {}", reqTopic);
-            logger.error("Cannot find resource with name: {}", resources[0]);
-            respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_NOTFOUND);
-            return;
+        Object requestObject = reqMessage.getProperties().get(ARGS_KEY.value());
+        List<String> resources;
+        if (requestObject instanceof List) {
+            resources = (List<String>) requestObject;
+        } else {
+            throw new KuraException(KuraErrorCode.BAD_REQUEST);
+        }
+
+        if (resources.size() != 1) {
+            logger.error("Bad request topic: {}", resources);
+            logger.error("Expected one resource but found {}", resources.size());
+            throw new KuraException(KuraErrorCode.BAD_REQUEST);
+        }
+
+        if (!resources.get(0).equals(RESOURCE_COMMAND)) {
+            logger.error("Bad request topic: {}", resources);
+            logger.error("Cannot find resource with name: {}", resources.get(0));
+            throw new KuraException(KuraErrorCode.NOT_FOUND);
         }
 
         logger.info("EXECuting resource: {}", RESOURCE_COMMAND);
 
-        KuraCommandResponsePayload commandResp = execute(reqPayload);
-
-        for (String name : commandResp.metricNames()) {
-            Object value = commandResp.getMetric(name);
-            respPayload.addMetric(name, value);
-        }
-        respPayload.setBody(commandResp.getBody());
+        KuraPayload reqPayload = reqMessage.getPayload();
+        KuraPayload resPayload = execute(reqPayload);
+        return new KuraMessage(resPayload);
     }
 
     @Override
-    public KuraCommandResponsePayload execute(KuraRequestPayload reqPayload) {
+    public KuraPayload execute(KuraPayload reqPayload) throws KuraException {
         KuraCommandRequestPayload commandReq = new KuraCommandRequestPayload(reqPayload);
 
         String receivedPassword = (String) commandReq.getMetric(EDC_PASSWORD_METRIC_NAME);
@@ -179,8 +182,7 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent, 
             String command = commandReq.getCommand();
             if (command == null || command.trim().isEmpty()) {
                 logger.error("null command");
-                commandResp.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
-                return commandResp;
+                throw new KuraException(KuraErrorCode.BAD_REQUEST);
             }
 
             String[] cmdarray = prepareCommandArray(commandReq, command);
@@ -194,9 +196,7 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent, 
                     UnZip.unZipBytes(zipBytes, dir);
                 } catch (IOException e) {
                     logger.error("Error unzipping command zip bytes", e);
-                    commandResp.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
-                    commandResp.setException(e);
-                    return commandResp;
+                    throw new KuraException(KuraErrorCode.DECODER_ERROR);
                 }
             }
 
@@ -205,9 +205,7 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent, 
                 proc = createExecutionProcess(dir, cmdarray, envp);
             } catch (Throwable t) {
                 logger.error("Error executing command {}", t);
-                commandResp.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
-                commandResp.setException(t);
-                return commandResp;
+                throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR);
             }
 
             boolean runAsync = commandReq.isRunAsync() != null ? commandReq.isRunAsync() : false;
@@ -229,8 +227,7 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent, 
 
         } else {
             logger.error("Password required but not correct and/or missing");
-            commandResp.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
-            commandResp.setExceptionMessage("Password missing or not correct");
+            throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
 
         return commandResp;

@@ -9,6 +9,12 @@ Service-Component: OSGI-INF/*.xml
 Bundle-ActivationPolicy: lazy
 Import-Package: org.eclipse.kura;version="[1.0,2.0)",
  org.eclipse.kura.cloud;version="[1.0,2.0)",
+ org.eclipse.kura.cloudconnection;version="[1.0,2.0)",
+ org.eclipse.kura.cloudconnection.listener;version="[1.0,2.0)",
+ org.eclipse.kura.cloudconnection.message;version="[1.0,2.0)",
+ org.eclipse.kura.cloudconnection.publisher;version="[1.0,2.0)",
+ org.eclipse.kura.cloudconnection.subscriber;version="[1.0,2.0)",
+ org.eclipse.kura.cloudconnection.subscriber.listener;version="[1.0,2.0)",
  org.eclipse.kura.configuration;version="[1.0,2.0)",
  org.eclipse.kura.message;version="[1.0,2.0)",
  org.osgi.framework;version="1.8.0",

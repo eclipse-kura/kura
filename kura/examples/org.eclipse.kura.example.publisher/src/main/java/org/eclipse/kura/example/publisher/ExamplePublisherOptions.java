@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -20,29 +20,21 @@ import java.util.Map;
 final class ExamplePublisherOptions {
 
     // Cloud Application identifier
-    private static final String DEFAULT_APP_ID = "EXAMPLE_PUBLISHER";
-    private static final String DEFAULT_CLOUD_SERVICE_PID = "org.eclipse.kura.cloud.CloudService";
+    private static final String DEFAULT_CLOUD_PUBLISHER_PID = "";
+    private static final String DEFAULT_CLOUD_SUBSCRIBER_PID = "";
     private static final int DEFAULT_PUBLISH_RATE = 1000;
-    private static final int DEFAULT_PUBLISH_QOS = 0;
-    private static final boolean DEFAULT_PUBLISH_RETAIN = false;
-    private static final String DEFAULT_APP_TOPIC = "data/metrics";
-    private static final String DEFAULT_SUBSCRIBE_TOPIC = "inbound/#";
     private static final float DEFAULT_TEMPERATURE_INITIAL = 10;
     private static final float DEFAULT_TEMPERATURE_INCREMENT = 0.1f;
 
     // Publishing Property Names
     private static final String PUBLISH_RATE_PROP_NAME = "publish.rate";
-    private static final String PUBLISH_TOPIC_PROP_NAME = "publish.appTopic";
-    private static final String SUBSCRIBE_TOPIC_PROP_NAME = "subscribe.topic";
-    private static final String PUBLISH_QOS_PROP_NAME = "publish.qos";
-    private static final String PUBLISH_RETAIN_PROP_NAME = "publish.retain";
     private static final String TEMP_INITIAL_PROP_NAME = "metric.temperature.initial";
     private static final String TEMP_INCREMENT_PROP_NAME = "metric.temperature.increment";
     private static final String[] METRIC_PROP_NAMES = { "metric.string", "metric.string.oneof", "metric.long",
             "metric.integer", "metric.integer.fixed", "metric.short", "metric.double", "metric.float", "metric.char",
             "metric.byte", "metric.boolean", "metric.password" };
-    private static final String CLOUD_SERVICE_PROP_NAME = "cloud.service.pid";
-    private static final String APP_ID_PROP_NAME = "app.id";
+    private static final String CLOUD_PUBLISHER_PROP_NAME = "CloudPublisher.target";
+    private static final String CLOUD_SUBSCRIBER_PROP_NAME = "CloudSubscriber.target";
 
     private final Map<String, Object> properties;
 
@@ -51,22 +43,22 @@ final class ExamplePublisherOptions {
         this.properties = properties;
     }
 
-    String getCloudServicePid() {
-        String cloudServicePid = DEFAULT_CLOUD_SERVICE_PID;
-        Object configCloudServicePid = this.properties.get(CLOUD_SERVICE_PROP_NAME);
-        if (nonNull(configCloudServicePid) && configCloudServicePid instanceof String) {
-            cloudServicePid = (String) configCloudServicePid;
+    String getCloudPublisherPid() {
+        String cloudPublisherPid = DEFAULT_CLOUD_PUBLISHER_PID;
+        Object configCloudPublisherPid = this.properties.get(CLOUD_PUBLISHER_PROP_NAME);
+        if (nonNull(configCloudPublisherPid) && configCloudPublisherPid instanceof String) {
+            cloudPublisherPid = (String) configCloudPublisherPid;
         }
-        return cloudServicePid;
+        return cloudPublisherPid;
     }
-
-    String getAppId() {
-        String appId = DEFAULT_APP_ID;
-        Object app = this.properties.get(APP_ID_PROP_NAME);
-        if (nonNull(app) && app instanceof String) {
-            appId = String.valueOf(app);
+    
+    String getCloudSubscriberPid() {
+        String cloudSubscriberPid = DEFAULT_CLOUD_SUBSCRIBER_PID;
+        Object configCloudSubscriberPid = this.properties.get(CLOUD_SUBSCRIBER_PROP_NAME);
+        if (nonNull(configCloudSubscriberPid) && configCloudSubscriberPid instanceof String) {
+            cloudSubscriberPid = (String) configCloudSubscriberPid;
         }
-        return appId;
+        return cloudSubscriberPid;
     }
 
     int getPublishRate() {
@@ -76,42 +68,6 @@ final class ExamplePublisherOptions {
             publishRate = (int) rate;
         }
         return publishRate;
-    }
-
-    int getPublishQos() {
-        int publishQos = DEFAULT_PUBLISH_QOS;
-        Object qos = this.properties.get(PUBLISH_QOS_PROP_NAME);
-        if (nonNull(qos) && qos instanceof Integer) {
-            publishQos = (int) qos;
-        }
-        return publishQos;
-    }
-
-    boolean getPublishRetain() {
-        boolean publishRetain = DEFAULT_PUBLISH_RETAIN;
-        Object retain = this.properties.get(PUBLISH_RETAIN_PROP_NAME);
-        if (nonNull(retain) && retain instanceof Boolean) {
-            publishRetain = (boolean) retain;
-        }
-        return publishRetain;
-    }
-
-    String getAppTopic() {
-        String appTopic = DEFAULT_APP_TOPIC;
-        Object app = this.properties.get(PUBLISH_TOPIC_PROP_NAME);
-        if (nonNull(app) && app instanceof String) {
-            appTopic = String.valueOf(app);
-        }
-        return appTopic;
-    }
-
-    String getSubscribeTopic() {
-        String subscribeTopic = DEFAULT_SUBSCRIBE_TOPIC;
-        Object topic = this.properties.get(SUBSCRIBE_TOPIC_PROP_NAME);
-        if (nonNull(topic) && topic instanceof String) {
-            subscribeTopic = String.valueOf(topic);
-        }
-        return subscribeTopic;
     }
 
     float getTempInitial() {

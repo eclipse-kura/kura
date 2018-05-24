@@ -23,22 +23,26 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.cloudconnection.CloudConnectionManager;
 import org.eclipse.kura.cloud.factory.CloudServiceFactory;
-import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
-import org.eclipse.kura.configuration.metatype.AD;
-import org.eclipse.kura.configuration.metatype.Icon;
-import org.eclipse.kura.configuration.metatype.OCD;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.component.ComponentContext;
 
 public class DefaultCloudServiceFactoryTest {
 
@@ -160,42 +164,66 @@ public class DefaultCloudServiceFactoryTest {
     public void testGetManagedCloudServicePidsEmpty() throws KuraException {
         DefaultCloudServiceFactory factory = new DefaultCloudServiceFactory();
 
-        ConfigurationService csMock = mock(ConfigurationService.class);
-        factory.setConfigurationService(csMock);
+        factory.activate(getMockComponentContext(Collections.emptyList()));
 
-        List<ComponentConfiguration> list = new ArrayList<ComponentConfiguration>();
-        when(csMock.getComponentConfigurations()).thenReturn(list);
-
-        Set<String> pids = factory.getManagedCloudServicePids();
+        Set<String> pids = factory.getManagedCloudConnectionPids();
 
         assertNotNull(pids);
         assertEquals(0, pids.size());
     }
 
-    private CCImpl createMockConfiguration(final String pid, final String factoryPid,
+    private ComponentContext getMockComponentContext(Collection<ServiceReference<CloudConnectionManager>> refs) {
+        try {
+            final BundleContext context = mock(BundleContext.class);
+
+            when(context.getServiceReferences(CloudConnectionManager.class, null)).thenReturn(refs);
+
+            final ComponentContext componentContext = mock(ComponentContext.class);
+
+            when(componentContext.getBundleContext()).thenReturn(context);
+
+            return componentContext;
+        } catch (InvalidSyntaxException e) {
+            throw new IllegalStateException();
+        }
+    }
+
+    private ServiceReference<CloudConnectionManager> createMockReference(final String pid, final String factoryPid,
             final Map<String, Object> properties) {
-        final OCD ocd = new OCDImpl(factoryPid);
-        return new CCImpl(pid, ocd, properties);
+
+        final Map<String, Object> refProperties = new HashMap<>();
+
+        if (properties != null) {
+            refProperties.putAll(properties);
+        }
+
+        refProperties.put(ConfigurationService.KURA_SERVICE_PID, pid);
+        refProperties.put(ConfigurationAdmin.SERVICE_FACTORYPID, factoryPid);
+
+        final ServiceReference<CloudConnectionManager> ref = mock(ServiceReference.class);
+        when(ref.getProperty(anyObject())).thenAnswer(answer -> {
+            final String key = answer.getArgumentAt(0, String.class);
+            return refProperties.get(key);
+        });
+
+        return ref;
     }
 
     @Test
     public void testGetManagedCloudServicePids() throws KuraException {
         DefaultCloudServiceFactory factory = new DefaultCloudServiceFactory();
 
-        ConfigurationService csMock = mock(ConfigurationService.class);
-        factory.setConfigurationService(csMock);
-
-        List<ComponentConfiguration> list = new ArrayList<ComponentConfiguration>();
-        list.add(createMockConfiguration(CLOUD_SERVICE_FACTORY_PID + "-FOO", CLOUD_SERVICE_FACTORY_PID,
+        List<ServiceReference<CloudConnectionManager>> list = new ArrayList<>();
+        list.add(createMockReference(CLOUD_SERVICE_FACTORY_PID + "-FOO", CLOUD_SERVICE_FACTORY_PID,
                 Collections.singletonMap(CloudServiceFactory.KURA_CLOUD_SERVICE_FACTORY_PID,
                         DefaultCloudServiceFactory.class.getName())));
 
-        list.add(createMockConfiguration(CLOUD_SERVICE_FACTORY_PID, CLOUD_SERVICE_FACTORY_PID, Collections.singletonMap(
+        list.add(createMockReference(CLOUD_SERVICE_FACTORY_PID, CLOUD_SERVICE_FACTORY_PID, Collections.singletonMap(
                 CloudServiceFactory.KURA_CLOUD_SERVICE_FACTORY_PID, DefaultCloudServiceFactory.class.getName())));
 
-        when(csMock.getComponentConfigurations()).thenReturn(list);
+        factory.activate(getMockComponentContext(list));
 
-        Set<String> pids = factory.getManagedCloudServicePids();
+        Set<String> pids = factory.getManagedCloudConnectionPids();
 
         assertNotNull(pids);
         assertEquals(2, pids.size());
@@ -207,33 +235,30 @@ public class DefaultCloudServiceFactoryTest {
     public void testGetManagedCloudServiceShouldOnlyReturnManagedEntries() throws KuraException {
         DefaultCloudServiceFactory factory = new DefaultCloudServiceFactory();
 
-        ConfigurationService csMock = mock(ConfigurationService.class);
-        factory.setConfigurationService(csMock);
-
-        List<ComponentConfiguration> list = new ArrayList<ComponentConfiguration>();
-        list.add(createMockConfiguration(CLOUD_SERVICE_FACTORY_PID + "-OK", CLOUD_SERVICE_FACTORY_PID,
+        List<ServiceReference<CloudConnectionManager>> list = new ArrayList<>();
+        list.add(createMockReference(CLOUD_SERVICE_FACTORY_PID + "-OK", CLOUD_SERVICE_FACTORY_PID,
                 Collections.singletonMap(CloudServiceFactory.KURA_CLOUD_SERVICE_FACTORY_PID,
                         DefaultCloudServiceFactory.class.getName())));
 
-        list.add(createMockConfiguration(CLOUD_SERVICE_FACTORY_PID + "-OK2", CLOUD_SERVICE_FACTORY_PID,
+        list.add(createMockReference(CLOUD_SERVICE_FACTORY_PID + "-OK2", CLOUD_SERVICE_FACTORY_PID,
                 Collections.singletonMap(CloudServiceFactory.KURA_CLOUD_SERVICE_FACTORY_PID,
                         DefaultCloudServiceFactory.class.getName())));
 
-        list.add(createMockConfiguration(CLOUD_SERVICE_FACTORY_PID + "-BAR", CLOUD_SERVICE_FACTORY_PID, Collections
+        list.add(createMockReference(CLOUD_SERVICE_FACTORY_PID + "-BAR", CLOUD_SERVICE_FACTORY_PID, Collections
                 .singletonMap(CloudServiceFactory.KURA_CLOUD_SERVICE_FACTORY_PID, "OtherCloudServiceFactory")));
 
-        list.add(createMockConfiguration(CLOUD_SERVICE_FACTORY_PID, CLOUD_SERVICE_FACTORY_PID, Collections.singletonMap(
+        list.add(createMockReference(CLOUD_SERVICE_FACTORY_PID, CLOUD_SERVICE_FACTORY_PID, Collections.singletonMap(
                 CloudServiceFactory.KURA_CLOUD_SERVICE_FACTORY_PID, DefaultCloudServiceFactory.class.getName())));
 
-        list.add(createMockConfiguration("CloudServiceBaz", CLOUD_SERVICE_FACTORY_PID, Collections.emptyMap()));
-        list.add(createMockConfiguration("OtherCloudService", CLOUD_SERVICE_FACTORY_PID,
+        list.add(createMockReference("CloudServiceBaz", CLOUD_SERVICE_FACTORY_PID, Collections.emptyMap()));
+        list.add(createMockReference("OtherCloudService", CLOUD_SERVICE_FACTORY_PID,
                 Collections.singletonMap(CloudServiceFactory.KURA_CLOUD_SERVICE_FACTORY_PID, null)));
 
-        list.add(createMockConfiguration("foo", "bar", Collections.emptyMap()));
+        list.add(createMockReference("foo", "bar", Collections.emptyMap()));
 
-        when(csMock.getComponentConfigurations()).thenReturn(list);
+        factory.activate(getMockComponentContext(list));
 
-        Set<String> pids = factory.getManagedCloudServicePids();
+        Set<String> pids = factory.getManagedCloudConnectionPids();
 
         assertNotNull(pids);
         assertEquals(3, pids.size());
@@ -241,71 +266,4 @@ public class DefaultCloudServiceFactoryTest {
         assertTrue(pids.contains(CLOUD_SERVICE_FACTORY_PID + "-OK2"));
         assertTrue(pids.contains(CLOUD_SERVICE_FACTORY_PID));
     }
-}
-
-class CCImpl implements ComponentConfiguration {
-
-    private String pid;
-    private OCD definition;
-    private Map<String, Object> properties;
-
-    public CCImpl(String pid, OCD definition) {
-        this(pid, definition, Collections.emptyMap());
-    }
-
-    public CCImpl(String pid, OCD definition, Map<String, Object> properties) {
-        this.pid = pid;
-        this.definition = definition;
-        this.properties = properties;
-    }
-
-    @Override
-    public String getPid() {
-        return pid;
-    }
-
-    @Override
-    public OCD getDefinition() {
-        return definition;
-    }
-
-    @Override
-    public Map<String, Object> getConfigurationProperties() {
-        return properties;
-    }
-}
-
-class OCDImpl implements OCD {
-
-    private String id;
-
-    public OCDImpl(String id) {
-        this.id = id;
-    }
-
-    @Override
-    public List<AD> getAD() {
-        return null;
-    }
-
-    @Override
-    public List<Icon> getIcon() {
-        return null;
-    }
-
-    @Override
-    public String getName() {
-        return null;
-    }
-
-    @Override
-    public String getDescription() {
-        return null;
-    }
-
-    @Override
-    public String getId() {
-        return id;
-    }
-
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -11,6 +11,8 @@
  *******************************************************************************/
 package org.eclipse.kura.cloud;
 
+import org.eclipse.kura.cloudconnection.listener.CloudConnectionListener;
+import org.eclipse.kura.cloudconnection.subscriber.listener.CloudSubscriberListener;
 import org.eclipse.kura.data.DataService;
 import org.eclipse.kura.data.DataTransportService;
 import org.eclipse.kura.message.KuraPayload;
@@ -22,8 +24,11 @@ import org.osgi.annotation.versioning.ConsumerType;
  * Arrived methods are invoked whenever a message is sent to a appTopic associated to the CloudClient.
  * The Arrived method signatures are differentiated based on whether the incoming messages have been
  * published to a data topic (by default accountName/#) or a control topic (by default $EDC/accountName/#).
+ * 
+ * @deprecated Please consider using {@link CloudConnectionListener} and {@link CloudSubscriberListener} instead
  */
 @ConsumerType
+@Deprecated
 public interface CloudClientListener {
 
     /**

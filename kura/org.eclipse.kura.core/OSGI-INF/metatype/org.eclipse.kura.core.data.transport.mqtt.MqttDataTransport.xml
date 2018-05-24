@@ -21,7 +21,7 @@
         <Icon resource="MqttDataTransport" size="32"/>
                 
         <AD id="broker-url"
-            name="broker-url"
+            name="Broker-url"
             type="String"
             cardinality="0" 
             required="true"
@@ -29,7 +29,7 @@
             description="URL of the mqtt broker to connect to. Everyware Cloud: mqtt://broker-sandbox.everyware-cloud.com:1883/, mqtts://broker-sandbox.everyware-cloud.com:8883/, ws://broker-sandbox.everyware-cloud.com:8080/ or wss://broker-sandbox.everyware-cloud.com:443/. Eclipse IoT: mqtt://iot.eclipse.org:1883/, mqtts://iot.eclipse.org:8883/, ws://iot.eclipse.org:80/ws or wss://iot.eclipse.org:443/ws."/>
 
         <AD id="topic.context.account-name"
-            name="topic.context.account-name"
+            name="Topic Context Account-Name"
             type="String"
             cardinality="0"
             required="false"
@@ -37,7 +37,7 @@
             description="The value of this attribute will replace the '#account-name' token found in publishing topics. For connections to remote management servers, this is generally the name of the server side account."/>
 
         <AD id="username"  
-            name="username"
+            name="Username"
             type="String"
             cardinality="0"
             required="false"
@@ -45,7 +45,7 @@
             description="Username to be used when connecting to the MQTT broker."/>
 
         <AD id="password"  
-            name="password"
+            name="Password"
             type="Password"
             cardinality="0" 
             required="false"
@@ -53,7 +53,7 @@
             description="Password to be used when connecting to the MQTT broker."/>
 
         <AD id="client-id"
-            name="client-id"
+            name="Client-id"
             type="String"
             cardinality="0"
             required="false"
@@ -61,7 +61,7 @@
             description="Client identifier to be used when connecting to the MQTT broker. The identifier has to be unique within your account. Characters '/', '+', '#' and '.' are invalid and they will be replaced by '-'. If left empty, this is automatically determined by the client software as the MAC address of the main network interface (in general uppercase and without ':')."/>
         
         <AD id="keep-alive"  
-            name="keep-alive"
+            name="Keep-alive"
             type="Integer"
             cardinality="0" 
             required="true"
@@ -69,7 +69,7 @@
             description="Frequency in seconds for the periodic MQTT PING message."/>
             
         <AD id="timeout"
-            name="timeout"
+            name="Timeout"
             type="Integer"
             cardinality="0" 
             required="true"
@@ -77,7 +77,7 @@
             description="Timeout used for all interactions with the MQTT broker."/>
 
         <AD id="clean-session"
-            name="clean-session"
+            name="Clean-session"
             type="Boolean"
             cardinality="0"
             required="true"
@@ -85,7 +85,7 @@
             description="MQTT Clean Session flag."/>
             
         <AD id="lwt.topic"
-            name="lwt.topic"
+            name="LWT Topic"
             type="String"
             cardinality="0"
             required="false"
@@ -93,7 +93,7 @@
             description="MQTT Last Will and Testament topic. The tokens '#account-name' and '#client-id' will be replaced by the values of the properties topic.context.account-name and client-id"/>
             
         <AD id="lwt.payload"
-            name="lwt.payload"
+            name="LWT Payload"
             type="String"
             cardinality="0"
             default=""
@@ -101,7 +101,7 @@
             description="MQTT Last Will and Testament payload as a string."/>
             
         <AD id="lwt.qos"  
-            name="lwt.qos"
+            name="LWT Qos"
             type="Integer"
             cardinality="0"
             required="false"
@@ -113,7 +113,7 @@
         </AD>
             
         <AD id="lwt.retain"
-            name="lwt.retain"
+            name="LWT Retain"
             type="Boolean"
             cardinality="0"
             required="false"
@@ -121,7 +121,7 @@
             description="MQTT Last Will and Testament Retain flag."/>
             
         <AD id="in-flight.persistence"
-            name="in-flight.persistence"
+            name="In-flight Persistence"
             type="String"
             cardinality="0" 
             required="true"
@@ -132,7 +132,7 @@
         </AD>
             
         <AD id="protocol-version"  
-            name="protocol-version"
+            name="Protocol-version"
             type="Integer"
             cardinality="0"
             required="false"
@@ -143,7 +143,7 @@
         </AD>
         
         <AD id="ssl.default.protocol"
-            name="ssl.default.protocol"
+            name="SSL Default Protocol"
             type="String"
             cardinality="0"
             required="false"
@@ -151,7 +151,7 @@
             description="The protocol to use to initialize the SSLContext. If not specified, the protocol specified in the SslManagerService will be used."/>
                         
         <AD id="ssl.hostname.verification"
-            name="ssl.hostname.verification"
+            name="SSL Hostname Verification"
             type="String"
             cardinality="0"
             required="true"
@@ -163,7 +163,7 @@
         </AD>
         
         <AD id="ssl.default.cipherSuites"
-            name="ssl.default.cipherSuites"
+            name="SSL Default Cipher Suites"
             type="String"
             cardinality="0"
             required="false"
@@ -171,7 +171,7 @@
             description="Comma-separated list of allosed ciphers. If not specified, the SslManagerService configuration will be used."/>
             
         <AD id="ssl.certificate.alias"
-            name="ssl.certificate.alias"
+            name="SSL Certificate Alias"
             type="String"
             cardinality="0"
             required="false"

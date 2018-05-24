@@ -97,6 +97,7 @@
 		<antcall target="core-config" />
 		<antcall target="core.certificates-config" />
 		<antcall target="core.cloud-config" />
+		<antcall target="cloud.mqtt.eclipseiot-config" />
 		<antcall target="core.comm-config" />
 		<antcall target="core.configuration-config" />
 		<antcall target="core.crypto-config" />
@@ -496,6 +497,8 @@ fi]]>
                         prefix="${build.output.name}/kura/plugins" />
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.core.cloud_${org.eclipse.kura.core.cloud.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
+            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider_${org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider.version}.jar"
+                        prefix="${build.output.name}/kura/plugins" />
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.core.comm_${org.eclipse.kura.core.comm.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.core.configuration_${org.eclipse.kura.core.configuration.version}.jar"
@@ -607,7 +610,7 @@ fi]]>
 			<arg value="${build.name}" />
 		</exec>
 	</target>
-
+	
 	<target name="set-http-port" if="http.port">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="org.osgi.service.http.port" operation="="
@@ -776,6 +779,13 @@ fi]]>
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.core.cloud_${org.eclipse.kura.core.cloud.version}.jar@4:start" />
+		</propertyfile>
+	</target>
+	
+	<target name="cloud.mqtt.eclipseiot-config">
+		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider_${org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider.version}.jar@4:start" />
 		</propertyfile>
 	</target>
 

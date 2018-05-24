@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+    Copyright (c) 2011, 2018 Eurotech and/or its affiliates
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -20,7 +20,7 @@
         <Icon resource="CommandPasswordService" size="32"/>
 
         <AD id="command.enable"
-            name="command.enable"
+            name="Command Enable"
             type="Boolean"
             cardinality="0"
             required="true"
@@ -29,7 +29,7 @@
         </AD>
         
         <AD id="command.password.value"
-        	name="command.password.value"
+        	name="Command Password Value"
         	type="Password"
         	cardinality="0"
         	required="false"
@@ -38,7 +38,7 @@
         </AD>
         
         <AD id="command.working.directory"
-        	name="command.working.directory"
+        	name="Command Working Directory"
         	type="String"
         	cardinality="0"
         	required="false"
@@ -47,7 +47,7 @@
         </AD>
         
         <AD id="command.timeout"
-        	name="command.timeout"
+        	name="Command Timeout"
         	type="Integer"
         	cardinality="0"
         	required="false"
@@ -56,7 +56,7 @@
         </AD>
         
         <AD id="command.environment"
-        	name="command.environment"
+        	name="Command Environment"
         	type="String"
         	cardinality="0"
         	required="false"

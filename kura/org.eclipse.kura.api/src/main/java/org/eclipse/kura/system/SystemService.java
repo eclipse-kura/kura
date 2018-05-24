@@ -11,15 +11,8 @@
  *******************************************************************************/
 package org.eclipse.kura.system;
 
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Properties;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 
 import org.osgi.annotation.versioning.ProviderType;
 import org.osgi.framework.Bundle;
@@ -27,7 +20,7 @@ import org.osgi.framework.Bundle;
 /**
  * Service to provide basic system information including Operating System
  * information, JVM information and filesystem information.
- * 
+ *
  * @noimplement This interface is not intended to be implemented by clients.
  */
 @ProviderType
@@ -325,7 +318,7 @@ public interface SystemService {
      * property of the kura.properties file located in the ${BASE_DIR}/${KURA_SYMLINK}/kura directory.
      * If the variable {@code kura.marketplace.compatibility.version} cannot be located, it defaults to the value
      * specified by {@link #getKuraVersion()}.
-     * 
+     *
      * @since 1.3
      * @return The marketplace compatibility Kura version string.
      */
@@ -462,5 +455,13 @@ public interface SystemService {
      * @return
      */
     public List<String> getDeviceManagementServiceIgnore();
+
+    /**
+     * Returns the device hostname
+     * 
+     * @return a String that represents the device hostname
+     * @since 2.0
+     */
+    public String getHostname();
 
 }

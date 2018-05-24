@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2018 Eurotech and/or its affiliates
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Eurotech
+
+-->
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" configuration-policy="require" deactivate="deactivate" enabled="true" immediate="true" modified="updated" name="org.eclipse.kura.cloud.subscriber.CloudSubscriber">
+   <implementation class="org.eclipse.kura.core.cloud.subscriber.CloudSubscriberImpl"/>
+   <service>
+      <provide interface="org.eclipse.kura.cloudconnection.subscriber.CloudSubscriber"/>
+      <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
+   </service>
+   <property name="service.pid" type="String" value="org.eclipse.kura.cloud.subscriber.CloudSubscriber"/>
+   <property name="cloud.connection.factory.pid" type="String" value="org.eclipse.kura.cloud.CloudService"/>
+   <property name="kura.ui.service.hide" type="Boolean" value="true"/>
+   <property name="kura.ui.factory.hide" type="String" value="true"/>
+</scr:component>

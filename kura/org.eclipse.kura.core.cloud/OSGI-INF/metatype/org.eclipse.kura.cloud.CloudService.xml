@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2011, 2017 Eurotech and/or its affiliates, and others
+    Copyright (c) 2011, 2018 Eurotech and/or its affiliates, and others
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -21,7 +21,7 @@
         <Icon resource="CloudService" size="32"/>
         
         <AD id="device.display-name"
-            name="device.display-name"
+            name="Device Display-Name"
             type="String"
             cardinality="0"
             required="true"
@@ -35,7 +35,7 @@
         </AD>
         
         <AD id="device.custom-name"
-        	name="device.custom-name"
+        	name="Device Custom-Name"
         	type="String"
         	cardinality="0"
         	required="false"
@@ -44,7 +44,7 @@
         </AD>
                     
         <AD id="topic.control-prefix"
-            name="topic.control-prefix"
+            name="Topic Control-Prefix"
             type="String"
             cardinality="0"
             required="true"
@@ -53,7 +53,7 @@
         </AD>
                     
         <AD id="encode.gzip"
-            name="encode.gzip"
+            name="Encode gzip"
             type="Boolean"
             cardinality="0"
             required="false"
@@ -62,7 +62,7 @@
         </AD>
         
         <AD id="republish.mqtt.birth.cert.on.gps.lock"
-            name="republish.mqtt.birth.cert.on.gps.lock"
+            name="Republish Mqtt Birth Cert On Gps Lock"
             type="Boolean"
             cardinality="0"
             required="true"
@@ -70,7 +70,7 @@
             description="Whether or not to republish the MQTT Birth Certificate on GPS lock event"/>
         
         <AD id="republish.mqtt.birth.cert.on.modem.detect"
-            name="republish.mqtt.birth.cert.on.modem.detect"
+            name="Republish Mqtt Birth Cert On Modem Detect"
             type="Boolean"
             cardinality="0"
             required="true"
@@ -78,7 +78,7 @@
             description="Whether or not to republish the MQTT Birth Certificate on modem detection event"/>
             
         <AD id="enable.default.subscriptions"
-            name="enable.default.subscriptions"
+            name="Enable Default Subscriptions"
             type="Boolean"
             cardinality="0"
             required="true"
@@ -86,7 +86,7 @@
             description="Manages the default subscriptions to the gateway management MQTT topics. When disabled, the gateway will not be remotely manageable."/>
             
         <AD id="birth.cert.policy"
-            name="birth.cert.policy"
+            name="Birth Cert Policy"
             type="String"
             cardinality="0"
             required="true"
@@ -98,7 +98,7 @@
         </AD>
         
         <AD id="payload.encoding"
-            name="payload.encoding"
+            name="Payload Encoding"
             type="String"
             cardinality="0"
             required="true"

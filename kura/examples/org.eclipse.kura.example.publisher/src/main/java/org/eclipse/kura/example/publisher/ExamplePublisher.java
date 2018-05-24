@@ -24,71 +24,26 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.kura.KuraException;
-import org.eclipse.kura.KuraStoreException;
-import org.eclipse.kura.cloud.CloudClient;
-import org.eclipse.kura.cloud.CloudClientListener;
-import org.eclipse.kura.cloud.CloudService;
+import org.eclipse.kura.cloudconnection.listener.CloudConnectionListener;
+import org.eclipse.kura.cloudconnection.listener.CloudDeliveryListener;
+import org.eclipse.kura.cloudconnection.message.KuraMessage;
+import org.eclipse.kura.cloudconnection.publisher.CloudPublisher;
+import org.eclipse.kura.cloudconnection.subscriber.CloudSubscriber;
+import org.eclipse.kura.cloudconnection.subscriber.listener.CloudSubscriberListener;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraPosition;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.framework.Filter;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.util.tracker.ServiceTracker;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ExamplePublisher implements ConfigurableComponent, CloudClientListener {
-
-    /**
-     * Inner class defined to track the CloudServices as they get added, modified or removed.
-     * Specific methods can refresh the cloudService definition and setup again the Cloud Client.
-     *
-     */
-    private final class CloudPublisherServiceTrackerCustomizer
-            implements ServiceTrackerCustomizer<CloudService, CloudService> {
-
-        @Override
-        public CloudService addingService(final ServiceReference<CloudService> reference) {
-            ExamplePublisher.this.cloudService = ExamplePublisher.this.bundleContext.getService(reference);
-            try {
-                // recreate the Cloud Client
-                setupCloudClient();
-            } catch (final KuraException e) {
-                logger.error("Cloud Client setup failed!", e);
-            }
-            return ExamplePublisher.this.cloudService;
-        }
-
-        @Override
-        public void modifiedService(final ServiceReference<CloudService> reference, final CloudService service) {
-            ExamplePublisher.this.cloudService = ExamplePublisher.this.bundleContext.getService(reference);
-            try {
-                // recreate the Cloud Client
-                setupCloudClient();
-            } catch (final KuraException e) {
-                logger.error("Cloud Client setup failed!", e);
-            }
-        }
-
-        @Override
-        public void removedService(final ServiceReference<CloudService> reference, final CloudService service) {
-            ExamplePublisher.this.cloudService = null;
-        }
-    }
+public class ExamplePublisher implements ConfigurableComponent, CloudSubscriberListener, CloudConnectionListener, CloudDeliveryListener {
 
     private static final Logger logger = LoggerFactory.getLogger(ExamplePublisher.class);
 
-    private ServiceTrackerCustomizer<CloudService, CloudService> cloudServiceTrackerCustomizer;
-    private ServiceTracker<CloudService, CloudService> cloudServiceTracker;
-    private CloudService cloudService;
-    private CloudClient cloudClient;
-    private String oldSubscriptionTopic;
+    private CloudPublisher cloudPublisher;
+
+    private CloudSubscriber cloudSubscriber;
 
     private ScheduledExecutorService worker;
     private ScheduledFuture<?> handle;
@@ -96,9 +51,31 @@ public class ExamplePublisher implements ConfigurableComponent, CloudClientListe
     private float temperature;
     private Map<String, Object> properties;
 
-    private BundleContext bundleContext;
-
     private ExamplePublisherOptions examplePublisherOptions;
+
+    public void setCloudPublisher(CloudPublisher cloudPublisher) {
+        this.cloudPublisher = cloudPublisher;
+        this.cloudPublisher.registerCloudConnectionListener(ExamplePublisher.this);
+        this.cloudPublisher.registerCloudDeliveryListener(ExamplePublisher.this);
+    }
+
+    public void unsetCloudPublisher(CloudPublisher cloudPublisher) {
+        this.cloudPublisher.unregisterCloudConnectionListener(ExamplePublisher.this);
+        this.cloudPublisher.unregisterCloudDeliveryistener(ExamplePublisher.this);
+        this.cloudPublisher = null;
+    }
+
+    public void setCloudSubscriber(CloudSubscriber cloudSubscriber) {
+        this.cloudSubscriber = cloudSubscriber;
+        this.cloudSubscriber.registerCloudSubscriberListener(ExamplePublisher.this);
+        this.cloudSubscriber.registerCloudConnectionListener(ExamplePublisher.this);
+    }
+
+    public void unsetCloudSubscriber(CloudSubscriber cloudSubscriber) {
+        this.cloudSubscriber.unregisterCloudSubscriberListener(ExamplePublisher.this);
+        this.cloudSubscriber.unregisterCloudConnectionListener(ExamplePublisher.this);
+        this.cloudSubscriber = null;
+    }
 
     // ----------------------------------------------------------------
     //
@@ -115,14 +92,9 @@ public class ExamplePublisher implements ConfigurableComponent, CloudClientListe
         this.properties = properties;
         dumpProperties("Activate", properties);
 
-        this.bundleContext = componentContext.getBundleContext();
-
         this.examplePublisherOptions = new ExamplePublisherOptions(properties);
 
-        this.cloudServiceTrackerCustomizer = new CloudPublisherServiceTrackerCustomizer();
-        initCloudServiceTracking();
         doUpdate();
-        subscribe();
 
         logger.info("Activating ExamplePublisher... Done.");
     }
@@ -132,16 +104,6 @@ public class ExamplePublisher implements ConfigurableComponent, CloudClientListe
 
         // shutting down the worker and cleaning up the properties
         this.worker.shutdown();
-
-        // Releasing the CloudApplicationClient
-        logger.info("Releasing CloudApplicationClient for {}...", this.examplePublisherOptions.getAppId());
-        // close the client
-        closeCloudClient();
-        oldSubscriptionTopic = null;
-
-        if (nonNull(this.cloudServiceTracker)) {
-            this.cloudServiceTracker.close();
-        }
 
         logger.info("Deactivating ExamplePublisher... Done.");
     }
@@ -155,77 +117,9 @@ public class ExamplePublisher implements ConfigurableComponent, CloudClientListe
 
         this.examplePublisherOptions = new ExamplePublisherOptions(properties);
 
-        if (nonNull(this.cloudServiceTracker)) {
-            this.cloudServiceTracker.close();
-        }
-        initCloudServiceTracking();
-
         // try to kick off a new job
         doUpdate();
-        subscribe();
         logger.info("Updated ExamplePublisher... Done.");
-    }
-
-    // ----------------------------------------------------------------
-    //
-    // Cloud Application Callback Methods
-    //
-    // ----------------------------------------------------------------
-
-    @Override
-    public void onConnectionEstablished() {
-        logger.info("Connection established");
-
-        try {
-            // Getting the lists of unpublished messages
-            logger.info("Number of unpublished messages: {}", this.cloudClient.getUnpublishedMessageIds().size());
-        } catch (KuraException e) {
-            logger.error("Cannot get the list of unpublished messages");
-        }
-
-        try {
-            // Getting the lists of in-flight messages
-            logger.info("Number of in-flight messages: {}", this.cloudClient.getInFlightMessageIds().size());
-        } catch (KuraException e) {
-            logger.error("Cannot get the list of in-flight messages");
-        }
-
-        try {
-            // Getting the lists of dropped in-flight messages
-            logger.info("Number of dropped in-flight messages: {}",
-                    this.cloudClient.getDroppedInFlightMessageIds().size());
-        } catch (KuraException e) {
-            logger.error("Cannot get the list of dropped in-flight messages");
-        }
-
-        subscribe();
-    }
-
-    @Override
-    public void onConnectionLost() {
-        logger.warn("Connection lost!");
-    }
-
-    @Override
-    public void onControlMessageArrived(String deviceId, String appTopic, KuraPayload msg, int qos, boolean retain) {
-        logger.info("Control message arrived on assetId: {} and semantic topic: {}", deviceId, appTopic);
-        logReceivedMessage(msg);
-    }
-
-    @Override
-    public void onMessageArrived(String deviceId, String appTopic, KuraPayload msg, int qos, boolean retain) {
-        logger.info("Message arrived on assetId: {} and semantic topic: {}", deviceId, appTopic);
-        logReceivedMessage(msg);
-    }
-
-    @Override
-    public void onMessagePublished(int messageId, String appTopic) {
-        logger.info("Published message with ID: {} on application topic: {}", messageId, appTopic);
-    }
-
-    @Override
-    public void onMessageConfirmed(int messageId, String appTopic) {
-        logger.info("Confirmed message with ID: {} on application topic: {}", messageId, appTopic);
     }
 
     // ----------------------------------------------------------------
@@ -274,11 +168,6 @@ public class ExamplePublisher implements ConfigurableComponent, CloudClientListe
      * Called at the configured rate to publish the next temperature measurement.
      */
     private void doPublish() {
-        // fetch the publishing configuration from the publishing properties
-        String topic = this.examplePublisherOptions.getAppTopic();
-        Integer qos = this.examplePublisherOptions.getPublishQos();
-        Boolean retain = this.examplePublisherOptions.getPublishRetain();
-
         // Increment the simulated temperature value
         float tempIncr = this.examplePublisherOptions.getTempIncrement();
         this.temperature += tempIncr;
@@ -313,52 +202,24 @@ public class ExamplePublisher implements ConfigurableComponent, CloudClientListe
 
         // Publish the message
         try {
-            if (nonNull(this.cloudService) && nonNull(this.cloudClient)) {
-                int messageId = this.cloudClient.publish(topic, payload, qos, retain);
-                logger.info("Published to {} message: {} with ID: {}", new Object[] { topic, payload, messageId });
+            if (nonNull(this.cloudPublisher)) {
+                KuraMessage message = new KuraMessage(payload);
+                String messageId = this.cloudPublisher.publish(message);
+                logger.info("Published to message: {} with ID: {}", message, messageId);
             }
         } catch (Exception e) {
-            logger.error("Cannot publish topic: {}", topic, e);
+            logger.error("Cannot publish: ", e);
         }
     }
 
-    private void initCloudServiceTracking() {
-        String selectedCloudServicePid = this.examplePublisherOptions.getCloudServicePid();
-        String filterString = String.format("(&(%s=%s)(kura.service.pid=%s))", Constants.OBJECTCLASS,
-                CloudService.class.getName(), selectedCloudServicePid);
-        Filter filter = null;
-        try {
-            filter = this.bundleContext.createFilter(filterString);
-        } catch (InvalidSyntaxException e) {
-            logger.error("Filter setup exception ", e);
-        }
-        this.cloudServiceTracker = new ServiceTracker<>(this.bundleContext, filter, this.cloudServiceTrackerCustomizer);
-        this.cloudServiceTracker.open();
-    }
-
-    private void closeCloudClient() {
-        if (nonNull(this.cloudClient)) {
-            this.cloudClient.removeCloudClientListener(this);
-            this.cloudClient.release();
-            this.cloudClient = null;
-        }
-    }
-
-    private void setupCloudClient() throws KuraException {
-        closeCloudClient();
-        // create the new CloudClient for the specified application
-        final String appId = this.examplePublisherOptions.getAppId();
-        this.cloudClient = this.cloudService.newCloudClient(appId);
-        this.cloudClient.addCloudClientListener(this);
-    }
-
-    private void logReceivedMessage(KuraPayload msg) {
-        Date timestamp = msg.getTimestamp();
+    private void logReceivedMessage(KuraMessage msg) {
+        KuraPayload payload = msg.getPayload();
+        Date timestamp = payload.getTimestamp();
         if (timestamp != null) {
             logger.info("Message timestamp: {}", timestamp.getTime());
         }
 
-        KuraPosition position = msg.getPosition();
+        KuraPosition position = payload.getPosition();
         if (position != null) {
             logger.info("Position latitude: {}", position.getLatitude());
             logger.info("         longitude: {}", position.getLongitude());
@@ -371,34 +232,40 @@ public class ExamplePublisher implements ConfigurableComponent, CloudClientListe
             logger.info("         timestamp: {}", position.getTimestamp());
         }
 
-        byte[] body = msg.getBody();
+        byte[] body = payload.getBody();
         if (body != null && body.length != 0) {
             logger.info("Body lenght: {}", body.length);
         }
 
-        if (msg.metrics() != null) {
-            for (Entry<String, Object> entry : msg.metrics().entrySet()) {
+        if (payload.metrics() != null) {
+            for (Entry<String, Object> entry : payload.metrics().entrySet()) {
                 logger.info("Message metric: {}, value: {}", entry.getKey(), entry.getValue());
             }
         }
     }
 
-    private void subscribe() {
-        try {
-            if (this.cloudClient != null && this.cloudClient.isConnected()) {
-                if (oldSubscriptionTopic != null) {
-                    this.cloudClient.unsubscribe(oldSubscriptionTopic);
-                }
+    @Override
+    public void onConnectionEstablished() {
+        logger.info("Connection established");
+    }
 
-                String newSubscriptionTopic = this.examplePublisherOptions.getSubscribeTopic();
-                logger.info("Subscribing to application topic {}", newSubscriptionTopic);
-                this.cloudClient.subscribe(newSubscriptionTopic, 0);
-                oldSubscriptionTopic = newSubscriptionTopic;
-            }
-        } catch (KuraStoreException e) {
-            logger.warn("Failed to request device shadow", e);
-        } catch (KuraException e) {
-            logger.warn("Failed to subscribe", e);
-        }
+    @Override
+    public void onConnectionLost() {
+        logger.warn("Connection lost!");
+    }
+
+    @Override
+    public void onMessageArrived(KuraMessage message) {
+        logReceivedMessage(message);
+    }
+
+    @Override
+    public void onDisconnected() {
+        logger.warn("On disconnected");
+    }
+
+    @Override
+    public void onMessageConfirmed(String messageId) {
+        logger.info("Confirmed message with id: {}", messageId);
     }
 }

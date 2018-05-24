@@ -12,4 +12,5 @@
 /**
  * Contains interfaces to manage the construction of Cloud Services.
  */
+@Deprecated
 package org.eclipse.kura.cloud.factory;

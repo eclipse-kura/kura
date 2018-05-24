@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -105,5 +105,21 @@ public enum KuraErrorCode {
     /**
      * @since 1.3
      */
-    BLE_DISCOVERY_ERROR
+    BLE_DISCOVERY_ERROR,
+    /**
+     * @since 2.0
+     */
+    BAD_REQUEST,
+    /**
+     * @since 2.0
+     */
+    NOT_FOUND,
+    /**
+     * @since 2.0
+     */
+    SERVICE_UNAVAILABLE,
+    /**
+     * @since 2.0
+     */
+    DISCONNECTION_FAILED;
 }

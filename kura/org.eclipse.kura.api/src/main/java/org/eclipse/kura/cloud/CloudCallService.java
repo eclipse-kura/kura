@@ -32,6 +32,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * @deprecated
  */
 @ProviderType
+@Deprecated
 public interface CloudCallService {
 
     /**

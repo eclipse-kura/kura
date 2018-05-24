@@ -230,7 +230,7 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
         this.status.addItem(MessageUtils.get(NET_IPV4_STATUS_DISABLED));
         this.status.addItem(MessageUtils.get(NET_IPV4_STATUS_UNMANAGED));
 
-        if (this.selectedNetIfConfig.getHwTypeEnum() != GwtNetIfType.MODEM) {
+        if (this.selectedNetIfConfig != null && this.selectedNetIfConfig.getHwTypeEnum() != GwtNetIfType.MODEM) {
             this.status.addItem(MessageUtils.get(NET_IPV4_STATUS_L2_ONLY));
             this.status.addItem(MessageUtils.get(NET_IPV4_STATUS_ENABLED_LAN));
         }

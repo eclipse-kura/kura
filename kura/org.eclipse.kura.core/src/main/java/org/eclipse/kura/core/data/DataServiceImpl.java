@@ -12,6 +12,7 @@
 package org.eclipse.kura.core.data;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -885,5 +886,14 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
     @Override
     public int getCriticalComponentTimeout() {
         return this.dataServiceOptions.getCriticalComponentTimeout();
+    }
+    
+    public Map<String,String> getConnectionInfo() {
+        Map<String,String> result = new HashMap<>();
+        result.put("Broker URL", dataTransportService.getBrokerUrl());
+        result.put("Account", dataTransportService.getAccountName());
+        result.put("Username", dataTransportService.getUsername());
+        result.put("Client ID", dataTransportService.getClientId());
+        return result;
     }
 }

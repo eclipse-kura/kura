@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2018 Eurotech and/or its affiliates
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Eurotech
+
+-->
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" configuration-policy="require" deactivate="deactivate" enabled="true" immediate="true" modified="updated" name="org.eclipse.kura.cloudconnection.eclipseiot.mqtt.ConnectionManager">
+   <implementation class="org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.cloud.CloudConnectionManagerImpl"/>
+   <service>
+      <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
+      <provide interface="org.eclipse.kura.cloud.CloudPayloadProtoBufEncoder"/>
+      <provide interface="org.eclipse.kura.cloud.CloudPayloadProtoBufDecoder"/>
+      <provide interface="org.eclipse.kura.cloudconnection.CloudConnectionManager"/>
+      <provide interface="org.eclipse.kura.cloudconnection.CloudEndpoint"/>
+   </service>
+   <reference name="DataService" 
+              interface="org.eclipse.kura.data.DataService" 
+              policy="static" 
+              cardinality="1..1" 
+              bind="setDataService" 
+              unbind="unsetDataService"/>
+   <reference name="SystemService" 
+              policy="static"
+              cardinality="1..1"
+              bind="setSystemService"
+              unbind="unsetSystemService"
+              interface="org.eclipse.kura.system.SystemService"/>
+   <reference name="SystemAdminService" 
+              policy="static"
+              cardinality="1..1"
+              bind="setSystemAdminService"
+              unbind="unsetSystemAdminService"
+              interface="org.eclipse.kura.system.SystemAdminService"/>
+   <reference name="NetworkService" 
+              policy="static" 
+              cardinality="1..1" 
+              bind="setNetworkService" 
+              unbind="unsetNetworkService"
+              interface="org.eclipse.kura.net.NetworkService"/>
+   <reference name="PositionService" 
+              cardinality="0..1" 
+              bind="setPositionService" 
+              interface="org.eclipse.kura.position.PositionService" 
+              policy="static" 
+              unbind="unsetPositionService"/>
+   <reference name="EventAdmin"              
+              cardinality="1..1" 
+              policy="static" 
+              bind="setEventAdmin" 
+              unbind="unsetEventAdmin"
+              interface="org.osgi.service.event.EventAdmin"/>
+   <property name="kura.ui.service.hide" type="Boolean" value="true"/>
+   <property name="kura.ui.factory.hide" type="String" value="true"/>
+</scr:component>

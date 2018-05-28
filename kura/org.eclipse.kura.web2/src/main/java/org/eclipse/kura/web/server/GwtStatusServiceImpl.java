@@ -12,6 +12,11 @@
  *******************************************************************************/
 package org.eclipse.kura.web.server;
 
+import static java.util.Collections.sort;
+import static java.util.Comparator.comparing;
+import static java.util.Comparator.naturalOrder;
+import static java.util.Comparator.nullsFirst;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -225,6 +230,8 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
             if (gwtNetInterfaceConfigs == null) {
                 return Collections.emptyList();
             }
+
+            sort(gwtNetInterfaceConfigs, comparing(GwtNetInterfaceConfig::getName, nullsFirst(naturalOrder())));
 
             for (GwtNetInterfaceConfig gwtNetInterfaceConfig : gwtNetInterfaceConfigs) {
 

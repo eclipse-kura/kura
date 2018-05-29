@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.Settings;
 
@@ -215,7 +216,7 @@ public class SnapshotsTabUi extends Composite implements Tab {
 
             @Override
             public String getValue(GwtSnapshot object) {
-                return String.valueOf(object.get("createdOnFormatted"));
+                return String.valueOf(object.getCreatedOnFormatted());
             }
         };
         col2.setCellStyleNames("status-table-row");

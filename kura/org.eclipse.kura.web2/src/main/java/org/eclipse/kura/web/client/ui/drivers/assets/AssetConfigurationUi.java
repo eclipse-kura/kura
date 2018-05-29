@@ -70,7 +70,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
 
 public class AssetConfigurationUi extends AbstractServicesUi implements HasConfiguration {
 
-    interface ServicesUiUiBinder extends UiBinder<Widget, AssetConfigurationUi> {
+    interface AssetConfigurationUiBinder extends UiBinder<Widget, AssetConfigurationUi> {
     }
 
     @UiField
@@ -112,7 +112,7 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
 
     private static final int MAXIMUM_PAGE_SIZE = 5;
 
-    private static ServicesUiUiBinder uiBinder = GWT.create(ServicesUiUiBinder.class);
+    private static AssetConfigurationUiBinder uiBinder = GWT.create(AssetConfigurationUiBinder.class);
 
     private final ListDataProvider<ChannelModel> channelsDataProvider = new ListDataProvider<>();
 

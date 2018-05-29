@@ -170,7 +170,7 @@ public final class EddystoneDriver
         if (!this.bluetoothLeEddystoneScanner.isScanning()) {
             try {
                 // Perform a scan for 10 minutes
-                this.bluetoothLeEddystoneScanner.startBeaconScan(SCAN_TIMEOUT * 1000L);
+                this.bluetoothLeEddystoneScanner.startBeaconScan(SCAN_TIMEOUT);
             } catch (KuraException e) {
                 logger.error("iBeacon scanning failed", e);
             }

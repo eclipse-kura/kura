@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -139,7 +139,7 @@ public class IBeaconScanner implements ConfigurableComponent, BluetoothLeBeaconL
             this.bluetoothLeIBeaconScanner = this.bluetoothLeIBeaconService.newBeaconScanner(bluetoothLeAdapter);
             this.bluetoothLeIBeaconScanner.addBeaconListener(this);
             try {
-                this.bluetoothLeIBeaconScanner.startBeaconScan(this.options.getScanDuration() * 1000L);
+                this.bluetoothLeIBeaconScanner.startBeaconScan(this.options.getScanDuration());
             } catch (KuraException e) {
                 logger.error("iBeacon scanning failed", e);
             }

@@ -275,17 +275,6 @@
 									<artifactId>org.moka7</artifactId>
 									<version>${org.moka7.version}</version>
 								</artifactItem>
-								<!--<artifactItem>
-									<groupId>org.eclipse.kura</groupId>
-									<artifactId>org.eclipse.kura.windows.system</artifactId>
-									<version>${org.eclipse.kura.windows.system.version}</version>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.eclipse.kura</groupId>
-									<artifactId>org.eclipse.kura.windows.launcher</artifactId>
-									<version>${org.eclipse.kura.windows.launcher.version}</version>
-
-								</artifactItem>-->
 								<artifactItem>
 									<groupId>org.osgi</groupId>
 									<artifactId>osgi.annotation</artifactId>
@@ -503,8 +492,6 @@
 								<move file="target/source/plugins/com.eclipsesource.jaxrs.provider.gson.jar" tofile="target/source/plugins/com.eclipsesource.jaxrs.provider.gson_${com.eclipsesource.jaxrs.provider.gson.version}.jar"/>
 								<move file="target/source/plugins/com.eclipsesource.jaxrs.provider.security.jar" tofile="target/source/plugins/com.eclipsesource.jaxrs.provider.security_${com.eclipsesource.jaxrs.provider.security.version}.jar"/>
 								<move file="target/source/plugins/com.google.gson.jar" tofile="target/source/plugins/com.google.gson_${com.google.gson.version}.jar"/>
-								<!--<move file="target/source/plugins/org.eclipse.kura.windows.system.jar" tofile="target/source/plugins/org.eclipse.kura.windows.system_${org.eclipse.kura.windows.system.version}.jar"/>
-								<move file="target/source/plugins/org.eclipse.kura.windows.launcher.jar" tofile="target/source/plugins/org.eclipse.kura.windows.launcher_${org.eclipse.kura.windows.launcher.version}.jar"/>-->
 								
 								<!-- Artemis Broker -->
 								<move file="target/source/plugins/guava.jar" tofile="target/source/plugins/guava_${guava.version}.jar"/>

@@ -530,7 +530,7 @@ public class BluetoothLeBeaconManagerImplTest {
 
         BluetoothLeBeaconScanner<BluetoothLeBeacon> scanner = svc.newBeaconScanner(adapter, decoder);
 
-        scanner.startBeaconScan(500);
+        scanner.startBeaconScan(1);
 
         BluetoothProcess hProc = (BluetoothProcess) TestUtil.getFieldValue(svc, "hcitoolProc");
         BluetoothProcess dProc = (BluetoothProcess) TestUtil.getFieldValue(svc, "dumpProc");
@@ -607,13 +607,12 @@ public class BluetoothLeBeaconManagerImplTest {
 
         // snooping only works on running scanners
         new Thread(() -> {
-                try {
-                    scanner.startBeaconScan(500);
-                } catch (KuraBluetoothCommandException e) {
-                    // won't happen
-                }
+            try {
+                scanner.startBeaconScan(1);
+            } catch (KuraBluetoothCommandException e) {
+                // won't happen
             }
-        ).start();
+        }).start();
 
         Thread.sleep(20); // allow scanner to start
 

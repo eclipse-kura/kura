@@ -47,7 +47,7 @@ public class BluetoothLeBeaconScannerImplTest {
 
         new Thread(() -> {
             try {
-                svc.startBeaconScan(500);
+                svc.startBeaconScan(1);
             } catch (KuraBluetoothCommandException e) {
             }
         }).start();
@@ -57,7 +57,7 @@ public class BluetoothLeBeaconScannerImplTest {
         assertTrue("Should be scanning", svc.isScanning());
 
         synchronized (lock) {
-            lock.wait(500);
+            lock.wait(1000);
         }
 
         Thread.sleep(100);

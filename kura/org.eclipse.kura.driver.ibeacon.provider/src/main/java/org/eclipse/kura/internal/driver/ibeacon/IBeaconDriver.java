@@ -169,7 +169,7 @@ public final class IBeaconDriver
         if (!this.bluetoothLeIBeaconScanner.isScanning()) {
             try {
                 // Perform a scan for 10 minutes
-                this.bluetoothLeIBeaconScanner.startBeaconScan(SCAN_TIMEOUT * 1000L);
+                this.bluetoothLeIBeaconScanner.startBeaconScan(SCAN_TIMEOUT);
             } catch (KuraException e) {
                 logger.error("iBeacon scanning failed", e);
             }

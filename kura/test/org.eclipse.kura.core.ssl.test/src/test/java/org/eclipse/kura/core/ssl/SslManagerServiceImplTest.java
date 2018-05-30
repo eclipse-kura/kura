@@ -145,7 +145,7 @@ public class SslManagerServiceImplTest {
 
         BundleContext bcMock = mock(BundleContext.class);
         when(ccMock.getBundleContext()).thenReturn(bcMock);
-        
+
         final Object lock = new Object();
 
         doAnswer(invocation -> {
@@ -163,7 +163,7 @@ public class SslManagerServiceImplTest {
         properties.put("ssl.keystore.password", "changeit");
 
         svc.activate(ccMock, properties);
-        
+
         synchronized (lock) {
             lock.wait(20000);
         }
@@ -203,7 +203,7 @@ public class SslManagerServiceImplTest {
 
         BundleContext bcMock = mock(BundleContext.class);
         when(ccMock.getBundleContext()).thenReturn(bcMock);
-        
+
         final Object lock = new Object();
 
         doAnswer(invocation -> {
@@ -221,7 +221,7 @@ public class SslManagerServiceImplTest {
         properties.put("ssl.keystore.password", "changeit");
 
         svc.activate(ccMock, properties);
-        
+
         synchronized (lock) {
             lock.wait(20000);
         }
@@ -264,7 +264,7 @@ public class SslManagerServiceImplTest {
 
         BundleContext bcMock = mock(BundleContext.class);
         when(ccMock.getBundleContext()).thenReturn(bcMock);
-        
+
         final Object lock = new Object();
 
         doAnswer(invocation -> {
@@ -282,7 +282,7 @@ public class SslManagerServiceImplTest {
         properties.put("ssl.keystore.password", "changeit");
 
         svc.activate(ccMock, properties);
-        
+
         synchronized (lock) {
             lock.wait(20000);
         }
@@ -325,7 +325,7 @@ public class SslManagerServiceImplTest {
 
         BundleContext bcMock = mock(BundleContext.class);
         when(ccMock.getBundleContext()).thenReturn(bcMock);
-        
+
         final Object lock = new Object();
 
         doAnswer(invocation -> {
@@ -343,7 +343,7 @@ public class SslManagerServiceImplTest {
         properties.put("ssl.keystore.password", "changeit");
 
         svc.activate(ccMock, properties);
-        
+
         synchronized (lock) {
             lock.wait(20000);
         }
@@ -394,7 +394,7 @@ public class SslManagerServiceImplTest {
 
         BundleContext bcMock = mock(BundleContext.class);
         when(ccMock.getBundleContext()).thenReturn(bcMock);
-        
+
         final Object lock = new Object();
 
         doAnswer(invocation -> {
@@ -416,7 +416,7 @@ public class SslManagerServiceImplTest {
         synchronized (lock) {
             lock.wait(20000);
         }
-        
+
         verify(ccMock, times(1)).getServiceReference();
 
         assertFalse(Arrays.equals("changeit".toCharArray(), cs.getKeyStorePassword(KEY_STORE_PATH)));
@@ -550,7 +550,7 @@ public class SslManagerServiceImplTest {
                 throw new UnsupportedOperationException();
             }
         };
-        
+
         result.setKeyStorePassword(KEY_STORE_PATH, "cryptoPassword".toCharArray());
         return result;
     }
@@ -693,7 +693,7 @@ public class SslManagerServiceImplTest {
 
         assertTrue(visited.get());
 
-        verify(csMock, times(0)).setKeyStorePassword(anyString(), (char[]) anyObject());
+        verify(csMock, times(1)).setKeyStorePassword(anyString(), (char[]) anyObject());
     }
 
     @Test

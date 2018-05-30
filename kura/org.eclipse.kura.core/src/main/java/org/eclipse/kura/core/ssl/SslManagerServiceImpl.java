@@ -307,9 +307,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
             } catch (KuraException e) {
                 logger.warn("Failed to decrypt keystore password");
             }
-            if (!Arrays.equals(oldPassword, newPassword)) {
-                updateKeystorePassword(oldPassword, newPassword);
-            }
+            updateKeystorePassword(oldPassword, newPassword);
         }
     }
 

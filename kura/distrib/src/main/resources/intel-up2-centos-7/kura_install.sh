@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # Copyright (c) 2016, 2018 Red Hat Inc and others
 #
@@ -11,6 +11,8 @@
 #     Red Hat Inc
 #	  Eurotech
 #
+
+set -e
 
 INSTALL_DIR=/opt/eclipse
 

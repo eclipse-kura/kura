@@ -705,7 +705,7 @@ public abstract class AbstractServicesUi extends Composite {
 
     private String getUpdatedFieldConfiguration(GwtConfigParameter param, Widget wg) {
         Map<String, String> options = param.getOptions();
-        if (options != null && options.size() > 0) {
+        if (options != null && !options.isEmpty()) {
             Map<String, String> oMap = param.getOptions();
             if (wg instanceof ListBox) {
                 return oMap.get(((ListBox) wg).getSelectedItemText());

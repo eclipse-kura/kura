@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -12,12 +12,9 @@
 package org.eclipse.kura.core.ssl;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -34,7 +31,7 @@ import org.slf4j.LoggerFactory;
  */
 public class SSLSocketFactoryWrapper extends SSLSocketFactory {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(SSLSocketFactoryWrapper.class);
+    private static final Logger logger = LoggerFactory.getLogger(SSLSocketFactoryWrapper.class);
 
     private final String ciphers;
     private final Boolean hostnameVerification;
@@ -72,14 +69,14 @@ public class SSLSocketFactoryWrapper extends SSLSocketFactory {
 
     @Override
     public Socket createSocket(String host, int port, InetAddress localHost, int localPort)
-            throws IOException, UnknownHostException {
+            throws IOException {
         Socket socket = this.sslsf.createSocket(host, port, localHost, localPort);
         updateSSLParameters(socket);
         return socket;
     }
 
     @Override
-    public Socket createSocket(String host, int port) throws IOException, UnknownHostException {
+    public Socket createSocket(String host, int port) throws IOException {
         Socket socket = this.sslsf.createSocket(host, port);
         updateSSLParameters(socket);
         return socket;
@@ -102,24 +99,25 @@ public class SSLSocketFactoryWrapper extends SSLSocketFactory {
 
     private void updateSSLParameters(Socket socket) throws SocketException {
         if (socket instanceof SSLSocket) {
+            SSLSocket sslSocket = (SSLSocket) socket;
 
-            SSLParameters sslParams = ((SSLSocket) socket).getSSLParameters();
+            SSLParameters sslParams = sslSocket.getSSLParameters();
 
             // Do not send an SSL-2.0-compatible Client Hello.
-            ArrayList<String> protocols = new ArrayList<String>(Arrays.asList(sslParams.getProtocols()));
+            ArrayList<String> protocols = new ArrayList<>(Arrays.asList(sslParams.getProtocols()));
             protocols.remove("SSLv2Hello");
             sslParams.setProtocols(protocols.toArray(new String[protocols.size()]));
 
             // enable server verification
             if (this.hostnameVerification) {
                 sslParams.setEndpointIdentificationAlgorithm("HTTPS");
-                s_logger.info("SSL Endpoint Identification enabled.");
+                logger.info("SSL Endpoint Identification enabled.");
             }
-            
+
             // Adjust the supported ciphers.
             if (this.ciphers != null && !this.ciphers.isEmpty()) {
                 String[] arrCiphers = this.ciphers.split(",");
-                ArrayList<String> lsCiphers = new ArrayList<String>();
+                ArrayList<String> lsCiphers = new ArrayList<>();
                 for (String cipher : arrCiphers) {
                     lsCiphers.add(cipher.trim());
                 }
@@ -127,7 +125,7 @@ public class SSLSocketFactoryWrapper extends SSLSocketFactory {
             }
 
             // update the socket parameters
-            ((SSLSocket) socket).setSSLParameters(sslParams);
+            sslSocket.setSSLParameters(sslParams);
 
             // Disable the Nagle algorithm.
             socket.setTcpNoDelay(true);

@@ -447,16 +447,14 @@ public interface SystemService {
      *
      * @return
      */
-    public char[] getJavaKeyStorePassword() throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException;
+    public char[] getJavaKeyStorePassword();
 
     /**
      * Returns the password to unlock the trust store keystore file.
      *
      * @return
      */
-    public char[] getJavaTrustStorePassword() throws InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException;
+    public char[] getJavaTrustStorePassword();
 
     /**
      * Returns a list of services that should be ignored by the Everyware Cloud Console

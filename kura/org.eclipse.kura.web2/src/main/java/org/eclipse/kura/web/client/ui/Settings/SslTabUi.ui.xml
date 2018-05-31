@@ -2,7 +2,7 @@
 
 <!--
 
-    Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+    Copyright (c) 2011, 2018 Eurotech and/or its affiliates
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -33,73 +33,35 @@
     </ui:style>
 
     <b:Container fluid="true">
-        <b:Column size="MD_12">
-            <b:Row>
+        <b:Row b:id="confirmDialog">
+            <b:Panel>
+                <b:ButtonGroup size="SMALL">
+                    <b:Button ui:field="apply" addStyleNames="fa fa-check"></b:Button>
+                    <b:Button ui:field="reset" addStyleNames="fa fa-times"></b:Button>
+                </b:ButtonGroup>
+            </b:Panel>
+        </b:Row>
+
+        <b:Row>
+            <b:Well>
+                <g:ScrollPanel>
+                    <b:Form ui:field="form">
+                        <b:FieldSet ui:field="fields" />
+                    </b:Form>
+                </g:ScrollPanel>
+            </b:Well>
+        </b:Row>
+        <b:Modal closable="true" dataKeyboard="true" ui:field="incompleteFieldsModal" b:id="incompleteFieldsModal">
+            <b:ModalBody>
                 <b:Panel>
-                    <b:NavPills justified="true">
-                        <b:ButtonGroup size="SMALL">
-                            <b:Button ui:field="apply"
-                                addStyleNames="fa fa-check"></b:Button>
-                            <b:Button ui:field="reset"
-                                addStyleNames="fa fa-times"></b:Button>
-                        </b:ButtonGroup>
-                    </b:NavPills>
+                    <b:PanelBody>
+                        <b:Alert type="WARNING" ui:field="incompleteFields">
+                            <b.html:Text ui:field="incompleteFieldsText" />
+                        </b:Alert>
+                    </b:PanelBody>
                 </b:Panel>
-            </b:Row>
-
-            <b:Row>
-                <g:HTMLPanel ui:field="description">
-                </g:HTMLPanel>
-
-                <b:Form ui:field="sslForm">
-                    <b:FieldSet>
-                        <b:FormGroup ui:field="defaultProtocolFormGroup">
-                            <b:FormLabel for="defaultProtocolInput"
-                                ui:field="defaultProtocolFormLabel" />
-                            <b:HelpBlock ui:field="defaultProtocolHelpBlock" />
-                            <b:Input type="TEXT" b:id="defaultProtocol"
-                                ui:field="defaultProtocolInput" />
-                        </b:FormGroup>
-
-                        <b:FormGroup ui:field="hostnameVerificationFormGroup">
-                            <b:FormLabel for="hostnameVerificationInput"
-                                ui:field="hostnameVerificationFormLabel" />
-                            <b:HelpBlock ui:field="hostnameVerificationHelpBlock" />
-                            <g:FlowPanel>
-                                <b:InlineRadio name="radio1"
-                                    formValue="true" ui:field="radio1" />
-                                <b:InlineRadio name="radio1"
-                                    formValue="false" ui:field="radio2" />
-                            </g:FlowPanel>
-                        </b:FormGroup>
-
-                        <b:FormGroup ui:field="keystorePathFormGroup">
-                            <b:FormLabel for="keystorePathInput"
-                                ui:field="keystorePathFormLabel" />
-                            <b:HelpBlock ui:field="keystorePathHelpBlock" />
-                            <b:Input type="TEXT" b:id="keystorePath"
-                                ui:field="keystorePathInput" />
-                        </b:FormGroup>
-
-                        <b:FormGroup ui:field="keystorePasswordFormGroup">
-                            <b:FormLabel for="defaultProtocolInput"
-                                ui:field="keystorePasswordFormLabel" />
-                            <b:HelpBlock ui:field="keystorePasswordHelpBlock" />
-                            <b:Input type="PASSWORD" b:id="keystorePassword"
-                                ui:field="keystorePasswordInput" />
-                        </b:FormGroup>
-
-                        <b:FormGroup ui:field="cipherSuitesFormGroup">
-                            <b:FormLabel for="cipherSuitesInput"
-                                ui:field="cipherSuitesFormLabel" />
-                            <b:HelpBlock ui:field="cipherSuitesHelpBlock" />
-                            <b:Input type="TEXT" b:id="cipherSuites"
-                                ui:field="cipherSuitesInput" />
-                        </b:FormGroup>
-                    </b:FieldSet>
-                </b:Form>
-            </b:Row>
-        </b:Column>
+            </b:ModalBody>
+        </b:Modal>
     </b:Container>
 
 </ui:UiBinder> 

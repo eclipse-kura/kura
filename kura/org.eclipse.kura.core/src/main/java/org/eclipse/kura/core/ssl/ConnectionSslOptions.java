@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -13,111 +13,109 @@ package org.eclipse.kura.core.ssl;
 
 import java.util.Arrays;
 
-import org.eclipse.kura.ssl.SslManagerServiceOptions;
-
 public class ConnectionSslOptions {
 
-    private final SslManagerServiceOptions m_sslManagerOpts;
-    private String m_protocol;
-    private String m_ciphers;
-    private String m_trustStore;
-    private String m_keyStore;
-    private char[] m_keyStorePassword;
-    private String m_alias;
-    private boolean m_hostnameVerification;
+    private final SslManagerServiceOptions sslManagerOpts;
+    private String protocol;
+    private String ciphers;
+    private String trustStore;
+    private String keyStore;
+    private char[] keyStorePassword;
+    private String alias;
+    private boolean hostnameVerification;
 
     public ConnectionSslOptions(SslManagerServiceOptions sslManagerOpts) {
-        this.m_sslManagerOpts = sslManagerOpts;
+        this.sslManagerOpts = sslManagerOpts;
     }
 
     public SslManagerServiceOptions getSslManagerOpts() {
-        return this.m_sslManagerOpts;
+        return this.sslManagerOpts;
     }
 
     public String getProtocol() {
-        return this.m_protocol;
+        return this.protocol;
     }
 
     public void setProtocol(String protocol) {
         if (protocol == null || "".equals(protocol.trim())) {
-            this.m_protocol = this.m_sslManagerOpts.getSslProtocol();
+            this.protocol = this.sslManagerOpts.getSslProtocol();
         } else {
-            this.m_protocol = protocol;
+            this.protocol = protocol;
         }
     }
 
     public String getCiphers() {
-        return this.m_ciphers;
+        return this.ciphers;
     }
 
     public void setCiphers(String ciphers) {
         if (ciphers == null || "".equals(ciphers.trim())) {
-            this.m_ciphers = this.m_sslManagerOpts.getSslCiphers();
+            this.ciphers = this.sslManagerOpts.getSslCiphers();
         } else {
-            this.m_ciphers = ciphers;
+            this.ciphers = ciphers;
         }
     }
 
     public String getTrustStore() {
-        return this.m_trustStore;
+        return this.trustStore;
     }
 
     public void setTrustStore(String trustStore) {
         if (trustStore == null || "".equals(trustStore.trim())) {
-            this.m_trustStore = this.m_sslManagerOpts.getSslKeyStore();
+            this.trustStore = this.sslManagerOpts.getSslKeyStore();
         } else {
-            this.m_trustStore = trustStore;
+            this.trustStore = trustStore;
         }
     }
 
     public String getKeyStore() {
-        return this.m_keyStore;
+        return this.keyStore;
     }
 
     public void setKeyStore(String keyStore) {
         if (keyStore == null || "".equals(keyStore.trim())) {
-            this.m_keyStore = this.m_sslManagerOpts.getSslKeyStore();
+            this.keyStore = this.sslManagerOpts.getSslKeyStore();
         } else {
-            this.m_keyStore = keyStore;
+            this.keyStore = keyStore;
         }
     }
 
     public char[] getKeyStorePassword() {
-        return this.m_keyStorePassword;
+        return this.keyStorePassword;
     }
 
     public void setKeyStorePassword(char[] keyStorePassword) {
-        this.m_keyStorePassword = keyStorePassword;
+        this.keyStorePassword = keyStorePassword;
     }
 
     public String getAlias() {
-        return this.m_alias;
+        return this.alias;
     }
 
     public void setAlias(String alias) {
-        this.m_alias = alias;
+        this.alias = alias;
     }
 
     public boolean getHostnameVerification() {
-        return this.m_hostnameVerification;
+        return this.hostnameVerification;
     }
 
     public void setHostnameVerification(boolean hostnameVerification) {
-        this.m_hostnameVerification = hostnameVerification;
+        this.hostnameVerification = hostnameVerification;
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + (this.m_alias == null ? 0 : this.m_alias.hashCode());
-        result = prime * result + (this.m_ciphers == null ? 0 : this.m_ciphers.hashCode());
-        result = prime * result + (this.m_hostnameVerification ? 1231 : 1237);
-        result = prime * result + (this.m_keyStore == null ? 0 : this.m_keyStore.hashCode());
-        result = prime * result + Arrays.hashCode(this.m_keyStorePassword);
-        result = prime * result + (this.m_protocol == null ? 0 : this.m_protocol.hashCode());
-        result = prime * result + (this.m_sslManagerOpts == null ? 0 : this.m_sslManagerOpts.hashCode());
-        result = prime * result + (this.m_trustStore == null ? 0 : this.m_trustStore.hashCode());
+        result = prime * result + (this.alias == null ? 0 : this.alias.hashCode());
+        result = prime * result + (this.ciphers == null ? 0 : this.ciphers.hashCode());
+        result = prime * result + (this.hostnameVerification ? 1231 : 1237);
+        result = prime * result + (this.keyStore == null ? 0 : this.keyStore.hashCode());
+        result = prime * result + Arrays.hashCode(this.keyStorePassword);
+        result = prime * result + (this.protocol == null ? 0 : this.protocol.hashCode());
+        result = prime * result + (this.sslManagerOpts == null ? 0 : this.sslManagerOpts.hashCode());
+        result = prime * result + (this.trustStore == null ? 0 : this.trustStore.hashCode());
         return result;
     }
 
@@ -133,52 +131,52 @@ public class ConnectionSslOptions {
             return false;
         }
         ConnectionSslOptions other = (ConnectionSslOptions) obj;
-        if (this.m_alias == null) {
-            if (other.m_alias != null) {
+        if (this.alias == null) {
+            if (other.alias != null) {
                 return false;
             }
-        } else if (!this.m_alias.equals(other.m_alias)) {
+        } else if (!this.alias.equals(other.alias)) {
             return false;
         }
-        if (this.m_ciphers == null) {
-            if (other.m_ciphers != null) {
+        if (this.ciphers == null) {
+            if (other.ciphers != null) {
                 return false;
             }
-        } else if (!this.m_ciphers.equals(other.m_ciphers)) {
+        } else if (!this.ciphers.equals(other.ciphers)) {
             return false;
         }
-        if (this.m_hostnameVerification != other.m_hostnameVerification) {
+        if (this.hostnameVerification != other.hostnameVerification) {
             return false;
         }
-        if (this.m_keyStore == null) {
-            if (other.m_keyStore != null) {
+        if (this.keyStore == null) {
+            if (other.keyStore != null) {
                 return false;
             }
-        } else if (!this.m_keyStore.equals(other.m_keyStore)) {
+        } else if (!this.keyStore.equals(other.keyStore)) {
             return false;
         }
-        if (!Arrays.equals(this.m_keyStorePassword, other.m_keyStorePassword)) {
+        if (!Arrays.equals(this.keyStorePassword, other.keyStorePassword)) {
             return false;
         }
-        if (this.m_protocol == null) {
-            if (other.m_protocol != null) {
+        if (this.protocol == null) {
+            if (other.protocol != null) {
                 return false;
             }
-        } else if (!this.m_protocol.equals(other.m_protocol)) {
+        } else if (!this.protocol.equals(other.protocol)) {
             return false;
         }
-        if (this.m_sslManagerOpts == null) {
-            if (other.m_sslManagerOpts != null) {
+        if (this.sslManagerOpts == null) {
+            if (other.sslManagerOpts != null) {
                 return false;
             }
-        } else if (!this.m_sslManagerOpts.equals(other.m_sslManagerOpts)) {
+        } else if (!this.sslManagerOpts.equals(other.sslManagerOpts)) {
             return false;
         }
-        if (this.m_trustStore == null) {
-            if (other.m_trustStore != null) {
+        if (this.trustStore == null) {
+            if (other.trustStore != null) {
                 return false;
             }
-        } else if (!this.m_trustStore.equals(other.m_trustStore)) {
+        } else if (!this.trustStore.equals(other.trustStore)) {
             return false;
         }
         return true;

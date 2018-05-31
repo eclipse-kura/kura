@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.eclipse.kura.linux.usb;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -40,34 +41,38 @@ import org.slf4j.LoggerFactory;
 
 public class UsbServiceImpl implements UsbService, LinuxUdevListener {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(UsbServiceImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(UsbServiceImpl.class);
 
-    private LinuxUdevNative m_linuxUdevNative;
-    private EventAdmin m_eventAdmin;
+    private LinuxUdevNative linuxUdevNative;
+    private EventAdmin eventAdmin;
 
     protected void activate(ComponentContext componentContext) {
         // only support Linux
         String osName = System.getProperty("os.name");
         String osVersion = System.getProperty("os.version");
         if (osName.equals("Linux")) {
-            this.m_linuxUdevNative = new LinuxUdevNative(this);
+            try {
+                this.linuxUdevNative = new LinuxUdevNative(this);
+            } catch (IOException e) {
+                logger.error("Udev native can't be instantiated");
+            }
         } else {
-            s_logger.error("This is not Linux! - can not start the USB service.  This is " + osVersion);
+            logger.error("This is not Linux! - can not start the USB service.  This is {}", osVersion);
             throw new ComponentException("This is not Linux! - can not start the USB service.  This is " + osVersion);
         }
     }
 
     protected void deactivate(ComponentContext componentContext) {
-        this.m_linuxUdevNative.unbind();
-        this.m_linuxUdevNative = null;
+        this.linuxUdevNative.unbind();
+        this.linuxUdevNative = null;
     }
 
     public void setEventAdmin(EventAdmin eventAdmin) {
-        this.m_eventAdmin = eventAdmin;
+        this.eventAdmin = eventAdmin;
     }
 
     public void unsetEventAdmin(EventAdmin eventAdmin) {
-        this.m_eventAdmin = null;
+        this.eventAdmin = null;
     }
 
     @Override
@@ -108,7 +113,7 @@ public class UsbServiceImpl implements UsbService, LinuxUdevListener {
 
     @Override
     public synchronized void attached(UsbDevice device) {
-        s_logger.debug("firing UsbDeviceAddedEvent for: {}", device);
+        logger.debug("firing UsbDeviceAddedEvent for: {}", device);
         Map<String, Object> map = new HashMap<>();
         map.put(UsbDeviceEvent.USB_EVENT_USB_PORT_PROPERTY, device.getUsbPort());
         map.put(UsbDeviceEvent.USB_EVENT_VENDOR_ID_PROPERTY, device.getVendorId());
@@ -130,12 +135,12 @@ public class UsbServiceImpl implements UsbService, LinuxUdevListener {
             map.put(UsbDeviceEvent.USB_EVENT_DEVICE_TYPE_PROPERTY, UsbDeviceType.USB_TTY_DEVICE);
         }
 
-        this.m_eventAdmin.postEvent(new UsbDeviceAddedEvent(map));
+        this.eventAdmin.postEvent(new UsbDeviceAddedEvent(map));
     }
 
     @Override
     public synchronized void detached(UsbDevice device) {
-        s_logger.debug("firing UsbDeviceRemovedEvent for: {}", device);
+        logger.debug("firing UsbDeviceRemovedEvent for: {}", device);
         Map<String, Object> map = new HashMap<>();
         map.put(UsbDeviceEvent.USB_EVENT_USB_PORT_PROPERTY, device.getUsbPort());
         map.put(UsbDeviceEvent.USB_EVENT_VENDOR_ID_PROPERTY, device.getVendorId());
@@ -156,6 +161,6 @@ public class UsbServiceImpl implements UsbService, LinuxUdevListener {
             map.put(UsbDeviceEvent.USB_EVENT_DEVICE_TYPE_PROPERTY, UsbDeviceType.USB_TTY_DEVICE);
         }
 
-        this.m_eventAdmin.postEvent(new UsbDeviceRemovedEvent(map));
+        this.eventAdmin.postEvent(new UsbDeviceRemovedEvent(map));
     }
 }

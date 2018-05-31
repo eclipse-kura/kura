@@ -37,30 +37,29 @@ public class LinuxUdevNative {
     private static final Logger logger = LoggerFactory.getLogger(LinuxUdevNative.class);
 
     private static final String LIBRARY_NAME = "EurotechLinuxUdev";
-
     private static final long THREAD_TERMINATION_TOUT = 1; // in seconds
-
     private static final String UNABLE_TO_LOAD_ERROR = "Unable to load: ";
+    private static final String UNKNOWN_UDEV_EVENT = "Unknown udev event: {}";
 
     static {
         try {
-            AccessController.doPrivileged((PrivilegedAction) () -> {
-                try {
-                    // privileged code goes here, for example:
-                    System.loadLibrary(LIBRARY_NAME);
-                    return null; // nothing to return
-                } catch (Exception e) {
-                    logger.error(UNABLE_TO_LOAD_ERROR + LIBRARY_NAME);
-                    return null;
-                }
-            });
+            AccessController.doPrivileged((PrivilegedAction) LinuxUdevNative::loadUdevLibrary);
         } catch (Exception e) {
             logger.error(UNABLE_TO_LOAD_ERROR + LIBRARY_NAME);
         }
     }
 
-    private static boolean started;
-    private static Future<?> task;
+    private static Object loadUdevLibrary() {
+        try {
+            System.loadLibrary(LIBRARY_NAME);
+        } catch (Exception e) {
+            logger.error(UNABLE_TO_LOAD_ERROR + LIBRARY_NAME);
+        }
+        return null;
+    }
+
+    private boolean started;
+    private Future<?> task;
     private ScheduledExecutorService executor;
 
     private LinuxUdevListener linuxUdevListener;
@@ -73,48 +72,44 @@ public class LinuxUdevNative {
     private static HashMap<String, UsbNetDevice> netDevices = new HashMap<>();
     private static HashMap<String, UsbTtyDevice> ttyDevices = new HashMap<>();
 
-    public LinuxUdevNative(LinuxUdevListener linuxUdevListener) {
-        if (!started) {
+    public LinuxUdevNative(LinuxUdevListener linuxUdevListener) throws IOException {
+        if (!this.started) {
             this.linuxUdevNativeInstance = this;
             this.linuxUdevListener = linuxUdevListener;
 
             /* Assume we get some "good" devices here */
             List<UsbBlockDevice> usbBlockDevices = (List<UsbBlockDevice>) LinuxUdevNative.getUsbDevices("block");
-            for (UsbBlockDevice blockDevice : usbBlockDevices) {
-                blockDevices.put(blockDevice.getDeviceNode(), blockDevice);
+            if (usbBlockDevices != null) {
+                for (UsbBlockDevice blockDevice : usbBlockDevices) {
+                    blockDevices.put(blockDevice.getDeviceNode(), blockDevice);
+                }
             }
 
             List<UsbNetDevice> usbNetDevices = (List<UsbNetDevice>) LinuxUdevNative.getUsbDevices("net");
-            for (UsbNetDevice netDevice : usbNetDevices) {
-                netDevices.put(netDevice.getInterfaceName(), netDevice);
+            if (usbNetDevices != null) {
+                for (UsbNetDevice netDevice : usbNetDevices) {
+                    netDevices.put(netDevice.getInterfaceName(), netDevice);
+                }
             }
 
             List<UsbTtyDevice> usbTtyDevices = (List<UsbTtyDevice>) LinuxUdevNative.getUsbDevices("tty");
-            for (UsbTtyDevice ttyDevice : usbTtyDevices) {
-                Integer interfaceNumber = null;
-                try {
-                    interfaceNumber = LinuxUdevUtil.getInterfaceNumber(ttyDevice.getDeviceNode());
-                } catch (IOException e) {
-                    logger.error("Error fetching interface number", e);
+            if (usbTtyDevices != null) {
+                for (UsbTtyDevice ttyDevice : usbTtyDevices) {
+                    ttyDevices.put(ttyDevice.getDeviceNode(), ttyDevice);
                 }
-                UsbTtyDevice ttyDeviceWithInterface = new UsbTtyDevice(ttyDevice.getVendorId(),
-                        ttyDevice.getProductId(), ttyDevice.getManufacturerName(), ttyDevice.getProductName(),
-                        ttyDevice.getUsbBusNumber(), ttyDevice.getUsbDevicePath(), ttyDevice.getDeviceNode(),
-                        interfaceNumber);
-                ttyDevices.put(ttyDevice.getDeviceNode(), ttyDeviceWithInterface);
             }
 
             start();
-            started = true;
+            this.started = true;
         }
     }
 
     public void unbind() {
-        if (task != null && !task.isDone()) {
+        if (this.task != null && !this.task.isDone()) {
             logger.debug("Cancelling LinuxUdevNative task ...");
-            task.cancel(true);
-            logger.info("LinuxUdevNative task cancelled? = {}", task.isDone());
-            task = null;
+            this.task.cancel(true);
+            logger.info("LinuxUdevNative task cancelled? = {}", this.task.isDone());
+            this.task = null;
         }
         if (this.executor != null) {
             logger.debug("Terminating LinuxUdevNative Thread ...");
@@ -128,7 +123,7 @@ public class LinuxUdevNative {
             logger.info("LinuxUdevNative Thread terminated? - {}", this.executor.isTerminated());
             this.executor = null;
         }
-        started = false;
+        this.started = false;
     }
 
     public static List<UsbBlockDevice> getUsbBlockDevices() {
@@ -143,9 +138,9 @@ public class LinuxUdevNative {
         return new ArrayList<>(ttyDevices.values());
     }
 
-    private static native void nativeHotplugThread(LinuxUdevNative linuxUdevNative);
+    private static native void nativeHotplugThread(LinuxUdevNative linuxUdevNative) throws IOException;
 
-    private static native ArrayList<? extends UsbDevice> getUsbDevices(String deviceClass);
+    private static native ArrayList<? extends UsbDevice> getUsbDevices(String deviceClass) throws IOException;
 
     /*
      * WARNING
@@ -176,69 +171,71 @@ public class LinuxUdevNative {
         logger.debug("\tUSB Bus Number: {}", usbDevice.getUsbBusNumber());
 
         if (usbDevice instanceof UsbBlockDevice) {
-            String name = ((UsbBlockDevice) usbDevice).getDeviceNode();
-            if (name != null) {
-                if (type.compareTo(UdevEventType.ATTACHED.name()) == 0) {
-                    /*
-                     * FIXME: does an already existing device, with the same name,
-                     * need to be removed first?
-                     */
-                    blockDevices.put(name, (UsbBlockDevice) usbDevice);
-                    this.linuxUdevListener.attached(usbDevice);
-                } else if (type.compareTo(UdevEventType.DETACHED.name()) == 0) {
-                    /*
-                     * Due to the above limitations,
-                     * the best we can do is to remove the device from the
-                     * map of already known devices by its name.
-                     */
-                    UsbBlockDevice removedDevice = blockDevices.remove(name);
-                    if (removedDevice != null) {
-                        this.linuxUdevListener.detached(removedDevice);
-                    }
-                } else {
-                    logger.debug("Unknown udev event: {}", type);
-                }
-            }
+            manageUsbBlockDevice(type, usbDevice);
         } else if (usbDevice instanceof UsbNetDevice) {
-            String name = ((UsbNetDevice) usbDevice).getInterfaceName();
-            if (name != null) {
-                if (type.compareTo(UdevEventType.ATTACHED.name()) == 0) {
-                    netDevices.put(name, (UsbNetDevice) usbDevice);
-                    this.linuxUdevListener.attached(usbDevice);
-                } else if (type.compareTo(UdevEventType.DETACHED.name()) == 0) {
-                    UsbNetDevice removedDevice = netDevices.remove(name);
-                    if (removedDevice != null) {
-                        this.linuxUdevListener.detached(removedDevice);
-                    }
-                } else {
-                    logger.debug("Unknown udev event: {}", type);
-                }
-            }
+            manageUsbNetDevice(type, usbDevice);
         } else if (usbDevice instanceof UsbTtyDevice) {
-            String name = ((UsbTtyDevice) usbDevice).getDeviceNode();
-            if (name != null) {
-                if (type.compareTo(UdevEventType.ATTACHED.name()) == 0) {
-                    UsbTtyDevice ttyDevice = (UsbTtyDevice) usbDevice;
-                    Integer interfaceNumber = null;
-                    try {
-                        interfaceNumber = LinuxUdevUtil.getInterfaceNumber(ttyDevice.getDeviceNode());
-                    } catch (IOException e) {
-                        logger.error("Error fetching interface number", e);
-                    }
-                    UsbTtyDevice ttyDeviceWithInterface = new UsbTtyDevice(ttyDevice.getVendorId(),
-                            ttyDevice.getProductId(), ttyDevice.getManufacturerName(), ttyDevice.getProductName(),
-                            ttyDevice.getUsbBusNumber(), ttyDevice.getUsbDevicePath(), ttyDevice.getDeviceNode(),
-                            interfaceNumber);
-                    ttyDevices.put(name, ttyDeviceWithInterface);
-                    this.linuxUdevListener.attached(ttyDeviceWithInterface);
-                } else if (type.compareTo(UdevEventType.DETACHED.name()) == 0) {
-                    UsbTtyDevice removedDevice = ttyDevices.remove(name);
-                    if (removedDevice != null) {
-                        this.linuxUdevListener.detached(removedDevice);
-                    }
-                } else {
-                    logger.debug("Unknown udev event: {}", type);
+            manageUsbTtyDevice(type, usbDevice);
+        }
+    }
+
+    private void manageUsbTtyDevice(String type, UsbDevice usbDevice) {
+        String name = ((UsbTtyDevice) usbDevice).getDeviceNode();
+        if (name != null) {
+            if (type.compareTo(UdevEventType.ATTACHED.name()) == 0) {
+                UsbTtyDevice ttyDevice = (UsbTtyDevice) usbDevice;
+                ttyDevices.put(name, ttyDevice);
+                this.linuxUdevListener.attached(ttyDevice);
+            } else if (type.compareTo(UdevEventType.DETACHED.name()) == 0) {
+                UsbTtyDevice removedDevice = ttyDevices.remove(name);
+                if (removedDevice != null) {
+                    this.linuxUdevListener.detached(removedDevice);
                 }
+            } else {
+                logger.debug(UNKNOWN_UDEV_EVENT, type);
+            }
+        }
+    }
+
+    private void manageUsbNetDevice(String type, UsbDevice usbDevice) {
+        String name = ((UsbNetDevice) usbDevice).getInterfaceName();
+        if (name != null) {
+            if (type.compareTo(UdevEventType.ATTACHED.name()) == 0) {
+                netDevices.put(name, (UsbNetDevice) usbDevice);
+                this.linuxUdevListener.attached(usbDevice);
+            } else if (type.compareTo(UdevEventType.DETACHED.name()) == 0) {
+                UsbNetDevice removedDevice = netDevices.remove(name);
+                if (removedDevice != null) {
+                    this.linuxUdevListener.detached(removedDevice);
+                }
+            } else {
+                logger.debug(UNKNOWN_UDEV_EVENT, type);
+            }
+        }
+    }
+
+    private void manageUsbBlockDevice(String type, UsbDevice usbDevice) {
+        String name = ((UsbBlockDevice) usbDevice).getDeviceNode();
+        if (name != null) {
+            if (type.compareTo(UdevEventType.ATTACHED.name()) == 0) {
+                /*
+                 * FIXME: does an already existing device, with the same name,
+                 * need to be removed first?
+                 */
+                blockDevices.put(name, (UsbBlockDevice) usbDevice);
+                this.linuxUdevListener.attached(usbDevice);
+            } else if (type.compareTo(UdevEventType.DETACHED.name()) == 0) {
+                /*
+                 * Due to the above limitations,
+                 * the best we can do is to remove the device from the
+                 * map of already known devices by its name.
+                 */
+                UsbBlockDevice removedDevice = blockDevices.remove(name);
+                if (removedDevice != null) {
+                    this.linuxUdevListener.detached(removedDevice);
+                }
+            } else {
+                logger.debug(UNKNOWN_UDEV_EVENT, type);
             }
         }
     }
@@ -252,7 +249,7 @@ public class LinuxUdevNative {
             return thread;
         });
 
-        task = this.executor.submit(() -> {
+        this.task = this.executor.submit(() -> {
             logger.info("Starting LinuxUdevNative Thread ...");
             Thread.currentThread().setName("LinuxUdevNative");
             try {

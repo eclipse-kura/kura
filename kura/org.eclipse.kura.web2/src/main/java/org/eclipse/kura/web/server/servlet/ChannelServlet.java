@@ -20,6 +20,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -39,27 +40,26 @@ import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ChannelServlet extends HttpServlet {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -1445700937173920652L;
-	
-	private static Logger logger = LoggerFactory.getLogger(ChannelServlet.class);
-	
-	/**
-	 * Instance of Base Asset Channel Descriptor
-	 */
-	private static final GwtConfigComponent WIRE_ASSET_CHANNEL_DESCRIPTOR = GwtServerUtil.toGwtConfigComponent(null,
+    /**
+     *
+     */
+    private static final long serialVersionUID = -1445700937173920652L;
+
+    private static Logger logger = LoggerFactory.getLogger(ChannelServlet.class);
+
+    /**
+     * Instance of Base Asset Channel Descriptor
+     */
+    private static final GwtConfigComponent WIRE_ASSET_CHANNEL_DESCRIPTOR = GwtServerUtil.toGwtConfigComponent(null,
             WireAssetChannelDescriptor.get().getDescriptor());
 
-	@Override
-	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		// BEGIN XSRF - Servlet dependent code
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        // BEGIN XSRF - Servlet dependent code
         try {
             GwtXSRFToken token = new GwtXSRFToken(req.getParameter("xsrfToken"));
             KuraRemoteServiceServlet.checkXSRFToken(req, token);
@@ -69,52 +69,51 @@ public class ChannelServlet extends HttpServlet {
         // END XSRF security check
         String assetPid = req.getParameter("assetPid");
         String driverPid = req.getParameter("driverPid");
-        
-        try{
-        	StringBuilder output = new StringBuilder();
-        	List<String> orderedFields = new ArrayList<>();
-        	
-        	WIRE_ASSET_CHANNEL_DESCRIPTOR.getParameters().forEach(i -> {
-        		output.append("\"").append(i.getName()).append("\",");
-        		orderedFields.add(new StringBuilder().append("+").append(i.getName()).toString());
-        	});
-        	        	
-        	withDriver(driverPid, driver -> {
-        		@SuppressWarnings("unchecked")
-				List<AD> descriptor = (List<AD>)driver.getChannelDescriptor().getDescriptor();
-        		
-        		for(AD ad : descriptor){
-        			output.append("\"").append(ad.getName()).append("\",");
-        			orderedFields.add(ad.getName());
-        		}
-        		output.delete(output.length()-1, output.length());
-        		output.append("\r");
-        	});
-        	
-        	withAsset(assetPid, asset -> {
-        		asset.getAssetConfiguration().getAssetChannels().forEach((name, channel) -> {
-        			orderedFields.forEach(key -> {
-        				output.append("\"").append(channel.getConfiguration().get(key)).append("\",");
-        			});
-            		output.delete(output.length()-1, output.length());
-            		output.append("\r");
-        		});
-        	});
-        	
-        	
-	        resp.setCharacterEncoding("UTF-8");
-	        resp.setContentType("application/xml");
-	        resp.setHeader("Content-Disposition", "attachment; filename=asset_" + assetPid + ".csv");
-	        resp.setHeader("Cache-Control", "no-transform, max-age=0");
-	        try(PrintWriter writer = resp.getWriter()){
-	        	writer.write(output.toString());
-	        }
-        }catch(Exception ex){
-        	throw new ServletException();
+
+        try {
+            StringBuilder output = new StringBuilder();
+            List<String> orderedFields = new ArrayList<>();
+
+            WIRE_ASSET_CHANNEL_DESCRIPTOR.getParameters().forEach(i -> {
+                output.append("\"").append(i.getName()).append("\",");
+                orderedFields.add(new StringBuilder().append("+").append(i.getName()).toString());
+            });
+
+            withDriver(driverPid, driver -> {
+                @SuppressWarnings("unchecked")
+                List<AD> descriptor = (List<AD>) driver.getChannelDescriptor().getDescriptor();
+
+                for (AD ad : descriptor) {
+                    output.append("\"").append(ad.getName()).append("\",");
+                    orderedFields.add(ad.getName());
+                }
+                output.delete(output.length() - 1, output.length());
+                output.append("\r");
+            });
+
+            withAsset(assetPid, asset -> {
+                asset.getAssetConfiguration().getAssetChannels().forEach((name, channel) -> {
+                    orderedFields.forEach(key -> {
+                        output.append("\"").append(channel.getConfiguration().get(key)).append("\",");
+                    });
+                    output.delete(output.length() - 1, output.length());
+                    output.append("\r");
+                });
+            });
+
+            resp.setCharacterEncoding("UTF-8");
+            resp.setContentType("application/xml");
+            resp.setHeader("Content-Disposition", "attachment; filename=asset_" + assetPid + ".csv");
+            resp.setHeader("Cache-Control", "no-transform, max-age=0");
+            try (PrintWriter writer = resp.getWriter()) {
+                writer.write(output.toString());
+            }
+        } catch (Exception ex) {
+            throw new ServletException();
         }
-	}
-		
-	private void withAsset(final String kuraServicePid, final ServiceConsumer<Asset> consumer) throws Exception {
+    }
+
+    private void withAsset(final String kuraServicePid, final ServiceConsumer<Asset> consumer) throws Exception {
         final BundleContext ctx = FrameworkUtil.getBundle(ServiceLocator.class).getBundleContext();
 
         final String filter = format("(%s=%s)", KURA_SERVICE_PID, kuraServicePid);
@@ -133,7 +132,7 @@ public class ChannelServlet extends HttpServlet {
         }
     }
 
-	private void withDriver(final String kuraServicePid, final ServiceConsumer<Driver> consumer) throws Exception {
+    private void withDriver(final String kuraServicePid, final ServiceConsumer<Driver> consumer) throws Exception {
         final BundleContext ctx = FrameworkUtil.getBundle(ServiceLocator.class).getBundleContext();
 
         final String filter = format("(%s=%s)", KURA_SERVICE_PID, kuraServicePid);

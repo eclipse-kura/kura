@@ -44,7 +44,7 @@
                                         <b:ButtonGroup size="SMALL">
                                             <b.html:Strong ui:field="channelTitle">Channels</b.html:Strong>
                                         </b:ButtonGroup>
-                                        <b:ButtonGroup size="SMALL" addStyleNames="pull-right hidden">
+                                        <b:ButtonGroup size="SMALL" addStyleNames="pull-right">
                                             <b:Button icon="DOWNLOAD" ui:field="btnDownload">Download Channels</b:Button>
                                             <b:Button icon="UPLOAD" ui:field="btnUpload">Upload Channels</b:Button>
                                         </b:ButtonGroup>
@@ -88,6 +88,30 @@
                         ui:field="btnCancelCreatingNewChannel" />
                     <b:Button icon="SAVE" type="PRIMARY" b:id="btn-create-channel" ui:field="btnCreateNewChannel" />
                 </b:ModalFooter>
+            </b:Modal>
+            <!-- File Upload Modal -->
+            <b:Modal closable="true" fade="true" title="Upload" b:id="upload-modal" 
+            	ui:field="uploadModal">
+                <b:ModalBody>
+                        <b:Container fluid="true">
+                            <g:FormPanel ui:field="uploadForm">
+                                <b:FieldSet>
+                                    <b:FormGroup>
+                                        <b:FormLabel>File</b:FormLabel>
+                                        <g:FileUpload
+                                            ui:field="filePath"></g:FileUpload>
+                                    </b:FormGroup>
+                                    <b:ButtonGroup pull="RIGHT">
+                                        <b:Button ui:field="uploadCancel">Cancel</b:Button>
+                                        <b:Button ui:field="uploadUpload">Upload</b:Button>
+                                    </b:ButtonGroup>
+                                    <g:Hidden ui:field="xsrfTokenField"></g:Hidden>
+                                    <g:Hidden ui:field="assetPidField"></g:Hidden>
+                                    <g:Hidden ui:field="driverPidField"></g:Hidden>
+                                </b:FieldSet>
+                            </g:FormPanel>
+                        </b:Container>
+                </b:ModalBody>
             </b:Modal>
         </b:Column>
     </b:Container>

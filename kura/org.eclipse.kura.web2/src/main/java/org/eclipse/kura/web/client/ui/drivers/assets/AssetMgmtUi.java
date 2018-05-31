@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -66,45 +66,46 @@ public class AssetMgmtUi extends Composite {
         final AssetModel model = new AssetModelImpl(new GwtConfigComponent(assetConfiguration), channelDescriptor,
                 configurations.getBaseChannelDescriptor());
         this.assetDataUi = new AssetDataUi(model);
-        this.assetConfigUi = new AssetConfigurationUi(model, assetDataUi);
-        final ConfigurationUiButtons buttonBar = createAssetUiButtonBar(assetConfigUi, configurations);
+        this.assetConfigUi = new AssetConfigurationUi(model, this.assetDataUi, configurations);
+        final ConfigurationUiButtons buttonBar = createAssetUiButtonBar(this.assetConfigUi, configurations);
 
         final Panel panel = new Panel();
         panel.add(buttonBar);
-        panel.add(assetConfigUi);
-        tab1Pane.add(panel);
-        tab2Pane.add(assetDataUi);
+        panel.add(this.assetConfigUi);
+        this.tab1Pane.add(panel);
+        this.tab2Pane.add(this.assetDataUi);
 
-        tab2NavTab.addClickHandler(new ClickHandler() {
+        this.tab2NavTab.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
-                if (assetConfigUi.isDirty()) {
-                    alertDialog.show(MSGS.driversAssetsAssetConfigDirty(), AlertDialog.Severity.ALERT, null);
+                if (AssetMgmtUi.this.assetConfigUi.isDirty()) {
+                    AssetMgmtUi.this.alertDialog.show(MSGS.driversAssetsAssetConfigDirty(), AlertDialog.Severity.ALERT,
+                            null);
                     event.stopPropagation();
                     event.preventDefault();
                     return;
                 }
-                assetDataUi.renderForm();
+                AssetMgmtUi.this.assetDataUi.renderForm();
             }
         });
     }
 
     public void refresh() {
-        if (tab1NavTab.isActive()) {
-            assetConfigUi.renderForm();
+        if (this.tab1NavTab.isActive()) {
+            this.assetConfigUi.renderForm();
         } else {
-            assetDataUi.renderForm();
+            this.assetDataUi.renderForm();
         }
     }
 
     public void setDirty(boolean flag) {
-        assetConfigUi.setDirty(flag);
-        assetDataUi.setDirty(flag);
+        this.assetConfigUi.setDirty(flag);
+        this.assetDataUi.setDirty(flag);
     }
 
     public boolean isDirty() {
-        return assetConfigUi.isDirty() || assetDataUi.isDirty();
+        return this.assetConfigUi.isDirty() || this.assetDataUi.isDirty();
     }
 
     public ConfigurationUiButtons createAssetUiButtonBar(final AssetConfigurationUi assetUi,
@@ -120,7 +121,7 @@ public class AssetMgmtUi extends Composite {
                         new GwtConfigComponent(
                                 configurations.getConfiguration(gwtConfig.getComponentId()).getConfiguration()),
                         configurations.getChannelDescriptor(driverPid), configurations.getBaseChannelDescriptor());
-                assetDataUi.setModel(model);
+                AssetMgmtUi.this.assetDataUi.setModel(model);
                 assetUi.setModel(model);
             }
 

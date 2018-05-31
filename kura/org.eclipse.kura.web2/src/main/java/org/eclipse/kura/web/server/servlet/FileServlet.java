@@ -54,6 +54,7 @@ import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.util.service.ServiceUtil;
 import org.eclipse.kura.web.Console;
 import org.eclipse.kura.web.server.KuraRemoteServiceServlet;
+import org.eclipse.kura.web.server.util.AssetConfigValidator;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
@@ -157,6 +158,8 @@ public class FileServlet extends HttpServlet {
             doPostConfigurationSnapshot(req, resp);
         } else if (reqPathInfo.equals("/command")) {
             doPostCommand(req, resp);
+        } else if (reqPathInfo.equals("/asset")) {
+            doPostAsset(req, resp);
         } else {
             logger.error("Unknown request path info: " + reqPathInfo);
             throw new ServletException("Unknown request path info: " + reqPathInfo);
@@ -373,6 +376,78 @@ public class FileServlet extends HttpServlet {
         } else {
             throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ACCESS);
         }
+    }
+
+    private void doPostAsset(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        UploadRequest upload = new UploadRequest(this.m_diskFileItemFactory);
+
+        try {
+            upload.parse(req);
+        } catch (FileUploadException e) {
+            logger.error("Error parsing the file upload request");
+            throw new ServletException("Error parsing the file upload request", e);
+        }
+
+        // BEGIN XSRF - Servlet dependent code
+        Map<String, String> formFields = upload.getFormFields();
+
+        try {
+            GwtXSRFToken token = new GwtXSRFToken(formFields.get("xsrfToken"));
+            KuraRemoteServiceServlet.checkXSRFToken(req, token);
+        } catch (Exception e) {
+            throw new ServletException("Security error: please retry this operation correctly.", e);
+        }
+        // END XSRF security check
+
+        List<FileItem> fileItems = upload.getFileItems();
+        if (fileItems.size() != 1) {
+            logger.error("expected 1 file item but found {}", fileItems.size());
+            throw new ServletException("Wrong number of file items");
+        }
+
+        FileItem fileItem = fileItems.get(0);
+        byte[] data = fileItem.get();
+        String csvString = new String(data, "UTF-8");
+        String assetPid = formFields.get("assetPid");
+        String driverPid = formFields.get("driverPid");
+
+        List<String> errors = new ArrayList<>();
+        try {
+            Map<String, Object> newProps = AssetConfigValidator.get().validateCsv(csvString, assetPid, driverPid,
+                    errors);
+
+            ServiceLocator locator = ServiceLocator.getInstance();
+            try {
+
+                ConfigurationService cs = locator.getService(ConfigurationService.class);
+
+                cs.updateConfiguration(assetPid, newProps);
+
+                //
+                // Add an additional delay after the configuration update
+                // to give the time to the device to apply the received
+                // configuration
+                SystemService ss = locator.getService(SystemService.class);
+                long delay = Long.parseLong(ss.getProperties().getProperty("console.updateConfigDelay", "5000"));
+                if (delay > 0) {
+                    Thread.sleep(delay);
+                }
+            } catch (KuraException | GwtKuraException | InterruptedException e) {
+                logger.error("Error updating device configuration: {}", e);
+                throw new ServletException("Error updating device configuration", e);
+            }
+        } catch (ServletException ex) {
+            if (errors.size() > 0) {
+                StringBuilder sb = new StringBuilder();
+                errors.forEach(line -> {
+                    sb.append(line).append("\n");
+                });
+                resp.getWriter().write(sb.toString());
+            } else {
+                throw new ServletException(ex);
+            }
+        }
+
     }
 
     private void doPostConfigurationSnapshot(HttpServletRequest req, HttpServletResponse resp)

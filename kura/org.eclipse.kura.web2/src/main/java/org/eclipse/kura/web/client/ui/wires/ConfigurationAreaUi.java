@@ -101,7 +101,8 @@ public class ConfigurationAreaUi extends Composite {
             final AssetModel assetModel = new AssetModelImpl(hasConfiguration.getConfiguration(),
                     configurations.getChannelDescriptor(driverPid), configurations.getBaseChannelDescriptor());
 
-            this.assetWireComponentUi = new AssetConfigurationUi(assetModel, this.genericWireComponentUi);
+            this.assetWireComponentUi = new AssetConfigurationUi(assetModel, this.genericWireComponentUi,
+                    configurations);
             this.assetWireComponentUi
                     .setTitle(WiresPanelUi.getComponentLabel(configuration) + " - " + configuration.getComponentId());
             this.assetWireComponentUi.renderForm();

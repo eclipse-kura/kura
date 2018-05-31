@@ -5,7 +5,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *******************************************************************************/
 package org.eclipse.kura.web;
 
@@ -34,6 +34,7 @@ import org.eclipse.kura.web.server.GwtSnapshotServiceImpl;
 import org.eclipse.kura.web.server.GwtSslServiceImpl;
 import org.eclipse.kura.web.server.GwtStatusServiceImpl;
 import org.eclipse.kura.web.server.GwtWireServiceImpl;
+import org.eclipse.kura.web.server.servlet.ChannelServlet;
 import org.eclipse.kura.web.server.servlet.DeviceSnapshotsServlet;
 import org.eclipse.kura.web.server.servlet.EventHandlerServlet;
 import org.eclipse.kura.web.server.servlet.FileServlet;
@@ -132,7 +133,7 @@ public class Console implements ConfigurableComponent {
                 s_appRoot = (String) properties.get(APP_ROOT);
                 String servletRoot = s_aliasRoot;
 
-                this.m_properties = new HashMap<String, Object>();
+                this.m_properties = new HashMap<>();
                 Iterator<String> keys = properties.keySet().iterator();
                 while (keys.hasNext()) {
                     String key = keys.next();
@@ -169,7 +170,7 @@ public class Console implements ConfigurableComponent {
 
                 initHTTPService(this.authMgr, servletRoot);
 
-                Map<String, Object> props = new HashMap<String, Object>();
+                Map<String, Object> props = new HashMap<>();
                 props.put("kura.version", this.m_systemService.getKuraVersion());
                 EventProperties eventProps = new EventProperties(props);
                 s_logger.info("postInstalledEvent() :: posting KuraConfigReadyEvent");
@@ -242,6 +243,7 @@ public class Console implements ConfigurableComponent {
         this.m_httpService.unregister(servletRoot + "/setting");
         this.m_httpService.unregister(servletRoot + "/file");
         this.m_httpService.unregister(servletRoot + "/device_snapshots");
+        this.m_httpService.unregister(servletRoot + "/assetsUpDownload");
         this.m_httpService.unregister(servletRoot + "/skin");
         this.m_httpService.unregister(servletRoot + "/wires");
         this.m_httpService.unregister("/sse");
@@ -284,6 +286,7 @@ public class Console implements ConfigurableComponent {
         this.m_httpService.registerServlet(servletRoot + "/file", new FileServlet(), null, httpCtx);
         this.m_httpService.registerServlet(servletRoot + "/device_snapshots", new DeviceSnapshotsServlet(), null,
                 httpCtx);
+        this.m_httpService.registerServlet(servletRoot + "/assetsUpDownload", new ChannelServlet(), null, httpCtx);
         this.m_httpService.registerServlet(servletRoot + "/skin", new SkinServlet(), null, httpCtx);
         this.m_httpService.registerServlet(servletRoot + "/ssl", new GwtSslServiceImpl(), null, httpCtx);
         this.m_httpService.registerServlet(servletRoot + "/cloudservices", new GwtCloudServiceImpl(), null, httpCtx);

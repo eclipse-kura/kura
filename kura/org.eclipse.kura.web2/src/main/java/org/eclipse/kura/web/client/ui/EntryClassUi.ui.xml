@@ -87,6 +87,10 @@
     .rotateImg i {
     	transform: rotate(-90deg);
     }
+    
+    .wordWrap {
+    	white-space: pre-wrap;
+    }
     </ui:style>
 
     <b:Container fluid="true">
@@ -190,7 +194,7 @@
                                             <b:Panel>
                                                 <b:Alert type="DANGER">
                                                     <b:Heading size="H4">
-                                                        <g:Label ui:field="errorMessage" text="Error Message" />
+                                                        <g:Label ui:field="errorMessage" text="Error Message" addStyleNames='{style.wordWrap}'/>
                                                     </b:Heading>
                                                 </b:Alert>
                                             </b:Panel>
@@ -295,7 +299,7 @@
             </b:ModalFooter>
         </b:Modal>
         <b:Modal closable="true" fade="true" dataBackdrop="STATIC" dataKeyboard="true" b:id="error-pid-modal"
-            ui:field="errorModal">
+            ui:field="errorModal" addStyleNames='{style.wordWrap}'>
             <b:ModalHeader addStyleNames="{style.comp-modal-header}">
             </b:ModalHeader>
             <b:ModalBody>

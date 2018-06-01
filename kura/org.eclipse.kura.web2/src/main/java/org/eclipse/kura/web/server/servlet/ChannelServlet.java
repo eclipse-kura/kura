@@ -20,7 +20,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -40,6 +39,7 @@ import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ChannelServlet extends HttpServlet {
@@ -64,7 +64,8 @@ public class ChannelServlet extends HttpServlet {
             GwtXSRFToken token = new GwtXSRFToken(req.getParameter("xsrfToken"));
             KuraRemoteServiceServlet.checkXSRFToken(req, token);
         } catch (Exception e) {
-            throw new ServletException("Security error: please retry this operation correctly.", e);
+            logger.warn("Security error: please retry this operation correctly.");
+            return;
         }
         // END XSRF security check
         String assetPid = req.getParameter("assetPid");
@@ -91,15 +92,12 @@ public class ChannelServlet extends HttpServlet {
                 output.append("\r");
             });
 
-            withAsset(assetPid, asset -> {
-                asset.getAssetConfiguration().getAssetChannels().forEach((name, channel) -> {
-                    orderedFields.forEach(key -> {
-                        output.append("\"").append(channel.getConfiguration().get(key)).append("\",");
-                    });
-                    output.delete(output.length() - 1, output.length());
-                    output.append("\r");
-                });
-            });
+            withAsset(assetPid, asset -> asset.getAssetConfiguration().getAssetChannels().forEach((name, channel) -> {
+                orderedFields
+                        .forEach(key -> output.append("\"").append(channel.getConfiguration().get(key)).append("\","));
+                output.delete(output.length() - 1, output.length());
+                output.append("\r");
+            }));
 
             resp.setCharacterEncoding("UTF-8");
             resp.setContentType("application/xml");
@@ -109,7 +107,7 @@ public class ChannelServlet extends HttpServlet {
                 writer.write(output.toString());
             }
         } catch (Exception ex) {
-            throw new ServletException();
+            logger.error("Error while executing get on ChannelServlet!", ex);
         }
     }
 

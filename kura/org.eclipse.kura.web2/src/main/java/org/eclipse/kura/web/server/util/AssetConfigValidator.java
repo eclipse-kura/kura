@@ -24,7 +24,6 @@ import java.util.Scanner;
 import javax.servlet.ServletException;
 
 import org.eclipse.kura.configuration.metatype.Option;
-import org.eclipse.kura.configuration.metatype.Scalar;
 import org.eclipse.kura.core.configuration.metatype.Tad;
 import org.eclipse.kura.driver.Driver;
 import org.eclipse.kura.internal.wire.asset.WireAssetChannelDescriptor;
@@ -40,75 +39,85 @@ public class AssetConfigValidator {
     private static Logger logger = LoggerFactory.getLogger(AssetConfigValidator.class);
 
     private static final AssetConfigValidator _instance = new AssetConfigValidator();
-    private static int lineNumber = 0;
+    private int lineNumber = 0;
 
     public static AssetConfigValidator get() {
         return _instance;
     }
 
     @SuppressWarnings("unchecked")
-    public Map<String, Object> validateCsv(String CSV, String assetPid, String driverPid, List<String> errors)
-            throws ServletException {
+    private void fillLists(List<Tad> metatypes, List<String> properties, String driverPid) throws Exception {
+        ((List<Tad>) WireAssetChannelDescriptor.get().getDescriptor()).forEach(element -> {
+            metatypes.add(element);
+            properties.add("+" + element.getName());
+        });
+
+        withDriver(driverPid,
+                descriptor -> ((List<Tad>) descriptor.getChannelDescriptor().getDescriptor()).forEach(element -> {
+                    metatypes.add(element);
+                    properties.add(element.getName());
+                }));
+    }
+
+    private String scanLine(String line, List<Object> channelValues, List<Tad> fullChannelMetatype,
+            List<String> errors) {
+        String channelName = "";
+        String[] tokens = line.split(",");
+        boolean errorInChannel = false;
+        for (int i = 0; i < tokens.length; i++) {
+            tokens[i] = tokens[i].substring(1, tokens[i].length() - 1);
+            if (tokens.length < fullChannelMetatype.size()) {
+                errors.add("Incorrect number of fields in CSV line " + this.lineNumber);
+                errorInChannel = true;
+            }
+            if (!errorInChannel) {
+                try {
+                    channelValues.add(validate(fullChannelMetatype.get(i), tokens[i], errors, this.lineNumber));
+                    if (fullChannelMetatype.get(i).getName().equals("name")) {
+                        channelName = tokens[i];
+                    }
+                } catch (Exception ex) {
+                    errorInChannel = true;
+                }
+            }
+            if (errorInChannel) {
+                channelName = "";
+                break;
+            }
+        }
+        return channelName;
+    }
+
+    public Map<String, Object> validateCsv(String csv, String driverPid, List<String> errors) throws ServletException {
 
         try {
             errors.clear();
             List<Tad> fullChannelMetatype = new ArrayList<>();
             List<String> propertyNames = new ArrayList<>();
-
-            ((List<Tad>) WireAssetChannelDescriptor.get().getDescriptor()).forEach(element -> {
-                fullChannelMetatype.add(element);
-                propertyNames.add("+" + element.getName());
-            });
-
-            withDriver(driverPid, descriptor -> {
-                ((List<Tad>) descriptor.getChannelDescriptor().getDescriptor()).forEach(element -> {
-                    fullChannelMetatype.add(element);
-                    propertyNames.add(element.getName());
-                });
-            });
+            fillLists(fullChannelMetatype, propertyNames, driverPid);
 
             Map<String, Object> updatedAssetProps = new HashMap<>();
-            try (Scanner sc = new Scanner(CSV)) {
+            try (Scanner sc = new Scanner(csv)) {
                 sc.nextLine();
-                lineNumber = 1;
+                this.lineNumber = 1;
                 if (!sc.hasNext()) {
                     errors.add("Empty CSV file.");
-                    throw new Exception();
+                    throw new ValidationException();
                 }
                 sc.forEachRemaining(line -> {
-                    lineNumber++;
+                    this.lineNumber++;
                     List<Object> channelValues = new ArrayList<>();
-                    String channelName = "";
-                    StringBuilder sb = new StringBuilder();
-                    String[] tokens = line.split(",");
-                    boolean errorInChannel = false;
-                    for (int i = 0; i < tokens.length; i++) {
-                        tokens[i] = tokens[i].substring(1, tokens[i].length() - 1);
-                        if (tokens.length < fullChannelMetatype.size()) {
-                            errors.add("Incorrect number of fields in CSV line " + String.valueOf(lineNumber));
-                            errorInChannel = true;
-                            break;
-                        }
-                        try {
-                            channelValues.add(validate(fullChannelMetatype.get(i), tokens[i], errors, lineNumber));
-                            sb.append(fullChannelMetatype.get(i).getName()).append("=").append(tokens[i]).append(" - ");
-                            if (fullChannelMetatype.get(i).getName().equals("name")) {
-                                channelName = tokens[i];
-                            }
-                        } catch (Exception ex) {
-                            errorInChannel = true;
-                            break;
-                        }
-                    }
-                    if (!errorInChannel) {
+                    String channelName = scanLine(line, channelValues, fullChannelMetatype, errors);
+                    if (!channelName.isEmpty()) {
                         for (int i = 0; i < propertyNames.size(); i++) {
                             updatedAssetProps.put(channelName + "#" + propertyNames.get(i), channelValues.get(i));
                         }
                     }
+
                 });
             }
-            if (errors.size() > 0) {
-                throw new Exception();
+            if (!errors.isEmpty()) {
+                throw new ValidationException();
             }
 
             return updatedAssetProps;
@@ -144,150 +153,62 @@ public class AssetConfigValidator {
     }
 
     // Validates all the entered values
-    // TODO: validation should be done like in the old web ui: cleaner approach
-    protected Object validate(Tad field, String value, List<String> errors, int lineNumber) throws Exception {
+    protected Object validate(Tad field, String value, List<String> errors, int lineNumber) throws ValidationException {
 
-        String trimmedValue = null;
-        final boolean isEmpty = value == null || (trimmedValue = value.trim()).isEmpty();
+        String trimmedValue = value.trim();
+        final boolean isEmpty = trimmedValue.isEmpty();
 
         if (field.isRequired() && isEmpty) {
-            throw new Exception();
+            throw new ValidationException();
         }
 
         if (!isEmpty) {
             // Validate "Options" field first. Data type will be taken care of next.
-            if (field.getOption().size() > 0) {
+            if (!field.getOption().isEmpty()) {
                 boolean foundEqual = false;
                 for (Option o : field.getOption()) {
-                    foundEqual |= o.getValue().toString().trim().equals(value.trim());
+                    foundEqual |= o.getValue().trim().equals(value.trim());
                 }
                 if (!foundEqual) {
                     final StringBuilder sb = new StringBuilder();
                     sb.append("Value \"").append(value).append("\" on line ").append(String.valueOf(lineNumber))
                             .append(" should be one of [");
-                    field.getOption().forEach(option -> {
-                        sb.append("\"").append(option.getValue()).append("\", ");
-                    });
+                    field.getOption().forEach(option -> sb.append("\"").append(option.getValue()).append("\", "));
                     sb.delete(sb.length() - 2, sb.length());
                     sb.append("]");
                     errors.add(sb.toString());
-                    throw new Exception();
+                    throw new ValidationException();
                 }
             }
             // Validate Data type and constraints.
-            if (field.getType().equals(Scalar.CHAR)) {
-                if (value.length() > 1) {
-                    errors.add(errorString(lineNumber, field, value));
-                    throw new Exception();
+            try {
+                switch (field.getType()) {
+                case CHAR:
+                    return new CharGwtValue(trimmedValue, field, errors).getValue();
+                case STRING:
+                    return new StringGwtValue(trimmedValue, field, errors).getValue();
+                case FLOAT:
+                    return new FloatGwtValue(trimmedValue, field, errors).getValue();
+                case INTEGER:
+                    return new IntegerGwtValue(trimmedValue, field, errors).getValue();
+                case SHORT:
+                    return new ShortGwtValue(trimmedValue, field, errors).getValue();
+                case BYTE:
+                    return new ByteGwtValue(trimmedValue, field, errors).getValue();
+                case LONG:
+                    return new LongGwtValue(trimmedValue, field, errors).getValue();
+                case DOUBLE:
+                    return new DoubleGwtValue(trimmedValue, field, errors).getValue();
+                case BOOLEAN:
+                    return new BooleanGwtValue(trimmedValue, field, errors).getValue();
+                default:
+                    errors.add("Unsupported data type: " + field.getType().toString());
+                    break;
                 }
-                if (field.getMin() != null && field.getMin().charAt(0) > trimmedValue.charAt(0)) {
-                    errors.add(errorString(lineNumber, field, value));
-                    throw new Exception();
-                }
-                if (field.getMax() != null && field.getMax().charAt(0) < trimmedValue.charAt(0)) {
-                    errors.add(errorString(lineNumber, field, value));
-                    throw new Exception();
-                }
-                return trimmedValue.charAt(0);
-            } else if (field.getType().equals(Scalar.STRING)) {
-                int configMinValue = 0;
-                int configMaxValue = Integer.MAX_VALUE;
-                try {
-                    configMinValue = Integer.parseInt(field.getMin());
-                } catch (NumberFormatException nfe) {
-                    logger.debug("Configuration min value error! Applying UI defaults...");
-                }
-                try {
-                    configMaxValue = Integer.parseInt(field.getMax());
-                } catch (NumberFormatException nfe) {
-                    logger.debug("Configuration max value error! Applying UI defaults...");
-                }
-
-                if (String.valueOf(trimmedValue).length() < configMinValue) {
-                    errors.add(errorString(lineNumber, field, value));
-                    throw new Exception();
-                }
-                if (String.valueOf(trimmedValue).length() > configMaxValue) {
-                    errors.add(errorString(lineNumber, field, value));
-                    throw new Exception();
-                }
-                return trimmedValue;
-            } else {
-                try {
-                    // numeric value
-                    if (field.getType().equals(Scalar.FLOAT)) {
-                        Float uiValue = Float.parseFloat(trimmedValue);
-                        if (field.getMin() != null && Float.parseFloat(field.getMin()) > uiValue) {
-                            errors.add(errorString(lineNumber, field, value));
-                            throw new Exception();
-                        }
-                        if (field.getMax() != null && Float.parseFloat(field.getMax()) < uiValue) {
-                            errors.add(errorString(lineNumber, field, value));
-                            throw new Exception();
-                        }
-                        return uiValue;
-                    } else if (field.getType().equals(Scalar.INTEGER)) {
-                        Integer uiValue = Integer.parseInt(trimmedValue);
-                        if (field.getMin() != null && Integer.parseInt(field.getMin()) > uiValue) {
-                            errors.add(errorString(lineNumber, field, value));
-                            throw new Exception();
-                        }
-                        if (field.getMax() != null && Integer.parseInt(field.getMax()) < uiValue) {
-                            errors.add(errorString(lineNumber, field, value));
-                            throw new Exception();
-                        }
-                        return uiValue;
-                    } else if (field.getType().equals(Scalar.SHORT)) {
-                        Short uiValue = Short.parseShort(trimmedValue);
-                        if (field.getMin() != null && Short.parseShort(field.getMin()) > uiValue) {
-                            errors.add(errorString(lineNumber, field, value));
-                            throw new Exception();
-                        }
-                        if (field.getMax() != null && Short.parseShort(field.getMax()) < uiValue) {
-                            errors.add(errorString(lineNumber, field, value));
-                            throw new Exception();
-                        }
-                        return uiValue;
-                    } else if (field.getType().equals(Scalar.BYTE)) {
-                        Byte uiValue = Byte.parseByte(trimmedValue);
-                        if (field.getMin() != null && Byte.parseByte(field.getMin()) > uiValue) {
-                            errors.add(errorString(lineNumber, field, value));
-                            throw new Exception();
-                        }
-                        if (field.getMax() != null && Byte.parseByte(field.getMax()) < uiValue) {
-                            errors.add(errorString(lineNumber, field, value));
-                            throw new Exception();
-                        }
-                        return uiValue;
-                    } else if (field.getType().equals(Scalar.LONG)) {
-                        Long uiValue = Long.parseLong(trimmedValue);
-                        if (field.getMin() != null && Long.parseLong(field.getMin()) > uiValue) {
-                            errors.add(errorString(lineNumber, field, value));
-                            throw new Exception();
-                        }
-                        if (field.getMax() != null && Long.parseLong(field.getMax()) < uiValue) {
-                            errors.add(errorString(lineNumber, field, value));
-                            throw new Exception();
-                        }
-                        return uiValue;
-                    } else if (field.getType().equals(Scalar.DOUBLE)) {
-                        Double uiValue = Double.parseDouble(trimmedValue);
-                        if (field.getMin() != null && Double.parseDouble(field.getMin()) > uiValue) {
-                            errors.add(errorString(lineNumber, field, value));
-                            throw new Exception();
-                        }
-                        if (field.getMax() != null && Double.parseDouble(field.getMax()) < uiValue) {
-                            errors.add(errorString(lineNumber, field, value));
-                            throw new Exception();
-                        }
-                        return uiValue;
-                    }
-                } catch (NumberFormatException e) {
-                    errors.add(errorString(lineNumber, field, value));
-                    throw new Exception();
-                }
+            } catch (NumberFormatException ex) {
+                errors.add(errorString(lineNumber, field, value));
+                throw new ValidationException();
             }
-
         }
         return null;
     }
@@ -295,6 +216,226 @@ public class AssetConfigValidator {
     protected interface ValidationErrorConsumer {
 
         public void addError(String errorMsg);
+    }
+
+    protected class ValidationException extends Exception {
+
+        /**
+         *
+         */
+        private static final long serialVersionUID = 5954147929480218028L;
+
+    }
+
+    private abstract class GwtValue<T> {
+
+        T value;
+
+        public GwtValue(String csvInput, Tad param, List<String> errors) throws ValidationException {
+            setValue(csvInput, param, errors);
+        }
+
+        public abstract void setValue(String csvInput, Tad param, List<String> errors) throws ValidationException;
+
+        public Object getValue() {
+            return this.value;
+        }
+    }
+
+    private class BooleanGwtValue extends GwtValue<Object> {
+
+        public BooleanGwtValue(String csvInput, Tad param, List<String> errors) throws ValidationException {
+            super(csvInput, param, errors);
+        }
+
+        @Override
+        public void setValue(String csvInput, Tad param, List<String> errors) throws ValidationException {
+            this.value = Boolean.parseBoolean(csvInput);
+
+        }
+
+    }
+
+    private class CharGwtValue extends GwtValue<Object> {
+
+        public CharGwtValue(String csvInput, Tad param, List<String> errors) throws ValidationException {
+            super(csvInput, param, errors);
+        }
+
+        @Override
+        public void setValue(String csvInput, Tad field, List<String> errors) throws ValidationException {
+            this.value = csvInput.charAt(0);
+            if (csvInput.length() > 1) {
+                errors.add(errorString(AssetConfigValidator.this.lineNumber, field, csvInput));
+                throw new ValidationException();
+            }
+            if (field.getMin() != null && field.getMin().charAt(0) > csvInput.charAt(0)) {
+                errors.add(errorString(AssetConfigValidator.this.lineNumber, field, csvInput));
+                throw new ValidationException();
+            }
+            if (field.getMax() != null && field.getMax().charAt(0) < csvInput.charAt(0)) {
+                errors.add(errorString(AssetConfigValidator.this.lineNumber, field, csvInput));
+                throw new ValidationException();
+            }
+
+        }
+    }
+
+    private class StringGwtValue extends GwtValue<Object> {
+
+        public StringGwtValue(String csvInput, Tad param, List<String> errors) throws ValidationException {
+            super(csvInput, param, errors);
+        }
+
+        @Override
+        public void setValue(String csvInput, Tad field, List<String> errors) throws ValidationException {
+            this.value = csvInput;
+            int configMinValue = 0;
+            int configMaxValue = Integer.MAX_VALUE;
+            try {
+                configMinValue = Integer.parseInt(field.getMin());
+            } catch (NumberFormatException nfe) {
+                logger.debug("Configuration min value error! Applying UI defaults...");
+            }
+            try {
+                configMaxValue = Integer.parseInt(field.getMax());
+            } catch (NumberFormatException nfe) {
+                logger.debug("Configuration max value error! Applying UI defaults...");
+            }
+
+            if (String.valueOf(csvInput).length() < configMinValue) {
+                errors.add(errorString(AssetConfigValidator.this.lineNumber, field, csvInput));
+                throw new ValidationException();
+            }
+            if (String.valueOf(csvInput).length() > configMaxValue) {
+                errors.add(errorString(AssetConfigValidator.this.lineNumber, field, csvInput));
+                throw new ValidationException();
+            }
+        }
+    }
+
+    private class LongGwtValue extends GwtValue<Object> {
+
+        public LongGwtValue(String csvInput, Tad param, List<String> errors) throws ValidationException {
+            super(csvInput, param, errors);
+        }
+
+        @Override
+        public void setValue(String csvInput, Tad field, List<String> errors) throws ValidationException {
+            this.value = Long.parseLong(csvInput);
+            if (field.getMin() != null && Long.parseLong(field.getMin()) > (Long) this.value) {
+                errors.add(errorString(AssetConfigValidator.this.lineNumber, field, csvInput));
+                throw new ValidationException();
+            }
+            if (field.getMax() != null && Long.parseLong(field.getMax()) < (Long) this.value) {
+                errors.add(errorString(AssetConfigValidator.this.lineNumber, field, csvInput));
+                throw new ValidationException();
+            }
+
+        }
+    }
+
+    private class DoubleGwtValue extends GwtValue<Object> {
+
+        public DoubleGwtValue(String csvInput, Tad param, List<String> errors) throws ValidationException {
+            super(csvInput, param, errors);
+        }
+
+        @Override
+        public void setValue(String csvInput, Tad field, List<String> errors) throws ValidationException {
+            this.value = Double.parseDouble(csvInput);
+            if (field.getMin() != null && Double.parseDouble(field.getMin()) > (Double) this.value) {
+                errors.add(errorString(AssetConfigValidator.this.lineNumber, field, csvInput));
+                throw new ValidationException();
+            }
+            if (field.getMax() != null && Double.parseDouble(field.getMax()) < (Double) this.value) {
+                errors.add(errorString(AssetConfigValidator.this.lineNumber, field, csvInput));
+                throw new ValidationException();
+            }
+
+        }
+    }
+
+    private class ByteGwtValue extends GwtValue<Object> {
+
+        public ByteGwtValue(String csvInput, Tad param, List<String> errors) throws ValidationException {
+            super(csvInput, param, errors);
+        }
+
+        @Override
+        public void setValue(String csvInput, Tad field, List<String> errors) throws ValidationException {
+            this.value = Byte.parseByte(csvInput);
+            if (field.getMin() != null && Byte.parseByte(field.getMin()) > (Byte) this.value) {
+                errors.add(errorString(AssetConfigValidator.this.lineNumber, field, csvInput));
+                throw new ValidationException();
+            }
+            if (field.getMax() != null && Byte.parseByte(field.getMax()) < (Byte) this.value) {
+                errors.add(errorString(AssetConfigValidator.this.lineNumber, field, csvInput));
+                throw new ValidationException();
+            }
+        }
+    }
+
+    private class ShortGwtValue extends GwtValue<Object> {
+
+        public ShortGwtValue(String csvInput, Tad param, List<String> errors) throws ValidationException {
+            super(csvInput, param, errors);
+        }
+
+        @Override
+        public void setValue(String csvInput, Tad field, List<String> errors) throws ValidationException {
+            this.value = Short.parseShort(csvInput);
+            if (field.getMin() != null && Short.parseShort(field.getMin()) > (Short) this.value) {
+                errors.add(errorString(AssetConfigValidator.this.lineNumber, field, csvInput));
+                throw new ValidationException();
+            }
+            if (field.getMax() != null && Short.parseShort(field.getMax()) < (Short) this.value) {
+                errors.add(errorString(AssetConfigValidator.this.lineNumber, field, csvInput));
+                throw new ValidationException();
+            }
+
+        }
+    }
+
+    private class IntegerGwtValue extends GwtValue<Object> {
+
+        public IntegerGwtValue(String csvInput, Tad param, List<String> errors) throws ValidationException {
+            super(csvInput, param, errors);
+        }
+
+        @Override
+        public void setValue(String csvInput, Tad field, List<String> errors) throws ValidationException {
+            this.value = Integer.parseInt(csvInput);
+            if (field.getMin() != null && Integer.parseInt(field.getMin()) > (Integer) this.value) {
+                errors.add(errorString(AssetConfigValidator.this.lineNumber, field, csvInput));
+                throw new ValidationException();
+            }
+            if (field.getMax() != null && Integer.parseInt(field.getMax()) < (Integer) this.value) {
+                errors.add(errorString(AssetConfigValidator.this.lineNumber, field, csvInput));
+                throw new ValidationException();
+            }
+
+        }
+    }
+
+    private class FloatGwtValue extends GwtValue<Object> {
+
+        public FloatGwtValue(String csvInput, Tad param, List<String> errors) throws ValidationException {
+            super(csvInput, param, errors);
+        }
+
+        @Override
+        public void setValue(String csvInput, Tad field, List<String> errors) throws ValidationException {
+            this.value = Float.parseFloat(csvInput);
+            if (field.getMin() != null && Float.parseFloat(field.getMin()) > (Float) this.value) {
+                errors.add(errorString(AssetConfigValidator.this.lineNumber, field, csvInput));
+                throw new ValidationException();
+            }
+            if (field.getMax() != null && Float.parseFloat(field.getMax()) < (Float) this.value) {
+                errors.add(errorString(AssetConfigValidator.this.lineNumber, field, csvInput));
+                throw new ValidationException();
+            }
+        }
     }
 
 }

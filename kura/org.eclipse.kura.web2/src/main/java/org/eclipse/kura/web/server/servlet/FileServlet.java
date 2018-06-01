@@ -74,12 +74,15 @@ public class FileServlet extends HttpServlet {
 
     private static Logger logger = LoggerFactory.getLogger(FileServlet.class);
 
+    private static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
+    private static final String EXPECTED_1_FILE_PATTERN = "expected 1 file item but found {}";
+
     private static final int BUFFER = 1024;
     private static int tooBig = 0x6400000; // Max size of unzipped data, 100MB
     private static int tooMany = 1024;     // Max number of files
 
-    private DiskFileItemFactory m_diskFileItemFactory;
-    private FileCleaningTracker m_fileCleaningTracker;
+    private DiskFileItemFactory diskFileItemFactory;
+    private FileCleaningTracker fileCleaningTracker;
 
     @Override
     public void destroy() {
@@ -87,8 +90,8 @@ public class FileServlet extends HttpServlet {
 
         logger.info("Servlet {} destroyed", getServletName());
 
-        if (this.m_fileCleaningTracker != null) {
-            logger.info("Number of temporary files tracked: " + this.m_fileCleaningTracker.getTrackCount());
+        if (this.fileCleaningTracker != null) {
+            logger.info("Number of temporary files tracked: {}", this.fileCleaningTracker.getTrackCount());
         }
     }
 
@@ -99,19 +102,19 @@ public class FileServlet extends HttpServlet {
         logger.info("Servlet {} initialized", getServletName());
 
         ServletContext ctx = getServletContext();
-        this.m_fileCleaningTracker = FileCleanerCleanup.getFileCleaningTracker(ctx);
+        this.fileCleaningTracker = FileCleanerCleanup.getFileCleaningTracker(ctx);
 
         getZipUploadSizeMax();
         getZipUploadCountMax();
 
         int sizeThreshold = getFileUploadInMemorySizeThreshold();
-        File repository = new File(System.getProperty("java.io.tmpdir"));
+        File repository = new File(System.getProperty(JAVA_IO_TMPDIR));
 
         logger.info("DiskFileItemFactory.DEFAULT_SIZE_THRESHOLD: {}", DiskFileItemFactory.DEFAULT_SIZE_THRESHOLD);
         logger.info("DiskFileItemFactory: using size threshold of: {}", sizeThreshold);
 
-        this.m_diskFileItemFactory = new DiskFileItemFactory(sizeThreshold, repository);
-        this.m_diskFileItemFactory.setFileCleaningTracker(this.m_fileCleaningTracker);
+        this.diskFileItemFactory = new DiskFileItemFactory(sizeThreshold, repository);
+        this.diskFileItemFactory.setFileCleaningTracker(this.fileCleaningTracker);
     }
 
     @Override
@@ -259,7 +262,7 @@ public class FileServlet extends HttpServlet {
     }
 
     private void doPostCommand(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        UploadRequest upload = new UploadRequest(this.m_diskFileItemFactory);
+        UploadRequest upload = new UploadRequest(this.diskFileItemFactory);
 
         try {
             upload.parse(req);
@@ -281,7 +284,7 @@ public class FileServlet extends HttpServlet {
 
         List<FileItem> fileItems = null;
         InputStream is = null;
-        File localFolder = new File(System.getProperty("java.io.tmpdir"));
+        File localFolder = new File(System.getProperty(JAVA_IO_TMPDIR));
         OutputStream os = null;
 
         try {
@@ -379,13 +382,13 @@ public class FileServlet extends HttpServlet {
     }
 
     private void doPostAsset(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        UploadRequest upload = new UploadRequest(this.m_diskFileItemFactory);
+        UploadRequest upload = new UploadRequest(this.diskFileItemFactory);
 
         try {
             upload.parse(req);
         } catch (FileUploadException e) {
-            logger.error("Error parsing the file upload request");
-            throw new ServletException("Error parsing the file upload request", e);
+            logger.error("Error parsing the file upload request", e);
+            return;
         }
 
         // BEGIN XSRF - Servlet dependent code
@@ -395,14 +398,15 @@ public class FileServlet extends HttpServlet {
             GwtXSRFToken token = new GwtXSRFToken(formFields.get("xsrfToken"));
             KuraRemoteServiceServlet.checkXSRFToken(req, token);
         } catch (Exception e) {
-            throw new ServletException("Security error: please retry this operation correctly.", e);
+            logger.warn("Security error: please retry this operation correctly.", e);
+            return;
         }
         // END XSRF security check
 
         List<FileItem> fileItems = upload.getFileItems();
         if (fileItems.size() != 1) {
-            logger.error("expected 1 file item but found {}", fileItems.size());
-            throw new ServletException("Wrong number of file items");
+            logger.error(EXPECTED_1_FILE_PATTERN, fileItems.size());
+            return;
         }
 
         FileItem fileItem = fileItems.get(0);
@@ -413,38 +417,34 @@ public class FileServlet extends HttpServlet {
 
         List<String> errors = new ArrayList<>();
         try {
-            Map<String, Object> newProps = AssetConfigValidator.get().validateCsv(csvString, assetPid, driverPid,
-                    errors);
+            Map<String, Object> newProps = AssetConfigValidator.get().validateCsv(csvString, driverPid, errors);
 
             ServiceLocator locator = ServiceLocator.getInstance();
-            try {
 
-                ConfigurationService cs = locator.getService(ConfigurationService.class);
+            ConfigurationService cs = locator.getService(ConfigurationService.class);
 
-                cs.updateConfiguration(assetPid, newProps);
+            cs.updateConfiguration(assetPid, newProps);
 
-                //
-                // Add an additional delay after the configuration update
-                // to give the time to the device to apply the received
-                // configuration
-                SystemService ss = locator.getService(SystemService.class);
-                long delay = Long.parseLong(ss.getProperties().getProperty("console.updateConfigDelay", "5000"));
-                if (delay > 0) {
-                    Thread.sleep(delay);
-                }
-            } catch (KuraException | GwtKuraException | InterruptedException e) {
-                logger.error("Error updating device configuration: {}", e);
-                throw new ServletException("Error updating device configuration", e);
+            // Add an additional delay after the configuration update
+            // to give the time to the device to apply the received configuration
+            SystemService ss = locator.getService(SystemService.class);
+            long delay = Long.parseLong(ss.getProperties().getProperty("console.updateConfigDelay", "5000"));
+            if (delay > 0) {
+                Thread.sleep(delay);
             }
+        } catch (KuraException | GwtKuraException | InterruptedException e) {
+            logger.error("Error updating device configuration: {}", e);
         } catch (ServletException ex) {
-            if (errors.size() > 0) {
+            if (!errors.isEmpty()) {
                 StringBuilder sb = new StringBuilder();
-                errors.forEach(line -> {
-                    sb.append(line).append("\n");
-                });
-                resp.getWriter().write(sb.toString());
+                errors.forEach(line -> sb.append(line).append("\n"));
+                try {
+                    resp.getWriter().write(sb.toString());
+                } catch (Exception e) {
+                    logger.error("Error while writing output: {}", e);
+                }
             } else {
-                throw new ServletException(ex);
+                logger.error("Servlet exception: {}", ex);
             }
         }
 
@@ -453,7 +453,7 @@ public class FileServlet extends HttpServlet {
     private void doPostConfigurationSnapshot(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        UploadRequest upload = new UploadRequest(this.m_diskFileItemFactory);
+        UploadRequest upload = new UploadRequest(this.diskFileItemFactory);
 
         try {
             upload.parse(req);
@@ -475,7 +475,7 @@ public class FileServlet extends HttpServlet {
 
         List<FileItem> fileItems = upload.getFileItems();
         if (fileItems.size() != 1) {
-            logger.error("expected 1 file item but found {}", fileItems.size());
+            logger.error(EXPECTED_1_FILE_PATTERN, fileItems.size());
             throw new ServletException("Wrong number of file items");
         }
 
@@ -534,7 +534,7 @@ public class FileServlet extends HttpServlet {
             throw new ServletException("Not a file upload request");
         }
 
-        UploadRequest upload = new UploadRequest(this.m_diskFileItemFactory);
+        UploadRequest upload = new UploadRequest(this.diskFileItemFactory);
 
         try {
             upload.parse(req);
@@ -564,7 +564,7 @@ public class FileServlet extends HttpServlet {
             fileItems = upload.getFileItems();
 
             if (fileItems.size() != 1) {
-                logger.error("expected 1 file item but found {}", fileItems.size());
+                logger.error(EXPECTED_1_FILE_PATTERN, fileItems.size());
                 throw new ServletException("Wrong number of file items");
             }
 
@@ -572,7 +572,7 @@ public class FileServlet extends HttpServlet {
             String filename = item.getName();
             is = item.getInputStream();
 
-            String filePath = System.getProperty("java.io.tmpdir") + File.separator + filename;
+            String filePath = System.getProperty(JAVA_IO_TMPDIR) + File.separator + filename;
 
             localFile = new File(filePath);
             if (localFile.exists()) {
@@ -739,7 +739,7 @@ public class FileServlet extends HttpServlet {
         return sizeMax;
     }
 
-    static private int getFileUploadInMemorySizeThreshold() {
+    private static int getFileUploadInMemorySizeThreshold() {
         ServiceLocator locator = ServiceLocator.getInstance();
 
         int sizeThreshold = DiskFileItemFactory.DEFAULT_SIZE_THRESHOLD;

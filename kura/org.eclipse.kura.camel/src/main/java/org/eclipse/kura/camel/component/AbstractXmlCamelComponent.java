@@ -19,9 +19,6 @@ import java.util.Objects;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.osgi.framework.BundleContext;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Modified;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +43,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractXmlCamelComponent extends AbstractCamelComponent implements ConfigurableComponent {
 
-    private final static Logger logger = LoggerFactory.getLogger(AbstractXmlCamelComponent.class);
+    private static final Logger logger = LoggerFactory.getLogger(AbstractXmlCamelComponent.class);
     private final String xmlDataProperty;
 
     public AbstractXmlCamelComponent(final String xmlDataProperty) {
@@ -55,7 +52,6 @@ public abstract class AbstractXmlCamelComponent extends AbstractCamelComponent i
         this.xmlDataProperty = xmlDataProperty;
     }
 
-    @Activate
     protected void activate(final BundleContext context, final Map<String, Object> properties) throws Exception {
         try {
             start(properties);
@@ -69,7 +65,6 @@ public abstract class AbstractXmlCamelComponent extends AbstractCamelComponent i
         }
     }
 
-    @Deactivate
     protected void deactivate(final BundleContext context) throws Exception {
         try {
             stop();
@@ -79,7 +74,6 @@ public abstract class AbstractXmlCamelComponent extends AbstractCamelComponent i
         }
     }
 
-    @Modified
     protected void modified(final Map<String, Object> properties) throws Exception {
         logger.debug("Updating properties: {}", properties);
         try {

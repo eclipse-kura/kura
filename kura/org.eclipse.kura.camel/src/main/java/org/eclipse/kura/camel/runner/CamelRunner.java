@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 Red Hat Inc and others.
+ * Copyright (c) 2016, 2018 Red Hat Inc and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,7 +31,9 @@ import org.apache.camel.model.OptionalIdentifiedDefinition;
 import org.apache.camel.model.RouteDefinition;
 import org.apache.camel.model.RoutesDefinition;
 import org.apache.camel.spi.ComponentResolver;
+import org.apache.camel.spi.LanguageResolver;
 import org.apache.camel.spi.Registry;
+import org.apache.camel.util.function.ThrowingBiConsumer;
 import org.eclipse.kura.camel.cloud.KuraCloudComponent;
 import org.eclipse.kura.cloud.CloudService;
 import org.osgi.framework.BundleContext;
@@ -137,6 +139,8 @@ public class CamelRunner {
 
         private final List<BeforeStart> beforeStarts;
 
+        private final List<ContextLifecycleListener> lifecycleListeners;
+
         private boolean disableJmx = true;
 
         private int shutdownTimeout = 5;
@@ -155,6 +159,7 @@ public class CamelRunner {
 
             this.dependencies = new LinkedList<>();
             this.beforeStarts = new LinkedList<>();
+            this.lifecycleListeners = new LinkedList<>();
         }
 
         public Builder(final Builder other) {
@@ -165,6 +170,7 @@ public class CamelRunner {
             this.contextFactory = other.contextFactory;
             this.dependencies = new LinkedList<>(other.dependencies);
             this.beforeStarts = new LinkedList<>(other.beforeStarts);
+            this.lifecycleListeners = new LinkedList<>(other.lifecycleListeners);
             this.disableJmx = other.disableJmx;
             this.shutdownTimeout = other.shutdownTimeout;
         }
@@ -322,14 +328,31 @@ public class CamelRunner {
                 final String filterString = String.format("(&(%s=%s)(%s=%s))", Constants.OBJECTCLASS,
                         ComponentResolver.class.getName(), "component", componentName);
                 final Filter filter = FrameworkUtil.createFilter(filterString);
-                dependOn(filter, new ServiceConsumer<Object, CamelContext>() {
-
-                    @Override
-                    public void consume(final CamelContext context, final Object service) {
-                    }
+                dependOn(filter, (context, service) -> {
                 });
             } catch (InvalidSyntaxException e) {
                 throw new IllegalArgumentException(String.format("Illegal component name: '%s'", componentName), e);
+            }
+
+            return this;
+        }
+
+        /**
+         * Require a Camel language to be registered with OSGi before starting
+         *
+         * @param languageName
+         *            the language name (e.g. "javaScript")
+         * @return the builder instance
+         */
+        public Builder requireLanguage(final String languageName) {
+            try {
+                final String filterString = String.format("(&(%s=%s)(%s=%s))", Constants.OBJECTCLASS,
+                        LanguageResolver.class.getName(), "language", languageName);
+                final Filter filter = FrameworkUtil.createFilter(filterString);
+                dependOn(filter, (context, service) -> {
+                });
+            } catch (InvalidSyntaxException e) {
+                throw new IllegalArgumentException(String.format("Illegal languageName name: '%s'", languageName), e);
             }
 
             return this;
@@ -361,6 +384,21 @@ public class CamelRunner {
         }
 
         /**
+         * Add a context lifecylce listener.
+         * 
+         * @param listener
+         *            The listener to add
+         * @return the builder instance
+         */
+        public Builder addLifecycleListener(final ContextLifecycleListener listener) {
+            Objects.requireNonNull(listener);
+
+            this.lifecycleListeners.add(listener);
+
+            return this;
+        }
+
+        /**
          * Build the actual CamelRunner instance based on the current configuration of the builder instance
          * <p>
          * Modifications which will be made to the builder after the {@link #build()} method was called will
@@ -375,32 +413,24 @@ public class CamelRunner {
             final List<ServiceDependency<?, CamelContext>> dependencies = new ArrayList<>(this.dependencies);
 
             if (this.disableJmx) {
-                beforeStarts.add(new BeforeStart() {
-
-                    @Override
-                    public void beforeStart(CamelContext camelContext) {
-                        camelContext.disableJMX();
-                    }
-                });
+                beforeStarts.add(camelContext -> camelContext.disableJMX());
             }
             if (this.shutdownTimeout > 0) {
                 final int shutdownTimeout = this.shutdownTimeout;
-                beforeStarts.add(new BeforeStart() {
-
-                    @Override
-                    public void beforeStart(CamelContext camelContext) {
-                        camelContext.getShutdownStrategy().setTimeUnit(TimeUnit.SECONDS);
-                        camelContext.getShutdownStrategy().setTimeout(shutdownTimeout);
-                    }
+                beforeStarts.add(camelContext -> {
+                    camelContext.getShutdownStrategy().setTimeUnit(TimeUnit.SECONDS);
+                    camelContext.getShutdownStrategy().setTimeout(shutdownTimeout);
                 });
             }
-            return new CamelRunner(this.registryFactory, this.contextFactory, beforeStarts, dependencies);
+            return new CamelRunner(this.registryFactory, this.contextFactory, beforeStarts, this.lifecycleListeners,
+                    dependencies);
         }
     }
 
     private final RegistryFactory registryFactory;
     private final ContextFactory contextFactory;
     private final List<BeforeStart> beforeStarts;
+    private final List<ContextLifecycleListener> lifecycleListeners;
     private final List<ServiceDependency<?, CamelContext>> dependencies;
 
     private CamelContext context;
@@ -408,10 +438,12 @@ public class CamelRunner {
     private DependencyRunner<CamelContext> dependencyRunner;
 
     private CamelRunner(final RegistryFactory registryFactory, final ContextFactory contextFactory,
-            final List<BeforeStart> beforeStarts, final List<ServiceDependency<?, CamelContext>> dependencies) {
+            final List<BeforeStart> beforeStarts, final List<ContextLifecycleListener> lifecycleListeners,
+            final List<ServiceDependency<?, CamelContext>> dependencies) {
         this.registryFactory = registryFactory;
         this.contextFactory = contextFactory;
         this.beforeStarts = beforeStarts;
+        this.lifecycleListeners = lifecycleListeners;
         this.dependencies = dependencies;
     }
 
@@ -430,8 +462,10 @@ public class CamelRunner {
      * </p>
      */
     public void start() {
-        logger.info("Starting...");
+
         stop();
+
+        logger.info("Starting...");
 
         this.dependencyRunner = new DependencyRunner<>(this.dependencies,
                 new DependencyRunner.Listener<CamelContext>() {
@@ -461,9 +495,9 @@ public class CamelRunner {
      * Stop the camel runner instance
      */
     public void stop() {
-        logger.info("Stopping...");
 
         if (this.dependencyRunner != null) {
+            logger.info("Stopping...");
             this.dependencyRunner.stop();
             this.dependencyRunner = null;
         }
@@ -489,12 +523,18 @@ public class CamelRunner {
 
         this.routes.applyRoutes(this.context);
         this.context.start();
+
+        fireLifecycle(this.context, ContextLifecycleListener::started);
     }
 
     protected void stopCamel() throws Exception {
         if (this.context != null) {
+
+            fireLifecycle(this.context, ContextLifecycleListener::stopping);
+
             this.context.stop();
             this.context = null;
+
         }
     }
 
@@ -504,6 +544,21 @@ public class CamelRunner {
         for (final BeforeStart beforeStart : this.beforeStarts) {
             beforeStart.beforeStart(context);
         }
+    }
+
+    private void fireLifecycle(final CamelContext context,
+            final ThrowingBiConsumer<ContextLifecycleListener, CamelContext, Exception> consumer) {
+
+        for (final ContextLifecycleListener listener : this.lifecycleListeners) {
+
+            try {
+                consumer.accept(listener, context);
+            } catch (Exception e) {
+                logger.warn("Failed to call listener", e);
+            }
+
+        }
+
     }
 
     /**

@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.kura.camel.runner;
 
+@FunctionalInterface
 public interface ServiceConsumer<T, C> {
 
     public void consume(C context, T service);

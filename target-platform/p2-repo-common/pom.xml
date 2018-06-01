@@ -176,9 +176,9 @@
 									<version>${slf4j.api.version}</version>
 								</artifactItem>
 								<artifactItem>
-								    <groupId>org.slf4j</groupId>
-								    <artifactId>jcl-over-slf4j</artifactId>
-								    <version>${jcl.over.slf4j.version}</version>
+									<groupId>org.slf4j</groupId>
+									<artifactId>jcl-over-slf4j</artifactId>
+									<version>${jcl.over.slf4j.version}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>log4j</groupId>
@@ -252,6 +252,11 @@
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.apache.camel</groupId>
+									<artifactId>camel-amqp</artifactId>
+									<version>${org.apache.camel.camel-amqp.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.apache.camel</groupId>
 									<artifactId>camel-core</artifactId>
 									<version>${org.apache.camel.camel-core.version}</version>
 								</artifactItem>
@@ -262,13 +267,58 @@
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.apache.camel</groupId>
+									<artifactId>camel-jms</artifactId>
+									<version>${org.apache.camel.camel-jms.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.apache.camel</groupId>
+									<artifactId>camel-script</artifactId>
+									<version>${org.apache.camel.camel-script.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.apache.camel</groupId>
 									<artifactId>camel-stream</artifactId>
 									<version>${org.apache.camel.camel-stream.version}</version>
 								</artifactItem>
 								<artifactItem>
-									<groupId>org.apache.camel</groupId>
-									<artifactId>camel-kura</artifactId>
-									<version>${org.apache.camel.camel-kura.version}</version>
+									<groupId>org.apache.qpid</groupId>
+									<artifactId>qpid-jms-client</artifactId>
+									<version>${apache-qpid-jms-client.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.apache.qpid</groupId>
+									<artifactId>proton-j</artifactId>
+									<version>${apache-qpid-proton-j.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.apache.servicemix.bundles</groupId>
+									<artifactId>org.apache.servicemix.bundles.spring-beans</artifactId>
+									<version>${spring.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.apache.servicemix.bundles</groupId>
+									<artifactId>org.apache.servicemix.bundles.spring-context</artifactId>
+									<version>${spring.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.apache.servicemix.bundles</groupId>
+									<artifactId>org.apache.servicemix.bundles.spring-core</artifactId>
+									<version>${spring.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.apache.servicemix.bundles</groupId>
+									<artifactId>org.apache.servicemix.bundles.spring-expression</artifactId>
+									<version>${spring.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.apache.servicemix.bundles</groupId>
+									<artifactId>org.apache.servicemix.bundles.spring-jms</artifactId>
+									<version>${spring.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.apache.servicemix.bundles</groupId>
+									<artifactId>org.apache.servicemix.bundles.spring-tx</artifactId>
+									<version>${spring.version}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
@@ -480,10 +530,19 @@
 								<move file="target/source/plugins/org.eclipse.soda.dk.comm.armv6hf.jar" tofile="target/source/plugins/org.eclipse.soda.dk.comm.armv6hf_${org.eclipse.soda.dk.comm.version}.jar"/>
 								<move file="target/source/plugins/org.eclipse.soda.dk.comm.x86_64.jar" tofile="target/source/plugins/org.eclipse.soda.dk.comm.x86_64_${org.eclipse.soda.dk.comm.version}.jar"/>
 								<move file="target/source/plugins/org.eclipse.soda.dk.comm.aarch64.jar" tofile="target/source/plugins/org.eclipse.soda.dk.comm.aarch64_${org.eclipse.soda.dk.comm.version}.jar"/>
+								<move file="target/source/plugins/camel-amqp.jar" tofile="target/source/plugins/org.apache.camel.camel-amqp_${org.apache.camel.camel-amqp.version}.jar"/>
 								<move file="target/source/plugins/camel-core.jar" tofile="target/source/plugins/org.apache.camel.camel-core_${org.apache.camel.camel-core.version}.jar"/>
+								<move file="target/source/plugins/camel-jms.jar" tofile="target/source/plugins/org.apache.camel.camel-jms_${org.apache.camel.camel-jms.version}.jar"/>
+								<move file="target/source/plugins/camel-script.jar" tofile="target/source/plugins/org.apache.camel.camel-script_${org.apache.camel.camel-script.version}.jar"/>
 								<move file="target/source/plugins/camel-stream.jar" tofile="target/source/plugins/org.apache.camel.camel-stream_${org.apache.camel.camel-stream.version}.jar"/>
 								<move file="target/source/plugins/camel-core-osgi.jar" tofile="target/source/plugins/org.apache.camel.camel-core-osgi_${org.apache.camel.camel-core-osgi.version}.jar"/>
-								<move file="target/source/plugins/camel-kura.jar" tofile="target/source/plugins/org.apache.camel.camel-kura_${org.apache.camel.camel-kura.version}.jar"/>
+								<move file="target/source/plugins/org.apache.servicemix.bundles.spring-beans.jar" tofile="target/source/plugins/org.apache.servicemix.bundles.spring-beans_${spring.version}.jar"/>
+								<move file="target/source/plugins/org.apache.servicemix.bundles.spring-context.jar" tofile="target/source/plugins/org.apache.servicemix.bundles.spring-context_${spring.version}.jar"/>
+								<move file="target/source/plugins/org.apache.servicemix.bundles.spring-core.jar" tofile="target/source/plugins/org.apache.servicemix.bundles.spring-core_${spring.version}.jar"/>
+								<move file="target/source/plugins/org.apache.servicemix.bundles.spring-expression.jar" tofile="target/source/plugins/org.apache.servicemix.bundles.spring-expression_${spring.version}.jar"/>
+								<move file="target/source/plugins/org.apache.servicemix.bundles.spring-jms.jar" tofile="target/source/plugins/org.apache.servicemix.bundles.spring-jms_${spring.version}.jar"/>
+								<move file="target/source/plugins/org.apache.servicemix.bundles.spring-tx.jar" tofile="target/source/plugins/org.apache.servicemix.bundles.spring-tx_${spring.version}.jar"/>
+								<move file="target/source/plugins/qpid-jms-client.jar" tofile="target/source/plugins/org.apache.qpid.jms.client_${apache-qpid-jms-client.version}.jar"/>
 								<move file="target/source/plugins/minimal-json.jar" tofile="target/source/plugins/minimal-json_${com.eclipsesource.minimal-json.version}.jar"/>
 								<move file="target/source/plugins/osgi.annotation.jar" tofile="target/source/plugins/osgi.annotation_${osgi.annotation.version}.jar"/>
 								<move file="target/source/plugins/org.moka7.jar" tofile="target/source/plugins/org.moka7_${org.moka7.version}.jar"/>

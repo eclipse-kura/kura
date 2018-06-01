@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,13 +8,15 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc
  *******************************************************************************/
 package org.eclipse.kura.net.admin.visitor.linux;
 
+import static org.eclipse.kura.net.admin.visitor.linux.WriterHelper.copyFile;
+
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.regex.Matcher;
 
@@ -26,8 +28,6 @@ import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
 import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.util.IOUtil;
-import org.eclipse.kura.core.util.ProcessUtil;
-import org.eclipse.kura.core.util.SafeProcess;
 import org.eclipse.kura.linux.net.util.KuraConstants;
 import org.eclipse.kura.linux.net.wifi.WpaSupplicantManager;
 import org.eclipse.kura.net.NetConfig;
@@ -100,8 +100,7 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 
         try {
             String fileAsString = readResource(WPA_SUPPLICANT_CONF_RESOURCE);
-            File outputFile = new File(TMP_WPA_CONFIG_FILE);
-            copyFile(fileAsString, outputFile);
+            copyFile(fileAsString, Paths.get(TMP_WPA_CONFIG_FILE));
         } catch (Exception e) {
             throw KuraException.internalError("Failed to generate wpa_supplicant.conf");
         }
@@ -286,8 +285,7 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
         fileAsString = fileAsString.replaceFirst("KURA_SCANFREQ", getScanFrequenciesMHz(wifiConfig.getChannels()));
 
         // everything is set and we haven't failed - write the file
-        File outputFile = new File(configFile);
-        copyFile(fileAsString, outputFile);
+        copyFile(fileAsString, Paths.get(configFile));
     }
 
     private String getAndUpdateModeContent(WifiConfig wifiConfig, String infraResource, String adhocResource,
@@ -449,68 +447,6 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
         } catch (IOException e) {
             throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR,
                     "error while building up new configuration file for wpa_supplicant config");
-        }
-    }
-
-    /*
-     * This method copies supplied String to a file
-     */
-    private void copyFile(String data, File destination) throws KuraException {
-        FileOutputStream fos = null;
-        PrintWriter pw = null;
-        try {
-            fos = new FileOutputStream(destination);
-            pw = new PrintWriter(fos);
-            pw.write(data);
-            pw.flush();
-            fos.getFD().sync();
-
-            setPermissions(destination.toString());
-        } catch (IOException e) {
-            throw KuraException.internalError(e);
-        } finally {
-            if (fos != null) {
-                try {
-                    fos.close();
-                } catch (IOException ex) {
-                    logger.error("I/O Exception while closing FileOutputStream!");
-                }
-            }
-            if (pw != null) {
-                pw.close();
-            }
-        }
-    }
-
-    /*
-     * This method sets permissions to the wpa_supplicant configuration file
-     */
-    private void setPermissions(String fileName) throws KuraException {
-        SafeProcess procChmod = null;
-        SafeProcess procDos = null;
-        try {
-            procChmod = ProcessUtil.exec("chmod 600 " + fileName);
-            procChmod.waitFor();
-
-            try {
-                procDos = ProcessUtil.exec("dos2unix " + fileName);
-                procDos.waitFor();
-            } catch (Exception e) {
-                // dos2unix may not exist on the target system resulting in
-                // java.io.IOException: Cannot run program "dos2unix": error=2, No such file or directory
-                if (!e.getMessage().contains("dos2unix")) {
-                    throw e;
-                }
-            }
-        } catch (Exception e) {
-            throw KuraException.internalError(e);
-        } finally {
-            if (procChmod != null) {
-                ProcessUtil.destroy(procChmod);
-            }
-            if (procDos != null) {
-                ProcessUtil.destroy(procDos);
-            }
         }
     }
 

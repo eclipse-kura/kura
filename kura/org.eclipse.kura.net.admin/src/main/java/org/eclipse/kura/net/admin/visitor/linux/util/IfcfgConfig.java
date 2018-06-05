@@ -50,6 +50,7 @@ public abstract class IfcfgConfig {
         return osVersion
                 .equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion())
                 || osVersion.equals(KuraConstants.Raspberry_Pi.getImageName())
+                || osVersion.equals(KuraConstants.Intel_Up2_Ubuntu.getImageName())
                 || osVersion.equals(KuraConstants.BeagleBone.getImageName())
                 || osVersion.equals(
                         KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion()

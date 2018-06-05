@@ -50,6 +50,7 @@ public class LinuxNamed {
         if (OS_VERSION
                 .equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion())
                 || OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName())
+                || OS_VERSION.equals(KuraConstants.Intel_Up2_Ubuntu.getImageName())
                 || OS_VERSION.equals(KuraConstants.BeagleBone.getImageName())) {
             persistentConfigFileName = "/etc/bind/named.conf";
             procString = "/usr/sbin/named";
@@ -195,6 +196,7 @@ public class LinuxNamed {
                             + KuraConstants.Intel_Edison.getTargetName())) {
                 result = LinuxProcessUtil.start("/etc/init.d/bind start");
             } else if (OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName())
+                    || OS_VERSION.equals(KuraConstants.Intel_Up2_Ubuntu.getImageName())
                     || OS_VERSION.equals(KuraConstants.BeagleBone.getImageName())
                     || OS_VERSION.equals(KuraConstants.ReliaGATE_50_21_Ubuntu.getImageName() + "_"
                             + KuraConstants.ReliaGATE_50_21_Ubuntu.getImageVersion())) {
@@ -233,6 +235,7 @@ public class LinuxNamed {
                             + KuraConstants.Intel_Edison.getTargetName())) {
                 result = LinuxProcessUtil.start("/etc/init.d/bind stop");
             } else if (OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName())
+                    || OS_VERSION.equals(KuraConstants.Intel_Up2_Ubuntu.getImageName())
                     || OS_VERSION.equals(KuraConstants.BeagleBone.getImageName())
                     || OS_VERSION.equals(KuraConstants.ReliaGATE_50_21_Ubuntu.getImageName() + "_"
                             + KuraConstants.ReliaGATE_50_21_Ubuntu.getImageVersion())) {

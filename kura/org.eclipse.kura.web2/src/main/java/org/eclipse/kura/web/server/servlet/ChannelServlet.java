@@ -17,15 +17,20 @@ import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_P
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.eclipse.kura.asset.Asset;
 import org.eclipse.kura.configuration.metatype.AD;
 import org.eclipse.kura.driver.Driver;
@@ -63,20 +68,39 @@ public class ChannelServlet extends HttpServlet {
         try {
             GwtXSRFToken token = new GwtXSRFToken(req.getParameter("xsrfToken"));
             KuraRemoteServiceServlet.checkXSRFToken(req, token);
-        } catch (Exception e) {
-            logger.warn("Security error: please retry this operation correctly.");
-            return;
+            // END XSRF security check
+            String assetPid = req.getParameter("assetPid");
+            String driverPid = req.getParameter("driverPid");
+
+            Writer out = new StringWriter();
+            CSVPrinter printer = new CSVPrinter(out, CSVFormat.RFC4180);
+
+            if (!fillCsvFields(printer, assetPid, driverPid)) {
+                resp.getWriter().write("Error generating CSV output!");
+            } else {
+                resp.setCharacterEncoding("UTF-8");
+                resp.setContentType("application/xml");
+                resp.setHeader("Content-Disposition", "attachment; filename=asset_" + assetPid + ".csv");
+                resp.setHeader("Cache-Control", "no-transform, max-age=0");
+                try (PrintWriter writer = resp.getWriter()) {
+                    writer.write(out.toString());
+                }
+            }
+        } catch (Exception ex) {
+            logger.error("Error while exporting CSV output!", ex);
         }
-        // END XSRF security check
-        String assetPid = req.getParameter("assetPid");
-        String driverPid = req.getParameter("driverPid");
+    }
 
+    private boolean fillCsvFields(CSVPrinter printer, String assetPid, String driverPid) {
+        final AtomicBoolean error = new AtomicBoolean(false);
+        List<String> orderedFields = new ArrayList<>();
         try {
-            StringBuilder output = new StringBuilder();
-            List<String> orderedFields = new ArrayList<>();
-
             WIRE_ASSET_CHANNEL_DESCRIPTOR.getParameters().forEach(i -> {
-                output.append("\"").append(i.getName()).append("\",");
+                try {
+                    printer.print(i.getName());
+                } catch (IOException e) {
+                    error.set(true);
+                }
                 orderedFields.add(new StringBuilder().append("+").append(i.getName()).toString());
             });
 
@@ -85,30 +109,35 @@ public class ChannelServlet extends HttpServlet {
                 List<AD> descriptor = (List<AD>) driver.getChannelDescriptor().getDescriptor();
 
                 for (AD ad : descriptor) {
-                    output.append("\"").append(ad.getName()).append("\",");
+                    try {
+                        printer.print(ad.getName());
+                    } catch (IOException e) {
+                        error.set(true);
+                    }
                     orderedFields.add(ad.getName());
                 }
-                output.delete(output.length() - 1, output.length());
-                output.append("\r");
             });
+            printer.println();
 
             withAsset(assetPid, asset -> asset.getAssetConfiguration().getAssetChannels().forEach((name, channel) -> {
-                orderedFields
-                        .forEach(key -> output.append("\"").append(channel.getConfiguration().get(key)).append("\","));
-                output.delete(output.length() - 1, output.length());
-                output.append("\r");
+                orderedFields.forEach(key -> {
+                    try {
+                        printer.print(channel.getConfiguration().get(key));
+                    } catch (IOException e) {
+                        error.set(true);
+                    }
+                });
+                try {
+                    printer.println();
+                } catch (IOException e) {
+                    error.set(true);
+                }
             }));
-
-            resp.setCharacterEncoding("UTF-8");
-            resp.setContentType("application/xml");
-            resp.setHeader("Content-Disposition", "attachment; filename=asset_" + assetPid + ".csv");
-            resp.setHeader("Cache-Control", "no-transform, max-age=0");
-            try (PrintWriter writer = resp.getWriter()) {
-                writer.write(output.toString());
-            }
         } catch (Exception ex) {
-            logger.error("Error while executing get on ChannelServlet!", ex);
+            error.set(true);
         }
+
+        return !error.get();
     }
 
     private void withAsset(final String kuraServicePid, final ServiceConsumer<Asset> consumer) throws Exception {

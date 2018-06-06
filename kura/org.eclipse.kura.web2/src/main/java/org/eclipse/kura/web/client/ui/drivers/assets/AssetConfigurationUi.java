@@ -52,6 +52,7 @@ import org.eclipse.kura.web.shared.service.GwtComponentServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.gwtbootstrap3.client.ui.Button;
+import org.gwtbootstrap3.client.ui.CheckBox;
 import org.gwtbootstrap3.client.ui.FieldSet;
 import org.gwtbootstrap3.client.ui.FormGroup;
 import org.gwtbootstrap3.client.ui.FormLabel;
@@ -142,11 +143,15 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
     @UiField
     FileUpload filePath;
     @UiField
+    CheckBox appendCheck;
+    @UiField
     Hidden xsrfTokenField;
     @UiField
     Hidden assetPidField;
     @UiField
     Hidden driverPidField;
+    @UiField
+    Hidden appendCheckField;
 
     private static final String INVALID_CLASS_NAME = "error-text-box";
 
@@ -233,6 +238,7 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
                         AssetConfigurationUi.this.assetPidField.setValue(AssetConfigurationUi.this.model.getAssetPid());
                         AssetConfigurationUi.this.driverPidField.setValue(AssetConfigurationUi.this.model
                                 .getConfiguration().getParameterValue(AssetConstants.ASSET_DRIVER_PROP.value()));
+                        AssetConfigurationUi.this.appendCheckField.setValue(AssetConfigurationUi.this.appendCheck.getValue().toString());                      
                         AssetConfigurationUi.this.uploadForm.submit();
                         AssetConfigurationUi.this.uploadModal.hide();
                         EntryClassUi.showWaitModal();
@@ -274,7 +280,6 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
             public void onSubmitComplete(SubmitCompleteEvent event) {
                 String htmlResponse = event.getResults();
                 if (htmlResponse == null || htmlResponse.isEmpty()) {
-                    // Window.Location.reload();
                     AssetConfigurationUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
                         @Override
@@ -706,5 +711,12 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
         this.driverPidField.setID("driverPid");
         this.driverPidField.setName("driverPid");
         this.driverPidField.setValue("");
+
+        this.appendCheck.setName("appendCheck");
+        this.appendCheck.setValue(false);
+        this.appendCheckField.setID("doReplace");
+        this.appendCheckField.setName("doReplace");
+        this.appendCheckField.setValue("");
+
     }
 }

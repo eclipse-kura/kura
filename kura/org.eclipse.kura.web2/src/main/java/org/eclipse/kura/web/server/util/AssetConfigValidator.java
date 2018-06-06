@@ -19,10 +19,12 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 
 import javax.servlet.ServletException;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.eclipse.kura.configuration.metatype.Option;
 import org.eclipse.kura.core.configuration.metatype.Tad;
 import org.eclipse.kura.driver.Driver;
@@ -59,30 +61,29 @@ public class AssetConfigValidator {
                 }));
     }
 
-    private String scanLine(String line, List<Object> channelValues, List<Tad> fullChannelMetatype,
+    private String scanLine(CSVRecord line, List<Object> channelValues, List<Tad> fullChannelMetatype,
             List<String> errors) {
         String channelName = "";
-        String[] tokens = line.split(",");
         boolean errorInChannel = false;
-        for (int i = 0; i < tokens.length; i++) {
-            tokens[i] = tokens[i].substring(1, tokens[i].length() - 1);
-            if (tokens.length < fullChannelMetatype.size()) {
-                errors.add("Incorrect number of fields in CSV line " + this.lineNumber);
-                errorInChannel = true;
-            }
-            if (!errorInChannel) {
+        if (line.size() != fullChannelMetatype.size()) {
+            errors.add("Incorrect number of fields in CSV line " + this.lineNumber);
+            errorInChannel = true;
+        }
+        if (!errorInChannel) {
+            for (int i = 0; i < line.size(); i++) {
+                String token = line.get(i);
                 try {
-                    channelValues.add(validate(fullChannelMetatype.get(i), tokens[i], errors, this.lineNumber));
+                    channelValues.add(validate(fullChannelMetatype.get(i), token, errors, this.lineNumber));
                     if (fullChannelMetatype.get(i).getName().equals("name")) {
-                        channelName = tokens[i];
+                        channelName = token;
                     }
                 } catch (Exception ex) {
                     errorInChannel = true;
                 }
-            }
-            if (errorInChannel) {
-                channelName = "";
-                break;
+                if (errorInChannel) {
+                    channelName = "";
+                    break;
+                }
             }
         }
         return channelName;
@@ -90,32 +91,30 @@ public class AssetConfigValidator {
 
     public Map<String, Object> validateCsv(String csv, String driverPid, List<String> errors) throws ServletException {
 
-        try {
+        try (CSVParser parser = CSVParser.parse(csv, CSVFormat.RFC4180)) {
             errors.clear();
             List<Tad> fullChannelMetatype = new ArrayList<>();
             List<String> propertyNames = new ArrayList<>();
             fillLists(fullChannelMetatype, propertyNames, driverPid);
-
             Map<String, Object> updatedAssetProps = new HashMap<>();
-            try (Scanner sc = new Scanner(csv)) {
-                sc.nextLine();
-                this.lineNumber = 1;
-                if (!sc.hasNext()) {
-                    errors.add("Empty CSV file.");
-                    throw new ValidationException();
-                }
-                sc.forEachRemaining(line -> {
-                    this.lineNumber++;
-                    List<Object> channelValues = new ArrayList<>();
-                    String channelName = scanLine(line, channelValues, fullChannelMetatype, errors);
-                    if (!channelName.isEmpty()) {
-                        for (int i = 0; i < propertyNames.size(); i++) {
-                            updatedAssetProps.put(channelName + "#" + propertyNames.get(i), channelValues.get(i));
-                        }
-                    }
-
-                });
+            List<CSVRecord> lines = parser.getRecords();
+            if (lines.size() <= 1) {
+                errors.add("Empty CSV file.");
+                throw new ValidationException();
             }
+            lines.remove(0);
+            this.lineNumber = 1;
+            lines.forEach(record -> {
+                this.lineNumber++;
+                List<Object> channelValues = new ArrayList<>();
+                String channelName = scanLine(record, channelValues, fullChannelMetatype, errors);
+                if (!channelName.isEmpty()) {
+                    for (int i = 0; i < propertyNames.size(); i++) {
+                        updatedAssetProps.put(channelName + "#" + propertyNames.get(i), channelValues.get(i));
+                    }
+                }
+
+            });
             if (!errors.isEmpty()) {
                 throw new ValidationException();
             }
@@ -123,6 +122,7 @@ public class AssetConfigValidator {
             return updatedAssetProps;
 
         } catch (Exception ex) {
+            errors.add("Validation exception on CSV file.");
             throw new ServletException("Validation exception on CSV file.");
         }
 

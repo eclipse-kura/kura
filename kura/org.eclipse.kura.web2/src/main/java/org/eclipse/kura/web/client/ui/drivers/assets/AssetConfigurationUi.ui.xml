@@ -98,8 +98,9 @@
                                 <b:FieldSet>
                                     <b:FormGroup>
                                         <b:FormLabel>File</b:FormLabel>
-                                        <g:FileUpload
-                                            ui:field="filePath"></g:FileUpload>
+                                        <g:FileUpload ui:field="filePath"></g:FileUpload>
+                                        <b:CheckBox ui:field="appendCheck">Replace current channels.</b:CheckBox>
+                                        <b:HelpBlock>If checked channels will be replaced by the imported ones. They will be appended to the list, otherwise.</b:HelpBlock>
                                     </b:FormGroup>
                                     <b:ButtonGroup pull="RIGHT">
                                         <b:Button ui:field="uploadCancel">Cancel</b:Button>
@@ -108,6 +109,7 @@
                                     <g:Hidden ui:field="xsrfTokenField"></g:Hidden>
                                     <g:Hidden ui:field="assetPidField"></g:Hidden>
                                     <g:Hidden ui:field="driverPidField"></g:Hidden>
+                                    <g:Hidden ui:field="appendCheckField"></g:Hidden>
                                 </b:FieldSet>
                             </g:FormPanel>
                         </b:Container>

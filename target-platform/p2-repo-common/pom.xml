@@ -230,6 +230,11 @@
 									<artifactId>org.apache.commons.lang3</artifactId>
 									<version>${org.apache.commons.lang3.version}</version>
 								</artifactItem>
+                        <artifactItem>
+                            <groupId>org.apache.commons</groupId>
+                            <artifactId>commons-csv</artifactId>
+                            <version>${org.apache.commons.csv.version}</version>
+                        </artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.soda.dk.comm</artifactId>

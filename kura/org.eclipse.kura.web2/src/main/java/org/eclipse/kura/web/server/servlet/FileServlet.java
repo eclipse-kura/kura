@@ -383,47 +383,52 @@ public class FileServlet extends HttpServlet {
 
     private void doPostAsset(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         UploadRequest upload = new UploadRequest(this.diskFileItemFactory);
+        List<String> errors = new ArrayList<>();
 
         try {
             upload.parse(req);
         } catch (FileUploadException e) {
-            logger.error("Error parsing the file upload request", e);
+            errors.add("Error parsing the file upload request");
+            resp.getWriter().write("Error parsing the file upload request.");
             return;
         }
 
-        // BEGIN XSRF - Servlet dependent code
         Map<String, String> formFields = upload.getFormFields();
-
         try {
+            // BEGIN XSRF - Servlet dependent code
             GwtXSRFToken token = new GwtXSRFToken(formFields.get("xsrfToken"));
             KuraRemoteServiceServlet.checkXSRFToken(req, token);
-        } catch (Exception e) {
-            logger.warn("Security error: please retry this operation correctly.", e);
-            return;
-        }
-        // END XSRF security check
+            // END XSRF security check
 
-        List<FileItem> fileItems = upload.getFileItems();
-        if (fileItems.size() != 1) {
-            logger.error(EXPECTED_1_FILE_PATTERN, fileItems.size());
-            return;
-        }
+            List<FileItem> fileItems = upload.getFileItems();
+            if (fileItems.size() != 1) {
+                logger.error(EXPECTED_1_FILE_PATTERN, fileItems.size());
+                errors.add("Security error: please retry this operation.");
+                throw new ServletException();
+            }
 
-        FileItem fileItem = fileItems.get(0);
-        byte[] data = fileItem.get();
-        String csvString = new String(data, "UTF-8");
-        String assetPid = formFields.get("assetPid");
-        String driverPid = formFields.get("driverPid");
+            FileItem fileItem = fileItems.get(0);
+            logger.info(fileItem.getName());
+            byte[] data = fileItem.get();
+            String csvString = new String(data, "UTF-8");
+            String assetPid = formFields.get("assetPid");
+            String driverPid = formFields.get("driverPid");
+            Boolean doReplace = formFields.get("doReplace").trim().equalsIgnoreCase("true");
 
-        List<String> errors = new ArrayList<>();
-        try {
             Map<String, Object> newProps = AssetConfigValidator.get().validateCsv(csvString, driverPid, errors);
 
             ServiceLocator locator = ServiceLocator.getInstance();
 
             ConfigurationService cs = locator.getService(ConfigurationService.class);
 
-            cs.updateConfiguration(assetPid, newProps);
+            if (doReplace) {
+                String fp = cs.getComponentConfiguration(assetPid).getConfigurationProperties().get("service.factoryPid").toString();
+                cs.deleteFactoryConfiguration(assetPid, false);
+                newProps.put("driver.pid", driverPid);
+                cs.createFactoryConfiguration(fp, assetPid, newProps, true);
+            }else{
+                cs.updateConfiguration(assetPid, newProps);
+            }
 
             // Add an additional delay after the configuration update
             // to give the time to the device to apply the received configuration
@@ -433,7 +438,7 @@ public class FileServlet extends HttpServlet {
                 Thread.sleep(delay);
             }
         } catch (KuraException | GwtKuraException | InterruptedException e) {
-            logger.error("Error updating device configuration: {}", e);
+            logger.error("Error updating device configuration", e);
         } catch (ServletException ex) {
             if (!errors.isEmpty()) {
                 StringBuilder sb = new StringBuilder();
@@ -441,11 +446,14 @@ public class FileServlet extends HttpServlet {
                 try {
                     resp.getWriter().write(sb.toString());
                 } catch (Exception e) {
-                    logger.error("Error while writing output: {}", e);
+                    logger.error("Error while writing output", e);
                 }
             } else {
-                logger.error("Servlet exception: {}", ex);
+                logger.error("Servlet exception.", ex);
             }
+        } catch (Exception ex2) {
+            logger.warn("Security error: please retry this operation correctly.", ex2);
+            resp.getWriter().write("Security error: please retry this operation.");
         }
 
     }

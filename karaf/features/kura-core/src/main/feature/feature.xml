@@ -2,7 +2,7 @@
 <features xmlns="http://karaf.apache.org/xmlns/features/v1.4.0" name="kura-core"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.4.0 http://karaf.apache.org/xmlns/features/v1.4.0">
 
-    <repository>mvn:org.apache.camel.karaf/apache-camel/2.17.2/xml/features</repository>
+    <repository>mvn:org.apache.camel.karaf/apache-camel/2.21.1/xml/features</repository>
 
     <feature name="kura-core">
         <feature prerequisite="true" dependency="true">scr</feature>

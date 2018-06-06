@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 Red Hat Inc and others.
+ * Copyright (c) 2016, 2018 Red Hat Inc and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,6 +31,7 @@ import org.eclipse.kura.camel.runner.CamelRunner.Builder;
 import org.eclipse.kura.cloud.CloudService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
+import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,10 +48,14 @@ public class XmlRouterComponent extends AbstractXmlCamelComponent {
 
     private static final String CLOUD_SERVICE_PREREQS = "cloudService.prereqs";
     private static final String COMPONENT_PREREQS = "component.prereqs";
+    private static final String LANGUAGE_PREREQS = "language.prereqs";
     private static final String DISABLE_JMX = "disableJmx";
     private static final String INIT_CODE = "initCode";
 
+    private final BundleContext bundleContext;
+
     private Set<String> requiredComponents = new HashSet<>();
+    private Set<String> requiredLanguages = new HashSet<>();
 
     private Map<String, String> cloudServiceRequirements = new HashMap<>();
     private String initCode = "";
@@ -59,6 +64,7 @@ public class XmlRouterComponent extends AbstractXmlCamelComponent {
 
     public XmlRouterComponent() {
         super("xml.data");
+        this.bundleContext = FrameworkUtil.getBundle(XmlRouterComponent.class).getBundleContext();
     }
 
     @Override
@@ -71,7 +77,8 @@ public class XmlRouterComponent extends AbstractXmlCamelComponent {
 
         // parse configuration
 
-        final Set<String> newRequiredComponents = parseComponentRequirements(asString(properties, COMPONENT_PREREQS));
+        final Set<String> newRequiredComponents = parseRequirements(asString(properties, COMPONENT_PREREQS));
+        final Set<String> newRequiredLanguages = parseRequirements(asString(properties, LANGUAGE_PREREQS));
 
         final Map<String, String> cloudServiceRequirements = parseCloudServiceRequirements(
                 asString(properties, CLOUD_SERVICE_PREREQS));
@@ -84,6 +91,12 @@ public class XmlRouterComponent extends AbstractXmlCamelComponent {
         for (final String component : newRequiredComponents) {
             logger.debug("Require component: {}", component);
             builder.requireComponent(component);
+        }
+
+        logger.debug("Setting new language requirements");
+        for (final String language : newRequiredLanguages) {
+            logger.debug("Require language: {}", language);
+            builder.requireLanguage(language);
         }
 
         // set cloud service requirements
@@ -119,6 +132,7 @@ public class XmlRouterComponent extends AbstractXmlCamelComponent {
         // assign new state
 
         this.requiredComponents = newRequiredComponents;
+        this.requiredLanguages = newRequiredLanguages;
         this.cloudServiceRequirements = cloudServiceRequirements;
         this.initCode = initCode;
         this.disableJmx = disableJmx;
@@ -129,7 +143,7 @@ public class XmlRouterComponent extends AbstractXmlCamelComponent {
 
         final boolean disableJmx = asBoolean(properties, DISABLE_JMX, false);
 
-        final Set<String> newRequiredComponents = parseComponentRequirements(asString(properties, COMPONENT_PREREQS));
+        final Set<String> newRequiredComponents = parseRequirements(asString(properties, COMPONENT_PREREQS));
 
         final Map<String, String> cloudServiceRequirements = parseCloudServiceRequirements(
                 asString(properties, CLOUD_SERVICE_PREREQS));
@@ -143,6 +157,11 @@ public class XmlRouterComponent extends AbstractXmlCamelComponent {
 
         if (!this.requiredComponents.equals(newRequiredComponents)) {
             logger.debug("Require restart due to '{}' change", COMPONENT_PREREQS);
+            return true;
+        }
+
+        if (!this.requiredLanguages.equals(newRequiredComponents)) {
+            logger.debug("Require restart due to '{}' change", LANGUAGE_PREREQS);
             return true;
         }
 
@@ -181,7 +200,7 @@ public class XmlRouterComponent extends AbstractXmlCamelComponent {
         return result;
     }
 
-    private static Set<String> parseComponentRequirements(final String value) {
+    private static Set<String> parseRequirements(final String value) {
         if (value == null || value.trim().isEmpty()) {
             return Collections.emptySet();
         }
@@ -191,6 +210,11 @@ public class XmlRouterComponent extends AbstractXmlCamelComponent {
 
     private static String parseInitCode(final Map<String, Object> properties) {
         return Configuration.asString(properties, INIT_CODE, "");
+    }
+
+    @Override
+    protected BundleContext getBundleContext() {
+        return this.bundleContext;
     }
 
 }

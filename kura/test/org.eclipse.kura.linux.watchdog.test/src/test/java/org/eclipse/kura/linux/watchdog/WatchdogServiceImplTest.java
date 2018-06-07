@@ -76,7 +76,7 @@ public class WatchdogServiceImplTest {
             this.hasCheckedCriticalComponents = true;
             notify();
         }
-        
+
         @Override
         protected Writer getWatchdogDeviceWriter(String watchdogDevice) throws IOException {
             return testWriter;
@@ -86,7 +86,7 @@ public class WatchdogServiceImplTest {
         protected boolean isWatchdogDeviceAvailable(String watchdogDevice) {
             return true;
         }
-        
+
         public synchronized boolean waitForCriticalComponentCheck(int delayMs) {
             if (!this.hasCheckedCriticalComponents) {
                 try {
@@ -286,7 +286,7 @@ public class WatchdogServiceImplTest {
         svc.checkin(cc2);
 
         assertTrue((long) TestUtil.getFieldValue(cci2, "updated") > 12345);
-        assertTrue((long) TestUtil.getFieldValue(cci2, "updated") <= System.currentTimeMillis());
+        assertTrue((long) TestUtil.getFieldValue(cci2, "updated") <= System.nanoTime());
     }
 
     public void testWatchdogFileDoesNotExist() throws Throwable {

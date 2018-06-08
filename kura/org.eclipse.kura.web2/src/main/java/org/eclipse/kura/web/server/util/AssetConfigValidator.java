@@ -17,8 +17,10 @@ import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_P
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.ServletException;
 
@@ -72,6 +74,9 @@ public class AssetConfigValidator {
         if (!errorInChannel) {
             for (int i = 0; i < line.size(); i++) {
                 String token = line.get(i);
+                token = token.replace(" ", "_");
+                token = token.replace("#", "_");
+                token = token.replace("+", "_");
                 try {
                     channelValues.add(validate(fullChannelMetatype.get(i), token, errors, this.lineNumber));
                     if (fullChannelMetatype.get(i).getName().equals("name")) {
@@ -98,6 +103,7 @@ public class AssetConfigValidator {
             fillLists(fullChannelMetatype, propertyNames, driverPid);
             Map<String, Object> updatedAssetProps = new HashMap<>();
             List<CSVRecord> lines = parser.getRecords();
+            Set<String> channels = new HashSet<>();
             if (lines.size() <= 1) {
                 errors.add("Empty CSV file.");
                 throw new ValidationException();
@@ -108,12 +114,12 @@ public class AssetConfigValidator {
                 this.lineNumber++;
                 List<Object> channelValues = new ArrayList<>();
                 String channelName = scanLine(record, channelValues, fullChannelMetatype, errors);
-                if (!channelName.isEmpty()) {
+                if (!channelName.isEmpty() && !channels.contains(channelName)) {
+                    channels.add(channelName);
                     for (int i = 0; i < propertyNames.size(); i++) {
                         updatedAssetProps.put(channelName + "#" + propertyNames.get(i), channelValues.get(i));
                     }
                 }
-
             });
             if (!errors.isEmpty()) {
                 throw new ValidationException();

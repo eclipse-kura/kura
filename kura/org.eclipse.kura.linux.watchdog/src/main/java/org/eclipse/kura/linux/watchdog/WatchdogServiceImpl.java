@@ -42,7 +42,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 
     private static final Logger logger = LoggerFactory.getLogger(WatchdogServiceImpl.class);
 
-    private static final long GRACE_PERIOD = Duration.ofMinutes(5).toMillis();
+    private static final long GRACE_PERIOD = Duration.ofMinutes(5).toNanos();
 
     private Long timedOutOn;
     private List<CriticalComponentRegistration> criticalComponentRegistrations;
@@ -217,7 +217,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
         if (this.timedOutOn == null) {
             CriticalComponentRegistration ccr = getAnyTimedOutRegistration();
             if (ccr != null) {
-                this.timedOutOn = System.currentTimeMillis();
+                this.timedOutOn = System.nanoTime();
                 logger.warn("Critical component '{}' timed out. System will reboot", ccr.getCriticalComponentName());
 
                 RebootCauseFileWriter rebootCauseWriter = new RebootCauseFileWriter(
@@ -234,7 +234,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
             }
         }
 
-        if (this.timedOutOn == null || System.currentTimeMillis() - this.timedOutOn < GRACE_PERIOD) {
+        if (this.timedOutOn == null || (System.nanoTime()) - this.timedOutOn < GRACE_PERIOD) {
             logger.debug("Refreshing watchdog.");
             refreshWatchdog();
         }

@@ -20,16 +20,16 @@ public class CriticalComponentRegistration {
 
     public CriticalComponentRegistration(CriticalComponent criticalComponent) {
         this.criticalComponent = criticalComponent;
-        this.updated = System.currentTimeMillis();
+        this.updated = System.nanoTime();
     }
 
     public boolean isTimedOut() {
-        long now = System.currentTimeMillis();
-        return this.criticalComponent.getCriticalComponentTimeout() < now - this.updated;
+        long now = System.nanoTime();
+        return (this.criticalComponent.getCriticalComponentTimeout() * 1000000L) < now - this.updated;
     }
 
     public void update() {
-        this.updated = System.currentTimeMillis();
+        this.updated = System.nanoTime();
     }
 
     public String getCriticalComponentName() {

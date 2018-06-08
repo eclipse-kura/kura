@@ -27,6 +27,7 @@ public enum KuraConstants {
     Reliagate_20_25("yocto", "1.2.1", "reliagate-20-25"),
     BoltGATE_20_25("yocto", "1.2.1", "boltgate-20-25"),
     Reliagate_20_26("rhel", "7.3", "reliagate-20-26"),
+    Intel_Up2_Ubuntu("ubuntu", "16.0.4", "intel-up2-ubuntu-16"),
     Intel_Up2("centos", "7", "intel-up2-centos-7"),
     Fedora_Pi("fedora", "2x", "raspberry-pi");
 

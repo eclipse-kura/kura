@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" configuration-policy="require" deactivate="deactivate" immediate="true" modified="modified" name="org.eclipse.kura.wire.camel.CamelProcess">
+   <implementation class="org.eclipse.kura.wire.camel.CamelProcess"/>
+   <reference bind="setWireHelperService" cardinality="1..1" interface="org.eclipse.kura.wire.WireHelperService" name="WireHelperService" policy="static"/>
+   <service>
+      <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
+      <provide interface="org.eclipse.kura.wire.WireReceiver"/>
+      <provide interface="org.eclipse.kura.wire.WireComponent"/>
+      <provide interface="org.osgi.service.wireadmin.Consumer"/>
+      <provide interface="org.osgi.service.wireadmin.Producer"/>
+      <provide interface="org.eclipse.kura.wire.WireEmitter"/>
+   </service>
+</scr:component>

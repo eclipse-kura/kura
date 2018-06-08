@@ -98,13 +98,7 @@ public class KuraCloudComponentTest {
         set.add(cs);
         when(regMock.findByType(clazz)).thenReturn(set);
 
-        KuraCloudComponent kcc = new KuraCloudComponent() {
-
-            @Override
-            public CamelContext getCamelContext() {
-                return ctxMock;
-            }
-        };
+        KuraCloudComponent kcc = new KuraCloudComponent(ctxMock);
 
         kcc.doStart();
 
@@ -130,8 +124,6 @@ public class KuraCloudComponentTest {
 
     @Test
     public void testCreateEndpointWrongRem() throws Exception {
-        final CloudClientCache cacheMock = mock(CloudClientCache.class);
-
         KuraCloudComponent kcc = new KuraCloudComponent();
 
         String uri = "uri";

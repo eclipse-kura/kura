@@ -1293,6 +1293,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         if (OS_VERSION
                 .equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion())
                 || OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName())
+                || OS_VERSION.equals(KuraConstants.Intel_Up2_Ubuntu.getImageName())
                 || OS_VERSION.equals(KuraConstants.BeagleBone.getImageName())
                 || OS_VERSION.equals(
                         KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion()

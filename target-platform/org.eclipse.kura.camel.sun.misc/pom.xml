@@ -60,7 +60,7 @@
 				</executions>
 				<configuration>
 					<instructions>
-						<Fragment-Host>org.apache.camel.camel-core;bundle-version="[2.16.0,2.18.0)"</Fragment-Host>>
+						<Fragment-Host>org.apache.camel.camel-core;bundle-version="[2.16.0,2.22.0)"</Fragment-Host>>
 					</instructions>
 				</configuration>
 			</plugin>

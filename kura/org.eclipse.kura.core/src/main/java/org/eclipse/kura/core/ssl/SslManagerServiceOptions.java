@@ -83,9 +83,8 @@ public class SslManagerServiceOptions {
         if (this.properties != null && this.properties.get(PROP_TRUST_PASSWORD) != null
                 && this.properties.get(PROP_TRUST_PASSWORD) instanceof String) {
             return (String) this.properties.get(PROP_TRUST_PASSWORD);
-        } else {
-            return PROP_DEFAULT_TRUST_PASSWORD;
         }
+        return PROP_DEFAULT_TRUST_PASSWORD;
     }
 
     /**

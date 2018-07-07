@@ -396,15 +396,23 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 
     private boolean isSnapshotPasswordDefault() {
         boolean result = false;
-        try {
-            char[] snapshotPassword = this.cryptoService
-                    .decryptAes(this.options.getSslKeystorePassword().toCharArray());
-            if (Arrays.equals(SslManagerServiceOptions.PROP_DEFAULT_TRUST_PASSWORD.toCharArray(), snapshotPassword)) {
-                result = true;
-            }
-        } catch (KuraException e) {
+
+        char[] snapshotPassword = getUnencryptedSslKeystorePassword();
+        if (Arrays.equals(SslManagerServiceOptions.PROP_DEFAULT_TRUST_PASSWORD.toCharArray(), snapshotPassword)) {
+            result = true;
         }
+
         return result;
+    }
+
+    private char[] getUnencryptedSslKeystorePassword() {
+        char[] snapshotPassword = this.options.getSslKeystorePassword().toCharArray();
+        try {
+            snapshotPassword = this.cryptoService.decryptAes(snapshotPassword);
+        } catch (KuraException e) {
+            // Nothing to do
+        }
+        return snapshotPassword;
     }
 
     private boolean isDefaultFromCrypto() {

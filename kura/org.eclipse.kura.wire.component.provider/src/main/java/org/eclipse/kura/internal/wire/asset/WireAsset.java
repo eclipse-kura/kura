@@ -281,7 +281,7 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
             throw new IllegalArgumentException("Channel Records cannot be empty");
         }
 
-        final Map<String, TypedValue<?>> wireRecordProperties = new HashMap<>();
+        final Map<String, TypedValue<?>> wireRecordProperties = new HashMap<>(channelRecords.size()*2);
         try {
             wireRecordProperties.put(WireAssetConstants.PROP_ASSET_NAME.value(),
                     TypedValues.newStringValue(getKuraServicePid()));

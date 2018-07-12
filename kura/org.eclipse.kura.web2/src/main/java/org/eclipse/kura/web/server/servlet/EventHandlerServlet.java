@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -16,8 +16,6 @@ package org.eclipse.kura.web.server.servlet;
 import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 import static org.eclipse.kura.util.base.StringUtil.isNullOrEmpty;
-import static org.eclipse.kura.wire.WireSupport.EMIT_EVENT_TOPIC;
-import static org.osgi.service.event.EventConstants.EVENT_TOPIC;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -37,11 +35,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.eclipse.kura.wire.graph.Constants;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventHandler;
+import org.osgi.service.wireadmin.Wire;
+import org.osgi.service.wireadmin.WireAdminEvent;
+import org.osgi.service.wireadmin.WireAdminListener;
+import org.osgi.service.wireadmin.WireConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,6 +58,12 @@ public final class EventHandlerServlet extends HttpServlet {
 
     /** Session Timeout in Seconds - 5 minutes */
     private static final int MAX_INACTIVE_INTERVAL = 5 * 60;
+
+    private static final Hashtable<String, Object> WIRE_EVENT_LISTENER_PROPERTIES = new Hashtable<String, Object>();
+
+    static {
+        WIRE_EVENT_LISTENER_PROPERTIES.put(WireConstants.WIREADMIN_EVENTS, WireAdminEvent.WIRE_TRACE);
+    }
 
     /**
      * Maximum size of the queue to maintain the events. The queue does not care if any
@@ -137,7 +144,7 @@ public final class EventHandlerServlet extends HttpServlet {
             this.requests.put(requestId, session);
         }
 
-        final BlockingQueue<Event> eventQueue = new LinkedBlockingQueue<>(MAX_SIZE_OF_QUEUE);
+        final BlockingQueue<Wire> eventQueue = new LinkedBlockingQueue<>(MAX_SIZE_OF_QUEUE);
         final ServletOutputStream outputStream = response.getOutputStream();
         final PrintStream printStream = new PrintStream(outputStream);
 
@@ -147,9 +154,13 @@ public final class EventHandlerServlet extends HttpServlet {
                 boolean requestExistsAndValid = checkRequestValidity(requestId);
                 // if session exists and valid, remove head element from the queue
                 while (requestExistsAndValid && !printStream.checkError()) {
-                    final Event data = eventQueue.poll(2, TimeUnit.SECONDS);
-                    if (!isNull(data)) {
-                        printStream.printf("data: %s %s%n%n", data.getProperty("emitter"), data.getProperty("port"));
+                    final Wire wire = eventQueue.poll(2, TimeUnit.SECONDS);
+                    if (!isNull(wire)) {
+                        final Dictionary properties = wire.getProperties();
+                        final Object emitterKuraServicePid = properties
+                                .get(Constants.EMITTER_KURA_SERVICE_PID_PROP_NAME.value());
+                        final Object emitterPort = properties.get(Constants.WIRE_EMITTER_PORT_PROP_NAME.value());
+                        printStream.printf("data: %s %s%n%n", emitterKuraServicePid.toString(), emitterPort.toString());
                     }
                     requestExistsAndValid = checkRequestValidity(requestId);
                 }
@@ -159,8 +170,7 @@ public final class EventHandlerServlet extends HttpServlet {
             }
         });
 
-        final ServiceRegistration<?> registration = registerEventHandler(EMIT_EVENT_TOPIC, eventQueue, requestId,
-                elementRemovalFuture);
+        final ServiceRegistration<?> registration = registerEventHandler(eventQueue, requestId, elementRemovalFuture);
         // unregisters event handler service and close the servlet output stream
         final CompletableFuture<Void> cleanupFuture = elementRemovalFuture.handle((ok, exeption) -> {
             logger.info("Cleaning resources for request: {}", requestId);
@@ -213,22 +223,17 @@ public final class EventHandlerServlet extends HttpServlet {
      * @throws NullPointerException
      *             if any of the provided arguments is null
      */
-    private ServiceRegistration<?> registerEventHandler(final String topic, final BlockingQueue<Event> eventQueue,
-            final String requestId, final CompletableFuture<?> future) {
-        requireNonNull(topic, "Topic must not be null");
+    private ServiceRegistration<?> registerEventHandler(final BlockingQueue<Wire> eventQueue, final String requestId,
+            final CompletableFuture<?> future) {
         requireNonNull(eventQueue, "Provided Queue must not be null");
         requireNonNull(requestId, "Provided Session ID must not be null");
         requireNonNull(future, "Future reference must not be null");
 
-        // event handler properties
-        final Dictionary<String, Object> props = new Hashtable<>();
-        props.put(EVENT_TOPIC, topic);
-        // register the handler as a service instance
-        return this.bundleContext.registerService(EventHandler.class, event -> {
+        return this.bundleContext.registerService(WireAdminListener.class, event -> {
             synchronized (EventHandlerServlet.class) {
 
                 final boolean validRequest = checkRequestValidity(requestId);
-                final boolean consumerAlive = eventQueue.offer(event);
+                final boolean consumerAlive = eventQueue.offer(event.getWire());
                 if (validRequest && consumerAlive) {
                     return;
                 } else {
@@ -239,7 +244,7 @@ public final class EventHandlerServlet extends HttpServlet {
                     future.cancel(true);
                 }
             }
-        }, props);
+        }, WIRE_EVENT_LISTENER_PROPERTIES);
     }
 
     private void cleanRequest(final String requestId) {

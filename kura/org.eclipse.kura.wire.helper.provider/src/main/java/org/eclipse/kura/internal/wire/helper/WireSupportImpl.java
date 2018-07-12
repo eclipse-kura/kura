@@ -23,10 +23,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-import org.eclipse.kura.util.collection.CollectionUtil;
 import org.eclipse.kura.wire.WireComponent;
 import org.eclipse.kura.wire.WireEnvelope;
 import org.eclipse.kura.wire.WireReceiver;
@@ -36,8 +34,6 @@ import org.eclipse.kura.wire.graph.EmitterPort;
 import org.eclipse.kura.wire.graph.MultiportWireSupport;
 import org.eclipse.kura.wire.graph.Port;
 import org.eclipse.kura.wire.graph.ReceiverPort;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventAdmin;
 import org.osgi.service.wireadmin.Wire;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,8 +44,6 @@ import org.slf4j.LoggerFactory;
 final class WireSupportImpl implements WireSupport, MultiportWireSupport {
 
     private static final Logger logger = LoggerFactory.getLogger(WireSupportImpl.class);
-
-    private final EventAdmin eventAdmin;
 
     private final List<ReceiverPort> receiverPorts;
 
@@ -63,19 +57,15 @@ final class WireSupportImpl implements WireSupport, MultiportWireSupport {
 
     private final Map<Wire, ReceiverPortImpl> receiverPortByWire;
 
-    private final BiConsumer<Wire, WireEnvelope> updateFunc;
-
     WireSupportImpl(final WireComponent wireComponent, final String servicePid, final String kuraServicePid,
-            final EventAdmin eventAdmin, int inputPortCount, int outputPortCount) {
+            int inputPortCount, int outputPortCount) {
         requireNonNull(wireComponent, "Wire component cannot be null");
-        requireNonNull(eventAdmin, "Event Admin cannot be null");
         requireNonNull(servicePid, "service pid cannot be null");
         requireNonNull(kuraServicePid, "kura service pid cannot be null");
 
         this.servicePid = servicePid;
         this.kuraServicePid = kuraServicePid;
         this.wireComponent = wireComponent;
-        this.eventAdmin = eventAdmin;
 
         if (inputPortCount < 0) {
             throw new IllegalArgumentException("Input port count must be greater or equal than zero");
@@ -88,18 +78,12 @@ final class WireSupportImpl implements WireSupport, MultiportWireSupport {
         this.emitterPorts = new ArrayList<>(outputPortCount);
         this.receiverPortByWire = new HashMap<>();
 
-        if (wireComponent instanceof WireReceiver) {
-            this.updateFunc = this::updatedLegacy;
-        } else {
-            this.updateFunc = this::updatedMultiport;
-        }
-
         for (int i = 0; i < inputPortCount; i++) {
             receiverPorts.add(new ReceiverPortImpl());
         }
 
         for (int i = 0; i < outputPortCount; i++) {
-            emitterPorts.add(new EmitterPortImpl(i));
+            emitterPorts.add(new EmitterPortImpl());
         }
     }
 
@@ -175,16 +159,13 @@ final class WireSupportImpl implements WireSupport, MultiportWireSupport {
             logger.warn("Wire cannot be null");
             return;
         }
-        this.updateFunc.accept(wire, (WireEnvelope) value);
-    }
-
-    private void updatedLegacy(final Wire wire, final WireEnvelope envelope) {
-        ((WireReceiver) this.wireComponent).onWireReceive(envelope);
-    }
-
-    private void updatedMultiport(final Wire wire, final WireEnvelope envelope) {
-        final ReceiverPortImpl receiverPort = this.receiverPortByWire.get(wire);
-        receiverPort.consumer.accept(envelope);
+        final WireEnvelope envelope = (WireEnvelope) value;
+        if (wireComponent instanceof WireReceiver) {
+            ((WireReceiver) this.wireComponent).onWireReceive(envelope);
+        } else {
+            final ReceiverPortImpl receiverPort = this.receiverPortByWire.get(wire);
+            receiverPort.consumer.accept(envelope);
+        }
     }
 
     @Override
@@ -209,23 +190,12 @@ final class WireSupportImpl implements WireSupport, MultiportWireSupport {
 
     private class EmitterPortImpl extends PortImpl implements EmitterPort {
 
-        private Event emitEvent;
-
-        public EmitterPortImpl(int index) {
-            final Map<String, Object> eventProperties = CollectionUtil.newHashMap();
-            eventProperties.put("emitter", kuraServicePid);
-            eventProperties.put("port", index);
-            this.emitEvent = new Event(WireSupport.EMIT_EVENT_TOPIC, eventProperties);
-        }
-
         @Override
         public void emit(WireEnvelope envelope) {
             for (final Wire wire : this.connectedWires) {
                 wire.update(envelope);
             }
-            eventAdmin.postEvent(emitEvent);
         }
-
     }
 
     private class ReceiverPortImpl extends PortImpl implements ReceiverPort {

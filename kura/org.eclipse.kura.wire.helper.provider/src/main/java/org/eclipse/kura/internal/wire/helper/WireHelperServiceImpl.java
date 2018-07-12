@@ -30,23 +30,12 @@ import org.eclipse.kura.wire.WireSupport;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.event.EventAdmin;
 
 /**
  * The Class WireHelperServiceImpl is the implementation of
  * {@link WireHelperService}
  */
 public final class WireHelperServiceImpl implements WireHelperService {
-
-    private volatile EventAdmin eventAdmin;
-
-    public void bindEventAdmin(final EventAdmin eventAdmin) {
-        this.eventAdmin = eventAdmin;
-    }
-
-    public void unbindEventAdmin(final EventAdmin eventAdmin) {
-        this.eventAdmin = null;
-    }
 
     /** {@inheritDoc} */
     @Override
@@ -176,7 +165,6 @@ public final class WireHelperServiceImpl implements WireHelperService {
         int emitterPortCount = getIntOrDefault(wireComponentRef.getProperty(EMITTER_PORT_COUNT_PROP_NAME.value()),
                 wireComponent instanceof WireEmitter ? 1 : 0);
 
-        return new WireSupportImpl(wireComponent, servicePid, kuraServicePid, this.eventAdmin, receiverPortCount,
-                emitterPortCount);
+        return new WireSupportImpl(wireComponent, servicePid, kuraServicePid, receiverPortCount, emitterPortCount);
     }
 }

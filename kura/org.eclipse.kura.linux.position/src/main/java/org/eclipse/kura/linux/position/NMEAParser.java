@@ -39,6 +39,9 @@ public class NMEAParser {
     private int fix3DNmea;
     private int nrSatellites;
     private boolean validPosition;
+    private char validFix = 0;
+    private char latitudeHemisphere = 0;
+    private char longitudeHemisphere = 0;
 
     /**
      * Fill the fields of GPS position depending of the type of the sentence
@@ -82,7 +85,7 @@ public class NMEAParser {
             throw new ParseException(Code.UNRECOGNIZED);
         }
 
-        return validPosition;
+        return this.validPosition;
     }
 
     private void parseVTGSentence(String[] tokens) {
@@ -94,59 +97,67 @@ public class NMEAParser {
 
     private void parseGSASentence(String[] tokens) {
         if (tokens.length > 5) {
-            validPosition = true;
+            this.validPosition = true;
             if (!tokens[2].isEmpty()) {
                 this.fix3DNmea = Integer.parseInt(tokens[2]);
                 if (this.fix3DNmea == 1) {
-                    validPosition = false;
+                    this.validPosition = false;
                 }
             } else {
-                validPosition = false;
+                this.validPosition = false;
             }
             int index = tokens.length - 3;
             if (!tokens[index].isEmpty()) {
                 this.pdopNmea = Double.parseDouble(tokens[index]);
             } else {
-                validPosition = false;
+                this.validPosition = false;
             }
             if (!tokens[index + 1].isEmpty()) {
                 this.hdopNmea = Double.parseDouble(tokens[index + 1]);
             } else {
-                validPosition = false;
+                this.validPosition = false;
             }
             if (!tokens[index + 2].isEmpty()) {
                 this.vdopNmea = Double.parseDouble(tokens[index + 2]);
             } else {
-                validPosition = false;
+                this.validPosition = false;
             }
         } else {
-            validPosition = false;
+            this.validPosition = false;
         }
     }
 
     private void parseRMCSentence(String[] tokens) {
         if (tokens.length > 8) {
-            validPosition = true;
+            this.validPosition = true;
             if (!tokens[1].isEmpty()) {
                 this.timeNmea = tokens[1];
             }
             if (!tokens[2].isEmpty()) { // check validity
                 if (!new String("A").equals(tokens[2])) {
-                    validPosition = false;
+                    this.validPosition = false;
                 }
+                this.validFix = tokens[2].charAt(0);
             } else {
-                validPosition = false;
+                this.validPosition = false;
+                this.validFix = 'V';
             }
             if (!tokens[3].isEmpty()) {
                 this.latNmea = convertPositionlat(tokens[3], tokens[4]);
             } else {
-                validPosition = false;
+                this.validPosition = false;
             }
+            if (!tokens[4].isEmpty()) {
+                this.latitudeHemisphere = tokens[4].charAt(0);
+            } 
             if (!tokens[5].isEmpty()) {
                 this.longNmea = convertPositionlon(tokens[5], tokens[6]);
             } else {
-                validPosition = false;
+                this.validPosition = false;
             }
+            if (!tokens[6].isEmpty()) {
+                this.longitudeHemisphere = tokens[6].charAt(0);
+            } 
             if (!tokens[7].isEmpty()) {
                 // conversion speed in knots to m/s : 1 m/s = 1.94384449 knots
                 this.speedNmea = Double.parseDouble(tokens[7]) / 1.94384449;
@@ -157,40 +168,46 @@ public class NMEAParser {
             if (!tokens[9].isEmpty()) {
                 this.dateNmea = tokens[9];
             } else {
-                validPosition = false;
+                this.validPosition = false;
             }
         } else {
-            validPosition = false;
+            this.validPosition = false;
         }
     }
 
     private void parseGLLSentence(String[] tokens) {
         if (tokens.length > 5) {
-            validPosition = true;
+            this.validPosition = true;
             if (!tokens[1].isEmpty()) {
                 this.latNmea = convertPositionlat(tokens[1], tokens[2]);
             } else {
-                validPosition = false;
+                this.validPosition = false;
             }
+            if (!tokens[2].isEmpty()) {
+                this.latitudeHemisphere = tokens[2].charAt(0);
+            } 
             if (!tokens[3].isEmpty()) {
                 this.longNmea = convertPositionlon(tokens[3], tokens[4]);
             } else {
-                validPosition = false;
+                this.validPosition = false;
             }
+            if (!tokens[4].isEmpty()) {
+                this.longitudeHemisphere = tokens[4].charAt(0);
+            } 
             if (!tokens[5].isEmpty()) {
                 this.timeNmea = tokens[5];
             } else {
-                validPosition = false;
+                this.validPosition = false;
             }
             if (!tokens[6].isEmpty()) { // check validity
                 if (!new String("A").equals(tokens[6])) {
-                    validPosition = false;
+                    this.validPosition = false;
                 }
             } else {
-                validPosition = false;
+                this.validPosition = false;
             }
         } else {
-            validPosition = false;
+            this.validPosition = false;
         }
     }
 
@@ -200,43 +217,49 @@ public class NMEAParser {
             if (!tokens[1].isEmpty()) {
                 this.timeNmea = tokens[1];
             } else {
-                validPosition = false;
+                this.validPosition = false;
             }
             if (!tokens[2].isEmpty()) {
                 this.latNmea = convertPositionlat(tokens[2], tokens[3]);
             } else {
-                validPosition = false;
+                this.validPosition = false;
             }
+            if (!tokens[3].isEmpty()) {
+                this.latitudeHemisphere = tokens[3].charAt(0);
+            } 
             if (!tokens[4].isEmpty()) {
                 this.longNmea = convertPositionlon(tokens[4], tokens[5]);
             } else {
-                validPosition = false;
+                this.validPosition = false;
             }
+            if (!tokens[5].isEmpty()) {
+                this.longitudeHemisphere = tokens[5].charAt(0);
+            } 
             if (!tokens[6].isEmpty()) {
                 this.fixQuality = Integer.parseInt(tokens[6]);
                 if (this.fixQuality == 0) {
-                    validPosition = false;
+                    this.validPosition = false;
                 }
             } else {
-                validPosition = false;
+                this.validPosition = false;
             }
             if (!tokens[7].isEmpty()) {
                 this.nrSatellites = Integer.parseInt(tokens[7]);
             } else {
-                validPosition = false;
+                this.validPosition = false;
             }
             if (!tokens[8].isEmpty()) {
                 this.dopNmea = Double.parseDouble(tokens[8]);
             } else {
-                validPosition = false;
+                this.validPosition = false;
             }
             if (!tokens[9].isEmpty()) {
                 this.altNmea = Double.parseDouble(tokens[9]);
             } else {
-                validPosition = false;
+                this.validPosition = false;
             }
         } else {
-            validPosition = false;
+            this.validPosition = false;
         }
     }
 
@@ -363,18 +386,29 @@ public class NMEAParser {
     }
 
     public Position getPosition() {
-        return new Position(this.getLatitude(), this.getLongitude(), this.getAltitude(), this.getSpeed(),
-                this.getTrack());
+        return new Position(getLatitude(), getLongitude(), getAltitude(), getSpeed(), getTrack());
     }
 
     public NmeaPosition getNmeaPosition() {
-        return new NmeaPosition(this.getLatNmea(), this.getLongNmea(), this.getAltNmea(), this.getSpeedNmea(),
-                this.getTrackNmea(), this.getFixQuality(), this.getNrSatellites(), this.getDOPNmea(),
-                this.getPDOPNmea(), this.getHDOPNmea(), this.getVDOPNmea(), this.getFix3DNmea());
+        return new NmeaPosition(getLatNmea(), getLongNmea(), getAltNmea(), getSpeedNmea(), getTrackNmea(),
+                getFixQuality(), getNrSatellites(), getDOPNmea(), getPDOPNmea(), getHDOPNmea(), getVDOPNmea(),
+                getFix3DNmea(), getValidFix(), getLatitudeHemisphere(), getLongitudeHemisphere());
     }
 
     public boolean isValidPosition() {
-        return validPosition;
+        return this.validPosition;
+    }
+
+    public char getValidFix() {
+        return this.validFix;
+    }
+
+    public char getLatitudeHemisphere() {
+        return this.latitudeHemisphere;
+    }
+
+    public char getLongitudeHemisphere() {
+        return this.longitudeHemisphere;
     }
 
     public enum Code {
@@ -386,6 +420,10 @@ public class NMEAParser {
     @SuppressWarnings("serial")
     public class ParseException extends Exception {
 
+        /**
+         *
+         */
+        private static final long serialVersionUID = -1441433820817330483L;
         private final Code code;
 
         public ParseException(final Code code) {
@@ -393,7 +431,7 @@ public class NMEAParser {
         }
 
         public Code getCode() {
-            return code;
+            return this.code;
         }
     }
 }

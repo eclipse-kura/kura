@@ -32,7 +32,7 @@ public class KuranetConfig {
 
     private static final Logger s_logger = LoggerFactory.getLogger(KuranetConfig.class);
 
-    private static final String KURA_DATA_DIR;
+    private static final String KURA_USER_CONFIG_DIR;
     private static final String KURANET_FILENAME;
     private static final String KURANET_TMP_FILENAME;
 
@@ -50,9 +50,9 @@ public class KuranetConfig {
         }
 
         try {
-            KURA_DATA_DIR = service.getKuraDataDirectory();
-            KURANET_FILENAME = KURA_DATA_DIR + "/kuranet.conf";
-            KURANET_TMP_FILENAME = KURA_DATA_DIR + "/kuranet.conf.tmp";
+            KURA_USER_CONFIG_DIR = service.getKuraUserConfigDirectory();
+            KURANET_FILENAME = KURA_USER_CONFIG_DIR + "/kuranet.conf";
+            KURANET_TMP_FILENAME = KURA_USER_CONFIG_DIR + "/kuranet.conf.tmp";
         } finally {
             ctx.ungetService(systemServiceRef);
         }

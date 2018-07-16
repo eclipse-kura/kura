@@ -35,6 +35,6 @@ if [ ! -d ${INSTALL_DIR}/kura/.data ]; then
 fi
 
 #set up recover default configuration script
-cp ${INSTALL_DIR}/kura/install/recover_default_config.init ${INSTALL_DIR}/kura/.data/.recoverDefaultConfig.sh
-chmod +x ${INSTALL_DIR}/kura/.data/.recoverDefaultConfig.sh
+cp ${INSTALL_DIR}/kura/install/recover_default_config.init ${INSTALL_DIR}/kura/bin/.recoverDefaultConfig.sh
+chmod +x ${INSTALL_DIR}/kura/bin/.recoverDefaultConfig.sh
 

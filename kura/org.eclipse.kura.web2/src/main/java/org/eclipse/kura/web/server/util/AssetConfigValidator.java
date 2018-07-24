@@ -226,9 +226,6 @@ public class AssetConfigValidator {
 
     protected class ValidationException extends Exception {
 
-        /**
-         *
-         */
         private static final long serialVersionUID = 5954147929480218028L;
 
     }

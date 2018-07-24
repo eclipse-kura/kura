@@ -41,11 +41,11 @@ import org.eclipse.kura.web.client.ui.wires.ValidationData;
 import org.eclipse.kura.web.client.ui.wires.ValidationInputCell;
 import org.eclipse.kura.web.client.util.DownloadHelper;
 import org.eclipse.kura.web.client.util.FailureHandler;
+import org.eclipse.kura.web.client.util.request.RequestQueue;
 import org.eclipse.kura.web.shared.AssetConstants;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter.GwtConfigParameterType;
-import org.eclipse.kura.web.shared.model.GwtWireComposerStaticInfo;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtComponentService;
 import org.eclipse.kura.web.shared.service.GwtComponentServiceAsync;
@@ -63,14 +63,9 @@ import org.gwtbootstrap3.client.ui.gwt.CellTable;
 import org.gwtbootstrap3.client.ui.html.Strong;
 
 import com.google.gwt.cell.client.AbstractCell;
-import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.SelectionCell;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.Column;
@@ -84,7 +79,6 @@ import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteHandler;
 import com.google.gwt.user.client.ui.Hidden;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
-import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 
 public class AssetConfigurationUi extends AbstractServicesUi implements HasConfiguration {
@@ -192,87 +186,32 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
 
         this.nonValidatedCells = new HashSet<>();
 
-        this.btnDownload.addClickHandler(new ClickHandler() {
+        this.btnDownload.addClickHandler(event -> RequestQueue.submit(
+                context -> this.gwtXSRFService.generateSecurityToken(context.callback(this::downloadChannels))));
 
-            @Override
-            public void onClick(final ClickEvent event) {
-                AssetConfigurationUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+        this.btnUpload.addClickHandler(event -> uploadAndApply());
 
-                    @Override
-                    public void onFailure(Throwable ex) {
-                        FailureHandler.handle(ex);
-                    }
+        this.uploadUpload.addClickHandler(event -> RequestQueue
+                .submit(context -> this.gwtXSRFService.generateSecurityToken(context.callback(token -> {
+                    AssetConfigurationUi.this.xsrfTokenField.setValue(token.getToken());
+                    AssetConfigurationUi.this.assetPidField.setValue(AssetConfigurationUi.this.model.getAssetPid());
+                    AssetConfigurationUi.this.driverPidField.setValue(AssetConfigurationUi.this.model.getConfiguration()
+                            .getParameterValue(AssetConstants.ASSET_DRIVER_PROP.value()));
+                    AssetConfigurationUi.this.appendCheckField
+                            .setValue(AssetConfigurationUi.this.appendCheck.getValue().toString());
+                    AssetConfigurationUi.this.uploadForm.submit();
+                    AssetConfigurationUi.this.uploadModal.hide();
+                }))));
 
-                    @Override
-                    public void onSuccess(GwtXSRFToken token) {
-                        downloadChannels(token);
-                    }
-                });
-            }
+        this.uploadCancel.addClickHandler(event -> AssetConfigurationUi.this.uploadModal.hide());
+
+        this.btnAdd.addClickHandler(event -> {
+            AssetConfigurationUi.this.newChannelNameInput.setText(getNewChannelName());
+            AssetConfigurationUi.this.newChannelModal.show();
         });
 
-        this.btnUpload.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                uploadAndApply();
-            }
-        });
-
-        this.uploadUpload.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                EntryClassUi.showWaitModal();
-                AssetConfigurationUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-
-                    @Override
-                    public void onFailure(Throwable ex) {
-                        EntryClassUi.hideWaitModal();
-                        FailureHandler.handle(ex);
-                    }
-
-                    @Override
-                    public void onSuccess(GwtXSRFToken token) {
-                        AssetConfigurationUi.this.xsrfTokenField.setValue(token.getToken());
-                        AssetConfigurationUi.this.assetPidField.setValue(AssetConfigurationUi.this.model.getAssetPid());
-                        AssetConfigurationUi.this.driverPidField.setValue(AssetConfigurationUi.this.model
-                                .getConfiguration().getParameterValue(AssetConstants.ASSET_DRIVER_PROP.value()));
-                        AssetConfigurationUi.this.appendCheckField.setValue(AssetConfigurationUi.this.appendCheck.getValue().toString());                      
-                        AssetConfigurationUi.this.uploadForm.submit();
-                        AssetConfigurationUi.this.uploadModal.hide();
-                        EntryClassUi.showWaitModal();
-                    }
-                });
-
-            }
-        });
-
-        this.uploadCancel.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                AssetConfigurationUi.this.uploadModal.hide();
-            }
-        });
-
-        this.btnAdd.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(final ClickEvent event) {
-                AssetConfigurationUi.this.newChannelNameInput.setText(getNewChannelName());
-                AssetConfigurationUi.this.newChannelModal.show();
-            }
-        });
-
-        this.selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-
-            @Override
-            public void onSelectionChange(final SelectionChangeEvent event) {
-                AssetConfigurationUi.this.btnRemove
-                        .setEnabled(AssetConfigurationUi.this.selectionModel.getSelectedObject() != null);
-            }
-        });
+        this.selectionModel.addSelectionChangeHandler(event -> AssetConfigurationUi.this.btnRemove
+                .setEnabled(AssetConfigurationUi.this.selectionModel.getSelectedObject() != null));
 
         this.uploadForm.addSubmitCompleteHandler(new SubmitCompleteHandler() {
 
@@ -304,26 +243,18 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
                                         public void onSuccess(List<GwtConfigComponent> result) {
 
                                             final GwtConfigComponent newConfiguration = result.get(0);
-                                            DriversAndAssetsRPC.loadStaticInfo(
-                                                    new DriversAndAssetsRPC.Callback<GwtWireComposerStaticInfo>() {
-
-                                                        @Override
-                                                        public void onSuccess(GwtWireComposerStaticInfo result) {
-                                                            AssetConfigurationUi.this.model = new AssetModelImpl(
-                                                                    newConfiguration,
-                                                                    AssetConfigurationUi.this.configurations
-                                                                            .getChannelDescriptor(
-                                                                                    AssetConfigurationUi.this.model
-                                                                                            .getConfiguration()
-                                                                                            .getParameterValue(
-                                                                                                    AssetConstants.ASSET_DRIVER_PROP
-                                                                                                            .value())),
-                                                                    AssetConfigurationUi.this.configurations
-                                                                            .getBaseChannelDescriptor());
-                                                            EntryClassUi.hideWaitModal();
-                                                            AssetConfigurationUi.this.renderForm();
-                                                        }
-                                                    });
+                                            DriversAndAssetsRPC.loadStaticInfo(result1 -> {
+                                                AssetConfigurationUi.this.model = new AssetModelImpl(newConfiguration,
+                                                        AssetConfigurationUi.this.configurations
+                                                                .getChannelDescriptor(AssetConfigurationUi.this.model
+                                                                        .getConfiguration().getParameterValue(
+                                                                                AssetConstants.ASSET_DRIVER_PROP
+                                                                                        .value())),
+                                                        AssetConfigurationUi.this.configurations
+                                                                .getBaseChannelDescriptor());
+                                                EntryClassUi.hideWaitModal();
+                                                AssetConfigurationUi.this.renderForm();
+                                            });
                                         }
                                     });
                         }
@@ -433,7 +364,7 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
 
     @Override
     protected void reset() {
-        return;
+        // Not needed
     }
 
     private Column<ChannelModel, String> getColumnFromParam(final GwtConfigParameter param, boolean isReadOnly) {
@@ -469,24 +400,20 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
         };
 
         if (!isReadOnly) {
-            result.setFieldUpdater(new FieldUpdater<ChannelModel, String>() {
-
-                @Override
-                public void update(final int index, final ChannelModel object, final String value) {
-                    ValidationData viewData;
-                    if (!isValid(param, value)) {
-                        viewData = ((ValidationInputCell) cell).getViewData(object);
-                        viewData.setInvalid(true);
-                        AssetConfigurationUi.this.nonValidatedCells.add(object.getChannelName());
-                        // We only modified the cell, so do a local redraw.
-                        AssetConfigurationUi.this.channelTable.redraw();
-                        return;
-                    }
-                    AssetConfigurationUi.this.nonValidatedCells.remove(object.getChannelName());
-                    AssetConfigurationUi.this.setDirty(true);
+            result.setFieldUpdater((index, object, value) -> {
+                ValidationData viewData;
+                if (!isValid(param, value)) {
+                    viewData = ((ValidationInputCell) cell).getViewData(object);
+                    viewData.setInvalid(true);
+                    AssetConfigurationUi.this.nonValidatedCells.add(object.getChannelName());
+                    // We only modified the cell, so do a local redraw.
                     AssetConfigurationUi.this.channelTable.redraw();
-                    object.setValue(param.getId(), value);
+                    return;
                 }
+                AssetConfigurationUi.this.nonValidatedCells.remove(object.getChannelName());
+                AssetConfigurationUi.this.setDirty(true);
+                AssetConfigurationUi.this.channelTable.redraw();
+                object.setValue(param.getId(), value);
             });
         }
 
@@ -520,14 +447,10 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
         };
 
         if (!isReadOnly) {
-            result.setFieldUpdater(new FieldUpdater<ChannelModel, String>() {
-
-                @Override
-                public void update(final int index, final ChannelModel object, final String label) {
-                    AssetConfigurationUi.this.setDirty(true);
-                    object.setValue(param.getId(), labelsToValues.get(label));
-                    AssetConfigurationUi.this.channelTable.redraw();
-                }
+            result.setFieldUpdater((index, object, label) -> {
+                AssetConfigurationUi.this.setDirty(true);
+                object.setValue(param.getId(), labelsToValues.get(label));
+                AssetConfigurationUi.this.channelTable.redraw();
             });
         }
 
@@ -540,55 +463,43 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
         this.btnCreateNewChannel.setText(MSGS.addButton());
         this.btnCancelCreatingNewChannel.setText(MSGS.cancelButton());
 
-        this.newChannelNameInput.addKeyUpHandler(new KeyUpHandler() {
-
-            @Override
-            public void onKeyUp(KeyUpEvent event) {
-                ValidationData isChannelNameValid = validateChannelName(
-                        AssetConfigurationUi.this.newChannelNameInput.getValue().trim());
-                if (isChannelNameValid.isInvalid()) {
-                    AssetConfigurationUi.this.newChannelNameInput.addStyleName(INVALID_CLASS_NAME);
-                    AssetConfigurationUi.this.newChannelNameError.setText(isChannelNameValid.getValue());
-                    return;
-                }
-                AssetConfigurationUi.this.newChannelNameError.setText("");
-                AssetConfigurationUi.this.newChannelNameInput.removeStyleName(INVALID_CLASS_NAME);
+        this.newChannelNameInput.addKeyUpHandler(event -> {
+            ValidationData isChannelNameValid = validateChannelName(
+                    AssetConfigurationUi.this.newChannelNameInput.getValue().trim());
+            if (isChannelNameValid.isInvalid()) {
+                AssetConfigurationUi.this.newChannelNameInput.addStyleName(INVALID_CLASS_NAME);
+                AssetConfigurationUi.this.newChannelNameError.setText(isChannelNameValid.getValue());
+                return;
             }
+            AssetConfigurationUi.this.newChannelNameError.setText("");
+            AssetConfigurationUi.this.newChannelNameInput.removeStyleName(INVALID_CLASS_NAME);
         });
 
-        this.btnCreateNewChannel.addClickHandler(new ClickHandler() {
+        this.btnCreateNewChannel.addClickHandler(event -> {
+            final String newChannelName = AssetConfigurationUi.this.newChannelNameInput.getValue().trim();
 
-            @Override
-            public void onClick(final ClickEvent event) {
-                final String newChannelName = AssetConfigurationUi.this.newChannelNameInput.getValue().trim();
-
-                ValidationData isChannelNameValid = validateChannelName(newChannelName);
-                if (isChannelNameValid.isInvalid()) {
-                    return;
-                }
-
-                AssetConfigurationUi.this.model.createNewChannel(newChannelName);
-
-                AssetConfigurationUi.this.channelsDataProvider.setList(AssetConfigurationUi.this.model.getChannels());
-                AssetConfigurationUi.this.channelsDataProvider.refresh();
-                AssetConfigurationUi.this.channelPager.lastPage();
-                AssetConfigurationUi.this.setDirty(true);
-                AssetConfigurationUi.this.newChannelModal.hide();
+            ValidationData isChannelNameValid = validateChannelName(newChannelName);
+            if (isChannelNameValid.isInvalid()) {
+                return;
             }
+
+            AssetConfigurationUi.this.model.createNewChannel(newChannelName);
+
+            AssetConfigurationUi.this.channelsDataProvider.setList(AssetConfigurationUi.this.model.getChannels());
+            AssetConfigurationUi.this.channelsDataProvider.refresh();
+            AssetConfigurationUi.this.channelPager.lastPage();
+            AssetConfigurationUi.this.setDirty(true);
+            AssetConfigurationUi.this.newChannelModal.hide();
         });
 
-        this.btnRemove.addClickHandler(new ClickHandler() {
+        this.btnRemove.addClickHandler(event -> {
+            final ChannelModel ci = AssetConfigurationUi.this.selectionModel.getSelectedObject();
+            AssetConfigurationUi.this.model.deleteChannel(ci.getChannelName());
 
-            @Override
-            public void onClick(final ClickEvent event) {
-                final ChannelModel ci = AssetConfigurationUi.this.selectionModel.getSelectedObject();
-                AssetConfigurationUi.this.model.deleteChannel(ci.getChannelName());
-
-                AssetConfigurationUi.this.channelsDataProvider.setList(AssetConfigurationUi.this.model.getChannels());
-                AssetConfigurationUi.this.channelsDataProvider.refresh();
-                AssetConfigurationUi.this.btnRemove.setEnabled(false);
-                AssetConfigurationUi.this.setDirty(true);
-            }
+            AssetConfigurationUi.this.channelsDataProvider.setList(AssetConfigurationUi.this.model.getChannels());
+            AssetConfigurationUi.this.channelsDataProvider.refresh();
+            AssetConfigurationUi.this.btnRemove.setEnabled(false);
+            AssetConfigurationUi.this.setDirty(true);
         });
     }
 

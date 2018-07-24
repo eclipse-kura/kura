@@ -49,9 +49,6 @@ import org.slf4j.LoggerFactory;
 
 public class ChannelServlet extends HttpServlet {
 
-    /**
-     *
-     */
     private static final long serialVersionUID = -1445700937173920652L;
 
     private static Logger logger = LoggerFactory.getLogger(ChannelServlet.class);

@@ -741,6 +741,8 @@ fi]]>
 					      value=", reference:file:${kura.install.dir}/kura/plugins/com.eclipsesource.jaxrs.provider.security_${com.eclipsesource.jaxrs.provider.security.version}.jar@4:start" />
 			<entry key="osgi.bundles" operation="+"
 								value=", reference:file:${kura.install.dir}/kura/plugins/com.google.gson_${com.google.gson.version}.jar@3" />
+			<entry key="osgi.bundles" operation="+"
+								value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.commons.csv_${org.apache.commons.csv.version}.jar@3" />
 		</propertyfile>
 	</target>
 

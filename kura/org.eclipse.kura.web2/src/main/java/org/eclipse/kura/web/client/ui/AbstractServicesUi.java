@@ -355,8 +355,7 @@ public abstract class AbstractServicesUi extends Composite {
 
         formGroup.add(input);
     }
-
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    
     protected void renderBooleanField(final GwtConfigParameter param, boolean isFirstInstance, FormGroup formGroup) {
         this.valid.put(param.getId(), true);
 

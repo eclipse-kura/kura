@@ -26,7 +26,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -41,6 +40,7 @@ import org.eclipse.kura.web.client.ui.wires.ValidationData;
 import org.eclipse.kura.web.client.ui.wires.ValidationInputCell;
 import org.eclipse.kura.web.client.util.DownloadHelper;
 import org.eclipse.kura.web.client.util.FailureHandler;
+import org.eclipse.kura.web.client.util.request.RequestContext;
 import org.eclipse.kura.web.client.util.request.RequestQueue;
 import org.eclipse.kura.web.shared.AssetConstants;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
@@ -71,11 +71,8 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.cellview.client.TextHeader;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FormPanel;
-import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
-import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteHandler;
 import com.google.gwt.user.client.ui.Hidden;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
@@ -186,6 +183,7 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
 
         this.nonValidatedCells = new HashSet<>();
 
+        this.btnDownload.setEnabled(true);
         this.btnDownload.addClickHandler(event -> RequestQueue.submit(
                 context -> this.gwtXSRFService.generateSecurityToken(context.callback(this::downloadChannels))));
 
@@ -213,61 +211,36 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
         this.selectionModel.addSelectionChangeHandler(event -> AssetConfigurationUi.this.btnRemove
                 .setEnabled(AssetConfigurationUi.this.selectionModel.getSelectedObject() != null));
 
-        this.uploadForm.addSubmitCompleteHandler(new SubmitCompleteHandler() {
+        this.uploadForm.addSubmitCompleteHandler(event -> {
+            String htmlResponse = event.getResults();
+            if (htmlResponse == null || htmlResponse.isEmpty()) {
+                RequestQueue.submit(context -> this.gwtXSRFService.generateSecurityToken(
+                        context.callback(token -> RequestQueue.submit(context1 -> getConfiguration(token, context1)))));
 
-            @Override
-            public void onSubmitComplete(SubmitCompleteEvent event) {
-                String htmlResponse = event.getResults();
-                if (htmlResponse == null || htmlResponse.isEmpty()) {
-                    AssetConfigurationUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-
-                        @Override
-                        public void onFailure(Throwable ex) {
-                            EntryClassUi.hideWaitModal();
-                            FailureHandler.handle(ex);
-                        }
-
-                        @Override
-                        public void onSuccess(GwtXSRFToken token) {
-                            AssetConfigurationUi.this.gwtComponentService.findFilteredComponentConfiguration(token,
-                                    AssetConfigurationUi.this.model.getAssetPid(),
-                                    new AsyncCallback<List<GwtConfigComponent>>() {
-
-                                        @Override
-                                        public void onFailure(Throwable caught) {
-                                            EntryClassUi.hideWaitModal();
-                                            FailureHandler.handle(caught);
-                                        }
-
-                                        @Override
-                                        public void onSuccess(List<GwtConfigComponent> result) {
-
-                                            final GwtConfigComponent newConfiguration = result.get(0);
-                                            DriversAndAssetsRPC.loadStaticInfo(result1 -> {
-                                                AssetConfigurationUi.this.model = new AssetModelImpl(newConfiguration,
-                                                        AssetConfigurationUi.this.configurations
-                                                                .getChannelDescriptor(AssetConfigurationUi.this.model
-                                                                        .getConfiguration().getParameterValue(
-                                                                                AssetConstants.ASSET_DRIVER_PROP
-                                                                                        .value())),
-                                                        AssetConfigurationUi.this.configurations
-                                                                .getBaseChannelDescriptor());
-                                                EntryClassUi.hideWaitModal();
-                                                AssetConfigurationUi.this.renderForm();
-                                            });
-                                        }
-                                    });
-                        }
-                    });
-                } else {
-                    EntryClassUi.hideWaitModal();
-                    logger.log(Level.SEVERE, MSGS.information() + ": " + MSGS.fileUploadFailure());
-                    FailureHandler.handle(new Exception(htmlResponse));
-                }
+            } else {
+                EntryClassUi.hideWaitModal();
+                logger.log(Level.SEVERE, MSGS.information() + ": " + MSGS.fileUploadFailure());
+                FailureHandler.handle(new Exception(htmlResponse));
             }
         });
         setModel(assetModel);
         initNewChannelModal();
+    }
+
+    private void getConfiguration(GwtXSRFToken token, final RequestContext context) {
+        AssetConfigurationUi.this.gwtComponentService.findFilteredComponentConfiguration(token,
+                AssetConfigurationUi.this.model.getAssetPid(), context.callback(result -> {
+                    final GwtConfigComponent newConfiguration = result.get(0);
+                    DriversAndAssetsRPC.loadStaticInfo(result1 -> {
+                        AssetConfigurationUi.this.model = new AssetModelImpl(newConfiguration,
+                                AssetConfigurationUi.this.configurations
+                                        .getChannelDescriptor(AssetConfigurationUi.this.model.getConfiguration()
+                                                .getParameterValue(AssetConstants.ASSET_DRIVER_PROP.value())),
+                                AssetConfigurationUi.this.configurations.getBaseChannelDescriptor());
+                        EntryClassUi.hideWaitModal();
+                        AssetConfigurationUi.this.renderForm();
+                    });
+                }));
     }
 
     public void setModel(AssetModel model) {
@@ -328,6 +301,9 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
     public void setDirty(final boolean flag) {
         boolean isDirtyStateChanged = flag != this.dirty;
         this.dirty = flag;
+        
+        this.btnDownload.setEnabled(!this.dirty);
+
         if (this.listener != null) {
             if (isDirtyStateChanged) {
                 this.listener.onDirtyStateChanged(this);
@@ -588,6 +564,7 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
     @Override
     public void clearDirtyState() {
         this.dirty = false;
+        this.btnDownload.setEnabled(true);
     }
 
     @Override

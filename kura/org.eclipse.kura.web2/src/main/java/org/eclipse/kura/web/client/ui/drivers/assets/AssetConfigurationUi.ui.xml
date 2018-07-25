@@ -1,7 +1,7 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <!--
 
-    Copyright (c) 2017 Eurotech and/or its affiliates and others
+    Copyright (c) 2017, 2018 Eurotech and/or its affiliates and others
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -12,6 +12,8 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:b="urn:import:org.gwtbootstrap3.client.ui"
     xmlns:b.html="urn:import:org.gwtbootstrap3.client.ui.html" xmlns:g="urn:import:com.google.gwt.user.client.ui"
     xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt" xmlns:cv="urn:import:com.google.gwt.user.cellview.client">
+
+    <ui:with field="msgs" type="org.eclipse.kura.web.client.messages.Messages"></ui:with>
 
     <ui:style>
     .center-panel {
@@ -42,16 +44,15 @@
                                 <b:PanelHeader>
                                     <b:ButtonToolBar>
                                         <b:ButtonGroup size="SMALL">
-                                            <b.html:Strong ui:field="channelTitle">Channels</b.html:Strong>
+                                            <b.html:Strong ui:field="channelTitle" text="{msgs.wiresChannelTitle}"/>
                                         </b:ButtonGroup>
                                         <b:ButtonGroup size="SMALL" addStyleNames="pull-right">
-                                            <b:Button icon="DOWNLOAD" ui:field="btnDownload">Download Channels</b:Button>
-                                            <b:Button icon="UPLOAD" ui:field="btnUpload">Upload Channels</b:Button>
+                                            <b:Button icon="DOWNLOAD" ui:field="btnDownload" text="{msgs.wiresDownloadChannels}"/>
+                                            <b:Button icon="UPLOAD" ui:field="btnUpload" text="{msgs.wiresUploadChannels}"/>
                                         </b:ButtonGroup>
                                         <b:ButtonGroup size="SMALL" addStyleNames="pull-right">
-                                            <b:Button icon="PLUS_SQUARE" ui:field="btnAdd">New Channel</b:Button>
-                                            <b:Button icon="MINUS_SQUARE" ui:field="btnRemove">Delete
-                                                Channel</b:Button>
+                                            <b:Button icon="PLUS_SQUARE" ui:field="btnAdd" text="{msgs.wiresNewChannel}"/>
+                                            <b:Button icon="MINUS_SQUARE" ui:field="btnRemove" text="{msgs.wiresDeleteChannel}"/>
                                         </b:ButtonGroup>
                                     </b:ButtonToolBar>
                                 </b:PanelHeader>
@@ -99,12 +100,12 @@
                                     <b:FormGroup>
                                         <b:FormLabel>File</b:FormLabel>
                                         <g:FileUpload ui:field="filePath"></g:FileUpload>
-                                        <b:CheckBox ui:field="appendCheck">Replace current channels.</b:CheckBox>
-                                        <b:HelpBlock>If checked channels will be replaced by the imported ones. They will be appended to the list, otherwise.</b:HelpBlock>
+                                        <b:CheckBox ui:field="appendCheck" text="{msgs.wiresAppendChannelsCheck}"/>
+                                        <b:HelpBlock text="{msgs.wiresAppendChannelsHelpText}"/>
                                     </b:FormGroup>
                                     <b:ButtonGroup pull="RIGHT">
-                                        <b:Button ui:field="uploadCancel">Cancel</b:Button>
-                                        <b:Button ui:field="uploadUpload">Upload</b:Button>
+                                        <b:Button ui:field="uploadCancel" text="{msgs.cancelButton}" />
+                                        <b:Button ui:field="uploadUpload" text="{msgs.uploadButton}" />
                                     </b:ButtonGroup>
                                     <g:Hidden ui:field="xsrfTokenField"></g:Hidden>
                                     <g:Hidden ui:field="assetPidField"></g:Hidden>

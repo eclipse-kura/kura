@@ -36,6 +36,9 @@ import org.osgi.annotation.versioning.ProviderType;
  * <li>PDOP : Dilution of precision (from GPGSA)
  * <li>HDOP : Horizontal Dilution of precision (from GPGSA)
  * <li>VDOP : Vertical Dilution of precision (from GPGSA)
+ * <li>validFix : indicator of fix validity = A:active or V:void
+ * <li>latitudeHemisphere : hemisphere of the latitude = N or S
+ * <li>longitudeHemisphere : hemisphere of the longitude = E or W
  * </ul>
  * 
  * @noextend This class is not intended to be subclassed by clients.
@@ -43,166 +46,223 @@ import org.osgi.annotation.versioning.ProviderType;
 @ProviderType
 public class NmeaPosition {
 
-    private double m_latitude;
-    private double m_longitude;
-    private double m_altitude;
-    private double m_speed;
-    private double m_track;
-    private int m_fixQuality;
-    private int m_nrSatellites;
-    private double m_DOP;
-    private double m_PDOP;
-    private double m_HDOP;
-    private double m_VDOP;
-    private int m_3Dfix;
+    private double latitude;
+    private double longitude;
+    private double altitude;
+    private double speed;
+    private double track;
+    private int fixQuality;
+    private int nrSatellites;
+    private double mDOP;
+    private double mPDOP;
+    private double mHDOP;
+    private double mVDOP;
+    private int m3Dfix;
+    private char validFix;
+    private char latitudeHemisphere;
+    private char longitudeHemisphere;
+
 
     public NmeaPosition(double lat, double lon, double alt, double speed, double track) {
-        this.m_latitude = lat;
-        this.m_longitude = lon;
-        this.m_altitude = alt;
-        this.m_speed = speed;
-        this.m_track = track;
+        this.latitude = lat;
+        this.longitude = lon;
+        this.altitude = alt;
+        this.speed = speed;
+        this.track = track;
     }
 
     public NmeaPosition(double lat, double lon, double alt, double speed, double track, int fixQuality,
             int nrSatellites, double DOP, double PDOP, double HDOP, double VDOP, int fix3D) {
-        this.m_latitude = lat;
-        this.m_longitude = lon;
-        this.m_altitude = alt;
-        this.m_speed = speed;
-        this.m_track = track;
-        this.m_fixQuality = fixQuality;
-        this.m_nrSatellites = nrSatellites;
-        this.m_DOP = DOP;
-        this.m_PDOP = PDOP;
-        this.m_HDOP = HDOP;
-        this.m_VDOP = VDOP;
-        this.m_3Dfix = fix3D;
+        this.latitude = lat;
+        this.longitude = lon;
+        this.altitude = alt;
+        this.speed = speed;
+        this.track = track;
+        this.fixQuality = fixQuality;
+        this.nrSatellites = nrSatellites;
+        this.mDOP = DOP;
+        this.mPDOP = PDOP;
+        this.mHDOP = HDOP;
+        this.mVDOP = VDOP;
+        this.m3Dfix = fix3D;
+        this.validFix = 0;
+        this.latitudeHemisphere = 0;
+        this.longitudeHemisphere = 0;
+    }
+
+    public NmeaPosition(double lat, double lon, double alt, double speed, double track, int fixQuality,
+            int nrSatellites, double DOP, double PDOP, double HDOP, double VDOP, int fix3D,
+            char validF, char hemiLat, char hemiLon) {
+        this.latitude = lat;
+        this.longitude = lon;
+        this.altitude = alt;
+        this.speed = speed;
+        this.track = track;
+        this.fixQuality = fixQuality;
+        this.nrSatellites = nrSatellites;
+        this.mDOP = DOP;
+        this.mPDOP = PDOP;
+        this.mHDOP = HDOP;
+        this.mVDOP = VDOP;
+        this.m3Dfix = fix3D;
+        this.validFix = validF;
+        this.latitudeHemisphere = hemiLat;
+        this.longitudeHemisphere = hemiLon;
     }
 
     /**
      * Return the latitude in degrees
      */
     public double getLatitude() {
-        return this.m_latitude;
+        return this.latitude;
     }
 
     public void setLatitude(double l_latitude) {
-        this.m_latitude = l_latitude;
+        this.latitude = l_latitude;
     }
 
     /**
      * Return the longitude in degrees
      */
     public double getLongitude() {
-        return this.m_longitude;
+        return this.longitude;
     }
 
     public void setLongitude(double l_longitude) {
-        this.m_longitude = l_longitude;
+        this.longitude = l_longitude;
     }
 
     /**
      * Return the altitude in meters
      */
     public double getAltitude() {
-        return this.m_altitude;
+        return this.altitude;
     }
 
     public void setAltitude(double l_altitude) {
-        this.m_altitude = l_altitude;
+        this.altitude = l_altitude;
     }
 
     /**
      * Return the speed in km/h
      */
     public double getSpeedKmh() {
-        return this.m_speed * 3.6;
+        return this.speed * 3.6;
     }
 
     /**
      * Return the speed in mph
      */
     public double getSpeedMph() {
-        return this.m_speed * 2.24;
+        return this.speed * 2.24;
     }
 
     /**
      * Return the speed in m/s
      */
     public double getSpeed() {
-        return this.m_speed;
+        return this.speed;
     }
 
     public void setSpeed(double l_speed) {
-        this.m_speed = l_speed;
+        this.speed = l_speed;
     }
 
     /**
      * Return the track in degrees
      */
     public double getTrack() {
-        return this.m_track;
+        return this.track;
     }
 
     public void setTrack(double l_track) {
-        this.m_track = l_track;
+        this.track = l_track;
     }
 
     public int getFixQuality() {
-        return this.m_fixQuality;
+        return this.fixQuality;
     }
 
     public void setFixQuality(int m_fixQuality) {
-        this.m_fixQuality = m_fixQuality;
+        this.fixQuality = m_fixQuality;
     }
 
     public int getNrSatellites() {
-        return this.m_nrSatellites;
+        return this.nrSatellites;
     }
 
     public void setNrSatellites(int m_nrSatellites) {
-        this.m_nrSatellites = m_nrSatellites;
+        this.nrSatellites = m_nrSatellites;
     }
 
     public double getDOP() {
-        return this.m_DOP;
+        return this.mDOP;
     }
 
     public void setDOP(double m_DOP) {
-        this.m_DOP = m_DOP;
+        this.mDOP = m_DOP;
     }
 
     public double getPDOP() {
-        return this.m_PDOP;
+        return this.mPDOP;
     }
 
     public void setPDOP(double m_PDOP) {
-        this.m_PDOP = m_PDOP;
+        this.mPDOP = m_PDOP;
     }
 
     public double getHDOP() {
-        return this.m_HDOP;
+        return this.mHDOP;
     }
 
     public void setHDOP(double m_HDOP) {
-        this.m_HDOP = m_HDOP;
+        this.mHDOP = m_HDOP;
     }
 
     public double getVDOP() {
-        return this.m_VDOP;
+        return this.mVDOP;
     }
 
     public void setVDOP(double m_VDOP) {
-        this.m_VDOP = m_VDOP;
+        this.mVDOP = m_VDOP;
     }
 
     public int get3Dfix() {
-        return this.m_3Dfix;
+        return this.m3Dfix;
     }
 
     public void set3Dfix(int m_3Dfix) {
-        this.m_3Dfix = m_3Dfix;
+        this.m3Dfix = m_3Dfix;
+    }
+
+    
+    public char getValidFix() {
+        return validFix;
+    }
+
+    
+    public void setValidFix(char validFix) {
+        this.validFix = validFix;
+    }
+
+    
+    public char getLatitudeHemisphere() {
+        return latitudeHemisphere;
+    }
+
+    
+    public void setLatitudeHemisphere(char latitudeHemisphere) {
+        this.latitudeHemisphere = latitudeHemisphere;
+    }
+
+    
+    public char getLongitudeHemisphere() {
+        return longitudeHemisphere;
+    }
+
+    
+    public void setLongitudeHemisphere(char longitudeHemisphere) {
+        this.longitudeHemisphere = longitudeHemisphere;
     }
 
 }

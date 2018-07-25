@@ -54,6 +54,7 @@ import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.util.service.ServiceUtil;
 import org.eclipse.kura.web.Console;
 import org.eclipse.kura.web.server.KuraRemoteServiceServlet;
+import org.eclipse.kura.web.server.util.AssetConfigValidator;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
@@ -73,12 +74,15 @@ public class FileServlet extends HttpServlet {
 
     private static Logger logger = LoggerFactory.getLogger(FileServlet.class);
 
+    private static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
+    private static final String EXPECTED_1_FILE_PATTERN = "expected 1 file item but found {}";
+
     private static final int BUFFER = 1024;
     private static int tooBig = 0x6400000; // Max size of unzipped data, 100MB
     private static int tooMany = 1024;     // Max number of files
 
-    private DiskFileItemFactory m_diskFileItemFactory;
-    private FileCleaningTracker m_fileCleaningTracker;
+    private DiskFileItemFactory diskFileItemFactory;
+    private FileCleaningTracker fileCleaningTracker;
 
     @Override
     public void destroy() {
@@ -86,8 +90,8 @@ public class FileServlet extends HttpServlet {
 
         logger.info("Servlet {} destroyed", getServletName());
 
-        if (this.m_fileCleaningTracker != null) {
-            logger.info("Number of temporary files tracked: " + this.m_fileCleaningTracker.getTrackCount());
+        if (this.fileCleaningTracker != null) {
+            logger.info("Number of temporary files tracked: {}", this.fileCleaningTracker.getTrackCount());
         }
     }
 
@@ -98,19 +102,19 @@ public class FileServlet extends HttpServlet {
         logger.info("Servlet {} initialized", getServletName());
 
         ServletContext ctx = getServletContext();
-        this.m_fileCleaningTracker = FileCleanerCleanup.getFileCleaningTracker(ctx);
+        this.fileCleaningTracker = FileCleanerCleanup.getFileCleaningTracker(ctx);
 
         getZipUploadSizeMax();
         getZipUploadCountMax();
 
         int sizeThreshold = getFileUploadInMemorySizeThreshold();
-        File repository = new File(System.getProperty("java.io.tmpdir"));
+        File repository = new File(System.getProperty(JAVA_IO_TMPDIR));
 
         logger.info("DiskFileItemFactory.DEFAULT_SIZE_THRESHOLD: {}", DiskFileItemFactory.DEFAULT_SIZE_THRESHOLD);
         logger.info("DiskFileItemFactory: using size threshold of: {}", sizeThreshold);
 
-        this.m_diskFileItemFactory = new DiskFileItemFactory(sizeThreshold, repository);
-        this.m_diskFileItemFactory.setFileCleaningTracker(this.m_fileCleaningTracker);
+        this.diskFileItemFactory = new DiskFileItemFactory(sizeThreshold, repository);
+        this.diskFileItemFactory.setFileCleaningTracker(this.fileCleaningTracker);
     }
 
     @Override
@@ -157,6 +161,8 @@ public class FileServlet extends HttpServlet {
             doPostConfigurationSnapshot(req, resp);
         } else if (reqPathInfo.equals("/command")) {
             doPostCommand(req, resp);
+        } else if (reqPathInfo.equals("/asset")) {
+            doPostAsset(req, resp);
         } else {
             logger.error("Unknown request path info: " + reqPathInfo);
             throw new ServletException("Unknown request path info: " + reqPathInfo);
@@ -256,7 +262,7 @@ public class FileServlet extends HttpServlet {
     }
 
     private void doPostCommand(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        UploadRequest upload = new UploadRequest(this.m_diskFileItemFactory);
+        UploadRequest upload = new UploadRequest(this.diskFileItemFactory);
 
         try {
             upload.parse(req);
@@ -278,7 +284,7 @@ public class FileServlet extends HttpServlet {
 
         List<FileItem> fileItems = null;
         InputStream is = null;
-        File localFolder = new File(System.getProperty("java.io.tmpdir"));
+        File localFolder = new File(System.getProperty(JAVA_IO_TMPDIR));
         OutputStream os = null;
 
         try {
@@ -375,10 +381,87 @@ public class FileServlet extends HttpServlet {
         }
     }
 
+    private void doPostAsset(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        UploadRequest upload = new UploadRequest(this.diskFileItemFactory);
+        List<String> errors = new ArrayList<>();
+
+        try {
+            upload.parse(req);
+        } catch (FileUploadException e) {
+            errors.add("Error parsing the file upload request");
+            resp.getWriter().write("Error parsing the file upload request.");
+            return;
+        }
+
+        Map<String, String> formFields = upload.getFormFields();
+        try {
+            // BEGIN XSRF - Servlet dependent code
+            GwtXSRFToken token = new GwtXSRFToken(formFields.get("xsrfToken"));
+            KuraRemoteServiceServlet.checkXSRFToken(req, token);
+            // END XSRF security check
+
+            List<FileItem> fileItems = upload.getFileItems();
+            if (fileItems.size() != 1) {
+                logger.error(EXPECTED_1_FILE_PATTERN, fileItems.size());
+                errors.add("Security error: please retry this operation.");
+                throw new ServletException();
+            }
+
+            FileItem fileItem = fileItems.get(0);
+            logger.info(fileItem.getName());
+            byte[] data = fileItem.get();
+            String csvString = new String(data, "UTF-8");
+            String assetPid = formFields.get("assetPid");
+            String driverPid = formFields.get("driverPid");
+            Boolean doReplace = formFields.get("doReplace").trim().equalsIgnoreCase("true");
+
+            Map<String, Object> newProps = AssetConfigValidator.get().validateCsv(csvString, driverPid, errors);
+
+            ServiceLocator locator = ServiceLocator.getInstance();
+
+            ConfigurationService cs = locator.getService(ConfigurationService.class);
+
+            if (doReplace) {
+                String fp = cs.getComponentConfiguration(assetPid).getConfigurationProperties().get("service.factoryPid").toString();
+                cs.deleteFactoryConfiguration(assetPid, false);
+                newProps.put("driver.pid", driverPid);
+                cs.createFactoryConfiguration(fp, assetPid, newProps, true);
+            }else{
+                cs.updateConfiguration(assetPid, newProps);
+            }
+
+            // Add an additional delay after the configuration update
+            // to give the time to the device to apply the received configuration
+            SystemService ss = locator.getService(SystemService.class);
+            long delay = Long.parseLong(ss.getProperties().getProperty("console.updateConfigDelay", "5000"));
+            if (delay > 0) {
+                Thread.sleep(delay);
+            }
+        } catch (KuraException | GwtKuraException | InterruptedException e) {
+            logger.error("Error updating device configuration", e);
+        } catch (ServletException ex) {
+            if (!errors.isEmpty()) {
+                StringBuilder sb = new StringBuilder();
+                errors.forEach(line -> sb.append(line).append("\n"));
+                try {
+                    resp.getWriter().write(sb.toString());
+                } catch (Exception e) {
+                    logger.error("Error while writing output", e);
+                }
+            } else {
+                logger.error("Servlet exception.", ex);
+            }
+        } catch (Exception ex2) {
+            logger.warn("Security error: please retry this operation correctly.", ex2);
+            resp.getWriter().write("Security error: please retry this operation.");
+        }
+
+    }
+
     private void doPostConfigurationSnapshot(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        UploadRequest upload = new UploadRequest(this.m_diskFileItemFactory);
+        UploadRequest upload = new UploadRequest(this.diskFileItemFactory);
 
         try {
             upload.parse(req);
@@ -400,7 +483,7 @@ public class FileServlet extends HttpServlet {
 
         List<FileItem> fileItems = upload.getFileItems();
         if (fileItems.size() != 1) {
-            logger.error("expected 1 file item but found {}", fileItems.size());
+            logger.error(EXPECTED_1_FILE_PATTERN, fileItems.size());
             throw new ServletException("Wrong number of file items");
         }
 
@@ -459,7 +542,7 @@ public class FileServlet extends HttpServlet {
             throw new ServletException("Not a file upload request");
         }
 
-        UploadRequest upload = new UploadRequest(this.m_diskFileItemFactory);
+        UploadRequest upload = new UploadRequest(this.diskFileItemFactory);
 
         try {
             upload.parse(req);
@@ -489,7 +572,7 @@ public class FileServlet extends HttpServlet {
             fileItems = upload.getFileItems();
 
             if (fileItems.size() != 1) {
-                logger.error("expected 1 file item but found {}", fileItems.size());
+                logger.error(EXPECTED_1_FILE_PATTERN, fileItems.size());
                 throw new ServletException("Wrong number of file items");
             }
 
@@ -497,7 +580,7 @@ public class FileServlet extends HttpServlet {
             String filename = item.getName();
             is = item.getInputStream();
 
-            String filePath = System.getProperty("java.io.tmpdir") + File.separator + filename;
+            String filePath = System.getProperty(JAVA_IO_TMPDIR) + File.separator + filename;
 
             localFile = new File(filePath);
             if (localFile.exists()) {
@@ -664,7 +747,7 @@ public class FileServlet extends HttpServlet {
         return sizeMax;
     }
 
-    static private int getFileUploadInMemorySizeThreshold() {
+    private static int getFileUploadInMemorySizeThreshold() {
         ServiceLocator locator = ServiceLocator.getInstance();
 
         int sizeThreshold = DiskFileItemFactory.DEFAULT_SIZE_THRESHOLD;

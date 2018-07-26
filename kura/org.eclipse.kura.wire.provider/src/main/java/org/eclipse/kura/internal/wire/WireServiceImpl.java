@@ -154,7 +154,7 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
     protected void deactivate(final ComponentContext componentContext) {
         logger.info("Deactivating Wire Service Component...");
         this.bundleContext = null;
-        if(this.wireComponentServiceTracker != null)
+        if (this.wireComponentServiceTracker != null)
             this.wireComponentServiceTracker.close();
 
         deleteAllWires();
@@ -267,14 +267,18 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
     private static MultiportWireConfiguration toWireConfiguration(Wire wire) {
         final Dictionary<?, ?> wireProps = wire.getProperties();
 
-        final String emitterKuraServicePid = (String) wireProps
-                .get(Constants.EMITTER_KURA_SERVICE_PID_PROP_NAME.value());
-        final String receiverKuraServicePid = (String) wireProps
-                .get(Constants.RECEIVER_KURA_SERVICE_PID_PROP_NAME.value());
-        final int emitterPort = (Integer) wireProps.get(Constants.WIRE_EMITTER_PORT_PROP_NAME.value());
-        final int receiverPort = (Integer) wireProps.get(Constants.WIRE_RECEIVER_PORT_PROP_NAME.value());
+        final Object emitterKuraServicePid = wireProps.get(Constants.EMITTER_KURA_SERVICE_PID_PROP_NAME.value());
+        final Object receiverKuraServicePid = wireProps.get(Constants.RECEIVER_KURA_SERVICE_PID_PROP_NAME.value());
+        final Object emitterPort = wireProps.get(Constants.WIRE_EMITTER_PORT_PROP_NAME.value());
+        final Object receiverPort = wireProps.get(Constants.WIRE_RECEIVER_PORT_PROP_NAME.value());
 
-        return new MultiportWireConfiguration(emitterKuraServicePid, receiverKuraServicePid, emitterPort, receiverPort);
+        if (!(emitterKuraServicePid instanceof String) || !(receiverKuraServicePid instanceof String)
+                || !(emitterPort instanceof Integer) || !(receiverPort instanceof Integer)) {
+            return null;
+        }
+
+        return new MultiportWireConfiguration((String) emitterKuraServicePid, (String) receiverKuraServicePid,
+                (Integer) emitterPort, (Integer) receiverPort);
     }
 
     private void deleteNoLongerExistingWires(final Set<MultiportWireConfiguration> newWires,
@@ -286,6 +290,9 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
             }
             for (final Wire osgiWire : wiresList) {
                 final MultiportWireConfiguration wire = toWireConfiguration(osgiWire);
+                if (wire == null) {
+                    continue;
+                }
                 if (!newWires.contains(wire) || componentsToDelete.contains(wire.getEmitterPid())
                         || componentsToDelete.contains(wire.getReceiverPid())) {
                     logger.info("Removing wire between {} and {} ...", wire.getEmitterPid(), wire.getReceiverPid());
@@ -309,7 +316,9 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
             }
 
             for (Wire w : wires) {
-                this.wireAdmin.deleteWire(w);
+                if (toWireConfiguration(w) != null) {
+                    this.wireAdmin.deleteWire(w);
+                }
             }
         } catch (InvalidSyntaxException e) {
             // no need since no filter is passed to getWires()

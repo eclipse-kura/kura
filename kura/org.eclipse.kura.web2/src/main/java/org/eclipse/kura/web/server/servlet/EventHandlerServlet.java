@@ -13,7 +13,6 @@
  *******************************************************************************/
 package org.eclipse.kura.web.server.servlet;
 
-import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 import static org.eclipse.kura.util.base.StringUtil.isNullOrEmpty;
 
@@ -144,7 +143,7 @@ public final class EventHandlerServlet extends HttpServlet {
             this.requests.put(requestId, session);
         }
 
-        final BlockingQueue<Wire> eventQueue = new LinkedBlockingQueue<>(MAX_SIZE_OF_QUEUE);
+        final BlockingQueue<WireEvent> eventQueue = new LinkedBlockingQueue<>(MAX_SIZE_OF_QUEUE);
         final ServletOutputStream outputStream = response.getOutputStream();
         final PrintStream printStream = new PrintStream(outputStream);
 
@@ -154,14 +153,12 @@ public final class EventHandlerServlet extends HttpServlet {
                 boolean requestExistsAndValid = checkRequestValidity(requestId);
                 // if session exists and valid, remove head element from the queue
                 while (requestExistsAndValid && !printStream.checkError()) {
-                    final Wire wire = eventQueue.poll(2, TimeUnit.SECONDS);
-                    if (!isNull(wire)) {
-                        final Dictionary properties = wire.getProperties();
-                        final Object emitterKuraServicePid = properties
-                                .get(Constants.EMITTER_KURA_SERVICE_PID_PROP_NAME.value());
-                        final Object emitterPort = properties.get(Constants.WIRE_EMITTER_PORT_PROP_NAME.value());
-                        printStream.printf("data: %s %s%n%n", emitterKuraServicePid.toString(), emitterPort.toString());
+                    final WireEvent event = eventQueue.poll(2, TimeUnit.SECONDS);
+
+                    if (event != null) {
+                        printStream.printf("data: %s %s%n%n", event.emitterKuraServicePid, event.emitterPort);
                     }
+
                     requestExistsAndValid = checkRequestValidity(requestId);
                 }
             } catch (final InterruptedException ex) {
@@ -223,17 +220,26 @@ public final class EventHandlerServlet extends HttpServlet {
      * @throws NullPointerException
      *             if any of the provided arguments is null
      */
-    private ServiceRegistration<?> registerEventHandler(final BlockingQueue<Wire> eventQueue, final String requestId,
-            final CompletableFuture<?> future) {
+    private ServiceRegistration<?> registerEventHandler(final BlockingQueue<WireEvent> eventQueue,
+            final String requestId, final CompletableFuture<?> future) {
         requireNonNull(eventQueue, "Provided Queue must not be null");
         requireNonNull(requestId, "Provided Session ID must not be null");
         requireNonNull(future, "Future reference must not be null");
 
         return this.bundleContext.registerService(WireAdminListener.class, event -> {
+
+            final WireEvent wireEvent = WireEvent.from(event.getWire());
+
+            if (wireEvent == null) {
+                // probably not a Kura Wires event
+                return;
+            }
+
             synchronized (EventHandlerServlet.class) {
 
                 final boolean validRequest = checkRequestValidity(requestId);
-                final boolean consumerAlive = eventQueue.offer(event.getWire());
+
+                final boolean consumerAlive = eventQueue.offer(wireEvent);
                 if (validRequest && consumerAlive) {
                     return;
                 } else {
@@ -250,5 +256,30 @@ public final class EventHandlerServlet extends HttpServlet {
     private void cleanRequest(final String requestId) {
         logger.debug("Cleaning request: {}", requestId);
         this.requests.remove(requestId);
+    }
+
+    private static class WireEvent {
+
+        final String emitterKuraServicePid;
+        final String emitterPort;
+
+        static WireEvent from(final Wire wire) {
+            if (wire == null) {
+                return null;
+            }
+
+            final Dictionary properties = wire.getProperties();
+            final Object pid = properties.get(Constants.EMITTER_KURA_SERVICE_PID_PROP_NAME.value());
+            final Object port = properties.get(Constants.WIRE_EMITTER_PORT_PROP_NAME.value());
+            if (pid != null && port != null) {
+                return new WireEvent(pid.toString(), port.toString());
+            }
+            return null;
+        }
+
+        WireEvent(final String emitterKuraServicePid, final String emitterPort) {
+            this.emitterKuraServicePid = emitterKuraServicePid;
+            this.emitterPort = emitterPort;
+        }
     }
 }

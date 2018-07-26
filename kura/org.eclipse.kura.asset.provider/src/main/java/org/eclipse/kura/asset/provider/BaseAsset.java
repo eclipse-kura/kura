@@ -21,6 +21,7 @@ import static org.eclipse.kura.channel.ChannelType.READ_WRITE;
 import static org.eclipse.kura.channel.ChannelType.WRITE;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -133,7 +134,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
 
     private ComponentContext context;
 
-    private volatile Driver driver;
+    protected volatile Driver driver;
 
     /** The configurable properties of this service. */
     private Map<String, Object> properties;
@@ -141,7 +142,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
 
     private ServiceTracker<Driver, Driver> driverServiceTracker;
 
-    private PreparedRead preparedRead;
+    protected PreparedRead preparedRead;
 
     private boolean hasReadChannels;
 
@@ -418,7 +419,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
             }
         }
 
-        return readRecords;
+        return Collections.unmodifiableList(readRecords);
     }
 
     /** {@inheritDoc} */
@@ -584,16 +585,26 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
             } catch (Exception e) {
                 logger.warn("Failed to close prepared read", e);
             }
+            onPreparedReadReleased(preparedRead);
             this.preparedRead = null;
         }
 
         if (!readRecords.isEmpty() && this.driver != null) {
             try {
                 this.preparedRead = this.driver.prepareRead(readRecords);
+                onPreparedReadCreated(preparedRead);
             } catch (Exception e) {
                 logger.warn("Failed to get prepared read", e);
             }
         }
+    }
+
+    protected void onPreparedReadCreated(PreparedRead preparedRead) {
+        // intended to be overridden by sublcasses
+    }
+
+    protected void onPreparedReadReleased(PreparedRead preparedRead) {
+        // intended to be overridden by sublcasses
     }
 
     /** {@inheritDoc} */

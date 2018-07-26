@@ -17,7 +17,6 @@ package org.eclipse.kura.wire;
 import static java.util.Objects.requireNonNull;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.kura.annotation.Immutable;
@@ -50,7 +49,7 @@ public class WireRecord {
     public WireRecord(final Map<String, TypedValue<?>> properties) {
         requireNonNull(properties, "Properties cannot be null");
 
-        this.properties = Collections.unmodifiableMap(new HashMap<>(properties));
+        this.properties = Collections.unmodifiableMap(properties);
     }
 
     /**

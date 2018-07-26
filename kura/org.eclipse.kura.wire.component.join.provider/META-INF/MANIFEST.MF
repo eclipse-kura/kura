@@ -8,7 +8,7 @@ Bundle-License: Eclipse Public License v1.0
 Bundle-Category: Kura Wires
 Import-Package: org.eclipse.kura.configuration;version="[1.1,2.0)",
  org.eclipse.kura.type;version="[1.0,2.0)",
- org.eclipse.kura.wire;version="[1.0,2.0)",
+ org.eclipse.kura.wire;version="[2.0,3.0)",
  org.eclipse.kura.wire.graph;version="[1.0,2.0)",
  org.eclipse.kura.wire.multiport;version="[1.0,2.0)",
  org.osgi.framework;version="1.8.0",

@@ -19,7 +19,7 @@ import org.eclipse.kura.type.TypedValues;
 enum TimestampMode {
 
     NO_TIMESTAMPS(None::new),
-    PER_CHANNEL(PerChannel::new),
+    PER_CHANNEL(None::new),
     SINGLE_ASSET_GENERATED(AssetGenerated::new),
     SINGLE_DRIVER_GENERATED_MAX(DriverGeneratedMax::new),
     SINGLE_DRIVER_GENERATED_MIN(DriverGeneratedMin::new);
@@ -42,27 +42,6 @@ enum TimestampMode {
         @Override
         public void processRecord(ChannelRecord record) {
             // nothing to do
-        }
-
-        @Override
-        public void fillSingleTimestamp() {
-            // nothing to do
-        }
-
-    }
-
-    private static final class PerChannel implements TimestampFiller {
-
-        private final Map<String, TypedValue<?>> wireRecordProperties;
-
-        public PerChannel(final Map<String, TypedValue<?>> wireRecordProperties) {
-            this.wireRecordProperties = wireRecordProperties;
-        }
-
-        @Override
-        public void processRecord(ChannelRecord record) {
-            wireRecordProperties.put(record.getChannelName() + WireAssetConstants.PROP_SUFFIX_TIMESTAMP.value(),
-                    TypedValues.newLongValue(record.getTimestamp()));
         }
 
         @Override

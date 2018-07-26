@@ -257,7 +257,6 @@ public final class CloudPublisher implements WireReceiver, CloudClientListener, 
     /** {@inheritDoc} */
     @Override
     public void producersConnected(final Wire[] wires) {
-        requireNonNull(wires, "Wires cannot be null");
         this.wireSupport.producersConnected(wires);
     }
 

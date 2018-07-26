@@ -19,8 +19,6 @@ import static org.eclipse.kura.wire.graph.Constants.EMITTER_PORT_COUNT_PROP_NAME
 import static org.eclipse.kura.wire.graph.Constants.RECEIVER_PORT_COUNT_PROP_NAME;
 import static org.osgi.framework.Constants.SERVICE_PID;
 
-import java.util.Arrays;
-
 import org.eclipse.kura.util.service.ServiceUtil;
 import org.eclipse.kura.wire.WireComponent;
 import org.eclipse.kura.wire.WireEmitter;
@@ -136,18 +134,6 @@ public final class WireHelperServiceImpl implements WireHelperService {
             return (Integer) portCount;
         }
         return defaultValue;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public WireSupport newWireSupport(final WireComponent wireComponent) {
-        requireNonNull(wireComponent, "Wire Component cannot be null");
-        final BundleContext context = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
-        return Arrays.stream(ServiceUtil.getServiceReferences(context, WireComponent.class, null)).filter(ref -> {
-            final boolean matches = context.getService(ref) == wireComponent;
-            context.ungetService(ref);
-            return matches;
-        }).map(ref -> newWireSupport(wireComponent, ref)).findAny().orElse(null);
     }
 
     /** {@inheritDoc} */

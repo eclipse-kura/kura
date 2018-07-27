@@ -10,26 +10,28 @@ package org.eclipse.kura.internal.wire.asset;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 
-import org.eclipse.kura.asset.AssetConfiguration;
+import org.eclipse.kura.asset.provider.AssetConstants;
 import org.eclipse.kura.channel.Channel;
 import org.eclipse.kura.channel.ChannelFlag;
 import org.eclipse.kura.channel.ChannelRecord;
 import org.eclipse.kura.channel.ChannelStatus;
 import org.eclipse.kura.channel.ChannelType;
 import org.eclipse.kura.configuration.ConfigurationService;
-import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.driver.Driver;
 import org.eclipse.kura.driver.Driver.ConnectionException;
 import org.eclipse.kura.type.BooleanValue;
@@ -39,28 +41,57 @@ import org.eclipse.kura.type.LongValue;
 import org.eclipse.kura.type.StringValue;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.wire.WireEnvelope;
+import org.eclipse.kura.wire.WireHelperService;
 import org.eclipse.kura.wire.WireRecord;
 import org.eclipse.kura.wire.WireSupport;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
+import org.osgi.framework.BundleContext;
+import org.osgi.service.component.ComponentContext;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class WireAssetTest {
 
+    private static void sync(final WireAsset asset) {
+        final CountDownLatch latch = new CountDownLatch(1);
+
+        asset.getBaseAssetExecutor().runConfig(latch::countDown);
+
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            fail("Interrupted during sync");
+        }
+    }
+
+    private static void putChannel(final Channel channel, final Map<String, Object> properties) {
+        properties.put(
+                channel.getName() + AssetConstants.CHANNEL_PROPERTY_SEPARATOR.value() + AssetConstants.NAME.value(),
+                channel.getName());
+        properties.put(
+                channel.getName() + AssetConstants.CHANNEL_PROPERTY_SEPARATOR.value() + AssetConstants.TYPE.value(),
+                channel.getType().toString());
+        properties.put(channel.getName() + AssetConstants.CHANNEL_PROPERTY_SEPARATOR.value()
+                + AssetConstants.VALUE_TYPE.value(), channel.getValueType().toString());
+        properties.put(
+                channel.getName() + AssetConstants.CHANNEL_PROPERTY_SEPARATOR.value() + AssetConstants.ENABLED.value(),
+                Boolean.toString(channel.isEnabled()));
+    }
+
     @Test
     public void testOnWireReceive() throws NoSuchFieldException, ConnectionException {
-        Map<String, Object> readChannel1Config = new HashMap<>();
-        Channel readChannel1 = new Channel("readChannel1", ChannelType.READ, DataType.BOOLEAN, readChannel1Config);
+        final Map<String, Object> wireAssetProperties = new HashMap<>();
 
-        Map<String, Object> writeChannel2Config = new HashMap<>();
-        Channel writeChannel2 = new Channel("writeChannel2", ChannelType.WRITE, DataType.BOOLEAN, writeChannel2Config);
+        wireAssetProperties.put(AssetConstants.ASSET_DESC_PROP.value(), "description");
+        wireAssetProperties.put(AssetConstants.ASSET_DRIVER_PROP.value(), "driverPid");
+        wireAssetProperties.put(ConfigurationService.KURA_SERVICE_PID, "componentName");
 
-        Map<String, Channel> channels = new HashMap<>();
-        channels.put(readChannel1.getName(), readChannel1);
-        channels.put(writeChannel2.getName(), writeChannel2);
+        Channel readChannel1 = new Channel("readChannel1", ChannelType.READ, DataType.BOOLEAN, new HashMap<>());
+        Channel writeChannel2 = new Channel("writeChannel2", ChannelType.WRITE, DataType.BOOLEAN, new HashMap<>());
 
-        AssetConfiguration assetConfiguration = new AssetConfiguration("description", "driverPid", channels);
+        putChannel(readChannel1, wireAssetProperties);
+        putChannel(writeChannel2, wireAssetProperties);
 
         List<WireRecord> writeWireRecords = new ArrayList<>();
         Map<String, TypedValue<?>> writeWireRecordProperties = new HashMap<>();
@@ -71,19 +102,21 @@ public class WireAssetTest {
 
         WireEnvelope wireEnvelope = new WireEnvelope("pid", writeWireRecords);
 
-        Map<String, Object> assetProperties = new HashMap<>();
-        assetProperties.put(ConfigurationService.KURA_SERVICE_PID, "componentName");
-
-        final WireAssetOptions options = new WireAssetOptions(assetProperties);
-
         WireAsset wireAsset = new WireAsset();
-        TestUtil.setFieldValue(wireAsset, "kuraServicePid", "componentName");
-        TestUtil.setFieldValue(wireAsset, "properties", assetProperties);
-        TestUtil.setFieldValue(wireAsset, "options", options);
-        TestUtil.setFieldValue(wireAsset, "assetConfiguration", assetConfiguration);
+
+        WireSupport mockWireSupport = mock(WireSupport.class);
+        WireHelperService wireHelperService = mock(WireHelperService.class);
+
+        when(wireHelperService.newWireSupport(any(), any())).thenReturn(mockWireSupport);
+
+        wireAsset.bindWireHelperService(wireHelperService);
+
+        final ComponentContext mockComponentContext = mock(ComponentContext.class);
+        when(mockComponentContext.getBundleContext()).thenReturn(mock(BundleContext.class));
+
+        wireAsset.activate(mockComponentContext, wireAssetProperties);
 
         Driver mockDriver = mock(Driver.class);
-        wireAsset.setDriver(mockDriver);
 
         doAnswer(invocation -> {
             Object[] arguments = invocation.getArguments();
@@ -121,8 +154,7 @@ public class WireAssetTest {
             return null;
         }).when(mockDriver).write(any());
 
-        WireSupport mockWireSupport = mock(WireSupport.class);
-        TestUtil.setFieldValue(wireAsset, "wireSupport", mockWireSupport);
+        when(mockDriver.getChannelDescriptor()).thenReturn(Collections::emptyList);
 
         doAnswer(invocation -> {
             Object[] arguments = invocation.getArguments();
@@ -141,6 +173,9 @@ public class WireAssetTest {
             return null;
         }).when(mockWireSupport).emit(any());
 
+        wireAsset.setDriver(mockDriver);
+        sync(wireAsset);
+
         wireAsset.onWireReceive(wireEnvelope);
 
         verify(mockWireSupport).emit(any());
@@ -150,26 +185,36 @@ public class WireAssetTest {
 
     @Test
     public void testTimestampModes() throws NoSuchFieldException, ConnectionException {
+
+        final Map<String, Object> wireAssetProperties = new HashMap<>();
+
+        wireAssetProperties.put(AssetConstants.ASSET_DESC_PROP.value(), "description");
+        wireAssetProperties.put(AssetConstants.ASSET_DRIVER_PROP.value(), "driverPid");
+        wireAssetProperties.put(ConfigurationService.KURA_SERVICE_PID, "componentName");
+
         Channel readChannel1 = new Channel("0", ChannelType.READ, DataType.BOOLEAN, Collections.emptyMap());
         Channel readChannel2 = new Channel("1", ChannelType.READ, DataType.BOOLEAN, Collections.emptyMap());
         Channel readChannel3 = new Channel("2", ChannelType.READ, DataType.BOOLEAN, Collections.emptyMap());
 
-        Map<String, Channel> channels = new HashMap<>();
-        channels.put(readChannel1.getName(), readChannel1);
-        channels.put(readChannel2.getName(), readChannel2);
-        channels.put(readChannel3.getName(), readChannel3);
+        putChannel(readChannel1, wireAssetProperties);
+        putChannel(readChannel2, wireAssetProperties);
+        putChannel(readChannel3, wireAssetProperties);
 
-        AssetConfiguration assetConfiguration = new AssetConfiguration("description", "driverPid", channels);
+        WireAsset wireAsset = new WireAsset();
+
+        WireSupport mockWireSupport = mock(WireSupport.class);
+        WireHelperService wireHelperService = mock(WireHelperService.class);
+
+        when(wireHelperService.newWireSupport(any(), any())).thenReturn(mockWireSupport);
+
+        wireAsset.bindWireHelperService(wireHelperService);
+
+        final ComponentContext mockComponentContext = mock(ComponentContext.class);
+        when(mockComponentContext.getBundleContext()).thenReturn(mock(BundleContext.class));
 
         WireEnvelope wireEnvelope = new WireEnvelope("pid", Collections.emptyList());
 
-        Map<String, Object> assetProperties = new HashMap<>();
-        assetProperties.put(ConfigurationService.KURA_SERVICE_PID, "componentName");
-
-        WireAsset wireAsset = new WireAsset();
-        TestUtil.setFieldValue(wireAsset, "kuraServicePid", "componentName");
-        TestUtil.setFieldValue(wireAsset, "properties", assetProperties);
-        TestUtil.setFieldValue(wireAsset, "assetConfiguration", assetConfiguration);
+        wireAsset.activate(mockComponentContext, wireAssetProperties);
 
         Driver mockDriver = mock(Driver.class);
         wireAsset.setDriver(mockDriver);
@@ -196,12 +241,10 @@ public class WireAssetTest {
         }).when(mockDriver).read(any());
 
         {
-            assetProperties.put(WireAssetOptions.TIMESTAMP_MODE_PROP_NAME, TimestampMode.NO_TIMESTAMPS.name());
-            final WireAssetOptions options = new WireAssetOptions(assetProperties);
+            wireAssetProperties.put(WireAssetOptions.TIMESTAMP_MODE_PROP_NAME, TimestampMode.NO_TIMESTAMPS.name());
 
-            WireSupport mockWireSupport = mock(WireSupport.class);
-            TestUtil.setFieldValue(wireAsset, "wireSupport", mockWireSupport);
-            TestUtil.setFieldValue(wireAsset, "options", options);
+            wireAsset.updated(wireAssetProperties);
+            sync(wireAsset);
 
             final long timestamp = System.currentTimeMillis();
             doAnswer(invocation -> {
@@ -228,12 +271,10 @@ public class WireAssetTest {
         }
 
         {
-            assetProperties.put(WireAssetOptions.TIMESTAMP_MODE_PROP_NAME, TimestampMode.PER_CHANNEL.name());
-            final WireAssetOptions options = new WireAssetOptions(assetProperties);
+            wireAssetProperties.put(WireAssetOptions.TIMESTAMP_MODE_PROP_NAME, TimestampMode.PER_CHANNEL.name());
 
-            WireSupport mockWireSupport = mock(WireSupport.class);
-            TestUtil.setFieldValue(wireAsset, "wireSupport", mockWireSupport);
-            TestUtil.setFieldValue(wireAsset, "options", options);
+            wireAsset.updated(wireAssetProperties);
+            sync(wireAsset);
 
             final long timestamp = System.currentTimeMillis();
             doAnswer(invocation -> {
@@ -259,16 +300,15 @@ public class WireAssetTest {
 
             wireAsset.onWireReceive(wireEnvelope);
 
-            verify(mockWireSupport).emit(any());
+            verify(mockWireSupport, times(2)).emit(any());
         }
 
         {
-            assetProperties.put(WireAssetOptions.TIMESTAMP_MODE_PROP_NAME, TimestampMode.SINGLE_ASSET_GENERATED.name());
-            final WireAssetOptions options = new WireAssetOptions(assetProperties);
+            wireAssetProperties.put(WireAssetOptions.TIMESTAMP_MODE_PROP_NAME,
+                    TimestampMode.SINGLE_ASSET_GENERATED.name());
 
-            WireSupport mockWireSupport = mock(WireSupport.class);
-            TestUtil.setFieldValue(wireAsset, "wireSupport", mockWireSupport);
-            TestUtil.setFieldValue(wireAsset, "options", options);
+            wireAsset.updated(wireAssetProperties);
+            sync(wireAsset);
 
             final long timestamp = System.currentTimeMillis();
             doAnswer(invocation -> {
@@ -293,17 +333,15 @@ public class WireAssetTest {
 
             wireAsset.onWireReceive(wireEnvelope);
 
-            verify(mockWireSupport).emit(any());
+            verify(mockWireSupport, times(3)).emit(any());
         }
 
         {
-            assetProperties.put(WireAssetOptions.TIMESTAMP_MODE_PROP_NAME,
+            wireAssetProperties.put(WireAssetOptions.TIMESTAMP_MODE_PROP_NAME,
                     TimestampMode.SINGLE_DRIVER_GENERATED_MAX.name());
-            final WireAssetOptions options = new WireAssetOptions(assetProperties);
 
-            WireSupport mockWireSupport = mock(WireSupport.class);
-            TestUtil.setFieldValue(wireAsset, "wireSupport", mockWireSupport);
-            TestUtil.setFieldValue(wireAsset, "options", options);
+            wireAsset.updated(wireAssetProperties);
+            sync(wireAsset);
 
             doAnswer(invocation -> {
                 Object[] arguments = invocation.getArguments();
@@ -326,17 +364,15 @@ public class WireAssetTest {
 
             wireAsset.onWireReceive(wireEnvelope);
 
-            verify(mockWireSupport).emit(any());
+            verify(mockWireSupport, times(4)).emit(any());
         }
 
         {
-            assetProperties.put(WireAssetOptions.TIMESTAMP_MODE_PROP_NAME,
+            wireAssetProperties.put(WireAssetOptions.TIMESTAMP_MODE_PROP_NAME,
                     TimestampMode.SINGLE_DRIVER_GENERATED_MIN.name());
-            final WireAssetOptions options = new WireAssetOptions(assetProperties);
 
-            WireSupport mockWireSupport = mock(WireSupport.class);
-            TestUtil.setFieldValue(wireAsset, "wireSupport", mockWireSupport);
-            TestUtil.setFieldValue(wireAsset, "options", options);
+            wireAsset.updated(wireAssetProperties);
+            sync(wireAsset);
 
             doAnswer(invocation -> {
                 Object[] arguments = invocation.getArguments();
@@ -359,7 +395,7 @@ public class WireAssetTest {
 
             wireAsset.onWireReceive(wireEnvelope);
 
-            verify(mockWireSupport).emit(any());
+            verify(mockWireSupport, times(5)).emit(any());
         }
 
         verify(mockDriver, times(5)).read(any());

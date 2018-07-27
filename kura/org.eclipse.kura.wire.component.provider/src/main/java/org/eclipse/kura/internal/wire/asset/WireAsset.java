@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -93,7 +94,7 @@ import org.osgi.service.wireadmin.Wire;
  * @see WireRecord
  * @see Asset
  */
-public final class WireAsset extends BaseAsset implements WireEmitter, WireReceiver, ChannelListener {
+public final class WireAsset extends BaseAsset implements WireEmitter, WireReceiver {
 
     private static final Logger logger = LogManager.getLogger();
 
@@ -339,17 +340,30 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
     }
 
     @Override
-    protected void tryAttachChannelListeners() {
-        getAssetConfiguration().getAssetChannels().entrySet().stream()
-                .filter(e -> isListeningChannel(e.getValue().getConfiguration()))
-                .map(e -> new ChannelListenerRegistration(e.getKey(), this)).forEach(this.channelListeners::add);
-        super.tryAttachChannelListeners();
+    protected boolean isChannelListenerValid(final ChannelListenerRegistration reg, final Channel channel) {
+
+        if (!super.isChannelListenerValid(reg, channel)) {
+            return false;
+        }
+
+        final ChannelListener listener = reg.getChannelListener();
+
+        if (!(listener instanceof EmitterChannelListener)) {
+            return true;
+        }
+
+        return ((EmitterChannelListener) listener).outer() != this;
     }
 
     @Override
-    protected boolean isChannelListenerValid(Channel channel, ChannelListenerRegistration reg) {
-        return super.isChannelListenerValid(channel, reg)
-                && (reg.getChannelListener() != this || isListeningChannel(channel.getConfiguration()));
+    protected void updateChannelListenerRegistrations(final Set<ChannelListenerRegistration> listeners,
+            final AssetConfiguration config) {
+
+        super.updateChannelListenerRegistrations(listeners, config);
+
+        config.getAssetChannels().entrySet().stream().filter(e -> isListeningChannel(e.getValue().getConfiguration()))
+                .map(e -> new ChannelListenerRegistration(e.getKey(), new EmitterChannelListener()))
+                .forEach(listeners::add);
     }
 
     @Override
@@ -381,12 +395,19 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
         this.wireSupport.updated(wire, value);
     }
 
-    @Override
-    public void onChannelEvent(ChannelEvent event) {
-        if (this.options.emitAllChannels()) {
-            emitAllReadChannels();
-        } else {
-            emitChannelRecords(Collections.singletonList(event.getChannelRecord()));
+    private class EmitterChannelListener implements ChannelListener {
+
+        @Override
+        public void onChannelEvent(ChannelEvent event) {
+            if (options.emitAllChannels()) {
+                emitAllReadChannels();
+            } else {
+                emitChannelRecords(Collections.singletonList(event.getChannelRecord()));
+            }
+        }
+
+        public WireAsset outer() {
+            return WireAsset.this;
         }
     }
 

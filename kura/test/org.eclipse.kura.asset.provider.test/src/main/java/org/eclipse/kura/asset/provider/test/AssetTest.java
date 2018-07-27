@@ -32,6 +32,7 @@ import org.eclipse.kura.asset.Asset;
 import org.eclipse.kura.asset.AssetConfiguration;
 import org.eclipse.kura.asset.provider.AssetConstants;
 import org.eclipse.kura.asset.provider.BaseAsset;
+import org.eclipse.kura.asset.provider.BaseAssetExecutor;
 import org.eclipse.kura.channel.Channel;
 import org.eclipse.kura.channel.ChannelFlag;
 import org.eclipse.kura.channel.ChannelRecord;
@@ -221,6 +222,7 @@ public final class AssetTest {
         };
 
         asset.registerChannelListener("1.CH", listener);
+        sync(asset);
 
         assertTrue(invoked.get());
     }
@@ -248,12 +250,15 @@ public final class AssetTest {
         };
 
         asset.registerChannelListener("1.CH", listener);
+        sync(asset);
         assertEquals(Arrays.asList(true), attachSequence);
 
         ((BaseAsset) asset).unsetDriver();
+        sync(asset);
         assertEquals(Arrays.asList(true, false), attachSequence);
 
         ((BaseAsset) asset).setDriver(driver);
+        sync(asset);
         assertEquals(Arrays.asList(true, false, true), attachSequence);
     }
 
@@ -281,14 +286,18 @@ public final class AssetTest {
         };
 
         ((BaseAsset) asset).unsetDriver();
+        sync(asset);
 
         asset.registerChannelListener("1.CH", listener);
+        sync(asset);
         assertEquals(Arrays.asList(), attachSequence);
 
         asset.registerChannelListener("1.CH", listener);
+        sync(asset);
         assertEquals(Arrays.asList(), attachSequence);
 
         ((BaseAsset) asset).setDriver(driver);
+        sync(asset);
         assertEquals(Arrays.asList(true), attachSequence);
     }
 
@@ -314,15 +323,19 @@ public final class AssetTest {
         };
 
         asset.registerChannelListener("1.CH", listener);
+        sync(asset);
         assertEquals(Arrays.asList(true), attachSequence);
 
         asset.registerChannelListener("1.CH", listener);
+        sync(asset);
         assertEquals(Arrays.asList(true), attachSequence);
 
         asset.registerChannelListener("1.CH", listener);
+        sync(asset);
         assertEquals(Arrays.asList(true), attachSequence);
 
         asset.registerChannelListener("1.CH", listener);
+        sync(asset);
         assertEquals(Arrays.asList(true), attachSequence);
     }
 
@@ -352,10 +365,12 @@ public final class AssetTest {
         };
 
         asset.registerChannelListener("1.CH", listener);
+        sync(asset);
 
         assertEquals(1, invoked.get());
 
         asset.unregisterChannelListener(listener);
+        sync(asset);
 
         assertEquals(2, invoked.get());
     }
@@ -385,11 +400,13 @@ public final class AssetTest {
         };
 
         asset.registerChannelListener("1.CH", listener);
+        sync(asset);
 
         assertEquals(1, invoked.get());
 
         try {
             asset.unregisterChannelListener(listener);
+            sync(asset);
         } catch (KuraException e) {
             assertEquals(KuraErrorCode.CONNECTION_FAILED, e.getCode());
             assertTrue(e.getCause() instanceof ConnectionException);
@@ -551,6 +568,7 @@ public final class AssetTest {
         };
 
         asset.registerChannelListener("3.CH", listener);
+        sync(asset);
         assertEquals(Arrays.asList(), attachSequence);
     }
 
@@ -589,17 +607,21 @@ public final class AssetTest {
         };
 
         asset.registerChannelListener("3.CH", listener);
+        sync(asset);
         assertEquals(Arrays.asList(), attachSequence);
 
         channels.put("3.CH#+enabled", "true");
         ((BaseAsset) asset).updated(channels);
+        sync(asset);
 
-        assertEquals(Arrays.asList(false, true), attachSequence);
+        assertEquals(Arrays.asList(true), attachSequence);
 
         channels.put("3.CH#+enabled", "false");
-        ((BaseAsset) asset).updated(channels);
 
-        assertEquals(Arrays.asList(false, true, false), attachSequence);
+        ((BaseAsset) asset).updated(channels);
+        sync(asset);
+
+        assertEquals(Arrays.asList(true, false), attachSequence);
 
         initt();
     }
@@ -623,6 +645,20 @@ public final class AssetTest {
 
     public void unbindCfgSvc(ConfigurationService cfgSvc) {
         AssetTest.cfgsvc = null;
+    }
+
+    private static void sync(final Asset asset) {
+        final BaseAsset baseAsset = (BaseAsset) asset;
+        final BaseAssetExecutor executor = baseAsset.getBaseAssetExecutor();
+
+        final CountDownLatch latch = new CountDownLatch(1);
+
+        executor.runConfig(latch::countDown);
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            fail("Interrupted during sync");
+        }
     }
 
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -54,83 +54,74 @@ public class ExampleComponent implements CloudClientListener, EventHandler {
     private static final String APP_ID = "EXAMPLE_COMPONENT";
     private static final int POLL_DELAY_SEC = 10;
 
-    private CloudService m_cloudService;
-    private PositionService m_positionService;
-    private ConfigurationService m_configurationService;
-    private ClockService m_clockService;
-    private CloudClient m_cloudClient;
-    private NetworkService m_networkService;
-    private UsbService m_usbService;
+    private CloudService cloudService;
+    private PositionService positionService;
+    private ConfigurationService configurationService;
+    private ClockService clockService;
+    private CloudClient cloudClient;
+    private UsbService usbService;
 
-    private ConnectionFactory m_connectionFactory;
-    private ScheduledThreadPoolExecutor m_worker;
-    private ScheduledFuture<?> m_handle;
-    private ScheduledExecutorService m_gpsWorker;
-    private ScheduledFuture<?> m_gpsHandle;
-    private ScheduledThreadPoolExecutor m_systemPropsWorker;
-    private ScheduledFuture<?> m_systemPropsHandle;
-    private Thread m_serialThread;
+    private ConnectionFactory connectionFactory;
+    private ScheduledThreadPoolExecutor worker;
+    private ScheduledFuture<?> handle;
+    private ScheduledExecutorService gpsWorker;
+    private ScheduledFuture<?> gpsHandle;
+    private ScheduledThreadPoolExecutor systemPropsWorker;
+    private ScheduledFuture<?> systemPropsHandle;
+    private Thread serialThread;
     private int counter;
-    private StringBuilder m_serialSb;
+    private StringBuilder serialSb;
 
     InputStream in;
     OutputStream out;
     CommConnection conn = null;
 
     public void setCloudService(CloudService cloudService) {
-        this.m_cloudService = cloudService;
+        this.cloudService = cloudService;
     }
 
     public void unsetCloudService(CloudService cloudService) {
-        this.m_cloudService = null;
+        this.cloudService = null;
     }
 
     public void setPositionService(PositionService positionService) {
-        this.m_positionService = positionService;
+        this.positionService = positionService;
     }
 
     public void unsetPositionService(PositionService positionService) {
-        this.m_positionService = null;
+        this.positionService = null;
     }
 
     public void setConnectionFactory(ConnectionFactory connectionFactory) {
-        this.m_connectionFactory = connectionFactory;
+        this.connectionFactory = connectionFactory;
     }
 
     public void unsetConnectionFactory(ConnectionFactory connectionFactory) {
-        this.m_connectionFactory = null;
+        this.connectionFactory = null;
     }
 
     public void setConfigurationService(ConfigurationService configurationService) {
-        this.m_configurationService = configurationService;
+        this.configurationService = configurationService;
     }
 
     public void unsetConfigurationService(ConfigurationService configurationService) {
-        this.m_configurationService = null;
+        this.configurationService = null;
     }
 
     public void setClockService(ClockService clockService) {
-        this.m_clockService = clockService;
+        this.clockService = clockService;
     }
 
     public void unsetClockService(ClockService clockService) {
-        this.m_clockService = null;
-    }
-
-    public void setNetworkService(NetworkService networkService) {
-        this.m_networkService = networkService;
-    }
-
-    public void unsetNetworkService(NetworkService networkService) {
-        this.m_networkService = null;
+        this.clockService = null;
     }
 
     public void setUsbService(UsbService usbService) {
-        this.m_usbService = usbService;
+        this.usbService = usbService;
     }
 
     public void unsetUsbService(UsbService usbService) {
-        this.m_usbService = null;
+        this.usbService = null;
     }
 
     private boolean clockIsSynced = false;
@@ -138,7 +129,7 @@ public class ExampleComponent implements CloudClientListener, EventHandler {
     protected void activate(ComponentContext componentContext) {
         s_logger.debug("Activating ExampleComponent");
 
-        List<UsbTtyDevice> ttyDevices = this.m_usbService.getUsbTtyDevices();
+        List<UsbTtyDevice> ttyDevices = this.usbService.getUsbTtyDevices();
         if (ttyDevices != null && !ttyDevices.isEmpty()) {
             for (UsbTtyDevice device : ttyDevices) {
                 System.out.println("Device: " + device.getVendorId() + ":" + device.getProductId());
@@ -350,7 +341,7 @@ public class ExampleComponent implements CloudClientListener, EventHandler {
                 .withParity(parity).withTimeout(2000).build().toString();
 
         try {
-            this.conn = (CommConnection) this.m_connectionFactory.createConnection(uri, 1, false);
+            this.conn = (CommConnection) this.connectionFactory.createConnection(uri, 1, false);
             s_logger.info(sPort + " initialized");
         } catch (IOException e1) {
             // TODO Auto-generated catch block
@@ -391,17 +382,17 @@ public class ExampleComponent implements CloudClientListener, EventHandler {
             }
             // on reception of CR, publish the received sentence
             if (c == 13) {
-                s_logger.debug("Received : " + this.m_serialSb.toString());
+                s_logger.debug("Received : " + this.serialSb.toString());
                 KuraPayload payload = new KuraPayload();
-                payload.addMetric("sentence", this.m_serialSb.toString());
+                payload.addMetric("sentence", this.serialSb.toString());
                 try {
-                    this.m_cloudClient.publish("message", payload, 0, false);
+                    this.cloudClient.publish("message", payload, 0, false);
                 } catch (KuraException e) {
                     e.printStackTrace();
                 }
-                this.m_serialSb = new StringBuilder();
+                this.serialSb = new StringBuilder();
             } else if (c != 10) {
-                this.m_serialSb.append((char) c);
+                this.serialSb.append((char) c);
             }
         }
     }
@@ -427,11 +418,11 @@ public class ExampleComponent implements CloudClientListener, EventHandler {
     }
 
     private void doUpdate() {
-        if (this.m_handle != null) {
-            this.m_handle.cancel(true);
+        if (this.handle != null) {
+            this.handle.cancel(true);
         }
 
-        this.m_handle = this.m_worker.scheduleAtFixedRate(new Runnable() {
+        this.handle = this.worker.scheduleAtFixedRate(new Runnable() {
 
             @Override
             public void run() {
@@ -441,24 +432,24 @@ public class ExampleComponent implements CloudClientListener, EventHandler {
     }
 
     private void doGpsUpdate() {
-        if (this.m_gpsHandle != null) {
-            this.m_gpsHandle.cancel(true);
+        if (this.gpsHandle != null) {
+            this.gpsHandle.cancel(true);
         }
 
-        this.m_gpsWorker = Executors.newSingleThreadScheduledExecutor();
-        this.m_gpsHandle = this.m_gpsWorker.scheduleAtFixedRate(new Runnable() {
+        this.gpsWorker = Executors.newSingleThreadScheduledExecutor();
+        this.gpsHandle = this.gpsWorker.scheduleAtFixedRate(new Runnable() {
 
             @Override
             public void run() {
-                Position position = ExampleComponent.this.m_positionService.getPosition();
+                Position position = ExampleComponent.this.positionService.getPosition();
                 s_logger.debug("Latitude: " + position.getLatitude());
                 s_logger.debug("Longitude: " + position.getLongitude());
                 s_logger.debug("Altitude: " + position.getAltitude());
                 s_logger.debug("Speed: " + position.getSpeed());
                 s_logger.debug("Track: " + position.getTrack());
-                s_logger.debug("Time: " + ExampleComponent.this.m_positionService.getNmeaTime());
-                s_logger.debug("Date: " + ExampleComponent.this.m_positionService.getNmeaDate());
-                s_logger.debug("Last Sentence: " + ExampleComponent.this.m_positionService.getLastSentence());
+                s_logger.debug("Time: " + ExampleComponent.this.positionService.getNmeaTime());
+                s_logger.debug("Date: " + ExampleComponent.this.positionService.getNmeaDate());
+                s_logger.debug("Last Sentence: " + ExampleComponent.this.positionService.getLastSentence());
             }
         }, 0, POLL_DELAY_SEC, TimeUnit.SECONDS);
     }
@@ -466,10 +457,10 @@ public class ExampleComponent implements CloudClientListener, EventHandler {
     public void doPublish() {
 
         try {
-            if (this.m_cloudClient != null) {
+            if (this.cloudClient != null) {
                 KuraPayload payload = new KuraPayload();
                 payload.addMetric("counter", this.counter);
-                this.m_cloudClient.publish("sensor", payload, 0, false);
+                this.cloudClient.publish("sensor", payload, 0, false);
                 this.counter++;
                 if (this.counter == 4) {
                     if (this.conn != null) {

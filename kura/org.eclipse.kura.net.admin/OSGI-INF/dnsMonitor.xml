@@ -18,4 +18,5 @@
       <provide interface="org.eclipse.kura.net.dns.DnsMonitorService"/>
    </service>
    <reference bind="setNetworkConfigurationService" cardinality="1..1" interface="org.eclipse.kura.net.admin.NetworkConfigurationService" name="NetworkConfigurationService" policy="static" unbind="unsetNetworkConfigurationService"/>
+   <reference bind="setDnsServerService" cardinality="1..1" interface="org.eclipse.kura.net.dns.DnsServer" name="DNSService" policy="static" unbind="unsetDnsServerService"/>
 </scr:component>

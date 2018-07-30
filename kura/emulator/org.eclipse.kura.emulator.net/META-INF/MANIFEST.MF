@@ -11,7 +11,7 @@ Bundle-ActivationPolicy: lazy
 Import-Package: org.eclipse.kura;version="[1.0,2.0)",
  org.eclipse.kura.core.net;version="[1.0,1.1)",
  org.eclipse.kura.emulator;version="[1.0,2.0)",
- org.eclipse.kura.net;version="[1.1,2.0)",
+ org.eclipse.kura.net;version="[2.0,3.0)",
  org.eclipse.kura.net.modem;version="[1.0,2.0)",
  org.eclipse.kura.net.wifi;version="[2.0,3.0)",
  org.osgi.service.component;version="1.2.0",

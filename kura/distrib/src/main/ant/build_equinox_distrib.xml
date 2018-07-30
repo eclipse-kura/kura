@@ -149,8 +149,18 @@
 		<condition property="is.nn">
 			<contains string="${build.name}" substring="-nn"/>
 		</condition>
+		<condition property="is.sysv">
+			<contains string="${service.manager}" substring="sysv"/>
+		</condition>
+		
+		<condition property="is.debian">
+			<contains string="${os.base}" substring="debian"/>
+		</condition>
 		<antcall target="emulator-config" />
-		<antcall target="linux-config" />
+		<antcall target="linux-sysv-config" />
+		<antcall target="linux-debian-config" />
+		<antcall target="linux-redhat-config" />
+		<antcall target="linux-systemd-config" />
 
 
 		<!-- Add mToolkit to config.ini -->
@@ -388,14 +398,7 @@ fi]]>
                         prefix="${build.output.name}/install" />
 			<zipfileset file="src/main/resources/common/dhcpd-enp2s0.conf"
                         prefix="${build.output.name}/install" />
-			<!-- <intel-edison> -->
-			<zipfileset file="src/main/resources/${build.name}/udhcpd-for-hostapd.service"
-                        prefix="${build.output.name}/install" />
-			<zipfileset file="src/main/resources/${build.name}/udhcpd-usb0.conf"
-                        prefix="${build.output.name}/install" />
-			<zipfileset file="src/main/resources/${build.name}/udhcpd-wlan0.conf"
-                        prefix="${build.output.name}/install" />
-			<!-- </intel-edison> -->
+                        
 			<zipfileset file="src/main/resources/common/named/named.conf"
                         prefix="${build.output.name}/install" />
 			<zipfileset file="src/main/resources/common/named/named.ca"
@@ -557,7 +560,10 @@ fi]]>
 		<antcall target="gpio-jar" />
 		<antcall target="emulator-gpio-jar" />
 		<antcall target="emulator-jars" />
-		<antcall target="linux-jars" />
+		<antcall target="linux-sysv-jars" />
+		<antcall target="linux-debian-jars" />
+		<antcall target="linux-redhat-jars" />
+		<antcall target="linux-systemd-jars" />
 		<antcall target="tinyb-jars" />
 
 		<echo message="Building Kura Distribution for ${build.name}-jars..." />
@@ -1229,6 +1235,34 @@ fi]]>
                    value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.jar@5:start" />
 		</propertyfile>
 	</target>
+	
+	<target name="linux-sysv-config" if="is.sysv" depends="linux-config">
+		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
+			<entry key="osgi.bundles" operation="+"
+					value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.linux.sysv.provider_${org.eclipse.kura.linux.sysv.provider.version}.jar@4" />
+		</propertyfile>
+	</target>
+	
+	<target name="linux-debian-config" if="is.debian" depends="linux-config">
+		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
+			<entry key="osgi.bundles" operation="+"
+					value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.linux.debian.provider_${org.eclipse.kura.linux.debian.provider.version}.jar@4" />
+		</propertyfile>
+	</target>
+	
+	<target name="linux-redhat-config" unless="is.debian" depends="linux-config">
+		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
+			<entry key="osgi.bundles" operation="+"
+					value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.linux.redhat.provider_${org.eclipse.kura.linux.redhat.provider.version}.jar@4" />
+		</propertyfile>
+	</target>
+	
+	<target name="linux-systemd-config" unless="is.sysv" depends="linux-config">
+		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
+			<entry key="osgi.bundles" operation="+"
+					value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.linux.systemd.provider_${org.eclipse.kura.linux.systemd.provider.version}.jar@4" />
+		</propertyfile>
+	</target>
 
 	<target name="emulator-jars" if="is.nn">
 		<zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
@@ -1244,6 +1278,34 @@ fi]]>
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux.net_${org.eclipse.kura.linux.net.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.jar"
+                        prefix="${build.output.name}/kura/plugins" />
+		</zip>
+	</target>
+	
+	<target name="linux-sysv-jars" if="is.sysv" depends="linux-jars">
+		<zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
+			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux.sysv.provider_${org.eclipse.kura.linux.sysv.provider.version}.jar"
+                        prefix="${build.output.name}/kura/plugins" />
+		</zip>
+	</target>
+	
+	<target name="linux-debian-jars" if="is.debian" depends="linux-jars">
+		<zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
+			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux.debian.provider_${org.eclipse.kura.linux.debian.provider.version}.jar"
+                        prefix="${build.output.name}/kura/plugins" />
+		</zip>
+	</target>
+	
+	<target name="linux-redhat-jars" unless="is.debian" depends="linux-jars">
+		<zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
+			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux.redhat.provider_${org.eclipse.kura.linux.redhat.provider.version}.jar"
+                        prefix="${build.output.name}/kura/plugins" />
+		</zip>
+	</target>
+	
+	<target name="linux-systemd-jars" unless="is.sysv" depends="linux-jars">
+		<zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
+			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux.systemd.provider_${org.eclipse.kura.linux.systemd.provider.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
 		</zip>
 	</target>

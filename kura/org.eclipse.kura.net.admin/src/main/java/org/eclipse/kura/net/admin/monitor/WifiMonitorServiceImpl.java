@@ -64,6 +64,7 @@ import org.eclipse.kura.net.wifi.WifiClientMonitorService;
 import org.eclipse.kura.net.wifi.WifiConfig;
 import org.eclipse.kura.net.wifi.WifiInterfaceAddressConfig;
 import org.eclipse.kura.net.wifi.WifiMode;
+import org.eclipse.kura.net.wifi.WifiUtils;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
@@ -97,6 +98,8 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
     private ExecutorService executor;
     private NetworkConfiguration currentNetworkConfiguration;
     private NetworkConfiguration newNetConfiguration;
+
+    private WifiUtils wifiUtils;
 
     public void setNetworkService(NetworkService networkService) {
         this.networkService = networkService;
@@ -134,6 +137,14 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
 
     public void unsetNetworkConfigurationService(NetworkConfigurationService netConfigService) {
         this.netConfigService = null;
+    }
+
+    public void setWifiUtilsService(WifiUtils wifiUtils) {
+        this.wifiUtils = wifiUtils;
+    }
+
+    public void unsetWifiUtilsService(WifiUtils wifiUtils) {
+        this.wifiUtils = null;
     }
 
     protected void activate(ComponentContext componentContext) {
@@ -206,7 +217,10 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
     }
 
     protected boolean isWifiDeviceOn(String interfaceName) {
-        return LinuxNetworkUtil.isWifiDeviceOn(interfaceName);
+        if (this.wifiUtils != null) {
+            return this.wifiUtils.isWifiDeviceOn(interfaceName);
+        }
+        return false;
     }
 
     private void monitor() {
@@ -268,7 +282,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                     // the right kernel module is loaded for the desired mode.
                     // If not we treat the interface as if needing to be reconfigured.
                     if (this.first
-                            && !LinuxNetworkUtil.isKernelModuleLoadedForMode(interfaceName, wifiConfig.getMode())) {
+                            && wifiUtils != null && !wifiUtils.isKernelModuleLoadedForMode(interfaceName, wifiConfig.getMode())) {
                         logger.info("monitor() :: {} kernel module not suitable for WiFi mode {}", interfaceName,
                                 wifiConfig.getMode());
                         this.first = false;
@@ -651,10 +665,13 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
 
     private void reloadKernelModule(String interfaceName, WifiMode wifiMode) throws KuraException {
         logger.info("monitor() :: reload {} using kernel module for WiFi mode {}", interfaceName, wifiMode);
-        if (LinuxNetworkUtil.isKernelModuleLoaded(interfaceName, wifiMode)) {
-            LinuxNetworkUtil.unloadKernelModule(interfaceName);
+        if (wifiUtils == null) {
+            return;
         }
-        LinuxNetworkUtil.loadKernelModule(interfaceName, wifiMode);
+        if (wifiUtils.isKernelModuleLoaded(interfaceName)) {
+            wifiUtils.unloadKernelModule(interfaceName);
+        }
+        wifiUtils.loadKernelModule(interfaceName, wifiMode);
     }
 
     private void initializeMonitoredInterfaces(NetworkConfiguration networkConfiguration) throws KuraException {
@@ -900,7 +917,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
     @Override
     public int getSignalLevel(String interfaceName, String ssid) throws KuraException {
         int rssi;
-        if (!LinuxNetworkUtil.isKernelModuleLoadedForMode(interfaceName, WifiMode.INFRA)) {
+        if (wifiUtils != null && !wifiUtils.isKernelModuleLoadedForMode(interfaceName, WifiMode.INFRA)) {
             logger.info("getSignalLevel() :: reload {} kernel module for WiFi mode {}", interfaceName, WifiMode.INFRA);
             reloadKernelModule(interfaceName, WifiMode.INFRA);
         }
@@ -987,13 +1004,13 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
         return statuses;
     }
 
-    private boolean resetWifiDevice(String interfaceName) throws Exception {
+    private boolean resetWifiDevice(String interfaceName) throws KuraException {
         boolean ret = false;
-        if (isWifiDeviceOn(interfaceName)) {
-            LinuxNetworkUtil.turnWifiDeviceOff(interfaceName);
+        if (isWifiDeviceOn(interfaceName) && wifiUtils != null) {
+            wifiUtils.turnWifiDeviceOff(interfaceName);
         }
-        if (isWifiDeviceReady(interfaceName, false, 10)) {
-            LinuxNetworkUtil.turnWifiDeviceOn(interfaceName);
+        if (isWifiDeviceReady(interfaceName, false, 10) && wifiUtils != null) {
+            wifiUtils.turnWifiDeviceOn(interfaceName);
             ret = isWifiDeviceReady(interfaceName, true, 20);
         }
         return ret;

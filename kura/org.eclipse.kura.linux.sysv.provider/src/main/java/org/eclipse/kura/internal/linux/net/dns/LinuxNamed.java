@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 Eurotech and others
+ * Copyright (c) 2018 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,9 +8,8 @@
  *
  * Contributors:
  *     Eurotech
- *     Red Hat Inc - Add Fedora support
  *******************************************************************************/
-package org.eclipse.kura.linux.net.dns;
+package org.eclipse.kura.internal.linux.net.dns;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -24,60 +23,46 @@ import java.util.StringTokenizer;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.linux.util.LinuxProcessUtil;
-import org.eclipse.kura.linux.net.util.KuraSupportedPlatforms;
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetworkPair;
+import org.eclipse.kura.net.dns.DnsServer;
+import org.eclipse.kura.net.dns.DnsServerConfig;
 import org.eclipse.kura.net.dns.DnsServerConfigIP4;
+import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LinuxNamed {
+public class LinuxNamed implements DnsServer {
 
     private static final Logger logger = LoggerFactory.getLogger(LinuxNamed.class);
 
-    private static final String OS_VERSION = System.getProperty("kura.os.version");
-
-    private static LinuxNamed linuxNamed = null;
-    private String persistentConfigFileName = null;
-    private String rfc1912ZonesFilename = null;
-    private String procString = null;
+    private static final String PERSISTENT_CONFIG_FILE_NAME = "/etc/bind/named.conf";
+    private static final String RFC_1912_ZONES_FILENAME = "/etc/named.rfc1912.zones";
+    private static final String PROC_STRING = "/usr/sbin/named";
 
     private DnsServerConfigIP4 dnsServerConfigIP4;
 
-    private LinuxNamed() throws KuraException {
-        if (OS_VERSION.equals(KuraSupportedPlatforms.RASPBIAN_100.getImageName())
-                || OS_VERSION.equals(KuraSupportedPlatforms.UBUNTU_16.getImageName())
-                || OS_VERSION.equals(KuraSupportedPlatforms.DEBIAN_100.getImageName())) {
-            this.persistentConfigFileName = "/etc/bind/named.conf";
-            this.procString = "/usr/sbin/named";
-            this.rfc1912ZonesFilename = "/etc/named.rfc1912.zones";
-        } else {
-            this.persistentConfigFileName = "/etc/named.conf";
-            this.procString = "named -u named -t";
-            this.rfc1912ZonesFilename = "/etc/named.rfc1912.zones";
-        }
-
-        // initialize the configuration
-        init();
-
-        if (this.dnsServerConfigIP4 == null) {
-            Set<IP4Address> forwarders = new HashSet<>();
-            HashSet<NetworkPair<IP4Address>> allowedNetworks = new HashSet<>();
-            this.dnsServerConfigIP4 = new DnsServerConfigIP4(forwarders, allowedNetworks);
+    protected void activate() {
+        logger.info("Activating LinuxNamed...");
+        try {
+            init();
+        } catch (KuraException e) {
+            logger.info("Error activating LinuxNamed...");
+            if (this.dnsServerConfigIP4 == null) {
+                Set<IP4Address> forwarders = new HashSet<>();
+                HashSet<NetworkPair<IP4Address>> allowedNetworks = new HashSet<>();
+                this.dnsServerConfigIP4 = new DnsServerConfigIP4(forwarders, allowedNetworks);
+            }
         }
     }
 
-    public static synchronized LinuxNamed getInstance() throws KuraException {
-        if (linuxNamed == null) {
-            linuxNamed = new LinuxNamed();
-        }
-
-        return linuxNamed;
+    protected void deactivate(ComponentContext componentContext) {
+        logger.info("Deactivating LinuxNamed...");
     }
 
     private void init() throws KuraException {
-        File configFile = new File(this.persistentConfigFileName);
+        File configFile = new File(LinuxNamed.PERSISTENT_CONFIG_FILE_NAME);
         if (!configFile.exists() || !isForwardOnlyConfiguration(configFile)) {
             logger.debug("There is no current DNS server configuration that allows forwarding");
             return;
@@ -111,9 +96,9 @@ public class LinuxNamed {
                             String allowedNetwork = st2.nextToken();
                             if (allowedNetwork != null && !"".equals(allowedNetwork.trim())) {
                                 String[] splitNetwork = allowedNetwork.split("/");
-                                allowedNetworks.add(new NetworkPair<>(
-                                        (IP4Address) IPAddress.parseHostAddress(splitNetwork[0]),
-                                        Short.parseShort(splitNetwork[1])));
+                                allowedNetworks
+                                        .add(new NetworkPair<>((IP4Address) IPAddress.parseHostAddress(splitNetwork[0]),
+                                                Short.parseShort(splitNetwork[1])));
                             }
                         }
                     }
@@ -124,7 +109,7 @@ public class LinuxNamed {
             this.dnsServerConfigIP4 = new DnsServerConfigIP4(forwarders, allowedNetworks);
         } catch (Exception e) {
             logger.error("init() :: failed to read the {} configuration file ", configFile.getName(), e);
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+            throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, e);
         }
     }
 
@@ -141,100 +126,67 @@ public class LinuxNamed {
         } catch (Exception e) {
             logger.error("isForwardOnlyConfiguration() :: failed to read the {} configuration file ",
                     configFile.getName(), e);
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+            throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, e);
         }
         return forwardingConfig;
     }
 
-    public boolean isEnabled() throws KuraException {
+    @Override
+    public boolean isEnabled() {
         try {
             // Check if named is running
-            int pid = LinuxProcessUtil.getPid(this.procString);
+            int pid = LinuxProcessUtil.getPid(LinuxNamed.PROC_STRING);
             return pid > -1;
         } catch (Exception e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+            return false;
         }
     }
 
-    public boolean enable() throws KuraException {
+    @Override
+    public void enable() throws KuraException {
         // write config happened during 'set config' step
         try {
             // Check if named is running
-            int pid = LinuxProcessUtil.getPid(this.procString);
+            int pid = LinuxProcessUtil.getPid(LinuxNamed.PROC_STRING);
             if (pid > -1) {
                 // If so, disable it
                 logger.error("DNS server is already running, bringing it down...");
                 disable();
             }
             // Start named
-            int result;
-            if (OS_VERSION
-                    .startsWith(KuraSupportedPlatforms.YOCTO_121.getImageName() + "_")
-                    || OS_VERSION.startsWith(KuraSupportedPlatforms.YOCTO_161.getImageName() + "_"
-                            + KuraSupportedPlatforms.YOCTO_161.getImageVersion() + "_")) {
-                result = LinuxProcessUtil.start("/etc/init.d/bind start");
-            } else if (OS_VERSION.equals(KuraSupportedPlatforms.RASPBIAN_100.getImageName())
-                    || OS_VERSION.equals(KuraSupportedPlatforms.DEBIAN_100.getImageName())
-                    || OS_VERSION.equals(KuraSupportedPlatforms.UBUNTU_16.getImageName())) {
-                result = LinuxProcessUtil.start("/etc/init.d/bind9 start");
-            } else if (OS_VERSION.equals(KuraSupportedPlatforms.FEDORA_2X.getImageName())
-                    || OS_VERSION.equals(KuraSupportedPlatforms.CENTOS_7.getImageName())
-                    || OS_VERSION.equals(KuraSupportedPlatforms.RHEL_73.getImageName() + "_"
-                            + KuraSupportedPlatforms.RHEL_73.getImageVersion())) {
-                result = LinuxProcessUtil.start("/bin/systemctl start named");
-            } else {
-                logger.info("Linux named enable fallback");
-                result = LinuxProcessUtil.start("/etc/init.d/named start");
-            }
+            int result = LinuxProcessUtil.start("/etc/init.d/bind9 start");
+
             if (result == 0) {
                 logger.debug("DNS server started.");
                 logger.trace("{}", this.dnsServerConfigIP4);
-                return true;
+            } else {
+                throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR);
             }
-        } catch (Exception e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-        }
 
-        return false;
+        } catch (Exception e) {
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e);
+        }
     }
 
-    public boolean disable() throws KuraException {
+    @Override
+    public void disable() throws KuraException {
         try {
-            int result;
-            // If so, stop it.
-            if (OS_VERSION
-                    .startsWith(KuraSupportedPlatforms.YOCTO_121.getImageName() + "_")
-                    || OS_VERSION.startsWith(KuraSupportedPlatforms.YOCTO_161.getImageName() + "_"
-                            + KuraSupportedPlatforms.YOCTO_161.getImageVersion() + "_")) {
-                result = LinuxProcessUtil.start("/etc/init.d/bind stop");
-            } else if (OS_VERSION.equals(KuraSupportedPlatforms.RASPBIAN_100.getImageName())
-                    || OS_VERSION.equals(KuraSupportedPlatforms.UBUNTU_16.getImageName())
-                    || OS_VERSION.equals(KuraSupportedPlatforms.DEBIAN_100.getImageName())) {
-                result = LinuxProcessUtil.start("/etc/init.d/bind9 stop");
-            } else if (OS_VERSION.equals(KuraSupportedPlatforms.FEDORA_2X.getImageName())
-                    || OS_VERSION.equals(KuraSupportedPlatforms.CENTOS_7.getImageName())
-                    || OS_VERSION.equals(KuraSupportedPlatforms.RHEL_73.getImageName() + "_"
-                            + KuraSupportedPlatforms.RHEL_73.getImageVersion())) {
-                result = LinuxProcessUtil.start("/bin/systemctl stop named");
-            } else {
-                result = LinuxProcessUtil.start("/etc/init.d/named stop");
-            }
+            int result = LinuxProcessUtil.start("/etc/init.d/bind9 stop");
 
             if (result == 0) {
                 logger.debug("DNS server stopped.");
                 logger.trace("{}", this.dnsServerConfigIP4);
-                return true;
             } else {
                 logger.debug("tried to kill DNS server for interface but it is not running");
+                throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR);
             }
         } catch (Exception e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e);
         }
-
-        return true;
     }
 
-    public boolean restart() throws KuraException {
+    @Override
+    public void restart() throws KuraException {
         try {
             if (LinuxProcessUtil.start("/etc/init.d/named restart") == 0) {
                 logger.debug("DNS server restarted.");
@@ -244,10 +196,9 @@ public class LinuxNamed {
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e);
         }
-
-        return true;
     }
 
+    @Override
     public boolean isConfigured() {
         if (this.dnsServerConfigIP4 == null || this.dnsServerConfigIP4.getForwarders() == null
                 || this.dnsServerConfigIP4.getAllowedNetworks() == null) {
@@ -257,12 +208,15 @@ public class LinuxNamed {
                 || this.dnsServerConfigIP4.getAllowedNetworks().isEmpty() ? false : true;
     }
 
-    public void setConfig(DnsServerConfigIP4 dnsServerConfigIP4) throws KuraException {
+    @Override
+    public void setConfig(DnsServerConfig dnsServerConfig) throws KuraException {
+        if (this.dnsServerConfigIP4 == null) {
+            logger.warn("Set DNS server configuration to null");
+        }
+        if (dnsServerConfig instanceof DnsServerConfigIP4) {
+            this.dnsServerConfigIP4 = (DnsServerConfigIP4) dnsServerConfig;
+        }
         try {
-            this.dnsServerConfigIP4 = dnsServerConfigIP4;
-            if (this.dnsServerConfigIP4 == null) {
-                logger.warn("Set DNS server configuration to null");
-            }
             writeConfig();
         } catch (Exception e) {
             logger.error("Error setting DNS server config", e);
@@ -270,24 +224,26 @@ public class LinuxNamed {
         }
     }
 
-    public DnsServerConfigIP4 getDnsServerConfig() {
+    @Override
+    public DnsServerConfig getDnsServerConfig() {
         return this.dnsServerConfigIP4;
     }
 
+    @Override
     public String getConfigFilename() {
-        return this.persistentConfigFileName;
+        return LinuxNamed.PERSISTENT_CONFIG_FILE_NAME;
     }
 
     private void writeConfig() throws KuraException {
-        try (FileOutputStream fos = new FileOutputStream(this.persistentConfigFileName);
+        try (FileOutputStream fos = new FileOutputStream(LinuxNamed.PERSISTENT_CONFIG_FILE_NAME);
                 PrintWriter pw = new PrintWriter(fos);) {
             // build up the file
             if (isConfigured()) {
-                logger.debug("writing custom named.conf to {} with: {}", this.persistentConfigFileName,
+                logger.debug("writing custom named.conf to {} with: {}", LinuxNamed.PERSISTENT_CONFIG_FILE_NAME,
                         this.dnsServerConfigIP4);
                 pw.print(getForwardingNamedFile());
             } else {
-                logger.debug("writing default named.conf to {} with: {}", this.persistentConfigFileName,
+                logger.debug("writing default named.conf to {} with: {}", LinuxNamed.PERSISTENT_CONFIG_FILE_NAME,
                         this.dnsServerConfigIP4);
                 pw.print(getDefaultNamedFile());
             }
@@ -308,7 +264,7 @@ public class LinuxNamed {
                 .append("\tforwarders {");
 
         Set<IP4Address> forwarders = this.dnsServerConfigIP4.getForwarders();
-        for (IP4Address forwarder : forwarders) {
+        for (IPAddress forwarder : forwarders) {
             sb.append(forwarder.getHostAddress()).append(";");
         }
         sb.append("};\n");
@@ -333,7 +289,7 @@ public class LinuxNamed {
                 .append("\tfile \"named.ca\";\n") //
                 .append("};\n") //
                 .append("include \"") //
-                .append(this.rfc1912ZonesFilename) //
+                .append(LinuxNamed.RFC_1912_ZONES_FILENAME) //
                 .append("\";\n");
 
         return sb.toString();
@@ -375,7 +331,7 @@ public class LinuxNamed {
                 .append("};\n") //
                 .append("\n") //
                 .append("include \"") //
-                .append(this.rfc1912ZonesFilename) //
+                .append(LinuxNamed.RFC_1912_ZONES_FILENAME) //
                 .append("\";\n"); //
         return sb.toString();
     }

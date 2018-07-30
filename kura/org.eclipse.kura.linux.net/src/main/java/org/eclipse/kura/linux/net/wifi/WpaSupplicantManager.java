@@ -17,7 +17,6 @@ import java.util.Collection;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.linux.util.LinuxProcessUtil;
-import org.eclipse.kura.linux.net.util.KuraSupportedPlatforms;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.slf4j.Logger;
@@ -27,20 +26,9 @@ public class WpaSupplicantManager {
 
     private static Logger logger = LoggerFactory.getLogger(WpaSupplicantManager.class);
 
-    private static final String OS_VERSION = System.getProperty("kura.os.version");
     private static final File TEMP_CONFIG_FILE = new File("/tmp/wpa_supplicant.conf");
 
     private static String supplicantDriver = null;
-
-    private static boolean isIntelEdison = false;
-
-    static {
-        StringBuilder sb = new StringBuilder(KuraSupportedPlatforms.YOCTO_161.getImageName());
-        sb.append('_').append(KuraSupportedPlatforms.YOCTO_161.getImageVersion()).append('_');
-        if (OS_VERSION.startsWith(sb.toString())) {
-            isIntelEdison = true;
-        }
-    }
 
     private WpaSupplicantManager() {
     }
@@ -64,11 +52,8 @@ public class WpaSupplicantManager {
 
             String drv = getDriver(interfaceName);
             if (drv != null) {
-                if (isIntelEdison) {
-                    supplicantDriver = driver;
-                } else {
-                    supplicantDriver = drv;
-                }
+
+                supplicantDriver = drv;
             } else {
                 supplicantDriver = driver;
             }
@@ -93,16 +78,13 @@ public class WpaSupplicantManager {
      */
     private static String formSupplicantStartCommand(String ifaceName, File configFile) {
         StringBuilder sb = new StringBuilder();
-        if (isIntelEdison) {
-            sb.append("systemctl start wpa_supplicant");
-        } else {
-            sb.append("wpa_supplicant -B -D ");
-            sb.append(supplicantDriver);
-            sb.append(" -i ");
-            sb.append(ifaceName);
-            sb.append(" -c ");
-            sb.append(configFile);
-        }
+
+        sb.append("wpa_supplicant -B -D ");
+        sb.append(supplicantDriver);
+        sb.append(" -i ");
+        sb.append(ifaceName);
+        sb.append(" -c ");
+        sb.append(configFile);
 
         return sb.toString();
     }
@@ -148,16 +130,14 @@ public class WpaSupplicantManager {
 
     /**
      * Stops all instances of wpa_supplicant
-     * 
+     *
      * @throws Exception
      */
     public static void stop(String ifaceName) throws KuraException {
         try {
-            if (!isIntelEdison) {
-                LinuxProcessUtil.stopAndKill(getPid(ifaceName));
-            } else {
-                LinuxProcessUtil.start("systemctl stop hostapd");
-            }
+
+            LinuxProcessUtil.start("systemctl stop hostapd");
+
             if (ifaceName != null) {
                 LinuxNetworkUtil.disableInterface(ifaceName);
                 Thread.sleep(1000);
@@ -169,11 +149,9 @@ public class WpaSupplicantManager {
 
     public static String getWpaSupplicantConfigFilename(String ifaceName) {
         StringBuilder sb = new StringBuilder();
-        if (isIntelEdison) {
-            sb.append("/etc/wpa_supplicant/wpa_supplicant.conf");
-        } else {
-            sb.append("/etc/wpa_supplicant-").append(ifaceName).append(".conf");
-        }
+
+        sb.append("/etc/wpa_supplicant-").append(ifaceName).append(".conf");
+
         return sb.toString();
     }
 

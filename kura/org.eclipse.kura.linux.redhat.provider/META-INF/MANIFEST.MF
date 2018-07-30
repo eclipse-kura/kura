@@ -1,0 +1,22 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.eclipse.kura.linux.redhat.provider
+Bundle-SymbolicName: org.eclipse.kura.linux.redhat.provider;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: Eclipse Kura
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Service-Component: OSGI-INF/*.xml
+Bundle-ClassPath: .
+Bundle-ActivationPolicy: lazy
+Import-Package: org.apache.commons.io;version="2.4.0",
+ org.eclipse.kura;version="[1.1,2.0)",
+ org.eclipse.kura.core.linux.util;version="[1.1,2.0)",
+ org.eclipse.kura.core.net;version="1.0.5",
+ org.eclipse.kura.core.net.util;version="1.0.0",
+ org.eclipse.kura.linux.net.dhcp;version="1.0.0",
+ org.eclipse.kura.linux.net.dns,
+ org.eclipse.kura.net;version="[2.0,3.0)",
+ org.eclipse.kura.net.dns;version="[1.0,2.0)",
+ org.eclipse.kura.net.wifi;version="2.0.0",
+ org.osgi.service.component;version="1.2.0",
+ org.slf4j;version="1.6.4"

@@ -30,7 +30,6 @@ import org.eclipse.kura.core.net.AbstractNetInterface;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.modem.ModemInterfaceConfigImpl;
 import org.eclipse.kura.linux.net.dns.LinuxDns;
-import org.eclipse.kura.linux.net.dns.LinuxNamed;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
@@ -46,6 +45,8 @@ import org.eclipse.kura.net.admin.event.NetworkConfigurationChangeEvent;
 import org.eclipse.kura.net.admin.event.NetworkStatusChangeEvent;
 import org.eclipse.kura.net.dhcp.DhcpServerConfig;
 import org.eclipse.kura.net.dns.DnsMonitorService;
+import org.eclipse.kura.net.dns.DnsServer;
+import org.eclipse.kura.net.dns.DnsServerConfig;
 import org.eclipse.kura.net.dns.DnsServerConfigIP4;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
@@ -75,6 +76,7 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
     private Set<IP4Address> forwarders;
 
     private LinuxDns dnsUtil;
+    private DnsServer dnsServer;
 
     public void setNetworkConfigurationService(NetworkConfigurationService netConfigService) {
         this.netConfigService = netConfigService;
@@ -82,6 +84,14 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
 
     public void unsetNetworkConfigurationService(NetworkConfigurationService netConfigService) {
         this.netConfigService = null;
+    }
+
+    public void setDnsServerService(DnsServer dnsServer) {
+        this.dnsServer = dnsServer;
+    }
+
+    public void unsetDnsServerService(DnsServer dnsServer) {
+        this.dnsServer = null;
     }
 
     protected void activate(ComponentContext componentContext) {
@@ -129,21 +139,17 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
                     logger.info("Detected DNS resolv.conf change - restarting DNS proxy");
                     DnsMonitorServiceImpl.this.forwarders = fwds;
 
-                    try {
-                        LinuxNamed linuxNamed = LinuxNamed.getInstance();
-                        DnsServerConfigIP4 currentDnsServerConfig = linuxNamed.getDnsServerConfig();
-                        DnsServerConfigIP4 newDnsServerConfig = new DnsServerConfigIP4(
-                                DnsMonitorServiceImpl.this.forwarders, DnsMonitorServiceImpl.this.allowedNetworks);
+                    DnsServerConfig currentDnsServerConfig = this.dnsServer.getDnsServerConfig();
+                    DnsServerConfigIP4 newDnsServerConfig = new DnsServerConfigIP4(
+                            DnsMonitorServiceImpl.this.forwarders, DnsMonitorServiceImpl.this.allowedNetworks);
 
-                        if (currentDnsServerConfig.equals(newDnsServerConfig)) {
-                            logger.debug("DNS server config has changed - updating from {} to {}",
-                                    currentDnsServerConfig, newDnsServerConfig);
+                    if (currentDnsServerConfig.equals(newDnsServerConfig)) {
+                        logger.debug("DNS server config has changed - updating from {} to {}", currentDnsServerConfig,
+                                newDnsServerConfig);
 
-                            reconfigureDNSProxy(newDnsServerConfig);
-                        }
-                    } catch (KuraException e) {
-                        logger.warn(e.getMessage(), e);
+                        reconfigureDNSProxy(newDnsServerConfig);
                     }
+
                 }
                 try {
                     monitorWait();
@@ -189,18 +195,17 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
 
     protected void reconfigureDNSProxy(DnsServerConfigIP4 dnsServerConfigIP4) {
         try {
-            LinuxNamed linuxNamed = LinuxNamed.getInstance();
 
             logger.debug("Disabling DNS proxy");
-            linuxNamed.disable();
+            this.dnsServer.disable();
 
             logger.debug("Writing config");
-            linuxNamed.setConfig(dnsServerConfigIP4);
+            this.dnsServer.setConfig(dnsServerConfigIP4);
 
             if (this.enabled) {
                 sleep(500);
                 logger.debug("Starting DNS proxy");
-                linuxNamed.enable();
+                this.dnsServer.enable();
             } else {
                 logger.debug("DNS proxy not enabled");
             }

@@ -14,7 +14,6 @@ package org.eclipse.kura.linux.net.util;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -43,9 +42,6 @@ public class LinuxNetworkUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(LinuxNetworkUtil.class);
 
-    private static final String OS_VERSION = System.getProperty("kura.os.version");
-    private static final String TARGET_NAME = System.getProperty("target.device");
-
     private static Map<String, LinuxIfconfig> ifconfigs = new HashMap<>();
 
     private static final String[] ignoreIfaces = { "can", "sit", "mon.wlan" };
@@ -62,7 +58,7 @@ public class LinuxNetworkUtil {
     private static final String UNKNOWN = "unknown";
     private static final String IW = "iw";
     private static final String IWCONFIG = "iwconfig";
-    private static final String EXECUTING_CMD_MSG = "Executing '{}'";
+
     private static final String LINE_MSG = "line: {}";
 
     private static final String ERR_EXECUTING_CMD_MSG = "error executing command --- {} --- exit value={}";
@@ -1048,17 +1044,12 @@ public class LinuxNetworkUtil {
             if (Character.isDigit(interfaceName.charAt(0))) {
                 return;
             }
-            // FIXME:
-            // * Can we unify the below cases?
-            // * Why is 'ifconfig iface' sometimes required before 'ifup iface'?
-            // * Is '-f', '--force' used because the interface is or might be already up?
-            if (OS_VERSION.equals(KuraSupportedPlatforms.RASPBIAN_100.getImageName())) {
-                // FIXME: check the exit code and throw an exception
-                LinuxProcessUtil.start("ifconfig " + interfaceName + " up\n");
+
+            // FIXME: check the exit code and throw an exception
+            LinuxProcessUtil.start("ifconfig " + interfaceName + " up\n");
+            try {
                 LinuxProcessUtil.start("ifup --force " + interfaceName + "\n");
-            } else {
-                // FIXME: check the exit code and throw an exception
-                LinuxProcessUtil.start("ifconfig " + interfaceName + " up\n");
+            } catch (Exception e) {
                 LinuxProcessUtil.start("ifup " + interfaceName + "\n");
             }
         }
@@ -1136,208 +1127,6 @@ public class LinuxNetworkUtil {
         LinuxIfconfig config = getInterfaceConfiguration(interfaceName);
 
         return config != null ? config.isUp() : false;
-    }
-
-    public static boolean isKernelModuleLoaded(String interfaceName, WifiMode wifiMode) throws KuraException {
-        boolean result = false;
-
-        // FIXME: how to find the right kernel module by interface name?
-        // Assume for now the interface name does not change
-        // Note that WiFiConfig.getDriver() below usually returns the "nl80211", not the
-        // the chipset kernel module (e.g. bcmdhd)
-        // s_logger.info("{} driver: '{}'", interfaceName, wifiConfig.getDriver());
-
-        if (KuraConstants.ReliaGATE_10_05.getTargetName().equals(TARGET_NAME) && "wlan0".equals(interfaceName)) {
-            SafeProcess proc = null;
-            String cmd = "lsmod";
-            try {
-                logger.debug(EXECUTING_CMD_MSG, cmd);
-                proc = ProcessUtil.exec(cmd);
-                if (proc.waitFor() != 0) {
-                    throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, cmd, proc.exitValue());
-                }
-                // get the output
-                result = isKernelModuleLoadedParse(cmd, proc);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formInterruptedCommandMessage(cmd));
-            } catch (Exception e) {
-                throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
-            } finally {
-                if (proc != null) {
-                    proc.destroy();
-                }
-            }
-        }
-        return result;
-    }
-
-    private static boolean isKernelModuleLoadedParse(String cmd, SafeProcess proc) throws KuraException {
-        boolean ret = false;
-        try (InputStreamReader isr = new InputStreamReader(proc.getInputStream());
-                BufferedReader br = new BufferedReader(isr)) {
-            String line = null;
-            while ((line = br.readLine()) != null) {
-                if (line.contains("bcmdhd")) {
-                    ret = true;
-                    break;
-                }
-            }
-        } catch (IOException e) {
-            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
-        }
-        return ret;
-    }
-
-    public static void unloadKernelModule(String interfaceName) throws KuraException {
-        // FIXME: how to find the right kernel module by interface name?
-        // Assume for now the interface name does not change
-        if (KuraConstants.ReliaGATE_10_05.getTargetName().equals(TARGET_NAME) && "wlan0".equals(interfaceName)) {
-            SafeProcess proc = null;
-            String cmd = "rmmod bcmdhd";
-            try {
-                logger.debug(EXECUTING_CMD_MSG, cmd);
-                proc = ProcessUtil.exec(cmd);
-                if (proc.waitFor() != 0) {
-                    throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, cmd, proc.exitValue());
-                }
-            } catch (IOException e) {
-                throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formInterruptedCommandMessage(cmd));
-            } finally {
-                if (proc != null) {
-                    proc.destroy();
-                }
-            }
-        } else {
-            logger.debug("Kernel module unload not needed by platform '{}'", TARGET_NAME);
-        }
-    }
-
-    public static void loadKernelModule(String interfaceName, WifiMode wifiMode) throws KuraException {
-        // FIXME: how to find the right kernel module by interface name?
-        // Assume for now the interface name does not change
-        if (KuraConstants.ReliaGATE_10_05.getTargetName().equals(TARGET_NAME) && "wlan0".equals(interfaceName)) {
-            SafeProcess proc = null;
-            String cmd = null;
-            if (wifiMode == WifiMode.MASTER) {
-                cmd = "modprobe -S 3.12.6 bcmdhd firmware_path=\"/system/etc/firmware/fw_bcm43438a0_apsta.bin\" op_mode=2";
-            } else if (wifiMode == WifiMode.INFRA || wifiMode == WifiMode.ADHOC) {
-                cmd = "modprobe -S 3.12.6 bcmdhd";
-            } else {
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR,
-                        "Don't know what to load for WifiMode " + wifiMode);
-            }
-
-            try {
-                logger.debug(EXECUTING_CMD_MSG, cmd);
-                proc = ProcessUtil.exec(cmd);
-                if (proc.waitFor() != 0) {
-                    throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, cmd, proc.exitValue());
-                }
-            } catch (IOException e) {
-                throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formInterruptedCommandMessage(cmd));
-            } finally {
-                if (proc != null) {
-                    proc.destroy();
-                }
-            }
-        } else {
-            logger.debug("Kernel module load not needed by platform '{}'", TARGET_NAME);
-        }
-    }
-
-    public static boolean isKernelModuleLoadedForMode(String interfaceName, WifiMode wifiMode) throws KuraException {
-        boolean result = false;
-
-        // Assume for now the interface name does not change.
-        if (KuraConstants.ReliaGATE_10_05.getTargetName().equals(TARGET_NAME) && "wlan0".equals(interfaceName)) {
-            SafeProcess proc = null;
-            String cmd = "systool -vm bcmdhd";
-            try {
-                logger.debug(EXECUTING_CMD_MSG, cmd);
-                proc = ProcessUtil.exec(cmd);
-                if (proc.waitFor() != 0) {
-                    throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, cmd, proc.exitValue());
-                }
-                // get the output
-                result = isKernelModuleLoadedForModeParse(cmd, wifiMode, proc);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formInterruptedCommandMessage(cmd));
-            } catch (Exception e) {
-                throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
-            } finally {
-                if (proc != null) {
-                    proc.destroy();
-                }
-            }
-        } else {
-            result = true;
-        }
-        return result;
-    }
-
-    private static boolean isKernelModuleLoadedForModeParse(String cmd, WifiMode wifiMode, SafeProcess proc)
-            throws KuraException {
-        boolean ret = false;
-        try (InputStreamReader isr = new InputStreamReader(proc.getInputStream());
-                BufferedReader br = new BufferedReader(isr)) {
-            String line = null;
-            while ((line = br.readLine()) != null) {
-                if (line.contains("op_mode") && compareModes(line, wifiMode)) {
-                    ret = true;
-                    break;
-                }
-            }
-        } catch (IOException e) {
-            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
-        }
-        return ret;
-    }
-
-    private static boolean compareModes(String line, WifiMode wifiMode) {
-        return line.contains("0") && wifiMode.equals(WifiMode.INFRA)
-                || line.contains("2") && wifiMode.equals(WifiMode.MASTER);
-
-    }
-
-    public static boolean isWifiDeviceOn(String interfaceName) {
-        boolean deviceOn = false;
-        // FIXME Assume for now the interface name does not change
-        if (KuraConstants.Reliagate_10_20.getTargetName().equals(TARGET_NAME) && "wlan0".equals(interfaceName)) {
-            File fDevice = new File("/sys/bus/pci/devices/0000:01:00.0");
-            if (fDevice.exists()) {
-                deviceOn = true;
-            }
-        }
-        logger.debug("isWifiDeviceOn()? {}", deviceOn);
-        return deviceOn;
-    }
-
-    public static void turnWifiDeviceOn(String interfaceName) throws Exception {
-        // FIXME Assume for now the interface name does not change
-        if (KuraConstants.Reliagate_10_20.getTargetName().equals(TARGET_NAME) && "wlan0".equals(interfaceName)) {
-            logger.info("Turning Wifi device ON ...");
-            try (FileWriter fw = new FileWriter("/sys/bus/pci/rescan")) {
-                fw.write("1");
-            }
-        }
-    }
-
-    public static void turnWifiDeviceOff(String interfaceName) throws Exception {
-        // FIXME Assume for now the interface name does not change
-        if (KuraConstants.Reliagate_10_20.getTargetName().equals(TARGET_NAME) && "wlan0".equals(interfaceName)) {
-            logger.info("Turning Wifi device OFF ...");
-            try (FileWriter fw = new FileWriter("/sys/bus/pci/devices/0000:01:00.0/remove")) {
-                fw.write("1");
-            }
-        }
     }
 
     private static String formIfconfigIfaceCommand(String ifaceName) {

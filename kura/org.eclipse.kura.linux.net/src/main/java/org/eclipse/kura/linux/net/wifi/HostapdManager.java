@@ -17,32 +17,18 @@ import java.util.Collection;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.linux.util.LinuxProcessUtil;
-import org.eclipse.kura.linux.net.util.KuraSupportedPlatforms;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Describes Hostapd Manager
- * 
- * @author ibinshtok
  *
  */
 public class HostapdManager {
 
     private static Logger logger = LoggerFactory.getLogger(HostapdManager.class);
 
-    private static final String OS_VERSION = System.getProperty("kura.os.version");
     private static final String HOSTAPD_EXEC = "hostapd";
-
-    private static boolean isIntelEdison = false;
-
-    static {
-        StringBuilder sb = new StringBuilder(KuraSupportedPlatforms.YOCTO_161.getImageName());
-        sb.append('_').append(KuraSupportedPlatforms.YOCTO_161.getImageVersion()).append('_');
-        if (OS_VERSION.startsWith(sb.toString())) {
-            isIntelEdison = true;
-        }
-    }
 
     private HostapdManager() {
     }
@@ -74,12 +60,7 @@ public class HostapdManager {
 
     public static void stop(String ifaceName) throws KuraException {
         try {
-            if (!isIntelEdison) {
-                LinuxProcessUtil.stopAndKill(getPid(ifaceName));
-            } else {
-                LinuxProcessUtil.start("systemctl stop hostapd");
-                Thread.sleep(1000);
-            }
+            LinuxProcessUtil.stopAndKill(getPid(ifaceName));
         } catch (Exception e) {
             throw KuraException.internalError(e);
         }
@@ -111,22 +92,18 @@ public class HostapdManager {
 
     private static String generateStartCommand(String ifaceName) {
         StringBuilder cmd = new StringBuilder();
-        if (isIntelEdison) {
-            cmd.append("systemctl start hostapd");
-        } else {
-            File configFile = new File(getHostapdConfigFileName(ifaceName));
-            cmd.append(HOSTAPD_EXEC).append(" -B ").append(configFile.getAbsolutePath());
-        }
+
+        File configFile = new File(getHostapdConfigFileName(ifaceName));
+        cmd.append(HOSTAPD_EXEC).append(" -B ").append(configFile.getAbsolutePath());
+
         return cmd.toString();
     }
 
     public static String getHostapdConfigFileName(String ifaceName) {
         StringBuilder sb = new StringBuilder();
-        if (isIntelEdison) {
-            sb.append("/etc/hostapd/hostapd.conf");
-        } else {
-            sb.append("/etc/hostapd-").append(ifaceName).append(".conf");
-        }
+
+        sb.append("/etc/hostapd-").append(ifaceName).append(".conf");
+
         return sb.toString();
     }
 

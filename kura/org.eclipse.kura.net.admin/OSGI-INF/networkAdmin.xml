@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+    Copyright (c) 2011, 2018 Eurotech and/or its affiliates
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -23,5 +23,6 @@
    <reference bind="setConfigurationService" cardinality="1..1" interface="org.eclipse.kura.configuration.ConfigurationService" name="ConfigurationService" policy="static" unbind="unsetConfigurationService"/>
    <reference bind="setNetworkConfigurationService" cardinality="1..1" interface="org.eclipse.kura.net.admin.NetworkConfigurationService" name="NetworkConfigurationService" policy="static" unbind="unsetNetworkConfigurationService"/>
    <reference bind="setFirewallConfigurationService" cardinality="1..1" interface="org.eclipse.kura.net.admin.FirewallConfigurationService" name="FirewallConfigurationService" policy="static" unbind="unsetFirewallConfigurationService"/>
-   <reference bind="setSystemService" cardinality="1..1" interface="org.eclipse.kura.system.SystemService" name="SystemService" policy="static" unbind="unsetSystemService"/>
+   <reference bind="setDnsServerService" cardinality="1..1" interface="org.eclipse.kura.net.dns.DnsServer" name="DNSService" policy="static" unbind="unsetDnsServerService"/>
+   <reference bind="setWifiUtilsService" cardinality="0..1" interface="org.eclipse.kura.net.wifi.WifiUtils" name="WifiUtils" policy="static" unbind="unsetWifiUtilsService"/>
 </scr:component>

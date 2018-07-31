@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -11,8 +11,8 @@
  *******************************************************************************/
 package org.eclipse.kura.net.wifi;
 
-import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.kura.net.NetInterface;
 import org.osgi.annotation.versioning.ProviderType;
@@ -21,7 +21,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * Wifi interface
  *
  * @param <T>
- * 
+ *
  * @noimplement This interface is not intended to be implemented by clients.
  */
 @ProviderType
@@ -32,12 +32,18 @@ public interface WifiInterface<T extends WifiInterfaceAddress> extends NetInterf
      */
     public enum Capability {
         /** no capabilities supported */
-        NONE, /** The device supports the 40-bit WEP cipher. */
-        CIPHER_WEP40, /** The device supports the 104-bit WEP cipher. */
-        CIPHER_WEP104, /** The device supports the TKIP cipher. */
-        CIPHER_TKIP, /** The device supports the CCMP cipher. */
-        CIPHER_CCMP, /** The device supports the WPA encryption/authentication protocol. */
-        WPA, /** The device supports the RSN encryption/authentication protocol. */
+        NONE,
+        /** The device supports the 40-bit WEP cipher. */
+        CIPHER_WEP40,
+        /** The device supports the 104-bit WEP cipher. */
+        CIPHER_WEP104,
+        /** The device supports the TKIP cipher. */
+        CIPHER_TKIP,
+        /** The device supports the CCMP cipher. */
+        CIPHER_CCMP,
+        /** The device supports the WPA encryption/authentication protocol. */
+        WPA,
+        /** The device supports the RSN encryption/authentication protocol. */
         RSN;
     }
 
@@ -45,8 +51,9 @@ public interface WifiInterface<T extends WifiInterfaceAddress> extends NetInterf
      * Returns the the capabilities of the wireless device.
      *
      * @return
+     * @since 2.0
      */
-    public EnumSet<Capability> getCapabilities();
+    public Set<Capability> getCapabilities();
 
     /**
      * Returns a List of all InterfaceAddresses of this network interface.

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -17,7 +17,7 @@ import java.util.Collection;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.linux.util.LinuxProcessUtil;
-import org.eclipse.kura.linux.net.util.KuraConstants;
+import org.eclipse.kura.linux.net.util.KuraSupportedPlatforms;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,10 +37,9 @@ public class HostapdManager {
     private static boolean isIntelEdison = false;
 
     static {
-        StringBuilder sb = new StringBuilder(KuraConstants.Intel_Edison.getImageName());
-        sb.append('_').append(KuraConstants.Intel_Edison.getImageVersion()).append('_')
-                .append(KuraConstants.Intel_Edison.getTargetName());
-        if (OS_VERSION.equals(sb.toString())) {
+        StringBuilder sb = new StringBuilder(KuraSupportedPlatforms.YOCTO_161.getImageName());
+        sb.append('_').append(KuraSupportedPlatforms.YOCTO_161.getImageVersion()).append('_');
+        if (OS_VERSION.startsWith(sb.toString())) {
             isIntelEdison = true;
         }
     }

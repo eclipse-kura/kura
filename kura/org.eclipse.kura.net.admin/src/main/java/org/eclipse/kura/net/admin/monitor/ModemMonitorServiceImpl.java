@@ -31,8 +31,6 @@ import org.eclipse.kura.comm.CommURI;
 import org.eclipse.kura.core.net.AbstractNetInterface;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.linux.net.ConnectionInfoImpl;
-import org.eclipse.kura.linux.net.modem.SupportedSerialModemInfo;
-import org.eclipse.kura.linux.net.modem.SupportedSerialModemsInfo;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemInfo;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemsInfo;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
@@ -54,8 +52,6 @@ import org.eclipse.kura.net.admin.modem.HspaCellularModem;
 import org.eclipse.kura.net.admin.modem.IModemLinkService;
 import org.eclipse.kura.net.admin.modem.PppFactory;
 import org.eclipse.kura.net.admin.modem.PppState;
-import org.eclipse.kura.net.admin.modem.SupportedSerialModemsFactoryInfo;
-import org.eclipse.kura.net.admin.modem.SupportedSerialModemsFactoryInfo.SerialModemFactoryInfo;
 import org.eclipse.kura.net.admin.modem.SupportedUsbModemsFactoryInfo;
 import org.eclipse.kura.net.admin.modem.SupportedUsbModemsFactoryInfo.UsbModemFactoryInfo;
 import org.eclipse.kura.net.admin.visitor.linux.util.KuranetConfig;
@@ -860,11 +856,6 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
             SupportedUsbModemInfo supportedUsbModemInfo = SupportedUsbModemsInfo.getModem((UsbModemDevice) modemDevice);
             UsbModemFactoryInfo usbModemFactoryInfo = SupportedUsbModemsFactoryInfo.getModem(supportedUsbModemInfo);
             modemFactoryClass = usbModemFactoryInfo.getModemFactoryClass();
-        } else if (modemDevice instanceof SerialModemDevice) {
-            SupportedSerialModemInfo supportedSerialModemInfo = SupportedSerialModemsInfo.getModem();
-            SerialModemFactoryInfo serialModemFactoryInfo = SupportedSerialModemsFactoryInfo
-                    .getModem(supportedSerialModemInfo);
-            modemFactoryClass = serialModemFactoryInfo.getModemFactoryClass();
         }
 
         return modemFactoryClass;

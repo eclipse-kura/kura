@@ -23,8 +23,6 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.comm.CommConnection;
 import org.eclipse.kura.comm.CommURI;
 import org.eclipse.kura.linux.net.modem.ModemDriver;
-import org.eclipse.kura.linux.net.modem.SupportedSerialModemInfo;
-import org.eclipse.kura.linux.net.modem.SupportedSerialModemsInfo;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemInfo;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemsInfo;
 import org.eclipse.kura.linux.net.modem.UsbModemDriver;
@@ -36,7 +34,6 @@ import org.eclipse.kura.net.modem.ModemPdpContext;
 import org.eclipse.kura.net.modem.ModemPdpContextType;
 import org.eclipse.kura.net.modem.ModemRegistrationStatus;
 import org.eclipse.kura.net.modem.ModemTechnologyType;
-import org.eclipse.kura.net.modem.SerialModemDevice;
 import org.eclipse.kura.usb.UsbModemDevice;
 import org.osgi.service.io.ConnectionFactory;
 import org.slf4j.Logger;
@@ -354,13 +351,6 @@ public class HspaModem implements HspaCellularModem {
                 } else {
                     throw new KuraException(KuraErrorCode.SERIAL_PORT_NOT_EXISTING, "No PPP serial port available");
                 }
-            } else if (this.device instanceof SerialModemDevice) {
-                SupportedSerialModemInfo serialModemInfo = SupportedSerialModemsInfo.getModem();
-                if (serialModemInfo != null) {
-                    port = serialModemInfo.getDriver().getComm().getDataPort();
-                } else {
-                    throw new KuraException(KuraErrorCode.SERIAL_PORT_NOT_EXISTING, "No PPP serial port available");
-                }
             } else {
                 throw new KuraException(KuraErrorCode.UNAVAILABLE_DEVICE, "Unsupported modem device");
             }
@@ -379,13 +369,6 @@ public class HspaModem implements HspaCellularModem {
                 SupportedUsbModemInfo usbModemInfo = SupportedUsbModemsInfo.getModem((UsbModemDevice) this.device);
                 if (usbModemInfo != null) {
                     port = ports.get(usbModemInfo.getAtPort());
-                } else {
-                    throw new KuraException(KuraErrorCode.SERIAL_PORT_NOT_EXISTING, "No AT serial port available");
-                }
-            } else if (this.device instanceof SerialModemDevice) {
-                SupportedSerialModemInfo serialModemInfo = SupportedSerialModemsInfo.getModem();
-                if (serialModemInfo != null) {
-                    port = serialModemInfo.getDriver().getComm().getAtPort();
                 } else {
                     throw new KuraException(KuraErrorCode.SERIAL_PORT_NOT_EXISTING, "No AT serial port available");
                 }
@@ -410,13 +393,6 @@ public class HspaModem implements HspaCellularModem {
                     if (gpsPort >= 0) {
                         port = ports.get(gpsPort);
                     }
-                } else {
-                    throw new KuraException(KuraErrorCode.SERIAL_PORT_NOT_EXISTING, "No GPS serial port available");
-                }
-            } else if (this.device instanceof SerialModemDevice) {
-                SupportedSerialModemInfo serialModemInfo = SupportedSerialModemsInfo.getModem();
-                if (serialModemInfo != null) {
-                    port = serialModemInfo.getDriver().getComm().getGpsPort();
                 } else {
                     throw new KuraException(KuraErrorCode.SERIAL_PORT_NOT_EXISTING, "No GPS serial port available");
                 }
@@ -609,11 +585,6 @@ public class HspaModem implements HspaCellularModem {
                     modemDriver = usbDeviceDrivers.get(0);
                 }
             }
-        } else if (this.device instanceof SerialModemDevice) {
-            SupportedSerialModemInfo serialModemInfo = SupportedSerialModemsInfo.getModem();
-            if (serialModemInfo != null) {
-                modemDriver = serialModemInfo.getDriver();
-            }
         }
         return modemDriver;
     }
@@ -728,13 +699,6 @@ public class HspaModem implements HspaCellularModem {
                 modemTechnologyTypes = usbModemInfo.getTechnologyTypes();
             } else {
                 throw new KuraException(KuraErrorCode.UNAVAILABLE_DEVICE, "No usbModemInfo available");
-            }
-        } else if (dev instanceof SerialModemDevice) {
-            SupportedSerialModemInfo serialModemInfo = SupportedSerialModemsInfo.getModem();
-            if (serialModemInfo != null) {
-                modemTechnologyTypes = serialModemInfo.getTechnologyTypes();
-            } else {
-                throw new KuraException(KuraErrorCode.UNAVAILABLE_DEVICE, "No serialModemInfo available");
             }
         } else {
             throw new KuraException(KuraErrorCode.UNAVAILABLE_DEVICE, "Unsupported modem device");

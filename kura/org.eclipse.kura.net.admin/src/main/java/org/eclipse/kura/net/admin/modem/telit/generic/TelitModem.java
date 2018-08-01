@@ -21,7 +21,6 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.comm.CommConnection;
 import org.eclipse.kura.comm.CommURI;
-import org.eclipse.kura.linux.net.modem.ModemDriver;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemInfo;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemsInfo;
 import org.eclipse.kura.linux.net.modem.UsbModemDriver;
@@ -67,34 +66,35 @@ public abstract class TelitModem {
 
     public void reset() throws KuraException {
 
-        boolean status = false;
-        int offOnDelay = 1000;
-
-        sleep(5000);
-        while (true) {
-            try {
-                status = turnOff();
-                if (status) {
-                    this.gpsEnabled = false;
-                    sleep(offOnDelay);
-                    status = turnOn();
-                    if (!status && isOnGpio()) {
-                        logger.info("reset() :: {} seconds delay, then turn OFF/ON", 35);
-                        offOnDelay = 35000;
-                        continue;
-                    }
-                }
-            } catch (Exception e) {
-                logger.error("Failed to reset the modem", e);
-            }
-            if (status) {
-                logger.info("reset() :: modem reset successful");
-                break;
-            } else {
-                logger.info("reset() :: modem reset failed");
-                sleep(1000);
-            }
-        }
+        // Not used ATM
+        // boolean status = false;
+        // int offOnDelay = 1000;
+        //
+        // sleep(5000);
+        // while (true) {
+        // try {
+        // status = turnOff();
+        // if (status) {
+        // this.gpsEnabled = false;
+        // sleep(offOnDelay);
+        // status = turnOn();
+        // if (!status && isOnGpio()) {
+        // logger.info("reset() :: {} seconds delay, then turn OFF/ON", 35);
+        // offOnDelay = 35000;
+        // continue;
+        // }
+        // }
+        // } catch (Exception e) {
+        // logger.error("Failed to reset the modem", e);
+        // }
+        // if (status) {
+        // logger.info("reset() :: modem reset successful");
+        // break;
+        // } else {
+        // logger.info("reset() :: modem reset failed");
+        // sleep(1000);
+        // }
+        // }
     }
 
     public String getModel() throws KuraException {
@@ -760,32 +760,28 @@ public abstract class TelitModem {
         return gpioOn;
     }
 
-    private boolean turnOff() throws Exception {
+    private void turnOff() throws Exception {
 
-        boolean retVal = true;
-        ModemDriver modemDriver = getModemDriver();
+        UsbModemDriver modemDriver = getModemDriver();
         if (modemDriver != null) {
-            retVal = modemDriver.turnModemOff();
+            modemDriver.turnModemOff();
         }
-        return retVal;
     }
 
-    private boolean turnOn() throws Exception {
+    private void turnOn() throws Exception {
 
-        boolean retVal = true;
-        ModemDriver modemDriver = getModemDriver();
+        UsbModemDriver modemDriver = getModemDriver();
         if (modemDriver != null) {
-            retVal = modemDriver.turnModemOn();
+            modemDriver.turnModemOn();
         }
-        return retVal;
     }
 
-    private ModemDriver getModemDriver() {
+    private UsbModemDriver getModemDriver() {
 
         if (this.device == null) {
             return null;
         }
-        ModemDriver modemDriver = null;
+        UsbModemDriver modemDriver = null;
         if (this.device instanceof UsbModemDevice) {
             SupportedUsbModemInfo usbModemInfo = SupportedUsbModemsInfo.getModem((UsbModemDevice) this.device);
             if (usbModemInfo != null) {

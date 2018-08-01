@@ -136,7 +136,7 @@ public class WpaSupplicantManager {
     public static void stop(String ifaceName) throws KuraException {
         try {
 
-            LinuxProcessUtil.start("systemctl stop hostapd");
+            LinuxProcessUtil.stopAndKill(getPid(ifaceName));
 
             if (ifaceName != null) {
                 LinuxNetworkUtil.disableInterface(ifaceName);

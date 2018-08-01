@@ -43,7 +43,6 @@ import org.eclipse.kura.core.net.modem.ModemInterfaceAddressImpl;
 import org.eclipse.kura.core.net.modem.ModemInterfaceImpl;
 import org.eclipse.kura.core.net.util.NetworkUtil;
 import org.eclipse.kura.linux.net.dns.LinuxDns;
-import org.eclipse.kura.linux.net.modem.ModemDriver;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemInfo;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemsInfo;
 import org.eclipse.kura.linux.net.modem.UsbModemDriver;
@@ -1072,7 +1071,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 
     private void toggleModem(SupportedUsbModemInfo modemInfo) throws Exception {
         while (!stopThread.get()) {
-            ModemDriver modemDriver = null;
+            UsbModemDriver modemDriver = null;
             List<? extends UsbModemDriver> usbDeviceDrivers = modemInfo.getDeviceDrivers();
             if (usbDeviceDrivers != null && !usbDeviceDrivers.isEmpty()) {
                 modemDriver = usbDeviceDrivers.get(0);
@@ -1081,16 +1080,15 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
                 boolean status = false;
                 try {
                     logger.info("toggleModem() :: turning modem off ...");
-                    if (modemDriver.turnModemOff()) {
-                        modemDriver.sleep(3000);
-                        logger.info("toggleModem() :: turning modem on ...");
-                        status = modemDriver.turnModemOn();
-                        if (status) {
-                            logger.info("toggleModem() :: modem has been toggled successfully ...");
-                            stopThread.set(status);
-                            toggleModemNotity();
-                        }
-                    }
+                    modemDriver.turnModemOff();
+                    sleep(3000);
+                    logger.info("toggleModem() :: turning modem on ...");
+                    modemDriver.turnModemOn();
+
+                    logger.info("toggleModem() :: modem has been toggled successfully ...");
+                    stopThread.set(status);
+                    toggleModemNotity();
+
                 } catch (Exception e) {
                     logger.error("toggleModem() :: failed to toggle modem ", e);
                 }
@@ -1098,6 +1096,14 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
             if (!stopThread.get()) {
                 toggleModemWait();
             }
+        }
+    }
+
+    private void sleep(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
     }
 

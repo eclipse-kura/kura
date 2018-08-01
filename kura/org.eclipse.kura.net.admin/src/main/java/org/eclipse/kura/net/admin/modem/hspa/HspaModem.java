@@ -22,7 +22,6 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.comm.CommConnection;
 import org.eclipse.kura.comm.CommURI;
-import org.eclipse.kura.linux.net.modem.ModemDriver;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemInfo;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemsInfo;
 import org.eclipse.kura.linux.net.modem.UsbModemDriver;
@@ -571,12 +570,12 @@ public class HspaModem implements HspaCellularModem {
         }
     }
 
-    protected ModemDriver getModemDriver() {
+    protected UsbModemDriver getModemDriver() {
 
         if (this.device == null) {
             return null;
         }
-        ModemDriver modemDriver = null;
+        UsbModemDriver modemDriver = null;
         if (this.device instanceof UsbModemDevice) {
             SupportedUsbModemInfo usbModemInfo = SupportedUsbModemsInfo.getModem((UsbModemDevice) this.device);
             if (usbModemInfo != null) {

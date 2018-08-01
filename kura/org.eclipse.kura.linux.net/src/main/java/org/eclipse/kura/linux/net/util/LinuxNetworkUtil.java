@@ -1047,9 +1047,10 @@ public class LinuxNetworkUtil {
 
             // FIXME: check the exit code and throw an exception
             LinuxProcessUtil.start("ifconfig " + interfaceName + " up\n");
-            try {
-                LinuxProcessUtil.start("ifup --force " + interfaceName + "\n");
-            } catch (Exception e) {
+
+            int result = LinuxProcessUtil.start("ifup --force " + interfaceName + "\n");
+
+            if (result != 0) {
                 LinuxProcessUtil.start("ifup " + interfaceName + "\n");
             }
         }

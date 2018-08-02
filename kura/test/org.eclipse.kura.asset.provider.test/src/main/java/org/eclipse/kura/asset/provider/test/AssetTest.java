@@ -10,6 +10,7 @@
 package org.eclipse.kura.asset.provider.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -509,10 +510,12 @@ public final class AssetTest {
         assertEquals("driver.pid", ads.get(1).getId());
 
         String[] expectedValues = { "#+enabled", "#+name", "#+type", "#+value.type", "#unit.id" };
+
         final int expectedChannelCount = 4;
         for (int i = 0; i < expectedValues.length; i++) {
             for (int j = 0; j < expectedChannelCount; j++) {
-                assertEquals((j + 1) + ".CH" + expectedValues[i], ads.get(2 + i * expectedChannelCount + j).getId());
+                final String id = (j + 1) + ".CH" + expectedValues[i];
+                assertEquals(1, ads.parallelStream().filter(ad -> ad.getId().equals(id)).count());
             }
         }
     }
@@ -622,6 +625,39 @@ public final class AssetTest {
         sync(asset);
 
         assertEquals(Arrays.asList(true, false), attachSequence);
+
+        initt();
+    }
+
+    /**
+     * Listeners attached to a channel should be detached from the driver if the channel is disabled and reattached if
+     * the channel is enabled again
+     */
+    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @Test
+    public void testCompleteConfigWithDefaults() throws KuraException {
+
+        final Map<String, Object> channels = CollectionUtil.newHashMap();
+        channels.put("kura.service.pid", "AssetTest");
+        channels.put(AssetConstants.ASSET_DESC_PROP.value(), "sample.asset.desc");
+        channels.put(AssetConstants.ASSET_DRIVER_PROP.value(), "non.existing.pid");
+        channels.put("3.CH#+name", "3.CH");
+        channels.put("3.CH#+type", "READ");
+        channels.put("3.CH#+enabled", "false");
+        channels.put("3.CH#+value.type", "INTEGER");
+
+        ((BaseAsset) asset).updated(channels);
+        sync(asset);
+
+        assertFalse(
+                asset.getAssetConfiguration().getAssetChannels().get("3.CH").getConfiguration().containsKey("unit.id"));
+
+        channels.put(AssetConstants.ASSET_DRIVER_PROP.value(), "org.eclipse.kura.asset.stub.driver");
+
+        ((BaseAsset) asset).updated(channels);
+        sync(asset);
+
+        assertEquals(5, asset.getAssetConfiguration().getAssetChannels().get("3.CH").getConfiguration().get("unit.id"));
 
         initt();
     }

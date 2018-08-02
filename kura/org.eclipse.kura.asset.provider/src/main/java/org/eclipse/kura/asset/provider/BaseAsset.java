@@ -140,11 +140,11 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
      *            the service properties
      */
     protected void activate(final ComponentContext componentContext, final Map<String, Object> properties) {
-        logger.debug("Activating Asset...");
+        logger.info("activating...");
         this.context = componentContext;
         this.executor = initBaseAssetExecutor();
         updated(properties);
-        logger.debug("Activating Asset...Done");
+        logger.debug("activating...done");
     }
 
     /**
@@ -155,13 +155,14 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
      */
     public void updated(final Map<String, Object> properties) {
 
-        logger.debug("Retrieving configurations from the properties...");
+        logger.info("loading asset configuration...");
+        final long start = System.currentTimeMillis();
         try {
             this.config = new BaseAssetConfiguration(properties);
         } catch (final Exception e) {
             logger.warn("Failed to retrieve properties from config", e);
         }
-        logger.debug("Retrieving configurations from the properties...Done");
+        logger.info("loading asset configuration...done in {} ms", System.currentTimeMillis() - start);
 
         reopenDriverTracker(this.config.getAssetConfiguration().getDriverPid());
     }
@@ -173,7 +174,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
      *            the component context
      */
     protected void deactivate(final ComponentContext context) {
-        logger.debug("Release Asset Resources...");
+        logger.debug("deactivating...");
 
         if (this.driverServiceTracker != null) {
             this.driverServiceTracker.close();
@@ -181,7 +182,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
 
         executor.shutdown();
 
-        logger.debug("Release Asset Resources...Done");
+        logger.debug("deactivating...done");
     }
 
     /**

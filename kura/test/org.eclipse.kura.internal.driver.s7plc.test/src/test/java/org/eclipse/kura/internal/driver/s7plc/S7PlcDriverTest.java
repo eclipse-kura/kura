@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates and others
  *
  *   All rights reserved. This program and the accompanying materials
  *   are made available under the terms of the Eclipse Public License v1.0
@@ -19,6 +19,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,6 +28,7 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.driver.ChannelDescriptor;
+import org.eclipse.kura.driver.Driver.ConnectionException;
 import org.eclipse.kura.driver.block.BlockFactory;
 import org.eclipse.kura.driver.block.task.BlockTask;
 import org.eclipse.kura.driver.block.task.Mode;
@@ -38,7 +40,16 @@ import Moka7.S7Client;
 
 public class S7PlcDriverTest {
 
-    private static final String CLIENT_FIELD = "client";
+    public static S7PlcDriver createTestDriver(final S7Client client) {
+        return new S7PlcDriver() {
+
+            @Override
+            protected S7ClientState createClientState(S7PlcOptions options) {
+
+                return new S7ClientState(options, client);
+            }
+        };
+    }
 
     @Test
     public void testActivate() {
@@ -47,85 +58,53 @@ public class S7PlcDriverTest {
         S7PlcDriver svc = new S7PlcDriver();
 
         try {
-            svc.activate(null, null);
+            svc.activate(null);
             fail("Exception was expected.");
         } catch (NullPointerException e) {
             // OK
         }
 
-        svc.activate(null, new HashMap<String, Object>());
+        svc.activate(new HashMap<String, Object>());
     }
 
     @Test
-    public void testDeactivate() throws NoSuchFieldException {
+    public void testDeactivate() throws NoSuchFieldException, ConnectionException {
         // check that deactivate tries to disconnect the client
 
-        S7PlcDriver svc = new S7PlcDriver();
-
         S7Client s7Mock = mock(S7Client.class);
-        TestUtil.setFieldValue(svc, CLIENT_FIELD, s7Mock);
+
+        S7PlcDriver svc = createTestDriver(s7Mock);
+
+        svc.activate(Collections.emptyMap());
 
         // deactivate a disconnected driver
-        svc.deactivate(null);
+        svc.deactivate();
 
         verify(s7Mock, times(0)).Disconnect();
 
+        svc.activate(Collections.emptyMap());
+
+        svc.connect();
         // deactivate a connected driver
         s7Mock.Connected = true;
 
-        svc.deactivate(null);
+        svc.deactivate();
 
         verify(s7Mock, times(1)).Disconnect();
     }
 
     @Test
-    public void testUpdatedWithConnectionFailure() throws NoSuchFieldException {
-        // update causes disconnect and reconnect of a connected client; test reconnection exception
-
-        String address = "127.0.0.1";
-        int rack = 1;
-        int slot = 1;
-
-        S7PlcDriver svc = new S7PlcDriver();
-
-        S7Client s7Mock = mock(S7Client.class);
-        TestUtil.setFieldValue(svc, CLIENT_FIELD, s7Mock);
-
-        doAnswer(invocation -> {
-            s7Mock.Connected = false; // set it to false so that connection attempt can be made later on
-
-            return null;
-        }).when(s7Mock).Disconnect();
-
-        when(s7Mock.ConnectTo(address, rack, slot)).thenReturn(1234); // cause exception
-
-        s7Mock.Connected = true;
-
-        Map<String, Object> properties = new HashMap<>();
-        properties.put("host.ip", address);
-        properties.put("rack", rack);
-        properties.put("slot", slot);
-
-        svc.updated(properties);
-
-        assertNotNull(TestUtil.getFieldValue(svc, "options"));
-
-        verify(s7Mock, times(1)).Disconnect();
-        verify(s7Mock, times(1)).ConnectTo(address, rack, slot);
-    }
-
-    @Test
-    public void testUpdated() throws NoSuchFieldException {
+    public void testUpdated() throws NoSuchFieldException, ConnectionException {
         // update causes disconnect and reconnect of a connected client; test normal reconnect
 
         String address = "127.0.0.1";
         int rack = 1;
         int slot = 1;
 
-        S7PlcDriver svc = new S7PlcDriver();
-
         S7Client s7Mock = mock(S7Client.class);
-        TestUtil.setFieldValue(svc, CLIENT_FIELD, s7Mock);
+        S7PlcDriver svc = createTestDriver(s7Mock);
+
+        svc.activate(Collections.emptyMap());
 
         doAnswer(invocation -> {
             s7Mock.Connected = false; // set it to false so that connection attempt can be made later on
@@ -135,6 +114,7 @@ public class S7PlcDriverTest {
 
         when(s7Mock.ConnectTo(address, rack, slot)).thenReturn(0);
 
+        svc.connect();
         s7Mock.Connected = true;
 
         Map<String, Object> properties = new HashMap<>();
@@ -144,7 +124,7 @@ public class S7PlcDriverTest {
 
         svc.updated(properties);
 
-        assertNotNull(TestUtil.getFieldValue(svc, "options"));
+        svc.connect();
 
         verify(s7Mock, times(1)).Disconnect();
         verify(s7Mock, times(1)).ConnectTo(address, rack, slot);
@@ -154,13 +134,10 @@ public class S7PlcDriverTest {
     public void testAuthenticateExceptionWithPassword() throws Throwable {
         // check that an exception is thrown in case password decryption fails
 
-        S7PlcDriver svc = new S7PlcDriver();
-
         String pass = "pass";
-        String dec = "dec";
 
         S7Client s7Mock = mock(S7Client.class);
-        TestUtil.setFieldValue(svc, CLIENT_FIELD, s7Mock);
+        S7PlcDriver svc = createTestDriver(s7Mock);
 
         CryptoService csMock = mock(CryptoService.class);
         svc.setCryptoService(csMock);
@@ -169,23 +146,23 @@ public class S7PlcDriverTest {
                 .thenThrow(new KuraException(KuraErrorCode.CONFIGURATION_ERROR, "test"));
 
         Map<String, Object> properties = new HashMap<>();
-        properties.put("password", pass);
-        svc.updated(properties);
 
-        TestUtil.invokePrivate(svc, "authenticate");
+        properties.put("password", pass);
+        properties.put("authenticate", true);
+
+        svc.updated(properties);
+        svc.connect();
     }
 
     @Test(expected = Exception.class)
     public void testAuthenticateWithException() throws Throwable {
         // check that an exception is thrown when session password fails to be set in the client
 
-        S7PlcDriver svc = new S7PlcDriver();
-
         String pass = "pass";
         String dec = "dec";
 
         S7Client s7Mock = mock(S7Client.class);
-        TestUtil.setFieldValue(svc, CLIENT_FIELD, s7Mock);
+        S7PlcDriver svc = createTestDriver(s7Mock);
 
         when(s7Mock.SetSessionPassword(dec)).thenReturn(123);
 
@@ -195,23 +172,23 @@ public class S7PlcDriverTest {
         when(csMock.decryptAes(pass.toCharArray())).thenReturn(dec.toCharArray());
 
         Map<String, Object> properties = new HashMap<>();
-        properties.put("password", pass);
-        svc.updated(properties);
 
-        TestUtil.invokePrivate(svc, "authenticate");
+        properties.put("password", pass);
+        properties.put("authenticate", true);
+
+        svc.updated(properties);
+        svc.connect();
     }
 
     @Test
     public void testAuthenticate() throws Throwable {
         // test successful authentication
 
-        S7PlcDriver svc = new S7PlcDriver();
-
         String pass = "pass";
         String dec = "dec";
 
         S7Client s7Mock = mock(S7Client.class);
-        TestUtil.setFieldValue(svc, CLIENT_FIELD, s7Mock);
+        S7PlcDriver svc = createTestDriver(s7Mock);
 
         when(s7Mock.SetSessionPassword(dec)).thenReturn(0);
 
@@ -303,18 +280,18 @@ public class S7PlcDriverTest {
     }
 
     @Test
-    public void testRunTaskWithReadMoka7Exception() throws IOException, NoSuchFieldException {
+    public void testRunTaskWithReadMoka7Exception() throws IOException, NoSuchFieldException, ConnectionException {
         // test what happens if read returns just the right value != 0 and Moka7Exception is thrown
-
-        S7PlcDriver svc = new S7PlcDriver();
 
         int db = 3;
         int offset = 0;
         byte[] data = new byte[4];
 
         S7Client s7Mock = mock(S7Client.class);
-        TestUtil.setFieldValue(svc, CLIENT_FIELD, s7Mock);
+        S7PlcDriver svc = createTestDriver(s7Mock);
 
+        svc.activate(Collections.emptyMap());
+        svc.connect();
         s7Mock.Connected = true;
 
         // result != 0 causes exception
@@ -334,20 +311,21 @@ public class S7PlcDriverTest {
     }
 
     @Test(expected = IOException.class)
-    public void testWrite() throws NoSuchFieldException, IOException {
+    public void testWrite() throws NoSuchFieldException, IOException, ConnectionException {
         // test that exception is thrown as a result of an unsuccessful write
-
-        S7PlcDriver svc = new S7PlcDriver();
 
         int db = 3;
         int offset = 0;
         byte[] data = new byte[4];
 
         S7Client s7Mock = mock(S7Client.class);
-        TestUtil.setFieldValue(svc, CLIENT_FIELD, s7Mock);
+        S7PlcDriver svc = createTestDriver(s7Mock);
+        svc.activate(Collections.emptyMap());
 
         // result != 0 causes exception
         when(s7Mock.WriteArea(S7.S7AreaDB, db, offset, data.length, data)).thenReturn(3);
+
+        svc.connect();
 
         svc.write(db, offset, data);
 

@@ -509,10 +509,12 @@ public final class AssetTest {
         assertEquals("driver.pid", ads.get(1).getId());
 
         String[] expectedValues = { "#+enabled", "#+name", "#+type", "#+value.type", "#unit.id" };
+
         final int expectedChannelCount = 4;
         for (int i = 0; i < expectedValues.length; i++) {
             for (int j = 0; j < expectedChannelCount; j++) {
-                assertEquals((j + 1) + ".CH" + expectedValues[i], ads.get(2 + i * expectedChannelCount + j).getId());
+                final String id = (j + 1) + ".CH" + expectedValues[i];
+                assertEquals(1, ads.parallelStream().filter(ad -> ad.getId().equals(id)).count());
             }
         }
     }

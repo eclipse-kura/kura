@@ -24,11 +24,11 @@ import static org.eclipse.kura.asset.provider.AssetConstants.VALUE_TYPE;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.kura.asset.AssetConfiguration;
@@ -205,120 +205,132 @@ public final class BaseAssetConfiguration {
         return (String) properties.get(ASSET_DRIVER_PROP.value());
     }
 
-    private static boolean isValidChannelName(String channelName) {
-        if (isNull(channelName))
-            return false;
-
-        final String prohibitedChars = CHANNEL_NAME_PROHIBITED_CHARS.value();
-
-        for (int i = 0; i < channelName.length(); i++) {
-            if (prohibitedChars.indexOf(channelName.charAt(i)) != -1) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    private static ChannelType getChannelType(final Map<String, Object> properties) {
-        final String channelTypeProp = (String) properties.get(TYPE.value());
-
-        if (channelTypeProp == null) {
-            return null;
-        }
-        return ChannelType.getChannelType(channelTypeProp);
-    }
-
-    private static DataType getDataType(final Map<String, Object> properties) {
-        final String valueTypeProp = (String) properties.get(VALUE_TYPE.value());
-
-        if (valueTypeProp == null) {
-            return null;
-        }
-        return DataType.getDataType(valueTypeProp);
-    }
-
-    private static boolean isEnabled(final Map<String, Object> properties) {
-        try {
-            return Boolean.parseBoolean(properties.get(ENABLED.value()).toString());
-        } catch (Exception e) {
-            logger.debug("Failed to retrieve enabled channel property");
-            return true;
-        }
-    }
-
-    private static Channel extractChannel(final String channelName, final Map<String, Object> properties) {
-        logger.debug("Retrieving single channel information from the properties...");
-        Channel channel = null;
-
-        Map<String, Object> channelConfig = retrieveChannelConfig(channelName, properties);
-        if (channelConfig == null) {
-            return null;
-        }
-
-        final ChannelType channelType = getChannelType(channelConfig);
-        final DataType dataType = getDataType(channelConfig);
-        final boolean isEnabled = isEnabled(channelConfig);
-
-        if (channelType != null && dataType != null) {
-            channel = new Channel(channelName, channelType, dataType, channelConfig);
-            channel.setEnabled(isEnabled);
-        }
-        logger.debug("Retrieving single channel information from the properties...Done");
-        return channel;
-    }
-
-    private static Map<String, Object> retrieveChannelConfig(final String targetChannelName,
-            final Map<String, Object> properties) {
-        final Map<String, Object> channelConfig = CollectionUtil.newConcurrentHashMap();
-        final int propertyBeginIndex = targetChannelName.length() + 1;
-
-        for (final Map.Entry<String, Object> entry : properties.entrySet()) {
-            final String key = entry.getKey();
-            final String channelName = extractChannelName(key);
-            if (channelName == null) {
-                continue;
-            }
-            if (!targetChannelName.equals(channelName)) {
-                continue;
-            }
-            if (key.length() <= propertyBeginIndex) {
-                return null;
-            }
-            final Object value = entry.getValue();
-            if (value != null) {
-                channelConfig.put(key.substring(propertyBeginIndex), value.toString());
-            }
-        }
-        return channelConfig;
-    }
-
-    private static String extractChannelName(String propertyKey) {
-        int pos = propertyKey.indexOf(CHANNEL_PROPERTY_SEPARATOR.value());
-        if (pos <= 0) {
-            return null;
-        }
-        return propertyKey.substring(0, pos);
-    }
-
     private static Map<String, Channel> retreiveChannelList(Map<String, Object> properties) {
-        Set<String> alreadyProcessedChannelNames = new HashSet<>();
-        Map<String, Channel> result = new HashMap<>();
+        final ChannelParser parser = new ChannelParser();
 
         for (Entry<String, Object> e : properties.entrySet()) {
-            String channelName = extractChannelName(e.getKey());
-            if (channelName == null || alreadyProcessedChannelNames.contains(channelName)) {
+            final ChannelProperty property = ChannelProperty.parse(e.getKey());
+
+            if (property == null) {
                 continue;
             }
-            alreadyProcessedChannelNames.add(channelName);
+
+            parser.process(property, e.getValue());
+        }
+
+        return parser.getChannelList();
+    }
+
+    private static final class ChannelProperty {
+
+        final String channelName;
+        final String propertyName;
+
+        ChannelProperty(final String channelName, final String propertyName) {
+            this.channelName = channelName;
+            this.propertyName = propertyName;
+        }
+
+        private static boolean isValidChannelName(String channelName) {
+            if (isNull(channelName))
+                return false;
+
+            final String prohibitedChars = CHANNEL_NAME_PROHIBITED_CHARS.value();
+
+            for (int i = 0; i < channelName.length(); i++) {
+                if (prohibitedChars.indexOf(channelName.charAt(i)) != -1) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        static ChannelProperty parse(final String propertyKey) {
+            int pos = propertyKey.indexOf(CHANNEL_PROPERTY_SEPARATOR.value());
+
+            if (pos <= 0 || pos >= propertyKey.length() - 1) {
+                return null;
+            }
+
+            final String channelName = propertyKey.substring(0, pos);
+
             if (!isValidChannelName(channelName)) {
-                continue;
+                return null;
             }
-            Channel channel = extractChannel(channelName, properties);
-            if (channel != null) {
-                result.put(channelName, channel);
+
+            final String propertyName = propertyKey.substring(pos + 1);
+
+            return new ChannelProperty(channelName, propertyName);
+        }
+    }
+
+    private static final class ChannelParser {
+
+        final Map<String, Map<String, Object>> channels = new HashMap<>();
+
+        private Map<String, Object> getChannelProperties(final String channelName) {
+            return channels.computeIfAbsent(channelName, k -> new HashMap<>());
+        }
+
+        void process(final ChannelProperty property, final Object value) {
+            getChannelProperties(property.channelName).put(property.propertyName, value);
+        }
+
+        final Map<String, Channel> getChannelList() {
+            return channels.entrySet().parallelStream().map(e -> extractChannel(e.getKey(), e.getValue()))
+                    .filter(Objects::nonNull).collect(Collectors.toMap(Channel::getName, c -> c));
+        }
+
+        private static ChannelType getChannelType(final Map<String, Object> properties) {
+            final String channelTypeProp = (String) properties.get(TYPE.value());
+
+            if (channelTypeProp == null) {
+                return null;
+            }
+            return ChannelType.getChannelType(channelTypeProp);
+        }
+
+        private static DataType getDataType(final Map<String, Object> properties) {
+            final String valueTypeProp = (String) properties.get(VALUE_TYPE.value());
+
+            if (valueTypeProp == null) {
+                return null;
+            }
+            return DataType.getDataType(valueTypeProp);
+        }
+
+        private static boolean isEnabled(final Map<String, Object> properties) {
+            try {
+                return Boolean.parseBoolean(properties.get(ENABLED.value()).toString());
+            } catch (Exception e) {
+                logger.debug("Failed to retrieve enabled channel property");
+                return true;
             }
         }
-        return result;
+
+        private static Channel extractChannel(final String channelName, final Map<String, Object> channelConfig) {
+            logger.debug("Retrieving single channel information from the properties...");
+
+            final ChannelType channelType = getChannelType(channelConfig);
+
+            if (channelType == null) {
+                return null;
+            }
+
+            final DataType dataType = getDataType(channelConfig);
+
+            if (dataType == null) {
+                return null;
+            }
+
+            final boolean isEnabled = isEnabled(channelConfig);
+
+            final Channel channel = new Channel(channelName, channelType, dataType, channelConfig);
+            channel.setEnabled(isEnabled);
+
+            logger.debug("Retrieving single channel information from the properties...Done");
+            return channel;
+        }
     }
 }

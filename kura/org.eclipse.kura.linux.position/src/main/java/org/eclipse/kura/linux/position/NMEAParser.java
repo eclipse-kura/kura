@@ -13,6 +13,9 @@ package org.eclipse.kura.linux.position;
 
 import static java.lang.Math.toRadians;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.eclipse.kura.position.NmeaPosition;
 import org.osgi.util.measurement.Measurement;
 import org.osgi.util.measurement.Unit;
@@ -57,7 +60,7 @@ public class NMEAParser {
 
         // first remove the end "*"+chksum
         int starpos = sentence.indexOf('*');
-        final String[] tokens = sentence.substring(0, starpos).split(",");
+        final List<String> tokens = Arrays.asList(sentence.substring(0, starpos).split(","));
 
         /*
          * Starting from 4.0 NMEA specs the GPS device can send messages representing different talkers
@@ -66,108 +69,111 @@ public class NMEAParser {
          * $GS = Glonass
          * $GN = GNSS, that is GPS + Glonass + possibly others
          */
-        if (!tokens[0].startsWith("$G")) {
+        if (!tokens.get(0).startsWith("$G")) {
             // Not a valid token. Return.
             throw new ParseException(Code.INVALID);
         }
 
-        if (tokens[0].endsWith("GGA")) {
+        if (tokens.get(0).endsWith("GGA")) {
             parseGGASentence(tokens);
-        } else if (tokens[0].endsWith("GLL")) {
+        } else if (tokens.get(0).endsWith("GLL")) {
             parseGLLSentence(tokens);
-        } else if (tokens[0].endsWith("RMC")) {
+        } else if (tokens.get(0).endsWith("RMC")) {
             parseRMCSentence(tokens);
-        } else if (tokens[0].endsWith("GSA")) {
+        } else if (tokens.get(0).endsWith("GSA")) {
             parseGSASentence(tokens);
-        } else if (tokens[0].endsWith("VTG")) {
+        } else if (tokens.get(0).endsWith("VTG")) {
             parseVTGSentence(tokens);
-        } else if (!tokens[0].endsWith("GSV") && sentence.indexOf("FOM") == -1 && sentence.indexOf("PPS") == -1) {
+        } else if (!tokens.get(0).endsWith("GSV") && sentence.indexOf("FOM") == -1 && sentence.indexOf("PPS") == -1) {
             throw new ParseException(Code.UNRECOGNIZED);
         }
 
         return this.validPosition;
     }
 
-    private void parseVTGSentence(String[] tokens) {
-        if (tokens.length > 7 && !tokens[7].isEmpty()) {
+    private void parseVTGSentence(List<String> tokens) {
+        if (tokens.size() > 7 && !tokens.get(7).isEmpty()) {
             // conversion km/h in m/s : 1 km/h -> 0,277777778 m/s
-            this.speedNmea = Double.parseDouble(tokens[7]) * 0.277777778;
+            this.speedNmea = Double.parseDouble(tokens.get(7)) * 0.277777778;
         }
     }
 
-    private void parseGSASentence(String[] tokens) {
-        if (tokens.length > 5) {
-            this.validPosition = true;
-            if (!tokens[2].isEmpty()) {
-                this.fix3DNmea = Integer.parseInt(tokens[2]);
+    private void parseGSASentence(List<String> tokens) {
+        if (tokens.size() > 5) {
+            checkPosition(tokens, tokens.size());
+            if (!tokens.get(2).isEmpty()) {
+                this.fix3DNmea = Integer.parseInt(tokens.get(2));
                 if (this.fix3DNmea == 1) {
                     this.validPosition = false;
                 }
-            } else {
-                this.validPosition = false;
             }
-            int index = tokens.length - 3;
-            if (!tokens[index].isEmpty()) {
-                this.pdopNmea = Double.parseDouble(tokens[index]);
-            } else {
-                this.validPosition = false;
+            int index = tokens.size() - 3;
+            if (!tokens.get(index).isEmpty()) {
+                this.pdopNmea = Double.parseDouble(tokens.get(index));
             }
-            if (!tokens[index + 1].isEmpty()) {
-                this.hdopNmea = Double.parseDouble(tokens[index + 1]);
-            } else {
-                this.validPosition = false;
+            if (!tokens.get(index + 1).isEmpty()) {
+                this.hdopNmea = Double.parseDouble(tokens.get(index + 1));
             }
-            if (!tokens[index + 2].isEmpty()) {
-                this.vdopNmea = Double.parseDouble(tokens[index + 2]);
-            } else {
-                this.validPosition = false;
+            if (!tokens.get(index + 2).isEmpty()) {
+                this.vdopNmea = Double.parseDouble(tokens.get(index + 2));
             }
         } else {
             this.validPosition = false;
         }
     }
 
-    private void parseRMCSentence(String[] tokens) {
-        if (tokens.length > 8) {
-            this.validPosition = true;
-            if (!tokens[1].isEmpty()) {
-                this.timeNmea = tokens[1];
+    private void parseRMCSentence(List<String> tokens) {
+        if (tokens.size() > 9) {
+            checkPosition(tokens, 9);
+            if (!tokens.get(1).isEmpty()) {
+                this.timeNmea = tokens.get(1);
             }
-            if (!tokens[2].isEmpty()) { // check validity
-                if (!new String("A").equals(tokens[2])) {
+            if (!tokens.get(2).isEmpty()) { // check validity
+                this.validFix = tokens.get(2).charAt(0);
+                if (!"A".equals(tokens.get(2))) {
                     this.validPosition = false;
                 }
-                this.validFix = tokens[2].charAt(0);
             } else {
-                this.validPosition = false;
                 this.validFix = 'V';
             }
-            if (!tokens[3].isEmpty()) {
-                this.latNmea = convertPositionlat(tokens[3], tokens[4]);
-            } else {
-                this.validPosition = false;
+            if (!tokens.get(3).isEmpty() && !tokens.get(4).isEmpty()) {
+                this.latNmea = convertPositionlat(tokens.get(3), tokens.get(4));
+                this.latitudeHemisphere = tokens.get(4).charAt(0);
             }
-            if (!tokens[4].isEmpty()) {
-                this.latitudeHemisphere = tokens[4].charAt(0);
-            } 
-            if (!tokens[5].isEmpty()) {
-                this.longNmea = convertPositionlon(tokens[5], tokens[6]);
-            } else {
-                this.validPosition = false;
+            if (!tokens.get(5).isEmpty() && !tokens.get(6).isEmpty()) {
+                this.longNmea = convertPositionlon(tokens.get(5), tokens.get(6));
+                this.longitudeHemisphere = tokens.get(6).charAt(0);
             }
-            if (!tokens[6].isEmpty()) {
-                this.longitudeHemisphere = tokens[6].charAt(0);
-            } 
-            if (!tokens[7].isEmpty()) {
+            if (!tokens.get(7).isEmpty()) {
                 // conversion speed in knots to m/s : 1 m/s = 1.94384449 knots
-                this.speedNmea = Double.parseDouble(tokens[7]) / 1.94384449;
+                this.speedNmea = Double.parseDouble(tokens.get(7)) / 1.94384449;
             }
-            if (!tokens[8].isEmpty()) {
-                this.trackNmea = Double.parseDouble(tokens[8]);
+            if (!tokens.get(8).isEmpty()) {
+                this.trackNmea = Double.parseDouble(tokens.get(8));
             }
-            if (!tokens[9].isEmpty()) {
-                this.dateNmea = tokens[9];
-            } else {
+            if (!tokens.get(9).isEmpty()) {
+                this.dateNmea = tokens.get(9);
+            }
+        } else {
+            this.validPosition = false;
+        }
+    }
+
+    private void parseGLLSentence(List<String> tokens) {
+        if (tokens.size() > 6) {
+            checkPosition(tokens, 6);
+            if (!tokens.get(1).isEmpty() && !tokens.get(2).isEmpty()) {
+                this.latNmea = convertPositionlat(tokens.get(1), tokens.get(2));
+                this.latitudeHemisphere = tokens.get(2).charAt(0);
+            }
+            if (!tokens.get(3).isEmpty() && !tokens.get(4).isEmpty()) {
+                this.longNmea = convertPositionlon(tokens.get(3), tokens.get(4));
+                this.longitudeHemisphere = tokens.get(4).charAt(0);
+            }
+            if (!tokens.get(5).isEmpty()) {
+                this.timeNmea = tokens.get(5);
+            }
+            if (!tokens.get(6).isEmpty() && !"A".equals(tokens.get(6))) { // check validity
                 this.validPosition = false;
             }
         } else {
@@ -175,92 +181,43 @@ public class NMEAParser {
         }
     }
 
-    private void parseGLLSentence(String[] tokens) {
-        if (tokens.length > 5) {
-            this.validPosition = true;
-            if (!tokens[1].isEmpty()) {
-                this.latNmea = convertPositionlat(tokens[1], tokens[2]);
-            } else {
-                this.validPosition = false;
+    private void parseGGASentence(List<String> tokens) {
+        if (tokens.size() > 9) {
+            checkPosition(tokens, 9);
+            if (!tokens.get(1).isEmpty()) {
+                this.timeNmea = tokens.get(1);
             }
-            if (!tokens[2].isEmpty()) {
-                this.latitudeHemisphere = tokens[2].charAt(0);
-            } 
-            if (!tokens[3].isEmpty()) {
-                this.longNmea = convertPositionlon(tokens[3], tokens[4]);
-            } else {
-                this.validPosition = false;
+            if (!tokens.get(2).isEmpty() && !tokens.get(3).isEmpty()) {
+                this.latNmea = convertPositionlat(tokens.get(2), tokens.get(3));
+                this.latitudeHemisphere = tokens.get(3).charAt(0);
             }
-            if (!tokens[4].isEmpty()) {
-                this.longitudeHemisphere = tokens[4].charAt(0);
-            } 
-            if (!tokens[5].isEmpty()) {
-                this.timeNmea = tokens[5];
-            } else {
-                this.validPosition = false;
+            if (!tokens.get(4).isEmpty() && tokens.get(5).isEmpty()) {
+                this.longNmea = convertPositionlon(tokens.get(4), tokens.get(5));
+                this.longitudeHemisphere = tokens.get(5).charAt(0);
             }
-            if (!tokens[6].isEmpty()) { // check validity
-                if (!new String("A").equals(tokens[6])) {
-                    this.validPosition = false;
-                }
-            } else {
-                this.validPosition = false;
-            }
-        } else {
-            this.validPosition = false;
-        }
-    }
-
-    private void parseGGASentence(String[] tokens) {
-        if (tokens.length > 9) {
-            this.validPosition = true;
-            if (!tokens[1].isEmpty()) {
-                this.timeNmea = tokens[1];
-            } else {
-                this.validPosition = false;
-            }
-            if (!tokens[2].isEmpty()) {
-                this.latNmea = convertPositionlat(tokens[2], tokens[3]);
-            } else {
-                this.validPosition = false;
-            }
-            if (!tokens[3].isEmpty()) {
-                this.latitudeHemisphere = tokens[3].charAt(0);
-            } 
-            if (!tokens[4].isEmpty()) {
-                this.longNmea = convertPositionlon(tokens[4], tokens[5]);
-            } else {
-                this.validPosition = false;
-            }
-            if (!tokens[5].isEmpty()) {
-                this.longitudeHemisphere = tokens[5].charAt(0);
-            } 
-            if (!tokens[6].isEmpty()) {
-                this.fixQuality = Integer.parseInt(tokens[6]);
+            if (!tokens.get(6).isEmpty()) {
+                this.fixQuality = Integer.parseInt(tokens.get(6));
                 if (this.fixQuality == 0) {
                     this.validPosition = false;
                 }
-            } else {
-                this.validPosition = false;
             }
-            if (!tokens[7].isEmpty()) {
-                this.nrSatellites = Integer.parseInt(tokens[7]);
-            } else {
-                this.validPosition = false;
+            if (!tokens.get(7).isEmpty()) {
+                this.nrSatellites = Integer.parseInt(tokens.get(7));
             }
-            if (!tokens[8].isEmpty()) {
-                this.dopNmea = Double.parseDouble(tokens[8]);
-            } else {
-                this.validPosition = false;
+            if (!tokens.get(8).isEmpty()) {
+                this.dopNmea = Double.parseDouble(tokens.get(8));
             }
-            if (!tokens[9].isEmpty()) {
-                this.altNmea = Double.parseDouble(tokens[9]);
-            } else {
-                this.validPosition = false;
+            if (!tokens.get(9).isEmpty()) {
+                this.altNmea = Double.parseDouble(tokens.get(9));
             }
         } else {
             this.validPosition = false;
         }
+    }
+
+    private void checkPosition(List<String> tokens, int size) {
+        // Create a list containing the indexes of empty tokens
+        this.validPosition = tokens.stream().limit(size).noneMatch(String::isEmpty);
     }
 
     /**
@@ -417,12 +374,8 @@ public class NMEAParser {
         UNRECOGNIZED
     }
 
-    @SuppressWarnings("serial")
     public class ParseException extends Exception {
 
-        /**
-         *
-         */
         private static final long serialVersionUID = -1441433820817330483L;
         private final Code code;
 

@@ -77,7 +77,7 @@ public class CommandCloudApp implements ConfigurableComponent, PasswordCommandSe
         try {
             requestHandlerRegistry.registerRequestHandler(APP_ID, this);
         } catch (KuraException e) {
-            logger.info("Unable to register cloudlet {} in {}", APP_ID, requestHandlerRegistry.getClass().getName());
+            logger.info("Unable to register request handler {} in {}", APP_ID, requestHandlerRegistry.getClass().getName());
         }
     }
 
@@ -85,7 +85,7 @@ public class CommandCloudApp implements ConfigurableComponent, PasswordCommandSe
         try {
             requestHandlerRegistry.unregister(APP_ID);
         } catch (KuraException e) {
-            logger.info("Unable to register cloudlet {} in {}", APP_ID, requestHandlerRegistry.getClass().getName());
+            logger.info("Unable to register request handler {} in {}", APP_ID, requestHandlerRegistry.getClass().getName());
         }
     }
 
@@ -98,7 +98,7 @@ public class CommandCloudApp implements ConfigurableComponent, PasswordCommandSe
     // This component inherits the activation methods from the parent
     // class CloudApp.
     protected void activate(Map<String, Object> properties) {
-        logger.info("Cloudlet {} has started with config!", APP_ID);
+        logger.info("Request handler {} has started with config!", APP_ID);
 
         updated(properties);
     }
@@ -128,7 +128,7 @@ public class CommandCloudApp implements ConfigurableComponent, PasswordCommandSe
     }
 
     protected void deactivate(ComponentContext componentContext) {
-        logger.info("Cloudlet {} is deactivating!", APP_ID);
+        logger.info("Request handler {} is deactivating!", APP_ID);
 
     }
 

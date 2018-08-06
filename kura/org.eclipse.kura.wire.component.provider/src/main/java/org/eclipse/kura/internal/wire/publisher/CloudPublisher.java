@@ -18,6 +18,7 @@ import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -55,6 +56,8 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 public final class CloudPublisher implements WireReceiver, ConfigurableComponent {
 
     private static final Logger logger = LogManager.getLogger();
+
+    private static final String ASSET_NAME_PROPERTY_KEY = "assetName";
 
     private CloudPublisherOptions cloudPublisherOptions;
 
@@ -249,12 +252,23 @@ public final class CloudPublisher implements WireReceiver, ConfigurableComponent
 
         try {
             for (final WireRecord dataRecord : wireRecords) {
+                final Map<String, Object> properties = buildKuraMessageProperties(dataRecord);
                 final KuraPayload kuraPayload = buildKuraPayload(dataRecord);
-                KuraMessage message = new KuraMessage(kuraPayload);
+                KuraMessage message = new KuraMessage(kuraPayload, properties);
                 this.cloudConnectionPublisher.publish(message);
             }
         } catch (final Exception e) {
             logger.error("Error in publishing wire records using cloud publisher..", e);
         }
+    }
+
+    private Map<String, Object> buildKuraMessageProperties(final WireRecord wireRecord) {
+        Map<String, TypedValue<?>> wireRecordProps = wireRecord.getProperties();
+
+        final Map<String, Object> properties = new HashMap<>();
+        if (wireRecordProps.containsKey(ASSET_NAME_PROPERTY_KEY)) {
+            properties.put(ASSET_NAME_PROPERTY_KEY, wireRecordProps.get(ASSET_NAME_PROPERTY_KEY).getValue());
+        }
+        return properties;
     }
 }

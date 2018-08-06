@@ -20,7 +20,6 @@
    <property name="kura.ui.service.hide" type="Boolean" value="true"/>
    <service>
       <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
-      <provide interface="org.eclipse.kura.cloud.CloudClientListener"/>
       <provide interface="org.eclipse.kura.wire.WireComponent"/>
       <provide interface="org.eclipse.kura.wire.WireReceiver"/>
       <provide interface="org.osgi.service.wireadmin.Consumer"/>

@@ -144,6 +144,7 @@ public class DataServiceTest implements DataServiceListener {
                     Integer id = s_dataService.publish(MSG_TOPIC1, MSG_PAYLOAD.getBytes(), 0, false, DFLT_MSG_PRIORITY);
                     s_qos0MsgIds.add(id);
                 }
+                Thread.sleep(1000);
             } catch (KuraStoreException e) {
                 break;
             }

@@ -100,7 +100,8 @@ public class NMEAParser {
 
     private void parseGSASentence(List<String> tokens) {
         if (tokens.size() > 5) {
-            checkPosition(tokens, tokens.size());
+            // Check only last 3 items for validity
+            checkPosition(tokens.subList(tokens.size() - 3, tokens.size()), 3);
             if (!tokens.get(2).isEmpty()) {
                 this.fix3DNmea = Integer.parseInt(tokens.get(2));
                 if (this.fix3DNmea == 1) {
@@ -191,7 +192,7 @@ public class NMEAParser {
                 this.latNmea = convertPositionlat(tokens.get(2), tokens.get(3));
                 this.latitudeHemisphere = tokens.get(3).charAt(0);
             }
-            if (!tokens.get(4).isEmpty() && tokens.get(5).isEmpty()) {
+            if (!tokens.get(4).isEmpty() && !tokens.get(5).isEmpty()) {
                 this.longNmea = convertPositionlon(tokens.get(4), tokens.get(5));
                 this.longitudeHemisphere = tokens.get(5).charAt(0);
             }

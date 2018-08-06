@@ -8,6 +8,8 @@ Service-Component: OSGI-INF/*.xml
 Import-Package: org.eclipse.kura;version="[1.0,2.0)",
  org.eclipse.kura.bluetooth;version="[1.1,2.0)",
  org.eclipse.kura.cloud;version="[1.0,2.0)",
+ org.eclipse.kura.cloudconnection.message;version="[1.0,2.0)",
+ org.eclipse.kura.cloudconnection.publisher;version="[1.0,2.0)",
  org.eclipse.kura.configuration;version="[1.0,2.0)",
  org.eclipse.kura.message;version="[1.0,2.0)",
  org.osgi.service.component;version="1.2.0",

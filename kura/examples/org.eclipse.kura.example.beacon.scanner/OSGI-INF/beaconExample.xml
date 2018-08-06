@@ -10,6 +10,11 @@
               name="BluetoothService" 
               policy="static" 
               unbind="unsetBluetoothService"/>
-    <reference bind="setCloudService" cardinality="1..1" interface="org.eclipse.kura.cloud.CloudService" name="CloudService" policy="static" unbind="unsetCloudService"/>
+    <reference name="CloudPublisher"
+           policy="static"
+           bind="setCloudPublisher"
+           unbind="unsetCloudPublisher"
+           cardinality="0..1"
+           interface="org.eclipse.kura.cloudconnection.publisher.CloudPublisher"/>
     <property name="service.pid" type="String" value="org.eclipse.kura.example.beacon.scanner.BeaconScannerExample"/>
 </scr:component>

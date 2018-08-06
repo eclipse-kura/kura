@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+    Copyright (c) 2011, 2018 Eurotech and/or its affiliates
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -19,33 +19,23 @@
         
         <Icon resource="http://s3.amazonaws.com/kura-resources/application/icon/applications-other.png" size="32"/>
         
-        <AD id="publish.semanticTopic"  
-            name="publish.semanticTopic"
+        <AD id="CloudPublisher.target"
+            name="CloudPublisher Target Filter"
             type="String"
-            cardinality="0" 
-            required="true"
-            default="data" 
-            description="Default semantic topic to publish the messages to."/>
-        
-        <AD id="publish.qos"  
-            name="publish.qos"
-            type="Integer"
-            cardinality="0" 
-            required="true"
-            default="0" 
-            description="Default QoS to publish the messages with.">
-           <Option label="Fire and forget" value="0"/>
-           <Option label="Al least once" value="1"/>          
-           <Option label="At most once" value="2"/>
+            cardinality="0"
+            required="false"
+            default="(kura.service.pid=changeme)"
+            description="Specifies, as an OSGi target filter, the pid of the Cloud Publisher used to publish messages to the cloud platform.">
         </AD>
-
-        <AD id="publish.retain"  
-            name="publish.retain"
-            type="Boolean"
-            cardinality="0" 
-            required="true"
-            default="false" 
-            description="Default retaing flag for the published messages."/>
+        
+        <AD id="CloudSubscriber.target"
+            name="CloudSubscriber Target Filter"
+            type="String"
+            cardinality="0"
+            required="false"
+            default="(kura.service.pid=changeme)"
+            description="Specifies, as an OSGi target filter, the pid of the Cloud Subscriber used to receive messages from the cloud platform.">
+        </AD>
   
         <AD id="serial.device"  
             name="serial.device"

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and others
+ * Copyright (c) 2011, 2018 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,22 +8,23 @@
  *
  * Contributors:
  *     Eurotech
- *     Red Hat Inc - Fix build warnigns
+ *     Red Hat Inc
  *******************************************************************************/
 package org.eclipse.kura.demo.modbus;
 
 import java.util.Date;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.kura.KuraException;
-import org.eclipse.kura.cloud.CloudClient;
-import org.eclipse.kura.cloud.CloudClientListener;
-import org.eclipse.kura.cloud.CloudService;
+import org.eclipse.kura.cloudconnection.listener.CloudConnectionListener;
+import org.eclipse.kura.cloudconnection.listener.CloudDeliveryListener;
+import org.eclipse.kura.cloudconnection.message.KuraMessage;
+import org.eclipse.kura.cloudconnection.publisher.CloudPublisher;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.protocol.modbus.ModbusProtocolDeviceService;
@@ -32,12 +33,9 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ModbusExample implements ConfigurableComponent, CloudClientListener {
+public class ModbusExample implements ConfigurableComponent, CloudConnectionListener, CloudDeliveryListener {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(ModbusExample.class);
-
-    // Cloud Application identifier
-    private static final String APP_ID = "MODBUS_EXAMPLE";
+    private static final Logger logger = LoggerFactory.getLogger(ModbusExample.class);
 
     // Publishing Property Names
     private static final String MODBUS_PROTOCOL = "protocol";
@@ -52,46 +50,48 @@ public class ModbusExample implements ConfigurableComponent, CloudClientListener
     private static final String ETHERNET_IP_ADDRESS = "ipAddress";
     private static final String ETHERNET_TCP_PORT = "tcp.port";
 
-    private static final String PUBLISH_TOPIC_PROP_NAME = "publishTopic";
     private static final String POLL_INTERVAL = "pollInterval";
     private static final String PUBLISH_INTERVAL = "publishInterval";
 
     private static final String INPUT_ADDRESS = "inputAddress";
     private static final String REGISTER_ADDRESS = "registerAddress";
 
-    private CloudService m_cloudService;
-    private CloudClient m_cloudClient;
-    private static boolean doConnection = true;
+    private boolean doConnection = true;
 
-    private ScheduledExecutorService m_worker;
-    private Future<?> m_handle;
+    private ScheduledExecutorService worker;
+    private Future<?> handle;
 
-    private ModbusProtocolDeviceService m_protocolDevice;
-    private Map<String, Object> m_properties;
-    private static Properties modbusProperties;
+    private ModbusProtocolDeviceService protocolDevice;
+    private Map<String, Object> properties;
+    private Properties modbusProperties;
     private boolean configured;
-    private int m_slaveAddr;
-    private int m_publish_interval = 0;
-    private String m_topic = "";
+    private int slaveAddr;
+    private int publishInterval = 0;
     private long startPublish = 0;
 
     private int inputaddr = 0;
     private int registeraddr = 0;
 
+    private CloudPublisher cloudPublisher;
+
     public void setModbusProtocolDeviceService(ModbusProtocolDeviceService modbusService) {
-        this.m_protocolDevice = modbusService;
+        this.protocolDevice = modbusService;
     }
 
     public void unsetModbusProtocolDeviceService(ModbusProtocolDeviceService modbusService) {
-        this.m_protocolDevice = null;
+        this.protocolDevice = null;
     }
 
-    public void setCloudService(CloudService cloudService) {
-        this.m_cloudService = cloudService;
+    public void setCloudPublisher(CloudPublisher cloudPublisher) {
+        this.cloudPublisher = cloudPublisher;
+        this.cloudPublisher.registerCloudConnectionListener(ModbusExample.this);
+        this.cloudPublisher.registerCloudDeliveryListener(ModbusExample.this);
     }
 
-    public void unsetCloudService(CloudService cloudService) {
-        this.m_cloudService = null;
+    public void unsetCloudPublisher(CloudPublisher cloudPublisher) {
+        this.cloudPublisher.unregisterCloudConnectionListener(ModbusExample.this);
+        this.cloudPublisher.unregisterCloudDeliveryistener(ModbusExample.this);
+        this.cloudPublisher = null;
     }
 
     // ----------------------------------------------------------------
@@ -101,38 +101,33 @@ public class ModbusExample implements ConfigurableComponent, CloudClientListener
     // ----------------------------------------------------------------
 
     protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
-        s_logger.info("Activating ModbusExample...");
+        logger.info("Activating ModbusExample...");
 
-        this.m_worker = Executors.newSingleThreadScheduledExecutor();
+        this.worker = Executors.newSingleThreadScheduledExecutor();
 
         this.configured = false;
         doUpdate(properties);
     }
 
     protected void deactivate(ComponentContext componentContext) {
-        s_logger.info("ModbusExample deactivate...");
-        if (this.m_handle != null) {
-            this.m_handle.cancel(true);
+        logger.info("ModbusExample deactivate...");
+        if (this.handle != null) {
+            this.handle.cancel(true);
         }
-        s_logger.info("Modbus polling thread killed");
+        logger.info("Modbus polling thread killed");
 
-        if (this.m_protocolDevice != null) {
+        if (this.protocolDevice != null) {
             try {
-                this.m_protocolDevice.disconnect();
+                this.protocolDevice.disconnect();
             } catch (ModbusProtocolException e) {
-                s_logger.error("Failed to disconnect : {}", e.getMessage());
+                logger.error("Failed to disconnect : {}", e.getMessage());
             }
         }
         this.configured = false;
-
-        // Releasing the CloudApplicationClient
-        s_logger.info("Releasing CloudApplicationClient for {}...", APP_ID);
-        this.m_cloudClient.release();
-
     }
 
     public void updated(Map<String, Object> properties) {
-        s_logger.info("updated...");
+        logger.info("updated...");
         this.configured = false;
         doUpdate(properties);
     }
@@ -149,62 +144,59 @@ public class ModbusExample implements ConfigurableComponent, CloudClientListener
     private void doUpdate(Map<String, Object> properties) {
         try {
 
-            for (String s : properties.keySet()) {
-                s_logger.info("Update - " + s + ": " + properties.get(s));
+            for (Entry<String, Object> property : properties.entrySet()) {
+                logger.info("Update - {}: {}", property.getKey(), property.getValue());
             }
 
             // cancel a current worker handle if one if active
-            if (this.m_handle != null) {
-                this.m_handle.cancel(true);
+            if (this.handle != null) {
+                this.handle.cancel(true);
             }
 
-            if (this.m_protocolDevice != null) {
+            if (this.protocolDevice != null) {
                 try {
-                    this.m_protocolDevice.disconnect();
+                    this.protocolDevice.disconnect();
                 } catch (ModbusProtocolException e) {
-                    s_logger.error("Failed to disconnect : {}", e.getMessage());
+                    logger.error("Failed to disconnect : {}", e.getMessage());
                 }
             }
             this.configured = false;
 
-            this.m_properties = properties;
-            modbusProperties = getModbusProperties();
-            if(modbusProperties==null){
-                s_logger.error("Something is wrong in the properties, program cannot continue");
+            this.properties = properties;
+            this.modbusProperties = getModbusProperties();
+            if (this.modbusProperties == null) {
+                logger.error("Something is wrong in the properties, program cannot continue");
                 return;
             }
-            
-            if (this.m_properties.get(PUBLISH_TOPIC_PROP_NAME) != null) {
-                this.m_topic = (String) this.m_properties.get(PUBLISH_TOPIC_PROP_NAME);
-            }
-            if (this.m_properties.get(PUBLISH_INTERVAL) != null) {
-                this.m_publish_interval = (Integer) this.m_properties.get(PUBLISH_INTERVAL);
+
+            if (this.properties.get(PUBLISH_INTERVAL) != null) {
+                this.publishInterval = (Integer) this.properties.get(PUBLISH_INTERVAL);
             }
 
-            if (this.m_properties.get(INPUT_ADDRESS) != null) {
-                inputaddr = (Integer) this.m_properties.get(INPUT_ADDRESS);
+            if (this.properties.get(INPUT_ADDRESS) != null) {
+                this.inputaddr = (Integer) this.properties.get(INPUT_ADDRESS);
             }
-            if (this.m_properties.get(REGISTER_ADDRESS) != null) {
-                registeraddr = (Integer) this.m_properties.get(REGISTER_ADDRESS);
+            if (this.properties.get(REGISTER_ADDRESS) != null) {
+                this.registeraddr = (Integer) this.properties.get(REGISTER_ADDRESS);
             }
 
             if (!this.configured) {
                 try {
-                    if (modbusProperties != null) {
+                    if (this.modbusProperties != null) {
                         configureDevice();
                     }
                 } catch (ModbusProtocolException e) {
-                    s_logger.error("ModbusProtocolException :  {}", e.getMessage());
+                    logger.error("ModbusProtocolException :  {}", e.getMessage());
                 }
             }
 
             // schedule a new worker based on the properties of the service
             int pubrate = 1000;
-            if (this.m_properties.get(POLL_INTERVAL) != null) {
-                pubrate = (Integer) this.m_properties.get(POLL_INTERVAL);
+            if (this.properties.get(POLL_INTERVAL) != null) {
+                pubrate = (Integer) this.properties.get(POLL_INTERVAL);
             }
-            s_logger.info("scheduleAtFixedRate {}", pubrate);
-            this.m_handle = this.m_worker.scheduleAtFixedRate(new Runnable() {
+            logger.info("scheduleAtFixedRate {}", pubrate);
+            this.handle = this.worker.scheduleAtFixedRate(new Runnable() {
 
                 @Override
                 public void run() {
@@ -213,104 +205,77 @@ public class ModbusExample implements ConfigurableComponent, CloudClientListener
             }, 0, pubrate, TimeUnit.MILLISECONDS);
 
         } catch (Throwable t) {
-            s_logger.error("Unexpected Throwable", t);
+            logger.error("Unexpected Throwable", t);
         }
     }
 
     private boolean doConnectionWork() {
-        try {
-            if (this.m_cloudClient == null) {
-                // Attempt to get Master Client reference
-                s_logger.debug("Getting Cloud Client");
-                try {
-                    // Acquire a Cloud Application Client for this Application
-                    s_logger.info("Getting CloudClient for {}...", APP_ID);
-                    this.m_cloudClient = this.m_cloudService.newCloudClient(APP_ID);
-                    this.m_cloudClient.addCloudClientListener(this);
-                } catch (KuraException e) {
-                    s_logger.debug("Cannot get a Cloud Client");
-                    e.printStackTrace();
-                    return true;
-                }
-
-            }
-
-            if (!this.m_cloudClient.isConnected()) {
-                s_logger.debug("Waiting for Cloud Client to connect");
-                return true;
-            }
-
-        } catch (Exception e) {
-            s_logger.debug("Cloud client is not yet available..");
+        if (this.cloudPublisher == null) {
+            logger.debug("No cloud publisher selected. Cannot publish!");
             return true;
         }
 
-        // Successfully connected - kill the thread
-        s_logger.info("Successfully connected the Cloud Client");
+        logger.info("Successfully selected a cloud publisher");
         return false;
     }
 
     private void doModbusLoop() {
 
         // Connect the Cloud Client
-        if (doConnection) {
-            doConnection = doConnectionWork();
+        if (this.doConnection) {
+            this.doConnection = doConnectionWork();
         }
 
         try {
             // Allocate a new payload
             KuraPayload payload = new KuraPayload();
-            
-            if(inputaddr>0){
-                boolean[] dicreteInputs = this.m_protocolDevice.readDiscreteInputs(this.m_slaveAddr, inputaddr, 1);
-                StringBuilder sb = new StringBuilder().append("Input ").append(inputaddr).append(" = ");                    
+
+            if (this.inputaddr > 0) {
+                boolean[] dicreteInputs = this.protocolDevice.readDiscreteInputs(this.slaveAddr, this.inputaddr, 1);
+                StringBuilder sb = new StringBuilder().append("Input ").append(this.inputaddr).append(" = ");
                 sb.append(dicreteInputs[0]);
-                s_logger.info(sb.toString());
-                payload.addMetric("input" , Boolean.valueOf(dicreteInputs[0]));
+                logger.info(sb.toString());
+                payload.addMetric("input", Boolean.valueOf(dicreteInputs[0]));
             }
-            if(registeraddr>0){                
-                int[] analogInputs = this.m_protocolDevice.readInputRegisters(this.m_slaveAddr, registeraddr, 1);
-                short val = (short)analogInputs[0];
-                StringBuilder sb = new StringBuilder().append("Register ").append(registeraddr).append(" = ");                    
+            if (this.registeraddr > 0) {
+                int[] analogInputs = this.protocolDevice.readInputRegisters(this.slaveAddr, this.registeraddr, 1);
+                short val = (short) analogInputs[0];
+                StringBuilder sb = new StringBuilder().append("Register ").append(this.registeraddr).append(" = ");
                 sb.append(val);
-                s_logger.info(sb.toString());
-                payload.addMetric("register" , Integer.valueOf(analogInputs[0]));
+                logger.info(sb.toString());
+                payload.addMetric("register", Integer.valueOf(analogInputs[0]));
             }
 
             // time to publish ?
             long elapsed = System.currentTimeMillis() - this.startPublish;
-            if (elapsed > this.m_publish_interval * 1000) {
+            if (elapsed > this.publishInterval * 1000) {
                 this.startPublish = System.currentTimeMillis();
-                if (!payload.metrics().isEmpty() && !this.m_topic.isEmpty() && this.m_cloudClient.isConnected()) {
+                if (!payload.metrics().isEmpty()) {
 
                     // Timestamp the message
                     payload.setTimestamp(new Date());
 
+                    KuraMessage message = new KuraMessage(payload);
+
                     // Publish the message
                     try {
-                        int messageId = this.m_cloudClient.publish(this.m_topic, payload, 0, false);
-                        s_logger.info("Published to {} message: {} with ID: {}", new Object[] { this.m_topic, payload, messageId });
+                        String messageId = this.cloudPublisher.publish(message);
+                        logger.info("Published message: {} with ID: {}", payload, messageId);
                     } catch (Exception e) {
-                        s_logger.error("Cannot publish topic: " + this.m_topic, e);
-                    }
-                } else {
-                    if (this.m_topic.isEmpty()) {
-                        s_logger.info("Topic empty -> no publish");
-                    } else if (!this.m_cloudClient.isConnected()) {
-                        s_logger.info("Cloud client not connected -> no publish");
+                        logger.error("Cannot publish message {}", message, e);
                     }
                 }
             }
         } catch (ModbusProtocolException e) {
-            s_logger.error("ModbusProtocolException :  {}", e.getMessage());
+            logger.error("ModbusProtocolException :  {}", e.getMessage());
         }
     }
 
     private void configureDevice() throws ModbusProtocolException {
-        if (this.m_protocolDevice != null) {
-            this.m_protocolDevice.disconnect();
+        if (this.protocolDevice != null) {
+            this.protocolDevice.disconnect();
 
-            this.m_protocolDevice.configureConnection(modbusProperties);
+            this.protocolDevice.configureConnection(this.modbusProperties);
 
             this.configured = true;
         }
@@ -318,85 +283,83 @@ public class ModbusExample implements ConfigurableComponent, CloudClientListener
 
     private Properties getModbusProperties() {
 
-        if (this.m_properties == null) {
+        if (this.properties == null) {
             return null;
         }
 
         Properties prop = new Properties();
 
         String modbusProtocol = null;
-        if (this.m_properties.get(MODBUS_SLAVE_ADDRESS) != null) {
-            modbusProtocol=(String) this.m_properties.get(MODBUS_PROTOCOL);
-        }
-        else
+        if (this.properties.get(MODBUS_SLAVE_ADDRESS) != null) {
+            modbusProtocol = (String) this.properties.get(MODBUS_PROTOCOL);
+        } else {
             return null;
+        }
         prop.setProperty("connectionType", modbusProtocol);
 
         String slave = "1";
-        if (this.m_properties.get(MODBUS_SLAVE_ADDRESS) != null) {
-            slave = (String) this.m_properties.get(MODBUS_SLAVE_ADDRESS);
+        if (this.properties.get(MODBUS_SLAVE_ADDRESS) != null) {
+            slave = (String) this.properties.get(MODBUS_SLAVE_ADDRESS);
         }
         prop.setProperty("slaveAddr", slave);
 
         boolean isTCP = "TCP-RTU".equals(modbusProtocol) || "TCP/IP".equals(modbusProtocol);
         if (isTCP) {
-            if (this.m_properties.get(ETHERNET_TCP_PORT) != null){
-                int iport = (Integer) this.m_properties.get(ETHERNET_TCP_PORT);
+            if (this.properties.get(ETHERNET_TCP_PORT) != null) {
+                int iport = (Integer) this.properties.get(ETHERNET_TCP_PORT);
                 prop.setProperty("ethport", String.valueOf(iport));
             }
-            prop.setProperty("ipAddress", (String) this.m_properties.get(ETHERNET_IP_ADDRESS));
+            prop.setProperty("ipAddress", (String) this.properties.get(ETHERNET_IP_ADDRESS));
         } else {
-            if (this.m_properties != null) {
-                String portName = null;
-                String baudRate = null;
-                String bitsPerWord = null;
-                String stopBits = null;
-                String parity = null;
-                if (this.m_properties.get(SERIAL_DEVICE_PROP_NAME) != null) {
-                    portName = (String) this.m_properties.get(SERIAL_DEVICE_PROP_NAME);
-                }
-                if (this.m_properties.get(SERIAL_BAUDRATE_PROP_NAME) != null) {
-                    baudRate = (String) this.m_properties.get(SERIAL_BAUDRATE_PROP_NAME);
-                }
-                if (this.m_properties.get(SERIAL_DATA_BITS_PROP_NAME) != null) {
-                    bitsPerWord = (String) this.m_properties.get(SERIAL_DATA_BITS_PROP_NAME);
-                }
-                if (this.m_properties.get(SERIAL_STOP_BITS_PROP_NAME) != null) {
-                    stopBits = (String) this.m_properties.get(SERIAL_STOP_BITS_PROP_NAME);
-                }
-                if (this.m_properties.get(SERIAL_PARITY_PROP_NAME) != null) {
-                    parity = (String) this.m_properties.get(SERIAL_PARITY_PROP_NAME);
-                }
-
-                if (portName == null) {
-                    return null;
-                }
-                if (baudRate == null) {
-                    baudRate = "9600";
-                }
-                if (stopBits == null) {
-                    stopBits = "1";
-                }
-                if (parity == null) {
-                    parity = "0";
-                }
-                if (bitsPerWord == null) {
-                    bitsPerWord = "8";
-                }
-
-                prop.setProperty("port", portName);
-                prop.setProperty("exclusive", "false");
-                prop.setProperty("baudRate", baudRate);
-                prop.setProperty("stopBits", stopBits);
-                prop.setProperty("parity", parity);
-                prop.setProperty("bitsPerWord", bitsPerWord);
+            String portName = null;
+            String baudRate = null;
+            String bitsPerWord = null;
+            String stopBits = null;
+            String parity = null;
+            if (this.properties.get(SERIAL_DEVICE_PROP_NAME) != null) {
+                portName = (String) this.properties.get(SERIAL_DEVICE_PROP_NAME);
             }
+            if (this.properties.get(SERIAL_BAUDRATE_PROP_NAME) != null) {
+                baudRate = (String) this.properties.get(SERIAL_BAUDRATE_PROP_NAME);
+            }
+            if (this.properties.get(SERIAL_DATA_BITS_PROP_NAME) != null) {
+                bitsPerWord = (String) this.properties.get(SERIAL_DATA_BITS_PROP_NAME);
+            }
+            if (this.properties.get(SERIAL_STOP_BITS_PROP_NAME) != null) {
+                stopBits = (String) this.properties.get(SERIAL_STOP_BITS_PROP_NAME);
+            }
+            if (this.properties.get(SERIAL_PARITY_PROP_NAME) != null) {
+                parity = (String) this.properties.get(SERIAL_PARITY_PROP_NAME);
+            }
+
+            if (portName == null) {
+                return null;
+            }
+            if (baudRate == null) {
+                baudRate = "9600";
+            }
+            if (stopBits == null) {
+                stopBits = "1";
+            }
+            if (parity == null) {
+                parity = "0";
+            }
+            if (bitsPerWord == null) {
+                bitsPerWord = "8";
+            }
+
+            prop.setProperty("port", portName);
+            prop.setProperty("exclusive", "false");
+            prop.setProperty("baudRate", baudRate);
+            prop.setProperty("stopBits", stopBits);
+            prop.setProperty("parity", parity);
+            prop.setProperty("bitsPerWord", bitsPerWord);
         }
         prop.setProperty("mode", "0");
         prop.setProperty("transmissionMode", "RTU");
         prop.setProperty("respTimeout", "1000");
-        this.m_slaveAddr = Integer.valueOf(slave);
-        
+        this.slaveAddr = Integer.valueOf(slave);
+
         return prop;
     }
 
@@ -407,31 +370,23 @@ public class ModbusExample implements ConfigurableComponent, CloudClientListener
     // ----------------------------------------------------------------
     @Override
     public void onConnectionEstablished() {
-
+        // TODO Auto-generated method stub
     }
 
     @Override
     public void onConnectionLost() {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public void onMessageConfirmed(String messageId) {
+        // TODO Auto-generated method stub
 
     }
 
     @Override
-    public void onControlMessageArrived(String arg0, String arg1, KuraPayload arg2, int arg3, boolean arg4) {
-
-    }
-
-    @Override
-    public void onMessageArrived(String arg0, String arg1, KuraPayload arg2, int arg3, boolean arg4) {
-
-    }
-
-    @Override
-    public void onMessageConfirmed(int arg0, String arg1) {
-
-    }
-
-    @Override
-    public void onMessagePublished(int arg0, String arg1) {
+    public void onDisconnected() {
+        // TODO Auto-generated method stub
 
     }
 

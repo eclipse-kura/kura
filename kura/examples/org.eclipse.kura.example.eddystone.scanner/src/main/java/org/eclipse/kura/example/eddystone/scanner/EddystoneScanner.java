@@ -23,8 +23,8 @@ import org.eclipse.kura.bluetooth.le.BluetoothLeAdapter;
 import org.eclipse.kura.bluetooth.le.BluetoothLeService;
 import org.eclipse.kura.bluetooth.le.beacon.BluetoothLeBeaconScanner;
 import org.eclipse.kura.bluetooth.le.beacon.listener.BluetoothLeBeaconListener;
-import org.eclipse.kura.cloud.CloudClient;
-import org.eclipse.kura.cloud.CloudService;
+import org.eclipse.kura.cloudconnection.message.KuraMessage;
+import org.eclipse.kura.cloudconnection.publisher.CloudPublisher;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.message.KuraPayload;
 import org.osgi.service.component.ComponentContext;
@@ -32,6 +32,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class EddystoneScanner implements ConfigurableComponent, BluetoothLeBeaconListener<BluetoothLeEddystone> {
+
+    private static final String ADDRESS_MESSAGE_PROP_KEY = "address";
 
     private static final Logger logger = LoggerFactory.getLogger(EddystoneScanner.class);
 
@@ -41,10 +43,10 @@ public class EddystoneScanner implements ConfigurableComponent, BluetoothLeBeaco
     private BluetoothLeService bluetoothLeService;
     private BluetoothLeEddystoneService bluetoothLeEddystoneService;
     private BluetoothLeBeaconScanner<BluetoothLeEddystone> bluetoothLeEddystoneScanner;
-    private CloudService cloudService;
-    private CloudClient cloudClient;
     private Map<String, Long> publishTimes;
     private EddystoneScannerOptions options;
+
+    private CloudPublisher cloudPublisher;
 
     public void setBluetoothLeService(BluetoothLeService bluetoothLeService) {
         this.bluetoothLeService = bluetoothLeService;
@@ -62,22 +64,16 @@ public class EddystoneScanner implements ConfigurableComponent, BluetoothLeBeaco
         this.bluetoothLeEddystoneService = null;
     }
 
-    public void setCloudService(CloudService cloudService) {
-        this.cloudService = cloudService;
+    public void setCloudPublisher(CloudPublisher cloudPublisher) {
+        this.cloudPublisher = cloudPublisher;
     }
 
-    public void unsetCloudService(CloudService cloudService) {
-        this.cloudService = null;
+    public void unsetCloudPublisher(CloudPublisher cloudPublisher) {
+        this.cloudPublisher = null;
     }
 
     protected void activate(ComponentContext context, Map<String, Object> properties) {
         logger.info("Activating Bluetooth Eddystone Scanner example...");
-
-        try {
-            this.cloudClient = this.cloudService.newCloudClient("EddystoneScannerExample");
-        } catch (KuraException e) {
-            logger.error("Unable to get CloudClient", e);
-        }
 
         this.publishTimes = new HashMap<>();
         doUpdate(properties);
@@ -95,10 +91,6 @@ public class EddystoneScanner implements ConfigurableComponent, BluetoothLeBeaco
 
         if (this.worker != null) {
             this.worker.shutdown();
-        }
-
-        if (this.cloudClient != null) {
-            this.cloudClient.release();
         }
 
         logger.debug("Deactivating Eddystone Scanner Example... Done.");
@@ -187,6 +179,11 @@ public class EddystoneScanner implements ConfigurableComponent, BluetoothLeBeaco
             // Store the publish time against the address
             this.publishTimes.put(eddystone.getAddress(), now);
 
+            if (this.cloudPublisher == null) {
+                logger.info("No cloud publisher selected. Cannot publish!");
+                return;
+            }
+            
             // Publish the beacon data to the beacon's topic
             KuraPayload kp = new KuraPayload();
             kp.setTimestamp(new Date());
@@ -200,8 +197,14 @@ public class EddystoneScanner implements ConfigurableComponent, BluetoothLeBeaco
             kp.addMetric("txpower", (int) eddystone.getTxPower());
             kp.addMetric("rssi", eddystone.getRssi());
             kp.addMetric("distance", calculateDistance(eddystone.getRssi(), eddystone.getTxPower()));
+
+            Map<String, Object> properties = new HashMap<>();
+            properties.put(ADDRESS_MESSAGE_PROP_KEY, eddystone.getAddress());
+
+            KuraMessage message = new KuraMessage(kp, properties);
+
             try {
-                this.cloudClient.publish(this.options.getTopicPrefix() + "/" + eddystone.getAddress(), kp, 2, false);
+                this.cloudPublisher.publish(message);
             } catch (KuraException e) {
                 logger.error("Unable to publish", e);
             }

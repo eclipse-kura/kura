@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+    Copyright (c) 2011, 2018 Eurotech and/or its affiliates
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -18,6 +18,15 @@
          description="Modbus protocol example application.">
               
         <Icon resource="http://s3.amazonaws.com/kura-resources/application/icon/modbus.png" size="32"/>
+        
+        <AD id="CloudPublisher.target"
+            name="CloudPublisher Target Filter"
+            type="String"
+            cardinality="0"
+            required="false"
+            default="(kura.service.pid=changeme)"
+            description="Specifies, as an OSGi target filter, the pid of the Cloud Publisher used to publish messages to the cloud platform.">
+        </AD>
         
         <AD id="protocol"
             name="protocol"
@@ -132,14 +141,6 @@
             min="1"
             max="65535"
             description="TCP port for Modbus TCP (usually 502)."/>
-
-        <AD id="publishTopic"  
-            name="publishTopic"
-            type="String"
-            cardinality="0" 
-            required="false"
-            default="" 
-            description="The topic to publish data to the Cloud, if empty no publish will occur."/>
 
         <AD id="pollInterval"  
             name="pollInterval"

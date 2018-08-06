@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -117,8 +117,8 @@ public class EddystoneAdvertiser implements ConfigurableComponent {
         if (this.options.isEnabled()) {
             this.bluetoothLeAdapter = this.bluetoothLeService.getAdapter(this.options.getIname());
             if (this.bluetoothLeAdapter != null) {
-                logger.info("Bluetooth adapter interface => " + this.options.getIname());
-                logger.info("Bluetooth adapter address => " + this.bluetoothLeAdapter.getAddress());
+                logger.info("Bluetooth adapter interface => {}", this.options.getIname());
+                logger.info("Bluetooth adapter address => {}", this.bluetoothLeAdapter.getAddress());
 
                 if (!this.bluetoothLeAdapter.isPowered()) {
                     logger.info("Enabling bluetooth adapter...");

@@ -13,6 +13,7 @@ package org.eclipse.kura.example.ble.tisensortag.tinyb;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -31,27 +32,24 @@ import org.eclipse.kura.bluetooth.le.BluetoothLeDevice;
 import org.eclipse.kura.bluetooth.le.BluetoothLeGattCharacteristic;
 import org.eclipse.kura.bluetooth.le.BluetoothLeGattService;
 import org.eclipse.kura.bluetooth.le.BluetoothLeService;
-import org.eclipse.kura.cloud.CloudClient;
-import org.eclipse.kura.cloud.CloudService;
+import org.eclipse.kura.cloudconnection.message.KuraMessage;
+import org.eclipse.kura.cloudconnection.publisher.CloudPublisher;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.message.KuraPayload;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.component.ComponentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class BluetoothLe implements ConfigurableComponent {
 
-    private static final Logger logger = LoggerFactory.getLogger(BluetoothLe.class);
+    private static final String ADDRESS_MESSAGE_PROP_KEY = "address";
 
-    private static final String APP_ID = "BLE_APP_V2";
+    private static final Logger logger = LoggerFactory.getLogger(BluetoothLe.class);
 
     private static final String INTERRUPTED_EX = "Interrupted Exception";
     private static final String DISCOVERY_STOP_EX = "Failed to stop discovery";
     private static final String CONNECTION_ERROR_EX = "Cannot connect/disconnect to TI SensorTag {}.";
 
-    private CloudService cloudService;
-    private CloudClient cloudClient;
     private List<TiSensorTag> tiSensorTagList;
     private BluetoothLeService bluetoothLeService;
     private BluetoothLeAdapter bluetoothLeAdapter;
@@ -60,12 +58,14 @@ public class BluetoothLe implements ConfigurableComponent {
 
     private BluetoothLeOptions options;
 
-    public void setCloudService(CloudService cloudService) {
-        this.cloudService = cloudService;
+    private CloudPublisher cloudPublisher;
+
+    public void setCloudPublisher(CloudPublisher cloudPublisher) {
+        this.cloudPublisher = cloudPublisher;
     }
 
-    public void unsetCloudService(CloudService cloudService) {
-        this.cloudService = null;
+    public void unsetCloudPublisher(CloudPublisher cloudPublisher) {
+        this.cloudPublisher = null;
     }
 
     public void setBluetoothLeService(BluetoothLeService bluetoothLeService) {
@@ -84,33 +84,18 @@ public class BluetoothLe implements ConfigurableComponent {
     protected void activate(ComponentContext context, Map<String, Object> properties) {
         logger.info("Activating BluetoothLe example...");
 
-        try {
-            this.cloudClient = this.cloudService.newCloudClient(APP_ID);
-        } catch (KuraException e) {
-            logger.error("Error starting component", e);
-            throw new ComponentException(e);
-        }
-
         this.tiSensorTagList = new CopyOnWriteArrayList<>(new ArrayList<>());
         doUpdate(properties);
         logger.debug("Updating Bluetooth Service... Done.");
     }
 
     protected void deactivate(ComponentContext context) {
-
         doDeactivate();
-
-        // Releasing the CloudApplicationClient
-        logger.info("Releasing CloudApplicationClient for {}...", APP_ID);
-        if (this.cloudClient != null) {
-            this.cloudClient.release();
-        }
 
         logger.debug("Deactivating BluetoothLe... Done.");
     }
 
     protected void updated(Map<String, Object> properties) {
-
         doDeactivate();
         doUpdate(properties);
         logger.debug("Updating Bluetooth Service... Done.");
@@ -206,8 +191,14 @@ public class BluetoothLe implements ConfigurableComponent {
         KuraPayload payload = new KuraPayload();
         payload.setTimestamp(new Date());
         payload.addMetric("key", key);
+
+        Map<String, Object> properties = new HashMap<>();
+        properties.put(ADDRESS_MESSAGE_PROP_KEY, address + "/keys");
+
+        KuraMessage message = new KuraMessage(payload, properties);
+
         try {
-            this.cloudClient.publish(this.options.getTopic() + "/" + address + "/keys", payload, 0, false);
+            this.cloudPublisher.publish(message);
         } catch (Exception e) {
             logger.error("Can't publish message for buttons", e);
         }
@@ -343,10 +334,12 @@ public class BluetoothLe implements ConfigurableComponent {
     }
 
     private void publish(TiSensorTag myTiSensorTag, KuraPayload payload) {
+        Map<String, Object> properties = new HashMap<>();
+        properties.put(ADDRESS_MESSAGE_PROP_KEY, myTiSensorTag.getBluetoothLeDevice().getAddress());
+
+        KuraMessage message = new KuraMessage(payload, properties);
         try {
-            this.cloudClient.publish(
-                    this.options.getTopic() + "/" + myTiSensorTag.getBluetoothLeDevice().getAddress(),
-                    payload, 0, false);
+            this.cloudPublisher.publish(message);
         } catch (KuraException e) {
             logger.error("Publish message failed", e);
         }

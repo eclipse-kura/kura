@@ -13,7 +13,7 @@ package org.eclipse.kura.linux.net.modem;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.linux.util.LinuxProcessUtil;
-import org.eclipse.kura.net.modem.GatewayModemDriver;
+import org.eclipse.kura.internal.linux.net.modem.GatewayModemDriver;
 import org.eclipse.kura.util.service.ServiceUtil;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;

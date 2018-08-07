@@ -9,12 +9,13 @@
  * Contributors:
  *     Eurotech
  *******************************************************************************/
-package org.eclipse.kura.internal.linux.net.dns;
+package org.eclipse.kura.internal.linux.systemd.net.dns;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashSet;
 import java.util.Set;
@@ -23,23 +24,23 @@ import java.util.StringTokenizer;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.linux.util.LinuxProcessUtil;
+import org.eclipse.kura.internal.linux.net.dns.DnsServerService;
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetworkPair;
-import org.eclipse.kura.net.dns.DnsServer;
 import org.eclipse.kura.net.dns.DnsServerConfig;
 import org.eclipse.kura.net.dns.DnsServerConfigIP4;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LinuxNamed implements DnsServer {
+public class DnsServerServiceImpl implements DnsServerService {
 
-    private static final Logger logger = LoggerFactory.getLogger(LinuxNamed.class);
+    private static final Logger logger = LoggerFactory.getLogger(DnsServerServiceImpl.class);
 
-    private static final String PERSISTENT_CONFIG_FILE_NAME = "/etc/bind/named.conf";
+    private static final String PERSISTENT_CONFIG_FILE_NAME = "/etc/named.conf";
     private static final String RFC_1912_ZONES_FILENAME = "/etc/named.rfc1912.zones";
-    private static final String PROC_STRING = "/usr/sbin/named";
+    private static final String PROC_STRING = "named -u named -t";
 
     private DnsServerConfigIP4 dnsServerConfigIP4;
 
@@ -62,7 +63,7 @@ public class LinuxNamed implements DnsServer {
     }
 
     private void init() throws KuraException {
-        File configFile = new File(LinuxNamed.PERSISTENT_CONFIG_FILE_NAME);
+        File configFile = new File(DnsServerServiceImpl.PERSISTENT_CONFIG_FILE_NAME);
         if (!configFile.exists() || !isForwardOnlyConfiguration(configFile)) {
             logger.debug("There is no current DNS server configuration that allows forwarding");
             return;
@@ -132,10 +133,10 @@ public class LinuxNamed implements DnsServer {
     }
 
     @Override
-    public boolean isEnabled() {
+    public boolean isRunning() {
         try {
             // Check if named is running
-            int pid = LinuxProcessUtil.getPid(LinuxNamed.PROC_STRING);
+            int pid = LinuxProcessUtil.getPid(DnsServerServiceImpl.PROC_STRING);
             return pid > -1;
         } catch (Exception e) {
             return false;
@@ -143,18 +144,18 @@ public class LinuxNamed implements DnsServer {
     }
 
     @Override
-    public void enable() throws KuraException {
+    public void start() throws KuraException {
         // write config happened during 'set config' step
         try {
             // Check if named is running
-            int pid = LinuxProcessUtil.getPid(LinuxNamed.PROC_STRING);
+            int pid = LinuxProcessUtil.getPid(DnsServerServiceImpl.PROC_STRING);
             if (pid > -1) {
                 // If so, disable it
                 logger.error("DNS server is already running, bringing it down...");
-                disable();
+                stop();
             }
             // Start named
-            int result = LinuxProcessUtil.start("/etc/init.d/bind9 start");
+            int result = LinuxProcessUtil.start("/bin/systemctl start named");
 
             if (result == 0) {
                 logger.debug("DNS server started.");
@@ -169,9 +170,9 @@ public class LinuxNamed implements DnsServer {
     }
 
     @Override
-    public void disable() throws KuraException {
+    public void stop() throws KuraException {
         try {
-            int result = LinuxProcessUtil.start("/etc/init.d/bind9 stop");
+            int result = LinuxProcessUtil.start("/bin/systemctl stop named");
 
             if (result == 0) {
                 logger.debug("DNS server stopped.");
@@ -209,7 +210,7 @@ public class LinuxNamed implements DnsServer {
     }
 
     @Override
-    public void setConfig(DnsServerConfig dnsServerConfig) throws KuraException {
+    public void setConfig(DnsServerConfig dnsServerConfig) {
         if (this.dnsServerConfigIP4 == null) {
             logger.warn("Set DNS server configuration to null");
         }
@@ -218,41 +219,31 @@ public class LinuxNamed implements DnsServer {
         }
         try {
             writeConfig();
-        } catch (Exception e) {
+        } catch (IOException e) {
             logger.error("Error setting DNS server config", e);
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
         }
     }
 
     @Override
-    public DnsServerConfig getDnsServerConfig() {
+    public DnsServerConfig getConfig() {
         return this.dnsServerConfigIP4;
     }
 
-    @Override
-    public String getConfigFilename() {
-        return LinuxNamed.PERSISTENT_CONFIG_FILE_NAME;
-    }
-
-    private void writeConfig() throws KuraException {
-        try (FileOutputStream fos = new FileOutputStream(LinuxNamed.PERSISTENT_CONFIG_FILE_NAME);
+    private void writeConfig() throws IOException {
+        try (FileOutputStream fos = new FileOutputStream(DnsServerServiceImpl.PERSISTENT_CONFIG_FILE_NAME);
                 PrintWriter pw = new PrintWriter(fos);) {
             // build up the file
             if (isConfigured()) {
-                logger.debug("writing custom named.conf to {} with: {}", LinuxNamed.PERSISTENT_CONFIG_FILE_NAME,
-                        this.dnsServerConfigIP4);
+                logger.debug("writing custom named.conf to {} with: {}",
+                        DnsServerServiceImpl.PERSISTENT_CONFIG_FILE_NAME, this.dnsServerConfigIP4);
                 pw.print(getForwardingNamedFile());
             } else {
-                logger.debug("writing default named.conf to {} with: {}", LinuxNamed.PERSISTENT_CONFIG_FILE_NAME,
-                        this.dnsServerConfigIP4);
+                logger.debug("writing default named.conf to {} with: {}",
+                        DnsServerServiceImpl.PERSISTENT_CONFIG_FILE_NAME, this.dnsServerConfigIP4);
                 pw.print(getDefaultNamedFile());
             }
             pw.flush();
             fos.getFD().sync();
-        } catch (Exception e) {
-            logger.error("Failed to write new configuration files for dns servers", e);
-            throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR,
-                    "error while building up new configuration files for dns servers: " + e.getMessage());
         }
     }
 
@@ -289,7 +280,7 @@ public class LinuxNamed implements DnsServer {
                 .append("\tfile \"named.ca\";\n") //
                 .append("};\n") //
                 .append("include \"") //
-                .append(LinuxNamed.RFC_1912_ZONES_FILENAME) //
+                .append(DnsServerServiceImpl.RFC_1912_ZONES_FILENAME) //
                 .append("\";\n");
 
         return sb.toString();
@@ -331,7 +322,7 @@ public class LinuxNamed implements DnsServer {
                 .append("};\n") //
                 .append("\n") //
                 .append("include \"") //
-                .append(LinuxNamed.RFC_1912_ZONES_FILENAME) //
+                .append(DnsServerServiceImpl.RFC_1912_ZONES_FILENAME) //
                 .append("\";\n"); //
         return sb.toString();
     }

@@ -30,6 +30,8 @@ import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.modem.ModemInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.modem.ModemInterfaceConfigImpl;
+import org.eclipse.kura.internal.linux.net.dns.DnsServerService;
+import org.eclipse.kura.internal.linux.net.wifi.WifiDriverService;
 import org.eclipse.kura.linux.net.dhcp.DhcpClientManager;
 import org.eclipse.kura.linux.net.dhcp.DhcpServerManager;
 import org.eclipse.kura.linux.net.iptables.LinuxFirewall;
@@ -55,7 +57,6 @@ import org.eclipse.kura.net.admin.monitor.WifiInterfaceState;
 import org.eclipse.kura.net.admin.visitor.linux.WpaSupplicantConfigWriter;
 import org.eclipse.kura.net.admin.visitor.linux.util.KuranetConfig;
 import org.eclipse.kura.net.dhcp.DhcpServerConfigIP4;
-import org.eclipse.kura.net.dns.DnsServer;
 import org.eclipse.kura.net.firewall.FirewallAutoNatConfig;
 import org.eclipse.kura.net.firewall.FirewallNatConfig;
 import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP;
@@ -67,7 +68,6 @@ import org.eclipse.kura.net.wifi.WifiHotspotInfo;
 import org.eclipse.kura.net.wifi.WifiInterfaceAddressConfig;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
-import org.eclipse.kura.net.wifi.WifiUtils;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
@@ -82,11 +82,11 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
     private ConfigurationService configurationService;
     private NetworkConfigurationService networkConfigurationService;
     private FirewallConfigurationService firewallConfigurationService;
-    private DnsServer dnsServer;
+    private DnsServerService dnsServer;
 
     private Object wifiClientMonitorServiceLock;
 
-    private WifiUtils wifiUtils;
+    private WifiDriverService wifiDriverService;
 
     private boolean pendingNetworkConfigurationChange = false;
 
@@ -124,11 +124,11 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         this.firewallConfigurationService = null;
     }
 
-    public void setDnsServerService(DnsServer dnsServer) {
+    public void setDnsServerService(DnsServerService dnsServer) {
         this.dnsServer = dnsServer;
     }
 
-    public void unsetDnsServerService(DnsServer dnsServer) {
+    public void unsetDnsServerService(DnsServerService dnsServer) {
         this.dnsServer = null;
     }
 
@@ -141,12 +141,12 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         this.wifiClientMonitorServiceLock = null;
     }
 
-    public void setWifiUtilsService(WifiUtils wifiUtils) {
-        this.wifiUtils = wifiUtils;
+    public void setWifiDriverService(WifiDriverService wifiDriverService) {
+        this.wifiDriverService = wifiDriverService;
     }
 
-    public void unsetWifiUtilsService(WifiUtils wifiUtils) {
-        this.wifiUtils = null;
+    public void unsetWifiDriverService(WifiDriverService wifiDriverService) {
+        this.wifiDriverService = null;
     }
 
     // ----------------------------------------------------------------
@@ -166,8 +166,8 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 
         try {
             if (this.dnsServer.isConfigured()) {
-                this.dnsServer.disable();
-                this.dnsServer.enable();
+                this.dnsServer.stop();
+                this.dnsServer.start();
             }
         } catch (KuraException e) {
             logger.warn("Exception while activating NetworkAdmin Service!", e);
@@ -1399,14 +1399,14 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
     }
 
     private void reloadKernelModule(String interfaceName, WifiMode wifiMode) throws KuraException {
-        if (this.wifiUtils == null) {
+        if (this.wifiDriverService == null) {
             return;
         }
-        if (!this.wifiUtils.isKernelModuleLoadedForMode(interfaceName, wifiMode)) {
+        if (!this.wifiDriverService.isKernelModuleLoadedForMode(interfaceName, wifiMode)) {
             logger.info("reloadKernelModule() :: reload {} using kernel module for WiFi mode {}", interfaceName,
                     wifiMode);
-            this.wifiUtils.unloadKernelModule(interfaceName);
-            this.wifiUtils.loadKernelModule(interfaceName, wifiMode);
+            this.wifiDriverService.unloadKernelModule(interfaceName);
+            this.wifiDriverService.loadKernelModule(interfaceName, wifiMode);
         }
     }
 

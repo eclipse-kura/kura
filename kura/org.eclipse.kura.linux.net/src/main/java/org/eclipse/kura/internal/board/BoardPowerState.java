@@ -9,20 +9,14 @@
  * Contributors:
  *     Eurotech
  *******************************************************************************/
-package org.eclipse.kura.net;
+package org.eclipse.kura.internal.board;
 
-import java.util.Properties;
+public enum BoardPowerState {
 
-import org.eclipse.kura.KuraException;
-
-/**
- * @since 2.0
- */
-public interface NetConfigManager {
-
-    public void readConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netConfig,
-            Properties kuraExtendedProps) throws KuraException;
-
-    public void writeConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netConfig) throws KuraException;
+    ON,
+    OFF,
+    TURNING_ON,
+    TURNING_OFF,
+    RESETTING;
 
 }

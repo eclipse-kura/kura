@@ -12,10 +12,10 @@
       Eurotech
 
 -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" deactivate="deactivate" enabled="true" immediate="true" name="org.eclipse.kura.net.sysv.provider.DnsServer">
-   <implementation class="org.eclipse.kura.internal.linux.net.dns.LinuxNamed"/>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" deactivate="deactivate" enabled="true" immediate="true" name="org.eclipse.kura.net.sysv.provider.DnsServerService">
+   <implementation class="org.eclipse.kura.internal.linux.sysv.net.dns.DnsServerServiceImpl"/>
    <service>
-      <provide interface="org.eclipse.kura.net.dns.DnsServer"/>
+      <provide interface="org.eclipse.kura.internal.linux.net.dns.DnsServerService"/>
    </service>
-   <property name="service.pid" value="org.eclipse.kura.net.sysv.provider.DnsServer"/>
+   <property name="service.pid" value="org.eclipse.kura.net.sysv.provider.DnsServerService"/>
 </scr:component>

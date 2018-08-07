@@ -19,7 +19,7 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.net.AbstractNetInterface;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
-import org.eclipse.kura.net.NetConfigManager;
+import org.eclipse.kura.internal.linux.net.NetInterfaceConfigSerializationService;
 import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceConfig;
 import org.eclipse.kura.net.NetInterfaceStatus;
@@ -37,13 +37,13 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
 
     private static IfcfgConfigWriter instance;
 
-    private static NetConfigManager netConfigManager; // TODO: can be null
+    private static NetInterfaceConfigSerializationService netConfigManager; // TODO: can be null
 
     public static synchronized IfcfgConfigWriter getInstance() {
         if (instance == null) {
             instance = new IfcfgConfigWriter();
             BundleContext context = FrameworkUtil.getBundle(IfcfgConfigWriter.class).getBundleContext();
-            ServiceReference<NetConfigManager> netConfigManagerSR = context.getServiceReference(NetConfigManager.class);
+            ServiceReference<NetInterfaceConfigSerializationService> netConfigManagerSR = context.getServiceReference(NetInterfaceConfigSerializationService.class);
             netConfigManager = context.getService(netConfigManagerSR);
         }
 
@@ -73,7 +73,7 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
             logger.info("writeConfig() :: Cannot write configuration file for this type of interface - {}", type);
             return;
         }
-        netConfigManager.writeConfig(netInterfaceConfig);
+        netConfigManager.write(netInterfaceConfig);
 
     }
 

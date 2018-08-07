@@ -9,29 +9,30 @@
  * Contributors:
  *     Eurotech
  *******************************************************************************/
-package org.eclipse.kura.net.dns;
+package org.eclipse.kura.internal.linux.net.dns;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.net.dns.DnsServerConfig;
 
 /**
- * @since 2.0
+ * Interface to manage the DNS Service running in the underlying operating system.
+ * Allows to start, stop and restart the managed server, get the status and manage the configuration.
+ *
  */
-public interface DnsServer {
+public interface DnsServerService {
 
-    public boolean isEnabled();
+    public boolean isRunning();
 
-    public void enable() throws KuraException;
+    public void start() throws KuraException;
 
-    public void disable() throws KuraException;
+    public void stop() throws KuraException;
 
     public void restart() throws KuraException;
 
     public boolean isConfigured();
 
-    public void setConfig(DnsServerConfig dnsServerConfig) throws KuraException;
+    public void setConfig(DnsServerConfig dnsServerConfig);
 
-    public DnsServerConfig getDnsServerConfig();
-
-    public String getConfigFilename();
+    public DnsServerConfig getConfig();
 
 }

@@ -17,7 +17,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
@@ -31,26 +30,19 @@ import org.apache.commons.io.FileUtils;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.net.AbstractNetInterface;
-import org.eclipse.kura.core.net.NetInterfaceAddressConfigImpl;
-import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
-import org.eclipse.kura.core.net.util.NetworkUtil;
-import org.eclipse.kura.linux.net.dhcp.DhcpClientLeases;
-import org.eclipse.kura.linux.net.dns.LinuxDns;
-import org.eclipse.kura.net.IP4Address;
+import org.eclipse.kura.internal.linux.net.NetInterfaceConfigSerializationService;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetConfigIP4;
-import org.eclipse.kura.net.NetConfigManager;
 import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceConfig;
 import org.eclipse.kura.net.NetInterfaceStatus;
-import org.eclipse.kura.net.NetInterfaceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class IfcfgConfigManager implements NetConfigManager {
+public class NetInterfaceConfigSerializationServiceImpl implements NetInterfaceConfigSerializationService {
 
-    private static final Logger logger = LoggerFactory.getLogger(IfcfgConfigManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(NetInterfaceConfigSerializationServiceImpl.class);
 
     private static final String DEBIAN_NET_CONFIGURATION_FILE = "/etc/network/interfaces";
     private static final String DEBIAN_TMP_NET_CONFIGURATION_FILE = "/etc/network/interfaces.tmp";
@@ -59,7 +51,6 @@ public class IfcfgConfigManager implements NetConfigManager {
     private static final String BOOTPROTO_PROP_NAME = "BOOTPROTO";
     private static final String IPADDR_PROP_NAME = "IPADDR";
     private static final String NETMASK_PROP_NAME = "NETMASK";
-    private static final String PREFIX_PROP_NAME = "PREFIX";
     private static final String GATEWAY_PROP_NAME = "GATEWAY";
     private static final String DEFROUTE_PROP_NAME = "DEFROUTE";
 
@@ -72,254 +63,16 @@ public class IfcfgConfigManager implements NetConfigManager {
             Arrays.asList("post-up route del default dev"));
 
     @Override
-    public void readConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig,
-            Properties kuraExtendedProps) throws KuraException {
-        String interfaceName = netInterfaceConfig.getName();
+    public Properties read(String interfaceName) throws KuraException {
         logger.debug("Getting config for {}", interfaceName);
 
         File ifcfgFile = getIfcfgFile();
         if (!ifcfgFile.exists()) {
             logger.error("getConfig() :: The {} file doesn't exist", interfaceName);
-            return;
+            throw new KuraException(KuraErrorCode.INVALID_PARAMETER);
         }
 
-        NetInterfaceType type = netInterfaceConfig.getType();
-        if (type != NetInterfaceType.ETHERNET && type != NetInterfaceType.WIFI && type != NetInterfaceType.LOOPBACK) {
-            logger.info("getConfig() :: The {} file doesn't contain configuration for the {} interface.", ifcfgFile,
-                    interfaceName);
-            return;
-        }
-        NetInterfaceAddressConfig netInterfaceAddressConfig = netInterfaceConfig.getNetInterfaceAddresses().get(0);
-        if (netInterfaceAddressConfig == null) {
-            throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, "InterfaceAddressConfig list is null");
-        }
-
-        Properties kuraProps = parseDebianConfigFile(ifcfgFile, interfaceName);
-        IfaceConfig ifaceConfig = getIfaceConfig(interfaceName, kuraProps, kuraExtendedProps);
-
-        List<NetConfig> netConfigs = netInterfaceAddressConfig.getConfigs();
-        if (netConfigs == null) {
-            netConfigs = new ArrayList<>();
-            setNetInterfaceAddressConfigs(interfaceName, ifaceConfig.isDhcp(), netConfigs, netInterfaceAddressConfig);
-        }
-        NetConfigIP4 netConfig = new NetConfigIP4(ifaceConfig.getNetInterfaceStatus(), ifaceConfig.isAutoConnect());
-        setNetConfigIP4(netConfig, ifaceConfig.isDhcp(), ifaceConfig.getAddress(), ifaceConfig.getGateway(),
-                ifaceConfig.getPrefixString(), ifaceConfig.getNetmask(), kuraProps);
-        logger.debug("NetConfig: {}", netConfig);
-        netConfigs.add(netConfig);
-    }
-
-    private IfaceConfig getIfaceConfig(String ifaceName, Properties kuraProps, Properties kuraExtendedProps)
-            throws KuraException {
-        boolean autoConnect = false;
-        boolean dhcp = false;
-        IP4Address address = null;
-        String prefixString = null;
-        String netmask = null;
-        String gateway = null;
-        NetInterfaceStatus netInterfaceStatus = getNetInterfaceStatus(ifaceName, kuraExtendedProps);
-        if (kuraProps != null) {
-            autoConnect = "yes".equals(kuraProps.getProperty(ONBOOT_PROP_NAME));
-            boolean defroute = "yes".equals(kuraProps.getProperty(DEFROUTE_PROP_NAME));
-
-            String bootproto = kuraProps.getProperty(BOOTPROTO_PROP_NAME);
-            if (bootproto == null) {
-                bootproto = "static";
-            }
-
-            // correct the status if needed by validating against the actual properties
-            netInterfaceStatus = getNetInterfaceStatus(netInterfaceStatus, autoConnect, defroute);
-
-            // check for dhcp or static configuration
-            gateway = kuraProps.getProperty(GATEWAY_PROP_NAME);
-            logger.debug("got gateway for {}: {}", ifaceName, gateway);
-
-            if ("dhcp".equals(bootproto)) {
-                logger.debug(
-                        "getIfaceConfig() :: Interface configuration mode for the {} interface is currently set for DHCP",
-                        ifaceName);
-                dhcp = true;
-            } else if ("static".equals(bootproto)) {
-                logger.debug(
-                        "getIfaceConfig() :: Interface configuration mode for the {} interface is currently set for static IP address",
-                        ifaceName);
-                String ipAddress = kuraProps.getProperty(IPADDR_PROP_NAME);
-                prefixString = kuraProps.getProperty(PREFIX_PROP_NAME);
-                netmask = kuraProps.getProperty(NETMASK_PROP_NAME);
-                if (autoConnect) {
-                    // make sure at least prefix or netmask is present
-                    address = parseIpAddress(ipAddress, netmask, prefixString);
-                }
-            }
-        }
-        return new IfaceConfig(netInterfaceStatus, autoConnect, dhcp, address, prefixString, netmask, gateway);
-    }
-
-    private void setNetInterfaceAddressConfigs(String interfaceName, boolean dhcp, List<NetConfig> netConfigs,
-            NetInterfaceAddressConfig netInterfaceAddressConfig) {
-        if (netInterfaceAddressConfig instanceof NetInterfaceAddressConfigImpl) {
-            setNetInterfaceAddressConfigs(interfaceName, netConfigs, netInterfaceAddressConfig, dhcp);
-        } else if (netInterfaceAddressConfig instanceof WifiInterfaceAddressConfigImpl) {
-            setWifiNetInterfaceAddressConfigs(interfaceName, netConfigs, netInterfaceAddressConfig, dhcp);
-        }
-    }
-
-    private void setNetInterfaceAddressConfigs(String interfaceName, List<NetConfig> netConfigs,
-            NetInterfaceAddressConfig netInterfaceAddressConfig, boolean dhcp) {
-        ((NetInterfaceAddressConfigImpl) netInterfaceAddressConfig).setNetConfigs(netConfigs);
-        if (dhcp) {
-            // obtain gateway provided by DHCP server
-            List<? extends IPAddress> dhcpRouters = getDhcpRouters(interfaceName,
-                    netInterfaceAddressConfig.getAddress());
-            if (!dhcpRouters.isEmpty()) {
-                ((NetInterfaceAddressConfigImpl) netInterfaceAddressConfig).setGateway(dhcpRouters.get(0));
-            }
-            // Replace with DNS provided by DHCP server (displayed as read-only in Denali)
-            List<? extends IPAddress> dhcpDnsServers = getDhcpDnsServers(interfaceName,
-                    netInterfaceAddressConfig.getAddress());
-            if (!dhcpDnsServers.isEmpty()) {
-                ((NetInterfaceAddressConfigImpl) netInterfaceAddressConfig).setDnsServers(dhcpDnsServers);
-            }
-        }
-    }
-
-    private void setWifiNetInterfaceAddressConfigs(String interfaceName, List<NetConfig> netConfigs,
-            NetInterfaceAddressConfig netInterfaceAddressConfig, boolean dhcp) {
-        ((WifiInterfaceAddressConfigImpl) netInterfaceAddressConfig).setNetConfigs(netConfigs);
-        if (dhcp) {
-            // obtain gateway provided by DHCP server
-            List<? extends IPAddress> dhcpRouters = getDhcpRouters(interfaceName,
-                    netInterfaceAddressConfig.getAddress());
-            if (!dhcpRouters.isEmpty()) {
-                ((WifiInterfaceAddressConfigImpl) netInterfaceAddressConfig).setGateway(dhcpRouters.get(0));
-            }
-            // Replace with DNS provided by DHCP server (displayed as read-only in Denali)
-            List<? extends IPAddress> dhcpDnsServers = getDhcpDnsServers(interfaceName,
-                    netInterfaceAddressConfig.getAddress());
-            if (!dhcpDnsServers.isEmpty()) {
-                ((WifiInterfaceAddressConfigImpl) netInterfaceAddressConfig).setDnsServers(dhcpDnsServers);
-            }
-        }
-    }
-
-    private NetInterfaceStatus getNetInterfaceStatus(String ifaceName, Properties kuraExtendedProps) {
-        NetInterfaceStatus netInterfaceStatus;
-        StringBuilder sb = new StringBuilder().append("net.interface.").append(ifaceName).append(".config.ip4.status");
-        if (kuraExtendedProps != null && kuraExtendedProps.getProperty(sb.toString()) != null) {
-            netInterfaceStatus = NetInterfaceStatus.valueOf(kuraExtendedProps.getProperty(sb.toString()));
-        } else {
-            netInterfaceStatus = NetInterfaceStatus.netIPv4StatusDisabled;
-        }
-        logger.debug("Setting NetInterfaceStatus to {} for {}", netInterfaceStatus, ifaceName);
-        return netInterfaceStatus;
-    }
-
-    private NetInterfaceStatus getNetInterfaceStatus(NetInterfaceStatus netInterfaceStatus, boolean autoConnect,
-            boolean defroute) {
-
-        NetInterfaceStatus ret = netInterfaceStatus;
-        if (netInterfaceStatus == NetInterfaceStatus.netIPv4StatusDisabled && autoConnect) {
-            if (!defroute) {
-                ret = NetInterfaceStatus.netIPv4StatusEnabledLAN;
-            } else {
-                ret = NetInterfaceStatus.netIPv4StatusEnabledWAN;
-            }
-        }
-        return ret;
-    }
-
-    private List<? extends IPAddress> getDhcpRouters(String interfaceName, IPAddress address) {
-        List<IPAddress> routers = null;
-        if (address != null) {
-            DhcpClientLeases dhcpClientLeases = DhcpClientLeases.getInstance();
-            try {
-                routers = dhcpClientLeases.getDhcpGateways(interfaceName, address);
-            } catch (KuraException e) {
-                logger.error("Error getting DHCP DNS servers", e);
-            }
-        }
-        if (routers == null) {
-            routers = new ArrayList<>();
-        }
-        return routers;
-    }
-
-    private List<? extends IPAddress> getDhcpDnsServers(String interfaceName, IPAddress address) {
-        List<IPAddress> dnsServers = null;
-        if (address != null) {
-            LinuxDns linuxDns = LinuxDns.getInstance();
-            try {
-                dnsServers = linuxDns.getDhcpDnsServers(interfaceName, address);
-            } catch (KuraException e) {
-                logger.error("Error getting DHCP DNS servers", e);
-            }
-        }
-        if (dnsServers == null) {
-            dnsServers = new ArrayList<>();
-        }
-        return dnsServers;
-    }
-
-    private void setNetConfigIP4(NetConfigIP4 netConfig, boolean dhcp, IP4Address address, String gateway,
-            String prefixString, String netmask, Properties kuraProps) throws KuraException {
-
-        netConfig.setDhcp(dhcp);
-        if (kuraProps == null) {
-            return;
-        }
-        netConfig.setDnsServers(getDnsServers(kuraProps));
-        if (!dhcp) {
-            netConfig.setAddress(address);
-            if (gateway != null && !gateway.isEmpty()) {
-                try {
-                    netConfig.setGateway((IP4Address) IPAddress.parseHostAddress(gateway));
-                } catch (UnknownHostException e) {
-                    logger.error("Could not parse address: " + gateway, e);
-                }
-            }
-            if (prefixString != null) {
-                short prefix = Short.parseShort(prefixString);
-                netConfig.setNetworkPrefixLength(prefix);
-            }
-            if (netmask != null) {
-                netConfig.setNetworkPrefixLength(NetworkUtil.getNetmaskShortForm(netmask));
-            }
-        }
-    }
-
-    private List<IP4Address> getDnsServers(Properties kuraProps) {
-        List<IP4Address> dnsServers = new ArrayList<>();
-        int count = 1;
-        while (true) {
-            String dns;
-            if ((dns = kuraProps.getProperty("DNS" + count)) != null) {
-                try {
-                    dnsServers.add((IP4Address) IPAddress.parseHostAddress(dns));
-                } catch (UnknownHostException e) {
-                    logger.error("Could not parse address: {}", dns, e);
-                }
-                count++;
-            } else {
-                break;
-            }
-        }
-        return dnsServers;
-    }
-
-    private IP4Address parseIpAddress(String ipAddress, String netmask, String prefix) throws KuraException {
-        if (netmask == null && prefix == null) {
-            throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR,
-                    "malformatted network interface configuration file: must contain NETMASK and/or PREFIX");
-        }
-        IP4Address address = null;
-        if (ipAddress != null && !ipAddress.isEmpty()) {
-            try {
-                address = (IP4Address) IPAddress.parseHostAddress(ipAddress);
-            } catch (UnknownHostException e) {
-                logger.warn("parseIpAddress() :: Error parsing address: {}", ipAddress, e);
-            }
-        }
-        return address;
+        return parseDebianConfigFile(ifcfgFile, interfaceName);
     }
 
     private File getIfcfgFile() {
@@ -327,15 +80,7 @@ public class IfcfgConfigManager implements NetConfigManager {
     }
 
     @Override
-    public void writeConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig)
-            throws KuraException {
-
-        NetInterfaceType type = netInterfaceConfig.getType();
-        if (type != NetInterfaceType.ETHERNET && type != NetInterfaceType.WIFI && type != NetInterfaceType.LOOPBACK) {
-            logger.info("writeConfig() :: Cannot write configuration file for this type of interface - {}", type);
-            return;
-        }
-
+    public void write(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig) throws KuraException {
         if (configHasChanged(netInterfaceConfig)) {
             writeDebianConfig(netInterfaceConfig);
         }
@@ -353,19 +98,19 @@ public class IfcfgConfigManager implements NetConfigManager {
         logger.debug("oldProps: {}", oldConfig);
         logger.debug("newProps: {}", newConfig);
 
-        if (!compare(oldConfig, newConfig, "ONBOOT")) {
+        if (!compare(oldConfig, newConfig, ONBOOT_PROP_NAME)) {
             logger.debug("ONBOOT differs");
             return true;
-        } else if (!compare(oldConfig, newConfig, "BOOTPROTO")) {
+        } else if (!compare(oldConfig, newConfig, BOOTPROTO_PROP_NAME)) {
             logger.debug("BOOTPROTO differs");
             return true;
-        } else if (!compare(oldConfig, newConfig, "IPADDR")) {
+        } else if (!compare(oldConfig, newConfig, IPADDR_PROP_NAME)) {
             logger.debug("IPADDR differs");
             return true;
-        } else if (!compare(oldConfig, newConfig, "NETMASK")) {
+        } else if (!compare(oldConfig, newConfig, NETMASK_PROP_NAME)) {
             logger.debug("NETMASK differs");
             return true;
-        } else if (!compare(oldConfig, newConfig, "GATEWAY")) {
+        } else if (!compare(oldConfig, newConfig, GATEWAY_PROP_NAME)) {
             logger.debug("GATEWAY differs");
             return true;
         } else if (!compare(oldConfig, newConfig, "DNS1")) {
@@ -377,7 +122,7 @@ public class IfcfgConfigManager implements NetConfigManager {
         } else if (!compare(oldConfig, newConfig, "DNS3")) {
             logger.debug("DNS3 differs");
             return true;
-        } else if (!compare(oldConfig, newConfig, "DEFROUTE")) {
+        } else if (!compare(oldConfig, newConfig, DEFROUTE_PROP_NAME)) {
             logger.debug("DEFROUTE differs");
             return true;
         }
@@ -570,7 +315,7 @@ public class IfcfgConfigManager implements NetConfigManager {
     private void writeDebianConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig)
             throws KuraException {
         StringBuilder sb = new StringBuilder();
-        File kuraFile = new File(DEBIAN_NET_CONFIGURATION_FILE);
+        File kuraFile = getIfcfgFile();
         String iName = netInterfaceConfig.getName();
         boolean appendConfig = true;
 
@@ -779,5 +524,4 @@ public class IfcfgConfigManager implements NetConfigManager {
         }
         return ret;
     }
-
 }

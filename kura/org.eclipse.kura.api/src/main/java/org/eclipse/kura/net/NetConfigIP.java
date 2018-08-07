@@ -162,7 +162,7 @@ public abstract class NetConfigIP<T extends IPAddress> implements NetConfig {
      * @param address
      *            - address to be statically assigned to the interface
      */
-    public void setAddress(T address) throws KuraException {
+    public void setAddress(T address) {
         this.address = address;
     }
 

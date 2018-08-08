@@ -83,7 +83,7 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
             if (type != NetInterfaceType.ETHERNET && type != NetInterfaceType.WIFI
                     && type != NetInterfaceType.LOOPBACK) {
                 logger.info("The {} interface is not supported", interfaceName);
-                return;
+                continue;
             }
 
             Properties kuraProps = netConfigManager.read(interfaceName);

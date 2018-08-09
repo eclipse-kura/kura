@@ -37,7 +37,7 @@ public class UbloxModem extends HspaModem {
     public void reset() throws KuraException {
         UsbModemDriver modemDriver = getModemDriver();
         try {
-            modemDriver.resetModem();
+            modemDriver.reset();
         } catch (KuraException e) {
             logger.warn("Modem reset failed");
             throw e;

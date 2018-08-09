@@ -1080,10 +1080,10 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
                 boolean status = false;
                 try {
                     logger.info("toggleModem() :: turning modem off ...");
-                    modemDriver.turnModemOff();
+                    modemDriver.disable();
                     sleep(3000);
                     logger.info("toggleModem() :: turning modem on ...");
-                    modemDriver.turnModemOn();
+                    modemDriver.enable();
 
                     logger.info("toggleModem() :: modem has been toggled successfully ...");
                     stopThread.set(status);

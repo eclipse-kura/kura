@@ -34,7 +34,6 @@ import org.eclipse.kura.comm.CommConnection;
 import org.eclipse.kura.comm.CommURI;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.message.KuraPayload;
-import org.eclipse.kura.net.NetworkService;
 import org.eclipse.kura.position.PositionService;
 import org.eclipse.kura.usb.UsbService;
 import org.eclipse.kura.usb.UsbTtyDevice;

@@ -144,7 +144,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         this.context = componentContext;
         this.executor = initBaseAssetExecutor();
         updated(properties);
-        logger.debug("activating...done");
+        logger.info("activating...done");
     }
 
     /**

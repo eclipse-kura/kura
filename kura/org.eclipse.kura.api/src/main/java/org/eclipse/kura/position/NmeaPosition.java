@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -71,6 +71,9 @@ public class NmeaPosition {
         this(lat, lon, alt, speed, track, fixQuality, nrSatellites, dop, pdop, hdop, vdop, fix3D, '0', '0', '0');
     }
 
+    /**
+     * @since 2.0
+     */
     public NmeaPosition(double lat, double lon, double alt, double speed, double track, int fixQuality,
             int nrSatellites, double dop, double pdop, double hdop, double vdop, int fix3D, char validF, char hemiLat,
             char hemiLon) {
@@ -216,26 +219,44 @@ public class NmeaPosition {
         this.m3Dfix = fix3D;
     }
 
+    /**
+     * @since 2.0
+     */
     public char getValidFix() {
         return validFix;
     }
 
+    /**
+     * @since 2.0
+     */
     public void setValidFix(char validFix) {
         this.validFix = validFix;
     }
 
+    /**
+     * @since 2.0
+     */
     public char getLatitudeHemisphere() {
         return latitudeHemisphere;
     }
 
+    /**
+     * @since 2.0
+     */
     public void setLatitudeHemisphere(char latitudeHemisphere) {
         this.latitudeHemisphere = latitudeHemisphere;
     }
 
+    /**
+     * @since 2.0
+     */
     public char getLongitudeHemisphere() {
         return longitudeHemisphere;
     }
 
+    /**
+     * @since 2.0
+     */
     public void setLongitudeHemisphere(char longitudeHemisphere) {
         this.longitudeHemisphere = longitudeHemisphere;
     }

@@ -201,30 +201,28 @@ public class H2DbWireRecordStore implements WireEmitter, WireReceiver, Configura
     private void truncate(final int noOfRecordsToKeep) {
         final String tableName = this.wireRecordStoreOptions.getTableName();
         final String sqlTableName = this.dbHelper.sanitizeSqlTableAndColumnName(tableName);
-        Connection conn = null;
-        ResultSet rsTbls = null;
-        try {
-            conn = this.dbHelper.getConnection();
 
-            final String catalog = conn.getCatalog();
-            final DatabaseMetaData dbMetaData = conn.getMetaData();
-            rsTbls = dbMetaData.getTables(catalog, null, tableName, TABLE_TYPE);
-            if (rsTbls.next()) {
-                // table does exist, truncate it
-                if (noOfRecordsToKeep == 0) {
-                    logger.info("Truncating table {}...", sqlTableName);
-                    this.dbHelper.execute(MessageFormat.format(SQL_TRUNCATE_TABLE, sqlTableName));
-                } else {
-                    logger.info("Partially emptying table {}", sqlTableName);
-                    this.dbHelper.execute(MessageFormat.format(SQL_DELETE_RANGE_TABLE, sqlTableName,
-                            Integer.toString(noOfRecordsToKeep)));
+        try {
+            this.dbHelper.withConnection(c -> {
+                final String catalog = c.getCatalog();
+                final DatabaseMetaData dbMetaData = c.getMetaData();
+                try (final ResultSet rsTbls = dbMetaData.getTables(catalog, null, tableName, TABLE_TYPE)) {
+                    if (rsTbls.next()) {
+                        // table does exist, truncate it
+                        if (noOfRecordsToKeep == 0) {
+                            logger.info("Truncating table {}...", sqlTableName);
+                            this.dbHelper.execute(c, MessageFormat.format(SQL_TRUNCATE_TABLE, sqlTableName));
+                        } else {
+                            logger.info("Partially emptying table {}", sqlTableName);
+                            this.dbHelper.execute(c, MessageFormat.format(SQL_DELETE_RANGE_TABLE, sqlTableName,
+                                    Integer.toString(noOfRecordsToKeep)));
+                        }
+                    }
                 }
-            }
+                return (Void) null;
+            });
         } catch (final SQLException sqlException) {
             logger.error("Error in truncating the table {}...", sqlTableName, sqlException);
-        } finally {
-            this.dbHelper.close(rsTbls);
-            this.dbHelper.close(conn);
         }
     }
 
@@ -232,27 +230,13 @@ public class H2DbWireRecordStore implements WireEmitter, WireReceiver, Configura
         final String tableName = this.wireRecordStoreOptions.getTableName();
         final String sqlTableName = this.dbHelper.sanitizeSqlTableAndColumnName(tableName);
 
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rset = null;
-
-        int size = 0;
-        try {
-            conn = this.dbHelper.getConnection();
-            stmt = conn.createStatement();
-            rset = stmt.executeQuery(MessageFormat.format(SQL_ROW_COUNT_TABLE, sqlTableName));
-
-            rset.next();
-            size = rset.getInt(1);
-        } catch (final SQLException e) {
-            throw e;
-        } finally {
-            this.dbHelper.close(rset);
-            this.dbHelper.close(stmt);
-            this.dbHelper.close(conn);
-        }
-
-        return size;
+        return dbHelper.withConnection(c -> {
+            try (final Statement stmt = c.createStatement();
+                    final ResultSet rset = stmt.executeQuery(MessageFormat.format(SQL_ROW_COUNT_TABLE, sqlTableName))) {
+                rset.next();
+                return rset.getInt(1);
+            }
+        });
     }
 
     /** {@inheritDoc} */
@@ -360,28 +344,30 @@ public class H2DbWireRecordStore implements WireEmitter, WireReceiver, Configura
     private void reconcileTable(final String tableName) throws SQLException {
         requireNonNull(tableName, "Table name cannot be null");
         final String sqlTableName = this.dbHelper.sanitizeSqlTableAndColumnName(tableName);
-        final Connection conn = this.dbHelper.getConnection();
-        ResultSet rsTbls = null;
-        try {
+
+        dbHelper.withConnection(c -> {
             // check for the table that would collect the data of this emitter
-            final String catalog = conn.getCatalog();
-            final DatabaseMetaData dbMetaData = conn.getMetaData();
-            rsTbls = dbMetaData.getTables(catalog, null, this.wireRecordStoreOptions.getTableName(), TABLE_TYPE);
-            if (!rsTbls.next()) {
-                // table does not exist, create it
-                logger.info("Creating table {}...", sqlTableName);
-                this.dbHelper.execute(MessageFormat.format(SQL_CREATE_TABLE, sqlTableName));
-                createIndex(this.dbHelper.sanitizeSqlTableAndColumnName(tableName + "_TIMESTAMP"), sqlTableName,
-                        "(TIMESTAMP DESC)");
+            final String catalog = c.getCatalog();
+            final DatabaseMetaData dbMetaData = c.getMetaData();
+            try (final ResultSet rsTbls = dbMetaData.getTables(catalog, null,
+                    this.wireRecordStoreOptions.getTableName(), TABLE_TYPE)) {
+                if (!rsTbls.next()) {
+                    // table does not exist, create it
+                    logger.info("Creating table {}...", sqlTableName);
+                    this.dbHelper.execute(c, MessageFormat.format(SQL_CREATE_TABLE, sqlTableName));
+                    createIndex(this.dbHelper.sanitizeSqlTableAndColumnName(tableName + "_TIMESTAMP"), sqlTableName,
+                            "(TIMESTAMP DESC)");
+                }
             }
-        } finally {
-            this.dbHelper.close(rsTbls);
-            this.dbHelper.close(conn);
-        }
+            return (Void) null;
+        });
     }
 
     private void createIndex(String indexname, String table, String order) throws SQLException {
-        this.dbHelper.execute(MessageFormat.format(SQL_CREATE_TABLE_INDEX, indexname, table, order));
+        this.dbHelper.withConnection(c -> {
+            this.dbHelper.execute(c, MessageFormat.format(SQL_CREATE_TABLE_INDEX, indexname, table, order));
+            return (Void) null;
+        });
         logger.info("Index {} created, order is {}", indexname, order);
     }
 
@@ -401,43 +387,40 @@ public class H2DbWireRecordStore implements WireEmitter, WireReceiver, Configura
         requireNonNull(tableName, "Table name cannot be null");
         requireNonNull(wireRecord, "Wire Record cannot be null");
 
-        Connection conn = null;
-        ResultSet rsColumns = null;
         final Map<String, Integer> columns = CollectionUtil.newHashMap();
-        try {
-            // check for the table that would collect the data of this emitter
-            conn = this.dbHelper.getConnection();
-            final String catalog = conn.getCatalog();
-            final DatabaseMetaData dbMetaData = conn.getMetaData();
-            rsColumns = dbMetaData.getColumns(catalog, null, tableName, null);
-            // map the columns
-            while (rsColumns.next()) {
-                final String colName = rsColumns.getString(COLUMN_NAME);
-                final String sqlColName = this.dbHelper.sanitizeSqlTableAndColumnName(colName);
-                final int colType = rsColumns.getInt(DATA_TYPE);
-                columns.put(sqlColName, colType);
+
+        this.dbHelper.withConnection(c -> {
+            final String catalog = c.getCatalog();
+            final DatabaseMetaData dbMetaData = c.getMetaData();
+            try (final ResultSet rsColumns = dbMetaData.getColumns(catalog, null, tableName, null)) {
+                // map the columns
+                while (rsColumns.next()) {
+                    final String colName = rsColumns.getString(COLUMN_NAME);
+                    final String sqlColName = this.dbHelper.sanitizeSqlTableAndColumnName(colName);
+                    final int colType = rsColumns.getInt(DATA_TYPE);
+                    columns.put(sqlColName, colType);
+                }
             }
-        } finally {
-            this.dbHelper.close(rsColumns);
-            this.dbHelper.close(conn);
-        }
-        // reconcile columns
-        for (Entry<String, TypedValue<?>> entry : wireRecord.getProperties().entrySet()) {
-            final String sqlColName = this.dbHelper.sanitizeSqlTableAndColumnName(entry.getKey());
-            final Integer sqlColType = columns.get(sqlColName);
-            final JdbcType jdbcType = H2DbDataTypeMapper.getJdbcType(entry.getValue().getType());
-            final String sqlTableName = this.dbHelper.sanitizeSqlTableAndColumnName(tableName);
-            if (isNull(sqlColType)) {
-                // add column
-                this.dbHelper.execute(
-                        MessageFormat.format(SQL_ADD_COLUMN, sqlTableName, sqlColName, jdbcType.getTypeString()));
-            } else if (sqlColType != jdbcType.getType()) {
-                // drop old column and add new one
-                this.dbHelper.execute(MessageFormat.format(SQL_DROP_COLUMN, sqlTableName, sqlColName));
-                this.dbHelper.execute(
-                        MessageFormat.format(SQL_ADD_COLUMN, sqlTableName, sqlColName, jdbcType.getTypeString()));
+
+            for (Entry<String, TypedValue<?>> entry : wireRecord.getProperties().entrySet()) {
+                final String sqlColName = this.dbHelper.sanitizeSqlTableAndColumnName(entry.getKey());
+                final Integer sqlColType = columns.get(sqlColName);
+                final JdbcType jdbcType = H2DbDataTypeMapper.getJdbcType(entry.getValue().getType());
+                final String sqlTableName = this.dbHelper.sanitizeSqlTableAndColumnName(tableName);
+                if (isNull(sqlColType)) {
+                    // add column
+                    this.dbHelper.execute(c,
+                            MessageFormat.format(SQL_ADD_COLUMN, sqlTableName, sqlColName, jdbcType.getTypeString()));
+                } else if (sqlColType != jdbcType.getType()) {
+                    // drop old column and add new one
+                    this.dbHelper.execute(c, MessageFormat.format(SQL_DROP_COLUMN, sqlTableName, sqlColName));
+                    this.dbHelper.execute(c,
+                            MessageFormat.format(SQL_ADD_COLUMN, sqlTableName, sqlColName, jdbcType.getTypeString()));
+                }
             }
-        }
+
+            return (Void) null;
+        });
     }
 
     /**
@@ -458,21 +441,17 @@ public class H2DbWireRecordStore implements WireEmitter, WireReceiver, Configura
 
         final Map<String, TypedValue<?>> wireRecordProperties = wireRecord.getProperties();
 
-        Connection connection = null;
-        PreparedStatement stmt = null;
-        try {
-            connection = this.dbHelper.getConnection();
-            stmt = prepareStatement(connection, tableName, wireRecordProperties, new Date().getTime());
-            stmt.execute();
-            connection.commit();
-            logger.debug("Stored typed value");
-        } catch (final SQLException e) {
-            this.dbHelper.rollback(connection);
-            throw e;
-        } finally {
-            this.dbHelper.close(stmt);
-            this.dbHelper.close(connection);
-        }
+        this.dbHelper.withConnection(c -> {
+            try (final PreparedStatement stmt = prepareStatement(c, tableName, wireRecordProperties,
+                    new Date().getTime())) {
+                stmt.execute();
+                c.commit();
+                return (Void) null;
+            }
+
+        });
+
+        logger.debug("Stored typed value");
     }
 
     private PreparedStatement prepareStatement(Connection connection, String tableName,

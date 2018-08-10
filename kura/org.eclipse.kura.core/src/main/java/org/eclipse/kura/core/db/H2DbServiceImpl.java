@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -20,6 +20,14 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
@@ -28,7 +36,6 @@ import org.eclipse.kura.db.H2DbService;
 import org.h2.jdbcx.JdbcConnectionPool;
 import org.h2.jdbcx.JdbcDataSource;
 import org.h2.tools.DeleteDbFiles;
-import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +43,7 @@ import org.slf4j.LoggerFactory;
 public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
 
     private static final String ANONYMOUS_MEM_INSTANCE_JDBC_URL = "jdbc:h2:mem:";
+    private static Map<String, H2DbServiceImpl> activeInstances = Collections.synchronizedMap(new HashMap<>());
 
     private static Logger logger = LoggerFactory.getLogger(H2DbServiceImpl.class);
 
@@ -51,17 +59,22 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
         }
     }
 
-    private DbConfiguration configuration;
+    private H2DbServiceOptions configuration;
 
     private JdbcDataSource dataSource;
     private JdbcConnectionPool connectionPool;
 
-    private CheckpointTask checkpointTask;
-    private static Map<String, H2DbServiceImpl> activeInstances = Collections.synchronizedMap(new HashMap<>());
-
     private char[] lastSessionPassword = null;
 
     private CryptoService cryptoService;
+
+    private ScheduledExecutorService executor;
+
+    private ScheduledFuture<?> checkpointTask;
+    private ScheduledFuture<?> defragTask;
+
+    private final ReadWriteLock rwLock = new ReentrantReadWriteLock(true);
+    private final AtomicInteger pendingUpdates = new AtomicInteger();
 
     // ----------------------------------------------------------------
     //
@@ -83,75 +96,29 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
     //
     // ----------------------------------------------------------------
 
-    protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
+    public void activate(final Map<String, Object> properties) {
         logger.info("activating...");
 
+        this.executor = Executors.newSingleThreadScheduledExecutor();
         updated(properties);
 
         logger.info("activating...done");
     }
 
-    protected synchronized void updated(Map<String, Object> properties) {
-        try {
-            logger.info("updating...");
-
-            DbConfiguration newConfiguration = new DbConfiguration(properties);
-
-            if (this.configuration != null) {
-                final boolean urlChanged = !this.configuration.getDbUrl().equals(newConfiguration.getDbUrl());
-                final boolean userChanged = !this.configuration.getUser().equalsIgnoreCase(newConfiguration.getUser());
-                if (urlChanged || userChanged) {
-                    shutdownDb();
-                }
-            }
-
-            if (newConfiguration.isRemote()) {
-                throw new IllegalArgumentException("Remote databases are not supported");
-            }
-
-            final String baseUrl = newConfiguration.getBaseUrl();
-            if (baseUrl.equals(ANONYMOUS_MEM_INSTANCE_JDBC_URL)) {
-                throw new IllegalArgumentException("Anonymous in-memory databases instances are not supported");
-            }
-
-            if (isManagedByAnotherInstance(baseUrl)) {
-                throw new IllegalStateException("Another H2DbService instance is managing the same DB URL,"
-                        + " please change the DB URL or deactivate the other instance");
-            }
-
-            final char[] passwordFromConfig = newConfiguration.getEncryptedPassword();
-            final char[] password = lastSessionPassword != null ? lastSessionPassword : passwordFromConfig;
-
-            if (connectionPool == null) {
-                openConnectionPool(newConfiguration, decryptPassword(password));
-                lastSessionPassword = password;
-            }
-            setParameters(newConfiguration);
-
-            if (!newConfiguration.isZipBased() && !Arrays.equals(password, passwordFromConfig)) {
-                final String decryptedPassword = decryptPassword(passwordFromConfig);
-                changePassword(newConfiguration.getUser(), decryptedPassword);
-                dataSource.setPassword(decryptedPassword);
-                lastSessionPassword = passwordFromConfig;
-            }
-
-            if (newConfiguration.isFileBased()) {
-                restartCheckpointTask(newConfiguration.getCheckpointIntervalSeconds() * 1000);
-            }
-
-            this.configuration = newConfiguration;
-            activeInstances.put(baseUrl, this);
-
-            logger.info("updating...done");
-        } catch (Exception e) {
-            disposeConnectionPool();
-            stopCheckpointTask();
-            logger.error("Database initialization failed", e);
-        }
+    public void updated(Map<String, Object> properties) {
+        pendingUpdates.incrementAndGet();
+        executor.submit(() -> this.updateInternal(properties));
     }
 
-    protected synchronized void deactivate(ComponentContext componentContext) {
+    public void deactivate() {
         logger.info("deactivate...");
+        this.executor.shutdown();
+        try {
+            this.executor.awaitTermination(1, TimeUnit.MINUTES);
+        } catch (InterruptedException e1) {
+            logger.warn("Interrupted while waiting for db shutdown");
+            Thread.currentThread().interrupt();
+        }
         try {
             shutdownDb();
         } catch (SQLException e) {
@@ -167,20 +134,40 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
     // ----------------------------------------------------------------
 
     @Override
-    public synchronized Connection getConnection() throws SQLException {
-        if (this.connectionPool == null) {
-            throw new SQLException("Database instance not initialized");
+    public Connection getConnection() throws SQLException {
+        if (pendingUpdates.get() > 0) {
+            syncWithExecutor();
         }
 
-        Connection conn = null;
+        final Lock lock = this.rwLock.readLock();
+        lock.lock();
         try {
-            conn = this.connectionPool.getConnection();
-        } catch (SQLException e) {
-            logger.error("Error getting connection", e);
-            rollback(conn);
-            throw e;
+            return this.getConnectionInternal();
+        } finally {
+            lock.unlock();
         }
-        return conn;
+    }
+
+    @Override
+    public <T> T withConnection(ConnectionCallable<T> callable) throws SQLException {
+        if (pendingUpdates.get() > 0) {
+            syncWithExecutor();
+        }
+
+        final Lock lock = this.rwLock.readLock();
+        lock.lock();
+        Connection connection = null;
+        try {
+            connection = getConnectionInternal();
+            return callable.call(connection);
+        } catch (final SQLException e) {
+            logger.warn("Db operation failed", e);
+            rollback(connection);
+            throw e;
+        } finally {
+            close(connection);
+            lock.unlock();
+        }
     }
 
     @Override
@@ -241,19 +228,108 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
     //
     // ----------------------------------------------------------------
 
-    private void setParameters(DbConfiguration configuration) throws SQLException {
+    private void updateInternal(final Map<String, Object> properties) {
+        final Lock lock = this.rwLock.writeLock();
+        lock.lock();
+        try {
+            logger.info("updating...");
+
+            H2DbServiceOptions newConfiguration = new H2DbServiceOptions(properties);
+
+            if (this.configuration != null) {
+                final boolean urlChanged = !this.configuration.getDbUrl().equals(newConfiguration.getDbUrl());
+                final boolean userChanged = !this.configuration.getUser().equalsIgnoreCase(newConfiguration.getUser());
+                if (urlChanged || userChanged) {
+                    shutdownDb();
+                }
+            }
+
+            if (newConfiguration.isRemote()) {
+                throw new IllegalArgumentException("Remote databases are not supported");
+            }
+
+            final String baseUrl = newConfiguration.getBaseUrl();
+            if (baseUrl.equals(ANONYMOUS_MEM_INSTANCE_JDBC_URL)) {
+                throw new IllegalArgumentException("Anonymous in-memory databases instances are not supported");
+            }
+
+            if (isManagedByAnotherInstance(baseUrl)) {
+                throw new IllegalStateException("Another H2DbService instance is managing the same DB URL,"
+                        + " please change the DB URL or deactivate the other instance");
+            }
+
+            final char[] passwordFromConfig = newConfiguration.getEncryptedPassword();
+            final char[] password = lastSessionPassword != null ? lastSessionPassword : passwordFromConfig;
+
+            if (connectionPool == null) {
+                openConnectionPool(newConfiguration, decryptPassword(password));
+                lastSessionPassword = password;
+            }
+            setParameters(newConfiguration);
+
+            if (!newConfiguration.isZipBased() && !Arrays.equals(password, passwordFromConfig)) {
+                final String decryptedPassword = decryptPassword(passwordFromConfig);
+                changePassword(newConfiguration.getUser(), decryptedPassword);
+                dataSource.setPassword(decryptedPassword);
+                lastSessionPassword = passwordFromConfig;
+            }
+
+            if (newConfiguration.isFileBased()) {
+                restartCheckpointTask(newConfiguration);
+                restartDefragTask(newConfiguration);
+            }
+
+            this.configuration = newConfiguration;
+            activeInstances.put(baseUrl, this);
+
+            logger.info("updating...done");
+        } catch (Exception e) {
+            disposeConnectionPool();
+            stopCheckpointTask();
+            logger.error("Database initialization failed", e);
+        } finally {
+            lock.unlock();
+            pendingUpdates.decrementAndGet();
+        }
+    }
+
+    private void setParameters(H2DbServiceOptions configuration) throws SQLException {
         if (!configuration.isFileBasedLogLevelSpecified()) {
-            execute("SET TRACE_LEVEL_FILE 0");
+            executeInternal("SET TRACE_LEVEL_FILE 0");
         }
 
         this.connectionPool.setMaxConnections(configuration.getConnectionPoolMaxSize());
     }
 
-    private void execute(String sql) throws SQLException {
+    private void syncWithExecutor() {
+        try {
+            executor.submit(() -> {
+            }).get();
+        } catch (final Exception e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    private Connection getConnectionInternal() throws SQLException {
+        if (this.connectionPool == null) {
+            throw new SQLException("Database instance not initialized");
+        }
+
+        Connection conn = null;
+        try {
+            conn = connectionPool.getConnection();
+        } catch (SQLException e) {
+            logger.error("Error getting connection", e);
+            throw e;
+        }
+        return conn;
+    }
+
+    private void executeInternal(String sql) throws SQLException {
         Connection conn = null;
         Statement stmt = null;
         try {
-            conn = getConnection();
+            conn = getConnectionInternal();
             stmt = conn.createStatement();
             stmt.execute(sql);
             conn.commit();
@@ -271,12 +347,14 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
         if (connectionPool == null) {
             return;
         }
+
+        stopDefragTask();
         stopCheckpointTask();
 
         Connection conn = null;
         Statement stmt = null;
         try {
-            conn = getConnection();
+            conn = dataSource.getConnection();
             stmt = conn.createStatement();
             stmt.execute("SHUTDOWN");
         } finally {
@@ -288,20 +366,7 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
         activeInstances.remove(configuration.getBaseUrl());
     }
 
-    private void restartCheckpointTask(long interval) {
-        stopCheckpointTask();
-        this.checkpointTask = new CheckpointTask(interval);
-        this.checkpointTask.start();
-    }
-
-    private void stopCheckpointTask() {
-        if (this.checkpointTask != null) {
-            this.checkpointTask.interrupt();
-            this.checkpointTask = null;
-        }
-    }
-
-    private void openConnectionPool(DbConfiguration configuration, String password) {
+    private void openConnectionPool(H2DbServiceOptions configuration, String password) {
         logger.info("Opening database with url: {}", configuration.getDbUrl());
 
         dataSource = new JdbcDataSource();
@@ -315,10 +380,10 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
         openDatabase(configuration, true);
     }
 
-    private void openDatabase(DbConfiguration configuration, boolean deleteDbOnError) {
+    private void openDatabase(H2DbServiceOptions configuration, boolean deleteDbOnError) {
         Connection conn = null;
         try {
-            conn = getConnection();
+            conn = getConnectionInternal();
         } catch (SQLException e) {
             logger.error("Failed to open database", e);
             if (deleteDbOnError && configuration.isFileBased()) {
@@ -335,7 +400,7 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
         }
     }
 
-    private void deleteDbFiles(DbConfiguration configuration) {
+    private void deleteDbFiles(H2DbServiceOptions configuration) {
         try {
             final String directory = configuration.getDbDirectory();
             final String dbName = configuration.getDatabaseName();
@@ -343,7 +408,7 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
                 logger.warn("Failed to determine database directory or name, not deleting db");
                 return;
             }
-            DeleteDbFiles.execute(configuration.getDbDirectory(), configuration.getDatabaseName(), false);
+            DeleteDbFiles.execute(directory, dbName, false);
         } catch (Exception e) {
             logger.warn("Failed to remove DB files", e);
         }
@@ -362,7 +427,7 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
     }
 
     private void changePassword(String user, String newPassword) throws SQLException {
-        execute("ALTER USER " + user + " SET PASSWORD '" + newPassword + "'");
+        executeInternal("ALTER USER " + user + " SET PASSWORD '" + newPassword + "'");
     }
 
     private boolean isManagedByAnotherInstance(String baseUrl) {
@@ -370,32 +435,91 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
         return owner != null && owner != this;
     }
 
-    private class CheckpointTask extends Thread {
-
-        private final long delay;
-
-        public CheckpointTask(long delay) {
-            this.delay = delay;
+    private void restartCheckpointTask(final H2DbServiceOptions config) {
+        stopCheckpointTask();
+        final long delaySeconds = config.getCheckpointIntervalSeconds();
+        if (delaySeconds <= 0) {
+            return;
         }
+        this.checkpointTask = executor.scheduleWithFixedDelay(new CheckpointTask(), delaySeconds, delaySeconds,
+                TimeUnit.SECONDS);
+    }
+
+    private void stopCheckpointTask() {
+        if (this.checkpointTask != null) {
+            this.checkpointTask.cancel(false);
+            this.checkpointTask = null;
+        }
+    }
+
+    private void restartDefragTask(final H2DbServiceOptions config) {
+        stopDefragTask();
+        final long delayMinutes = config.getDefragIntervalMinutes();
+        if (delayMinutes <= 0) {
+            return;
+        }
+        this.checkpointTask = executor.scheduleWithFixedDelay(new DefragTask(config), delayMinutes, delayMinutes,
+                TimeUnit.MINUTES);
+    }
+
+    private void stopDefragTask() {
+        if (this.defragTask != null) {
+            this.defragTask.cancel(false);
+            this.defragTask = null;
+        }
+    }
+
+    private class CheckpointTask implements Runnable {
 
         @Override
         public void run() {
             try {
-                while (!this.isInterrupted()) {
-                    Thread.sleep(delay);
-                    try {
-                        logger.info("performing checkpoint...");
-                        execute("CHECKPOINT SYNC");
-                        logger.info("performing checkpoint...done");
-                    } catch (SQLException e) {
-                        logger.error("checkpoint failed", e);
-                    }
-                }
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                // stop if interrupted
+                logger.info("performing checkpoint...");
+                executeInternal("CHECKPOINT SYNC");
+                logger.info("performing checkpoint...done");
+            } catch (final SQLException e) {
+                logger.error("checkpoint failed", e);
             }
-            logger.info("checkpoint task exiting");
+        }
+    }
+
+    private class DefragTask implements Runnable {
+
+        private final H2DbServiceOptions configuration;
+
+        public DefragTask(final H2DbServiceOptions configuration) {
+            this.configuration = configuration;
+        }
+
+        private void shutdownDefrag() throws SQLException {
+            Connection conn = null;
+            Statement stmt = null;
+            try {
+                conn = dataSource.getConnection();
+                stmt = conn.createStatement();
+                stmt.execute("SHUTDOWN DEFRAG");
+            } finally {
+                close(stmt);
+                close(conn);
+            }
+        }
+
+        @Override
+        public void run() {
+            final Lock lock = rwLock.writeLock();
+            lock.lock();
+            try {
+                logger.info("shutting down and defragmenting db...");
+                shutdownDefrag();
+                disposeConnectionPool();
+                final String password = decryptPassword(configuration.getEncryptedPassword());
+                openConnectionPool(configuration, password);
+                logger.info("shutting down and defragmenting db...done");
+            } catch (final Exception e) {
+                logger.error("failed to shutdown and defrag db", e);
+            } finally {
+                lock.unlock();
+            }
         }
     }
 }

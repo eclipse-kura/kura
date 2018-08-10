@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2017 Eurotech and/or its affiliates, and others
+    Copyright (c) 2017, 2018 Eurotech and/or its affiliates, and others
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -15,7 +15,7 @@
          description="H2 based database service.">
 
         <AD id="db.connector.url"
-            name="db.connector.url"
+            name="Connector URL"
             type="String"
             cardinality="0" 
             required="true"
@@ -25,7 +25,7 @@
             Please use the db.user and db.password fields to provide the credentials."/>
 
         <AD id="db.user"
-            name="db.user"
+            name="User"
             type="String"
             cardinality="0" 
             required="true"
@@ -33,7 +33,7 @@
             description="Specifies the user for the database connection."/>
 
         <AD id="db.password"
-            name="db.password"
+            name="Password"
             type="Password"
             cardinality="0" 
             required="false"
@@ -41,16 +41,25 @@
             description="Specifies the password. The default password is the empty string."/>
             
         <AD id="db.checkpoint.interval.seconds"
-            name="db.checkpoint.interval.seconds"
+            name="Checkpoint interval (seconds)"
             type="Integer"
             cardinality="0" 
             required="true"
             default="900"
             min="5"
-            description="DbService instances support running periodic checkpoints to ensure data consistency. This parameter specifies the interval in seconds beetween two successive checkpoints. This setting has no effect for in-memory database instances."/>
+            description="H2DbService instances support running periodic checkpoints to ensure data consistency. This parameter specifies the interval in seconds between two successive checkpoints. This setting has no effect for in-memory database instances."/>
+            
+        <AD id="db.defrag.interval.minutes"
+            name="Defrag interval (minutes)"
+            type="Integer"
+            cardinality="0" 
+            required="true"
+            default="15"
+            min="0"
+            description="H2DbService instances support running periodic defragmentation. This parameter specifies the interval in minutes beetween two successive checkpoints, set to zero to disable. This setting has no effect for in-memory database instances. Existing database connections will be closed during the defragmentation process and need to be reopened by the applications."/>    
             
          <AD id="db.connection.pool.max.size"
-            name="db.connection.pool.max.size"
+            name="Connection pool max size"
             type="Integer"
             cardinality="0" 
             required="true"

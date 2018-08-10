@@ -13,10 +13,7 @@ import static java.util.Objects.requireNonNull;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.Arrays;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -60,44 +57,6 @@ public final class H2DbServiceHelper {
     }
 
     /**
-     * Close the connection instance.
-     *
-     * @param conn
-     *            the connection instance to be closed
-     */
-    public void close(final Connection conn) {
-        logger.debug("Closing connection instance... {}", conn);
-        this.dbService.close(conn);
-        logger.debug("Closing connection instance... Done");
-    }
-
-    /**
-     * close the result sets.
-     *
-     * @param rss
-     *            the result sets
-     */
-    public void close(final ResultSet... rss) {
-        logger.debug("Closing all result sets... {}", () -> Arrays.toString(rss));
-
-        this.dbService.close(rss);
-        logger.debug("Closing all result sets... Done");
-    }
-
-    /**
-     * Close the SQL statements.
-     *
-     * @param stmts
-     *            the SQL statements
-     */
-    public void close(final Statement... stmts) {
-        logger.debug("Closing all statements... {}", () -> Arrays.toString(stmts));
-
-        this.dbService.close(stmts);
-        logger.debug("Closing all statements... Done");
-    }
-
-    /**
      * Executes the provided SQL query.
      *
      * @param sql
@@ -109,53 +68,24 @@ public final class H2DbServiceHelper {
      * @throws NullPointerException
      *             if SQL query argument is null
      */
-    public synchronized void execute(final String sql, final Integer... params) throws SQLException {
+    public synchronized void execute(final Connection c, final String sql, final Integer... params)
+            throws SQLException {
         requireNonNull(sql, "SQL query cannot be null");
         logger.debug("Executing SQL query... {}", sql);
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        try {
-            conn = getConnection();
-            stmt = conn.prepareStatement(sql);
+
+        try (final PreparedStatement stmt = c.prepareStatement(sql)) {
             for (int i = 0; i < params.length; i++) {
                 stmt.setInt(1 + i, params[i]);
             }
             stmt.execute();
-            conn.commit();
-        } catch (final SQLException e) {
-            rollback(conn);
-            throw e;
-        } finally {
-            this.close(stmt);
-            this.close(conn);
+            c.commit();
         }
+
         logger.debug("Executing SQL query... Done");
     }
 
-    /**
-     * Gets the connection.
-     *
-     * @return the connection instance
-     * @throws SQLException
-     *             the SQL exception
-     */
-    public Connection getConnection() throws SQLException {
-        return this.dbService.getConnection();
-    }
-
-    /**
-     * Rollback the connection.
-     *
-     * @param conn
-     *            the connection instance
-     * @throws NullPointerException
-     *             if argument is null
-     */
-    public void rollback(final Connection conn) {
-        requireNonNull(conn, "Connection instance cannnot be null");
-        logger.debug("Rolling back the connection instance... {}", conn);
-        this.dbService.rollback(conn);
-        logger.debug("Rolling back the connection instance... Done");
+    public <T> T withConnection(final H2DbService.ConnectionCallable<T> callable) throws SQLException {
+        return dbService.withConnection(callable);
     }
 
     /**

@@ -10,7 +10,6 @@
 package org.eclipse.kura.web;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -53,7 +52,7 @@ import org.slf4j.LoggerFactory;
 
 public class Console implements ConfigurableComponent {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(Console.class);
+    private static final Logger logger = LoggerFactory.getLogger(Console.class);
 
     private static final String SERVLET_ALIAS_ROOT = "servlet.alias.root";
     private static final String APP_ROOT = "app.root";
@@ -61,18 +60,16 @@ public class Console implements ConfigurableComponent {
     private static final String CONSOLE_PASSWORD = "console.password.value";
     private static final String CONSOLE_USERNAME = "console.username.value";
 
-    private static String s_aliasRoot;
-    private static String s_appRoot;
-    private static ComponentContext s_context;
+    private static String aliasRoot;
+    private static String appRoot;
+    private static ComponentContext context;
 
-    private HttpService m_httpService;
+    private HttpService httpService;
 
-    private SystemService m_systemService;
-    private CryptoService m_cryptoService;
+    private SystemService systemService;
+    private CryptoService cryptoService;
 
-    private Map<String, Object> m_properties;
-
-    private EventAdmin m_eventAdmin;
+    private EventAdmin eventAdmin;
     private AuthenticationManager authMgr;
     private GwtEventServiceImpl eventService;
 
@@ -83,35 +80,35 @@ public class Console implements ConfigurableComponent {
     // ----------------------------------------------------------------
 
     public void setHttpService(HttpService httpService) {
-        this.m_httpService = httpService;
+        this.httpService = httpService;
     }
 
     public void unsetHttpService(HttpService httpService) {
-        this.m_httpService = null;
+        this.httpService = null;
     }
 
     public void setSystemService(SystemService systemService) {
-        this.m_systemService = systemService;
+        this.systemService = systemService;
     }
 
     public void unsetSystemService(SystemService systemService) {
-        this.m_systemService = null;
+        this.systemService = null;
     }
 
     public void setCryptoService(CryptoService cryptoService) {
-        this.m_cryptoService = cryptoService;
+        this.cryptoService = cryptoService;
     }
 
     public void unsetCryptoService(CryptoService cryptoService) {
-        this.m_cryptoService = null;
+        this.cryptoService = null;
     }
 
     public void setEventAdminService(EventAdmin eventAdmin) {
-        this.m_eventAdmin = eventAdmin;
+        this.eventAdmin = eventAdmin;
     }
 
     public void unsetEventAdminService(EventAdmin eventAdmin) {
-        this.m_eventAdmin = null;
+        this.eventAdmin = null;
     }
 
     // ----------------------------------------------------------------
@@ -123,23 +120,15 @@ public class Console implements ConfigurableComponent {
     protected void activate(ComponentContext context, Map<String, Object> properties) {
         try {
             // Check if web interface is enabled.
-            boolean webEnabled = Boolean.parseBoolean(this.m_systemService.getKuraWebEnabled());
+            boolean webEnabled = Boolean.parseBoolean(this.systemService.getKuraWebEnabled());
 
             if (webEnabled) {
-                s_logger.info("activate...");
+                logger.info("activate...");
 
-                s_context = context;
-                s_aliasRoot = (String) properties.get(SERVLET_ALIAS_ROOT);
-                s_appRoot = (String) properties.get(APP_ROOT);
-                String servletRoot = s_aliasRoot;
-
-                this.m_properties = new HashMap<>();
-                Iterator<String> keys = properties.keySet().iterator();
-                while (keys.hasNext()) {
-                    String key = keys.next();
-                    Object value = properties.get(key);
-                    this.m_properties.put(key, value);
-                }
+                Console.context = context;
+                aliasRoot = (String) properties.get(SERVLET_ALIAS_ROOT);
+                appRoot = (String) properties.get(APP_ROOT);
+                String servletRoot = aliasRoot;
 
                 Object pwdProp = properties.get(CONSOLE_PASSWORD);
                 char[] propertyPassword = null;
@@ -150,18 +139,18 @@ public class Console implements ConfigurableComponent {
                 }
 
                 try {
-                    propertyPassword = this.m_cryptoService.decryptAes(propertyPassword);
+                    propertyPassword = this.cryptoService.decryptAes(propertyPassword);
                 } catch (Exception e) {
                 }
 
                 Object value = properties.get(CONSOLE_PASSWORD);
                 char[] decryptedPassword = null;
                 try {
-                    decryptedPassword = this.m_cryptoService.decryptAes(((String) value).toCharArray());
+                    decryptedPassword = this.cryptoService.decryptAes(((String) value).toCharArray());
                 } catch (Exception e) {
                     decryptedPassword = value.toString().toCharArray();
                 }
-                propertyPassword = this.m_cryptoService.sha1Hash(new String(decryptedPassword)).toCharArray();
+                propertyPassword = this.cryptoService.sha1Hash(new String(decryptedPassword)).toCharArray();
 
                 String registeredUsername = (String) properties.get(CONSOLE_USERNAME);
                 this.authMgr = new AuthenticationManager(registeredUsername, propertyPassword);
@@ -171,23 +160,23 @@ public class Console implements ConfigurableComponent {
                 initHTTPService(this.authMgr, servletRoot);
 
                 Map<String, Object> props = new HashMap<>();
-                props.put("kura.version", this.m_systemService.getKuraVersion());
+                props.put("kura.version", this.systemService.getKuraVersion());
                 EventProperties eventProps = new EventProperties(props);
-                s_logger.info("postInstalledEvent() :: posting KuraConfigReadyEvent");
-                this.m_eventAdmin.postEvent(new Event(KuraConfigReadyEvent.KURA_CONFIG_EVENT_READY_TOPIC, eventProps));
+                logger.info("postInstalledEvent() :: posting KuraConfigReadyEvent");
+                this.eventAdmin.postEvent(new Event(KuraConfigReadyEvent.KURA_CONFIG_EVENT_READY_TOPIC, eventProps));
 
             } else {
-                s_logger.info("Web interface disabled in Kura properties file.");
+                logger.info("Web interface disabled in Kura properties file.");
             }
         } catch (Throwable t) {
-            s_logger.warn("Error Registering Web Resources", t);
+            logger.warn("Error Registering Web Resources", t);
         }
 
     }
 
     protected void updated(Map<String, Object> properties) {
 
-        boolean webEnabled = Boolean.parseBoolean(this.m_systemService.getKuraWebEnabled());
+        boolean webEnabled = Boolean.parseBoolean(this.systemService.getKuraWebEnabled());
         if (!webEnabled) {
             return;
         }
@@ -201,24 +190,22 @@ public class Console implements ConfigurableComponent {
             Object value = properties.get(CONSOLE_PASSWORD);
             char[] decryptedPassword = null;
             try {
-                decryptedPassword = this.m_cryptoService.decryptAes(((String) value).toCharArray());
+                decryptedPassword = this.cryptoService.decryptAes(((String) value).toCharArray());
             } catch (Exception e) {
                 decryptedPassword = value.toString().toCharArray();
             }
 
-            propertyPassword = this.m_cryptoService.sha1Hash(new String(decryptedPassword)).toCharArray();
+            propertyPassword = this.cryptoService.sha1Hash(new String(decryptedPassword)).toCharArray();
 
             this.authMgr.updatePassword(propertyPassword);
         } catch (Exception e) {
-            s_logger.warn("Error Updating Web properties", e);
+            logger.warn("Error Updating Web properties", e);
         }
 
     }
 
     protected void deactivate(BundleContext context) {
-        s_logger.info("deactivate...");
-
-        s_context = null;
+        logger.info("deactivate...");
 
         unregisterServlet();
     }
@@ -230,72 +217,73 @@ public class Console implements ConfigurableComponent {
     // ----------------------------------------------------------------
 
     private void unregisterServlet() {
-        String servletRoot = s_aliasRoot;
-        this.m_httpService.unregister("/");
-        this.m_httpService.unregister(s_appRoot);
-        this.m_httpService.unregister(s_aliasRoot);
-        this.m_httpService.unregister(servletRoot + "/status");
-        this.m_httpService.unregister(servletRoot + "/device");
-        this.m_httpService.unregister(servletRoot + "/network");
-        this.m_httpService.unregister(servletRoot + "/component");
-        this.m_httpService.unregister(servletRoot + "/package");
-        this.m_httpService.unregister(servletRoot + "/snapshot");
-        this.m_httpService.unregister(servletRoot + "/setting");
-        this.m_httpService.unregister(servletRoot + "/file");
-        this.m_httpService.unregister(servletRoot + "/device_snapshots");
-        this.m_httpService.unregister(servletRoot + "/assetsUpDownload");
-        this.m_httpService.unregister(servletRoot + "/skin");
-        this.m_httpService.unregister(servletRoot + "/wires");
-        this.m_httpService.unregister("/sse");
+        String servletRoot = aliasRoot;
+        this.httpService.unregister("/");
+        this.httpService.unregister(appRoot);
+        this.httpService.unregister(aliasRoot);
+        this.httpService.unregister(servletRoot + "/status");
+        this.httpService.unregister(servletRoot + "/device");
+        this.httpService.unregister(servletRoot + "/network");
+        this.httpService.unregister(servletRoot + "/component");
+        this.httpService.unregister(servletRoot + "/package");
+        this.httpService.unregister(servletRoot + "/snapshot");
+        this.httpService.unregister(servletRoot + "/setting");
+        this.httpService.unregister(servletRoot + "/file");
+        this.httpService.unregister(servletRoot + "/device_snapshots");
+        this.httpService.unregister(servletRoot + "/assetsUpDownload");
+        this.httpService.unregister(servletRoot + "/skin");
+        this.httpService.unregister(servletRoot + "/wires");
+        this.httpService.unregister("/sse");
         this.eventService.stop();
-        this.m_httpService.unregister(servletRoot + "/event");
+        this.httpService.unregister(servletRoot + "/event");
     }
 
     public static BundleContext getBundleContext() {
-        return s_context.getBundleContext();
+        return context.getBundleContext();
     }
 
     public static String getApplicationRoot() {
-        return s_appRoot;
+        return appRoot;
     }
 
     public static String getServletRoot() {
-        return s_aliasRoot;
+        return aliasRoot;
     }
 
     private void initHTTPService(AuthenticationManager authMgr, String servletRoot)
             throws NamespaceException, ServletException {
         // Initialize HttpService
 
-        HttpContext httpCtx = new SecureBasicHttpContext(this.m_httpService.createDefaultHttpContext(), authMgr);
-        this.m_httpService.registerResources("/", "www", httpCtx);
-        this.m_httpService.registerResources(s_appRoot, "www/denali.html", httpCtx);
-        this.m_httpService.registerResources(s_aliasRoot, "www" + s_aliasRoot, httpCtx);
+        HttpContext httpCtx = new SecureBasicHttpContext(this.httpService.createDefaultHttpContext(), authMgr);
+        this.httpService.registerResources("/", "www", httpCtx);
+        this.httpService.registerResources(appRoot, "www/denali.html", httpCtx);
+        this.httpService.registerResources(aliasRoot, "www" + aliasRoot, httpCtx);
 
-        this.m_httpService.registerServlet(servletRoot + "/xsrf", new GwtSecurityTokenServiceImpl(), null, httpCtx);
-        this.m_httpService.registerServlet(servletRoot + "/status", new GwtStatusServiceImpl(), null, httpCtx);
-        this.m_httpService.registerServlet(servletRoot + "/device", new GwtDeviceServiceImpl(), null, httpCtx);
-        this.m_httpService.registerServlet(servletRoot + "/network", new GwtNetworkServiceImpl(), null, httpCtx);
-        this.m_httpService.registerServlet(servletRoot + "/component", new GwtComponentServiceImpl(), null, httpCtx);
-        this.m_httpService.registerServlet(servletRoot + "/package", new GwtPackageServiceImpl(), null, httpCtx);
-        this.m_httpService.registerServlet(servletRoot + "/snapshot", new GwtSnapshotServiceImpl(), null, httpCtx);
-        this.m_httpService.registerServlet(servletRoot + "/setting", new GwtSettingServiceImpl(), null, httpCtx);
-        this.m_httpService.registerServlet(servletRoot + "/certificate", new GwtCertificatesServiceImpl(), null,
+        this.httpService.registerServlet(servletRoot + "/xsrf", new GwtSecurityTokenServiceImpl(), null, httpCtx);
+        this.httpService.registerServlet(servletRoot + "/status", new GwtStatusServiceImpl(), null, httpCtx);
+        this.httpService.registerServlet(servletRoot + "/device", new GwtDeviceServiceImpl(), null, httpCtx);
+        this.httpService.registerServlet(servletRoot + "/network", new GwtNetworkServiceImpl(), null, httpCtx);
+        this.httpService.registerServlet(servletRoot + "/component", new GwtComponentServiceImpl(), null, httpCtx);
+        this.httpService.registerServlet(servletRoot + "/package", new GwtPackageServiceImpl(), null, httpCtx);
+        this.httpService.registerServlet(servletRoot + "/snapshot", new GwtSnapshotServiceImpl(), null, httpCtx);
+        this.httpService.registerServlet(servletRoot + "/setting", new GwtSettingServiceImpl(), null, httpCtx);
+        this.httpService.registerServlet(servletRoot + "/certificate", new GwtCertificatesServiceImpl(), null, httpCtx);
+        this.httpService.registerServlet(servletRoot + "/security", new GwtSecurityServiceImpl(), null, httpCtx);
+        this.httpService.registerServlet(servletRoot + "/file", new FileServlet(), null, httpCtx);
+        this.httpService.registerServlet(servletRoot + "/device_snapshots", new DeviceSnapshotsServlet(), null,
                 httpCtx);
-        this.m_httpService.registerServlet(servletRoot + "/security", new GwtSecurityServiceImpl(), null, httpCtx);
-        this.m_httpService.registerServlet(servletRoot + "/file", new FileServlet(), null, httpCtx);
-        this.m_httpService.registerServlet(servletRoot + "/device_snapshots", new DeviceSnapshotsServlet(), null,
-                httpCtx);
-        this.m_httpService.registerServlet(servletRoot + "/assetsUpDownload", new ChannelServlet(), null, httpCtx);
-        this.m_httpService.registerServlet(servletRoot + "/skin", new SkinServlet(), null, httpCtx);
-        this.m_httpService.registerServlet(servletRoot + "/ssl", new GwtSslServiceImpl(), null, httpCtx);
-        this.m_httpService.registerServlet(servletRoot + "/cloudservices", new GwtCloudServiceImpl(), null, httpCtx);
-        this.m_httpService.registerServlet(servletRoot + "/wires", new GwtWireServiceImpl(), null, httpCtx);
-        this.m_httpService.registerServlet(servletRoot + "/wiresSnapshot", new WiresSnapshotServlet(), null, httpCtx);
-        this.m_httpService.registerServlet(servletRoot + "/assetservices", new GwtAssetServiceImpl(), null, httpCtx);
-        this.m_httpService.registerServlet("/sse", new EventHandlerServlet(), null, httpCtx);
-        this.m_httpService.registerServlet(servletRoot + "/event", this.eventService, null, httpCtx);
+        this.httpService.registerServlet(servletRoot + "/assetsUpDownload", new ChannelServlet(), null, httpCtx);
+        this.httpService.registerServlet(servletRoot + "/skin", new SkinServlet(), null, httpCtx);
+        this.httpService.registerServlet(servletRoot + "/ssl", new GwtSslServiceImpl(), null, httpCtx);
+        this.httpService.registerServlet(servletRoot + "/cloudservices", new GwtCloudServiceImpl(), null, httpCtx);
+        this.httpService.registerServlet(servletRoot + "/wires", new GwtWireServiceImpl(), null, httpCtx);
+        this.httpService.registerServlet(servletRoot + "/wiresSnapshot", new WiresSnapshotServlet(), null, httpCtx);
+        this.httpService.registerServlet(servletRoot + "/assetservices", new GwtAssetServiceImpl(), null, httpCtx);
+        this.httpService.registerServlet("/sse", new EventHandlerServlet(), null, httpCtx);
+        this.httpService.registerServlet(servletRoot + "/event", this.eventService, null, httpCtx);
         this.eventService.start();
+
+        org.eclipse.jetty.http.HttpGenerator.setJettyVersion("Jetty");
     }
 
 }

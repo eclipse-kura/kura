@@ -17,6 +17,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.kura.KuraBluetoothBeaconAdvertiserNotAvailable;
 import org.eclipse.kura.KuraBluetoothCommandException;
 import org.eclipse.kura.KuraException;
@@ -34,13 +36,11 @@ import org.eclipse.kura.internal.ble.util.BluetoothLeUtil;
 import org.eclipse.kura.internal.ble.util.BluetoothProcess;
 import org.eclipse.kura.internal.ble.util.BluetoothProcessListener;
 import org.osgi.service.component.ComponentContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class BluetoothLeBeaconManagerImpl
         implements BluetoothLeBeaconManager<BluetoothLeBeacon>, BTSnoopListener, BluetoothProcessListener {
 
-    private static final Logger logger = LoggerFactory.getLogger(BluetoothLeBeaconManagerImpl.class);
+    private static final Logger logger = LogManager.getLogger(BluetoothLeBeaconManagerImpl.class);
 
     // See Bluetooth 4.0 Core specifications (https://www.bluetooth.org/docman/handlers/downloaddoc.ashx?doc_id=229737)
     private static final String OGF_CONTROLLER_CMD = "0x08";
@@ -134,9 +134,8 @@ public class BluetoothLeBeaconManagerImpl
     public void stopBeaconAdvertising(String interfaceName) throws KuraBluetoothCommandException {
         String[] cmd = { CMD, OGF_CONTROLLER_CMD, OCF_ADVERTISING_ENABLE_CMD, "00" };
 
-        if (logger.isDebugEnabled()) {
-            logger.debug("Set Advertising Parameters : hcitool -i {} {}", interfaceName, String.join(" ", cmd));
-        }
+        logger.debug("Set Advertising Parameters : hcitool -i {} {}", () -> interfaceName, () -> String.join(" ", cmd));
+
         logger.info("Stop Advertising on interface {}", interfaceName);
 
         try {
@@ -157,9 +156,8 @@ public class BluetoothLeBeaconManagerImpl
         String[] cmd = { CMD, OGF_CONTROLLER_CMD, OCF_ADVERTISING_PARAM_CMD, minHex[1], minHex[0], maxHex[1], maxHex[0],
                 "03", "00", "00", "00", "00", "00", "00", "00", "00", "07", "00" };
 
-        if (logger.isDebugEnabled()) {
-            logger.debug("Set Advertising Parameters : hcitool -i {} {}", interfaceName, String.join(" ", cmd));
-        }
+        logger.debug("Set Advertising Parameters : hcitool -i {} {}", () -> interfaceName, () -> String.join(" ", cmd));
+
         logger.info("Set Advertising Parameters on interface {}", interfaceName);
 
         try {
@@ -193,9 +191,8 @@ public class BluetoothLeBeaconManagerImpl
             cmd[i + 3] = data[i];
         }
 
-        if (logger.isDebugEnabled()) {
-            logger.debug("Set Advertising Data : hcitool -i {} {}", interfaceName, String.join(" ", cmd));
-        }
+        logger.debug("Set Advertising Data : hcitool -i {} {}", () -> interfaceName, () -> String.join(" ", cmd));
+
         logger.info("Set Advertising Data on interface {}", interfaceName);
         try {
             execHcitool(interfaceName, cmd);

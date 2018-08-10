@@ -15,8 +15,8 @@ import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 import org.osgi.annotation.versioning.ProviderType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * The {@link KuraRuntimeException} class is the superclass of all runtime exceptions in the Kura project. It extends
@@ -39,7 +39,7 @@ public class KuraRuntimeException extends RuntimeException {
     private static final String KURA_GENERIC_MESSAGES_PATTERN = "Generic Error - {0}: {1}";
 
     /** The Logger. */
-    private static final Logger logger = LoggerFactory.getLogger(KuraRuntimeException.class);
+    private static final Logger logger = LogManager.getLogger(KuraRuntimeException.class);
 
     /** The Constant denoting serial version identifier. */
     private static final long serialVersionUID = -7202805328805688329L;

@@ -37,15 +37,14 @@ Copyright (c) 2017 Eurotech and/or its affiliates and others
                     <failIfNoTests>false</failIfNoTests>
                     <providerHint>junit4</providerHint>
                     <useUnlimitedThreads>false</useUnlimitedThreads>
-                    <argLine>${jacocoArgs}
+                    <argLine>${tycho.argline}
                         -DbuildingWithTycho=true -Dosgi.locking=none
                         -Dds.showtrace=true -Djava.io.tmpdir=/tmp
                         -Dorg.osgi.framework.storage=/tmp/osgi/framework_storage
                         -Dosgi.clean=true
                         -Dorg.eclipse.kura.mode=emulator
                         -Dkura.configuration=file:${kura.basedir}/emulator/org.eclipse.kura.emulator/src/main/resources/kura.properties
-                        -Ddpa.configuration=/tmp/kura/dpa.properties
-                        -Dlog4j.configuration=file:${kura.basedir}/emulator/org.eclipse.kura.emulator/src/main/resources/log4j.properties</argLine>
+                        -Ddpa.configuration=/tmp/kura/dpa.properties</argLine>
                     <bundleStartLevel>
                         <bundle>
                             <id>org.eclipse.equinox.ds</id>
@@ -134,6 +133,26 @@ Copyright (c) 2017 Eurotech and/or its affiliates and others
                         </bundle>
                         <bundle>
                             <id>slf4j.api</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.apache.log4j2-api-config</id>
+                            <level>4</level>
+                            <autoStart>false</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.apache.logging.log4j.api</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.apache.logging.log4j.core</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.apache.logging.log4j.slf4j-impl</id>
                             <level>4</level>
                             <autoStart>true</autoStart>
                         </bundle>
@@ -272,14 +291,6 @@ Copyright (c) 2017 Eurotech and/or its affiliates and others
                             <type>p2-installable-unit</type>
                             <artifactId>org.apache.commons.io</artifactId>
                         </dependency>
-                        <dependency>
-                            <type>p2-installable-unit</type>
-                            <artifactId>log4j</artifactId>
-                        </dependency>
-                        <dependency>
-                            <type>p2-installable-unit</type>
-                            <artifactId>log4j.apache-log4j-extras</artifactId>
-                        </dependency>
                     </dependencies>
                 </configuration>
             </plugin>
@@ -323,6 +334,26 @@ Copyright (c) 2017 Eurotech and/or its affiliates and others
                             <requirement>
                                 <type>eclipse-plugin</type>
                                 <id>org.eclipse.kura.xml.marshaller.unmarshaller.provider</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>p2-installable-unit</type>
+                                <id>org.apache.logging.log4j.api</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>p2-installable-unit</type>
+                                <id>org.apache.logging.log4j.core</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>eclipse-plugin</type>
+                                <id>org.apache.log4j2-api-config</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>p2-installable-unit</type>
+                                <id>org.apache.logging.log4j.slf4j-impl</id>
                                 <versionRange>0.0.0</versionRange>
                             </requirement>
                         </extraRequirements>

@@ -22,10 +22,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.db.DbService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The Class DbServiceHelper is responsible for providing {@link DbService}
@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class DbServiceHelper {
 
-    private static final Logger logger = LoggerFactory.getLogger(DbServiceHelper.class);
+    private static final Logger logger = LogManager.getLogger(DbServiceHelper.class);
 
     private final DbService dbService;
 
@@ -82,9 +82,8 @@ public final class DbServiceHelper {
      *            the result sets
      */
     public void close(final ResultSet... rss) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Closing all result sets... {}", Arrays.toString(rss));
-        }
+        logger.debug("Closing all result sets... {}", () -> Arrays.toString(rss));
+
         this.dbService.close(rss);
         logger.debug("Closing all result sets... Done");
     }
@@ -96,9 +95,8 @@ public final class DbServiceHelper {
      *            the SQL statements
      */
     public void close(final Statement... stmts) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Closing all statements... {}", Arrays.toString(stmts));
-        }
+        logger.debug("Closing all statements... {}", () -> Arrays.toString(stmts));
+
         this.dbService.close(stmts);
         logger.debug("Closing all statements... Done");
     }
@@ -159,9 +157,9 @@ public final class DbServiceHelper {
      */
     public void rollback(final Connection conn) {
         requireNonNull(conn, "Connection instance cannnot be null");
-        if (logger.isDebugEnabled()) {
-            logger.debug("Rolling back the connection instance... {}", conn);
-        }
+
+        logger.debug("Rolling back the connection instance... {}", () -> conn);
+
         this.dbService.rollback(conn);
         logger.debug("Rolling back the connection instance... Done");
     }

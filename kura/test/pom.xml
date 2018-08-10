@@ -9,19 +9,15 @@ Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
   http://www.eclipse.org/legal/epl-v10.html
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <parent>
         <groupId>org.eclipse.kura</groupId>
         <artifactId>kura</artifactId>
         <version>3.3.0-SNAPSHOT</version>
     </parent>
-
     <artifactId>test</artifactId>
     <packaging>pom</packaging>
-
     <dependencies>
         <dependency>
             <groupId>org.mockito</groupId>
@@ -36,7 +32,6 @@ Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
             <scope>test</scope>
         </dependency>
     </dependencies>
-
     <build>
         <plugins>
             <plugin>
@@ -52,7 +47,6 @@ Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
                     </execution>
                 </executions>
             </plugin>
-
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.7.2</version>
@@ -64,13 +58,11 @@ Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
                             <goal>test</goal>
                         </goals>
                         <configuration>
-                            <argLine>${jacocoArgs}</argLine>
+                            <argLine>${tycho.argline}</argLine>
                         </configuration>
                     </execution>
                 </executions>
-                <configuration></configuration>
             </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
@@ -90,6 +82,99 @@ Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
             </plugin>
             <plugin>
                 <groupId>org.eclipse.tycho</groupId>
+                <artifactId>tycho-surefire-plugin</artifactId>
+                <version>${tycho-version}</version>
+                <configuration>
+                    <argLine>${tycho.argline}</argLine>
+                    <failIfNoTests>false</failIfNoTests>
+                    <providerHint>junit4</providerHint>
+                    <useUnlimitedThreads>false</useUnlimitedThreads>
+                    <bundleStartLevel>
+                        <bundle>
+                            <id>org.apache.felix.scr</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.eclipse.equinox.cm</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.eclipse.equinox.event</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.eclipse.equinox.metatype</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.eclipse.equinox.registry</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.eclipse.equinox.console</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.apache.log4j2-api-config</id>
+                            <level>4</level>
+                            <autoStart>false</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.apache.logging.log4j.api</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.apache.logging.log4j.core</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.apache.logging.log4j.slf4j-impl</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.eclipse.kura.core.configuration</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.eclipse.kura.core.crypto</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.eclipse.kura.emulator</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.eclipse.kura.emulator.net</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.eclipse.kura.json.marshaller.unmarshaller.provider</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.eclipse.kura.xml.marshaller.unmarshaller.provider</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                    </bundleStartLevel>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.eclipse.tycho</groupId>
                 <artifactId>target-platform-configuration</artifactId>
                 <configuration>
                     <pomDependencies>consider</pomDependencies>
@@ -100,6 +185,31 @@ Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
                             <requirement>
                                 <type>eclipse-plugin</type>
                                 <id>org.hamcrest</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>p2-installable-unit</type>
+                                <id>org.apache.logging.log4j.api</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>p2-installable-unit</type>
+                                <id>org.apache.logging.log4j.core</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>eclipse-plugin</type>
+                                <id>org.apache.log4j2-api-config</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>p2-installable-unit</type>
+                                <id>org.apache.logging.log4j.slf4j-impl</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>eclipse-plugin</type>
+                                <id>org.eclipse.kura.api</id>
                                 <versionRange>0.0.0</versionRange>
                             </requirement>
                         </extraRequirements>
@@ -116,13 +226,11 @@ Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
             </plugin>
         </plugins>
     </build>
-
     <properties>
         <kura.basedir>${project.basedir}/..</kura.basedir>
+        <tycho.argline>${jacocoArgs} -Dlog4j.configurationFile=file:${kura.basedir}/emulator/org.eclipse.kura.emulator/src/main/resources/log4j.properties</tycho.argline>
     </properties>
-
     <modules>
-        <module>log4j.test.configuration</module>
         <module>org.eclipse.kura.asset.provider.test</module>
         <module>org.eclipse.kura.camel.test</module>
         <module>org.eclipse.kura.cloud.test</module>
@@ -179,7 +287,6 @@ Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
         -->
         <!-- note: examples have their own test modules -->
     </modules>
-
     <profiles>
         <profile>
             <id>can</id>

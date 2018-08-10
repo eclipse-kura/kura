@@ -2,9 +2,6 @@ language: java
 
 sudo: false
 
-jdk:
-  - oraclejdk8
-
 cache:
   directories:
   - $HOME/.m2
@@ -30,7 +27,6 @@ addons:
   apt:
     packages:
       - dos2unix
-      - oracle-java8-installer
 
 jobs:
   include:

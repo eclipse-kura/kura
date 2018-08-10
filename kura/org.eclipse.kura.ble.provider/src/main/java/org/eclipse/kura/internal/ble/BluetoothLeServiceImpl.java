@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -18,14 +18,14 @@ import java.util.List;
 import org.eclipse.kura.bluetooth.le.BluetoothLeAdapter;
 import org.eclipse.kura.bluetooth.le.BluetoothLeService;
 import org.osgi.service.component.ComponentContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import tinyb.BluetoothManager;
 
 public class BluetoothLeServiceImpl implements BluetoothLeService {
 
-    private static final Logger logger = LoggerFactory.getLogger(BluetoothLeServiceImpl.class);
+    private static final Logger logger = LogManager.getLogger();
 
     private BluetoothManager bluetoothManager;
 

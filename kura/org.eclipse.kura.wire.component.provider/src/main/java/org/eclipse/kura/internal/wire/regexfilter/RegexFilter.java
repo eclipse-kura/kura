@@ -5,7 +5,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *      Amit Kumar Mondal
  *      Eurotech
@@ -35,6 +35,8 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import java.util.stream.Stream;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.wire.WireComponent;
@@ -47,8 +49,6 @@ import org.eclipse.kura.wire.WireSupport;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.wireadmin.Wire;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The Class {@link RegexFilter} represents a {@link WireComponent} which filters the keys from
@@ -58,7 +58,7 @@ import org.slf4j.LoggerFactory;
 public final class RegexFilter implements WireEmitter, WireReceiver, ConfigurableComponent {
 
     /** Logger instance */
-    private static final Logger logger = LoggerFactory.getLogger(RegexFilter.class);
+    private static final Logger logger = LogManager.getLogger();
 
     /** Regular Expression Metatype Attribute Definition Property Key */
     private static final String REGEX_PROP = "regex.filter";

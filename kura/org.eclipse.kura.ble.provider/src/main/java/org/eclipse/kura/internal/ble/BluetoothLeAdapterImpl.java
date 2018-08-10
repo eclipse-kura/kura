@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -23,15 +23,15 @@ import java.util.function.Consumer;
 import org.eclipse.kura.KuraBluetoothDiscoveryException;
 import org.eclipse.kura.bluetooth.le.BluetoothLeAdapter;
 import org.eclipse.kura.bluetooth.le.BluetoothLeDevice;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import tinyb.BluetoothDevice;
 import tinyb.BluetoothException;
 
 public class BluetoothLeAdapterImpl implements BluetoothLeAdapter {
 
-    private static final Logger logger = LoggerFactory.getLogger(BluetoothLeAdapterImpl.class);
+    private static final Logger logger = LogManager.getLogger();
     private static final long TIMEOUT = 30;
 
     private final tinyb.BluetoothAdapter adapter;

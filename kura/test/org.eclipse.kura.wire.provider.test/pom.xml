@@ -43,7 +43,7 @@
                     <testSuite>org.eclipse.kura.wire.provider.test</testSuite>
                     <testClass>org.eclipse.kura.wire.provider.test.WireTestsSuite</testClass>
                     <useUnlimitedThreads>true</useUnlimitedThreads>
-                    <argLine>${jacocoArgs}
+                    <argLine>${tycho.argline}
                         -DbuildingWithTycho=true -Dosgi.locking=none
                         -Dds.showtrace=true
                         -Djava.io.tmpdir=/tmp
@@ -58,7 +58,6 @@
                         -Dorg.eclipse.kura.mode=emulator
                         -Dkura.configuration=file:${kura.basedir}/emulator/org.eclipse.kura.emulator/src/main/resources/kura.properties
                         -Ddpa.configuration=/tmp/kura/dpa.properties
-                        -Dlog4j.configuration=file:${kura.basedir}/emulator/org.eclipse.kura.emulator/src/main/resources/log4j.properties
                     </argLine>
                     <!--<appArgLine>-consoleLog -console 5002 -noExit</appArgLine>-->
                     <bundleStartLevel>
@@ -184,6 +183,26 @@
                         </bundle>
                         <bundle>
                             <id>slf4j.api</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.apache.log4j2-api-config</id>
+                            <level>4</level>
+                            <autoStart>false</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.apache.logging.log4j.api</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.apache.logging.log4j.core</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.apache.logging.log4j.slf4j-impl</id>
                             <level>4</level>
                             <autoStart>true</autoStart>
                         </bundle>
@@ -445,11 +464,7 @@
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>
-                            <artifactId>log4j</artifactId>
-                        </dependency>
-                        <dependency>
-                            <type>p2-installable-unit</type>
-                            <artifactId>log4j.apache-log4j-extras</artifactId>
+                            <artifactId>org.apache.logging.log4j.api</artifactId>
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>
@@ -565,6 +580,21 @@
                             <requirement>
                                 <type>eclipse-plugin</type>
                                 <id>org.eclipse.kura.json.marshaller.unmarshaller.provider</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>p2-installable-unit</type>
+                                <id>org.apache.logging.log4j.api</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>p2-installable-unit</type>
+                                <id>org.apache.logging.log4j.core</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>eclipse-plugin</type>
+                                <id>org.apache.log4j2-api-config</id>
                                 <versionRange>0.0.0</versionRange>
                             </requirement>
                         </extraRequirements>

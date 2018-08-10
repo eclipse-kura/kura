@@ -68,10 +68,9 @@
                         <parallel>both</parallel> -->
 
                     <useUnlimitedThreads>true</useUnlimitedThreads>
-                    <argLine>${jacocoArgs}
+                    <argLine>${tycho.argline}
                         -DbuildingWithTycho=true -Dosgi.locking=none
                         -Dds.showtrace=true -Djava.io.tmpdir=/tmp
-                        -Dlog4j.configuration=file:${project.basedir}/src/main/resources/log4j.properties
                         ${kura.vm.args}
                         ${moquette.vm.args}
                     </argLine>
@@ -206,6 +205,41 @@
                         </bundle>
                         <bundle>
                             <id>slf4j.api</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.apache.log4j2-api-config</id>
+                            <level>4</level>
+                            <autoStart>false</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.apache.logging.log4j.api</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.apache.logging.log4j.core</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.apache.logging.log4j.slf4j-impl</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.apache.logging.log4j.api</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.apache.logging.log4j.core</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.apache.logging.log4j.slf4j-impl</id>
                             <level>4</level>
                             <autoStart>true</autoStart>
                         </bundle>
@@ -427,10 +461,6 @@
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>
-                            <artifactId>slf4j.log4j12</artifactId>
-                        </dependency>
-                        <dependency>
-                            <type>p2-installable-unit</type>
                             <artifactId>com.google.protobuf</artifactId>
                         </dependency>
                         <dependency>
@@ -448,14 +478,6 @@
                         <dependency>
                             <type>p2-installable-unit</type>
                             <artifactId>javax.servlet</artifactId>
-                        </dependency>
-                        <dependency>
-                            <type>p2-installable-unit</type>
-                            <artifactId>log4j</artifactId>
-                        </dependency>
-                        <dependency>
-                            <type>p2-installable-unit</type>
-                            <artifactId>log4j.apache-log4j-extras</artifactId>
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>
@@ -566,6 +588,26 @@
                             <requirement>
                                 <type>eclipse-plugin</type>
                                 <id>org.eclipse.kura.xml.marshaller.unmarshaller.provider</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>p2-installable-unit</type>
+                                <id>org.apache.logging.log4j.api</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>p2-installable-unit</type>
+                                <id>org.apache.logging.log4j.core</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>eclipse-plugin</type>
+                                <id>org.apache.log4j2-api-config</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>p2-installable-unit</type>
+                                <id>org.apache.logging.log4j.slf4j-impl</id>
                                 <versionRange>0.0.0</versionRange>
                             </requirement>
                         </extraRequirements>

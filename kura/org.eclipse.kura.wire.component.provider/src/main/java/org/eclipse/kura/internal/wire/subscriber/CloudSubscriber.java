@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.CloudClient;
 import org.eclipse.kura.cloud.CloudClientListener;
@@ -46,8 +48,6 @@ import org.osgi.service.component.ComponentContext;
 import org.osgi.service.wireadmin.Wire;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The Class CloudSubscriber is the specific Wire Component to subscribe a list
@@ -101,7 +101,7 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
         }
     }
 
-    private static final Logger logger = LoggerFactory.getLogger(CloudSubscriber.class);
+    private static final Logger logger = LogManager.getLogger();
 
     private BundleContext bundleContext;
 

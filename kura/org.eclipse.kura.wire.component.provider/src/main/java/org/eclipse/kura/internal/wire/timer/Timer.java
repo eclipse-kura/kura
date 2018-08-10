@@ -20,6 +20,8 @@ import static java.util.Objects.requireNonNull;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.wire.WireComponent;
 import org.eclipse.kura.wire.WireEmitter;
@@ -39,8 +41,6 @@ import org.quartz.SimpleScheduleBuilder;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.quartz.impl.StdSchedulerFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The Class Timer represents a Wire Component which triggers a ticking event on
@@ -54,7 +54,7 @@ public class Timer implements WireEmitter, ConfigurableComponent {
     /** This is required to generate unique ID for the Quartz Trigger and Job */
     private static AtomicInteger nextJobId = new AtomicInteger(0);
 
-    private static final Logger logger = LoggerFactory.getLogger(Timer.class);
+    private static final Logger logger = LogManager.getLogger();
 
     /** Job Key for Quartz Scheduling */
     private JobKey jobKey;

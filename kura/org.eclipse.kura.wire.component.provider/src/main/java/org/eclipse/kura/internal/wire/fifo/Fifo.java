@@ -33,15 +33,15 @@ import org.eclipse.kura.wire.WireSupport;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.wireadmin.Wire;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 public class Fifo implements WireEmitter, WireReceiver, ConfigurableComponent {
 
     private static final String DISCARD_ENVELOPES_PROP_NAME = "discard.envelopes";
     private static final String QUEUE_CAPACITY_PROP_NAME = "queue.capacity";
 
-    private static final Logger logger = LoggerFactory.getLogger(Fifo.class);
+    private static final Logger logger = LogManager.getLogger();
 
     private volatile WireHelperService wireHelperService;
     private WireSupport wireSupport;

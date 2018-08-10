@@ -101,7 +101,6 @@
 		<antcall target="core.configuration-config" />
 		<antcall target="core.crypto-config" />
 		<antcall target="core.deployment-config" />
-		<antcall target="core.log-config" />
 		<antcall target="core.net-config" />
 		<antcall target="core.status-config" />
 		<antcall target="deployment.agent-config" />
@@ -202,7 +201,7 @@ if [ -z "$KURA_RUNNING" ] ; then
         -Dkura.custom.configuration=file:${DIR}/kura/kura_custom.properties \
         -Dkura.data.dir=${DIR}/data \
         -Ddpa.configuration=${DIR}/kura/dpa.properties \
-        -Dlog4j.configuration=file:${DIR}/kura/log4j.properties \
+        -Dlog4j.configurationFile=file:${DIR}/kura/log4j.xml \
         -Djava.security.policy=${DIR}/kura/jdk.dio.policy \
         -Djdk.dio.registry=${DIR}/kura/jdk.dio.properties \
         -Djdk.tls.trustNameService=true \
@@ -246,7 +245,7 @@ if [ -z "$KURA_RUNNING" ] ; then
         -Dkura.custom.configuration=file:${DIR}/kura/kura_custom.properties \
         -Dkura.data.dir=${DIR}/data \
         -Ddpa.configuration=${DIR}/kura/dpa.properties \
-        -Dlog4j.configuration=file:${DIR}/kura/log4j.properties \
+        -Dlog4j.configurationFile=file:${DIR}/kura/log4j.xml \
         -Djava.security.policy=${DIR}/kura/jdk.dio.policy \
         -Djdk.dio.registry=${DIR}/kura/jdk.dio.properties \
         -Djdk.tls.trustNameService=true \
@@ -288,7 +287,7 @@ if [ -z "$KURA_RUNNING" ] ; then
         -Dkura.custom.configuration=file:${DIR}/kura/kura_custom.properties \
         -Dkura.data.dir=${DIR}/data \
         -Ddpa.configuration=${DIR}/kura/dpa.properties \
-        -Dlog4j.configuration=file:${DIR}/kura/log4j.properties \
+        -Dlog4j.configurationFile=file:${DIR}/kura/log4j.xml \
         -Djava.security.policy=${DIR}/kura/jdk.dio.policy \
         -Djdk.dio.registry=${DIR}/kura/jdk.dio.properties \
         -Djdk.tls.trustNameService=true \
@@ -444,7 +443,7 @@ fi]]>
                         prefix="${build.output.name}/" />
 			<zipfileset file="epl-v10.html"
                         prefix="${build.output.name}/" />
-			<zipfileset file="src/main/resources/${build.name}/log4j.properties"
+			<zipfileset file="src/main/resources/${build.name}/log4j.xml"
                         prefix="${build.output.name}/kura/" />
 			<zipfileset file="${project.build.directory}/${build.output.name}/kura.properties"
                         prefix="${build.output.name}/kura/" />
@@ -504,8 +503,6 @@ fi]]>
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.core.crypto_${org.eclipse.kura.core.crypto.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.core.deployment_${org.eclipse.kura.core.deployment.version}.jar"
-                        prefix="${build.output.name}/kura/plugins" />
-			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.core.log_${org.eclipse.kura.core.log.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.core.net_${org.eclipse.kura.core.net.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
@@ -694,9 +691,13 @@ fi]]>
 			<entry key="osgi.bundles" operation="+"
 			    value=", reference:file:${kura.install.dir}/kura/plugins/jcl.over.slf4j_${jcl.over.slf4j.version}.jar@3:start" />
 			<entry key="osgi.bundles" operation="+"
-				value=", reference:file:${kura.install.dir}/kura/plugins/slf4j.log4j12_${slf4j.log4j12.version}.jar@3" />
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.log4j2-api-config_${org.apache.log4j2-api-config.version}.jar@3" />
 			<entry key="osgi.bundles" operation="+"
-				value=", reference:file:${kura.install.dir}/kura/plugins/log4j_${log4j.version}.jar@3" />
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.logging.log4j.api_${log4j.version}.jar@3:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.logging.log4j.core_${log4j.version}.jar@3:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.logging.log4j.slf4j-impl_${log4j.version}.jar@3:start" />
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/plugins/log4j.apache-log4j-extras_${log4j.apache-log4j-extras.version}.jar@3" />
 			<entry key="osgi.bundles" operation="+"
@@ -801,13 +802,6 @@ fi]]>
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.core.deployment_${org.eclipse.kura.core.deployment.version}.jar@4:start" />
-		</propertyfile>
-	</target>
-
-	<target name="core.log-config">
-		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
-			<entry key="osgi.bundles" operation="+"
-				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.core.log_${org.eclipse.kura.core.log.version}.jar@4" />
 		</propertyfile>
 	</target>
 

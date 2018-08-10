@@ -21,12 +21,11 @@ Copyright (c) 2018 Eurotech and/or its affiliates and others
 
     <artifactId>org.eclipse.kura.internal.ble.test</artifactId>
     <packaging>eclipse-test-plugin</packaging>
-    <version>3.3.0-SNAPSHOT</version>
 
     <properties>
         <kura.basedir>${project.basedir}/../..</kura.basedir>
     </properties>
-
+    
     <build>
         <plugins>
             <plugin>
@@ -34,7 +33,7 @@ Copyright (c) 2018 Eurotech and/or its affiliates and others
                 <artifactId>tycho-surefire-plugin</artifactId>
                 <version>${tycho-version}</version>
                 <configuration>
-                    <failIfNoTests>false</failIfNoTests>
+                    <skip>true</skip>
                 </configuration>
             </plugin>
         </plugins>

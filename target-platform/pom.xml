@@ -23,6 +23,7 @@
         <module>tinyb-parent</module>
         <module>moquette-broker</module>
         <module>apache.log4j.extras</module>
+        <module>org.apache.log4j2-api-config</module>
 		<module>p2-repo-common</module>
         <module>p2-repo-equinox_3.12.50</module>
         <module>p2-repo-test-deps</module>

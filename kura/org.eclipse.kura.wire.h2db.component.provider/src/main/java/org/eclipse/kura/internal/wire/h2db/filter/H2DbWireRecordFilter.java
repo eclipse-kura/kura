@@ -52,8 +52,8 @@ import org.osgi.service.component.ComponentException;
 import org.osgi.service.wireadmin.Wire;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * The Class DbWireRecordFilter is responsible for representing a wire component
@@ -62,7 +62,7 @@ import org.slf4j.LoggerFactory;
  */
 public class H2DbWireRecordFilter implements WireEmitter, WireReceiver, ConfigurableComponent {
 
-    private static final Logger logger = LoggerFactory.getLogger(H2DbWireRecordFilter.class);
+    private static final Logger logger = LogManager.getLogger();
 
     private List<WireRecord> lastRecords;
 

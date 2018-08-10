@@ -23,8 +23,8 @@ import org.eclipse.kura.message.KuraResponsePayload;
 import org.osgi.annotation.versioning.ConsumerType;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * Cloudlet is an abstract class that can be extended by services that wants to implement remote resource management.
@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
 @ConsumerType
 public abstract class Cloudlet implements CloudClientListener {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(Cloudlet.class);
+    private static final Logger s_logger = LogManager.getLogger(Cloudlet.class);
 
     protected static final int DFLT_PUB_QOS = 0;
     protected static final boolean DFLT_RETAIN = false;
@@ -211,7 +211,7 @@ public abstract class Cloudlet implements CloudClientListener {
 
 class MessageHandlerCallable implements Callable<Void> {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(MessageHandlerCallable.class);
+    private static final Logger s_logger = LogManager.getLogger(MessageHandlerCallable.class);
 
     private final Cloudlet m_cloudApp;
     @SuppressWarnings("unused")

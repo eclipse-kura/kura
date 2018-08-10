@@ -329,7 +329,10 @@ public final class SensorTagDriver implements Driver, ConfigurableComponent {
             BluetoothLeDevice device = null;
             try {
                 device = future.get();
-            } catch (InterruptedException | ExecutionException e) {
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                logger.error("Get SensorTag {} failed", sensorTagAddress, e);
+            } catch (ExecutionException e) {
                 logger.error("Get SensorTag {} failed", sensorTagAddress, e);
             }
             if (device != null) {

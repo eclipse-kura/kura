@@ -230,7 +230,10 @@ public class BluetoothUtil {
                 proc = BluetoothProcessUtil.exec(commandKill);
             }
 
-        } catch (IOException | InterruptedException e) {
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            s_logger.error("Error executing command: {}", commandPidOf, e);
+        } catch (IOException e) {
             s_logger.error("Error executing command: {}", commandPidOf, e);
         } finally {
             if (proc != null) {
@@ -403,8 +406,8 @@ public class BluetoothUtil {
 
                 int prefixPtr = ptr + 2;
                 byte[] prefix = new byte[4];
-                prefix[0] = new Integer(Integer.parseInt(companyName.substring(2, 4), 16)).byteValue();
-                prefix[1] = new Integer(Integer.parseInt(companyName.substring(0, 2), 16)).byteValue();
+                prefix[0] = (byte) Integer.parseInt(companyName.substring(2, 4), 16);
+                prefix[1] = (byte) Integer.parseInt(companyName.substring(0, 2), 16);
                 prefix[2] = 0x02;
                 prefix[3] = 0x15;
 

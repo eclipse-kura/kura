@@ -221,7 +221,7 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent, 
                     pmt.join();
                     prepareResponseNoTimeout(commandResp, pmt);
                 } catch (InterruptedException e) {
-                    Thread.interrupted();
+                    Thread.currentThread().interrupt();
                     pmt.interrupt();
                     prepareTimeoutResponse(commandResp, pmt);
                 }
@@ -264,7 +264,7 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent, 
                             return pmt.getStderr();
                         }
                     } catch (InterruptedException e) {
-                        Thread.interrupted();
+                        Thread.currentThread().interrupt();
                         pmt.interrupt();
                         throw KuraException.internalError(e);
                     }

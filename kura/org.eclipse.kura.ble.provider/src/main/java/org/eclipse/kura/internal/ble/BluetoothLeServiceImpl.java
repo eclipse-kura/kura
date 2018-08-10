@@ -78,7 +78,10 @@ public class BluetoothLeServiceImpl implements BluetoothLeService {
         try {
             process = Runtime.getRuntime().exec(systemdCommand);
             started = process.waitFor() == 0 ? true : false;
-        } catch (IOException | InterruptedException e) {
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            logger.error("Failed to start linux systemd bluetooth", e);
+        } catch (IOException e) {
             logger.error("Failed to start linux systemd bluetooth", e);
         }
         return started;

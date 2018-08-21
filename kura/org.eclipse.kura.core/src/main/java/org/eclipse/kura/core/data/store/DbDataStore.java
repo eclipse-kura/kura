@@ -152,8 +152,9 @@ public class DbDataStore implements DataStore {
         logger.info("Canceling the Housekeeper Task...");
         if (this.houseKeeperTask != null) {
             this.houseKeeperTask.cancel(true);
+            this.houseKeeperExecutor.shutdownNow();
+            this.houseKeeperTask = null;
         }
-        this.houseKeeperExecutor.shutdownNow();
         dbService = null;
     }
 

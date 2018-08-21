@@ -228,7 +228,7 @@ Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
     </build>
     <properties>
         <kura.basedir>${project.basedir}/..</kura.basedir>
-        <tycho.argline>${jacocoArgs} -Dlog4j.configurationFile=file:${kura.basedir}/emulator/org.eclipse.kura.emulator/src/main/resources/log4j.properties</tycho.argline>
+        <tycho.argline>${jacocoArgs} -Dlog4j.configurationFile=file:${kura.basedir}/emulator/org.eclipse.kura.emulator/src/main/resources/log4j.xml</tycho.argline>
     </properties>
     <modules>
         <module>org.eclipse.kura.asset.provider.test</module>

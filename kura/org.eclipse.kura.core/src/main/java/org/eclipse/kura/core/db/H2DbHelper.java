@@ -44,11 +44,25 @@ public class H2DbHelper {
             logger.error("Failed to retrieve or create default H2DbService factory configuration", e);
         }
     }
+    
+    private void stopDefaultDbServiceInstance () {
+ 		try {
+ 			if (configurationService.getComponentConfiguration(H2DbService.DEFAULT_INSTANCE_PID) != null) {
+ 				configurationService.deleteFactoryConfiguration(H2DbService.DEFAULT_INSTANCE_PID, true);
+ 			} 
+ 		} catch (KuraException e) {
+ 			logger.error("Failed to remove default H2DbService instance", e);
+ 		}
+ 	}
 
     protected void activate() {
         logger.info("activating...");
         startDefaultDbServiceInstance();
         logger.info("activating...done");
     }
-
+    
+ 	
+	protected void deactivate() {
+		stopDefaultDbServiceInstance();
+	}
 }

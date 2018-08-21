@@ -665,6 +665,8 @@ fi]]>
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/plugins/org.eclipse.equinox.http.jetty_${org.eclipse.equinox.http.jetty.version}.jar@5:start" />
 			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.eclipse.kura.jetty.customizer_${org.eclipse.kura.jetty.customizer.version}.jar" />
+			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/plugins/org.eclipse.equinox.http.servlet_${org.eclipse.equinox.http.servlet.version}.jar@5:start" />
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/plugins/org.eclipse.jetty.continuation_${org.eclipse.jetty.continuation.version}.jar@5:start" />

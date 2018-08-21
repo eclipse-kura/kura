@@ -467,6 +467,11 @@
                                     <artifactId>org.apache.activemq.artemis</artifactId>
                                     <version>${org.apache.activemq.artemis.version}</version>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.jetty.customizer</artifactId>
+                                    <version>${org.eclipse.kura.jetty.customizer.version}</version>
+                                </artifactItem>
                             </artifactItems>
                             <stripVersion>true</stripVersion>
                             <outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>

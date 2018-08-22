@@ -9,6 +9,7 @@
  *******************************************************************************/
 package org.eclipse.kura.example.ibeacon.scanner;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -185,6 +186,7 @@ public class IBeaconScanner implements ConfigurableComponent, BluetoothLeBeaconL
 
             // Publish the beacon data to the beacon's topic
             KuraPayload kp = new KuraPayload();
+            kp.setTimestamp(new Date());
             kp.addMetric("uuid", iBeacon.getUuid().toString());
             kp.addMetric("txpower", (int) iBeacon.getTxPower());
             kp.addMetric("rssi", iBeacon.getRssi());

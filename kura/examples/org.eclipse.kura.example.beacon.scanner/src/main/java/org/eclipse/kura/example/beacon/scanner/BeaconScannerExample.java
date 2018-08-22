@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,6 +8,7 @@
  *******************************************************************************/
 package org.eclipse.kura.example.beacon.scanner;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -183,6 +184,7 @@ public class BeaconScannerExample implements ConfigurableComponent, BluetoothBea
 
             // Publish the beacon data to the beacon's topic
             KuraPayload kp = new KuraPayload();
+            kp.setTimestamp(new Date());
             kp.addMetric("uuid", beaconData.uuid);
             kp.addMetric("txpower", beaconData.txpower);
             kp.addMetric("rssi", beaconData.rssi);

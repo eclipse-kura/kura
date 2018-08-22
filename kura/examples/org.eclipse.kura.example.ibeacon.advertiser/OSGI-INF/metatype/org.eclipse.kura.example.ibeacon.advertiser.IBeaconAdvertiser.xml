@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2017 Eurotech and/or its affiliates
+    Copyright (c) 2017, 2018 Eurotech and/or its affiliates
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -12,11 +12,11 @@
 -->
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
     <OCD id="org.eclipse.kura.example.ibeacon.advertiser.IBeaconAdvertiser"
-         name="iBeacon Advertiser" 
+         name="iBeacon Advertiser"
          description="The iBeacon Advertiser broadcasts iBeacon frames.">
-         
+
          <Icon resource="http://s3.amazonaws.com/kura-resources/application/icon/beacon.png" size="32"/>
-         
+
         <AD id="enable.advertising"
             name="Enable Advertising"
             type="Boolean"
@@ -32,9 +32,9 @@
             required="true"
             default="1000"
             description="Minimum time interval between beacons (milliseconds)."/>
-            
+
         <AD id="max.beacon.interval"
-            name="Maximum Beaconadvertisin interval"
+            name="Maximum Beacon advertising interval"
             type="Integer"
             cardinality="0"
             required="true"
@@ -49,20 +49,20 @@
             default="aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
             description="128-bit uuid for beacon advertising expressed as hex string."/>
 
-        <AD id="major"  
+        <AD id="major"
             name="major"
             type="Integer"
-            cardinality="0" 
+            cardinality="0"
             required="true"
-            default="0" 
+            default="0"
             description="Major value."/>
 
-        <AD id="minor"  
+        <AD id="minor"
             name="minor"
             type="Integer"
-            cardinality="0" 
+            cardinality="0"
             required="true"
-            default="0" 
+            default="0"
             description="Minor value."/>
 
          <AD id="tx.power"
@@ -72,7 +72,7 @@
             required="true"
             default="0"
             description="Transmission power measured at 1m away from the beacon expressed in dBm."/>
-            
+
         <AD id="iname"
             name="Bluetooth interface name"
             type="String"
@@ -80,7 +80,7 @@
             required="true"
             default="hci0"
             description="Name of bluetooth adapter."/>
-                    
+
     </OCD>
 
     <Designate pid="org.eclipse.kura.example.ibeacon.advertiser.IBeaconAdvertiser">

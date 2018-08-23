@@ -48,22 +48,22 @@ cleanup() {
     	  rm -f $KURA_DP >> $LOG 2>&1
        fi
 	fi
-    
+
     # Remove the upgrade installation directory on fail
     if [ $SUCCESS -ne 0 ]; then
         echo "Could not upgrade - Remove the upgrade installation directory" >> $LOG 2>&1
         rm -rf "${BASE_DIR}/${INSTALL_DIR}" >> $LOG 2>&1
     fi
-    
+
     # Remove temporary stuff
     rm -rf "$TMP" >> $LOG 2>&1
     rm -rf "${BASE_DIR}/${INSTALL_DIR}/install" >> $LOG 2>&1
     rm -f kura-*.zip >> $LOG 2>&1
-    
+
     # Save the log file in a persistent directory
     mkdir -p ${BASE_DIR}/kura/log
     cp -f $LOG ${BASE_DIR}/kura/log
-    
+
     # Always stop watchdog, sync and reboot
     stop_watchdog
     sync
@@ -82,7 +82,7 @@ function run_kura_upgrade {
         kura_upgrade &
         PID=$!
         START=$(date +%s)
-        
+
         while [ -d "/proc/$PID" ]; do
             echo w > ${WATCHDOG_DEVICE}
             DELTA=$(($(date +%s) - $START))
@@ -97,7 +97,7 @@ function run_kura_upgrade {
 		kura_upgrade &
         PID=$!
         START=$(date +%s)
-        
+
         while [ -d "/proc/$PID" ]; do
             DELTA=$(($(date +%s) - $START))
             if [ "$DELTA" -ge "$TIMEOUT_TIME" ]; then
@@ -116,7 +116,7 @@ function run_cleanup {
         echo "Got watchdog ${WATCHDOG_DEVICE}" >> $LOG 2>&1
         cleanup &
         PID=$!
-        
+
         while [ -d "/proc/$PID" ]; do
             echo w > ${WATCHDOG_DEVICE}
             DELTA=$(($(date +%s) - $START))
@@ -131,7 +131,7 @@ function run_cleanup {
 		cleanup &
         PID=$!
         START=$(date +%s)
-        
+
         while [ -d "/proc/$PID" ]; do
             DELTA=$(($(date +%s) - $START))
             if [ "$DELTA" -ge "$TIMEOUT_TIME" ]; then
@@ -159,19 +159,19 @@ function kura_upgrade {
 	# PRE-INSTALL SCRIPT
 	##############################################
 	sleep 3
-	
+
 	# remove OSGi storage directory
 	if [ -d "/tmp/.kura/configuration" ]; then
 		echo "Removing OSGi storage directory..." >> $LOG 2>&1
 		rm -rf /tmp/.kura/configuration >> $LOG 2>&1
 	fi
-	
+
 	# Make a copy of the previous installation using hard links
 	echo "Creating hard link copy of previous version into ${INSTALL_DIR}" >> $LOG 2>&1
 	mkdir "${BASE_DIR}/${INSTALL_DIR}"
 	cd "${BASE_DIR}/kura" && find . -type d | cpio -dp ${BASE_DIR}/${INSTALL_DIR} >> $LOG 2>&1
 	cd "${BASE_DIR}/kura" && find . -type f -exec ln {} ${BASE_DIR}/${INSTALL_DIR}/{} \; >> $LOG 2>&1
-	
+
 	# Replace hard links with real copies for certain files
 	FILES=" \
 		bin/* \
@@ -181,7 +181,8 @@ function kura_upgrade {
 		kura/dpa.properties \
 		kura/kura.properties \
 		kura/kura_custom.properties \
-		kura/log4j.properties
+		kura/log4j.properties \
+		kura/log4j.xml
 	"
 	for f in $FILES
 	do
@@ -193,24 +194,24 @@ function kura_upgrade {
 			cp -r ${BASE_DIR}/kura/$f ${target%/*} >> $LOG 2>&1
 		fi
 	done
-	
+
 	echo "" >> $LOG 2>&1
 	##############################################
 	# END PRE-INSTALL SCRIPT
 	##############################################
-	
+
 	echo "Extracting tar file..." >> $LOG 2>&1
 	SKIP=`awk '/^__TARFILE_FOLLOWS__/ { print NR + 1; exit 0; }' $ABSOLUTE_PATH`
 	echo "SKIP: ${SKIP}, file: ${0}" >> $LOG 2>&1
-	
+
 	# take the tarfile and pipe it into tar and redirect the output
 	cd $TMP && tail -n +$SKIP $ABSOLUTE_PATH | tar -xz >> $LOG 2>&1
 	echo "FINISHED TAR" >> $LOG 2>&1
-	
+
 	##############################################
 	# POST INSTALL SCRIPT
 	##############################################
-	
+
 	# Remove files not needed in the new version
 	echo "Removing old files..." >> $LOG 2>&1
 	while read line
@@ -219,48 +220,48 @@ function kura_upgrade {
 		if [[ $line == "#"* ]] ; then
 			continue
 		fi
-	
+
 		# TODO - remove files outside of kura directory
 		rmfile="${BASE_DIR}/${INSTALL_DIR}/$line"
 		echo "Removing $rmfile" >> $LOG 2>&1
 		rm -f $rmfile
 	done < ${TMP}/${REMOVE_LIST}
-	
+
 	# Extract new files
 	unzip -o ${TMP}/kura_*.zip -d ${BASE_DIR} >> $LOG 2>&1
-	
+
 	# set permissions
 	chmod +x ${BASE_DIR}/${INSTALL_DIR}/bin/*.sh >> $LOG 2>&1
-	
+
 	# read the absolute path of the old installation directory from the link
 	OLD_INSTALL_PATH=`readlink -f ${BASE_DIR}/kura`
-	
+
 	# Point symlink to new version
 	rm -f ${BASE_DIR}/kura
 	find ${BASE_DIR} \! -name '${INSTALL_DIR}' -delete
 	ln -s ${BASE_DIR}/${INSTALL_DIR} ${BASE_DIR}/kura
-	
+
 	# if /etc/hostapd.conf file exists and /etc/hostapd-wlan0.conf file doesn't exist
 	# rename /etc/hostapd.conf to /etc/hostapd-wlan0.conf
 	if [[ -f ${HOSTAPD_FILE}.conf && ! -f ${HOSTAPD_FILE}-wlan0.conf ]]; then
 	    mv ${HOSTAPD_FILE}.conf ${HOSTAPD_FILE}-wlan0.conf
 	fi
-	
+
 	# if /etc/wpa_supplicant.conf file exists and /etc/wpa_supplicant-wlan0.conf file doesn't exist
 	# rename /etc/wpa_supplicant.conf to /etc/wpa_supplicant-wlan0.conf
 	if [[ -f ${WPASUPPLICANT_FILE}.conf && ! -f ${WPASUPPLICANT_FILE}-wlan0.conf ]]; then
 	    mv ${WPASUPPLICANT_FILE}.conf ${WPASUPPLICANT_FILE}-wlan0.conf
 	fi
-	
+
 	# Upgrade was successful
 	SUCCESS=0
-	
+
 	echo "Removing the old installation directory: ${OLD_INSTALL_PATH}" >> $LOG 2>&1
 	rm -rf ${OLD_INSTALL_PATH} >> $LOG 2>&1
-	
+
 	echo "" >> $LOG 2>&1
 	echo "Finished.  Kura has been upgraded in ${BASE_DIR}/kura and system will now reboot" >> $LOG 2>&1
-	
+
 	#############################################
 	# END POST INSTALL SCRIPT
 ##############################################

@@ -9,6 +9,7 @@
  *******************************************************************************/
 package org.eclipse.kura.example.eddystone.scanner;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -188,6 +189,7 @@ public class EddystoneScanner implements ConfigurableComponent, BluetoothLeBeaco
 
             // Publish the beacon data to the beacon's topic
             KuraPayload kp = new KuraPayload();
+            kp.setTimestamp(new Date());
             kp.addMetric("type", eddystone.getFrameType());
             if ("UID".equals(eddystone.getFrameType())) {
                 kp.addMetric("namespace", bytesArrayToHexString(eddystone.getNamespace()));

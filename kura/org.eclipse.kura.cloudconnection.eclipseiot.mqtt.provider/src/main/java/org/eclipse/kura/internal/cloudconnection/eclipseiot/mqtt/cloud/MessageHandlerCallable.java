@@ -30,6 +30,7 @@ import org.eclipse.kura.cloudconnection.publisher.CloudNotificationPublisher;
 import org.eclipse.kura.cloudconnection.request.RequestHandler;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerContext;
 import org.eclipse.kura.data.DataService;
+import org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.MessageType;
 import org.eclipse.kura.message.KuraPayload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,15 +60,15 @@ public class MessageHandlerCallable implements Callable<Void> {
     private final RequestHandler cloudApp;
     private final String appTopic;
     private final KuraPayload kuraMessage;
-    private final CloudConnectionManagerImpl cloudService;
+    private final CloudConnectionManagerImpl cloudConnectionManager;
 
     public MessageHandlerCallable(RequestHandler cloudApp, String appTopic, KuraPayload msg,
-            CloudConnectionManagerImpl cloudService) {
+            CloudConnectionManagerImpl cloudConnectionManager) {
         super();
         this.cloudApp = cloudApp;
         this.appTopic = appTopic;
         this.kuraMessage = msg;
-        this.cloudService = cloudService;
+        this.cloudConnectionManager = cloudConnectionManager;
     }
 
     @Override
@@ -83,8 +84,8 @@ public class MessageHandlerCallable implements Callable<Void> {
         KuraPayload reqPayload = this.kuraMessage;
         KuraMessage response;
 
-        String notificationPublisherPid = null;// this.cloudService.getNotificationPublisherPid();
-        CloudNotificationPublisher notificationPublisher = null; // this.cloudService.getNotificationPublisher();
+        String notificationPublisherPid = null; //TODO: this.cloudConnectionManager.getNotificationPublisherPid();
+        CloudNotificationPublisher notificationPublisher = null; //TODO: this.cloudConnectionManager.getNotificationPublisher();
         RequestHandlerContext requestContext = new RequestHandlerContext(notificationPublisherPid,
                 notificationPublisher);
 
@@ -151,10 +152,10 @@ public class MessageHandlerCallable implements Callable<Void> {
         try {
             response.getPayload().setTimestamp(new Date());
 
-            DataService dataService = this.cloudService.getDataService();
+            DataService dataService = this.cloudConnectionManager.getDataService();
             String fullTopic = encodeTopic(requestId,
                     String.valueOf(response.getPayload().getMetric(METRIC_RESPONSE_CODE)));
-            byte[] appPayload = this.cloudService.encodePayload(response.getPayload());
+            byte[] appPayload = this.cloudConnectionManager.encodePayload(response.getPayload());
             dataService.publish(fullTopic, appPayload, DFLT_PUB_QOS, DFLT_RETAIN, DFLT_PRIORITY);
         } catch (KuraException e) {
             logger.error("Error publishing response for topic: {}\n{}", this.appTopic, e);
@@ -205,12 +206,12 @@ public class MessageHandlerCallable implements Callable<Void> {
     }
 
     private String encodeTopic(String requestId, String responseCode) {
-        CloudConnectionManagerOptions options = this.cloudService.getCloudConnectionManagerOptions();
+        CloudConnectionManagerOptions options = this.cloudConnectionManager.getCloudConnectionManagerOptions();
         String topicSeparator = options.getTopicSeparator();
         StringBuilder sb = new StringBuilder();
 
         // fixed response topic subsection
-        sb.append("c").append(topicSeparator).append(topicSeparator).append(topicSeparator).append("res");
+        sb.append(MessageType.CONTROL.getTopicPrefix()).append(topicSeparator).append(topicSeparator).append(topicSeparator).append("res");
 
         // variable response topic part
         sb.append(topicSeparator).append(requestId).append(topicSeparator).append(responseCode);

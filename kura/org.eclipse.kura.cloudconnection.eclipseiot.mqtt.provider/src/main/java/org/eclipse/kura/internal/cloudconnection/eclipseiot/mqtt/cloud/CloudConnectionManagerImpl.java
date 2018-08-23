@@ -44,6 +44,7 @@ import org.eclipse.kura.cloudconnection.CloudConnectionManager;
 import org.eclipse.kura.cloudconnection.CloudEndpoint;
 import org.eclipse.kura.cloudconnection.listener.CloudConnectionListener;
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
+import org.eclipse.kura.cloudconnection.publisher.CloudNotificationPublisher;
 import org.eclipse.kura.cloudconnection.request.RequestHandler;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
 import org.eclipse.kura.cloudconnection.subscriber.listener.CloudSubscriberListener;
@@ -53,8 +54,8 @@ import org.eclipse.kura.core.data.DataServiceImpl;
 import org.eclipse.kura.data.DataService;
 import org.eclipse.kura.data.listener.DataServiceListener;
 import org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.MessageType;
-import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraApplicationTopic;
+import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.net.NetworkService;
 import org.eclipse.kura.net.modem.ModemReadyEvent;
 import org.eclipse.kura.position.PositionLockedEvent;
@@ -400,7 +401,7 @@ public class CloudConnectionManagerImpl
         logger.info("Message arrived on topic: {}", topic);
 
         // notify listeners
-        ControlTopic kuraTopic = new ControlTopic(topic, "c");
+        ControlTopic kuraTopic = new ControlTopic(topic, MessageType.CONTROL.getTopicPrefix());
 
         KuraPayload kuraPayload = null;
 
@@ -413,7 +414,7 @@ public class CloudConnectionManagerImpl
         try {
 
             boolean validMessage = isValidMessage(kuraTopic, kuraPayload);
-            
+
             if (validMessage) {
                 dispatchControlMessage(kuraTopic, kuraPayload);
             } else {
@@ -548,9 +549,9 @@ public class CloudConnectionManagerImpl
     private void setupDeviceSubscriptions() throws KuraException {
         StringBuilder sbDeviceSubscription = new StringBuilder();
         sbDeviceSubscription.append(MessageType.CONTROL.getTopicPrefix()).append(this.options.getTopicSeparator())
-                .append("+").append(this.options.getTopicSeparator())
-                .append("+").append(this.options.getTopicSeparator()).append("req")
-                .append(this.options.getTopicSeparator()).append(this.options.getTopicWildCard());
+                .append("+").append(this.options.getTopicSeparator()).append("+")
+                .append(this.options.getTopicSeparator()).append("req").append(this.options.getTopicSeparator())
+                .append(this.options.getTopicWildCard());
 
         this.dataService.subscribe(sbDeviceSubscription.toString(), 0);
     }
@@ -562,8 +563,7 @@ public class CloudConnectionManagerImpl
 
         StringBuilder sbTopic = new StringBuilder();
         sbTopic.append(MessageType.EVENT.getTopicPrefix()).append(this.options.getTopicSeparator())
-                .append(this.options.getTopicSeparator())
-                .append(this.options.getTopicSeparator())
+                .append(this.options.getTopicSeparator()).append(this.options.getTopicSeparator())
                 .append(this.options.getTopicBirthSuffix());
 
         String topic = sbTopic.toString();
@@ -742,5 +742,17 @@ public class CloudConnectionManagerImpl
     @Override
     public void unregister(String id) throws KuraException {
         this.registeredRequestHandlers.remove(id);
+    }
+
+    public String getNotificationPublisherPid() {
+        // TODO: Specify a notification publisher when Hono will define apis to support long running jobs with
+        // notifications
+        // return NOTIFICATION_PUBLISHER_PID;
+        throw new UnsupportedOperationException();
+    }
+
+    public CloudNotificationPublisher getNotificationPublisher() {
+        // return this.notificationPublisher;
+        throw new UnsupportedOperationException();
     }
 }

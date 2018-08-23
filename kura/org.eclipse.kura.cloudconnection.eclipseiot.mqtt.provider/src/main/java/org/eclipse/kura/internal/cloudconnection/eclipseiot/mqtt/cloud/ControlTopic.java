@@ -1,5 +1,6 @@
 package org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.cloud;
 
+import org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.MessageType;
 import org.eclipse.kura.message.KuraApplicationTopic;
 
 public class ControlTopic extends KuraApplicationTopic {
@@ -13,7 +14,7 @@ public class ControlTopic extends KuraApplicationTopic {
     private String reqId;
 
     public ControlTopic(String fullTopic) {
-        this(fullTopic, "c");
+        this(fullTopic, MessageType.CONTROL.getTopicPrefix());
     }
     
     public ControlTopic(String fullTopic, String controlPrefix) {

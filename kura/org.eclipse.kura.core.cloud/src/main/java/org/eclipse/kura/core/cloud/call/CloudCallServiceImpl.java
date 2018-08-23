@@ -13,7 +13,6 @@ package org.eclipse.kura.core.cloud.call;
 
 import java.io.IOException;
 
-import org.eclipse.kura.KuraConnectException;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraInvalidMessageException;
@@ -23,12 +22,13 @@ import org.eclipse.kura.cloud.CloudCallService;
 import org.eclipse.kura.cloud.app.RequestIdGenerator;
 import org.eclipse.kura.core.cloud.CloudPayloadProtoBufDecoderImpl;
 import org.eclipse.kura.core.cloud.CloudPayloadProtoBufEncoderImpl;
+import org.eclipse.kura.core.cloud.KuraTopicImpl;
 import org.eclipse.kura.data.DataService;
 import org.eclipse.kura.data.listener.DataServiceListener;
+import org.eclipse.kura.message.KuraApplicationTopic;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
-import org.eclipse.kura.message.KuraTopic;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -189,8 +189,8 @@ public class CloudCallServiceImpl implements CloudCallService, DataServiceListen
 
         if (this.m_respTopic != null) {
             // Filter on application ID and topic
-            KuraTopic kuraTopic = new KuraTopic(topic);
-            KuraTopic kuraRespTopic = new KuraTopic(this.m_respTopic);
+            KuraApplicationTopic kuraTopic = new KuraTopicImpl(topic);
+            KuraApplicationTopic kuraRespTopic = new KuraTopicImpl(this.m_respTopic);
 
             if (kuraTopic.getApplicationId().equals(kuraRespTopic.getApplicationId())
                     && kuraTopic.getApplicationTopic().equals(kuraRespTopic.getApplicationTopic())) {

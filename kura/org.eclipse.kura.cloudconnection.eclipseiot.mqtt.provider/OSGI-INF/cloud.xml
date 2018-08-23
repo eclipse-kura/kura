@@ -19,6 +19,7 @@
       <provide interface="org.eclipse.kura.cloud.CloudPayloadProtoBufEncoder"/>
       <provide interface="org.eclipse.kura.cloud.CloudPayloadProtoBufDecoder"/>
       <provide interface="org.eclipse.kura.cloudconnection.CloudConnectionManager"/>
+      <provide interface="org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry"/>
       <provide interface="org.eclipse.kura.cloudconnection.CloudEndpoint"/>
    </service>
    <reference name="DataService" 

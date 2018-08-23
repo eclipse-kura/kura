@@ -24,7 +24,7 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.certificate.CertificatesService;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.message.KuraPayload;
-import org.eclipse.kura.message.KuraTopic;
+import org.eclipse.kura.message.KuraApplicationTopic;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -111,7 +111,7 @@ public class CertificatesManager implements CertificatesService {
     }
 
     @Override
-    public boolean verifySignature(KuraTopic kuraTopic, KuraPayload kuraPayload) {
+    public boolean verifySignature(KuraApplicationTopic kuraTopic, KuraPayload kuraPayload) {
         return true;
     }
 

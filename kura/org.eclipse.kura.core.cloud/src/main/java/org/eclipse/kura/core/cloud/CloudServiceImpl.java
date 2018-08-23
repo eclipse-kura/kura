@@ -67,8 +67,8 @@ import org.eclipse.kura.core.cloud.subscriber.CloudSubscriptionRecord;
 import org.eclipse.kura.core.data.DataServiceImpl;
 import org.eclipse.kura.data.DataService;
 import org.eclipse.kura.data.listener.DataServiceListener;
+import org.eclipse.kura.message.KuraApplicationTopic;
 import org.eclipse.kura.message.KuraPayload;
-import org.eclipse.kura.message.KuraTopic;
 import org.eclipse.kura.net.NetworkService;
 import org.eclipse.kura.net.modem.ModemReadyEvent;
 import org.eclipse.kura.position.PositionLockedEvent;
@@ -504,7 +504,7 @@ public class CloudServiceImpl
         logger.info("Message arrived on topic: {}", topic);
 
         // notify listeners
-        KuraTopic kuraTopic = new KuraTopic(topic, this.options.getTopicControlPrefix());
+        KuraTopicImpl kuraTopic = new KuraTopicImpl(topic, this.options.getTopicControlPrefix());
         if (TOPIC_MQTT_APP.equals(kuraTopic.getApplicationId()) || TOPIC_BA_APP.equals(kuraTopic.getApplicationId())) {
             logger.info("Ignoring feedback message from {}", topic);
         } else {
@@ -535,7 +535,7 @@ public class CloudServiceImpl
 
     }
 
-    private void dispatchControlMessage(int qos, boolean retained, KuraTopic kuraTopic, KuraPayload kuraPayload) {
+    private void dispatchControlMessage(int qos, boolean retained, KuraTopicImpl kuraTopic, KuraPayload kuraPayload) {
         String applicationId = kuraTopic.getApplicationId();
 
         RequestHandler cloudlet = this.registeredRequestHandlers.get(applicationId);
@@ -567,7 +567,7 @@ public class CloudServiceImpl
                         .onMessageArrived(receivedMessage));
     }
 
-    private void dispatchDataMessage(int qos, boolean retained, KuraTopic kuraTopic, KuraPayload kuraPayload) {
+    private void dispatchDataMessage(int qos, boolean retained, KuraTopicImpl kuraTopic, KuraPayload kuraPayload) {
         this.cloudClients.stream()
                 .filter(cloudClient -> cloudClient.getApplicationId().equals(kuraTopic.getApplicationId()))
                 .forEach(cloudClient -> cloudClient.onMessageArrived(kuraTopic.getDeviceId(),
@@ -585,7 +585,7 @@ public class CloudServiceImpl
                         .onMessageArrived(receivedMessage));
     }
 
-    private boolean isValidMessage(KuraTopic kuraTopic, KuraPayload kuraPayload) {
+    private boolean isValidMessage(KuraApplicationTopic kuraTopic, KuraPayload kuraPayload) {
         if (this.certificatesService == null) {
             ServiceReference<CertificatesService> sr = this.ctx.getBundleContext()
                     .getServiceReference(CertificatesService.class);
@@ -613,7 +613,7 @@ public class CloudServiceImpl
         }
 
         // notify listeners
-        KuraTopic kuraTopic = new KuraTopic(topic, this.options.getTopicControlPrefix());
+        KuraApplicationTopic kuraTopic = new KuraTopicImpl(topic, this.options.getTopicControlPrefix());
         this.cloudClients.stream()
                 .filter(cloudClient -> cloudClient.getApplicationId().equals(kuraTopic.getApplicationId()))
                 .collect(Collectors.toList())
@@ -631,7 +631,7 @@ public class CloudServiceImpl
         }
 
         // notify listeners
-        KuraTopic kuraTopic = new KuraTopic(topic, this.options.getTopicControlPrefix());
+        KuraApplicationTopic kuraTopic = new KuraTopicImpl(topic, this.options.getTopicControlPrefix());
         this.cloudClients.stream()
                 .filter(cloudClient -> cloudClient.getApplicationId().equals(kuraTopic.getApplicationId()))
                 .collect(Collectors.toList())

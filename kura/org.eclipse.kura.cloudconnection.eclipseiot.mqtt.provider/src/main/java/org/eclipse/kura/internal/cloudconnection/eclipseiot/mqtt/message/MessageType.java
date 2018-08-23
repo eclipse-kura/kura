@@ -13,8 +13,9 @@ public enum MessageType {
 
     TELEMETRY_QOS_0("telemetryQos0", 0, 7, "t"),
     TELEMETRY_QOS_1("telemetryQos1", 1, 7, "t"),
-    EVENTS("events", 1, 5, "e"),
-    ALERTS("alerts", 1, 2, "a");
+    EVENT("event", 1, 5, "e"),
+    ALERT("alert", 1, 2, "a"),
+    CONTROL("control", 0, 2, "c");
 
     private String type;
     private int qos;

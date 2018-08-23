@@ -191,7 +191,7 @@ public class CloudPublisherImpl
     }
 
     private String encodeTopic(String topicPrefix, String semanticTopic) {
-        CloudConnectionManagerOptions options = this.cloudConnectionImpl.getCloudServiceOptions();
+        CloudConnectionManagerOptions options = this.cloudConnectionImpl.getCloudConnectionManagerOptions();
         String deviceId = options.getTopicClientIdToken();
         String topicSeparator = options.getTopicSeparator();
         String accountName = options.getTopicAccountToken();
@@ -263,7 +263,7 @@ public class CloudPublisherImpl
 
     @Override
     public void onMessageConfirmed(String messageId, String topic) {
-        CloudConnectionManagerOptions options = this.cloudConnectionImpl.getCloudServiceOptions();
+        CloudConnectionManagerOptions options = this.cloudConnectionImpl.getCloudConnectionManagerOptions();
         String topicSeparator = options.getTopicSeparator();
 
         String[] semanticTopicElements = this.cloudPublisherOptions.getSemanticTopic().split(topicSeparator);
@@ -273,6 +273,9 @@ public class CloudPublisherImpl
 
         String[] messageSemanticTopicElements = getMessageSemanticTopicElements(topic, topicSeparator,
                 semanticTopicComparisonElement);
+        if (messageSemanticTopicElements.length == 0) {
+            return;
+        }
 
         index = 0;
         for (String semanticTopicElement : semanticTopicElements) {
@@ -289,8 +292,11 @@ public class CloudPublisherImpl
     private String[] getMessageSemanticTopicElements(String topic, String topicSeparator,
             String semanticTopicComparisonElement) {
         int messagePostfixTopicOffset = topic.indexOf(semanticTopicComparisonElement);
-        String messagePostfixTopic = topic.substring(messagePostfixTopicOffset, topic.length());
-        return messagePostfixTopic.split(topicSeparator);
+        if (messagePostfixTopicOffset >= 0) {
+            String messagePostfixTopic = topic.substring(messagePostfixTopicOffset, topic.length());
+            return messagePostfixTopic.split(topicSeparator);
+        }
+        return new String[0];
     }
 
     private int getSemanticTopicComparisonOffset(String[] semanticTopicElements) {

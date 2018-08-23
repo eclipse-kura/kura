@@ -7,7 +7,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  *******************************************************************************/
-package org.eclipse.kura.core.cloud;
+package org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.cloud;
 
 import static org.eclipse.kura.cloudconnection.request.RequestHandlerConstants.ARGS_KEY;
 
@@ -57,16 +57,14 @@ public class MessageHandlerCallable implements Callable<Void> {
     protected static final int DFLT_PRIORITY = 1;
 
     private final RequestHandler cloudApp;
-    private final String appId;
     private final String appTopic;
     private final KuraPayload kuraMessage;
-    private final CloudServiceImpl cloudService;
+    private final CloudConnectionManagerImpl cloudService;
 
-    public MessageHandlerCallable(RequestHandler cloudApp, String appId, String appTopic, KuraPayload msg,
-            CloudServiceImpl cloudService) {
+    public MessageHandlerCallable(RequestHandler cloudApp, String appTopic, KuraPayload msg,
+            CloudConnectionManagerImpl cloudService) {
         super();
         this.cloudApp = cloudApp;
-        this.appId = appId;
         this.appTopic = appTopic;
         this.kuraMessage = msg;
         this.cloudService = cloudService;
@@ -77,8 +75,7 @@ public class MessageHandlerCallable implements Callable<Void> {
         logger.debug("Control Arrived on topic: {}", this.appTopic);
 
         String requestId = (String) this.kuraMessage.getMetric(METRIC_REQUEST_ID);
-        String requesterClientId = (String) this.kuraMessage.getMetric(REQUESTER_CLIENT_ID);
-        if (requestId == null || requesterClientId == null) {
+        if (requestId == null) {
             throw new ParseException("Not a valid request payload", 0);
         }
 
@@ -86,8 +83,8 @@ public class MessageHandlerCallable implements Callable<Void> {
         KuraPayload reqPayload = this.kuraMessage;
         KuraMessage response;
 
-        String notificationPublisherPid = this.cloudService.getNotificationPublisherPid();
-        CloudNotificationPublisher notificationPublisher = this.cloudService.getNotificationPublisher();
+        String notificationPublisherPid = null;// this.cloudService.getNotificationPublisherPid();
+        CloudNotificationPublisher notificationPublisher = null; // this.cloudService.getNotificationPublisher();
         RequestHandlerContext requestContext = new RequestHandlerContext(notificationPublisherPid,
                 notificationPublisher);
 
@@ -145,20 +142,18 @@ public class MessageHandlerCallable implements Callable<Void> {
             response = manageException(e);
         }
 
-        buildResponseMessage(requestId, requesterClientId, response);
+        buildResponseMessage(requestId, response);
 
         return null;
     }
 
-    private void buildResponseMessage(String requestId, String requesterClientId, KuraMessage response) {
+    private void buildResponseMessage(String requestId, KuraMessage response) {
         try {
             response.getPayload().setTimestamp(new Date());
 
-            StringBuilder sb = new StringBuilder("REPLY").append("/").append(requestId);
-            logger.debug("Publishing response topic: {}", sb);
-
             DataService dataService = this.cloudService.getDataService();
-            String fullTopic = encodeTopic(requesterClientId, sb.toString());
+            String fullTopic = encodeTopic(requestId,
+                    String.valueOf(response.getPayload().getMetric(METRIC_RESPONSE_CODE)));
             byte[] appPayload = this.cloudService.encodePayload(response.getPayload());
             dataService.publish(fullTopic, appPayload, DFLT_PUB_QOS, DFLT_RETAIN, DFLT_PRIORITY);
         } catch (KuraException e) {
@@ -209,17 +204,16 @@ public class MessageHandlerCallable implements Callable<Void> {
         return sw.toString();
     }
 
-    private String encodeTopic(String deviceId, String appTopic) {
-        CloudServiceOptions options = this.cloudService.getCloudServiceOptions();
+    private String encodeTopic(String requestId, String responseCode) {
+        CloudConnectionManagerOptions options = this.cloudService.getCloudConnectionManagerOptions();
+        String topicSeparator = options.getTopicSeparator();
         StringBuilder sb = new StringBuilder();
-        sb.append(options.getTopicControlPrefix()).append(options.getTopicSeparator());
 
-        sb.append(options.getTopicAccountToken()).append(options.getTopicSeparator()).append(deviceId)
-                .append(options.getTopicSeparator()).append(this.appId);
+        // fixed response topic subsection
+        sb.append("c").append(topicSeparator).append(topicSeparator).append(topicSeparator).append("res");
 
-        if (appTopic != null && !appTopic.isEmpty()) {
-            sb.append(options.getTopicSeparator()).append(appTopic);
-        }
+        // variable response topic part
+        sb.append(topicSeparator).append(requestId).append(topicSeparator).append(responseCode);
 
         return sb.toString();
     }

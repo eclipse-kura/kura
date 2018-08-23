@@ -54,13 +54,13 @@ public class LifeCyclePayloadBuilder {
         String acceptEncoding = buildAcceptEncoding();
 
         // build device name
-        CloudConnectionManagerOptions cso = this.cloudConnectionManagerImpl.getCloudServiceOptions();
+        CloudConnectionManagerOptions cso = this.cloudConnectionManagerImpl.getCloudConnectionManagerOptions();
         String deviceName = cso.getDeviceDisplayName();
         if (deviceName == null) {
             deviceName = this.cloudConnectionManagerImpl.getSystemService().getDeviceName();
         }
 
-        String payloadEncoding = this.cloudConnectionManagerImpl.getCloudServiceOptions().getPayloadEncoding().name();
+        String payloadEncoding = this.cloudConnectionManagerImpl.getCloudConnectionManagerOptions().getPayloadEncoding().name();
 
         // build birth certificate
         KuraBirthPayloadBuilder birthPayloadBuilder = new KuraBirthPayloadBuilder();
@@ -110,7 +110,7 @@ public class LifeCyclePayloadBuilder {
     public KuraDisconnectPayload buildDisconnectPayload() {
         SystemService systemService = this.cloudConnectionManagerImpl.getSystemService();
         SystemAdminService sysAdminService = this.cloudConnectionManagerImpl.getSystemAdminService();
-        CloudConnectionManagerOptions cloudOptions = this.cloudConnectionManagerImpl.getCloudServiceOptions();
+        CloudConnectionManagerOptions cloudOptions = this.cloudConnectionManagerImpl.getCloudConnectionManagerOptions();
 
         // build device name
         String deviceName = cloudOptions.getDeviceDisplayName();
@@ -203,7 +203,7 @@ public class LifeCyclePayloadBuilder {
 
     private String buildAcceptEncoding() {
         String acceptEncoding = "";
-        CloudConnectionManagerOptions options = this.cloudConnectionManagerImpl.getCloudServiceOptions();
+        CloudConnectionManagerOptions options = this.cloudConnectionManagerImpl.getCloudConnectionManagerOptions();
         if (options.getEncodeGzip()) {
             acceptEncoding = "gzip";
         }

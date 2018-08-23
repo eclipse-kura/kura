@@ -956,6 +956,27 @@
                         </lifecycleMappingMetadata>
                     </configuration>
                 </plugin>
+                <plugin>
+                    <groupId>io.fabric8</groupId>
+                    <artifactId>docker-maven-plugin</artifactId>
+                    <version>0.24.0</version>
+                    <executions>
+                        <execution>
+                            <id>build</id>
+                            <phase>install</phase>
+                            <goals>
+                                <goal>build</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>push</id>
+                            <phase>deploy</phase>
+                            <goals>
+                                <goal>push</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>
@@ -2538,6 +2559,51 @@
                                 </configuration>
                             </execution>
                         </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        
+        <profile>
+            <id>docker-fedora</id>
+            <properties>
+        		<docker.dockerfile>${basedir}/docker/Fedora/Dockerfile</docker.dockerfile>
+        		<docker.imagename>kura-fedora</docker.imagename>
+        	</properties>
+            <build>
+                <plugins>
+                	<plugin>
+                        <groupId>io.fabric8</groupId>
+                        <artifactId>docker-maven-plugin</artifactId>
+                        <version>0.24.0</version>
+                        <configuration>
+                        	<images>
+                        		<image>
+                            		<name>kura-fedora</name>
+                                	<build>
+                                    	<dockerFile>${basedir}/docker/Fedora/Dockerfile</dockerFile>
+                                    	<tags>
+                                        	<tag>${project.version}</tag>
+                                        	<tag>${timestamp}</tag>
+                                    	</tags>
+                                    	<assembly>
+                                        	<basedir>/tmp</basedir>
+                                        	<inline>
+                                            	<fileSets>
+                                            		<fileSet>
+                                            			<directory>${basedir}/target/</directory>
+                                            			<outputDirectory>./</outputDirectory>
+                                            			<includes>
+                                            				<include>kura_${project.version}_intel-up2-centos-7-nn_installer.sh</include>
+                                            			</includes>
+                                            		</fileSet>
+                                            	</fileSets>
+                                        	</inline>
+                                    	</assembly>
+                                	</build>
+                            	</image>
+                        	</images>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>

@@ -41,7 +41,7 @@ public class CloudConnectionManagerOptions {
     private static final String BIRTH_CERT_POLICY = "birth.cert.policy";
     private static final String PAYLOAD_ENCODING = "payload.encoding";
 
-    private static final int LIFECYCLE_QOS = 0;
+    private static final int LIFECYCLE_QOS = 1;
     private static final int LIFECYCLE_PRIORITY = 0;
     private static final boolean LIFECYCLE_RETAIN = false;
 

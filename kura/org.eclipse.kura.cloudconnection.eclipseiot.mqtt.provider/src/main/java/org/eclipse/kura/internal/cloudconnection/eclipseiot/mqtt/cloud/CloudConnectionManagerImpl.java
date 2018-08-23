@@ -21,16 +21,20 @@ import static org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Dictionary;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.kura.KuraConnectException;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraInvalidMessageException;
+import org.eclipse.kura.certificate.CertificatesService;
 import org.eclipse.kura.cloud.CloudConnectionEstablishedEvent;
 import org.eclipse.kura.cloud.CloudConnectionLostEvent;
 import org.eclipse.kura.cloud.CloudPayloadEncoding;
@@ -40,19 +44,24 @@ import org.eclipse.kura.cloudconnection.CloudConnectionManager;
 import org.eclipse.kura.cloudconnection.CloudEndpoint;
 import org.eclipse.kura.cloudconnection.listener.CloudConnectionListener;
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
+import org.eclipse.kura.cloudconnection.request.RequestHandler;
+import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
 import org.eclipse.kura.cloudconnection.subscriber.listener.CloudSubscriberListener;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.core.data.DataServiceImpl;
 import org.eclipse.kura.data.DataService;
 import org.eclipse.kura.data.listener.DataServiceListener;
+import org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.MessageType;
 import org.eclipse.kura.message.KuraPayload;
+import org.eclipse.kura.message.KuraApplicationTopic;
 import org.eclipse.kura.net.NetworkService;
 import org.eclipse.kura.net.modem.ModemReadyEvent;
 import org.eclipse.kura.position.PositionLockedEvent;
 import org.eclipse.kura.position.PositionService;
 import org.eclipse.kura.system.SystemAdminService;
 import org.eclipse.kura.system.SystemService;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
@@ -62,14 +71,19 @@ import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CloudConnectionManagerImpl implements DataServiceListener, ConfigurableComponent, EventHandler,
-        CloudPayloadProtoBufEncoder, CloudPayloadProtoBufDecoder, CloudConnectionManager, CloudEndpoint {
+public class CloudConnectionManagerImpl
+        implements DataServiceListener, ConfigurableComponent, EventHandler, CloudPayloadProtoBufEncoder,
+        CloudPayloadProtoBufDecoder, RequestHandlerRegistry, CloudConnectionManager, CloudEndpoint {
 
     private static final String ERROR = "ERROR";
 
     private static final Logger logger = LoggerFactory.getLogger(CloudConnectionManagerImpl.class);
 
     private static final String CONNECTION_EVENT_PID_PROPERTY_KEY = "cloud.service.pid";
+
+    private static final int NUM_CONCURRENT_CALLBACKS = 2;
+
+    private static ExecutorService callbackExecutor = Executors.newFixedThreadPool(NUM_CONCURRENT_CALLBACKS);
 
     private ComponentContext ctx;
 
@@ -81,6 +95,7 @@ public class CloudConnectionManagerImpl implements DataServiceListener, Configur
     private NetworkService networkService;
     private PositionService positionService;
     private EventAdmin eventAdmin;
+    private CertificatesService certificatesService;
 
     // package visibility for LifeCyclePayloadBuilder
     String imei;
@@ -94,12 +109,15 @@ public class CloudConnectionManagerImpl implements DataServiceListener, Configur
 
     private ServiceRegistration<?> cloudServiceRegistration;
 
+    private final Map<String, RequestHandler> registeredRequestHandlers;
+
     private final Set<CloudConnectionListener> registeredCloudConnectionListeners;
     private final Set<CloudPublisherDeliveryListener> registeredCloudPublisherDeliveryListeners;
 
     public CloudConnectionManagerImpl() {
         this.messageId = new AtomicInteger();
         this.registeredCloudConnectionListeners = new CopyOnWriteArraySet<>();
+        this.registeredRequestHandlers = new HashMap<>();
         this.registeredCloudPublisherDeliveryListeners = new CopyOnWriteArraySet<>();
     }
 
@@ -312,7 +330,7 @@ public class CloudConnectionManagerImpl implements DataServiceListener, Configur
     //
     // ----------------------------------------------------------------
 
-    public CloudConnectionManagerOptions getCloudServiceOptions() {
+    public CloudConnectionManagerOptions getCloudConnectionManagerOptions() {
         return this.options;
     }
 
@@ -381,6 +399,60 @@ public class CloudConnectionManagerImpl implements DataServiceListener, Configur
     public void onMessageArrived(String topic, byte[] payload, int qos, boolean retained) {
         logger.info("Message arrived on topic: {}", topic);
 
+        // notify listeners
+        ControlTopic kuraTopic = new ControlTopic(topic, "c");
+
+        KuraPayload kuraPayload = null;
+
+        if (this.options.getPayloadEncoding() == SIMPLE_JSON) {
+            kuraPayload = createKuraPayloadFromJson(payload);
+        } else if (this.options.getPayloadEncoding() == KURA_PROTOBUF) {
+            kuraPayload = createKuraPayloadFromProtoBuf(topic, payload);
+        }
+
+        try {
+
+            boolean validMessage = isValidMessage(kuraTopic, kuraPayload);
+            
+            if (validMessage) {
+                dispatchControlMessage(kuraTopic, kuraPayload);
+            } else {
+                logger.warn("Message verification failed! Not valid signature or message not signed.");
+            }
+
+        } catch (Exception e) {
+            logger.error("Error during CloudClientListener notification.", e);
+        }
+
+    }
+
+    private void dispatchControlMessage(ControlTopic kuraTopic, KuraPayload kuraPayload) {
+
+        String applicationId = kuraTopic.getApplicationId();
+
+        kuraPayload.addMetric(MessageHandlerCallable.METRIC_REQUEST_ID, kuraTopic.getReqId());
+
+        RequestHandler cloudlet = this.registeredRequestHandlers.get(applicationId);
+        if (cloudlet != null) {
+
+            callbackExecutor
+                    .submit(new MessageHandlerCallable(cloudlet, kuraTopic.getApplicationTopic(), kuraPayload, this));
+        }
+    }
+
+    private boolean isValidMessage(KuraApplicationTopic kuraAppTopic, KuraPayload kuraPayload) {
+        if (this.certificatesService == null) {
+            ServiceReference<CertificatesService> sr = this.ctx.getBundleContext()
+                    .getServiceReference(CertificatesService.class);
+            if (sr != null) {
+                this.certificatesService = this.ctx.getBundleContext().getService(sr);
+            }
+        }
+        boolean validMessage = false;
+        if (this.certificatesService == null || this.certificatesService.verifySignature(kuraAppTopic, kuraPayload)) {
+            validMessage = true;
+        }
+        return validMessage;
     }
 
     @Override
@@ -469,6 +541,18 @@ public class CloudConnectionManagerImpl implements DataServiceListener, Configur
             publishBirthCertificate();
             this.birthPublished = true;
         }
+
+        setupDeviceSubscriptions();
+    }
+
+    private void setupDeviceSubscriptions() throws KuraException {
+        StringBuilder sbDeviceSubscription = new StringBuilder();
+        sbDeviceSubscription.append(MessageType.CONTROL.getTopicPrefix()).append(this.options.getTopicSeparator())
+                .append("+").append(this.options.getTopicSeparator())
+                .append("+").append(this.options.getTopicSeparator()).append("req")
+                .append(this.options.getTopicSeparator()).append(this.options.getTopicWildCard());
+
+        this.dataService.subscribe(sbDeviceSubscription.toString(), 0);
     }
 
     private void publishBirthCertificate() throws KuraException {
@@ -477,9 +561,10 @@ public class CloudConnectionManagerImpl implements DataServiceListener, Configur
         }
 
         StringBuilder sbTopic = new StringBuilder();
-        sbTopic.append("e").append(this.options.getTopicSeparator()).append(this.options.getTopicAccountToken())
-                .append(this.options.getTopicSeparator()).append(this.options.getTopicClientIdToken())
-                .append(this.options.getTopicSeparator()).append(this.options.getTopicBirthSuffix());
+        sbTopic.append(MessageType.EVENT.getTopicPrefix()).append(this.options.getTopicSeparator())
+                .append(this.options.getTopicSeparator())
+                .append(this.options.getTopicSeparator())
+                .append(this.options.getTopicBirthSuffix());
 
         String topic = sbTopic.toString();
         KuraPayload payload = createBirthPayload();
@@ -492,9 +577,10 @@ public class CloudConnectionManagerImpl implements DataServiceListener, Configur
         }
 
         StringBuilder sbTopic = new StringBuilder();
-        sbTopic.append("e").append(this.options.getTopicSeparator()).append(this.options.getTopicAccountToken())
-                .append(this.options.getTopicSeparator()).append(this.options.getTopicClientIdToken())
-                .append(this.options.getTopicSeparator()).append(this.options.getTopicDisconnectSuffix());
+        sbTopic.append(MessageType.EVENT.getTopicPrefix()).append(this.options.getTopicSeparator())
+                .append(this.options.getTopicAccountToken()).append(this.options.getTopicSeparator())
+                .append(this.options.getTopicClientIdToken()).append(this.options.getTopicSeparator())
+                .append(this.options.getTopicDisconnectSuffix());
 
         String topic = sbTopic.toString();
         KuraPayload payload = createDisconnectPayload();
@@ -550,6 +636,25 @@ public class CloudConnectionManagerImpl implements DataServiceListener, Configur
 
     private byte[] encodeJsonPayload(KuraPayload payload) {
         return CloudPayloadJsonEncoder.getBytes(payload);
+    }
+
+    private KuraPayload createKuraPayloadFromJson(byte[] payload) {
+        return CloudPayloadJsonDecoder.buildFromByteArray(payload);
+    }
+
+    private KuraPayload createKuraPayloadFromProtoBuf(String topic, byte[] payload) {
+        KuraPayload kuraPayload;
+        try {
+            // try to decode the message into an KuraPayload
+            kuraPayload = new CloudPayloadProtoBufDecoderImpl(payload).buildFromByteArray();
+        } catch (Exception e) {
+            // Wrap the received bytes payload into an KuraPayload
+            logger.debug("Received message on topic {} that could not be decoded. Wrapping it into an KuraPayload.",
+                    topic);
+            kuraPayload = new KuraPayload();
+            kuraPayload.setBody(payload);
+        }
+        return kuraPayload;
     }
 
     private void postConnectionStateChangeEvent(final boolean isConnected) {
@@ -627,5 +732,15 @@ public class CloudConnectionManagerImpl implements DataServiceListener, Configur
     @Override
     public void unregisterSubscriber(Map<String, Object> subscriptionProperties) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void registerRequestHandler(String id, RequestHandler requestHandler) throws KuraException {
+        this.registeredRequestHandlers.put(id, requestHandler);
+    }
+
+    @Override
+    public void unregister(String id) throws KuraException {
+        this.registeredRequestHandlers.remove(id);
     }
 }

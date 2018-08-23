@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -16,7 +16,7 @@ import java.util.Enumeration;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.message.KuraPayload;
-import org.eclipse.kura.message.KuraTopic;
+import org.eclipse.kura.message.KuraApplicationTopic;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -105,14 +105,15 @@ public interface CertificatesService {
      * verifySignature is a method that takes the topic used
      * to send the message and the signed message to verify the correctness of the signature.
      *
-     * @param kuraTopic
-     *            The topic used to send the message
+     * @param kuraAppTopic
+     *            The application topic part used to send the message
      * @param kuraPayload
      *            The kuraPayload message received and that needs to be verified
      * @return A boolean value that is true if the signature received corresponds with the signature
      *         calculated from the message content. False otherwise.
+     * @since 2.0
      *
      */
-    public boolean verifySignature(KuraTopic kuraTopic, KuraPayload kuraPayload);
+    public boolean verifySignature(KuraApplicationTopic kuraAppTopic, KuraPayload kuraPayload);
 
 }

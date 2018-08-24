@@ -287,14 +287,6 @@ Copyright (c) 2017 Eurotech and/or its affiliates and others
                             <artifactId>org.apache.commons.io</artifactId>
                         </dependency>
                         <dependency>
-                            <type>p2-installable-unit</type>
-                            <artifactId>log4j</artifactId>
-                        </dependency>
-                        <dependency>
-                            <type>p2-installable-unit</type>
-                            <artifactId>log4j.apache-log4j-extras</artifactId>
-                        </dependency>
-                        <dependency>
                         	<type>p2-installable-unit</type>
                         	<artifactId>org.eclipse.equinox.console</artifactId>
                         </dependency>

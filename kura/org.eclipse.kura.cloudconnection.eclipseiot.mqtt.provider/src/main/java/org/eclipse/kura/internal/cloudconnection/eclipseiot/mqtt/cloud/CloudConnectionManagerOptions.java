@@ -26,8 +26,6 @@ public class CloudConnectionManagerOptions {
     private static final Logger logger = LoggerFactory.getLogger(CloudConnectionManagerOptions.class);
 
     private static final String TOPIC_SEPARATOR = "/";
-    private static final String TOPIC_ACCOUNT_TOKEN = "#account-name";
-    private static final String TOPIC_CLIENT_ID_TOKEN = "#client-id";
     private static final String TOPIC_BIRTH_SUFFIX = "MQTT/BIRTH";
     private static final String TOPIC_DISCONNECT_SUFFIX = "MQTT/DC";
     private static final String TOPIC_APPS_SUFFIX = "MQTT/APPS";
@@ -197,14 +195,6 @@ public class CloudConnectionManagerOptions {
 
     public String getTopicSeparator() {
         return TOPIC_SEPARATOR;
-    }
-
-    public String getTopicAccountToken() {
-        return TOPIC_ACCOUNT_TOKEN;
-    }
-
-    public String getTopicClientIdToken() {
-        return TOPIC_CLIENT_ID_TOKEN;
     }
 
     public String getTopicBirthSuffix() {

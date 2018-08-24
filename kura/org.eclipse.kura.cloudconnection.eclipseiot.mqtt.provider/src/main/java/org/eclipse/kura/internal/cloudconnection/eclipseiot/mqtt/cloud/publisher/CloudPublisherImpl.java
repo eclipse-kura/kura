@@ -192,13 +192,11 @@ public class CloudPublisherImpl
 
     private String encodeTopic(String topicPrefix, String semanticTopic) {
         CloudConnectionManagerOptions options = this.cloudConnectionImpl.getCloudConnectionManagerOptions();
-        String deviceId = options.getTopicClientIdToken();
         String topicSeparator = options.getTopicSeparator();
-        String accountName = options.getTopicAccountToken();
 
         StringBuilder sb = new StringBuilder();
 
-        sb.append(topicPrefix).append(topicSeparator).append(accountName).append(topicSeparator).append(deviceId);
+        sb.append(topicPrefix).append(topicSeparator).append(topicSeparator);
 
         if (semanticTopic != null && !semanticTopic.isEmpty()) {
             sb.append(topicSeparator).append(semanticTopic);

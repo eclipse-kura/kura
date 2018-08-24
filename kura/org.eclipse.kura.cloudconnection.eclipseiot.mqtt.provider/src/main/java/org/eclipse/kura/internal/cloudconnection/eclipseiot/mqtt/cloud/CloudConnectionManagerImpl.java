@@ -578,8 +578,8 @@ public class CloudConnectionManagerImpl
 
         StringBuilder sbTopic = new StringBuilder();
         sbTopic.append(MessageType.EVENT.getTopicPrefix()).append(this.options.getTopicSeparator())
-                .append(this.options.getTopicAccountToken()).append(this.options.getTopicSeparator())
-                .append(this.options.getTopicClientIdToken()).append(this.options.getTopicSeparator())
+                .append(this.options.getTopicSeparator())
+                .append(this.options.getTopicSeparator())
                 .append(this.options.getTopicDisconnectSuffix());
 
         String topic = sbTopic.toString();

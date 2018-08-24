@@ -40,6 +40,8 @@ import org.osgi.service.component.ComponentContext;
 public class BluetoothLeBeaconManagerImpl
         implements BluetoothLeBeaconManager<BluetoothLeBeacon>, BTSnoopListener, BluetoothProcessListener {
 
+    private static final String SET_ADVERTISING_PARAMETERS_HCITOOL_MESSAGE = "Set Advertising Parameters : hcitool -i {} {}";
+
     private static final Logger logger = LogManager.getLogger(BluetoothLeBeaconManagerImpl.class);
 
     // See Bluetooth 4.0 Core specifications (https://www.bluetooth.org/docman/handlers/downloaddoc.ashx?doc_id=229737)
@@ -119,9 +121,8 @@ public class BluetoothLeBeaconManagerImpl
     public void startBeaconAdvertising(String interfaceName) throws KuraBluetoothCommandException {
         String[] cmd = { CMD, OGF_CONTROLLER_CMD, OCF_ADVERTISING_ENABLE_CMD, "01" };
 
-        if (logger.isDebugEnabled()) {
-            logger.debug("Set Advertising Parameters : hcitool -i {} {}", interfaceName, String.join(" ", cmd));
-        }
+        logger.debug(SET_ADVERTISING_PARAMETERS_HCITOOL_MESSAGE, () -> interfaceName, () -> String.join(" ", cmd));
+
         logger.info("Start Advertising on interface {}", interfaceName);
 
         try {
@@ -134,7 +135,7 @@ public class BluetoothLeBeaconManagerImpl
     public void stopBeaconAdvertising(String interfaceName) throws KuraBluetoothCommandException {
         String[] cmd = { CMD, OGF_CONTROLLER_CMD, OCF_ADVERTISING_ENABLE_CMD, "00" };
 
-        logger.debug("Set Advertising Parameters : hcitool -i {} {}", () -> interfaceName, () -> String.join(" ", cmd));
+        logger.debug(SET_ADVERTISING_PARAMETERS_HCITOOL_MESSAGE, () -> interfaceName, () -> String.join(" ", cmd));
 
         logger.info("Stop Advertising on interface {}", interfaceName);
 
@@ -156,7 +157,7 @@ public class BluetoothLeBeaconManagerImpl
         String[] cmd = { CMD, OGF_CONTROLLER_CMD, OCF_ADVERTISING_PARAM_CMD, minHex[1], minHex[0], maxHex[1], maxHex[0],
                 "03", "00", "00", "00", "00", "00", "00", "00", "00", "07", "00" };
 
-        logger.debug("Set Advertising Parameters : hcitool -i {} {}", () -> interfaceName, () -> String.join(" ", cmd));
+        logger.debug(SET_ADVERTISING_PARAMETERS_HCITOOL_MESSAGE, () -> interfaceName, () -> String.join(" ", cmd));
 
         logger.info("Set Advertising Parameters on interface {}", interfaceName);
 

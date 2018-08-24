@@ -80,7 +80,10 @@ public class BluetoothSafeProcess {
             this.inBytes = futureInputGobbler.get();
             this.errBytes = futureErrorGobbler.get();
             this.exitValue = this.process.waitFor();
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IOException(e);
+        } catch (ExecutionException e) {
             throw new IOException(e);
         } finally {
             closeQuietly(this.process.getInputStream());

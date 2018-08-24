@@ -110,6 +110,7 @@ public class ProcessMonitorThread extends Thread {
         } catch (IOException e) {
             this.exception = e;
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             this.timedOut = true;
         } finally {
             if (timer != null) {
@@ -121,7 +122,7 @@ public class ProcessMonitorThread extends Thread {
                 try {
                     isg.join(1000);
                 } catch (InterruptedException e) {
-                    // Ignore
+                    Thread.currentThread().interrupt();
                 }
                 this.stdout = isg.getStreamAsString();
             }
@@ -131,7 +132,7 @@ public class ProcessMonitorThread extends Thread {
                 try {
                     esg.join(1000);
                 } catch (InterruptedException e) {
-                    // Ignore
+                    Thread.currentThread().interrupt();
                 }
                 this.stderr = esg.getStreamAsString();
             }

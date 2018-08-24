@@ -60,6 +60,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
                     logger.debug(e.getMessage(), e);
                 }
             }
@@ -82,6 +83,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
             try {
                 Thread.sleep(500);
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
                 logger.debug(e.getMessage(), e);
             }
         }
@@ -109,6 +111,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
                         try {
                             Thread.sleep(500);
                         } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
                             logger.debug(e.getMessage(), e);
                         }
                     }
@@ -232,10 +235,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
     private void refreshWatchdog() {
         File f = new File("/dev/watchdog");
         if (f.exists()) {
-            try (
-                FileOutputStream fos = new FileOutputStream(f);
-                PrintWriter pw = new PrintWriter(fos);
-            ) {
+            try (FileOutputStream fos = new FileOutputStream(f); PrintWriter pw = new PrintWriter(fos);) {
                 pw.write("w");
                 pw.flush();
                 fos.getFD().sync();

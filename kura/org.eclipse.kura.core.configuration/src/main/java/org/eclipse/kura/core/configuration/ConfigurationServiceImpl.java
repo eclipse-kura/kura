@@ -12,6 +12,8 @@
  *******************************************************************************/
 package org.eclipse.kura.core.configuration;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -60,7 +62,6 @@ import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.marshalling.Marshaller;
 import org.eclipse.kura.marshalling.Unmarshaller;
 import org.eclipse.kura.system.SystemService;
-import org.eclipse.kura.util.service.ServiceUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -97,6 +98,8 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
     private SystemService systemService;
     private CryptoService cryptoService;
     private ServiceComponentRuntime scrService;
+    private Marshaller xmlMarshaller;
+    private Unmarshaller xmlUnmarshaller;
 
     // contains all the PIDs (aka kura.service.pid) - both of configurable and self configuring components
     private final Set<String> allActivatedPids;
@@ -163,6 +166,22 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
     public void unsetScrService(ServiceComponentRuntime scrService) {
         this.scrService = null;
+    }
+
+    public void setXmlMarshaller(final Marshaller marshaller) {
+        this.xmlMarshaller = marshaller;
+    }
+
+    public void unsetXmlMarshaller(final Marshaller marshaller) {
+        this.xmlMarshaller = null;
+    }
+
+    public void setXmlUnmarshaller(final Unmarshaller unmarshaller) {
+        this.xmlUnmarshaller = unmarshaller;
+    }
+
+    public void unsetXmlUnmarshaller(final Unmarshaller unmarshaller) {
+        this.xmlUnmarshaller = null;
     }
 
     public ConfigurationServiceImpl() {
@@ -1707,64 +1726,20 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         return getServiceProviderOCDs(classNames);
     }
 
-    private ServiceReference<Marshaller>[] getXmlMarshallers() {
-        String filterString = String.format("(&(kura.service.pid=%s))",
-                "org.eclipse.kura.xml.marshaller.unmarshaller.provider");
-        return ServiceUtil.getServiceReferences(this.bundleContext, Marshaller.class, filterString);
-    }
-
-    private ServiceReference<Unmarshaller>[] getXmlUnmarshallers() {
-        String filterString = String.format("(&(kura.service.pid=%s))",
-                "org.eclipse.kura.xml.marshaller.unmarshaller.provider");
-        return ServiceUtil.getServiceReferences(this.bundleContext, Unmarshaller.class, filterString);
-    }
-
     protected <T> T unmarshal(final String string, final Class<T> clazz) throws KuraException {
-        T result = null;
-        ServiceReference<Unmarshaller>[] unmarshallerSRs = getXmlUnmarshallers();
         try {
-            for (final ServiceReference<Unmarshaller> unmarshallerSR : unmarshallerSRs) {
-                Unmarshaller unmarshaller = this.bundleContext.getService(unmarshallerSR);
-                try {
-                    result = unmarshaller.unmarshal(string, clazz);
-                    if (result != null) {
-                        break;
-                    }
-                } finally {
-                    bundleContext.ungetService(unmarshallerSR);
-                }
-            }
-        } catch (Exception e) {
-            logger.warn("Failed to extract persisted configuration.");
+            return requireNonNull(this.xmlUnmarshaller.unmarshal(string, clazz));
+        } catch (final Exception e) {
+            throw new KuraException(KuraErrorCode.DECODER_ERROR, e);
         }
-        if (result == null) {
-            throw new KuraException(KuraErrorCode.DECODER_ERROR);
-        }
-        return result;
     }
 
     protected String marshal(final Object object) throws KuraException {
-        String result = null;
-        ServiceReference<Marshaller>[] marshallerSRs = getXmlMarshallers();
         try {
-            for (final ServiceReference<Marshaller> marshallerSR : marshallerSRs) {
-                Marshaller marshaller = this.bundleContext.getService(marshallerSR);
-                try {
-                    result = marshaller.marshal(object);
-                    if (result != null) {
-                        break;
-                    }
-                } finally {
-                    bundleContext.ungetService(marshallerSR);
-                }
-            }
+            return requireNonNull(xmlMarshaller.marshal(object));
         } catch (Exception e) {
-            logger.warn("Failed to marshal configuration.");
+            throw new KuraException(KuraErrorCode.ENCODE_ERROR, e);
         }
-        if (result == null) {
-            throw new KuraException(KuraErrorCode.ENCODE_ERROR, "Unable to find marshaller");
-        }
-        return result;
     }
 
     private static final class TrackedComponentFactory {

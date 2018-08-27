@@ -12,11 +12,11 @@
 
 package org.eclipse.kura.internal.driver.s7plc;
 
-import static java.util.Objects.requireNonNull;
-
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
 import org.eclipse.kura.KuraException;
@@ -31,7 +31,6 @@ import org.eclipse.kura.driver.block.task.Mode;
 import org.eclipse.kura.driver.block.task.ToplevelBlockTask;
 import org.eclipse.kura.internal.driver.s7plc.task.S7PlcTaskBuilder;
 import org.eclipse.kura.internal.driver.s7plc.task.S7PlcToplevelBlockTask;
-import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,13 +54,12 @@ import Moka7.S7Client;
  * @see S7PlcChannelDescriptor
  * @see S7PlcOptions
  */
-public final class S7PlcDriver extends AbstractBlockDriver<S7PlcDomain> implements ConfigurableComponent {
+public class S7PlcDriver extends AbstractBlockDriver<S7PlcDomain> implements ConfigurableComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(S7PlcDriver.class);
 
-    private S7Client client = new S7Client();
-
-    private S7PlcOptions options;
+    private S7ClientState state = new S7ClientState(new S7PlcOptions(Collections.emptyMap()));
+    private AtomicReference<S7PlcOptions> options = new AtomicReference<>();
 
     private CryptoService cryptoService;
 
@@ -73,15 +71,13 @@ public final class S7PlcDriver extends AbstractBlockDriver<S7PlcDomain> implemen
         this.cryptoService = null;
     }
 
-    protected synchronized void activate(final ComponentContext componentContext,
-            final Map<String, Object> properties) {
+    public void activate(final Map<String, Object> properties) {
         logger.debug("Activating S7 PLC Driver...");
-        requireNonNull(properties, "Properties cannot be null");
         updated(properties);
         logger.debug("Activating S7 PLC Driver... Done");
     }
 
-    protected synchronized void deactivate(final ComponentContext componentContext) {
+    public synchronized void deactivate() {
         logger.debug("Deactivating S7 PLC Driver...");
         try {
             this.disconnect();
@@ -91,19 +87,9 @@ public final class S7PlcDriver extends AbstractBlockDriver<S7PlcDomain> implemen
         logger.debug("Deactivating S7 PLC Driver.....Done");
     }
 
-    public synchronized void updated(final Map<String, Object> properties) {
+    public void updated(final Map<String, Object> properties) {
         logger.debug("Updating S7 PLC Driver...");
-        requireNonNull(properties, "Properties cannot be null");
-        this.options = new S7PlcOptions(properties);
-        if (client.Connected) {
-            try {
-                logger.info("Reconnecting after configuration update...");
-                disconnect();
-                connect();
-            } catch (ConnectionException e) {
-                logger.warn("Failed to reset connection after update", e);
-            }
-        }
+        this.options.set(new S7PlcOptions(properties));
         logger.debug("Updating S7 PLC Driver... Done");
     }
 
@@ -112,11 +98,11 @@ public final class S7PlcDriver extends AbstractBlockDriver<S7PlcDomain> implemen
         return new String(decodedPasswordChars);
     }
 
-    private void authenticate() throws ConnectionException {
+    private void authenticate(final S7ClientState state) throws ConnectionException {
         logger.debug("Authenticating");
         int code;
         try {
-            code = this.client.SetSessionPassword(decryptPassword(this.options.getPassword().toCharArray()));
+            code = state.client.SetSessionPassword(decryptPassword(state.options.getPassword().toCharArray()));
         } catch (Exception e) {
             throw new ConnectionException(e);
         }
@@ -128,15 +114,25 @@ public final class S7PlcDriver extends AbstractBlockDriver<S7PlcDomain> implemen
     @Override
     public synchronized void connect() throws ConnectionException {
         try {
-            if (!this.client.Connected) {
+            final S7PlcOptions currentOptions = this.options.get();
+
+            if (this.state.options != currentOptions) {
+                logger.info("configuration changed, disconnecting...");
+                disconnect();
+                this.state = createClientState(currentOptions);
+                logger.info("configuration changed, disconnecting...Done");
+            }
+
+            if (!this.state.client.Connected) {
                 logger.debug("Connecting to S7 PLC...");
-                client.SetConnectionType(S7.OP);
-                int code = this.client.ConnectTo(this.options.getIp(), this.options.getRack(), this.options.getSlot());
+                this.state.client.SetConnectionType(S7.OP);
+                int code = this.state.client.ConnectTo(currentOptions.getIp(), currentOptions.getRack(),
+                        currentOptions.getSlot());
                 if (code != 0) {
                     throw new ConnectionException("Failed to connect to PLC, ConnectTo() failed with code: " + code);
                 }
-                if (this.options.shouldAuthenticate()) {
-                    authenticate();
+                if (currentOptions.shouldAuthenticate()) {
+                    authenticate(this.state);
                 }
                 logger.debug("Connecting to S7 PLC... Done");
             }
@@ -147,16 +143,16 @@ public final class S7PlcDriver extends AbstractBlockDriver<S7PlcDomain> implemen
 
     @Override
     public synchronized void disconnect() throws ConnectionException {
-        if (this.client.Connected) {
+        if (this.state.client.Connected) {
             logger.debug("Disconnecting from S7 PLC...");
-            this.client.Disconnect();
+            this.state.client.Disconnect();
             logger.debug("Disconnecting from S7 PLC... Done");
         }
     }
 
     @Override
     protected int getReadMinimumGapSizeForDomain(S7PlcDomain domain) {
-        return this.options.getMinimumGapSize();
+        return this.options.get().getMinimumGapSize();
     }
 
     @Override
@@ -172,6 +168,10 @@ public final class S7PlcDriver extends AbstractBlockDriver<S7PlcDomain> implemen
     @Override
     public ChannelDescriptor getChannelDescriptor() {
         return new S7PlcChannelDescriptor();
+    }
+
+    protected S7ClientState createClientState(final S7PlcOptions options) {
+        return new S7ClientState(options);
     }
 
     @Override
@@ -198,7 +198,7 @@ public final class S7PlcDriver extends AbstractBlockDriver<S7PlcDomain> implemen
     }
 
     public synchronized void write(int db, int offset, byte[] data) throws IOException {
-        int result = this.client.WriteArea(S7.S7AreaDB, db, offset, data.length, data);
+        int result = this.state.client.WriteArea(S7.S7AreaDB, db, offset, data.length, data);
         if (result != 0) {
             throw new Moka7Exception("DB: " + db + " off: " + offset + " len: " + data.length + " status: " + result,
                     result);
@@ -206,7 +206,7 @@ public final class S7PlcDriver extends AbstractBlockDriver<S7PlcDomain> implemen
     }
 
     public synchronized void read(int db, int offset, byte[] data) throws IOException {
-        int result = this.client.ReadArea(S7.S7AreaDB, db, offset, data.length, data);
+        int result = this.state.client.ReadArea(S7.S7AreaDB, db, offset, data.length, data);
         if (result != 0) {
             throw new Moka7Exception("DB: " + db + " off: " + offset + " len: " + data.length + " status: " + result,
                     result);
@@ -214,7 +214,7 @@ public final class S7PlcDriver extends AbstractBlockDriver<S7PlcDomain> implemen
     }
 
     @SuppressWarnings("serial")
-    private class Moka7Exception extends IOException {
+    static final class Moka7Exception extends IOException {
 
         private final int statusCode;
 
@@ -225,6 +225,21 @@ public final class S7PlcDriver extends AbstractBlockDriver<S7PlcDomain> implemen
 
         public int getStatusCode() {
             return statusCode;
+        }
+    }
+
+    static final class S7ClientState {
+
+        private final S7Client client;
+        private final S7PlcOptions options;
+
+        S7ClientState(final S7PlcOptions options) {
+            this(options, new S7Client());
+        }
+
+        public S7ClientState(final S7PlcOptions options, final S7Client client) {
+            this.options = options;
+            this.client = client;
         }
     }
 }

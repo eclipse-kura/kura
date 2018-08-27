@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates and others
  *
  *   All rights reserved. This program and the accompanying materials
  *   are made available under the terms of the Eclipse Public License v1.0
@@ -16,10 +16,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.util.Collections;
 
-import org.eclipse.kura.core.testutil.TestUtil;
+import org.eclipse.kura.driver.Driver.ConnectionException;
 import org.eclipse.kura.driver.block.task.Mode;
 import org.eclipse.kura.internal.driver.s7plc.S7PlcDriver;
+import org.eclipse.kura.internal.driver.s7plc.S7PlcDriverTest;
 import org.junit.Test;
 
 import Moka7.S7;
@@ -28,11 +30,13 @@ import Moka7.S7Client;
 public class S7PlcToplevelBlockTaskTest {
 
     @Test
-    public void testProcessBufferRead() throws IOException, NoSuchFieldException {
-        S7PlcDriver driver = new S7PlcDriver();
+    public void testProcessBufferRead() throws IOException, NoSuchFieldException, ConnectionException {
 
         S7Client s7Mock = mock(S7Client.class);
-        TestUtil.setFieldValue(driver, "client", s7Mock);
+        S7PlcDriver driver = S7PlcDriverTest.createTestDriver(s7Mock);
+
+        driver.activate(Collections.emptyMap());
+        driver.connect();
 
         int db = 3;
         int start = 0;
@@ -49,11 +53,13 @@ public class S7PlcToplevelBlockTaskTest {
     }
 
     @Test
-    public void testProcessBufferWrite() throws IOException, NoSuchFieldException {
-        S7PlcDriver driver = new S7PlcDriver();
+    public void testProcessBufferWrite() throws IOException, NoSuchFieldException, ConnectionException {
 
         S7Client s7Mock = mock(S7Client.class);
-        TestUtil.setFieldValue(driver, "client", s7Mock);
+        S7PlcDriver driver = S7PlcDriverTest.createTestDriver(s7Mock);
+
+        driver.activate(Collections.emptyMap());
+        driver.connect();
 
         int db = 3;
         int start = 0;

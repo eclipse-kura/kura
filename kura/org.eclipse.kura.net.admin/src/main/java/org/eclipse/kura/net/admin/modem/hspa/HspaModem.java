@@ -706,21 +706,6 @@ public class HspaModem implements HspaCellularModem {
     }
 
     @Override
-    @Deprecated
-    public ModemTechnologyType getTechnologyType() {
-        ModemTechnologyType modemTechnologyType = null;
-        try {
-            List<ModemTechnologyType> modemTechnologyTypes = getTechnologyTypes();
-            if (modemTechnologyTypes != null && !modemTechnologyTypes.isEmpty()) {
-                modemTechnologyType = modemTechnologyTypes.get(0);
-            }
-        } catch (KuraException e) {
-            logger.error("Failed to obtain modem technology - {}", e);
-        }
-        return modemTechnologyType;
-    }
-
-    @Override
     public boolean isSimCardReady() throws KuraException {
         boolean status = false;
         synchronized (this.atLock) {

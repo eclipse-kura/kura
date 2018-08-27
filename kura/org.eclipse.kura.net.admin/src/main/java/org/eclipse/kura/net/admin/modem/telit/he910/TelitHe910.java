@@ -384,24 +384,6 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
         return modemTechnologyTypes;
     }
 
-    /**
-     * @deprecated
-     */
-    @Override
-    @Deprecated
-    public ModemTechnologyType getTechnologyType() {
-        ModemTechnologyType modemTechnologyType = null;
-        try {
-            List<ModemTechnologyType> modemTechnologyTypes = getTechnologyTypes();
-            if (modemTechnologyTypes != null && !modemTechnologyTypes.isEmpty()) {
-                modemTechnologyType = modemTechnologyTypes.get(0);
-            }
-        } catch (KuraException e) {
-            logger.error("Failed to obtain modem technology - {}", e);
-        }
-        return modemTechnologyType;
-    }
-
     private String formGetPdpContextAtCommand() {
         StringBuilder sb = new StringBuilder(TelitHe910AtCommands.pdpContext.getCommand());
         sb.append("?\r\n");

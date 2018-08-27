@@ -82,7 +82,7 @@ public class NotificationPublisherImpl implements CloudNotificationPublisher {
     }
 
     @Override
-    public void unregisterCloudDeliveryistener(CloudDeliveryListener cloudDeliveryListener) {
+    public void unregisterCloudDeliveryListener(CloudDeliveryListener cloudDeliveryListener) {
         // Not needed
     }
 

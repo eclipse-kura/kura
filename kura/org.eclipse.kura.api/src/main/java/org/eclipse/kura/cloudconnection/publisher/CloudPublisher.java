@@ -19,13 +19,13 @@ import org.osgi.annotation.versioning.ProviderType;
 /**
  * The CloudPublisher interface is an abstraction on top of the {@link CloudEndpoint} to simplify the
  * publishing process for each application running in the framework.
- * A CloudPublisher is used to publish a message with the specified KuraPayload to a cloud platform.
+ * A CloudPublisher is used to publish the specified {@link KuraMessage} to a cloud platform.
  * The CloudPublisher and the associated CloudEndpoint implementations abstract, to the user applications, all the low
  * level specificities like the message destination address, quality of service or properties because those are added by
  * the {@link CloudPublisher} implementation based, for example, on a configuration.
  *
  * When an application wants to publish, it has to take a CloudPublisher instance and use the
- * {@link CloudPublisher#publish(KuraMessage)} method, passing as argument a {@link KuraMessage}.
+ * {@link CloudPublisher#publish(KuraMessage)} method, passing as argument a KuraMessage.
  *
  * Every KuraMessage accepted by the CloudPublisher is associated to a string identifier that can be
  * used to confirm that the KuraMessage has been published.
@@ -54,7 +54,10 @@ public interface CloudPublisher {
      *
      * @param message
      *            The {@link KuraMessage} to be published
-     * @return a String representing the message ID
+     * @return a String representing the message ID. {@code null} is returned if the cloud endpoint will not confirm the
+     *         message delivery, either because this is not supported by the underlying protocol or because the cloud
+     *         endpoint itself is not implemented or configured to request the confirmation. The message ID can be
+     *         confirmed when the message is delivered. See {@link CloudDeliveryListener}.
      * @throws KuraException
      *             if the publishing operation fails.
      */
@@ -92,6 +95,6 @@ public interface CloudPublisher {
      *
      * @param cloudConnectionListener
      */
-    public void unregisterCloudDeliveryistener(CloudDeliveryListener cloudDeliveryListener);
+    public void unregisterCloudDeliveryListener(CloudDeliveryListener cloudDeliveryListener);
 
 }

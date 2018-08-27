@@ -43,6 +43,7 @@ import org.eclipse.kura.cloud.CloudPayloadProtoBufEncoder;
 import org.eclipse.kura.cloudconnection.CloudConnectionManager;
 import org.eclipse.kura.cloudconnection.CloudEndpoint;
 import org.eclipse.kura.cloudconnection.listener.CloudConnectionListener;
+import org.eclipse.kura.cloudconnection.listener.CloudDeliveryListener;
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
 import org.eclipse.kura.cloudconnection.publisher.CloudNotificationPublisher;
 import org.eclipse.kura.cloudconnection.request.RequestHandler;
@@ -114,12 +115,14 @@ public class CloudConnectionManagerImpl
 
     private final Set<CloudConnectionListener> registeredCloudConnectionListeners;
     private final Set<CloudPublisherDeliveryListener> registeredCloudPublisherDeliveryListeners;
+    private final Set<CloudDeliveryListener> registeredCloudDeliveryListeners;
 
     public CloudConnectionManagerImpl() {
         this.messageId = new AtomicInteger();
         this.registeredCloudConnectionListeners = new CopyOnWriteArraySet<>();
         this.registeredRequestHandlers = new HashMap<>();
         this.registeredCloudPublisherDeliveryListeners = new CopyOnWriteArraySet<>();
+        this.registeredCloudDeliveryListeners = new CopyOnWriteArraySet<>();
     }
 
     // ----------------------------------------------------------------
@@ -479,6 +482,9 @@ public class CloudConnectionManagerImpl
 
         this.registeredCloudPublisherDeliveryListeners
                 .forEach(deliveryListener -> deliveryListener.onMessageConfirmed(String.valueOf(messageId), topic));
+
+        this.registeredCloudDeliveryListeners
+                .forEach(deliveryListener -> deliveryListener.onMessageConfirmed(String.valueOf(messageId)));
     }
 
     // ----------------------------------------------------------------
@@ -578,8 +584,7 @@ public class CloudConnectionManagerImpl
 
         StringBuilder sbTopic = new StringBuilder();
         sbTopic.append(MessageType.EVENT.getTopicPrefix()).append(this.options.getTopicSeparator())
-                .append(this.options.getTopicSeparator())
-                .append(this.options.getTopicSeparator())
+                .append(this.options.getTopicSeparator()).append(this.options.getTopicSeparator())
                 .append(this.options.getTopicDisconnectSuffix());
 
         String topic = sbTopic.toString();
@@ -754,5 +759,16 @@ public class CloudConnectionManagerImpl
     public CloudNotificationPublisher getNotificationPublisher() {
         // return this.notificationPublisher;
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void registerCloudDeliveryListener(CloudDeliveryListener cloudDeliveryListener) {
+        this.registeredCloudDeliveryListeners.add(cloudDeliveryListener);
+
+    }
+
+    @Override
+    public void unregisterCloudDeliveryListener(CloudDeliveryListener cloudDeliveryListener) {
+        this.registeredCloudDeliveryListeners.remove(cloudDeliveryListener);
     }
 }

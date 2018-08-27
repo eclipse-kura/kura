@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.Map;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.cloudconnection.listener.CloudDeliveryListener;
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
 import org.eclipse.kura.cloudconnection.publisher.CloudPublisher;
 import org.eclipse.kura.cloudconnection.subscriber.CloudSubscriber;
@@ -23,12 +24,15 @@ import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * CloudEndpoint provide APIs to ease the communication with a cloud platform allowing to publish a message, manage
- * subscribers or get information about the specific cloud endpoint configuration.
+ * subscribers, subscribe to message delivery notification or get information about the specific cloud endpoint
+ * configuration.
  *
  * Each CloudEndpoint is referenced by zero or more {@link CloudPublisher} and {@link CloudSubscriber} instances.
  *
  * Applications should not use directly this API but, instead, use the {@link CloudPublisher} and the
  * {@link CloudSubscriber} interfaces to give applications the capabilities to publish and receive messages.
+ *
+ * The implementor must register itself as a CloudEndpoint OSGi service provider.
  *
  * @noimplement This interface is not intended to be implemented by clients.
  * @since 2.0
@@ -52,7 +56,8 @@ public interface CloudEndpoint {
     public String publish(KuraMessage message) throws KuraException;
 
     /**
-     * Registers the provided {@link CloudSubscriberListener} using the specified {@code subscriptionProperties} that will allow
+     * Registers the provided {@link CloudSubscriberListener} using the specified {@code subscriptionProperties} that
+     * will allow
      * to disambiguate the specific subscriptions.
      *
      * @param subscriptionProperties
@@ -65,7 +70,7 @@ public interface CloudEndpoint {
 
     /**
      * Unregisters the subscriber identified by the provided {@code subscriptionProperties}
-     * 
+     *
      * @param subscriptionProperties
      */
     public void unregisterSubscriber(Map<String, Object> subscriptionProperties);
@@ -80,5 +85,22 @@ public interface CloudEndpoint {
     public default Map<String, String> getInfo() {
         return Collections.emptyMap();
     }
+
+    /**
+     * The implementation will register the {@link CloudDeliveryListener} instance passed as argument. Once a cloud
+     * connection related event happens, all the registered {@link CloudDeliveryListener}s will be notified.
+     *
+     * @param cloudDeliveryListener
+     *            a {@link CloudDeliveryListener} instance
+     */
+    public void registerCloudDeliveryListener(CloudDeliveryListener cloudDeliveryListener);
+
+    /**
+     * Unregisters the provided {@link CloudDeliveryListener} instance from cloud connection related events
+     * notifications.
+     *
+     * @param cloudConnectionListener
+     */
+    public void unregisterCloudDeliveryListener(CloudDeliveryListener cloudDeliveryListener);
 
 }

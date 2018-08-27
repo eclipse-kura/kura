@@ -72,7 +72,7 @@ public class CloudPublisherImplTest {
         cloudServiceImpl = (CloudServiceImpl) cloudService;
         cfgSvc.createFactoryConfiguration("org.eclipse.kura.cloud.publisher.CloudPublisher",
                 "org.eclipse.kura.cloud.publisher.CloudPublisher-1",
-                Collections.singletonMap(CloudConnectionConstants.CLOUD_CONNECTION_SERVICE_PID_PROP_NAME.value(),
+                Collections.singletonMap(CloudConnectionConstants.CLOUD_ENDPOINT_SERVICE_PID_PROP_NAME.value(),
                         "org.eclipse.kura.cloud.CloudService"),
                 true);
         dependencyLatch.countDown();

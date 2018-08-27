@@ -255,7 +255,7 @@ public class CloudPublisherImpl
     }
 
     @Override
-    public void unregisterCloudDeliveryistener(CloudDeliveryListener cloudDeliveryListener) {
+    public void unregisterCloudDeliveryListener(CloudDeliveryListener cloudDeliveryListener) {
         this.cloudDeliveryListeners.remove(cloudDeliveryListener);
     }
 

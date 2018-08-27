@@ -29,7 +29,7 @@ public class CloudPublisherOptionsTest {
     @Test
     public void testNotAllProps() {
         Map<String, Object> props = new HashMap<>();
-        props.put(CloudConnectionConstants.CLOUD_CONNECTION_SERVICE_PID_PROP_NAME.value(),
+        props.put(CloudConnectionConstants.CLOUD_ENDPOINT_SERVICE_PID_PROP_NAME.value(),
                 "org.eclipse.kura.cloud.CloudService");
         CloudPublisherOptions options = new CloudPublisherOptions(props);
         assertNotNull(options);
@@ -41,7 +41,7 @@ public class CloudPublisherOptionsTest {
     public void testGetCloudServicePid() {
         Map<String, Object> props = new HashMap<>();
         String cloudServicePid = "org.eclipse.kura.cloud.CloudService1";
-        props.put(CloudConnectionConstants.CLOUD_CONNECTION_SERVICE_PID_PROP_NAME.value(), cloudServicePid);
+        props.put(CloudConnectionConstants.CLOUD_ENDPOINT_SERVICE_PID_PROP_NAME.value(), cloudServicePid);
         CloudPublisherOptions options = new CloudPublisherOptions(props);
         assertNotNull(options);
         assertEquals(cloudServicePid, options.getCloudServicePid());

@@ -20,16 +20,16 @@ import org.eclipse.kura.cloudconnection.CloudEndpoint;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
- * A {@link CloudConnectionFactory} is responsible to register cloud connection instances in the
+ * A {@link CloudConnectionFactory} is responsible to register {@link CloudEndpoint} instances in the
  * framework.
  * The Component creates multiple component instances upon reception of a configuration
  * created through the Configuration Service.
  *
  * It provides all the implementations that can be used to connect to a specific Cloud platform.
  *
- * Typically, a {@link CloudConnectionFactory} creates the {@link CloudEndpoint} and the {@link CloudConnectionManager}
- * that are used to
- * establish and manage the connection to a cloud platform, for example an Mqtt connection.
+ * A {@link CloudConnectionFactory} must create a {@link CloudEndpoint} and, eventually, a
+ * {@link CloudConnectionManager} that are used to establish and manage the connection to a cloud platform, for example
+ * an Mqtt connection.
  *
  * Multiple {@link CloudConnectionFactory} services can be registered in the framework to support multiple simultaneous
  * connections to different Cloud platforms.
@@ -56,14 +56,15 @@ public interface CloudConnectionFactory {
     public String getFactoryPid();
 
     /**
-     * Creates one or more service instances and initializes its configuration with the defaults
-     * expressed in the Metatype of the target component factories.
+     * This method creates a CloudEndpoint instance and, eventually, more service instances that are necessary to
+     * identify and the manage the endpoint and the connection. It initializes the configuration of the created services
+     * with the defaults expressed in the Metatype of the target component factories.
      *
-     * The created instances will have their {@code kura.service.pid} properties
+     * The created Cloud Endpoint instance will have its {@code kura.service.pid} property
      * set to the value provided in the {@code pid} parameter.
      *
      * @param pid
-     *            the Kura persistent identifier ({@code kura.service.pid}) of the service
+     *            the Kura persistent identifier ({@code kura.service.pid}) of the Cloud Endpoint service
      *            instance created by this factory.
      * @throws KuraException
      *             an exception is thrown in case the creation operation fails
@@ -86,19 +87,14 @@ public interface CloudConnectionFactory {
      * Deletes a previously created configuration deactivating the associated instances.
      *
      * @param pid
-     *            the Kura persistent identifier, {@code kura.service.pid}
+     *            the Kura persistent identifier, {@code kura.service.pid} of a Cloud Endpoint
      * @throws KuraException
      *             if the provided {@code kura.service.pid} is incorrect or the delete operation fails.
      */
     public void deleteConfiguration(String pid) throws KuraException;
 
     /**
-     * Returns a set of services managed by this factory
-     * It is up to the factory to specify how to assembles the result. The PIDs returned by this list must be the PIDs
-     * assigned to the OSGi service property {@code kura.service.pid} and it must be possible to pass all those results
-     * into the method {@link #getStackComponentsPids(String)} of the same factory instance.
-     *
-     * The IDs returned by this method must not necessarily point to registered OSGi services.
+     * Returns a set of {@code kura.service.pid} that corresponds to the Cloud Endpoint services managed by this factory.
      *
      * @return the set of services or an empty set.
      * @throws KuraException

@@ -19,6 +19,9 @@ import org.eclipse.kura.cloudconnection.message.KuraMessage;
  */
 public enum RequestHandlerConstants {
 
+    /**
+     * Request arguments. The corresponding value must be a {@code List<String>}.
+     */
     ARGS_KEY("args");
 
     private String value;

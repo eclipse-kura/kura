@@ -272,7 +272,7 @@ public class GwtCloudConnectionServiceImpl extends OsgiRemoteServiceServlet impl
 
         ServiceLocator.applyToServiceOptionally(ConfigurationService.class, cs -> {
             cs.createFactoryConfiguration(factoryPid, pid, Collections.singletonMap(
-                    CloudConnectionConstants.CLOUD_CONNECTION_SERVICE_PID_PROP_NAME.value(), cloudConnectionPid), true);
+                    CloudConnectionConstants.CLOUD_ENDPOINT_SERVICE_PID_PROP_NAME.value(), cloudConnectionPid), true);
             return (Void) null;
         });
     }
@@ -334,7 +334,7 @@ public class GwtCloudConnectionServiceImpl extends OsgiRemoteServiceServlet impl
     }
 
     private static GwtCloudPubSubEntry toGwt(final ServiceReference<?> ref, final GwtCloudPubSubEntry.Type type) {
-        final Object ccsPid = ref.getProperty(CloudConnectionConstants.CLOUD_CONNECTION_SERVICE_PID_PROP_NAME.value());
+        final Object ccsPid = ref.getProperty(CloudConnectionConstants.CLOUD_ENDPOINT_SERVICE_PID_PROP_NAME.value());
         final Object factoryPid = ref.getProperty(ConfigurationAdmin.SERVICE_FACTORYPID);
 
         if (!(ccsPid instanceof String && factoryPid instanceof String)) {

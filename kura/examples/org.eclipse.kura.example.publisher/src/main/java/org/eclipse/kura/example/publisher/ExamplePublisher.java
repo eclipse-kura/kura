@@ -61,7 +61,7 @@ public class ExamplePublisher implements ConfigurableComponent, CloudSubscriberL
 
     public void unsetCloudPublisher(CloudPublisher cloudPublisher) {
         this.cloudPublisher.unregisterCloudConnectionListener(ExamplePublisher.this);
-        this.cloudPublisher.unregisterCloudDeliveryistener(ExamplePublisher.this);
+        this.cloudPublisher.unregisterCloudDeliveryListener(ExamplePublisher.this);
         this.cloudPublisher = null;
     }
 

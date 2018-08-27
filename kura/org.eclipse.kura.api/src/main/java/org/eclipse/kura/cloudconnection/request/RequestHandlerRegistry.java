@@ -13,7 +13,7 @@ import org.eclipse.kura.KuraException;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
- * Interface used to register or unregister {@link RequestHandler}s identified by a specific id
+ * Interface used to register or unregister {@link RequestHandler}s identified by a specific id.
  *
  * @noextend This class is not intended to be subclassed by clients.
  * @since 2.0

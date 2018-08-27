@@ -90,7 +90,7 @@ public class ModbusExample implements ConfigurableComponent, CloudConnectionList
 
     public void unsetCloudPublisher(CloudPublisher cloudPublisher) {
         this.cloudPublisher.unregisterCloudConnectionListener(ModbusExample.this);
-        this.cloudPublisher.unregisterCloudDeliveryistener(ModbusExample.this);
+        this.cloudPublisher.unregisterCloudDeliveryListener(ModbusExample.this);
         this.cloudPublisher = null;
     }
 

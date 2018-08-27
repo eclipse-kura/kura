@@ -55,6 +55,7 @@ import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.cloudconnection.CloudConnectionManager;
 import org.eclipse.kura.cloudconnection.CloudEndpoint;
 import org.eclipse.kura.cloudconnection.listener.CloudConnectionListener;
+import org.eclipse.kura.cloudconnection.listener.CloudDeliveryListener;
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
 import org.eclipse.kura.cloudconnection.publisher.CloudNotificationPublisher;
 import org.eclipse.kura.cloudconnection.request.RequestHandler;
@@ -118,6 +119,7 @@ public class CloudServiceImpl
     private final List<CloudClientImpl> cloudClients;
     private final Set<CloudConnectionListener> registeredCloudConnectionListeners;
     private final Set<CloudPublisherDeliveryListener> registeredCloudPublisherDeliveryListeners;
+    private final Set<CloudDeliveryListener> registeredCloudDeliveryListeners;
 
     // package visibility for LyfeCyclePayloadBuilder
     String imei;
@@ -146,6 +148,7 @@ public class CloudServiceImpl
         this.registeredSubscribers = new HashMap<>();
         this.registeredCloudConnectionListeners = new CopyOnWriteArraySet<>();
         this.registeredCloudPublisherDeliveryListeners = new CopyOnWriteArraySet<>();
+        this.registeredCloudDeliveryListeners = new CopyOnWriteArraySet<>();
         this.notificationPublisher = new NotificationPublisherImpl(this);
     }
 
@@ -639,6 +642,9 @@ public class CloudServiceImpl
 
         this.registeredCloudPublisherDeliveryListeners
                 .forEach(deliveryListener -> deliveryListener.onMessageConfirmed(String.valueOf(messageId), topic));
+
+        this.registeredCloudDeliveryListeners
+                .forEach(deliveryListener -> deliveryListener.onMessageConfirmed(String.valueOf(messageId)));
     }
 
     // ----------------------------------------------------------------
@@ -1008,5 +1014,16 @@ public class CloudServiceImpl
         }
 
         return sb.toString();
+    }
+
+    @Override
+    public void registerCloudDeliveryListener(CloudDeliveryListener cloudDeliveryListener) {
+        this.registeredCloudDeliveryListeners.add(cloudDeliveryListener);
+
+    }
+
+    @Override
+    public void unregisterCloudDeliveryListener(CloudDeliveryListener cloudDeliveryListener) {
+        this.registeredCloudDeliveryListeners.remove(cloudDeliveryListener);
     }
 }

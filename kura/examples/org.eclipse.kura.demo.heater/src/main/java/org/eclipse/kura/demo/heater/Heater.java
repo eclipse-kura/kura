@@ -78,7 +78,7 @@ public class Heater implements ConfigurableComponent, CloudConnectionListener, C
 
     public void unsetCloudPublisher(CloudPublisher cloudPublisher) {
         this.cloudPublisher.unregisterCloudConnectionListener(Heater.this);
-        this.cloudPublisher.unregisterCloudDeliveryistener(Heater.this);
+        this.cloudPublisher.unregisterCloudDeliveryListener(Heater.this);
         this.cloudPublisher = null;
     }
 

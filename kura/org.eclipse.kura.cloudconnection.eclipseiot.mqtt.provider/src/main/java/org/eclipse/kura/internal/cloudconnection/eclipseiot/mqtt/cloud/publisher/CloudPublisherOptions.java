@@ -17,7 +17,7 @@ import org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.Message
 public class CloudPublisherOptions {
 
     private static final Property<String> PROPERTY_CLOUD_SERVICE_PID = new Property<>(
-            CloudConnectionConstants.CLOUD_CONNECTION_SERVICE_PID_PROP_NAME.value(),
+            CloudConnectionConstants.CLOUD_ENDPOINT_SERVICE_PID_PROP_NAME.value(),
             "org.eclipse.kura.cloud.mqtt.eclipseiot.CloudService");
     private static final Property<String> PROPERTY_SEMANTIC_TOPIC = new Property<>("semantic.topic",
             "W1/A1/$assetName");

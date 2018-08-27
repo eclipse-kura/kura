@@ -16,7 +16,8 @@ import org.eclipse.kura.cloudconnection.publisher.CloudPublisher;
 import org.eclipse.kura.cloudconnection.subscriber.CloudSubscriber;
 
 /**
- * Provides constants that can be used by cloud connections.
+ * Provides constants that are used by cloud connections to relate service instances to their respective
+ * {@link CloudEndpoint} or {@link CloudConnectionFactory}.
  *
  * @since 2.0
  */
@@ -24,13 +25,13 @@ public enum CloudConnectionConstants {
 
     /**
      * The key of the property that specifies the {@code kura.service.pid} of the associated
-     * {@link CloudConnectionManager} in {@link CloudPublisher} or {@link CloudSubscriber} component configuration.
+     * {@link CloudEndpoint} in {@link CloudPublisher} or {@link CloudSubscriber} component configuration.
      */
-    CLOUD_CONNECTION_SERVICE_PID_PROP_NAME("cloud.connection.service.pid"),
+    CLOUD_ENDPOINT_SERVICE_PID_PROP_NAME("cloud.endpoint.service.pid"),
 
     /**
      * The key of the property that specifies the {@code kura.service.pid} of the associated
-     * {@link CloudConnectionFactory} in {@link CloudConnectionManager} component definition.
+     * {@link CloudConnectionFactory} in {@link CloudEndpoint} component definition.
      */
     CLOUD_CONNECTION_FACTORY_PID_PROP_NAME("cloud.connection.factory.pid");
 

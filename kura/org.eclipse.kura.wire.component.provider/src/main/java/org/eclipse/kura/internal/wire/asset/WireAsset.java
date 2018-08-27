@@ -14,16 +14,15 @@
 package org.eclipse.kura.internal.wire.asset;
 
 import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 import static org.eclipse.kura.channel.ChannelType.READ_WRITE;
 import static org.eclipse.kura.channel.ChannelType.WRITE;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,14 +31,13 @@ import org.eclipse.kura.asset.Asset;
 import org.eclipse.kura.asset.AssetConfiguration;
 import org.eclipse.kura.asset.provider.BaseAsset;
 import org.eclipse.kura.channel.Channel;
-import org.eclipse.kura.channel.ChannelFlag;
 import org.eclipse.kura.channel.ChannelRecord;
-import org.eclipse.kura.channel.ChannelStatus;
 import org.eclipse.kura.channel.ChannelType;
 import org.eclipse.kura.channel.listener.ChannelEvent;
 import org.eclipse.kura.channel.listener.ChannelListener;
 import org.eclipse.kura.core.configuration.metatype.Tad;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
+import org.eclipse.kura.driver.PreparedRead;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
 import org.eclipse.kura.util.collection.CollectionUtil;
@@ -96,7 +94,7 @@ import org.osgi.service.wireadmin.Wire;
  * @see WireRecord
  * @see Asset
  */
-public final class WireAsset extends BaseAsset implements WireEmitter, WireReceiver, ChannelListener {
+public final class WireAsset extends BaseAsset implements WireEmitter, WireReceiver {
 
     private static final Logger logger = LogManager.getLogger();
 
@@ -105,6 +103,8 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
     private WireSupport wireSupport;
 
     private WireAssetOptions options = new WireAssetOptions();
+
+    private PreparedEmit preparedEmit;
 
     /**
      * Binds the Wire Helper Service.
@@ -218,6 +218,16 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
         }
     }
 
+    @Override
+    protected void onPreparedReadCreated(PreparedRead preparedRead) {
+        this.preparedEmit = new PreparedEmit(preparedRead.getChannelRecords());
+    }
+
+    @Override
+    protected void onPreparedReadReleased(PreparedRead preparedRead) {
+        this.preparedEmit = null;
+    }
+
     private void emitAllReadChannels() {
         if (hasReadChannels()) {
             try {
@@ -281,7 +291,14 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
             throw new IllegalArgumentException("Channel Records cannot be empty");
         }
 
-        final Map<String, TypedValue<?>> wireRecordProperties = new HashMap<>();
+        final Map<String, TypedValue<?>> wireRecordProperties;
+
+        if (this.preparedEmit != null) {
+            wireRecordProperties = this.preparedEmit.execute(channelRecords);
+        } else {
+            wireRecordProperties = Utils.toWireRecordProperties(channelRecords, options);
+        }
+
         try {
             wireRecordProperties.put(WireAssetConstants.PROP_ASSET_NAME.value(),
                     TypedValues.newStringValue(getKuraServicePid()));
@@ -289,63 +306,7 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
             logger.error("Configurations cannot be null", e);
         }
 
-        final TimestampFiller timestampFiller = this.options.getTimestampMode().createFiller(wireRecordProperties);
-        final boolean emitErrors = this.options.emitErrors();
-
-        for (final ChannelRecord channelRecord : channelRecords) {
-            if (emitErrors) {
-                fillRecordWithErrors(channelRecord, wireRecordProperties, timestampFiller);
-            } else {
-                fillRecordWithoutErrors(channelRecord, wireRecordProperties, timestampFiller);
-            }
-        }
-
-        timestampFiller.fillSingleTimestamp();
-
         this.wireSupport.emit(Collections.singletonList(new WireRecord(wireRecordProperties)));
-    }
-
-    private void fillRecordWithoutErrors(final ChannelRecord channelRecord,
-            final Map<String, TypedValue<?>> wireRecordProperties, final TimestampFiller timestampFiller) {
-        final String channelName = channelRecord.getChannelName();
-        final ChannelStatus channelStatus = channelRecord.getChannelStatus();
-        if (channelStatus.getChannelFlag() == ChannelFlag.FAILURE) {
-            logger.warn(getErrorMessage(channelStatus));
-            return;
-        }
-
-        wireRecordProperties.put(channelName, channelRecord.getValue());
-        timestampFiller.processRecord(channelRecord);
-    }
-
-    private void fillRecordWithErrors(final ChannelRecord channelRecord,
-            final Map<String, TypedValue<?>> wireRecordProperties, final TimestampFiller timestampFiller) {
-        final String channelName = channelRecord.getChannelName();
-        final ChannelStatus channelStatus = channelRecord.getChannelStatus();
-        if (channelStatus.getChannelFlag() == ChannelFlag.FAILURE) {
-            final String errorMessage = getErrorMessage(channelStatus);
-            wireRecordProperties.put(channelName + WireAssetConstants.PROP_SUFFIX_ERROR.value(),
-                    TypedValues.newStringValue(errorMessage));
-        } else {
-            wireRecordProperties.put(channelName + WireAssetConstants.PROP_SUFFIX_ERROR.value(),
-                    TypedValues.newStringValue(WireAssetConstants.PROP_VALUE_NO_ERROR.value()));
-            wireRecordProperties.put(channelName, channelRecord.getValue());
-        }
-        timestampFiller.processRecord(channelRecord);
-    }
-
-    private String getErrorMessage(final ChannelStatus channelStatus) {
-        String errorMessage = WireAssetConstants.ERROR_NOT_SPECIFIED_MESSAGE.value();
-        final Exception exception = channelStatus.getException();
-        final String exceptionMsg = channelStatus.getExceptionMessage();
-        if (nonNull(exception) && nonNull(exceptionMsg)) {
-            errorMessage = exceptionMsg + " " + exception.toString();
-        } else if (isNull(exception) && nonNull(exceptionMsg)) {
-            errorMessage = exceptionMsg;
-        } else if (nonNull(exception)) {
-            errorMessage = exception.toString();
-        }
-        return errorMessage;
     }
 
     /**
@@ -379,17 +340,30 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
     }
 
     @Override
-    protected void tryAttachChannelListeners() {
-        getAssetConfiguration().getAssetChannels().entrySet().stream()
-                .filter(e -> isListeningChannel(e.getValue().getConfiguration()))
-                .map(e -> new ChannelListenerRegistration(e.getKey(), this)).forEach(this.channelListeners::add);
-        super.tryAttachChannelListeners();
+    protected boolean isChannelListenerValid(final ChannelListenerRegistration reg, final Channel channel) {
+
+        if (!super.isChannelListenerValid(reg, channel)) {
+            return false;
+        }
+
+        final ChannelListener listener = reg.getChannelListener();
+
+        if (!(listener instanceof EmitterChannelListener)) {
+            return true;
+        }
+
+        return ((EmitterChannelListener) listener).outer() != this;
     }
 
     @Override
-    protected boolean isChannelListenerValid(Channel channel, ChannelListenerRegistration reg) {
-        return super.isChannelListenerValid(channel, reg)
-                && (reg.getChannelListener() != this || isListeningChannel(channel.getConfiguration()));
+    protected void updateChannelListenerRegistrations(final Set<ChannelListenerRegistration> listeners,
+            final AssetConfiguration config) {
+
+        super.updateChannelListenerRegistrations(listeners, config);
+
+        config.getAssetChannels().entrySet().stream().filter(e -> isListeningChannel(e.getValue().getConfiguration()))
+                .map(e -> new ChannelListenerRegistration(e.getKey(), new EmitterChannelListener()))
+                .forEach(listeners::add);
     }
 
     @Override
@@ -421,12 +395,42 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
         this.wireSupport.updated(wire, value);
     }
 
-    @Override
-    public void onChannelEvent(ChannelEvent event) {
-        if (this.options.emitAllChannels()) {
-            emitAllReadChannels();
-        } else {
-            emitChannelRecords(Collections.singletonList(event.getChannelRecord()));
+    private class EmitterChannelListener implements ChannelListener {
+
+        @Override
+        public void onChannelEvent(ChannelEvent event) {
+            if (options.emitAllChannels()) {
+                emitAllReadChannels();
+            } else {
+                emitChannelRecords(Collections.singletonList(event.getChannelRecord()));
+            }
         }
+
+        public WireAsset outer() {
+            return WireAsset.this;
+        }
+    }
+
+    private class PreparedEmit {
+
+        private final List<ChannelRecord> preparedRecords;
+        private final List<RecordFiller> recordFillers;
+
+        PreparedEmit(final List<ChannelRecord> records) {
+            this.preparedRecords = records;
+            this.recordFillers = RecordFillers.create(preparedRecords, options);
+        }
+
+        Map<String, TypedValue<?>> execute(final List<ChannelRecord> channelRecords) {
+
+            if (channelRecords != preparedRecords) {
+                // driver changed the record list
+                // fallback to slow mode
+                return Utils.toWireRecordProperties(channelRecords, options);
+            }
+
+            return Utils.toWireRecordProperties(channelRecords, options, recordFillers);
+        }
+
     }
 }

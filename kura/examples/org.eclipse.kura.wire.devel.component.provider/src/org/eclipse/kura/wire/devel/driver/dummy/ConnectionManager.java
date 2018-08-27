@@ -99,7 +99,7 @@ public class ConnectionManager {
 
         if (connectionDelay > 0) {
             try {
-                Thread.sleep(connectionDelay);
+                Thread.sleep(connectionDelay * 1000);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }

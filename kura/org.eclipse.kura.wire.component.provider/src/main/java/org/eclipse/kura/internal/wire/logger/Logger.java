@@ -148,7 +148,6 @@ public final class Logger implements WireReceiver, ConfigurableComponent {
     /** {@inheritDoc} */
     @Override
     public void producersConnected(final Wire[] wires) {
-        requireNonNull(wires, "Wires cannot be null");
         this.wireSupport.producersConnected(wires);
     }
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -29,11 +29,6 @@ import org.osgi.service.wireadmin.Producer;
  */
 @ProviderType
 public interface WireSupport extends Producer, Consumer {
-
-    /**
-     * The topic to be used for publishing and receiving the emit trigger events
-     */
-    public static final String EMIT_EVENT_TOPIC = "org/eclipse/kura/wires/emit";
 
     /**
      * Emit the provided {@link WireRecord}s

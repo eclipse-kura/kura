@@ -1,19 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
+    Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
      which accompanies this distribution, and is available at
      http://www.eclipse.org/legal/epl-v10.html
 -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" 
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
                name="org.eclipse.kura.wire.CloudSubscriber"
-               activate="activate" 
-               deactivate="deactivate" 
+               activate="activate"
+               deactivate="deactivate"
                modified="updated"
-               enabled="true" 
-               configuration-policy="require"> 
+               enabled="true"
+               immediate="true"
+               configuration-policy="require">
    <implementation class="org.eclipse.kura.internal.wire.subscriber.CloudSubscriber"/>
    <property name="service.pid" value="org.eclipse.kura.wire.CloudSubscriber"/>
    <property name="kura.ui.service.hide" type="Boolean" value="true"/>
@@ -24,10 +25,10 @@
       <provide interface="org.eclipse.kura.wire.WireEmitter"/>
       <provide interface="org.osgi.service.wireadmin.Producer"/>
    </service>
-   <reference bind="bindWireHelperService" 
-   	          cardinality="1..1" 
-   	          interface="org.eclipse.kura.wire.WireHelperService" 
-   	          name="WireHelperService" 
-   	          policy="static" 
+   <reference bind="bindWireHelperService"
+   	          cardinality="1..1"
+   	          interface="org.eclipse.kura.wire.WireHelperService"
+   	          name="WireHelperService"
+   	          policy="static"
    	          unbind="unbindWireHelperService"/>
 </scr:component>

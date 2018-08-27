@@ -327,7 +327,7 @@ public class ComponentUtil {
         return ocd;
     }
 
-    public static Map<String, Object> getDefaultProperties(OCD ocd, ComponentContext ctx) throws KuraException {
+    public static Map<String, Object> getDefaultProperties(OCD ocd, ComponentContext ctx) {
         //
         // reconcile by looping through the ocd properties
         Map<String, Object> defaults = null;

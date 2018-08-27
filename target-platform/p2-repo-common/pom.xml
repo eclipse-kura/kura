@@ -197,11 +197,6 @@
                                     <version>${log4j.version}</version>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>log4j.apache-log4j-extras</artifactId>
-                                    <version>${log4j.apache-log4j-extras.version}</version>
-                                </artifactItem>
-                                <artifactItem>
                                     <groupId>org.junit</groupId>
                                     <artifactId>org.junit</artifactId>
                                     <version>${org.junit.version}</version>
@@ -515,7 +510,6 @@
                                 <move file="target/source/plugins/org.apache.log4j2-api-config.jar" tofile="target/source/plugins/org.apache.log4j2-api-config_${org.apache.log4j2-api-config.version}.jar"/>
                                 <move file="target/source/plugins/log4j-core.jar" tofile="target/source/plugins/log4j-core_${log4j.version}.jar"/>
                                 <move file="target/source/plugins/log4j-slf4j-impl.jar" tofile="target/source/plugins/log4j-slf4j-impl_${log4j.version}.jar"/>
-                                <move file="target/source/plugins/log4j.apache-log4j-extras.jar" tofile="target/source/plugins/log4j.apache-log4j-extras_${log4j.apache-log4j-extras.version}.jar"/>
                                 <move file="target/source/plugins/org.junit.jar" tofile="target/source/plugins/org.junit_${org.junit.version}.jar"/>
                                 <move file="target/source/plugins/commons-fileupload.jar" tofile="target/source/plugins/commons-fileupload.jar_${org.apache.commons.fileupload.version}.jar"/>
                                 <move file="target/source/plugins/usb4java-javax.jar" tofile="target/source/plugins/usb4java-javax_${usb4java-javax.version}.jar"/>

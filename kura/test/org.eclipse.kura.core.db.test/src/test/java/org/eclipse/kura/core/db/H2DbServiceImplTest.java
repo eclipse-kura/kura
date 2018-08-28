@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates and others
  *
  *   All rights reserved. This program and the accompanying materials
  *   are made available under the terms of the Eclipse Public License v1.0
@@ -19,6 +19,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,6 +38,7 @@ public class H2DbServiceImplTest {
         String user = "USR";
 
         H2DbServiceImpl svc = new H2DbServiceImpl();
+        svc.activate(Collections.emptyMap());
 
         CryptoService csMock = mock(CryptoService.class);
         svc.setCryptoService(csMock);
@@ -66,7 +68,7 @@ public class H2DbServiceImplTest {
 
         assertEquals(user, result);
 
-        svc.deactivate(null);
+        svc.deactivate();
     }
 
     @Test
@@ -75,6 +77,7 @@ public class H2DbServiceImplTest {
         String user = "USR";
 
         H2DbServiceImpl svc = new H2DbServiceImpl();
+        svc.activate(Collections.emptyMap());
 
         Map<String, Object> props = new HashMap<>();
         props.put("db.user", user);
@@ -101,6 +104,7 @@ public class H2DbServiceImplTest {
         String user = "USR";
 
         H2DbServiceImpl svc = new H2DbServiceImpl();
+        svc.activate(Collections.emptyMap());
 
         Map<String, Object> props = new HashMap<>();
         props.put("db.user", user);
@@ -129,6 +133,7 @@ public class H2DbServiceImplTest {
         String user = "USR";
 
         H2DbServiceImpl svc = new H2DbServiceImpl();
+        svc.activate(Collections.emptyMap());
 
         Map<String, Object> props = new HashMap<>();
         props.put("db.user", user);
@@ -151,6 +156,7 @@ public class H2DbServiceImplTest {
         String user = "USR";
 
         H2DbServiceImpl svc = new H2DbServiceImpl();
+        svc.activate(Collections.emptyMap());
 
         Map<String, Object> props = new HashMap<>();
         props.put("db.user", user);
@@ -179,6 +185,7 @@ public class H2DbServiceImplTest {
         activeInstances.put(url, svc1);
 
         H2DbServiceImpl svc = new H2DbServiceImpl();
+        svc.activate(Collections.emptyMap());
 
         Map<String, Object> props = new HashMap<>();
         props.put("db.user", user);
@@ -201,6 +208,7 @@ public class H2DbServiceImplTest {
         String user = "USR";
 
         H2DbServiceImpl svc = new H2DbServiceImpl();
+        svc.activate(Collections.emptyMap());
 
         CryptoService csMock = mock(CryptoService.class);
         svc.setCryptoService(csMock);
@@ -231,13 +239,13 @@ public class H2DbServiceImplTest {
 
         assertEquals(user, result);
 
-        svc.deactivate(null);
+        svc.deactivate();
 
         // test a method and clean the files
         File[] files = f.getParentFile().listFiles();
         assertEquals(1, files.length);
 
-        DbConfiguration cfg = (DbConfiguration) TestUtil.getFieldValue(svc, "configuration");
+        H2DbServiceOptions cfg = (H2DbServiceOptions) TestUtil.getFieldValue(svc, "configuration");
         TestUtil.invokePrivate(svc, "deleteDbFiles", cfg);
 
         for (File file : files) {

@@ -19,7 +19,6 @@ import static java.util.Objects.requireNonNull;
 import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_PID;
 
 import java.sql.Blob;
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -183,32 +182,21 @@ public class H2DbWireRecordFilter implements WireEmitter, WireReceiver, Configur
     }
 
     private List<WireRecord> performSQLQuery() throws SQLException {
-        final List<WireRecord> dataRecords = new ArrayList<>();
 
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rset = null;
         final String sqlView = this.options.getSqlView();
-        try {
-            conn = this.dbHelper.getConnection();
-            stmt = conn.createStatement();
-            rset = stmt.executeQuery(sqlView);
 
-            while (rset.next()) {
-                final WireRecord wireRecord = new WireRecord(convertSQLRowToWireRecord(rset));
-                dataRecords.add(wireRecord);
+        return this.dbHelper.withConnection(c -> {
+            final List<WireRecord> dataRecords = new ArrayList<>();
+
+            try (final Statement stmt = c.createStatement(); final ResultSet rset = stmt.executeQuery(sqlView)) {
+                while (rset.next()) {
+                    final WireRecord wireRecord = new WireRecord(convertSQLRowToWireRecord(rset));
+                    dataRecords.add(wireRecord);
+                }
             }
-
             logger.debug("Refreshed typed values");
-        } catch (final SQLException e) {
-            throw e;
-        } finally {
-            this.dbHelper.close(rset);
-            this.dbHelper.close(stmt);
-            this.dbHelper.close(conn);
-        }
-
-        return dataRecords;
+            return dataRecords;
+        });
     }
 
     private Map<String, TypedValue<?>> convertSQLRowToWireRecord(ResultSet rset) throws SQLException {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates and others
  *
  *   All rights reserved. This program and the accompanying materials
  *   are made available under the terms of the Eclipse Public License v1.0
@@ -10,6 +10,7 @@ package org.eclipse.kura.internal.wire.h2db.store;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -57,6 +58,15 @@ public class H2DbWireRecordStoreTest {
         return connection;
     }
 
+    private H2DbService createMockH2DbService(final Connection connection) throws SQLException {
+        final H2DbService dbServiceMock = mock(H2DbService.class);
+        when(dbServiceMock.withConnection(anyObject())).thenAnswer(invocation -> {
+            return invocation.getArgumentAt(0, H2DbService.ConnectionCallable.class).call(connection);
+        });
+        when(dbServiceMock.getConnection()).thenReturn(connection);
+        return dbServiceMock;
+    }
+
     @Test
     public void testSequence() throws SQLException {
         // create DB, insert a few wire records, check they are actually in there, trigger column type update,
@@ -64,8 +74,7 @@ public class H2DbWireRecordStoreTest {
 
         Connection connection = getConnection();
 
-        H2DbService dbServiceMock = mock(H2DbService.class);
-        when(dbServiceMock.getConnection()).thenReturn(connection);
+        H2DbService dbServiceMock = createMockH2DbService(connection);
 
         AtomicInteger resets = new AtomicInteger(0);
         H2DbWireRecordStore store = new H2DbWireRecordStore() {
@@ -198,8 +207,7 @@ public class H2DbWireRecordStoreTest {
         // create DB, insert a few wire records, check they are actually in there and clean the DB
         Connection connection = getConnection();
 
-        H2DbService dbServiceMock = mock(H2DbService.class);
-        when(dbServiceMock.getConnection()).thenReturn(connection);
+        H2DbService dbServiceMock = createMockH2DbService(connection);
 
         H2DbWireRecordStore store = new H2DbWireRecordStore() {
 
@@ -277,8 +285,7 @@ public class H2DbWireRecordStoreTest {
 
         Connection connection = getConnection();
 
-        H2DbService dbServiceMock = mock(H2DbService.class);
-        when(dbServiceMock.getConnection()).thenReturn(connection);
+        H2DbService dbServiceMock = createMockH2DbService(connection);
 
         H2DbWireRecordStore store = new H2DbWireRecordStore() {
 
@@ -356,8 +363,7 @@ public class H2DbWireRecordStoreTest {
 
         Connection connection = getConnection();
 
-        H2DbService dbServiceMock = mock(H2DbService.class);
-        when(dbServiceMock.getConnection()).thenReturn(connection);
+        H2DbService dbServiceMock = createMockH2DbService(connection);
 
         H2DbWireRecordStore store = new H2DbWireRecordStore() {
 

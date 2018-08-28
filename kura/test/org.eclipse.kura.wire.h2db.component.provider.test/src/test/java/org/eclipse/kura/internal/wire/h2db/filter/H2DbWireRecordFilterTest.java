@@ -11,6 +11,7 @@ package org.eclipse.kura.internal.wire.h2db.filter;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -36,6 +37,15 @@ import org.osgi.service.component.ComponentContext;
 import org.osgi.service.wireadmin.Wire;
 
 public class H2DbWireRecordFilterTest {
+
+    private H2DbService createMockH2DbService(final Connection connection) throws SQLException {
+        final H2DbService dbServiceMock = mock(H2DbService.class);
+        when(dbServiceMock.withConnection(anyObject())).thenAnswer(invocation -> {
+            return invocation.getArgumentAt(0, H2DbService.ConnectionCallable.class).call(connection);
+        });
+        when(dbServiceMock.getConnection()).thenReturn(connection);
+        return dbServiceMock;
+    }
 
     @Test
     public void testActivateAndUpdated() throws NoSuchFieldException {
@@ -150,7 +160,9 @@ public class H2DbWireRecordFilterTest {
 
     @Test
     public void testOnWireReceive() throws SQLException {
-        H2DbService mockDbService = mock(H2DbService.class);
+        Connection mockConnection = mock(Connection.class);
+
+        H2DbService mockDbService = createMockH2DbService(mockConnection);
 
         WireHelperService mockWireHelperService = mock(WireHelperService.class);
 
@@ -180,9 +192,6 @@ public class H2DbWireRecordFilterTest {
         when(mockResultSet.next()).thenReturn(true).thenReturn(false);
         when(mockResultSet.getMetaData()).thenReturn(mockResultSetMetaData);
         when(mockResultSet.getObject(1)).thenReturn(42);
-
-        Connection mockConnection = mock(Connection.class);
-        when(mockDbService.getConnection()).thenReturn(mockConnection);
 
         Statement mockStatement = mock(Statement.class);
         when(mockStatement.executeQuery("sql command")).thenReturn(mockResultSet);

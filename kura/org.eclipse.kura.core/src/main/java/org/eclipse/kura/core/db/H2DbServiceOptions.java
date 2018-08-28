@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -16,19 +16,16 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-class DbConfiguration {
+class H2DbServiceOptions {
 
-    private static final String DB_CONNECTOR_URL_PROP_NAME = "db.connector.url";
-    private static final String DB_USER_PROP_NAME = "db.user";
-    private static final String DB_PASSWORD_PROP_NAME = "db.password";
-    private static final String DB_CHECKPOINT_INTERVAL_SECONDS_PROP_NAME = "db.checkpoint.interval.seconds";
-    private static final String DB_CONNECTION_POOL_MAX_SIZE_PROP_NAME = "db.connection.pool.max.size";
-
-    private static final String DB_CONNECTOR_URL_DEFAULT = "jdbc:h2:mem:kuradb";
-    private static final String DB_USER_DEFAULT = "SA";
-    private static final String DB_PASSWORD_DEFAULT = "";
-    private static final int DB_CHECKPOINT_INTERVAL_SECONDS_DEFAULT = 900;
-    private static final int DB_CONNECTION_POOL_MAX_SIZE_DEFAULT = 10;
+    private static final Property<String> CONNECTOR_URL_PROP = new Property<>("db.connector.url", "jdbc:h2:mem:kuradb");
+    private static final Property<String> USER_PROP = new Property<>("db.user", "SA");
+    private static final Property<String> PASSWORD_PROP = new Property<String>("db.password", "");
+    private static final Property<Integer> CHECKPOINT_INTERVAL_SECONDS_PROP = new Property<>(
+            "db.checkpoint.interval.seconds", 900);
+    private static final Property<Integer> DEFRAG_INTERVAL_MINUTES_PROP = new Property<>("db.defrag.interval.minutes",
+            20);
+    private static final Property<Integer> CONNECTION_POOL_MAX_SIZE = new Property<>("db.connection.pool.max.size", 10);
 
     private static final Pattern FILE_LOG_LEVEL_PATTERN = generatePatternForProperty("trace_level_file");
     private static final Pattern USER_PATTERN = generatePatternForProperty("user");
@@ -40,6 +37,7 @@ class DbConfiguration {
     private final String user;
     private final char[] password;
     private final long checkpointIntervalSeconds;
+    private final long defragIntervalMinutes;
     private final int maxConnectionPoolSize;
 
     private boolean isInMemory;
@@ -52,15 +50,14 @@ class DbConfiguration {
     private String dbDirectory;
     private String dbName;
 
-    public DbConfiguration(Map<String, Object> properties) {
-        this.password = ((String) properties.getOrDefault(DB_PASSWORD_PROP_NAME, DB_PASSWORD_DEFAULT)).toCharArray();
-        this.user = (String) properties.getOrDefault(DB_USER_PROP_NAME, DB_USER_DEFAULT);
-        this.checkpointIntervalSeconds = (Integer) properties.getOrDefault(DB_CHECKPOINT_INTERVAL_SECONDS_PROP_NAME,
-                DB_CHECKPOINT_INTERVAL_SECONDS_DEFAULT);
-        this.maxConnectionPoolSize = (Integer) properties.getOrDefault(DB_CONNECTION_POOL_MAX_SIZE_PROP_NAME,
-                DB_CONNECTION_POOL_MAX_SIZE_DEFAULT);
+    public H2DbServiceOptions(Map<String, Object> properties) {
+        this.password = PASSWORD_PROP.get(properties).toCharArray();
+        this.user = USER_PROP.get(properties);
+        this.checkpointIntervalSeconds = CHECKPOINT_INTERVAL_SECONDS_PROP.get(properties);
+        this.defragIntervalMinutes = DEFRAG_INTERVAL_MINUTES_PROP.get(properties);
+        this.maxConnectionPoolSize = CONNECTION_POOL_MAX_SIZE.get(properties);
 
-        String dbUrl = (String) properties.getOrDefault(DB_CONNECTOR_URL_PROP_NAME, DB_CONNECTOR_URL_DEFAULT);
+        String dbUrl = CONNECTOR_URL_PROP.get(properties);
 
         dbUrl = USER_PATTERN.matcher(dbUrl).replaceAll("");
         dbUrl = PASSWORD_PATTERN.matcher(dbUrl).replaceAll("");
@@ -164,6 +161,10 @@ class DbConfiguration {
         return this.checkpointIntervalSeconds;
     }
 
+    public long getDefragIntervalMinutes() {
+        return this.defragIntervalMinutes;
+    }
+
     public String getBaseUrl() {
         return this.baseUrl;
     }
@@ -182,5 +183,25 @@ class DbConfiguration {
 
     public boolean isFileBasedLogLevelSpecified() {
         return this.isFileBasedLogLevelSpecified;
+    }
+
+    private static class Property<T> {
+
+        private final String key;
+        private final T defaultValue;
+
+        public Property(String key, T defaultValue) {
+            this.key = key;
+            this.defaultValue = defaultValue;
+        }
+
+        @SuppressWarnings("unchecked")
+        public T get(Map<String, Object> properties) {
+            final Object value = properties.get(this.key);
+            if (this.defaultValue.getClass().isInstance(value)) {
+                return (T) value;
+            }
+            return defaultValue;
+        }
     }
 }

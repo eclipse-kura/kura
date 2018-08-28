@@ -54,18 +54,6 @@ public class NotificationPublisherImpl implements CloudNotificationPublisher {
         this.cloudServiceImpl = cloudServiceImpl;
     }
 
-    protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
-        logger.debug("Activating Cloud Notification Publisher...");
-
-        logger.debug("Activating Cloud Notification Publisher... Done");
-    }
-
-    protected void deactivate(ComponentContext componentContext) {
-        logger.debug("Deactivating Cloud Notification Publisher...");
-
-        logger.debug("Deactivating Cloud Notification Publisher... Done");
-    }
-
     @Override
     public void registerCloudConnectionListener(CloudConnectionListener cloudConnectionListener) {
         // Not needed

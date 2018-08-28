@@ -1124,4 +1124,17 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             System.exit(-1);
         }
     }
+
+    @Override
+    public String getHostname() {
+        String hostname = UNKNOWN;
+
+        if (OS_MAC_OSX.equals(getOsName())) {
+            hostname = runSystemCommand("scutil --get ComputerName");
+        } else if (OS_LINUX.equals(getOsName()) || OS_CLOUDBEES.equals(getOsName())) {
+            hostname = runSystemCommand("hostname");
+        }
+
+        return hostname;
+    }
 }

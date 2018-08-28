@@ -41,7 +41,7 @@ public class CloudClientImpl implements CloudClient, CloudClientListener {
         this.applicationId = applicationId;
         this.dataService = dataService;
         this.cloudServiceImpl = cloudServiceImpl;
-        this.listeners = new CopyOnWriteArrayList<CloudClientListenerAdapter>();
+        this.listeners = new CopyOnWriteArrayList<>();
     }
 
     /**
@@ -79,7 +79,7 @@ public class CloudClientImpl implements CloudClient, CloudClientListener {
     @Override
     public void removeCloudClientListener(CloudClientListener cloudClientListener) {
         // create a copy to avoid concurrent modification exceptions
-        List<CloudClientListenerAdapter> adapters = new ArrayList<CloudClientListenerAdapter>(this.listeners);
+        List<CloudClientListenerAdapter> adapters = new ArrayList<>(this.listeners);
         for (CloudClientListenerAdapter adapter : adapters) {
             if (adapter.getCloudClientListenerAdapted() == cloudClientListener) {
                 this.listeners.remove(adapter);
@@ -147,8 +147,8 @@ public class CloudClientImpl implements CloudClient, CloudClientListener {
     }
 
     @Override
-    public int controlPublish(String deviceId, String appTopic, KuraPayload payload, int qos, boolean retain, int priority)
-            throws KuraException {
+    public int controlPublish(String deviceId, String appTopic, KuraPayload payload, int qos, boolean retain,
+            int priority) throws KuraException {
         byte[] appPayload = this.cloudServiceImpl.encodePayload(payload);
         return controlPublish(deviceId, appTopic, appPayload, qos, retain, priority);
     }
@@ -314,7 +314,8 @@ public class CloudClientImpl implements CloudClient, CloudClientListener {
                 // .append(options.getTopicControlPrefix())
                 .append("\\$EDC").append(options.getTopicSeparator()).append(")?")
 
-        .append(options.getTopicAccountToken()).append(options.getTopicSeparator()).append(".+") // Any device ID
+                .append(options.getTopicAccountToken()).append(options.getTopicSeparator()).append(".+") // Any device
+                                                                                                         // ID
                 .append(options.getTopicSeparator()).append(this.applicationId).append("(/.+)?");
 
         return sb.toString();

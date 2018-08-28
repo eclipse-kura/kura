@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -12,11 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.web.shared.model;
 
-import java.io.Serializable;
-
-import org.eclipse.kura.web.client.util.KuraBaseModel;
-
-public class GwtCloudConnectionEntry extends KuraBaseModel implements Serializable {
+public class GwtCloudConnectionEntry extends GwtCloudEntry {
 
     private static final long serialVersionUID = 3373858744219238675L;
 
@@ -24,26 +20,37 @@ public class GwtCloudConnectionEntry extends KuraBaseModel implements Serializab
     }
 
     public GwtCloudConnectionState getState() {
-        return get("state");
+        return GwtCloudConnectionState.valueOf(get("state"));
     }
 
     public void setState(GwtCloudConnectionState state) {
-        set("state", state);
+        set("state", state.name());
+    }
+    
+    public GwtCloudConnectionType getConnectionType() {
+        return GwtCloudConnectionType.valueOf(get("type"));
+    }
+    
+    public void setConnectionType(GwtCloudConnectionType type) {
+        set("type", type.name());
     }
 
-    public String getCloudFactoryPid() {
-        return get("cloudFactoryPid");
+    public String getCloudConnectionFactoryPid() {
+        return get("cloudConnectionFactoryPid");
     }
 
-    public void setCloudFactoryPid(String cloudFactoryPid) {
-        set("cloudFactoryPid", cloudFactoryPid);
+    public void setCloudConnectionFactoryPid(String cloudConnectionFactoryPid) {
+        set("cloudConnectionFactoryPid", cloudConnectionFactoryPid);
     }
 
-    public String getCloudServicePid() {
-        return get("cloudServicePid");
+    public enum GwtCloudConnectionState {
+        UNREGISTERED,
+        DISCONNECTED,
+        CONNECTED;
     }
-
-    public void setCloudServicePid(String cloudServicePid) {
-        set("cloudServicePid", cloudServicePid);
+    
+    public enum GwtCloudConnectionType {
+        ENDPOINT,
+        CONNECTION;
     }
 }

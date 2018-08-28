@@ -12,75 +12,17 @@
          name="Publisher" 
          description="A wire component which publishes data to the cloud platform">
 
-        <AD id="cloud.service.pid"
-            name="cloud.service.pid"
+        <AD id="CloudPublisher.target"
+            name="CloudPublisher Target Filter"
             type="String"
-            cardinality="0"
-            required="true"
-            default="org.eclipse.kura.cloud.CloudService"
-            description="Specify the pid of the Cloud Service that has to used to publish messages to the cloud platform.">
-        </AD>
-
-        <AD id="publish.application"
-            name="publish.application"
-            type="String"
-            cardinality="0"
-            required="true"
-            default="W1"
-            description="Application topic prefix to be used when publishing messages.">
-        </AD>
-
-        <AD id="publish.topic"
-            name="publish.topic"
-            type="String"
-            cardinality="0"
-            required="true"
-            default="A1/$assetName"
-            description="Application portion of the topic to be used when publishing messages.">
-        </AD>
-        
-        <AD id="publish.control.messages"
-            name="publish.control.messages"
-            type="Boolean"
-            cardinality="0"
-            required="true"
-            default="false"
-            description="Allows to specify if the messages will be published as control messages (true) or data messages (false).">
-        </AD>
-
-        <AD id="publish.priority"
-            name="publish.priority"
-            type="Integer"
             cardinality="0"
             required="false"
-            default="7"
-            min="0"
-            description="Relative ordering of this message with other messages that may be currently queued for publishing. Application should consider using priority 5 or higher.">
-        </AD>
-
-        <AD id="publish.qos"
-            name="publish.qos"
-            type="Integer"
-            cardinality="0"
-            required="false"
-            default="0"
-            description="An integer specifying the quality of service the message was published on.">
-            <Option label="0" value="0"/>
-            <Option label="1" value="1"/>
-            <Option label="2" value="2"/>
-        </AD>
-
-        <AD id="publish.retain"
-            name="publish.retain"
-            type="Boolean"
-            cardinality="0"
-            required="true"
-            default="false"
-            description="Whether or not the broker should retain the message">
+            default="(kura.service.pid=changeme)"
+            description="Specifies, as an OSGi target filter, the pid of the Cloud Publisher used to publish messages to the cloud platform.">
         </AD>
         
         <AD id="publish.position"
-            name="publish.position"
+            name="Publish Position"
             type="String"
             cardinality="0"
             required="true"

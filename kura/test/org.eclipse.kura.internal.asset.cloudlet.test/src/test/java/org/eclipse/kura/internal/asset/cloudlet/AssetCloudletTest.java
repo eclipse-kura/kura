@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates and others
  *
  *   All rights reserved. This program and the accompanying materials
  *   are made available under the terms of the Eclipse Public License v1.0
@@ -8,6 +8,8 @@
  ******************************************************************************/
 package org.eclipse.kura.internal.asset.cloudlet;
 
+import static org.eclipse.kura.cloudconnection.request.RequestHandlerConstants.ARGS_KEY;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -15,19 +17,18 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.asset.Asset;
 import org.eclipse.kura.asset.AssetConfiguration;
 import org.eclipse.kura.asset.AssetService;
 import org.eclipse.kura.channel.Channel;
 import org.eclipse.kura.channel.ChannelType;
-import org.eclipse.kura.cloud.CloudClient;
-import org.eclipse.kura.cloud.CloudService;
-import org.eclipse.kura.cloud.CloudletTopic;
+import org.eclipse.kura.cloudconnection.message.KuraMessage;
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
@@ -36,30 +37,8 @@ import org.junit.Test;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.component.ComponentException;
 
 public class AssetCloudletTest {
-
-    @Test
-    public void testActivateException() throws KuraException {
-        // activate with forced exception
-
-        AssetCloudlet svc = new AssetCloudlet();
-
-        CloudService csMock = mock(CloudService.class);
-        svc.setCloudService(csMock);
-
-        CloudClient clientMock = mock(CloudClient.class);
-        when(csMock.newCloudClient("ASSET-V1")).thenThrow(new KuraException(KuraErrorCode.CONFIGURATION_ERROR, "test"));
-
-        ComponentContext ccMock = mock(ComponentContext.class);
-
-        try {
-            svc.activate(ccMock);
-        } catch (ComponentException e) {
-            assertTrue(e.getCause().getMessage().contains("test"));
-        }
-    }
 
     @Test
     public void testActivateDeactivate() throws KuraException {
@@ -67,12 +46,6 @@ public class AssetCloudletTest {
 
         AssetCloudlet svc = new AssetCloudlet();
 
-        CloudService csMock = mock(CloudService.class);
-        svc.setCloudService(csMock);
-
-        CloudClient clientMock = mock(CloudClient.class);
-        when(csMock.newCloudClient("ASSET-V1")).thenReturn(clientMock);
-
         BundleContext bcMock = mock(BundleContext.class);
 
         ComponentContext ccMock = mock(ComponentContext.class);
@@ -80,25 +53,15 @@ public class AssetCloudletTest {
 
         svc.activate(ccMock);
 
-        verify(clientMock, times(1)).addCloudClientListener(svc);
-
         svc.deactivate(ccMock);
-
-        verify(clientMock, times(1)).release();
     }
 
-    @Test
+    @Test(expected = KuraException.class)
     public void testDoGetBadTopic() throws NoSuchFieldException, KuraException {
         // activate, then doGet with an invalid app topic
 
         AssetCloudlet svc = new AssetCloudlet();
 
-        CloudService csMock = mock(CloudService.class);
-        svc.setCloudService(csMock);
-
-        CloudClient clientMock = mock(CloudClient.class);
-        when(csMock.newCloudClient("ASSET-V1")).thenReturn(clientMock);
-
         BundleContext bcMock = mock(BundleContext.class);
 
         ComponentContext ccMock = mock(ComponentContext.class);
@@ -109,27 +72,23 @@ public class AssetCloudletTest {
 
         svc.activate(ccMock);
 
-        CloudletTopic topic = CloudletTopic.parseAppTopic("GET/topic");
+        List<String> resourcesList = new ArrayList<>();
+        resourcesList.add("topic");
+        Map<String, Object> reqResources = new HashMap<>();
+        reqResources.put(ARGS_KEY.value(), resourcesList);
         KuraRequestPayload reqPayload = new KuraRequestPayload();
-        KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
 
-        svc.doGet(topic, reqPayload, respPayload);
+        KuraMessage message = new KuraMessage(reqPayload, reqResources);
 
-        assertEquals(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST, respPayload.getResponseCode());
+        svc.doGet(null, message);
     }
 
-    @Test
+    @Test(expected = KuraException.class)
     public void testDoGetBadRequestBody() throws NoSuchFieldException, KuraException {
         // activate and doGet with proper topic, but bad request body (not in JSON format)
 
         AssetCloudlet svc = new AssetCloudlet();
 
-        CloudService csMock = mock(CloudService.class);
-        svc.setCloudService(csMock);
-
-        CloudClient clientMock = mock(CloudClient.class);
-        when(csMock.newCloudClient("ASSET-V1")).thenReturn(clientMock);
-
         BundleContext bcMock = mock(BundleContext.class);
 
         ComponentContext ccMock = mock(ComponentContext.class);
@@ -140,15 +99,17 @@ public class AssetCloudletTest {
 
         svc.activate(ccMock);
 
-        CloudletTopic topic = CloudletTopic.parseAppTopic("GET/assets");
+        List<String> resourcesList = new ArrayList<>();
+        resourcesList.add("assets");
+        Map<String, Object> reqResources = new HashMap<>();
+        reqResources.put(ARGS_KEY.value(), resourcesList);
         KuraRequestPayload reqPayload = new KuraRequestPayload();
-        KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
 
         reqPayload.setBody("{bad[body}".getBytes());
 
-        svc.doGet(topic, reqPayload, respPayload);
+        KuraMessage message = new KuraMessage(reqPayload, reqResources);
 
-        assertEquals(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST, respPayload.getResponseCode());
+        svc.doGet(null, message);
     }
 
     @Test
@@ -157,12 +118,6 @@ public class AssetCloudletTest {
 
         AssetCloudlet svc = new AssetCloudlet();
 
-        CloudService csMock = mock(CloudService.class);
-        svc.setCloudService(csMock);
-
-        CloudClient clientMock = mock(CloudClient.class);
-        when(csMock.newCloudClient("ASSET-V1")).thenReturn(clientMock);
-
         Asset assetMock = mock(Asset.class);
         Map<String, Channel> channels = new HashMap<>();
         Map<String, Object> channelConfig = new HashMap<>();
@@ -187,32 +142,32 @@ public class AssetCloudletTest {
         AssetTrackerCustomizer atc = (AssetTrackerCustomizer) TestUtil.getFieldValue(svc, "assetTrackerCustomizer");
         atc.addingService(null);
 
-        CloudletTopic topic = CloudletTopic.parseAppTopic("GET/assets");
+        List<String> resourcesList = new ArrayList<>();
+        resourcesList.add("assets");
+        Map<String, Object> reqResources = new HashMap<>();
+        reqResources.put(ARGS_KEY.value(), resourcesList);
         KuraRequestPayload reqPayload = new KuraRequestPayload();
-        KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
 
         reqPayload.setBody("[]".getBytes());
 
-        svc.doGet(topic, reqPayload, respPayload);
+        KuraMessage message = new KuraMessage(reqPayload, reqResources);
 
-        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, respPayload.getResponseCode());
+        KuraMessage response = svc.doGet(null, message);
+
+        KuraResponsePayload resPayload = (KuraResponsePayload) response.getPayload();
+
+        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resPayload.getResponseCode());
         assertEquals(
                 "[{\"name\":\"asset2\",\"channels\":[{\"name\":\"ch1\",\"type\":\"INTEGER\",\"mode\":\"READ_WRITE\"}]}]",
-                new String(respPayload.getBody()));
+                new String(resPayload.getBody()));
 
     }
 
-    @Test
+    @Test(expected = KuraException.class)
     public void testDoGetNotMetadataRequest() throws NoSuchFieldException, KuraException {
         // activate, doGet and fail due to JSON body not describing objects when creating a new MetadataRequest
 
         AssetCloudlet svc = new AssetCloudlet();
-
-        CloudService csMock = mock(CloudService.class);
-        svc.setCloudService(csMock);
-
-        CloudClient clientMock = mock(CloudClient.class);
-        when(csMock.newCloudClient("ASSET-V1")).thenReturn(clientMock);
 
         BundleContext bcMock = mock(BundleContext.class);
         Asset assetMock = mock(Asset.class);
@@ -231,15 +186,17 @@ public class AssetCloudletTest {
         AssetTrackerCustomizer atc = (AssetTrackerCustomizer) TestUtil.getFieldValue(svc, "assetTrackerCustomizer");
         atc.addingService(null);
 
-        CloudletTopic topic = CloudletTopic.parseAppTopic("GET/assets");
+        List<String> resourcesList = new ArrayList<>();
+        resourcesList.add("assets");
+        Map<String, Object> reqResources = new HashMap<>();
+        reqResources.put(ARGS_KEY.value(), resourcesList);
         KuraRequestPayload reqPayload = new KuraRequestPayload();
-        KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
 
         reqPayload.setBody("[\"asset1\", \"asset2\"]".getBytes()); // not objects => fail
 
-        svc.doGet(topic, reqPayload, respPayload);
+        KuraMessage message = new KuraMessage(reqPayload, reqResources);
 
-        assertEquals(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST, respPayload.getResponseCode());
+        svc.doGet(null, message);
     }
 
     @Test
@@ -248,12 +205,6 @@ public class AssetCloudletTest {
 
         AssetCloudlet svc = new AssetCloudlet();
 
-        CloudService csMock = mock(CloudService.class);
-        svc.setCloudService(csMock);
-
-        CloudClient clientMock = mock(CloudClient.class);
-        when(csMock.newCloudClient("ASSET-V1")).thenReturn(clientMock);
-
         Asset assetMock = mock(Asset.class);
         Map<String, Channel> channels = new HashMap<>();
         Map<String, Object> channelConfig = new HashMap<>();
@@ -278,62 +229,68 @@ public class AssetCloudletTest {
         AssetTrackerCustomizer atc = (AssetTrackerCustomizer) TestUtil.getFieldValue(svc, "assetTrackerCustomizer");
         atc.addingService(null);
 
-        CloudletTopic topic = CloudletTopic.parseAppTopic("GET/assets");
+        List<String> resourcesList = new ArrayList<>();
+        resourcesList.add("assets");
+        Map<String, Object> reqResources = new HashMap<>();
+        reqResources.put(ARGS_KEY.value(), resourcesList);
         KuraRequestPayload reqPayload = new KuraRequestPayload();
-        KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
 
         reqPayload.setBody("[{\"name\":\"asset2\"}]".getBytes());
 
-        svc.doGet(topic, reqPayload, respPayload);
+        KuraMessage message = new KuraMessage(reqPayload, reqResources);
 
-        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, respPayload.getResponseCode());
+        KuraMessage response = svc.doGet(null, message);
+
+        KuraResponsePayload resPayload = (KuraResponsePayload) response.getPayload();
+
+        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resPayload.getResponseCode());
         assertEquals(
                 "[{\"name\":\"asset2\",\"channels\":[{\"name\":\"ch1\",\"type\":\"INTEGER\",\"mode\":\"READ_WRITE\"}]}]",
-                new String(respPayload.getBody()));
+                new String(resPayload.getBody()));
     }
 
-    @Test
-    public void testDoExecTooManyResources() {
+    @Test(expected = KuraException.class)
+    public void testDoExecTooManyResources() throws KuraException {
         // test doExec with a bad topic
 
         AssetCloudlet svc = new AssetCloudlet();
 
-        CloudletTopic topic = CloudletTopic.parseAppTopic("EXEC/assets/read");
+        List<String> resourcesList = new ArrayList<>();
+        resourcesList.add("assets");
+        resourcesList.add("read");
+        Map<String, Object> reqResources = new HashMap<>();
+        reqResources.put(ARGS_KEY.value(), resourcesList);
+
         KuraRequestPayload reqPayload = new KuraRequestPayload();
-        KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+        KuraMessage message = new KuraMessage(reqPayload, reqResources);
 
-        svc.doExec(topic, reqPayload, respPayload);
-
-        assertEquals(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST, respPayload.getResponseCode());
+        svc.doExec(null, message);
     }
 
-    @Test
-    public void testDoExecWrongFirstResource() {
+    @Test(expected = KuraException.class)
+    public void testDoExecWrongFirstResource() throws KuraException {
         // test doExec with another bad topic
 
         AssetCloudlet svc = new AssetCloudlet();
 
-        CloudletTopic topic = CloudletTopic.parseAppTopic("EXEC/assets");
+        List<String> resourcesList = new ArrayList<>();
+        resourcesList.add("assets");
+        Map<String, Object> reqResources = new HashMap<>();
+        reqResources.put(ARGS_KEY.value(), resourcesList);
+
         KuraRequestPayload reqPayload = new KuraRequestPayload();
-        KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
 
-        svc.doExec(topic, reqPayload, respPayload);
+        KuraMessage message = new KuraMessage(reqPayload, reqResources);
 
-        assertEquals(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST, respPayload.getResponseCode());
+        svc.doExec(null, message);
     }
 
-    @Test
+    @Test(expected = KuraException.class)
     public void testDoExecReadJsonParseException() throws KuraException, NoSuchFieldException {
         // test doExec with non-parsable request body
 
         AssetCloudlet svc = new AssetCloudlet();
 
-        CloudService csMock = mock(CloudService.class);
-        svc.setCloudService(csMock);
-
-        CloudClient clientMock = mock(CloudClient.class);
-        when(csMock.newCloudClient("ASSET-V1")).thenReturn(clientMock);
-
         Asset assetMock = mock(Asset.class);
         Map<String, Channel> channels = new HashMap<>();
         Map<String, Object> channelConfig = new HashMap<>();
@@ -358,15 +315,18 @@ public class AssetCloudletTest {
         AssetTrackerCustomizer atc = (AssetTrackerCustomizer) TestUtil.getFieldValue(svc, "assetTrackerCustomizer");
         atc.addingService(null);
 
-        CloudletTopic topic = CloudletTopic.parseAppTopic("EXEC/read");
+        List<String> resourcesList = new ArrayList<>();
+        resourcesList.add("read");
+        Map<String, Object> reqResources = new HashMap<>();
+        reqResources.put(ARGS_KEY.value(), resourcesList);
+
         KuraRequestPayload reqPayload = new KuraRequestPayload();
-        KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
 
         reqPayload.setBody("{[test".getBytes());
 
-        svc.doExec(topic, reqPayload, respPayload);
+        KuraMessage message = new KuraMessage(reqPayload, reqResources);
 
-        assertEquals(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST, respPayload.getResponseCode());
+        svc.doExec(null, message);
     }
 
     @Test
@@ -375,12 +335,6 @@ public class AssetCloudletTest {
 
         AssetCloudlet svc = new AssetCloudlet();
 
-        CloudService csMock = mock(CloudService.class);
-        svc.setCloudService(csMock);
-
-        CloudClient clientMock = mock(CloudClient.class);
-        when(csMock.newCloudClient("ASSET-V1")).thenReturn(clientMock);
-
         Asset assetMock = mock(Asset.class);
         Map<String, Channel> channels = new HashMap<>();
         Map<String, Object> channelConfig = new HashMap<>();
@@ -405,14 +359,21 @@ public class AssetCloudletTest {
         AssetTrackerCustomizer atc = (AssetTrackerCustomizer) TestUtil.getFieldValue(svc, "assetTrackerCustomizer");
         atc.addingService(null);
 
-        CloudletTopic topic = CloudletTopic.parseAppTopic("EXEC/read");
+        List<String> resourcesList = new ArrayList<>();
+        resourcesList.add("read");
+        Map<String, Object> reqResources = new HashMap<>();
+        reqResources.put(ARGS_KEY.value(), resourcesList);
+
         KuraRequestPayload reqPayload = new KuraRequestPayload();
-        KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
 
-        svc.doExec(topic, reqPayload, respPayload);
+        KuraMessage message = new KuraMessage(reqPayload, reqResources);
 
-        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, respPayload.getResponseCode());
-        assertTrue(new String(respPayload.getBody()).contains("{\"name\":\"asset2\""));
+        KuraMessage response = svc.doExec(null, message);
+
+        KuraResponsePayload resPayload = (KuraResponsePayload) response.getPayload();
+
+        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resPayload.getResponseCode());
+        assertTrue(new String(resPayload.getBody()).contains("{\"name\":\"asset2\""));
 
         verify(assetMock, times(1)).readAllChannels();
     }
@@ -423,12 +384,6 @@ public class AssetCloudletTest {
 
         AssetCloudlet svc = new AssetCloudlet();
 
-        CloudService csMock = mock(CloudService.class);
-        svc.setCloudService(csMock);
-
-        CloudClient clientMock = mock(CloudClient.class);
-        when(csMock.newCloudClient("ASSET-V1")).thenReturn(clientMock);
-
         Asset assetMock = mock(Asset.class);
         Map<String, Channel> channels = new HashMap<>();
         Map<String, Object> channelConfig = new HashMap<>();
@@ -453,20 +408,26 @@ public class AssetCloudletTest {
         AssetTrackerCustomizer atc = (AssetTrackerCustomizer) TestUtil.getFieldValue(svc, "assetTrackerCustomizer");
         atc.addingService(null);
 
-        CloudletTopic topic = CloudletTopic.parseAppTopic("EXEC/read");
-        KuraRequestPayload reqPayload = new KuraRequestPayload();
-        KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+        List<String> resourcesList = new ArrayList<>();
+        resourcesList.add("read");
+        Map<String, Object> reqResources = new HashMap<>();
+        reqResources.put(ARGS_KEY.value(), resourcesList);
 
+        KuraRequestPayload reqPayload = new KuraRequestPayload();
         reqPayload.setBody("[{\"name\":\"asset2\",\"channels\":[{\"name\":\"ch1\"}]}]".getBytes());
 
-        svc.doExec(topic, reqPayload, respPayload);
+        KuraMessage message = new KuraMessage(reqPayload, reqResources);
 
-        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, respPayload.getResponseCode());
-        assertTrue(new String(respPayload.getBody()).contains("{\"name\":\"asset2\""));
+        KuraMessage response = svc.doExec(null, message);
+
+        KuraResponsePayload resPayload = (KuraResponsePayload) response.getPayload();
+
+        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resPayload.getResponseCode());
+        assertTrue(new String(resPayload.getBody()).contains("{\"name\":\"asset2\""));
     }
 
-    @Test
-    public void testDoExecWriteNoRequestBody() throws NoSuchFieldException, InvalidSyntaxException {
+    @Test(expected = KuraException.class)
+    public void testDoExecWriteNoRequestBody() throws NoSuchFieldException, InvalidSyntaxException, KuraException {
         // test doExec initiating write with no request body
 
         AssetCloudlet svc = new AssetCloudlet();
@@ -487,17 +448,19 @@ public class AssetCloudletTest {
 
         atc.addingService(null);
 
-        CloudletTopic topic = CloudletTopic.parseAppTopic("EXEC/write");
+        List<String> resourcesList = new ArrayList<>();
+        resourcesList.add("write");
+        Map<String, Object> reqResources = new HashMap<>();
+        reqResources.put(ARGS_KEY.value(), resourcesList);
         KuraRequestPayload reqPayload = new KuraRequestPayload();
-        KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
 
-        svc.doExec(topic, reqPayload, respPayload);
+        KuraMessage message = new KuraMessage(reqPayload, reqResources);
 
-        assertEquals(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST, respPayload.getResponseCode());
+        svc.doExec(null, message);
     }
 
     @Test
-    public void testDoExecWrite() throws NoSuchFieldException, InvalidSyntaxException {
+    public void testDoExecWrite() throws NoSuchFieldException, InvalidSyntaxException, KuraException {
         // test doExec initiating write
 
         AssetCloudlet svc = new AssetCloudlet();
@@ -518,17 +481,23 @@ public class AssetCloudletTest {
 
         atc.addingService(null);
 
-        CloudletTopic topic = CloudletTopic.parseAppTopic("EXEC/write");
-        KuraRequestPayload reqPayload = new KuraRequestPayload();
-        KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+        List<String> resourcesList = new ArrayList<>();
+        resourcesList.add("write");
+        Map<String, Object> reqResources = new HashMap<>();
+        reqResources.put(ARGS_KEY.value(), resourcesList);
 
+        KuraRequestPayload reqPayload = new KuraRequestPayload();
         reqPayload.setBody(
                 "[{\"name\":\"asset2\",\"channels\":[{\"name\":\"ch1\",\"type\":\"INTEGER\",\"value\":\"10\"}]}]"
                         .getBytes());
 
-        svc.doExec(topic, reqPayload, respPayload);
+        KuraMessage message = new KuraMessage(reqPayload, reqResources);
 
-        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, respPayload.getResponseCode());
+        KuraMessage response = svc.doExec(null, message);
+
+        KuraResponsePayload resPayload = (KuraResponsePayload) response.getPayload();
+
+        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resPayload.getResponseCode());
     }
 
 }

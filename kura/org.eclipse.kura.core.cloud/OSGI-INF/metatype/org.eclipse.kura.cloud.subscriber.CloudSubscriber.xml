@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2018 Eurotech and/or its affiliates, and others
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Eurotech
+
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.cloud.subscriber.CloudSubscriber" 
+         name="CloudSubscriber" 
+         description="The CloudSubscriber allows to define the subscribe topic and notify the associated applications when a subscription event happens.">
+        
+        <AD id="appId"
+            name="Application Id"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="W1"
+            description='The application id used to receive messages.'>
+        </AD>
+        
+        <AD id="app.topic"
+        	name="Application Topic"
+        	type="String"
+        	cardinality="0"
+        	required="false"
+        	default="A1/#"
+        	description='Follows the application Id and specifies the rest of the subscription topic.'>
+        </AD>
+                    
+        <AD id="qos"
+            name="Qos"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="0"
+            description='The desired quality of service for the subscription messages.'>
+            <Option label="0" value="0" />
+            <Option label="1" value="1" />
+        </AD>
+        
+        <AD id="message.type"
+            name="Kind of Message"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="data"
+            description="Type of message to be received.">
+            <Option label="Data" value="data" />
+            <Option label="Control" value="control" />
+        </AD>
+    </OCD>
+    
+    <Designate pid="org.eclipse.kura.cloud.subscriber.CloudSubscriber" factoryPid="org.eclipse.kura.cloud.subscriber.CloudSubscriber">
+        <Object ocdref="org.eclipse.kura.cloud.subscriber.CloudSubscriber"/>
+    </Designate>
+</MetaData>

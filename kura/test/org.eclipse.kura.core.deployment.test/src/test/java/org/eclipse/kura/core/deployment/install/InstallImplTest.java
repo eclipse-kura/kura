@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.util.Properties;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.cloudconnection.publisher.CloudNotificationPublisher;
 import org.eclipse.kura.core.deployment.CloudDeploymentHandlerV2;
 import org.eclipse.kura.core.deployment.DeploymentPackageOptions;
 import org.eclipse.kura.core.deployment.InstallStatus;
@@ -301,7 +302,7 @@ public class InstallImplTest {
     }
 
     @Test
-    public void testSendInstallConfirmations() throws IOException {
+    public void testSendInstallConfirmations() throws IOException, KuraException {
         CloudDeploymentHandlerV2 callbackMock = mock(CloudDeploymentHandlerV2.class);
         String kuraDataDir = "/tmp";
 
@@ -327,15 +328,16 @@ public class InstallImplTest {
         f1.createNewFile();
         f1.deleteOnExit();
 
-        File fperf = new File(persDir, "test_file_sh_persistance");
+        File fperf = new File(persDir, "test_script.sh_persistance");
         StringBuilder sb = new StringBuilder();
         sb.append(DeploymentPackageDownloadOptions.METRIC_DP_DOWNLOAD_URI).append("=DOWNLOAD_URI\n");
         sb.append(DeploymentPackageOptions.METRIC_DP_NAME).append("=NAME\n");
         sb.append(DeploymentPackageOptions.METRIC_DP_VERSION).append("=VERSION\n");
         sb.append(DeploymentPackageOptions.METRIC_DP_CLIENT_ID).append("=CLIENT_ID\n");
         sb.append(DeploymentPackageOptions.METRIC_JOB_ID).append("=1234\n");
-        sb.append(InstallImpl.PERSISTANCE_FILE_NAME).append("=PERSISTANCE_FILE_NAME\n");
+        sb.append(InstallImpl.PERSISTANCE_FILE_NAME).append("=test_script.sh\n");
         sb.append(CloudDeploymentHandlerV2.METRIC_REQUESTER_CLIENT_ID).append("=REQUESTER_CLIENT_ID\n");
+        sb.append(DeploymentPackageOptions.NOTIFICATION_PUBLISHER_PID_KEY).append("=org.eclipse.kura.cloud.publisher.CloudNotificationPublisher\n");
         fw = new FileWriter(fperf);
         fw.write(sb.toString());
         fw.close();
@@ -351,14 +353,17 @@ public class InstallImplTest {
                 assertEquals("", 100, kp.getInstallProgress());
                 assertEquals("", InstallStatus.COMPLETED.getStatusString(), kp.getInstallStatus());
                 assertEquals("", 1234, kp.getJobId().longValue());
-                assertEquals("", "PERSISTANCE_FILE_NAME", kp.getMetric(KuraInstallPayload.METRIC_DP_NAME));
+                assertEquals("", "test_script.sh", kp.getMetric(KuraInstallPayload.METRIC_DP_NAME));
 
                 return null;
             }
         }).when(callbackMock).publishMessage(Mockito.anyObject(), Mockito.anyObject(),
                 eq(InstallImpl.RESOURCE_INSTALL));
+        
+        CloudNotificationPublisher notificationPublisher = mock(CloudNotificationPublisher.class);
+        when(notificationPublisher.publish(anyObject())).thenReturn("12345");
 
-        ii.sendInstallConfirmations();
+        ii.sendInstallConfirmations("org.eclipse.kura.cloud.publisher.CloudNotificationPublisher", notificationPublisher);
 
         assertFalse("File should have been deleted.", f.exists());
         assertTrue("File should not have been deleted.", f1.exists());
@@ -372,7 +377,7 @@ public class InstallImplTest {
     }
 
     @Test
-    public void testSendInstallConfirmationsError() throws IOException {
+    public void testSendInstallConfirmationsError() throws IOException, KuraException {
         CloudDeploymentHandlerV2 callbackMock = mock(CloudDeploymentHandlerV2.class);
         String kuraDataDir = "/tmp";
 
@@ -394,15 +399,16 @@ public class InstallImplTest {
         fw.write(cmds);
         fw.close();
 
-        File fperf = new File(persDir, "test_file_sh_persistance");
+        File fperf = new File(persDir, "test_scriptError.sh_persistance");
         StringBuilder sb = new StringBuilder();
         sb.append(DeploymentPackageDownloadOptions.METRIC_DP_DOWNLOAD_URI).append("=DOWNLOAD_URI\n");
         sb.append(DeploymentPackageOptions.METRIC_DP_NAME).append("=NAME\n");
         sb.append(DeploymentPackageOptions.METRIC_DP_VERSION).append("=VERSION\n");
         sb.append(DeploymentPackageOptions.METRIC_DP_CLIENT_ID).append("=CLIENT_ID\n");
         sb.append(DeploymentPackageOptions.METRIC_JOB_ID).append("=1234\n");
-        sb.append(InstallImpl.PERSISTANCE_FILE_NAME).append("=PERSISTANCE_FILE_NAME\n");
+        sb.append(InstallImpl.PERSISTANCE_FILE_NAME).append("=test_scriptError.sh\n");
         sb.append(CloudDeploymentHandlerV2.METRIC_REQUESTER_CLIENT_ID).append("=REQUESTER_CLIENT_ID\n");
+        sb.append(DeploymentPackageOptions.NOTIFICATION_PUBLISHER_PID_KEY).append("=org.eclipse.kura.cloud.publisher.CloudNotificationPublisher\n");
         fw = new FileWriter(fperf);
         fw.write(sb.toString());
         fw.close();
@@ -418,14 +424,17 @@ public class InstallImplTest {
                 assertEquals("", 0, kp.getInstallProgress());
                 assertEquals("", InstallStatus.FAILED.getStatusString(), kp.getInstallStatus());
                 assertEquals("", 1234, kp.getJobId().longValue());
-                assertEquals("", "PERSISTANCE_FILE_NAME", kp.getMetric(KuraInstallPayload.METRIC_DP_NAME));
+                assertEquals("", "test_scriptError.sh", kp.getMetric(KuraInstallPayload.METRIC_DP_NAME));
 
                 return null;
             }
         }).when(callbackMock).publishMessage(Mockito.anyObject(), Mockito.anyObject(),
                 eq(InstallImpl.RESOURCE_INSTALL));
 
-        ii.sendInstallConfirmations();
+        CloudNotificationPublisher notificationPublisher = mock(CloudNotificationPublisher.class);
+        when(notificationPublisher.publish(anyObject())).thenReturn("12345");
+        
+        ii.sendInstallConfirmations("org.eclipse.kura.cloud.publisher.CloudNotificationPublisher", notificationPublisher);
 
         assertFalse("File should have been deleted.", f.exists());
 

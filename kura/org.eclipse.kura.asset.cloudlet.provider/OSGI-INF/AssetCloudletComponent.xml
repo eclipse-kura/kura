@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
+    Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -9,19 +9,16 @@
 -->
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" deactivate="deactivate" immediate="true" name="org.eclipse.kura.asset.cloudlet">
    <implementation class="org.eclipse.kura.internal.asset.cloudlet.AssetCloudlet"/>
-   <reference bind="bindCloudService" 
-   		cardinality="1..1" 
-   		interface="org.eclipse.kura.cloud.CloudService" 
-   		name="CloudService" 
-   		policy="static" 
-   		unbind="unbindCloudService"/>
+   <reference name="RequestHandlerRegistry"
+              policy="dynamic"
+              cardinality="0..n" 
+              bind="setRequestHandlerRegistry"
+              unbind="unsetRequestHandlerRegistry"
+              interface="org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry"/>
    	<reference bind="bindAssetService" 
    		cardinality="1..1" 
    		interface="org.eclipse.kura.asset.AssetService" 
    		name="AssetService" 
    		policy="static" 
    		unbind="unbindAssetService"/>
-   <service>
-      <provide interface="org.eclipse.kura.cloud.CloudClientListener"/>
-   </service>
 </scr:component>

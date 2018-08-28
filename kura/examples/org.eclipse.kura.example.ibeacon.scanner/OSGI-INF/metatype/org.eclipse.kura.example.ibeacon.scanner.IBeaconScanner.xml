@@ -16,6 +16,15 @@
 
          <Icon resource="http://s3.amazonaws.com/kura-resources/application/icon/beacon.png" size="32"/>
 
+         <AD id="CloudPublisher.target"
+            name="CloudPublisher Target Filter"
+            type="String"
+            cardinality="0"
+            required="false"
+            default="(kura.service.pid=changeme)"
+            description="Specifies, as an OSGi target filter, the pid of the Cloud Publisher used to publish messages to the cloud platform.">
+        </AD>
+        
          <AD id="enable.scanning"
             name="Enable iBeacon scanning"
             type="Boolean"
@@ -31,14 +40,6 @@
             required="true"
             default="60"
             description="iBeacon scan duration in seconds."/>
-
-         <AD id="topic.prefix"
-            name="Topic"
-            type="String"
-            cardinality="0"
-            required="true"
-            default="beacons"
-            description="Prefix for discovered items' topic"/>
 
         <AD id="iname"
             name="Bluetooth interface name"

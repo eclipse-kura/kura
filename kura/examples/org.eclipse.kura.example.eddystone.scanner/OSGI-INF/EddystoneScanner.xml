@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2017 Eurotech and/or its affiliates and others
+    Copyright (c) 2017, 2018 Eurotech and/or its affiliates and others
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -20,7 +20,12 @@
               name="BluetoothLeService" 
               policy="static" 
               unbind="unsetBluetoothLeService"/>
-    <reference bind="setCloudService" cardinality="1..1" interface="org.eclipse.kura.cloud.CloudService" name="CloudService" policy="static" unbind="unsetCloudService"/>
+    <reference name="CloudPublisher"
+           policy="static"
+           bind="setCloudPublisher"
+           unbind="unsetCloudPublisher"
+           cardinality="0..1"
+           interface="org.eclipse.kura.cloudconnection.publisher.CloudPublisher"/>
     <property name="service.pid" type="String" value="org.eclipse.kura.example.eddystone.scanner.EddystoneScanner"/>
     <reference bind="setBluetoothLeEddystoneService" cardinality="1..1" interface="org.eclipse.kura.ble.eddystone.BluetoothLeEddystoneService" name="BluetoothLeEddystoneService" policy="static" unbind="unsetBluetoothLeEddystoneService"/>
 </scr:component>

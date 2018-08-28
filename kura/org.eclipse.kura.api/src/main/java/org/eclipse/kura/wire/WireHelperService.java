@@ -100,6 +100,7 @@ public interface WireHelperService {
      * @return the wire support instance
      * @throws NullPointerException
      *             if the argument is null
+     * @since 2.0
      */
     public WireSupport newWireSupport(WireComponent wireComponent, ServiceReference<WireComponent> wireComponentRef);
 

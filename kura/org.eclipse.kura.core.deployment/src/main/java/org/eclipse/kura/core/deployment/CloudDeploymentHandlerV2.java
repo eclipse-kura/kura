@@ -10,14 +10,18 @@
  *     Eurotech
  *     Red Hat Inc - Clean up kura properties handling
  *******************************************************************************/
-
 package org.eclipse.kura.core.deployment;
+
+import static java.util.Objects.nonNull;
+import static org.eclipse.kura.cloudconnection.request.RequestHandlerConstants.ARGS_KEY;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
@@ -26,8 +30,11 @@ import java.util.concurrent.Future;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.cloud.Cloudlet;
-import org.eclipse.kura.cloud.CloudletTopic;
+import org.eclipse.kura.cloudconnection.message.KuraMessage;
+import org.eclipse.kura.cloudconnection.publisher.CloudNotificationPublisher;
+import org.eclipse.kura.cloudconnection.request.RequestHandler;
+import org.eclipse.kura.cloudconnection.request.RequestHandlerContext;
+import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.core.deployment.download.DeploymentPackageDownloadOptions;
 import org.eclipse.kura.core.deployment.download.DownloadCountingOutputStream;
@@ -43,12 +50,10 @@ import org.eclipse.kura.core.deployment.xml.XmlBundleInfo;
 import org.eclipse.kura.core.deployment.xml.XmlBundles;
 import org.eclipse.kura.core.deployment.xml.XmlDeploymentPackage;
 import org.eclipse.kura.core.deployment.xml.XmlDeploymentPackages;
-import org.eclipse.kura.core.util.ThrowableUtil;
 import org.eclipse.kura.data.DataTransportService;
 import org.eclipse.kura.deployment.hook.DeploymentHook;
 import org.eclipse.kura.marshalling.Marshaller;
 import org.eclipse.kura.message.KuraPayload;
-import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.eclipse.kura.ssl.SslManagerService;
 import org.eclipse.kura.system.SystemService;
@@ -56,15 +61,47 @@ import org.eclipse.kura.util.service.ServiceUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.deploymentadmin.BundleInfo;
 import org.osgi.service.deploymentadmin.DeploymentAdmin;
 import org.osgi.service.deploymentadmin.DeploymentPackage;
+import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableComponent {
+public class CloudDeploymentHandlerV2 implements ConfigurableComponent, RequestHandler {
+
+    private final class CloudNotificationPublisherTrackerCustomizer
+            implements ServiceTrackerCustomizer<CloudNotificationPublisher, CloudNotificationPublisher> {
+
+        @Override
+        public CloudNotificationPublisher addingService(final ServiceReference<CloudNotificationPublisher> reference) {
+            CloudDeploymentHandlerV2.this.cloudNotificationPublisher = CloudDeploymentHandlerV2.this.bundleContext
+                    .getService(reference);
+            String notificationPublisherPid = (String) reference.getProperty("kura.service.pid");
+
+            installImplementation.sendInstallConfirmations(notificationPublisherPid, cloudNotificationPublisher);
+
+            return CloudDeploymentHandlerV2.this.cloudNotificationPublisher;
+        }
+
+        @Override
+        public void modifiedService(final ServiceReference<CloudNotificationPublisher> reference,
+                final CloudNotificationPublisher service) {
+            // Not needed
+        }
+
+        @Override
+        public void removedService(final ServiceReference<CloudNotificationPublisher> reference,
+                final CloudNotificationPublisher service) {
+            CloudDeploymentHandlerV2.this.cloudNotificationPublisher = null;
+        }
+    }
 
     private static final Logger logger = LoggerFactory.getLogger(CloudDeploymentHandlerV2.class);
     public static final String APP_ID = "DEPLOY-V2";
@@ -83,6 +120,12 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableCo
     /* Metrics in the REPLY to RESOURCE_DOWNLOAD */
     public static final String METRIC_DOWNLOAD_STATUS = "download.status";
     public static final String METRIC_REQUESTER_CLIENT_ID = "requester.client.id";
+
+    private static final String MESSAGE_TYPE_KEY = "messageType";
+
+    private static final String REQUESTOR_CLIENT_ID_KEY = "requestorClientId";
+
+    private static final String APP_ID_KEY = "appId";
 
     private static String pendingPackageUrl = null;
     private static DownloadImpl downloadImplementation;
@@ -113,11 +156,11 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableCo
     private String pendingUninstPackageName;
     private String installVerificationDir;
 
-    private CloudDeploymentHandlerOptions options;
+    private CloudNotificationPublisher cloudNotificationPublisher;
 
-    public CloudDeploymentHandlerV2() {
-        super(APP_ID);
-    }
+    private ServiceTrackerCustomizer<CloudNotificationPublisher, CloudNotificationPublisher> cloudPublisherTrackerCustomizer;
+
+    private ServiceTracker<CloudNotificationPublisher, CloudNotificationPublisher> cloudPublisherTracker;
 
     // ----------------------------------------------------------------
     //
@@ -165,6 +208,22 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableCo
         this.deploymentHookManager = null;
     }
 
+    public void setRequestHandlerRegistry(RequestHandlerRegistry requestHandlerRegistry) {
+        try {
+            requestHandlerRegistry.registerRequestHandler(APP_ID, this);
+        } catch (KuraException e) {
+            logger.info("Unable to register cloudlet {} in {}", APP_ID, requestHandlerRegistry.getClass().getName());
+        }
+    }
+
+    public void unsetRequestHandlerRegistry(RequestHandlerRegistry requestHandlerRegistry) {
+        try {
+            requestHandlerRegistry.unregister(APP_ID);
+        } catch (KuraException e) {
+            logger.info("Unable to register cloudlet {} in {}", APP_ID, requestHandlerRegistry.getClass().getName());
+        }
+    }
+
     // ----------------------------------------------------------------
     //
     // Activation APIs
@@ -173,22 +232,24 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableCo
 
     protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
         logger.info("Cloud Deployment v2 is starting");
-        super.activate(componentContext);
-        updated(properties);
-
         this.bundleContext = componentContext.getBundleContext();
 
-        this.options = new CloudDeploymentHandlerOptions(this.systemService.getProperties());
+        CloudDeploymentHandlerOptions options = new CloudDeploymentHandlerOptions(
+                CloudDeploymentHandlerV2.this.systemService.getProperties());
 
-        String dpaConfPath = this.options.getDpaConfigurationFilePath();
-        String packagesPath = this.options.getPackagesPath();
-        String kuraDataDir = this.options.getKuraDataDir();
+        String dpaConfPath = options.getDpaConfigurationFilePath();
+        String packagesPath = options.getPackagesPath();
+        String kuraDataDir = options.getKuraDataDir();
 
-        installImplementation = new InstallImpl(this, kuraDataDir);
+        installImplementation = new InstallImpl(CloudDeploymentHandlerV2.this, kuraDataDir);
         installImplementation.setPackagesPath(packagesPath);
         installImplementation.setDpaConfPath(dpaConfPath);
-        installImplementation.setDeploymentAdmin(this.deploymentAdmin);
-        installImplementation.sendInstallConfirmations();
+        installImplementation.setDeploymentAdmin(CloudDeploymentHandlerV2.this.deploymentAdmin);
+
+        this.cloudPublisherTrackerCustomizer = new CloudNotificationPublisherTrackerCustomizer();
+        initCloudPublisherTracking();
+
+        updated(properties);
     }
 
     protected void updated(Map<String, Object> properties) {
@@ -200,9 +261,10 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableCo
             logger.warn("failed to parse hook associations from configuration", e);
         }
         this.deploymentHookManager.updateAssociations(associations);
+
+        this.installVerificationDir = installImplementation.getVerificationDirectory();
     }
 
-    @Override
     protected void deactivate(ComponentContext componentContext) {
         logger.info("Bundle {} is deactivating!", APP_ID);
         if (this.downloaderFuture != null) {
@@ -211,6 +273,10 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableCo
 
         if (this.installerFuture != null) {
             this.installerFuture.cancel(true);
+        }
+
+        if (nonNull(this.cloudPublisherTracker)) {
+            this.cloudPublisherTracker.close();
         }
 
         this.bundleContext = null;
@@ -224,11 +290,15 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableCo
 
     public void publishMessage(DeploymentPackageOptions options, KuraPayload messagePayload, String messageType) {
         try {
-            String messageTopic = new StringBuilder("NOTIFY/").append(options.getClientId()).append("/")
-                    .append(messageType).toString();
+            Map<String, Object> properties = new HashMap<>();
+            properties.put(APP_ID_KEY, APP_ID);
+            properties.put(MESSAGE_TYPE_KEY, messageType);
+            properties.put(REQUESTOR_CLIENT_ID_KEY, options.getRequestClientId());
 
-            getCloudApplicationClient().controlPublish(options.getRequestClientId(), messageTopic, messagePayload, 1,
-                    DFLT_RETAIN, DFLT_PRIORITY);
+            KuraMessage message = new KuraMessage(messagePayload, properties);
+
+            CloudNotificationPublisher notificationPublisher = options.getNotificationPublisher();
+            notificationPublisher.publish(message);
         } catch (KuraException e) {
             logger.error("Error publishing response for command {}", messageType, e);
         }
@@ -240,89 +310,109 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableCo
     //
     // ----------------------------------------------------------------
 
+    @SuppressWarnings("unchecked")
     @Override
-    protected void doGet(CloudletTopic reqTopic, KuraRequestPayload reqPayload, KuraResponsePayload respPayload)
-            throws KuraException {
+    public KuraMessage doGet(RequestHandlerContext requestContext, KuraMessage reqMessage) throws KuraException {
 
-        String[] resources = reqTopic.getResources();
-
-        if (resources == null || resources.length == 0) {
-            logger.error("Bad request topic: {}", reqTopic.toString());
-            logger.error("Expected one resource but found {}", resources != null ? resources.length : "none");
-            respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
-            return;
-        }
-
-        if (resources[0].equals(RESOURCE_DOWNLOAD)) {
-            doGetDownload(respPayload);
-        } else if (resources[0].equals(RESOURCE_INSTALL)) {
-            doGetInstall(respPayload);
-        } else if (resources[0].equals(RESOURCE_PACKAGES)) {
-            doGetPackages(respPayload);
-        } else if (resources[0].equals(RESOURCE_BUNDLES)) {
-            doGetBundles(respPayload);
+        Object requestObject = reqMessage.getProperties().get(ARGS_KEY.value());
+        List<String> resources;
+        if (requestObject instanceof List) {
+            resources = (List<String>) requestObject;
         } else {
-            logger.error("Bad request topic: {}", reqTopic.toString());
-            logger.error("Cannot find resource with name: {}", resources[0]);
-            respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_NOTFOUND);
-            return;
+            throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
+
+        if (resources.isEmpty()) {
+            logger.error("Bad request topic: {}", resources);
+            logger.error("Expected one resource but found none");
+            throw new KuraException(KuraErrorCode.BAD_REQUEST);
+        }
+
+        KuraPayload resPayload;
+        if (resources.get(0).equals(RESOURCE_DOWNLOAD)) {
+            resPayload = doGetDownload();
+        } else if (resources.get(0).equals(RESOURCE_INSTALL)) {
+            resPayload = doGetInstall();
+        } else if (resources.get(0).equals(RESOURCE_PACKAGES)) {
+            resPayload = doGetPackages();
+        } else if (resources.get(0).equals(RESOURCE_BUNDLES)) {
+            resPayload = doGetBundles();
+        } else {
+            logger.error("Bad request topic: {}", resources);
+            logger.error("Cannot find resource with name: {}", resources.get(0));
+            throw new KuraException(KuraErrorCode.NOT_FOUND);
+        }
+
+        return new KuraMessage(resPayload);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    protected void doExec(CloudletTopic reqTopic, KuraRequestPayload reqPayload, KuraResponsePayload respPayload)
-            throws KuraException {
+    public KuraMessage doExec(RequestHandlerContext requestContext, KuraMessage reqMessage) throws KuraException {
 
-        String[] resources = reqTopic.getResources();
-
-        if (resources == null || resources.length == 0) {
-            logger.error("Bad request topic: {}", reqTopic.toString());
-            logger.error("Expected one resource but found {}", resources != null ? resources.length : "none");
-            respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
-            return;
-        }
-
-        if (resources[0].equals(RESOURCE_DOWNLOAD)) {
-            doExecDownload(reqPayload, respPayload);
-        } else if (resources[0].equals(RESOURCE_INSTALL)) {
-            doExecInstall(reqPayload, respPayload);
-        } else if (resources[0].equals(RESOURCE_UNINSTALL)) {
-            doExecUninstall(reqPayload, respPayload);
-        } else if (resources[0].equals(RESOURCE_START)) {
-            String bundleId = resources.length >= 2 ? resources[1] : null; // no checking is done before
-            doExecStartStopBundle(respPayload, true, bundleId);
-        } else if (resources[0].equals(RESOURCE_STOP)) {
-            String bundleId = resources.length >= 2 ? resources[1] : null; // no checking is done before
-            doExecStartStopBundle(respPayload, false, bundleId);
+        Object requestObject = reqMessage.getProperties().get(ARGS_KEY.value());
+        List<String> resources;
+        if (requestObject instanceof List) {
+            resources = (List<String>) requestObject;
         } else {
-            logger.error("Bad request topic: {}", reqTopic.toString());
-            logger.error("Cannot find resource with name: {}", resources[0]);
-            respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_NOTFOUND);
-            return;
+            throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
+
+        if (resources.isEmpty()) {
+            logger.error("Bad request topic: {}", resources);
+            logger.error("Expected one resource but found none");
+            throw new KuraException(KuraErrorCode.BAD_REQUEST);
+        }
+
+        KuraPayload reqPayload = reqMessage.getPayload();
+        KuraPayload resPayload;
+        if (resources.get(0).equals(RESOURCE_DOWNLOAD)) {
+            resPayload = doExecDownload(requestContext, reqPayload);
+        } else if (resources.get(0).equals(RESOURCE_INSTALL)) {
+            resPayload = doExecInstall(requestContext, reqPayload);
+        } else if (resources.get(0).equals(RESOURCE_UNINSTALL)) {
+            resPayload = doExecUninstall(requestContext, reqPayload);
+        } else if (resources.get(0).equals(RESOURCE_START)) {
+            String bundleId = resources.size() >= 2 ? resources.get(1) : null; // no checking is done before
+            resPayload = doExecStartStopBundle(true, bundleId);
+        } else if (resources.get(0).equals(RESOURCE_STOP)) {
+            String bundleId = resources.size() >= 2 ? resources.get(1) : null; // no checking is done before
+            resPayload = doExecStartStopBundle(false, bundleId);
+        } else {
+            logger.error("Bad request topic: {}", resources);
+            logger.error("Cannot find resource with name: {}", resources.get(0));
+            throw new KuraException(KuraErrorCode.NOT_FOUND);
+        }
+        return new KuraMessage(resPayload);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    protected void doDel(CloudletTopic reqTopic, KuraRequestPayload reqPayload, KuraResponsePayload respPayload)
-            throws KuraException {
+    public KuraMessage doDel(RequestHandlerContext requestContext, KuraMessage reqMessage) throws KuraException {
 
-        String[] resources = reqTopic.getResources();
-
-        if (resources == null || resources.length == 0) {
-            logger.error("Bad request topic: {}", reqTopic.toString());
-            logger.error("Expected one resource but found {}", resources != null ? resources.length : "none");
-            respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
-            return;
-        }
-
-        if (resources[0].equals(RESOURCE_DOWNLOAD)) {
-            doDelDownload(reqPayload, respPayload);
+        Object requestObject = reqMessage.getProperties().get(ARGS_KEY.value());
+        List<String> resources;
+        if (requestObject instanceof List) {
+            resources = (List<String>) requestObject;
         } else {
-            logger.error("Bad request topic: {}", reqTopic.toString());
-            logger.error("Cannot find resource with name: {}", resources[0]);
-            respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_NOTFOUND);
-            return;
+            throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
+
+        if (resources.isEmpty()) {
+            logger.error("Bad request topic: {}", resources);
+            logger.error("Expected one resource but found none");
+            throw new KuraException(KuraErrorCode.BAD_REQUEST);
+        }
+
+        KuraPayload resPayload;
+        if (resources.get(0).equals(RESOURCE_DOWNLOAD)) {
+            resPayload = doDelDownload();
+        } else {
+            logger.error("Bad request topic: {}", resources);
+            logger.error("Cannot find resource with name: {}", resources.get(0));
+            throw new KuraException(KuraErrorCode.NOT_FOUND);
+        }
+        return new KuraMessage(resPayload);
     }
 
     protected DownloadImpl createDownloadImpl(final DeploymentPackageDownloadOptions options) {
@@ -331,9 +421,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableCo
     }
 
     protected UninstallImpl createUninstallImpl() {
-        UninstallImpl uninstallImplementation = new UninstallImpl(this, this.deploymentAdmin);
-
-        return uninstallImplementation;
+        return new UninstallImpl(this, this.deploymentAdmin);
     }
 
     protected File getDpDownloadFile(final DeploymentPackageInstallOptions options) throws IOException {
@@ -346,7 +434,21 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableCo
     //
     // ----------------------------------------------------------------
 
-    private void doDelDownload(KuraRequestPayload request, KuraResponsePayload response) {
+    private void initCloudPublisherTracking() {
+        String filterString = String.format("(%s=%s)", Constants.OBJECTCLASS,
+                CloudNotificationPublisher.class.getName());
+        Filter filter = null;
+        try {
+            filter = this.bundleContext.createFilter(filterString);
+        } catch (InvalidSyntaxException e) {
+            logger.error("Filter setup exception ", e);
+        }
+        this.cloudPublisherTracker = new ServiceTracker<>(this.bundleContext, filter,
+                this.cloudPublisherTrackerCustomizer);
+        this.cloudPublisherTracker.open();
+    }
+
+    private KuraPayload doDelDownload() throws KuraException {
 
         try {
             DownloadCountingOutputStream downloadHelper = downloadImplementation.getDownloadHelper();
@@ -357,15 +459,10 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableCo
         } catch (Exception ex) {
             String errMsg = "Error cancelling download!";
             logger.warn(errMsg, ex);
-            response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
-            response.setTimestamp(new Date());
-            try {
-                response.setBody(errMsg.getBytes("UTF-8"));
-                response.setException(ex);
-            } catch (UnsupportedEncodingException uee) {
-            }
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR); // TODO:review exception code
         }
 
+        return new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
     }
 
     private void checkHook(DeploymentPackageInstallOptions options) {
@@ -375,7 +472,9 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableCo
         }
     }
 
-    private void doExecDownload(KuraRequestPayload request, KuraResponsePayload response) {
+    private KuraPayload doExecDownload(RequestHandlerContext requestContext, KuraPayload request) throws KuraException {
+
+        KuraResponsePayload response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
 
         final DeploymentPackageDownloadOptions options;
         try {
@@ -385,16 +484,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableCo
             downloadImplementation = createDownloadImpl(options);
         } catch (Exception ex) {
             logger.info("Malformed download request!");
-            response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
-            response.setTimestamp(new Date());
-            try {
-                response.setBody("Malformed download request".getBytes("UTF-8"));
-            } catch (UnsupportedEncodingException e) {
-                logger.info("Unsupported encoding");
-            }
-            response.setException(ex);
-
-            return;
+            throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
         this.downloadOptions = options;
 
@@ -402,16 +492,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableCo
             checkHook(this.downloadOptions);
         } catch (Exception ex) {
             logger.warn(ex.getMessage());
-            response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
-            response.setTimestamp(new Date());
-            try {
-                response.setBody(ex.getMessage().getBytes("UTF-8"));
-            } catch (UnsupportedEncodingException e) {
-                logger.info("Unsupported encoding");
-            }
-            response.setException(ex);
-
-            return;
+            throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
 
         if (pendingPackageUrl != null) {
@@ -424,7 +505,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableCo
                 response.setBody("Another resource is already in download".getBytes("UTF-8"));
             } catch (UnsupportedEncodingException e) {
             }
-            return;
+            return response;
         }
 
         boolean alreadyDownloaded = false;
@@ -439,7 +520,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableCo
                 response.setBody("Error checking download status".getBytes("UTF-8"));
             } catch (UnsupportedEncodingException e) {
             }
-            return;
+            return response;
         }
 
         logger.info("About to download and install package at URL {}", options.getDeployUri());
@@ -460,6 +541,9 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableCo
             downloadImplementation.setSslManager(this.sslManagerService);
             downloadImplementation.setAlreadyDownloadedFlag(alreadyDownloaded);
             downloadImplementation.setVerificationDirectory(this.installVerificationDir);
+
+            options.setNotificationPublisher(requestContext.getNotificationPublisher());
+            options.setNotificationPublisherPid(requestContext.getNotificationPublisherPid());
 
             logger.info("Downloading package from URL: {}", options.getDeployUri());
 
@@ -491,18 +575,13 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableCo
 
             pendingPackageUrl = null;
 
-            response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
-            response.setTimestamp(new Date());
-            try {
-                response.setBody(e.getMessage().getBytes("UTF-8"));
-            } catch (UnsupportedEncodingException uee) {
-            }
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR);
         }
 
-        return;
+        return response;
     }
 
-    private void doExecInstall(KuraRequestPayload request, KuraResponsePayload response) {
+    private KuraPayload doExecInstall(RequestHandlerContext requestContext, KuraPayload request) throws KuraException {
         final DeploymentPackageInstallOptions options;
         try {
             options = new DeploymentPackageInstallOptions(request, this.deploymentHookManager,
@@ -510,16 +589,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableCo
             options.setClientId(this.dataTransportService.getClientId());
         } catch (Exception ex) {
             logger.error("Malformed install request!");
-            response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
-            response.setTimestamp(new Date());
-            try {
-                response.setBody("Malformed install request".getBytes("UTF-8"));
-            } catch (UnsupportedEncodingException e) {
-                // Ignore
-            }
-            response.setException(ex);
-
-            return;
+            throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
 
         this.installOptions = options;
@@ -528,16 +598,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableCo
             checkHook(this.installOptions);
         } catch (Exception ex) {
             logger.warn(ex.getMessage());
-            response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
-            response.setTimestamp(new Date());
-            try {
-                response.setBody(ex.getMessage().getBytes("UTF-8"));
-            } catch (UnsupportedEncodingException e) {
-                logger.info("Unsupported encoding");
-            }
-            response.setException(ex);
-
-            return;
+            throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
 
         boolean alreadyDownloaded = false;
@@ -545,14 +606,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableCo
         try {
             alreadyDownloaded = downloadImplementation.isAlreadyDownloaded();
         } catch (KuraException ex) {
-            response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
-            response.setException(ex);
-            response.setTimestamp(new Date());
-            try {
-                response.setBody("Error checking download status".getBytes("UTF-8"));
-            } catch (UnsupportedEncodingException e) {
-            }
-            return;
+            throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
 
         if (alreadyDownloaded && !this.isInstalling) {
@@ -577,6 +631,9 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableCo
 
                 installImplementation.setOptions(options);
 
+                options.setNotificationPublisher(requestContext.getNotificationPublisher());
+                options.setNotificationPublisherPid(requestContext.getNotificationPublisherPid());
+
                 this.installerFuture = executor.submit(new Runnable() {
 
                     @Override
@@ -595,43 +652,23 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableCo
                     }
                 });
             } catch (Exception e) {
-                response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
-                response.setException(e);
-                response.setTimestamp(new Date());
-                try {
-                    response.setBody("Exception during install".getBytes("UTF-8"));
-                } catch (UnsupportedEncodingException e1) {
-                }
+                throw new KuraException(KuraErrorCode.BAD_REQUEST);
             }
         } else {
-            response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
-            response.setException(new KuraException(KuraErrorCode.INTERNAL_ERROR));
-            response.setTimestamp(new Date());
-            try {
-                response.setBody("Already installing/uninstalling".getBytes("UTF-8"));
-            } catch (UnsupportedEncodingException e) {
-            }
-            return;
+            throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
+        return new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
     }
 
-    private void doExecUninstall(KuraRequestPayload request, KuraResponsePayload response) {
+    private KuraPayload doExecUninstall(RequestHandlerContext requestContext, KuraPayload request)
+            throws KuraException {
         final DeploymentPackageUninstallOptions options;
         try {
             options = new DeploymentPackageUninstallOptions(request);
             options.setClientId(this.dataTransportService.getClientId());
         } catch (Exception ex) {
             logger.error("Malformed uninstall request!");
-            response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
-            response.setTimestamp(new Date());
-            try {
-                response.setBody("Malformed uninstall request".getBytes("UTF-8"));
-            } catch (UnsupportedEncodingException e) {
-                // Ignore
-            }
-            response.setException(ex);
-
-            return;
+            throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
 
         final String packageName = options.getDpName();
@@ -641,13 +678,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableCo
         if (!this.isInstalling && this.pendingUninstPackageName != null) {
             logger.info("Another request seems still pending: {}. Checking if stale...", this.pendingUninstPackageName);
 
-            response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
-            response.setTimestamp(new Date());
-            try {
-                response.setBody("Only one request at a time is allowed".getBytes("UTF-8"));
-            } catch (UnsupportedEncodingException e) {
-                // Ignore
-            }
+            throw new KuraException(KuraErrorCode.BAD_REQUEST);
         } else {
             logger.info("About to uninstall package {}", packageName);
 
@@ -655,6 +686,9 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableCo
                 this.isInstalling = true;
                 this.pendingUninstPackageName = packageName;
                 uninstallImplementation = createUninstallImpl();
+
+                options.setNotificationPublisher(requestContext.getNotificationPublisher());
+                options.setNotificationPublisherPid(requestContext.getNotificationPublisherPid());
 
                 logger.info("Uninstalling package...");
                 this.installerFuture = executor.submit(new Runnable() {
@@ -678,27 +712,20 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableCo
             } catch (Exception e) {
                 logger.error("Failed to uninstall package {}: {}", packageName, e);
 
-                response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
-                response.setTimestamp(new Date());
-                try {
-                    response.setBody(e.getMessage().getBytes("UTF-8"));
-                } catch (UnsupportedEncodingException uee) {
-                    // Ignore
-                }
+                throw new KuraException(KuraErrorCode.BAD_REQUEST);
             } finally {
                 this.isInstalling = false;
                 this.pendingUninstPackageName = null;
             }
         }
+        return new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
     }
 
-    private void doExecStartStopBundle(KuraResponsePayload response, boolean start, String bundleId) {
+    private KuraPayload doExecStartStopBundle(boolean start, String bundleId) throws KuraException {
         if (bundleId == null) {
             logger.info("EXEC start/stop bundle: null bundle ID");
 
-            response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
-
-            response.setTimestamp(new Date());
+            throw new KuraException(KuraErrorCode.BAD_REQUEST);
         } else {
             Long id = null;
             try {
@@ -706,10 +733,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableCo
             } catch (NumberFormatException e) {
 
                 logger.error("EXEC start/stop bundle: bad bundle ID format: {}", e);
-                response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
-                response.setTimestamp(new Date());
-                response.setExceptionMessage(e.getMessage());
-                response.setExceptionStack(ThrowableUtil.stackTraceAsString(e));
+                throw new KuraException(KuraErrorCode.BAD_REQUEST);
             }
 
             if (id != null) {
@@ -719,8 +743,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableCo
                 Bundle bundle = this.bundleContext.getBundle(id);
                 if (bundle == null) {
                     logger.error("Bundle ID {} not found", id);
-                    response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_NOTFOUND);
-                    response.setTimestamp(new Date());
+                    throw new KuraException(KuraErrorCode.BAD_REQUEST);
                 } else {
                     try {
                         if (start) {
@@ -730,36 +753,39 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableCo
                         }
                         logger.info("{} bundle ID {} ({})",
                                 new Object[] { start ? "Started" : "Stopped", id, bundle.getSymbolicName() });
-                        response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
-                        response.setTimestamp(new Date());
                     } catch (BundleException e) {
                         logger.error("Failed to {} bundle {}: {}", new Object[] { start ? "start" : "stop", id, e });
-                        response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
-                        response.setTimestamp(new Date());
+                        throw new KuraException(KuraErrorCode.BAD_REQUEST);
                     }
                 }
-            }
+            } // TODO:review this side
         }
+        return new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
     }
 
-    private void doGetInstall(KuraResponsePayload respPayload) {
+    private KuraPayload doGetInstall() {
+        KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
         if (this.isInstalling) {
             installImplementation.installInProgressSyncMessage(respPayload);
         } else {
             installImplementation.installIdleSyncMessage(respPayload);
         }
+        return respPayload;
     }
 
-    private void doGetDownload(KuraResponsePayload respPayload) {
+    private KuraPayload doGetDownload() {
+        KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
         if (pendingPackageUrl != null) { // A download is pending
             DownloadCountingOutputStream downloadHelper = downloadImplementation.getDownloadHelper();
             DownloadImpl.downloadInProgressSyncMessage(respPayload, downloadHelper, this.downloadOptions);
         } else { // No pending downloads
             DownloadImpl.downloadAlreadyDoneSyncMessage(respPayload); // is it right? Do we remove the last object
         }
+
+        return respPayload;
     }
 
-    private void doGetPackages(KuraResponsePayload response) {
+    private KuraPayload doGetPackages() {
         DeploymentPackage[] dps = this.deploymentAdmin.listDeploymentPackages();
         XmlDeploymentPackages xdps = new XmlDeploymentPackages();
         XmlDeploymentPackage[] axdp = new XmlDeploymentPackage[dps.length];
@@ -791,16 +817,18 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableCo
 
         xdps.setDeploymentPackages(axdp);
 
+        KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
         try {
             String s = marshal(xdps);
-            response.setTimestamp(new Date());
-            response.setBody(s.getBytes("UTF-8"));
+            respPayload.setTimestamp(new Date());
+            respPayload.setBody(s.getBytes("UTF-8"));
         } catch (Exception e) {
             logger.error("Error getting resource {}: {}", RESOURCE_PACKAGES, e);
         }
+        return respPayload;
     }
 
-    private void doGetBundles(KuraResponsePayload response) {
+    private KuraPayload doGetBundles() {
         Bundle[] bundles = this.bundleContext.getBundles();
         XmlBundles xmlBundles = new XmlBundles();
         XmlBundle[] axb = new XmlBundle[bundles.length];
@@ -850,13 +878,15 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableCo
 
         xmlBundles.setBundles(axb);
 
+        KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
         try {
             String s = marshal(xmlBundles);
-            response.setTimestamp(new Date());
-            response.setBody(s.getBytes("UTF-8"));
+            respPayload.setTimestamp(new Date());
+            respPayload.setBody(s.getBytes("UTF-8"));
         } catch (Exception e) {
             logger.error("Error getting resource {}", RESOURCE_BUNDLES, e);
         }
+        return respPayload;
     }
 
     public void installDownloadedFile(File dpFile, DeploymentPackageInstallOptions options) throws KuraException {

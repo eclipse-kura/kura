@@ -275,9 +275,9 @@ public class DownloadImpl implements ProgressListener {
         this.callback.publishMessage(this.options, notify, RESOURCE_DOWNLOAD);
     }
 
-    private File getDpVerifierFile(DeploymentPackageInstallOptions options) throws IOException {
+    private File getDpVerifierFile(DeploymentPackageInstallOptions options) {
 
-        String shName = FileUtilities.getFileName(options.getDpName(), options.getDpVersion(), "_verifier.sh");
+        String shName = FileUtilities.getFileName(options.getDpName(), options.getDpVersion(), ".sh_verifier.sh");
         String packageFilename = new StringBuilder().append(this.verificationDirectory).append(File.separator)
                 .append(shName).toString();
 

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2018 Eurotech and/or its affiliates, and others
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Eurotech
+
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.cloudconnection.eclipseiot.mqtt.ConnectionManager" 
+         name="Eclipse ConnectionManager" 
+         description="The Eclipse IoT ConnectionManager allows for setting a user friendly name for the current device. It also provides the option to compress message payloads to reduce network traffic.">
+        
+        <AD id="device.display-name"
+            name="Device Display-Name"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="device-name"
+            description="Friendly name of the device. Device name is the common name of the device (eg: Reliagate 20-25, Raspberry Pi, etc.). Hostname will use the linux hostname utility. 
+            				Custom allows for defining a unique string. Server defined relies on the remote management server to define a name.">
+        	<Option label="Set display name as device name" value="device-name" />
+        	<Option label="Set display name from hostname" value="hostname" />
+        	<Option label="Custom" value="custom" />
+        	<Option label="Server defined" value="server" />
+        </AD>
+        
+        <AD id="device.custom-name"
+        	name="Device Custom-Name"
+        	type="String"
+        	cardinality="0"
+        	required="false"
+        	default=""
+        	description='Custom name for the device. This value is applied ONLY if device.display-name is set to "Custom"'>
+        </AD>
+                    
+        <AD id="encode.gzip"
+            name="Encode gzip"
+            type="Boolean"
+            cardinality="0"
+            required="false"
+            default="true"
+            description="Compress message payloads before sending them to the remote server to reduce the network traffic.">
+        </AD>
+        
+        <AD id="republish.mqtt.birth.cert.on.gps.lock"
+            name="Republish Mqtt Birth Cert On Gps Lock"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Whether or not to republish the MQTT Birth Certificate on GPS lock event"/>
+        
+        <AD id="republish.mqtt.birth.cert.on.modem.detect"
+            name="Republish Mqtt Birth Cert On Modem Detect"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Whether or not to republish the MQTT Birth Certificate on modem detection event"/>
+            
+        <AD id="birth.cert.policy"
+            name="Birth Cert Policy"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="birth-connect-reconnect"
+            description="Specify the birth certificate policy.">
+            <Option label="Disable publishing" value="disable" />
+            <Option label="Publish birth on connect" value="birth-connect" />
+            <Option label="Publish birth on connect and reconnect" value="birth-connect-reconnect" />
+        </AD>
+        
+        <AD id="payload.encoding"
+            name="Payload Encoding"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="kura-protobuf"
+            description="Specify the message payload encoding.">
+            <Option label="Kura Protobuf" value="kura-protobuf" />
+            <Option label="Simple JSON" value="simple-json" />
+        </AD>
+    </OCD>
+    
+    <Designate pid="org.eclipse.kura.cloudconnection.eclipseiot.mqtt.ConnectionManager" factoryPid="org.eclipse.kura.cloudconnection.eclipseiot.mqtt.ConnectionManager">
+        <Object ocdref="org.eclipse.kura.cloudconnection.eclipseiot.mqtt.ConnectionManager"/>
+    </Designate>
+</MetaData>

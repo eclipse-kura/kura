@@ -14,17 +14,20 @@ import java.util.Map;
 
 public class CloudDeploymentHandlerV2Options {
 
-    private ConfigurationProperty<String> PROPERTY_DOWNLOADS_DIRECTORY = new ConfigurationProperty<>(
+    private final ConfigurationProperty<String> PROPERTY_DOWNLOADS_DIRECTORY = new ConfigurationProperty<>(
             "downloads.directory", "/tmp");
-    private ConfigurationProperty<String> PROPERTY_HOOK_ASSOCIATIONS = new ConfigurationProperty<>(
+    private final ConfigurationProperty<String> PROPERTY_VERIFICATION_DIRECTORY = new ConfigurationProperty<>(
+            "verification.directory", "/home/root");
+    private final ConfigurationProperty<String> PROPERTY_HOOK_ASSOCIATIONS = new ConfigurationProperty<>(
             "deployment.hook.associations", "");
 
-    private String downloadsDirectory;
-    private String hookAssociations;
+    private final String downloadsDirectory;
+    private final String verificationDirectory;
+    private final String hookAssociations;
 
     public CloudDeploymentHandlerV2Options(Map<String, Object> properties) {
-        this.hookAssociations = PROPERTY_HOOK_ASSOCIATIONS.get(properties);
-        final File downloadsDirectory = new File(PROPERTY_DOWNLOADS_DIRECTORY.get(properties));
+        this.hookAssociations = this.PROPERTY_HOOK_ASSOCIATIONS.get(properties);
+        final File downloadsDirectory = new File(this.PROPERTY_DOWNLOADS_DIRECTORY.get(properties));
 
         boolean isDirectoryValid = true;
         if (!downloadsDirectory.exists()) {
@@ -33,15 +36,21 @@ public class CloudDeploymentHandlerV2Options {
         isDirectoryValid = isDirectoryValid && downloadsDirectory.isDirectory();
 
         this.downloadsDirectory = isDirectoryValid ? downloadsDirectory.getAbsolutePath()
-                : PROPERTY_DOWNLOADS_DIRECTORY.defaultValue;
+                : this.PROPERTY_DOWNLOADS_DIRECTORY.defaultValue;
+
+        this.verificationDirectory = this.PROPERTY_VERIFICATION_DIRECTORY.get(properties);
     }
 
     public String getDownloadsDirectory() {
-        return downloadsDirectory;
+        return this.downloadsDirectory;
+    }
+
+    public String getVerificationDirectory() {
+        return this.verificationDirectory;
     }
 
     public String getHookAssociations() {
-        return hookAssociations;
+        return this.hookAssociations;
     }
 
     private static class ConfigurationProperty<T> {
@@ -60,7 +69,7 @@ public class CloudDeploymentHandlerV2Options {
             if (this.defaultValue.getClass().isInstance(value)) {
                 return (T) value;
             }
-            return defaultValue;
+            return this.defaultValue;
         }
     }
 

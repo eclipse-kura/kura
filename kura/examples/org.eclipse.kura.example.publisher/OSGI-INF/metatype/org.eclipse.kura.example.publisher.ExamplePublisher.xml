@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+    Copyright (c) 2011, 2018 Eurotech and/or its affiliates
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -19,72 +19,35 @@
         
         <Icon resource="http://s3.amazonaws.com/kura-resources/application/icon/applications-other.png" size="32"/>
         
-        <AD id="cloud.service.pid"
-            name="cloud.service.pid"
+        <AD id="CloudPublisher.target"
+            name="CloudPublisher Target Filter"
             type="String"
             cardinality="0"
-            required="true"
-            default="org.eclipse.kura.cloud.CloudService"
-            description="Specify the pid of the Cloud Service that has to used to publish messages to the cloud platform.">
+            required="false"
+            default="(kura.service.pid=changeme)"
+            description="Specifies, as an OSGi target filter, the pid of the Cloud Publisher used to publish messages to the cloud platform.">
         </AD>
         
-        <AD id="app.id"
-            name="app.id"
+        <AD id="CloudSubscriber.target"
+            name="CloudSubscriber Target Filter"
             type="String"
             cardinality="0"
-            required="true"
-            default="EXAMPLE_PUBLISHER"
-            description="Application ID">
+            required="false"
+            default="(kura.service.pid=changeme)"
+            description="Specifies, as an OSGi target filter, the pid of the Cloud Subscriber used to receive messages from the cloud platform.">
         </AD>
         
         <AD id="publish.rate"  
-            name="publish.rate"
+            name="Publish Rate"
             type="Integer"
             cardinality="0" 
             required="true"
             default="1000"
             min="1"
             description="Default message publishing rate in milliseconds (min 1)."/>
-            
-        <AD id="publish.qos"  
-            name="publish.qos"
-            type="Integer"
-            cardinality="0" 
-            required="true"
-            default="0" 
-            description="Default QoS to publish the messages with.">
-           <Option label="0 - At most once" value="0"/>
-           <Option label="1 - At least once" value="1"/>          
-           <Option label="2 - Exactly once" value="2"/>
-        </AD>
-
-        <AD id="publish.retain"  
-            name="publish.retain"
-            type="Boolean"
-            cardinality="0" 
-            required="true"
-            default="false" 
-            description="Default retaing flag for the published messages."/>
-        
-        <AD id="publish.appTopic"  
-            name="publish.appTopic"
-            type="String"
-            cardinality="0" 
-            required="true"
-            default="data/metrics" 
-            description="Default semantic topic to publish the metrics to."/>
-            
-        <AD id="subscribe.topic"  
-            name="subscribe.topic"
-            type="String"
-            cardinality="0" 
-            required="true"
-            default="inbound/#" 
-            description="Application topic used for incoming messages from cloud. Will subscribe to #account-name/#client-id/#app.name/#subscribe.topic/">       
-        </AD>
         
         <AD id="metric.temperature.initial"  
-            name="metric.temperature.initial"
+            name="Initial Temperature"
             type="Float"
             cardinality="0" 
             required="true"
@@ -92,7 +55,7 @@
             description="Initial value for the temperature metric."/>
         
         <AD id="metric.temperature.increment"  
-            name="metric.temperature.increment"
+            name="Temperature Increment"
             type="Float"
             cardinality="0" 
             required="true"
@@ -102,7 +65,7 @@
         <!-- String, Long, Integer, Short, Double, Float, Char, Byte, Boolean, Password -->
         
         <AD id="metric.string"
-            name="metric.string"
+            name="Metric String"
             type="String"
             cardinality="0" 
             required="true"
@@ -110,7 +73,7 @@
             description="Test metric of String type."/>
          
         <AD id="metric.string.oneof"
-            name="metric.string.oneof"
+            name="Metric String Oneof"
             type="String"
             cardinality="0" 
             required="true"
@@ -122,7 +85,7 @@
         </AD>
         
         <AD id="metric.long"  
-            name="metric.long"
+            name="Metric Long"
             type="Long"
             cardinality="0" 
             required="true"
@@ -132,7 +95,7 @@
             description="Long metric. Metric range min -9223372036854775000 max 9223372036854775000. Long min -9223372036854775808 max 9223372036854775807."/>
 
         <AD id="metric.integer"  
-            name="metric.integer"
+            name="Metric Integer"
             type="Integer"
             cardinality="0" 
             required="true"
@@ -142,7 +105,7 @@
             description="Integer metric. Metric range min -2147483600 max 2147483600. Integer min -2147483647 max 2147483647."/>
 
         <AD id="metric.integer.fixed"  
-            name="metric.integer.fixed"
+            name="Metric Integer Fixed"
             type="Integer"
             cardinality="0" 
             required="true"
@@ -152,7 +115,7 @@
             description="Integer metric. Metric range min -2147483600 max 2147483600. Integer min -2147483647 max 2147483647."/>
         
         <AD id="metric.short"  
-            name="metric.short"
+            name="Metric Short"
             type="Short"
             cardinality="0" 
             required="true"
@@ -162,7 +125,7 @@
             description="Short metric. Metric range min -32760 max 32760. Short min -32767 max 32767."/>
         
         <AD id="metric.double"  
-            name="metric.double"
+            name="Metric Duble"
             type="Double"
             cardinality="0" 
             required="true"
@@ -172,7 +135,7 @@
             description="Double metric. Metric range min -4294967295.99999 max 4294967295.99999."/>
         
         <AD id="metric.float"  
-            name="metric.float"
+            name="Metric Float"
             type="Float"
             cardinality="0" 
             required="true"
@@ -182,7 +145,7 @@
             description="Float metric. Metric range min -32766.99 max 32766.99."/>
 
         <AD id="metric.char"  
-            name="metric.char"
+            name="Metric Char"
             type="Char"
             cardinality="0" 
             required="true"
@@ -192,7 +155,7 @@
             description="Char metric. Min a. Max z."/>
 
         <AD id="metric.byte"  
-            name="metric.byte"
+            name="Metric Byte"
             type="Byte"
             cardinality="0" 
             required="true"
@@ -202,7 +165,7 @@
             description="Byte metric. Metric range min -120 max 120. Byte min -127 max 127."/>
 
         <AD id="metric.boolean"  
-            name="metric.boolean"
+            name="Metric Boolean"
             type="Boolean"
             cardinality="0" 
             required="true"
@@ -210,7 +173,7 @@
             description="Boolean metric."/>
         
         <AD id="metric.password"
-            name="metric.password"
+            name="Metric Password"
             type="Password"
             cardinality="0" 
             required="true"
@@ -218,7 +181,7 @@
             description="Password metric."/>
 
         <AD id="metric.string.array"
-            name="metric.string.array"
+            name="Metric String Array"
             type="String"
             cardinality="5" 
             required="false"
@@ -226,7 +189,7 @@
             description="Test metric of Array of String type."/>
 
         <AD id="metric.short.array"  
-            name="metric.short.array"
+            name="Metric Short Array"
             type="Short"
             cardinality="5" 
             required="false"
@@ -236,7 +199,7 @@
             description="Short Array metric. Metric range min -32760 max 32760. Short min -32767 max 32767."/>
   
         <AD id="metric.string.optional"
-            name="metric.string.optional"
+            name="Metric String Optional"
             type="String"
             cardinality="1" 
             required="false"

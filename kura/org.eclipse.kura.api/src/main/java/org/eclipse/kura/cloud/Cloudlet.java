@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -17,6 +17,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.cloudconnection.request.RequestHandler;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
@@ -41,8 +42,11 @@ import org.apache.logging.log4j.LogManager;
  * {@link CloudletTopic#getResources()}
  * <li>{@link Cloudlet#doExec} is used to perform applicatioon operation not necessary tied to a given resource.
  * </ul>
+ *
+ * @deprecated Please consider using {@link RequestHandler}
  */
 @ConsumerType
+@Deprecated
 public abstract class Cloudlet implements CloudClientListener {
 
     private static final Logger s_logger = LogManager.getLogger(Cloudlet.class);

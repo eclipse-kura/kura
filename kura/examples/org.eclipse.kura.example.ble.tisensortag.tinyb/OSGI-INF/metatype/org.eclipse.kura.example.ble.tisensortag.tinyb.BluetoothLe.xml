@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+    Copyright (c) 2011, 2018 Eurotech and/or its affiliates
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -16,6 +16,15 @@
          
         <Icon resource="http://s3.amazonaws.com/kura-resources/application/icon/sensortag.png" size="32"/>
 
+        <AD id="CloudPublisher.target"
+            name="CloudPublisher Target Filter"
+            type="String"
+            cardinality="0"
+            required="false"
+            default="(kura.service.pid=changeme)"
+            description="Specifies, as an OSGi target filter, the pid of the Cloud Publisher used to publish messages to the cloud platform.">
+        </AD>
+        
          <AD id="scan_enable"
             name="scan_enable"
             type="Boolean"
@@ -136,14 +145,6 @@
             required="true"
             default="false"
             description="Perform a discovery of GATT services and characteristics."/>
-                        
-        <AD id="publishTopic"  
-            name="publishTopic"
-            type="String"
-            cardinality="0" 
-            required="true"
-            default="data" 
-            description="The topic to publish data to the Cloud."/>
 
         <AD id="iname"
             name="iname"

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2018 Eurotech and/or its affiliates
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Eurotech
+
+-->
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="CloudServiceTest">
+   <implementation class="org.eclipse.kura.core.cloud.CloudServiceTest"/>
+   <reference name="ConfigurationService"
+              policy="static"
+              cardinality="1..1"
+              bind="bindCfgSvc"
+              unbind="unbindCfgSvc"
+              interface="org.eclipse.kura.configuration.ConfigurationService"/>
+   <reference name="DefaultCloudServiceFactory"
+              policy="static"
+              cardinality="1..n"
+              bind="bindCloudFactory"
+              unbind="unbindCloudFactory"
+              interface="org.eclipse.kura.cloudconnection.factory.CloudConnectionFactory"/>
+   <reference bind="bindCloudService"
+              unbind="unbindCloudService"
+              cardinality="0..1"
+              interface="org.eclipse.kura.cloud.CloudService"
+              name="cloudService"
+              target="(kura.service.pid=org.eclipse.kura.cloud.CloudService)"
+              policy="dynamic"/>
+</scr:component>

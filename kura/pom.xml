@@ -92,6 +92,8 @@
 
         <module>org.eclipse.kura.wire.component.conditional.provider</module>
         <module>org.eclipse.kura.wire.component.join.provider</module>
+        
+        <module>org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider</module>
 
         <module>features</module>
         <module>emulator</module>

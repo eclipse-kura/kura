@@ -19,7 +19,6 @@ import java.util.Enumeration;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.crypto.CryptoService;
-import org.eclipse.kura.message.KuraTopic;
 import org.junit.Test;
 
 public class CertificatesManagerTest {

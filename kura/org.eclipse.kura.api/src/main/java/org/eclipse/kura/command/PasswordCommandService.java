@@ -12,6 +12,7 @@
 package org.eclipse.kura.command;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.osgi.annotation.versioning.ProviderType;
@@ -44,6 +45,22 @@ public interface PasswordCommandService {
      * @param commandReq
      *            Payload containing command information
      * @return KuraResponsePayload containing the result of the command execution and details on the result
+     * @deprecated
      */
-    public KuraResponsePayload execute(KuraRequestPayload commandReq);
+    @Deprecated
+    public default KuraResponsePayload execute(KuraRequestPayload commandReq) {
+        throw new UnsupportedOperationException();
+    }
+    
+    /**
+     * Password protected command execution service
+     *
+     * @param commandReq
+     *            Payload containing command information
+     * @return KuraResponsePayload containing the result of the command execution and details on the result
+     * @throws KuraException
+     *             raised if the command execution fails
+     * @since 2.0
+     */
+    public KuraPayload execute(KuraPayload commandReq) throws KuraException;
 }

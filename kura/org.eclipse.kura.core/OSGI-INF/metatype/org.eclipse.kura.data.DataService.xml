@@ -20,7 +20,7 @@
         <Icon resource="DataService" size="32"/>
         
         <AD id="connect.auto-on-startup"
-            name="connect.auto-on-startup"
+            name="Connect Auto-on-startup"
             type="Boolean"
             cardinality="0"
             required="true"
@@ -28,7 +28,7 @@
             description="Enable automatic connect of the Data Publishers on startup and after a disconnection."/>
                         
         <AD id="connect.retry-interval"
-            name="connect.retry-interval"
+            name="Connect Retry-interval"
             type="Integer"
             cardinality="0" 
             required="true"
@@ -37,7 +37,7 @@
             description="Frequency in seconds to retry a connection of the Data Publishers after a disconnect (Minimum value 1)."/>
             
         <AD id="enable.recovery.on.connection.failure"
-            name="enable.recovery.on.connection.failure"
+            name="Enable Recovery On Connection Failure"
             type="Boolean"
             cardinality="0"
             required="true"
@@ -45,7 +45,7 @@
             description="Enables the recovery feature on connection failure. If the device is not able to connect to a remote cloud platform, the service will wait for a specified amount of connection retries. If the recovery fails, the device will be rebooted. Being based on the Watchdog service, it needs to be activated as well."/>
         
         <AD id="connection.recovery.max.failures"
-            name="connection.recovery.max.failures"
+            name="Connection Recovery Max Failures"
             type="Integer"
             cardinality="0" 
             required="true"
@@ -54,7 +54,7 @@
             description="Number of failures in Data Publishers connection before forcing a reboot."/>
             
         <AD id="disconnect.quiesce-timeout"
-            name="disconnect.quiesce-timeout"
+            name="Disconnect Quiesce-timeout"
             type="Integer"
             cardinality="0"
             required="true"
@@ -63,7 +63,7 @@
             description="Timeout used to try to complete the delivery of stored messages before forcing a disconnect of the Data Publisher."/>
 
         <AD id="store.db.service.pid"
-            name="store.db.service.pid"
+            name="Store DB Service PID"
             type="String"
             cardinality="0"
             required="true"
@@ -71,7 +71,7 @@
             description="The Kura service pid of the H2 database instance to be used. The pid of the default instance is org.eclipse.kura.db.H2DbService."/>
 
         <AD id="store.housekeeper-interval"
-            name="store.housekeeper-interval"
+            name="Store Housekeeper-interval"
             type="Integer"
             cardinality="0"
             required="true"
@@ -80,7 +80,7 @@
             description="Interval in seconds used to run the Data Store housekeeper task (min 5)."/>
 
         <AD id="store.purge-age"
-            name="store.purge-age"
+            name="Store Purge-age"
             type="Integer"
             cardinality="0"
             required="true"
@@ -89,7 +89,7 @@
             description="Age in seconds of completed messages (either published with QoS = 0 or confirmed with QoS > 0) after which they are deleted (min 5)."/>
             
         <AD id="store.capacity"
-            name="store.capacity"
+            name="Store Capacity"
             type="Integer"
             cardinality="0"
             required="true"
@@ -98,7 +98,7 @@
             description="Maximum number of messages persisted in the Data Store. The limit does not apply to messages with the priority less than 2. These priority levels are reserved to the framework which uses it for life-cycle messages - birth and death certificates - and replies to request/response flows."/>
             
         <AD id="in-flight-messages.republish-on-new-session"
-            name="in-flight-messages.republish-on-new-session"
+            name="In-flight-messages Republish-on-new-session"
             type="Boolean"
             cardinality="0"
             required="true"
@@ -106,7 +106,7 @@
             description="Whether to republish in-flight messages on a new MQTT session."/>
 
         <AD id="in-flight-messages.max-number"
-            name="in-flight-messages.max-number"
+            name="In-flight-messages Max-number"
             type="Integer"
             cardinality="0"
             required="true"
@@ -116,7 +116,7 @@
             description="The maximum number of in-flight messages."/>
             
         <AD id="in-flight-messages.congestion-timeout"
-            name="in-flight-messages.congestion-timeout"
+            name="In-flight-messages Congestion-timeout"
             type="Integer"
             cardinality="0"
             required="true"
@@ -125,7 +125,7 @@
             description="Timeouts the in-flight messages congestion condition. The service will force a disconnect attempting to reconnect (0 to disable)."/>
         
         <AD id="enable.rate.limit" 
-            name="enable.rate.limit" 
+            name="Enable Rate Limit" 
             type="Boolean" 
             cardinality="0" 
             required="true" 
@@ -133,7 +133,7 @@
             description="Enables the token bucket message rate limiting." />
 
         <AD id="rate.limit.average"
-            name="rate.limit.average"
+            name="Rate Limit Average"
             type="Integer"
             cardinality="0"
             required="true"
@@ -142,7 +142,7 @@
             description="The average message publish rate in number of messages per unit of time. (e.g. 10 messages per MINUTE)"/>
         
         <AD id="rate.limit.time.unit"
-            name="rate.limit.time.unit"
+            name="Rate Limit Time Unit"
             type="String"
             cardinality="0"
             required="true"
@@ -155,7 +155,7 @@
         </AD>
         
         <AD id="rate.limit.burst.size"
-            name="rate.limit.burst.size"
+            name="Rate Limit Burst Size"
             type="Integer"
             cardinality="0"
             required="true"

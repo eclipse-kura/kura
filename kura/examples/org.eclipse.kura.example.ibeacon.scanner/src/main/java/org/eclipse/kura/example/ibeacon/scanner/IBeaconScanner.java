@@ -23,8 +23,8 @@ import org.eclipse.kura.bluetooth.le.BluetoothLeAdapter;
 import org.eclipse.kura.bluetooth.le.BluetoothLeService;
 import org.eclipse.kura.bluetooth.le.beacon.BluetoothLeBeaconScanner;
 import org.eclipse.kura.bluetooth.le.beacon.listener.BluetoothLeBeaconListener;
-import org.eclipse.kura.cloud.CloudClient;
-import org.eclipse.kura.cloud.CloudService;
+import org.eclipse.kura.cloudconnection.message.KuraMessage;
+import org.eclipse.kura.cloudconnection.publisher.CloudPublisher;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.message.KuraPayload;
 import org.osgi.service.component.ComponentContext;
@@ -32,6 +32,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class IBeaconScanner implements ConfigurableComponent, BluetoothLeBeaconListener<BluetoothLeIBeacon> {
+
+    private static final String ADDRESS_MESSAGE_PROP_KEY = "address";
 
     private static final Logger logger = LoggerFactory.getLogger(IBeaconScanner.class);
 
@@ -41,10 +43,10 @@ public class IBeaconScanner implements ConfigurableComponent, BluetoothLeBeaconL
     private BluetoothLeService bluetoothLeService;
     private BluetoothLeIBeaconService bluetoothLeIBeaconService;
     private BluetoothLeBeaconScanner<BluetoothLeIBeacon> bluetoothLeIBeaconScanner;
-    private CloudService cloudService;
-    private CloudClient cloudClient;
     private Map<String, Long> publishTimes;
     private IBeaconScannerOptions options;
+
+    private CloudPublisher cloudPublisher;
 
     public void setBluetoothLeService(BluetoothLeService bluetoothLeService) {
         this.bluetoothLeService = bluetoothLeService;
@@ -62,22 +64,16 @@ public class IBeaconScanner implements ConfigurableComponent, BluetoothLeBeaconL
         this.bluetoothLeIBeaconService = null;
     }
 
-    public void setCloudService(CloudService cloudService) {
-        this.cloudService = cloudService;
+    public void setCloudPublisher(CloudPublisher cloudPublisher) {
+        this.cloudPublisher = cloudPublisher;
     }
 
-    public void unsetCloudService(CloudService cloudService) {
-        this.cloudService = null;
+    public void unsetCloudPublisher(CloudPublisher cloudPublisher) {
+        this.cloudPublisher = null;
     }
 
     protected void activate(ComponentContext context, Map<String, Object> properties) {
         logger.info("Activating Bluetooth iBeacon Scanner example...");
-
-        try {
-            this.cloudClient = this.cloudService.newCloudClient("IBeaconScannerExample");
-        } catch (KuraException e) {
-            logger.error("Unable to get CloudClient", e);
-        }
 
         this.publishTimes = new HashMap<>();
         doUpdate(properties);
@@ -95,10 +91,6 @@ public class IBeaconScanner implements ConfigurableComponent, BluetoothLeBeaconL
 
         if (this.worker != null) {
             this.worker.shutdown();
-        }
-
-        if (this.cloudClient != null) {
-            this.cloudClient.release();
         }
 
         logger.debug("Deactivating iBeacon Scanner Example... Done.");
@@ -184,6 +176,11 @@ public class IBeaconScanner implements ConfigurableComponent, BluetoothLeBeaconL
             // Store the publish time against the address
             this.publishTimes.put(iBeacon.getAddress(), now);
 
+            if (this.cloudPublisher == null) {
+                logger.info("No cloud publisher selected. Cannot publish!");
+                return;
+            }
+
             // Publish the beacon data to the beacon's topic
             KuraPayload kp = new KuraPayload();
             kp.setTimestamp(new Date());
@@ -193,8 +190,13 @@ public class IBeaconScanner implements ConfigurableComponent, BluetoothLeBeaconL
             kp.addMetric("major", (int) iBeacon.getMajor());
             kp.addMetric("minor", (int) iBeacon.getMinor());
             kp.addMetric("distance", calculateDistance(iBeacon.getRssi(), iBeacon.getTxPower()));
+
+            Map<String, Object> properties = new HashMap<>();
+            properties.put(ADDRESS_MESSAGE_PROP_KEY, iBeacon.getAddress());
+
+            KuraMessage message = new KuraMessage(kp, properties);
             try {
-                this.cloudClient.publish(this.options.getTopicPrefix() + "/" + iBeacon.getAddress(), kp, 2, false);
+                this.cloudPublisher.publish(message);
             } catch (KuraException e) {
                 logger.error("Unable to publish", e);
             }

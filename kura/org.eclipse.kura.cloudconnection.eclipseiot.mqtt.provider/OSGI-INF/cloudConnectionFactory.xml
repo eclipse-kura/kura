@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="org.eclipse.kura.cloudconnection.eclipseiot.mqtt.DefaultCloudConnectionFactory"> 
+   <implementation class="org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.cloud.factory.DefaultCloudConnectionFactory"/>
+   <reference bind="setConfigurationService" cardinality="1..1" interface="org.eclipse.kura.configuration.ConfigurationService" name="ConfigurationService" policy="static" unbind="unsetConfigurationService"/>
+   <service>
+      <provide interface="org.eclipse.kura.cloudconnection.factory.CloudConnectionFactory"/>
+   </service>
+   <property name="osgi.command.scope" type="String" value="kura.cloud"/>
+   <property name="osgi.command.function" type="String">
+      createConfiguration
+   </property>
+   <property name="kura.ui.csf.pid.default" type="String" value="org.eclipse.kura.cloudconnection.eclipseiot.mqtt.ConnectionManager"/>
+   <property name="kura.ui.csf.pid.regex" type="String" value="^org.eclipse.kura.cloudconnection.eclipseiot.mqtt.ConnectionManager(\-[a-zA-Z0-9]+)?$"/>
+   <property name="service.pid" type="String" value="org.eclipse.kura.cloudconnection.eclipseiot.mqtt.DefaultCloudConnectionFactory"/>
+</scr:component>

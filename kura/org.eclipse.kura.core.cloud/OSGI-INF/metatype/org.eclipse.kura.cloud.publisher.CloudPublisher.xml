@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2018 Eurotech and/or its affiliates, and others
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Eurotech
+
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.cloud.publisher.CloudPublisher" 
+         name="CloudPublisher" 
+         description="The CloudPublisher allows to define publishing parameters and provide a simple endpoint where the applications can attach to publish their messages.">
+
+        <AD id="appId"
+            name="Application Id"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="W1"
+            description='The application id used to publish messages.'>
+        </AD>
+        
+        <AD id="app.topic"
+        	name="Application Topic"
+        	type="String"
+        	cardinality="0"
+        	required="false"
+        	default="A1/$assetName"
+        	description='Follows the application Id and specifies the rest of the publishing topic. Wildcards can be defined in the topic by specifing a $value in the field. The publisher will try to match "value" with a corresponding property in the received KuraMessage. If possible, the $value placeholder will be substituted with the real value specified in the KuraMessage received from the user application.'>
+        </AD>
+                    
+        <AD id="qos"
+            name="Qos"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="0"
+            description='The desired quality of service for the messages that have to be published. If Qos is 0, the message is delivered at most once, or it is not delivered at all. If Qos is set to 1, the message is always delivered at least once.'>
+            <Option label="0" value="0" />
+            <Option label="1" value="1" />
+        </AD>
+                    
+        <AD id="retain"
+            name="Retain"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Default retaing flag for the published messages.">
+        </AD>
+        
+        <AD id="message.type"
+            name="Kind of Message"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="data"
+            description="Type of message to be published.">
+            <Option label="Data" value="data" />
+            <Option label="Control" value="control" />
+        </AD>
+            
+        <AD id="priority"
+            name="Priority"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="7"
+            description='Topic prefix for system and device management messages. 0 is highest priority.'>
+        </AD>
+    </OCD>
+    
+    <Designate pid="org.eclipse.kura.cloud.publisher.CloudPublisher" factoryPid="org.eclipse.kura.cloud.publisher.CloudPublisher">
+        <Object ocdref="org.eclipse.kura.cloud.publisher.CloudPublisher"/>
+    </Designate>
+</MetaData>

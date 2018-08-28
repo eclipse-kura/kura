@@ -21,7 +21,7 @@ import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.web.server.GwtAssetServiceImpl;
 import org.eclipse.kura.web.server.GwtCertificatesServiceImpl;
-import org.eclipse.kura.web.server.GwtCloudServiceImpl;
+import org.eclipse.kura.web.server.GwtCloudConnectionServiceImpl;
 import org.eclipse.kura.web.server.GwtComponentServiceImpl;
 import org.eclipse.kura.web.server.GwtDeviceServiceImpl;
 import org.eclipse.kura.web.server.GwtEventServiceImpl;
@@ -289,7 +289,8 @@ public class Console implements ConfigurableComponent {
         this.m_httpService.registerServlet(servletRoot + "/assetsUpDownload", new ChannelServlet(), null, httpCtx);
         this.m_httpService.registerServlet(servletRoot + "/skin", new SkinServlet(), null, httpCtx);
         this.m_httpService.registerServlet(servletRoot + "/ssl", new GwtSslServiceImpl(), null, httpCtx);
-        this.m_httpService.registerServlet(servletRoot + "/cloudservices", new GwtCloudServiceImpl(), null, httpCtx);
+        this.m_httpService.registerServlet(servletRoot + "/cloudservices", new GwtCloudConnectionServiceImpl(), null,
+                httpCtx);
         this.m_httpService.registerServlet(servletRoot + "/wires", new GwtWireServiceImpl(), null, httpCtx);
         this.m_httpService.registerServlet(servletRoot + "/wiresSnapshot", new WiresSnapshotServlet(), null, httpCtx);
         this.m_httpService.registerServlet(servletRoot + "/assetservices", new GwtAssetServiceImpl(), null, httpCtx);

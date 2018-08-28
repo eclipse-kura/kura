@@ -1,0 +1,121 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<!--
+
+    Copyright (c) 2016, 2018 Eurotech and/or its affiliates
+
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+    Eurotech
+
+-->
+
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:b="urn:import:org.gwtbootstrap3.client.ui"
+    xmlns:b.html="urn:import:org.gwtbootstrap3.client.ui.html" xmlns:g="urn:import:com.google.gwt.user.client.ui"
+    xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt" xmlns:kura.util="urn:import:org.eclipse.kura.web.client.util"
+    xmlns:kura="urn:import:org.eclipse.kura.web.client.ui">
+
+    <ui:with field="msgs" type="org.eclipse.kura.web.client.messages.Messages"/>
+
+    <ui:style>
+    .important {
+    	font-weight: bold;
+    }
+    
+    .asset-comp-modal-header {
+    	display: none;
+    }
+    
+    .asset-comp-modal-body {
+    	padding-bottom: 40px;
+    }
+    
+    .center-panel {
+    	height: 100%;
+    	padding: 0px;
+    	border: none;
+    }
+    
+    .drivers-list {
+    	padding-bottom: 30px;
+    }
+    
+    .spinner {
+    	margin-left: 0.2cm;
+    }
+    </ui:style>
+
+    <b:Container fluid="true">
+        <b:Column size="MD10">
+            <b:Row b:id="buttonBar">
+                <b:Panel>
+                    <b:ButtonGroup size="SMALL">
+                        <b:Button ui:field="newConnection" addStyleNames="fa fa-plus" text="{msgs.newConnectionButton}"></b:Button>
+                        <b:Button ui:field="newPubSub" addStyleNames="fa fa-plus" text="{msgs.newPubSubShort}"></b:Button>
+                        <b:Button ui:field="deleteConnection" addStyleNames="fa fa-trash" text="{msgs.deleteButton}"></b:Button>
+                        <b:Button ui:field="statusConnectDisconnect" addStyleNames="fa fa-toggle-on" text="{msgs.connectDisconnectButton}"></b:Button>
+                        <b:Button ui:field="connectionRefresh" addStyleNames="fa fa-refresh" text="{msgs.refresh}"></b:Button>
+                    </b:ButtonGroup>
+                </b:Panel>
+            </b:Row>
+            <b:Row b:id="connectionsTable">
+                <b:Well addStyleNames="{style.center-panel} connections-well" ui:field="connectionsWell">
+                    <gwt:CellTable bordered="true" condensed="true" striped="true" hover="true" height="100%"
+                        width="100%" ui:field="connectionsGrid" />
+                </b:Well>
+            </b:Row>
+            <b:Modal ui:field="newConnectionModal" b:id="newConnectionModal" title="{msgs.newCloudService}">
+                <b:ModalBody addStyleNames="{style.asset-comp-modal-body}">
+                    <b:Form>
+                        <b:FormGroup addStyleNames="{style.drivers-list}">
+                            <b:FormLabel for="cloudFactoriesPid" ui:field="cloudFactoriesPidLabel" text="{msgs.availableCloudFactories}"/>
+                            <g:FlowPanel>
+                                <b:ListBox ui:field="cloudFactoriesPids" b:id="cloudFactoriesPids">
+                                </b:ListBox>
+                            </g:FlowPanel>
+                        </b:FormGroup>
+                        <b:FormGroup>
+                            <b:FormLabel for="cloudConnectionPid" text="{msgs.newCloudServicePid}"/>
+                            <b:HelpBlock iconType="EXCLAMATION_TRIANGLE"/>
+                            <b:Icon type="COG" ui:field="cloudConnectionPidSpinner" spin="true" visible="false" addStyleNames="{style.spinner}"/>
+                            <kura.util:PidTextBox ui:field="cloudConnectionPid" b:id="cloudConnectionPid" allowBlank="false"
+                                autoComplete="false" validateOnBlur="true"/>
+                        </b:FormGroup>
+                    </b:Form>
+                </b:ModalBody>
+                <b:ModalFooter>
+                    <b:Button type="PRIMARY" dataDismiss="MODAL" ui:field="btnCancel" text="{msgs.cancelButton}"/>
+                    <b:Button type="PRIMARY" b:id="btn-create-comp" ui:field="btnCreateComp" text="{msgs.apply}"/>
+                </b:ModalFooter>
+            </b:Modal>
+            <b:Modal ui:field="newPubSubModal" b:id="newPubSubModal" title="{msgs.newPubSub}">
+                <b:ModalBody addStyleNames="{style.asset-comp-modal-body}">
+                    <b:Form>
+                        <b:FormGroup addStyleNames="{style.drivers-list}">
+                            <b:FormLabel for="pubSubFactoriesPids" text="{msgs.availablePubSubFactories}"/>
+                            <g:FlowPanel>
+                                <b:ListBox ui:field="pubSubFactoriesPids" b:id="pubSubFactoriesPids">
+                                </b:ListBox>
+                            </g:FlowPanel>
+                        </b:FormGroup>
+                        <b:FormGroup>
+                            <b:FormLabel for="pubSubPid" text="{msgs.newPubSubPid}"/>
+                            <b:HelpBlock iconType="EXCLAMATION_TRIANGLE"/>
+                            <b:Icon type="COG" ui:field="pubSubPidSpinner" spin="true" visible="false" addStyleNames="{style.spinner}"/>
+                            <kura.util:PidTextBox ui:field="pubSubPid" b:id="pubSubPid" allowBlank="false"
+                                autoComplete="false" validateOnBlur="true"/>
+                        </b:FormGroup>
+                    </b:Form>
+                </b:ModalBody>
+                <b:ModalFooter>
+                    <b:Button type="PRIMARY" dataDismiss="MODAL" ui:field="btnPubSubCancel" text="{msgs.cancelButton}"/>
+                    <b:Button type="PRIMARY" b:id="btn-pub-sub-create-comp" ui:field="btnPubSubCreateComp" text="{msgs.apply}"/>
+                </b:ModalFooter>
+            </b:Modal>
+        </b:Column>
+        <kura:AlertDialog ui:field="alertDialog" b:id="cloud-instances-alert-dialog"/>
+    </b:Container>
+</ui:UiBinder> 

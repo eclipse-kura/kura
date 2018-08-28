@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates and others
  *
  *   All rights reserved. This program and the accompanying materials
  *   are made available under the terms of the Eclipse Public License v1.0
@@ -10,7 +10,6 @@ package org.eclipse.kura.internal.wire.subscriber;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doAnswer;
@@ -24,8 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.cloud.CloudClient;
-import org.eclipse.kura.core.testutil.TestUtil;
+import org.eclipse.kura.cloudconnection.message.KuraMessage;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.type.TypedValue;
@@ -41,62 +39,24 @@ import org.osgi.service.component.ComponentContext;
 public class CloudSubscriberTest {
 
     @Test
-    public void testActivate() throws InvalidSyntaxException {
-        // test activation with filter exception
-
-        CloudSubscriber cs = new CloudSubscriber();
-
-        int qos = 0;
-        boolean retain = false;
-
-        WireHelperService wireHelperServiceMock = mock(WireHelperService.class);
-        cs.bindWireHelperService(wireHelperServiceMock);
-
-        BundleContext bundleCtxMock = mock(BundleContext.class);
-        when(bundleCtxMock.createFilter(anyString())).thenThrow(new InvalidSyntaxException("test", "filter"));
-
-        ComponentContext ctxMock = mock(ComponentContext.class);
-        when(ctxMock.getBundleContext()).thenReturn(bundleCtxMock);
-
-        Map<String, Object> properties = new HashMap<>();
-        properties.put("cloud.service.pid", "cspid");
-        properties.put("publish.qos", qos);
-        properties.put("publish.retain", retain);
-        properties.put("publish.topic", "$topic");
-
-        try {
-            cs.activate(ctxMock, properties);
-            fail("Expected an exception.");
-        } catch (NullPointerException e) {
-            // OK
-        }
-
-        verify(ctxMock, times(1)).getBundleContext();
-        verify(bundleCtxMock, times(1)).createFilter(anyString());
-    }
-
-    @Test
     public void testOnMessageArrived() throws InvalidSyntaxException {
         // test arrival of payload with all supported types and its conversion into WireRecord
 
         CloudSubscriber cs = new CloudSubscriber();
 
-        String deviceId = "DevId";
-        String appTopic = "topic";
-        int qos = 0;
-        boolean retain = false;
-
         byte[] bytea = new byte[] { 0x01, 0x03 };
         String strval = "strval";
 
-        KuraPayload msg = new KuraPayload();
-        msg.addMetric("bool", true);
-        msg.addMetric("bytea", bytea);
-        msg.addMetric("float", 1.1f);
-        msg.addMetric("double", 1.2);
-        msg.addMetric("integer", 11);
-        msg.addMetric("long", 12l);
-        msg.addMetric("string", strval);
+        KuraPayload payload = new KuraPayload();
+        payload.addMetric("bool", true);
+        payload.addMetric("bytea", bytea);
+        payload.addMetric("float", 1.1f);
+        payload.addMetric("double", 1.2);
+        payload.addMetric("integer", 11);
+        payload.addMetric("long", 12l);
+        payload.addMetric("string", strval);
+
+        KuraMessage message = new KuraMessage(payload);
 
         WireHelperService wireHelperServiceMock = mock(WireHelperService.class);
         cs.bindWireHelperService(wireHelperServiceMock);
@@ -140,18 +100,11 @@ public class CloudSubscriberTest {
         when(ctxMock.getBundleContext()).thenReturn(bundleCtxMock);
 
         Map<String, Object> properties = new HashMap<>();
-        properties.put("cloud.service.pid", "cspid");
-        properties.put("subscribe.qos", qos);
-        properties.put("subscribe.deviceId", deviceId);
-        properties.put("subscribe.appTopic", "$topic");
+        properties.put("CloudSubscriber.target", "cspid");
 
         cs.activate(ctxMock, properties);
 
-        verify(ctxMock, times(1)).getBundleContext();
-        verify(bundleCtxMock, times(1))
-                .createFilter("(&(objectClass=org.eclipse.kura.cloud.CloudService)(kura.service.pid=cspid))");
-
-        cs.onMessageArrived(deviceId, appTopic, msg, qos, retain);
+        cs.onMessageArrived(message);
 
         verify(wsMock, times(1)).emit(anyObject());
     }
@@ -161,13 +114,6 @@ public class CloudSubscriberTest {
         // test activation and deactivation in a sequence
 
         CloudSubscriber cs = new CloudSubscriber();
-
-        CloudClient ccMock = mock(CloudClient.class);
-        TestUtil.setFieldValue(cs, "cloudClient", ccMock);
-
-        String deviceId = "DevId";
-        String appTopic = "topic";
-        int qos = 0;
 
         WireHelperService wireHelperServiceMock = mock(WireHelperService.class);
         cs.bindWireHelperService(wireHelperServiceMock);
@@ -183,20 +129,10 @@ public class CloudSubscriberTest {
         when(ctxMock.getBundleContext()).thenReturn(bundleCtxMock);
 
         Map<String, Object> properties = new HashMap<>();
-        properties.put("cloud.service.pid", "cspid");
-        properties.put("subscribe.qos", qos);
-        properties.put("subscribe.deviceId", deviceId);
-        properties.put("subscribe.appTopic", appTopic);
+        properties.put("CloudSubscriber.target", "cspid");
 
         cs.activate(ctxMock, properties);
 
-        verify(ctxMock, times(1)).getBundleContext();
-        verify(bundleCtxMock, times(1))
-                .createFilter("(&(objectClass=org.eclipse.kura.cloud.CloudService)(kura.service.pid=cspid))");
-
         cs.deactivate(ctxMock);
-
-        verify(ccMock, times(1)).release();
-        verify(ccMock, times(1)).unsubscribe(deviceId, appTopic);
     }
 }

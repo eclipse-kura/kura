@@ -14,21 +14,24 @@ package org.eclipse.kura.core.cloud.factory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.cloud.factory.CloudServiceFactory;
-import org.eclipse.kura.configuration.ComponentConfiguration;
+import org.eclipse.kura.cloudconnection.CloudConnectionManager;
+import org.eclipse.kura.cloudconnection.factory.CloudConnectionFactory;
 import org.eclipse.kura.configuration.ConfigurationService;
-import org.eclipse.kura.data.DataService;
 import org.eclipse.kura.data.DataTransportService;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.component.ComponentConstants;
+import org.osgi.service.component.ComponentContext;
 
 /**
  * The Kura default {@link CloudServiceFactory} implements a three layer stack architecture.
@@ -48,7 +51,7 @@ import org.osgi.service.component.ComponentConstants;
  * </tr>
  * <tr>
  * <td>org.eclipse.kura.data.DataService</td>
- * <td>{@link DataService}</td>
+ * <td>{@link CloudService}</td>
  * </tr>
  * <tr>
  * <td>org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport</td>
@@ -155,7 +158,7 @@ import org.osgi.service.component.ComponentConstants;
  *
  * <br>
  */
-public class DefaultCloudServiceFactory implements CloudServiceFactory {
+public class DefaultCloudServiceFactory implements CloudServiceFactory, CloudConnectionFactory {
 
     private static final String FACTORY_PID = "org.eclipse.kura.core.cloud.factory.DefaultCloudServiceFactory";
 
@@ -177,6 +180,7 @@ public class DefaultCloudServiceFactory implements CloudServiceFactory {
             .compile("^org\\.eclipse\\.kura\\.cloud\\.CloudService(-[a-zA-Z0-9]+)?$");
 
     private ConfigurationService configurationService;
+    private BundleContext bundleContext;
 
     protected void setConfigurationService(ConfigurationService configurationService) {
         this.configurationService = configurationService;
@@ -186,6 +190,10 @@ public class DefaultCloudServiceFactory implements CloudServiceFactory {
         if (configurationService == this.configurationService) {
             this.configurationService = null;
         }
+    }
+
+    public void activate(final ComponentContext context) {
+        this.bundleContext = context.getBundleContext();
     }
 
     @Override
@@ -210,10 +218,11 @@ public class DefaultCloudServiceFactory implements CloudServiceFactory {
             }
 
             // create the CloudService layer and set the selective dependency on the DataService PID
-            Map<String, Object> cloudServiceProperties = new HashMap<String, Object>();
+            Map<String, Object> cloudServiceProperties = new HashMap<>();
             String name = DATA_SERVICE_REFERENCE_NAME + ComponentConstants.REFERENCE_TARGET_SUFFIX;
             cloudServiceProperties.put(name, String.format(REFERENCE_TARGET_VALUE_FORMAT, dataServicePid));
             cloudServiceProperties.put(KURA_CLOUD_SERVICE_FACTORY_PID, FACTORY_PID);
+            cloudServiceProperties.put(KURA_CLOUD_CONNECTION_FACTORY_PID, FACTORY_PID);
 
             this.configurationService.createFactoryConfiguration(CLOUD_SERVICE_FACTORY_PID, pid, cloudServiceProperties,
                     false);
@@ -283,23 +292,27 @@ public class DefaultCloudServiceFactory implements CloudServiceFactory {
     }
 
     @Override
-    public Set<String> getManagedCloudServicePids() throws KuraException {
-        final Set<String> cloudServicePids = new HashSet<>();
+    public Set<String> getManagedCloudConnectionPids() throws KuraException {
 
-        for (ComponentConfiguration cc : this.configurationService.getComponentConfigurations()) {
-            if (cc.getDefinition() == null) {
-                continue;
-            }
+        try {
+            return this.bundleContext.getServiceReferences(CloudConnectionManager.class, null).stream().filter(ref -> {
+                final Object kuraServicePid = ref.getProperty(ConfigurationService.KURA_SERVICE_PID);
 
-            final String pid = cc.getPid();
-            final String factoryPid = cc.getDefinition().getId();
+                if (!(kuraServicePid instanceof String)) {
+                    return false;
+                }
 
-            if (CLOUD_SERVICE_FACTORY_PID.equals(factoryPid) && MANAGED_CLOUD_SERVICE_PID_PATTERN.matcher(pid).matches()
-                    && FACTORY_PID.equals(cc.getConfigurationProperties().get(KURA_CLOUD_SERVICE_FACTORY_PID))) {
-                cloudServicePids.add(pid);
-            }
+                return MANAGED_CLOUD_SERVICE_PID_PATTERN.matcher((String) kuraServicePid).matches()
+                        && (FACTORY_PID.equals(ref.getProperty(KURA_CLOUD_SERVICE_FACTORY_PID))
+                                || FACTORY_PID.equals(ref.getProperty(KURA_CLOUD_CONNECTION_FACTORY_PID)));
+            }).map(ref -> (String) ref.getProperty(ConfigurationService.KURA_SERVICE_PID)).collect(Collectors.toSet());
+        } catch (InvalidSyntaxException e) {
+            throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID, e);
         }
+    }
 
-        return cloudServicePids;
+    @Override
+    public Set<String> getManagedCloudServicePids() throws KuraException {
+        return getManagedCloudConnectionPids();
     }
 }

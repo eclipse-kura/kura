@@ -12,7 +12,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -33,8 +32,8 @@ import org.eclipse.kura.bluetooth.le.BluetoothLeDevice;
 import org.eclipse.kura.bluetooth.le.BluetoothLeGattCharacteristic;
 import org.eclipse.kura.bluetooth.le.BluetoothLeGattService;
 import org.eclipse.kura.bluetooth.le.BluetoothLeService;
-import org.eclipse.kura.cloud.CloudClient;
-import org.eclipse.kura.cloud.CloudService;
+import org.eclipse.kura.cloudconnection.message.KuraMessage;
+import org.eclipse.kura.cloudconnection.publisher.CloudPublisher;
 import org.eclipse.kura.example.testutil.TestUtil;
 import org.eclipse.kura.message.KuraPayload;
 import org.junit.Test;
@@ -44,14 +43,10 @@ public class BluetoothLeTest {
 
     @Test
     public void testActivateDeactivate() throws NoSuchFieldException, KuraException {
-        String appId = "BLE_APP_V2";
-
         BluetoothLe svc = new BluetoothLe();
 
-        CloudService csMock = mock(CloudService.class);
-        CloudClient ccMock = mock(CloudClient.class);
-        when(csMock.newCloudClient(appId)).thenReturn(ccMock);
-        svc.setCloudService(csMock);
+        CloudPublisher cpMock = mock(CloudPublisher.class);
+        svc.setCloudPublisher(cpMock);
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("iname", "hci0");
@@ -60,7 +55,6 @@ public class BluetoothLeTest {
 
         svc.activate(null, properties);
 
-        verify(csMock, times(1)).newCloudClient(appId);
         assertNull(TestUtil.getFieldValue(svc, "worker"));
         assertNotNull(TestUtil.getFieldValue(svc, "tiSensorTagList"));
 
@@ -78,26 +72,22 @@ public class BluetoothLeTest {
         svc.deactivate(null);
 
         verify(bluetoothLeAdapter, times(1)).stopDiscovery();
-        verify(ccMock, times(1)).release();
         verify(tistMock, times(1)).disconnect();
         assertNull(TestUtil.getFieldValue(svc, "bluetoothLeAdapter"));
 
-        svc.unsetCloudService(csMock);
+        svc.unsetCloudPublisher(cpMock);
 
-        assertNull(TestUtil.getFieldValue(svc, "cloudService"));
+        assertNull(TestUtil.getFieldValue(svc, "cloudPublisher"));
     }
 
     @Test
     public void testUpdate() throws NoSuchFieldException, KuraException, InterruptedException, ExecutionException {
-        String appId = "BLE_APP_V2";
         String interfaceName = "hci0";
 
         BluetoothLe svc = new BluetoothLe();
 
-        CloudService csMock = mock(CloudService.class);
-        CloudClient ccMock = mock(CloudClient.class);
-        when(csMock.newCloudClient(appId)).thenReturn(ccMock);
-        svc.setCloudService(csMock);
+        CloudPublisher cpMock = mock(CloudPublisher.class);
+        svc.setCloudPublisher(cpMock);
 
         BluetoothLeService bleMock = mock(BluetoothLeService.class);
         BluetoothLeAdapter adapterMock = mock(BluetoothLeAdapter.class);
@@ -144,7 +134,6 @@ public class BluetoothLeTest {
             devMock.wait(2000); // wait < period
         }
 
-        verify(csMock, times(1)).newCloudClient(appId);
         assertNotNull(TestUtil.getFieldValue(svc, "worker"));
 
         List<TiSensorTag> tiSensorTagList = (List<TiSensorTag>) TestUtil.getFieldValue(svc, "tiSensorTagList");
@@ -176,10 +165,10 @@ public class BluetoothLeTest {
         BluetoothLeOptions options = new BluetoothLeOptions(properties);
         TestUtil.setFieldValue(svc, "options", options);
 
-        CloudClient ccMock = mock(CloudClient.class);
-        TestUtil.setFieldValue(svc, "cloudClient", ccMock);
+        CloudPublisher cpMock = mock(CloudPublisher.class);
+        svc.setCloudPublisher(cpMock);
 
-        List<TiSensorTag> tiSensorTagList = new ArrayList<TiSensorTag>();
+        List<TiSensorTag> tiSensorTagList = new ArrayList<>();
         TestUtil.setFieldValue(svc, "tiSensorTagList", tiSensorTagList);
 
         TiSensorTag tistMock = mock(TiSensorTag.class);
@@ -237,10 +226,11 @@ public class BluetoothLeTest {
         verify(tistMock, times(1)).switchOnBuzzer();
         verify(tistMock, times(1)).enableIOService();
 
-        ArgumentCaptor<KuraPayload> payloadArg = ArgumentCaptor.forClass(KuraPayload.class);
-        verify(ccMock).publish(eq("testTopic/12:34:56:78:90:AC"), payloadArg.capture(), eq(0), eq(false));
+        ArgumentCaptor<KuraMessage> messageArg = ArgumentCaptor.forClass(KuraMessage.class);
+        verify(cpMock).publish(messageArg.capture());
 
-        KuraPayload payload = payloadArg.getValue();
+        KuraMessage message = messageArg.getValue();
+        KuraPayload payload = message.getPayload();
         assertEquals(temp[0], payload.getMetric("Ambient"));
         assertEquals(temp[1], payload.getMetric("Target"));
         assertEquals(acc[0], payload.getMetric("Acceleration X"));

@@ -14,6 +14,8 @@ package org.eclipse.kura.cloud;
 import java.util.List;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.cloudconnection.publisher.CloudPublisher;
+import org.eclipse.kura.cloudconnection.subscriber.CloudSubscriber;
 import org.eclipse.kura.data.DataService;
 import org.eclipse.kura.message.KuraPayload;
 import org.osgi.annotation.versioning.ProviderType;
@@ -77,8 +79,10 @@ import org.osgi.annotation.versioning.ProviderType;
  * to specific applications running on specific devices.
  * 
  * @noimplement This interface is not intended to be implemented by clients.
+ * @deprecated Please consider using {@link CloudPublisher} and {@link CloudSubscriber}
  */
 @ProviderType
+@Deprecated
 public interface CloudClient {
 
     /**
@@ -326,7 +330,7 @@ public interface CloudClient {
     /**
      * Publishes a control message to the remote server. Control messages are qualified with an
      * additional prefix appended at the beginning of the target topic. The
-     * prefix is configured as a property of the {@link CloudService} and it appended
+     * prefix is configured as a property of the {@link DataService} and it appended
      * automatically by this controlPublish method. Just as {@link #publish}, the
      * controlPublish method will manipulate the provided topic by appending the necessary parts
      * to achieve topic partitioning including device identification and encode
@@ -368,7 +372,7 @@ public interface CloudClient {
     /**
      * Publishes a control message to the remote server addressing it to another device.
      * Control messages are qualified with an additional prefix appended at the beginning of the target topic.
-     * The prefix is configured as a property of the {@link CloudService} and it appended
+     * The prefix is configured as a property of the {@link DataService} and it appended
      * automatically by this controlPublish method. Just as {@link #publish}, the
      * controlPublish method will manipulate the provided topic by appending the necessary parts
      * to achieve topic partitioning including device identification and encode
@@ -413,7 +417,7 @@ public interface CloudClient {
      * Publishes a control message to the remote server addressing it to another device
      * with a raw byte array payload.
      * Control messages are qualified with an additional prefix appended at the beginning of the target topic.
-     * The prefix is configured as a property of the {@link CloudService} and it appended
+     * The prefix is configured as a property of the {@link DataService} and it appended
      * automatically by this controlPublish method. Just as {@link #publish}, the
      * controlPublish method will manipulate the provided topic by appending the necessary parts
      * to achieve topic partitioning including device identification.

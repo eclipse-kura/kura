@@ -20,7 +20,6 @@
    <property name="kura.ui.service.hide" type="Boolean" value="true"/>
    <service>
       <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
-      <provide interface="org.eclipse.kura.cloud.CloudClientListener"/>
       <provide interface="org.eclipse.kura.wire.WireComponent"/>
       <provide interface="org.eclipse.kura.wire.WireEmitter"/>
       <provide interface="org.osgi.service.wireadmin.Producer"/>
@@ -31,4 +30,10 @@
    	          name="WireHelperService"
    	          policy="static"
    	          unbind="unbindWireHelperService"/>
+   <reference name="CloudSubscriber"
+           policy="static"
+           bind="setCloudSubscriber"
+           unbind="unsetCloudSubscriber"
+           cardinality="0..1"
+           interface="org.eclipse.kura.cloudconnection.subscriber.CloudSubscriber"/>
 </scr:component>

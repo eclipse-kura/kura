@@ -225,6 +225,11 @@ table {
     border: none !important;
 }
 
+.drop-down {
+    background-color: white !important;
+    border: none !important;
+}
+
 /**********************
 Overriding Bootstrap END
 ***********************/

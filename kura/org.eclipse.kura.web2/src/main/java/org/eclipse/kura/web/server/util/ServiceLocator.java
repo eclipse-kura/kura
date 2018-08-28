@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and others
+ * Copyright (c) 2011, 2018 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -84,6 +84,11 @@ public class ServiceLocator {
         public void consume(T service) throws Exception;
     }
 
+    public interface ServiceReferenceConsumer<T> {
+
+        public void consume(ServiceReference<T> service, BundleContext context) throws Exception;
+    }
+
     /**
      * Locate a service and execute the provided function
      * <p>
@@ -136,6 +141,41 @@ public class ServiceLocator {
         withAllServices(serviceClass, null, consumer);
     }
 
+    @SuppressWarnings("unchecked")
+    public static void applyToAllServices(final ServiceConsumer<Object> consumer, final Class<?>... classes)
+            throws GwtKuraException {
+
+        for (Class<?> c : classes) {
+            withAllServices((Class<Object>) c, null, consumer);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static void withAllServices(String filter, final ServiceConsumer<Object> consumer, final Class<?>... classes)
+            throws GwtKuraException {
+
+        if (classes == null || classes.length == 0) {
+            withAllServices(null, filter, consumer);
+        }
+
+        for (Class<?> c : classes) {
+            withAllServices((Class<Object>) c, filter, consumer);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static void withAllServiceReferences(String filter, final ServiceReferenceConsumer<Object> consumer,
+            final Class<?>... classes) throws GwtKuraException {
+
+        if (classes == null || classes.length == 0) {
+            withAllServiceReferences(null, filter, consumer);
+        }
+
+        for (Class<?> c : classes) {
+            withAllServiceReferences((Class<Object>) c, filter, consumer);
+        }
+    }
+
     /**
      * Lookup services with a filter and iterate over their instances
      *
@@ -151,13 +191,26 @@ public class ServiceLocator {
     public static <T> void withAllServices(final Class<T> serviceClass, String filter,
             final ServiceConsumer<T> consumer) throws GwtKuraException {
 
+        withAllServiceReferences(serviceClass, filter, (ref, ctx) -> {
+            final T service = ctx.getService(ref);
+
+            try {
+                consumer.consume(service);
+            } finally {
+                ctx.ungetService(ref);
+            }
+        });
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> void withAllServiceReferences(final Class<T> serviceClass, String filter,
+            final ServiceReferenceConsumer<T> consumer) throws GwtKuraException {
+
         final BundleContext ctx = FrameworkUtil.getBundle(ServiceLocator.class).getBundleContext();
 
-        // get matching references
-
-        final Collection<ServiceReference<T>> refs;
+        final ServiceReference<?>[] refs;
         try {
-            refs = ctx.getServiceReferences(serviceClass, filter);
+            refs = ctx.getAllServiceReferences(serviceClass != null ? serviceClass.getName() : null, filter);
         } catch (InvalidSyntaxException e) {
             throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
         }
@@ -170,16 +223,12 @@ public class ServiceLocator {
 
         // iterate over results
 
-        for (final ServiceReference<T> ref : refs) {
-            final T service = ctx.getService(ref);
-
+        for (final ServiceReference<?> ref : refs) {
             try {
-                consumer.consume(service);
+                consumer.consume((ServiceReference<T>) ref, ctx);
             } catch (Exception e) {
                 // wrap and throw
                 throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
-            } finally {
-                ctx.ungetService(ref);
             }
         }
     }

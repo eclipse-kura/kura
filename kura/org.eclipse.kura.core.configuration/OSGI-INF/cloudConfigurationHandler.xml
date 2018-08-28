@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+    Copyright (c) 2011, 2018 Eurotech and/or its affiliates
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -26,11 +26,10 @@
               bind="setSystemService"
               unbind="unsetSystemService"
               interface="org.eclipse.kura.system.SystemService"/>
-   <reference name="CloudService"
+   <reference name="RequestHandlerRegistry"
               policy="dynamic"
-              cardinality="0..1"
-              bind="setCloudService"
-              unbind="unsetCloudService"
-              target="(kura.service.pid=org.eclipse.kura.cloud.CloudService)"
-              interface="org.eclipse.kura.cloud.CloudService"/>
+              cardinality="0..n" 
+              bind="setRequestHandlerRegistry"
+              unbind="unsetRequestHandlerRegistry"
+              interface="org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry"/>
 </scr:component>

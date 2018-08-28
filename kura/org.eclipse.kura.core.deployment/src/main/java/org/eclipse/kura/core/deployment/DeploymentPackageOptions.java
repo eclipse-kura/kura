@@ -12,6 +12,8 @@
 
 package org.eclipse.kura.core.deployment;
 
+import org.eclipse.kura.cloudconnection.publisher.CloudNotificationPublisher;
+
 public abstract class DeploymentPackageOptions {
 
     // Metrics
@@ -22,6 +24,8 @@ public abstract class DeploymentPackageOptions {
     public static final String METRIC_DP_REBOOT_DELAY = "dp.reboot.delay";
     public static final String METRIC_DP_CLIENT_ID = "client.id";
     public static final String METRIC_JOB_ID = "job.id";
+
+    public static final String NOTIFICATION_PUBLISHER_PID_KEY = "publisherpid";
 
     private String dpName;
     private String dpVersion;
@@ -35,6 +39,9 @@ public abstract class DeploymentPackageOptions {
     private String clientId = "";
     private String requestClientId = "";
     private Long jobId = null;
+
+    private CloudNotificationPublisher notificationPublisher;
+    private String notificationPublisherPid;
 
     public DeploymentPackageOptions(String dpName, String dpVersion) {
         this.dpName = dpName;
@@ -128,4 +135,21 @@ public abstract class DeploymentPackageOptions {
     public void setRequestClientId(String requestClientId) {
         this.requestClientId = requestClientId;
     }
+
+    public CloudNotificationPublisher getNotificationPublisher() {
+        return this.notificationPublisher;
+    }
+
+    public void setNotificationPublisher(CloudNotificationPublisher notificationPublisher) {
+        this.notificationPublisher = notificationPublisher;
+    }
+
+    public String getNotificationPublisherPid() {
+        return this.notificationPublisherPid;
+    }
+
+    public void setNotificationPublisherPid(String notificationPublisherPid) {
+        this.notificationPublisherPid = notificationPublisherPid;
+    }
+
 }

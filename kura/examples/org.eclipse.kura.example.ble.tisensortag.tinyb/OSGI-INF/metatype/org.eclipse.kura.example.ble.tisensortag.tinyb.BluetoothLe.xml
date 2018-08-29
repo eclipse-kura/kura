@@ -20,7 +20,7 @@
             name="CloudPublisher Target Filter"
             type="String"
             cardinality="0"
-            required="false"
+            required="true"
             default="(kura.service.pid=changeme)"
             description="Specifies, as an OSGi target filter, the pid of the Cloud Publisher used to publish messages to the cloud platform.">
         </AD>

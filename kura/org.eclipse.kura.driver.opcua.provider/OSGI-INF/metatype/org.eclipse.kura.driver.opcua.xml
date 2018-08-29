@@ -17,7 +17,7 @@
          description="OPC-UA Driver">
 
         <AD id="endpoint.ip"
-            name="endpoint.ip"
+            name="Endpoint IP"
             type="String"
             cardinality="0"
             required="true"
@@ -26,7 +26,7 @@
         </AD>
 
         <AD id="endpoint.port"
-            name="endpoint.port"
+            name="Endpoint port"
             type="Integer"
             cardinality="0"
             required="true"
@@ -36,7 +36,7 @@
         </AD>
         
         <AD id="server.name"
-            name="server.name"
+            name="Server Name"
             type="String"
             cardinality="0"
             required="false"
@@ -45,7 +45,7 @@
         </AD>
         
         <AD id="session.timeout"
-            name="session.timeout"
+            name="Session timeout"
             type="Integer"
             cardinality="0"
             required="true"
@@ -54,7 +54,7 @@
         </AD>
         
         <AD id="request.timeout"
-            name="request.timeout"
+            name="Request timeout"
             type="Integer"
             cardinality="0"
             required="true"
@@ -63,7 +63,7 @@
         </AD>
         
         <AD id="application.name" 
-        	name="application.name" 
+        	name="Application name" 
         	type="String"
 			cardinality="0" 
 			required="true" 
@@ -71,7 +71,7 @@
 			description="OPC-UA application name" />
 			
 		<AD id="application.uri" 
-			name="application.uri" 
+			name="Application URI" 
 			type="String"
 			cardinality="0" 
 			required="true" 
@@ -79,7 +79,7 @@
 			description="OPC-UA application uri" />
 			
 		<AD id="subscription.publish.interval" 
-			name="subscription.publish.interval"
+			name="Subscription publish interval"
 			type="Long" 
 			cardinality="0" 
 			required="true" 
@@ -88,15 +88,15 @@
 		</AD>
 			
 		<AD id="certificate.location" 
-			name="certificate.location" 
+			name="Keystore path" 
 			type="String"
 			cardinality="0" 
 			required="true" 
 			default="PFX or JKS Keystore"
-			description="OPC-UA application certificate (Absolute Location)" />
+			description="Absolute path of the PKCS or JKS keystore that contains the OPC-UA client certificate, private key and trusted server certificates" />
 			
 		<AD id="security.policy" 
-			name="security.policy"
+			name="Security policy"
 			type="Integer" 
 			cardinality="0" 
 			required="true" 
@@ -109,7 +109,7 @@
 		</AD>
 		
 		<AD id="username" 
-			name="username"
+			name="Username"
 			type="String" 
 			cardinality="0" 
 			required="false" 
@@ -117,7 +117,7 @@
 			description="OPC-UA server username" />
 		
 		<AD id="password" 
-			name="password"
+			name="Password"
 			type="Password" 
 			cardinality="0" 
 			required="false" 
@@ -125,23 +125,23 @@
 			description="OPC-UA server password" />
 		
 		<AD id="keystore.client.alias" 
-			name="keystore.client.alias" 
+			name="Client certificate alias" 
 			type="String"
 			cardinality="0" 
 			required="true" 
 			default="client-ai"
-			description="Client alias for the keystore" />
+			description="Alias for the client certificate in the keystore" />
 
-		<AD id="keystore.server.alias" 
-			name="keystore.server.alias"
-			type="String" 
+		<AD id="authenticate.server" 
+			name="Enable server authentication"
+			type="Boolean" 
 			cardinality="0" 
 			required="true" 
-			default="server-ai"
-			description="Server alias for the keystore" />
+			default="false"
+			description="Specifies whether to enable or not server certificate verification" />
 		
 		<AD id="keystore.type" 
-			name="keystore.type"
+			name="Keystore type"
 			type="String" 
 			cardinality="0" 
 			required="true" 
@@ -153,7 +153,7 @@
 		</AD>
 
 		<AD id="keystore.password" 
-			name="keystore.password"
+			name="Keystore password"
 			type="Password" 
 			cardinality="0" 
 			required="true" 
@@ -161,7 +161,7 @@
 			description="Configurable Property to set keystore password (default set to password)" />
 			
 		<AD id="max.request.items" 
-			name="max.request.items"
+			name="Max request items"
 			type="Integer" 
 			cardinality="0" 
 			required="true" 

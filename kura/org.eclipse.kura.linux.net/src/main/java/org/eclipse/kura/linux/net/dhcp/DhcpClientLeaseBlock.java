@@ -47,12 +47,12 @@ public class DhcpClientLeaseBlock {
     private IPAddress fixedAddress;
     private IPAddress subnetMask;
     private List<IPAddress> routers;
-    private int dhcpLeaseTime;
+    private long dhcpLeaseTime;
     private int dhcpMessageType;
     private List<IPAddress> dnsServers;
     private IPAddress dhcpServer;
-    private int dhcpRenewalTime;
-    private int dhcpRebindingTime;
+    private long dhcpRenewalTime;
+    private long dhcpRebindingTime;
     private String domainName;
 
     /**
@@ -76,7 +76,7 @@ public class DhcpClientLeaseBlock {
             } else if (line.contains(ROUTERS_OPTION_NAME)) {
                 this.routers = parseIPlist(line, ROUTERS_OPTION_NAME);
             } else if (line.contains(DHCP_LEASE_TIME_OPTION_NAME)) {
-                this.dhcpLeaseTime = parseInteger(line, DHCP_LEASE_TIME_OPTION_NAME);
+                this.dhcpLeaseTime = parseLong(line, DHCP_LEASE_TIME_OPTION_NAME);
             } else if (line.contains(DHCP_MESSAGE_TYPE_OPTION_NAME)) {
                 this.dhcpMessageType = parseInteger(line, DHCP_MESSAGE_TYPE_OPTION_NAME);
             } else if (line.contains(DOMAIN_NANE_SERVERS_OPTION_NAME)) {
@@ -84,9 +84,9 @@ public class DhcpClientLeaseBlock {
             } else if (line.contains(DHCP_SERVER_IDENTIFIER_OPTION_NAME)) {
                 this.dhcpServer = parseIPaddress(line, DHCP_SERVER_IDENTIFIER_OPTION_NAME);
             } else if (line.contains(DHCP_RENEWAL_TIME_OPTION_NAME)) {
-                this.dhcpRenewalTime = parseInteger(line, DHCP_RENEWAL_TIME_OPTION_NAME);
+                this.dhcpRenewalTime = parseLong(line, DHCP_RENEWAL_TIME_OPTION_NAME);
             } else if (line.contains(DHCP_REBINDING_TIME_OPTION_NAME)) {
-                this.dhcpRebindingTime = parseInteger(line, DHCP_REBINDING_TIME_OPTION_NAME);
+                this.dhcpRebindingTime = parseLong(line, DHCP_REBINDING_TIME_OPTION_NAME);
             } else if (line.contains(DOMAIN_NAME_OPTION_NAME)) {
                 this.domainName = parseString(line, DOMAIN_NAME_OPTION_NAME);
             }
@@ -151,7 +151,7 @@ public class DhcpClientLeaseBlock {
      * 
      * @return DHCP lease time
      */
-    public int getDhcpLeaseTime() {
+    public long getDhcpLeaseTime() {
         return this.dhcpLeaseTime;
     }
 
@@ -187,7 +187,7 @@ public class DhcpClientLeaseBlock {
      * 
      * @return DHCP renewal time
      */
-    public int getDhcpRenewalTime() {
+    public long getDhcpRenewalTime() {
         return this.dhcpRenewalTime;
     }
 
@@ -196,7 +196,7 @@ public class DhcpClientLeaseBlock {
      * 
      * @return DHCP rebinding time
      */
-    public int getDhcpRebindingTime() {
+    public long getDhcpRebindingTime() {
         return this.dhcpRebindingTime;
     }
 
@@ -232,6 +232,17 @@ public class DhcpClientLeaseBlock {
         int ret = 0;
         try {
             ret = Integer.parseInt(line.substring(line.indexOf(name) + name.length(), line.length() - 1).trim());
+        } catch (NumberFormatException e) {
+            logger.error(FAILED_PARSE_LINE_MSG, line, e);
+            throw new KuraException(KuraErrorCode.INVALID_PARAMETER, e);
+        }
+        return ret;
+    }
+
+    private long parseLong(String line, String name) throws KuraException {
+        long ret = 0;
+        try {
+            ret = Long.parseLong(line.substring(line.indexOf(name) + name.length(), line.length() - 1).trim());
         } catch (NumberFormatException e) {
             logger.error(FAILED_PARSE_LINE_MSG, line, e);
             throw new KuraException(KuraErrorCode.INVALID_PARAMETER, e);

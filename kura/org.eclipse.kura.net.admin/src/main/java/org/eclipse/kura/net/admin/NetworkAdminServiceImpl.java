@@ -11,19 +11,13 @@
  *******************************************************************************/
 package org.eclipse.kura.net.admin;
 
-import java.io.File;
-import java.io.IOException;
 import java.net.UnknownHostException;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.EnumSet;
 import java.util.Hashtable;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -36,13 +30,13 @@ import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.modem.ModemInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.modem.ModemInterfaceConfigImpl;
+import org.eclipse.kura.internal.linux.net.dns.DnsServerService;
+import org.eclipse.kura.internal.linux.net.wifi.WifiDriverService;
 import org.eclipse.kura.linux.net.dhcp.DhcpClientManager;
 import org.eclipse.kura.linux.net.dhcp.DhcpServerManager;
-import org.eclipse.kura.linux.net.dns.LinuxNamed;
 import org.eclipse.kura.linux.net.iptables.LinuxFirewall;
 import org.eclipse.kura.linux.net.iptables.NATRule;
 import org.eclipse.kura.linux.net.util.IScanTool;
-import org.eclipse.kura.linux.net.util.KuraConstants;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.eclipse.kura.linux.net.util.ScanTool;
 import org.eclipse.kura.linux.net.wifi.HostapdManager;
@@ -74,7 +68,6 @@ import org.eclipse.kura.net.wifi.WifiHotspotInfo;
 import org.eclipse.kura.net.wifi.WifiInterfaceAddressConfig;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
-import org.eclipse.kura.system.SystemService;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
@@ -86,14 +79,14 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 
     private static final Logger logger = LoggerFactory.getLogger(NetworkAdminServiceImpl.class);
 
-    private static final String OS_VERSION = System.getProperty("kura.os.version");
-
     private ConfigurationService configurationService;
     private NetworkConfigurationService networkConfigurationService;
     private FirewallConfigurationService firewallConfigurationService;
-    private SystemService systemService;
+    private DnsServerService dnsServer;
 
     private Object wifiClientMonitorServiceLock;
+
+    private WifiDriverService wifiDriverService;
 
     private boolean pendingNetworkConfigurationChange = false;
 
@@ -101,17 +94,6 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
             NetworkConfigurationChangeEvent.NETWORK_EVENT_CONFIG_CHANGE_TOPIC };
 
     private ComponentContext context;
-
-    private class NetworkRollbackItem {
-
-        String src;
-        String dst;
-
-        NetworkRollbackItem(String src, String dst) {
-            this.src = src;
-            this.dst = dst;
-        }
-    }
 
     // ----------------------------------------------------------------
     //
@@ -142,12 +124,12 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         this.firewallConfigurationService = null;
     }
 
-    public void setSystemService(SystemService systemService) {
-        this.systemService = systemService;
+    public void setDnsServerService(DnsServerService dnsServer) {
+        this.dnsServer = dnsServer;
     }
 
-    public void unsetSystemService(SystemService systemService) {
-        this.systemService = null;
+    public void unsetDnsServerService(DnsServerService dnsServer) {
+        this.dnsServer = null;
     }
 
     // hack to synchronize verifyWifiCredentials() with WifiClientMonitorService
@@ -157,6 +139,14 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 
     public synchronized void unsetWifiClientMonitorServiceLock() {
         this.wifiClientMonitorServiceLock = null;
+    }
+
+    public void setWifiDriverService(WifiDriverService wifiDriverService) {
+        this.wifiDriverService = wifiDriverService;
+    }
+
+    public void unsetWifiDriverService(WifiDriverService wifiDriverService) {
+        this.wifiDriverService = null;
     }
 
     // ----------------------------------------------------------------
@@ -173,12 +163,11 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         this.context = componentContext;
 
         // since we are just starting up, start named if needed
-        LinuxNamed linuxNamed;
+
         try {
-            linuxNamed = LinuxNamed.getInstance();
-            if (linuxNamed.isConfigured()) {
-                linuxNamed.disable();
-                linuxNamed.enable();
+            if (this.dnsServer.isConfigured()) {
+                this.dnsServer.stop();
+                this.dnsServer.start();
             }
         } catch (KuraException e) {
             logger.warn("Exception while activating NetworkAdmin Service!", e);
@@ -969,7 +958,8 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
                     if (netConfig instanceof NetConfigIP4) {
                         status = ((NetConfigIP4) netConfig).getStatus();
                         isL2Only = ((NetConfigIP4) netConfig).getStatus() == NetInterfaceStatus.netIPv4StatusL2Only
-                                ? true : false;
+                                ? true
+                                : false;
                         logger.debug("Interface status is set to {}", status);
                     } else if (netConfig instanceof WifiConfig && ((WifiConfig) netConfig).getMode() == wifiMode) {
                         wifiConfig = (WifiConfig) netConfig;
@@ -1167,12 +1157,6 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
     }
 
     @Override
-    public Map<String, WifiHotspotInfo> getWifiHotspots(String ifaceName) throws KuraException {
-        List<WifiHotspotInfo> wifiHotspotInfoList = getWifiHotspotList(ifaceName);
-        return wifiHotspotInfoList.stream().collect(Collectors.toMap(WifiHotspotInfo::getSsid, item -> item));
-    }
-
-    @Override
     public List<WifiHotspotInfo> getWifiHotspotList(String ifaceName) throws KuraException {
         List<WifiHotspotInfo> wifiHotspotInfoList = new ArrayList<>();
         WifiMode wifiMode = getWifiMode(ifaceName);
@@ -1246,130 +1230,6 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
                 logger.warn("Exception while managing the temporary instance of the Wpa supplicant.", e);
             }
             return ret;
-        }
-    }
-
-    @Override
-    @Deprecated
-    public boolean rollbackDefaultConfiguration() throws KuraException {
-        logger.debug("rollbackDefaultConfiguration() :: Recovering default configuration ...");
-
-        ArrayList<NetworkRollbackItem> rollbackItems = new ArrayList<>();
-
-        if (this.systemService == null) {
-            return false;
-        }
-
-        String dstDataDirectory = this.systemService.getKuraDataDirectory();
-        if (dstDataDirectory == null) {
-            return false;
-        }
-
-        int ind = dstDataDirectory.lastIndexOf('/');
-        String srcDataDirectory = null;
-        if (ind >= 0) {
-            srcDataDirectory = "".concat(dstDataDirectory.substring(0, ind + 1).concat(".data"));
-        }
-
-        if (srcDataDirectory == null) {
-            return false;
-        }
-
-        rollbackItems
-                .add(new NetworkRollbackItem(srcDataDirectory + "/kuranet.conf", dstDataDirectory + "/kuranet.conf"));
-
-        if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_"
-                + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
-            rollbackItems.add(new NetworkRollbackItem(srcDataDirectory + "/hostapd.conf", "/etc/hostapd/hostapd.conf"));
-            rollbackItems.add(new NetworkRollbackItem(srcDataDirectory + "/dhcpd-eth0.conf", "/etc/udhcpd-usb0.conf"));
-            rollbackItems
-                    .add(new NetworkRollbackItem(srcDataDirectory + "/dhcpd-wlan0.conf", "/etc/udhcpd-wlan0.conf"));
-        } else {
-            rollbackItems.add(new NetworkRollbackItem(srcDataDirectory + "/hostapd.conf", "/etc/hostapd.conf"));
-            rollbackItems.add(new NetworkRollbackItem(srcDataDirectory + "/dhcpd-eth0.conf", "/etc/dhcpd-eth0.conf"));
-            rollbackItems.add(new NetworkRollbackItem(srcDataDirectory + "/dhcpd-wlan0.conf", "/etc/dhcpd-wlan0.conf"));
-        }
-
-        if (OS_VERSION
-                .equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion())
-                || OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName())
-                || OS_VERSION.equals(KuraConstants.Intel_Up2_Ubuntu.getImageName())
-                || OS_VERSION.equals(KuraConstants.BeagleBone.getImageName())
-                || OS_VERSION.equals(
-                        KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion()
-                                + "_" + KuraConstants.Intel_Edison.getTargetName())) {
-            // restore Debian interface configuration
-            rollbackItems.add(new NetworkRollbackItem(srcDataDirectory + "/interfaces", "/etc/network/interfaces"));
-        } else {
-            // restore RedHat interface configuration
-            rollbackItems.add(new NetworkRollbackItem(srcDataDirectory + "/ifcfg-eth0",
-                    "/etc/sysconfig/network-scripts/ifcfg-eth0"));
-            rollbackItems.add(new NetworkRollbackItem(srcDataDirectory + "/ifcfg-eth1",
-                    "/etc/sysconfig/network-scripts/ifcfg-eth1"));
-            rollbackItems.add(new NetworkRollbackItem(srcDataDirectory + "/ifcfg-wlan0",
-                    "/etc/sysconfig/network-scripts/ifcfg-wlan0"));
-        }
-
-        for (NetworkRollbackItem rollbackItem : rollbackItems) {
-            rollbackItem(rollbackItem);
-        }
-
-        logger.debug("rollbackDefaultConfiguration() :: setting network configuration ...");
-        ComponentConfiguration networkComponentConfiguration = ((SelfConfiguringComponent) this.networkConfigurationService)
-                .getConfiguration();
-        if (networkComponentConfiguration != null) {
-            try {
-                NetworkConfiguration netConfiguration = new NetworkConfiguration(
-                        networkComponentConfiguration.getConfigurationProperties());
-                this.networkConfigurationService.setNetworkConfiguration(netConfiguration);
-            } catch (UnknownHostException e) {
-                logger.error("rollback to snapshot_0 has failed ", e);
-            }
-        }
-        return true;
-    }
-
-    @Override
-    @Deprecated
-    public boolean rollbackDefaultFirewallConfiguration() throws KuraException {
-        logger.debug("rollbackDefaultFirewallConfiguration() :: initializing firewall ...");
-        if (this.systemService == null) {
-            return false;
-        }
-
-        String dstDataDirectory = this.systemService.getKuraDataDirectory();
-        if (dstDataDirectory == null) {
-            return false;
-        }
-
-        int ind = dstDataDirectory.lastIndexOf('/');
-        String srcDataDirectory = null;
-        if (ind >= 0) {
-            srcDataDirectory = "".concat(dstDataDirectory.substring(0, ind + 1).concat(".data"));
-        }
-
-        if (srcDataDirectory == null) {
-            return false;
-        }
-
-        NetworkRollbackItem firewallRollbackItem = new NetworkRollbackItem(srcDataDirectory + "/iptables",
-                "/etc/sysconfig/iptables");
-        rollbackItem(firewallRollbackItem);
-        LinuxFirewall.getInstance().initialize();
-        LinuxFirewall.getInstance().enable();
-        return true;
-    }
-
-    private void rollbackItem(NetworkRollbackItem rollbackItem) {
-        File srcFile = new File(rollbackItem.src);
-        File dstFile = new File(rollbackItem.dst);
-        if (srcFile.exists()) {
-            try {
-                logger.debug("rollbackItem() :: copying {} to {} ...", srcFile, dstFile);
-                Files.copy(srcFile.toPath(), dstFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            } catch (IOException e) {
-                logger.error("rollbackItem() :: Failed to recover {} file ", dstFile, e);
-            }
         }
     }
 
@@ -1539,11 +1399,14 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
     }
 
     private void reloadKernelModule(String interfaceName, WifiMode wifiMode) throws KuraException {
-        if (!LinuxNetworkUtil.isKernelModuleLoadedForMode(interfaceName, wifiMode)) {
+        if (this.wifiDriverService == null) {
+            return;
+        }
+        if (!this.wifiDriverService.isKernelModuleLoadedForMode(interfaceName, wifiMode)) {
             logger.info("reloadKernelModule() :: reload {} using kernel module for WiFi mode {}", interfaceName,
                     wifiMode);
-            LinuxNetworkUtil.unloadKernelModule(interfaceName);
-            LinuxNetworkUtil.loadKernelModule(interfaceName, wifiMode);
+            this.wifiDriverService.unloadKernelModule(interfaceName);
+            this.wifiDriverService.loadKernelModule(interfaceName, wifiMode);
         }
     }
 
@@ -1613,7 +1476,6 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         }
 
         return wifiSecurity;
-
     }
 
     private void setCiphers(WifiHotspotInfo wifiHotspotInfo, WifiAccessPoint wap, WifiSecurity wifiSecurity) {

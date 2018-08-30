@@ -507,21 +507,6 @@ public class SierraUsb598 implements EvdoCellularModem {
         return modemTechnologyTypes;
     }
 
-    @Override
-    @Deprecated
-    public ModemTechnologyType getTechnologyType() {
-        ModemTechnologyType modemTechnologyType = null;
-        try {
-            List<ModemTechnologyType> modemTechnologyTypes = getTechnologyTypes();
-            if (modemTechnologyTypes != null && !modemTechnologyTypes.isEmpty()) {
-                modemTechnologyType = modemTechnologyTypes.get(0);
-            }
-        } catch (KuraException e) {
-            logger.error("Failed to obtain modem technology - {}", e);
-        }
-        return modemTechnologyType;
-    }
-
     private String getHipPort() throws KuraException {
         String port;
 

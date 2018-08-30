@@ -12,7 +12,6 @@
 
 package org.eclipse.kura.net.admin.modem.telit.generic;
 
-import java.io.FileReader;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -21,9 +20,7 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.comm.CommConnection;
 import org.eclipse.kura.comm.CommURI;
-import org.eclipse.kura.linux.net.modem.ModemDriver;
-import org.eclipse.kura.linux.net.modem.SupportedSerialModemInfo;
-import org.eclipse.kura.linux.net.modem.SupportedSerialModemsInfo;
+import org.eclipse.kura.internal.board.BoardPowerState;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemInfo;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemsInfo;
 import org.eclipse.kura.linux.net.modem.UsbModemDriver;
@@ -31,7 +28,6 @@ import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.admin.modem.telit.he910.TelitHe910;
 import org.eclipse.kura.net.modem.CellularModem.SerialPortType;
 import org.eclipse.kura.net.modem.ModemDevice;
-import org.eclipse.kura.net.modem.SerialModemDevice;
 import org.eclipse.kura.usb.UsbModemDevice;
 import org.osgi.service.io.ConnectionFactory;
 import org.slf4j.Logger;
@@ -68,34 +64,21 @@ public abstract class TelitModem {
         this.gpsEnabled = false;
     }
 
-    public void reset() throws KuraException {
-
-        boolean status = false;
+    public void reset() {
         int offOnDelay = 1000;
 
         sleep(5000);
         while (true) {
             try {
-                status = turnOff();
-                if (status) {
-                    gpsEnabled = false;
-                    sleep(offOnDelay);
-                    status = turnOn();
-                    if (!status && isOnGpio()) {
-                        logger.info("reset() :: {} seconds delay, then turn OFF/ON", 35);
-                        offOnDelay = 35000;
-                        continue;
-                    }
-                }
-            } catch (Exception e) {
-                logger.error("Failed to reset the modem", e);
-            }
-            if (status) {
+                turnOff();
+
+                this.gpsEnabled = false;
+                sleep(offOnDelay);
+                turnOn();
                 logger.info("reset() :: modem reset successful");
                 break;
-            } else {
-                logger.info("reset() :: modem reset failed");
-                sleep(1000);
+            } catch (Exception e) {
+                logger.error("Failed to reset the modem", e);
             }
         }
     }
@@ -548,13 +531,6 @@ public abstract class TelitModem {
                 } else {
                     throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "No PPP serial port available");
                 }
-            } else if (this.device instanceof SerialModemDevice) {
-                SupportedSerialModemInfo serialModemInfo = SupportedSerialModemsInfo.getModem();
-                if (serialModemInfo != null) {
-                    port = serialModemInfo.getDriver().getComm().getDataPort();
-                } else {
-                    throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "No PPP serial port available");
-                }
             } else {
                 throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "Unsupported modem device");
             }
@@ -572,13 +548,6 @@ public abstract class TelitModem {
                 SupportedUsbModemInfo usbModemInfo = SupportedUsbModemsInfo.getModem((UsbModemDevice) this.device);
                 if (usbModemInfo != null) {
                     port = ports.get(usbModemInfo.getAtPort());
-                } else {
-                    throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "No AT serial port available");
-                }
-            } else if (this.device instanceof SerialModemDevice) {
-                SupportedSerialModemInfo serialModemInfo = SupportedSerialModemsInfo.getModem();
-                if (serialModemInfo != null) {
-                    port = serialModemInfo.getDriver().getComm().getAtPort();
                 } else {
                     throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "No AT serial port available");
                 }
@@ -602,13 +571,6 @@ public abstract class TelitModem {
                     if (gpsPort >= 0) {
                         port = ports.get(gpsPort);
                     }
-                } else {
-                    throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "No GPS serial port available");
-                }
-            } else if (this.device instanceof SerialModemDevice) {
-                SupportedSerialModemInfo serialModemInfo = SupportedSerialModemsInfo.getModem();
-                if (serialModemInfo != null) {
-                    port = serialModemInfo.getDriver().getComm().getGpsPort();
                 } else {
                     throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "No GPS serial port available");
                 }
@@ -770,46 +732,32 @@ public abstract class TelitModem {
         return gpsPowered;
     }
 
-    private boolean isOnGpio() throws Exception {
+    private void turnOff() throws KuraException {
 
-        boolean gpioOn = false;
-        if ("reliagate-10-20".equals(this.platform)) {
-            FileReader fr = new FileReader("/sys/class/gpio/usb-rear-pwr/value");
-            int data = fr.read();
-            fr.close();
-            logger.debug("isGpioOn() :: data={}", data);
-            gpioOn = data == 48 ? false : true;
-            logger.info("isGpioOn()? {}", gpioOn);
-        }
-        return gpioOn;
-    }
-
-    private boolean turnOff() throws Exception {
-
-        boolean retVal = true;
-        ModemDriver modemDriver = getModemDriver();
+        UsbModemDriver modemDriver = getModemDriver();
         if (modemDriver != null) {
-            retVal = modemDriver.turnModemOff();
+            modemDriver.disable();
+        } else {
+            throw new KuraException(KuraErrorCode.UNAVAILABLE_DEVICE);
         }
-        return retVal;
     }
 
-    private boolean turnOn() throws Exception {
+    private void turnOn() throws KuraException {
 
-        boolean retVal = true;
-        ModemDriver modemDriver = getModemDriver();
+        UsbModemDriver modemDriver = getModemDriver();
         if (modemDriver != null) {
-            retVal = modemDriver.turnModemOn();
+            modemDriver.enable();
+        } else {
+            throw new KuraException(KuraErrorCode.UNAVAILABLE_DEVICE);
         }
-        return retVal;
     }
 
-    private ModemDriver getModemDriver() {
+    private UsbModemDriver getModemDriver() {
 
         if (this.device == null) {
             return null;
         }
-        ModemDriver modemDriver = null;
+        UsbModemDriver modemDriver = null;
         if (this.device instanceof UsbModemDevice) {
             SupportedUsbModemInfo usbModemInfo = SupportedUsbModemsInfo.getModem((UsbModemDevice) this.device);
             if (usbModemInfo != null) {
@@ -817,11 +765,6 @@ public abstract class TelitModem {
                 if (usbDeviceDrivers != null && !usbDeviceDrivers.isEmpty()) {
                     modemDriver = usbDeviceDrivers.get(0);
                 }
-            }
-        } else if (this.device instanceof SerialModemDevice) {
-            SupportedSerialModemInfo serialModemInfo = SupportedSerialModemsInfo.getModem();
-            if (serialModemInfo != null) {
-                modemDriver = serialModemInfo.getDriver();
             }
         }
         return modemDriver;

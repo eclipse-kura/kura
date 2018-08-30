@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.eclipse.kura.net.admin.monitor;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -33,6 +34,8 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.net.AbstractNetInterface;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.WifiInterfaceConfigImpl;
+import org.eclipse.kura.internal.board.BoardPowerState;
+import org.eclipse.kura.internal.linux.net.wifi.WifiDriverService;
 import org.eclipse.kura.linux.net.route.RouteService;
 import org.eclipse.kura.linux.net.route.RouteServiceImpl;
 import org.eclipse.kura.linux.net.util.IScanTool;
@@ -98,6 +101,8 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
     private NetworkConfiguration currentNetworkConfiguration;
     private NetworkConfiguration newNetConfiguration;
 
+    private WifiDriverService wifiDriverService;
+
     public void setNetworkService(NetworkService networkService) {
         this.networkService = networkService;
     }
@@ -134,6 +139,14 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
 
     public void unsetNetworkConfigurationService(NetworkConfigurationService netConfigService) {
         this.netConfigService = null;
+    }
+
+    public void setWifiDriverService(WifiDriverService wifiDriverService) {
+        this.wifiDriverService = wifiDriverService;
+    }
+
+    public void unsetWifiDriverService(WifiDriverService wifiUtils) {
+        this.wifiDriverService = null;
     }
 
     protected void activate(ComponentContext componentContext) {
@@ -206,7 +219,16 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
     }
 
     protected boolean isWifiDeviceOn(String interfaceName) {
-        return LinuxNetworkUtil.isWifiDeviceOn(interfaceName);
+        if (this.wifiDriverService != null) {
+            BoardPowerState wifiState;
+            try {
+                wifiState = this.wifiDriverService.getState(interfaceName);
+            } catch (IOException e) {
+                wifiState = BoardPowerState.OFF;
+            }
+            return wifiState == BoardPowerState.ON;
+        }
+        return false;
     }
 
     private void monitor() {
@@ -267,8 +289,8 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                     // There are interfaces for which we need to initially check if
                     // the right kernel module is loaded for the desired mode.
                     // If not we treat the interface as if needing to be reconfigured.
-                    if (this.first
-                            && !LinuxNetworkUtil.isKernelModuleLoadedForMode(interfaceName, wifiConfig.getMode())) {
+                    if (this.first && this.wifiDriverService != null && !this.wifiDriverService
+                            .isKernelModuleLoadedForMode(interfaceName, wifiConfig.getMode())) {
                         logger.info("monitor() :: {} kernel module not suitable for WiFi mode {}", interfaceName,
                                 wifiConfig.getMode());
                         this.first = false;
@@ -651,10 +673,13 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
 
     private void reloadKernelModule(String interfaceName, WifiMode wifiMode) throws KuraException {
         logger.info("monitor() :: reload {} using kernel module for WiFi mode {}", interfaceName, wifiMode);
-        if (LinuxNetworkUtil.isKernelModuleLoaded(interfaceName, wifiMode)) {
-            LinuxNetworkUtil.unloadKernelModule(interfaceName);
+        if (this.wifiDriverService == null) {
+            return;
         }
-        LinuxNetworkUtil.loadKernelModule(interfaceName, wifiMode);
+        if (this.wifiDriverService.isKernelModuleLoaded(interfaceName)) {
+            this.wifiDriverService.unloadKernelModule(interfaceName);
+        }
+        this.wifiDriverService.loadKernelModule(interfaceName, wifiMode);
     }
 
     private void initializeMonitoredInterfaces(NetworkConfiguration networkConfiguration) throws KuraException {
@@ -900,7 +925,8 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
     @Override
     public int getSignalLevel(String interfaceName, String ssid) throws KuraException {
         int rssi;
-        if (!LinuxNetworkUtil.isKernelModuleLoadedForMode(interfaceName, WifiMode.INFRA)) {
+        if (this.wifiDriverService != null
+                && !this.wifiDriverService.isKernelModuleLoadedForMode(interfaceName, WifiMode.INFRA)) {
             logger.info("getSignalLevel() :: reload {} kernel module for WiFi mode {}", interfaceName, WifiMode.INFRA);
             reloadKernelModule(interfaceName, WifiMode.INFRA);
         }
@@ -987,13 +1013,13 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
         return statuses;
     }
 
-    private boolean resetWifiDevice(String interfaceName) throws Exception {
+    private boolean resetWifiDevice(String interfaceName) throws IOException {
         boolean ret = false;
-        if (isWifiDeviceOn(interfaceName)) {
-            LinuxNetworkUtil.turnWifiDeviceOff(interfaceName);
+        if (isWifiDeviceOn(interfaceName) && this.wifiDriverService != null) {
+            this.wifiDriverService.disable(interfaceName);
         }
-        if (isWifiDeviceReady(interfaceName, false, 10)) {
-            LinuxNetworkUtil.turnWifiDeviceOn(interfaceName);
+        if (isWifiDeviceReady(interfaceName, false, 10) && this.wifiDriverService != null) {
+            this.wifiDriverService.enable(interfaceName);
             ret = isWifiDeviceReady(interfaceName, true, 20);
         }
         return ret;

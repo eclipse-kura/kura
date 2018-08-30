@@ -269,6 +269,21 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.linux.sysv.provider</artifactId>
+                                    <version>${org.eclipse.kura.linux.sysv.provider.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.linux.systemd.provider</artifactId>
+                                    <version>${org.eclipse.kura.linux.systemd.provider.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.linux.debian.provider</artifactId>
+                                    <version>${org.eclipse.kura.linux.debian.provider.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.linux.position</artifactId>
                                     <version>${org.eclipse.kura.linux.position.version}</version>
                                 </artifactItem>
@@ -585,6 +600,12 @@
                                     tofile="target/plugins/org.eclipse.kura.linux.command_${org.eclipse.kura.linux.command.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.linux.net.jar"
                                     tofile="target/plugins/org.eclipse.kura.linux.net_${org.eclipse.kura.linux.net.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.linux.sysv.provider.jar"
+                                    tofile="target/plugins/org.eclipse.kura.linux.sysv.provider_${org.eclipse.kura.linux.sysv.provider.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.linux.systemd.provider.jar"
+                                    tofile="target/plugins/org.eclipse.kura.linux.systemd.provider_${org.eclipse.kura.linux.systemd.provider.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.linux.debian.provider.jar"
+                                    tofile="target/plugins/org.eclipse.kura.linux.debian.provider_${org.eclipse.kura.linux.debian.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.linux.position.jar"
                                     tofile="target/plugins/org.eclipse.kura.linux.position_${org.eclipse.kura.linux.position.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.linux.usb.jar"
@@ -1043,6 +1064,8 @@
                                         <property name="kura.os.version" value="debian" />
                                         <property name="kura.arch" value="x86_64" />
                                         <property name="native.tag" value="x86_64" />
+                                        <property name="service.manager" value="sysv" />
+                                        <property name="os.base" value="debian" />
                                         <property name="kura.mem.size" value="1024m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
                                         <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
@@ -1135,6 +1158,8 @@
                                         <property name="kura.os.version" value="debian" />
                                         <property name="kura.arch" value="x86_64" />
                                         <property name="native.tag" value="x86_64" />
+                                        <property name="service.manager" value="sysv" />
+                                        <property name="os.base" value="debian" />
                                         <property name="kura.mem.size" value="1024m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
                                         <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
@@ -1168,68 +1193,6 @@
                                             </mapper>
                                         </data>
                                     </dataSet>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
-            <id>intel-edison-nn</id>
-            <properties>
-            </properties>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <build>
-                <resources>
-                    <resource>
-                        <directory>src/main/resources</directory>
-                        <filtering>true</filtering>
-                    </resource>
-                </resources>
-                <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>buildnumber-maven-plugin</artifactId>
-                        <version>1.0</version>
-                        <executions>
-                            <execution>
-                                <phase>validate</phase>
-                                <goals>
-                                    <goal>create-timestamp</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-antrun-plugin</artifactId>
-                        <version>1.7</version>
-                        <executions>
-                            <execution>
-                                <id>intel-edison-nn-jars</id>
-                                <phase>prepare-package</phase>
-                                <goals>
-                                    <goal>run</goal>
-                                </goals>
-                                <configuration>
-                                    <target>
-                                        <property name="buildNumber" value="buildNumber" />
-                                        <property name="project.version" value="${project.version}" />
-                                        <property name="project.build.profile" value="${project.build.profile}" />
-                                        <property name="project.build.directory" value="${project.build.directory}" />
-                                        <property name="target.device" value="intel-edison" />
-                                        <property name="native.tag" value="x86_64" />
-                                        <property name="kura.os.version" value="yocto_1.6.1_edison" />
-                                        <property name="build.name" value="intel-edison-nn" />
-                                        <property name="kura.arch" value="x86_64" />
-                                        <property name="kura.mem.size" value="256m" />
-                                        <property name="kura.install.dir" value="/home/root/eclipse" />
-                                        <property name="http.port" value="8080" />
-                                        <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
-                                    </target>
                                 </configuration>
                             </execution>
                         </executions>
@@ -1290,6 +1253,8 @@
                                         <property name="native.tag" value="armv6hf" />
                                         <property name="kura.os.version" value="debian" />
                                         <property name="kura.arch" value="armv7_hf" />
+                                        <property name="service.manager" value="sysv" />
+                                        <property name="os.base" value="debian" />
                                         <property name="kura.mem.size" value="256m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
                                         <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
@@ -1382,6 +1347,8 @@
                                         <property name="native.tag" value="armv6hf" />
                                         <property name="kura.os.version" value="debian" />
                                         <property name="kura.arch" value="armv7_hf" />
+                                        <property name="service.manager" value="sysv" />
+                                        <property name="os.base" value="debian" />
                                         <property name="kura.mem.size" value="256m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
                                         <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
@@ -1474,6 +1441,8 @@
                                         <property name="native.tag" value="armv6hf" />
                                         <property name="kura.os.version" value="raspbian" />
                                         <property name="kura.arch" value="armv6_hf" />
+                                        <property name="service.manager" value="sysv" />
+                                        <property name="os.base" value="debian" />
                                         <property name="kura.mem.size" value="256m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
                                         <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
@@ -1565,6 +1534,8 @@
                                         <property name="native.tag" value="armv6hf" />
                                         <property name="kura.os.version" value="raspbian" />
                                         <property name="kura.arch" value="armv6_hf" />
+                                        <property name="service.manager" value="sysv" />
+                                        <property name="os.base" value="debian" />
                                         <property name="kura.mem.size" value="256m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
                                         <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
@@ -1657,6 +1628,8 @@
                                         <property name="native.tag" value="armv6hf" />
                                         <property name="kura.os.version" value="raspbian" />
                                         <property name="kura.arch" value="armv6_hf" />
+                                        <property name="service.manager" value="sysv" />
+                                        <property name="os.base" value="debian" />
                                         <property name="kura.mem.size" value="256m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
                                         <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
@@ -1748,6 +1721,8 @@
                                         <property name="native.tag" value="armv6hf" />
                                         <property name="kura.os.version" value="raspbian" />
                                         <property name="kura.arch" value="armv6_hf" />
+                                        <property name="service.manager" value="sysv" />
+                                        <property name="os.base" value="debian" />
                                         <property name="kura.mem.size" value="256m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
                                         <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
@@ -1841,6 +1816,8 @@
                                         <property name="native.tag" value="armv6hf" />
                                         <property name="kura.os.version" value="raspbian" />
                                         <property name="kura.arch" value="armv7_hf" />
+                                        <property name="service.manager" value="sysv" />
+                                        <property name="os.base" value="debian" />
                                         <property name="kura.mem.size" value="512m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
                                         <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
@@ -1933,6 +1910,8 @@
                                         <property name="native.tag" value="armv6hf" />
                                         <property name="kura.os.version" value="raspbian" />
                                         <property name="kura.arch" value="armv7_hf" />
+                                        <property name="service.manager" value="sysv" />
+                                        <property name="os.base" value="debian" />
                                         <property name="kura.mem.size" value="512m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
                                         <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
@@ -2022,6 +2001,8 @@
                                         <property name="native.tag" value="armv6hf" />
                                         <property name="kura.os.version" value="fedora" />
                                         <property name="kura.arch" value="armv7_hf" />
+                                        <property name="service.manager" value="systemd" />
+                                        <property name="os.base" value="redhat" />
                                         <property name="kura.mem.size" value="512m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
                                         <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
@@ -2152,6 +2133,8 @@
                                         <property name="native.tag" value="armv6hf" />
                                         <property name="kura.os.version" value="fedora" />
                                         <property name="kura.arch" value="armv7_hf" />
+                                        <property name="service.manager" value="systemd" />
+                                        <property name="os.base" value="redhat" />
                                         <property name="kura.mem.size" value="512m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
                                         <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
@@ -2273,6 +2256,8 @@
                                         <property name="native.tag" value="x86_64" />
                                         <property name="kura.os.version" value="ubuntu" />
                                         <property name="kura.arch" value="intel-up2-ubuntu-16" />
+                                        <property name="service.manager" value="sysv" />
+                                        <property name="os.base" value="debian" />
                                         <property name="kura.mem.size" value="1024m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
                                         <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
@@ -2362,6 +2347,8 @@
                                         <property name="native.tag" value="x86_64" />
                                         <property name="kura.os.version" value="centos" />
                                         <property name="kura.arch" value="intel-up2-centos-7" />
+                                        <property name="service.manager" value="systemd" />
+                                        <property name="os.base" value="redhat" />
                                         <property name="kura.mem.size" value="1024m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
                                         <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
@@ -2493,6 +2480,8 @@
                                         <property name="native.tag" value="x86_64" />
                                         <property name="kura.os.version" value="centos" />
                                         <property name="kura.arch" value="intel-up2-centos-7" />
+                                        <property name="service.manager" value="systemd" />
+                                        <property name="os.base" value="redhat" />
                                         <property name="kura.mem.size" value="1024m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
                                         <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
@@ -2556,6 +2545,68 @@
                                         <script>/tmp/kura_${project.version}_installer.sh</script>
                                     </afterInstallation>
                                     <skipSigning>true</skipSigning>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        
+        <profile>
+            <id>aarch64-nn</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <resources>
+                    <resource>
+                        <directory>src/main/resources</directory>
+                        <filtering>true</filtering>
+                    </resource>
+                </resources>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>buildnumber-maven-plugin</artifactId>
+                        <version>1.0</version>
+                        <executions>
+                            <execution>
+                                <phase>validate</phase>
+                                <goals>
+                                    <goal>create-timestamp</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>1.7</version>
+                        <executions>
+                            <execution>
+                                <id>aarch64-nn-jars</id>
+                                <phase>prepare-package</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <property name="buildNumber" value="buildNumber" />
+                                        <property name="project.version" value="${project.version}" />
+                                        <property name="project.build.profile" value="${project.build.profile}" />
+                                        <property name="project.build.directory" value="${project.build.directory}" />
+                                        <property name="build.name" value="aarch64-nn" />
+                                        <property name="target.device" value="aarch64-nn" />
+                                        <property name="kura.os.version" value="debian" />
+                                        <property name="native.tag" value="aarch64"/>
+                                        <property name="kura.arch" value="aarch64" />
+                                        <property name="service.manager" value="sysv" />
+                                        <property name="os.base" value="debian" />
+                                        <property name="kura.mem.size" value="256m" />
+                                        <property name="kura.install.dir" value="/opt/eclipse/" />
+                                        <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
+                                    </target>
                                 </configuration>
                             </execution>
                         </executions>
@@ -3188,65 +3239,6 @@
               </plugin>
             </plugins>
           </build>
-        </profile>
-        <profile>
-            <id>aarch64-nn</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <build>
-                <resources>
-                    <resource>
-                        <directory>src/main/resources</directory>
-                        <filtering>true</filtering>
-                    </resource>
-                </resources>
-                <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>buildnumber-maven-plugin</artifactId>
-                        <version>1.0</version>
-                        <executions>
-                            <execution>
-                                <phase>validate</phase>
-                                <goals>
-                                    <goal>create-timestamp</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-antrun-plugin</artifactId>
-                        <version>1.7</version>
-                        <executions>
-                            <execution>
-                                <id>aarch64-nn-jars</id>
-                                <phase>prepare-package</phase>
-                                <goals>
-                                    <goal>run</goal>
-                                </goals>
-                                <configuration>
-                                    <target>
-                                        <property name="buildNumber" value="buildNumber" />
-                                        <property name="project.version" value="${project.version}" />
-                                        <property name="project.build.profile" value="${project.build.profile}" />
-                                        <property name="project.build.directory" value="${project.build.directory}" />
-                                        <property name="build.name" value="aarch64-nn" />
-                                        <property name="target.device" value="aarch64-nn" />
-                                        <property name="kura.os.version" value="debian" />
-                                        <property name="native.tag" value="aarch64"/>
-                                        <property name="kura.arch" value="aarch64" />
-                                        <property name="kura.mem.size" value="256m" />
-                                        <property name="kura.install.dir" value="/opt/eclipse/" />
-                                        <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
-                                    </target>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
         </profile>
     </profiles>
 </project>

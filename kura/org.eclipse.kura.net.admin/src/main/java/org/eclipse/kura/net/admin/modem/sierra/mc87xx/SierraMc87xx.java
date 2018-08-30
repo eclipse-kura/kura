@@ -461,21 +461,6 @@ public class SierraMc87xx implements HspaCellularModem {
     }
 
     @Override
-    @Deprecated
-    public ModemTechnologyType getTechnologyType() {
-        ModemTechnologyType modemTechnologyType = null;
-        try {
-            List<ModemTechnologyType> modemTechnologyTypes = getTechnologyTypes();
-            if (modemTechnologyTypes != null && !modemTechnologyTypes.isEmpty()) {
-                modemTechnologyType = modemTechnologyTypes.get(0);
-            }
-        } catch (KuraException e) {
-            s_logger.error("Failed to obtain modem technology - {}", e);
-        }
-        return modemTechnologyType;
-    }
-
-    @Override
     public boolean isSimCardReady() throws KuraException {
 
         boolean simReady = false;

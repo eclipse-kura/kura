@@ -19,8 +19,6 @@ import java.util.Scanner;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.comm.CommConnection;
-import org.eclipse.kura.linux.net.modem.SupportedSerialModemInfo;
-import org.eclipse.kura.linux.net.modem.SupportedSerialModemsInfo;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemInfo;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemsInfo;
 import org.eclipse.kura.net.admin.modem.HspaCellularModem;
@@ -30,7 +28,6 @@ import org.eclipse.kura.net.modem.ModemPdpContext;
 import org.eclipse.kura.net.modem.ModemPdpContextType;
 import org.eclipse.kura.net.modem.ModemRegistrationStatus;
 import org.eclipse.kura.net.modem.ModemTechnologyType;
-import org.eclipse.kura.net.modem.SerialModemDevice;
 import org.eclipse.kura.usb.UsbModemDevice;
 import org.osgi.service.io.ConnectionFactory;
 import org.slf4j.Logger;
@@ -44,7 +41,7 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
     private static final Logger logger = LoggerFactory.getLogger(TelitHe910.class);
 
     // FIXME PDP context should not be hard coded
-    private final int pdpContext = 1;
+    private static final int PDP_CONTEXT = 1;
 
     /**
      * TelitHe910 modem constructor
@@ -233,7 +230,7 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
                             splitData = pdp.trim().split(",");
                             if (splitData.length >= 4) {
                                 int pdpNo = Integer.parseInt(splitData[0]);
-                                if (pdpNo == this.pdpContext) {
+                                if (pdpNo == this.PDP_CONTEXT) {
                                     txCnt = Integer.parseInt(splitData[2]);
                                 }
                             }
@@ -276,7 +273,7 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
                             splitData = pdp.trim().split(",");
                             if (splitData.length >= 4) {
                                 int pdpNo = Integer.parseInt(splitData[0]);
-                                if (pdpNo == this.pdpContext) {
+                                if (pdpNo == this.PDP_CONTEXT) {
                                     rxCnt = Integer.parseInt(splitData[3]);
                                 }
                             }
@@ -381,32 +378,10 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
             } else {
                 throw new KuraException(KuraErrorCode.UNAVAILABLE_DEVICE, "No usbModemInfo available");
             }
-        } else if (device instanceof SerialModemDevice) {
-            SupportedSerialModemInfo serialModemInfo = SupportedSerialModemsInfo.getModem();
-            if (serialModemInfo != null) {
-                modemTechnologyTypes = serialModemInfo.getTechnologyTypes();
-            } else {
-                throw new KuraException(KuraErrorCode.UNAVAILABLE_DEVICE, "No serialModemInfo available");
-            }
         } else {
             throw new KuraException(KuraErrorCode.UNAVAILABLE_DEVICE, "Unsupported modem device");
         }
         return modemTechnologyTypes;
-    }
-
-    @Override
-    @Deprecated
-    public ModemTechnologyType getTechnologyType() {
-        ModemTechnologyType modemTechnologyType = null;
-        try {
-            List<ModemTechnologyType> modemTechnologyTypes = getTechnologyTypes();
-            if (modemTechnologyTypes != null && !modemTechnologyTypes.isEmpty()) {
-                modemTechnologyType = modemTechnologyTypes.get(0);
-            }
-        } catch (KuraException e) {
-            logger.error("Failed to obtain modem technology - {}", e);
-        }
-        return modemTechnologyType;
     }
 
     private String formGetPdpContextAtCommand() {

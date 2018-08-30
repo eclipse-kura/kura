@@ -41,8 +41,6 @@ import org.eclipse.kura.core.net.WifiInterfaceConfigImpl;
 import org.eclipse.kura.core.net.WifiInterfaceImpl;
 import org.eclipse.kura.core.net.modem.ModemInterfaceConfigImpl;
 import org.eclipse.kura.core.net.modem.ModemInterfaceImpl;
-import org.eclipse.kura.linux.net.modem.SupportedSerialModemInfo;
-import org.eclipse.kura.linux.net.modem.SupportedSerialModemsInfo;
 import org.eclipse.kura.linux.net.modem.UsbModemDriver;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.eclipse.kura.net.EthernetInterface;
@@ -254,16 +252,9 @@ public class NetworkConfigurationServiceImpl
 
     private NetInterfaceType updateUnknownType(String interfaceName, NetInterfaceType type) {
         NetInterfaceType result = type;
-        if (type == NetInterfaceType.UNKNOWN) {
-            if (interfaceName.matches(UNCONFIGURED_MODEM_REGEX)) {
-                // If the interface name is in a form such as "1-3.4" (USB address), assume it is a modem
-                result = NetInterfaceType.MODEM;
-            } else {
-                SupportedSerialModemInfo serialModemInfo = SupportedSerialModemsInfo.getModem();
-                if (serialModemInfo != null && serialModemInfo.getModemName().equals(interfaceName)) {
-                    result = NetInterfaceType.MODEM;
-                }
-            }
+        if (type == NetInterfaceType.UNKNOWN && interfaceName.matches(UNCONFIGURED_MODEM_REGEX)) {
+            // If the interface name is in a form such as "1-3.4" (USB address), assume it is a modem
+            result = NetInterfaceType.MODEM;
         }
 
         return result;

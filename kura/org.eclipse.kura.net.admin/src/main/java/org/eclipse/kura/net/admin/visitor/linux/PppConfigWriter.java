@@ -21,12 +21,9 @@ import java.util.Set;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.core.net.AbstractNetInterface;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
 import org.eclipse.kura.core.net.modem.ModemInterfaceConfigImpl;
-import org.eclipse.kura.linux.net.modem.SupportedSerialModemInfo;
-import org.eclipse.kura.linux.net.modem.SupportedSerialModemsInfo;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemInfo;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemsInfo;
 import org.eclipse.kura.net.IP4Address;
@@ -36,8 +33,6 @@ import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceConfig;
 import org.eclipse.kura.net.admin.modem.ModemPppConfigGenerator;
 import org.eclipse.kura.net.admin.modem.PppPeer;
-import org.eclipse.kura.net.admin.modem.SupportedSerialModemsFactoryInfo;
-import org.eclipse.kura.net.admin.modem.SupportedSerialModemsFactoryInfo.SerialModemFactoryInfo;
 import org.eclipse.kura.net.admin.modem.SupportedUsbModemsFactoryInfo;
 import org.eclipse.kura.net.admin.modem.SupportedUsbModemsFactoryInfo.UsbModemFactoryInfo;
 import org.eclipse.kura.net.admin.util.LinuxFileUtil;
@@ -50,7 +45,7 @@ import org.slf4j.LoggerFactory;
 
 public class PppConfigWriter implements NetworkConfigurationVisitor {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(PppConfigWriter.class);
+    private static final Logger logger = LoggerFactory.getLogger(PppConfigWriter.class);
 
     private static final String NET_INTERFACE_PPP = "net.interface.ppp";
     public static final String OS_PEERS_DIRECTORY = "/etc/ppp/peers/";
@@ -58,32 +53,32 @@ public class PppConfigWriter implements NetworkConfigurationVisitor {
     public static final String OS_SCRIPTS_DIRECTORY = "/etc/ppp/scripts/";
     public static final String DNS_DELIM = ",";
 
-    private static PppConfigWriter s_instance;
+    private static PppConfigWriter instance;
 
     public static PppConfigWriter getInstance() {
-        if (s_instance == null) {
-            s_instance = new PppConfigWriter();
+        if (instance == null) {
+            instance = new PppConfigWriter();
         }
 
-        return s_instance;
+        return instance;
     }
 
     private PppConfigWriter() {
         File peersDir = new File(OS_PEERS_DIRECTORY);
         if (!peersDir.exists()) {
             if (peersDir.mkdirs()) {
-                s_logger.debug("Created directory: {}", OS_PEERS_DIRECTORY);
+                logger.debug("Created directory: {}", OS_PEERS_DIRECTORY);
             } else {
-                s_logger.warn("Could not create peers directory: " + OS_PEERS_DIRECTORY);
+                logger.warn("Could not create peers directory: {}", OS_PEERS_DIRECTORY);
             }
         }
 
         File scriptsDir = new File(OS_SCRIPTS_DIRECTORY);
         if (!scriptsDir.exists()) {
             if (scriptsDir.mkdirs()) {
-                s_logger.debug("Created directory: {}", OS_SCRIPTS_DIRECTORY);
+                logger.debug("Created directory: {}", OS_SCRIPTS_DIRECTORY);
             } else {
-                s_logger.warn("Could not create scripts directory: " + OS_SCRIPTS_DIRECTORY);
+                logger.warn("Could not create scripts directory: {}", OS_SCRIPTS_DIRECTORY);
             }
         }
     }
@@ -92,7 +87,7 @@ public class PppConfigWriter implements NetworkConfigurationVisitor {
     public void visit(NetworkConfiguration config) throws KuraException {
         List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> updatedNetInterfaceConfigs = config
                 .getModifiedNetInterfaceConfigs();
-        List<String> modemNetInterfaceNames = new ArrayList<String>();
+        List<String> modemNetInterfaceNames = new ArrayList<>();
         for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : updatedNetInterfaceConfigs) {
             if (netInterfaceConfig instanceof ModemInterfaceConfigImpl) {
                 writeConfig((ModemInterfaceConfigImpl) netInterfaceConfig);
@@ -117,7 +112,7 @@ public class PppConfigWriter implements NetworkConfigurationVisitor {
         ModemConfig modemConfig = null;
         NetConfigIP4 netConfigIP4 = null;
 
-        List<NetConfig> netConfigs = ((AbstractNetInterface<?>) modemInterfaceConfig).getNetConfigs();
+        List<NetConfig> netConfigs = modemInterfaceConfig.getNetConfigs();
         for (NetConfig netConfig : netConfigs) {
             if (netConfig instanceof ModemConfig) {
                 modemConfig = (ModemConfig) netConfig;
@@ -149,11 +144,6 @@ public class PppConfigWriter implements NetworkConfigurationVisitor {
                 configClass = usbFactoryInfo.getConfigGeneratorClass();
             }
             baudRate = 921600;
-        } else {
-            SupportedSerialModemInfo serialModemInfo = SupportedSerialModemsInfo.getModem();
-            SerialModemFactoryInfo serialFactoryInfo = SupportedSerialModemsFactoryInfo.getModem(serialModemInfo);
-            configClass = serialFactoryInfo.getConfigGeneratorClass();
-            baudRate = serialModemInfo.getDriver().getComm().getBaudRate();
         }
 
         String pppPeerFilename = formPeerFilename(usbDevice);
@@ -161,35 +151,28 @@ public class PppConfigWriter implements NetworkConfigurationVisitor {
         String chatFilename = formChatFilename(usbDevice);
         String disconnectFilename = formDisconnectFilename(usbDevice);
 
-        /*
-         * String tmpPppPeerFilename = new StringBuffer().append(pppPeerFilename).append(".tmp").toString();
-         * String tmpPppLogfile = new StringBuffer().append(pppLogfile).append(".tmp").toString();
-         * String tmpChatFilename = new StringBuffer().append(chatFilename).append(".tmp").toString();
-         * String tmpDisconnectFilename = new StringBuffer().append(chatFilename).append(".tmp").toString();
-         */
-
         // Cleanup values associated with the old name if the interface name has changed
         if (!oldInterfaceName.equals(newInterfaceName)) {
             try {
                 // Remove the old ppp peers symlink
-                s_logger.debug("Removing old symlinks to {}", pppPeerFilename);
+                logger.debug("Removing old symlinks to {}", pppPeerFilename);
                 removeSymbolicLinks(pppPeerFilename, OS_PEERS_DIRECTORY);
 
                 // Remove the old modem identifier
                 StringBuilder key = new StringBuilder("net.interface.").append(oldInterfaceName)
                         .append(".modem.identifier");
-                s_logger.debug("Removing modem identifier for {}", oldInterfaceName);
+                logger.debug("Removing modem identifier for {}", oldInterfaceName);
                 KuranetConfig.deleteProperty(key.toString());
 
                 // Remove custom dns servers
                 key = new StringBuilder("net.interface.").append(oldInterfaceName).append(".config.dnsServers");
-                s_logger.debug("Removing dns servers for {}", oldInterfaceName);
+                logger.debug("Removing dns servers for {}", oldInterfaceName);
                 KuranetConfig.deleteProperty(key.toString());
 
                 // Remove gpsEnabled
                 key = new StringBuilder().append("net.interface.").append(oldInterfaceName)
                         .append(".config.gpsEnabled");
-                s_logger.debug("Removing gpsEnabled for {}", oldInterfaceName);
+                logger.debug("Removing gpsEnabled for {}", oldInterfaceName);
                 KuranetConfig.deleteProperty(key.toString());
 
                 // Remove status
@@ -209,38 +192,38 @@ public class PppConfigWriter implements NetworkConfigurationVisitor {
                     if (modemIdentifier != null) {
                         StringBuilder key = new StringBuilder("net.interface.").append(modemInterfaceConfig.getName())
                                 .append(".modem.identifier");
-                        s_logger.debug("Storing modem identifier " + modemIdentifier + " using key: " + key);
+                        logger.debug("Storing modem identifier {} using key: {}", modemIdentifier, key);
                         KuranetConfig.setProperty(key.toString(), modemIdentifier);
                     }
 
                     final StringBuilder gpsEnabledKey = new StringBuilder().append("net.interface.")
                             .append(newInterfaceName).append(".config.gpsEnabled");
-                    s_logger.debug("Setting gpsEnabled for {}", newInterfaceName);
+                    logger.debug("Setting gpsEnabled for {}", newInterfaceName);
                     KuranetConfig.setProperty(gpsEnabledKey.toString(), Boolean.toString(modemConfig.isGpsEnabled()));
 
-                    s_logger.debug("Writing connect scripts for " + modemInterfaceConfig.getName() + " using "
-                            + configClass.toString());
+                    logger.debug("Writing connect scripts for {} using {}", modemInterfaceConfig.getName(),
+                            configClass);
 
-                    s_logger.debug("Writing {}", pppPeerFilename);
+                    logger.debug("Writing {}", pppPeerFilename);
                     PppPeer pppPeer = scriptGenerator.getPppPeer(getDeviceId(usbDevice), modemConfig, pppLogfile,
                             chatFilename, disconnectFilename);
                     pppPeer.setBaudRate(baudRate);
                     pppPeer.write(pppPeerFilename);
 
                     if (pppNum >= 0) {
-                        s_logger.debug("Linking peer file using ppp number: {}", pppNum);
+                        logger.debug("Linking peer file using ppp number: {}", pppNum);
                         String symlinkFilename = formPeerLinkAbsoluteName(pppNum);
                         LinuxFileUtil.createSymbolicLink(pppPeerFilename, symlinkFilename);
                     } else {
-                        s_logger.error(
-                                "Can't create symbolic link to " + pppPeerFilename + ", invalid ppp number: " + pppNum);
+                        logger.error("Can't create symbolic link to {}, invalid ppp number: {}", pppPeerFilename,
+                                pppNum);
                     }
 
-                    s_logger.debug("Writing {}", chatFilename);
+                    logger.debug("Writing {}", chatFilename);
                     ModemXchangeScript connectScript = scriptGenerator.getConnectScript(modemConfig);
                     connectScript.writeScript(chatFilename);
 
-                    s_logger.debug("Writing {}", disconnectFilename);
+                    logger.debug("Writing {}", disconnectFilename);
                     ModemXchangeScript disconnectScript = scriptGenerator.getDisconnectScript(modemConfig);
                     disconnectScript.writeScript(disconnectFilename);
 
@@ -259,7 +242,7 @@ public class PppConfigWriter implements NetworkConfigurationVisitor {
                                 serversSB.append(DNS_DELIM).append(it.next().getHostAddress());
                             }
 
-                            s_logger.debug("Storing DNS servers " + serversSB + " using key: " + key);
+                            logger.debug("Storing DNS servers {} using key: {}", serversSB, key);
                             KuranetConfig.setProperty(key.toString(), serversSB.toString());
                         } else {
                             KuranetConfig.deleteProperty(key.toString());
@@ -268,27 +251,27 @@ public class PppConfigWriter implements NetworkConfigurationVisitor {
 
                     final StringBuilder resetTimeoutKey = new StringBuilder().append("net.interface.")
                             .append(newInterfaceName).append(".config.resetTimeout");
-                    s_logger.debug("Setting modem resetTimeout for {}", newInterfaceName);
+                    logger.debug("Setting modem resetTimeout for {}", newInterfaceName);
                     KuranetConfig.setProperty(resetTimeoutKey.toString(),
                             Integer.toString(modemConfig.getResetTimeout()));
                 } else {
-                    s_logger.error("Error writing connect scripts - modemConfig is null");
+                    logger.error("Error writing connect scripts - modemConfig is null");
                 }
             } catch (Exception e) {
-                s_logger.error("Could not write modem config", e);
+                logger.error("Could not write modem config", e);
             }
         }
     }
 
     public static String formPeerFilename(UsbDevice usbDevice) {
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         buf.append(OS_PEERS_DIRECTORY);
         buf.append(formBaseFilename(usbDevice));
         return buf.toString();
     }
 
     public static String formPppLogFilename(UsbDevice usbDevice) {
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         buf.append(OS_PPP_LOG_DIRECTORY);
         buf.append("kura-");
         buf.append(formBaseFilename(usbDevice));
@@ -296,7 +279,7 @@ public class PppConfigWriter implements NetworkConfigurationVisitor {
     }
 
     public static String formChatFilename(UsbDevice usbDevice) {
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         buf.append(OS_SCRIPTS_DIRECTORY);
         buf.append("chat");
         buf.append('_');
@@ -305,7 +288,7 @@ public class PppConfigWriter implements NetworkConfigurationVisitor {
     }
 
     public static String formPeerLinkName(int pppUnitNo) {
-        StringBuffer peerLinkName = new StringBuffer();
+        StringBuilder peerLinkName = new StringBuilder();
         peerLinkName.append("ppp");
         peerLinkName.append(pppUnitNo);
 
@@ -313,14 +296,14 @@ public class PppConfigWriter implements NetworkConfigurationVisitor {
     }
 
     public static String formPeerLinkAbsoluteName(int pppUnitNo) {
-        StringBuffer peerLink = new StringBuffer();
+        StringBuilder peerLink = new StringBuilder();
         peerLink.append(OS_PEERS_DIRECTORY);
         peerLink.append(formPeerLinkName(pppUnitNo));
         return peerLink.toString();
     }
 
     public static String formDisconnectFilename(UsbDevice usbDevice) {
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         buf.append(OS_SCRIPTS_DIRECTORY);
         buf.append("disconnect");
         buf.append('_');
@@ -329,7 +312,7 @@ public class PppConfigWriter implements NetworkConfigurationVisitor {
     }
 
     private static String formBaseFilename(UsbDevice usbDevice) {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
 
         if (usbDevice != null) {
             SupportedUsbModemInfo modemInfo = SupportedUsbModemsInfo.getModem(usbDevice);
@@ -338,27 +321,16 @@ public class PppConfigWriter implements NetworkConfigurationVisitor {
                 sb.append('_');
                 sb.append(usbDevice.getUsbPort());
             }
-        } else {
-            SupportedSerialModemInfo modemInfo = SupportedSerialModemsInfo.getModem();
-            if (modemInfo != null) {
-                sb.append(modemInfo.getModemName());
-            }
         }
         return sb.toString();
     }
 
     private static String getDeviceId(UsbDevice usbDevice) {
-
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         if (usbDevice != null) {
             SupportedUsbModemInfo modemInfo = SupportedUsbModemsInfo.getModem(usbDevice);
             if (modemInfo != null) {
                 sb.append(modemInfo.getDeviceName());
-            }
-        } else {
-            SupportedSerialModemInfo modemInfo = SupportedSerialModemsInfo.getModem();
-            if (modemInfo != null) {
-                sb.append(modemInfo.getModemName());
             }
         }
 
@@ -377,7 +349,7 @@ public class PppConfigWriter implements NetworkConfigurationVisitor {
                 }
 
                 if (file.getCanonicalPath().equals(targetFile.getAbsolutePath())) {
-                    s_logger.debug("Deleting {}", file.getAbsolutePath());
+                    logger.debug("Deleting {}", file.getAbsolutePath());
                     file.delete();
                 }
             }
@@ -390,7 +362,7 @@ public class PppConfigWriter implements NetworkConfigurationVisitor {
             return;
         }
 
-        List<String> keysToRemove = new ArrayList<String>();
+        List<String> keysToRemove = new ArrayList<>();
         Set<Object> keys = props.keySet();
         for (Object obj : keys) {
             String key = (String) obj;

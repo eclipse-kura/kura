@@ -1447,27 +1447,6 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
         }
     }
 
-    @Override
-    @Deprecated
-    public void rollbackDefaultConfiguration(GwtXSRFToken xsrfToken) {
-        logger.debug("Rolling back to default configuration ...");
-        try {
-            checkXSRFToken(xsrfToken);
-
-            NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
-            if (nas != null) {
-                try {
-                    nas.rollbackDefaultConfiguration();
-                    logger.debug("ESF is set to default configuration.");
-                } catch (KuraException e) {
-                    throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
-                }
-            }
-        } catch (GwtKuraException e) {
-            logger.warn("Failed to obtain the NetworkAdminService. This is ok if running the 'No-Network' version.", e);
-        }
-    }
-
     private WifiConfig getWifiConfig(GwtWifiConfig gwtWifiConfig) {
 
         WifiConfig wifiConfig = new WifiConfig();

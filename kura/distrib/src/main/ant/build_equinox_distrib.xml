@@ -92,7 +92,7 @@
               tofile="${project.build.directory}/${build.output.name}/jdk.dio.properties" />
 		<copy file="src/main/resources/common/jdk.dio.policy"
               tofile="${project.build.directory}/${build.output.name}/jdk.dio.policy" />
-              
+
     	<copy file="src/main/resources/common/cacerts.ks" tofile="${project.build.directory}/${build.output.name}/cacerts.ks" />
 
 
@@ -138,7 +138,7 @@
 
 		<!-- Deployment hook bundles configs -->
 		<antcall target="deployment-hooks-config" />
-		
+
 		<!-- Marshalling bundles configs -->
 		<antcall target="marshallers-config" />
 
@@ -163,7 +163,7 @@
 		<condition property="is.sysv">
 			<contains string="${service.manager}" substring="sysv"/>
 		</condition>
-		
+
 		<condition property="is.debian">
 			<contains string="${os.base}" substring="debian"/>
 		</condition>
@@ -357,7 +357,7 @@ fi]]>
 
 			<zipfileset file="${project.build.directory}/${build.output.name}/jdk.dio.properties"
                         prefix="${build.output.name}/${framework.config.folder}/" />
-                        
+
             <zipfileset file="${project.build.directory}/${build.output.name}/cacerts.ks" prefix="${build.output.name}/${security.folder}/" />
 
 			<zipfileset file="src/main/resources/common/kura_custom.properties"
@@ -626,7 +626,7 @@ fi]]>
 			<arg value="${build.name}" />
 		</exec>
 	</target>
-	
+
 	<target name="set-http-port" if="http.port">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="org.osgi.service.http.port" operation="="
@@ -722,8 +722,6 @@ fi]]>
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/minimal-json_${com.eclipsesource.minimal-json.version}.jar" />
 			<entry key="osgi.bundles" operation="+"
-				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.hsqldb.hsqldb_${org.hsqldb.hsqldb.version}.jar@3:start" />
-			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.h2_${com.h2database.h2.version}.jar@3:start" />
 			<entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/com.codeminders.hidapi.${native.tag}_${com.codeminders.hidapi.version}.jar@3" />
@@ -795,7 +793,7 @@ fi]]>
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.core.cloud_${org.eclipse.kura.core.cloud.version}.jar@4:start" />
 		</propertyfile>
 	</target>
-	
+
 	<target name="cloud.mqtt.eclipseiot-config">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
@@ -965,7 +963,7 @@ fi]]>
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.hook.file.move.provider_${org.eclipse.kura.hook.file.move.provider.version}.jar@4:start" />
 		</propertyfile>
 	</target>
-	
+
 	<target name="marshallers-config">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
@@ -1026,7 +1024,7 @@ fi]]>
 				prefix="${build.output.name}/${plugins.folder}" />
 		</zip>
 	</target>
-	
+
 	<target name="marshallers-jar">
 		<zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.json.marshaller.unmarshaller.provider_${org.eclipse.kura.json.marshaller.unmarshaller.provider.version}.jar"
@@ -1242,28 +1240,28 @@ fi]]>
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.jar@5:start" />
 		</propertyfile>
 	</target>
-	
+
 	<target name="linux-sysv-config" if="is.sysv" depends="linux-config">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
 					value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.linux.sysv.provider_${org.eclipse.kura.linux.sysv.provider.version}.jar@4" />
 		</propertyfile>
 	</target>
-	
+
 	<target name="linux-debian-config" if="is.debian" depends="linux-config">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
 					value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.linux.debian.provider_${org.eclipse.kura.linux.debian.provider.version}.jar@4" />
 		</propertyfile>
 	</target>
-	
+
 	<target name="linux-redhat-config" unless="is.debian" depends="linux-config">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
 					value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.linux.redhat.provider_${org.eclipse.kura.linux.redhat.provider.version}.jar@4" />
 		</propertyfile>
 	</target>
-	
+
 	<target name="linux-systemd-config" unless="is.sysv" depends="linux-config">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
@@ -1288,28 +1286,28 @@ fi]]>
                         prefix="${build.output.name}/${plugins.folder}" />
 		</zip>
 	</target>
-	
+
 	<target name="linux-sysv-jars" if="is.sysv" depends="linux-jars">
 		<zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux.sysv.provider_${org.eclipse.kura.linux.sysv.provider.version}.jar"
                         prefix="${build.output.name}/${plugins.folder}" />
 		</zip>
 	</target>
-	
+
 	<target name="linux-debian-jars" if="is.debian" depends="linux-jars">
 		<zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux.debian.provider_${org.eclipse.kura.linux.debian.provider.version}.jar"
                         prefix="${build.output.name}/${plugins.folder}" />
 		</zip>
 	</target>
-	
+
 	<target name="linux-redhat-jars" unless="is.debian" depends="linux-jars">
 		<zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux.redhat.provider_${org.eclipse.kura.linux.redhat.provider.version}.jar"
                         prefix="${build.output.name}/${plugins.folder}" />
 		</zip>
 	</target>
-	
+
 	<target name="linux-systemd-jars" unless="is.sysv" depends="linux-jars">
 		<zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux.systemd.provider_${org.eclipse.kura.linux.systemd.provider.version}.jar"

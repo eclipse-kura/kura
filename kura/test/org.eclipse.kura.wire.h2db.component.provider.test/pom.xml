@@ -97,11 +97,6 @@ Copyright (c) 2017 Eurotech and/or its affiliates and others
                             <autoStart>true</autoStart>
                         </bundle>
                         <bundle>
-                            <id>org.hsqldb.hsqldb</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
                             <id>org.eclipse.kura.core.configuration</id>
                             <level>4</level>
                             <autoStart>true</autoStart>
@@ -192,10 +187,6 @@ Copyright (c) 2017 Eurotech and/or its affiliates and others
                         <dependency>
                             <type>p2-installable-unit</type>
                             <artifactId>org.eclipse.equinox.launcher</artifactId>
-                        </dependency>
-                        <dependency>
-                            <type>p2-installable-unit</type>
-                            <artifactId>org.hsqldb.hsqldb</artifactId>
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>

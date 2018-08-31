@@ -5,9 +5,9 @@ read -r -p "Are you sure? [y/N] " response
 case $response in
     [yY][eE][sS]|[yY]) 
         script_dir=$(dirname $0)
-	data_dir=$script_dir/data
-	snapshots_dir=$data_dir/snapshots
-	dflt_data_dir=$script_dir/.data
+    user_config_dir=$script_dir/../user
+    snapshots_dir=$user_config_dir/snapshots
+    dflt_data_dir=$script_dir/../.data
 	
 	for snapshot_file in "$snapshots_dir"/*
 	do

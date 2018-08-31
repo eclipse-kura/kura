@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates and others
  *
  *   All rights reserved. This program and the accompanying materials
  *   are made available under the terms of the Eclipse Public License v1.0
@@ -35,13 +35,13 @@ public class SystemServiceTest {
         System.setProperty("dpa.configuration", "kura/dpa.properties");
         System.setProperty("log4j.configuration", "file:kura/log4j.properties");
 
-        System.setProperty(SystemService.KURA_CUSTOM_CONFIG, "file:/opt/eclipse/kura/kura/kura.properties");
+        System.setProperty(SystemService.KURA_CUSTOM_CONFIG, "file:/opt/eclipse/kura/framework/kura.properties");
 
         systemService.activate(ctxMock);
 
-        assertEquals("file:/opt/eclipse/kura/kura/kura.properties", System.getProperty(SystemService.KURA_CONFIG));
-        assertEquals("/opt/eclipse/kura/kura/dpa.properties", System.getProperty("dpa.configuration"));
-        assertEquals("file:/opt/eclipse/kura/kura/log4j.properties", System.getProperty("log4j.configuration"));
+        assertEquals("file:/opt/eclipse/kura/framework/kura.properties", System.getProperty(SystemService.KURA_CONFIG));
+        assertEquals("/opt/eclipse/kura/data/dpa.properties", System.getProperty("dpa.configuration"));
+        assertEquals("file:/opt/eclipse/kura/user/log4j.properties", System.getProperty("log4j.configuration"));
     }
 
     @Test
@@ -92,7 +92,7 @@ public class SystemServiceTest {
 
     @Test
     public void testActivateWithHomePropertyValues() throws IOException {
-        // verify that fallack to kura's home directory works
+        // verify that fallback to kura's home directory works
 
         SystemServiceImpl systemService = new SystemServiceImpl() {
 
@@ -105,12 +105,14 @@ public class SystemServiceTest {
 
         ComponentContext ctxMock = mock(ComponentContext.class);
 
-        String props = "/tmp/kura.properties";
-        String customProps = "/tmp/kura_custom.properties";
+        String props = "/tmp/framework/kura.properties";
+        String customProps = "/tmp/user/kura_custom.properties";
 
         System.clearProperty(SystemService.KURA_CONFIG);
         System.clearProperty(SystemService.KURA_CUSTOM_CONFIG);
         System.setProperty(SystemService.KEY_KURA_HOME_DIR, "/tmp");
+        System.setProperty(SystemService.KEY_KURA_FRAMEWORK_CONFIG_DIR, "/tmp/framework");
+        System.setProperty(SystemService.KEY_KURA_USER_CONFIG_DIR, "/tmp/user");
 
         String key_proper = "property.proper";
         String val_proper = "proper property value";
@@ -163,19 +165,19 @@ public class SystemServiceTest {
         System.clearProperty(SystemService.KURA_CUSTOM_CONFIG);
         System.clearProperty(SystemService.KEY_KURA_HOME_DIR);
 
-        File f1 = writeFile(props, String.format("%s = kura\n%s = kura/plugins\n%s = kura/packages",
-                SystemService.KEY_KURA_HOME_DIR, SystemService.KEY_KURA_PLUGINS_DIR,
-                SystemService.KEY_KURA_PACKAGES_DIR));
+        File f1 = writeFile(props,
+                String.format("%s = kura\n%s = kura/plugins\n%s = kura/packages", SystemService.KEY_KURA_HOME_DIR,
+                        SystemService.KEY_KURA_PLUGINS_DIR, SystemService.KEY_KURA_PACKAGES_DIR));
 
         systemService.activate(ctxMock);
 
         f1.delete();
 
-        // check that the defults are properly set
+        // check that the defaults are properly set
         Properties properties = systemService.getProperties();
-        assertEquals("/opt/eclipse/kura/kura", properties.getProperty(SystemService.KEY_KURA_HOME_DIR));
-        assertEquals("/opt/eclipse/kura/kura/plugins", properties.getProperty(SystemService.KEY_KURA_PLUGINS_DIR));
-        assertEquals("/opt/eclipse/kura/kura/packages", properties.getProperty(SystemService.KEY_KURA_PACKAGES_DIR));
+        assertEquals("/opt/eclipse/kura", properties.getProperty(SystemService.KEY_KURA_HOME_DIR));
+        assertEquals("/opt/eclipse/kura/plugins", properties.getProperty(SystemService.KEY_KURA_PLUGINS_DIR));
+        assertEquals("/opt/eclipse/kura/data/packages", properties.getProperty(SystemService.KEY_KURA_PACKAGES_DIR));
     }
 
     @Test
@@ -183,6 +185,8 @@ public class SystemServiceTest {
         // verify that certain system properties are actually used as kura's property overrides
 
         System.setProperty(SystemService.KEY_KURA_HOME_DIR, "/tmp");
+        System.setProperty(SystemService.KEY_KURA_FRAMEWORK_CONFIG_DIR, "/tmp/framework");
+        System.setProperty(SystemService.KEY_KURA_USER_CONFIG_DIR, "/tmp/user");
         System.setProperty(SystemService.KEY_KURA_NAME, "KEY_KURA_NAME");
         System.setProperty(SystemService.KEY_DEVICE_NAME, "KEY_DEVICE_NAME");
         System.setProperty(SystemService.KEY_PLATFORM, "KEY_PLATFORM");

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and others
+ * Copyright (c) 2011, 2018 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -93,7 +93,8 @@ public class GPIOServiceImpl implements GPIOService {
 
             if (configFile == null) {
                 // Testing for Kura home relative path
-                configFile = whenAvailable(this.systemService.getKuraHome() + File.separator + "jdk.dio.properties");
+                configFile = whenAvailable(
+                        this.systemService.getKuraFrameworkConfigDirectory() + File.separator + "jdk.dio.properties");
                 logger.debug("Kura Home relative location: {}", configFile);
             }
 

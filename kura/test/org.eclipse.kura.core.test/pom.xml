@@ -36,10 +36,10 @@
         <kura.vm.args>
             -Dkura.home=${project.basedir}/target/kura
             -Dkura.plugins=${project.basedir}/target/kura/plugins
-            -Dkura.packages=${project.basedir}/target/kura/packages
+            -Dkura.packages=${project.basedir}/target/kura/data/packages
             -Dkura.data=${project.basedir}/target/kura/data
             -Dkura.tmp=${project.basedir}/target/kura/tmp
-            -Dkura.snapshots=${project.basedir}/target/kura/snapshots
+            -Dkura.snapshots=${project.basedir}/target/kura/user/snapshots
             -Dorg.eclipse.kura.mode=emulator
             -Dkura.configuration=file:${project.basedir}/src/main/resources/kura.properties
             -Ddpa.configuration=${project.basedir}/target/kura/dpa.properties

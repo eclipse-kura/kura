@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -38,6 +38,11 @@ public interface SystemService {
 
     public static final String KEY_KURA_NAME = "kura.name";
     public static final String KEY_KURA_VERSION = "kura.version";
+    /**
+     * since 1.4
+     */
+    public static final String KEY_KURA_FRAMEWORK_CONFIG_DIR = "kura.framework.config";
+    public static final String KEY_KURA_USER_CONFIG_DIR = "kura.user.config";
     /**
      * @since 1.3
      */
@@ -310,6 +315,22 @@ public interface SystemService {
      * @return The Kura version string as denoted in kura.version property of the kura.properties file.
      */
     public String getKuraVersion();
+
+    /**
+     * Gets the location where Kura stores the framework configuration files in the filesystem.
+     *
+     * @since 1.4
+     * @return The framework configuration files directory.
+     */
+    public String getKuraFrameworkConfigDirectory();
+
+    /**
+     * Gets the location where Kura stores the user configuration files in the filesystem.
+     *
+     * @since 1.4
+     * @return The user configuration files directory.
+     */
+    public String getKuraUserConfigDirectory();
 
     /**
      * Gets the Eclipse Marketplace compatibility product version for this unit.

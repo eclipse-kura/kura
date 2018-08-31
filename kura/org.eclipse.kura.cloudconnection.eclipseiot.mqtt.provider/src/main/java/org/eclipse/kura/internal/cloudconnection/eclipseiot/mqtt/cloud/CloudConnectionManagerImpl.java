@@ -735,7 +735,7 @@ public class CloudConnectionManagerImpl
     }
 
     @Override
-    public void unregisterSubscriber(Map<String, Object> subscriptionProperties) {
+    public void unregisterSubscriber(CloudSubscriberListener subscriberListener) {
         throw new UnsupportedOperationException();
     }
 

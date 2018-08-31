@@ -62,18 +62,20 @@ public interface CloudEndpoint {
      *
      * @param subscriptionProperties
      *            a map representing the subscription context
-     * @param subscriber
+     * @param cloudSubscriberListener
      *            a {@link CloudSubscriberListener} object that will be notified when a message is received in a context
      *            that matches the one identified by the subscription properties.
      */
-    public void registerSubscriber(Map<String, Object> subscriptionProperties, CloudSubscriberListener subscriber);
+    public void registerSubscriber(Map<String, Object> subscriptionProperties,
+            CloudSubscriberListener cloudSubscriberListener);
 
     /**
-     * Unregisters the subscriber identified by the provided {@code subscriptionProperties}
+     * Unregisters the provided {@code cloudSubscriberListener}.
      *
-     * @param subscriptionProperties
+     * @param cloudSubscriberListener
+     *            the {@link CloudSubscriberListener} to be unregistered.
      */
-    public void unregisterSubscriber(Map<String, Object> subscriptionProperties);
+    public void unregisterSubscriber(CloudSubscriberListener cloudSubscriberListener);
 
     /**
      * Provides information related to the associated connection. The information provided depends on the specific

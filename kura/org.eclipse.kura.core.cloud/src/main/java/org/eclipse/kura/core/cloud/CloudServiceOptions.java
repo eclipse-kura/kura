@@ -220,43 +220,43 @@ public class CloudServiceOptions {
         return result;
     }
 
-    public String getTopicSeparator() {
+    public static String getTopicSeparator() {
         return TOPIC_SEPARATOR;
     }
 
-    public String getTopicAccountToken() {
+    public static String getTopicAccountToken() {
         return TOPIC_ACCOUNT_TOKEN;
     }
 
-    public String getTopicClientIdToken() {
+    public static String getTopicClientIdToken() {
         return TOPIC_CLIENT_ID_TOKEN;
     }
 
-    public String getTopicBirthSuffix() {
+    public static String getTopicBirthSuffix() {
         return TOPIC_BIRTH_SUFFIX;
     }
 
-    public String getTopicDisconnectSuffix() {
+    public static String getTopicDisconnectSuffix() {
         return TOPIC_DISCONNECT_SUFFIX;
     }
 
-    public String getTopicAppsSuffix() {
+    public static String getTopicAppsSuffix() {
         return TOPIC_APPS_SUFFIX;
     }
 
-    public String getTopicWildCard() {
+    public static String getTopicWildCard() {
         return TOPIC_WILD_CARD;
     }
 
-    public int getLifeCycleMessageQos() {
+    public static int getLifeCycleMessageQos() {
         return LIFECYCLE_QOS;
     }
 
-    public int getLifeCycleMessagePriority() {
+    public static int getLifeCycleMessagePriority() {
         return LIFECYCLE_PRIORITY;
     }
 
-    public boolean getLifeCycleMessageRetain() {
+    public static boolean getLifeCycleMessageRetain() {
         return LIFECYCLE_RETAIN;
     }
 }

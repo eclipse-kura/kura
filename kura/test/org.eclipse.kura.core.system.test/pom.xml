@@ -16,11 +16,10 @@ Copyright (c) 2017 Eurotech and/or its affiliates and others
     <parent>
         <groupId>org.eclipse.kura</groupId>
         <artifactId>test</artifactId>
-        <version>3.3.0-SNAPSHOT</version>
+        <version>4.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>org.eclipse.kura.core.system.test</artifactId>
-    <version>3.3.0-SNAPSHOT</version>
     <packaging>eclipse-test-plugin</packaging>
 
     <properties>

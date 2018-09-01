@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.kura.runtime.feature"
       label="%featureName"
-      version="3.3.0.qualifier"
+      version="4.0.0.qualifier"
       provider-name="%providerName"
       license-feature="org.eclipse.license"
       license-feature-version="0.0.0">

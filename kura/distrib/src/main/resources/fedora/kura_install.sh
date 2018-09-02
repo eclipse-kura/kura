@@ -41,8 +41,8 @@ systemctl disable wpa_supplicant
 rm /etc/resolv.conf
 
 #set up recover default configuration script
-cp ${INSTALL_DIR}/kura/install/recover_default_config.init ${INSTALL_DIR}/kura/.data/.recoverDefaultConfig.sh
-chmod +x ${INSTALL_DIR}/kura/.data/.recoverDefaultConfig.sh
+cp ${INSTALL_DIR}/kura/install/recover_default_config.init ${INSTALL_DIR}/kura/bin/.recoverDefaultConfig.sh
+chmod +x ${INSTALL_DIR}/kura/bin/.recoverDefaultConfig.sh
 
 cp ${INSTALL_DIR}/kura/install/iptables.init /etc/sysconfig/iptables
 cp /etc/sysconfig/iptables ${INSTALL_DIR}/kura/.data/iptables
@@ -65,7 +65,7 @@ cp ${INSTALL_DIR}/kura/install/dhcpd-wlan0.conf /etc/dhcpd-wlan0.conf
 cp ${INSTALL_DIR}/kura/install/dhcpd-wlan0.conf ${INSTALL_DIR}/kura/.data/dhcpd-wlan0.conf
 
 #set up kuranet.conf
-cp ${INSTALL_DIR}/kura/install/kuranet.conf ${INSTALL_DIR}/kura/data/kuranet.conf
+cp ${INSTALL_DIR}/kura/install/kuranet.conf ${INSTALL_DIR}/kura/user/kuranet.conf
 cp ${INSTALL_DIR}/kura/install/kuranet.conf ${INSTALL_DIR}/kura/.data/kuranet.conf
 
 OLD_PATH=$(pwd)

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -12,7 +12,6 @@
 package org.eclipse.kura.net;
 
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.net.firewall.FirewallNatConfig;
@@ -176,8 +175,6 @@ public interface NetworkAdminService {
     public void setFirewallPortForwardingConfiguration(
             List<FirewallPortForwardConfigIP<? extends IPAddress>> firewallConfiguration) throws KuraException;
 
-    // public List<FirewallReverseNatConfig> getFirewallNatConfiguration(String sourceIface) throws KuraException;
-
     public void setFirewallNatConfiguration(List<FirewallNatConfig> natConfigs) throws KuraException;
 
     /**
@@ -191,17 +188,6 @@ public interface NetworkAdminService {
      * @throws KuraException
      */
     public void manageFirewall(String gatewayIface) throws KuraException;
-
-    /**
-     * Obtains information for WiFi hotspots in range.
-     *
-     * @param ifaceName
-     *            - name of WiFi interface
-     * @return map of SSIDs with respective hotspot information.
-     * @throws KuraException
-     */
-    @Deprecated
-    public Map<String, WifiHotspotInfo> getWifiHotspots(String ifaceName) throws KuraException;
 
     /**
      * Obtains information for WiFi hotspots in range.
@@ -226,22 +212,4 @@ public interface NetworkAdminService {
      * @return status - <i>true</i> if credentials are correct, <i>false</i> otherwise
      */
     public boolean verifyWifiCredentials(String ifaceName, WifiConfig wifiConfig, int tout);
-
-    /**
-     * Rolls back to default network configuration.
-     *
-     * @return status
-     * @throws KuraException
-     */
-    @Deprecated
-    public boolean rollbackDefaultConfiguration() throws KuraException;
-
-    /**
-     * Rolls back to default firewall configuration.
-     *
-     * @return status
-     * @throws KuraException
-     */
-    @Deprecated
-    public boolean rollbackDefaultFirewallConfiguration() throws KuraException;
 }

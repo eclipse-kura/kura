@@ -20,7 +20,6 @@
  <reference bind="setConnectionFactory" cardinality="1..1" interface="org.osgi.service.io.ConnectionFactory" name="ConnectionFactory" policy="static" unbind="unsetConnectionFactory"/>
  <reference bind="setClockService" cardinality="1..1" interface="org.eclipse.kura.clock.ClockService" name="ClockService" policy="static" unbind="unsetClockService"/>
  <reference bind="setConfigurationService" cardinality="1..1" interface="org.eclipse.kura.configuration.ConfigurationService" name="ConfigurationService" policy="static" unbind="unsetConfigurationService"/>
- <reference bind="setNetworkService" cardinality="1..1" interface="org.eclipse.kura.net.NetworkService" name="NetworkService" policy="static" unbind="unsetNetworkService"/>
  <reference bind="setUsbService" cardinality="1..1" interface="org.eclipse.kura.usb.UsbService" name="UsbService" policy="static" unbind="unsetUsbService"/>
  
 </scr:component>

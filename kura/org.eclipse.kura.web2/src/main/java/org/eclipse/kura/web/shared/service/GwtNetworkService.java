@@ -60,7 +60,4 @@ public interface GwtNetworkService extends RemoteService {
 
     public List<GwtModemPdpEntry> findPdpContextInfo(GwtXSRFToken xsrfToken, String interfaceName)
             throws GwtKuraException;
-
-    @Deprecated
-    public void rollbackDefaultConfiguration(GwtXSRFToken xsrfToken);
 }

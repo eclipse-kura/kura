@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and others
+ * Copyright (c) 2011, 2018 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -107,19 +107,19 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             // special cases for older versions to fix relative path bug in v2.0.4 and earlier
             if (System.getProperty(KURA_CONFIG) != null
                     && System.getProperty(KURA_CONFIG).trim().equals("file:kura/kura.properties")) {
-                System.setProperty(KURA_CONFIG, "file:/opt/eclipse/kura/kura/kura.properties");
+                System.setProperty(KURA_CONFIG, "file:/opt/eclipse/kura/framework/kura.properties");
                 updateTriggered = true;
                 logger.warn("Overridding invalid kura.properties location");
             }
             if (System.getProperty("dpa.configuration") != null
                     && System.getProperty("dpa.configuration").trim().equals("kura/dpa.properties")) {
-                System.setProperty("dpa.configuration", "/opt/eclipse/kura/kura/dpa.properties");
+                System.setProperty("dpa.configuration", "/opt/eclipse/kura/data/dpa.properties");
                 updateTriggered = true;
                 logger.warn("Overridding invalid dpa.properties location");
             }
             if (System.getProperty("log4j.configuration") != null
                     && System.getProperty("log4j.configuration").trim().equals("file:kura/log4j.properties")) {
-                System.setProperty("log4j.configuration", "file:/opt/eclipse/kura/kura/log4j.properties");
+                System.setProperty("log4j.configuration", "file:/opt/eclipse/kura/user/log4j.properties");
                 updateTriggered = true;
                 logger.warn("Overridding invalid log4j.properties location");
             }
@@ -128,6 +128,8 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             // look for kura.properties as resource in the classpath
             // if not found, look for such file in the kura.home directory
             String kuraHome = System.getProperty(KEY_KURA_HOME_DIR);
+            String kuraFrameworkConfig = System.getProperty(KEY_KURA_FRAMEWORK_CONFIG_DIR);
+            String kuraUserConfig = System.getProperty(KEY_KURA_USER_CONFIG_DIR);
             String kuraConfig = System.getProperty(KURA_CONFIG);
             String kuraProperties = readResource(KURA_PROPS_FILE);
 
@@ -149,8 +151,8 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
                 } catch (Exception e) {
                     logger.warn("Could not open kuraConfig URL", e);
                 }
-            } else if (kuraHome != null) {
-                File kuraPropsFile = new File(kuraHome + File.separator + KURA_PROPS_FILE);
+            } else if (kuraFrameworkConfig != null) {
+                File kuraPropsFile = new File(kuraFrameworkConfig + File.separator + KURA_PROPS_FILE);
                 if (kuraPropsFile.exists()) {
                     final FileReader fr = new FileReader(kuraPropsFile);
                     try {
@@ -164,17 +166,25 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
                 }
 
             } else {
-                logger.error("Could not located kura.properties with kura.home "); // +kuraHome
+                logger.error("Could not locate kura.properties file");
             }
 
             // Try to reload kuraHome with the value set in kura.properties file.
             if (kuraHome == null) {
                 kuraHome = kuraDefaults.getProperty(KEY_KURA_HOME_DIR);
             }
+            // Try to reload kuraFrameworkConfig with the value set in kura.properties file.
+            if (kuraFrameworkConfig == null) {
+                kuraFrameworkConfig = kuraDefaults.getProperty(KEY_KURA_FRAMEWORK_CONFIG_DIR);
+            }
+            // Try to reload kurauserConfig with the value set in kura.properties file.
+            if (kuraUserConfig == null) {
+                kuraUserConfig = kuraDefaults.getProperty(KEY_KURA_USER_CONFIG_DIR);
+            }
 
             // load custom kura properties
             // look for kura_custom.properties as resource in the classpath
-            // if not found, look for such file in the kura.home directory
+            // if not found, look for such file in the kura.user.config directory
             Properties kuraCustomProps = new Properties();
             String kuraCustomConfig = System.getProperty(KURA_CUSTOM_CONFIG);
             String kuraCustomProperties = readResource(KURA_CUSTOM_PROPS_FILE);
@@ -197,8 +207,8 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
                 } catch (Exception e) {
                     logger.warn("Could not open kuraCustomConfig URL: ", e);
                 }
-            } else if (kuraHome != null) {
-                File kuraCustomPropsFile = new File(kuraHome + File.separator + KURA_CUSTOM_PROPS_FILE);
+            } else if (kuraUserConfig != null) {
+                File kuraCustomPropsFile = new File(kuraUserConfig + File.separator + KURA_CUSTOM_PROPS_FILE);
                 if (kuraCustomPropsFile.exists()) {
                     Reader reader = new FileReader(kuraCustomPropsFile);
                     try {
@@ -211,7 +221,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
                     logger.warn("File does not exist: {}", kuraCustomPropsFile);
                 }
             } else {
-                logger.info("Did not locate a kura_custom.properties file in {}", kuraHome);
+                logger.info("Did not locate a kura_custom.properties file in {}", kuraUserConfig);
             }
 
             // Override defaults with values from kura_custom.properties
@@ -220,19 +230,19 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             // more path overrides based on earlier Kura problem with relative paths
             if (kuraDefaults.getProperty(KEY_KURA_HOME_DIR) != null
                     && kuraDefaults.getProperty(KEY_KURA_HOME_DIR).trim().equals("kura")) {
-                kuraDefaults.setProperty(KEY_KURA_HOME_DIR, "/opt/eclipse/kura/kura");
+                kuraDefaults.setProperty(KEY_KURA_HOME_DIR, "/opt/eclipse/kura");
                 updateTriggered = true;
                 logger.warn("Overridding invalid kura.home location");
             }
             if (kuraDefaults.getProperty(KEY_KURA_PLUGINS_DIR) != null
                     && kuraDefaults.getProperty(KEY_KURA_PLUGINS_DIR).trim().equals("kura/plugins")) {
-                kuraDefaults.setProperty(KEY_KURA_PLUGINS_DIR, "/opt/eclipse/kura/kura/plugins");
+                kuraDefaults.setProperty(KEY_KURA_PLUGINS_DIR, "/opt/eclipse/kura/plugins");
                 updateTriggered = true;
                 logger.warn("Overridding invalid kura.plugins location");
             }
             if (kuraDefaults.getProperty(KEY_KURA_PACKAGES_DIR) != null
                     && kuraDefaults.getProperty(KEY_KURA_PACKAGES_DIR).trim().equals("kura/packages")) {
-                kuraDefaults.setProperty(KEY_KURA_PACKAGES_DIR, "/opt/eclipse/kura/kura/packages");
+                kuraDefaults.setProperty(KEY_KURA_PACKAGES_DIR, "/opt/eclipse/kura/data/packages");
                 updateTriggered = true;
                 logger.warn("Overridding invalid kura.packages location");
             }
@@ -304,6 +314,13 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             }
             if (System.getProperty(KEY_KURA_HOME_DIR) != null) {
                 this.kuraProperties.put(KEY_KURA_HOME_DIR, System.getProperty(KEY_KURA_HOME_DIR));
+            }
+            if (System.getProperty(KEY_KURA_FRAMEWORK_CONFIG_DIR) != null) {
+                this.kuraProperties.put(KEY_KURA_FRAMEWORK_CONFIG_DIR,
+                        System.getProperty(KEY_KURA_FRAMEWORK_CONFIG_DIR));
+            }
+            if (System.getProperty(KEY_KURA_USER_CONFIG_DIR) != null) {
+                this.kuraProperties.put(KEY_KURA_USER_CONFIG_DIR, System.getProperty(KEY_KURA_USER_CONFIG_DIR));
             }
             if (System.getProperty(KEY_KURA_PLUGINS_DIR) != null) {
                 this.kuraProperties.put(KEY_KURA_PLUGINS_DIR, System.getProperty(KEY_KURA_PLUGINS_DIR));
@@ -426,6 +443,18 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             } else {
                 logger.info("Kura home directory is {}", getKuraHome());
                 createDirIfNotExists(getKuraHome());
+            }
+            if (getKuraFrameworkConfigDirectory() == null) {
+                logger.error("Did not initialize kura.framework.config");
+            } else {
+                logger.info("Kura framework configuration directory is {}", getKuraFrameworkConfigDirectory());
+                createDirIfNotExists(getKuraFrameworkConfigDirectory());
+            }
+            if (getKuraUserConfigDirectory() == null) {
+                logger.error("Did not initialize kura.user.config");
+            } else {
+                logger.info("Kura user configuration directory is {}", getKuraUserConfigDirectory());
+                createDirIfNotExists(getKuraUserConfigDirectory());
             }
             if (getKuraSnapshotsDirectory() == null) {
                 logger.error("Did not initialize kura.snapshots");
@@ -809,6 +838,16 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             marketplaceCompatibilityVersion = getKuraVersion();
         }
         return marketplaceCompatibilityVersion.replaceAll("KURA[-_ ]", "").replaceAll("[-_]", ".");
+    }
+
+    @Override
+    public String getKuraFrameworkConfigDirectory() {
+        return this.kuraProperties.getProperty(KEY_KURA_FRAMEWORK_CONFIG_DIR);
+    }
+
+    @Override
+    public String getKuraUserConfigDirectory() {
+        return this.kuraProperties.getProperty(KEY_KURA_USER_CONFIG_DIR);
     }
 
     @Override

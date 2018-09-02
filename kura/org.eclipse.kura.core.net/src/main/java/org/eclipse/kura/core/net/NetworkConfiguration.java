@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.eclipse.kura.KuraErrorCode;
@@ -529,7 +530,7 @@ public class NetworkConfiguration {
                 properties.put(netIfReadOnlyPrefix + "eth.link.up",
                         ((EthernetInterfaceConfigImpl) netInterfaceConfig).isLinkUp());
             } else if (netInterfaceConfig instanceof WifiInterfaceConfigImpl) {
-                EnumSet<Capability> capabilities = ((WifiInterfaceConfigImpl) netInterfaceConfig).getCapabilities();
+                Set<Capability> capabilities = ((WifiInterfaceConfigImpl) netInterfaceConfig).getCapabilities();
                 if (capabilities != null && !capabilities.isEmpty()) {
                     StringBuilder sb = new StringBuilder();
                     for (Capability capability : capabilities) {
@@ -547,7 +548,7 @@ public class NetworkConfiguration {
 
                 // capabilities
                 StringBuilder sbCapabilities = new StringBuilder();
-                EnumSet<Capability> capabilities = ((WifiInterface<?>) netInterfaceConfig).getCapabilities();
+                Set<Capability> capabilities = ((WifiInterface<?>) netInterfaceConfig).getCapabilities();
                 if (capabilities != null) {
                     Iterator<Capability> it2 = capabilities.iterator();
                     while (it2.hasNext()) {

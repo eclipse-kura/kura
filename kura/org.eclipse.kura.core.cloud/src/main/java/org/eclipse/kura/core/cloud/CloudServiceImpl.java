@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutorService;
@@ -120,6 +121,7 @@ public class CloudServiceImpl
     private final Set<CloudConnectionListener> registeredCloudConnectionListeners;
     private final Set<CloudPublisherDeliveryListener> registeredCloudPublisherDeliveryListeners;
     private final Set<CloudDeliveryListener> registeredCloudDeliveryListeners;
+    private final Map<CloudSubscriptionRecord, List<CloudSubscriberListener>> registeredSubscribers;
 
     // package visibility for LyfeCyclePayloadBuilder
     String imei;
@@ -136,8 +138,6 @@ public class CloudServiceImpl
 
     private final Map<String, RequestHandler> registeredRequestHandlers;
 
-    private final Map<String, CloudSubscriptionRecord> registeredSubscribers;
-
     private ServiceRegistration<?> notificationPublisherRegistration;
     private final CloudNotificationPublisher notificationPublisher;
 
@@ -145,7 +145,7 @@ public class CloudServiceImpl
         this.cloudClients = new CopyOnWriteArrayList<>();
         this.messageId = new AtomicInteger();
         this.registeredRequestHandlers = new HashMap<>();
-        this.registeredSubscribers = new HashMap<>();
+        this.registeredSubscribers = new ConcurrentHashMap<>();
         this.registeredCloudConnectionListeners = new CopyOnWriteArraySet<>();
         this.registeredCloudPublisherDeliveryListeners = new CopyOnWriteArraySet<>();
         this.registeredCloudDeliveryListeners = new CopyOnWriteArraySet<>();
@@ -448,7 +448,7 @@ public class CloudServiceImpl
             logger.warn("Cannot setup cloud service connection");
         }
 
-        this.registeredSubscribers.values().forEach(subscriptionRecord -> subscribe(subscriptionRecord));
+        this.registeredSubscribers.keySet().forEach(this::subscribe);
 
         postConnectionStateChangeEvent(true);
 
@@ -459,10 +459,10 @@ public class CloudServiceImpl
 
     private void setupDeviceSubscriptions(boolean subscribe) throws KuraException {
         StringBuilder sbDeviceSubscription = new StringBuilder();
-        sbDeviceSubscription.append(this.options.getTopicControlPrefix()).append(this.options.getTopicSeparator())
-                .append(this.options.getTopicAccountToken()).append(this.options.getTopicSeparator())
-                .append(this.options.getTopicClientIdToken()).append(this.options.getTopicSeparator())
-                .append(this.options.getTopicWildCard());
+        sbDeviceSubscription.append(this.options.getTopicControlPrefix())
+                .append(CloudServiceOptions.getTopicSeparator()).append(CloudServiceOptions.getTopicAccountToken())
+                .append(CloudServiceOptions.getTopicSeparator()).append(CloudServiceOptions.getTopicClientIdToken())
+                .append(CloudServiceOptions.getTopicSeparator()).append(CloudServiceOptions.getTopicWildCard());
 
         // restore or remove default subscriptions
         if (subscribe) {
@@ -565,9 +565,8 @@ public class CloudServiceImpl
         KuraMessage receivedMessage = new KuraMessage(kuraPayload, properties);
 
         this.registeredSubscribers.entrySet().stream()
-                .filter(cloudSubscriberEntry -> cloudSubscriberEntry.getKey().equals(kuraTopic.getApplicationId()))
-                .forEach(cloudSubscriberEntry -> cloudSubscriberEntry.getValue().getSubscriber()
-                        .onMessageArrived(receivedMessage));
+                .filter(cloudSubscriberEntry -> cloudSubscriberEntry.getKey().matches(kuraTopic.getFullTopic()))
+                .forEach(e -> dispatchMessage(receivedMessage, e.getValue()));
     }
 
     private void dispatchDataMessage(int qos, boolean retained, KuraTopicImpl kuraTopic, KuraPayload kuraPayload) {
@@ -583,9 +582,18 @@ public class CloudServiceImpl
         KuraMessage receivedMessage = new KuraMessage(kuraPayload, properties);
 
         this.registeredSubscribers.entrySet().stream()
-                .filter(cloudSubscriberEntry -> cloudSubscriberEntry.getKey().equals(kuraTopic.getApplicationId()))
-                .forEach(cloudSubscriberEntry -> cloudSubscriberEntry.getValue().getSubscriber()
-                        .onMessageArrived(receivedMessage));
+                .filter(cloudSubscriberEntry -> cloudSubscriberEntry.getKey().matches(kuraTopic.getFullTopic()))
+                .forEach(e -> dispatchMessage(receivedMessage, e.getValue()));
+    }
+
+    private static void dispatchMessage(final KuraMessage message, final List<CloudSubscriberListener> listeners) {
+        for (final CloudSubscriberListener listener : listeners) {
+            try {
+                listener.onMessageArrived(message);
+            } catch (final Exception e) {
+                logger.warn("unhandled exception in CloudSubscriberListener", e);
+            }
+        }
     }
 
     private boolean isValidMessage(KuraApplicationTopic kuraTopic, KuraPayload kuraPayload) {
@@ -607,7 +615,7 @@ public class CloudServiceImpl
     public void onMessagePublished(int messageId, String topic) {
         synchronized (this.messageId) {
             if (this.messageId.get() != -1 && this.messageId.get() == messageId) {
-                if (this.options.getLifeCycleMessageQos() == 0) {
+                if (CloudServiceOptions.getLifeCycleMessageQos() == 0) {
                     this.messageId.set(-1);
                 }
                 this.messageId.notifyAll();
@@ -735,10 +743,10 @@ public class CloudServiceImpl
         }
 
         StringBuilder sbTopic = new StringBuilder();
-        sbTopic.append(this.options.getTopicControlPrefix()).append(this.options.getTopicSeparator())
-                .append(this.options.getTopicAccountToken()).append(this.options.getTopicSeparator())
-                .append(this.options.getTopicClientIdToken()).append(this.options.getTopicSeparator())
-                .append(this.options.getTopicBirthSuffix());
+        sbTopic.append(this.options.getTopicControlPrefix()).append(CloudServiceOptions.getTopicSeparator())
+                .append(CloudServiceOptions.getTopicAccountToken()).append(CloudServiceOptions.getTopicSeparator())
+                .append(CloudServiceOptions.getTopicClientIdToken()).append(CloudServiceOptions.getTopicSeparator())
+                .append(CloudServiceOptions.getTopicBirthSuffix());
 
         String topic = sbTopic.toString();
         KuraPayload payload = createBirthPayload();
@@ -751,10 +759,10 @@ public class CloudServiceImpl
         }
 
         StringBuilder sbTopic = new StringBuilder();
-        sbTopic.append(this.options.getTopicControlPrefix()).append(this.options.getTopicSeparator())
-                .append(this.options.getTopicAccountToken()).append(this.options.getTopicSeparator())
-                .append(this.options.getTopicClientIdToken()).append(this.options.getTopicSeparator())
-                .append(this.options.getTopicDisconnectSuffix());
+        sbTopic.append(this.options.getTopicControlPrefix()).append(CloudServiceOptions.getTopicSeparator())
+                .append(CloudServiceOptions.getTopicAccountToken()).append(CloudServiceOptions.getTopicSeparator())
+                .append(CloudServiceOptions.getTopicClientIdToken()).append(CloudServiceOptions.getTopicSeparator())
+                .append(CloudServiceOptions.getTopicDisconnectSuffix());
 
         String topic = sbTopic.toString();
         KuraPayload payload = createDisconnectPayload();
@@ -767,10 +775,10 @@ public class CloudServiceImpl
         }
 
         StringBuilder sbTopic = new StringBuilder();
-        sbTopic.append(this.options.getTopicControlPrefix()).append(this.options.getTopicSeparator())
-                .append(this.options.getTopicAccountToken()).append(this.options.getTopicSeparator())
-                .append(this.options.getTopicClientIdToken()).append(this.options.getTopicSeparator())
-                .append(this.options.getTopicAppsSuffix());
+        sbTopic.append(this.options.getTopicControlPrefix()).append(CloudServiceOptions.getTopicSeparator())
+                .append(CloudServiceOptions.getTopicAccountToken()).append(CloudServiceOptions.getTopicSeparator())
+                .append(CloudServiceOptions.getTopicClientIdToken()).append(CloudServiceOptions.getTopicSeparator())
+                .append(CloudServiceOptions.getTopicAppsSuffix());
 
         String topic = sbTopic.toString();
         KuraPayload payload = createBirthPayload();
@@ -793,8 +801,9 @@ public class CloudServiceImpl
         synchronized (this.messageId) {
             this.messageId.set(-1);
             byte[] encodedPayload = encodePayload(payload);
-            int messageId = this.dataService.publish(topic, encodedPayload, this.options.getLifeCycleMessageQos(),
-                    this.options.getLifeCycleMessageRetain(), this.options.getLifeCycleMessagePriority());
+            int messageId = this.dataService.publish(topic, encodedPayload,
+                    CloudServiceOptions.getLifeCycleMessageQos(), CloudServiceOptions.getLifeCycleMessageRetain(),
+                    CloudServiceOptions.getLifeCycleMessagePriority());
             this.messageId.set(messageId);
             try {
                 this.messageId.wait(1000);
@@ -938,7 +947,7 @@ public class CloudServiceImpl
         int priority = (Integer) messageProps.get(PRIORITY.name());
         boolean isControl = (Boolean) messageProps.get(CONTROL.name());
 
-        String deviceId = this.options.getTopicClientIdToken();
+        String deviceId = CloudServiceOptions.getTopicClientIdToken();
 
         String fullTopic = encodeTopic(appId, deviceId, appTopic, isControl);
         byte[] appPayload = encodePayload(message.getPayload());
@@ -962,19 +971,49 @@ public class CloudServiceImpl
             return;
         }
 
-        String fullTopic = encodeTopic(appId, this.options.getTopicClientIdToken(), appTopic, isControl);
-        CloudSubscriptionRecord subscriptionRecord = new CloudSubscriptionRecord(fullTopic, qos, subscriber);
-        this.registeredSubscribers.put(appId, subscriptionRecord);
-        subscribe(subscriptionRecord);
+        String fullTopic = encodeTopic(appId, CloudServiceOptions.getTopicClientIdToken(), appTopic, isControl);
+
+        CloudSubscriptionRecord subscriptionRecord = new CloudSubscriptionRecord(fullTopic, qos);
+
+        final List<CloudSubscriberListener> subscribers;
+
+        synchronized (this) {
+            subscribers = this.registeredSubscribers.compute(subscriptionRecord, (t, list) -> {
+                if (list == null) {
+                    return new CopyOnWriteArrayList<>(Collections.singletonList(subscriber));
+                }
+                list.add(subscriber);
+                return list;
+            });
+        }
+
+        if (subscribers.size() == 1) {
+            subscribe(subscriptionRecord);
+        }
     }
 
     @Override
-    public void unregisterSubscriber(Map<String, Object> subscriptionProperties) {
-        String appId = (String) subscriptionProperties.get(APP_ID.name());
-        if (appId != null) {
-            CloudSubscriptionRecord subscriptionRecord = this.registeredSubscribers.get(appId);
-            unsubscribe(subscriptionRecord);
-            this.registeredSubscribers.remove(appId);
+    public void unregisterSubscriber(CloudSubscriberListener subscriber) {
+
+        final List<CloudSubscriptionRecord> toUnsubscribe = new ArrayList<>();
+
+        synchronized (this) {
+            this.registeredSubscribers.entrySet().removeIf(e -> {
+                final List<CloudSubscriberListener> subscribers = e.getValue();
+
+                subscribers.removeIf(s -> s == subscriber);
+
+                if (subscribers.isEmpty()) {
+                    toUnsubscribe.add(e.getKey());
+                    return true;
+                } else {
+                    return false;
+                }
+            });
+        }
+
+        for (final CloudSubscriptionRecord subscription : toUnsubscribe) {
+            unsubscribe(subscription);
         }
     }
 
@@ -1003,14 +1042,14 @@ public class CloudServiceImpl
     private String encodeTopic(String appId, String deviceId, String appTopic, boolean isControl) {
         StringBuilder sb = new StringBuilder();
         if (isControl) {
-            sb.append(this.options.getTopicControlPrefix()).append(this.options.getTopicSeparator());
+            sb.append(this.options.getTopicControlPrefix()).append(CloudServiceOptions.getTopicSeparator());
         }
 
-        sb.append(this.options.getTopicAccountToken()).append(this.options.getTopicSeparator()).append(deviceId)
-                .append(this.options.getTopicSeparator()).append(appId);
+        sb.append(CloudServiceOptions.getTopicAccountToken()).append(CloudServiceOptions.getTopicSeparator())
+                .append(deviceId).append(CloudServiceOptions.getTopicSeparator()).append(appId);
 
         if (appTopic != null && !appTopic.isEmpty()) {
-            sb.append(this.options.getTopicSeparator()).append(appTopic);
+            sb.append(CloudServiceOptions.getTopicSeparator()).append(appTopic);
         }
 
         return sb.toString();

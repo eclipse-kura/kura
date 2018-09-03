@@ -7,7 +7,10 @@ Bundle-Vendor: Eclipse Kura
 Bundle-License: Eclipse Public License v1.0
 Bundle-Category: Asset-Driver Management
 Bundle-ActivationPolicy: lazy
-Import-Package: javax.security.cert,
+Import-Package: javax.crypto,
+ javax.crypto.spec,
+ javax.net.ssl,
+ javax.security.cert,
  javax.xml,
  javax.xml.bind,
  javax.xml.stream,

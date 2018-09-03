@@ -24,6 +24,8 @@ import java.util.Map;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.crypto.CryptoService;
+import org.eclipse.kura.internal.driver.opcua.auth.CertificateManager;
+import org.eclipse.kura.internal.driver.opcua.auth.ExternalKeystoreCertificateManager;
 import org.eclipse.kura.util.base.StringUtil;
 import org.eclipse.milo.opcua.sdk.client.api.identity.AnonymousProvider;
 import org.eclipse.milo.opcua.sdk.client.api.identity.IdentityProvider;
@@ -90,7 +92,7 @@ final class OpcUaOptions {
     /**
      * Configurable Property to set server alias for the keystore
      */
-    private static final String KEYSTORE_SERVER_ALIAS = "keystore.server.alias";
+    private static final String AUTHENTICATE_SERVER = "authenticate.server";
 
     /**
      * Configurable Property to set keystore type
@@ -141,6 +143,8 @@ final class OpcUaOptions {
     /** The properties as associated */
     private final Map<String, Object> properties;
 
+    private CertificateManager certificateManager;
+
     /**
      * Instantiates a new OPCUA options.
      *
@@ -157,12 +161,7 @@ final class OpcUaOptions {
         this.cryptoService = cryptoService;
     }
 
-    /**
-     * Returns the OPC-UA Application Certificate
-     *
-     * @return the OPC-UA Application Certificate
-     */
-    String getApplicationCertificate() {
+    String getKeyStorePath() {
         String applicationCert = null;
         final Object certificate = this.properties.get(APPLICATION_CERTIFICATE);
         if (nonNull(certificate) && (certificate instanceof String)) {
@@ -264,18 +263,13 @@ final class OpcUaOptions {
         return password;
     }
 
-    /**
-     * Returns the Keystore Server Alias
-     *
-     * @return the Keystore Server Alias
-     */
-    String getKeystoreServerAlias() {
-        String serverAlias = null;
-        final Object keystoreServerAlias = this.properties.get(KEYSTORE_SERVER_ALIAS);
-        if (nonNull(keystoreServerAlias) && (keystoreServerAlias instanceof String)) {
-            serverAlias = keystoreServerAlias.toString();
+    boolean isServerAuthenticationEnabled() {
+        boolean shouldAuthenticateServer = false;
+        final Object shouldAuthenticateServerRaw = this.properties.get(AUTHENTICATE_SERVER);
+        if (nonNull(shouldAuthenticateServerRaw) && (shouldAuthenticateServerRaw instanceof Boolean)) {
+            shouldAuthenticateServer = (Boolean) shouldAuthenticateServerRaw;
         }
-        return serverAlias;
+        return shouldAuthenticateServer;
     }
 
     /**
@@ -419,5 +413,15 @@ final class OpcUaOptions {
             return (Integer) maxRequestItems;
         }
         return 10;
+    }
+
+    CertificateManager getCertificateManager() {
+
+        if (certificateManager == null) {
+            certificateManager = new ExternalKeystoreCertificateManager(getKeyStorePath(), getKeystoreType(),
+                    getKeystorePassword(), getKeystoreClientAlias(), isServerAuthenticationEnabled());
+        }
+
+        return certificateManager;
     }
 }

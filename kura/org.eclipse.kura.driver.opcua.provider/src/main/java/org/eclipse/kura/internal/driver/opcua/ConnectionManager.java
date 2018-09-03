@@ -10,8 +10,8 @@
 
 package org.eclipse.kura.internal.driver.opcua;
 
-import static org.eclipse.kura.internal.driver.opcua.Utils.fillStatus;
 import static org.eclipse.kura.internal.driver.opcua.Utils.fillRecord;
+import static org.eclipse.kura.internal.driver.opcua.Utils.fillStatus;
 import static org.eclipse.kura.internal.driver.opcua.Utils.runSafe;
 
 import java.util.ArrayList;
@@ -22,6 +22,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 
 import org.eclipse.kura.channel.ChannelRecord;
+import org.eclipse.kura.internal.driver.opcua.auth.CertificateManager;
 import org.eclipse.kura.internal.driver.opcua.request.ReadParams;
 import org.eclipse.kura.internal.driver.opcua.request.Request;
 import org.eclipse.kura.internal.driver.opcua.request.WriteParams;
@@ -187,18 +188,24 @@ public class ConnectionManager {
 
         logger.debug("Connecting to endpoint: {}", endpoint.get());
 
-        final KeyStoreLoader loader = new KeyStoreLoader(options.getKeystoreType(), options.getKeystoreClientAlias(),
-                options.getKeystoreServerAlias(), options.getKeystorePassword(), options.getApplicationCertificate());
+        final CertificateManager certificateManager = options.getCertificateManager();
+
+        try {
+            certificateManager.load();
+        } catch (final Exception e) {
+            logger.warn("Failed to load certificates");
+            logger.debug("Failed to load certificates", e);
+        }
 
         final OpcUaClientConfigBuilder clientConfigBuilder = OpcUaClientConfig.builder();
 
-        clientConfigBuilder.setEndpoint(endpoint.get())
+        clientConfigBuilder.setEndpoint(endpoint.get()).setCertificateValidator(certificateManager)
                 .setApplicationName(LocalizedText.english(options.getApplicationName()))
                 .setApplicationUri(options.getApplicationUri())
                 .setRequestTimeout(UInteger.valueOf(options.getRequestTimeout()))
                 .setSessionTimeout(UInteger.valueOf(options.getSessionTimeout()))
-                .setIdentityProvider(options.getIdentityProvider()).setKeyPair(loader.getClientKeyPair())
-                .setCertificate(loader.getClientCertificate()).build();
+                .setIdentityProvider(options.getIdentityProvider()).setKeyPair(certificateManager.getClientKeyPair())
+                .setCertificate(certificateManager.getClientCertificate()).build();
 
         final OpcUaClient client = new OpcUaClient(clientConfigBuilder.build());
         return client.connect();

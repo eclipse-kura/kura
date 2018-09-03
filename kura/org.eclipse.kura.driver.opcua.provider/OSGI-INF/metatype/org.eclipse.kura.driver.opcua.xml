@@ -44,6 +44,15 @@
             description="OPC-UA Server Name">
         </AD>
         
+        <AD id="force.endpoint.url"
+            name="Force endpoint URL"
+            type="Boolean"
+            cardinality="0"
+            required="false"
+            default="false"
+            description="If set to true the driver will use the hostname, port, and server name parameters specified in the configuration instead of the values contained in endpoint descriptions fetched from the server.">
+        </AD>
+        
         <AD id="session.timeout"
             name="Session timeout"
             type="Integer"

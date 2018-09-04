@@ -11,18 +11,19 @@
  *******************************************************************************/
 package org.eclipse.kura.core.cloud.subscriber;
 
-import org.eclipse.kura.cloudconnection.subscriber.listener.CloudSubscriberListener;
+import org.eclipse.kura.core.cloud.CloudServiceOptions;
+import org.eclipse.kura.core.util.MqttTopicUtil;
 
 public class CloudSubscriptionRecord {
 
     private final String topic;
     private final int qos;
-    private final CloudSubscriberListener subscriber;
 
-    public CloudSubscriptionRecord(String topic, int qos, CloudSubscriberListener subscriber) {
+    private String topicFilter;
+
+    public CloudSubscriptionRecord(final String topic, final int qos) {
         this.topic = topic;
         this.qos = qos;
-        this.subscriber = subscriber;
     }
 
     public String getTopic() {
@@ -33,8 +34,24 @@ public class CloudSubscriptionRecord {
         return this.qos;
     }
 
-    public CloudSubscriberListener getSubscriber() {
-        return this.subscriber;
+    public boolean matches(final String topic) {
+        if (topicFilter == null) {
+            topicFilter = this.topic.replaceAll(CloudServiceOptions.getTopicAccountToken(), "+")
+                    .replaceAll(CloudServiceOptions.getTopicClientIdToken(), "+");
+        }
+        return MqttTopicUtil.isMatched(this.topicFilter, topic);
     }
 
+    @Override
+    public int hashCode() {
+        return topic.hashCode();
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (!(obj instanceof CloudSubscriptionRecord)) {
+            return false;
+        }
+        return ((CloudSubscriptionRecord) obj).topic.equals(topic);
+    }
 }

@@ -72,10 +72,8 @@ public class CloudSubscriberImpl
         @Override
         public void removedService(final ServiceReference<CloudConnectionManager> reference,
                 final CloudConnectionManager service) {
-            Map<String, Object> subscriptionProps = new HashMap<>();
-            subscriptionProps.put(APP_ID.name(), CloudSubscriberImpl.this.cloudSubscriberOptions.getAppId());
 
-            CloudSubscriberImpl.this.cloudService.unregisterSubscriber(subscriptionProps);
+            CloudSubscriberImpl.this.cloudService.unregisterSubscriber(CloudSubscriberImpl.this);
             CloudSubscriberImpl.this.cloudService.unregisterCloudConnectionListener(CloudSubscriberImpl.this);
             CloudSubscriberImpl.this.cloudService = null;
         }

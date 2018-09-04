@@ -15,7 +15,7 @@ The following packages must be installed before installing Kura:
 
 Install Kura:
 
-    sudo gdebi kura_3.3.0-SNAPSHOT_intel-up2-ubuntu_installer.deb
+    sudo gdebi kura_4.0.0-SNAPSHOT_intel-up2-ubuntu_installer.deb
 
 After the installation is complete, reboot the machine by executing:
 

@@ -21,6 +21,8 @@ cp ${INSTALL_DIR}/kura/install/kura.init.raspbian /etc/init.d/kura
 chmod +x /etc/init.d/kura
 chmod +x ${INSTALL_DIR}/kura/bin/*.sh
 
+mkdir -p ${INSTALL_DIR}/kura/data
+
 #set up runlevels to start/stop Kura by default
 update-rc.d kura defaults
 
@@ -28,6 +30,9 @@ update-rc.d kura defaults
 if [ ! -d ${INSTALL_DIR}/kura/.data ]; then
     mkdir ${INSTALL_DIR}/kura/.data
 fi
+
+#copy snapshot_0.xml
+cp ${INSTALL_DIR}/kura/data/snapshots/snapshot_0.xml ${INSTALL_DIR}/kura/.data/snapshot_0.xml
 
 #set up logrotate - no need to restart as it is a cronjob
 cp ${INSTALL_DIR}/kura/install/logrotate.conf /etc/logrotate.conf

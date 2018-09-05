@@ -22,6 +22,8 @@ cp ${INSTALL_DIR}/kura/install/kura.init.raspbian /etc/init.d/kura
 chmod +x /etc/init.d/kura
 chmod +x ${INSTALL_DIR}/kura/bin/*.sh
 
+mkdir -p ${INSTALL_DIR}/kura/data
+
 #set up runlevels to start/stop Kura by default
 update-rc.d kura defaults
 
@@ -33,6 +35,9 @@ cp ${INSTALL_DIR}/kura/install/kura.logrotate /etc/logrotate.d/kura
 if [ ! -d ${INSTALL_DIR}/kura/.data ]; then
     mkdir ${INSTALL_DIR}/kura/.data
 fi
+
+#copy snapshot_0.xml
+cp ${INSTALL_DIR}/kura/data/snapshots/snapshot_0.xml ${INSTALL_DIR}/kura/.data/snapshot_0.xml
 
 #set up recover default configuration script
 cp ${INSTALL_DIR}/kura/install/recover_default_config.init ${INSTALL_DIR}/kura/bin/.recoverDefaultConfig.sh

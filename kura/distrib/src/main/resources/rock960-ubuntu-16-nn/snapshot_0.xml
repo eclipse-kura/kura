@@ -184,7 +184,7 @@
                 <esf:value>true</esf:value>
             </esf:property>
             <esf:property name="device.custom-name" array="false" encrypted="false" type="String">
-                <esf:value>aarch64</esf:value>
+                <esf:value>Rock 960</esf:value>
             </esf:property>
         </esf:properties>
     </esf:configuration>

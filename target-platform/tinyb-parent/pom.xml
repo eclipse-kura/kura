@@ -28,6 +28,7 @@
         <module>tinyb</module>
         <module>tinyb.armv6hf</module>
         <module>tinyb.x86_64</module>
+        <module>tinyb.aarch64</module>
     </modules>
     
     <properties>

@@ -10,6 +10,7 @@
 package org.eclipse.kura.core.cloud.publisher;
 
 import static java.util.Objects.isNull;
+import static org.eclipse.kura.core.message.MessageConstants.CONTROL;
 import static org.eclipse.kura.core.message.MessageConstants.PRIORITY;
 import static org.eclipse.kura.core.message.MessageConstants.QOS;
 import static org.eclipse.kura.core.message.MessageConstants.RETAIN;
@@ -105,6 +106,7 @@ public class NotificationPublisherImpl implements CloudNotificationPublisher {
         publishMessageProps.put(QOS.name(), DFLT_PUB_QOS);
         publishMessageProps.put(RETAIN.name(), DFLT_RETAIN);
         publishMessageProps.put(PRIORITY.name(), DFLT_PRIORITY);
+        publishMessageProps.put(CONTROL.name(), true);
 
         KuraMessage publishMessage = new KuraMessage(message.getPayload(), publishMessageProps);
 

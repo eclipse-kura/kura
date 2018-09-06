@@ -235,7 +235,9 @@ public final class BaseAssetConfiguration {
                 continue;
             }
 
-            parser.process(property, e.getValue());
+            final Object value = e.getValue();
+
+            parser.process(property, value != null ? value.toString() : null);
         }
 
         return parser.getChannelList();

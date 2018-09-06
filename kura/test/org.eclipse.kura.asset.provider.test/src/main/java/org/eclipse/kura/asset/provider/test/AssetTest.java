@@ -657,7 +657,8 @@ public final class AssetTest {
         ((BaseAsset) asset).updated(channels);
         sync(asset);
 
-        assertEquals(5, asset.getAssetConfiguration().getAssetChannels().get("3.CH").getConfiguration().get("unit.id"));
+        assertEquals("5",
+                asset.getAssetConfiguration().getAssetChannels().get("3.CH").getConfiguration().get("unit.id"));
 
         initt();
     }

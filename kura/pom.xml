@@ -97,7 +97,7 @@
 
         <module>org.eclipse.kura.linux.sysv.provider</module>
         <module>org.eclipse.kura.linux.systemd.provider</module>
-        
+
         <module>org.eclipse.kura.linux.debian.provider</module>
         <module>org.eclipse.kura.linux.redhat.provider</module>
 
@@ -258,7 +258,7 @@
         <profile>
             <id>check-exists-plugin</id>
             <properties>
-            	<check.plugins.exist.remote>true</check.plugins.exist.remote>
+                <check.plugins.exist.remote>true</check.plugins.exist.remote>
             </properties>
         </profile>
     </profiles>
@@ -460,23 +460,6 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.eclipse.tycho</groupId>
-                <artifactId>tycho-surefire-plugin</artifactId>
-                <version>${tycho-version}</version>
-                <configuration>
-                    <providerHint>junit4</providerHint>
-                    <parallel>both</parallel>
-                    <useUnlimitedThreads>true</useUnlimitedThreads>
-                    <argLine>${jacocoArgs} -Deurotech.framework.mode=emulator -Dds.showtrace=true</argLine>
-                    <dependencies>
-                        <dependency>
-                            <type>p2-installable-unit</type>
-                            <artifactId>org.eclipse.equinox.ds</artifactId>
-                        </dependency>
-                    </dependencies>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

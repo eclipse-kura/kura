@@ -33,7 +33,7 @@
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-server</artifactId>
-            <version>9.4.7.v20180619</version>
+            <version>9.4.12.v20180830</version>
         </dependency>
     </dependencies>
 

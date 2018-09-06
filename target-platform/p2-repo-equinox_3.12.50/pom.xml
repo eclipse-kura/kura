@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.eclipse.kura</groupId>
         <artifactId>target-platform</artifactId>
-        <version>3.3.0-SNAPSHOT</version>
+        <version>4.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>p2-repo-equinox_3.12.50</artifactId>
@@ -204,12 +204,6 @@
                                     tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.servlet_${org.eclipse.jetty.servlet.version}.jar" />
                                 <move file="${project.build.directory}/source/plugins/jetty-util.jar"
                                     tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.util_${org.eclipse.jetty.util.version}.jar" />
-                                <!-- <move file="${project.build.directory}/source/plugins/org.eclipse.equinox.http.jetty.jar"
-                                    tofile="${project.build.directory}/source/plugins/org.eclipse.equinox.http.jetty_${org.eclipse.equinox.http.jetty.version}.jar" />
-                                <move file="${project.build.directory}/source/plugins/org.eclipse.equinox.http.registry.jar"
-                                    tofile="${project.build.directory}/source/plugins/org.eclipse.equinox.http.registry_${org.eclipse.equinox.http.registry.version}.jar" />
-                                <move file="${project.build.directory}/source/plugins/org.eclipse.equinox.http.servlet.jar"
-                                    tofile="${project.build.directory}/source/plugins/org.eclipse.equinox.http.servlet_${org.eclipse.equinox.http.servlet.version}.jar" /> -->
                             </target>
                         </configuration>
                     </execution>

@@ -25,7 +25,7 @@ In order to install Kura you will need to enable EPEL repositories by executing:
 
 Next install Kura itself:
 
-    sudo yum install kura-intel-up2-centos-7-3.3.0-1-x86_64
+    sudo yum install kura-intel-up2-centos-7-4.0.0-1-x86_64
 
 After the installation is complete, reboot the machine by executing:
 

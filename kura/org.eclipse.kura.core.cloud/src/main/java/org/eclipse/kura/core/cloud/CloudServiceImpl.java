@@ -18,6 +18,7 @@ import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_P
 import static org.eclipse.kura.core.message.MessageConstants.APP_ID;
 import static org.eclipse.kura.core.message.MessageConstants.APP_TOPIC;
 import static org.eclipse.kura.core.message.MessageConstants.CONTROL;
+import static org.eclipse.kura.core.message.MessageConstants.FULL_TOPIC;
 import static org.eclipse.kura.core.message.MessageConstants.PRIORITY;
 import static org.eclipse.kura.core.message.MessageConstants.QOS;
 import static org.eclipse.kura.core.message.MessageConstants.RETAIN;
@@ -940,16 +941,22 @@ public class CloudServiceImpl
     @Override
     public String publish(KuraMessage message) throws KuraException {
         Map<String, Object> messageProps = message.getProperties();
-        String appId = (String) messageProps.get(APP_ID.name());
-        String appTopic = (String) messageProps.get(APP_TOPIC.name());
         int qos = (Integer) messageProps.get(QOS.name());
         boolean retain = (Boolean) messageProps.get(RETAIN.name());
         int priority = (Integer) messageProps.get(PRIORITY.name());
-        boolean isControl = (Boolean) messageProps.get(CONTROL.name());
 
-        String deviceId = CloudServiceOptions.getTopicClientIdToken();
+        String fullTopic = (String) messageProps.get(FULL_TOPIC.name());
 
-        String fullTopic = encodeTopic(appId, deviceId, appTopic, isControl);
+        if (isNull(fullTopic)) {
+            String appId = (String) messageProps.get(APP_ID.name());
+            String appTopic = (String) messageProps.get(APP_TOPIC.name());
+            boolean isControl = (Boolean) messageProps.get(CONTROL.name());
+
+            String deviceId = CloudServiceOptions.getTopicClientIdToken();
+
+            fullTopic = encodeTopic(appId, deviceId, appTopic, isControl);
+        }
+
         byte[] appPayload = encodePayload(message.getPayload());
 
         int id = this.dataService.publish(fullTopic, appPayload, qos, retain, priority);

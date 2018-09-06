@@ -26,6 +26,7 @@ import org.eclipse.kura.cloudconnection.subscriber.CloudSubscriber;
  */
 public enum MessageConstants {
 
+    FULL_TOPIC,
     APP_ID,
     APP_TOPIC,
     QOS,

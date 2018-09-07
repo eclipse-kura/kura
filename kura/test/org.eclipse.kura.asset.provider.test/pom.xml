@@ -161,11 +161,6 @@
                             <autoStart>true</autoStart>
                         </bundle>
                         <bundle>
-                            <id>org.hsqldb.hsqldb</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
                             <id>org.junit</id>
                             <level>4</level>
                             <autoStart>true</autoStart>
@@ -286,10 +281,6 @@
                         <dependency>
                             <type>p2-installable-unit</type>
                             <artifactId>slf4j.api</artifactId>
-                        </dependency>
-                        <dependency>
-                            <type>p2-installable-unit</type>
-                            <artifactId>org.hsqldb.hsqldb</artifactId>
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>

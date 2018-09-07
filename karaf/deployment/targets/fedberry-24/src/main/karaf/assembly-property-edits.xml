@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <property-edits xmlns="http://karaf.apache.org/tools/property-edits/1.0.0">
     <edits>
-    
+
         <edit>
             <file>config.properties</file>
             <operation>put</operation>
             <key>karaf.framework</key>
             <value>equinox</value>
         </edit>
-        
+
      	<edit>
      		<file>system.properties</file>
      		<operation>put</operation>
@@ -16,12 +16,6 @@
      		<value>false</value>
      	</edit>
      	
-        <edit>
-            <file>system.properties</file>
-            <operation>put</operation>
-            <key>db.service.hsqldb.url</key>
-            <value>jdbc:hsqldb:file:/opt/eclipse/kura/data/db/data;hsqldb.lock_file=false</value>
-        </edit>
         <edit>
             <file>system.properties</file>
             <operation>put</operation>
@@ -76,14 +70,14 @@
             <key>jdk.dio.registry</key>
             <value>/etc/kura/jdk.dio.properties</value>
         </edit>
-        
+
         <edit>
             <file>system.properties</file>
             <operation>put</operation>
             <key>target.device</key>
             <value>generic.raspberry.pi2</value>
         </edit>
-        
+
         <edit>
             <file>org.ops4j.pax.web.cfg</file>
             <operation>put</operation>

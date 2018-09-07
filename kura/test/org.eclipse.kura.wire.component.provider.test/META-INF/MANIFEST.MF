@@ -9,9 +9,6 @@ Bundle-ClassPath: .
 Bundle-ActivationPolicy: lazy
 Import-Package: org.apache.logging.log4j;version="2.8.2",
  org.eclipse.kura.core.testutil;version="1.0.0",
- org.hsqldb,
- org.hsqldb.jdbc,
- org.hsqldb.jdbc.pool,
  org.junit;version="4.12.0",
  org.junit.runners;version="4.12.0",
  org.mockito;version="1.10.19",

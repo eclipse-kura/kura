@@ -1218,6 +1218,7 @@ class TiSensorTagBuilder {
 
         if (connected) {
             when(deviceMock.isConnected()).thenReturn(true);
+            when(deviceMock.isServicesResolved()).thenReturn(true);
         }
 
     }

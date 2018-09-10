@@ -62,7 +62,10 @@ public class SupportedUsbModems {
         }
     }
 
-    static {
+    private SupportedUsbModems() {
+    }
+
+    public static void installModemDrivers() {
         List<LsusbEntry> lsusbEntries = null;
         try {
             lsusbEntries = getLsusbInfo();

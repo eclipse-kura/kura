@@ -101,10 +101,10 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
     private static final String[] EVENT_TOPICS = new String[] { UsbDeviceAddedEvent.USB_EVENT_DEVICE_ADDED_TOPIC,
             UsbDeviceRemovedEvent.USB_EVENT_DEVICE_REMOVED_TOPIC };
 
-    private static final String TOOGLE_MODEM_TASK_NAME = "ToggleModem";
-    private static final long TOOGLE_MODEM_THREAD_INTERVAL = 10000; // in msec
-    private static final long TOOGLE_MODEM_THREAD_TERMINATION_TOUT = 1; // in sec
-    private static final long TOOGLE_MODEM_THREAD_EXECUTION_DELAY = 2; // in min
+    private static final String TOGGLE_MODEM_TASK_NAME = "ToggleModem";
+    private static final long TOGGLE_MODEM_TASK_INTERVAL = 10000; // in msec
+    private static final long TOGGLE_MODEM_TASK_TERMINATION_TOUT = 1; // in sec
+    private static final long TOGGLE_MODEM_TASK_EXECUTION_DELAY = 2; // in min
 
     private final Map<String, UsbModemDevice> usbModems = new ConcurrentHashMap<>();
     private final List<String> addedModems = new CopyOnWriteArrayList<>();
@@ -202,10 +202,10 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
                     } else {
                         logger.warn(
                                 "activate() :: modem doesn't have correct number of resources, will try to toggle it ...");
-                        logger.info("activate() :: scheduling {} thread in {} minutes ..", TOOGLE_MODEM_TASK_NAME,
-                                TOOGLE_MODEM_THREAD_EXECUTION_DELAY);
+                        logger.info("activate() :: scheduling {} thread in {} minutes ..", TOGGLE_MODEM_TASK_NAME,
+                                TOGGLE_MODEM_TASK_EXECUTION_DELAY);
                         this.executor.schedule(new ToggleModemTask(modemInfo, usbPort),
-                                TOOGLE_MODEM_THREAD_EXECUTION_DELAY, TimeUnit.MINUTES);
+                                TOGGLE_MODEM_TASK_EXECUTION_DELAY, TimeUnit.MINUTES);
                     }
                 }
             } finally {
@@ -243,15 +243,15 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
     protected void deactivate(ComponentContext componentContext) {
 
         if (this.executor != null) {
-            logger.debug("deactivate() :: Terminating {} Thread ...", TOOGLE_MODEM_TASK_NAME);
+            logger.debug("deactivate() :: Terminating {} Thread ...", TOGGLE_MODEM_TASK_NAME);
             this.executor.shutdownNow();
             try {
-                this.executor.awaitTermination(TOOGLE_MODEM_THREAD_TERMINATION_TOUT, TimeUnit.SECONDS);
+                this.executor.awaitTermination(TOGGLE_MODEM_TASK_TERMINATION_TOUT, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 logger.warn("Interrupted", e);
             }
-            logger.info("deactivate() :: {} Thread terminated? - {}", TOOGLE_MODEM_TASK_NAME,
+            logger.info("deactivate() :: {} Thread terminated? - {}", TOGGLE_MODEM_TASK_NAME,
                     this.executor.isTerminated());
         }
         this.ctx = null;
@@ -1094,7 +1094,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
         public void run() {
 
             final String threadName = Thread.currentThread().getName();
-            Thread.currentThread().setName(TOOGLE_MODEM_TASK_NAME);
+            Thread.currentThread().setName(TOGGLE_MODEM_TASK_NAME);
 
             try {
                 final UsbModemDevice modemDevice = usbModems.get(usbPort);
@@ -1127,13 +1127,12 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 
                 logger.info("ToggleModemTask :: modem has been toggled successfully ...");
 
-                if (!hasCorrectNumberOfResources(modemInfo, modemDevice)) {
-                    throw new IllegalStateException("Modem is not ready after toggle");
-                }
+                // will check if the modem is ready at next iteration and toggles again if needed
+                executor.schedule(this, TOGGLE_MODEM_TASK_INTERVAL, TimeUnit.SECONDS);
 
             } catch (Exception e) {
                 logger.error("toggleModem() :: failed to toggle modem ", e);
-                executor.schedule(this, TOOGLE_MODEM_THREAD_INTERVAL, TimeUnit.SECONDS);
+                executor.schedule(this, TOGGLE_MODEM_TASK_INTERVAL, TimeUnit.SECONDS);
             } finally {
                 Thread.currentThread().setName(threadName);
             }

@@ -68,9 +68,9 @@ public final class OpcUaDriver implements Driver, ConfigurableComponent {
     private long connectAttempt = 0;
 
     protected synchronized void activate(final Map<String, Object> properties) {
-        logger.debug("Activating OPC-UA Driver...");
+        logger.info("Activating OPC-UA Driver...");
         this.extractProperties(properties);
-        logger.debug("Activating OPC-UA Driver... Done");
+        logger.info("Activating OPC-UA Driver... Done");
     }
 
     protected synchronized void bindCryptoService(final CryptoService cryptoService) {
@@ -127,19 +127,22 @@ public final class OpcUaDriver implements Driver, ConfigurableComponent {
     }
 
     protected synchronized void deactivate() {
-        logger.debug("Deactivating OPC-UA Driver...");
+        logger.info("Deactivating OPC-UA Driver...");
         try {
             this.disconnect();
         } catch (final ConnectionException e) {
             logger.error("Error while disconnecting....", e);
         }
-        logger.debug("Deactivating OPC-UA Driver... Done");
+        logger.info("Deactivating OPC-UA Driver... Done");
     }
 
     @Override
     public synchronized void disconnect() throws ConnectionException {
         try {
             this.connectAttempt++;
+            if (this.connectTask.isPresent()) {
+                this.connectTask = Optional.empty();
+            }
             if (this.connectionManager.isPresent()) {
                 this.connectionManager.get().close();
                 this.connectionManager = Optional.empty();
@@ -203,19 +206,22 @@ public final class OpcUaDriver implements Driver, ConfigurableComponent {
      *            the properties
      */
     public synchronized void updated(final Map<String, Object> properties) {
-        logger.debug("Updating OPC-UA Driver...");
+        logger.info("Updating OPC-UA Driver...");
 
         this.extractProperties(properties);
+
         try {
-            if (connectionManager.isPresent()) {
-                this.disconnect();
+            final boolean reconnect = connectionManager.isPresent();
+            this.disconnect();
+
+            if (reconnect) {
                 this.connectAsync();
             }
         } catch (ConnectionException e) {
             logger.warn("Unable to Disconnect...");
         }
 
-        logger.debug("Updating OPC-UA Driver... Done");
+        logger.info("Updating OPC-UA Driver... Done");
     }
 
     private synchronized void onFailure(final ConnectionManager manager, final Throwable ex) {

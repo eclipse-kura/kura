@@ -137,6 +137,8 @@ final class OpcUaOptions {
 
     private static final String MAX_REQUEST_ITEMS = "max.request.items";
 
+    private static final String FORCE_ENDPOINT_URL = "force.endpoint.url";
+
     /** The Crypto Service dependency. */
     private final CryptoService cryptoService;
 
@@ -413,6 +415,14 @@ final class OpcUaOptions {
             return (Integer) maxRequestItems;
         }
         return 10;
+    }
+
+    boolean shouldForceEndpointUrl() {
+        final Object raw = this.properties.get(FORCE_ENDPOINT_URL);
+        if (raw instanceof Boolean) {
+            return (Boolean) raw;
+        }
+        return false;
     }
 
     CertificateManager getCertificateManager() {

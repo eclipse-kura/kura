@@ -16,10 +16,12 @@ import static org.eclipse.kura.internal.driver.opcua.Utils.runSafe;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
 
 import org.eclipse.kura.channel.ChannelRecord;
 import org.eclipse.kura.internal.driver.opcua.auth.CertificateManager;
@@ -74,10 +76,10 @@ public class ConnectionManager {
 
         final String endpointString = getEndpointString(options);
 
-        logger.debug("Connecting to endpoint: {}", endpointString);
+        logger.debug("Fetching endpoint list for: {}", endpointString);
 
         return UaTcpStackClient.getEndpoints(endpointString)
-                .thenCompose(endpoints -> connectToEndpoint(options, endpoints)).thenApply(client -> {
+                .thenCompose(endpoints -> tryConnectToEndpoints(options, endpoints)).thenApply(client -> {
                     logger.info("Connecting to OPC-UA...Done");
                     return new ConnectionManager((OpcUaClient) client, options, failureHandler, registrations);
                 });
@@ -173,20 +175,38 @@ public class ConnectionManager {
         return endPointBuilder.toString();
     }
 
-    private static CompletableFuture<UaClient> connectToEndpoint(final OpcUaOptions options,
+    private static void dumpEndpoints(final String message, final EndpointDescription[] availableEndpoints) {
+        if (logger.isDebugEnabled()) {
+            for (final EndpointDescription desc : availableEndpoints) {
+                logger.debug("{}: {}", message, desc.getEndpointUrl());
+            }
+        } else if (logger.isTraceEnabled()) {
+            for (final EndpointDescription desc : availableEndpoints) {
+                logger.trace("{}: {}", message, desc);
+            }
+        }
+    }
+
+    private static CompletableFuture<UaClient> tryConnectToEndpoints(final OpcUaOptions options,
             final EndpointDescription[] availableEndpoints) {
 
-        logger.debug("Returned endpoints: {}", (Object[]) availableEndpoints);
+        dumpEndpoints("found endpoint", availableEndpoints);
 
-        final Optional<EndpointDescription> endpoint = Arrays.stream(availableEndpoints)
-                .filter(e -> e.getSecurityPolicyUri().equals(options.getSecurityPolicy().getSecurityPolicyUri()))
-                .findAny();
+        List<EndpointDescription> endpoints = filterEndpoints(options, availableEndpoints);
 
-        if (!endpoint.isPresent()) {
+        dumpEndpoints("endpoint matches configuration", availableEndpoints);
+
+        if (endpoints.isEmpty()) {
             throw new RuntimeException("Unable to Connect...No desired Endpoints returned");
         }
 
-        logger.debug("Connecting to endpoint: {}", endpoint.get());
+        final EndpointDescription forced = forceEndpointUrl(endpoints.get(0), getEndpointString(options));
+
+        if (options.shouldForceEndpointUrl()) {
+            endpoints = Collections.singletonList(forced);
+        } else {
+            endpoints.add(forced);
+        }
 
         final CertificateManager certificateManager = options.getCertificateManager();
 
@@ -197,17 +217,80 @@ public class ConnectionManager {
             logger.debug("Failed to load certificates", e);
         }
 
-        final OpcUaClientConfigBuilder clientConfigBuilder = OpcUaClientConfig.builder();
+        final ConnectionHelper helper = new ConnectionHelper(options, certificateManager, endpoints);
+        helper.tryNextEndpoint();
 
-        clientConfigBuilder.setEndpoint(endpoint.get()).setCertificateValidator(certificateManager)
-                .setApplicationName(LocalizedText.english(options.getApplicationName()))
-                .setApplicationUri(options.getApplicationUri())
-                .setRequestTimeout(UInteger.valueOf(options.getRequestTimeout()))
-                .setSessionTimeout(UInteger.valueOf(options.getSessionTimeout()))
-                .setIdentityProvider(options.getIdentityProvider()).setKeyPair(certificateManager.getClientKeyPair())
-                .setCertificate(certificateManager.getClientCertificate()).build();
+        return helper.future;
+    }
 
-        final OpcUaClient client = new OpcUaClient(clientConfigBuilder.build());
-        return client.connect();
+    private static List<EndpointDescription> filterEndpoints(final OpcUaOptions options,
+            final EndpointDescription[] availableEndpoints) {
+
+        return Arrays.stream(availableEndpoints)
+                .filter(e -> e.getSecurityPolicyUri().equals(options.getSecurityPolicy().getSecurityPolicyUri()))
+                .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    private static EndpointDescription forceEndpointUrl(final EndpointDescription original, final String endpointUrl) {
+        return new EndpointDescription(endpointUrl, original.getServer(), original.getServerCertificate(),
+                original.getSecurityMode(), original.getSecurityPolicyUri(), original.getUserIdentityTokens(),
+                original.getTransportProfileUri(), original.getSecurityLevel());
+    }
+
+    private static final class ConnectionHelper {
+
+        private final Iterator<EndpointDescription> endpoints;
+        private final CertificateManager certificateManager;
+        private final CompletableFuture<UaClient> future;
+        private final OpcUaOptions options;
+
+        public ConnectionHelper(final OpcUaOptions options, final CertificateManager certificateManager,
+                final List<EndpointDescription> endpoints) {
+            this.certificateManager = certificateManager;
+            this.endpoints = endpoints.iterator();
+            this.options = options;
+            this.future = new CompletableFuture<>();
+        }
+
+        private void tryNextEndpoint() {
+            if (!endpoints.hasNext()) {
+                future.completeExceptionally(
+                        new IllegalStateException("failed to connect to any of the matching endpoints"));
+                return;
+            }
+
+            final EndpointDescription endpoint = endpoints.next();
+
+            logger.info("connecting to endpoint: {}", endpoint.getEndpointUrl());
+
+            final OpcUaClientConfigBuilder clientConfigBuilder = OpcUaClientConfig.builder();
+
+            clientConfigBuilder.setEndpoint(endpoint).setCertificateValidator(certificateManager)
+                    .setApplicationName(LocalizedText.english(options.getApplicationName()))
+                    .setApplicationUri(options.getApplicationUri())
+                    .setRequestTimeout(UInteger.valueOf(options.getRequestTimeout()))
+                    .setSessionTimeout(UInteger.valueOf(options.getSessionTimeout()))
+                    .setIdentityProvider(options.getIdentityProvider())
+                    .setKeyPair(certificateManager.getClientKeyPair())
+                    .setCertificate(certificateManager.getClientCertificate()).build();
+
+            final OpcUaClient cl = new OpcUaClient(clientConfigBuilder.build());
+
+            cl.connect().whenComplete((c, err) -> {
+                if (err != null) {
+                    logger.warn("failed to connect to endpoint", err);
+                    tryNextEndpoint();
+                    return;
+                }
+
+                if (!endpoints.hasNext() && !options.shouldForceEndpointUrl()) {
+                    logger.info(
+                            "Connection has been established by forcing endpoint URL from configuration, setting \"Force endpoint URL\" to true in driver configuration might reduce connection time for this server.");
+                }
+
+                future.complete(c);
+            });
+        }
+
     }
 }

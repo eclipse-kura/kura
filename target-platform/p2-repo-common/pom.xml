@@ -82,6 +82,11 @@
                                     <version>${tinyb.version}</version>
                                 </artifactItem>
                                 <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>tinyb.aarch64</artifactId>
+                                    <version>${tinyb.version}</version>
+                                </artifactItem>
+                                <artifactItem>
                                     <groupId>org.apache</groupId>
                                     <artifactId>org.apache.commons.net</artifactId>
                                     <version>${org.apache.commons.net.version}</version>
@@ -488,6 +493,7 @@
                                 <move file="target/source/plugins/tinyb.jar" tofile="target/source/plugins/tinyb_${tinyb.version}.jar"/>
                                 <move file="target/source/plugins/tinyb.armv6hf.jar" tofile="target/source/plugins/tinyb.armv6hf_${tinyb.version}.jar"/>
                                 <move file="target/source/plugins/tinyb.x86_64.jar" tofile="target/source/plugins/tinyb.x86_64_${tinyb.version}.jar"/>
+                                <move file="target/source/plugins/tinyb.aarch64.jar" tofile="target/source/plugins/tinyb.aarch64_${tinyb.version}.jar"/>
                                 <move file="target/source/plugins/org.apache.commons.net.jar" tofile="target/source/plugins/org.apache.commons.net_${org.apache.commons.net.version}.jar"/>
                                 <move file="target/source/plugins/commons-exec.jar" tofile="target/source/plugins/org.apache.commons.exec_${org.apache.commons.exec.version}.jar"/>
                                 <move file="target/source/plugins/com.google.protobuf.jar" tofile="target/source/plugins/com.google.protobuf_${com.google.protobuf.version}.jar"/>

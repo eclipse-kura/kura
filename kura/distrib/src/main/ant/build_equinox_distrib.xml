@@ -161,11 +161,37 @@
 			<contains string="${build.name}" substring="-nn"/>
 		</condition>
 		<condition property="is.sysv">
-			<contains string="${service.manager}" substring="sysv"/>
+			<and>
+				<contains string="${service.manager}" substring="sysv"/>
+				<not>
+					<contains string="${build.name}" substring="-nn"/>
+				</not>
+			</and>
+		</condition>
+		<condition property="is.systemd">
+			<and>
+				<contains string="${service.manager}" substring="systemd"/>
+				<not>
+					<contains string="${build.name}" substring="-nn"/>
+				</not>
+			</and>
 		</condition>
 
 		<condition property="is.debian">
-			<contains string="${os.base}" substring="debian"/>
+			<and>
+				<contains string="${os.base}" substring="debian"/>
+				<not>
+					<contains string="${build.name}" substring="-nn"/>
+				</not>
+			</and>
+		</condition>
+		<condition property="is.redhat">
+			<and>
+				<contains string="${os.base}" substring="redhat"/>
+				<not>
+					<contains string="${build.name}" substring="-nn"/>
+				</not>
+			</and>
 		</condition>
 		<antcall target="emulator-config" />
 		<antcall target="linux-sysv-config" />
@@ -1255,14 +1281,14 @@ fi]]>
 		</propertyfile>
 	</target>
 
-	<target name="linux-redhat-config" unless="is.debian" depends="linux-config">
+	<target name="linux-redhat-config" if="is.redhat" depends="linux-config">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
 					value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.linux.redhat.provider_${org.eclipse.kura.linux.redhat.provider.version}.jar@4" />
 		</propertyfile>
 	</target>
 
-	<target name="linux-systemd-config" unless="is.sysv" depends="linux-config">
+	<target name="linux-systemd-config" if="is.systemd" depends="linux-config">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
 					value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.linux.systemd.provider_${org.eclipse.kura.linux.systemd.provider.version}.jar@4" />
@@ -1301,14 +1327,14 @@ fi]]>
 		</zip>
 	</target>
 
-	<target name="linux-redhat-jars" unless="is.debian" depends="linux-jars">
+	<target name="linux-redhat-jars" if="is.redhat" depends="linux-jars">
 		<zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux.redhat.provider_${org.eclipse.kura.linux.redhat.provider.version}.jar"
                         prefix="${build.output.name}/${plugins.folder}" />
 		</zip>
 	</target>
 
-	<target name="linux-systemd-jars" unless="is.sysv" depends="linux-jars">
+	<target name="linux-systemd-jars" if="is.systemd" depends="linux-jars">
 		<zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux.systemd.provider_${org.eclipse.kura.linux.systemd.provider.version}.jar"
                         prefix="${build.output.name}/${plugins.folder}" />

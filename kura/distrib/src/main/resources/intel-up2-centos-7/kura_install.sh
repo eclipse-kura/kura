@@ -83,6 +83,8 @@ if [ -z "$SELINUX_KURA" ]; then
     cd ${OLD_PATH}
 fi
 
+mkdir -p ${INSTALL_DIR}/kura/data
+
 #copy snapshot_0.xml
 cp ${INSTALL_DIR}/kura/data/snapshots/snapshot_0.xml ${INSTALL_DIR}/kura/.data/snapshot_0.xml
 

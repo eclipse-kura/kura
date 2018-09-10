@@ -34,6 +34,8 @@ fi
 cp ${INSTALL_DIR}/kura/install/recover_default_config.init ${INSTALL_DIR}/kura/bin/.recoverDefaultConfig.sh
 chmod +x ${INSTALL_DIR}/kura/bin/.recoverDefaultConfig.sh
 
+mkdir -p ${INSTALL_DIR}/kura/data
+
 #copy snapshot_0.xml
 cp ${INSTALL_DIR}/kura/data/snapshots/snapshot_0.xml ${INSTALL_DIR}/kura/.data/snapshot_0.xml
 

@@ -141,9 +141,9 @@
             </modules>
         </profile>
         <profile>
-         	<id>check-exists-plugin</id>
+            <id>check-exists-plugin</id>
             <properties>
-             	<check.plugins.exist.remote>true</check.plugins.exist.remote>
+                <check.plugins.exist.remote>true</check.plugins.exist.remote>
             </properties>
         </profile>
     </profiles>
@@ -311,8 +311,6 @@
                 <version>${tycho-version}</version>
                 <configuration>
                     <providerHint>junit4</providerHint>
-                    <parallel>both</parallel>
-                    <useUnlimitedThreads>true</useUnlimitedThreads>
                     <argLine>${jacocoArgs} -Deurotech.framework.mode=emulator -Dds.showtrace=true</argLine>
                     <dependencies>
                         <dependency>

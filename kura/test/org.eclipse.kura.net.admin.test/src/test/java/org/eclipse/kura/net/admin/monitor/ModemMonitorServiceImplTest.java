@@ -11,26 +11,30 @@ package org.eclipse.kura.net.admin.monitor;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Matchers.isA;
-import static org.mockito.Matchers.anyLong;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.anyLong;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.comm.CommURI;
@@ -51,8 +55,8 @@ import org.eclipse.kura.net.admin.event.NetworkConfigurationChangeEvent;
 import org.eclipse.kura.net.admin.event.NetworkStatusChangeEvent;
 import org.eclipse.kura.net.admin.modem.CellularModemFactory;
 import org.eclipse.kura.net.admin.modem.EvdoCellularModem;
+import org.eclipse.kura.net.admin.modem.HspaCellularModem;
 import org.eclipse.kura.net.admin.modem.IModemLinkService;
-import org.eclipse.kura.net.admin.modem.PppFactory;
 import org.eclipse.kura.net.admin.modem.PppState;
 import org.eclipse.kura.net.admin.util.AbstractCellularModemFactory;
 import org.eclipse.kura.net.modem.CellularModem;
@@ -70,31 +74,24 @@ import org.eclipse.kura.net.modem.ModemTechnologyType;
 import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.usb.UsbModemDevice;
 import org.junit.Test;
-import org.osgi.framework.BundleContext;
-import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
-import org.osgi.service.event.EventHandler;
 
 public class ModemMonitorServiceImplTest {
 
     @Test
-    public void testActivateNoModems() throws NoSuchFieldException {
+    public void testActivateNoModems() throws NoSuchFieldException, InterruptedException, ExecutionException {
         ModemMonitorServiceImpl svc = new ModemMonitorServiceImpl();
 
-        ComponentContext cctxMock = mock(ComponentContext.class);
-        BundleContext bctxMock = mock(BundleContext.class);
-        when(cctxMock.getBundleContext()).thenReturn(bctxMock);
-
-        svc.activate(cctxMock);
-
-        verify(bctxMock, times(1)).registerService(eq(EventHandler.class.getName()), eq(svc), anyObject());
+        svc.activate();
+        svc.sync();
 
         assertTrue((boolean) TestUtil.getFieldValue(svc, "serviceActivated"));
     }
 
     @Test
-    public void testActivateWithModemNoFramework() throws NoSuchFieldException, KuraException {
+    public void testActivateWithModemNoFramework()
+            throws NoSuchFieldException, KuraException, InterruptedException, ExecutionException {
         // enters creation of a modem, but fails early
 
         // needed for ModemDriver:
@@ -118,20 +115,16 @@ public class ModemMonitorServiceImplTest {
         infcs.add(modemIface);
         when(networkServiceMock.getNetworkInterfaces()).thenReturn(infcs);
 
-        ComponentContext cctxMock = mock(ComponentContext.class);
-        BundleContext bctxMock = mock(BundleContext.class);
-        when(cctxMock.getBundleContext()).thenReturn(bctxMock);
-
-        svc.activate(cctxMock);
-
-        verify(bctxMock, times(1)).registerService(eq(EventHandler.class.getName()), eq(svc), anyObject());
+        svc.activate();
+        svc.sync();
 
         assertTrue((boolean) TestUtil.getFieldValue(svc, "serviceActivated"));
         assertTrue(((Map) TestUtil.getFieldValue(svc, "modems")).isEmpty());
     }
 
     @Test
-    public void testActivateWithUsbModem() throws NoSuchFieldException, KuraException, URISyntaxException {
+    public void testActivateWithUsbModem()
+            throws Throwable {
         // enters creation of a modem, and ends up activating the GPS
 
         ModemMonitorServiceImpl svc = new ModemMonitorServiceImpl() {
@@ -139,6 +132,17 @@ public class ModemMonitorServiceImplTest {
             @Override
             protected Class<? extends CellularModemFactory> getModemFactoryClass(ModemDevice modemDevice) {
                 return TestModemFactory.class;
+            }
+            
+            @Override
+            IModemLinkService getPppService(String interfaceName, String port) {
+                final IModemLinkService modemLinkServiceMock = mock(IModemLinkService.class);
+                try {
+                    when(modemLinkServiceMock.getPppState()).thenReturn(PppState.CONNECTED);
+                } catch (KuraException e) {
+                    //no need
+                }
+                return modemLinkServiceMock;
             }
         };
 
@@ -164,6 +168,7 @@ public class ModemMonitorServiceImplTest {
         netInterfaceConfig.setNetInterfaceAddresses(interfaceAddressConfigs);
 
         when(ncsMock.getNetworkConfiguration()).thenReturn(nc);
+        svc.setNetworkConfigurationService(ncsMock);
 
         // for obtaining the available network interfaces, ppp port
         NetworkService networkServiceMock = mock(NetworkService.class);
@@ -216,35 +221,51 @@ public class ModemMonitorServiceImplTest {
             assertEquals(0, event.getProperty("parity"));
 
             return null;
+        }).doAnswer(invocation -> {
+            Event event = invocation.getArgumentAt(0, Event.class);
+
+            assertEquals("org/eclipse/kura/net/modem/gps/ENABLED", event.getTopic());
+            assertEquals("gps0", event.getProperty("port"));
+            assertEquals(56400, event.getProperty("baudRate"));
+            assertEquals(8, event.getProperty("bitsPerWord"));
+            assertEquals(1, event.getProperty("stopBits"));
+            assertEquals(0, event.getProperty("parity"));
+
+            return null;
+        }).doAnswer(invocation -> {
+            Event event = invocation.getArgumentAt(0, Event.class);
+
+            assertEquals("org/eclipse/kura/net/admin/event/NETWORK_EVENT_STATUS_CHANGE_TOPIC", event.getTopic());
+
+            return null;
         }).when(eaMock).postEvent(anyObject());
 
         // modem mock
-        setModemMock();
+        setModemMock(modemDevice);
 
+        
         TestUtil.setFieldValue(svc, "task", mock(Future.class));
 
-        // args, event handler
-        ComponentContext cctxMock = mock(ComponentContext.class);
-        BundleContext bctxMock = mock(BundleContext.class);
-        when(cctxMock.getBundleContext()).thenReturn(bctxMock);
+        svc.activate();
+        svc.sync();
 
-        svc.activate(cctxMock);
-
-        verify(bctxMock, times(1)).registerService(eq(EventHandler.class.getName()), eq(svc), anyObject());
-        verify(eaMock, times(3)).postEvent(anyObject());
+        TestUtil.invokePrivate(svc, "monitor");
+        
+        verify(eaMock, times(5)).postEvent(anyObject());
 
         assertTrue((boolean) TestUtil.getFieldValue(svc, "serviceActivated"));
 
-        Map modems = (Map) TestUtil.getFieldValue(svc, "modems");
+        Collection<CellularModem> modems = svc.getAllModemServices();
         assertEquals(1, modems.size());
-        CellularModem modem = (CellularModem) modems.get("usb0");
+        CellularModem modem = (CellularModem) modems.iterator().next();
         assertNotNull(modem);
         assertEquals("imei", modem.getSerialNumber());
 
         verify(modem, times(1)).enableGps();
     }
 
-    private void setModemMock() throws KuraException, URISyntaxException {
+    @SuppressWarnings("unchecked")
+    private void setModemMock(final ModemDevice modemDevice) throws KuraException, URISyntaxException {
         TestModemFactory modemFactory = TestModemFactory.getInstance();
         EvdoCellularModem modem = mock(EvdoCellularModem.class);
         modemFactory.setModem(modem);
@@ -260,6 +281,14 @@ public class ModemMonitorServiceImplTest {
         when(modem.getAtPort()).thenReturn("usb0");
         when(modem.isPortReachable("usb0")).thenReturn(false).thenReturn(true); // first not, then OK
         when(modem.getGpsPort()).thenReturn("gps0");
+        when(modem.getModemDevice()).thenReturn(modemDevice);
+
+        final AtomicReference<List<NetConfig>> config = new AtomicReference<>();
+        doAnswer(invocation -> {
+            config.set(invocation.getArgumentAt(0, List.class));
+            return ((Void) null);
+        }).when(modem).setConfiguration(anyObject());
+        when(modem.getConfiguration()).thenAnswer(invocation -> config.get());
 
         CommURI commuri = CommURI.parseString(
                 "comm:gps0;baudrate=56400;databits=8;stopbits=1;parity=0;flowcontrol=1;timeout=10;receivetimeout=5");
@@ -270,25 +299,26 @@ public class ModemMonitorServiceImplTest {
     public void testDeactivate() throws Exception {
         // test deactivation - stop the task and shutdown executor
 
-        ModemMonitorServiceImpl svc = new ModemMonitorServiceImpl();
+        final ScheduledExecutorService executor = mock(ScheduledExecutorService.class);
+
+        ModemMonitorServiceImpl svc = new ModemMonitorServiceImpl() {
+
+            ScheduledExecutorService createExecutor() {
+                return executor;
+            }
+        };
 
         Future task = mock(Future.class);
         TestUtil.setFieldValue(svc, "task", task);
 
         when(task.isDone()).thenReturn(false);
 
-        ExecutorService executor = mock(ExecutorService.class);
-        TestUtil.setFieldValue(svc, "executor", executor);
-
         // produce a warning log...
         when(executor.awaitTermination(anyLong(), eq(TimeUnit.SECONDS))).thenThrow(new InterruptedException("test"));
 
-        AtomicBoolean stop = new AtomicBoolean(false);
-        TestUtil.setFieldValue(svc, "stopThread", stop);
+        svc.deactivate();
 
-        svc.deactivate(null);
-
-        verify(task, times(1)).cancel(true);
+        verify(task, times(1)).cancel(false);
         verify(executor, times(1)).shutdownNow();
     }
 
@@ -334,7 +364,7 @@ public class ModemMonitorServiceImplTest {
     }
 
     @Test
-    public void testHandleEventModemRemoved() throws NoSuchFieldException, InterruptedException {
+    public void testHandleEventModemRemoved() throws NoSuchFieldException, InterruptedException, ExecutionException {
         // handle the ModemAddedEvent event
 
         ModemMonitorServiceImpl svc = new ModemMonitorServiceImpl();
@@ -350,6 +380,7 @@ public class ModemMonitorServiceImplTest {
         Event event = new ModemRemovedEvent(properties);
 
         svc.handleEvent(event);
+        svc.sync();
 
         assertTrue(modems.isEmpty());
     }
@@ -365,11 +396,12 @@ public class ModemMonitorServiceImplTest {
         svc.registerListener(listener);
         svc.registerListener(listener); // try to add a duplicate listener - shouldn't work
 
-        List<ModemMonitorListener> listeners = (List<ModemMonitorListener>) TestUtil.getFieldValue(svc, "listeners");
+        Collection<ModemMonitorListener> listeners = (Collection<ModemMonitorListener>) TestUtil.getFieldValue(svc,
+                "listeners");
 
         assertNotNull(listeners);
         assertEquals(1, listeners.size());
-        assertEquals(listener, listeners.get(0));
+        assertEquals(listener, listeners.iterator().next());
 
         svc.unregisterListener(listener);
 
@@ -662,14 +694,25 @@ public class ModemMonitorServiceImplTest {
 
     @Test
     public void testProcessNetworkConfigurationChangeEvent() throws Throwable {
-        ModemMonitorServiceImpl svc = new ModemMonitorServiceImpl();
+        // PPP service preparation
+        IModemLinkService pppMock = mock(IModemLinkService.class);
+        when(pppMock.getPppState()).thenReturn(PppState.CONNECTED); // trigger disconnect
+
+        ModemMonitorServiceImpl svc = new ModemMonitorServiceImpl() {
+
+            IModemLinkService getPppService(final String interfaceName, final String port) {
+                if ("ppp2".equals(interfaceName)) {
+                    return pppMock;
+                }
+                fail("expected ppp2");
+                return null;
+            }
+        };
 
         // add so that anything happens at all
         // need at least one modem with a device set
-        Map<String, CellularModem> modems = new HashMap<>();
         CellularModem modemMock = mock(CellularModem.class);
-        modems.put("ttyUsb3", modemMock);
-        TestUtil.setFieldValue(svc, "modems", modems);
+        svc.addModem("ttyUsb3", modemMock);
 
         ModemDevice modemDevice = mock(ModemDevice.class);
         when(modemMock.getModemDevice()).thenReturn(modemDevice);
@@ -693,14 +736,6 @@ public class ModemMonitorServiceImplTest {
 
         when(nsMock.getModemPppPort(modemDevice)).thenReturn("ppp2");
 
-        // PPP service preparation
-        IModemLinkService pppMock = mock(IModemLinkService.class);
-        when(pppMock.getPppState()).thenReturn(PppState.CONNECTED); // trigger disconnect
-
-        Map<String, IModemLinkService> pppSvcs = new HashMap<>();
-        pppSvcs.put("ppp2", pppMock);
-        TestUtil.setFieldValue(new PppFactory(), "s_pppServices", pppSvcs);
-
         // for posting the modem disabled event
         EventAdmin eaMock = mock(EventAdmin.class);
         svc.setEventAdmin(eaMock);
@@ -720,16 +755,25 @@ public class ModemMonitorServiceImplTest {
         TestUtil.invokePrivate(svc, "processNetworkConfigurationChangeEvent", nc);
 
         verify(pppMock, times(1)).disconnect();
-        verify(eaMock, times(1)).postEvent(isA(ModemGpsDisabledEvent.class));
+        verify(eaMock, times(1)).postEvent(org.mockito.Mockito.isA(ModemGpsDisabledEvent.class));
     }
 
     @Test
     public void testProcessNetworkConfigurationChangeEventEvdo() throws Throwable {
-        ModemMonitorServiceImpl svc = new ModemMonitorServiceImpl();
+        // PPP service preparation
+        IModemLinkService pppMock = mock(IModemLinkService.class);
+        when(pppMock.getPppState()).thenReturn(PppState.CONNECTED); // trigger disconnect
 
-        // for Evdo
-        AtomicBoolean stopThread = new AtomicBoolean(false);
-        TestUtil.setFieldValue(svc, "stopThread", stopThread);
+        ModemMonitorServiceImpl svc = new ModemMonitorServiceImpl() {
+
+            IModemLinkService getPppService(final String interfaceName, final String port) {
+                if ("ppp2".equals(interfaceName)) {
+                    return pppMock;
+                }
+                fail("expected ppp2");
+                return null;
+            }
+        };
 
         Future task = mock(Future.class);
         TestUtil.setFieldValue(svc, "task", task);
@@ -737,12 +781,8 @@ public class ModemMonitorServiceImplTest {
         ExecutorService executor = mock(ExecutorService.class);
         TestUtil.setFieldValue(svc, "executor", executor);
 
-        // add so that anything happens at all
-        // need at least one modem with a device set
-        Map<String, CellularModem> modems = new HashMap<>();
         CellularModem modemMock = mock(EvdoCellularModem.class);
-        modems.put("ttyUsb3", modemMock);
-        TestUtil.setFieldValue(svc, "modems", modems);
+        svc.addModem("ttyUsb3", modemMock);
 
         ModemDevice modemDevice = mock(ModemDevice.class);
         when(modemMock.getModemDevice()).thenReturn(modemDevice);
@@ -769,14 +809,6 @@ public class ModemMonitorServiceImplTest {
 
         when(nsMock.getModemPppPort(modemDevice)).thenReturn("ppp2");
 
-        // PPP service preparation
-        IModemLinkService pppMock = mock(IModemLinkService.class);
-        when(pppMock.getPppState()).thenReturn(PppState.CONNECTED); // trigger disconnect
-
-        Map<String, IModemLinkService> pppSvcs = new HashMap<>();
-        pppSvcs.put("ppp2", pppMock);
-        TestUtil.setFieldValue(new PppFactory(), "s_pppServices", pppSvcs);
-
         // for posting the modem disabled event
         EventAdmin eaMock = mock(EventAdmin.class);
         svc.setEventAdmin(eaMock);
@@ -800,13 +832,96 @@ public class ModemMonitorServiceImplTest {
 
         TestUtil.invokePrivate(svc, "processNetworkConfigurationChangeEvent", nc);
 
-        verify(pppMock, times(1)).disconnect();
-        verify(executor, times(1)).submit((Runnable) anyObject());
-        verify(task, times(1)).cancel(true);
         verify(modemMock, times(1)).enableGps();
-        verify(eaMock, times(1)).postEvent(isA(ModemGpsEnabledEvent.class));
+        verify(eaMock, times(1)).postEvent(org.mockito.Mockito.isA(ModemGpsEnabledEvent.class));
     }
 
+    private void testModemReset(final PppState pppState, final boolean resetExpected, final boolean connectExpected,
+            final boolean isSimCardReady) throws Throwable {
+        IModemLinkService pppMock = mock(IModemLinkService.class);
+        when(pppMock.getPppState()).thenReturn(pppState);
+
+        ModemMonitorServiceImpl svc = new ModemMonitorServiceImpl() {
+
+            @Override
+            IModemLinkService getPppService(final String interfaceName, final String port) {
+                if ("ppp0".equals(interfaceName)) {
+                    return pppMock;
+                }
+                fail("expected ppp0");
+                return null;
+            }
+
+            @Override
+            long getModemResetTimeoutMsec(String ifaceName, java.util.List<NetConfig> netConfigs) {
+                return 1000;
+            }
+        };
+
+        final HspaCellularModem mockModem = mock(HspaCellularModem.class);
+
+        ModemDevice modemDevice = mock(ModemDevice.class);
+        when(mockModem.getModemDevice()).thenReturn(modemDevice);
+        when(mockModem.getTechnologyTypes()).thenReturn(Collections.singletonList(ModemTechnologyType.HSDPA));
+        when(mockModem.isSimCardReady()).thenReturn(isSimCardReady);
+
+        List<NetConfig> modemConfigs = new ArrayList<>();
+        NetConfig config = new NetConfigIP4(NetInterfaceStatus.netIPv4StatusEnabledWAN, true);
+        modemConfigs.add(config);
+        ModemConfig mc = new ModemConfig(1, PdpType.PPP, "apn", IPAddress.parseHostAddress("10.10.10.10"), 1, 2);
+        mc.setPppNumber(2); // so that
+        modemConfigs.add(mc);
+        when(mockModem.getConfiguration()).thenReturn(modemConfigs);
+
+        NetworkService nsMock = mock(NetworkService.class);
+        when(nsMock.getModemPppPort(modemDevice)).thenReturn("ppp0");
+
+        NetworkConfigurationService nsCfgMock = mock(NetworkConfigurationService.class);
+        NetworkConfiguration networkConfigMock = mock(NetworkConfiguration.class);
+
+        when(nsCfgMock.getNetworkConfiguration()).thenReturn(networkConfigMock);
+        svc.setNetworkConfigurationService(nsCfgMock);
+
+        svc.setNetworkService(nsMock);
+        svc.setEventAdmin(mock(EventAdmin.class));
+
+        svc.activate();
+        svc.addModem("ppp0", mockModem);
+        svc.sync();
+
+        final long startTime = System.currentTimeMillis();
+
+        for (int i = 0; i < 15; i++) {
+            TestUtil.invokePrivate(svc, "monitor");
+            Thread.sleep(100);
+            if (resetExpected && System.currentTimeMillis() - startTime < 1000) {
+                verify(mockModem, times(0)).reset();
+            }
+            verify(pppMock, connectExpected ? times(i + 2) : times(0)).connect();
+        }
+
+        verify(mockModem, resetExpected ? times(1) : times(0)).reset();
+    }
+
+    @Test
+    public void testModemResetNotConnected() throws Throwable {
+        testModemReset(PppState.NOT_CONNECTED, true, true, true);
+    }
+
+    @Test
+    public void testModemResetNotConnectedNoSim() throws Throwable {
+        testModemReset(PppState.NOT_CONNECTED, false, false, false);
+    }
+
+    @Test
+    public void testModemResetInProgress() throws Throwable {
+        testModemReset(PppState.IN_PROGRESS, true, false, true);
+    }
+
+    @Test
+    public void testModemResetConnected() throws Throwable {
+        testModemReset(PppState.CONNECTED, false, false, true);
+    }
 }
 
 class TestModemFactory extends AbstractCellularModemFactory<CellularModem> {

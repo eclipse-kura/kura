@@ -102,7 +102,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
             UsbDeviceRemovedEvent.USB_EVENT_DEVICE_REMOVED_TOPIC };
 
     private static final String TOGGLE_MODEM_TASK_NAME = "ToggleModem";
-    private static final long TOGGLE_MODEM_TASK_INTERVAL = 10000; // in msec
+    private static final long TOGGLE_MODEM_TASK_INTERVAL = 40; // in sec
     private static final long TOGGLE_MODEM_TASK_TERMINATION_TOUT = 1; // in sec
     private static final long TOGGLE_MODEM_TASK_EXECUTION_DELAY = 2; // in min
 
@@ -1125,7 +1125,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
                 logger.info("ToggleModemTask :: turning modem on ...");
                 modemDriver.enable();
 
-                logger.info("ToggleModemTask :: modem has been toggled successfully ...");
+                logger.info("ToggleModemTask :: modem has been toggled ...");
 
                 // will check if the modem is ready at next iteration and toggles again if needed
                 executor.schedule(this, TOGGLE_MODEM_TASK_INTERVAL, TimeUnit.SECONDS);

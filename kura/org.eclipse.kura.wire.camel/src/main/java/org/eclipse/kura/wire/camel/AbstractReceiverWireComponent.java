@@ -39,7 +39,7 @@ public abstract class AbstractReceiverWireComponent extends AbstractEndpointWire
         final String endpointUri = this.endpointUri;
 
         if (StringUtil.isNullOrEmpty(endpointUri)) {
-            logger.debug("Endpoint missing. Componnent is disabled.");
+            logger.debug("Endpoint missing. Component is disabled.");
             return;
         }
 

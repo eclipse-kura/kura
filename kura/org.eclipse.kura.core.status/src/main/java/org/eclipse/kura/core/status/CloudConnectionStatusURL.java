@@ -45,7 +45,7 @@ public class CloudConnectionStatusURL {
 
             String[] urls = urlImage.split(CCS_NOTIFICATION_URLS_SEPARATOR);
             for (String url : urls) {
-                props.putAll(parseUrlType(url));
+                props.putAll(parseUrlType(url, ccsUrl));
             }
         } else {
             props.put(NOTIFICATION_TYPE, StatusNotificationTypeEnum.NONE);
@@ -54,7 +54,7 @@ public class CloudConnectionStatusURL {
         return props;
     }
 
-    private static Properties parseUrlType(String urlImage) {
+    private static Properties parseUrlType(String urlImage, String originalCcsUrl) {
         Properties props = new Properties();
         if (urlImage.startsWith(LED)) {
             // Cloud Connection Status on LED
@@ -77,7 +77,8 @@ public class CloudConnectionStatusURL {
                 // Do nothing
             }
         } else if (urlImage.startsWith(LINUX_LED)) {
-            String ledPath = urlImage.replace(LINUX_LED, "");
+            String[] ccsSplit = originalCcsUrl.split(":", 3);
+            String ledPath = ccsSplit.length > 2 ? ccsSplit[2].trim() : urlImage.replace(LINUX_LED, "");
             props.put(NOTIFICATION_TYPE, StatusNotificationTypeEnum.LED);
             props.put("linux_led", ledPath);
         } else if (urlImage.startsWith(LOG)) {

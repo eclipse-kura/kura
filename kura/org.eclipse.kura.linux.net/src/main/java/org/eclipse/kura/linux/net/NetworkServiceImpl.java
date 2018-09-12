@@ -25,9 +25,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -44,6 +45,7 @@ import org.eclipse.kura.core.net.modem.ModemInterfaceImpl;
 import org.eclipse.kura.core.net.util.NetworkUtil;
 import org.eclipse.kura.linux.net.dns.LinuxDns;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemInfo;
+import org.eclipse.kura.linux.net.modem.SupportedUsbModems;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemsInfo;
 import org.eclipse.kura.linux.net.modem.UsbModemDriver;
 import org.eclipse.kura.linux.net.util.IScanTool;
@@ -99,25 +101,22 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
     private static final String[] EVENT_TOPICS = new String[] { UsbDeviceAddedEvent.USB_EVENT_DEVICE_ADDED_TOPIC,
             UsbDeviceRemovedEvent.USB_EVENT_DEVICE_REMOVED_TOPIC };
 
-    private static final String TOOGLE_MODEM_THREAD_NAME = "ToggleModem";
-    private static final long TOOGLE_MODEM_THREAD_INTERVAL = 10000; // in msec
-    private static final long TOOGLE_MODEM_THREAD_TERMINATION_TOUT = 1; // in sec
-    private static final long TOOGLE_MODEM_THREAD_EXECUTION_DELAY = 2; // in min
+    private static final String TOGGLE_MODEM_TASK_NAME = "ToggleModem";
+    private static final long TOGGLE_MODEM_TASK_INTERVAL = 40; // in sec
+    private static final long TOGGLE_MODEM_TASK_TERMINATION_TOUT = 1; // in sec
+    private static final long TOGGLE_MODEM_TASK_EXECUTION_DELAY = 2; // in min
+
+    private final Map<String, UsbModemDevice> usbModems = new ConcurrentHashMap<>();
+    private final List<String> addedModems = new CopyOnWriteArrayList<>();
+    private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+    private final AtomicBoolean activated = new AtomicBoolean(false);
 
     private ComponentContext ctx;
 
     private EventAdmin eventAdmin;
     private UsbService usbService;
 
-    private Map<String, UsbModemDevice> usbModems;
     private SerialModemDevice serialModem;
-
-    private List<String> addedModems;
-
-    private ScheduledExecutorService executor;
-
-    private ScheduledFuture<?> task;
-    private static AtomicBoolean stopThread;
 
     // ----------------------------------------------------------------
     //
@@ -150,71 +149,69 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
         // save the bundle context
         this.ctx = componentContext;
 
-        stopThread = new AtomicBoolean();
-        this.usbModems = new HashMap<>();
-        this.addedModems = new ArrayList<>();
-
         Dictionary<String, String[]> d = new Hashtable<>();
         d.put(EventConstants.EVENT_TOPIC, EVENT_TOPICS);
         this.ctx.getBundleContext().registerService(EventHandler.class.getName(), this, d);
 
-        // Add tty devices
-        List<? extends AbstractUsbDevice> ttyDevices = this.usbService.getUsbTtyDevices();
-        if (ttyDevices != null && !ttyDevices.isEmpty()) {
-            logger.debug("activate() :: Total tty devices reported by UsbService: {}", ttyDevices.size());
-            addUsbDevices(ttyDevices);
-        }
+        executor.execute(() -> {
+            try {
+                SupportedUsbModems.installModemDrivers();
 
-        // Add block devices
-        List<? extends AbstractUsbDevice> blockDevices = this.usbService.getUsbBlockDevices();
-        if (blockDevices != null && !blockDevices.isEmpty()) {
-            logger.debug("activate() :: Total block devices reported by UsbService: {}", blockDevices.size());
-            addUsbDevices(blockDevices);
-        }
-
-        // At this point, we should have some modems - display them
-        Iterator<Entry<String, UsbModemDevice>> it = this.usbModems.entrySet().iterator();
-        while (it.hasNext()) {
-            final UsbModemDevice usbModem = it.next().getValue();
-            final SupportedUsbModemInfo modemInfo = SupportedUsbModemsInfo.getModem(usbModem.getVendorId(),
-                    usbModem.getProductId(), usbModem.getProductName());
-
-            logger.debug("activate() :: Found modem: {}", usbModem);
-
-            // Check for correct number of resources
-            if (modemInfo != null) {
-                logger.debug("activate() :: usbModem.getTtyDevs().size()={}, modemInfo.getNumTtyDevs()={}",
-                        usbModem.getTtyDevs().size(), modemInfo.getNumTtyDevs());
-                logger.debug("activate() :: usbModem.getBlockDevs().size()={}, modemInfo.getNumBlockDevs()={}",
-                        usbModem.getBlockDevs().size(), modemInfo.getNumBlockDevs());
-
-                if (usbModem.getTtyDevs().size() == modemInfo.getNumTtyDevs()
-                        && usbModem.getBlockDevs().size() == modemInfo.getNumBlockDevs()) {
-                    logger.info("activate () :: posting ModemAddedEvent ... {}", usbModem);
-                    this.eventAdmin.postEvent(new ModemAddedEvent(usbModem));
-                    this.addedModems.add(usbModem.getUsbPort());
-                } else {
-                    logger.warn(
-                            "activate() :: modem doesn't have correct number of resources, will try to toggle it ...");
-                    this.executor = Executors.newSingleThreadScheduledExecutor();
-                    logger.info("activate() :: scheduling {} thread in {} minutes ..", TOOGLE_MODEM_THREAD_NAME,
-                            TOOGLE_MODEM_THREAD_EXECUTION_DELAY);
-                    stopThread.set(false);
-                    this.task = this.executor.schedule(() -> {
-                        Thread.currentThread().setName(TOOGLE_MODEM_THREAD_NAME);
-                        try {
-                            toggleModem(modemInfo);
-                        } catch (InterruptedException interruptedException) {
-                            Thread.currentThread().interrupt();
-                            logger.debug("activate() :: modem monitor interrupted - {}", interruptedException);
-                        } catch (Throwable t) {
-                            logger.error("activate() :: Exception while monitoring cellular connection ", t);
-                        }
-
-                    }, TOOGLE_MODEM_THREAD_EXECUTION_DELAY, TimeUnit.MINUTES);
+                // Add tty devices
+                List<? extends AbstractUsbDevice> ttyDevices = this.usbService.getUsbTtyDevices();
+                if (ttyDevices != null && !ttyDevices.isEmpty()) {
+                    logger.debug("activate() :: Total tty devices reported by UsbService: {}", ttyDevices.size());
+                    addUsbDevices(ttyDevices);
                 }
+
+                // Add block devices
+                List<? extends AbstractUsbDevice> blockDevices = this.usbService.getUsbBlockDevices();
+                if (blockDevices != null && !blockDevices.isEmpty()) {
+                    logger.debug("activate() :: Total block devices reported by UsbService: {}", blockDevices.size());
+                    addUsbDevices(blockDevices);
+                }
+
+                // At this point, we should have some modems - display them
+                Iterator<Entry<String, UsbModemDevice>> it = this.usbModems.entrySet().iterator();
+                while (it.hasNext()) {
+                    final Entry<String, UsbModemDevice> e = it.next();
+
+                    final String usbPort = e.getKey();
+                    final UsbModemDevice usbModem = e.getValue();
+
+                    final SupportedUsbModemInfo modemInfo = SupportedUsbModemsInfo.getModem(usbModem.getVendorId(),
+                            usbModem.getProductId(), usbModem.getProductName());
+
+                    logger.debug("activate() :: Found modem: {}", usbModem);
+
+                    if (modemInfo == null) {
+                        continue;
+                    }
+
+                    // Check for correct number of resources
+
+                    logger.debug("activate() :: usbModem.getTtyDevs().size()={}, modemInfo.getNumTtyDevs()={}",
+                            usbModem.getTtyDevs().size(), modemInfo.getNumTtyDevs());
+                    logger.debug("activate() :: usbModem.getBlockDevs().size()={}, modemInfo.getNumBlockDevs()={}",
+                            usbModem.getBlockDevs().size(), modemInfo.getNumBlockDevs());
+
+                    if (hasCorrectNumberOfResources(modemInfo, usbModem)) {
+                        logger.info("activate () :: posting ModemAddedEvent ... {}", usbModem);
+                        this.eventAdmin.postEvent(new ModemAddedEvent(usbModem));
+                        this.addedModems.add(usbModem.getUsbPort());
+                    } else {
+                        logger.warn(
+                                "activate() :: modem doesn't have correct number of resources, will try to toggle it ...");
+                        logger.info("activate() :: scheduling {} thread in {} minutes ..", TOGGLE_MODEM_TASK_NAME,
+                                TOGGLE_MODEM_TASK_EXECUTION_DELAY);
+                        this.executor.schedule(new ToggleModemTask(modemInfo, usbPort),
+                                TOGGLE_MODEM_TASK_EXECUTION_DELAY, TimeUnit.MINUTES);
+                    }
+                }
+            } finally {
+                activated.set(true);
             }
-        }
+        });
     }
 
     private void addUsbDevices(List<? extends AbstractUsbDevice> usbDevices) {
@@ -244,29 +241,19 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
     }
 
     protected void deactivate(ComponentContext componentContext) {
-        if (this.task != null && !this.task.isDone()) {
-            stopThread.set(true);
-            toggleModemNotity();
-            logger.debug("deactivate() :: Cancelling {} task ...", TOOGLE_MODEM_THREAD_NAME);
-            this.task.cancel(true);
-            logger.info("deactivate() :: {} task cancelled? = {}", TOOGLE_MODEM_THREAD_NAME, this.task.isDone());
-            this.task = null;
-        }
 
         if (this.executor != null) {
-            logger.debug("deactivate() :: Terminating {} Thread ...", TOOGLE_MODEM_THREAD_NAME);
+            logger.debug("deactivate() :: Terminating {} Thread ...", TOGGLE_MODEM_TASK_NAME);
             this.executor.shutdownNow();
             try {
-                this.executor.awaitTermination(TOOGLE_MODEM_THREAD_TERMINATION_TOUT, TimeUnit.SECONDS);
+                this.executor.awaitTermination(TOGGLE_MODEM_TASK_TERMINATION_TOUT, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 logger.warn("Interrupted", e);
             }
-            logger.info("deactivate() :: {} Thread terminated? - {}", TOOGLE_MODEM_THREAD_NAME,
+            logger.info("deactivate() :: {} Thread terminated? - {}", TOGGLE_MODEM_TASK_NAME,
                     this.executor.isTerminated());
-            this.executor = null;
         }
-        this.usbModems = null;
         this.ctx = null;
     }
 
@@ -317,6 +304,8 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 
     @Override
     public List<String> getAllNetworkInterfaceNames() throws KuraException {
+        waitActivated();
+
         ArrayList<String> interfaceNames = new ArrayList<>();
         List<String> allInterfaceNames = LinuxNetworkUtil.getAllInterfaceNames();
         if (allInterfaceNames != null) {
@@ -354,6 +343,9 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
     @Override
     public List<NetInterface<? extends NetInterfaceAddress>> getNetworkInterfaces() throws KuraException {
         logger.trace("getNetworkInterfaces()");
+
+        waitActivated();
+
         List<NetInterface<? extends NetInterfaceAddress>> netInterfaces = new ArrayList<>();
 
         List<String> interfaceNames = getAllNetworkInterfaceNames();
@@ -478,6 +470,9 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
     }
 
     public NetInterface<? extends NetInterfaceAddress> getNetworkInterface(String interfaceName) throws KuraException {
+
+        waitActivated();
+
         // ignore redpine vlan interface
         if (interfaceName.startsWith("rpine")) {
             logger.debug("Ignoring redpine vlan interface.");
@@ -1069,32 +1064,77 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
         return false;
     }
 
-    private void toggleModem(SupportedUsbModemInfo modemInfo) throws Exception {
-        while (!stopThread.get()) {
-            UsbModemDriver modemDriver = null;
-            List<? extends UsbModemDriver> usbDeviceDrivers = modemInfo.getDeviceDrivers();
-            if (usbDeviceDrivers != null && !usbDeviceDrivers.isEmpty()) {
-                modemDriver = usbDeviceDrivers.get(0);
+    private boolean hasCorrectNumberOfResources(final SupportedUsbModemInfo modemInfo,
+            final UsbModemDevice modemDevice) {
+        return modemDevice.getTtyDevs().size() == modemInfo.getNumTtyDevs()
+                && modemDevice.getBlockDevs().size() == modemInfo.getNumBlockDevs();
+    }
+
+    private void waitActivated() {
+        if (!activated.get()) {
+            try {
+                executor.submit(() -> {
+                }).get();
+            } catch (final Exception e) {
+                logger.warn("Exception while waiting for activation", e);
             }
-            if (modemDriver != null) {
-                boolean status = false;
-                try {
-                    logger.info("toggleModem() :: turning modem off ...");
-                    modemDriver.disable();
-                    sleep(3000);
-                    logger.info("toggleModem() :: turning modem on ...");
-                    modemDriver.enable();
+        }
+    }
 
-                    logger.info("toggleModem() :: modem has been toggled successfully ...");
-                    stopThread.set(status);
-                    toggleModemNotity();
+    private final class ToggleModemTask implements Runnable {
 
-                } catch (Exception e) {
-                    logger.error("toggleModem() :: failed to toggle modem ", e);
+        private final SupportedUsbModemInfo modemInfo;
+        private final String usbPort;
+
+        ToggleModemTask(final SupportedUsbModemInfo modemInfo, final String usbPort) {
+            this.modemInfo = modemInfo;
+            this.usbPort = usbPort;
+        }
+
+        public void run() {
+
+            final String threadName = Thread.currentThread().getName();
+            Thread.currentThread().setName(TOGGLE_MODEM_TASK_NAME);
+
+            try {
+                final UsbModemDevice modemDevice = usbModems.get(usbPort);
+
+                if (modemDevice == null) {
+                    logger.info("ToggleModemTask :: modem is no longer attached, exiting");
+                    return;
                 }
-            }
-            if (!stopThread.get()) {
-                toggleModemWait();
+
+                if (hasCorrectNumberOfResources(modemInfo, modemDevice)) {
+                    logger.info("ToggleModemTask :: modem is ready, exiting");
+                    return;
+                }
+
+                UsbModemDriver modemDriver = null;
+                List<? extends UsbModemDriver> usbDeviceDrivers = modemInfo.getDeviceDrivers();
+                if (usbDeviceDrivers != null && !usbDeviceDrivers.isEmpty()) {
+                    modemDriver = usbDeviceDrivers.get(0);
+                }
+
+                if (modemDriver == null) {
+                    return;
+                }
+
+                logger.info("ToggleModemTask :: turning modem off ...");
+                modemDriver.disable();
+                sleep(3000);
+                logger.info("ToggleModemTask :: turning modem on ...");
+                modemDriver.enable();
+
+                logger.info("ToggleModemTask :: modem has been toggled ...");
+
+                // will check if the modem is ready at next iteration and toggles again if needed
+                executor.schedule(this, TOGGLE_MODEM_TASK_INTERVAL, TimeUnit.SECONDS);
+
+            } catch (Exception e) {
+                logger.error("toggleModem() :: failed to toggle modem ", e);
+                executor.schedule(this, TOGGLE_MODEM_TASK_INTERVAL, TimeUnit.SECONDS);
+            } finally {
+                Thread.currentThread().setName(threadName);
             }
         }
     }
@@ -1104,22 +1144,6 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
             Thread.sleep(millis);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-        }
-    }
-
-    private void toggleModemNotity() {
-        if (stopThread != null) {
-            synchronized (stopThread) {
-                stopThread.notifyAll();
-            }
-        }
-    }
-
-    private void toggleModemWait() throws InterruptedException {
-        if (stopThread != null) {
-            synchronized (stopThread) {
-                stopThread.wait(TOOGLE_MODEM_THREAD_INTERVAL);
-            }
         }
     }
 }

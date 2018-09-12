@@ -38,10 +38,14 @@ public interface SystemService {
 
     public static final String KEY_KURA_NAME = "kura.name";
     public static final String KEY_KURA_VERSION = "kura.version";
+
     /**
-     * since 1.4
+     * @since 2.0
      */
     public static final String KEY_KURA_FRAMEWORK_CONFIG_DIR = "kura.framework.config";
+    /**
+     * @since 2.0
+     */
     public static final String KEY_KURA_USER_CONFIG_DIR = "kura.user.config";
     /**
      * @since 1.3
@@ -319,7 +323,7 @@ public interface SystemService {
     /**
      * Gets the location where Kura stores the framework configuration files in the filesystem.
      *
-     * @since 1.4
+     * @since 2.0
      * @return The framework configuration files directory.
      */
     public String getKuraFrameworkConfigDirectory();
@@ -327,7 +331,7 @@ public interface SystemService {
     /**
      * Gets the location where Kura stores the user configuration files in the filesystem.
      *
-     * @since 1.4
+     * @since 2.0
      * @return The user configuration files directory.
      */
     public String getKuraUserConfigDirectory();

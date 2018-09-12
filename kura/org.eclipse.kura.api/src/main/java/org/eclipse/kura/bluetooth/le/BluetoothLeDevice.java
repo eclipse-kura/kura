@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -15,6 +15,7 @@ import java.util.UUID;
 
 import org.eclipse.kura.KuraBluetoothConnectionException;
 import org.eclipse.kura.KuraBluetoothPairException;
+import org.eclipse.kura.KuraBluetoothRemoveException;
 import org.eclipse.kura.KuraBluetoothResourceNotFoundException;
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -235,7 +236,6 @@ public interface BluetoothLeDevice {
      * @return manufacturer specific advertisement data.
      */
     public Map<Short, byte[]> getManufacturerData();
-    // ???
 
     /**
      * Returns a map containing service advertisement data.
@@ -252,4 +252,21 @@ public interface BluetoothLeDevice {
      */
     public short getTxPower();
 
+    /**
+     * Returns if the service discovery is ended.
+     * 
+     * @since 1.2.0
+     */
+    public boolean isServicesResolved();
+
+    /**
+     * Remove this device from the system. Be aware that after the removing the object representing the device
+     * will not be valid anymore and any operation on it will have no effect.
+     * 
+     * @return TRUE if the device has been removed
+     * @throws BluetKuraBluetoothRemoveExceptionoothException
+     * 
+     * @since 1.2.0
+     */
+    public boolean remove() throws KuraBluetoothRemoveException;
 }

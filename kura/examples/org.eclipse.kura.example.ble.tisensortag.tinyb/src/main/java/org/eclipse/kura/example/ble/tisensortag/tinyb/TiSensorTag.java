@@ -53,6 +53,8 @@ public class TiSensorTag {
     private static final String OPTO_ERROR_MESSAGE = "No optical sensor on CC2541.";
     private static final String MOV_ERROR_MESSAGE = "Movement sensor failed to be enabled";
 
+    private static final int SERVICE_TIMEOUT = 10000;
+
     private BluetoothLeDevice device;
     private boolean cc2650;
     private byte[] pressureCalibration;
@@ -82,11 +84,19 @@ public class TiSensorTag {
 
     public void connect() throws KuraBluetoothConnectionException {
         this.device.connect();
-        if (!isConnected()) {
+        // Wait a bit to ensure that the device is really connected and services discovered
+        Long startTime = System.currentTimeMillis();
+        while (System.currentTimeMillis() - startTime < SERVICE_TIMEOUT) {
+            if (this.device.isServicesResolved()) {
+                break;
+            }
+            BluetoothLe.waitFor(1000);
+        }
+        if (!isConnected() || !this.device.isServicesResolved()) {
+            this.device.disconnect();
             throw new KuraBluetoothConnectionException("Connection failed");
         }
-        // Wait a while after connection
-        BluetoothLe.waitFor(1000);
+
     }
 
     public void init() throws KuraBluetoothConnectionException {

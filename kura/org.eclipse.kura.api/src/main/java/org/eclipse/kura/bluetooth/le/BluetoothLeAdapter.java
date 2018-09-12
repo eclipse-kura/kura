@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -15,6 +15,7 @@ import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
 import org.eclipse.kura.KuraBluetoothDiscoveryException;
+import org.eclipse.kura.KuraBluetoothRemoveException;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -234,5 +235,49 @@ public interface BluetoothLeAdapter {
      * @return Array containing the UUIDs of the adapter.
      */
     public UUID[] getUUIDs();
+
+    /**
+     * Remove all the known devices from the system. Be aware that after the removing the objects representing the
+     * devices
+     * will not be valid anymore and any operation on them will have no effect.
+     * 
+     * @return The number of devices removed from internal list
+     * @throws KuraBluetoothRemoveException
+     * 
+     * @since 1.2.0
+     */
+    public int removeDevices() throws KuraBluetoothRemoveException;
+
+    /**
+     * Sets a scan filter for this adapter.
+     * 
+     * <p>
+     * When a remote device is found that advertises any UUID from UUIDs, it will be reported if:
+     * <ul>
+     * <li>Pathloss and RSSI are both empty.</li>
+     * <li>only Pathloss param is set, device advertise TX power, and computed pathloss is less than Pathloss
+     * param.</li>
+     * <li>only RSSI param is set, and received RSSI is higher than RSSI param.</li>
+     * </ul>
+     * <p>
+     *
+     * <p>
+     * If "auto" transport is requested, scan will use LE, BREDR, or both, depending on what's
+     * currently enabled on the controller.
+     * 
+     * To remove the filter, call this method with empty parameters.
+     */
+    public void setDiscoveryFilter(List<UUID> uuids, int rssi, int pathloss, BluetoothTransportType transportType);
+
+    /**
+     * Set a device discovery filter based on RSSI value. Only devices with rssi greater than the provided value will be
+     * reported. Set it to 0 to remove the filter.
+     * 
+     * @param rssi
+     *            the Receiver Signal Strength Indication value used by the filter
+     * 
+     * @since 1.2.0
+     */
+    public void setRssiDiscoveryFilter(int rssi);
 
 }

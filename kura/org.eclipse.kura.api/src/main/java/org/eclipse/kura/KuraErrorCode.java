@@ -109,6 +109,10 @@ public enum KuraErrorCode {
     /**
      * @since 2.0
      */
+    BLE_REMOVE_ERROR,
+    /**
+     * @since 2.0
+     */
     BAD_REQUEST,
     /**
      * @since 2.0

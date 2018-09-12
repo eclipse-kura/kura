@@ -86,4 +86,32 @@ public final class TypeConverter {
 
         return recordsFromRecord(new WireRecord(result));
     }
+
+    @Converter
+    public static Map<?, ?> mapFromRecord(final WireRecord record) {
+
+        final Map<Object, Object> result = new HashMap<>(record.getProperties().size());
+
+        for (final Map.Entry<String, TypedValue<?>> entry : record.getProperties().entrySet()) {
+            result.put(entry.getKey(), entry.getValue().getValue());
+        }
+
+        return result;
+
+    }
+
+    @Converter
+    public static Map<?, ?> mapFromRecords(final WireRecord[] records) {
+
+        final Map<Object, Object> result = new HashMap<>();
+
+        for (final WireRecord record : records) {
+            for (final Map.Entry<String, TypedValue<?>> entry : record.getProperties().entrySet()) {
+                result.put(entry.getKey(), entry.getValue().getValue());
+            }
+        }
+
+        return result;
+
+    }
 }

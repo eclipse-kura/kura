@@ -11,6 +11,8 @@ import org.junit.Test;
 
 public class CloudConnectionStatusURLTest {
 
+    private static final String LINUX_LED_TEST_UPPER_CASE_PATH = "/sys/class/led/UPPER_CASE";
+    private static final String LINUX_LED_TEST_UPPER_CASE = "linux_led:" + LINUX_LED_TEST_UPPER_CASE_PATH;
     private static final String LINUX_LED_LED1_GREEN_PATH = "/sys/class/led/led1_green";
     private static final String LINUX_LED_LED1_GREEN = "linux_led:" + LINUX_LED_LED1_GREEN_PATH;
     private static final String LED_44 = "led:44";
@@ -116,5 +118,15 @@ public class CloudConnectionStatusURLTest {
         assertEquals(LINUX_LED_LED1_GREEN_PATH, props.get("linux_led"));
         assertEquals(false, props.get("inverted"));
         assertEquals(5, props.size());
+    }
+    
+    @Test
+    public void testParseUrlCcsLinuxLedUpperCasePath() {
+        Properties props = CloudConnectionStatusURL.parseURL(CCS_PREFIX + LINUX_LED_TEST_UPPER_CASE);
+        assertNotNull(props);
+        assertEquals(StatusNotificationTypeEnum.LED, props.get(NOTIFICATION_TYPE));
+        assertNull(props.get("led"));
+        assertEquals(LINUX_LED_TEST_UPPER_CASE_PATH, props.get("linux_led"));
+        assertEquals(3, props.size());
     }
 }

@@ -27,6 +27,7 @@ public class CloudConnectionStatusURL {
 
     public static final String INVERTED = ":inverted";
     
+    private static final String CASE_INSENSITIVE_PREFIX = "(?i)";
     private static final String CCS_NOTIFICATION_URLS_SEPARATOR = ";";
 
     private CloudConnectionStatusURL() {
@@ -35,17 +36,17 @@ public class CloudConnectionStatusURL {
     public static Properties parseURL(String ccsUrl) {
         requireNonNull(ccsUrl);
 
-        String urlImage = ccsUrl.toLowerCase(Locale.ENGLISH);
+        String urlImage = ccsUrl;
 
         Properties props = new Properties();
 
-        if (urlImage.startsWith(CCS)) {
-            urlImage = urlImage.replace(CCS, "");
+        if (urlImage.toLowerCase(Locale.ENGLISH).startsWith(CCS)) {
+        	urlImage = urlImage.replaceAll(CASE_INSENSITIVE_PREFIX+CCS, "");
             props.put("url", ccsUrl);
-
+            
             String[] urls = urlImage.split(CCS_NOTIFICATION_URLS_SEPARATOR);
             for (String url : urls) {
-                props.putAll(parseUrlType(url, ccsUrl));
+                props.putAll(parseUrlType(url));
             }
         } else {
             props.put(NOTIFICATION_TYPE, StatusNotificationTypeEnum.NONE);
@@ -54,11 +55,12 @@ public class CloudConnectionStatusURL {
         return props;
     }
 
-    private static Properties parseUrlType(String urlImage, String originalCcsUrl) {
+    private static Properties parseUrlType(String urlImage) {
         Properties props = new Properties();
-        if (urlImage.startsWith(LED)) {
+        String urlLowerCase = urlImage.toLowerCase(Locale.ENGLISH);
+        if (urlLowerCase.startsWith(LED)) {
             // Cloud Connection Status on LED
-            String ledString = urlImage.replace(LED, "").trim();
+            String ledString = urlLowerCase.replace(LED, "").trim();
             try {
                 if (ledString.endsWith(INVERTED)) {
                     props.put("inverted", true);
@@ -76,14 +78,13 @@ public class CloudConnectionStatusURL {
             } catch (Exception ex) {
                 // Do nothing
             }
-        } else if (urlImage.startsWith(LINUX_LED)) {
-            String[] ccsSplit = originalCcsUrl.split(":", 3);
-            String ledPath = ccsSplit.length > 2 ? ccsSplit[2].trim() : urlImage.replace(LINUX_LED, "");
+        } else if (urlLowerCase.startsWith(LINUX_LED)) {
+            String ledPath = urlImage.substring(LINUX_LED.length());
             props.put(NOTIFICATION_TYPE, StatusNotificationTypeEnum.LED);
             props.put("linux_led", ledPath);
-        } else if (urlImage.startsWith(LOG)) {
+        } else if (urlLowerCase.startsWith(LOG)) {
             props.put(NOTIFICATION_TYPE, StatusNotificationTypeEnum.LOG);
-        } else if (urlImage.startsWith(NONE)) {
+        } else if (urlLowerCase.startsWith(NONE)) {
             props.put(NOTIFICATION_TYPE, StatusNotificationTypeEnum.NONE);
         }
         return props;

@@ -48,8 +48,8 @@ public class H2DbHelper {
     private void stopDefaultDbServiceInstance () {
  		try {
  			if (configurationService.getComponentConfiguration(H2DbService.DEFAULT_INSTANCE_PID) != null) {
- 				configurationService.deleteFactoryConfiguration(H2DbService.DEFAULT_INSTANCE_PID, true);
- 			} 
+ 				configurationService.deleteFactoryConfiguration(H2DbService.DEFAULT_INSTANCE_PID, false);
+ 			}
  		} catch (KuraException e) {
  			logger.error("Failed to remove default H2DbService instance", e);
  		}

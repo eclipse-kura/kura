@@ -435,6 +435,8 @@ fi]]>
                         prefix="${build.output.name}/${install.folder}" />
 			<zipfileset file="src/main/resources/common/dhcpd-enp2s0.conf"
                         prefix="${build.output.name}/${install.folder}" />
+            <zipfileset file="src/main/resources/common/dhcpd-wlp4s0.conf"
+                        prefix="${build.output.name}/${install.folder}" />
 			<zipfileset file="src/main/resources/common/named/named.conf"
                         prefix="${build.output.name}/${install.folder}" />
 			<zipfileset file="src/main/resources/common/named/named.ca"
@@ -451,6 +453,12 @@ fi]]>
 			<zipfileset file="src/main/resources/common/ifcfg-eth1"
                         prefix="${build.output.name}/${install.folder}" />
 			<zipfileset file="src/main/resources/common/ifcfg-wlan0"
+                        prefix="${build.output.name}/${install.folder}" />
+            <zipfileset file="src/main/resources/common/ifcfg-enp2s0"
+                        prefix="${build.output.name}/${install.folder}" />
+            <zipfileset file="src/main/resources/common/ifcfg-enp3s0"
+                        prefix="${build.output.name}/${install.folder}" />
+            <zipfileset file="src/main/resources/common/ifcfg-wlp4s0"
                         prefix="${build.output.name}/${install.folder}" />
 			<zipfileset file="src/main/resources/common/network.interfaces"
                         prefix="${build.output.name}/${install.folder}" />

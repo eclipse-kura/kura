@@ -27,7 +27,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.asset.Asset;
 import org.eclipse.kura.asset.AssetConfiguration;
@@ -45,7 +44,6 @@ import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.metatype.AD;
 import org.eclipse.kura.configuration.metatype.OCD;
 import org.eclipse.kura.driver.Driver;
-import org.eclipse.kura.driver.Driver.ConnectionException;
 import org.eclipse.kura.test.annotation.TestTarget;
 import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.type.TypedValues;
@@ -152,6 +150,7 @@ public final class AssetTest {
         channels.put("4.CH#DRIVER.modbus.DUMMY.NN", "sample.channel2.modbus.FC");
 
         ((BaseAsset) asset).updated(channels);
+        sync(asset);
     }
 
     protected void activate() throws KuraException {
@@ -383,11 +382,16 @@ public final class AssetTest {
     @Test
     public void testUnlistenDriverException() throws KuraException {
         AtomicInteger invoked = new AtomicInteger(0);
+        AtomicBoolean disableListener = new AtomicBoolean(false);
 
         final ChannelListener listener = new ChannelListener() {
 
             @Override
             public void onChannelEvent(ChannelEvent event) {
+                if (disableListener.get()) {
+                    return;
+                }
+
                 int cnt = invoked.getAndIncrement();
 
                 if (cnt == 0) {
@@ -405,16 +409,12 @@ public final class AssetTest {
 
         assertEquals(1, invoked.get());
 
-        try {
-            asset.unregisterChannelListener(listener);
-            sync(asset);
-        } catch (KuraException e) {
-            assertEquals(KuraErrorCode.CONNECTION_FAILED, e.getCode());
-            assertTrue(e.getCause() instanceof ConnectionException);
-            assertEquals("test", ((ConnectionException) e.getCause()).getMessage());
-        }
+        asset.unregisterChannelListener(listener);
+        sync(asset);
 
         assertEquals(2, invoked.get());
+
+        disableListener.set(true);
     }
 
     /**
@@ -596,6 +596,7 @@ public final class AssetTest {
         channels.put("3.CH#DRIVER.modbus.FC", "sample.channel1.modbus.FC");
 
         ((BaseAsset) asset).updated(channels);
+        sync(asset);
 
         final ChannelListener listener = new ChannelListener() {
 

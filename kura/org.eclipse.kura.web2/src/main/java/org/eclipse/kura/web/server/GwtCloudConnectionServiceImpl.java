@@ -66,7 +66,7 @@ public class GwtCloudConnectionServiceImpl extends OsgiRemoteServiceServlet impl
     private static final long serialVersionUID = 693996483299382655L;
 
     private static final String CLOUD_CONNECTION_FACTORY_FILTER = "(|(objectClass=org.eclipse.kura.cloudconnection.factory.CloudConnectionFactory)(objectClass=org.eclipse.kura.cloud.factory.CloudServiceFactory))";
-    
+
     private static final String KURA_UI_CSF_PID_DEFAULT = "kura.ui.csf.pid.default";
     private static final String KURA_UI_CSF_PID_REGEX = "kura.ui.csf.pid.regex";
 
@@ -170,24 +170,11 @@ public class GwtCloudConnectionServiceImpl extends OsgiRemoteServiceServlet impl
             throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_NULL_ARGUMENT);
         }
 
-        final AtomicReference<CloudConnectionFactory> ref = new AtomicReference<>();
-
         withAllCloudConnectionFactories(service -> {
-
-            if (!service.getFactoryPid().equals(factoryPid) || ref.get() != null) {
-                return;
+            if (service.getFactoryPid().equals(factoryPid)) {
+                service.createConfiguration(cloudServicePid);
             }
-
-            ref.set(service);
-
         });
-
-        try {
-            ref.get().createConfiguration(cloudServicePid);
-        } catch (KuraException e) {
-            throw new GwtKuraException("Failed to create cloud stack");
-        }
-
     }
 
     @Override
@@ -198,24 +185,11 @@ public class GwtCloudConnectionServiceImpl extends OsgiRemoteServiceServlet impl
             throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_NULL_ARGUMENT);
         }
 
-        final AtomicReference<CloudConnectionFactory> ref = new AtomicReference<>();
-
         withAllCloudConnectionFactories(service -> {
-
-            if (!service.getFactoryPid().equals(factoryPid) || ref.get() != null) {
-                return;
+            if (service.getFactoryPid().equals(factoryPid)) {
+                service.deleteConfiguration(cloudServicePid);
             }
-
-            ref.set(service);
-
         });
-
-        try {
-            ref.get().deleteConfiguration(cloudServicePid);
-        } catch (KuraException e) {
-            throw new GwtKuraException("Failed to delete cloud stack");
-        }
-
     }
 
     @Override
@@ -299,7 +273,7 @@ public class GwtCloudConnectionServiceImpl extends OsgiRemoteServiceServlet impl
         final Object ccsfFactoryPid = component.properties.get(ccsfFactoryPidPropName);
         final Object factoryPid = component.properties.get("service.pid");
         final Object defaultFactoryPid = component.properties.get(KURA_UI_CSF_PID_DEFAULT);
-        final Object defaultFactoryPidRegex= component.properties.get(KURA_UI_CSF_PID_REGEX);
+        final Object defaultFactoryPidRegex = component.properties.get(KURA_UI_CSF_PID_REGEX);
 
         if (!(factoryPid instanceof String)) {
             logger.warn(
@@ -319,8 +293,8 @@ public class GwtCloudConnectionServiceImpl extends OsgiRemoteServiceServlet impl
 
         entry.setPid((String) factoryPid);
         entry.setFactoryPid((String) ccsfFactoryPid);
-        entry.setDefaultFactoryPid((String)defaultFactoryPid) ;
-        entry.setDefaultFactoryPidRegex((String)defaultFactoryPidRegex) ;
+        entry.setDefaultFactoryPid((String) defaultFactoryPid);
+        entry.setDefaultFactoryPidRegex((String) defaultFactoryPidRegex);
 
         return entry;
     }

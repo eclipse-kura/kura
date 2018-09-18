@@ -1,0 +1,47 @@
+#!/usr/bin/bash
+
+set -e
+
+mkdir -p /tmp/.kura/configuration
+cp "${KURA_DIR}/framework/config.ini" /tmp/.kura/configuration/
+
+JAVA_INT_OPTS="$JAVA_INT_OPTS -XX:+IgnoreUnrecognizedVMOptions"
+
+JAVA_INT_OPTS="$JAVA_INT_OPTS -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap"
+
+JAVA_INT_OPTS="$JAVA_INT_OPTS -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/kura-heapdump.hprof"
+JAVA_INT_OPTS="$JAVA_INT_OPTS -XX:ErrorFile=/var/log/kura-error.log"
+JAVA_INT_OPTS="$JAVA_INT_OPTS --add-modules=java.sql,java.xml,java.xml.bind"
+
+JAVA_INT_OPTS="$JAVA_INT_OPTS -Dkura.os.version=centos"
+JAVA_INT_OPTS="$JAVA_INT_OPTS -Dkura.arch=intel-up2-centos-7"
+JAVA_INT_OPTS="$JAVA_INT_OPTS -Dtarget.device=intel-up2-nn"
+JAVA_INT_OPTS="$JAVA_INT_OPTS -Dkura.device.name=\"${KURA_DEVICE_NAME:-Kura Container Instance}\""
+
+JAVA_INT_OPTS="$JAVA_INT_OPTS -Declipse.ignoreApp=true"
+JAVA_INT_OPTS="$JAVA_INT_OPTS -Dosgi.console=9000"
+JAVA_INT_OPTS="$JAVA_INT_OPTS -Declipse.consoleLog=true"
+
+JAVA_INT_OPTS="$JAVA_INT_OPTS -Dkura.home=\"${KURA_DIR}/kura\""
+JAVA_INT_OPTS="$JAVA_INT_OPTS -Dkura.configuration=file:\"${KURA_DIR}/framework/kura.properties\""
+JAVA_INT_OPTS="$JAVA_INT_OPTS -Djava.security.policy=\"${KURA_DIR}/framework/jdk.dio.policy\""
+JAVA_INT_OPTS="$JAVA_INT_OPTS -Djdk.dio.registry=\"${KURA_DIR}/framework/jdk.dio.properties\""
+
+if [ -n "${PERSISTENT_DIR}" ]; then
+	JAVA_INT_OPTS="$JAVA_INT_OPTS -Dkura.data=\"${PERSISTENT_DIR}/data\""
+	JAVA_INT_OPTS="$JAVA_INT_OPTS -Dkura.snapshots=\"${PERSISTENT_DIR}/data/snapshots\""
+	JAVA_INT_OPTS="$JAVA_INT_OPTS -Dkura.packages=\"${PERSISTENT_DIR}/packages\""
+	JAVA_INT_OPTS="$JAVA_INT_OPTS -Ddpa.configuration=\"${PERSISTENT_DIR}/dpa.properties\""
+else
+	JAVA_INT_OPTS="$JAVA_INT_OPTS -Dkura.data=\"${KURA_DIR}/data\""
+	JAVA_INT_OPTS="$JAVA_INT_OPTS -Dkura.snapshots=\"${KURA_DIR}/data/snapshots\""
+	JAVA_INT_OPTS="$JAVA_INT_OPTS -Dkura.packages=\"${KURA_DIR}/kura/packages\""
+	JAVA_INT_OPTS="$JAVA_INT_OPTS -Ddpa.configuration=\"${KURA_DIR}/data/dpa.properties\""
+fi
+
+JAVA_INT_OPTS="$JAVA_INT_OPTS -Dkura.custom.configuration=file:\"${KURA_CUSTOM_PROPERTIES_FILE:-${KURA_DIR}/user/kura_custom.properties}\""
+JAVA_INT_OPTS="$JAVA_INT_OPTS -Dlog4j.configurationFile=file:\"${KURA_LOG4J_FILE:-${KURA_DIR}/user/log4j.xml}\""
+
+set -x
+
+eval exec /usr/bin/java ${JAVA_OPTS} ${JAVA_INT_OPTS} -jar ${KURA_DIR}/plugins/org.eclipse.equinox.launcher_${LAUNCHER_VERSION}.jar -configuration  /tmp/.kura/configuration "$@"

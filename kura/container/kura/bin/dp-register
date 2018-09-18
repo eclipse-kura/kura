@@ -1,0 +1,18 @@
+#!/usr/bin/bash
+
+set -e
+
+SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
+
+DP="$(realpath "$1")"
+shift
+
+ : ${DPA_PROPERTIES:=${KURA_DIR}/data/dpa.properties}
+
+echo "Registering '$DP' ..."
+
+DP_NAME="$($SCRIPT_DIR/dp-extract-name "$DP")"
+
+echo "Register '$DP' as '$DP_NAME'"
+
+echo "${DP_NAME}=file\:${DP}" >> "${DPA_PROPERTIES}"

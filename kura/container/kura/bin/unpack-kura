@@ -1,0 +1,12 @@
+#!/usr/bin/bash
+
+set -e
+
+if [ -f /kura.packed ]; then
+	if [ -d /opt/eclipse/kura ]; then
+		rm -Rf /opt/eclipse
+		mkdir -p /opt/eclipse
+	fi
+	cd /opt/eclipse
+	tar --strip-components 2 -xvf /kura.init.tar
+fi

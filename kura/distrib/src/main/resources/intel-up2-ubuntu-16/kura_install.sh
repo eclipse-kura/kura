@@ -29,7 +29,7 @@ fi
 mkdir -p ${INSTALL_DIR}/kura/data
 
 #copy snapshot_0.xml
-cp ${INSTALL_DIR}/kura/data/snapshots/snapshot_0.xml ${INSTALL_DIR}/kura/.data/snapshot_0.xml
+cp ${INSTALL_DIR}/kura/user/snapshots/snapshot_0.xml ${INSTALL_DIR}/kura/.data/snapshot_0.xml
 
 # setup /etc/sysconfig folder for iptables configuration file
 if [ ! -d /etc/sysconfig ]; then

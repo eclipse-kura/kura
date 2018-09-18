@@ -32,12 +32,12 @@ fi
 
 # disable network manager
 systemctl stop NetworkManager.service
-systemctl disable NetworkManager.service
-systemctl disable systemd-networkd
-systemctl disable systemd-resolved
-systemctl disable systemd-hostnamed
-systemctl disable hostapd
-systemctl disable wpa_supplicant
+systemctl disable NetworkManager.service || true
+systemctl disable systemd-networkd || true
+systemctl disable systemd-resolved || true
+systemctl disable systemd-hostnamed || true
+systemctl disable hostapd || true
+systemctl disable wpa_supplicant || true
 
 # remove existing /etc/resolv.conf file (it should be a link)
 rm /etc/resolv.conf
@@ -64,9 +64,6 @@ cp /etc/hostapd-wlp4s0.conf ${INSTALL_DIR}/kura/.data/hostapd-wlp4s0.conf
 cp ${INSTALL_DIR}/kura/install/dhcpd-enp2s0.conf /etc/dhcpd-enp2s0.conf
 cp ${INSTALL_DIR}/kura/install/dhcpd-enp2s0.conf ${INSTALL_DIR}/kura/.data/dhcpd-enp2s0.conf
 
-cp ${INSTALL_DIR}/kura/install/dhcpd-enp3s0.conf /etc/dhcpd-enp3s0.conf
-cp ${INSTALL_DIR}/kura/install/dhcpd-enp3s0.conf ${INSTALL_DIR}/kura/.data/dhcpd-enp3s0.conf
-
 cp ${INSTALL_DIR}/kura/install/dhcpd-wlp4s0.conf /etc/dhcpd-wlan0.conf
 cp ${INSTALL_DIR}/kura/install/dhcpd-wlp4s0.conf ${INSTALL_DIR}/kura/.data/dhcpd-wlan0.conf
 
@@ -75,18 +72,14 @@ cp ${INSTALL_DIR}/kura/install/kuranet.conf ${INSTALL_DIR}/kura/user/kuranet.con
 cp ${INSTALL_DIR}/kura/install/kuranet.conf ${INSTALL_DIR}/kura/.data/kuranet.conf
 
 OLD_PATH=$(pwd)
-SELINUX_KURA=$(semodule -l | grep selinuxKura)
-if [ -z "$SELINUX_KURA" ]; then
-	echo "Applying semodule..."
-	cd ${INSTALL_DIR}/kura/install/
-    semodule -i selinuxKura.pp
-    cd ${OLD_PATH}
-fi
+cd ${INSTALL_DIR}/kura/install/
+semodule -i selinuxKura.pp
+cd ${OLD_PATH}
 
 mkdir -p ${INSTALL_DIR}/kura/data
 
 #copy snapshot_0.xml
-cp ${INSTALL_DIR}/kura/data/snapshots/snapshot_0.xml ${INSTALL_DIR}/kura/.data/snapshot_0.xml
+cp ${INSTALL_DIR}/kura/user/snapshots/snapshot_0.xml ${INSTALL_DIR}/kura/.data/snapshot_0.xml
 
 #set up ifcfg files
 cp ${INSTALL_DIR}/kura/install/ifcfg-enp2s0 /etc/sysconfig/network-scripts/ifcfg-enp2s0

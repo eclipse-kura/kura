@@ -69,6 +69,7 @@ public abstract class AbstractServicesUi extends Composite {
     private static final String CONFIG_MAX_VALUE = "configMaxValue";
     private static final String CONFIG_MIN_VALUE = "configMinValue";
     private static final String INVALID_VALUE = "invalidValue";
+    private static final String INVALID_BOOLEAN_VALUE = "invalidBooleanValue";
 
     protected static final Logger logger = Logger.getLogger(ServicesUi.class.getSimpleName());
     protected static final Logger errorLogger = Logger.getLogger("ErrorLogger");
@@ -421,7 +422,7 @@ public abstract class AbstractServicesUi extends Composite {
 
         formGroup.add(input);
     }
-    
+
     protected void renderBooleanField(final GwtConfigParameter param, boolean isFirstInstance, FormGroup formGroup) {
         this.valid.put(param.getId(), true);
 
@@ -575,6 +576,9 @@ public abstract class AbstractServicesUi extends Composite {
         if (!isEmpty) {
             try {
                 switch (param.getType()) {
+                case BOOLEAN:
+                    new BooleanGwtValue().setValue(trimmedValue, param, consumer);
+                    break;
                 case CHAR:
                     new CharGwtValue().setValue(trimmedValue, param, consumer);
                     break;
@@ -730,6 +734,21 @@ public abstract class AbstractServicesUi extends Composite {
         T value;
 
         public abstract void setValue(String csvInput, GwtConfigParameter param, ValidationErrorConsumer consumer);
+    }
+
+    private class BooleanGwtValue extends GwtValue<Object> {
+
+        @Override
+        public void setValue(String csvInput, GwtConfigParameter param, ValidationErrorConsumer consumer) {
+            if ("true".equalsIgnoreCase(csvInput)) {
+                this.value = true;
+            } else if ("false".equalsIgnoreCase(csvInput)) {
+                this.value = false;
+            } else {
+                consumer.addError(MessageUtils.get(INVALID_BOOLEAN_VALUE, csvInput));
+            }
+        }
+
     }
 
     private class CharGwtValue extends GwtValue<Object> {

@@ -695,6 +695,7 @@ public final class AssetTest {
         try {
             latch.await();
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             fail("Interrupted during sync");
         }
     }

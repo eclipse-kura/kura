@@ -217,7 +217,6 @@ public class WireAssetTest {
         wireAsset.activate(mockComponentContext, wireAssetProperties);
 
         Driver mockDriver = mock(Driver.class);
-        wireAsset.setDriver(mockDriver);
 
         doAnswer(invocation -> {
             Object[] arguments = invocation.getArguments();
@@ -239,6 +238,8 @@ public class WireAssetTest {
 
             return null;
         }).when(mockDriver).read(any());
+
+        wireAsset.setDriver(mockDriver);
 
         {
             wireAssetProperties.put(WireAssetOptions.TIMESTAMP_MODE_PROP_NAME, TimestampMode.NO_TIMESTAMPS.name());

@@ -17,6 +17,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -62,6 +63,7 @@ public class XmlMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
     private void marshal(Object object, Writer w) throws Exception {
         try {
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+            docFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
 
             // root elements
@@ -144,6 +146,7 @@ public class XmlMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
 
         try {
             factory = DocumentBuilderFactory.newInstance();
+            factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
             parser = factory.newDocumentBuilder();
         } catch (FactoryConfigurationError fce) {
             // The implementation is not available or cannot be instantiated

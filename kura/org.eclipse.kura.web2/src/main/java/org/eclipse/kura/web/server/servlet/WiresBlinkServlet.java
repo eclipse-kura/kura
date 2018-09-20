@@ -57,7 +57,7 @@ public final class WiresBlinkServlet extends HttpServlet implements WireAdminLis
 
     private static final int MIN_EVENT_DELAY_MS = 400;
 
-    private static final Hashtable<String, Object> WIRE_EVENT_LISTENER_PROPERTIES = new Hashtable<>();
+    private static final Dictionary<String, Object> WIRE_EVENT_LISTENER_PROPERTIES = new Hashtable<>();
 
     static {
         WIRE_EVENT_LISTENER_PROPERTIES.put(WireConstants.WIREADMIN_EVENTS, WireAdminEvent.WIRE_TRACE);
@@ -74,26 +74,19 @@ public final class WiresBlinkServlet extends HttpServlet implements WireAdminLis
     private static final long serialVersionUID = -8962416452919656283L;
 
     /** Bundle Context */
-    private BundleContext bundleContext;
+    private static final BundleContext bundleContext = FrameworkUtil.getBundle(WiresBlinkServlet.class)
+            .getBundleContext();
 
     /** Used to track the new sessions */
-    private Map<String, RequestContext> requests;
+    private static Map<String, RequestContext> requests = new ConcurrentHashMap<>();
 
-    private ServiceRegistration<WireAdminListener> registration;
-
-    /** {@inheritDoc} */
-    @Override
-    public void init() throws ServletException {
-        super.init();
-        this.bundleContext = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
-        this.requests = new ConcurrentHashMap<>();
-    }
+    private static ServiceRegistration<WireAdminListener> registration;
 
     /** {@inheritDoc} */
     @Override
     public void destroy() {
         super.destroy();
-        this.requests.clear();
+        requests.clear();
     }
 
     /**
@@ -163,14 +156,13 @@ public final class WiresBlinkServlet extends HttpServlet implements WireAdminLis
         removeContext(requestId);
         requests.put(requestId, context);
         if (registration == null) {
-            this.registration = this.bundleContext.registerService(WireAdminListener.class, this,
-                    WIRE_EVENT_LISTENER_PROPERTIES);
+            registration = bundleContext.registerService(WireAdminListener.class, this, WIRE_EVENT_LISTENER_PROPERTIES);
             logger.info("registered");
         }
     }
 
     private synchronized void removeContext(final String requestId) {
-        final RequestContext context = this.requests.remove(requestId);
+        final RequestContext context = requests.remove(requestId);
         if (context != null) {
             context.close();
         }
@@ -258,9 +250,9 @@ public final class WiresBlinkServlet extends HttpServlet implements WireAdminLis
             removeContext(requestId);
         }
 
-        void submit(final Wire wire) {
+        boolean submit(final Wire wire) {
 
-            events.offer(wire);
+            return events.offer(wire);
         }
 
         void close() {
@@ -329,7 +321,7 @@ public final class WiresBlinkServlet extends HttpServlet implements WireAdminLis
 
         final Wire wire = event.getWire();
 
-        for (final RequestContext context : this.requests.values()) {
+        for (final RequestContext context : requests.values()) {
             context.submit(wire);
         }
     }

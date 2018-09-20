@@ -33,9 +33,6 @@ before_script:
   - hash -r
 
 addons:
-  apt:
-    packages:
-      - dos2unix
   coverity_scan:
     project:
       name: "eclipse/kura"

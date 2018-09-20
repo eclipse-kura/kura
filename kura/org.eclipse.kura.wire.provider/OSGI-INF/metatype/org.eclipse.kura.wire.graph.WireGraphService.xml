@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    Copyright (c) 2017 Eurotech and/or its affiliates and others
+    Copyright (c) 2017, 2018 Eurotech and/or its affiliates and others
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -8,9 +8,9 @@
      http://www.eclipse.org/legal/epl-v10.html
 -->
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
-    <OCD id="org.eclipse.kura.wire.WireService" 
-         name="WireService" 
-         description="WireService metatype">
+    <OCD id="org.eclipse.kura.wire.graph.WireGraphService" 
+         name="WireGraphService" 
+         description="WireGraphService metatype">
 
         <AD id="WireGraph"
             name="WireGraph"
@@ -22,7 +22,7 @@
         </AD>
     </OCD>
     
-    <Designate pid="org.eclipse.kura.wire.WireService">
-        <Object ocdref="org.eclipse.kura.wire.WireService"/>
+    <Designate pid="org.eclipse.kura.wire.graph.WireGraphService">
+        <Object ocdref="org.eclipse.kura.wire.graph.WireGraphService"/>
     </Designate>
 </MetaData>

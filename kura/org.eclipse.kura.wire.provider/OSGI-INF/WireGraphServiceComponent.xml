@@ -11,15 +11,14 @@
      	Eurotech
      	Amit Kumar Mondal
 -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" configuration-policy="require" deactivate="deactivate" enabled="true" immediate="true" modified="updated" name="org.eclipse.kura.wire.WireService">
-   <implementation class="org.eclipse.kura.internal.wire.WireServiceImpl"/>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" configuration-policy="require" deactivate="deactivate" enabled="true" immediate="true" modified="updated" name="org.eclipse.kura.wire.graph.WireGraphService">
+   <implementation class="org.eclipse.kura.internal.wire.WireGraphServiceImpl"/>
    <service>
       <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
-      <provide interface="org.eclipse.kura.wire.WireService"/>
       <provide interface="org.eclipse.kura.wire.graph.WireGraphService"/>
    </service>
-   <property name="service.pid" value="org.eclipse.kura.wire.WireService"/>
-   <property name="kura.service.pid" value="org.eclipse.kura.wire.WireService"/>
+   <property name="service.pid" value="org.eclipse.kura.wire.graph.WireGraphService"/>
+   <property name="kura.service.pid" value="org.eclipse.kura.wire.graph.WireGraphService"/>
    <reference name="WireAdmin"
               bind="bindWireAdmin"
               unbind="unbindWireAdmin"

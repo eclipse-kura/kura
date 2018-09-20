@@ -24,14 +24,12 @@ import static org.osgi.service.wireadmin.WireConstants.WIREADMIN_CONSUMER_PID;
 import static org.osgi.service.wireadmin.WireConstants.WIREADMIN_PRODUCER_PID;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -44,8 +42,6 @@ import org.eclipse.kura.marshalling.Marshaller;
 import org.eclipse.kura.marshalling.Unmarshaller;
 import org.eclipse.kura.util.service.ServiceUtil;
 import org.eclipse.kura.wire.WireComponent;
-import org.eclipse.kura.wire.WireConfiguration;
-import org.eclipse.kura.wire.WireService;
 import org.eclipse.kura.wire.graph.Constants;
 import org.eclipse.kura.wire.graph.MultiportWireConfiguration;
 import org.eclipse.kura.wire.graph.WireComponentConfiguration;
@@ -62,9 +58,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The Class {@link WireServiceImpl} implements {@link WireService} and {@link WireGraphService}
+ * The Class {@link WireGraphServiceImpl} implements {@link WireGraphService}
  */
-public class WireServiceImpl implements ConfigurableComponent, WireService, WireGraphService {
+public class WireGraphServiceImpl implements ConfigurableComponent, WireGraphService {
 
     private static final String WIRE_ASSET_FACTORY_PID = "org.eclipse.kura.wire.WireAsset";
 
@@ -73,7 +69,7 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
     /** Configuration PID Property */
     private static final String CONF_PID = "org.eclipse.kura.wire.WireService";
 
-    private static final Logger logger = LoggerFactory.getLogger(WireServiceImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(WireGraphServiceImpl.class);
 
     private volatile WireAdmin wireAdmin;
 
@@ -132,7 +128,7 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
 
             this.currentConfiguration = loadWireGraphConfiguration(properties);
 
-            if (wireComponentServiceTracker == null) {
+            if (this.wireComponentServiceTracker == null) {
                 logger.info("Opening Wire Component Service tracker...");
                 WireComponentTrackerCustomizer wireComponentTrackerCustomizer = new WireComponentTrackerCustomizer(
                         this.bundleContext, this);
@@ -154,8 +150,9 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
     protected void deactivate(final ComponentContext componentContext) {
         logger.info("Deactivating Wire Service Component...");
         this.bundleContext = null;
-        if (this.wireComponentServiceTracker != null)
+        if (this.wireComponentServiceTracker != null) {
             this.wireComponentServiceTracker.close();
+        }
 
         deleteAllWires();
 
@@ -244,22 +241,12 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
         return null;
     }
 
-    /** {@inheritDoc} */
-    @Override
-    public WireConfiguration createWireConfiguration(final String emitterPid, final String receiverPid)
-            throws KuraException {
-        requireNonNull(emitterPid, "Emitter PID cannot be null");
-        requireNonNull(receiverPid, "Receiver PID cannot be null");
-
-        return createWireConfigurationInternal(emitterPid, receiverPid, 0, 0);
-    }
-
     /**
      * Create the wires based on the provided wire configurations
      */
     synchronized void createWires() {
 
-        for (final MultiportWireConfiguration wireConfig : currentConfiguration.getWireConfigurations()) {
+        for (final MultiportWireConfiguration wireConfig : this.currentConfiguration.getWireConfigurations()) {
             createConfiguration(wireConfig);
         }
     }
@@ -296,7 +283,7 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
                 if (!newWires.contains(wire) || componentsToDelete.contains(wire.getEmitterPid())
                         || componentsToDelete.contains(wire.getReceiverPid())) {
                     logger.info("Removing wire between {} and {} ...", wire.getEmitterPid(), wire.getReceiverPid());
-                    wireAdmin.deleteWire(osgiWire);
+                    this.wireAdmin.deleteWire(osgiWire);
                     logger.info("Removing wire between {} and {} ... done", wire.getEmitterPid(),
                             wire.getReceiverPid());
                 }
@@ -324,48 +311,6 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
             // no need since no filter is passed to getWires()
         }
 
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void deleteWireConfiguration(WireConfiguration wireConfiguration) {
-        requireNonNull(wireConfiguration, "Wire Configuration cannot be null");
-
-        try {
-            List<MultiportWireConfiguration> wireConfigurations = currentConfiguration.getWireConfigurations();
-
-            final WireConfiguration actualWireConfiguration;
-
-            if (wireConfiguration.getClass().equals(WireConfiguration.class)) {
-                actualWireConfiguration = new MultiportWireConfiguration(wireConfiguration.getEmitterPid(),
-                        wireConfiguration.getReceiverPid(), 0, 0);
-            } else {
-                actualWireConfiguration = wireConfiguration;
-            }
-
-            if (!wireConfigurations.stream().anyMatch(actualWireConfiguration::equals)) {
-                return;
-            }
-
-            final WireGraphConfiguration currentGraphConfiguration = get();
-
-            update(new WireGraphConfiguration(currentGraphConfiguration.getWireComponentConfigurations(),
-                    currentGraphConfiguration.getWireConfigurations().stream()
-                            .filter(wire -> !actualWireConfiguration.equals(wire)).collect(Collectors.toList())));
-        } catch (Exception e) {
-            throw new IllegalArgumentException(e);
-        }
-
-        logger.info("Removing Wires...Done");
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public Set<WireConfiguration> getWireConfigurations() {
-        if (this.currentConfiguration == null) {
-            return Collections.emptySet();
-        }
-        return new HashSet<>(this.currentConfiguration.getWireConfigurations());
     }
 
     @Override
@@ -540,8 +485,8 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
     public synchronized void delete() throws KuraException {
         deleteAllWires();
 
-        for (WireComponentConfiguration config : currentConfiguration.getWireComponentConfigurations()) {
-            configurationService.deleteFactoryConfiguration(config.getConfiguration().getPid(), false);
+        for (WireComponentConfiguration config : this.currentConfiguration.getWireComponentConfigurations()) {
+            this.configurationService.deleteFactoryConfiguration(config.getConfiguration().getPid(), false);
         }
 
         WireGraphConfiguration newWireGraphConfiguration = new WireGraphConfiguration(new ArrayList<>(),
@@ -554,7 +499,7 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
 
         this.configurationService.updateConfiguration(CONF_PID, wireServiceComponentConfig.getConfigurationProperties(),
                 true);
-        currentConfiguration = newWireGraphConfiguration;
+        this.currentConfiguration = newWireGraphConfiguration;
     }
 
     @Override
@@ -563,7 +508,7 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
         List<ComponentConfiguration> configServiceComponentConfigurations = this.configurationService
                 .getComponentConfigurations();
 
-        WireGraphConfiguration wireGraphConfiguration = currentConfiguration;
+        WireGraphConfiguration wireGraphConfiguration = this.currentConfiguration;
 
         List<WireComponentConfiguration> wireComponentConfigurations = wireGraphConfiguration
                 .getWireComponentConfigurations();

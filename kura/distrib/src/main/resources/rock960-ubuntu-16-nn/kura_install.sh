@@ -37,7 +37,7 @@ if [ ! -d ${INSTALL_DIR}/kura/.data ]; then
 fi
 
 #copy snapshot_0.xml
-cp ${INSTALL_DIR}/kura/data/snapshots/snapshot_0.xml ${INSTALL_DIR}/kura/.data/snapshot_0.xml
+cp ${INSTALL_DIR}/kura/user/snapshots/snapshot_0.xml ${INSTALL_DIR}/kura/.data/snapshot_0.xml
 
 #set up recover default configuration script
 cp ${INSTALL_DIR}/kura/install/recover_default_config.init ${INSTALL_DIR}/kura/bin/.recoverDefaultConfig.sh

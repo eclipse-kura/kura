@@ -37,7 +37,7 @@ chmod +x ${INSTALL_DIR}/kura/bin/.recoverDefaultConfig.sh
 mkdir -p ${INSTALL_DIR}/kura/data
 
 #copy snapshot_0.xml
-cp ${INSTALL_DIR}/kura/data/snapshots/snapshot_0.xml ${INSTALL_DIR}/kura/.data/snapshot_0.xml
+cp ${INSTALL_DIR}/kura/user/snapshots/snapshot_0.xml ${INSTALL_DIR}/kura/.data/snapshot_0.xml
 
 # Set up logrotate
 cp ${INSTALL_DIR}/kura/install/logrotate.conf /etc/logrotate.conf

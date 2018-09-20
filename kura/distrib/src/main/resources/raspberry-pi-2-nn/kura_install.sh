@@ -32,7 +32,7 @@ if [ ! -d ${INSTALL_DIR}/kura/.data ]; then
 fi
 
 #copy snapshot_0.xml
-cp ${INSTALL_DIR}/kura/data/snapshots/snapshot_0.xml ${INSTALL_DIR}/kura/.data/snapshot_0.xml
+cp ${INSTALL_DIR}/kura/user/snapshots/snapshot_0.xml ${INSTALL_DIR}/kura/.data/snapshot_0.xml
 
 #set up logrotate - no need to restart as it is a cronjob
 cp ${INSTALL_DIR}/kura/install/logrotate.conf /etc/logrotate.conf

@@ -10,52 +10,75 @@
 
 package org.eclipse.kura.web.client.ui.drivers.assets;
 
+import java.util.Set;
+
 import com.google.gwt.cell.client.AbstractCell;
+import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 
 public class BooleanInputCell extends AbstractCell<String> {
 
-    public BooleanInputCell() {
-        super("change");
-    }
+    private CheckboxCell inner = new CheckboxCell(false, false);
 
     @Override
     public void render(Context context, String value, SafeHtmlBuilder sb) {
-        sb.append(new Checkbox("true".equals(value)));
+        inner.render(context, toBoolean(value), sb);
     }
 
     @Override
     public void onBrowserEvent(Context context, Element parent, String value, NativeEvent event,
             ValueUpdater<String> valueUpdater) {
-        if (valueUpdater == null) {
-            return;
-        }
-
-        if ("change".equals(event.getType())) {
-            final InputElement input = event.getEventTarget().cast();
-            valueUpdater.update(input.isChecked() ? "true" : "false");
-        }
+        inner.onBrowserEvent(context, parent, toBoolean(value), event, new ValueUpdaterWrapper(valueUpdater));
     }
 
-    private class Checkbox implements SafeHtml {
+    @Override
+    public Set<String> getConsumedEvents() {
+        return inner.getConsumedEvents();
+    }
 
-        private final boolean checked;
+    @Override
+    public boolean dependsOnSelection() {
+        return inner.dependsOnSelection();
+    }
 
-        public Checkbox(boolean checked) {
-            this.checked = checked;
+    @Override
+    public boolean handlesSelection() {
+        return inner.handlesSelection();
+    }
+
+    @Override
+    public boolean isEditing(Context context, Element parent, String value) {
+        return inner.isEditing(context, parent, toBoolean(value));
+    }
+
+    @Override
+    public boolean resetFocus(Context context, Element parent, String value) {
+        return inner.resetFocus(context, parent, toBoolean(value));
+    }
+
+    @Override
+    public void setValue(Context context, Element parent, String value) {
+        inner.setValue(context, parent, toBoolean(value));
+    }
+
+    private static boolean toBoolean(final String value) {
+        return "true".equalsIgnoreCase(value);
+    }
+
+    private static final class ValueUpdaterWrapper implements ValueUpdater<Boolean> {
+
+        private final ValueUpdater<String> wrapped;
+
+        public ValueUpdaterWrapper(final ValueUpdater<String> wrapped) {
+            this.wrapped = wrapped;
         }
 
         @Override
-        public String asString() {
-            return "<div style=\"text-align: center\"><input type=\"checkbox\" " + (checked ? "checked" : "")
-                    + "></input></div>";
+        public void update(Boolean value) {
+            wrapped.update(Boolean.toString(value));
         }
-
     }
-
 }

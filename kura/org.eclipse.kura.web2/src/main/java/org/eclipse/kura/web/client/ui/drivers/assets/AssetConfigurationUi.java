@@ -73,6 +73,7 @@ import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FormPanel;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.Hidden;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
@@ -301,7 +302,7 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
     public void setDirty(final boolean flag) {
         boolean isDirtyStateChanged = flag != this.dirty;
         this.dirty = flag;
-        
+
         this.btnDownload.setEnabled(!this.dirty);
 
         if (this.listener != null) {
@@ -391,6 +392,10 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
                 AssetConfigurationUi.this.channelTable.redraw();
                 object.setValue(param.getId(), value);
             });
+        }
+
+        if (param.getType() == GwtConfigParameterType.BOOLEAN) {
+            result.setHorizontalAlignment(HasAlignment.ALIGN_CENTER);
         }
 
         return result;

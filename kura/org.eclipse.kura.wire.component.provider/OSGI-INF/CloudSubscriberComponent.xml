@@ -7,7 +7,7 @@
      which accompanies this distribution, and is available at
      http://www.eclipse.org/legal/epl-v10.html
 -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.2.0"
                name="org.eclipse.kura.wire.CloudSubscriber"
                activate="activate"
                deactivate="deactivate"
@@ -34,6 +34,7 @@
            policy="static"
            bind="setCloudSubscriber"
            unbind="unsetCloudSubscriber"
+           policy-option="greedy"
            cardinality="0..1"
            interface="org.eclipse.kura.cloudconnection.subscriber.CloudSubscriber"/>
 </scr:component>

@@ -13,11 +13,11 @@
       Red Hat Inc - Export ConfigurableComponent
 
 -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" 
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.2.0"
     name="org.eclipse.kura.example.publisher.ExamplePublisher"
-    activate="activate" 
-    deactivate="deactivate" 
-    modified="updated" 
+    activate="activate"
+    deactivate="deactivate"
+    modified="updated"
     enabled="true"
     immediate="true"
     configuration-policy="require">
@@ -28,17 +28,19 @@
    <service>
        <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
    </service>
-   
+
    <reference name="CloudPublisher"
            policy="static"
            bind="setCloudPublisher"
            unbind="unsetCloudPublisher"
+           policy-option="greedy"
            cardinality="0..1"
            interface="org.eclipse.kura.cloudconnection.publisher.CloudPublisher"/>
    <reference name="CloudSubscriber"
            policy="static"
            bind="setCloudSubscriber"
            unbind="unsetCloudSubscriber"
+           policy-option="greedy"
            cardinality="0..1"
            interface="org.eclipse.kura.cloudconnection.subscriber.CloudSubscriber"/>
 </scr:component>

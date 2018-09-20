@@ -13,11 +13,11 @@
       Red Hat Inc
 
 -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" 
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.2.0"
     name="org.eclipse.kura.demo.heater.Heater"
-    activate="activate" 
-    deactivate="deactivate" 
-    modified="updated" 
+    activate="activate"
+    deactivate="deactivate"
+    modified="updated"
     enabled="true"
     immediate="true"
     configuration-policy="require">
@@ -28,11 +28,12 @@
    <service>
        <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
    </service>
-   
+
    <reference name="CloudPublisher"
            policy="static"
            bind="setCloudPublisher"
            unbind="unsetCloudPublisher"
+           policy-option="greedy"
            cardinality="0..1"
            interface="org.eclipse.kura.cloudconnection.publisher.CloudPublisher"/>
 </scr:component>

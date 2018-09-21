@@ -19,6 +19,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,7 +32,6 @@ import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.internal.json.marshaller.unmarshaller.JsonMarshallUnmarshallImpl;
 import org.eclipse.kura.wire.WireComponent;
 import org.eclipse.kura.wire.WireConfiguration;
-import org.eclipse.kura.wire.WireService;
 import org.eclipse.kura.wire.graph.MultiportWireConfiguration;
 import org.eclipse.kura.wire.graph.WireComponentConfiguration;
 import org.eclipse.kura.wire.graph.WireGraphConfiguration;
@@ -62,7 +62,7 @@ public class WireServiceImplTest {
         servicePidMappings.put(emitterPid, emitterPid);
         servicePidMappings.put(receiverPid, receiverPid);
 
-        WireServiceImpl wsi = getWireServiceImpl(servicePidMappings);
+        WireGraphServiceImpl wsi = getWireGraphServiceImpl(servicePidMappings);
 
         WireAdmin wireAdmin = mock(WireAdmin.class);
 
@@ -81,7 +81,7 @@ public class WireServiceImplTest {
     public void testCreateWires() throws NoSuchFieldException, InvalidSyntaxException {
         final Map<String, String> servicePidMappings = mock(Map.class);
 
-        WireServiceImpl wsi = (WireServiceImpl) getWireServiceImpl(servicePidMappings);
+        WireGraphServiceImpl wsi = getWireGraphServiceImpl(servicePidMappings);
 
         Map<String, Object> properties = new HashMap<>();
         properties.put(WIRE_GRAPH_PROPERTY_NAME, SIMPLE_GRAPH);
@@ -101,34 +101,12 @@ public class WireServiceImplTest {
     }
 
     @Test
-    public void testUpdatedCallback() throws NoSuchFieldException {
-        WireServiceImpl wsi = new WireServiceImpl();
-
-        BundleContext bundleContext = mock(BundleContext.class);
-        TestUtil.setFieldValue(wsi, "bundleContext", bundleContext);
-
-        WireAdmin wireAdmin = mock(WireAdmin.class);
-        TestUtil.setFieldValue(wsi, "wireAdmin", wireAdmin);
-
-        ServiceTracker<WireComponent, WireComponent> wireComponentServiceTracker = mock(ServiceTracker.class);
-        TestUtil.setFieldValue(wsi, "wireComponentServiceTracker", wireComponentServiceTracker);
-
-        Map<String, Object> properties = new HashMap<>();
-        wsi.updated(properties);
-
-        Set<WireConfiguration> cfg = wsi.getWireConfigurations();
-
-        assertNotNull(cfg);
-        assertTrue(cfg.isEmpty());
-    }
-
-    @Test
     public void testWireGraphUpdate() throws KuraException, NoSuchFieldException, InvalidSyntaxException {
         ConfigurationService configurationService = mock(ConfigurationService.class);
         WireAdmin wireAdmin = mock(WireAdmin.class);
         when(wireAdmin.getWires(null)).thenReturn(new Wire[0]);
 
-        WireServiceImpl wireGraphService = getWireServiceImpl(new HashMap<>());
+        WireGraphServiceImpl wireGraphService = getWireGraphServiceImpl(new HashMap<>());
 
         Map<String, Object> properties = new HashMap<>();
         properties.put(WIRE_GRAPH_PROPERTY_NAME, DEFAULT_GRAPH);
@@ -191,7 +169,7 @@ public class WireServiceImplTest {
         WireAdmin wireAdmin = mock(WireAdmin.class);
         when(wireAdmin.getWires(null)).thenReturn(new Wire[0]);
 
-        WireServiceImpl wireGraphService = getWireServiceImpl(new HashMap<>());
+        WireGraphServiceImpl wireGraphService = getWireGraphServiceImpl(new HashMap<>());
 
         Map<String, Object> properties = new HashMap<>();
         properties.put(WIRE_GRAPH_PROPERTY_NAME, SIMPLE_GRAPH);
@@ -239,7 +217,7 @@ public class WireServiceImplTest {
     public void testGetWireGraph() throws NoSuchFieldException, KuraException {
         ConfigurationService configurationService = mock(ConfigurationService.class);
 
-        WireServiceImpl wireGraphService = getWireServiceImpl(new HashMap<>());
+        WireGraphServiceImpl wireGraphService = getWireGraphServiceImpl(new HashMap<>());
 
         TestUtil.setFieldValue(wireGraphService, "configurationService", configurationService);
 
@@ -276,7 +254,7 @@ public class WireServiceImplTest {
         when(configurationService.getComponentConfiguration(WIRE_SERVICE_PID))
                 .thenReturn(new ComponentConfigurationImpl(WIRE_SERVICE_PID, null, new HashMap<>()));
 
-        WireServiceImpl wireGraphService = getWireServiceImpl(new HashMap<>());
+        WireGraphServiceImpl wireGraphService = getWireGraphServiceImpl(new HashMap<>());
 
         Map<String, Object> properties = new HashMap<>();
         properties.put(WIRE_GRAPH_PROPERTY_NAME, SIMPLE_GRAPH);
@@ -298,97 +276,8 @@ public class WireServiceImplTest {
         assertEquals("{\"components\":[],\"wires\":[]}", arguments.get(WIRE_GRAPH_PROPERTY_NAME));
     }
 
-    @Test
-    public void testDeleteWireConfiguration() throws InvalidSyntaxException, KuraException, NoSuchFieldException {
-        ConfigurationService configurationService = mock(ConfigurationService.class);
-        WireAdmin wireAdmin = mock(WireAdmin.class);
-        when(wireAdmin.getWires(null)).thenReturn(new Wire[0]);
-        when(configurationService.getComponentConfiguration(WIRE_SERVICE_PID))
-                .thenReturn(new ComponentConfigurationImpl(WIRE_SERVICE_PID, null, new HashMap<>()));
-
-        WireServiceImpl wireService = getWireServiceImpl(new HashMap<>());
-
-        Map<String, Object> properties = new HashMap<>();
-        properties.put(WIRE_GRAPH_PROPERTY_NAME, SIMPLE_GRAPH);
-
-        TestUtil.setFieldValue(wireService, "configurationService", configurationService);
-        TestUtil.setFieldValue(wireService, "wireAdmin", wireAdmin);
-
-        ServiceTracker<WireComponent, WireComponent> wireComponentServiceTracker = mock(ServiceTracker.class);
-        TestUtil.setFieldValue(wireService, "wireComponentServiceTracker", wireComponentServiceTracker);
-
-        WireConfiguration wConfigToDelete = new WireConfiguration("emitterPid", "receiverPid");
-
-        final ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
-
-        wireService.activate(mock(ComponentContext.class), properties);
-        wireService.deleteWireConfiguration(wConfigToDelete);
-
-        verify(configurationService).updateConfigurations(captor.capture(), eq(true));
-
-        List<ComponentConfiguration> arguments = captor.getValue();
-
-        assertNotNull(arguments);
-
-        assertEquals(1, arguments.size());
-
-        ComponentConfiguration wireServiceConfig = arguments.get(0);
-
-        String wireGraphJson = (String) wireServiceConfig.getConfigurationProperties().get(WIRE_GRAPH_PROPERTY_NAME);
-        assertEquals(SIMPLE_GRAPH_NO_ARCS, wireGraphJson);
-    }
-
-    @Test
-    public void testCreateWireConfiguration() throws InvalidSyntaxException, KuraException, NoSuchFieldException {
-
-        ConfigurationService configurationService = mock(ConfigurationService.class);
-        WireAdmin wireAdmin = mock(WireAdmin.class);
-
-        when(wireAdmin.getWires(null)).thenReturn(new Wire[0]);
-        when(configurationService.getComponentConfiguration(WIRE_SERVICE_PID))
-                .thenReturn(new ComponentConfigurationImpl(WIRE_SERVICE_PID, null, new HashMap<>()));
-
-        final Map<String, String> servicePidMappings = new HashMap<>();
-        servicePidMappings.put("emitterPid", "emitterServicePid");
-        servicePidMappings.put("receiverPid", "receiverServicePid");
-
-        WireServiceImpl wireService = getWireServiceImpl(servicePidMappings);
-
-        Map<String, Object> properties = new HashMap<>();
-        properties.put(WIRE_GRAPH_PROPERTY_NAME, SIMPLE_GRAPH_NO_ARCS);
-
-        TestUtil.setFieldValue(wireService, "configurationService", configurationService);
-        TestUtil.setFieldValue(wireService, "wireAdmin", wireAdmin);
-
-        wireService.activate(mock(ComponentContext.class), properties);
-
-        ServiceTracker<WireComponent, WireComponent> wireComponentServiceTracker = mock(ServiceTracker.class);
-        TestUtil.setFieldValue(wireService, "wireComponentServiceTracker", wireComponentServiceTracker);
-
-        final ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
-
-        WireConfiguration wireConfiguration = wireService.createWireConfiguration("emitterPid", "receiverPid");
-
-        assertNotNull(wireConfiguration);
-        assertEquals("emitterPid", wireConfiguration.getEmitterPid());
-        assertEquals("receiverPid", wireConfiguration.getReceiverPid());
-
-        verify(configurationService).updateConfigurations(captor.capture(), eq(true));
-
-        List<ComponentConfiguration> arguments = captor.getValue();
-
-        assertNotNull(arguments);
-
-        assertEquals(1, arguments.size());
-
-        ComponentConfiguration wireServiceConfig = arguments.get(0);
-
-        String wireGraphJson = (String) wireServiceConfig.getConfigurationProperties().get(WIRE_GRAPH_PROPERTY_NAME);
-        assertEquals(SIMPLE_GRAPH, wireGraphJson);
-    }
-
-    private WireServiceImpl getWireServiceImpl(final Map<String, String> servicePidMappings) {
-        WireServiceImpl wireService = new WireServiceImpl() {
+    private WireGraphServiceImpl getWireGraphServiceImpl(final Map<String, String> servicePidMappings) {
+        WireGraphServiceImpl wireService = new WireGraphServiceImpl() {
 
             @Override
             protected <T> T unmarshal(String jsonWireGraph, Class<T> clazz) {
@@ -420,24 +309,6 @@ public class WireServiceImplTest {
             }
         };
         return wireService;
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void testCreateWireConfigurationNullArgs()
-            throws InvalidSyntaxException, KuraException, NoSuchFieldException {
-        WireService wireService = new WireServiceImpl();
-
-        wireService.createWireConfiguration(null, null);
-    }
-
-    @Test
-    public void testCreateWireConfigurationEmitterReceiverEqual()
-            throws InvalidSyntaxException, KuraException, NoSuchFieldException {
-        WireService wireService = new WireServiceImpl();
-
-        WireConfiguration wireConfiguration = wireService.createWireConfiguration("pid", "pid");
-
-        assertEquals(null, wireConfiguration);
     }
 
     private ComponentConfiguration createEmitterComponentConfiguration() {

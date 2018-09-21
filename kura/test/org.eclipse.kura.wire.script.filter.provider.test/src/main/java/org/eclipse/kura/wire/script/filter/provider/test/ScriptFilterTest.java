@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates and others
  *
  *   All rights reserved. This program and the accompanying materials
  *   are made available under the terms of the Eclipse Public License v1.0
@@ -34,7 +34,7 @@ import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.wire.WireComponent;
 import org.eclipse.kura.wire.WireEnvelope;
 import org.eclipse.kura.wire.WireRecord;
-import org.eclipse.kura.wire.WireService;
+import org.eclipse.kura.wire.graph.WireGraphService;
 import org.eclipse.kura.wire.script.filter.provider.ScriptFilter;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -47,7 +47,7 @@ public class ScriptFilterTest {
 
     private static ScriptFilter filter;
     private static ConfigurationService cfgsvc;
-    private static WireService wiresvc;
+    private static WireGraphService wireGraphSvc;
 
     private static Object filterLock = new Object();
 
@@ -89,7 +89,7 @@ public class ScriptFilterTest {
     @Test
     public void testSvcs() {
         assertNotNull(cfgsvc);
-        assertNotNull(wiresvc);
+        assertNotNull(wireGraphSvc);
         assertNotNull(filter);
     }
 
@@ -157,13 +157,13 @@ public class ScriptFilterTest {
         ScriptFilterTest.cfgsvc = null;
     }
 
-    protected void bindWireSvc(final WireService wireSvc) {
-        ScriptFilterTest.wiresvc = wireSvc;
+    protected void bindWireGraphSvc(final WireGraphService wireGraphSvc) {
+        ScriptFilterTest.wireGraphSvc = wireGraphSvc;
         dependencyLatch.countDown();
     }
 
-    protected void unbindWireSvc(WireService wireSvc) {
-        ScriptFilterTest.wiresvc = null;
+    protected void unbindWireGraphSvc(WireGraphService wireGraphSvc) {
+        ScriptFilterTest.wireGraphSvc = null;
     }
 
 }

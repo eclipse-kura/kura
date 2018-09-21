@@ -15,18 +15,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtWireConfiguration;
 import org.eclipse.kura.wire.WireComponent;
-import org.eclipse.kura.wire.WireConfiguration;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireHelperService;
 import org.eclipse.kura.wire.WireReceiver;
-import org.eclipse.kura.wire.WireService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
@@ -186,60 +183,6 @@ public final class GwtWireServiceUtil {
     }
 
     /**
-     * Gets the wire configurations.
-     *
-     * @return the wire configurations
-     * @throws GwtKuraException
-     *             the gwt kura exception
-     */
-    public static Set<WireConfiguration> getWireConfigurations() throws GwtKuraException {
-        final WireService wireService = ServiceLocator.getInstance().getService(WireService.class);
-        return wireService.getWireConfigurations();
-    }
-
-    /**
-     * Gets the wire configurations by emitter PID.
-     *
-     * @param pid
-     *            the PID
-     * @return the wire configurations by emitter PID
-     * @throws GwtKuraException
-     *             the gwt kura exception
-     */
-    public static List<WireConfiguration> getWireConfigurationsByEmitterPid(final String pid) throws GwtKuraException {
-        final WireService wireService = ServiceLocator.getInstance().getService(WireService.class);
-        final List<WireConfiguration> wireConfs = new ArrayList<>();
-        for (final WireConfiguration wireConf : wireService.getWireConfigurations()) {
-            final String emitterPid = wireConf.getEmitterPid();
-            if (emitterPid.equalsIgnoreCase(pid)) {
-                wireConfs.add(wireConf);
-            }
-        }
-        return wireConfs;
-    }
-
-    /**
-     * Gets the wire configurations by receiver PID.
-     *
-     * @param pid
-     *            the PID
-     * @return the wire configurations by receiver PID
-     * @throws GwtKuraException
-     *             the gwt kura exception
-     */
-    public static List<WireConfiguration> getWireConfigurationsByReceiverPid(final String pid) throws GwtKuraException {
-        final WireService wireService = ServiceLocator.getInstance().getService(WireService.class);
-        final List<WireConfiguration> wireConfs = new ArrayList<>();
-        for (final WireConfiguration wireConf : wireService.getWireConfigurations()) {
-            final String receiverPid = wireConf.getReceiverPid();
-            if (receiverPid.equalsIgnoreCase(pid)) {
-                wireConfs.add(wireConf);
-            }
-        }
-        return wireConfs;
-    }
-
-    /**
      * Gets the wire configurations from JSON.
      *
      * @param json
@@ -284,9 +227,9 @@ public final class GwtWireServiceUtil {
 
     public static class WireComponentDescriptor {
 
-        private String pid;
-        private String factoryPid;
-        private String driverPid;
+        private final String pid;
+        private final String factoryPid;
+        private final String driverPid;
 
         public WireComponentDescriptor(String pid, String factoryPid, String driverPid) {
             this.pid = pid;
@@ -295,15 +238,15 @@ public final class GwtWireServiceUtil {
         }
 
         public String getPid() {
-            return pid;
+            return this.pid;
         }
 
         public String getFactoryPid() {
-            return factoryPid;
+            return this.factoryPid;
         }
 
         public String getDriverPid() {
-            return driverPid;
+            return this.driverPid;
         }
     }
 

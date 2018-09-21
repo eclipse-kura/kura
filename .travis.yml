@@ -15,7 +15,7 @@ addons:
       name: "eclipse/kura"
       description: "Eclipse Kura"
     notification_email: david.woodard@eurotech.com
-    build_command_prepend: "rm -rf $HOME/.m2/repository/org/eclipse && rm -rf kura/target-definition/{common,equinox*,test-deps}"
-    build_command: "mvn -B -f target-platform/pom.xml clean install && mvn -B -f kura/pom.xml clean install -DskipTests"
+    build_command_prepend: mvn -B -f target-platform/pom.xml clean install
+    build_command: mvn -B -f kura/pom.xml clean install -DskipTests
     branch_pattern: coverity_scan
 

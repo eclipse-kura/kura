@@ -48,7 +48,7 @@ import org.osgi.util.tracker.ServiceTracker;
 public class WireServiceImplTest {
 
     private static final String WIRE_GRAPH_PROPERTY_NAME = "WireGraph";
-    private static final String WIRE_SERVICE_PID = "org.eclipse.kura.wire.WireService";
+    private static final String WIRE_SERVICE_PID = "org.eclipse.kura.wire.graph.WireGraphService";
     private static final String DEFAULT_GRAPH = "{\"components\":[],\"wires\":[]}";
     private static final String SIMPLE_GRAPH = "{\"components\":[{\"pid\":\"emitterPid\",\"inputPortCount\":0,\"outputPortCount\":1,\"renderingProperties\":{\"position\":{\"x\":10,\"y\":15},\"inputPortNames\":{},\"outputPortNames\":{}}},{\"pid\":\"receiverPid\",\"inputPortCount\":1,\"outputPortCount\":0,\"renderingProperties\":{\"position\":{\"x\":100,\"y\":150},\"inputPortNames\":{},\"outputPortNames\":{}}}],\"wires\":[{\"emitter\":\"emitterPid\",\"emitterPort\":0,\"receiver\":\"receiverPid\",\"receiverPort\":0}]}";
     private static final String SIMPLE_GRAPH_NO_ARCS = "{\"components\":[{\"pid\":\"emitterPid\",\"inputPortCount\":0,\"outputPortCount\":1,\"renderingProperties\":{\"position\":{\"x\":10,\"y\":15},\"inputPortNames\":{},\"outputPortNames\":{}}},{\"pid\":\"receiverPid\",\"inputPortCount\":1,\"outputPortCount\":0,\"renderingProperties\":{\"position\":{\"x\":100,\"y\":150},\"inputPortNames\":{},\"outputPortNames\":{}}}],\"wires\":[]}";

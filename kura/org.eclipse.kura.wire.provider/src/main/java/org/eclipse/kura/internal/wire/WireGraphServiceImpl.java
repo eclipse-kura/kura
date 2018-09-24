@@ -67,7 +67,7 @@ public class WireGraphServiceImpl implements ConfigurableComponent, WireGraphSer
     private static final String NEW_WIRE_GRAPH_PROPERTY = "WireGraph";
 
     /** Configuration PID Property */
-    private static final String CONF_PID = "org.eclipse.kura.wire.WireService";
+    private static final String CONF_PID = "org.eclipse.kura.wire.graph.WireGraphService";
 
     private static final Logger logger = LoggerFactory.getLogger(WireGraphServiceImpl.class);
 

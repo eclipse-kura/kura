@@ -1,48 +1,21 @@
 language: java
 
-sudo: false
+env:
+  global:
+   # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
+   #   via the "travis encrypt" command using the project repo's public key
+   - secure: "gLEymzqzdMsTS4rQxwWGMDNLeU8S09lhvENIgyPF/cZ6wjnt92W4iRLrEEmZw5JYttQM+czekQ+R7RVFuwxL8Ut9BllnYf3sSuU4KUi3oG+N51z9XRAaRRjtHiZvpn0BehrqcGWKviKKh52KE20SMCMpGrmWnHIHKWI3ZKQuvfU="
 
-cache:
-  directories:
-  - $HOME/.m2
-  - kura/target-definition
-  - target-platform/p2-repo-common/target
-  - target-platform/p2-repo-equinox_3.12.50/target
-  - target-platform/p2-repo-test-deps/target
-
-before_script:
-  - echo ==== Setting up toolchain.xml ====
-  - ls /usr/lib/jvm
-  - cp kura/setups/toolchains/toolchains-travis.xml ~/.m2/toolchains.xml
-  - echo ==== Setting up Maven 3.3 for Travis ====
-  - wget -O maven.tar.gz http://archive.apache.org/dist/maven/maven-3/3.3.9/binaries/apache-maven-3.3.9-bin.tar.gz
-  - mkdir maven
-  - cd maven ; tar --strip-components 1 -xzf ../maven.tar.gz ; cd ..
-  - chmod a+x maven/bin/mvn
-  - export M2_HOME=$PWD/maven
-  - export PATH=${M2_HOME}/maven/bin:${PATH}
-  - hash -r
+before_install:
+  - echo -n | openssl s_client -connect https://scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
 
 addons:
-  apt:
-    packages:
-      - dos2unix
+  coverity_scan:
+    project:
+      name: "eclipse/kura"
+      description: "Eclipse Kura"
+    notification_email: david.woodard@eurotech.com
+    build_command_prepend: mvn -B -f target-platform/pom.xml clean install
+    build_command: mvn -B -f kura/pom.xml clean install -DskipTests
+    branch_pattern: coverity_scan
 
-jobs:
-  include:
-    - stage: Main-build
-      script:
-        - rm -rf $HOME/.m2/repository/org/eclipse
-        - rm -rf kura/target-definition/{common,equinox*,test-deps}
-        - $M2_HOME/bin/mvn -B -f target-platform/pom.xml clean install
-        - $M2_HOME/bin/mvn -B -f kura/pom.xml clean install -DskipTests
-    - stage: distrib-examples-tests-karaf
-      script: $M2_HOME/bin/mvn -f kura/distrib/pom.xml clean install
-    - # stage name not required, will continue to use the previous
-      script:
-      - $M2_HOME/bin/mvn -f kura/org.eclipse.kura-p2/pom.xml clean install 
-      - $M2_HOME/bin/mvn -f kura/examples/pom.xml clean install
-    - # stage name not required, will continue to use the previous 
-      script: $M2_HOME/bin/mvn -f kura/test/pom.xml clean install
-    - # stage name not required, will continue to use the previous
-      script: $M2_HOME/bin/mvn -f karaf/pom.xml clean install

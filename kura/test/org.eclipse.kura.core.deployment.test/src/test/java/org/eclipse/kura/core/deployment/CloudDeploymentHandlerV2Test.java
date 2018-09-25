@@ -8,7 +8,7 @@
  ******************************************************************************/
 package org.eclipse.kura.core.deployment;
 
-import static org.eclipse.kura.cloudconnection.request.RequestHandlerConstants.ARGS_KEY;
+import static org.eclipse.kura.cloudconnection.request.RequestHandlerMessageConstants.ARGS_KEY;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -1106,7 +1106,7 @@ public class CloudDeploymentHandlerV2Test {
         InstallImpl installImpl = mock(InstallImpl.class);
         TestUtil.setFieldValue(handler, "installImplementation", installImpl);
 
-        RequestHandlerContext requestContext = new RequestHandlerContext(null, null);
+        RequestHandlerContext requestContext = new RequestHandlerContext(null, Collections.emptyMap());
         KuraMessage resMessage = handler.doExec(requestContext, message);
 
         KuraResponsePayload resPayload = (KuraResponsePayload) resMessage.getPayload();
@@ -1319,7 +1319,7 @@ public class CloudDeploymentHandlerV2Test {
         when(dtsMock.getClientId()).thenReturn("ClientId");
         TestUtil.setFieldValue(handler, "pendingPackageUrl", null);
 
-        RequestHandlerContext requestContext = new RequestHandlerContext(null, null);
+        RequestHandlerContext requestContext = new RequestHandlerContext(null, Collections.emptyMap());
         KuraMessage resMessage = handler.doExec(requestContext, message);
 
         KuraResponsePayload resPayload = (KuraResponsePayload) resMessage.getPayload();
@@ -1371,7 +1371,7 @@ public class CloudDeploymentHandlerV2Test {
         when(dlMock.isAlreadyDownloaded()).thenReturn(false);
         doThrow(new KuraException(KuraErrorCode.INTERNAL_ERROR)).when(dlMock).downloadDeploymentPackageInternal();
 
-        RequestHandlerContext requestContext = new RequestHandlerContext(null, null);
+        RequestHandlerContext requestContext = new RequestHandlerContext(null, Collections.emptyMap());
         KuraMessage resMessage = handler.doExec(requestContext, message);
 
         KuraResponsePayload resPayload = (KuraResponsePayload) resMessage.getPayload();

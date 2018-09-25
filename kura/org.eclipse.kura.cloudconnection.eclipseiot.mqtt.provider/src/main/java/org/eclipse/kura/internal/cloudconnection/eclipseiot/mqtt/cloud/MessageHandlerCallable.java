@@ -9,7 +9,8 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.cloud;
 
-import static org.eclipse.kura.cloudconnection.request.RequestHandlerConstants.ARGS_KEY;
+import static org.eclipse.kura.cloudconnection.request.RequestHandlerContextConstants.NOTIFICATION_PUBLISHER_PID;
+import static org.eclipse.kura.cloudconnection.request.RequestHandlerMessageConstants.ARGS_KEY;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -61,6 +62,7 @@ public class MessageHandlerCallable implements Callable<Void> {
     private final String appTopic;
     private final KuraPayload kuraMessage;
     private final CloudConnectionManagerImpl cloudConnectionManager;
+    private final RequestHandlerContext requestHandlerContext;
 
     public MessageHandlerCallable(RequestHandler cloudApp, String appTopic, KuraPayload msg,
             CloudConnectionManagerImpl cloudConnectionManager) {
@@ -69,6 +71,14 @@ public class MessageHandlerCallable implements Callable<Void> {
         this.appTopic = appTopic;
         this.kuraMessage = msg;
         this.cloudConnectionManager = cloudConnectionManager;
+
+        String notificationPublisherPid = null; // TODO: this.cloudConnectionManager.getNotificationPublisherPid();
+        CloudNotificationPublisher notificationPublisher = null; // TODO:
+                                                                 // this.cloudConnectionManager.getNotificationPublisher();
+        Map<String, String> contextProperties = new HashMap<>();
+        contextProperties.put(NOTIFICATION_PUBLISHER_PID.name(), notificationPublisherPid);
+
+        this.requestHandlerContext = new RequestHandlerContext(notificationPublisher, contextProperties);
     }
 
     @Override
@@ -83,11 +93,6 @@ public class MessageHandlerCallable implements Callable<Void> {
         // Prepare the default response
         KuraPayload reqPayload = this.kuraMessage;
         KuraMessage response;
-
-        String notificationPublisherPid = null; //TODO: this.cloudConnectionManager.getNotificationPublisherPid();
-        CloudNotificationPublisher notificationPublisher = null; //TODO: this.cloudConnectionManager.getNotificationPublisher();
-        RequestHandlerContext requestContext = new RequestHandlerContext(notificationPublisherPid,
-                notificationPublisher);
 
         try {
             Iterator<String> resources = RESOURCES_DELIM.splitAsStream(this.appTopic).iterator();
@@ -105,27 +110,27 @@ public class MessageHandlerCallable implements Callable<Void> {
             switch (method) {
             case "GET":
                 logger.debug("Handling GET request topic: {}", this.appTopic);
-                response = this.cloudApp.doGet(requestContext, reqMessage);
+                response = this.cloudApp.doGet(this.requestHandlerContext, reqMessage);
                 break;
 
             case "PUT":
                 logger.debug("Handling PUT request topic: {}", this.appTopic);
-                response = this.cloudApp.doPut(requestContext, reqMessage);
+                response = this.cloudApp.doPut(this.requestHandlerContext, reqMessage);
                 break;
 
             case "POST":
                 logger.debug("Handling POST request topic: {}", this.appTopic);
-                response = this.cloudApp.doPost(requestContext, reqMessage);
+                response = this.cloudApp.doPost(this.requestHandlerContext, reqMessage);
                 break;
 
             case "DEL":
                 logger.debug("Handling DEL request topic: {}", this.appTopic);
-                response = this.cloudApp.doDel(requestContext, reqMessage);
+                response = this.cloudApp.doDel(this.requestHandlerContext, reqMessage);
                 break;
 
             case "EXEC":
                 logger.debug("Handling EXEC request topic: {}", this.appTopic);
-                response = this.cloudApp.doExec(requestContext, reqMessage);
+                response = this.cloudApp.doExec(this.requestHandlerContext, reqMessage);
                 break;
 
             default:
@@ -211,7 +216,8 @@ public class MessageHandlerCallable implements Callable<Void> {
         StringBuilder sb = new StringBuilder();
 
         // fixed response topic subsection
-        sb.append(MessageType.CONTROL.getTopicPrefix()).append(topicSeparator).append(topicSeparator).append(topicSeparator).append("res");
+        sb.append(MessageType.CONTROL.getTopicPrefix()).append(topicSeparator).append(topicSeparator)
+                .append(topicSeparator).append("res");
 
         // variable response topic part
         sb.append(topicSeparator).append(requestId).append(topicSeparator).append(responseCode);

@@ -9,14 +9,18 @@
  *******************************************************************************/
 package org.eclipse.kura.cloudconnection.request;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.kura.cloudconnection.publisher.CloudNotificationPublisher;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * PoJo class used to wrap the context associated to a request received from the cloud and passed to a
  * {@link RequestHandler}.
- * It should be used, for example, to provide the context that will be leveraged by a {@link RequestHandler} to publish event
- * notifications to a remote cloud platform.
+ * It should be used, for example, to provide the context that will be leveraged by a {@link RequestHandler} to publish
+ * event notifications to a remote cloud platform.
  *
  * @noextend This class is not intended to be subclassed by clients.
  * @since 2.0
@@ -24,20 +28,21 @@ import org.osgi.annotation.versioning.ProviderType;
 @ProviderType
 public class RequestHandlerContext {
 
-    private final String notificationPublisherPid;
     private final CloudNotificationPublisher notificationPublisher;
+    private final Map<String, String> contextProperties;
 
-    public RequestHandlerContext(String notificationPublisherPid, CloudNotificationPublisher notificationPublisher) {
-        this.notificationPublisherPid = notificationPublisherPid;
+    public RequestHandlerContext(CloudNotificationPublisher notificationPublisher,
+            Map<String, String> contextProperties) {
         this.notificationPublisher = notificationPublisher;
+        this.contextProperties = new HashMap<>(contextProperties);
     }
 
-    public String getNotificationPublisherPid() {
-        return this.notificationPublisherPid;
-    }
-    
     public CloudNotificationPublisher getNotificationPublisher() {
         return this.notificationPublisher;
+    }
+
+    public Map<String, String> getContextProperties() {
+        return Collections.unmodifiableMap(this.contextProperties);
     }
 
 }

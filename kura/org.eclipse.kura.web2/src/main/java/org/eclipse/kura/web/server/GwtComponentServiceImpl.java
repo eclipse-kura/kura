@@ -55,7 +55,7 @@ import org.eclipse.kura.web.shared.model.GwtConfigParameter;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter.GwtConfigParameterType;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtComponentService;
-import org.eclipse.kura.web.shared.service.GwtWireService;
+import org.eclipse.kura.web.shared.service.GwtWireGraphService;
 import org.eclipse.kura.wire.WireHelperService;
 import org.eclipse.kura.wire.graph.WireComponentDefinition;
 import org.eclipse.kura.wire.graph.WireComponentDefinitionService;
@@ -659,7 +659,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
         this.checkXSRFToken(xsrfToken);
 
         List<String> driverFactoriesPids = new ArrayList<>();
-        final Bundle[] bundles = FrameworkUtil.getBundle(GwtWireService.class).getBundleContext().getBundles();
+        final Bundle[] bundles = FrameworkUtil.getBundle(GwtWireGraphService.class).getBundleContext().getBundles();
         for (final Bundle bundle : bundles) {
             final Enumeration<URL> enumeration = bundle.findEntries("OSGI-INF", "*.xml", false);
             if (enumeration != null) {
@@ -710,7 +710,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
 
         List<String> result = new ArrayList<>();
 
-        final BundleContext context = FrameworkUtil.getBundle(GwtWireService.class).getBundleContext();
+        final BundleContext context = FrameworkUtil.getBundle(GwtWireGraphService.class).getBundleContext();
         ServiceReference<ServiceComponentRuntime> scrServiceRef = context
                 .getServiceReference(ServiceComponentRuntime.class);
         try {

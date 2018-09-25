@@ -174,7 +174,7 @@ public class EntryClassUi extends Composite {
     private static final String NOT_SCROLLABLE_STYLE_NAME = "not-scrollable";
     private static final String SERVICES_FILTER = FilterBuilder.of(not(or("service.pid=*SystemPropertiesService",
             "service.pid=*NetworkAdminService", "service.pid=*NetworkConfigurationService",
-            "service.pid=*SslManagerService", "service.pid=*FirewallConfigurationService", "service.pid=*WireService",
+            "service.pid=*SslManagerService", "service.pid=*FirewallConfigurationService", "service.pid=*WireGraphService",
             "objectClass=org.eclipse.kura.wire.WireComponent", "objectClass=org.eclipse.kura.driver.Driver",
             "kura.ui.service.hide=true")));
 

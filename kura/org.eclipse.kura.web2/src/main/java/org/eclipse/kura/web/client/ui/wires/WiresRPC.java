@@ -22,8 +22,8 @@ import org.eclipse.kura.web.shared.service.GwtComponentService;
 import org.eclipse.kura.web.shared.service.GwtComponentServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
-import org.eclipse.kura.web.shared.service.GwtWireService;
-import org.eclipse.kura.web.shared.service.GwtWireServiceAsync;
+import org.eclipse.kura.web.shared.service.GwtWireGraphService;
+import org.eclipse.kura.web.shared.service.GwtWireGraphServiceAsync;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -31,7 +31,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 public final class WiresRPC {
 
     private static final GwtComponentServiceAsync gwtComponentService = GWT.create(GwtComponentService.class);
-    private static final GwtWireServiceAsync gwtWireService = GWT.create(GwtWireService.class);
+    private static final GwtWireGraphServiceAsync gwtWireGraphService = GWT.create(GwtWireGraphService.class);
     private static final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
 
     private WiresRPC() {
@@ -49,7 +49,7 @@ public final class WiresRPC {
 
             @Override
             public void onSuccess(GwtXSRFToken result) {
-                gwtWireService.getWireComposerStaticInfo(result, new AsyncCallback<GwtWireComposerStaticInfo>() {
+                gwtWireGraphService.getWireComposerStaticInfo(result, new AsyncCallback<GwtWireComposerStaticInfo>() {
 
                     @Override
                     public void onFailure(Throwable ex) {
@@ -79,7 +79,7 @@ public final class WiresRPC {
 
             @Override
             public void onSuccess(GwtXSRFToken result) {
-                gwtWireService.getWiresConfiguration(result, new AsyncCallback<GwtWireGraphConfiguration>() {
+                gwtWireGraphService.getWiresConfiguration(result, new AsyncCallback<GwtWireGraphConfiguration>() {
 
                     @Override
                     public void onFailure(Throwable ex) {
@@ -110,7 +110,7 @@ public final class WiresRPC {
 
             @Override
             public void onSuccess(GwtXSRFToken result) {
-                gwtWireService.updateWireConfiguration(result, wireGraph, additionalConfigs, new AsyncCallback<Void>() {
+                gwtWireGraphService.updateWireConfiguration(result, wireGraph, additionalConfigs, new AsyncCallback<Void>() {
 
                     @Override
                     public void onFailure(Throwable ex) {
@@ -161,7 +161,7 @@ public final class WiresRPC {
 
                             @Override
                             public void onSuccess(GwtXSRFToken result) {
-                                gwtWireService.getGwtChannelDescriptor(result, pid,
+                                gwtWireGraphService.getGwtChannelDescriptor(result, pid,
                                         new AsyncCallback<GwtConfigComponent>() {
 
                                             @Override

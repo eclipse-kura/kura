@@ -32,23 +32,23 @@ final class WireComponentTrackerCustomizer implements ServiceTrackerCustomizer<W
 
     private final BundleContext context;
 
-    private final WireGraphServiceImpl wireService;
+    private final WireGraphServiceImpl wireGraphService;
 
     /**
      * Instantiates a new wire service tracker.
      *
      * @param context
      *            the bundle context
-     * @param wireService
-     *            the wire service
+     * @param wireGraphService
+     *            the wire graph service
      * @throws NullPointerException
      *             if any of the arguments is null
      */
-    WireComponentTrackerCustomizer(final BundleContext context, final WireGraphServiceImpl wireService) {
+    WireComponentTrackerCustomizer(final BundleContext context, final WireGraphServiceImpl wireGraphService) {
         requireNonNull(context, "Bundle context cannot be null");
-        requireNonNull(wireService, "Wire Service cannot be null");
+        requireNonNull(wireGraphService, "Wire Graph Service cannot be null");
 
-        this.wireService = wireService;
+        this.wireGraphService = wireGraphService;
         this.context = context;
 
     }
@@ -59,7 +59,7 @@ final class WireComponentTrackerCustomizer implements ServiceTrackerCustomizer<W
         final WireComponent service = this.context.getService(reference);
         logger.debug("Adding Wire Components....");
 
-        this.wireService.createWires();
+        this.wireGraphService.createWires();
 
         logger.debug("Adding Wire Components....Done");
         return service;

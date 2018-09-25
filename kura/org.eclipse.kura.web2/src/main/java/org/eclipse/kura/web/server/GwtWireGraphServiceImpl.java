@@ -48,7 +48,7 @@ import org.eclipse.kura.web.shared.model.GwtWireComposerStaticInfo;
 import org.eclipse.kura.web.shared.model.GwtWireConfiguration;
 import org.eclipse.kura.web.shared.model.GwtWireGraphConfiguration;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
-import org.eclipse.kura.web.shared.service.GwtWireService;
+import org.eclipse.kura.web.shared.service.GwtWireGraphService;
 import org.eclipse.kura.wire.graph.MultiportWireConfiguration;
 import org.eclipse.kura.wire.graph.WireComponentConfiguration;
 import org.eclipse.kura.wire.graph.WireComponentDefinition;
@@ -58,9 +58,9 @@ import org.eclipse.kura.wire.graph.WireGraphService;
 import org.osgi.service.cm.ConfigurationAdmin;
 
 /**
- * The class GwtWireServiceImpl implements {@link GwtWireService}
+ * The class GwtWireGraphServiceImpl implements {@link GwtWireGraphService}
  */
-public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implements GwtWireService {
+public final class GwtWireGraphServiceImpl extends OsgiRemoteServiceServlet implements GwtWireGraphService {
 
     private static final GwtConfigComponent WIRE_ASSET_OCD = GwtServerUtil.toGwtConfigComponent(
             new ComponentConfigurationImpl("org.eclipse.kura.wire.WireAsset", new WireAssetOCD(), new HashMap<>()));

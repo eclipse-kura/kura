@@ -10,7 +10,6 @@ package org.eclipse.kura.internal.wire;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -19,10 +18,8 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
@@ -31,21 +28,19 @@ import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.internal.json.marshaller.unmarshaller.JsonMarshallUnmarshallImpl;
 import org.eclipse.kura.wire.WireComponent;
-import org.eclipse.kura.wire.WireConfiguration;
 import org.eclipse.kura.wire.graph.MultiportWireConfiguration;
 import org.eclipse.kura.wire.graph.WireComponentConfiguration;
 import org.eclipse.kura.wire.graph.WireGraphConfiguration;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.wireadmin.Wire;
 import org.osgi.service.wireadmin.WireAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 
-public class WireServiceImplTest {
+public class WireGraphServiceImplTest {
 
     private static final String WIRE_GRAPH_PROPERTY_NAME = "WireGraph";
     private static final String WIRE_SERVICE_PID = "org.eclipse.kura.wire.graph.WireGraphService";
@@ -225,12 +220,12 @@ public class WireServiceImplTest {
         properties.put("kura.service.pid", WIRE_SERVICE_PID);
         properties.put(WIRE_GRAPH_PROPERTY_NAME, SIMPLE_GRAPH);
 
-        ComponentConfiguration wireServiceComponentConfig = createWireServiceComponentConfiguration();
+        ComponentConfiguration wireGraphServiceComponentConfig = createWireGraphServiceComponentConfiguration();
         ComponentConfiguration emitterComponentConfig = createEmitterComponentConfiguration();
         ComponentConfiguration receiverComponentConfig = createReceiverComponentConfiguration();
 
         List<ComponentConfiguration> configServiceComponentConfigurations = new ArrayList<>();
-        configServiceComponentConfigurations.add(wireServiceComponentConfig);
+        configServiceComponentConfigurations.add(wireGraphServiceComponentConfig);
         configServiceComponentConfigurations.add(emitterComponentConfig);
         configServiceComponentConfigurations.add(receiverComponentConfig);
 
@@ -277,7 +272,7 @@ public class WireServiceImplTest {
     }
 
     private WireGraphServiceImpl getWireGraphServiceImpl(final Map<String, String> servicePidMappings) {
-        WireGraphServiceImpl wireService = new WireGraphServiceImpl() {
+        WireGraphServiceImpl wireGraphService = new WireGraphServiceImpl() {
 
             @Override
             protected <T> T unmarshal(String jsonWireGraph, Class<T> clazz) {
@@ -308,7 +303,7 @@ public class WireServiceImplTest {
                 return servicePidMappings.get(kuraServicePid);
             }
         };
-        return wireService;
+        return wireGraphService;
     }
 
     private ComponentConfiguration createEmitterComponentConfiguration() {
@@ -319,7 +314,7 @@ public class WireServiceImplTest {
         return new ComponentConfigurationImpl(emitterPid, null, emitterProperties);
     }
 
-    private ComponentConfiguration createWireServiceComponentConfiguration() {
+    private ComponentConfiguration createWireGraphServiceComponentConfiguration() {
         Map<String, Object> properties = new HashMap<>();
         properties.put("kura.service.pid", WIRE_SERVICE_PID);
         properties.put(WIRE_GRAPH_PROPERTY_NAME, SIMPLE_GRAPH);

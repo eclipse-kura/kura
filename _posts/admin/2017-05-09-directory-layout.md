@@ -68,4 +68,4 @@ The default logger level in this file is set to INFO. This level may be modified
 
 In this example, the logger level is set to DEBUG only for the **net.admin** bundle. Additional, more specific, properties may be defined as required for your particular logging needs. The logger levels are hierarchical, so that those in a deeper level of the hierarchy will apply; otherwise, the more general logger level will override them.
 
-Once the logger levels are modified as needed and the **log4j.xml** configuration file is saved, Kura automatically loads the new configuration. By default Kura check the file every 30 seconds.
+Once the logger levels are modified as needed and the **log4j.xml** configuration file is saved, Kura automatically loads the new configuration. By default Kura checks the file every 30 seconds.

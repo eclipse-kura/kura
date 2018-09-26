@@ -29,7 +29,7 @@ import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.core.configuration.XmlComponentConfigurations;
 import org.eclipse.kura.marshalling.Marshaller;
-import org.eclipse.kura.web.server.GwtWireServiceImpl;
+import org.eclipse.kura.web.server.GwtWireGraphServiceImpl;
 import org.eclipse.kura.web.server.KuraRemoteServiceServlet;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraException;
@@ -45,14 +45,14 @@ import org.slf4j.LoggerFactory;
 
 public class WiresSnapshotServlet extends HttpServlet {
 
-    private static final String WIRE_SERVICE_PID = "org.eclipse.kura.wire.WireService";
+    private static final String WIRE_GRAPH_SERVICE_PID = "org.eclipse.kura.wire.graph.WireGraphService";
     private static final String WIRE_ASSET_FACTORY_PID = "org.eclipse.kura.wire.WireAsset";
 
     private static final long serialVersionUID = -7483037360719617846L;
     private static final Logger logger = LoggerFactory.getLogger(WiresSnapshotServlet.class);
 
     private String toSnapshot(XmlComponentConfigurations configs) throws GwtKuraException {
-        final BundleContext context = FrameworkUtil.getBundle(GwtWireServiceImpl.class).getBundleContext();
+        final BundleContext context = FrameworkUtil.getBundle(GwtWireGraphServiceImpl.class).getBundleContext();
         ServiceReference<Marshaller> marshallerRef = null;
         Marshaller marshaller = null;
         try {
@@ -116,7 +116,7 @@ public class WiresSnapshotServlet extends HttpServlet {
                 configurationService.getComponentConfigurations().stream()
                         .filter(config -> driverPids.contains(config.getPid()))
                         .map(WiresSnapshotServlet::removeDefinition).forEach(result::add);
-                result.add(removeDefinition(configurationService.getComponentConfiguration(WIRE_SERVICE_PID)));
+                result.add(removeDefinition(configurationService.getComponentConfiguration(WIRE_GRAPH_SERVICE_PID)));
                 return null;
             });
 

@@ -33,7 +33,7 @@ import org.eclipse.kura.web.server.GwtSettingServiceImpl;
 import org.eclipse.kura.web.server.GwtSnapshotServiceImpl;
 import org.eclipse.kura.web.server.GwtSslServiceImpl;
 import org.eclipse.kura.web.server.GwtStatusServiceImpl;
-import org.eclipse.kura.web.server.GwtWireServiceImpl;
+import org.eclipse.kura.web.server.GwtWireGraphServiceImpl;
 import org.eclipse.kura.web.server.servlet.ChannelServlet;
 import org.eclipse.kura.web.server.servlet.DeviceSnapshotsServlet;
 import org.eclipse.kura.web.server.servlet.WiresBlinkServlet;
@@ -291,7 +291,7 @@ public class Console implements ConfigurableComponent {
         this.m_httpService.registerServlet(servletRoot + "/ssl", new GwtSslServiceImpl(), null, httpCtx);
         this.m_httpService.registerServlet(servletRoot + "/cloudservices", new GwtCloudConnectionServiceImpl(), null,
                 httpCtx);
-        this.m_httpService.registerServlet(servletRoot + "/wires", new GwtWireServiceImpl(), null, httpCtx);
+        this.m_httpService.registerServlet(servletRoot + "/wires", new GwtWireGraphServiceImpl(), null, httpCtx);
         this.m_httpService.registerServlet(servletRoot + "/wiresSnapshot", new WiresSnapshotServlet(), null, httpCtx);
         this.m_httpService.registerServlet(servletRoot + "/assetservices", new GwtAssetServiceImpl(), null, httpCtx);
         this.m_httpService.registerServlet("/sse", new WiresBlinkServlet(), null, httpCtx);

@@ -67,7 +67,7 @@ public class WireGraphServiceImpl implements ConfigurableComponent, WireGraphSer
     private static final String NEW_WIRE_GRAPH_PROPERTY = "WireGraph";
 
     /** Configuration PID Property */
-    private static final String CONF_PID = "org.eclipse.kura.wire.WireService";
+    private static final String CONF_PID = "org.eclipse.kura.wire.graph.WireGraphService";
 
     private static final Logger logger = LoggerFactory.getLogger(WireGraphServiceImpl.class);
 
@@ -124,7 +124,7 @@ public class WireGraphServiceImpl implements ConfigurableComponent, WireGraphSer
     public synchronized void updated(final Map<String, Object> properties) {
 
         try {
-            logger.info("Updating Wire Service Component...");
+            logger.info("Updating Wire Graph Service Component...");
 
             this.currentConfiguration = loadWireGraphConfiguration(properties);
 
@@ -142,7 +142,7 @@ public class WireGraphServiceImpl implements ConfigurableComponent, WireGraphSer
 
             logger.info("Updating Wire Service Component...Done");
         } catch (Exception e) {
-            logger.warn("Failed to update WireServiceImpl", e);
+            logger.warn("Failed to update WireGraphServiceImpl", e);
         }
 
     }
@@ -364,11 +364,11 @@ public class WireGraphServiceImpl implements ConfigurableComponent, WireGraphSer
         }
 
         String jsonConfig = marshal(newConfiguration);
-        ComponentConfiguration wireServiceComponentConfig = this.configurationService
+        ComponentConfiguration wireGraphServiceComponentConfig = this.configurationService
                 .getComponentConfiguration(CONF_PID);
-        wireServiceComponentConfig.getConfigurationProperties().put(NEW_WIRE_GRAPH_PROPERTY, jsonConfig);
+        wireGraphServiceComponentConfig.getConfigurationProperties().put(NEW_WIRE_GRAPH_PROPERTY, jsonConfig);
 
-        componentConfigurations.add(wireServiceComponentConfig);
+        componentConfigurations.add(wireGraphServiceComponentConfig);
 
         this.configurationService.updateConfigurations(componentConfigurations, true);
     }
@@ -493,11 +493,11 @@ public class WireGraphServiceImpl implements ConfigurableComponent, WireGraphSer
                 new ArrayList<>());
 
         String jsonConfig = marshal(newWireGraphConfiguration);
-        ComponentConfiguration wireServiceComponentConfig = this.configurationService
+        ComponentConfiguration wireGraphServiceComponentConfig = this.configurationService
                 .getComponentConfiguration(CONF_PID);
-        wireServiceComponentConfig.getConfigurationProperties().put(NEW_WIRE_GRAPH_PROPERTY, jsonConfig);
+        wireGraphServiceComponentConfig.getConfigurationProperties().put(NEW_WIRE_GRAPH_PROPERTY, jsonConfig);
 
-        this.configurationService.updateConfiguration(CONF_PID, wireServiceComponentConfig.getConfigurationProperties(),
+        this.configurationService.updateConfiguration(CONF_PID, wireGraphServiceComponentConfig.getConfigurationProperties(),
                 true);
         this.currentConfiguration = newWireGraphConfiguration;
     }

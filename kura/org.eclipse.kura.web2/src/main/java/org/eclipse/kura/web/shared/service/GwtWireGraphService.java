@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -25,11 +25,11 @@ import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
 /**
- * This is essentially used by GWT to interact with the OSGi WireService for
+ * This is essentially used by GWT to interact with the OSGi WireGraphService for
  * retrieving and managing the Wire Graphs.
  */
 @RemoteServiceRelativePath("wires")
-public interface GwtWireService extends RemoteService {
+public interface GwtWireGraphService extends RemoteService {
 
     /**
      * Gets the channel descriptor.

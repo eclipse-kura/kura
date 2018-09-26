@@ -570,7 +570,10 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
             ModemDevice modemDevice = null;
             if (interfaceName.startsWith("ppp")) {
                 // already connected - find the corresponding usb device
-                modemDevice = this.usbModems.get(getModemUsbPort(interfaceName));
+                String modemUsbPort = getModemUsbPort(interfaceName);
+                if (modemUsbPort != null && !modemUsbPort.isEmpty()) {
+                    modemDevice = this.usbModems.get(getModemUsbPort(interfaceName));
+                }
                 if (modemDevice == null && this.serialModem != null) {
                     modemDevice = this.serialModem;
                 }

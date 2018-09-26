@@ -392,7 +392,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                                     rssi = 0;
                                 }
                                 for (WifiClientMonitorListener listener : this.listeners) {
-                                    listener.setWifiSignalLevel(rssi);
+                                    listener.setWifiSignalLevel(interfaceName, rssi);
                                 }
                             }
 

@@ -9,7 +9,10 @@
  *******************************************************************************/
 package org.eclipse.kura.core.cloud;
 
-import static org.eclipse.kura.cloudconnection.request.RequestHandlerConstants.ARGS_KEY;
+import static org.eclipse.kura.cloudconnection.request.RequestHandlerContextConstants.DEVICE_ID;
+import static org.eclipse.kura.cloudconnection.request.RequestHandlerContextConstants.NOTIFICATION_PUBLISHER_PID;
+import static org.eclipse.kura.cloudconnection.request.RequestHandlerContextConstants.TENANT_ID;
+import static org.eclipse.kura.cloudconnection.request.RequestHandlerMessageConstants.ARGS_KEY;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -61,6 +64,7 @@ public class MessageHandlerCallable implements Callable<Void> {
     private final String appTopic;
     private final KuraPayload kuraMessage;
     private final CloudServiceImpl cloudService;
+    private final RequestHandlerContext requestHandlerContext;
 
     public MessageHandlerCallable(RequestHandler cloudApp, String appId, String appTopic, KuraPayload msg,
             CloudServiceImpl cloudService) {
@@ -70,6 +74,16 @@ public class MessageHandlerCallable implements Callable<Void> {
         this.appTopic = appTopic;
         this.kuraMessage = msg;
         this.cloudService = cloudService;
+
+        String notificationPublisherPid = this.cloudService.getNotificationPublisherPid();
+        CloudNotificationPublisher notificationPublisher = this.cloudService.getNotificationPublisher();
+        Map<String, String> connectionProperties = this.cloudService.getInfo();
+        Map<String, String> contextProperties = new HashMap<>();
+        contextProperties.put(NOTIFICATION_PUBLISHER_PID.name(), notificationPublisherPid);
+        contextProperties.put(TENANT_ID.name(), connectionProperties.get("Account"));
+        contextProperties.put(DEVICE_ID.name(), connectionProperties.get("Client ID"));
+        
+        this.requestHandlerContext = new RequestHandlerContext(notificationPublisher, contextProperties);
     }
 
     @Override
@@ -85,11 +99,6 @@ public class MessageHandlerCallable implements Callable<Void> {
         // Prepare the default response
         KuraPayload reqPayload = this.kuraMessage;
         KuraMessage response;
-
-        String notificationPublisherPid = this.cloudService.getNotificationPublisherPid();
-        CloudNotificationPublisher notificationPublisher = this.cloudService.getNotificationPublisher();
-        RequestHandlerContext requestContext = new RequestHandlerContext(notificationPublisherPid,
-                notificationPublisher);
 
         try {
             Iterator<String> resources = RESOURCES_DELIM.splitAsStream(this.appTopic).iterator();
@@ -107,27 +116,27 @@ public class MessageHandlerCallable implements Callable<Void> {
             switch (method) {
             case "GET":
                 logger.debug("Handling GET request topic: {}", this.appTopic);
-                response = this.cloudApp.doGet(requestContext, reqMessage);
+                response = this.cloudApp.doGet(this.requestHandlerContext, reqMessage);
                 break;
 
             case "PUT":
                 logger.debug("Handling PUT request topic: {}", this.appTopic);
-                response = this.cloudApp.doPut(requestContext, reqMessage);
+                response = this.cloudApp.doPut(this.requestHandlerContext, reqMessage);
                 break;
 
             case "POST":
                 logger.debug("Handling POST request topic: {}", this.appTopic);
-                response = this.cloudApp.doPost(requestContext, reqMessage);
+                response = this.cloudApp.doPost(this.requestHandlerContext, reqMessage);
                 break;
 
             case "DEL":
                 logger.debug("Handling DEL request topic: {}", this.appTopic);
-                response = this.cloudApp.doDel(requestContext, reqMessage);
+                response = this.cloudApp.doDel(this.requestHandlerContext, reqMessage);
                 break;
 
             case "EXEC":
                 logger.debug("Handling EXEC request topic: {}", this.appTopic);
-                response = this.cloudApp.doExec(requestContext, reqMessage);
+                response = this.cloudApp.doExec(this.requestHandlerContext, reqMessage);
                 break;
 
             default:
@@ -212,13 +221,13 @@ public class MessageHandlerCallable implements Callable<Void> {
     private String encodeTopic(String deviceId, String appTopic) {
         CloudServiceOptions options = this.cloudService.getCloudServiceOptions();
         StringBuilder sb = new StringBuilder();
-        sb.append(options.getTopicControlPrefix()).append(options.getTopicSeparator());
+        sb.append(options.getTopicControlPrefix()).append(CloudServiceOptions.getTopicSeparator());
 
-        sb.append(options.getTopicAccountToken()).append(options.getTopicSeparator()).append(deviceId)
-                .append(options.getTopicSeparator()).append(this.appId);
+        sb.append(CloudServiceOptions.getTopicAccountToken()).append(CloudServiceOptions.getTopicSeparator())
+                .append(deviceId).append(CloudServiceOptions.getTopicSeparator()).append(this.appId);
 
         if (appTopic != null && !appTopic.isEmpty()) {
-            sb.append(options.getTopicSeparator()).append(appTopic);
+            sb.append(CloudServiceOptions.getTopicSeparator()).append(appTopic);
         }
 
         return sb.toString();

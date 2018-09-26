@@ -13,7 +13,7 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.asset.cloudlet;
 
-import static org.eclipse.kura.cloudconnection.request.RequestHandlerConstants.ARGS_KEY;
+import static org.eclipse.kura.cloudconnection.request.RequestHandlerMessageConstants.ARGS_KEY;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;

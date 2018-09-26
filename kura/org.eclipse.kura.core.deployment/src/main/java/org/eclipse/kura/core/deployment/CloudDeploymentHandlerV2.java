@@ -13,7 +13,8 @@
 package org.eclipse.kura.core.deployment;
 
 import static java.util.Objects.nonNull;
-import static org.eclipse.kura.cloudconnection.request.RequestHandlerConstants.ARGS_KEY;
+import static org.eclipse.kura.cloudconnection.request.RequestHandlerContextConstants.NOTIFICATION_PUBLISHER_PID;
+import static org.eclipse.kura.cloudconnection.request.RequestHandlerMessageConstants.ARGS_KEY;
 
 import java.io.File;
 import java.io.IOException;
@@ -85,7 +86,8 @@ public class CloudDeploymentHandlerV2 implements ConfigurableComponent, RequestH
                     .getService(reference);
             String notificationPublisherPid = (String) reference.getProperty("kura.service.pid");
 
-            installImplementation.sendInstallConfirmations(notificationPublisherPid, cloudNotificationPublisher);
+            installImplementation.sendInstallConfirmations(notificationPublisherPid,
+                    CloudDeploymentHandlerV2.this.cloudNotificationPublisher);
 
             return CloudDeploymentHandlerV2.this.cloudNotificationPublisher;
         }
@@ -542,8 +544,11 @@ public class CloudDeploymentHandlerV2 implements ConfigurableComponent, RequestH
             downloadImplementation.setAlreadyDownloadedFlag(alreadyDownloaded);
             downloadImplementation.setVerificationDirectory(this.installVerificationDir);
 
+            Map<String, String> requestProperties = requestContext.getContextProperties();
+            String notificationPublisherPid = requestProperties.get(NOTIFICATION_PUBLISHER_PID.name());
+
             options.setNotificationPublisher(requestContext.getNotificationPublisher());
-            options.setNotificationPublisherPid(requestContext.getNotificationPublisherPid());
+            options.setNotificationPublisherPid(notificationPublisherPid);
 
             logger.info("Downloading package from URL: {}", options.getDeployUri());
 
@@ -631,8 +636,11 @@ public class CloudDeploymentHandlerV2 implements ConfigurableComponent, RequestH
 
                 installImplementation.setOptions(options);
 
+                Map<String, String> requestProperties = requestContext.getContextProperties();
+                String notificationPublisherPid = requestProperties.get(NOTIFICATION_PUBLISHER_PID.name());
+
                 options.setNotificationPublisher(requestContext.getNotificationPublisher());
-                options.setNotificationPublisherPid(requestContext.getNotificationPublisherPid());
+                options.setNotificationPublisherPid(notificationPublisherPid);
 
                 this.installerFuture = executor.submit(new Runnable() {
 
@@ -687,8 +695,11 @@ public class CloudDeploymentHandlerV2 implements ConfigurableComponent, RequestH
                 this.pendingUninstPackageName = packageName;
                 uninstallImplementation = createUninstallImpl();
 
+                Map<String, String> requestProperties = requestContext.getContextProperties();
+                String notificationPublisherPid = requestProperties.get(NOTIFICATION_PUBLISHER_PID.name());
+
                 options.setNotificationPublisher(requestContext.getNotificationPublisher());
-                options.setNotificationPublisherPid(requestContext.getNotificationPublisherPid());
+                options.setNotificationPublisherPid(notificationPublisherPid);
 
                 logger.info("Uninstalling package...");
                 this.installerFuture = executor.submit(new Runnable() {

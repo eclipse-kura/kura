@@ -9,28 +9,15 @@
  *******************************************************************************/
 package org.eclipse.kura.cloudconnection.request;
 
-import org.eclipse.kura.cloudconnection.message.KuraMessage;
-
 /**
- * This class is an enumeration that wraps some of the possible property keys set in the properties of a
- * {@link KuraMessage} used for request/response.
+ * This class is an enumeration that wraps property keys used to defined a Context for a RequestHandler.
  *
  * @since 2.0
  */
-public enum RequestHandlerConstants {
+public enum RequestHandlerContextConstants {
+    
+    TENANT_ID,
+    DEVICE_ID,
+    NOTIFICATION_PUBLISHER_PID;
 
-    /**
-     * Request arguments. The corresponding value must be a {@code List<String>}.
-     */
-    ARGS_KEY("args");
-
-    private String value;
-
-    RequestHandlerConstants(final String value) {
-        this.value = value;
-    }
-
-    public String value() {
-        return this.value;
-    }
 }

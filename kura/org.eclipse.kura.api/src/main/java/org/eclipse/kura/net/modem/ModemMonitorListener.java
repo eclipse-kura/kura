@@ -16,5 +16,8 @@ import org.osgi.annotation.versioning.ConsumerType;
 @ConsumerType
 public interface ModemMonitorListener {
 
+    /**
+     * @since 2.0
+     */
     public void setCellularSignalLevel(String interfaceName, int signalLevel);
 }

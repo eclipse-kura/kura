@@ -16,5 +16,8 @@ import org.osgi.annotation.versioning.ConsumerType;
 @ConsumerType
 public interface WifiClientMonitorListener {
 
+    /**
+     * @since 2.0
+     */
     public void setWifiSignalLevel(String interfaceName, int signalLevel);
 }

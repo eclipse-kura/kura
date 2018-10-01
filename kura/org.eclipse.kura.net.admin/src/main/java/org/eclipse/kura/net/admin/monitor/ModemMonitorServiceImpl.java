@@ -770,7 +770,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
             }
         }
 
-        void reportSignalStrength() {
+        void reportSignalStrength(String interfaceName) {
 
             if (listeners.isEmpty()) {
                 return;
@@ -785,7 +785,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
             }
 
             for (final ModemMonitorListener listener : listeners) {
-                listener.setCellularSignalLevel(rssi);
+                listener.setCellularSignalLevel(interfaceName, rssi);
             }
         }
 
@@ -888,11 +888,11 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 
                 boolean modemReset = false;
 
-                reportSignalStrength();
-
                 NetInterfaceStatus netInterfaceStatus = getNetInterfaceStatus(modem.getConfiguration());
 
                 final String ifaceName = networkService.getModemPppPort(modem.getModemDevice());
+
+                reportSignalStrength(ifaceName);
 
                 if (netInterfaceStatus == NetInterfaceStatus.netIPv4StatusUnmanaged) {
                     logger.warn("The {} interface is configured not to be managed by Kura and will not be monitored.",

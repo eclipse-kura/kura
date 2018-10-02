@@ -29,14 +29,11 @@ JAVA_INT_OPTS="$JAVA_INT_OPTS -Djdk.dio.registry=\"${KURA_DIR}/framework/jdk.dio
 
 if [ -n "${PERSISTENT_DIR}" ]; then
 	JAVA_INT_OPTS="$JAVA_INT_OPTS -Dkura.data=\"${PERSISTENT_DIR}/data\""
-	JAVA_INT_OPTS="$JAVA_INT_OPTS -Dkura.snapshots=\"${PERSISTENT_DIR}/data/snapshots\""
-	JAVA_INT_OPTS="$JAVA_INT_OPTS -Dkura.packages=\"${PERSISTENT_DIR}/packages\""
-	JAVA_INT_OPTS="$JAVA_INT_OPTS -Ddpa.configuration=\"${PERSISTENT_DIR}/dpa.properties\""
+	JAVA_INT_OPTS="$JAVA_INT_OPTS -Dkura.snapshots=\"${PERSISTENT_DIR}/user/snapshots\""
+	JAVA_INT_OPTS="$JAVA_INT_OPTS -Dkura.packages=\"${PERSISTENT_DIR}/data/packages\""
+	JAVA_INT_OPTS="$JAVA_INT_OPTS -Ddpa.configuration=\"${PERSISTENT_DIR}/data/dpa.properties\""
 else
 	JAVA_INT_OPTS="$JAVA_INT_OPTS -Dkura.data=\"${KURA_DIR}/data\""
-	JAVA_INT_OPTS="$JAVA_INT_OPTS -Dkura.snapshots=\"${KURA_DIR}/data/snapshots\""
-	JAVA_INT_OPTS="$JAVA_INT_OPTS -Dkura.packages=\"${KURA_DIR}/kura/packages\""
-	JAVA_INT_OPTS="$JAVA_INT_OPTS -Ddpa.configuration=\"${KURA_DIR}/data/dpa.properties\""
 fi
 
 JAVA_INT_OPTS="$JAVA_INT_OPTS -Dkura.custom.configuration=file:\"${KURA_CUSTOM_PROPERTIES_FILE:-${KURA_DIR}/user/kura_custom.properties}\""

@@ -56,11 +56,12 @@ RUN \
     `# Test for the existence of the entry point` \
     test -x "${KURA_DIR}/bin/start_kura.sh" && \
     \
-    cp -av /kura/kura/container/kura/bin/* /usr/local/bin && \
+    cp -av /context/bin/* /usr/local/bin && \
     chmod a+x /usr/local/bin/* && \
     \
     rm -Rf /context /kura /root/.m2 && \
     install -m 0777 -d "${KURA_DIR}/data" && \
+    sed -i 's/kura.primary.network.interface/#kura.primary.network.interface/g' ${KURA_DIR}/framework/kura.properties && \
     if [ "$PACKED" == "true" ]; then touch /kura.packed && pack-kura; fi
 
 RUN \

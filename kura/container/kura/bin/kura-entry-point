@@ -12,24 +12,24 @@ if [ -n "${PERSISTENT_DIR}" ]; then
 	
 	echo "Using persistent directory: ${PERSISTENT_DIR}"
 	
-	if [ ! -d "${PERSISTENT_DIR}/data" ]; then
+	if [ ! -d "${PERSISTENT_DIR}/user" ]; then
 		
-		echo "Initializing data directory: ${PERSISTENT_DIR}/data"
+		echo "Initializing data directory: ${PERSISTENT_DIR}/user"
 		
-		# initial data directory
+		# initial user data directory
 		
-		mkdir -p "${PERSISTENT_DIR}/data"
-		cp -r "${KURA_DIR}/data/snapshots" "${PERSISTENT_DIR}/data"
+		mkdir -p "${PERSISTENT_DIR}/user"
+		cp -r "${KURA_DIR}/user/snapshots" "${PERSISTENT_DIR}/user"
 	fi
 	
-	if [ ! -f "${PERSISTENT_DIR}/dpa.properties" ]; then
+	if [ ! -f "${PERSISTENT_DIR}/data/dpa.properties" ]; then
 		
 		echo "Re-registering packages:"
 		
 		# re-register packages with new properties file
 		
-		for i in $(ls "${KURA_DIR}/kura/packages/"*.dp); do
-			DPA_PROPERTIES="${PERSISTENT_DIR}/dpa.properties" dp-register "$i"
+		for i in $(ls "${KURA_DIR}/kura/data/packages/"*.dp); do
+			DPA_PROPERTIES="${PERSISTENT_DIR}/data/dpa.properties" dp-register "$i"
 		done 
 	fi
 fi

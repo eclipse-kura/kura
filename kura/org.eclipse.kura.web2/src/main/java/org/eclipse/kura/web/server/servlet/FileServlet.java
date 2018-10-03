@@ -22,6 +22,7 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -69,6 +70,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class FileServlet extends HttpServlet {
+
+    private static final String CANNOT_CLOSE_INPUT_STREAM = "Cannot close input stream";
+
+    private static final String CANNOT_CLOSE_OUTPUT_STREAM = "Cannot close output stream";
+
+    private static final String XSRF_TOKEN = "xsrfToken";
+
+    private static final String ERROR_PARSING_THE_FILE_UPLOAD_REQUEST = "Error parsing the file upload request";
+
+    private static final String ERROR_PARSING_QUERY_STRING = "Error parsing query string.";
+
+    private static final String REQUEST_PATH_INFO_NOT_FOUND = "Request path info not found";
 
     private static final long serialVersionUID = -5016170117606322129L;
 
@@ -124,8 +137,8 @@ public class FileServlet extends HttpServlet {
         String reqPathInfo = req.getPathInfo();
 
         if (reqPathInfo == null) {
-            logger.error("Request path info not found");
-            throw new ServletException("Request path info not found");
+            logger.error(REQUEST_PATH_INFO_NOT_FOUND);
+            throw new ServletException(REQUEST_PATH_INFO_NOT_FOUND);
         }
 
         logger.debug("req.getRequestURI(): {}", req.getRequestURI());
@@ -135,7 +148,7 @@ public class FileServlet extends HttpServlet {
         if (reqPathInfo.startsWith("/icon")) {
             doGetIcon(req, resp);
         } else {
-            logger.error("Unknown request path info: " + reqPathInfo);
+            logger.error("Unknown request path info: {}", reqPathInfo);
             throw new ServletException("Unknown request path info: " + reqPathInfo);
         }
     }
@@ -147,8 +160,8 @@ public class FileServlet extends HttpServlet {
 
         String reqPathInfo = req.getPathInfo();
         if (reqPathInfo == null) {
-            logger.error("Request path info not found");
-            throw new ServletException("Request path info not found");
+            logger.error(REQUEST_PATH_INFO_NOT_FOUND);
+            throw new ServletException(REQUEST_PATH_INFO_NOT_FOUND);
         }
 
         logger.debug("req.getRequestURI(): {}", req.getRequestURI());
@@ -156,7 +169,7 @@ public class FileServlet extends HttpServlet {
         logger.debug("req.getPathInfo(): {}", req.getPathInfo());
 
         if (reqPathInfo.startsWith("/deploy")) {
-            doPostDeploy(req, resp);
+            doPostDeploy(req);
         } else if (reqPathInfo.equals("/configuration/snapshot")) {
             doPostConfigurationSnapshot(req, resp);
         } else if (reqPathInfo.equals("/command")) {
@@ -164,7 +177,7 @@ public class FileServlet extends HttpServlet {
         } else if (reqPathInfo.equals("/asset")) {
             doPostAsset(req, resp);
         } else {
-            logger.error("Unknown request path info: " + reqPathInfo);
+            logger.error("Unknown request path info: {}", reqPathInfo);
             throw new ServletException("Unknown request path info: " + reqPathInfo);
         }
     }
@@ -173,8 +186,8 @@ public class FileServlet extends HttpServlet {
         String queryString = req.getQueryString();
 
         if (queryString == null) {
-            logger.error("Error parsing query string.");
-            throw new ServletException("Error parsing query string.");
+            logger.error(ERROR_PARSING_QUERY_STRING);
+            throw new ServletException(ERROR_PARSING_QUERY_STRING);
         }
 
         // Parse the query string
@@ -182,14 +195,14 @@ public class FileServlet extends HttpServlet {
         try {
             pairs = parseQueryString(queryString);
         } catch (UnsupportedEncodingException e) {
-            logger.error("Error parsing query string.", e);
+            logger.error(ERROR_PARSING_QUERY_STRING, e);
             throw new ServletException("Error parsing query string: " + e.getLocalizedMessage());
         }
 
         // Check for malformed request
         if (pairs == null || pairs.size() != 1) {
-            logger.error("Error parsing query string.");
-            throw new ServletException("Error parsing query string.");
+            logger.error(ERROR_PARSING_QUERY_STRING);
+            throw new ServletException(ERROR_PARSING_QUERY_STRING);
         }
 
         final boolean factories;
@@ -243,8 +256,8 @@ public class FileServlet extends HttpServlet {
                 }
             }
         } else {
-            logger.error("Error parsing query string.");
-            throw new ServletException("Error parsing query string.");
+            logger.error(ERROR_PARSING_QUERY_STRING);
+            throw new ServletException(ERROR_PARSING_QUERY_STRING);
         }
 
     }
@@ -254,9 +267,9 @@ public class FileServlet extends HttpServlet {
 
         String[] pairs = queryString.split("&");
         for (String p : pairs) {
-            int index = p.indexOf("=");
-            qp.put(URLDecoder.decode(p.substring(0, index), "UTF-8"),
-                    URLDecoder.decode(p.substring(index + 1), "UTF-8"));
+            int index = p.indexOf('=');
+            qp.put(URLDecoder.decode(p.substring(0, index), StandardCharsets.UTF_8.name()),
+                    URLDecoder.decode(p.substring(index + 1), StandardCharsets.UTF_8.name()));
         }
         return qp;
     }
@@ -267,15 +280,15 @@ public class FileServlet extends HttpServlet {
         try {
             upload.parse(req);
         } catch (FileUploadException e) {
-            logger.error("Error parsing the file upload request");
-            throw new ServletException("Error parsing the file upload request", e);
+            logger.error(ERROR_PARSING_THE_FILE_UPLOAD_REQUEST);
+            throw new ServletException(ERROR_PARSING_THE_FILE_UPLOAD_REQUEST, e);
         }
 
         // BEGIN XSRF - Servlet dependent code
         Map<String, String> formFields = upload.getFormFields();
 
         try {
-            GwtXSRFToken token = new GwtXSRFToken(formFields.get("xsrfToken"));
+            GwtXSRFToken token = new GwtXSRFToken(formFields.get(XSRF_TOKEN));
             KuraRemoteServiceServlet.checkXSRFToken(req, token);
         } catch (Exception e) {
             throw new ServletException("Security error: please retry this operation correctly.", e);
@@ -290,7 +303,7 @@ public class FileServlet extends HttpServlet {
         try {
             fileItems = upload.getFileItems();
 
-            if (fileItems.size() > 0) {
+            if (!fileItems.isEmpty()) {
                 FileItem item = fileItems.get(0);
                 is = item.getInputStream();
 
@@ -349,14 +362,14 @@ public class FileServlet extends HttpServlet {
                 try {
                     os.close();
                 } catch (IOException e) {
-                    logger.warn("Cannot close output stream", e);
+                    logger.warn(CANNOT_CLOSE_OUTPUT_STREAM, e);
                 }
             }
             if (is != null) {
                 try {
                     is.close();
                 } catch (IOException e) {
-                    logger.warn("Cannot close input stream", e);
+                    logger.warn(CANNOT_CLOSE_INPUT_STREAM, e);
                 }
             }
             if (fileItems != null) {
@@ -388,7 +401,7 @@ public class FileServlet extends HttpServlet {
         try {
             upload.parse(req);
         } catch (FileUploadException e) {
-            errors.add("Error parsing the file upload request");
+            errors.add(ERROR_PARSING_THE_FILE_UPLOAD_REQUEST);
             resp.getWriter().write("Error parsing the file upload request.");
             return;
         }
@@ -396,7 +409,7 @@ public class FileServlet extends HttpServlet {
         Map<String, String> formFields = upload.getFormFields();
         try {
             // BEGIN XSRF - Servlet dependent code
-            GwtXSRFToken token = new GwtXSRFToken(formFields.get("xsrfToken"));
+            GwtXSRFToken token = new GwtXSRFToken(formFields.get(XSRF_TOKEN));
             KuraRemoteServiceServlet.checkXSRFToken(req, token);
             // END XSRF security check
 
@@ -466,15 +479,15 @@ public class FileServlet extends HttpServlet {
         try {
             upload.parse(req);
         } catch (FileUploadException e) {
-            logger.error("Error parsing the file upload request");
-            throw new ServletException("Error parsing the file upload request", e);
+            logger.error(ERROR_PARSING_THE_FILE_UPLOAD_REQUEST);
+            throw new ServletException(ERROR_PARSING_THE_FILE_UPLOAD_REQUEST, e);
         }
 
         // BEGIN XSRF - Servlet dependent code
         Map<String, String> formFields = upload.getFormFields();
 
         try {
-            GwtXSRFToken token = new GwtXSRFToken(formFields.get("xsrfToken"));
+            GwtXSRFToken token = new GwtXSRFToken(formFields.get(XSRF_TOKEN));
             KuraRemoteServiceServlet.checkXSRFToken(req, token);
         } catch (Exception e) {
             throw new ServletException("Security error: please retry this operation correctly.", e);
@@ -524,7 +537,7 @@ public class FileServlet extends HttpServlet {
         }
     }
 
-    private void doPostDeployUpload(HttpServletRequest req, HttpServletResponse resp)
+    private void doPostDeployUpload(HttpServletRequest req)
             throws ServletException, IOException {
         ServiceLocator locator = ServiceLocator.getInstance();
         DeploymentAgentService deploymentAgentService;
@@ -547,15 +560,15 @@ public class FileServlet extends HttpServlet {
         try {
             upload.parse(req);
         } catch (FileUploadException e) {
-            logger.error("Error parsing the file upload request", e);
-            throw new ServletException("Error parsing the file upload request", e);
+            logger.error(ERROR_PARSING_THE_FILE_UPLOAD_REQUEST, e);
+            throw new ServletException(ERROR_PARSING_THE_FILE_UPLOAD_REQUEST, e);
         }
 
         // BEGIN XSRF - Servlet dependent code
         Map<String, String> formFields = upload.getFormFields();
 
         try {
-            GwtXSRFToken token = new GwtXSRFToken(formFields.get("xsrfToken"));
+            GwtXSRFToken token = new GwtXSRFToken(formFields.get(XSRF_TOKEN));
             KuraRemoteServiceServlet.checkXSRFToken(req, token);
         } catch (Exception e) {
             throw new ServletException("Security error: please retry this operation correctly.", e);
@@ -617,7 +630,7 @@ public class FileServlet extends HttpServlet {
             try {
                 os.close();
             } catch (IOException e) {
-                logger.warn("Cannot close output stream", e);
+                logger.warn(CANNOT_CLOSE_OUTPUT_STREAM, e);
             }
 
             URL url = localFile.toURI().toURL();
@@ -640,7 +653,7 @@ public class FileServlet extends HttpServlet {
                 try {
                     os.close();
                 } catch (IOException e) {
-                    logger.warn("Cannot close output stream", e);
+                    logger.warn(CANNOT_CLOSE_OUTPUT_STREAM, e);
                 }
             }
             if (localFile != null && !successful) {
@@ -654,7 +667,7 @@ public class FileServlet extends HttpServlet {
                 try {
                     is.close();
                 } catch (IOException e) {
-                    logger.warn("Cannot close input stream", e);
+                    logger.warn(CANNOT_CLOSE_INPUT_STREAM, e);
                 }
             }
             if (fileItems != null) {
@@ -665,7 +678,7 @@ public class FileServlet extends HttpServlet {
         }
     }
 
-    private void doPostDeploy(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    private void doPostDeploy(HttpServletRequest req) throws ServletException, IOException {
 
         ServiceLocator locator = ServiceLocator.getInstance();
         DeploymentAgentService deploymentAgentService;
@@ -686,7 +699,7 @@ public class FileServlet extends HttpServlet {
             }
 
             // BEGIN XSRF - Servlet dependent code
-            String tokenId = req.getParameter("xsrfToken");
+            String tokenId = req.getParameter(XSRF_TOKEN);
 
             try {
                 GwtXSRFToken token = new GwtXSRFToken(tokenId);
@@ -704,7 +717,7 @@ public class FileServlet extends HttpServlet {
                 throw new ServletException("Error installing deployment package", e);
             }
         } else if (reqPathInfo.endsWith("upload")) {
-            doPostDeployUpload(req, resp);
+            doPostDeployUpload(req);
         } else {
             logger.error("Unsupported package deployment request");
             throw new ServletException("Unsupported package deployment request");
@@ -797,7 +810,7 @@ public class FileServlet extends HttpServlet {
 
 class UploadRequest extends ServletFileUpload {
 
-    private static Logger s_logger = LoggerFactory.getLogger(UploadRequest.class);
+    private static Logger logger = LoggerFactory.getLogger(UploadRequest.class);
 
     Map<String, String> formFields;
     List<FileItem> fileItems;
@@ -811,8 +824,8 @@ class UploadRequest extends ServletFileUpload {
 
     public void parse(HttpServletRequest req) throws FileUploadException {
 
-        s_logger.debug("upload.getFileSizeMax(): {}", getFileSizeMax());
-        s_logger.debug("upload.getSizeMax(): {}", getSizeMax());
+        logger.debug("upload.getFileSizeMax(): {}", getFileSizeMax());
+        logger.debug("upload.getSizeMax(): {}", getSizeMax());
 
         // Parse the request
         List<FileItem> items = null;
@@ -827,7 +840,7 @@ class UploadRequest extends ServletFileUpload {
                 String name = item.getFieldName();
                 String value = item.getString();
 
-                s_logger.debug("Form field item name: {}, value: {}", name, value);
+                logger.debug("Form field item name: {}, value: {}", name, value);
 
                 this.formFields.put(name, value);
             } else {
@@ -837,7 +850,7 @@ class UploadRequest extends ServletFileUpload {
                 boolean isInMemory = item.isInMemory();
                 long sizeInBytes = item.getSize();
 
-                s_logger.debug("File upload item name: {}, fileName: {}, contentType: {}, isInMemory: {}, size: {}",
+                logger.debug("File upload item name: {}, fileName: {}, contentType: {}, isInMemory: {}, size: {}",
                         new Object[] { fieldName, fileName, contentType, isInMemory, sizeInBytes });
 
                 this.fileItems.add(item);

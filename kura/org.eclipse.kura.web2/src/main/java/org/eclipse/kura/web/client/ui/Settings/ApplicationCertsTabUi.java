@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -26,16 +26,10 @@ import org.gwtbootstrap3.client.ui.FormGroup;
 import org.gwtbootstrap3.client.ui.FormLabel;
 import org.gwtbootstrap3.client.ui.Input;
 import org.gwtbootstrap3.client.ui.TextArea;
-import org.gwtbootstrap3.client.ui.base.form.AbstractForm.SubmitCompleteEvent;
-import org.gwtbootstrap3.client.ui.base.form.AbstractForm.SubmitCompleteHandler;
 import org.gwtbootstrap3.client.ui.constants.ValidationState;
 import org.gwtbootstrap3.client.ui.html.Span;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -51,8 +45,6 @@ public class ApplicationCertsTabUi extends Composite implements Tab {
     }
 
     private static final Messages MSGS = GWT.create(Messages.class);
-
-    private final static String SERVLET_URL = "/" + GWT.getModuleName() + "/file/certificate";
 
     private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
     private final GwtCertificatesServiceAsync gwtCertificatesService = GWT.create(GwtCertificatesService.class);
@@ -93,10 +85,7 @@ public class ApplicationCertsTabUi extends Composite implements Tab {
     public boolean isValid() {
         boolean validAlias = isAliasValid();
         boolean validAppCert = isAppCertValid();
-        if (validAlias && validAppCert) {
-            return true;
-        }
-        return false;
+        return validAlias && validAppCert;
     }
 
     @Override
@@ -118,14 +107,37 @@ public class ApplicationCertsTabUi extends Composite implements Tab {
     }
 
     private void initForm() {
-        this.appCertsForm.setAction(SERVLET_URL);
-        this.appCertsForm.setEncoding(com.google.gwt.user.client.ui.FormPanel.ENCODING_MULTIPART);
-        this.appCertsForm.setMethod(com.google.gwt.user.client.ui.FormPanel.METHOD_POST);
         this.description.add(new Span("<p>" + MSGS.settingsAddBundleCertsDescription() + "</p>"));
-        this.appCertsForm.addSubmitCompleteHandler(new SubmitCompleteHandler() {
 
-            @Override
-            public void onSubmitComplete(SubmitCompleteEvent event) {
+        this.storageAliasLabel.setText(MSGS.settingsStorageAliasLabel());
+        this.formStorageAlias.addChangeHandler(event -> {
+            isAliasValid();
+            setDirty(true);
+            ApplicationCertsTabUi.this.apply.setEnabled(true);
+            ApplicationCertsTabUi.this.reset.setEnabled(true);
+        });
+
+        this.certificateLabel.setText(MSGS.settingsPublicCertLabel());
+        this.formCert.setVisibleLines(20);
+        this.formCert.addChangeHandler(event -> {
+            isAppCertValid();
+            setDirty(true);
+            ApplicationCertsTabUi.this.apply.setEnabled(true);
+            ApplicationCertsTabUi.this.reset.setEnabled(true);
+        });
+
+        this.reset.setText(MSGS.reset());
+        this.reset.addClickHandler(event -> {
+            reset();
+            setDirty(false);
+            ApplicationCertsTabUi.this.apply.setEnabled(false);
+            ApplicationCertsTabUi.this.reset.setEnabled(false);
+        });
+
+        this.apply.setText(MSGS.apply());
+        this.apply.addClickHandler(event -> {
+            if (isValid()) {
+                EntryClassUi.showWaitModal();
                 ApplicationCertsTabUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
                     @Override
@@ -157,55 +169,6 @@ public class ApplicationCertsTabUi extends Composite implements Tab {
                         });
                     }
                 });
-            }
-        });
-
-        this.storageAliasLabel.setText(MSGS.settingsStorageAliasLabel());
-        this.formStorageAlias.addChangeHandler(new ChangeHandler() {
-
-            @Override
-            public void onChange(ChangeEvent event) {
-                isAliasValid();
-                setDirty(true);
-                ApplicationCertsTabUi.this.apply.setEnabled(true);
-                ApplicationCertsTabUi.this.reset.setEnabled(true);
-            }
-        });
-
-        this.certificateLabel.setText(MSGS.settingsAddCertLabel()); // TODO: this is a wrong label. Change it!
-        this.formCert.setVisibleLines(20);
-        this.formCert.addChangeHandler(new ChangeHandler() {
-
-            @Override
-            public void onChange(ChangeEvent event) {
-                isAppCertValid();
-                setDirty(true);
-                ApplicationCertsTabUi.this.apply.setEnabled(true);
-                ApplicationCertsTabUi.this.reset.setEnabled(true);
-            }
-        });
-
-        this.reset.setText(MSGS.reset());
-        this.reset.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                reset();
-                setDirty(false);
-                ApplicationCertsTabUi.this.apply.setEnabled(false);
-                ApplicationCertsTabUi.this.reset.setEnabled(false);
-            }
-        });
-
-        this.apply.setText(MSGS.apply());
-        this.apply.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                if (isValid()) {
-                    EntryClassUi.showWaitModal();
-                    ApplicationCertsTabUi.this.appCertsForm.submit();
-                }
             }
         });
     }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -30,10 +30,6 @@ import org.gwtbootstrap3.client.ui.constants.ValidationState;
 import org.gwtbootstrap3.client.ui.html.Span;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -124,81 +120,65 @@ public class ServerCertsTabUi extends Composite implements Tab {
         this.description.add(new Span(title.toString()));
 
         this.storageAliasLabel.setText(MSGS.settingsStorageAliasLabel());
-        this.storageAliasInput.addChangeHandler(new ChangeHandler() {
-
-            @Override
-            public void onChange(ChangeEvent event) {
-                isAliasValid();
-                setDirty(true);
-                ServerCertsTabUi.this.apply.setEnabled(true);
-                ServerCertsTabUi.this.reset.setEnabled(true);
-            }
+        this.storageAliasInput.addChangeHandler(event -> {
+            isAliasValid();
+            setDirty(true);
+            ServerCertsTabUi.this.apply.setEnabled(true);
+            ServerCertsTabUi.this.reset.setEnabled(true);
         });
 
         this.certificateLabel.setText(MSGS.settingsPublicCertLabel());
         this.certificateInput.setVisibleLines(20);
-        this.certificateInput.addChangeHandler(new ChangeHandler() {
-
-            @Override
-            public void onChange(ChangeEvent event) {
-                isServerCertValid();
-                setDirty(true);
-                ServerCertsTabUi.this.apply.setEnabled(true);
-                ServerCertsTabUi.this.reset.setEnabled(true);
-            }
+        this.certificateInput.addChangeHandler(event -> {
+            isServerCertValid();
+            setDirty(true);
+            ServerCertsTabUi.this.apply.setEnabled(true);
+            ServerCertsTabUi.this.reset.setEnabled(true);
         });
 
         this.reset.setText(MSGS.reset());
-        this.reset.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                reset();
-                setDirty(false);
-                ServerCertsTabUi.this.apply.setEnabled(false);
-                ServerCertsTabUi.this.reset.setEnabled(false);
-            }
+        this.reset.addClickHandler(event -> {
+            reset();
+            setDirty(false);
+            ServerCertsTabUi.this.apply.setEnabled(false);
+            ServerCertsTabUi.this.reset.setEnabled(false);
         });
 
         this.apply.setText(MSGS.apply());
-        this.apply.addClickHandler(new ClickHandler() {
+        this.apply.addClickHandler(event -> {
+            if (isValid()) {
+                EntryClassUi.showWaitModal();
+                ServerCertsTabUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
-            @Override
-            public void onClick(ClickEvent event) {
-                if (isValid()) {
-                    EntryClassUi.showWaitModal();
-                    ServerCertsTabUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+                    @Override
+                    public void onFailure(Throwable ex) {
+                        FailureHandler.handle(ex);
+                        EntryClassUi.hideWaitModal();
+                    }
 
-                        @Override
-                        public void onFailure(Throwable ex) {
-                            FailureHandler.handle(ex);
-                            EntryClassUi.hideWaitModal();
-                        }
+                    @Override
+                    public void onSuccess(GwtXSRFToken token) {
+                        ServerCertsTabUi.this.gwtCertificatesService.storeSSLPublicChain(token,
+                                ServerCertsTabUi.this.certificateInput.getValue(),
+                                ServerCertsTabUi.this.storageAliasInput.getValue(), new AsyncCallback<Integer>() {
 
-                        @Override
-                        public void onSuccess(GwtXSRFToken token) {
-                            ServerCertsTabUi.this.gwtCertificatesService.storeSSLPublicChain(token,
-                                    ServerCertsTabUi.this.certificateInput.getValue(),
-                                    ServerCertsTabUi.this.storageAliasInput.getValue(), new AsyncCallback<Integer>() {
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        FailureHandler.handle(caught);
+                                        EntryClassUi.hideWaitModal();
+                                    }
 
-                                        @Override
-                                        public void onFailure(Throwable caught) {
-                                            FailureHandler.handle(caught);
-                                            EntryClassUi.hideWaitModal();
-                                        }
-
-                                        @Override
-                                        public void onSuccess(Integer certsStored) {
-                                            reset();
-                                            setDirty(false);
-                                            ServerCertsTabUi.this.apply.setEnabled(false);
-                                            ServerCertsTabUi.this.reset.setEnabled(false);
-                                            EntryClassUi.hideWaitModal();
-                                        }
-                                    });
-                        }
-                    });
-                }
+                                    @Override
+                                    public void onSuccess(Integer certsStored) {
+                                        reset();
+                                        setDirty(false);
+                                        ServerCertsTabUi.this.apply.setEnabled(false);
+                                        ServerCertsTabUi.this.reset.setEnabled(false);
+                                        EntryClassUi.hideWaitModal();
+                                    }
+                                });
+                    }
+                });
             }
         });
     }

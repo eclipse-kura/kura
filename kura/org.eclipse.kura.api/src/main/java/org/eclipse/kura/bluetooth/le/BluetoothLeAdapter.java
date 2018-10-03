@@ -238,13 +238,12 @@ public interface BluetoothLeAdapter {
 
     /**
      * Remove all the known devices from the system. Be aware that after the removing the objects representing the
-     * devices
-     * will not be valid anymore and any operation on them will have no effect.
+     * devices will not be valid anymore and any operation on them will have no effect.
      * 
      * @return The number of devices removed from internal list
      * @throws KuraBluetoothRemoveException
      * 
-     * @since 1.2.0
+     * @since 2.0
      */
     public int removeDevices() throws KuraBluetoothRemoveException;
 
@@ -266,6 +265,17 @@ public interface BluetoothLeAdapter {
      * currently enabled on the controller.
      * 
      * To remove the filter, call this method with empty parameters.
+     * 
+     * @param uuids
+     *            the uuids advertised by the devices
+     * @param rssi
+     *            the Receiver Signal Strength Indication value
+     * @param pathloss
+     *            the pathloss value
+     * @param trasportType
+     *            the trasportType (LE or BREDR)
+     * 
+     * @since 2.0
      */
     public void setDiscoveryFilter(List<UUID> uuids, int rssi, int pathloss, BluetoothTransportType transportType);
 
@@ -276,7 +286,7 @@ public interface BluetoothLeAdapter {
      * @param rssi
      *            the Receiver Signal Strength Indication value used by the filter
      * 
-     * @since 1.2.0
+     * @since 2.0
      */
     public void setRssiDiscoveryFilter(int rssi);
 

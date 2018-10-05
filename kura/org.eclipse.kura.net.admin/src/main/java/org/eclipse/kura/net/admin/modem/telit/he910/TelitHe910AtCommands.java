@@ -13,9 +13,6 @@ package org.eclipse.kura.net.admin.modem.telit.he910;
 
 /**
  * Defines AT commands for the Telit HE910 modem.
- *
- * @author ilya.binshtok
- *
  */
 public enum TelitHe910AtCommands {
 
@@ -28,7 +25,7 @@ public enum TelitHe910AtCommands {
     getMobileStationClass("at+cgclass?\r\n"),
     getRegistrationStatus("at+cgreg?\r\n"),
     getGprsSessionDataVolume("at#gdatavol=1\r\n"),
-    pdpContext("AT+CGDCONT");
+    pdpContext("at+cgdcont");
 
     private String command;
 

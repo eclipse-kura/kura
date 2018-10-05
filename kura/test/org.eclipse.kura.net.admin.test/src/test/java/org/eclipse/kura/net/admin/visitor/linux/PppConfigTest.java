@@ -130,12 +130,11 @@ public class PppConfigTest {
             fw.write("user='a user'\n");
             fw.write("connect=connect -f " + dir + "chat\n");
         }
-
-        try (FileWriter fw = new FileWriter(dir + "chat")) {
+        
+        try (FileWriter fw = new FileWriter(dir + "chat")) {    
             fw.write("expectedresult send\n");
             fw.write("dial a number\n");
             fw.write("CONNECT connect\n");
-            fw.write("OK 1,PPP,apn\n");
         }
 
         PppConfigReader reader = new PppConfigReader() {
@@ -150,6 +149,10 @@ public class PppConfigTest {
                     return "true";
                 } else if (key.equals("net.interface." + intfName + ".config.resetTimeout")) {
                     return "123";
+                } else if (key.equals("net.interface." + intfName + ".config.apn")) {
+                    return "apn";
+                } else if (key.equals("net.interface." + intfName + ".config.pdpType")) {
+                    return "PPP";
                 }
 
                 return null;

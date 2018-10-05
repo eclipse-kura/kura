@@ -10,3 +10,5 @@ Currently, the following field protocols are supported and downloadable from the
 - **[Modbus](https://marketplace.eclipse.org/content/esf-modbus-driver-community-edition)**
 - **[OPC-UA](https://marketplace.eclipse.org/content/opc-ua-driver-kura)**
 - **[S7](https://marketplace.eclipse.org/content/s7-driver-kura-developer-preview)**
+- **[iBeacon](https://marketplace.eclipse.org/content/ibeacon-driver-eclipse-kura)**
+- **[Eddystone](https://marketplace.eclipse.org/content/eddystone-driver-eclipse-kura)**

@@ -1,0 +1,264 @@
+apiVersion: v1
+kind: Template
+metadata:
+  name: kura-container-template
+  annotations:
+    openshift.io/display-name: Eclipse Kura™ semi-persistent emulator instance
+    description: >-
+      A deployment of Kura for running in a semi-persitent mode. This will use the Kura
+      instance from the container image and keep data. It is not possible updating the instance
+      using the Kura updater archives. In order to update Kura a new container image has to be used.
+      But runtime data and configuration will be persisted.
+    iconClass: "pficon-connected"
+    tags: "iot"
+    openshift.io/documentation-url: "https://github.com/eclipse/kura/container/kura/openshift"
+
+labels:
+  kura.persistence: data
+
+# Parameters
+
+parameters:
+- name:         GIT_URI
+  displayName:     Git URI
+  value:           https://github.com/eclipse/kura
+  required:        true
+- name:         GIT_BRANCH
+  displayName:     Git branch
+  value:           master
+  required:        true
+  description:     The branch from where to pull the files for building the Kura emulator.
+                   This is not the branch to pull the Kura sources from.
+- name:         KURA_GIT_URI
+  displayName:     Override Kura Git repository
+  required:        false
+- name:         KURA_GIT_BRANCH
+  displayName:     Override Kura Git Branch
+  required:        false
+- name:         KURA_COMMIT
+  displayName:     Override Kura commit to build
+  description:     This is a specific commit which has to be present in the Git URI, Git Branch
+                   combination provided. Only this commit will be built. This ensures that sub-sequent
+                   builds re-create the same Kura instance.
+  required:        false
+- name:         VOLUME_SIZE
+  value:           1Gi
+  displayName:     PVC volume size
+- name:         VOLUME_STORAGE_CLASS
+  displayName:     PVC storage class
+
+objects:
+
+# Build configuration
+
+- kind: ImageStream
+  apiVersion: v1
+  metadata:
+    name: centos
+  spec:
+    lookupPolicy:
+      local: false
+    tags:
+    - name: "7"
+      from:
+        kind: DockerImage
+        name: docker.io/centos:7
+      importPolicy:
+        scheduled: true
+      referencePolicy:
+        type: Source
+
+- kind: ImageStream
+  apiVersion: v1
+  metadata:
+    name: kura-container
+    labels:
+      app: kura-instance
+
+- kind: BuildConfig
+  apiVersion: v1
+  metadata:
+    name: kura-container-build
+    labels:
+      app: kura-instance
+  spec:
+    triggers: 
+      - type: ImageChange
+      - type: ConfigChange
+    source: 
+      type: Git
+      git:
+        uri: ${GIT_URI}
+        ref: ${GIT_BRANCH}
+    strategy: 
+      type: Docker
+      dockerStrategy:
+        env:
+          - name: GIT_REPO
+            value: ${KURA_GIT_URI}
+          - name: GIT_BRANCH
+            value: ${KURA_GIT_BRANCH}
+          - name: KURA_COMMIT
+            value: ${KURA_COMMIT}
+    postCommit:
+    output: 
+      to:
+        kind: ImageStreamTag
+        name: kura-container:latest
+
+# Configs
+
+- kind: ConfigMap
+  apiVersion: v1
+  metadata:
+    name: kura-instance-load-config
+    labels:
+      app: kura-instance
+
+- kind: ConfigMap
+  apiVersion: v1
+  metadata:
+    name: kura-instance-config
+    labels:
+      app: kura-instance
+  data:
+    log4j.xml: |-
+      <?xml version="1.0" encoding="UTF-8"?>
+      <Configuration status="warn" name="EclipseKura" strict="true" monitorInterval="30">
+
+          <Appenders>
+              <Console name="STDOUT" target="SYSTEM_OUT">
+                  <PatternLayout pattern="%d{ISO8601} [%t] %-5p %c{1.} - %m%n"/>
+              </Console>
+          </Appenders>
+
+          <Loggers>
+              <Root level="warn">
+                  <AppenderRef ref="STDOUT"/>
+              </Root>
+        </Loggers>
+
+      </Configuration>
+    kura_custom.properties:
+
+# Service
+
+- kind: StatefulSet
+  apiVersion: apps/v1
+  metadata:
+    name: kura-instance
+    labels:
+      app: kura-instance
+    annotations:
+      image.openshift.io/triggers: '[{"from":{"kind":"ImageStreamTag","name":"kura-container:latest"},"fieldPath":"spec.template.spec.containers[?(@.name==\"kura-container\")].image"}]'
+  spec:
+    serviceName: kura-instance
+    replicas: 1
+    selector:
+      matchLabels:
+        app: kura-instance
+        statefulset: kura-instance
+    template:
+      metadata:
+        annotations:
+          alpha.image.policy.openshift.io/resolve-names: '*'
+        labels:
+          app: kura-instance
+          statefulset: kura-instance
+      spec:
+        containers:
+        - name: kura-container
+          image: kura-container:latest
+          imagePullPolicy: Always
+          ports:
+          - containerPort: 8080 
+            name: http
+          env:
+          - name: JAVA_OPTS
+            value: -XX:ParallelGCThreads=1 -XX:CICompilerCount=2 -XX:ActiveProcessorCount=1
+          - name: KURA_CUSTOM_PROPERTIES_FILE
+            value: /config/kura_custom.properties
+          - name: KURA_LOG4J_FILE
+            value: /config/log4j.xml
+          - name: PERSISTENT_DIR
+            value: /persistent
+          - name: KURA_DEVICE_NAME
+            value: OpenShift Kura instance
+          readinessProbe:
+            failureThreshold: 5
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            successThreshold: 1
+            tcpSocket:
+              port: 8080
+            timeoutSeconds: 5
+          livenessProbe:
+            failureThreshold: 5
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            successThreshold: 1
+            tcpSocket:
+              port: 8080
+            timeoutSeconds: 5
+          resources:
+            limits:
+              cpu: "1"
+              memory: 1024Mi
+            requests:
+              cpu: "1"
+              memory: 1024Mi
+          volumeMounts:
+          - mountPath: /persistent
+            name: data
+          - mountPath: /load
+            name: load
+          - mountPath: /config
+            name: config
+        volumes:
+        - name: load
+          configMap:
+            name: kura-instance-load-config
+        - name: config
+          configMap:
+            name: kura-instance-config
+    volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: ${VOLUME_SIZE}
+        storageClassName: ${VOLUME_STORAGE_CLASS}
+
+- kind: Service
+  apiVersion: v1
+  metadata:
+    name: kura-instance
+    labels:
+      app: kura-instance
+  spec:
+    ports:
+    - name: http
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
+    selector:
+      app: kura-instance
+      statefulset: kura-instance
+
+- kind: Route
+  apiVersion: v1
+  metadata:
+    name: console
+    labels:
+      app: kura-instance
+  spec:
+    to:
+      kind: Service
+      name: kura-instance
+    port:
+      targetPort: http
+    tls:
+      termination: edge

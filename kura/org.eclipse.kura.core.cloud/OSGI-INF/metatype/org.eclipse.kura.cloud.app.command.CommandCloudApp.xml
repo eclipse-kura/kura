@@ -24,7 +24,7 @@
             type="Boolean"
             cardinality="0"
             required="true"
-            default="true"
+            default="false"
             description="Enables or disables the Command Service">
         </AD>
         

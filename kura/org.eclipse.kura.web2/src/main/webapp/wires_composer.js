@@ -206,7 +206,6 @@ WireComposer.prototype.addWireComponent = function (component) {
 	}
 	
 	var componentCell = new joint.shapes.devs.Atomic({
-		position : position,
 		attrs : {
 			'.label' : {
 				text : joint.util.breakText(component.pid, {
@@ -229,11 +228,13 @@ WireComposer.prototype.addWireComponent = function (component) {
 		self.dispatchWireComponentChanged(component)
 	})
 	
+	this.graph.addCells([ componentCell ])
+	
+	componentCell.translate(position.x, position.y)
+	
 	if (this.moveToFreeSpot(componentCell)) {
 		this.centerOnComponent(componentCell)
 	}
-	
-	this.graph.addCells([ componentCell ])
 	
 	component.v = this.paper.findViewByModel(componentCell).vel
 	
@@ -409,7 +410,7 @@ WireComposer.prototype.moveToFreeSpot = function(comp) {
 }
 
 WireComposer.prototype.centerOnComponent = function(comp) {
-	var pos = comp.get('position')
+	var pos = comp.position()
 	var scale = this.currentZoomLevel < 1 ? 1 : this.currentZoomLevel
 	this.centerOnLocalPoint(pos.x, pos.y, scale, this.transformTransition)
 }
@@ -606,10 +607,12 @@ var DragHandler = function (composer) {
 
 
 DragHandler.prototype.toLocalCoords = function (clientX, clientY) {
-	var offset = $(this.composer.element).offset()
-	clientX -= offset.left - $(window).scrollLeft()
-	clientY -= offset.top - $(window).scrollTop()
-	return this.composer.clampToGrid(this.composer.clientToLocal(clientX, clientY))
+	var boundingRect = this.composer.element.getBoundingClientRect();
+	var bx = boundingRect.x || boundingRect.left
+	var by = boundingRect.y || boundingRect.top
+	var px = clientX - bx
+	var py = clientY - by
+	return this.composer.clampToGrid(this.composer.clientToLocal(px, py))
 }
 
 DragHandler.prototype.movePreview = function (clientX, clientY) {

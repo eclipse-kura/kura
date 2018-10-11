@@ -34,6 +34,7 @@ if [ -n "${PERSISTENT_DIR}" ]; then
 	JAVA_INT_OPTS="$JAVA_INT_OPTS -Ddpa.configuration=\"${PERSISTENT_DIR}/data/dpa.properties\""
 else
 	JAVA_INT_OPTS="$JAVA_INT_OPTS -Dkura.data=\"${KURA_DIR}/data\""
+	JAVA_INT_OPTS="$JAVA_INT_OPTS -Ddpa.configuration=\"${KURA_DIR}/data/dpa.properties\""
 fi
 
 JAVA_INT_OPTS="$JAVA_INT_OPTS -Dkura.custom.configuration=file:\"${KURA_CUSTOM_PROPERTIES_FILE:-${KURA_DIR}/user/kura_custom.properties}\""

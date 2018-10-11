@@ -29,6 +29,7 @@ RUN \
     \
     if [ -d /context/.git ]; then \
       mv /context /kura; \
+      mv /kura/kura/container/kura /context; \
     else \
       git clone "$GIT_REPO" -b "$GIT_BRANCH"; \
     fi && \
@@ -49,7 +50,7 @@ RUN \
     yum -y install java-1.8.0-openjdk-headless && \
     yum -y install procps zip unzip gzip tar psmisc socat telnet dos2unix openssl net-tools hostname which && \
     yum -y clean all && rm -rf /var/cache/yum && \
-    /kura/kura/distrib/target/kura_*-SNAPSHOT_intel-up2-centos-7-nn_installer.sh && \
+    /kura/kura/distrib/target/kura_*_intel-up2-centos-7-nn_installer.sh && \
     chmod a+rw -R /opt/eclipse && \
     find /opt/eclipse -type d | xargs chmod a+x && \
     chmod a+rwx /var/log && \

@@ -18,13 +18,9 @@ import org.eclipse.kura.web.client.ui.AbstractServicesUi;
 import org.eclipse.kura.web.client.ui.AlertDialog;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.util.FailureHandler;
-import org.eclipse.kura.web.client.util.request.Request;
-import org.eclipse.kura.web.client.util.request.RequestContext;
 import org.eclipse.kura.web.client.util.request.RequestQueue;
-import org.eclipse.kura.web.client.util.request.SuccessCallback;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter;
-import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtComponentService;
 import org.eclipse.kura.web.shared.service.GwtComponentServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
@@ -35,8 +31,6 @@ import org.gwtbootstrap3.client.ui.Form;
 import org.gwtbootstrap3.client.ui.FormGroup;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
@@ -75,22 +69,10 @@ public class CloudConnectionConfigurationUi extends AbstractServicesUi {
         this.connectionEditFields.clear();
 
         this.applyConnectionEdit.setText(MSGS.apply());
-        this.applyConnectionEdit.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                apply();
-            }
-        });
+        this.applyConnectionEdit.addClickHandler(e -> apply());
 
         this.resetConnectionEdit.setText(MSGS.reset());
-        this.resetConnectionEdit.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                reset();
-            }
-        });
+        this.resetConnectionEdit.addClickHandler(e -> reset());
 
         setDirty(false);
         this.applyConnectionEdit.setEnabled(false);
@@ -114,13 +96,7 @@ public class CloudConnectionConfigurationUi extends AbstractServicesUi {
     @Override
     protected void reset() {
         if (isDirty()) {
-            alertDialog.show(MSGS.deviceConfigDirty(), new AlertDialog.Listener() {
-
-                @Override
-                public void onConfirm() {
-                    resetVisualization();
-                }
-            });
+            alertDialog.show(MSGS.deviceConfigDirty(), this::resetVisualization);
         }
     }
 
@@ -165,53 +141,34 @@ public class CloudConnectionConfigurationUi extends AbstractServicesUi {
     private void apply() {
         if (isValid()) {
             if (isDirty()) {
-                alertDialog.show(MSGS.deviceConfigConfirmation(this.configurableComponent.getComponentName()),
-                        new AlertDialog.Listener() {
+                alertDialog.show(MSGS.deviceConfigConfirmation(this.configurableComponent.getComponentName()), () -> {
+                    try {
+                        getUpdatedConfiguration();
+                    } catch (Exception ex) {
+                        EntryClassUi.hideWaitModal();
+                        FailureHandler.handle(ex);
+                        return;
+                    }
+                    RequestQueue
+                            .submit(context -> CloudConnectionConfigurationUi.this.gwtXSRFService.generateSecurityToken(
+                                    context.callback(token -> CloudConnectionConfigurationUi.this.gwtComponentService
+                                            .updateComponentConfiguration(token,
+                                                    CloudConnectionConfigurationUi.this.configurableComponent,
+                                                    context.callback(result -> {
+                                                        logger.info(MSGS.info() + ": " + MSGS.deviceConfigApplied());
+                                                        CloudConnectionConfigurationUi.this.applyConnectionEdit
+                                                                .setEnabled(false);
+                                                        CloudConnectionConfigurationUi.this.resetConnectionEdit
+                                                                .setEnabled(false);
+                                                        setDirty(false);
+                                                        originalConfig = CloudConnectionConfigurationUi.this.configurableComponent;
+                                                        EntryClassUi.hideWaitModal();
+                                                    }))
 
-                            @Override
-                            public void onConfirm() {
-                                try {
-                                    getUpdatedConfiguration();
-                                } catch (Exception ex) {
-                                    EntryClassUi.hideWaitModal();
-                                    FailureHandler.handle(ex);
-                                    return;
-                                }
-                                RequestQueue.submit(new Request() {
+                                    )));
+                }
 
-                                    @Override
-                                    public void run(final RequestContext context) {
-                                        CloudConnectionConfigurationUi.this.gwtXSRFService.generateSecurityToken(
-                                                context.callback(new SuccessCallback<GwtXSRFToken>() {
-
-                                                    @Override
-                                                    public void onSuccess(GwtXSRFToken token) {
-                                                        CloudConnectionConfigurationUi.this.gwtComponentService
-                                                                .updateComponentConfiguration(token,
-                                                                        CloudConnectionConfigurationUi.this.configurableComponent,
-                                                                        context.callback(new SuccessCallback<Void>() {
-
-                                                                            @Override
-                                                                            public void onSuccess(Void result) {
-                                                                                logger.info(MSGS.info() + ": "
-                                                                                        + MSGS.deviceConfigApplied());
-                                                                                CloudConnectionConfigurationUi.this.applyConnectionEdit
-                                                                                        .setEnabled(false);
-                                                                                CloudConnectionConfigurationUi.this.resetConnectionEdit
-                                                                                        .setEnabled(false);
-                                                                                setDirty(false);
-                                                                                originalConfig = CloudConnectionConfigurationUi.this.configurableComponent;
-                                                                                EntryClassUi.hideWaitModal();
-                                                                            }
-                                                                        }));
-
-                                                    }
-                                                }));
-                                    }
-                                });
-                            }
-
-                        });
+                );
             }
         } else {
             errorLogger.log(Level.SEVERE, "Device configuration error!");

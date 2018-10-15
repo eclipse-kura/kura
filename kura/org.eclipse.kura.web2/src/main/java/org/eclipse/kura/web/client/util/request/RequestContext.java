@@ -18,4 +18,6 @@ public interface RequestContext {
     public <T> AsyncCallback<T> callback(SuccessCallback<T> callback);
 
     public <T> AsyncCallback<T> callback(AsyncCallback<T> callback);
+
+    public void defer(int delayMs, Runnable action);
 }

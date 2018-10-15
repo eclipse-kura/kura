@@ -132,6 +132,8 @@ public class NMEAParser {
                 this.validFix = tokens.get(2).charAt(0);
                 if (!"A".equals(tokens.get(2))) {
                     this.validPosition = false;
+                } else {
+                    this.validPosition = true;
                 }
             } else {
                 this.validFix = 'V';

@@ -30,18 +30,16 @@
    </service>
 
    <reference name="CloudPublisher"
-           policy="static"
+           policy="dynamic"
            bind="setCloudPublisher"
            unbind="unsetCloudPublisher"
            cardinality="0..1"
-           policy-option="greedy"
            interface="org.eclipse.kura.cloudconnection.publisher.CloudPublisher"/>
    <reference name="CloudSubscriber"
-           policy="static"
+           policy="dynamic"
            bind="setCloudSubscriber"
            unbind="unsetCloudSubscriber"
            cardinality="0..1"
-           policy-option="greedy"
            interface="org.eclipse.kura.cloudconnection.subscriber.CloudSubscriber"/>
    <reference bind="setConnectionFactory" cardinality="1..1" interface="org.osgi.service.io.ConnectionFactory" name="ConnectionFactory" policy="static" unbind="unsetConnectionFactory"/>
 </scr:component>

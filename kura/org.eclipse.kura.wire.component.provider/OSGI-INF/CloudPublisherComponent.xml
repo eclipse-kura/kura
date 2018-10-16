@@ -32,10 +32,9 @@
    	          unbind="unbindWireHelperService"/>
    <reference bind="setPositionService" cardinality="1..1" interface="org.eclipse.kura.position.PositionService" name="PositionService" policy="static" unbind="unsetPositionService"/>
    <reference name="CloudPublisher"
-           policy="static"
+           policy="dynamic"
            bind="setCloudPublisher"
            unbind="unsetCloudPublisher"
-           policy-option="greedy"
            cardinality="0..1"
            interface="org.eclipse.kura.cloudconnection.publisher.CloudPublisher"/>
 </scr:component>

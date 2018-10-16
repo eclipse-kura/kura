@@ -31,10 +31,9 @@
    	          policy="static"
    	          unbind="unbindWireHelperService"/>
    <reference name="CloudSubscriber"
-           policy="static"
+           policy="dynamic"
            bind="setCloudSubscriber"
            unbind="unsetCloudSubscriber"
-           policy-option="greedy"
            cardinality="0..1"
            interface="org.eclipse.kura.cloudconnection.subscriber.CloudSubscriber"/>
 </scr:component>

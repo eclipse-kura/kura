@@ -21,10 +21,9 @@
    </service>
    <property name="service.pid" value="org.eclipse.kura.example.ble.tisensortag.BluetoothLe"/>
    <reference name="CloudPublisher"
-           policy="static"
+           policy="dynamic"
            bind="setCloudPublisher"
            unbind="unsetCloudPublisher"
-           policy-option="greedy"
            cardinality="0..1"
            interface="org.eclipse.kura.cloudconnection.publisher.CloudPublisher"/>
     <reference bind="setBluetoothService"

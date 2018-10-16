@@ -34,6 +34,7 @@ import org.eclipse.kura.web.client.ui.wires.WiresPanelUi;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.util.FilterBuilder;
 import org.eclipse.kura.web.client.util.PidTextBox;
+import org.eclipse.kura.web.client.util.request.RequestQueue;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtSession;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
@@ -174,9 +175,9 @@ public class EntryClassUi extends Composite {
     private static final String NOT_SCROLLABLE_STYLE_NAME = "not-scrollable";
     private static final String SERVICES_FILTER = FilterBuilder.of(not(or("service.pid=*SystemPropertiesService",
             "service.pid=*NetworkAdminService", "service.pid=*NetworkConfigurationService",
-            "service.pid=*SslManagerService", "service.pid=*FirewallConfigurationService", "service.pid=*WireGraphService",
-            "objectClass=org.eclipse.kura.wire.WireComponent", "objectClass=org.eclipse.kura.driver.Driver",
-            "kura.ui.service.hide=true")));
+            "service.pid=*SslManagerService", "service.pid=*FirewallConfigurationService",
+            "service.pid=*WireGraphService", "objectClass=org.eclipse.kura.wire.WireComponent",
+            "objectClass=org.eclipse.kura.driver.Driver", "kura.ui.service.hide=true")));
 
     private static PopupPanel waitModal;
 
@@ -695,33 +696,25 @@ public class EntryClassUi extends Composite {
         this.buttonNewComponentCancel.setText(MSGS.cancelButton());
 
         // New factory configuration handler
-        this.buttonNewComponent.addClickHandler(new ClickHandler() {
+        this.buttonNewComponent.addClickHandler(event -> {
 
-            @Override
-            public void onClick(ClickEvent event) {
+            String factoryPid = EntryClassUi.this.factoriesList.getSelectedValue();
+            String pid = EntryClassUi.this.componentName.getPid();
+            if (pid == null) {
+                return;
+            }
+            if (SELECT_COMPONENT.equalsIgnoreCase(factoryPid) || "".equals(pid)) {
+                EntryClassUi.this.errorAlertText.setText(MSGS.servicesComponentFactoryAlertNotSelected());
+                errorModal.show();
+                return;
+            }
 
-                EntryClassUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+            RequestQueue.submit(
+                    context -> EntryClassUi.this.gwtXSRFService.generateSecurityToken(context.callback(token -> {
 
-                    @Override
-                    public void onFailure(Throwable ex) {
-                        FailureHandler.handle(ex, EntryClassUi.class.getName());
-                    }
-
-                    @Override
-                    public void onSuccess(GwtXSRFToken token) {
-                        String factoryPid = EntryClassUi.this.factoriesList.getSelectedValue();
-                        String pid = EntryClassUi.this.componentName.getPid();
-                        if (pid == null) {
-                            return;
-                        }
-                        if (SELECT_COMPONENT.equalsIgnoreCase(factoryPid) || "".equals(pid)) {
-                            EntryClassUi.this.errorAlertText.setText(MSGS.servicesComponentFactoryAlertNotSelected());
-                            errorModal.show();
-                            return;
-                        }
                         EntryClassUi.this.newFactoryComponentModal.hide();
                         EntryClassUi.this.gwtComponentService.createFactoryComponent(token, factoryPid, pid,
-                                new AsyncCallback<Void>() {
+                                context.callback(new AsyncCallback<Void>() {
 
                                     @Override
                                     public void onFailure(Throwable ex) {
@@ -730,12 +723,10 @@ public class EntryClassUi extends Composite {
 
                                     @Override
                                     public void onSuccess(Void result) {
-                                        fetchAvailableServices(null);
+                                        context.defer(2000, () -> fetchAvailableServices(null));
                                     }
-                                });
-                    }
-                });
-            }
+                                }));
+                    })));
         });
     }
 

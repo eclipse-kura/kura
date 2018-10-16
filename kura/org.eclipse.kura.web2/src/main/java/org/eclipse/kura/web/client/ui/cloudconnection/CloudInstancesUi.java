@@ -61,6 +61,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
 
 public class CloudInstancesUi extends Composite {
 
+    private static final int REFRESH_DELAY_MS = 2000;
     private static CloudConnectionsUiUiBinder uiBinder = GWT.create(CloudConnectionsUiUiBinder.class);
     private static final Messages MSGS = GWT.create(Messages.class);
 
@@ -154,7 +155,7 @@ public class CloudInstancesUi extends Composite {
             final String factoryPid = this.cloudFactoriesPids.getSelectedValue();
             getSuggestedCloudConnectionPid(factoryPid);
         });
-        
+
         this.pubSubFactoriesPids.addChangeHandler(event -> {
             final String factoryPid = this.pubSubFactoriesPids.getSelectedValue();
             getSuggestedCloudPubSubPid(factoryPid);
@@ -446,16 +447,17 @@ public class CloudInstancesUi extends Composite {
         final String cloudConnectionPid = entry.getPid();
         final String factoryPid = this.pubSubFactoriesPids.getSelectedValue();
 
-        RequestQueue.submit(context -> this.gwtXSRFService.generateSecurityToken(
-                context.callback(token -> this.gwtCloudConnection.createPubSubInstance(token, kuraServicePid, factoryPid,
-                        cloudConnectionPid, context.callback(v -> this.cloudServicesUi.refresh())))));
+        RequestQueue.submit(context -> this.gwtXSRFService
+                .generateSecurityToken(context.callback(token -> this.gwtCloudConnection.createPubSubInstance(token,
+                        kuraServicePid, factoryPid, cloudConnectionPid,
+                        context.callback(v -> context.defer(REFRESH_DELAY_MS, this.cloudServicesUi::refresh))))));
     }
 
     private void deletePubSub(final String pid) {
 
-        RequestQueue.submit(
-                context -> this.gwtXSRFService.generateSecurityToken(context.callback(token -> this.gwtCloudConnection
-                        .deletePubSubInstance(token, pid, context.callback(v -> this.cloudServicesUi.refresh())))));
+        RequestQueue.submit(context -> this.gwtXSRFService
+                .generateSecurityToken(context.callback(token -> this.gwtCloudConnection.deletePubSubInstance(token,
+                        pid, context.callback(v -> context.defer(REFRESH_DELAY_MS, this.cloudServicesUi::refresh))))));
     }
 
     private void createCloudConnectionServiceFactory() {
@@ -479,7 +481,7 @@ public class CloudInstancesUi extends Composite {
 
                             @Override
                             public void onSuccess(Void result) {
-                                CloudInstancesUi.this.cloudServicesUi.refresh();
+                                context.defer(REFRESH_DELAY_MS, CloudInstancesUi.this.cloudServicesUi::refresh);
                                 CloudInstancesUi.this.newConnectionModal.hide();
                             }
                         })))));
@@ -511,7 +513,7 @@ public class CloudInstancesUi extends Composite {
         for (final GwtCloudEntry entry : entries) {
             this.pubSubFactoriesPids.addItem(entry.getPid());
         }
-        
+
         String selectedPubSubPid = CloudInstancesUi.this.pubSubFactoriesPids.getSelectedValue();
         getSuggestedCloudPubSubPid(selectedPubSubPid);
 
@@ -562,7 +564,7 @@ public class CloudInstancesUi extends Composite {
         RequestQueue.submit(context -> this.gwtXSRFService.generateSecurityToken(
                 context.callback(token -> CloudInstancesUi.this.gwtCloudConnection.deleteCloudServiceFromFactory(token,
                         factoryPid, cloudServicePid,
-                        context.callback(result -> CloudInstancesUi.this.cloudServicesUi.refresh())))));
+                        context.callback(result -> context.defer(REFRESH_DELAY_MS, this.cloudServicesUi::refresh))))));
 
     }
 
@@ -613,7 +615,8 @@ public class CloudInstancesUi extends Composite {
     }
 
     @SuppressWarnings("unchecked")
-    private void getCloudConnectionPidRegex(final RequestContext context, final String factoryPid, final String example) {
+    private void getCloudConnectionPidRegex(final RequestContext context, final String factoryPid,
+            final String example) {
         this.gwtCloudConnection.findCloudServicePidRegex(factoryPid, context.callback(result -> {
             final PidTextBox pidTextBox = CloudInstancesUi.this.cloudConnectionPid;
             pidTextBox.reset();
@@ -636,20 +639,20 @@ public class CloudInstancesUi extends Composite {
             this.cloudConnectionPidSpinner.setVisible(false);
         }));
     }
-    
+
     @SuppressWarnings("unchecked")
     private void getSuggestedCloudPubSubPid(final String pubSubPid) {
         this.pubSubPid.clear();
         this.pubSubPid.setEnabled(false);
         this.pubSubPid.setVisible(true);
-       
+
         final List<GwtCloudEntry> providerList = cloudComponentFactories.getPubSubFactories();
 
         for (final GwtCloudEntry entry : providerList) {
             if (pubSubPid.equals(entry.getPid())) {
                 String example = entry.getDefaultFactoryPid();
                 String regex = entry.getDefaultFactoryPidRegex();
-                
+
                 String placeholder = null;
                 String validationMessage = null;
                 if (example != null) {

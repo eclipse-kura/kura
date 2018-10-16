@@ -14,6 +14,7 @@ import java.util.LinkedList;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.util.FailureHandler;
 
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 /*
@@ -124,7 +125,7 @@ public class RequestQueue {
                     try {
                         callback.onSuccess(result);
                         requestCompleted();
-                    } catch (Throwable e) {
+                    } catch (final Exception e) {
                         onFailure(e);
                     }
                 }
@@ -133,13 +134,27 @@ public class RequestQueue {
 
         @Override
         public <T> AsyncCallback<T> callback() {
-            // TODO Auto-generated method stub
-            return callback(new SuccessCallback<T>() {
+            return callback(result -> {
+            });
+        }
+
+        @Override
+        public void defer(final int delayMs, final Runnable action) {
+            newRequest();
+            final Timer timer = new Timer() {
 
                 @Override
-                public void onSuccess(T result) {
+                public void run() {
+                    try {
+                        action.run();
+                    } catch (final Exception e) {
+                        FailureHandler.handle(e);
+                    } finally {
+                        requestCompleted();
+                    }
                 }
-            });
+            };
+            timer.schedule(delayMs);
         }
     }
 

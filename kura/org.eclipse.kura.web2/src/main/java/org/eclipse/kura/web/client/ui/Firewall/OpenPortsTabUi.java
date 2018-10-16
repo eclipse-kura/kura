@@ -469,10 +469,10 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
     private void initNewRuleModal() {
         this.cancel.setText(MSGS.cancelButton());
         this.cancel.addClickHandler(event -> {
-            OpenPortsTabUi.this.openPortsForm.hide();
-            OpenPortsTabUi.this.openPortEntry = null;
-            OpenPortsTabUi.this.editOpenPortEntry = null;
-            OpenPortsTabUi.this.newOpenPortEntry = null;
+            this.openPortsForm.hide();
+            this.openPortEntry = null;
+            this.editOpenPortEntry = null;
+            this.newOpenPortEntry = null;
         });
 
         this.submit.setText(MSGS.submitButton());
@@ -480,42 +480,25 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
 
             checkFieldsValues();
 
-            if (OpenPortsTabUi.this.groupPort.getValidationState() == ValidationState.ERROR
-                    || OpenPortsTabUi.this.groupPermittedNw.getValidationState() == ValidationState.ERROR
-                    || OpenPortsTabUi.this.groupPermittedI.getValidationState() == ValidationState.ERROR
-                    || OpenPortsTabUi.this.groupUnpermittedI.getValidationState() == ValidationState.ERROR
-                    || OpenPortsTabUi.this.groupPermittedMac.getValidationState() == ValidationState.ERROR
-                    || OpenPortsTabUi.this.groupSource.getValidationState() == ValidationState.ERROR) {
+            if (this.groupPort.getValidationState() == ValidationState.ERROR
+                    || this.groupPermittedNw.getValidationState() == ValidationState.ERROR
+                    || this.groupPermittedI.getValidationState() == ValidationState.ERROR
+                    || this.groupUnpermittedI.getValidationState() == ValidationState.ERROR
+                    || this.groupPermittedMac.getValidationState() == ValidationState.ERROR
+                    || this.groupSource.getValidationState() == ValidationState.ERROR) {
                 return;
             }
 
             // create a new entry
-            OpenPortsTabUi.this.openPortEntry = new GwtFirewallOpenPortEntry();
-            OpenPortsTabUi.this.openPortEntry.setPortRange(OpenPortsTabUi.this.port.getText());
-            OpenPortsTabUi.this.openPortEntry.setProtocol(OpenPortsTabUi.this.protocol.getSelectedItemText());
-            if (OpenPortsTabUi.this.permittedNw.getText() != null
-                    && !"".equals(OpenPortsTabUi.this.permittedNw.getText().trim())) {
-                OpenPortsTabUi.this.openPortEntry.setPermittedNetwork(OpenPortsTabUi.this.permittedNw.getText());
-            } else {
-                OpenPortsTabUi.this.openPortEntry.setPermittedNetwork("0.0.0.0/0");
-            }
-            if (OpenPortsTabUi.this.permittedI.getText() != null
-                    && !"".equals(OpenPortsTabUi.this.permittedI.getText().trim())) {
-                OpenPortsTabUi.this.openPortEntry.setPermittedInterfaceName(OpenPortsTabUi.this.permittedI.getText());
-            }
-            if (OpenPortsTabUi.this.unpermittedI.getText() != null
-                    && !"".equals(OpenPortsTabUi.this.unpermittedI.getText().trim())) {
-                OpenPortsTabUi.this.openPortEntry
-                        .setUnpermittedInterfaceName(OpenPortsTabUi.this.unpermittedI.getText());
-            }
-            if (OpenPortsTabUi.this.permittedMac.getText() != null
-                    && !"".equals(OpenPortsTabUi.this.permittedMac.getText().trim())) {
-                OpenPortsTabUi.this.openPortEntry.setPermittedMAC(OpenPortsTabUi.this.permittedMac.getText());
-            }
-            if (OpenPortsTabUi.this.source.getText() != null
-                    && !"".equals(OpenPortsTabUi.this.source.getText().trim())) {
-                OpenPortsTabUi.this.openPortEntry.setSourcePortRange(OpenPortsTabUi.this.source.getText());
-            }
+            this.openPortEntry = new GwtFirewallOpenPortEntry();
+            this.openPortEntry.setPortRange(this.port.getText());
+            this.openPortEntry.setProtocol(this.protocol.getSelectedItemText());
+
+            this.openPortEntry.setPermittedNetwork(validOrDefault(this.permittedNw.getText(), "0.0.0.0/0"));
+            this.openPortEntry.setPermittedInterfaceName(validOrDefault(this.permittedI.getText(), null));
+            this.openPortEntry.setUnpermittedInterfaceName(validOrDefault(this.unpermittedI.getText(), null));
+            this.openPortEntry.setPermittedMAC(validOrDefault(this.permittedMac.getText(), null));
+            this.openPortEntry.setSourcePortRange(validOrDefault(this.source.getText(), null));
 
             if (OpenPortsTabUi.this.submit.getId().equals("new")) {
                 OpenPortsTabUi.this.newOpenPortEntry = OpenPortsTabUi.this.openPortEntry;
@@ -527,8 +510,15 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
 
             setDirty(true);
 
-            OpenPortsTabUi.this.openPortsForm.hide();
+            this.openPortsForm.hide();
         });
+    }
+
+    private static String validOrDefault(final String str, final String defaultValue) {
+        if (str == null || str.trim().isEmpty()) {
+            return defaultValue;
+        }
+        return str;
     }
 
     private void showModal(final GwtFirewallOpenPortEntry existingEntry) {

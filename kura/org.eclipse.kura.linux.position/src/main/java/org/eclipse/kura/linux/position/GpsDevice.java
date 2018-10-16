@@ -199,6 +199,11 @@ public class GpsDevice {
 
         private void handleNmeaSentence(final String sentence) {
 
+            if (sentence.isEmpty()) {
+                logger.debug("Empty NMEA sentence detected");
+                return;
+            }
+
             if (GpsDevice.this.listener != null) {
                 GpsDevice.this.listener.newNmeaSentence(sentence);
             }

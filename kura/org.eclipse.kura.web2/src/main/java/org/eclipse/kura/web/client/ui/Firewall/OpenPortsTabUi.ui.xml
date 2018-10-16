@@ -16,6 +16,8 @@
     xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt"
     xmlns:firewall="urn:import:org.eclipse.kura.web.client.ui.Firewall" xmlns:kura="urn:import:org.eclipse.kura.web.client.ui">
 
+    <ui:with field="msgs" type="org.eclipse.kura.web.client.messages.Messages"></ui:with>
+    
     <ui:style>
     .important {
     	font-weight: bold;
@@ -90,6 +92,19 @@
             <b:ModalFooter>
                 <b:Button ui:field="submit" />
                 <b:Button ui:field="cancel" />
+            </b:ModalFooter>
+        </b:Modal>
+        
+        <b:Modal ui:field="existingRule" b:id="existingRule" title="{msgs.warning}" >
+            <b:ModalBody>
+                <b:Panel>
+                    <b:PanelBody>
+                        <b:Alert type="WARNING" ui:field="existingRuleWarn" text="{msgs.firewallOpenPortFormDuplicate}"/>
+                    </b:PanelBody>
+                </b:Panel>
+            </b:ModalBody>
+            <b:ModalFooter>
+                <b:Button ui:field="close" text="{msgs.closeButton}" />
             </b:ModalFooter>
         </b:Modal>
 

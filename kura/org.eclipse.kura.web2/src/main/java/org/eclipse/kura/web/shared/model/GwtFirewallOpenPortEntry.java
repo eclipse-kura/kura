@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -24,21 +24,6 @@ public class GwtFirewallOpenPortEntry extends KuraBaseModel implements Serializa
 
     public GwtFirewallOpenPortEntry() {
     }
-
-    /*
-     * public Integer getPort() {
-     * if (get("port") != null) {
-     * return (Integer) get("port");
-     * }
-     * else {
-     * return 0;
-     * }
-     * }
-     *
-     * public void setPort(int port) {
-     * set("port", port);
-     * }
-     */
 
     public String getPortRange() {
         return get("portRange");

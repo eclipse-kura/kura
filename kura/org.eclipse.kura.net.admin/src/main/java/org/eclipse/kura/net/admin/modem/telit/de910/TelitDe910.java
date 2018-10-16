@@ -396,7 +396,7 @@ public class TelitDe910 extends TelitModem implements EvdoCellularModem {
     }
 
     @Override
-    public boolean isSimCardReady() throws KuraException {
+    public boolean isTelitSimCardReady() throws KuraException {
         return true;
     }
 

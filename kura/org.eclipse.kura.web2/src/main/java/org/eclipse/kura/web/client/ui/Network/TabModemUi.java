@@ -23,6 +23,7 @@ import org.eclipse.kura.web.client.util.MessageUtils;
 import org.eclipse.kura.web.shared.model.GwtModemAuthType;
 import org.eclipse.kura.web.shared.model.GwtModemInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtModemPdpEntry;
+import org.eclipse.kura.web.shared.model.GwtModemPdpType;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtSession;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
@@ -276,6 +277,7 @@ public class TabModemUi extends Composite implements NetworkTab {
         this.tcpTab = tcp;
 
         this.defaultDialString.put("HE910", "atd*99***1#");
+        this.defaultDialString.put("LE910", "atd*99***2#");
         this.defaultDialString.put("DE910", "atd#777");
         initForm();
 
@@ -363,6 +365,7 @@ public class TabModemUi extends Composite implements NetworkTab {
     @Override
     public void getUpdatedNetInterface(GwtNetInterfaceConfig updatedNetIf) {
         GwtModemInterfaceConfig updatedModemNetIf = (GwtModemInterfaceConfig) updatedNetIf;
+        updatedModemNetIf.setPdpType(GwtModemPdpType.netModemPdpIP);
 
         if (this.model.getText() != null && this.service.getText() != null) {
             // note - status is set in tcp/ip tab
@@ -560,6 +563,8 @@ public class TabModemUi extends Composite implements NetworkTab {
             if (modemModel != null && !modemModel.isEmpty()) {
                 if (modemModel.contains("HE910")) {
                     this.dialString = this.defaultDialString.get("HE910");
+                } else if (modemModel.contains("LE910")) {
+                    this.dialString = this.defaultDialString.get("LE910");
                 } else if (modemModel.contains("DE910")) {
                     this.dialString = this.defaultDialString.get("DE910");
                 } else {

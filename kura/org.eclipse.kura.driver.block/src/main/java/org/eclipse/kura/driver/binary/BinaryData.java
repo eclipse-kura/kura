@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -12,49 +12,23 @@
 
 package org.eclipse.kura.driver.binary;
 
-import static java.util.Objects.requireNonNull;
-
 /**
  * This class can be used to read/write a block of data in a {@link Buffer} to/from an instance of type T.
  *
  * @param <T>
  *            the type to be used for reading or writing.
  */
-public abstract class BinaryData<T> {
-
-    protected final Endianness endianness;
-    protected final int size;
-
-    /**
-     * Creates a new {@link BinaryData} instance.
-     *
-     * @param endianness
-     *            the endianness of the data
-     * @param size
-     *            the size of the data
-     */
-    public BinaryData(Endianness endianness, int size) {
-        requireNonNull(endianness, "Endianness cannot be null");
-        if (size <= 0) {
-            throw new IllegalArgumentException("Size must be positive");
-        }
-        this.endianness = endianness;
-        this.size = size;
-    }
+public interface BinaryData<T> {
 
     /**
      * @return the endianness of the data
      */
-    public Endianness getEndianness() {
-        return this.endianness;
-    }
+    public Endianness getEndianness();
 
     /**
      * @return the size of the data
      */
-    public int getSize() {
-        return this.size;
-    }
+    public int getSize();
 
     /**
      * Writes the provided value into the provided {@link Buffer}

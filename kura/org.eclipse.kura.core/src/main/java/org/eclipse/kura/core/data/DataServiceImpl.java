@@ -11,8 +11,6 @@
  *******************************************************************************/
 package org.eclipse.kura.core.data;
 
-import static java.util.Objects.requireNonNull;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -129,8 +127,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
         createThrottle();
         submitPublishingWork();
 
-        String tableName = sanitizeSql(pid);
-        this.store = new DbDataStore(tableName);
+        this.store = new DbDataStore(pid);
 
         restartDbServiceTracker(this.dataServiceOptions.getDbServiceInstancePid());
 
@@ -142,12 +139,6 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
         this.dataTransportService.addDataTransportListener(this);
 
         startConnectionMonitorTask();
-    }
-    
-    private String sanitizeSql(final String string) {
-        requireNonNull(string, "Provided string cannot be null");
-        final String sanitizedName = string.replaceAll("\"", "\"\"");
-        return "\"" + sanitizedName + "\"";
     }
 
     private void restartDbServiceTracker(String kuraServicePid) {

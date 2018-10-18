@@ -186,6 +186,7 @@ Bug Fixes :
     * #181:  [GPS] position service: code review
 
   * Merged no issue-related Pull Requests:
+    * #2285: Changes to the binary parser library
     * #2276: Changed validity checks for RMC strings
     * #2273: Fixed dev-env launch configs.
     * #2270: Updated Eclipse SSL cert to enable connection to Eclipse Mqtt broker. 

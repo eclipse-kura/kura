@@ -11,6 +11,8 @@
  *******************************************************************************/
 package org.eclipse.kura.core.data;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -127,12 +129,8 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
         createThrottle();
         submitPublishingWork();
 
-        String[] parts = pid.split("-");
-        String table = "ds_messages";
-        if (parts.length > 1) {
-            table += "_" + parts[1];
-        }
-        this.store = new DbDataStore(table);
+        String tableName = sanitizeSql(pid);
+        this.store = new DbDataStore(tableName);
 
         restartDbServiceTracker(this.dataServiceOptions.getDbServiceInstancePid());
 
@@ -144,6 +142,12 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
         this.dataTransportService.addDataTransportListener(this);
 
         startConnectionMonitorTask();
+    }
+    
+    private String sanitizeSql(final String string) {
+        requireNonNull(string, "Provided string cannot be null");
+        final String sanitizedName = string.replaceAll("\"", "\"\"");
+        return "\"" + sanitizedName + "\"";
     }
 
     private void restartDbServiceTracker(String kuraServicePid) {
@@ -887,13 +891,13 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
     public int getCriticalComponentTimeout() {
         return this.dataServiceOptions.getCriticalComponentTimeout();
     }
-    
-    public Map<String,String> getConnectionInfo() {
-        Map<String,String> result = new HashMap<>();
-        result.put("Broker URL", dataTransportService.getBrokerUrl());
-        result.put("Account", dataTransportService.getAccountName());
-        result.put("Username", dataTransportService.getUsername());
-        result.put("Client ID", dataTransportService.getClientId());
+
+    public Map<String, String> getConnectionInfo() {
+        Map<String, String> result = new HashMap<>();
+        result.put("Broker URL", this.dataTransportService.getBrokerUrl());
+        result.put("Account", this.dataTransportService.getAccountName());
+        result.put("Username", this.dataTransportService.getUsername());
+        result.put("Client ID", this.dataTransportService.getClientId());
         return result;
     }
 }

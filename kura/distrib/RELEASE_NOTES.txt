@@ -26,6 +26,7 @@ New and Noteworthy:
   	* Non-blocking assets configuration updates
   	* Wires Graph Blinking rate limit 
   	* Added fix validity, latitude and longitude hemisphere fields to GPS NMEA Position 
+  	* Reduced CPU usage by Kura Wires
 
   * Refactor and Cleanup
     * Modular support of new platforms: Refactoring of framework structure to support, in a pluggable way, different operating systems and 

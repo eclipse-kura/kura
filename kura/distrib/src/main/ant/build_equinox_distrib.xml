@@ -232,7 +232,7 @@ cd $DIR
 mkdir -p /tmp/.kura/configuration
 cp ${DIR}/framework/config.ini /tmp/.kura/configuration/
 
-KURA_RUNNING=`ps ax | grep java | grep "org.eclipse.osgi"`
+KURA_RUNNING=`ps ax | grep java | grep "org.eclipse.equinox"`
 
 if [ -z "$KURA_RUNNING" ] ; then
         exec java -Xms${kura.mem.size} -Xmx${kura.mem.size} \
@@ -273,7 +273,7 @@ cd $DIR
 mkdir -p /tmp/.kura/configuration
 cp ${DIR}/framework/config.ini /tmp/.kura/configuration/
 
-KURA_RUNNING=`ps ax | grep java | grep "org.eclipse.osgi"`
+KURA_RUNNING=`ps ax | grep java | grep "org.eclipse.equinox"`
 
 if [ -z "$KURA_RUNNING" ] ; then
         exec java -Xms${kura.mem.size} -Xmx${kura.mem.size} \
@@ -318,7 +318,7 @@ cd $DIR
 mkdir -p /tmp/.kura/configuration
 cp ${DIR}/framework/config.ini /tmp/.kura/configuration/
 
-KURA_RUNNING=`ps ax | grep java | grep "org.eclipse.osgi"`
+KURA_RUNNING=`ps ax | grep java | grep "org.eclipse.equinox"`
 
 if [ -z "$KURA_RUNNING" ] ; then
   nohup java -Xms${kura.mem.size} -Xmx${kura.mem.size} \

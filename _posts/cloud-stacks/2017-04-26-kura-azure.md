@@ -1,7 +1,7 @@
 ---
 layout: page
 title:  "Azure IoT Hub&trade; platform"
-categories: [cloud]
+categories: [cloud-stacks]
 ---
 
 [Get Azure IoT Hub information](#get-azure-iot-hub-information)
@@ -71,9 +71,9 @@ The Kura Gateway Administrative Console exposes all services necessary to config
 
 The first step is to create a new Kura Cloud stack. From the Kura Gateway Administrative Console:
 
-- Select *Cloud Services* in the navigation on the left and click *New* to create a new Cloud stack
-- In the dialog, select `org.eclipse.kura.cloud.CloudService` as the Cloud Service Factory
-- Enter a *Cloud Service Pid* name like `org.eclipse.kura.cloud.CloudService-Azure`
+- Select *Cloud Connections* in the navigation on the left and click *New Connection* to create a new Cloud connection
+- In the dialog, select `org.eclipse.kura.cloud.CloudService` as the *Cloud Connection Factory PID*
+- Enter a *Cloud Connection Service PID* name like `org.eclipse.kura.cloud.CloudService-Azure`
 - Press the *Create* button to create the new Cloud stack
 
 Now review and update the configuration of each Kura Cloud stack component as outline below.

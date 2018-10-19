@@ -1,7 +1,7 @@
 ---
 layout: page
 title:  "Eclipse Kapua&trade; platform"
-categories: [cloud]
+categories: [cloud-stacks]
 ---
 
 {% include alerts.html message='The content of this document is preliminary and some links are not updated.' %}

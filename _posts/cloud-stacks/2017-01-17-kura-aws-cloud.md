@@ -1,7 +1,7 @@
 ---
 layout: page
 title:  "Amazon AWS IoT&trade; platform"
-categories: [cloud]
+categories: [cloud-stacks]
 ---
 
 [Overview](#overview)
@@ -165,14 +165,12 @@ The following steps should be performed on the device, this guide is based on Ku
 
         Restart Kura to reload the keystore.
 
-9.  Click on **Cloud Services** in the left panel, you should see this screen:
+9.  Click on **Cloud Connections** in the left panel, and setup a new cloud connection:
 
-      ![cloud_services]({{ site.baseurl }}/assets/images/aws/cloud_services.png)
+    1. Click on the **New Connection** button at the top of the page and set the following parameters in the dialog:
 
-    1. Click on the **New** button at the top of the page and set the following parameters in the dialog:
-
-        * **Factory** -> `org.eclipse.kura.cloud.CloudService`
-        * **Cloud Service Pid** -> `org.eclipse.kura.cloud.CloudService-AWS`
+        * **Cloud Connection Factory PID** -> `org.eclipse.kura.cloud.CloudService`
+        * **Cloud Connection Service PID** -> `org.eclipse.kura.cloud.CloudService-AWS`
 
         Press the **Create** button to confirm and then select the newly created CloudService instance from the list.
 

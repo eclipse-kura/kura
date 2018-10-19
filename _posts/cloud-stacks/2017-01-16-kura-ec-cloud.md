@@ -1,7 +1,7 @@
 ---
 layout: page
 title:  "Eurotech Everyware Cloud&trade; platform"
-categories: [cloud]
+categories: [cloud-stacks]
 ---
 
 Everyware Cloud provides an easy mechanism for connecting cloud-ready devices to IT systems and/or applications; therefore, connecting to Everyware Cloud is an important step in creating and maintaining a complete M2M application. Information on Everyware Cloud and its features can be found <a href="http://www.eurotech.com/en/products/software+services/everyware+cloud+m2m+platform/m2m+what+it+is" about="_blank">here</a>. This document outlines how to connect to Everyware Cloud using the Kura Gateway Administrative Console.

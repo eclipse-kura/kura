@@ -6,28 +6,28 @@ categories: [cloud-stacks]
 
 {% include alerts.html message='The content of this document is preliminary and some links are not updated.' %}
 
-Eclipse Kapua™ is a modular platform providing the services required to manage IoT gateways and smart edge devices. Kapua provides a core integration framework and an initial set of core IoT services including a device registry, device management services, messaging services, data management, and application enablement. More information can be found <a href="http://www.eclipse.org/kapua/" about="_blank">here</a>. This document outlines how to connect to Eclipse Kapua using the ESF Gateway Administrative Console.
+Eclipse Kapua™ is a modular platform providing the services required to manage IoT gateways and smart edge devices. Kapua provides a core integration framework and an initial set of core IoT services including a device registry, device management services, messaging services, data management, and application enablement. More information can be found <a href="http://www.eclipse.org/kapua/" about="_blank">here</a>. This document outlines how to connect to Eclipse Kapua using the Kura Gateway Administrative Console.
 
 
 ## Using the Kura Gateway Administrative Console
 
-The Kura Gateway Administrative Console exposes all services necessary for connecting to Eclipse Kapua. The reference links listed below outline each service involved in the Everyware Cloud connection. It is recommended that each section be reviewed.
+The Kura Gateway Administrative Console exposes all services necessary for connecting to Eclipse Kapua. The reference links listed below outline each service involved in the cloud connection. It is recommended that each section be reviewed.
 
-- [CloudService](kura-cloud.html#cloudservice)
+- [CloudService]({{ site.baseurl }}/cloud-api/5-stack-components.html#cloudservice)
 
-- [DataService](kura-cloud.html#dataservice)
+- [DataService]({{ site.baseurl }}/cloud-api/5-stack-components.html#dataservice)
 
-- [MqttDataTransport](kura-cloud.html#mqttdatatransport)
+- [MqttDataTransport]({{ site.baseurl }}/cloud-api/5-stack-components.html#mqttdatatransport)
 
 ### CloudService
 
-The default settings for the CloudService are typically adequate for connecting to Everyware Cloud. The screen capture shown below displays the default settings for the CloudService. For details about each setting, please refer to [CloudService](kura-cloud.html#cloudservice).
+The default settings for the CloudService are typically adequate for connecting to a Kapua instance. The screen capture shown below displays the default settings for the CloudService. For details about each setting, please refer to [CloudService]({{ site.baseurl }}/cloud-api/5-stack-components.html#cloudservice).
 
 ![]({{ site.baseurl }}/assets/images/kapua/kapuaCloudService.png)
 
 ### DataService
 
-The majority of default settings in the DataService can be left unchanged. A screen capture of the DataService configuration is shown below. For complete details about the DataService configuration parameters, please refer to [DataService](kura-cloud.html#dataservice).
+The majority of default settings in the DataService can be left unchanged. A screen capture of the DataService configuration is shown below. For complete details about the DataService configuration parameters, please refer to [DataService]({{ site.baseurl }}/cloud-api/5-stack-components.html#dataservice).
 
 In order for Kura to connect to Eclipse Kapua on startup, the *connect.auto-on-startup* option must be set to *true.* If this value is changed from false to true, Kura will immediately begin the connection process. It is recommended that the CloudService and MqttDataTransport are configured before setting the *connect.auto-on-startup* option to true.
 
@@ -39,15 +39,15 @@ In order for Kura to connect to Eclipse Kapua on startup, the *connect.auto-on-s
 
 While the majority of default settings in the MqttDataTransport can be left unchanged, the following parameters must be modified:
 
-- **broker-url** - defines the MQTT broker URL that was provided when the Eclipse Kapua account was established. Information on how to obtain the broker URL can be found [here](????).
+- **broker-url** - defines the Kapua MQTT broker URL.
 
 - **topic.context.account-name** - defines the account name of the account to which the device is attempting to connect.
 
 - **username** - identifies the user to be used when creating the connection.
 
-For complete details about the MqttDataTransport configuration parameters, please refer to [MqttDataTransport](kura-cloud.html#mqttdatatransport).
+For complete details about the MqttDataTransport configuration parameters, please refer to [MqttDataTransport]({{ site.baseurl }}/cloud-api/5-stack-components.html#mqttdatatransport).
 
-![]({{ site.baseurl }}/assets/images/kapua/KapuaMQTTDataTransport.png)
+![]({{ site.baseurl }}/assets/images/kapua/kapuaMQTTDataTransport.png)
 
 ## Connect/Disconnect
 

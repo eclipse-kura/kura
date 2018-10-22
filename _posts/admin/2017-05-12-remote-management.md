@@ -8,7 +8,7 @@ categories: [admin]
 
 This section describes the remote management of devices running Kura via Everyware Cloud Console. The Everyware Cloud Console provides the administration tools used for the management of the built-in services exposed by Kura.
 
-To remotely manage a device running Kura through the Everyware Cloud Console, select the desired device from the **Devices Table** of the console and open the **Configuration** tab as shown in the screen capture below. Please refer to [Built-in Services Configuration](../config/builtin-services.html) for a description of the available **Services** and their configuration parameters.
+To remotely manage a device running Kura through the Everyware Cloud Console, select the desired device from the **Devices Table** of the console and open the **Configuration** tab as shown in the screen capture below. Please refer to the **Built-in Services** section for a description of the available **Services** and their configuration parameters.
 
 ![]({{ site.baseurl }}/assets/images/admin/ECconfiguration.png)
 
@@ -28,7 +28,7 @@ As described in [Snapshot Management](snapshot-management.html), the overall Kur
 
 ## Remote Command Execution from Everyware Cloud Console
 
-The Everyware Cloud Console provides the ability to run system commands directly on the device. Refer to [Command Service](../config/builtin-services.html#command-service) for details on how to configure this service in Kura.
+The Everyware Cloud Console provides the ability to run system commands directly on the device. Refer to [Command Service]({{ site.baseurl }}/builtin/command-service.html) for details on how to configure this service in Kura.
 
 It is also possible to send a script to execute using the **File** option of the **Command** tab in Everyware Cloud Console as shown in the screen capture below. This script must be compressed into a zip file with the eventual associated resource files. Once the file is selected, click **Execute**.
 

@@ -198,9 +198,13 @@ public class BluetoothLe implements ConfigurableComponent {
         KuraMessage message = new KuraMessage(payload, properties);
 
         try {
-            this.cloudPublisher.publish(message);
+            if (this.cloudPublisher != null) {
+                this.cloudPublisher.publish(message);
+            } else {
+                logger.warn("Can't publish message for button event: cloudPublisher undefined.");
+            }
         } catch (Exception e) {
-            logger.error("Can't publish message for buttons", e);
+            logger.error("Can't publish message for button event", e);
         }
 
     }
@@ -339,7 +343,11 @@ public class BluetoothLe implements ConfigurableComponent {
 
         KuraMessage message = new KuraMessage(payload, properties);
         try {
-            this.cloudPublisher.publish(message);
+            if (this.cloudPublisher != null) {
+                this.cloudPublisher.publish(message);
+            } else {
+                logger.warn("Can't publish message: cloudPublisher undefined.");
+            }
         } catch (KuraException e) {
             logger.error("Publish message failed", e);
         }

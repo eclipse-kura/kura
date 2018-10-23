@@ -64,17 +64,16 @@ Environment
 
 ### Hardware
 
-* Raspberry Pi
-    * B
-    * B+
-    * 2
-    * 3
-* BeagleBone Black
+* Raspberry Pi 3
+* Intel Up2
+* Rockchip 960
+* Docker
 
 ### OS
 
 * Raspbian
-* Fedora PI
+* Ubuntu 16
+* Centos 7
 
 ### Java
 

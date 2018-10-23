@@ -22,7 +22,7 @@ The only two hard
 requirements at this time for running Kura are:
 
 * Linux Operating System
-* Java SE 7
+* Java SE 8
 
 Memory requirements will vary greatly depending on the types of applications running within the
 framework and the amount/frequency of messages being sent and received. Also note that some
@@ -113,8 +113,8 @@ kura/distrib/pom.xml and add the below Maven profile to the profiles section:
     </build>
 </profile>
 ```
-The profile will assist in creating a shell script installer for the targeted hardware. If the hardware is running a Debian based OS, the "raspberry-pi" and "beaglebone"
-profiles can be used as references for creating a Debian package. There is also information on the use of jdeb in Kura [here](http://wiki.eclipse.org/Kura/Use_of_jdeb_in_Kura).
+The profile will assist in creating a shell script installer for the targeted hardware. If the hardware is running a Debian based OS, the "raspberry-pi"
+profile can be used as references for creating a Debian package. There is also information on the use of jdeb in Kura [here](http://wiki.eclipse.org/Kura/Use_of_jdeb_in_Kura).
 
 The majority of the profile can be used as is, the attributes that must be edited are:
 

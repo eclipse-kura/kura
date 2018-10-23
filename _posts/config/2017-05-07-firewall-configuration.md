@@ -84,7 +84,7 @@ Complete the **Port Forward Entry** form and click the **Apply** button for the 
 
 This section describes an example on port forwarding rules. The initial setup is described below.
 
-- A couple of RaspberryPi 3 or Beaglebone that shares the same LAN over Ethernet.
+- A couple of RaspberryPi 3 that shares the same LAN over Ethernet.
 
 - The first RaspberryPi running Kura is configured as follows:
   - The eth0 interface static with IP address of 172.16.0.5.

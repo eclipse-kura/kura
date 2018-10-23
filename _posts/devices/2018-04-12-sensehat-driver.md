@@ -13,6 +13,11 @@ The driver allows access to the following resources:
 
 The driver-specific channel configuration contains a single parameter, **resource**, which allows to select the specific device resource that the channel is addressing (a sensor, a joystick event, etc).
 
+**Note about running on OpenJDK**
+
+If some exceptions reporting `Locked by other application` are visible in the log and the driver fails to start, try switching to the Oracle JVM by installing the `oracle-java8-jdk` package.
+For more information on the problem, please see [this](https://github.com/eclipse/kura/issues/2098) GitHub issue.
+
 ## Sensors
 
 The following values of the **resource** parameters refer to device sensors:

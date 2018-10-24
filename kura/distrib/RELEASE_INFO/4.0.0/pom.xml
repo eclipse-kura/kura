@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	This POM is used to build the target platform of a previous release of Kura.
+	After the build all the dependencies will be available inside the target folder of the specified modules
+	and have to be retrieved by the distribution process at a later stage.
+	
+	Versions of the previous bundles are specified in the config/kura.target-platform.properties file
+
+	Repositories have to be specified basing on the version of Kura
+-->
+<project>
+
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.eclipse.kura</groupId>
+	<artifactId>target-platform-previous</artifactId>
+	<version>4.0.0</version>
+
+	<packaging>pom</packaging>
+
+	<modules>
+		<module>kura-bundles</module>
+		<module>p2-repo-common</module>
+		<module>p2-repo-equinox_3.12.50</module>
+	</modules>
+
+	<repositories>
+		<repository>
+			<id>Kura Releases</id>
+			<name>Kura Repository - Releases</name>
+			<url>https://repo.eclipse.org/content/repositories/kura-releases/</url>
+		</repository>
+		<repository>
+			<id>Kura Snapshots</id>
+			<name>Kura Repository - Snapshots</name>
+			<url>https://repo.eclipse.org/content/repositories/kura-snapshots/</url>
+		</repository>
+		<repository>
+			<id>kura_addons</id>
+			<name>Kura Addons Maven Repository</name>
+			<url>https://raw.github.com/eurotech/kura_addons/mvn-repo/</url>
+			<snapshots>
+				<enabled>true</enabled>
+				<updatePolicy>always</updatePolicy>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>Eclipse Paho Repo</id>
+			<url>https://repo.eclipse.org/content/repositories/paho-releases/</url>
+		</repository>
+	</repositories>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+</project>

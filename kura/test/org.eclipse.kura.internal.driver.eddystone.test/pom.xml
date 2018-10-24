@@ -16,7 +16,7 @@ Copyright (c) 2018 Eurotech and/or its affiliates and others
     <parent>
         <groupId>org.eclipse.kura</groupId>
         <artifactId>test</artifactId>
-        <version>4.0.0</version>
+        <version>4.1.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>org.eclipse.kura.internal.driver.eddystone.test</artifactId>

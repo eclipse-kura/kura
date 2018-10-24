@@ -137,20 +137,25 @@ public class BlockTaskTest {
     }
 
     private void testRead(TaskProvider taskProvider, byte[] raw, Object javaValue) throws IOException {
+        testRead(taskProvider, raw, javaValue, DataType.BOOLEAN);
+    }
+
+    private void testRead(TaskProvider taskProvider, byte[] raw, Object javaValue, DataType valueType)
+            throws IOException {
         int[] offsets = new int[] { 0, 7 };
         for (final int offset : offsets) {
-            ChannelRecord record = ChannelRecord.createReadRecord("test", DataType.BOOLEAN);
+            ChannelRecord record = ChannelRecord.createReadRecord("test", valueType);
             byte[] buf = new byte[offset + raw.length];
             System.arraycopy(raw, 0, buf, offset, raw.length);
             ChannelBlockTask task = taskProvider.get(record, offset, Mode.READ);
             ToplevelBlockTask parent = getToplevelBlockTask(buf, Mode.READ);
             parent.addChild(task);
             parent.run();
-            assertEquals(ChannelFlag.SUCCESS, record.getChannelStatus().getChannelFlag());
+            assertEquals(ChannelFlag.SUCCESS, task.getRecord().getChannelStatus().getChannelFlag());
             if (!javaValue.getClass().isArray()) {
-                assertEquals(javaValue, record.getValue().getValue());
+                assertEquals(javaValue, task.getRecord().getValue().getValue());
             } else {
-                assertArrayEquals((byte[]) javaValue, (byte[]) record.getValue().getValue());
+                assertArrayEquals((byte[]) javaValue, (byte[]) task.getRecord().getValue().getValue());
             }
         }
     }

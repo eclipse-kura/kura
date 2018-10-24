@@ -125,7 +125,6 @@ public class NMEAParser {
 
     private void parseRMCSentence(List<String> tokens) {
         if (tokens.size() > 9) {
-            checkPosition(tokens, 9);
             if (!tokens.get(1).isEmpty()) {
                 this.timeNmea = tokens.get(1);
             }
@@ -133,9 +132,12 @@ public class NMEAParser {
                 this.validFix = tokens.get(2).charAt(0);
                 if (!"A".equals(tokens.get(2))) {
                     this.validPosition = false;
+                } else {
+                    this.validPosition = true;
                 }
             } else {
                 this.validFix = 'V';
+                this.validPosition = false;
             }
             if (!tokens.get(3).isEmpty() && !tokens.get(4).isEmpty()) {
                 this.latNmea = convertPositionlat(tokens.get(3), tokens.get(4));
@@ -162,7 +164,7 @@ public class NMEAParser {
 
     private void parseGLLSentence(List<String> tokens) {
         if (tokens.size() > 6) {
-            checkPosition(tokens, 6);
+            checkPosition(tokens, 7);
             if (!tokens.get(1).isEmpty() && !tokens.get(2).isEmpty()) {
                 this.latNmea = convertPositionlat(tokens.get(1), tokens.get(2));
                 this.latitudeHemisphere = tokens.get(2).charAt(0);
@@ -184,7 +186,7 @@ public class NMEAParser {
 
     private void parseGGASentence(List<String> tokens) {
         if (tokens.size() > 9) {
-            checkPosition(tokens, 9);
+            checkPosition(tokens, 10);
             if (!tokens.get(1).isEmpty()) {
                 this.timeNmea = tokens.get(1);
             }

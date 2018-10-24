@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.eclipse.kura</groupId>
         <artifactId>target-platform</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
     </parent>
 
     <artifactId>p2-repo-equinox_3.12.50</artifactId>
@@ -101,6 +101,14 @@
                                     <artifactId>jetty-util</artifactId>
                                     <version>${org.eclipse.jetty.util.version}</version>
                                 </artifactItem>
+                                <!--
+                                    use wireadming 1.0.800, remove this on full Equinox upgrade
+                                -->
+                                <artifactItem>
+                                    <groupId>org.eclipse.platform</groupId>
+                                    <artifactId>org.eclipse.equinox.wireadmin</artifactId>
+                                    <version>1.0.800</version>
+                                </artifactItem>
                             </artifactItems>
                             <stripVersion>true</stripVersion>
                             <outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>
@@ -154,6 +162,10 @@
                                         <exclude name="plugins/org.eclipse.equinox.console.ssh*.jar" />
                                         <exclude name="plugins/org.eclipse.equinox.simpleconfig*.jar" />
                                         <exclude name="plugins/org.eclipse.equinox.http.servletbridge*.jar" />
+                                        <!--
+                                            use wireadming 1.0.800, remove this on full Equinox upgrade
+                                        -->
+                                        <exclude name="plugins/org.eclipse.equinox.wireadmin*.jar" />
 
                                         <include name="plugins/org.eclipse.equinox.launcher_*.jar" />
                                         <include name="plugins/org.eclipse.equinox.launcher.source_*.jar" />
@@ -168,6 +180,7 @@
                                         <include name="plugins/org.apache.felix*.jar" />
 
                                         <include name="plugins/javax*.jar" />
+
                                     </patternset>
                                     <mapper type="flatten" />
                                 </unzip>
@@ -204,6 +217,11 @@
                                     tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.servlet_${org.eclipse.jetty.servlet.version}.jar" />
                                 <move file="${project.build.directory}/source/plugins/jetty-util.jar"
                                     tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.util_${org.eclipse.jetty.util.version}.jar" />
+                                <!--
+                                    use wireadming 1.0.800, remove this on full Equinox upgrade
+                                -->
+                                <move file="${project.build.directory}/source/plugins/org.eclipse.equinox.wireadmin.jar"
+                                    tofile="${project.build.directory}/source/plugins/org.eclipse.equinox.wireadmin_${org.eclipse.equinox.wireadmin.version}.jar" />
                             </target>
                         </configuration>
                     </execution>

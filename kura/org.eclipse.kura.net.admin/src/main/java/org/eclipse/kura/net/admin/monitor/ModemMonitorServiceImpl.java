@@ -496,26 +496,38 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
     }
 
     private void monitor() {
-        monitorRequestPending.set(false);
+        try {
+            monitorRequestPending.set(false);
 
-        if (this.modems.isEmpty()) {
-            return;
+            if (this.modems.isEmpty()) {
+                return;
+            }
+
+            final HashMap<String, InterfaceState> newInterfaceStatuses = new HashMap<>();
+
+            logger.debug("tracked modems: {}", modems.keySet());
+
+            for (final Entry<String, MonitoredModem> e : this.modems.entrySet()) {
+
+                logger.debug("processing modem {}", e.getKey());
+                processMonitor(newInterfaceStatuses, e.getKey(), e.getValue());
+            }
+
+            // post event for any status changes
+            checkStatusChange(this.interfaceStatuses, newInterfaceStatuses);
+            this.interfaceStatuses = newInterfaceStatuses;
+        } catch (Exception ex) {
+            logger.error("Unexpected error during monitoring", ex);
         }
+    }
 
-        final HashMap<String, InterfaceState> newInterfaceStatuses = new HashMap<>();
-
-        logger.debug("tracked modems: {}", modems.keySet());
-
-        for (final Entry<String, MonitoredModem> e : this.modems.entrySet()) {
-
-            logger.debug("processing modem {}", e.getKey());
-
-            e.getValue().monitor(newInterfaceStatuses);
+    private void processMonitor(final HashMap<String, InterfaceState> newInterfaceStatuses, final String modemName,
+            final MonitoredModem modem) {
+        try {
+            modem.monitor(newInterfaceStatuses);
+        } catch (Exception ex) {
+            logger.error("Failed to monitor {}", modemName, ex);
         }
-
-        // post event for any status changes
-        checkStatusChange(this.interfaceStatuses, newInterfaceStatuses);
-        this.interfaceStatuses = newInterfaceStatuses;
     }
 
     private void checkStatusChange(Map<String, InterfaceState> oldStatuses, Map<String, InterfaceState> newStatuses) {

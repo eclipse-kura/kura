@@ -15,13 +15,24 @@ package org.eclipse.kura.driver.block.test;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import org.eclipse.kura.driver.binary.BinaryData;
 import org.eclipse.kura.driver.binary.BinaryDataTypes;
+import org.eclipse.kura.driver.binary.Buffer;
+import org.eclipse.kura.driver.binary.ByteArray;
 import org.eclipse.kura.driver.binary.ByteArrayBuffer;
 import org.eclipse.kura.driver.binary.Endianness;
+import org.eclipse.kura.driver.binary.UnsignedIntegerLE;
+import org.eclipse.kura.driver.binary.adapter.GainOffset;
+import org.eclipse.kura.driver.binary.adapter.StringData;
+import org.eclipse.kura.driver.binary.adapter.ToBoolean;
+import org.junit.Assert;
 import org.junit.Test;
 
 public class BinaryDataTest {
@@ -151,6 +162,116 @@ public class BinaryDataTest {
         testReadWrite(BinaryDataTypes.DOUBLE_LE, BinaryDataTest::createFloatPositiveMin, Double.MIN_VALUE);
     }
 
+    @Test
+    public void shouldSupportUnsignedInteger() {
+        final byte[] testBuf = new byte[] { 1, 2, 3, 4 };
+        testRead(new UnsignedIntegerLE(32, 0), (endiannes, size) -> testBuf, BigInteger.valueOf(67305985));
+
+        final byte[] testBuf2 = new byte[] { (byte) 0xAA, (byte) 0xAA, (byte) 0xAA, (byte) 0xAA, (byte) 0xAA,
+                (byte) 0xAA, (byte) 0xAA, (byte) 0xAA };
+        testRead(new UnsignedIntegerLE(3, 0), (endiannes, size) -> testBuf2, BigInteger.valueOf(2));
+        testRead(new UnsignedIntegerLE(3, 3), (endiannes, size) -> testBuf2, BigInteger.valueOf(5));
+        testRead(new UnsignedIntegerLE(6, 2), (endiannes, size) -> testBuf2, BigInteger.valueOf(42));
+        testRead(new UnsignedIntegerLE(2, 7), (endiannes, size) -> testBuf2, BigInteger.valueOf(1));
+        testRead(new UnsignedIntegerLE(12, 7), (endiannes, size) -> testBuf2, BigInteger.valueOf(1365));
+        testRead(new UnsignedIntegerLE(17, 7), (endiannes, size) -> testBuf2, BigInteger.valueOf(87381));
+    }
+
+    @Test
+    public void shouldSupportByteArray() {
+        final byte[] testBuf = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+        testRead(new ByteArray(testBuf.length), (size, endianness) -> testBuf, testBuf, Assert::assertArrayEquals);
+        testRead(new ByteArray(4), (size, endianness) -> testBuf, new byte[] { 1, 2, 3, 4 }, Assert::assertArrayEquals);
+        testRead(new ByteArray(40), (size, endianness) -> testBuf, testBuf, Assert::assertArrayEquals);
+    }
+
+    @Test
+    public void shouldSupportGainOffset() {
+        testAdapterRead(a -> new GainOffset<>(a, 1.0f, 0.0f), (byte) 10, (byte) 10);
+        testAdapterRead(a -> new GainOffset<>(a, 1.0f, 0.0f), (short) 10, (short) 10);
+        testAdapterRead(a -> new GainOffset<>(a, 1.0f, 0.0f), (int) 10, (int) 10);
+        testAdapterRead(a -> new GainOffset<>(a, 1.0f, 0.0f), (long) 10, (long) 10);
+        testAdapterRead(a -> new GainOffset<>(a, 1.0f, 0.0f), (short) 10, (short) 10);
+        testAdapterRead(a -> new GainOffset<>(a, 1.0f, 0.0f), (float) 10, (float) 10);
+        testAdapterRead(a -> new GainOffset<>(a, 1.0f, 0.0f), (double) 10, (double) 10);
+        testAdapterRead(a -> new GainOffset<>(a, 1.0f, 0.0f), BigInteger.valueOf(10), BigInteger.valueOf(10));
+
+        testAdapterWrite(a -> new GainOffset<>(a, 1.0f, 0.0f), (byte) 10, (byte) 10);
+        testAdapterWrite(a -> new GainOffset<>(a, 1.0f, 0.0f), (short) 10, (short) 10);
+        testAdapterWrite(a -> new GainOffset<>(a, 1.0f, 0.0f), (int) 10, (int) 10);
+        testAdapterWrite(a -> new GainOffset<>(a, 1.0f, 0.0f), (long) 10, (long) 10);
+        testAdapterWrite(a -> new GainOffset<>(a, 1.0f, 0.0f), (short) 10, (short) 10);
+        testAdapterWrite(a -> new GainOffset<>(a, 1.0f, 0.0f), (float) 10, (float) 10);
+        testAdapterWrite(a -> new GainOffset<>(a, 1.0f, 0.0f), (double) 10, (double) 10);
+        testAdapterWrite(a -> new GainOffset<>(a, 1.0f, 0.0f), BigInteger.valueOf(10), BigInteger.valueOf(10));
+
+        testAdapterRead(a -> new GainOffset<>(a, 2.0f, 0.0f), (byte) 10, (byte) 20);
+        testAdapterRead(a -> new GainOffset<>(a, 3.0f, 0.0f), (short) 10, (short) 30);
+        testAdapterRead(a -> new GainOffset<>(a, 5.0f, 0.0f), (int) 10, (int) 50);
+        testAdapterRead(a -> new GainOffset<>(a, 15.0f, 0.0f), (long) 10, (long) 150);
+        testAdapterRead(a -> new GainOffset<>(a, -1.0f, 0.0f), (short) 10, (short) -10);
+        testAdapterRead(a -> new GainOffset<>(a, -2.0f, 0.0f), (float) 10, (float) -20);
+        testAdapterRead(a -> new GainOffset<>(a, -5.0f, 0.0f), (double) 10, (double) -50);
+        testAdapterRead(a -> new GainOffset<>(a, -11.0f, 0.0f), BigInteger.valueOf(10), BigInteger.valueOf(-110));
+
+        testAdapterRead(a -> new GainOffset<>(a, 2.0f, 1.0f), (byte) 10, (byte) (20 + 1));
+        testAdapterRead(a -> new GainOffset<>(a, 3.0f, 4.0f), (short) 10, (short) (30 + 4));
+        testAdapterRead(a -> new GainOffset<>(a, 5.0f, -2.0f), (int) 10, (int) (50 - 2));
+        testAdapterRead(a -> new GainOffset<>(a, 15.0f, -5.0f), (long) 10, (long) (150 - 5));
+        testAdapterRead(a -> new GainOffset<>(a, -1.0f, 10.0f), (short) 10, (short) (-10 + 10));
+        testAdapterRead(a -> new GainOffset<>(a, -2.0f, 54.0f), (float) 10, (float) (-20 + 54));
+        testAdapterRead(a -> new GainOffset<>(a, -5.0f, 1.0f), (double) 10, (double) (-50 + 1));
+        testAdapterRead(a -> new GainOffset<>(a, -11.0f, 22.0f), BigInteger.valueOf(10), BigInteger.valueOf(-110 + 22));
+
+        testAdapterWrite(a -> new GainOffset<>(a, 2.0f, 0.0f), (byte) 10, (byte) 20);
+        testAdapterWrite(a -> new GainOffset<>(a, 3.0f, 0.0f), (short) 10, (short) 30);
+        testAdapterWrite(a -> new GainOffset<>(a, 5.0f, 0.0f), (int) 10, (int) 50);
+        testAdapterWrite(a -> new GainOffset<>(a, 15.0f, 0.0f), (long) 10, (long) 150);
+        testAdapterWrite(a -> new GainOffset<>(a, -1.0f, 0.0f), (short) 10, (short) -10);
+        testAdapterWrite(a -> new GainOffset<>(a, -2.0f, 0.0f), (float) 10, (float) -20);
+        testAdapterWrite(a -> new GainOffset<>(a, -5.0f, 0.0f), (double) 10, (double) -50);
+        testAdapterWrite(a -> new GainOffset<>(a, -11.0f, 0.0f), BigInteger.valueOf(10), BigInteger.valueOf(-110));
+
+        testAdapterWrite(a -> new GainOffset<>(a, 2.0f, 1.0f), (byte) 10, (byte) (20 + 1));
+        testAdapterWrite(a -> new GainOffset<>(a, 3.0f, 4.0f), (short) 10, (short) (30 + 4));
+        testAdapterWrite(a -> new GainOffset<>(a, 5.0f, -2.0f), (int) 10, (int) (50 - 2));
+        testAdapterWrite(a -> new GainOffset<>(a, 15.0f, -5.0f), (long) 10, (long) (150 - 5));
+        testAdapterWrite(a -> new GainOffset<>(a, -1.0f, 10.0f), (short) 10, (short) (-10 + 10));
+        testAdapterWrite(a -> new GainOffset<>(a, -2.0f, 54.0f), (float) 10, (float) (-20 + 54));
+        testAdapterWrite(a -> new GainOffset<>(a, -5.0f, 1.0f), (double) 10, (double) (-50 + 1));
+        testAdapterWrite(a -> new GainOffset<>(a, -11.0f, 22.0f), BigInteger.valueOf(10),
+                BigInteger.valueOf(-110 + 22));
+    }
+
+    @Test
+    public void shouldSupportStringData() {
+        testAdapterRead(a -> new StringData(a, StandardCharsets.US_ASCII), new byte[] { 0x74, 0x65, 0x73, 0x74 },
+                "test");
+        testAdapterWrite(a -> new StringData(a, StandardCharsets.US_ASCII), "test",
+                new byte[] { 0x74, 0x65, 0x73, 0x74 }, Assert::assertArrayEquals);
+    }
+
+    @Test
+    public void shouldSupportToBooolean() {
+        testAdapterRead(ToBoolean::new, (byte) 10, true);
+        testAdapterRead(ToBoolean::new, (short) 10, true);
+        testAdapterRead(ToBoolean::new, (int) 10, true);
+        testAdapterRead(ToBoolean::new, (long) 10, true);
+        testAdapterRead(ToBoolean::new, (short) 10, true);
+        testAdapterRead(ToBoolean::new, (float) 10, true);
+        testAdapterRead(ToBoolean::new, (double) 10, true);
+        testAdapterRead(ToBoolean::new, BigInteger.valueOf(10), true);
+
+        testAdapterRead(ToBoolean::new, (byte) 0, false);
+        testAdapterRead(ToBoolean::new, (short) 0, false);
+        testAdapterRead(ToBoolean::new, (int) 0, false);
+        testAdapterRead(ToBoolean::new, (long) 0, false);
+        testAdapterRead(ToBoolean::new, (short) 0, false);
+        testAdapterRead(ToBoolean::new, (float) 0, false);
+        testAdapterRead(ToBoolean::new, (double) 0, false);
+        testAdapterRead(ToBoolean::new, BigInteger.valueOf(0), false);
+    }
+
     private static void apply(byte[] data, Endianness endianness, BiFunction<byte[], Integer, Byte> func) {
         int start;
         int inc;
@@ -234,13 +355,115 @@ public class BinaryDataTest {
         return result;
     }
 
+    private <T> void testRead(BinaryData<T> data, BiFunction<Endianness, Integer, byte[]> bufferProvider,
+            T expectedValue) {
+        testRead(data, bufferProvider, expectedValue, Assert::assertEquals);
+    }
+
+    private <T> void testRead(BinaryData<T> data, BiFunction<Endianness, Integer, byte[]> bufferProvider,
+            T expectedValue, final BiConsumer<T, T> validator) {
+        ByteArrayBuffer testBuf = new ByteArrayBuffer(bufferProvider.apply(data.getEndianness(), data.getSize()));
+        validator.accept(expectedValue, data.read(testBuf, 0));
+    }
+
     private <T> void testReadWrite(BinaryData<T> data, BiFunction<Endianness, Integer, byte[]> bufferProvider,
             T expectedValue) {
+        testReadWrite(data, bufferProvider, expectedValue, Assert::assertEquals);
+    }
+
+    private <T> void testReadWrite(BinaryData<T> data, BiFunction<Endianness, Integer, byte[]> bufferProvider,
+            T expectedValue, final BiConsumer<T, T> readValidator) {
         ByteArrayBuffer testBuf = new ByteArrayBuffer(bufferProvider.apply(data.getEndianness(), data.getSize()));
-        assertEquals(expectedValue, data.read(testBuf, 0));
+        readValidator.accept(expectedValue, data.read(testBuf, 0));
         ByteArrayBuffer writeBuf = new ByteArrayBuffer(new byte[data.getSize()]);
         data.write(writeBuf, 0, expectedValue);
         assertArrayEquals(testBuf.getBackingArray(), writeBuf.getBackingArray());
+    }
+
+    private <T, U> void testAdapterRead(final Function<BinaryData<T>, BinaryData<U>> supplier, final T suppliedValue,
+            final U expectedValue) {
+        testAdapterRead(supplier, suppliedValue, expectedValue, Assert::assertEquals);
+    }
+
+    private <T, U> void testAdapterWrite(final Function<BinaryData<T>, BinaryData<U>> supplier, final U writtenValue,
+            final T forwardedValue) {
+        testAdapterWrite(supplier, writtenValue, forwardedValue, Assert::assertEquals);
+    }
+
+    private <T, U> void testAdapterRead(final Function<BinaryData<T>, BinaryData<U>> supplier, final T suppliedValue,
+            final U expectedValue, final BiConsumer<U, U> validator) {
+        final AdapterHelper<T> helper = new AdapterHelper<>(suppliedValue);
+        final BinaryData<U> underTest = supplier.apply(helper);
+        helper.assertIsWrapper(underTest);
+        validator.accept(expectedValue, underTest.read(new ByteArrayBuffer(new byte[0]), 0));
+    }
+
+    private <T, U> void testAdapterWrite(final Function<BinaryData<T>, BinaryData<U>> supplier, final U writtenValue,
+            final T forwardedValue, final BiConsumer<T, T> validator) {
+        @SuppressWarnings("unchecked")
+        final AdapterHelper<T> helper = new AdapterHelper<>((Class<T>) forwardedValue.getClass());
+        final BinaryData<U> underTest = supplier.apply(helper);
+        helper.assertIsWrapper(underTest);
+        underTest.write(new ByteArrayBuffer(new byte[0]), 0, writtenValue);
+        validator.accept(forwardedValue, helper.getValue());
+    }
+
+    private static final class AdapterHelper<T> implements BinaryData<T> {
+
+        private T value;
+        private final Class<T> valueType;
+        private final Endianness endianness;
+        private final int size;
+
+        public AdapterHelper(T value, Class<T> valueType, Endianness endianness, int size) {
+            this.value = value;
+            this.valueType = valueType;
+            this.endianness = endianness;
+            this.size = size;
+        }
+
+        @SuppressWarnings("unchecked")
+        public AdapterHelper(final T value) {
+            this(value, (Class<T>) value.getClass(), Endianness.LITTLE_ENDIAN, 1);
+        }
+
+        public AdapterHelper(final Class<T> valueType) {
+            this(null, valueType, Endianness.LITTLE_ENDIAN, 1);
+        }
+
+        @Override
+        public Endianness getEndianness() {
+            return endianness;
+        }
+
+        @Override
+        public int getSize() {
+            return size;
+        }
+
+        @Override
+        public void write(Buffer buf, int offset, T value) {
+            this.value = value;
+        }
+
+        @Override
+        public T read(Buffer buf, int offset) {
+            return value;
+        }
+
+        public T getValue() {
+            return value;
+        }
+
+        @Override
+        public Class<T> getValueType() {
+            return valueType;
+        }
+
+        public <U> void assertIsWrapper(final BinaryData<U> wrapper) {
+            assertEquals(getEndianness(), wrapper.getEndianness());
+            assertEquals(getSize(), wrapper.getSize());
+        }
     }
 
 }

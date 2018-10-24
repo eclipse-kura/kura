@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 
 import org.eclipse.kura.KuraErrorCode;
@@ -237,22 +238,10 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
 
                 while (modemXchangePair != null) {
                     String expectedStr = modemXchangePair.getExpectString();
-                    String sendStr = removeQuotes(modemXchangePair.getSendString());
 
-                    if ("OK".equals(expectedStr)) {
-                        // apn
-                        if (sendStr.contains(",")) {
-                            String[] sendArgs = sendStr.split(",");
-                            if (sendArgs.length == 3 && isGsmGprsUmtsHspa) {
-                                pdpType = removeQuotes(sendArgs[1]);
-                                apn = removeQuotes(sendArgs[2]);
-                            }
-                        }
-                    } else if ("CONNECT".equals(expectedStr)) {
+                    if ("CONNECT".equals(expectedStr) && prevXchangePair != null) {
                         // dial string
-                        if (prevXchangePair != null) {
-                            dialString = removeQuotes(prevXchangePair.getSendString());
-                        }
+                        dialString = removeQuotes(prevXchangePair.getSendString());
                     }
 
                     prevXchangePair = modemXchangePair;
@@ -260,9 +249,13 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
                 }
             }
 
+            pdpType = getPdpType(ifaceName);
+            apn = getApn(ifaceName);
+
             logger.debug("* Enabled: {}", enabled);
             logger.debug("* CHAT file: {}", chatFilename);
             logger.debug("* UnitNum: {}", unitNum);
+            logger.debug("* APN: {}", apn);
             logger.debug("* dial string: {}", dialString);
             logger.debug("* persist: {}", persist);
             logger.debug("* maxfail: {}", maxFail);
@@ -290,7 +283,6 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
                     pass = papSecret;
                 }
 
-                logger.debug("* APN: {}", apn);
                 logger.debug("* auth: {}", authType);
                 logger.debug("* username: {}", username);
                 logger.debug("* password: {}", pass);
@@ -300,7 +292,6 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
         boolean gpsEnabled = isGpsEnabled(ifaceName);
 
         int resetTout = getResetTimeout(ifaceName);
-
         // Populate the modem config
         ModemConfig modemConfig = new ModemConfig();
 
@@ -359,11 +350,11 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
 
     private Properties loadPeerFileProperties(String peerFilename) throws KuraException {
         Properties props = new Properties();
-        try (FileInputStream fis = new FileInputStream(peerFilename);){
+        try (FileInputStream fis = new FileInputStream(peerFilename);) {
             props.load(fis);
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "Error getting modem config", e);
-        } 
+        }
 
         return props;
     }
@@ -389,6 +380,18 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
         }
 
         return gpsEnabled;
+    }
+
+    private String getPdpType(String ifaceName) {
+        StringBuilder key = new StringBuilder().append("net.interface.").append(ifaceName).append(".config.pdpType");
+        String pdpType = getKuranetProperty(key.toString());
+        return Objects.toString(pdpType, ModemConfig.PdpType.UNKNOWN.name());
+    }
+
+    private String getApn(String ifaceName) {
+        StringBuilder key = new StringBuilder().append("net.interface.").append(ifaceName).append(".config.apn");
+        String apn = getKuranetProperty(key.toString());
+        return Objects.toString(apn, "");
     }
 
     private String checkIsPeerSymlink(String defaultModel, File peerFile) {

@@ -94,11 +94,11 @@ public class ChannelServlet extends HttpServlet {
         try {
             WIRE_ASSET_CHANNEL_DESCRIPTOR.getParameters().forEach(i -> {
                 try {
-                    printer.print(i.getName());
+                    printer.print(i.getId().substring(1));
                 } catch (IOException e) {
                     error.set(true);
                 }
-                orderedFields.add(new StringBuilder().append("+").append(i.getName()).toString());
+                orderedFields.add(new StringBuilder().append("+").append(i.getId().substring(1)).toString());
             });
 
             withDriver(driverPid, driver -> {
@@ -107,11 +107,11 @@ public class ChannelServlet extends HttpServlet {
 
                 for (AD ad : descriptor) {
                     try {
-                        printer.print(ad.getName());
+                        printer.print(ad.getId());
                     } catch (IOException e) {
                         error.set(true);
                     }
-                    orderedFields.add(ad.getName());
+                    orderedFields.add(ad.getId());
                 }
             });
             printer.println();

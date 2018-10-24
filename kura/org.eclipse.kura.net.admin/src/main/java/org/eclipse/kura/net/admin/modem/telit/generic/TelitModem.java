@@ -20,7 +20,6 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.comm.CommConnection;
 import org.eclipse.kura.comm.CommURI;
-import org.eclipse.kura.internal.board.BoardPowerState;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemInfo;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemsInfo;
 import org.eclipse.kura.linux.net.modem.UsbModemDriver;
@@ -453,7 +452,7 @@ public abstract class TelitModem {
     public String getMobileSubscriberIdentity() throws KuraException {
         synchronized (this.atLock) {
             if (this.imsi == null) {
-                if (isSimCardReady()) {
+                if (isTelitSimCardReady()) {
                     logger.debug("sendCommand getIMSI :: {}", TelitModemAtCommands.getIMSI.getCommand());
                     byte[] reply;
                     CommConnection commAtConnection = openSerialPort(getAtPort());
@@ -488,7 +487,7 @@ public abstract class TelitModem {
     public String getIntegratedCirquitCardId() throws KuraException {
         synchronized (this.atLock) {
             if (this.iccid == null) {
-                if (isSimCardReady()) {
+                if (isTelitSimCardReady()) {
                     logger.debug("sendCommand getICCID :: {}", TelitModemAtCommands.getICCID.getCommand());
                     byte[] reply;
                     CommConnection commAtConnection = openSerialPort(getAtPort());
@@ -627,7 +626,7 @@ public abstract class TelitModem {
         return this.gpsEnabled;
     }
 
-    public abstract boolean isSimCardReady() throws KuraException;
+    public abstract boolean isTelitSimCardReady() throws KuraException;
 
     protected CommConnection openSerialPort(String port) throws KuraException {
 

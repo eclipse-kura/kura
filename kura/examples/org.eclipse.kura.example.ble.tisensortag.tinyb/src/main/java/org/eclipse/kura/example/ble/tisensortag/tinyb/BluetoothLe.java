@@ -11,6 +11,8 @@
  *******************************************************************************/
 package org.eclipse.kura.example.ble.tisensortag.tinyb;
 
+import static java.util.Objects.isNull;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -188,6 +190,11 @@ public class BluetoothLe implements ConfigurableComponent {
     // --------------------------------------------------------------------
 
     protected void doPublishKeys(String address, int key) {
+        if (isNull(this.cloudPublisher)) {
+            logger.warn("Can't publish message for button event: cloudPublisher undefined.");
+            return;
+        }
+
         KuraPayload payload = new KuraPayload();
         payload.setTimestamp(new Date());
         payload.addMetric("key", key);
@@ -198,12 +205,8 @@ public class BluetoothLe implements ConfigurableComponent {
         KuraMessage message = new KuraMessage(payload, properties);
 
         try {
-            if (this.cloudPublisher != null) {
-                this.cloudPublisher.publish(message);
-            } else {
-                logger.warn("Can't publish message for button event: cloudPublisher undefined.");
-            }
-        } catch (Exception e) {
+            this.cloudPublisher.publish(message);
+        } catch (KuraException e) {
             logger.error("Can't publish message for button event", e);
         }
 
@@ -338,16 +341,17 @@ public class BluetoothLe implements ConfigurableComponent {
     }
 
     private void publish(TiSensorTag myTiSensorTag, KuraPayload payload) {
+        if (isNull(this.cloudPublisher)) {
+            logger.warn("Can't publish message: cloudPublisher undefined.");
+            return;
+        }
+
         Map<String, Object> properties = new HashMap<>();
         properties.put(ADDRESS_MESSAGE_PROP_KEY, myTiSensorTag.getBluetoothLeDevice().getAddress());
 
         KuraMessage message = new KuraMessage(payload, properties);
         try {
-            if (this.cloudPublisher != null) {
-                this.cloudPublisher.publish(message);
-            } else {
-                logger.warn("Can't publish message: cloudPublisher undefined.");
-            }
+            this.cloudPublisher.publish(message);
         } catch (KuraException e) {
             logger.error("Publish message failed", e);
         }

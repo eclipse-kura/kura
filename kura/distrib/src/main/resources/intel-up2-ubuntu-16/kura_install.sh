@@ -36,6 +36,9 @@ if [ ! -d /etc/sysconfig ]; then
     mkdir /etc/sysconfig
 fi
 
+systemctl stop apparmor
+systemctl disable apparmor
+
 #set up default networking file
 cp ${INSTALL_DIR}/kura/install/network.interfaces.ubuntu /etc/network/interfaces
 cp ${INSTALL_DIR}/kura/install/network.interfaces.ubuntu ${INSTALL_DIR}/kura/.data/interfaces

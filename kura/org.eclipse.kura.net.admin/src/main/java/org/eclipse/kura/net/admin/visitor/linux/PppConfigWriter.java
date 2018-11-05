@@ -175,6 +175,16 @@ public class PppConfigWriter implements NetworkConfigurationVisitor {
                 logger.debug("Removing gpsEnabled for {}", oldInterfaceName);
                 KuranetConfig.deleteProperty(key.toString());
 
+                // Remove apn
+                key = new StringBuilder().append("net.interface.").append(oldInterfaceName).append(".config.apn");
+                logger.debug("Removing apn for {}", oldInterfaceName);
+                KuranetConfig.deleteProperty(key.toString());
+
+                // Remove pdpType
+                key = new StringBuilder().append("net.interface.").append(oldInterfaceName).append(".config.pdpType");
+                logger.debug("Removing pdpType for {}", oldInterfaceName);
+                KuranetConfig.deleteProperty(key.toString());
+
                 // Remove status
                 IfcfgConfigWriter.removeKuraExtendedConfig(oldInterfaceName);
             } catch (IOException e) {
@@ -200,6 +210,16 @@ public class PppConfigWriter implements NetworkConfigurationVisitor {
                             .append(newInterfaceName).append(".config.gpsEnabled");
                     logger.debug("Setting gpsEnabled for {}", newInterfaceName);
                     KuranetConfig.setProperty(gpsEnabledKey.toString(), Boolean.toString(modemConfig.isGpsEnabled()));
+
+                    final StringBuilder apnKey = new StringBuilder().append("net.interface.").append(newInterfaceName)
+                            .append(".config.apn");
+                    logger.debug("Setting apn for {}", newInterfaceName);
+                    KuranetConfig.setProperty(apnKey.toString(), modemConfig.getApn());
+
+                    final StringBuilder pdpTypeKey = new StringBuilder().append("net.interface.")
+                            .append(newInterfaceName).append(".config.pdpType");
+                    logger.debug("Setting pdpType for {}", newInterfaceName);
+                    KuranetConfig.setProperty(pdpTypeKey.toString(), modemConfig.getPdpType().name());
 
                     logger.debug("Writing connect scripts for {} using {}", modemInterfaceConfig.getName(),
                             configClass);

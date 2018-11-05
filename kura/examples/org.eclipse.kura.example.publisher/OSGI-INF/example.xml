@@ -30,17 +30,15 @@
    </service>
 
    <reference name="CloudPublisher"
-           policy="static"
+           policy="dynamic"
            bind="setCloudPublisher"
            unbind="unsetCloudPublisher"
-           policy-option="greedy"
            cardinality="0..1"
            interface="org.eclipse.kura.cloudconnection.publisher.CloudPublisher"/>
    <reference name="CloudSubscriber"
-           policy="static"
+           policy="dynamic"
            bind="setCloudSubscriber"
            unbind="unsetCloudSubscriber"
-           policy-option="greedy"
            cardinality="0..1"
            interface="org.eclipse.kura.cloudconnection.subscriber.CloudSubscriber"/>
 </scr:component>

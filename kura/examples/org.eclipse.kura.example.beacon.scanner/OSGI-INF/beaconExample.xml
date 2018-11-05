@@ -11,10 +11,9 @@
               policy="static"
               unbind="unsetBluetoothService"/>
     <reference name="CloudPublisher"
-           policy="static"
+           policy="dynamic"
            bind="setCloudPublisher"
            unbind="unsetCloudPublisher"
-           policy-option="greedy"
            cardinality="0..1"
            interface="org.eclipse.kura.cloudconnection.publisher.CloudPublisher"/>
     <property name="service.pid" type="String" value="org.eclipse.kura.example.beacon.scanner.BeaconScannerExample"/>

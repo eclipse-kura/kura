@@ -255,7 +255,7 @@ public interface BluetoothLeDevice {
     /**
      * Returns if the service discovery is ended.
      * 
-     * @since 1.2.0
+     * @since 2.0
      */
     public boolean isServicesResolved();
 
@@ -266,7 +266,7 @@ public interface BluetoothLeDevice {
      * @return TRUE if the device has been removed
      * @throws BluetKuraBluetoothRemoveExceptionoothException
      * 
-     * @since 1.2.0
+     * @since 2.0
      */
     public boolean remove() throws KuraBluetoothRemoveException;
 }

@@ -19,6 +19,7 @@ import java.util.Iterator;
 import java.util.logging.Level;
 
 import org.eclipse.kura.web.client.util.FailureHandler;
+import org.eclipse.kura.web.client.util.request.RequestQueue;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
@@ -243,17 +244,17 @@ public class ServicesUi extends AbstractServicesUi {
                     ServicesUi.this.gwtComponentService.deleteFactoryConfiguration(token,
                             ServicesUi.this.configurableComponent.getComponentId(), true, new AsyncCallback<Void>() {
 
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            EntryClassUi.hideWaitModal();
-                            errorLogger.log(Level.SEVERE, caught.getLocalizedMessage());
-                        }
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    EntryClassUi.hideWaitModal();
+                                    errorLogger.log(Level.SEVERE, caught.getLocalizedMessage());
+                                }
 
-                        @Override
-                        public void onSuccess(Void result) {
-                            Window.Location.reload();
-                        }
-                    });
+                                @Override
+                                public void onSuccess(Void result) {
+                                    Window.Location.reload();
+                                }
+                            });
                 }
             });
         }
@@ -335,57 +336,39 @@ public class ServicesUi extends AbstractServicesUi {
                 Button yes = new Button();
                 yes.setText(MSGS.yesButton());
                 yes.addStyleName("fa fa-check");
-                yes.addClickHandler(new ClickHandler() {
-
-                    @Override
-                    public void onClick(ClickEvent event) {
-                        EntryClassUi.showWaitModal();
-                        try {
-                            getUpdatedConfiguration();
-                        } catch (Exception ex) {
-                            EntryClassUi.hideWaitModal();
-                            FailureHandler.handle(ex);
-                            return;
-                        }
-                        ServicesUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-
-                            @Override
-                            public void onFailure(Throwable ex) {
-                                EntryClassUi.hideWaitModal();
-                                FailureHandler.handle(ex);
-                            }
-
-                            @Override
-                            public void onSuccess(GwtXSRFToken token) {
-                                ServicesUi.this.gwtComponentService.updateComponentConfiguration(token,
-                                        ServicesUi.this.configurableComponent, new AsyncCallback<Void>() {
-
-                                    @Override
-                                    public void onFailure(Throwable caught) {
-                                        EntryClassUi.hideWaitModal();
-                                        FailureHandler.handle(caught);
-                                        errorLogger.log(
-                                                Level.SEVERE, caught.getLocalizedMessage() != null
-                                                        ? caught.getLocalizedMessage() : caught.getClass().getName(),
-                                                caught);
-                                    }
-
-                                    @Override
-                                    public void onSuccess(Void result) {
-                                        ServicesUi.this.modal.hide();
-                                        logger.info(MSGS.info() + ": " + MSGS.deviceConfigApplied());
-                                        ServicesUi.this.apply.setEnabled(false);
-                                        ServicesUi.this.reset.setEnabled(false);
-                                        setDirty(false);
-                                        ServicesUi.this.originalConfig = ServicesUi.this.configurableComponent;
-                                        ServicesUi.this.entryClass.fetchAvailableServices(null);
-                                        EntryClassUi.hideWaitModal();
-                                    }
-                                });
-
-                            }
-                        });
+                yes.addClickHandler(event -> {
+                    try {
+                        getUpdatedConfiguration();
+                    } catch (Exception ex) {
+                        FailureHandler.handle(ex);
+                        return;
                     }
+                    RequestQueue.submit(context -> ServicesUi.this.gwtXSRFService.generateSecurityToken(context
+                            .callback(token -> ServicesUi.this.gwtComponentService.updateComponentConfiguration(token,
+                                    ServicesUi.this.configurableComponent, context.callback(new AsyncCallback<Void>() {
+
+                                        @Override
+                                        public void onFailure(Throwable caught) {
+                                            FailureHandler.handle(caught);
+                                            errorLogger.log(Level.SEVERE,
+                                                    caught.getLocalizedMessage() != null ? caught.getLocalizedMessage()
+                                                            : caught.getClass().getName(),
+                                                    caught);
+                                        }
+
+                                        @Override
+                                        public void onSuccess(Void result) {
+                                            ServicesUi.this.modal.hide();
+                                            logger.info(MSGS.info() + ": " + MSGS.deviceConfigApplied());
+                                            ServicesUi.this.apply.setEnabled(false);
+                                            ServicesUi.this.reset.setEnabled(false);
+                                            setDirty(false);
+                                            ServicesUi.this.originalConfig = ServicesUi.this.configurableComponent;
+                                            context.defer(2000,
+                                                    () -> ServicesUi.this.entryClass.fetchAvailableServices(null));
+                                        }
+                                    })))));
+
                 });
                 group.add(yes);
                 footer.add(group);

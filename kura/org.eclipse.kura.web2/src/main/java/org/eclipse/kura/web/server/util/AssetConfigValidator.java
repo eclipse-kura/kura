@@ -53,13 +53,13 @@ public class AssetConfigValidator {
     private void fillLists(List<Tad> metatypes, List<String> properties, String driverPid) throws Exception {
         ((List<Tad>) WireAssetChannelDescriptor.get().getDescriptor()).forEach(element -> {
             metatypes.add(element);
-            properties.add("+" + element.getName());
+            properties.add(element.getId());
         });
 
         withDriver(driverPid,
                 descriptor -> ((List<Tad>) descriptor.getChannelDescriptor().getDescriptor()).forEach(element -> {
                     metatypes.add(element);
-                    properties.add(element.getName());
+                    properties.add(element.getId());
                 }));
     }
 
@@ -79,7 +79,7 @@ public class AssetConfigValidator {
                 token = token.replace("+", "_");
                 try {
                     channelValues.add(validate(fullChannelMetatype.get(i), token, errors, this.lineNumber));
-                    if (fullChannelMetatype.get(i).getName().equals("name")) {
+                    if (fullChannelMetatype.get(i).getId().substring(1).equals("name")) {
                         channelName = token;
                     }
                 } catch (Exception ex) {

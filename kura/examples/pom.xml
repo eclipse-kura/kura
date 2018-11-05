@@ -19,7 +19,7 @@
 
     <groupId>org.eclipse.kura</groupId>
     <artifactId>examples</artifactId>
-    <version>4.0.0-SNAPSHOT</version>
+    <version>4.1.0-SNAPSHOT</version>
 
     <packaging>pom</packaging>
 

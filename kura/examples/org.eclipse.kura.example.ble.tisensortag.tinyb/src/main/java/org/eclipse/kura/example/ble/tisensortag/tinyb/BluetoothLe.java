@@ -11,6 +11,8 @@
  *******************************************************************************/
 package org.eclipse.kura.example.ble.tisensortag.tinyb;
 
+import static java.util.Objects.isNull;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -188,6 +190,11 @@ public class BluetoothLe implements ConfigurableComponent {
     // --------------------------------------------------------------------
 
     protected void doPublishKeys(String address, int key) {
+        if (isNull(this.cloudPublisher)) {
+            logger.warn("Can't publish message for button event: cloudPublisher undefined.");
+            return;
+        }
+
         KuraPayload payload = new KuraPayload();
         payload.setTimestamp(new Date());
         payload.addMetric("key", key);
@@ -199,8 +206,8 @@ public class BluetoothLe implements ConfigurableComponent {
 
         try {
             this.cloudPublisher.publish(message);
-        } catch (Exception e) {
-            logger.error("Can't publish message for buttons", e);
+        } catch (KuraException e) {
+            logger.error("Can't publish message for button event", e);
         }
 
     }
@@ -334,6 +341,11 @@ public class BluetoothLe implements ConfigurableComponent {
     }
 
     private void publish(TiSensorTag myTiSensorTag, KuraPayload payload) {
+        if (isNull(this.cloudPublisher)) {
+            logger.warn("Can't publish message: cloudPublisher undefined.");
+            return;
+        }
+
         Map<String, Object> properties = new HashMap<>();
         properties.put(ADDRESS_MESSAGE_PROP_KEY, myTiSensorTag.getBluetoothLeDevice().getAddress());
 

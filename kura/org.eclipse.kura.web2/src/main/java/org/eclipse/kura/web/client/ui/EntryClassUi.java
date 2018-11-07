@@ -17,7 +17,6 @@ import static org.eclipse.kura.web.client.util.FilterBuilder.not;
 import static org.eclipse.kura.web.client.util.FilterBuilder.or;
 
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -66,8 +65,6 @@ import org.gwtbootstrap3.client.ui.html.Span;
 import org.gwtbootstrap3.client.ui.html.Strong;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -231,15 +228,11 @@ public class EntryClassUi extends Composite {
         this.contentPanel.setVisible(false);
 
         // Add handler for sidenav show/hide button
-        this.sidenavButton.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                if (EntryClassUi.this.sidenav.getStyleName().contains(SIDENAV_HIDDEN_STYLE_NAME)) {
-                    showSidenav();
-                } else {
-                    hideSidenav();
-                }
+        this.sidenavButton.addClickHandler(event -> {
+            if (EntryClassUi.this.sidenav.getStyleName().contains(SIDENAV_HIDDEN_STYLE_NAME)) {
+                showSidenav();
+            } else {
+                hideSidenav();
             }
         });
 
@@ -275,8 +268,8 @@ public class EntryClassUi extends Composite {
         RootPanel.get().removeStyleName(NOT_SCROLLABLE_STYLE_NAME);
     }
 
-    public void setSession(GwtSession GwtSession) {
-        this.currentSession = GwtSession;
+    public void setSession(GwtSession gwtSession) {
+        this.currentSession = gwtSession;
     }
 
     public void setFooter(GwtSession gwtSession) {
@@ -298,243 +291,170 @@ public class EntryClassUi extends Composite {
         }
 
         // Status Panel
-        this.status.addClickHandler(new ClickHandler() {
+        this.status.addClickHandler(event -> {
+            Button b = new Button(MSGS.yesButton(), event1 -> {
+                forceTabsCleaning();
+                if (EntryClassUi.this.modal != null) {
+                    EntryClassUi.this.modal.hide();
+                }
+                EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.status);
+                EntryClassUi.this.contentPanel.setVisible(true);
+                setHeader("Status", null);
+                EntryClassUi.this.contentPanelBody.clear();
+                EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.statusBinder);
+                EntryClassUi.this.statusBinder.setSession(EntryClassUi.this.currentSession);
+                EntryClassUi.this.statusBinder.setParent(instanceReference);
+                EntryClassUi.this.statusBinder.loadStatusData();
+            });
 
-            @Override
-            public void onClick(ClickEvent event) {
-                Button b = new Button(MSGS.yesButton(), new ClickHandler() {
-
-                    @Override
-                    public void onClick(ClickEvent event) {
-                        forceTabsCleaning();
-                        if (EntryClassUi.this.modal != null) {
-                            EntryClassUi.this.modal.hide();
-                        }
-                        EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.status);
-                        EntryClassUi.this.contentPanel.setVisible(true);
-                        setHeader("Status", null);
-                        EntryClassUi.this.contentPanelBody.clear();
-                        EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.statusBinder);
-                        EntryClassUi.this.statusBinder.setSession(EntryClassUi.this.currentSession);
-                        EntryClassUi.this.statusBinder.setParent(instanceReference);
-                        EntryClassUi.this.statusBinder.loadStatusData();
-                    }
-                });
-
-                renderDirtyConfigModal(b);
-            }
+            renderDirtyConfigModal(b);
         });
 
         // Device Panel
-        this.device.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                Button b = new Button(MSGS.yesButton(), new ClickHandler() {
-
-                    @Override
-                    public void onClick(ClickEvent event) {
-                        forceTabsCleaning();
-                        if (EntryClassUi.this.modal != null) {
-                            EntryClassUi.this.modal.hide();
-                        }
-                        EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.device);
-                        EntryClassUi.this.contentPanel.setVisible(true);
-                        setHeader(MSGS.device(), null);
-                        EntryClassUi.this.contentPanelBody.clear();
-                        EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.deviceBinder);
-                        EntryClassUi.this.deviceBinder.setSession(EntryClassUi.this.currentSession);
-                        EntryClassUi.this.deviceBinder.initDevicePanel();
-                    }
-                });
-                renderDirtyConfigModal(b);
-            }
+        this.device.addClickHandler(event -> {
+            Button b = new Button(MSGS.yesButton(), event1 -> {
+                forceTabsCleaning();
+                if (EntryClassUi.this.modal != null) {
+                    EntryClassUi.this.modal.hide();
+                }
+                EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.device);
+                EntryClassUi.this.contentPanel.setVisible(true);
+                setHeader(MSGS.device(), null);
+                EntryClassUi.this.contentPanelBody.clear();
+                EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.deviceBinder);
+                EntryClassUi.this.deviceBinder.setSession(EntryClassUi.this.currentSession);
+                EntryClassUi.this.deviceBinder.initDevicePanel();
+            });
+            renderDirtyConfigModal(b);
         });
 
         // Network Panel
         if (this.network.isVisible()) {
-            this.network.addClickHandler(new ClickHandler() {
-
-                @Override
-                public void onClick(ClickEvent event) {
-                    Button b = new Button(MSGS.yesButton(), new ClickHandler() {
-
-                        @Override
-                        public void onClick(ClickEvent event) {
-                            forceTabsCleaning();
-                            if (EntryClassUi.this.modal != null) {
-                                EntryClassUi.this.modal.hide();
-                            }
-                            EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.network);
-                            EntryClassUi.this.contentPanel.setVisible(true);
-                            setHeader(MSGS.network(), null);
-                            EntryClassUi.this.contentPanelBody.clear();
-                            EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.networkBinder);
-                            EntryClassUi.this.networkBinder.setSession(EntryClassUi.this.currentSession);
-                            EntryClassUi.this.networkBinder.initNetworkPanel();
-                        }
-                    });
-                    renderDirtyConfigModal(b);
-                }
+            this.network.addClickHandler(event -> {
+                Button b = new Button(MSGS.yesButton(), event1 -> {
+                    forceTabsCleaning();
+                    if (EntryClassUi.this.modal != null) {
+                        EntryClassUi.this.modal.hide();
+                    }
+                    EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.network);
+                    EntryClassUi.this.contentPanel.setVisible(true);
+                    setHeader(MSGS.network(), null);
+                    EntryClassUi.this.contentPanelBody.clear();
+                    EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.networkBinder);
+                    EntryClassUi.this.networkBinder.setSession(EntryClassUi.this.currentSession);
+                    EntryClassUi.this.networkBinder.initNetworkPanel();
+                });
+                renderDirtyConfigModal(b);
             });
         }
 
         // Firewall Panel
         if (this.firewall.isVisible()) {
-            this.firewall.addClickHandler(new ClickHandler() {
-
-                @Override
-                public void onClick(ClickEvent event) {
-                    Button b = new Button(MSGS.yesButton(), new ClickHandler() {
-
-                        @Override
-                        public void onClick(ClickEvent event) {
-                            forceTabsCleaning();
-                            if (EntryClassUi.this.modal != null) {
-                                EntryClassUi.this.modal.hide();
-                            }
-                            EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.firewall);
-                            EntryClassUi.this.contentPanel.setVisible(true);
-                            setHeader(MSGS.firewall(), null);
-                            EntryClassUi.this.contentPanelBody.clear();
-                            EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.firewallBinder);
-                            EntryClassUi.this.firewallBinder.initFirewallPanel();
-                        }
-                    });
-                    renderDirtyConfigModal(b);
-                }
+            this.firewall.addClickHandler(event -> {
+                Button b = new Button(MSGS.yesButton(), event1 -> {
+                    forceTabsCleaning();
+                    if (EntryClassUi.this.modal != null) {
+                        EntryClassUi.this.modal.hide();
+                    }
+                    EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.firewall);
+                    EntryClassUi.this.contentPanel.setVisible(true);
+                    setHeader(MSGS.firewall(), null);
+                    EntryClassUi.this.contentPanelBody.clear();
+                    EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.firewallBinder);
+                    EntryClassUi.this.firewallBinder.initFirewallPanel();
+                });
+                renderDirtyConfigModal(b);
             });
         }
 
         // Packages Panel
-        this.packages.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                Button b = new Button(MSGS.yesButton(), new ClickHandler() {
-
-                    @Override
-                    public void onClick(ClickEvent event) {
-                        forceTabsCleaning();
-                        if (EntryClassUi.this.modal != null) {
-                            EntryClassUi.this.modal.hide();
-                        }
-                        EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.packages);
-                        EntryClassUi.this.contentPanel.setVisible(true);
-                        setHeader(MSGS.packages(), null);
-                        EntryClassUi.this.contentPanelBody.clear();
-                        EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.packagesBinder);
-                        EntryClassUi.this.packagesBinder.setSession(EntryClassUi.this.currentSession);
-                        EntryClassUi.this.packagesBinder.setMainUi(EntryClassUi.this.ui);
-                        EntryClassUi.this.packagesBinder.refresh();
-                    }
-                });
-                renderDirtyConfigModal(b);
-            }
+        this.packages.addClickHandler(event -> {
+            Button b = new Button(MSGS.yesButton(), event1 -> {
+                forceTabsCleaning();
+                if (EntryClassUi.this.modal != null) {
+                    EntryClassUi.this.modal.hide();
+                }
+                EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.packages);
+                EntryClassUi.this.contentPanel.setVisible(true);
+                setHeader(MSGS.packages(), null);
+                EntryClassUi.this.contentPanelBody.clear();
+                EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.packagesBinder);
+                EntryClassUi.this.packagesBinder.setSession(EntryClassUi.this.currentSession);
+                EntryClassUi.this.packagesBinder.setMainUi(EntryClassUi.this.ui);
+                EntryClassUi.this.packagesBinder.refresh();
+            });
+            renderDirtyConfigModal(b);
         });
 
         // Settings Panel
-        this.settings.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                Button b = new Button(MSGS.yesButton(), new ClickHandler() {
-
-                    @Override
-                    public void onClick(ClickEvent event) {
-                        forceTabsCleaning();
-                        if (EntryClassUi.this.modal != null) {
-                            EntryClassUi.this.modal.hide();
-                        }
-                        EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.settings);
-                        EntryClassUi.this.contentPanel.setVisible(true);
-                        setHeader(MSGS.settings(), null);
-                        EntryClassUi.this.contentPanelBody.clear();
-                        EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.settingsBinder);
-                        EntryClassUi.this.settingsBinder.setSession(EntryClassUi.this.currentSession);
-                        EntryClassUi.this.settingsBinder.load();
-                    }
-                });
-                renderDirtyConfigModal(b);
-            }
+        this.settings.addClickHandler(event -> {
+            Button b = new Button(MSGS.yesButton(), event1 -> {
+                forceTabsCleaning();
+                if (EntryClassUi.this.modal != null) {
+                    EntryClassUi.this.modal.hide();
+                }
+                EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.settings);
+                EntryClassUi.this.contentPanel.setVisible(true);
+                setHeader(MSGS.settings(), null);
+                EntryClassUi.this.contentPanelBody.clear();
+                EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.settingsBinder);
+                EntryClassUi.this.settingsBinder.setSession(EntryClassUi.this.currentSession);
+                EntryClassUi.this.settingsBinder.load();
+            });
+            renderDirtyConfigModal(b);
         });
 
         // Cloud services Panel
-        this.cloudServices.addClickHandler(new ClickHandler() {
+        this.cloudServices.addClickHandler(event -> {
+            Button b = new Button(MSGS.yesButton(), event1 -> {
+                forceTabsCleaning();
+                if (EntryClassUi.this.modal != null) {
+                    EntryClassUi.this.modal.hide();
+                }
+                EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.cloudServices);
+                EntryClassUi.this.contentPanel.setVisible(true);
+                setHeader(MSGS.cloudServices(), null);
+                EntryClassUi.this.contentPanelBody.clear();
+                EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.cloudServicesBinder);
+                EntryClassUi.this.cloudServicesBinder.refresh();
 
-            @Override
-            public void onClick(ClickEvent event) {
-                Button b = new Button(MSGS.yesButton(), new ClickHandler() {
-
-                    @Override
-                    public void onClick(ClickEvent event) {
-                        forceTabsCleaning();
-                        if (EntryClassUi.this.modal != null) {
-                            EntryClassUi.this.modal.hide();
-                        }
-                        EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.cloudServices);
-                        EntryClassUi.this.contentPanel.setVisible(true);
-                        setHeader(MSGS.cloudServices(), null);
-                        EntryClassUi.this.contentPanelBody.clear();
-                        EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.cloudServicesBinder);
-                        EntryClassUi.this.cloudServicesBinder.refresh();
-
-                    }
-                });
-                renderDirtyConfigModal(b);
-            }
+            });
+            renderDirtyConfigModal(b);
         });
 
         // Wires Panel
-        this.wires.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                Button b = new Button(MSGS.yesButton(), new ClickHandler() {
-
-                    @Override
-                    public void onClick(ClickEvent event) {
-                        forceTabsCleaning();
-                        if (EntryClassUi.this.modal != null) {
-                            EntryClassUi.this.modal.hide();
-                        }
-                        EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.wires);
-                        EntryClassUi.this.contentPanel.setVisible(true);
-                        setHeader(MSGS.wires(), null);
-                        EntryClassUi.this.contentPanelBody.clear();
-                        EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.wiresBinder);
-                        EntryClassUi.this.wiresBinder.load();
-                        // EntryClassUi.this.discardWiresPanelChanges();
-                    }
-                });
-                renderDirtyConfigModal(b);
-            }
+        this.wires.addClickHandler(event -> {
+            Button b = new Button(MSGS.yesButton(), event1 -> {
+                forceTabsCleaning();
+                if (EntryClassUi.this.modal != null) {
+                    EntryClassUi.this.modal.hide();
+                }
+                EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.wires);
+                EntryClassUi.this.contentPanel.setVisible(true);
+                setHeader(MSGS.wires(), null);
+                EntryClassUi.this.contentPanelBody.clear();
+                EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.wiresBinder);
+                EntryClassUi.this.wiresBinder.load();
+            });
+            renderDirtyConfigModal(b);
         });
 
         // Drivers and Twins services Panel
-        this.driversAndAssetsServices.addClickHandler(new ClickHandler() {
+        this.driversAndAssetsServices.addClickHandler(event -> {
+            Button b = new Button(MSGS.yesButton(), event1 -> {
+                forceTabsCleaning();
+                if (EntryClassUi.this.modal != null) {
+                    EntryClassUi.this.modal.hide();
+                }
+                EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.driversAndAssetsServices);
+                EntryClassUi.this.contentPanel.setVisible(true);
+                setHeader(MSGS.driversAndAssetsServices(), null);
+                EntryClassUi.this.contentPanelBody.clear();
+                EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.driversAndTwinsBinder);
+                EntryClassUi.this.driversAndTwinsBinder.refresh();
 
-            @Override
-            public void onClick(ClickEvent event) {
-                Button b = new Button(MSGS.yesButton(), new ClickHandler() {
-
-                    @Override
-                    public void onClick(ClickEvent event) {
-                        forceTabsCleaning();
-                        if (EntryClassUi.this.modal != null) {
-                            EntryClassUi.this.modal.hide();
-                        }
-                        EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.driversAndAssetsServices);
-                        EntryClassUi.this.contentPanel.setVisible(true);
-                        setHeader(MSGS.driversAndAssetsServices(), null);
-                        EntryClassUi.this.contentPanelBody.clear();
-                        EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.driversAndTwinsBinder);
-                        EntryClassUi.this.driversAndTwinsBinder.refresh();
-
-                    }
-                });
-                renderDirtyConfigModal(b);
-            }
+            });
+            renderDirtyConfigModal(b);
         });
 
     }
@@ -572,31 +492,27 @@ public class EntryClassUi extends Composite {
     }
 
     private void sortConfigurationsByName(List<GwtConfigComponent> configs) {
-        Collections.sort(configs, new Comparator<GwtConfigComponent>() {
-
-            @Override
-            public int compare(GwtConfigComponent arg0, GwtConfigComponent arg1) {
-                String name0;
-                String pid0 = arg0.getComponentId();
-                String pid1 = arg1.getComponentId();
-                int start = pid0.lastIndexOf('.');
-                int substringIndex = start + 1;
-                if (start != -1 && substringIndex < pid0.length()) {
-                    name0 = pid0.substring(substringIndex);
-                } else {
-                    name0 = pid0;
-                }
-
-                String name1;
-                start = pid1.lastIndexOf('.');
-                substringIndex = start + 1;
-                if (start != -1 && substringIndex < pid1.length()) {
-                    name1 = pid1.substring(substringIndex);
-                } else {
-                    name1 = pid1;
-                }
-                return name0.compareTo(name1);
+        Collections.sort(configs, (arg0, arg1) -> {
+            String name0;
+            String pid0 = arg0.getComponentId();
+            String pid1 = arg1.getComponentId();
+            int start = pid0.lastIndexOf('.');
+            int substringIndex = start + 1;
+            if (start != -1 && substringIndex < pid0.length()) {
+                name0 = pid0.substring(substringIndex);
+            } else {
+                name0 = pid0;
             }
+
+            String name1;
+            start = pid1.lastIndexOf('.');
+            substringIndex = start + 1;
+            if (start != -1 && substringIndex < pid1.length()) {
+                name1 = pid1.substring(substringIndex);
+            } else {
+                name1 = pid1;
+            }
+            return name0.compareTo(name1);
         });
     }
 
@@ -648,42 +564,38 @@ public class EntryClassUi extends Composite {
 
         initNewFactoryComponentModal();
 
-        this.factoriesButton.addClickHandler(new ClickHandler() {
+        this.factoriesButton.addClickHandler(event -> {
+            // always empty the PID input field
+            EntryClassUi.this.componentName.setValue("");
+            EntryClassUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
-            @Override
-            public void onClick(ClickEvent event) {
-                // always empty the PID input field
-                EntryClassUi.this.componentName.setValue("");
-                EntryClassUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+                @Override
+                public void onFailure(Throwable ex) {
+                    FailureHandler.handle(ex, EntryClassUi.class.getName());
+                }
 
-                    @Override
-                    public void onFailure(Throwable ex) {
-                        FailureHandler.handle(ex, EntryClassUi.class.getName());
-                    }
+                @Override
+                public void onSuccess(GwtXSRFToken token) {
+                    EntryClassUi.this.gwtComponentService.findFactoryComponents(token,
+                            new AsyncCallback<List<String>>() {
 
-                    @Override
-                    public void onSuccess(GwtXSRFToken token) {
-                        EntryClassUi.this.gwtComponentService.findFactoryComponents(token,
-                                new AsyncCallback<List<String>>() {
+                                @Override
+                                public void onFailure(Throwable ex) {
+                                    FailureHandler.handle(ex, EntryClassUi.class.getName());
+                                }
 
-                                    @Override
-                                    public void onFailure(Throwable ex) {
-                                        FailureHandler.handle(ex, EntryClassUi.class.getName());
+                                @Override
+                                public void onSuccess(final List<String> result) {
+                                    EntryClassUi.this.factoriesList.clear();
+                                    EntryClassUi.this.factoriesList.addItem(SELECT_COMPONENT);
+                                    for (final String servicePid : result) {
+                                        EntryClassUi.this.factoriesList.addItem(servicePid);
                                     }
-
-                                    @Override
-                                    public void onSuccess(final List<String> result) {
-                                        EntryClassUi.this.factoriesList.clear();
-                                        EntryClassUi.this.factoriesList.addItem(SELECT_COMPONENT);
-                                        for (final String servicePid : result) {
-                                            EntryClassUi.this.factoriesList.addItem(servicePid);
-                                        }
-                                        EntryClassUi.this.newFactoryComponentModal.show();
-                                    }
-                                });
-                    }
-                });
-            }
+                                    EntryClassUi.this.newFactoryComponentModal.show();
+                                }
+                            });
+                }
+            });
         });
     }
 
@@ -771,13 +683,7 @@ public class EntryClassUi extends Composite {
             Button no = new Button();
             no.setText(MSGS.noButton());
             no.addStyleName("fa fa-times");
-            no.addClickHandler(new ClickHandler() {
-
-                @Override
-                public void onClick(ClickEvent event) {
-                    EntryClassUi.this.modal.hide();
-                }
-            });
+            no.addClickHandler(event -> EntryClassUi.this.modal.hide());
             footer.add(no);
 
             b.addStyleName("fa fa-check");
@@ -847,7 +753,7 @@ public class EntryClassUi extends Composite {
         }
     }
 
-    public void setDirty(boolean b) {
+    public void setDirty() {
         if (this.servicesUi != null) {
             this.servicesUi.setDirty(false);
         }

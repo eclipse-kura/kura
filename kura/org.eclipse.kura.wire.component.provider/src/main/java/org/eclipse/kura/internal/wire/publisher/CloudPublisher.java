@@ -53,7 +53,7 @@ import org.osgi.service.wireadmin.Wire;
  */
 public final class CloudPublisher implements WireReceiver, ConfigurableComponent {
 
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger logger = LogManager.getLogger(CloudPublisher.class);
 
     private static final String ASSET_NAME_PROPERTY_KEY = "assetName";
 

@@ -53,7 +53,7 @@ import org.osgi.service.wireadmin.Wire;
  */
 public final class CloudSubscriber implements WireEmitter, ConfigurableComponent, CloudSubscriberListener {
 
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger logger = LogManager.getLogger(CloudSubscriber.class);
 
     private volatile WireHelperService wireHelperService;
 

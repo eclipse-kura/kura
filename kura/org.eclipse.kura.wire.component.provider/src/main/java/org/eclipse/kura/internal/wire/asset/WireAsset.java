@@ -96,7 +96,7 @@ import org.osgi.service.wireadmin.Wire;
  */
 public final class WireAsset extends BaseAsset implements WireEmitter, WireReceiver {
 
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger logger = LogManager.getLogger(WireAsset.class);
 
     private volatile WireHelperService wireHelperService;
 

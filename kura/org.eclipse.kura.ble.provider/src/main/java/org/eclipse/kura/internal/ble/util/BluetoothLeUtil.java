@@ -26,7 +26,7 @@ import org.apache.logging.log4j.LogManager;
 
 public class BluetoothLeUtil {
 
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger logger = LogManager.getLogger(BluetoothLeUtil.class);
     private static final ExecutorService processExecutor = Executors.newSingleThreadExecutor();
 
     public static final String HCITOOL = "hcitool";

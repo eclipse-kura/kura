@@ -41,7 +41,7 @@ import org.osgi.service.wireadmin.Wire;
  */
 public final class Logger implements WireReceiver, ConfigurableComponent {
 
-    private static final org.apache.logging.log4j.Logger logger = LogManager.getLogger();
+    private static final org.apache.logging.log4j.Logger logger = LogManager.getLogger(Logger.class);
 
     private static final String DEFAULT_LOG_LEVEL = QUIET.name();
 

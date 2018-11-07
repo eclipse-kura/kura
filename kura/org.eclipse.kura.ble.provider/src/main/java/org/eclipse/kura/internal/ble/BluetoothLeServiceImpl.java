@@ -15,17 +15,17 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.kura.bluetooth.le.BluetoothLeAdapter;
 import org.eclipse.kura.bluetooth.le.BluetoothLeService;
 import org.osgi.service.component.ComponentContext;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 
 import tinyb.BluetoothManager;
 
 public class BluetoothLeServiceImpl implements BluetoothLeService {
 
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger logger = LogManager.getLogger(BluetoothLeServiceImpl.class);
 
     private BluetoothManager bluetoothManager;
 

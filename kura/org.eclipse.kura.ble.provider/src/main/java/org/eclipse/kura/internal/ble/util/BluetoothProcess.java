@@ -21,13 +21,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import org.eclipse.kura.KuraException;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.eclipse.kura.KuraException;
 
 public class BluetoothProcess {
 
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger logger = LogManager.getLogger(BluetoothProcess.class);
     private static final ExecutorService streamGobblers = Executors.newCachedThreadPool();
 
     private Process process;

@@ -75,7 +75,7 @@ public class H2DbWireRecordStore implements WireEmitter, WireReceiver, Configura
 
     private static final String DATA_TYPE = "DATA_TYPE";
 
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger logger = LogManager.getLogger(H2DbWireRecordStore.class);
 
     private static final String SQL_ADD_COLUMN = "ALTER TABLE {0} ADD COLUMN {1} {2};";
 

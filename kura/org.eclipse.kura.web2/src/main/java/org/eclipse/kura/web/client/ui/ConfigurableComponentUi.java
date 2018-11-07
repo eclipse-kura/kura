@@ -49,7 +49,7 @@ public class ConfigurableComponentUi extends AbstractServicesUi implements HasCo
 
     public void setConfiguration(GwtConfigComponent originalConfig) {
         final String description = originalConfig.getComponentDescription();
-        componentDescription.setText(description != null ? description : "");
+        this.componentDescription.setText(description != null ? description : "");
         restoreConfiguration(originalConfig);
         this.fields.clear();
 
@@ -61,19 +61,19 @@ public class ConfigurableComponentUi extends AbstractServicesUi implements HasCo
     public void setDirty(final boolean flag) {
         boolean isDirtyStateChanged = flag != this.dirty;
         this.dirty = flag;
-        if (listener != null) {
+        if (this.listener != null) {
             if (isDirtyStateChanged) {
-                listener.onDirtyStateChanged(this);
+                this.listener.onDirtyStateChanged(this);
             }
             if (isValid()) {
-                listener.onConfigurationChanged(this);
+                this.listener.onConfigurationChanged(this);
             }
         }
     }
 
     @Override
     protected void reset() {
-        return;
+        // Nothing to do
     }
 
     @Override
@@ -133,7 +133,7 @@ public class ConfigurableComponentUi extends AbstractServicesUi implements HasCo
 
     @Override
     public GwtConfigComponent getConfiguration() {
-        final GwtConfigComponent result = this.getUpdatedConfiguration();
+        final GwtConfigComponent result = getUpdatedConfiguration();
         result.getProperties().putAll(this.configurableComponent.getProperties());
         return result;
     }

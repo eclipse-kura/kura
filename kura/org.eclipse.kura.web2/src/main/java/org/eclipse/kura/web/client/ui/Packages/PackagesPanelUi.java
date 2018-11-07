@@ -25,7 +25,6 @@ import org.eclipse.kura.web.client.util.EventService;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.ForwardedEventTopic;
 import org.eclipse.kura.web.shared.model.GwtDeploymentPackage;
-import org.eclipse.kura.web.shared.model.GwtEventInfo;
 import org.eclipse.kura.web.shared.model.GwtMarketplacePackageDescriptor;
 import org.eclipse.kura.web.shared.model.GwtSession;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
@@ -48,8 +47,6 @@ import org.gwtbootstrap3.client.ui.html.Span;
 import org.gwtbootstrap3.client.ui.html.Text;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -59,8 +56,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FormPanel;
-import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
-import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteHandler;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Hidden;
 import com.google.gwt.user.client.ui.Widget;
@@ -69,8 +64,9 @@ import com.google.gwt.view.client.SingleSelectionModel;
 
 public class PackagesPanelUi extends Composite {
 
+    private static final String XSRF_TOKEN = "xsrfToken";
     private static final String DROPZONE_ACTIVE_STYLE_NAME = "active";
-    private static RegExp MARKETPLACE_URL_REGEXP = RegExp
+    private static RegExp marketplaceUrlRegexp = RegExp
             .compile("http[s]?:\\/\\/marketplace.eclipse.org/marketplace-client-intro\\?mpc_install=.*");
 
     private static PackagesPanelUiUiBinder uiBinder = GWT.create(PackagesPanelUiUiBinder.class);
@@ -197,25 +193,21 @@ public class PackagesPanelUi extends Composite {
 
         initDragDrop();
 
-        EventService.Handler onPackagesUpdatedHandler = new EventService.Handler() {
-
-            @Override
-            public void handleEvent(GwtEventInfo eventInfo) {
-                if (!PackagesPanelUi.this.isVisible() || !PackagesPanelUi.this.isAttached()) {
-                    return;
-                }
-
-                if (eventInfo.get("exception") != null) {
-                    PackagesPanelUi.this.uploadErrorText.setText(
-                            "Failed to " + (eventInfo.getTopic().indexOf("UNINSTALL") != -1 ? "uninstall" : "install")
-                                    + " deployment package");
-                    PackagesPanelUi.this.uploadModal.hide();
-                    PackagesPanelUi.this.uploadErrorModal.show();
-                    return;
-                }
-
-                PackagesPanelUi.this.refresh();
+        EventService.Handler onPackagesUpdatedHandler = eventInfo -> {
+            if (!PackagesPanelUi.this.isVisible() || !PackagesPanelUi.this.isAttached()) {
+                return;
             }
+
+            if (eventInfo.get("exception") != null) {
+                PackagesPanelUi.this.uploadErrorText.setText(
+                        "Failed to " + (eventInfo.getTopic().indexOf("UNINSTALL") != -1 ? "uninstall" : "install")
+                                + " deployment package");
+                PackagesPanelUi.this.uploadModal.hide();
+                PackagesPanelUi.this.uploadErrorModal.show();
+                return;
+            }
+
+            PackagesPanelUi.this.refresh();
         };
 
         EventService.subscribe(ForwardedEventTopic.DEPLOYMENT_PACKAGE_INSTALLED, onPackagesUpdatedHandler);
@@ -237,138 +229,82 @@ public class PackagesPanelUi extends Composite {
     private void initTabButtons() {
         // Refresh Button
         this.packagesRefresh.setText(MSGS.refreshButton());
-        this.packagesRefresh.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-
-                refresh();
-            }
-        });
+        this.packagesRefresh.addClickHandler(event -> refresh());
         // Install Button
         this.packagesInstall.setText(MSGS.packageAddButton());
-        this.packagesInstall.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                upload();
-            }
-        });
+        this.packagesInstall.addClickHandler(event -> upload());
 
         // Uninstall Button
         this.packagesUninstall.setText(MSGS.packageDeleteButton());
-        this.packagesUninstall.addClickHandler(new ClickHandler() {
+        this.packagesUninstall.addClickHandler(event -> {
+            PackagesPanelUi.this.selected = PackagesPanelUi.this.selectionModel.getSelectedObject();
+            if (PackagesPanelUi.this.selected != null && PackagesPanelUi.this.selected.getVersion() != null) {
+                final Modal modal = new Modal();
+                ModalBody modalBody = new ModalBody();
+                ModalFooter modalFooter = new ModalFooter();
+                modal.setClosable(true);
+                modal.setTitle(MSGS.confirm());
+                modalBody.add(new Span(MSGS.deviceUninstallPackage(PackagesPanelUi.this.selected.getName())));
+                modalFooter.add(new Button("No", event11 -> modal.hide()));
+                modalFooter.add(new Button("Yes", event12 -> {
+                    modal.hide();
+                    uninstall(PackagesPanelUi.this.selected);
+                }));
 
-            @Override
-            public void onClick(ClickEvent event) {
-                PackagesPanelUi.this.selected = PackagesPanelUi.this.selectionModel.getSelectedObject();
-                if (PackagesPanelUi.this.selected != null && PackagesPanelUi.this.selected.getVersion() != null) {
-                    final Modal modal = new Modal();
-                    ModalBody modalBody = new ModalBody();
-                    ModalFooter modalFooter = new ModalFooter();
-                    modal.setClosable(true);
-                    modal.setTitle(MSGS.confirm());
-                    modalBody.add(new Span(MSGS.deviceUninstallPackage(PackagesPanelUi.this.selected.getName())));
-                    modalFooter.add(new Button("No", new ClickHandler() {
-
-                        @Override
-                        public void onClick(ClickEvent event) {
-                            modal.hide();
-                        }
-                    }));
-                    modalFooter.add(new Button("Yes", new ClickHandler() {
-
-                        @Override
-                        public void onClick(ClickEvent event) {
-                            modal.hide();
-                            uninstall(PackagesPanelUi.this.selected);
-                        }
-                    }));
-
-                    modal.add(modalBody);
-                    modal.add(modalFooter);
-                    modal.show();
-                }       // end if null
-            }// end on click
+                modal.add(modalBody);
+                modal.add(modalFooter);
+                modal.show();
+            }
         });
     }
 
     private void initModalHandlers() {
-        this.fileSubmit.addClickHandler(new ClickHandler() {
+        this.fileSubmit.addClickHandler(event -> PackagesPanelUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
             @Override
-            public void onClick(ClickEvent event) {
-                PackagesPanelUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-
-                    @Override
-                    public void onFailure(Throwable ex) {
-                        FailureHandler.handle(ex);
-                    }
-
-                    @Override
-                    public void onSuccess(GwtXSRFToken token) {
-                        PackagesPanelUi.this.xsrfTokenFieldFile.setValue(token.getToken());
-                        if (!"".equals(PackagesPanelUi.this.filePath.getFilename())) {
-                            PackagesPanelUi.this.packagesFormFile.submit();
-                        } else {
-                            PackagesPanelUi.this.uploadModal.hide();
-                            PackagesPanelUi.this.uploadErrorModal.show();
-                        }
-                    }
-                });
-
+            public void onFailure(Throwable ex) {
+                FailureHandler.handle(ex);
             }
-        });
-
-        this.fileCancel.addClickHandler(new ClickHandler() {
 
             @Override
-            public void onClick(ClickEvent event) {
-                PackagesPanelUi.this.uploadModal.hide();
-            }
-        });
-
-        this.urlSubmit.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                PackagesPanelUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-
-                    @Override
-                    public void onFailure(Throwable ex) {
-                        FailureHandler.handle(ex);
-                    }
-
-                    @Override
-                    public void onSuccess(GwtXSRFToken token) {
-                        if (!"".equals(PackagesPanelUi.this.formUrl.getValue())) {
-                            PackagesPanelUi.this.xsrfTokenFieldUrl.setValue(token.getToken());
-                            PackagesPanelUi.this.packagesFormUrl.submit();
-                        } else {
-                            PackagesPanelUi.this.uploadModal.hide();
-                            PackagesPanelUi.this.uploadErrorModal.show();
-                        }
-                    }
-                });
-            }
-        });
-
-        this.urlCancel.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                PackagesPanelUi.this.uploadModal.hide();
-            }
-        });
-
-        this.btnConfirmMarketplaceInstall.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                if (PackagesPanelUi.this.marketplaceDescriptor != null) {
-                    installMarketplaceDp(PackagesPanelUi.this.marketplaceDescriptor);
-                    PackagesPanelUi.this.marketplaceDescriptor = null;
+            public void onSuccess(GwtXSRFToken token) {
+                PackagesPanelUi.this.xsrfTokenFieldFile.setValue(token.getToken());
+                if (!"".equals(PackagesPanelUi.this.filePath.getFilename())) {
+                    PackagesPanelUi.this.packagesFormFile.submit();
+                } else {
+                    PackagesPanelUi.this.uploadModal.hide();
+                    PackagesPanelUi.this.uploadErrorModal.show();
                 }
+            }
+        }));
+
+        this.fileCancel.addClickHandler(event -> PackagesPanelUi.this.uploadModal.hide());
+
+        this.urlSubmit.addClickHandler(event -> PackagesPanelUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+
+            @Override
+            public void onFailure(Throwable ex) {
+                FailureHandler.handle(ex);
+            }
+
+            @Override
+            public void onSuccess(GwtXSRFToken token) {
+                if (!"".equals(PackagesPanelUi.this.formUrl.getValue())) {
+                    PackagesPanelUi.this.xsrfTokenFieldUrl.setValue(token.getToken());
+                    PackagesPanelUi.this.packagesFormUrl.submit();
+                } else {
+                    PackagesPanelUi.this.uploadModal.hide();
+                    PackagesPanelUi.this.uploadErrorModal.show();
+                }
+            }
+        }));
+
+        this.urlCancel.addClickHandler(event -> PackagesPanelUi.this.uploadModal.hide());
+
+        this.btnConfirmMarketplaceInstall.addClickHandler(event -> {
+            if (PackagesPanelUi.this.marketplaceDescriptor != null) {
+                installMarketplaceDp(PackagesPanelUi.this.marketplaceDescriptor);
+                PackagesPanelUi.this.marketplaceDescriptor = null;
             }
         });
     }
@@ -392,51 +328,43 @@ public class PackagesPanelUi extends Composite {
 
         this.filePath.setName("uploadedFile");
 
-        this.xsrfTokenFieldFile.setID("xsrfToken");
-        this.xsrfTokenFieldFile.setName("xsrfToken");
+        this.xsrfTokenFieldFile.setID(XSRF_TOKEN);
+        this.xsrfTokenFieldFile.setName(XSRF_TOKEN);
         this.xsrfTokenFieldFile.setValue("");
 
         this.packagesFormFile.setAction(SERVLET_URL + "/upload");
         this.packagesFormFile.setEncoding(FormPanel.ENCODING_MULTIPART);
         this.packagesFormFile.setMethod(FormPanel.METHOD_POST);
-        this.packagesFormFile.addSubmitCompleteHandler(new SubmitCompleteHandler() {
-
-            @Override
-            public void onSubmitComplete(SubmitCompleteEvent event) {
-                String result = event.getResults();
-                if (result == null || result.isEmpty()) {
-                    PackagesPanelUi.this.uploadModal.hide();
-                } else {
-                    logger.log(Level.SEVERE, "Error uploading package!");
-                }
+        this.packagesFormFile.addSubmitCompleteHandler(event -> {
+            String result = event.getResults();
+            if (result == null || result.isEmpty()) {
+                PackagesPanelUi.this.uploadModal.hide();
+            } else {
+                logger.log(Level.SEVERE, "Error uploading package!");
             }
         });
 
         // ******URL TAB ****//
         this.formUrl.setName("packageUrl");
 
-        this.xsrfTokenFieldUrl.setID("xsrfToken");
-        this.xsrfTokenFieldUrl.setName("xsrfToken");
+        this.xsrfTokenFieldUrl.setID(XSRF_TOKEN);
+        this.xsrfTokenFieldUrl.setName(XSRF_TOKEN);
         this.xsrfTokenFieldUrl.setValue("");
 
         this.packagesFormUrl.setAction(SERVLET_URL + "/url");
         this.packagesFormUrl.setMethod(FormPanel.METHOD_POST);
-        this.packagesFormUrl.addSubmitCompleteHandler(new SubmitCompleteHandler() {
-
-            @Override
-            public void onSubmitComplete(SubmitCompleteEvent event) {
-                String result = event.getResults();
-                if (result == null || result.isEmpty()) {
-                    PackagesPanelUi.this.uploadModal.hide();
-                } else {
-                    String errMsg = result;
-                    int startIdx = result.indexOf("<pre>");
-                    int endIndex = result.indexOf("</pre>");
-                    if (startIdx != -1 && endIndex != -1) {
-                        errMsg = result.substring(startIdx + 5, endIndex);
-                    }
-                    logger.log(Level.SEVERE, MSGS.error() + ": " + MSGS.fileDownloadFailure() + ": " + errMsg);
+        this.packagesFormUrl.addSubmitCompleteHandler(event -> {
+            String result = event.getResults();
+            if (result == null || result.isEmpty()) {
+                PackagesPanelUi.this.uploadModal.hide();
+            } else {
+                String errMsg = result;
+                int startIdx = result.indexOf("<pre>");
+                int endIndex = result.indexOf("</pre>");
+                if (startIdx != -1 && endIndex != -1) {
+                    errMsg = result.substring(startIdx + 5, endIndex);
                 }
+                logger.log(Level.SEVERE, MSGS.error() + ": " + MSGS.fileDownloadFailure() + ": " + errMsg);
             }
         });
     }
@@ -648,7 +576,7 @@ public class PackagesPanelUi extends Composite {
     }
 
     private boolean isEclipseMarketplaceUrl(String url) {
-        return url != null && !url.isEmpty() && MARKETPLACE_URL_REGEXP.test(url);
+        return url != null && !url.isEmpty() && marketplaceUrlRegexp.test(url);
     }
 
     private void initDragDrop() {
@@ -661,13 +589,7 @@ public class PackagesPanelUi extends Composite {
                     final String url = event.getAsText();
                     packagesDropzone.removeStyleName(DROPZONE_ACTIVE_STYLE_NAME);
                     if (isEclipseMarketplaceUrl(url)) {
-                        confirmDialog.show(MSGS.packagesMarketplaceInstallConfirmMessage(), new AlertDialog.Listener() {
-
-                            @Override
-                            public void onConfirm() {
-                                eclipseMarketplaceInstall(url);
-                            }
-                        });
+                        confirmDialog.show(MSGS.packagesMarketplaceInstallConfirmMessage(), () -> eclipseMarketplaceInstall(url));
                     }
                     return true;
                 }

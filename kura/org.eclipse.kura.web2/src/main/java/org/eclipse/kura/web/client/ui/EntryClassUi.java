@@ -65,7 +65,6 @@ import org.gwtbootstrap3.client.ui.html.Span;
 import org.gwtbootstrap3.client.ui.html.Strong;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -191,15 +190,11 @@ public class EntryClassUi extends Composite {
     private final GwtComponentServiceAsync gwtComponentService = GWT.create(GwtComponentService.class);
     private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
 
-    private final KeyUpHandler searchBoxChangeHandler = new KeyUpHandler() {
-
-        @Override
-        public void onKeyUp(KeyUpEvent event) {
-            TextBox searchBox = (TextBox) event.getSource();
-            String searchedValue = searchBox.getValue();
-            if (searchedValue != null) {
-                filterAvailableServices(searchedValue);
-            }
+    private final KeyUpHandler searchBoxChangeHandler = event -> {
+        TextBox searchBox = (TextBox) event.getSource();
+        String searchedValue = searchBox.getValue();
+        if (searchedValue != null) {
+            filterAvailableServices(searchedValue);
         }
     };
 
@@ -283,7 +278,7 @@ public class EntryClassUi extends Composite {
         }
     }
 
-    public void initSystemPanel(GwtSession gwtSession, boolean connectionStatus) {
+    public void initSystemPanel(GwtSession gwtSession) {
         final EntryClassUi instanceReference = this;
         if (!gwtSession.isNetAdminAvailable()) {
             this.network.setVisible(false);

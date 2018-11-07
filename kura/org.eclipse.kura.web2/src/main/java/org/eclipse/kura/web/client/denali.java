@@ -33,7 +33,6 @@ import org.eclipse.kura.web.shared.service.GwtStatusServiceAsync;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.core.client.ScriptInjector;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -64,13 +63,7 @@ public class denali implements EntryPoint {
     public void onModuleLoad() {
         // use deferred command to catch initialization exceptions in
         // onModuleLoad2
-        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-
-            @Override
-            public void execute() {
-                onModuleLoad2();
-            }
-        });
+        Scheduler.get().scheduleDeferred(() -> onModuleLoad2());
     }
 
     /**
@@ -96,63 +89,61 @@ public class denali implements EntryPoint {
                 denali.this.gwtDeviceService.findSystemProperties(token,
                         new AsyncCallback<ArrayList<GwtGroupedNVPair>>() {
 
-                    @Override
-                    public void onSuccess(ArrayList<GwtGroupedNVPair> results) {
+                            @Override
+                            public void onSuccess(ArrayList<GwtGroupedNVPair> results) {
 
-                        final GwtSession gwtSession = new GwtSession();
+                                final GwtSession gwtSession = new GwtSession();
 
-                        if (results != null) {
-                            List<GwtGroupedNVPair> pairs = results;
-                            if (pairs != null) {
-                                for (GwtGroupedNVPair pair : pairs) {
-                                    String name = pair.getName();
-                                    if ("kura.have.net.admin".equals(name)) {
-                                        Boolean value = Boolean.valueOf(pair.getValue());
-                                        gwtSession.setNetAdminAvailable(value);
-                                    }
-                                    if ("kura.version".equals(name)) {
-                                        gwtSession.setKuraVersion(pair.getValue());
-                                    }
-                                    if ("kura.os.version".equals(name)) {
-                                        gwtSession.setOsVersion(pair.getValue());
+                                if (results != null) {
+                                    List<GwtGroupedNVPair> pairs = results;
+                                    for (GwtGroupedNVPair pair : pairs) {
+                                        String name = pair.getName();
+                                        if ("kura.have.net.admin".equals(name)) {
+                                            Boolean value = Boolean.valueOf(pair.getValue());
+                                            gwtSession.setNetAdminAvailable(value);
+                                        }
+                                        if ("kura.version".equals(name)) {
+                                            gwtSession.setKuraVersion(pair.getValue());
+                                        }
+                                        if ("kura.os.version".equals(name)) {
+                                            gwtSession.setOsVersion(pair.getValue());
+                                        }
                                     }
                                 }
-                            }
-                        }
 
-                        denali.this.gwtSecurityService.isDebugMode(new AsyncCallback<Boolean>() {
+                                denali.this.gwtSecurityService.isDebugMode(new AsyncCallback<Boolean>() {
+
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        FailureHandler.handle(caught, denali.class.getSimpleName());
+                                        denali.this.binder.setFooter(gwtSession);
+                                        denali.this.binder.initSystemPanel(gwtSession);
+                                        denali.this.binder.setSession(gwtSession);
+                                        denali.this.binder.init();
+                                    }
+
+                                    @Override
+                                    public void onSuccess(Boolean result) {
+                                        if (result) {
+                                            denali.this.isDevelopMode = true;
+                                            gwtSession.setDevelopMode(true);
+                                        }
+                                        denali.this.binder.setFooter(gwtSession);
+                                        denali.this.binder.initSystemPanel(gwtSession);
+                                        denali.this.binder.setSession(gwtSession);
+                                        denali.this.binder.init();
+                                    }
+                                });
+                            }
 
                             @Override
                             public void onFailure(Throwable caught) {
                                 FailureHandler.handle(caught, denali.class.getSimpleName());
-                                denali.this.binder.setFooter(gwtSession);
-                                denali.this.binder.initSystemPanel(gwtSession, denali.this.connected);
-                                denali.this.binder.setSession(gwtSession);
-                                denali.this.binder.init();
-                            }
-
-                            @Override
-                            public void onSuccess(Boolean result) {
-                                if (result) {
-                                    denali.this.isDevelopMode = true;
-                                    gwtSession.setDevelopMode(true);
-                                }
-                                denali.this.binder.setFooter(gwtSession);
-                                denali.this.binder.initSystemPanel(gwtSession, denali.this.connected);
-                                denali.this.binder.setSession(gwtSession);
-                                denali.this.binder.init();
+                                denali.this.binder.setFooter(new GwtSession());
+                                denali.this.binder.initSystemPanel(new GwtSession());
+                                denali.this.binder.setSession(new GwtSession());
                             }
                         });
-                    }
-
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        FailureHandler.handle(caught, denali.class.getSimpleName());
-                        denali.this.binder.setFooter(new GwtSession());
-                        denali.this.binder.initSystemPanel(new GwtSession(), denali.this.connected);
-                        denali.this.binder.setSession(new GwtSession());
-                    }
-                });
             }
         });
     }

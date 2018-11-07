@@ -20,8 +20,6 @@ import org.gwtbootstrap3.client.ui.html.Span;
 import org.gwtbootstrap3.client.ui.html.Strong;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -63,24 +61,14 @@ public class AlertDialog extends Composite implements HasId {
         this.yes.setText(MSGS.yesButton());
         this.no.setText(MSGS.noButton());
 
-        this.yes.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                if (AlertDialog.this.listener != null) {
-                    AlertDialog.this.listener.onConfirm();
-                }
-                AlertDialog.this.modal.hide();
+        this.yes.addClickHandler(event -> {
+            if (AlertDialog.this.listener != null) {
+                AlertDialog.this.listener.onConfirm();
             }
+            AlertDialog.this.modal.hide();
         });
 
-        this.no.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                AlertDialog.this.modal.hide();
-            }
-        });
+        this.no.addClickHandler(event -> AlertDialog.this.modal.hide());
     }
 
     public void setListener(Listener listener) {

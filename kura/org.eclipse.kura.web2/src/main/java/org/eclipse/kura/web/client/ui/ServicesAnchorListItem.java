@@ -25,8 +25,6 @@ import org.gwtbootstrap3.client.ui.constants.IconType;
 import org.gwtbootstrap3.client.ui.html.Span;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.URL;
 
 public class ServicesAnchorListItem extends AnchorListItem {
@@ -69,57 +67,43 @@ public class ServicesAnchorListItem extends AnchorListItem {
             super.setTitle(description);
         }
 
-        super.addClickHandler(new ClickHandler() {
+        super.addClickHandler(event -> {
+            if (ServicesAnchorListItem.this.ui.getSelected() != null
+                    && ServicesAnchorListItem.this.ui.getSelected() != ServicesAnchorListItem.this.item
+                    && ServicesAnchorListItem.this.ui.isServicesUiDirty()
+                    || ServicesAnchorListItem.this.ui.isNetworkDirty()
+                    || ServicesAnchorListItem.this.ui.isFirewallDirty()
+                    || ServicesAnchorListItem.this.ui.isSettingsDirty()) {
+                final Modal modal = new Modal();
 
-            @Override
-            public void onClick(ClickEvent event) {
-                if (ServicesAnchorListItem.this.ui.getSelected() != null
-                        && ServicesAnchorListItem.this.ui.getSelected() != ServicesAnchorListItem.this.item
-                        && ServicesAnchorListItem.this.ui.isServicesUiDirty()
-                        || ServicesAnchorListItem.this.ui.isNetworkDirty()
-                        || ServicesAnchorListItem.this.ui.isFirewallDirty()
-                        || ServicesAnchorListItem.this.ui.isSettingsDirty()) {
-                    final Modal modal = new Modal();
+                ModalHeader header = new ModalHeader();
+                header.setTitle(MSGS.warning());
+                modal.add(header);
 
-                    ModalHeader header = new ModalHeader();
-                    header.setTitle(MSGS.warning());
-                    modal.add(header);
+                ModalBody body = new ModalBody();
+                body.add(new Span(MSGS.deviceConfigDirty()));
+                modal.add(body);
 
-                    ModalBody body = new ModalBody();
-                    body.add(new Span(MSGS.deviceConfigDirty()));
-                    modal.add(body);
-
-                    ModalFooter footer = new ModalFooter();
-                    Button yes = new Button(MSGS.yesButton(), new ClickHandler() {
-
-                        @Override
-                        public void onClick(ClickEvent event) {
-                            ServicesAnchorListItem.this.ui.setDirty(false);
-                            ServicesAnchorListItem.this.ui.setSelected(ServicesAnchorListItem.this.item);
-                            modal.hide();
-                            ServicesAnchorListItem.this.ui.render(ServicesAnchorListItem.this.item);
-                        }
-                    });
-
-                    Button no = new Button(MSGS.noButton(), new ClickHandler() {
-
-                        @Override
-                        public void onClick(ClickEvent event) {
-                            modal.hide();
-                        }
-                    });
-                    footer.add(no);
-                    footer.add(yes);
-                    modal.add(footer);
-
-                    modal.show();
-                    no.setFocus(true);
-
-                } else {
+                ModalFooter footer = new ModalFooter();
+                Button yes = new Button(MSGS.yesButton(), event11 -> {
+                    ServicesAnchorListItem.this.ui.setDirty();
                     ServicesAnchorListItem.this.ui.setSelected(ServicesAnchorListItem.this.item);
-                    ServicesAnchorListItem.this.ui.setSelectedAnchorListItem(ServicesAnchorListItem.this);
+                    modal.hide();
                     ServicesAnchorListItem.this.ui.render(ServicesAnchorListItem.this.item);
-                }
+                });
+
+                Button no = new Button(MSGS.noButton(), event12 -> modal.hide());
+                footer.add(no);
+                footer.add(yes);
+                modal.add(footer);
+
+                modal.show();
+                no.setFocus(true);
+
+            } else {
+                ServicesAnchorListItem.this.ui.setSelected(ServicesAnchorListItem.this.item);
+                ServicesAnchorListItem.this.ui.setSelectedAnchorListItem(ServicesAnchorListItem.this);
+                ServicesAnchorListItem.this.ui.render(ServicesAnchorListItem.this.item);
             }
         });
 

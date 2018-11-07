@@ -526,7 +526,7 @@ public class EntryClassUi extends Composite {
                         }
                         EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.driversAndAssetsServices);
                         EntryClassUi.this.contentPanel.setVisible(true);
-                        EntryClassUi.this.contentPanelHeader.setText(MSGS.driversAndAssetsServices());
+                        setHeader(MSGS.driversAndAssetsServices(), null);
                         EntryClassUi.this.contentPanelBody.clear();
                         EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.driversAndTwinsBinder);
                         EntryClassUi.this.driversAndTwinsBinder.refresh();

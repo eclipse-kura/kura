@@ -54,7 +54,7 @@ public class Timer implements WireEmitter, ConfigurableComponent {
     /** This is required to generate unique ID for the Quartz Trigger and Job */
     private static AtomicInteger nextJobId = new AtomicInteger(0);
 
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger logger = LogManager.getLogger(Timer.class);
 
     /** Job Key for Quartz Scheduling */
     private JobKey jobKey;

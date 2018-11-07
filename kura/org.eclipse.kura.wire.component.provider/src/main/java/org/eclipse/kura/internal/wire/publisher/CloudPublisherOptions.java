@@ -27,7 +27,7 @@ import org.apache.logging.log4j.Logger;
  */
 final class CloudPublisherOptions {
 
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger logger = LogManager.getLogger(CloudPublisherOptions.class);
 
     private static final String CONF_POSITION = "publish.position";
 

@@ -21,13 +21,13 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.kura.KuraBluetoothDiscoveryException;
 import org.eclipse.kura.KuraBluetoothRemoveException;
 import org.eclipse.kura.bluetooth.le.BluetoothLeAdapter;
 import org.eclipse.kura.bluetooth.le.BluetoothLeDevice;
 import org.eclipse.kura.bluetooth.le.BluetoothTransportType;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 
 import tinyb.BluetoothDevice;
 import tinyb.BluetoothException;
@@ -35,7 +35,7 @@ import tinyb.TransportType;
 
 public class BluetoothLeAdapterImpl implements BluetoothLeAdapter {
 
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger logger = LogManager.getLogger(BluetoothLeAdapterImpl.class);
     private static final long TIMEOUT = 30;
 
     private final tinyb.BluetoothAdapter adapter;

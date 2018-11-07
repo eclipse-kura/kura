@@ -22,6 +22,8 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.wire.WireComponent;
@@ -33,15 +35,13 @@ import org.eclipse.kura.wire.WireSupport;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.wireadmin.Wire;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 
 public class Fifo implements WireEmitter, WireReceiver, ConfigurableComponent {
 
     private static final String DISCARD_ENVELOPES_PROP_NAME = "discard.envelopes";
     private static final String QUEUE_CAPACITY_PROP_NAME = "queue.capacity";
 
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger logger = LogManager.getLogger(Fifo.class);
 
     private volatile WireHelperService wireHelperService;
     private WireSupport wireSupport;

@@ -58,7 +58,7 @@ import org.osgi.service.wireadmin.Wire;
 public final class RegexFilter implements WireEmitter, WireReceiver, ConfigurableComponent {
 
     /** Logger instance */
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger logger = LogManager.getLogger(RegexFilter.class);
 
     /** Regular Expression Metatype Attribute Definition Property Key */
     private static final String REGEX_PROP = "regex.filter";

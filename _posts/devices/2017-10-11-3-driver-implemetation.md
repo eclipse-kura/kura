@@ -22,13 +22,7 @@ Generally, a Driver instance is a configurable component which parameters can be
 ## Supported Field Protocols and Availability
 
 Drivers will be provided as add-ons available in the [Eclipse IoT Marketplace](https://marketplace.eclipse.org/category/categories/eclipse-kura).
-
-Currently, supported drivers are:
-- [Modbus](https://marketplace.eclipse.org/content/esf-modbus-driver-community-edition);
-- [OPC-UA](https://marketplace.eclipse.org/content/opc-ua-driver-kura);
-- [S7](https://marketplace.eclipse.org/content/s7-driver-kura-developer-preview);
-- [TiSensorTag](https://marketplace.eclipse.org/content/ti-sensortag-driver-eclipse-kura);
-- [GPIO](https://marketplace.eclipse.org/content/???);
+Please see [here](/kura/devices/2-field-protocols.html) for a complete list.
 
 ## Driver-Specific Optimizations
 

@@ -4,16 +4,15 @@ title:  "BLE Beacon Drivers"
 categories: [devices]
 ---
 
-Eclipse Kura provides a set of drivers specifically developed to manage BLE Beacons. In particular, the framework offers support for iBeacon&trade; and Eddystone&trade; protocols.
-The drivers are available only for gateways that support the new Bluetooth LE APIs. They can be used in to the Wires framework, the Asset model or directly using the Driver itself.
+Eclipse Kura provides a set of drivers specifically developed to manage BLE Beacons. In particular, the framework offers support for iBeacon&trade; and Eddystone&trade; protocols. The drivers are available only for gateways that support the new Bluetooth LE APIs. They can be used in to the Wires framework, the Asset model or directly using the Driver itself.
 
 ## Features
 
-The iBeacon&trade; and Eddystone&trade; drivers are designed to listen for incoming beacon packets and to recognize the specific protocols. Of course it's not possible to write data to the beacons, since this is outside the protocol sprcification. On the Eddystone&trade; driver, moreover, the frame format to be filtered can be chosen from the channel definition. For more information about Eddystone&trade; frame format, see [here](https://developers.google.com/beacons/eddystone).
+The iBeacon&trade; and Eddystone&trade; drivers are designed to listen for incoming beacon packets and to recognize the specific protocols. Of course it's not possible to write data to the beacons, since this is outside the protocol specification. On the Eddystone&trade; driver, moreover, the frame format to be filtered can be chosen from the channel definition. For more information about Eddystone&trade; frame format, see [here](https://developers.google.com/beacons/eddystone).
  
 ## Installation
 
-As the others Drivers supported by ESF, it is distributed as a deployment package on the Eclipse Marketplace [here](https://marketplace.eclipse.org/content/ibeacon-driver-eclipse-kura) and [here](https://marketplace.eclipse.org/content/eddystone-driver-eclipse-kura). It can be installed following the instructions provided [here](../admin/application-management.html#section-eclipse-kura-marketplace).
+As the others Drivers supported by Kura, it is distributed as a deployment package on the Eclipse Marketplace [here](https://marketplace.eclipse.org/content/ibeacon-driver-eclipse-kura-4xy) and [here](https://marketplace.eclipse.org/content/eddystone-driver-eclipse-kura-4xy). It can be installed following the instructions provided [here](../admin/application-management.html#section-eclipse-kura-marketplace).
 
 ## Instance creation
 

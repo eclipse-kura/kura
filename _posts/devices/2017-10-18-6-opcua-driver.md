@@ -6,7 +6,7 @@ categories: [devices]
 
 This Driver implements the client side of the OPC UA protocol using the Driver model. The Driver can be used to interact as a client with OPC UA servers using different abstractions, such as the Wires framework, the Asset model or by directly using the Driver itself.
 
-The Driver is distributed as a deployment package on [Eclipse Marketplace](https://marketplace.eclipse.org/content/opc-ua-driver-kura).
+The Driver is distributed as a deployment package on Eclipse Marketplace for Kura [3.x](https://marketplace.eclipse.org/content/opc-ua-driver-eclipse-kura-3xy) and [4.x](https://marketplace.eclipse.org/content/opc-ua-driver-eclipse-kura-4xy).
 It can be installed following the instructions provided [here](/kura/admin/application-management.html#installation-from-eclipse-marketplace).
 
 ## Features

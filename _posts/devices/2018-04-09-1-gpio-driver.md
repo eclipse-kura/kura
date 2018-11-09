@@ -16,7 +16,7 @@ The GPIO Driver includes the following features:
 
 ## Installation
 
-As the others Drivers supported by Eclipse Kura, it is distributed as a deployment package on [Eclipse Marketplace](https://marketplace.eclipse.org/content/esf-gpio-driver). It can be installed following the instructions provided [here](application-management#section-eclipse-kura-marketplace).
+As the others Drivers supported by Eclipse Kura, it is distributed as a deployment package on the Eclipse Marketplace for Kura [3.x](https://marketplace.eclipse.org/content/gpio-driver-eclipse-kura-3xy) and [4.x](https://marketplace.eclipse.org/content/gpio-driver-eclipse-kura-4xy). It can be installed following the instructions provided [here](/kura/admin/application-management.html#installation-from-eclipse-marketplace).
 
 ## Instance creation
 

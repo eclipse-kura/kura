@@ -41,38 +41,37 @@ Kura Wires is an application built on top of two new Kura features:
 Through the wires, the message flow is composed by Eclipse Kura Wire Envelopes.
 
 ## Wire Envelopes
-The [Wire Envelope](http://download.eclipse.org/kura/docs/api/3.0.0/apidocs/org/eclipse/kura/wire/WireEnvelope.html) is a composite envelope to be used as an abstract data to be transmitted between the Wire Emitter and the Wire Receiver.
+The [Wire Envelope](http://download.eclipse.org/kura/docs/api/4.0.0/apidocs/org/eclipse/kura/wire/WireEnvelope.html) is a composite envelope to be used as an abstract data to be transmitted between the Wire Emitter and the Wire Receiver.
 
-Every Envelope transmitted is composed by an **Emitter PID** that univocally identifies the emitter of the envelope, and an unmodifiable list of [Wire Records](http://download.eclipse.org/kura/docs/api/3.0.0/apidocs/org/eclipse/kura/wire/WireRecord.html) that effectively carries all the information shared between the Emitter and the Receiver.
+Every Envelope transmitted is composed by an **Emitter PID** that univocally identifies the emitter of the envelope, and an unmodifiable list of [Wire Records](http://download.eclipse.org/kura/docs/api/4.0.0/apidocs/org/eclipse/kura/wire/WireRecord.html) that effectively carries all the information shared between the Emitter and the Receiver.
 
 Following, some references to the Envelopes code and structure:
-* [Wire Envelope](https://github.com/eclipse/kura/blob/KURA_3.0.0_RELEASE/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/wire/WireEnvelope.java);
-* [Wire Record](https://github.com/eclipse/kura/blob/KURA_3.0.0_RELEASE/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/wire/WireRecord.java).
+* [Wire Envelope](https://github.com/eclipse/kura/blob/KURA_4.0.0_RELEASE/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/wire/WireEnvelope.java);
+* [Wire Record](https://github.com/eclipse/kura/blob/KURA_4.0.0_RELEASE/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/wire/WireRecord.java).
 
 
 
-## Wire Components provided in Kura 3.0.0
+## Wire Components provided in Kura 4.0.0
 
-The following components will be provided out of the box with the Kura 3.0.0 installer:
+The following components will be provided out of the box with the Kura 4.0.0 installer:
 
-  * **Timer**, tick every x seconds and start the graph;
+  * **Timer**, emits a Wire Message at a fixed configurable rate: it can be used to periodically start the graph;
   * **Publisher**, publishes every message received from a Wire (Wire Message). It is configurable in order to use a specific Cloud Service;
   * **Subscriber**, subscribes to a configurable topic via a specific Cloud Service. It receives a message from a Cloud Platform, wraps it as a Wire Message and sends it through the connected wires to the other components that are part of the Wire Graph;
-  * **DB Store**, allows the storage of Wire Messages into a specific DB table. It has rules for message cleanup and retention;
-  * **DB Filter**, allows the filtering of messages residing in a DB via a proper SQL query. The corresponding messages are sent as Wire Messages to the connected Wire Components;
+  * **H2 DB Store**, allows the storage of Wire Messages into a specific DB table. It has rules for message cleanup and retention;
+  * **H2 DB Filter**, allows the filtering of messages residing in a DB via a proper SQL query. The corresponding messages are sent as Wire Messages to the connected Wire Components;
   * **Logger**, logs the received messages;
-  * **Asset**, allows the definition of Wire Channels that will be used to communicate with the associated driver instance.
+  * **WireAsset**, allows the definition of Wire Channels that will be used to communicate with the associated driver instance;
+  * [**Fifo**](/kura/wires/kura-wires-fifo.html), adds the received envelopes to a FIFO queue, and delivers them using a dedicated thread;
+  * **Regex Filter**, filters the keys from incoming Wire Envelopes based on a regular expression;
+  * [**Conditional**](/kura/wires/2-kura-wires-conditional.html), allows to forward the received envelopes to different ports depending on a boolean condition;
+  * [**Join**](/kura/wires/3-kura-wires-join.html), merges the properties contained in envelopes received on different ports into a single envelope;
+  * **Camel Consumer**, consumes data from an endpoint;
+  * **Camel Producer**, send message exchanges to a Camel endpoint;
+  * **Camel Processor**, calls an endpoint and extract its result.
 
 ## Wire Drivers
-Wire drivers will be made available in form of Deployment Packages (dp) in the Eclipse Marketplace, in order to ease the deployment in the final Kura devices.
-For some of them, the source code will be available in the [Kura Github Repository](https://github.com/eclipse/kura).
-
-As initial contributions, the following drivers are available in Eclipse Marketplace:
-
-  * [OPC-UA Driver](https://marketplace.eclipse.org/content/opc-ua-driver-kura)
-  * [Modbus Driver](https://marketplace.eclipse.org/content/esf-modbus-driver-community-edition)
-  * **S7** (Will be available with Kura 3.1.0, source code available [here](https://github.com/eclipse/kura/tree/develop/kura/org.eclipse.kura.driver.s7plc.provider))
-
+Wire drivers will be made available in form of Deployment Packages (dp) in the Eclipse Marketplace, in order to ease the deployment in the final Kura devices. See [here](/kura/devices/2-field-protocols.html) for a complete list. For some of them, the source code will be available in the [Kura Github Repository](https://github.com/eclipse/kura).
 
 ## Additional information
 Additional information about Kura Wires is available at the following resources:

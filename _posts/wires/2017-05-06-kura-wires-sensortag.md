@@ -4,7 +4,7 @@ title:  "TI SensorTag driver in Kura Wires"
 categories: [wires]
 ---
 
-As presented in [TI SensorTag Driver](sensortag-driver.html), Eclipse Kura provides a specific driver that can be used to interact with TI SensorTag devices. The driver is available only for gateways that support the new Kura BLE APIs.
+As presented in [TI SensorTag Driver](/kura/devices/sensortag-driver.html), Eclipse Kura provides a specific driver that can be used to interact with TI SensorTag devices. The driver is available only for gateways that support the new Kura BLE APIs.
 
 This tutorial will explain how to configure a Wire graph that connects with a SensorTag, reads sensor values and publishes data to the cloud platform.
 
@@ -12,7 +12,7 @@ This tutorial will explain how to configure a Wire graph that connects with a Se
 
 ## Configure Kura Wires TI SensorTag application
 
-1. Install the TI SensorTag driver from the [Eclipse Kura Marketplace](https://marketplace.eclipse.org/content/ti-sensortag-driver-eclipse-kura)
+1. Install the TI SensorTag driver from the Eclipse Kura Marketplace ([here](https://marketplace.eclipse.org/content/ti-sensortag-driver-eclipse-kura-3xy) or [here](https://marketplace.eclipse.org/content/ti-sensortag-driver-eclipse-kura-3xy)).
 2. On the Kura web interface, instantiate a SensorTag Driver:
   * Under "System", select "Drivers and Assets" and click on the "New Driver" button.
   * Select "org.eclipse.kura.driver.ble.sensortag" as "Driver Factory", type a name in to "Driver Name" and click "Apply": a new driver will be instantiated and shown up under the "Drivers and Assets" tab.

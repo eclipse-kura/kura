@@ -4,13 +4,13 @@ title:  "iBeacon&trade; driver in Kura Wires"
 categories: [wires]
 ---
 
-As presented in the [iBeacon&trade; Driver](ibeacon-driver.html), Eclipse Kura provides a specific driver that can be used to listen for iBeacons packets. The driver is available only for gateways that support the new Kura BLE APIs.
+As presented in the [Beacon Driver](/kura/devices/2-beacon-drivers.html) page, Eclipse Kura provides a specific driver that can be used to listen for iBeacons packets. The driver is available only for gateways that support the new Kura BLE APIs.
 
 This tutorial will explain how to configure a Wire graph that get iBeacon&trade; data and show them to a logger.
 
 ## Configure Kura Wires iBeacon&trade; application
 
-1. Install the iBeacon driver from the [Eclipse Kura Marketplace](https://marketplace.eclipse.org/content/ibeacon-driver-eclipse-kura)
+1. Install the iBeacon driver from the [Eclipse Kura Marketplace](https://marketplace.eclipse.org/content/ibeacon-driver-eclipse-kura-4xy)
 2. On the Kura web interface, instantiate a iBeacon Driver:
   * Under "System", select "Drivers and Assets" and click on the "New Driver" button.
   * Select "org.eclipse.kura.driver.ibeacon" as "Driver Factory", type a name in to "Driver Name" and click "Apply": a new driver will be instantiated and shown up under the "Drivers and Assets" tab.
@@ -24,7 +24,7 @@ This tutorial will explain how to configure a Wire graph that get iBeacon&trade;
   * Click "Apply".
 4. Click on "Wires" under "System".
 5. Add a new "Asset" with the previously added iBeacon asset.
-6. Add a new "Javascript Filter" component (if it is not available on the list, install it from the [Eclipse Kura Marketplace](https://marketplace.eclipse.org/content/wires-script-filter-kura)). The filter will be configured to parse the iBeacon packets and extract relevant data from it. In the **script** window write the following code:
+6. Add a new "Javascript Filter" component (if it is not available on the list, install it from the [Eclipse Kura Marketplace](https://marketplace.eclipse.org/content/wires-script-filter-kura-4xy)). The filter will be configured to parse the iBeacon packets and extract relevant data from it. In the **script** window write the following code:
    
 ```
 var record = input.records[0]

@@ -13,7 +13,7 @@ This tutorial will present how to collect data from a OPC/UA device and publish 
 
 ## Configure Kura Wires OPC/UA application
 
-1. Install the OPC/UA driver from [Eclipse Kura Marketplace](https://marketplace.eclipse.org/content/opc-ua-driver)
+1. Install the OPC/UA driver from the Eclipse Kura Marketplace ([here](https://marketplace.eclipse.org/content/opc-ua-driver-eclipse-kura-3xy) or [here](https://marketplace.eclipse.org/content/opc-ua-driver-eclipse-kura-4xy))
 2. On the Kura web interface, add the OPC/UA driver:
   * Under "Services", click the "+" button
   * Select "org.eclipse.kura.driver.opcua", type in a name and click "Apply": a new service will show up under Services.

@@ -10,7 +10,6 @@ Bundle-ClassPath: .
 Bundle-ActivationPolicy: lazy
 Import-Package: com.eclipsesource.json;version="0.9.4",
  javax.crypto,
- javax.xml.bind,
  javax.xml.namespace,
  javax.xml.parsers,
  javax.xml.stream,

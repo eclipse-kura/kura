@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.bind.JAXBException;
 import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLStreamException;
 
@@ -215,7 +214,6 @@ public class ComponentUtil {
      *            ID of the service whose OCD should be loaded
      * @return
      * @throws IOException
-     * @throws JAXBException
      * @throws XMLStreamException
      * @throws FactoryConfigurationError
      */
@@ -243,7 +241,6 @@ public class ComponentUtil {
      *            Url of the MetaData XML file which needs to be loaded
      * @return
      * @throws IOException
-     * @throws JAXBException
      * @throws XMLStreamException
      * @throws FactoryConfigurationError
      */
@@ -272,7 +269,6 @@ public class ComponentUtil {
      *            ID of the service whose OCD should be loaded
      * @return
      * @throws IOException
-     * @throws JAXBException
      * @throws XMLStreamException
      * @throws FactoryConfigurationError
      */
@@ -306,7 +302,6 @@ public class ComponentUtil {
      *            ID of the service whose OCD should be loaded
      * @return
      * @throws IOException
-     * @throws JAXBException
      * @throws XMLStreamException
      * @throws FactoryConfigurationError
      */

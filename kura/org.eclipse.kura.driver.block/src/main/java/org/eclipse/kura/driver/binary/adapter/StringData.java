@@ -12,7 +12,6 @@
 package org.eclipse.kura.driver.binary.adapter;
 
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 
 import org.eclipse.kura.driver.binary.BinaryData;
 import org.eclipse.kura.driver.binary.Buffer;
@@ -47,7 +46,7 @@ public class StringData implements BinaryData<String> {
     @Override
     public String read(Buffer buf, int offset) {
         final byte[] raw = wrapped.read(buf, offset);
-        return new String(raw, StandardCharsets.US_ASCII);
+        return new String(raw, charset);
     }
 
     @Override

@@ -14,11 +14,11 @@
 -->
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
     <OCD id="org.eclipse.kura.example.publisher.ExamplePublisher"
-         name="ExamplePublisher" 
+         name="ExamplePublisher"
          description="Example of a Configuring Kura Application.">
-        
+
         <Icon resource="http://s3.amazonaws.com/kura-resources/application/icon/applications-other.png" size="32"/>
-        
+
         <AD id="CloudPublisher.target"
             name="CloudPublisher Target Filter"
             type="String"
@@ -27,7 +27,7 @@
             default="(kura.service.pid=changeme)"
             description="Specifies, as an OSGi target filter, the pid of the Cloud Publisher used to publish messages to the cloud platform.">
         </AD>
-        
+
         <AD id="CloudSubscriber.target"
             name="CloudSubscriber Target Filter"
             type="String"
@@ -36,146 +36,146 @@
             default="(kura.service.pid=changeme)"
             description="Specifies, as an OSGi target filter, the pid of the Cloud Subscriber used to receive messages from the cloud platform.">
         </AD>
-        
-        <AD id="publish.rate"  
+
+        <AD id="publish.rate"
             name="Publish Rate"
             type="Integer"
-            cardinality="0" 
+            cardinality="0"
             required="true"
             default="1000"
             min="1"
             description="Default message publishing rate in milliseconds (min 1)."/>
-        
-        <AD id="metric.temperature.initial"  
+
+        <AD id="metric.temperature.initial"
             name="Initial Temperature"
             type="Float"
-            cardinality="0" 
+            cardinality="0"
             required="true"
             default="10"
             description="Initial value for the temperature metric."/>
-        
-        <AD id="metric.temperature.increment"  
+
+        <AD id="metric.temperature.increment"
             name="Temperature Increment"
             type="Float"
-            cardinality="0" 
+            cardinality="0"
             required="true"
             default="0.1"
             description="Increment value for the temperature metric."/>
 
         <!-- String, Long, Integer, Short, Double, Float, Char, Byte, Boolean, Password -->
-        
+
         <AD id="metric.string"
             name="Metric String"
             type="String"
-            cardinality="0" 
+            cardinality="0"
             required="true"
             default="string.value"
             description="Test metric of String type."/>
-         
+
         <AD id="metric.string.oneof"
             name="Metric String Oneof"
             type="String"
-            cardinality="0" 
+            cardinality="0"
             required="true"
             default="string.value.option.1"
             description="Test metric of String type whose value is one of a list.">
            <Option label="string.value.option.1" value="string.value.option.1"/>
-           <Option label="string.value.option.2" value="string.value.option.2"/>          
-           <Option label="string.value.option.3" value="string.value.option.3"/>          
+           <Option label="string.value.option.2" value="string.value.option.2"/>
+           <Option label="string.value.option.3" value="string.value.option.3"/>
         </AD>
-        
-        <AD id="metric.long"  
+
+        <AD id="metric.long"
             name="Metric Long"
             type="Long"
-            cardinality="0" 
+            cardinality="0"
             required="true"
-            default="9223372036854774999" 
+            default="9223372036854774999"
             min = "-9223372036854775000"
             max = "9223372036854775000"
             description="Long metric. Metric range min -9223372036854775000 max 9223372036854775000. Long min -9223372036854775808 max 9223372036854775807."/>
 
-        <AD id="metric.integer"  
+        <AD id="metric.integer"
             name="Metric Integer"
             type="Integer"
-            cardinality="0" 
+            cardinality="0"
             required="true"
-            default="2147483599" 
+            default="2147483599"
             min = "-2147483600"
             max = "2147483600"
-            description="Integer metric. Metric range min -2147483600 max 2147483600. Integer min -2147483647 max 2147483647."/>
+            description="Integer metric. Metric range min -2147483600 max 2147483600. Integer min -2147483648 max 2147483647."/>
 
-        <AD id="metric.integer.fixed"  
+        <AD id="metric.integer.fixed"
             name="Metric Integer Fixed"
             type="Integer"
-            cardinality="0" 
+            cardinality="0"
             required="true"
-            default="101" 
+            default="101"
             min = "101"
             max = "101"
-            description="Integer metric. Metric range min -2147483600 max 2147483600. Integer min -2147483647 max 2147483647."/>
-        
-        <AD id="metric.short"  
+            description="Integer metric. Metric range min -2147483600 max 2147483600. Integer min -2147483648 max 2147483647."/>
+
+        <AD id="metric.short"
             name="Metric Short"
             type="Short"
-            cardinality="0" 
+            cardinality="0"
             required="true"
-            default="32759" 
+            default="32759"
             min = "-32760"
             max = "32760"
-            description="Short metric. Metric range min -32760 max 32760. Short min -32767 max 32767."/>
-        
-        <AD id="metric.double"  
-            name="Metric Duble"
+            description="Short metric. Metric range min -32760 max 32760. Short min -32768 max 32767."/>
+
+        <AD id="metric.double"
+            name="Metric Double"
             type="Double"
-            cardinality="0" 
+            cardinality="0"
             required="true"
-            default="4294967295.99998" 
+            default="4294967295.99998"
             min = "-4294967295.99999"
             max = "4294967295.99999"
             description="Double metric. Metric range min -4294967295.99999 max 4294967295.99999."/>
-        
-        <AD id="metric.float"  
+
+        <AD id="metric.float"
             name="Metric Float"
             type="Float"
-            cardinality="0" 
+            cardinality="0"
             required="true"
-            default="32766.98" 
+            default="32766.98"
             min = "-32766.99"
             max = "32766.99"
             description="Float metric. Metric range min -32766.99 max 32766.99."/>
 
-        <AD id="metric.char"  
+        <AD id="metric.char"
             name="Metric Char"
             type="Char"
-            cardinality="0" 
+            cardinality="0"
             required="true"
-            default="a" 
+            default="a"
             min = "a"
             max = "z"
             description="Char metric. Min a. Max z."/>
 
-        <AD id="metric.byte"  
+        <AD id="metric.byte"
             name="Metric Byte"
             type="Byte"
-            cardinality="0" 
+            cardinality="0"
             required="true"
-            default="119" 
+            default="119"
             min = "-120"
             max = "120"
-            description="Byte metric. Metric range min -120 max 120. Byte min -127 max 127."/>
+            description="Byte metric. Metric range min -120 max 120. Byte min -128 max 127."/>
 
-        <AD id="metric.boolean"  
+        <AD id="metric.boolean"
             name="Metric Boolean"
             type="Boolean"
-            cardinality="0" 
+            cardinality="0"
             required="true"
-            default="false" 
+            default="false"
             description="Boolean metric."/>
-        
+
         <AD id="metric.password"
             name="Metric Password"
             type="Password"
-            cardinality="0" 
+            cardinality="0"
             required="true"
             default="password.value"
             description="Password metric."/>
@@ -183,29 +183,29 @@
         <AD id="metric.string.array"
             name="Metric String Array"
             type="String"
-            cardinality="5" 
+            cardinality="5"
             required="false"
             default="string.value1,string.value2,string.value3"
             description="Test metric of Array of String type."/>
 
-        <AD id="metric.short.array"  
+        <AD id="metric.short.array"
             name="Metric Short Array"
             type="Short"
-            cardinality="5" 
+            cardinality="5"
             required="false"
             min = "-32760"
             max = "32760"
             default="10,20,30"
-            description="Short Array metric. Metric range min -32760 max 32760. Short min -32767 max 32767."/>
-  
+            description="Short Array metric. Metric range min -32760 max 32760. Short min -32768 max 32767."/>
+
         <AD id="metric.string.optional"
             name="Metric String Optional"
             type="String"
-            cardinality="1" 
+            cardinality="1"
             required="false"
             default=""
             description="Test optional strng metric. Leave EMPTY."/>
-        
+
     </OCD>
     <Designate pid="org.eclipse.kura.example.publisher.ExamplePublisher" factoryPid="org.eclipse.kura.example.publisher.ExamplePublisher">
         <Object ocdref="org.eclipse.kura.example.publisher.ExamplePublisher"/>

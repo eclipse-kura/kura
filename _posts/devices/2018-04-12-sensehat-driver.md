@@ -18,6 +18,10 @@ The driver-specific channel configuration contains a single parameter, **resourc
 If some exceptions reporting `Locked by other application` are visible in the log and the driver fails to start, try switching to the Oracle JVM by installing the `oracle-java8-jdk` package.
 For more information on the problem, please see [this](https://github.com/eclipse/kura/issues/2098) GitHub issue.
 
+## Installation
+
+As the others Drivers supported by Kura, it is distributed as a deployment package on the Eclipse Marketplace [here](https://marketplace.eclipse.org/content/sensehat-example-driver-eclipse-kura-3xy) and [here](https://marketplace.eclipse.org/content/sensehat-example-driver-eclipse-kura-4xy). It can be installed following the instructions provided [here](../admin/application-management.html#section-eclipse-kura-marketplace).
+
 ## Sensors
 
 The following values of the **resource** parameters refer to device sensors:

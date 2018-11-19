@@ -4,13 +4,13 @@ title:  "Connect to a RuuviTag+ using the Eddystone&trade; Driver"
 categories: [wires]
 ---
 
-As presented in [Eddystone Driver](eddystone-driver.html), Eclipse Kura provides a specific driver that can be used to listen for Eddystone&trade; beacons. The driver is available only for gateways that support the new Kura BLE APIs.
+As presented in the [Beacon Driver](/kura/devices/2-beacon-drivers.html) page, Eclipse Kura provides a specific driver that can be used to listen for Eddystone&trade; beacons. The driver is available only for gateways that support the new Kura BLE APIs.
 
 This tutorial will explain how to configure an Eddystone&trade; driver and put it into a Wire graph that retrieves data from a [RuuviTag+](https://ruuvi.com/ruuvitag-specs/). For further information about RuuviTag see [here](https://lab.ruuvi.com/).
 
 ## Configure Kura Wires Eddystone application
 
-1. Install the Eddystone driver from the [Eclipse Kura Marketplace](https://marketplace.eclipse.org/content/eddystone-driver-eclipse-kura)
+1. Install the Eddystone driver from the [Eclipse Kura Marketplace](https://marketplace.eclipse.org/content/eddystone-driver-eclipse-kura-4xy)
 2. On the Kura web interface, instantiate an Eddystone Driver:
   * Under "System", select "Drivers and Assets" and click on the "New Driver" button.
   * Select "org.eclipse.kura.driver.eddystone" as "Driver Factory", type a name in to "Driver Name" and click "Apply": a new driver will be instantiated and shown up under the "Drivers and Assets" tab.
@@ -26,7 +26,7 @@ This tutorial will explain how to configure an Eddystone&trade; driver and put i
 
 4. Click on "Wires" under "System".
 5. Add a new "Asset" with the previously added Eddystone asset.
-6. Add a new "Javascript Filter" component (if it is not available on the list, install it from the [Eclipse Kura Marketplace](https://marketplace.eclipse.org/content/wires-script-filter-kura)). The filter will be configured to parse the `URL` frames coming from the RuuviTag+ and extract the environmental data from the on-board sensors. In the **script** window write the following code:
+6. Add a new "Javascript Filter" component (if it is not available on the list, install it from the [Eclipse Kura Marketplace](https://marketplace.eclipse.org/content/wires-script-filter-kura-4xy)). The filter will be configured to parse the `URL` frames coming from the RuuviTag+ and extract the environmental data from the on-board sensors. In the **script** window write the following code:
 
 ```
 

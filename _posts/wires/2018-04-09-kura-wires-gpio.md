@@ -10,7 +10,7 @@ Setup a RaspberryPi as shown in [GPIO Driver](../devices/1-gpio-driver.html#driv
 
 ## Configure Kura Wires GPIO Driver Application
 
-1. Install the GPIO Driver from the [Eclipse Kura Marketplace](https://marketplace.eclipse.org/content/???)
+1. Install the GPIO Driver from the Eclipse Kura Marketplace ([here](https://marketplace.eclipse.org/content/gpio-driver-eclipse-kura-3xy) or [here](https://marketplace.eclipse.org/content/gpio-driver-eclipse-kura-4xy)).
 2. On the Kura web interface, instantiate a GPIO Driver:
   * Under "System", select "Drivers and Assets" and click on the "New Driver" button.
   * Select "org.eclipse.kura.driver.gpio" as "Driver Factory", type a name in to "Driver Name" and click "Apply": a new driver will be instantiated and shown up under the "Drivers and Assets" tab.
@@ -32,7 +32,7 @@ Setup a RaspberryPi as shown in [GPIO Driver](../devices/1-gpio-driver.html#driv
 {:start="5"}
 5. Click on "Wires" under "System".
 6. Add a new "Timer" component and configure the interval at which the LED will be toggled.
-7. Add a new "Script Filter" (it can be downloaded from the [Eclipse Marketplace](https://marketplace.eclipse.org/content/wires-script-filter-kura)) and configure it with the following script:
+7. Add a new "Script Filter" (it can be downloaded from the Eclipse Marketplace ([here](https://marketplace.eclipse.org/content/wires-script-filter-kura-3xy-0) or [here](https://marketplace.eclipse.org/content/wires-script-filter-kura-4xy))) and configure it with the following script:
 
 ```javascript
 // create a persistent counter

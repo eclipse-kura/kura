@@ -29,7 +29,7 @@ When a notification is enabled for a specific channel (sensor), the notification
  
 ## Installation
 
-As the others Drivers supported by ESF, it is distributed as a deployment package on [Eclipse Marketplace](https://marketplace.eclipse.org/content/ti-sensortag-driver-eclipse-kura). It can be installed following the instructions provided [here](application-management#section-eclipse-kura-marketplace).
+As the others Drivers supported by Kura, it is distributed as a deployment package on the Eclipse Marketplace [here](https://marketplace.eclipse.org/content/ti-sensortag-driver-eclipse-kura-3xy) and [here](https://marketplace.eclipse.org/content/ti-sensortag-driver-eclipse-kura-4xy). It can be installed following the instructions provided [here](../admin/application-management.html#section-eclipse-kura-marketplace).
 
 ## Instance creation
 

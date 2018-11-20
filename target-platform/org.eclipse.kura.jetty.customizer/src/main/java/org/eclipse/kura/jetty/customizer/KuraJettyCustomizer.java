@@ -5,6 +5,11 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *  Red Hat Inc
+ *  Eurotech
+ *
  *******************************************************************************/
 package org.eclipse.kura.jetty.customizer;
 
@@ -46,6 +51,8 @@ public class KuraJettyCustomizer extends JettyCustomizer {
             }
 
             final HttpConnectionFactory httpConnectionFactory = (HttpConnectionFactory) factory;
+
+            httpConnectionFactory.getHttpConfiguration().setSendServerVersion(false);
 
             List<Customizer> customizers = httpConnectionFactory.getHttpConfiguration().getCustomizers();
             if (customizers == null) {

@@ -187,60 +187,59 @@ public class BinaryDataTest {
 
     @Test
     public void shouldSupportGainOffset() {
-        testAdapterRead(a -> new GainOffset<>(a, 1.0f, 0.0f), (byte) 10, (byte) 10);
-        testAdapterRead(a -> new GainOffset<>(a, 1.0f, 0.0f), (short) 10, (short) 10);
-        testAdapterRead(a -> new GainOffset<>(a, 1.0f, 0.0f), (int) 10, (int) 10);
-        testAdapterRead(a -> new GainOffset<>(a, 1.0f, 0.0f), (long) 10, (long) 10);
-        testAdapterRead(a -> new GainOffset<>(a, 1.0f, 0.0f), (short) 10, (short) 10);
-        testAdapterRead(a -> new GainOffset<>(a, 1.0f, 0.0f), (float) 10, (float) 10);
-        testAdapterRead(a -> new GainOffset<>(a, 1.0f, 0.0f), (double) 10, (double) 10);
-        testAdapterRead(a -> new GainOffset<>(a, 1.0f, 0.0f), BigInteger.valueOf(10), BigInteger.valueOf(10));
+        testAdapterRead(a -> new GainOffset(a, 1.0f, 0.0f), (byte) 10, 10.0d);
+        testAdapterRead(a -> new GainOffset(a, 1.0f, 0.0f), (short) 10, 10.0d);
+        testAdapterRead(a -> new GainOffset(a, 1.0f, 0.0f), (int) 10, 10.0d);
+        testAdapterRead(a -> new GainOffset(a, 1.0f, 0.0f), (long) 10, 10.0d);
+        testAdapterRead(a -> new GainOffset(a, 1.0f, 0.0f), (short) 10, 10.0d);
+        testAdapterRead(a -> new GainOffset(a, 1.0f, 0.0f), 12.5f, 12.5d);
+        testAdapterRead(a -> new GainOffset(a, 1.0f, 0.0f), 10.123d, 10.123d);
+        testAdapterRead(a -> new GainOffset(a, 1.0f, 0.0f), BigInteger.valueOf(10), 10.0d);
 
-        testAdapterWrite(a -> new GainOffset<>(a, 1.0f, 0.0f), (byte) 10, (byte) 10);
-        testAdapterWrite(a -> new GainOffset<>(a, 1.0f, 0.0f), (short) 10, (short) 10);
-        testAdapterWrite(a -> new GainOffset<>(a, 1.0f, 0.0f), (int) 10, (int) 10);
-        testAdapterWrite(a -> new GainOffset<>(a, 1.0f, 0.0f), (long) 10, (long) 10);
-        testAdapterWrite(a -> new GainOffset<>(a, 1.0f, 0.0f), (short) 10, (short) 10);
-        testAdapterWrite(a -> new GainOffset<>(a, 1.0f, 0.0f), (float) 10, (float) 10);
-        testAdapterWrite(a -> new GainOffset<>(a, 1.0f, 0.0f), (double) 10, (double) 10);
-        testAdapterWrite(a -> new GainOffset<>(a, 1.0f, 0.0f), BigInteger.valueOf(10), BigInteger.valueOf(10));
+        testAdapterWrite(a -> new GainOffset(a, 1.0f, 0.0f), 10.0d, (short) 10);
+        testAdapterWrite(a -> new GainOffset(a, 1.0f, 0.0f), 10.0d, (short) 10);
+        testAdapterWrite(a -> new GainOffset(a, 1.0f, 0.0f), 10.0d, (int) 10);
+        testAdapterWrite(a -> new GainOffset(a, 1.0f, 0.0f), 10.0d, (long) 10);
+        testAdapterWrite(a -> new GainOffset(a, 1.0f, 0.0f), 10.0d, (short) 10);
+        testAdapterWrite(a -> new GainOffset(a, 1.0f, 0.0f), 10.0d, (float) 10);
+        testAdapterWrite(a -> new GainOffset(a, 1.0f, 0.0f), 10.0d, (double) 10);
+        testAdapterWrite(a -> new GainOffset(a, 1.0f, 0.0f), 10.0d, BigInteger.valueOf(10));
 
-        testAdapterRead(a -> new GainOffset<>(a, 2.0f, 0.0f), (byte) 10, (byte) 20);
-        testAdapterRead(a -> new GainOffset<>(a, 3.0f, 0.0f), (short) 10, (short) 30);
-        testAdapterRead(a -> new GainOffset<>(a, 5.0f, 0.0f), (int) 10, (int) 50);
-        testAdapterRead(a -> new GainOffset<>(a, 15.0f, 0.0f), (long) 10, (long) 150);
-        testAdapterRead(a -> new GainOffset<>(a, -1.0f, 0.0f), (short) 10, (short) -10);
-        testAdapterRead(a -> new GainOffset<>(a, -2.0f, 0.0f), (float) 10, (float) -20);
-        testAdapterRead(a -> new GainOffset<>(a, -5.0f, 0.0f), (double) 10, (double) -50);
-        testAdapterRead(a -> new GainOffset<>(a, -11.0f, 0.0f), BigInteger.valueOf(10), BigInteger.valueOf(-110));
+        testAdapterRead(a -> new GainOffset(a, 2.0f, 0.0f), (byte) 10, 20.0d);
+        testAdapterRead(a -> new GainOffset(a, 3.0f, 0.0f), (short) 10, 30.0d);
+        testAdapterRead(a -> new GainOffset(a, 5.5f, 0.0f), (int) 10, 55.0d);
+        testAdapterRead(a -> new GainOffset(a, 15.0f, 0.0f), (long) 10, 150.0d);
+        testAdapterRead(a -> new GainOffset(a, -1.5f, 0.0f), (short) 10, -15.0d);
+        testAdapterRead(a -> new GainOffset(a, -2.0f, 0.0f), (float) 10, -20.0d);
+        testAdapterRead(a -> new GainOffset(a, -5.0f, 0.0f), (double) 10, -50.0d);
+        testAdapterRead(a -> new GainOffset(a, -11.0f, 0.0f), BigInteger.valueOf(10), -110.0d);
 
-        testAdapterRead(a -> new GainOffset<>(a, 2.0f, 1.0f), (byte) 10, (byte) (20 + 1));
-        testAdapterRead(a -> new GainOffset<>(a, 3.0f, 4.0f), (short) 10, (short) (30 + 4));
-        testAdapterRead(a -> new GainOffset<>(a, 5.0f, -2.0f), (int) 10, (int) (50 - 2));
-        testAdapterRead(a -> new GainOffset<>(a, 15.0f, -5.0f), (long) 10, (long) (150 - 5));
-        testAdapterRead(a -> new GainOffset<>(a, -1.0f, 10.0f), (short) 10, (short) (-10 + 10));
-        testAdapterRead(a -> new GainOffset<>(a, -2.0f, 54.0f), (float) 10, (float) (-20 + 54));
-        testAdapterRead(a -> new GainOffset<>(a, -5.0f, 1.0f), (double) 10, (double) (-50 + 1));
-        testAdapterRead(a -> new GainOffset<>(a, -11.0f, 22.0f), BigInteger.valueOf(10), BigInteger.valueOf(-110 + 22));
+        testAdapterRead(a -> new GainOffset(a, 2.0f, 1.0f), (byte) 10, (double) (20 + 1));
+        testAdapterRead(a -> new GainOffset(a, 3.0f, 4.0f), (short) 10, (double) (30 + 4));
+        testAdapterRead(a -> new GainOffset(a, 5.0f, -2.0f), (int) 10, (double) (50 - 2));
+        testAdapterRead(a -> new GainOffset(a, 15.0f, -5.0f), (long) 10, (double) (150 - 5));
+        testAdapterRead(a -> new GainOffset(a, -1.0f, 10.0f), (short) 10, (double) (-10 + 10));
+        testAdapterRead(a -> new GainOffset(a, -2.0f, 54.0f), (float) 10, (double) (-20 + 54));
+        testAdapterRead(a -> new GainOffset(a, -5.0f, 1.0f), (double) 10, (double) (-50 + 1));
+        testAdapterRead(a -> new GainOffset(a, -11.0f, 22.0f), BigInteger.valueOf(10), (double) (-110 + 22));
 
-        testAdapterWrite(a -> new GainOffset<>(a, 2.0f, 0.0f), (byte) 10, (byte) 20);
-        testAdapterWrite(a -> new GainOffset<>(a, 3.0f, 0.0f), (short) 10, (short) 30);
-        testAdapterWrite(a -> new GainOffset<>(a, 5.0f, 0.0f), (int) 10, (int) 50);
-        testAdapterWrite(a -> new GainOffset<>(a, 15.0f, 0.0f), (long) 10, (long) 150);
-        testAdapterWrite(a -> new GainOffset<>(a, -1.0f, 0.0f), (short) 10, (short) -10);
-        testAdapterWrite(a -> new GainOffset<>(a, -2.0f, 0.0f), (float) 10, (float) -20);
-        testAdapterWrite(a -> new GainOffset<>(a, -5.0f, 0.0f), (double) 10, (double) -50);
-        testAdapterWrite(a -> new GainOffset<>(a, -11.0f, 0.0f), BigInteger.valueOf(10), BigInteger.valueOf(-110));
+        testAdapterWrite(a -> new GainOffset(a, 2.0f, 0.0f), 10.0d, (byte) 20);
+        testAdapterWrite(a -> new GainOffset(a, 3.0f, 0.0f), 10.0d, (short) 30);
+        testAdapterWrite(a -> new GainOffset(a, 5.0f, 0.0f), 10.0d, (int) 50);
+        testAdapterWrite(a -> new GainOffset(a, 15.0f, 0.0f), 10.0d, (long) 150);
+        testAdapterWrite(a -> new GainOffset(a, -1.0f, 0.0f), 10.0d, (short) -10);
+        testAdapterWrite(a -> new GainOffset(a, -2.0f, 0.0f), 10.0d, (float) -20);
+        testAdapterWrite(a -> new GainOffset(a, -5.0f, 0.0f), 10.0d, (double) -50);
+        testAdapterWrite(a -> new GainOffset(a, -11.0f, 0.0f), 10.0d, BigInteger.valueOf(-110));
 
-        testAdapterWrite(a -> new GainOffset<>(a, 2.0f, 1.0f), (byte) 10, (byte) (20 + 1));
-        testAdapterWrite(a -> new GainOffset<>(a, 3.0f, 4.0f), (short) 10, (short) (30 + 4));
-        testAdapterWrite(a -> new GainOffset<>(a, 5.0f, -2.0f), (int) 10, (int) (50 - 2));
-        testAdapterWrite(a -> new GainOffset<>(a, 15.0f, -5.0f), (long) 10, (long) (150 - 5));
-        testAdapterWrite(a -> new GainOffset<>(a, -1.0f, 10.0f), (short) 10, (short) (-10 + 10));
-        testAdapterWrite(a -> new GainOffset<>(a, -2.0f, 54.0f), (float) 10, (float) (-20 + 54));
-        testAdapterWrite(a -> new GainOffset<>(a, -5.0f, 1.0f), (double) 10, (double) (-50 + 1));
-        testAdapterWrite(a -> new GainOffset<>(a, -11.0f, 22.0f), BigInteger.valueOf(10),
-                BigInteger.valueOf(-110 + 22));
+        testAdapterWrite(a -> new GainOffset(a, 2.0f, 1.0f), 10.0d, (byte) (20 + 1));
+        testAdapterWrite(a -> new GainOffset(a, 3.0f, 4.0f), 10.0d, (short) (30 + 4));
+        testAdapterWrite(a -> new GainOffset(a, 5.0f, -2.0f), 10.0d, (int) (50 - 2));
+        testAdapterWrite(a -> new GainOffset(a, 15.0f, -5.0f), 10.0d, (long) (150 - 5));
+        testAdapterWrite(a -> new GainOffset(a, -1.0f, 10.0f), 10.0d, (short) (-10 + 10));
+        testAdapterWrite(a -> new GainOffset(a, -2.0f, 54.0f), 10.0d, (float) (-20 + 54));
+        testAdapterWrite(a -> new GainOffset(a, -5.0f, 1.0f), 10.0d, (double) (-50 + 1));
+        testAdapterWrite(a -> new GainOffset(a, -11.0f, 22.0f), 10.0d, BigInteger.valueOf(-110 + 22));
     }
 
     @Test

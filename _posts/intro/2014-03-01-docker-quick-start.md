@@ -4,13 +4,9 @@ title:  "Docker Quick Start"
 categories: [intro]
 ---
 
-[Installation](#installtion)
+[Installation](#installation)
 
 [Command Toolbox](#command-toolbox)
-
-[Eclipse Kura&trade; Installation](#eclipse-kuratrade-installation)
-
-[Development Environment Installation](#development-environment-installation)
 
 ## Installation
 

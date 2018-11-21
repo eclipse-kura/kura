@@ -12,10 +12,10 @@ categories: [intro]
 
 Eclipse Kura is also available as a Docker container available in [Docker Hub](https://hub.docker.com/r/eclipse/kura/)
 
-To download and run, run the following command:
+To download and run, use the following command:
 
 ```
-docker run -d -p 8080:8080 eclipse/kura
+docker run -d -p 8080:8080 -t eclipse/kura
 ```
 
 This command will start Kura in background and the Kura Web Ui will be available through port 8080.
@@ -23,12 +23,12 @@ This command will start Kura in background and the Kura Web Ui will be available
 
 ## Command Toolbox
 
-Following a set of useful Docker command that can be used to list and manage Docker containers.
+Following, a set of useful Docker command that can be used to list and manage Docker containers.
 For more details on Docker commands, please reference the official [Docker documentation](https://docs.docker.com/get-started/) 
 
 ### List Docker Images
 
-To list all the installed docker images run:
+To list all the installed Docker images run:
 
 ```
 docker images

@@ -32,7 +32,7 @@ public class SkinServlet extends HttpServlet {
 
     private static final long serialVersionUID = -556598856721497972L;
 
-    private static Logger s_logger = LoggerFactory.getLogger(SkinServlet.class);
+    private static Logger logger = LoggerFactory.getLogger(SkinServlet.class);
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -77,7 +77,7 @@ public class SkinServlet extends HttpServlet {
                 iRead = fr.read(buffer);
             }
         } catch (Exception e) {
-            s_logger.error("Error loading skin resource", e);
+            logger.error("Error loading skin resource", e);
         } finally {
             if (fr != null) {
                 fr.close();
@@ -115,7 +115,7 @@ public class SkinServlet extends HttpServlet {
             }
 
         } catch (Exception e) {
-            s_logger.error("Error loading skin resource", e);
+            logger.error("Error loading skin resource", e);
         } finally {
             if (in != null) {
                 in.close();
@@ -134,7 +134,7 @@ public class SkinServlet extends HttpServlet {
 
             fResourceDir = new File(resourceDir);
             if (!fResourceDir.exists()) {
-                s_logger.warn("Resource Directory {} does not exist", fResourceDir.getAbsolutePath());
+                logger.warn("Resource Directory {} does not exist", fResourceDir.getAbsolutePath());
                 fResourceDir = null;
 
                 return fResourceDir;
@@ -144,13 +144,17 @@ public class SkinServlet extends HttpServlet {
     }
 
     private File checkFile(File resourceDir, String resourceName) {
-        File fResourceFile = new File(resourceDir, resourceName);
+        File fResourceFile = null;
 
-        if (!fResourceFile.exists()) {
-            s_logger.warn("Resource File {} does not exist", fResourceFile.getAbsolutePath());
-            fResourceFile = null;
+        if (resourceName != null && resourceName.trim().length() != 0) {
+            fResourceFile = new File(resourceDir, resourceName);
 
-            return fResourceFile;
+            if (!fResourceFile.exists()) {
+                logger.warn("Resource File {} does not exist", fResourceFile.getAbsolutePath());
+                fResourceFile = null;
+
+                return fResourceFile;
+            }
         }
 
         return fResourceFile;

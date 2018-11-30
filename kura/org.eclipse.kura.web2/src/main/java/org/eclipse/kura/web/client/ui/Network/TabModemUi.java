@@ -18,7 +18,6 @@ import java.util.Map;
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.util.HelpButton;
-import org.eclipse.kura.web.client.util.HelpButton.HelpTextProvider;
 import org.eclipse.kura.web.client.util.MessageUtils;
 import org.eclipse.kura.web.shared.model.GwtModemAuthType;
 import org.eclipse.kura.web.shared.model.GwtModemInterfaceConfig;
@@ -50,18 +49,6 @@ import org.gwtbootstrap3.client.ui.html.Span;
 import org.gwtbootstrap3.client.ui.html.Text;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.BlurEvent;
-import com.google.gwt.event.dom.client.BlurHandler;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.MouseOutEvent;
-import com.google.gwt.event.dom.client.MouseOutHandler;
-import com.google.gwt.event.dom.client.MouseOverEvent;
-import com.google.gwt.event.dom.client.MouseOverHandler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -75,6 +62,9 @@ import com.google.gwt.view.client.SingleSelectionModel;
 
 public class TabModemUi extends Composite implements NetworkTab {
 
+    private static final String DE910 = "DE910";
+    private static final String LE910 = "LE910";
+    private static final String HE910 = "HE910";
     private static final String MODEM_AUTH_NONE_MESSAGE = MessageUtils.get(GwtModemAuthType.netModemAuthNONE.name());
     private static TabModemUiUiBinder uiBinder = GWT.create(TabModemUiUiBinder.class);
 
@@ -276,20 +266,14 @@ public class TabModemUi extends Composite implements NetworkTab {
         this.session = currentSession;
         this.tcpTab = tcp;
 
-        this.defaultDialString.put("HE910", "atd*99***1#");
-        this.defaultDialString.put("LE910", "atd*99***2#");
-        this.defaultDialString.put("DE910", "atd#777");
+        this.defaultDialString.put(HE910, "atd*99***1#");
+        this.defaultDialString.put(LE910, "atd*99***2#");
+        this.defaultDialString.put(DE910, "atd#777");
         initForm();
 
         initHelpButtons();
 
-        this.tcpTab.status.addChangeHandler(new ChangeHandler() {
-
-            @Override
-            public void onChange(ChangeEvent event) {
-                update();
-            }
-        });
+        this.tcpTab.status.addChangeHandler(event -> update());
     }
 
     @Override
@@ -422,15 +406,11 @@ public class TabModemUi extends Composite implements NetworkTab {
         this.networkHelp.setHelpText(MSGS.netModemToolTipNetworkTopology());
         this.modemHelp.setHelpText(MSGS.netModemToolTipModemIndentifier());
         this.numberHelp.setHelpText(MSGS.netModemToolTipModemInterfaceNumber());
-        this.dialHelp.setHelpTextProvider(new HelpTextProvider() {
-
-            @Override
-            public String getHelpText() {
-                if ("".equals(TabModemUi.this.dialString)) {
-                    return MSGS.netModemToolTipDialStringDefault();
-                } else {
-                    return MSGS.netModemToolTipDialString(TabModemUi.this.dial.getText());
-                }
+        this.dialHelp.setHelpTextProvider(() -> {
+            if ("".equals(TabModemUi.this.dialString)) {
+                return MSGS.netModemToolTipDialStringDefault();
+            } else {
+                return MSGS.netModemToolTipDialString(TabModemUi.this.dial.getText());
             }
         });
         this.apnHelp.setHelpText(MSGS.netModemToolTipApn());
@@ -454,30 +434,16 @@ public class TabModemUi extends Composite implements NetworkTab {
         // NETWORK TECHNOLOGY
         this.labelNetwork.setText(MSGS.netModemNetworkTechnology());
         this.network.addItem(MSGS.unknown());
-        this.network.addMouseOverHandler(new MouseOverHandler() {
-
-            @Override
-            public void onMouseOver(MouseOverEvent event) {
-                if (TabModemUi.this.network.isEnabled()) {
-                    TabModemUi.this.helpText.clear();
-                    TabModemUi.this.helpText.add(new Span(MSGS.netModemToolTipNetworkTopology()));
-                }
+        this.network.addMouseOverHandler(event -> {
+            if (TabModemUi.this.network.isEnabled()) {
+                TabModemUi.this.helpText.clear();
+                TabModemUi.this.helpText.add(new Span(MSGS.netModemToolTipNetworkTopology()));
             }
         });
-        this.network.addMouseOutHandler(new MouseOutHandler() {
-
-            @Override
-            public void onMouseOut(MouseOutEvent event) {
-                resetHelp();
-            }
-        });
-        this.network.addChangeHandler(new ChangeHandler() {
-
-            @Override
-            public void onChange(ChangeEvent event) {
-                setDirty(true);
-                refreshForm();
-            }
+        this.network.addMouseOutHandler(event -> resetHelp());
+        this.network.addChangeHandler(event -> {
+            setDirty(true);
+            refreshForm();
         });
 
         // CONNECTION TYPE
@@ -485,171 +451,109 @@ public class TabModemUi extends Composite implements NetworkTab {
 
         // MODEM IDENTIFIER
         this.labelModem.setText(MSGS.netModemIdentifier());
-        this.modem.addMouseOverHandler(new MouseOverHandler() {
-
-            @Override
-            public void onMouseOver(MouseOverEvent event) {
-                if (TabModemUi.this.modem.isEnabled()) {
-                    TabModemUi.this.helpText.clear();
-                    TabModemUi.this.helpText.add(new Span(MSGS.netModemToolTipModemIndentifier()));
-                }
+        this.modem.addMouseOverHandler(event -> {
+            if (TabModemUi.this.modem.isEnabled()) {
+                TabModemUi.this.helpText.clear();
+                TabModemUi.this.helpText.add(new Span(MSGS.netModemToolTipModemIndentifier()));
             }
         });
-        this.modem.addMouseOutHandler(new MouseOutHandler() {
-
-            @Override
-            public void onMouseOut(MouseOutEvent event) {
-                resetHelp();
-            }
-        });
-        this.modem.addValueChangeHandler(new ValueChangeHandler<String>() {
-
-            @Override
-            public void onValueChange(ValueChangeEvent<String> event) {
-                setDirty(true);
-            }
-        });
+        this.modem.addMouseOutHandler(event -> resetHelp());
+        this.modem.addValueChangeHandler(event -> setDirty(true));
 
         // INTERFACE NUMBER
         this.labelNumber.setText(MSGS.netModemInterfaceNum() + "*");
-        this.number.addBlurHandler(new BlurHandler() {
-
-            @Override
-            public void onBlur(BlurEvent event) {
-                setDirty(true);
-                if (TabModemUi.this.number.getText().trim() != null
-                        && (!TabModemUi.this.number.getText().trim().matches(REGEX_NUM)
-                                || Integer.parseInt(TabModemUi.this.number.getText()) < 0)) {
-                    TabModemUi.this.helpNumber.setText("This Field requires a numeric input");
-                    TabModemUi.this.groupNumber.setValidationState(ValidationState.ERROR);
-                } else {
-                    TabModemUi.this.helpNumber.setText("");
-                    TabModemUi.this.groupNumber.setValidationState(ValidationState.NONE);
-                }
+        this.number.addBlurHandler(event -> {
+            setDirty(true);
+            if (TabModemUi.this.number.getText().trim() != null
+                    && (!TabModemUi.this.number.getText().trim().matches(REGEX_NUM)
+                            || Integer.parseInt(TabModemUi.this.number.getText()) < 0)) {
+                TabModemUi.this.helpNumber.setText("This Field requires a numeric input");
+                TabModemUi.this.groupNumber.setValidationState(ValidationState.ERROR);
+            } else {
+                TabModemUi.this.helpNumber.setText("");
+                TabModemUi.this.groupNumber.setValidationState(ValidationState.NONE);
             }
         });
-        this.number.addMouseOverHandler(new MouseOverHandler() {
-
-            @Override
-            public void onMouseOver(MouseOverEvent event) {
-                if (TabModemUi.this.number.isEnabled()) {
-                    TabModemUi.this.helpText.clear();
-                    TabModemUi.this.helpText.add(new Span(MSGS.netModemToolTipModemInterfaceNumber()));
-                }
+        this.number.addMouseOverHandler(event -> {
+            if (TabModemUi.this.number.isEnabled()) {
+                TabModemUi.this.helpText.clear();
+                TabModemUi.this.helpText.add(new Span(MSGS.netModemToolTipModemInterfaceNumber()));
             }
         });
-        this.number.addMouseOutHandler(new MouseOutHandler() {
-
-            @Override
-            public void onMouseOut(MouseOutEvent event) {
-                resetHelp();
-            }
-        });
+        this.number.addMouseOutHandler(event -> resetHelp());
 
         // DIAL STRING
         this.labelDial.setText(MSGS.netModemDialString() + "*");
 
-        this.dial.addMouseOutHandler(new MouseOutHandler() {
-
-            @Override
-            public void onMouseOut(MouseOutEvent event) {
-                resetHelp();
-            }
-        });
+        this.dial.addMouseOutHandler(event -> resetHelp());
         this.dialString = "";
         String modemModel;
         if (this.selectedNetIfConfig != null) {
             modemModel = this.selectedNetIfConfig.getModel();
             if (modemModel != null && !modemModel.isEmpty()) {
-                if (modemModel.contains("HE910")) {
-                    this.dialString = this.defaultDialString.get("HE910");
-                } else if (modemModel.contains("LE910")) {
-                    this.dialString = this.defaultDialString.get("LE910");
-                } else if (modemModel.contains("DE910")) {
-                    this.dialString = this.defaultDialString.get("DE910");
+                if (modemModel.contains(HE910)) {
+                    this.dialString = this.defaultDialString.get(HE910);
+                } else if (modemModel.contains(LE910)) {
+                    this.dialString = this.defaultDialString.get(LE910);
+                } else if (modemModel.contains(DE910)) {
+                    this.dialString = this.defaultDialString.get(DE910);
                 } else {
                     this.dialString = "";
                 }
             }
         }
-        this.dial.addMouseOverHandler(new MouseOverHandler() {
-
-            @Override
-            public void onMouseOver(MouseOverEvent event) {
-                if (TabModemUi.this.dial.isEnabled()) {
-                    TabModemUi.this.helpText.clear();
-                    if (TabModemUi.this.dialString.equals("")) {
-                        TabModemUi.this.helpText.add(new Span(MSGS.netModemToolTipDialStringDefault()));
-                    } else {
-                        TabModemUi.this.helpText
-                                .add(new Span(MSGS.netModemToolTipDialString(TabModemUi.this.dial.getText())));
-                    }
-                }
-            }
-        });
-        this.dial.addBlurHandler(new BlurHandler() {
-
-            @Override
-            public void onBlur(BlurEvent event) {
-                setDirty(true);
-                if (TabModemUi.this.dial.getText() == null || "".equals(TabModemUi.this.dial.getText().trim())) {
-                    TabModemUi.this.groupDial.setValidationState(ValidationState.ERROR);
+        this.dial.addMouseOverHandler(event -> {
+            if (TabModemUi.this.dial.isEnabled()) {
+                TabModemUi.this.helpText.clear();
+                if (TabModemUi.this.dialString.equals("")) {
+                    TabModemUi.this.helpText.add(new Span(MSGS.netModemToolTipDialStringDefault()));
                 } else {
-                    TabModemUi.this.groupDial.setValidationState(ValidationState.NONE);
+                    TabModemUi.this.helpText
+                            .add(new Span(MSGS.netModemToolTipDialString(TabModemUi.this.dial.getText())));
                 }
             }
         });
-
-        this.buttonPdp.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                if (!TabModemUi.this.pdpInit) {
-                    initPdp();
-                    TabModemUi.this.pdpDataProvider.getList().clear();
-                    TabModemUi.this.searching.setVisible(true);
-                    TabModemUi.this.noPdp.setVisible(false);
-                    TabModemUi.this.pdpGrid.setVisible(false);
-                    TabModemUi.this.pdpFail.setVisible(false);
-                }
-                initModal();
-                loadPdpData();
+        this.dial.addBlurHandler(event -> {
+            setDirty(true);
+            if (TabModemUi.this.dial.getText() == null || "".equals(TabModemUi.this.dial.getText().trim())) {
+                TabModemUi.this.groupDial.setValidationState(ValidationState.ERROR);
+            } else {
+                TabModemUi.this.groupDial.setValidationState(ValidationState.NONE);
             }
+        });
+
+        this.buttonPdp.addClickHandler(event -> {
+            if (!TabModemUi.this.pdpInit) {
+                initPdp();
+                TabModemUi.this.pdpDataProvider.getList().clear();
+                TabModemUi.this.searching.setVisible(true);
+                TabModemUi.this.noPdp.setVisible(false);
+                TabModemUi.this.pdpGrid.setVisible(false);
+                TabModemUi.this.pdpFail.setVisible(false);
+            }
+            initModal();
+            loadPdpData();
         });
 
         // APN
         this.labelApn.setText(MSGS.netModemAPN() + "*");
-        this.apn.addMouseOverHandler(new MouseOverHandler() {
-
-            @Override
-            public void onMouseOver(MouseOverEvent event) {
+        this.apn.addMouseOverHandler(event -> {
+            if (TabModemUi.this.apn.isEnabled()) {
+                TabModemUi.this.helpText.clear();
+                TabModemUi.this.helpText.add(new Span(MSGS.netModemToolTipApn()));
+            }
+        });
+        this.apn.addMouseOutHandler(event -> resetHelp());
+        this.apn.addBlurHandler(event -> {
+            setDirty(true);
+            if (TabModemUi.this.apn.getText() == null || "".equals(TabModemUi.this.apn.getText().trim())) {
                 if (TabModemUi.this.apn.isEnabled()) {
-                    TabModemUi.this.helpText.clear();
-                    TabModemUi.this.helpText.add(new Span(MSGS.netModemToolTipApn()));
-                }
-            }
-        });
-        this.apn.addMouseOutHandler(new MouseOutHandler() {
-
-            @Override
-            public void onMouseOut(MouseOutEvent event) {
-                resetHelp();
-            }
-        });
-        this.apn.addBlurHandler(new BlurHandler() {
-
-            @Override
-            public void onBlur(BlurEvent event) {
-                setDirty(true);
-                if (TabModemUi.this.apn.getText() == null || "".equals(TabModemUi.this.apn.getText().trim())) {
-                    if (TabModemUi.this.apn.isEnabled()) {
-                        TabModemUi.this.groupApn.setValidationState(ValidationState.ERROR);
-                    } else {
-                        TabModemUi.this.groupApn.setValidationState(ValidationState.NONE);
-                    }
+                    TabModemUi.this.groupApn.setValidationState(ValidationState.ERROR);
                 } else {
                     TabModemUi.this.groupApn.setValidationState(ValidationState.NONE);
                 }
+            } else {
+                TabModemUi.this.groupApn.setValidationState(ValidationState.NONE);
             }
         });
 
@@ -658,343 +562,179 @@ public class TabModemUi extends Composite implements NetworkTab {
         for (GwtModemAuthType a : GwtModemAuthType.values()) {
             this.auth.addItem(MessageUtils.get(a.name()));
         }
-        this.auth.addMouseOverHandler(new MouseOverHandler() {
-
-            @Override
-            public void onMouseOver(MouseOverEvent event) {
-                if (TabModemUi.this.auth.isEnabled()) {
-                    TabModemUi.this.helpText.clear();
-                    TabModemUi.this.helpText.add(new Span(MSGS.netModemToolTipAuthentication()));
-                }
+        this.auth.addMouseOverHandler(event -> {
+            if (TabModemUi.this.auth.isEnabled()) {
+                TabModemUi.this.helpText.clear();
+                TabModemUi.this.helpText.add(new Span(MSGS.netModemToolTipAuthentication()));
             }
         });
-        this.auth.addMouseOutHandler(new MouseOutHandler() {
-
-            @Override
-            public void onMouseOut(MouseOutEvent event) {
-                resetHelp();
-            }
-        });
-        this.auth.addChangeHandler(new ChangeHandler() {
-
-            @Override
-            public void onChange(ChangeEvent event) {
-                setDirty(true);
-                refreshForm();
-            }
+        this.auth.addMouseOutHandler(event -> resetHelp());
+        this.auth.addChangeHandler(event -> {
+            setDirty(true);
+            refreshForm();
         });
 
         // USERNAME
         this.labelUsername.setText(MSGS.netModemUsername());
-        this.username.addMouseOverHandler(new MouseOverHandler() {
-
-            @Override
-            public void onMouseOver(MouseOverEvent event) {
-                if (TabModemUi.this.username.isEnabled()) {
-                    TabModemUi.this.helpText.clear();
-                    TabModemUi.this.helpText.add(new Span(MSGS.netModemToolTipUsername()));
-                }
+        this.username.addMouseOverHandler(event -> {
+            if (TabModemUi.this.username.isEnabled()) {
+                TabModemUi.this.helpText.clear();
+                TabModemUi.this.helpText.add(new Span(MSGS.netModemToolTipUsername()));
             }
         });
-        this.username.addMouseOutHandler(new MouseOutHandler() {
-
-            @Override
-            public void onMouseOut(MouseOutEvent event) {
-                resetHelp();
-            }
-        });
-        this.username.addValueChangeHandler(new ValueChangeHandler<String>() {
-
-            @Override
-            public void onValueChange(ValueChangeEvent<String> event) {
-                setDirty(true);
-            }
-        });
+        this.username.addMouseOutHandler(event -> resetHelp());
+        this.username.addValueChangeHandler(event -> setDirty(true));
 
         // PASSWORD
         this.labelPassword.setText(MSGS.netModemPassword());
-        this.password.addMouseOverHandler(new MouseOverHandler() {
-
-            @Override
-            public void onMouseOver(MouseOverEvent event) {
-                if (TabModemUi.this.network.isEnabled()) {
-                    TabModemUi.this.helpText.clear();
-                    TabModemUi.this.helpText.add(new Span(MSGS.netModemToolTipPassword()));
-                }
+        this.password.addMouseOverHandler(event -> {
+            if (TabModemUi.this.network.isEnabled()) {
+                TabModemUi.this.helpText.clear();
+                TabModemUi.this.helpText.add(new Span(MSGS.netModemToolTipPassword()));
             }
         });
-        this.password.addMouseOutHandler(new MouseOutHandler() {
-
-            @Override
-            public void onMouseOut(MouseOutEvent event) {
-                resetHelp();
-            }
-        });
-        this.password.addValueChangeHandler(new ValueChangeHandler<String>() {
-
-            @Override
-            public void onValueChange(ValueChangeEvent<String> event) {
-                setDirty(true);
-            }
-        });
+        this.password.addMouseOutHandler(event -> resetHelp());
+        this.password.addValueChangeHandler(event -> setDirty(true));
 
         // MODEM RESET TIMEOUT
         this.labelReset.setText(MSGS.netModemResetTimeout() + "*");
-        this.reset.addMouseOverHandler(new MouseOverHandler() {
-
-            @Override
-            public void onMouseOver(MouseOverEvent event) {
-                if (TabModemUi.this.reset.isEnabled()) {
-                    TabModemUi.this.helpText.clear();
-                    TabModemUi.this.helpText.add(new Span(MSGS.netModemToolTipResetTimeout()));
-                }
+        this.reset.addMouseOverHandler(event -> {
+            if (TabModemUi.this.reset.isEnabled()) {
+                TabModemUi.this.helpText.clear();
+                TabModemUi.this.helpText.add(new Span(MSGS.netModemToolTipResetTimeout()));
             }
         });
-        this.reset.addMouseOutHandler(new MouseOutHandler() {
-
-            @Override
-            public void onMouseOut(MouseOutEvent event) {
-                resetHelp();
-            }
-        });
-        this.reset.addBlurHandler(new BlurHandler() {
-
-            @Override
-            public void onBlur(BlurEvent event) {
-                setDirty(true);
-                if (TabModemUi.this.reset.getText().trim() != null
-                        && (!TabModemUi.this.reset.getText().trim().matches(REGEX_NUM)
-                                || Integer.parseInt(TabModemUi.this.reset.getText()) < 0
-                                || Integer.parseInt(TabModemUi.this.reset.getText()) == 1)) {
-                    TabModemUi.this.helpReset.setText(MSGS.netModemInvalidResetTimeout());
-                    TabModemUi.this.groupReset.setValidationState(ValidationState.ERROR);
-                } else {
-                    TabModemUi.this.helpReset.setText("");
-                    TabModemUi.this.groupReset.setValidationState(ValidationState.NONE);
-                }
+        this.reset.addMouseOutHandler(event -> resetHelp());
+        this.reset.addBlurHandler(event -> {
+            setDirty(true);
+            if (TabModemUi.this.reset.getText().trim() != null
+                    && (!TabModemUi.this.reset.getText().trim().matches(REGEX_NUM)
+                            || Integer.parseInt(TabModemUi.this.reset.getText()) < 0
+                            || Integer.parseInt(TabModemUi.this.reset.getText()) == 1)) {
+                TabModemUi.this.helpReset.setText(MSGS.netModemInvalidResetTimeout());
+                TabModemUi.this.groupReset.setValidationState(ValidationState.ERROR);
+            } else {
+                TabModemUi.this.helpReset.setText("");
+                TabModemUi.this.groupReset.setValidationState(ValidationState.NONE);
             }
         });
 
         // REOPEN CONNECTION ON TERMINATION
         this.labelPersist.setText(MSGS.netModemPersist());
-        this.radio1.addMouseOverHandler(new MouseOverHandler() {
-
-            @Override
-            public void onMouseOver(MouseOverEvent event) {
-                if (TabModemUi.this.radio1.isEnabled()) {
-                    TabModemUi.this.helpText.clear();
-                    TabModemUi.this.helpText.add(new Span(MSGS.netModemToolTipPersist()));
-                }
+        this.radio1.addMouseOverHandler(event -> {
+            if (TabModemUi.this.radio1.isEnabled()) {
+                TabModemUi.this.helpText.clear();
+                TabModemUi.this.helpText.add(new Span(MSGS.netModemToolTipPersist()));
             }
         });
-        this.radio1.addMouseOutHandler(new MouseOutHandler() {
-
-            @Override
-            public void onMouseOut(MouseOutEvent event) {
-                resetHelp();
+        this.radio1.addMouseOutHandler(event -> resetHelp());
+        this.radio2.addMouseOverHandler(event -> {
+            if (TabModemUi.this.radio2.isEnabled()) {
+                TabModemUi.this.helpText.clear();
+                TabModemUi.this.helpText.add(new Span(MSGS.netModemToolTipPersist()));
             }
         });
-        this.radio2.addMouseOverHandler(new MouseOverHandler() {
+        this.radio2.addMouseOutHandler(event -> resetHelp());
 
-            @Override
-            public void onMouseOver(MouseOverEvent event) {
-                if (TabModemUi.this.radio2.isEnabled()) {
-                    TabModemUi.this.helpText.clear();
-                    TabModemUi.this.helpText.add(new Span(MSGS.netModemToolTipPersist()));
-                }
-            }
-        });
-        this.radio2.addMouseOutHandler(new MouseOutHandler() {
-
-            @Override
-            public void onMouseOut(MouseOutEvent event) {
-                resetHelp();
-            }
-        });
-
-        this.radio1.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-
-            @Override
-            public void onValueChange(ValueChangeEvent<Boolean> event) {
-                setDirty(true);
-            }
-        });
-        this.radio2.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-
-            @Override
-            public void onValueChange(ValueChangeEvent<Boolean> event) {
-                setDirty(true);
-            }
-        });
+        this.radio1.addValueChangeHandler(event -> setDirty(true));
+        this.radio2.addValueChangeHandler(event -> setDirty(true));
 
         // CONNECTION ATTEMPTS
         this.labelMaxfail.setText(MSGS.netModemMaxFail() + "*");
-        this.maxfail.addMouseOverHandler(new MouseOverHandler() {
-
-            @Override
-            public void onMouseOver(MouseOverEvent event) {
-                if (TabModemUi.this.maxfail.isEnabled()) {
-                    TabModemUi.this.helpText.clear();
-                    TabModemUi.this.helpText.add(new Span(MSGS.netModemToolTipMaxFail()));
-                }
+        this.maxfail.addMouseOverHandler(event -> {
+            if (TabModemUi.this.maxfail.isEnabled()) {
+                TabModemUi.this.helpText.clear();
+                TabModemUi.this.helpText.add(new Span(MSGS.netModemToolTipMaxFail()));
             }
         });
-        this.maxfail.addMouseOutHandler(new MouseOutHandler() {
-
-            @Override
-            public void onMouseOut(MouseOutEvent event) {
-                resetHelp();
-            }
-        });
-        this.maxfail.addBlurHandler(new BlurHandler() {
-
-            @Override
-            public void onBlur(BlurEvent event) {
-                setDirty(true);
-                if (TabModemUi.this.maxfail.getText().trim() != null
-                        && (!TabModemUi.this.maxfail.getText().trim().matches(REGEX_NUM)
-                                || Integer.parseInt(TabModemUi.this.maxfail.getText()) <= 0)
-                        || TabModemUi.this.maxfail.getText().trim().length() <= 0) {
-                    TabModemUi.this.helpMaxfail.setText(MSGS.netModemInvalidMaxFail());
-                    TabModemUi.this.groupMaxfail.setValidationState(ValidationState.ERROR);
-                } else {
-                    TabModemUi.this.helpMaxfail.setText("");
-                    TabModemUi.this.groupMaxfail.setValidationState(ValidationState.NONE);
-                }
+        this.maxfail.addMouseOutHandler(event -> resetHelp());
+        this.maxfail.addBlurHandler(event -> {
+            setDirty(true);
+            if (TabModemUi.this.maxfail.getText().trim() != null
+                    && (!TabModemUi.this.maxfail.getText().trim().matches(REGEX_NUM)
+                            || Integer.parseInt(TabModemUi.this.maxfail.getText()) <= 0)
+                    || TabModemUi.this.maxfail.getText().trim().length() <= 0) {
+                TabModemUi.this.helpMaxfail.setText(MSGS.netModemInvalidMaxFail());
+                TabModemUi.this.groupMaxfail.setValidationState(ValidationState.ERROR);
+            } else {
+                TabModemUi.this.helpMaxfail.setText("");
+                TabModemUi.this.groupMaxfail.setValidationState(ValidationState.NONE);
             }
         });
 
         // DISCONNET IF IDLE
         this.labelIdle.setText(MSGS.netModemIdle() + "*");
-        this.idle.addMouseOverHandler(new MouseOverHandler() {
-
-            @Override
-            public void onMouseOver(MouseOverEvent event) {
-                if (TabModemUi.this.idle.isEnabled()) {
-                    TabModemUi.this.helpText.clear();
-                    TabModemUi.this.helpText.add(new Span(MSGS.netModemToolTipIdle()));
-                }
+        this.idle.addMouseOverHandler(event -> {
+            if (TabModemUi.this.idle.isEnabled()) {
+                TabModemUi.this.helpText.clear();
+                TabModemUi.this.helpText.add(new Span(MSGS.netModemToolTipIdle()));
             }
         });
-        this.idle.addMouseOutHandler(new MouseOutHandler() {
-
-            @Override
-            public void onMouseOut(MouseOutEvent event) {
-                resetHelp();
-            }
-        });
-        this.idle.addBlurHandler(new BlurHandler() {
-
-            @Override
-            public void onBlur(BlurEvent event) {
-                setDirty(true);
-                if (TabModemUi.this.idle.getText().trim() != null
-                        && (!TabModemUi.this.idle.getText().trim().matches(REGEX_NUM)
-                                || Integer.parseInt(TabModemUi.this.idle.getText()) < 0)) {
-                    TabModemUi.this.helpIdle.setText(MSGS.netModemInvalidIdle());
-                    TabModemUi.this.groupIdle.setValidationState(ValidationState.ERROR);
-                } else {
-                    TabModemUi.this.helpIdle.setText("");
-                    TabModemUi.this.groupIdle.setValidationState(ValidationState.NONE);
-                }
+        this.idle.addMouseOutHandler(event -> resetHelp());
+        this.idle.addBlurHandler(event -> {
+            setDirty(true);
+            if (TabModemUi.this.idle.getText().trim() != null
+                    && (!TabModemUi.this.idle.getText().trim().matches(REGEX_NUM)
+                            || Integer.parseInt(TabModemUi.this.idle.getText()) < 0)) {
+                TabModemUi.this.helpIdle.setText(MSGS.netModemInvalidIdle());
+                TabModemUi.this.groupIdle.setValidationState(ValidationState.ERROR);
+            } else {
+                TabModemUi.this.helpIdle.setText("");
+                TabModemUi.this.groupIdle.setValidationState(ValidationState.NONE);
             }
         });
 
         // ACTIVE FILTER
         this.labelActive.setText(MSGS.netModemActiveFilter());
-        this.active.addMouseOverHandler(new MouseOverHandler() {
-
-            @Override
-            public void onMouseOver(MouseOverEvent event) {
-                if (TabModemUi.this.active.isEnabled()) {
-                    TabModemUi.this.helpText.clear();
-                    TabModemUi.this.helpText.add(new Span(MSGS.netModemToolTipActiveFilter()));
-                }
+        this.active.addMouseOverHandler(event -> {
+            if (TabModemUi.this.active.isEnabled()) {
+                TabModemUi.this.helpText.clear();
+                TabModemUi.this.helpText.add(new Span(MSGS.netModemToolTipActiveFilter()));
             }
         });
-        this.active.addMouseOutHandler(new MouseOutHandler() {
-
-            @Override
-            public void onMouseOut(MouseOutEvent event) {
-                resetHelp();
-            }
-        });
-        this.active.addValueChangeHandler(new ValueChangeHandler<String>() {
-
-            @Override
-            public void onValueChange(ValueChangeEvent<String> event) {
-                setDirty(true);
-            }
-        });
+        this.active.addMouseOutHandler(event -> resetHelp());
+        this.active.addValueChangeHandler(event -> setDirty(true));
 
         // LCP ECHO INTERVAL
         this.labelInterval.setText(MSGS.netModemLcpEchoInterval() + "*");
-        this.interval.addMouseOverHandler(new MouseOverHandler() {
-
-            @Override
-            public void onMouseOver(MouseOverEvent event) {
-                if (TabModemUi.this.interval.isEnabled()) {
-                    TabModemUi.this.helpText.clear();
-                    TabModemUi.this.helpText.add(new Span(MSGS.netModemToolTipLcpEchoInterval()));
-                }
+        this.interval.addMouseOverHandler(event -> {
+            if (TabModemUi.this.interval.isEnabled()) {
+                TabModemUi.this.helpText.clear();
+                TabModemUi.this.helpText.add(new Span(MSGS.netModemToolTipLcpEchoInterval()));
             }
         });
-        this.interval.addMouseOutHandler(new MouseOutHandler() {
-
-            @Override
-            public void onMouseOut(MouseOutEvent event) {
-                resetHelp();
-            }
-        });
-        this.interval.addBlurHandler(new BlurHandler() {
-
-            @Override
-            public void onBlur(BlurEvent event) {
-                setDirty(true);
-                if (TabModemUi.this.interval.getText().trim() != null
-                        && (!TabModemUi.this.interval.getText().trim().matches(REGEX_NUM)
-                                || Integer.parseInt(TabModemUi.this.interval.getText()) < 0)) {
-                    TabModemUi.this.helpInterval.setText(MSGS.netModemInvalidLcpEchoInterval());
-                    TabModemUi.this.groupInterval.setValidationState(ValidationState.ERROR);
-                } else {
-                    TabModemUi.this.groupInterval.setValidationState(ValidationState.NONE);
-                }
+        this.interval.addMouseOutHandler(event -> resetHelp());
+        this.interval.addBlurHandler(event -> {
+            setDirty(true);
+            if (TabModemUi.this.interval.getText().trim() != null
+                    && (!TabModemUi.this.interval.getText().trim().matches(REGEX_NUM)
+                            || Integer.parseInt(TabModemUi.this.interval.getText()) < 0)) {
+                TabModemUi.this.helpInterval.setText(MSGS.netModemInvalidLcpEchoInterval());
+                TabModemUi.this.groupInterval.setValidationState(ValidationState.ERROR);
+            } else {
+                TabModemUi.this.groupInterval.setValidationState(ValidationState.NONE);
             }
         });
 
         // LCP ECHO FAILURE
         this.labelFailure.setText(MSGS.netModemLcpEchoFailure() + "*");
-        this.failure.addMouseOverHandler(new MouseOverHandler() {
-
-            @Override
-            public void onMouseOver(MouseOverEvent event) {
-                if (TabModemUi.this.failure.isEnabled()) {
-                    TabModemUi.this.helpText.clear();
-                    TabModemUi.this.helpText.add(new Span(MSGS.netModemToolTipLcpEchoFailure()));
-                }
+        this.failure.addMouseOverHandler(event -> {
+            if (TabModemUi.this.failure.isEnabled()) {
+                TabModemUi.this.helpText.clear();
+                TabModemUi.this.helpText.add(new Span(MSGS.netModemToolTipLcpEchoFailure()));
             }
         });
-        this.failure.addMouseOutHandler(new MouseOutHandler() {
-
-            @Override
-            public void onMouseOut(MouseOutEvent event) {
-                resetHelp();
-            }
-        });
-        this.failure.addBlurHandler(new BlurHandler() {
-
-            @Override
-            public void onBlur(BlurEvent event) {
-                setDirty(true);
-                if (TabModemUi.this.failure.getText().trim() != null
-                        && (!TabModemUi.this.failure.getText().trim().matches(REGEX_NUM)
-                                || Integer.parseInt(TabModemUi.this.failure.getText()) < 0)) {
-                    TabModemUi.this.helpFailure.setText(MSGS.netModemInvalidLcpEchoFailure());
-                    TabModemUi.this.groupFailure.setValidationState(ValidationState.ERROR);
-                } else {
-                    TabModemUi.this.helpFailure.setText("");
-                    TabModemUi.this.groupFailure.setValidationState(ValidationState.NONE);
-                }
+        this.failure.addMouseOutHandler(event -> resetHelp());
+        this.failure.addBlurHandler(event -> {
+            setDirty(true);
+            if (TabModemUi.this.failure.getText().trim() != null
+                    && (!TabModemUi.this.failure.getText().trim().matches(REGEX_NUM)
+                            || Integer.parseInt(TabModemUi.this.failure.getText()) < 0)) {
+                TabModemUi.this.helpFailure.setText(MSGS.netModemInvalidLcpEchoFailure());
+                TabModemUi.this.groupFailure.setValidationState(ValidationState.ERROR);
+            } else {
+                TabModemUi.this.helpFailure.setText("");
+                TabModemUi.this.groupFailure.setValidationState(ValidationState.NONE);
             }
         });
 

@@ -93,7 +93,7 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
             try {
                 String port = getUnusedAtPort();
                 logger.debug("sendCommand getSimStatus :: {} command to port {}",
-                        TelitHe910AtCommands.getSimStatus.getCommand(), port);
+                        TelitHe910AtCommands.GET_SIM_STATUS.getCommand(), port);
 
                 commAtConnection = openSerialPort(port);
                 if (!isAtReachable(commAtConnection)) {
@@ -124,7 +124,7 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
         ModemRegistrationStatus modemRegistrationStatus = ModemRegistrationStatus.UNKNOWN;
         synchronized (this.atLock) {
             logger.debug("sendCommand getRegistrationStatus :: {}",
-                    TelitHe910AtCommands.getRegistrationStatus.getCommand());
+                    TelitHe910AtCommands.GET_REGISTRATION_STATUS.getCommand());
             byte[] reply;
             CommConnection commAtConnection = openSerialPort(getAtPort());
             if (!isAtReachable(commAtConnection)) {
@@ -133,7 +133,7 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
             }
             try {
                 reply = commAtConnection.sendCommand(
-                        TelitHe910AtCommands.getRegistrationStatus.getCommand().getBytes(StandardCharsets.US_ASCII),
+                        TelitHe910AtCommands.GET_REGISTRATION_STATUS.getCommand().getBytes(StandardCharsets.US_ASCII),
                         1000, 100);
             } catch (IOException e) {
                 closeSerialPort(commAtConnection);
@@ -172,7 +172,7 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
         long txCnt = 0;
         synchronized (this.atLock) {
             logger.debug("sendCommand getGprsSessionDataVolume :: {}",
-                    TelitHe910AtCommands.getGprsSessionDataVolume.getCommand());
+                    TelitHe910AtCommands.GET_GPRS_SESSION_DATA_VOLUME.getCommand());
             byte[] reply;
             CommConnection commAtConnection = openSerialPort(getAtPort());
             if (!isAtReachable(commAtConnection)) {
@@ -181,7 +181,7 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
             }
             try {
                 reply = commAtConnection.sendCommand(
-                        TelitHe910AtCommands.getGprsSessionDataVolume.getCommand().getBytes(StandardCharsets.US_ASCII),
+                        TelitHe910AtCommands.GET_GPRS_SESSION_DATA_VOLUME.getCommand().getBytes(StandardCharsets.US_ASCII),
                         1000, 100);
             } catch (IOException e) {
                 closeSerialPort(commAtConnection);
@@ -216,7 +216,7 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
         long rxCnt = 0;
         synchronized (this.atLock) {
             logger.debug("sendCommand getGprsSessionDataVolume :: {}",
-                    TelitHe910AtCommands.getGprsSessionDataVolume.getCommand());
+                    TelitHe910AtCommands.GET_GPRS_SESSION_DATA_VOLUME.getCommand());
             byte[] reply;
             CommConnection commAtConnection = openSerialPort(getAtPort());
             if (!isAtReachable(commAtConnection)) {
@@ -225,7 +225,7 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
             }
             try {
                 reply = commAtConnection.sendCommand(
-                        TelitHe910AtCommands.getGprsSessionDataVolume.getCommand().getBytes(StandardCharsets.US_ASCII),
+                        TelitHe910AtCommands.GET_GPRS_SESSION_DATA_VOLUME.getCommand().getBytes(StandardCharsets.US_ASCII),
                         1000, 100);
             } catch (IOException e) {
                 closeSerialPort(commAtConnection);
@@ -272,7 +272,7 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
         String serviceType = null;
         synchronized (this.atLock) {
             logger.debug("sendCommand getMobileStationClass :: {}",
-                    TelitHe910AtCommands.getMobileStationClass.getCommand());
+                    TelitHe910AtCommands.GET_MOBILE_STATION_CLASS.getCommand());
             byte[] reply;
             CommConnection commAtConnection = openSerialPort(getAtPort());
             if (!isAtReachable(commAtConnection)) {
@@ -281,7 +281,7 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
             }
             try {
                 reply = commAtConnection.sendCommand(
-                        TelitHe910AtCommands.getMobileStationClass.getCommand().getBytes(StandardCharsets.US_ASCII),
+                        TelitHe910AtCommands.GET_MOBILE_STATION_CLASS.getCommand().getBytes(StandardCharsets.US_ASCII),
                         1000, 100);
             } catch (IOException e) {
                 closeSerialPort(commAtConnection);
@@ -374,7 +374,7 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
     protected boolean isSimCardReady(CommConnection comm) throws KuraException, IOException {
         boolean simReady = false;
         byte[] reply = comm.sendCommand(
-                TelitHe910AtCommands.getSimStatus.getCommand().getBytes(StandardCharsets.US_ASCII), 1000, 100);
+                TelitHe910AtCommands.GET_SIM_STATUS.getCommand().getBytes(StandardCharsets.US_ASCII), 1000, 100);
         if (reply != null) {
             String simStatus = getResponseString(reply);
             String[] simStatusSplit = simStatus.split(",");
@@ -388,12 +388,12 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
     protected boolean simultateInsertSimCard(CommConnection comm) throws KuraException, IOException {
         boolean simReady = false;
         byte[] reply = comm.sendCommand(
-                TelitHe910AtCommands.simulateSimNotInserted.getCommand().getBytes(StandardCharsets.US_ASCII), 1000,
+                TelitHe910AtCommands.SIMULATE_SIM_NOT_INSERTED.getCommand().getBytes(StandardCharsets.US_ASCII), 1000,
                 100);
         if (reply != null) {
             sleep(5000);
             reply = comm.sendCommand(
-                    TelitHe910AtCommands.simulateSimInserted.getCommand().getBytes(StandardCharsets.US_ASCII), 1000,
+                    TelitHe910AtCommands.SIMULATE_SIM_INSERTED.getCommand().getBytes(StandardCharsets.US_ASCII), 1000,
                     100);
             if (reply != null) {
                 sleep(1000);
@@ -424,7 +424,7 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
                 String cid = parseContextIdFromDialString(modemConfig.getDialString());
                 String apn = modemConfig.getApn();
                 String pdpType = modemConfig.getPdpType().name();
-                StringBuilder sb = new StringBuilder(TelitHe910AtCommands.pdpContext.getCommand()).append("=")
+                StringBuilder sb = new StringBuilder(TelitHe910AtCommands.PDP_CONTEXT.getCommand()).append("=")
                         .append(cid).append(",").append('"').append(pdpType).append('"').append(",").append('"')
                         .append(apn).append('"').append("\r\n");
                 result = sb.toString();
@@ -486,7 +486,7 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
     }
 
     protected String formGetPdpContextAtCommand() {
-        StringBuilder sb = new StringBuilder(TelitHe910AtCommands.pdpContext.getCommand());
+        StringBuilder sb = new StringBuilder(TelitHe910AtCommands.PDP_CONTEXT.getCommand());
         sb.append("?\r\n");
         return sb.toString();
     }

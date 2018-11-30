@@ -16,16 +16,16 @@ package org.eclipse.kura.net.admin.modem.telit.he910;
  */
 public enum TelitHe910AtCommands {
 
-    getSimStatus("at#qss?\r\n"),
-    getSimPinStatus("at+cpin?\r\n"),
-    setAutoSimDetection("at#simdet=2\r\n"),
-    simulateSimNotInserted("at#simdet=0\r\n"),
-    simulateSimInserted("at#simdet=1\r\n"),
-    getSmsc("at+csca?\r\n"),
-    getMobileStationClass("at+cgclass?\r\n"),
-    getRegistrationStatus("at+cgreg?\r\n"),
-    getGprsSessionDataVolume("at#gdatavol=1\r\n"),
-    pdpContext("at+cgdcont");
+    GET_SIM_STATUS("at#qss?\r\n"),
+    GET_SIM_PIN_STATUS("at+cpin?\r\n"),
+    SET_AUTO_SIM_DETECTION("at#simdet=2\r\n"),
+    SIMULATE_SIM_NOT_INSERTED("at#simdet=0\r\n"),
+    SIMULATE_SIM_INSERTED("at#simdet=1\r\n"),
+    GET_SMSC("at+csca?\r\n"),
+    GET_MOBILE_STATION_CLASS("at+cgclass?\r\n"),
+    GET_REGISTRATION_STATUS("at+cgreg?\r\n"),
+    GET_GPRS_SESSION_DATA_VOLUME("at#gdatavol=1\r\n"),
+    PDP_CONTEXT("at+cgdcont");
 
     private String command;
 

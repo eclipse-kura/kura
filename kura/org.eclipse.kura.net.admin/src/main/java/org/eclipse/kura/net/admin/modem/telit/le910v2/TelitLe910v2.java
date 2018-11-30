@@ -72,14 +72,14 @@ public class TelitLe910v2 extends TelitHe910 implements HspaCellularModem {
             try {
                 String port = getUnusedAtPort();
                 logger.debug("sendCommand getSimStatus :: {} command to port {}",
-                        TelitHe910AtCommands.getSimStatus.getCommand(), port);
+                        TelitHe910AtCommands.GET_SIM_STATUS.getCommand(), port);
 
                 commAtConnection = openSerialPort(port);
                 if (!isAtReachable(commAtConnection)) {
                     throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
                 }
 
-                // FIXME we need an explicit initialization method.
+                // TODO: we need an explicit initialization method.
                 if (!this.initialized) {
                     initialize(commAtConnection);
                 }
@@ -164,7 +164,7 @@ public class TelitLe910v2 extends TelitHe910 implements HspaCellularModem {
     }
 
     protected String formTestPdpAuthAtCommand() {
-        StringBuilder sb = new StringBuilder(TelitLe910v2AtCommands.pdpAuth.getCommand()).append("=?\r\n");
+        StringBuilder sb = new StringBuilder(TelitLe910v2AtCommands.PDP_AUTH.getCommand()).append("=?\r\n");
         return sb.toString();
     }
 
@@ -198,7 +198,7 @@ public class TelitLe910v2 extends TelitHe910 implements HspaCellularModem {
                 // a little bit silly
                 String cid = parseContextIdFromDialString(modemConfig.getDialString());
 
-                StringBuilder sb = new StringBuilder(TelitLe910v2AtCommands.pdpAuth.getCommand()).append("=")
+                StringBuilder sb = new StringBuilder(TelitLe910v2AtCommands.PDP_AUTH.getCommand()).append("=")
                         .append(cid).append(",").append(auth).append(",").append('"').append(username).append('"')
                         .append(",").append('"').append(password).append('"').append("\r\n");
                 result = sb.toString();

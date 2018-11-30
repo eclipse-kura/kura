@@ -37,10 +37,10 @@ public final class TypeUtil {
             return toStringTypedValue(sourceType);
         }
         if (targetType == DataType.BOOLEAN) {
-            toBooleanTypedValue(sourceType, targetType);
+            return toBooleanTypedValue(sourceType, targetType);
         }
         if (Number.class.isAssignableFrom(sourceType)) {
-            toNumericalTypedValue(sourceType, targetType);
+            return toNumericalTypedValue(sourceType, targetType);
         }
         if (sourceType == String.class) {
             if (targetType == DataType.INTEGER) {
@@ -97,7 +97,7 @@ public final class TypeUtil {
             return toStringValue(sourceType);
         }
         if (targetType == Boolean.class) {
-            toBooleanValue(targetType, sourceType);
+            return toBooleanValue(targetType, sourceType);
         }
         if (sourceType == DataType.STRING) {
             if (targetType == Integer.class) {

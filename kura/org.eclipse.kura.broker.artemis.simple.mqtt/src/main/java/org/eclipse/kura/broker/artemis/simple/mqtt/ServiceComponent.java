@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
@@ -141,7 +142,10 @@ public class ServiceComponent implements ConfigurableComponent {
 
             customizeDocument(document, properties);
 
-            final Transformer transformer = TransformerFactory.newInstance().newTransformer();
+            final TransformerFactory factory = TransformerFactory.newInstance();
+            factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            
+            final Transformer transformer = factory.newTransformer();
             final StringWriter sw = new StringWriter();
             final StreamResult result = new StreamResult(sw);
             transformer.transform(new DOMSource(document), result);

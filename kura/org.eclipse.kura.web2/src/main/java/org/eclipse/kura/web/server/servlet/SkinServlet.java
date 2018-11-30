@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -128,33 +128,27 @@ public class SkinServlet extends HttpServlet {
     }
 
     private File checkDir(String resourceDir) {
-        File fResourceDir = null;
+        if (resourceDir == null || resourceDir.trim().length() == 0) {
+            return null;
+        }
 
-        if (resourceDir != null && resourceDir.trim().length() != 0) {
-
-            fResourceDir = new File(resourceDir);
-            if (!fResourceDir.exists()) {
-                logger.warn("Resource Directory {} does not exist", fResourceDir.getAbsolutePath());
-                fResourceDir = null;
-
-                return fResourceDir;
-            }
+        File fResourceDir = new File(resourceDir);
+        if (!fResourceDir.exists()) {
+            logger.warn("Resource Directory {} does not exist", fResourceDir.getAbsolutePath());
+            return null;
         }
         return fResourceDir;
     }
 
     private File checkFile(File resourceDir, String resourceName) {
-        File fResourceFile = null;
+        if (resourceName == null || resourceName.trim().length() == 0) {
+            return null;
+        }
 
-        if (resourceName != null && resourceName.trim().length() != 0) {
-            fResourceFile = new File(resourceDir, resourceName);
-
-            if (!fResourceFile.exists()) {
-                logger.warn("Resource File {} does not exist", fResourceFile.getAbsolutePath());
-                fResourceFile = null;
-
-                return fResourceFile;
-            }
+        File fResourceFile = new File(resourceDir, resourceName);
+        if (!fResourceFile.exists()) {
+            logger.warn("Resource File {} does not exist", fResourceFile.getAbsolutePath());
+            return null;
         }
 
         return fResourceFile;

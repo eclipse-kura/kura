@@ -247,7 +247,6 @@ if [ -z "$KURA_RUNNING" ] ; then
         -Dkura.home=${DIR} \
         -Dkura.configuration=file:${DIR}/framework/kura.properties \
         -Dkura.custom.configuration=file:${DIR}/user/kura_custom.properties \
-        -Dkura.data.dir=${DIR}/data \
         -Ddpa.configuration=${DIR}/data/dpa.properties \
         -Dlog4j.configurationFile=file:${DIR}/user/log4j.xml \
         -Djava.security.policy=${DIR}/framework/jdk.dio.policy \
@@ -291,7 +290,6 @@ if [ -z "$KURA_RUNNING" ] ; then
         -Dkura.home=${DIR} \
         -Dkura.configuration=file:${DIR}/framework/kura.properties \
         -Dkura.custom.configuration=file:${DIR}/user/kura_custom.properties \
-        -Dkura.data.dir=${DIR}/data \
         -Ddpa.configuration=${DIR}/data/dpa.properties \
         -Dlog4j.configurationFile=file:${DIR}/user/log4j.xml \
         -Djava.security.policy=${DIR}/framework/jdk.dio.policy \
@@ -333,7 +331,6 @@ if [ -z "$KURA_RUNNING" ] ; then
         -Dkura.home=${DIR} \
         -Dkura.configuration=file:${DIR}/framework/kura.properties \
         -Dkura.custom.configuration=file:${DIR}/user/kura_custom.properties \
-        -Dkura.data.dir=${DIR}/data \
         -Ddpa.configuration=${DIR}/data/dpa.properties \
         -Dlog4j.configurationFile=file:${DIR}/user/log4j.xml \
         -Djava.security.policy=${DIR}/framework/jdk.dio.policy \

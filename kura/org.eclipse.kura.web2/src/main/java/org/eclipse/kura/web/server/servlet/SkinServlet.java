@@ -17,6 +17,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -33,6 +35,8 @@ public class SkinServlet extends HttpServlet {
     private static final long serialVersionUID = -556598856721497972L;
 
     private static Logger logger = LoggerFactory.getLogger(SkinServlet.class);
+
+    private static final Pattern filenamePattern = Pattern.compile("^[\\w,\\s-]+\\.[A-Za-z]+$");
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -141,7 +145,9 @@ public class SkinServlet extends HttpServlet {
     }
 
     private File checkFile(File resourceDir, String resourceName) {
-        if (resourceName == null || resourceName.trim().length() == 0) {
+        Matcher fileMatcher = filenamePattern.matcher(resourceName);
+
+        if (!fileMatcher.matches()) {
             return null;
         }
 

@@ -1,10 +1,10 @@
-# Eclipse Kura™ emulator Docker image [![Docker Automated build](https://img.shields.io/docker/automated/ctron/kura-emulator.svg)](https://hub.docker.com/r/ctron/kura-emulator/)
+# Eclipse Kura™ emulator Docker image
 
-This is a docker image running the Eclipse Kura™ emulator.
+This is a docker image running Eclipse Kura™.
 
 Use the following command to run it:
 
-    docker run -ti -p 8080:8080 ctron/kura-emulator
+    docker run -d -p 8080:8080 -t eclipse/kura
 
 Once the image is started you can navigate your browser to http://localhost:8080 and log in using the credentials `admin` : `admin`.
 
@@ -18,7 +18,7 @@ This image includes [Apache Felix FileInstall](https://felix.apache.org/document
 File Install loads bundles from `/load` which is also defined as a docker volume,
 so that you can link this up with your container host:
 
-    docker run -ti -p 8080:8080 -v /home/user/path/to/bundles:/load:z ctron/kura-emulator
+    docker run -ti -p 8080:8080 -v /home/user/path/to/bundles:/load:z eclipse/kura
 
 Now you can access `/home/user/path/to/bundles` on your host machine and bundles will be loaded
 by Kura inside the docker container.

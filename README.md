@@ -1,6 +1,8 @@
 Eclipse Kura™
 =============
+Travis-ci:
 [![Build Status](https://travis-ci.org/eclipse/kura.svg?branch=master)](https://travis-ci.org/eclipse/kura)
+Hudson:
 [![Hudson](https://img.shields.io/jenkins/s/https/hudson.eclipse.org/kura/job/kura-develop.svg)](https://hudson.eclipse.org/kura/)
 
 An OSGi-based Application Framework for M2M Service Gateways
@@ -33,6 +35,10 @@ Development on Kura follows the [gitflow model](http://nvie.com/posts/a-successf
 
 Getting Started
 -----------------
+
+Development for Kura can be done in Eclipse IDE using the Kura Development Environment, in a gateway or in a Docker container.
+
+## Development Environment
 The simplest way to start developing on Eclipse Kura is to use an Eclipse Installer based setup.
 To correctly setup the environment, proceed as follows:
 - Start the Eclipse Installer
@@ -52,11 +58,11 @@ For further information, building and deployment instructions, please visit the 
 
 To raise an issue, please report a bug on [GitHub issues](https://github.com/eclipse/kura/issues/new).
 
-## Supported Development Platforms
+### Supported Development Platforms
 The Eclipse Installer based setup works for the main used platforms like Linux, Mac Os and Windows.
 
 
-## Known Issues
+### Known Issues
 Currently, the emulator web ui is not properly working on Windows so, with your setup, you will be able to build and deploy you applications, but not be able to use the Eclipse IDE based Kura emulator.
 
 The full build of Kura is only supported for Linux and Mac Os based systems.
@@ -64,9 +70,11 @@ The full build of Kura is only supported for Linux and Mac Os based systems.
 Currently the maven build on Windows requires to disable the tests and will fail when it tries to create the installers for the target platforms.
 
 
-## Exists Plugin Failure
-The project's POM files contain a reference to the Maven Exists Plugin.
-This plugin allows to verify the existence of a Bundle in the remote repositories and fails the build process if that happens.
-This helps Kura developers to prevent possible errors when building Kura.
+## Target Gateways Installers
+Eclipse Kura provides pre-built installers for common development boards.
+Check the following [link](https://www.eclipse.org/kura/downloads.php) to download the desired installers.
 
-If you want to build Kura and an error due to the Maven Exists Plugin happens, please review your changes. If you still want to rebuild a released Kura (or an already released Bundle of Kura), please invoke the Kura build with the *-Pskip-exists-plugin* profile. 
+
+## Docker Image
+Eclipse Kura is available also as a [Docker container](https://hub.docker.com/r/eclipse/kura/)
+To easily run, use: `docker run -d -p 8080:8080 -t eclipse/kura`.

@@ -28,7 +28,6 @@ import org.eclipse.kura.web.shared.service.GwtNetworkService;
 import org.eclipse.kura.web.shared.service.GwtNetworkServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
-import org.gwtbootstrap3.client.shared.event.ModalHideEvent;
 import org.gwtbootstrap3.client.shared.event.ModalHideHandler;
 import org.gwtbootstrap3.client.ui.Alert;
 import org.gwtbootstrap3.client.ui.Button;
@@ -161,9 +160,7 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
     }
 
     private void initDuplicateRuleModal() {
-        this.close.addClickHandler(event -> {
-            this.existingRule.hide();
-        });
+        this.close.addClickHandler(event -> this.existingRule.hide());
     }
 
     //
@@ -381,25 +378,21 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
 
     @Override
     public void onCancel() {
-        OpenPortsTabUi.this.alertDialog.show(MSGS.deviceConfigDirty(), () -> OpenPortsTabUi.this.refresh());
+        OpenPortsTabUi.this.alertDialog.show(MSGS.deviceConfigDirty(), OpenPortsTabUi.this::refresh);
     }
 
     @Override
     public void onCreate() {
-        replaceModalHideHandler(new ModalHideHandler() {
+        replaceModalHideHandler(evt -> {
 
-            @Override
-            public void onHide(ModalHideEvent evt) {
-
-                if (OpenPortsTabUi.this.newOpenPortEntry != null) {
-                    if (!duplicateEntry(OpenPortsTabUi.this.newOpenPortEntry)) {
-                        OpenPortsTabUi.this.openPortsDataProvider.getList().add(OpenPortsTabUi.this.newOpenPortEntry);
-                        refreshTable();
-                        setVisibility();
-                        OpenPortsTabUi.this.buttonBar.setDirty(true);
-                    } else {
-                        existingRule.show();
-                    }
+            if (OpenPortsTabUi.this.newOpenPortEntry != null) {
+                if (!duplicateEntry(OpenPortsTabUi.this.newOpenPortEntry)) {
+                    OpenPortsTabUi.this.openPortsDataProvider.getList().add(OpenPortsTabUi.this.newOpenPortEntry);
+                    refreshTable();
+                    setVisibility();
+                    OpenPortsTabUi.this.buttonBar.setDirty(true);
+                } else {
+                    existingRule.show();
                 }
             }
         });

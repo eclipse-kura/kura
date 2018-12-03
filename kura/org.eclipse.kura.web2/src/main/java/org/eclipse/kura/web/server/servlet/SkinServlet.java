@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -32,7 +32,7 @@ public class SkinServlet extends HttpServlet {
 
     private static final long serialVersionUID = -556598856721497972L;
 
-    private static Logger s_logger = LoggerFactory.getLogger(SkinServlet.class);
+    private static Logger logger = LoggerFactory.getLogger(SkinServlet.class);
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -77,7 +77,7 @@ public class SkinServlet extends HttpServlet {
                 iRead = fr.read(buffer);
             }
         } catch (Exception e) {
-            s_logger.error("Error loading skin resource", e);
+            logger.error("Error loading skin resource", e);
         } finally {
             if (fr != null) {
                 fr.close();
@@ -115,7 +115,7 @@ public class SkinServlet extends HttpServlet {
             }
 
         } catch (Exception e) {
-            s_logger.error("Error loading skin resource", e);
+            logger.error("Error loading skin resource", e);
         } finally {
             if (in != null) {
                 in.close();
@@ -128,29 +128,27 @@ public class SkinServlet extends HttpServlet {
     }
 
     private File checkDir(String resourceDir) {
-        File fResourceDir = null;
+        if (resourceDir == null || resourceDir.trim().length() == 0) {
+            return null;
+        }
 
-        if (resourceDir != null && resourceDir.trim().length() != 0) {
-
-            fResourceDir = new File(resourceDir);
-            if (!fResourceDir.exists()) {
-                s_logger.warn("Resource Directory {} does not exist", fResourceDir.getAbsolutePath());
-                fResourceDir = null;
-
-                return fResourceDir;
-            }
+        File fResourceDir = new File(resourceDir);
+        if (!fResourceDir.exists()) {
+            logger.warn("Resource Directory {} does not exist", fResourceDir.getAbsolutePath());
+            return null;
         }
         return fResourceDir;
     }
 
     private File checkFile(File resourceDir, String resourceName) {
+        if (resourceName == null || resourceName.trim().length() == 0) {
+            return null;
+        }
+
         File fResourceFile = new File(resourceDir, resourceName);
-
         if (!fResourceFile.exists()) {
-            s_logger.warn("Resource File {} does not exist", fResourceFile.getAbsolutePath());
-            fResourceFile = null;
-
-            return fResourceFile;
+            logger.warn("Resource File {} does not exist", fResourceFile.getAbsolutePath());
+            return null;
         }
 
         return fResourceFile;

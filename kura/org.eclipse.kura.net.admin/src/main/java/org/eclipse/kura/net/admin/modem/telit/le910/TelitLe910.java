@@ -73,7 +73,7 @@ public class TelitLe910 extends TelitHe910 implements HspaCellularModem {
 
         synchronized (this.atLock) {
             s_logger.debug("sendCommand getSimStatus :: {} command to port {}",
-                    TelitHe910AtCommands.getSimStatus.getCommand(), port);
+                    TelitHe910AtCommands.GET_SIM_STATUS.getCommand(), port);
             byte[] reply = null;
             CommConnection commAtConnection = null;
             try {
@@ -83,7 +83,7 @@ public class TelitLe910 extends TelitHe910 implements HspaCellularModem {
                     throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
                 }
 
-                reply = commAtConnection.sendCommand(TelitHe910AtCommands.getSimStatus.getCommand().getBytes(), 1000,
+                reply = commAtConnection.sendCommand(TelitHe910AtCommands.GET_SIM_STATUS.getCommand().getBytes(), 1000,
                         100);
                 if (reply != null) {
                     String simStatus = getResponseString(reply);

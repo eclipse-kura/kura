@@ -14,7 +14,7 @@ package org.eclipse.kura.net.admin.modem.telit.le910v2;
  */
 public enum TelitLe910v2AtCommands {
 
-    pdpAuth("at#pdpauth");
+    PDP_AUTH("at#pdpauth");
 
     private String command;
 

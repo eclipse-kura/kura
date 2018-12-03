@@ -133,7 +133,7 @@ public class TelitHe910ConfigGenerator implements ModemPppConfigGenerator {
      */
     private String formPDPcontext(int pdpPid, PdpType pdpType, String apn) {
 
-        StringBuilder pdpcontext = new StringBuilder(TelitHe910AtCommands.pdpContext.getCommand());
+        StringBuilder pdpcontext = new StringBuilder(TelitHe910AtCommands.PDP_CONTEXT.getCommand());
         pdpcontext.append('=');
         pdpcontext.append(pdpPid);
         pdpcontext.append(',');

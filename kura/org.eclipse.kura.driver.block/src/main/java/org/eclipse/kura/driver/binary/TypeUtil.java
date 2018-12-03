@@ -1,3 +1,14 @@
+/*******************************************************************************
+ * Copyright (c) 2018 Eurotech and/or its affiliates
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.driver.binary;
 
 import java.math.BigInteger;
@@ -15,36 +26,21 @@ import org.eclipse.kura.type.TypedValue;
 
 public final class TypeUtil {
 
+    private static final String TO_KURA_DATA_TYPE_MESSAGE = " to Kura data type ";
+    private static final String CANNOT_CONVERT_FROM_NATIVE_TYPE_MESSAGE = "Cannot convert from native type ";
+
     private TypeUtil() {
     }
 
     public static <T> Function<T, TypedValue<?>> toTypedValue(final Class<T> sourceType, final DataType targetType) {
         if (targetType == DataType.STRING) {
-            if (sourceType == byte[].class) {
-                return value -> new StringValue(Arrays.toString((byte[]) value));
-            } else {
-                return value -> new StringValue(value.toString());
-            }
+            return toStringTypedValue(sourceType);
         }
         if (targetType == DataType.BOOLEAN) {
-            if (sourceType == Boolean.class) {
-                return value -> new BooleanValue((Boolean) value);
-            } else if (sourceType == String.class) {
-                return value -> new BooleanValue(Boolean.parseBoolean((String) value));
-            } else if (sourceType.isAssignableFrom(Number.class)) {
-                return value -> new BooleanValue(((Number) value).doubleValue() != 0);
-            }
+            return toBooleanTypedValue(sourceType, targetType);
         }
         if (Number.class.isAssignableFrom(sourceType)) {
-            if (targetType == DataType.INTEGER) {
-                return value -> new IntegerValue(((Number) value).intValue());
-            } else if (targetType == DataType.LONG) {
-                return value -> new LongValue(((Number) value).longValue());
-            } else if (targetType == DataType.FLOAT) {
-                return value -> new FloatValue(((Number) value).floatValue());
-            } else if (targetType == DataType.DOUBLE) {
-                return value -> new DoubleValue(((Number) value).doubleValue());
-            }
+            return toNumericalTypedValue(sourceType, targetType);
         }
         if (sourceType == String.class) {
             if (targetType == DataType.INTEGER) {
@@ -57,27 +53,51 @@ public final class TypeUtil {
                 return value -> new DoubleValue(java.lang.Double.parseDouble((String) value));
             }
         }
-        throw new IllegalArgumentException("Cannot convert from native type " + sourceType.getSimpleName()
-                + " to Kura data type " + targetType.name());
+        throw new IllegalArgumentException(CANNOT_CONVERT_FROM_NATIVE_TYPE_MESSAGE + sourceType.getSimpleName()
+                + TO_KURA_DATA_TYPE_MESSAGE + targetType.name());
+    }
+
+    private static <T> Function<T, TypedValue<?>> toNumericalTypedValue(final Class<T> sourceType, final DataType targetType) {
+        if (targetType == DataType.INTEGER) {
+            return value -> new IntegerValue(((Number) value).intValue());
+        } else if (targetType == DataType.LONG) {
+            return value -> new LongValue(((Number) value).longValue());
+        } else if (targetType == DataType.FLOAT) {
+            return value -> new FloatValue(((Number) value).floatValue());
+        } else if (targetType == DataType.DOUBLE) {
+            return value -> new DoubleValue(((Number) value).doubleValue());
+        }
+        throw new IllegalArgumentException(CANNOT_CONVERT_FROM_NATIVE_TYPE_MESSAGE + sourceType.getSimpleName()
+        + TO_KURA_DATA_TYPE_MESSAGE + targetType.name());
+    }
+
+    private static <T> Function<T, TypedValue<?>> toBooleanTypedValue(final Class<T> sourceType, final DataType targetType) {
+        if (sourceType == Boolean.class) {
+            return value -> new BooleanValue((Boolean) value);
+        } else if (sourceType == String.class) {
+            return value -> new BooleanValue(Boolean.parseBoolean((String) value));
+        } else if (sourceType.isAssignableFrom(Number.class)) {
+            return value -> new BooleanValue(((Number) value).doubleValue() != 0);
+        }
+        throw new IllegalArgumentException(CANNOT_CONVERT_FROM_NATIVE_TYPE_MESSAGE + sourceType.getSimpleName()
+        + TO_KURA_DATA_TYPE_MESSAGE + targetType.name());
+    }
+
+    private static <T> Function<T, TypedValue<?>> toStringTypedValue(final Class<T> sourceType) {
+        if (sourceType == byte[].class) {
+            return value -> new StringValue(Arrays.toString((byte[]) value));
+        } else {
+            return value -> new StringValue(value.toString());
+        }
     }
 
     @SuppressWarnings("unchecked")
     public static <T> Function<TypedValue<?>, T> fromTypedValue(final Class<T> targetType, final DataType sourceType) {
         if (targetType == String.class) {
-            if (sourceType == DataType.BYTE_ARRAY) {
-                return value -> (T) Arrays.toString((byte[]) value.getValue());
-            } else {
-                return value -> (T) value.toString();
-            }
+            return toStringValue(sourceType);
         }
         if (targetType == Boolean.class) {
-            if (sourceType == DataType.BOOLEAN) {
-                return value -> (T) value.getValue();
-            } else if (sourceType == DataType.STRING) {
-                return value -> (T) (Boolean) Boolean.parseBoolean((String) value.getValue());
-            } else if (sourceType != DataType.BYTE_ARRAY) {
-                return value -> (T) (Boolean) (((Number) value.getValue()).doubleValue() != 0);
-            }
+            return toBooleanValue(targetType, sourceType);
         }
         if (sourceType == DataType.STRING) {
             if (targetType == Integer.class) {
@@ -104,5 +124,27 @@ public final class TypeUtil {
         }
         throw new IllegalArgumentException("Cannot convert from Kura data type " + sourceType.name()
                 + " to native type " + targetType.getSimpleName());
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> Function<TypedValue<?>, T> toBooleanValue(final Class<T> targetType, final DataType sourceType) {
+        if (sourceType == DataType.BOOLEAN) {
+            return value -> (T) value.getValue();
+        } else if (sourceType == DataType.STRING) {
+            return value -> (T) (Boolean) Boolean.parseBoolean((String) value.getValue());
+        } else if (sourceType != DataType.BYTE_ARRAY) {
+            return value -> (T) (Boolean) (((Number) value.getValue()).doubleValue() != 0);
+        }
+        throw new IllegalArgumentException("Cannot convert from Kura data type " + sourceType.name()
+        + " to native type " + targetType.getSimpleName());
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> Function<TypedValue<?>, T> toStringValue(final DataType sourceType) {
+        if (sourceType == DataType.BYTE_ARRAY) {
+            return value -> (T) Arrays.toString((byte[]) value.getValue());
+        } else {
+            return value -> (T) value.toString();
+        }
     }
 }

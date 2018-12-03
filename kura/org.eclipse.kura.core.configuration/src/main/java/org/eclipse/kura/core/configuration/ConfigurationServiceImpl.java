@@ -22,6 +22,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -781,7 +783,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
                 factoryPid = (String) properties.get(ConfigurationAdmin.SERVICE_FACTORYPID);
             }
             if (factoryPid != null && !this.allActivatedPids.contains(config.getPid())) {
-                ConfigurationUpgrade.upgrade(config, bundleContext);
+                ConfigurationUpgrade.upgrade(config, this.bundleContext);
                 String pid = config.getPid();
                 logger.info("Creating configuration with pid: {} and factory pid: {}", pid, factoryPid);
                 try {
@@ -1258,13 +1260,19 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
             // preserve snapshot ID 0 as this will be considered the seeding
             // one.
             long sid = sids.pollFirst();
-            if (sid != 0) {
-                File fSnapshot = getSnapshotFile(sid);
-                if (fSnapshot != null && fSnapshot.exists()) {
-                    logger.info("Snapshots Garbage Collector. Deleting {}", fSnapshot.getAbsolutePath());
-                    fSnapshot.delete();
+            File fSnapshot = getSnapshotFile(sid);
+            if (sid == 0 || fSnapshot == null) {
+                continue;
+            }
+
+            Path fSnapshotPath = fSnapshot.toPath();
+            try {
+                if (Files.deleteIfExists(fSnapshotPath)) {
+                    logger.info("Snapshots Garbage Collector. Deleted {}", fSnapshotPath);
                     currCount--;
                 }
+            } catch (IOException e) {
+                logger.warn("Snapshots Garbage Collector. Deletion failed for {}", fSnapshotPath, e);
             }
         }
     }
@@ -1633,7 +1641,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         }
 
         for (final ComponentConfiguration config : result) {
-            ConfigurationUpgrade.upgrade(config, bundleContext);
+            ConfigurationUpgrade.upgrade(config, this.bundleContext);
         }
 
         return result;
@@ -1736,7 +1744,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
     protected String marshal(final Object object) throws KuraException {
         try {
-            return requireNonNull(xmlMarshaller.marshal(object));
+            return requireNonNull(this.xmlMarshaller.marshal(object));
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.ENCODE_ERROR, e);
         }
@@ -1753,35 +1761,40 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         }
 
         public String getFactoryPid() {
-            return factoryPid;
+            return this.factoryPid;
         }
 
         public Bundle getProviderBundle() {
-            return provider;
+            return this.provider;
         }
 
         @Override
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + ((factoryPid == null) ? 0 : factoryPid.hashCode());
+            result = prime * result + (this.factoryPid == null ? 0 : this.factoryPid.hashCode());
             return result;
         }
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj)
+            if (this == obj) {
                 return true;
-            if (obj == null)
+            }
+            if (obj == null) {
                 return false;
-            if (getClass() != obj.getClass())
+            }
+            if (getClass() != obj.getClass()) {
                 return false;
+            }
             TrackedComponentFactory other = (TrackedComponentFactory) obj;
-            if (factoryPid == null) {
-                if (other.factoryPid != null)
+            if (this.factoryPid == null) {
+                if (other.factoryPid != null) {
                     return false;
-            } else if (!factoryPid.equals(other.factoryPid))
+                }
+            } else if (!this.factoryPid.equals(other.factoryPid)) {
                 return false;
+            }
             return true;
         }
     }

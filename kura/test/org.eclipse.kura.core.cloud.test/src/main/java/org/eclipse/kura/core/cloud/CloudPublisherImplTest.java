@@ -47,7 +47,6 @@ public class CloudPublisherImplTest {
             dependencyLatch.await(10, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            e.printStackTrace();
         }
     }
 

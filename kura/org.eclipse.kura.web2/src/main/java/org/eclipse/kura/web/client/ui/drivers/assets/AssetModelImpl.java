@@ -158,15 +158,6 @@ public class AssetModelImpl implements AssetModel {
         return channelDescriptor;
     }
 
-    private ChannelModel getChannelModel(String channelName) {
-        for (ChannelModel model : channelModels) {
-            if (model.getChannelName().equals(channelName)) {
-                return model;
-            }
-        }
-        return null;
-    }
-
     @Override
     public void deleteChannel(String channelName) {
         this.channelNames.remove(channelName);

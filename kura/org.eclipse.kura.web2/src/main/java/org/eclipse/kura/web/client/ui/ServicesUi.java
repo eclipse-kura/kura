@@ -45,8 +45,6 @@ import org.gwtbootstrap3.client.ui.html.Span;
 import org.gwtbootstrap3.client.ui.html.Text;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Window;
@@ -116,39 +114,15 @@ public class ServicesUi extends AbstractServicesUi {
         this.fields.clear();
 
         this.apply.setText(MSGS.apply());
-        this.apply.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                apply();
-            }
-        });
+        this.apply.addClickHandler(event -> apply());
 
         this.reset.setText(MSGS.reset());
-        this.reset.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                reset();
-            }
-        });
+        this.reset.addClickHandler(event -> reset());
 
         this.delete.setText(MSGS.delete());
-        this.delete.addClickHandler(new ClickHandler() {
+        this.delete.addClickHandler(event -> ServicesUi.this.deleteModal.show());
 
-            @Override
-            public void onClick(ClickEvent event) {
-                ServicesUi.this.deleteModal.show();
-            }
-        });
-
-        this.deleteButton.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                delete();
-            }
-        });
+        this.deleteButton.addClickHandler(event -> delete());
         this.deleteButton.setText(MSGS.delete());
         this.cancelButton.setText(MSGS.cancelButton());
         this.deleteModalBody.add(new Span(MSGS.deleteWarning()));
@@ -196,29 +170,19 @@ public class ServicesUi extends AbstractServicesUi {
             Button no = new Button();
             no.setText(MSGS.noButton());
             no.addStyleName("fa fa-times");
-            no.addClickHandler(new ClickHandler() {
-
-                @Override
-                public void onClick(ClickEvent event) {
-                    ServicesUi.this.modal.hide();
-                }
-            });
+            no.addClickHandler(event -> ServicesUi.this.modal.hide());
             group.add(no);
             Button yes = new Button();
             yes.setText(MSGS.yesButton());
             yes.addStyleName("fa fa-check");
-            yes.addClickHandler(new ClickHandler() {
-
-                @Override
-                public void onClick(ClickEvent event) {
-                    ServicesUi.this.modal.hide();
-                    restoreConfiguration(ServicesUi.this.originalConfig);
-                    renderForm();
-                    ServicesUi.this.apply.setEnabled(false);
-                    ServicesUi.this.reset.setEnabled(false);
-                    setDirty(false);
-                    ServicesUi.this.entryClass.fetchAvailableServices(null);
-                }
+            yes.addClickHandler(event -> {
+                ServicesUi.this.modal.hide();
+                restoreConfiguration(ServicesUi.this.originalConfig);
+                renderForm();
+                ServicesUi.this.apply.setEnabled(false);
+                ServicesUi.this.reset.setEnabled(false);
+                setDirty(false);
+                ServicesUi.this.entryClass.fetchAvailableServices(null);
             });
             group.add(yes);
             footer.add(group);
@@ -324,13 +288,7 @@ public class ServicesUi extends AbstractServicesUi {
                 Button no = new Button();
                 no.setText(MSGS.noButton());
                 no.addStyleName("fa fa-times");
-                no.addClickHandler(new ClickHandler() {
-
-                    @Override
-                    public void onClick(ClickEvent event) {
-                        ServicesUi.this.modal.hide();
-                    }
-                });
+                no.addClickHandler(event -> ServicesUi.this.modal.hide());
 
                 group.add(no);
                 Button yes = new Button();

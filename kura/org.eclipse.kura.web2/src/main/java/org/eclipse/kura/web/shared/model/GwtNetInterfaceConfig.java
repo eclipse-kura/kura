@@ -13,14 +13,15 @@ package org.eclipse.kura.web.shared.model;
 
 import java.io.Serializable;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.Map.Entry;
 
 import org.eclipse.kura.web.client.util.KuraBaseModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GwtNetInterfaceConfig extends KuraBaseModel implements Serializable {
 
-    private static final Logger logger = Logger.getLogger(GwtNetInterfaceConfig.class.getSimpleName());
+    private static final Logger logger = LoggerFactory.getLogger(GwtNetInterfaceConfig.class);
     private static final long serialVersionUID = 7079533925979145804L;
 
     public GwtNetInterfaceConfig() {
@@ -123,7 +124,7 @@ public class GwtNetInterfaceConfig extends KuraBaseModel implements Serializable
         try {
             typeEnum = GwtNetIfType.valueOf(getHwType());
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.warn("Error getting HwType.", e);
         }
 
         return typeEnum;
@@ -288,19 +289,18 @@ public class GwtNetInterfaceConfig extends KuraBaseModel implements Serializable
                 return false;
             }
             if (properties.size() != otherProps.size()) {
-                logger.log(Level.FINER, "Sizes differ");
+                logger.debug("Sizes differ");
                 return false;
             }
-            ;
 
-            Object oldVal, newVal;
-            for (String key : properties.keySet()) {
-                oldVal = properties.get(key);
-                newVal = otherProps.get(key);
+            Object oldVal;
+            Object newVal;
+            for (Entry<String, Object> entry : properties.entrySet()) {
+                oldVal = entry.getValue();
+                newVal = otherProps.get(entry.getKey());
                 if (oldVal != null) {
                     if (!oldVal.equals(newVal)) {
-                        logger.log(Level.FINER,
-                                "Values differ - Key: " + key + " oldVal: " + oldVal + ", newVal: " + newVal);
+                        logger.debug("Values differ - Key: {} oldVal: {}, newVal: {}", entry.getKey(), oldVal, newVal);
                         return false;
                     }
                 } else if (newVal != null) {

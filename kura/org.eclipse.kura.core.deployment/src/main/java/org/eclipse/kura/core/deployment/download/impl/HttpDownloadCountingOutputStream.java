@@ -92,7 +92,7 @@ public class HttpDownloadCountingOutputStream extends GenericDownloadCountingOut
                         });
                     }
 
-                    localUrl = new URL(HttpDownloadCountingOutputStream.this.m_downloadURL);
+                    localUrl = new URL(HttpDownloadCountingOutputStream.this.downloadURL);
                     URLConnection urlConnection = localUrl.openConnection();
                     int connectTimeout = getConnectTimeout();
                     int readTimeout = getPropReadTimeout();
@@ -167,7 +167,7 @@ public class HttpDownloadCountingOutputStream extends GenericDownloadCountingOut
         try {
             if (urlConnection instanceof HttpsURLConnection) {
                 ((HttpsURLConnection) urlConnection)
-                        .setSSLSocketFactory(this.m_sslManagerService.getSSLSocketFactory());
+                        .setSSLSocketFactory(this.sslManagerService.getSSLSocketFactory());
             } else if (!(urlConnection instanceof HttpURLConnection)) {
                 postProgressEvent(this.options.getClientId(), getByteCount(), this.totalBytes, DownloadStatus.FAILED,
                         "The request URL is not supported");

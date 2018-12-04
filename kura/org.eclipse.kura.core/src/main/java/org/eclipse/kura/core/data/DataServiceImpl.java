@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -33,7 +33,6 @@ import org.eclipse.kura.KuraConnectException;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraNotConnectedException;
 import org.eclipse.kura.KuraStoreException;
-import org.eclipse.kura.KuraTimeoutException;
 import org.eclipse.kura.KuraTooManyInflightMessagesException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
@@ -97,7 +96,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
     private boolean notifyPending;
     private final Condition lockCondition = this.lock.newCondition();
 
-    private volatile AtomicBoolean publisherEnabled = new AtomicBoolean();
+    private AtomicBoolean publisherEnabled = new AtomicBoolean();
 
     private ServiceTracker<H2DbService, H2DbService> dbServiceTracker;
     private ComponentContext componentContext;
@@ -513,12 +512,12 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
     }
 
     @Override
-    public void subscribe(String topic, int qos) throws KuraTimeoutException, KuraException, KuraNotConnectedException {
+    public void subscribe(String topic, int qos) throws KuraException {
         this.dataTransportService.subscribe(topic, qos);
     }
 
     @Override
-    public void unsubscribe(String topic) throws KuraTimeoutException, KuraException, KuraNotConnectedException {
+    public void unsubscribe(String topic) throws KuraException {
         this.dataTransportService.unsubscribe(topic);
     }
 
@@ -694,37 +693,6 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
         this.publisherExecutor.execute(new PublishManager());
     }
 
-    // It's very important that the publishInternal and messageConfirmed methods are synchronized
-    private synchronized void publishInternal(DataMessage message) throws KuraException {
-
-        String topic = message.getTopic();
-        byte[] payload = message.getPayload();
-        int qos = message.getQos();
-        boolean retain = message.isRetain();
-        int msgId = message.getId();
-
-        logger.debug("Publishing message with ID: {} on topic: {}, priority: {}",
-                new Object[] { msgId, topic, message.getPriority() });
-
-        DataTransportToken token = this.dataTransportService.publish(topic, payload, qos, retain);
-
-        if (token == null) {
-            this.store.published(msgId);
-            logger.debug("Published message with ID: {}", msgId);
-        } else {
-
-            // Check if the token is already tracked in the map (in which case we are in trouble)
-            Integer trackedMsgId = this.inFlightMsgIds.get(token);
-            if (trackedMsgId != null) {
-                logger.error("Token already tracked: {} -", token.getSessionId(), token.getMessageId());
-            }
-
-            this.inFlightMsgIds.put(token, msgId);
-            this.store.published(msgId, token.getMessageId(), token.getSessionId());
-            logger.debug("Published message with ID: {} and MQTT message ID: {}", msgId, token.getMessageId());
-        }
-    }
-
     private List<Integer> buildMessageIds(List<DataMessage> messages, String topicRegex) {
         Pattern topicPattern = Pattern.compile(topicRegex);
         List<Integer> ids = new ArrayList<>();
@@ -739,25 +707,6 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
         }
 
         return ids;
-    }
-
-    private void handleInFlightCongestion() {
-        int timeout = this.dataServiceOptions.getInFlightMessagesCongestionTimeout();
-
-        // Do not schedule more that one task at a time
-        if (timeout != 0 && (this.congestionFuture == null || this.congestionFuture.isDone())) {
-            logger.warn("In-flight message congestion timeout started");
-            this.congestionFuture = this.congestionExecutor.schedule(new Runnable() {
-
-                @Override
-                public void run() {
-                    Thread.currentThread().setName("DataServiceImpl:InFlightCongestion");
-                    logger.warn("In-flight message congestion timeout elapsed. Disconnecting and reconnecting again");
-                    disconnect();
-                    startConnectionMonitorTask();
-                }
-            }, timeout, TimeUnit.SECONDS);
-        }
     }
 
     private void handleInFlightDecongestion() {
@@ -862,7 +811,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
             DataServiceImpl.this.dataServiceListeners.onMessagePublished(message.getId(), message.getTopic());
         }
 
-        private boolean publishMessageTokenBucket(DataMessage message) throws KuraException, InterruptedException {
+        private boolean publishMessageTokenBucket(DataMessage message) throws KuraException {
             boolean tokenAvailable = DataServiceImpl.this.throttle.getToken();
 
             if (tokenAvailable) {
@@ -870,6 +819,53 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
                 return true;
             }
             return false;
+        }
+
+        private void handleInFlightCongestion() {
+            int timeout = DataServiceImpl.this.dataServiceOptions.getInFlightMessagesCongestionTimeout();
+
+            // Do not schedule more that one task at a time
+            if (timeout != 0 && (DataServiceImpl.this.congestionFuture == null
+                    || DataServiceImpl.this.congestionFuture.isDone())) {
+                logger.warn("In-flight message congestion timeout started");
+                DataServiceImpl.this.congestionFuture = DataServiceImpl.this.congestionExecutor.schedule(() -> {
+                    Thread.currentThread().setName("DataServiceImpl:InFlightCongestion");
+                    logger.warn("In-flight message congestion timeout elapsed. Disconnecting and reconnecting again");
+                    disconnect();
+                    startConnectionMonitorTask();
+                }, timeout, TimeUnit.SECONDS);
+            }
+        }
+
+        // It's very important that the publishInternal and messageConfirmed methods are synchronized
+        private synchronized void publishInternal(DataMessage message) throws KuraException {
+
+            String topic = message.getTopic();
+            byte[] payload = message.getPayload();
+            int qos = message.getQos();
+            boolean retain = message.isRetain();
+            int msgId = message.getId();
+
+            logger.debug("Publishing message with ID: {} on topic: {}, priority: {}", msgId, topic,
+                    message.getPriority());
+
+            DataTransportToken token = DataServiceImpl.this.dataTransportService.publish(topic, payload, qos, retain);
+
+            if (token == null) {
+                DataServiceImpl.this.store.published(msgId);
+                logger.debug("Published message with ID: {}", msgId);
+            } else {
+
+                // Check if the token is already tracked in the map (in which case we are in trouble)
+                Integer trackedMsgId = DataServiceImpl.this.inFlightMsgIds.get(token);
+                if (trackedMsgId != null) {
+                    logger.error("Token already tracked: {} - {}", token.getSessionId(), token.getMessageId());
+                }
+
+                DataServiceImpl.this.inFlightMsgIds.put(token, msgId);
+                DataServiceImpl.this.store.published(msgId, token.getMessageId(), token.getSessionId());
+                logger.debug("Published message with ID: {} and MQTT message ID: {}", msgId, token.getMessageId());
+            }
         }
     }
 

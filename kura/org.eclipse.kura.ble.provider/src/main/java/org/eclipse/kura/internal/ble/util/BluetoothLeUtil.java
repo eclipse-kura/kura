@@ -20,9 +20,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.apache.commons.io.FileUtils;
-import org.eclipse.kura.bluetooth.le.beacon.AdvertisingReportRecord;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.eclipse.kura.bluetooth.le.beacon.AdvertisingReportRecord;
 
 public class BluetoothLeUtil {
 
@@ -42,10 +42,16 @@ public class BluetoothLeUtil {
             FileUtils.writeStringToFile(f, "#!/bin/bash\n" + "set -e\n" + "ADAPTER=$1\n"
                     + "{ exec hcidump -i $ADAPTER -R -w /dev/fd/3 >/dev/null; } 3>&1", false);
 
-            f.setExecutable(true);
+            if (!f.setExecutable(true)) {
+                logger.warn("Unable to set as executable");
+            }
         } catch (IOException e) {
             logger.info("Unable to update", e);
         }
+
+    }
+
+    private BluetoothLeUtil() {
 
     }
 
@@ -55,11 +61,19 @@ public class BluetoothLeUtil {
     public static void killCmd(String cmd, String signal) {
         String[] commandPidOf = { "pidof", cmd };
         BluetoothSafeProcess proc = null;
-        BufferedReader br = null;
         try {
             proc = BluetoothProcessUtil.exec(commandPidOf);
             proc.waitFor();
-            br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+        } catch (IOException e) {
+            logger.error(COMMAND_ERROR, commandPidOf, e);
+            return;
+        } catch (InterruptedException e) {
+            logger.error(COMMAND_ERROR, commandPidOf, e);
+            Thread.currentThread().interrupt();
+        }
+        
+        try (InputStreamReader is = new InputStreamReader(proc.getInputStream());
+                BufferedReader br = new BufferedReader(is);) {
             String pid = br.readLine();
 
             // Check if the pid is not empty
@@ -70,20 +84,8 @@ public class BluetoothLeUtil {
 
         } catch (IOException e) {
             logger.error(COMMAND_ERROR, commandPidOf, e);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            logger.error(COMMAND_ERROR, commandPidOf, e);
         } finally {
-            if (proc != null) {
-                proc.destroy();
-            }
-            try {
-                if (br != null) {
-                    br.close();
-                }
-            } catch (IOException e) {
-                logger.warn("Error closing process for command: {}", commandPidOf, e);
-            }
+            proc.destroy();
         }
     }
 

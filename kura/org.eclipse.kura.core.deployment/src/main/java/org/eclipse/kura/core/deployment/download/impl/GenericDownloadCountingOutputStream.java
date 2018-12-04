@@ -9,7 +9,6 @@
  * Contributors:
  *     Eurotech
  *******************************************************************************/
-
 package org.eclipse.kura.core.deployment.download.impl;
 
 import java.io.IOException;
@@ -34,28 +33,27 @@ public class GenericDownloadCountingOutputStream extends CountingOutputStream {
     long totalBytes;
 
     final DeploymentPackageDownloadOptions options;
-    final SslManagerService m_sslManagerService;
+    final SslManagerService sslManagerService;
     final ProgressListener pl;
-    final int m_alreadyDownloaded;
-    final String m_downloadURL;
+    final int alreadyDownloaded;
+    final String downloadURL;
 
     InputStream is = null;
 
-    private long m_currentStep = 1;
-    // private long previous;
-    private DownloadStatus m_downloadStatus = DownloadStatus.FAILED;
+    private long currentStep = 1;
+    private DownloadStatus downloadStatus = DownloadStatus.FAILED;
 
     public GenericDownloadCountingOutputStream(DownloadOptions downloadOptions) {
         super(downloadOptions.getOut());
         this.options = downloadOptions.getRequestOptions();
-        this.m_sslManagerService = downloadOptions.getSslManagerService();
+        this.sslManagerService = downloadOptions.getSslManagerService();
         this.pl = downloadOptions.getCallback();
-        this.m_downloadURL = downloadOptions.getDownloadURL();
-        this.m_alreadyDownloaded = downloadOptions.getAlreadyDownloaded();
+        this.downloadURL = downloadOptions.getDownloadURL();
+        this.alreadyDownloaded = downloadOptions.getAlreadyDownloaded();
     }
 
     public DownloadStatus getDownloadTransferStatus() {
-        return this.m_downloadStatus;
+        return this.downloadStatus;
     }
 
     public Long getDownloadTransferProgressPercentage() {
@@ -83,10 +81,8 @@ public class GenericDownloadCountingOutputStream extends CountingOutputStream {
         } else if (this.propResolution == 0) {
             this.propResolution = 1024 * 256;
         }
-        if (getByteCount() >= this.m_currentStep * this.propResolution) {
-            // System.out.println("Bytes read: "+ (getByteCount() - previous));
-            // previous = getByteCount();
-            this.m_currentStep++;
+        if (getByteCount() >= this.currentStep * this.propResolution) {
+            this.currentStep++;
             postProgressEvent(this.options.getClientId(), getByteCount(), this.totalBytes, DownloadStatus.IN_PROGRESS,
                     null);
         }
@@ -94,16 +90,15 @@ public class GenericDownloadCountingOutputStream extends CountingOutputStream {
             Thread.sleep(this.propBlockDelay);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            e.printStackTrace();
         }
     }
 
     protected void postProgressEvent(String clientId, long progress, long total, DownloadStatus status,
             String errorMessage) {
         Long perc = getDownloadTransferProgressPercentage();
-        this.m_downloadStatus = status;
+        this.downloadStatus = status;
         ProgressEvent pe = new ProgressEvent(this, this.options, ((Long) total).intValue(), perc.intValue(),
-                getDownloadTransferStatus().getStatusString(), this.m_alreadyDownloaded);
+                getDownloadTransferStatus().getStatusString(), this.alreadyDownloaded);
         if (errorMessage != null) {
             pe.setExceptionMessage(errorMessage);
         }

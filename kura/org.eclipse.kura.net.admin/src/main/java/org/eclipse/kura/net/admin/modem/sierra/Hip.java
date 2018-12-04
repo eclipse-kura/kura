@@ -99,7 +99,7 @@ public class Hip {
     private static final int PAYLOAD_OFFSET = 4;
 
     private int payloadlength = 0;
-    private byte message_id = 0;
+    private byte messageId = 0;
     private byte parameter = 0;
 
     private byte[] hipmsg = null;
@@ -115,7 +115,7 @@ public class Hip {
      */
     public Hip(byte[] payload) {
 
-        this.message_id = MSGID_CNS_HOST2MODEM;
+        this.messageId = MSGID_CNS_HOST2MODEM;
         this.payloadlength = payload.length;
 
         List<Byte> alMsg = new ArrayList<>();
@@ -123,7 +123,7 @@ public class Hip {
         // form HIP message
         alMsg.add(Byte.valueOf((byte) (this.payloadlength >> 8 & 0xff)));
         alMsg.add(Byte.valueOf((byte) (this.payloadlength & 0xff)));
-        alMsg.add(Byte.valueOf(this.message_id));
+        alMsg.add(Byte.valueOf(this.messageId));
         alMsg.add(Byte.valueOf(this.parameter));
         for (int i = 0; i < this.payloadlength; i++) {
             alMsg.add(Byte.valueOf(payload[i]));
@@ -188,7 +188,7 @@ public class Hip {
 
             this.payloadlength = alMsg.get(0).byteValue() << 8 & 0x0ffff | alMsg.get(1).byteValue() & 0x0ff;
 
-            this.message_id = alMsg.get(MESSAGE_ID_OFFSET).byteValue();
+            this.messageId = alMsg.get(MESSAGE_ID_OFFSET).byteValue();
             this.parameter = alMsg.get(PARAMETER_OFFSET).byteValue();
 
             // get HIP payload
@@ -199,7 +199,6 @@ public class Hip {
             }
         } catch (Exception e) {
             this.is_error = true;
-            e.printStackTrace();
         }
     }
 
@@ -227,7 +226,7 @@ public class Hip {
      * @return Message ID
      */
     public byte getMessageID() {
-        return this.message_id;
+        return this.messageId;
     }
 
     /**

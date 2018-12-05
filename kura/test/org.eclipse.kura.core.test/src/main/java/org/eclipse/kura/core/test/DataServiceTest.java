@@ -33,10 +33,14 @@ import org.eclipse.kura.data.DataServiceListener;
 import org.eclipse.kura.test.annotation.TestTarget;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("deprecation")
 public class DataServiceTest implements DataServiceListener {
 
+    private static final Logger s_logger = LoggerFactory.getLogger(DataServiceTest.class);
+    
     private static CountDownLatch s_dependencyLatch = new CountDownLatch(1);	// initialize with number of
     // dependencies
     private static DataService s_dataService;
@@ -173,6 +177,7 @@ public class DataServiceTest implements DataServiceListener {
                 synchronized (s_qos12MsgIds) {
                     Integer id = s_dataService.publish(MSG_TOPIC1, MSG_PAYLOAD.getBytes(), 1, false, DFLT_MSG_PRIORITY);
                     s_qos12MsgIds.add(id);
+                    s_logger.info("Added id: {}", id);
                 }
             } catch (KuraStoreException e) {
                 break;
@@ -182,6 +187,8 @@ public class DataServiceTest implements DataServiceListener {
         boolean allConfirmed = false;
         for (int i = 0; i < ALL_CONFIRMED_QOS1_TIMEOUT; i++) {
             synchronized (s_qos12MsgIds) {
+                s_logger.info("confirm check round {}", i);
+                s_qos12MsgIds.forEach(element -> s_logger.info("To confirm: {}", element));
                 if (s_qos12MsgIds.isEmpty()) {
                     allConfirmed = true;
                     break;
@@ -190,6 +197,7 @@ public class DataServiceTest implements DataServiceListener {
             Thread.sleep(1000);
         }
 
+        s_logger.info("All confirmed value: {}", allConfirmed);
         assertTrue(allConfirmed);
 
         // publish at QoS = 2
@@ -234,6 +242,7 @@ public class DataServiceTest implements DataServiceListener {
                 synchronized (s_qos12MsgIds) {
                     Integer id = s_dataService.publish(MSG_TOPIC1, MSG_PAYLOAD.getBytes(), 1, false, DFLT_MSG_PRIORITY);
                     s_qos12MsgIds.add(id);
+                    s_logger.info("Added id: {}", id);
                 }
             } catch (KuraStoreException e) {
                 break;
@@ -262,6 +271,9 @@ public class DataServiceTest implements DataServiceListener {
         for (int i = 0; i < ALL_CONFIRMED_QOS1_TIMEOUT; i++) {
             synchronized (s_qos12MsgIds) {
                 synchronized (s_qos12HighPriorityMsgIds) {
+                    s_logger.info("confirm check round {}", i);
+                    s_qos12HighPriorityMsgIds.forEach(element -> s_logger.info("To confirm s_qos12HighPriorityMsgIds: {}", element));
+                    s_qos12MsgIds.forEach(element -> s_logger.info("To confirm s_qos12MsgIds: {}", element));
                     if (!s_qos12HighPriorityMsgIds.isEmpty() && s_qos12MsgIds.isEmpty()) {
                         fail("High priority messages should be confirmed before default priority messages");
                     } else if (s_qos12HighPriorityMsgIds.isEmpty() && s_qos12MsgIds.isEmpty()) {
@@ -273,6 +285,7 @@ public class DataServiceTest implements DataServiceListener {
             Thread.sleep(1000);
         }
 
+        s_logger.info("All confirmed value: {}", allConfirmed);
         assertTrue(allConfirmed);
     }
 

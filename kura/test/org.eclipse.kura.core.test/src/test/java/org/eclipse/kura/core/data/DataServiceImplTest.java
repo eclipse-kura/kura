@@ -648,25 +648,4 @@ public class DataServiceImplTest {
 
         return storeMock;
     }
-
-    @Test
-    public void testCongestion() throws Throwable {
-        // run handleInFlightCongestion
-
-        DataServiceImpl svc = new DataServiceImpl();
-
-        Map<String, Object> properties = new HashMap<>();
-        properties.put("in-flight-messages.congestion-timeout", 100);
-        DataServiceOptions dataServiceOptions = new DataServiceOptions(properties);
-
-        TestUtil.setFieldValue(svc, "dataServiceOptions", dataServiceOptions);
-
-        ScheduledExecutorService congestionMock = mock(ScheduledExecutorService.class);
-        TestUtil.setFieldValue(svc, "congestionExecutor", congestionMock);
-
-        TestUtil.invokePrivate(svc, "handleInFlightCongestion");
-
-        verify(congestionMock, times(1)).schedule((Runnable) anyObject(), eq(100L), eq(TimeUnit.SECONDS));
-    }
-
 }

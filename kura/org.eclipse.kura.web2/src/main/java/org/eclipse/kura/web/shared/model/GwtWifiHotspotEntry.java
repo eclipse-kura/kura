@@ -14,12 +14,12 @@ package org.eclipse.kura.web.shared.model;
 import java.io.Serializable;
 
 import org.eclipse.kura.web.client.util.KuraBaseModel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class GwtWifiHotspotEntry extends KuraBaseModel implements Serializable {
 
-    private static Logger logger = LoggerFactory.getLogger(GwtWifiHotspotEntry.class);
+    private static final Logger logger = Logger.getLogger(GwtWifiHotspotEntry.class.getSimpleName());
     
     private static final String FREQUENCY = "frequency";
     private static final String CHANNEL = "channel";
@@ -91,7 +91,7 @@ public class GwtWifiHotspotEntry extends KuraBaseModel implements Serializable {
         try {
             ciphers = GwtWifiCiphers.valueOf(getPairwiseCiphers());
         } catch (Exception e) {
-            logger.warn("Error getting pairwise ciphers.", e);
+            logger.log(Level.WARNING, "Error getting pairwise ciphers.", e);
         }
         return ciphers;
     }
@@ -109,7 +109,7 @@ public class GwtWifiHotspotEntry extends KuraBaseModel implements Serializable {
         try {
             ciphers = GwtWifiCiphers.valueOf(getGroupCiphers());
         } catch (Exception e) {
-            logger.warn("Error getting group ciphers.", e);
+            logger.log(Level.WARNING, "Error getting group ciphers.", e);
         }
         return ciphers;
     }

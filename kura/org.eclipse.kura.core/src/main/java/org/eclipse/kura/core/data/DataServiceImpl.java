@@ -96,7 +96,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
     private boolean notifyPending;
     private final Condition lockCondition = this.lock.newCondition();
 
-    private AtomicBoolean publisherEnabled = new AtomicBoolean();
+    private final AtomicBoolean publisherEnabled = new AtomicBoolean();
 
     private ServiceTracker<H2DbService, H2DbService> dbServiceTracker;
     private ComponentContext componentContext;
@@ -693,6 +693,36 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
         this.publisherExecutor.execute(new PublishManager());
     }
 
+    // It's very important that the publishInternal and messageConfirmed methods are synchronized
+    private synchronized void publishInternal(DataMessage message) throws KuraException {
+
+        String topic = message.getTopic();
+        byte[] payload = message.getPayload();
+        int qos = message.getQos();
+        boolean retain = message.isRetain();
+        int msgId = message.getId();
+
+        logger.debug("Publishing message with ID: {} on topic: {}, priority: {}", msgId, topic, message.getPriority());
+
+        DataTransportToken token = DataServiceImpl.this.dataTransportService.publish(topic, payload, qos, retain);
+
+        if (token == null) {
+            DataServiceImpl.this.store.published(msgId);
+            logger.debug("Published message with ID: {}", msgId);
+        } else {
+
+            // Check if the token is already tracked in the map (in which case we are in trouble)
+            Integer trackedMsgId = DataServiceImpl.this.inFlightMsgIds.get(token);
+            if (trackedMsgId != null) {
+                logger.error("Token already tracked: {} - {}", token.getSessionId(), token.getMessageId());
+            }
+
+            DataServiceImpl.this.inFlightMsgIds.put(token, msgId);
+            DataServiceImpl.this.store.published(msgId, token.getMessageId(), token.getSessionId());
+            logger.debug("Published message with ID: {} and MQTT message ID: {}", msgId, token.getMessageId());
+        }
+    }
+
     private List<Integer> buildMessageIds(List<DataMessage> messages, String topicRegex) {
         Pattern topicPattern = Pattern.compile(topicRegex);
         List<Integer> ids = new ArrayList<>();
@@ -834,37 +864,6 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
                     disconnect();
                     startConnectionMonitorTask();
                 }, timeout, TimeUnit.SECONDS);
-            }
-        }
-
-        // It's very important that the publishInternal and messageConfirmed methods are synchronized
-        private synchronized void publishInternal(DataMessage message) throws KuraException {
-
-            String topic = message.getTopic();
-            byte[] payload = message.getPayload();
-            int qos = message.getQos();
-            boolean retain = message.isRetain();
-            int msgId = message.getId();
-
-            logger.debug("Publishing message with ID: {} on topic: {}, priority: {}", msgId, topic,
-                    message.getPriority());
-
-            DataTransportToken token = DataServiceImpl.this.dataTransportService.publish(topic, payload, qos, retain);
-
-            if (token == null) {
-                DataServiceImpl.this.store.published(msgId);
-                logger.debug("Published message with ID: {}", msgId);
-            } else {
-
-                // Check if the token is already tracked in the map (in which case we are in trouble)
-                Integer trackedMsgId = DataServiceImpl.this.inFlightMsgIds.get(token);
-                if (trackedMsgId != null) {
-                    logger.error("Token already tracked: {} - {}", token.getSessionId(), token.getMessageId());
-                }
-
-                DataServiceImpl.this.inFlightMsgIds.put(token, msgId);
-                DataServiceImpl.this.store.published(msgId, token.getMessageId(), token.getSessionId());
-                logger.debug("Published message with ID: {} and MQTT message ID: {}", msgId, token.getMessageId());
             }
         }
     }

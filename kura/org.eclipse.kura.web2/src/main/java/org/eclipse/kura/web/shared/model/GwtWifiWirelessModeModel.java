@@ -12,12 +12,12 @@
 package org.eclipse.kura.web.shared.model;
 
 import org.eclipse.kura.web.client.util.KuraBaseModel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class GwtWifiWirelessModeModel extends KuraBaseModel {
     
-    private static Logger logger = LoggerFactory.getLogger(GwtWifiWirelessModeModel.class);
+    private static final Logger logger = Logger.getLogger(GwtWifiWirelessModeModel.class.getSimpleName());
 
     private static final long serialVersionUID = -6095963356000494663L;
 
@@ -46,7 +46,7 @@ public class GwtWifiWirelessModeModel extends KuraBaseModel {
         try {
             mode = GwtWifiWirelessMode.valueOf(modeStr);
         } catch (Exception e) {
-            logger.warn("Error getting Wifi Wireless Mode.", e);
+            logger.log(Level.WARNING, "Error getting Wifi Wireless Mode.", e);
         }
 
         return mode;

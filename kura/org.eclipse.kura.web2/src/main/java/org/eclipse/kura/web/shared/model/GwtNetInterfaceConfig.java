@@ -16,12 +16,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.eclipse.kura.web.client.util.KuraBaseModel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class GwtNetInterfaceConfig extends KuraBaseModel implements Serializable {
 
-    private static final Logger logger = LoggerFactory.getLogger(GwtNetInterfaceConfig.class);
+    private static final String ROUTER_DNS_PASS = "routerDnsPass";
+    private static final Logger logger = Logger.getLogger(GwtNetInterfaceConfig.class.getSimpleName());
     private static final long serialVersionUID = 7079533925979145804L;
 
     public GwtNetInterfaceConfig() {
@@ -124,7 +125,7 @@ public class GwtNetInterfaceConfig extends KuraBaseModel implements Serializable
         try {
             typeEnum = GwtNetIfType.valueOf(getHwType());
         } catch (Exception e) {
-            logger.warn("Error getting HwType.", e);
+            logger.log(Level.WARNING, "Error getting HwType.", e);
         }
 
         return typeEnum;
@@ -265,14 +266,14 @@ public class GwtNetInterfaceConfig extends KuraBaseModel implements Serializable
     }
 
     public boolean getRouterDnsPass() {
-        if (get("routerDnsPass") != null) {
-            return (Boolean) get("routerDnsPass");
+        if (get(ROUTER_DNS_PASS) != null) {
+            return (Boolean) get(ROUTER_DNS_PASS);
         }
         return false;
     }
 
     public void setRouterDnsPass(boolean routerDnsPass) {
-        set("routerDnsPass", routerDnsPass);
+        set(ROUTER_DNS_PASS, routerDnsPass);
     }
 
     @Override
@@ -289,18 +290,16 @@ public class GwtNetInterfaceConfig extends KuraBaseModel implements Serializable
                 return false;
             }
             if (properties.size() != otherProps.size()) {
-                logger.debug("Sizes differ");
+                logger.log(Level.FINER, "Sizes differ");
                 return false;
             }
-
-            Object oldVal;
-            Object newVal;
+            
             for (Entry<String, Object> entry : properties.entrySet()) {
-                oldVal = entry.getValue();
-                newVal = otherProps.get(entry.getKey());
+                final Object oldVal = entry.getValue();
+                final Object newVal = otherProps.get(entry.getKey());
                 if (oldVal != null) {
                     if (!oldVal.equals(newVal)) {
-                        logger.debug("Values differ - Key: {} oldVal: {}, newVal: {}", entry.getKey(), oldVal, newVal);
+                        logger.log(Level.FINER, () -> "Values differ - Key: " + entry.getKey() + " oldVal: " + oldVal + ", newVal: " + newVal);
                         return false;
                     }
                 } else if (newVal != null) {

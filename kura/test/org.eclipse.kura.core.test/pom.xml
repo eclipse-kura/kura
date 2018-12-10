@@ -188,11 +188,6 @@
                             <autoStart>true</autoStart>
                         </bundle>
                         <bundle>
-                            <id>osgi.cmpn</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
                             <id>org.eclipse.equinox.launcher</id>
                             <level>4</level>
                             <autoStart>true</autoStart>
@@ -446,10 +441,6 @@
                         <dependency>
                             <type>p2-installable-unit</type>
                             <artifactId>org.hamcrest.core</artifactId>
-                        </dependency>
-                        <dependency>
-                            <type>p2-installable-unit</type>
-                            <artifactId>osgi.cmpn</artifactId>
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>

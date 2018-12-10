@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -12,10 +12,14 @@
 package org.eclipse.kura.web.shared.model;
 
 import org.eclipse.kura.web.client.util.KuraBaseModel;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class GwtNetIfStatusModel extends KuraBaseModel {
 
     private static final long serialVersionUID = 2779596516813518500L;
+    
+    private static final Logger logger = Logger.getLogger(GwtNetIfStatusModel.class.getSimpleName());
 
     public static final String NAME = "name";
     public static final String STATUS = "status";
@@ -42,7 +46,7 @@ public class GwtNetIfStatusModel extends KuraBaseModel {
         try {
             status = GwtNetIfStatus.valueOf(statusStr);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.log(Level.WARNING, "Error getting status.", e);
         }
 
         return status;

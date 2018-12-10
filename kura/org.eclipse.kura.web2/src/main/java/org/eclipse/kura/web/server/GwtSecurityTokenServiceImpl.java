@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -33,23 +33,24 @@ public class GwtSecurityTokenServiceImpl extends OsgiRemoteServiceServlet implem
      */
     private static final long serialVersionUID = 5333012054583792499L;
 
-    private static ThreadLocal<HttpServletRequest> perThreadRequest = new ThreadLocal<HttpServletRequest>();
+    private static ThreadLocal<HttpServletRequest> threadRequest = new ThreadLocal<>();
 
-    public static Logger s_logger = LoggerFactory.getLogger(GwtSecurityTokenServiceImpl.class);
-    public static final String XSRF_TOKEN_KEY = "XSRF_TOKEN";
+    private static Logger logger = LoggerFactory.getLogger(GwtSecurityTokenServiceImpl.class);
+
+    static final String XSRF_TOKEN_KEY = "XSRF_TOKEN";
 
     @Override
     public String processCall(String payload) throws SerializationException {
         try {
-            perThreadRequest.set(getThreadLocalRequest());
+            threadRequest.set(getThreadLocalRequest());
             return super.processCall(payload);
         } finally {
-            perThreadRequest.set(null);
+            threadRequest.set(null);
         }
     }
 
     public static HttpServletRequest getRequest() {
-        return perThreadRequest.get();
+        return threadRequest.get();
     }
 
     public HttpSession getHttpSession() {
@@ -67,7 +68,7 @@ public class GwtSecurityTokenServiceImpl extends OsgiRemoteServiceServlet implem
             token = new GwtXSRFToken(UUID.randomUUID().toString());
             session.setAttribute(XSRF_TOKEN_KEY, token);
 
-            s_logger.debug("Generated XSRF token: {} for HTTP session: {}", token.getToken(), session.getId());
+            logger.debug("Generated XSRF token: {} for HTTP session: {}", token.getToken(), session.getId());
         }
         return token;
     }

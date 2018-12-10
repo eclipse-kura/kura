@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -12,8 +12,12 @@
 package org.eclipse.kura.web.shared.model;
 
 import org.eclipse.kura.web.client.util.KuraBaseModel;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class GwtWifiWirelessModeModel extends KuraBaseModel {
+    
+    private static final Logger logger = Logger.getLogger(GwtWifiWirelessModeModel.class.getSimpleName());
 
     private static final long serialVersionUID = -6095963356000494663L;
 
@@ -42,7 +46,7 @@ public class GwtWifiWirelessModeModel extends KuraBaseModel {
         try {
             mode = GwtWifiWirelessMode.valueOf(modeStr);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.log(Level.WARNING, "Error getting Wifi Wireless Mode.", e);
         }
 
         return mode;

@@ -12,3 +12,4 @@ Import-Package: org.apache.commons.io;version="2.4.0",
  org.osgi.framework;version="1.7.0",
  org.osgi.service.component;version="1.2.0"
 Bundle-ClassPath: .
+Automatic-Module-Name: org.eclipse.kura.emulator

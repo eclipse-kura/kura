@@ -13,5 +13,6 @@ Import-Package: org.eclipse.kura.channel.listener;version="1.0.0",
  org.mockito;version="1.10.19",
  org.mockito.invocation;version="1.10.19",
  org.mockito.stubbing;version="1.10.19",
- org.slf4j;version="1.6.4"
+ org.slf4j;version="[1.7.0,2.0.0)"
 Fragment-Host: org.eclipse.kura.driver.ble.sensortag.provider
+Automatic-Module-Name: org.eclipse.kura.internal.driver.ble.sensortag.test

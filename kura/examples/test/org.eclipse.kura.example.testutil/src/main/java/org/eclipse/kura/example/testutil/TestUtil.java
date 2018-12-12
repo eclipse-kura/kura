@@ -24,7 +24,7 @@ public class TestUtil {
 
     private static Field getField(Object svc, String fieldName) throws NoSuchFieldException {
         Field field = null;
-        Class clazz = svc.getClass();
+        Class<?> clazz = svc.getClass();
         while (!(clazz == Object.class || field != null)) {
             try {
                 field = clazz.getDeclaredField(fieldName);
@@ -67,7 +67,8 @@ public class TestUtil {
         return result;
     }
 
-    private static Method getMethod(Object svc, String methodName, Class... paramTypes) throws NoSuchMethodException {
+    private static Method getMethod(Object svc, String methodName, Class<?>... paramTypes)
+            throws NoSuchMethodException {
         Method method = null;
         Class<?> clazz = svc.getClass();
         while (!(clazz == Object.class || method != null)) {
@@ -83,7 +84,7 @@ public class TestUtil {
         throw new NoSuchMethodException(String.format("Method not found: %s", methodName));
     }
 
-    private static boolean checkParameterTypes(Method m, Class... paramTypes) {
+    private static boolean checkParameterTypes(Method m, Class<?>... paramTypes) {
         if (paramTypes == null) {
             return true;
         }

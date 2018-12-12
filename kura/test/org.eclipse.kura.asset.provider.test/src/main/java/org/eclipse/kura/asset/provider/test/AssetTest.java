@@ -85,7 +85,7 @@ public final class AssetTest {
      * JUnit Callback to be triggered before creating the instance of this suite
      *
      * @throws Exception
-     *             if the dependent services are null
+     *                       if the dependent services are null
      */
     @BeforeClass
     public static void setUpClass() throws Exception {
@@ -423,7 +423,7 @@ public final class AssetTest {
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testRead() throws KuraException {
-        final List<ChannelRecord> records = asset.read(new HashSet(Arrays.asList("1.CH")));
+        final List<ChannelRecord> records = asset.read(new HashSet<String>(Arrays.asList("1.CH")));
 
         assertNotNull(records);
         assertEquals(1, records.size());
@@ -436,7 +436,7 @@ public final class AssetTest {
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testReadChannelNotReadable() throws KuraException {
-        List<ChannelRecord> result = asset.read(new HashSet(Arrays.asList("2.CH")));
+        List<ChannelRecord> result = asset.read(new HashSet<String>(Arrays.asList("2.CH")));
 
         assertNotNull(result);
         assertEquals(1, result.size());
@@ -526,7 +526,7 @@ public final class AssetTest {
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testReadChannelDisabled() throws KuraException {
-        List<ChannelRecord> result = asset.read(new HashSet(Arrays.asList("3.CH")));
+        List<ChannelRecord> result = asset.read(new HashSet<String>(Arrays.asList("3.CH")));
 
         assertNotNull(result);
         assertEquals(1, result.size());

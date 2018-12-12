@@ -10,3 +10,4 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: org.junit;bundle-version="4.10.0"
 Import-Package: org.eclipse.kura.core.configuration.metatype;version="[1.0,2.0)",
  org.eclipse.kura.test.annotation;version="[1.0,2.0)"
+Automatic-Module-Name: org.eclipse.kura.asset.provider.test

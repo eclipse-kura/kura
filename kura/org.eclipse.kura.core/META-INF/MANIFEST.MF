@@ -28,14 +28,15 @@ Import-Package: javax.crypto,
  org.eclipse.kura.ssl;version="[2.0,2.1)",
  org.eclipse.kura.status;version="[1.0,2.0)",
  org.eclipse.kura.system;version="[1.4,1.5)",
- org.h2;version="1.4.192",
- org.h2.api;version="1.4.192",
- org.h2.jdbcx;version="1.4.192",
- org.h2.tools;version="1.4.192",
+ org.h2;version="1.4.197",
+ org.h2.api;version="1.4.197",
+ org.h2.jdbcx;version="1.4.197",
+ org.h2.tools;version="1.4.197",
  org.eclipse.kura.watchdog;version="[1.0,2.0)",
  org.osgi.framework;version="1.5.0",
  org.osgi.service.component;version="1.2.0",
  org.osgi.util.tracker;version="1.5.0",
- org.slf4j;version="1.6.4"
+ org.slf4j;version="[1.7.0,2.0.0)"
 Bundle-ClassPath: .,
- lib/org.eclipse.paho.client.mqttv3-1.2.0.jar
+ lib/org.eclipse.paho.client.mqttv3-1.2.1-20181004.040532-203.jar
+Automatic-Module-Name: org.eclipse.kura.core

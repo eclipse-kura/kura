@@ -42,7 +42,7 @@ public class StringValue implements TypedValue<String> {
      * Instantiates a new string value.
      *
      * @param value
-     *            the value
+     *                  the value
      */
     public StringValue(@Nullable final String value) {
         this.value = value == null ? "" : value;

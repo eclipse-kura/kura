@@ -456,8 +456,6 @@
       <dropinLocation
           rootFolder="${git.clone.location}/target-platform/p2-repo-common/target/repository"/>
       <dropinLocation
-          rootFolder="${git.clone.location}/target-platform/p2-repo-equinox_3.8.1/target/repository"/>
-      <dropinLocation
           rootFolder="${git.clone.location}/target-platform/p2-repo-equinox_3.12.50/target/repository"/>
       <dropinLocation
           rootFolder="${git.clone.location}/target-platform/p2-repo-test-deps/target/repository"/>
@@ -500,18 +498,6 @@
       </predicate>
     </workingSet>
     <workingSet
-        name="Karaf">
-      <predicate
-          xsi:type="predicates:OrPredicate">
-        <operand
-            xsi:type="predicates:LocationPredicate"
-            pattern=".*\/karaf\/.*"/>
-        <operand
-            xsi:type="predicates:NamePredicate"
-            pattern="karaf"/>
-      </predicate>
-    </workingSet>
-    <workingSet
         name="Target Platform">
       <predicate
           xsi:type="predicates:OrPredicate">
@@ -521,28 +507,6 @@
         <operand
             xsi:type="predicates:LocationPredicate"
             pattern=".*/target-definition.*"/>
-      </predicate>
-    </workingSet>
-    <workingSet
-        name="Features"
-        id="">
-      <predicate
-          xsi:type="predicates:AndPredicate">
-        <operand
-            xsi:type="predicates:OrPredicate">
-          <operand
-              xsi:type="predicates:LocationPredicate"
-              pattern=".*/features/.*"/>
-          <operand
-              xsi:type="predicates:NamePredicate"
-              pattern=".*\.feature.*"/>
-        </operand>
-        <operand
-            xsi:type="predicates:NotPredicate">
-          <operand
-              xsi:type="predicates:LocationPredicate"
-              pattern=".*\/karaf\/.*"/>
-        </operand>
       </predicate>
     </workingSet>
     <workingSet
@@ -619,8 +583,6 @@
             </operand>
           </predicate>
         </sourceLocator>
-        <sourceLocator
-            rootFolder="${git.clone.location}/karaf"/>
         <sourceLocator
             rootFolder="${git.clone.location}/kura/examples"
             locateNestedProjects="true"/>

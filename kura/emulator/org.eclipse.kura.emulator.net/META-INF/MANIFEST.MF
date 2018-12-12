@@ -4,7 +4,7 @@ Bundle-Name: org.eclipse.kura.emulator.net
 Bundle-SymbolicName: org.eclipse.kura.emulator.net;singleton:=true
 Bundle-Version: 1.0.400.qualifier
 Bundle-Vendor: Eclipse Kura
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: org.eclipse.kura.emulator.net; version="1.0.0"
 Service-Component: OSGI-INF/*.xml
 Bundle-ActivationPolicy: lazy
@@ -15,5 +15,6 @@ Import-Package: org.eclipse.kura;version="[1.0,2.0)",
  org.eclipse.kura.net.modem;version="[2.0,3.0)",
  org.eclipse.kura.net.wifi;version="[2.0,3.0)",
  org.osgi.service.component;version="1.2.0",
- org.slf4j;version="1.6.4"
+ org.slf4j;version="[1.7.0,2.0.0)"
 Bundle-ClassPath: .
+Automatic-Module-Name: org.eclipse.kura.emulator.net

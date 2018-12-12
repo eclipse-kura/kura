@@ -40,13 +40,21 @@ public class StringData implements BinaryData<String> {
     @Override
     public void write(Buffer buf, int offset, String value) {
         final byte[] raw = value.getBytes(charset);
-        wrapped.write(buf, offset, raw);
+        int amount = wrapped.getSize();
+        int size = value.length();
+        byte[] sendByte = new byte[amount + 2];
+        sendByte[0] = (byte) amount;
+        sendByte[1] = (byte) size;
+        System.arraycopy(raw, 0, sendByte, 2, size);
+
+        wrapped.write(buf, offset, sendByte);
     }
 
     @Override
     public String read(Buffer buf, int offset) {
         final byte[] raw = wrapped.read(buf, offset);
-        return new String(raw, charset);
+        int size = (int) raw[1]; // Current length of the string
+        return new String(raw, 2, size, charset);
     }
 
     @Override

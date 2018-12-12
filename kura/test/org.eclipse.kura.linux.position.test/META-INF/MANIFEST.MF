@@ -19,3 +19,4 @@ Import-Package: javax.microedition.io,
  org.osgi.service.component;version="1.0.0",
  org.osgi.service.event;version="1.3.0"
 Bundle-ActivationPolicy: lazy
+Automatic-Module-Name: org.eclipse.kura.linux.position.test

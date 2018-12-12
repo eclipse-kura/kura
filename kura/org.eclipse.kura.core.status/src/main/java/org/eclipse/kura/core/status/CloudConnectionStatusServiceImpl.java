@@ -175,7 +175,7 @@ public class CloudConnectionStatusServiceImpl implements CloudConnectionStatusSe
             if (this.properties.get("linux_led") != null) {
                 runnable = getLinuxStatusWorker(status);
             }
-            if (runnable == null && this.properties.get("led") != null) {
+            if (runnable == null && this.properties.get("led") != null && this.gpioService != null) {
                 runnable = getGpioStatusWorker(status);
             }
             if (runnable != null) {

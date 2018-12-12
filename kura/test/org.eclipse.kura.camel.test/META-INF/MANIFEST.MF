@@ -14,3 +14,4 @@ Import-Package: org.apache.camel.component.mock;version="[2.17.2,3.0.0)",
  org.mockito;version="1.10.19",
  org.mockito.invocation;version="1.10.19",
  org.mockito.stubbing;version="1.10.19"
+Automatic-Module-Name: org.eclipse.kura.camel.test

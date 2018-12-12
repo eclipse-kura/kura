@@ -152,7 +152,7 @@ public final class DataTypeMapper {
                 final LocalizedText text = (LocalizedText) value;
                 return TypedValues.newStringValue(text.getText());
             } else {
-                return TypedValues.newStringValue(value.toString());
+                return TypedValues.newStringValue(value == null ? "" : value.toString());
             }
         case BYTE_ARRAY:
             return TypedValues.newByteArrayValue(toByteArray(value));

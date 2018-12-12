@@ -61,7 +61,6 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
     private static SystemService systemService;
     private static DataService dataService;
 
-    @SuppressWarnings("unused")
     private static ComponentContext componentContext;
 
     private static Map<String, Object> s_properties;

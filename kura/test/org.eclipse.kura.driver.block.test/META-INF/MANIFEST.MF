@@ -10,3 +10,4 @@ Bundle-ActivationPolicy: lazy
 Import-Package: org.junit;version="4.12.0",
  org.junit.runners;version="4.12.0"
 Fragment-Host: org.eclipse.kura.driver.block;bundle-version="1.0.300"
+Automatic-Module-Name: org.eclipse.kura.driver.block.test

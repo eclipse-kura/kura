@@ -19,7 +19,8 @@ Import-Package: org.apache.camel;version="[2.17,3.0)",
  org.osgi.framework;version="1.7.0",
  org.osgi.service.component;version="1.2.0",
  org.osgi.util.tracker;version="1.5.1",
- org.slf4j;version="[1.6,2.0)"
+ org.slf4j;version="[1.7.0,2.0.0)"
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: Eclipse Kura
+Automatic-Module-Name: org.eclipse.kura.example.camel.aggregation
 

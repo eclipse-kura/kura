@@ -11,14 +11,12 @@ package org.eclipse.kura.wire.provider.test;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
 
 /**
  * WireTestsSuite is a JUnit Test Suite containing a list of test cases to
  * execute
  */
 @RunWith(Suite.class)
-@SuiteClasses({ WireServiceTest.class })
 public final class WireTestsSuite {
 
 }

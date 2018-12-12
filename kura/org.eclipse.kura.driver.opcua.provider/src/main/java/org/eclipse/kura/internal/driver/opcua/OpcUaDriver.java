@@ -20,6 +20,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.channel.ChannelRecord;
@@ -67,7 +70,11 @@ public final class OpcUaDriver implements Driver, ConfigurableComponent {
     private OpcUaOptions options;
     private long connectAttempt = 0;
 
+    protected ScheduledExecutorService connectionMonitorExecutor;
+    private ScheduledFuture<?> connectionMonitorFuture;
+
     protected synchronized void activate(final Map<String, Object> properties) {
+        this.connectionMonitorExecutor = Executors.newSingleThreadScheduledExecutor();
         logger.info("Activating OPC-UA Driver...");
         this.extractProperties(properties);
         logger.info("Activating OPC-UA Driver... Done");
@@ -150,6 +157,7 @@ public final class OpcUaDriver implements Driver, ConfigurableComponent {
         } catch (Exception e) {
             throw new ConnectionException(e);
         }
+        stopConnectionMonitorTask();
     }
 
     private void extractProperties(final Map<String, Object> properties) {
@@ -191,6 +199,7 @@ public final class OpcUaDriver implements Driver, ConfigurableComponent {
             throws ConnectionException {
         this.registrations.registerListener(ListenRequest.extractListenRequest(channelConfig, listener));
         connectAsync();
+        startConnectionMonitorTask();
     }
 
     /** {@inheritDoc} */
@@ -226,12 +235,14 @@ public final class OpcUaDriver implements Driver, ConfigurableComponent {
 
     private synchronized void onFailure(final ConnectionManager manager, final Throwable ex) {
         if (connectionManager.isPresent() && connectionManager.get() == manager) {
-            logger.debug("Unrecoverable failure, forcing disconnect", ex);
+            logger.warn("Unrecoverable failure, forcing disconnect", ex);
             try {
                 this.disconnect();
+                this.startConnectionMonitorTask();
             } catch (ConnectionException e) {
                 logger.warn("Unable to Disconnect...");
             }
+            startConnectionMonitorTask();
         } else {
             logger.debug("Ignoring failure from old connection", ex);
         }
@@ -242,6 +253,44 @@ public final class OpcUaDriver implements Driver, ConfigurableComponent {
         requireNonNull(channelRecords, "Channel Record list cannot be null");
 
         return new OpcUaPreparedRead(Request.extractReadRequests(channelRecords), channelRecords);
+    }
+
+    private void startConnectionMonitorTask() {
+        if (this.connectionMonitorFuture != null && !this.connectionMonitorFuture.isDone()) {
+            return;
+        }
+        this.connectionMonitorFuture = this.connectionMonitorExecutor.scheduleAtFixedRate(new Runnable() {
+
+            @Override
+            public void run() {
+                String originalName = Thread.currentThread().getName();
+                Thread.currentThread().setName("OpcUaDriver:ReconnectTask");
+                try {
+                    if (!connectionManager.isPresent()) {
+                        connectAsync();
+                    }
+                } catch (Exception e) {
+                    logger.warn("Connect failed", e);
+                } finally {
+                    Thread.currentThread().setName(originalName);
+                    if (connectionManager.isPresent()) {
+                        logger.info("Connected. Reconnect task will be terminated.");
+                        throw new RuntimeException("OpcUaDriver Connected. Reconnect task will be terminated.");
+                    }
+                }
+
+            }
+
+        }, 10, 10, TimeUnit.SECONDS);
+    }
+
+    private void stopConnectionMonitorTask() {
+        if (this.connectionMonitorFuture != null && !this.connectionMonitorFuture.isDone()) {
+
+            logger.info("Reconnect task running. Stopping it");
+
+            this.connectionMonitorFuture.cancel(true);
+        }
     }
 
     private class OpcUaPreparedRead implements PreparedRead {

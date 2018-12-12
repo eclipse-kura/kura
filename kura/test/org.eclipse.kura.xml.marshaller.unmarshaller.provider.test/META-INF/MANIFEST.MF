@@ -20,4 +20,5 @@ Import-Package: org.eclipse.kura;version="[1.4,2.0)",
  org.mockito;version="1.10.19";resolution:=optional,
  org.mockito.invocation;version="1.10.19";resolution:=optional,
  org.mockito.stubbing;version="1.10.19";resolution:=optional,
- org.slf4j;version="1.7.21"
+ org.slf4j;version="[1.7.0,2.0.0)"
+Automatic-Module-Name: org.eclipse.kura.xml.marshaller.unmarshaller.provider.test

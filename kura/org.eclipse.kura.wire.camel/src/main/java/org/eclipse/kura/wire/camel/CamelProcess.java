@@ -15,6 +15,7 @@ import static org.apache.camel.builder.DefaultFluentProducerTemplate.on;
 import java.util.Arrays;
 
 import org.apache.camel.CamelContext;
+import org.apache.camel.FluentProducerTemplate;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireEnvelope;
 import org.eclipse.kura.wire.WireRecord;
@@ -24,12 +25,15 @@ import org.slf4j.LoggerFactory;
 public class CamelProcess extends AbstractReceiverWireComponent implements WireEmitter {
 
     private static final Logger logger = LoggerFactory.getLogger(CamelProcess.class);
+    private FluentProducerTemplate template = null;
 
     @Override
     protected void processReceive(final CamelContext context, final String endpointUri, final WireEnvelope envelope)
             throws Exception {
 
-        final WireRecord[] result = on(context) //
+        if (template == null)
+            return;
+        final WireRecord[] result = template //
                 .withBody(envelope) //
                 .to(endpointUri) //
                 .request(WireRecord[].class);
@@ -39,6 +43,13 @@ public class CamelProcess extends AbstractReceiverWireComponent implements WireE
         if (result != null) {
             this.wireSupport.emit(Arrays.asList(result));
         }
+    }
+
+    @Override
+    protected void bindContext(final CamelContext context) {
+
+        this.template = on(context);
+
     }
 
 }

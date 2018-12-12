@@ -26,7 +26,6 @@
 
 	<groupId>org.eclipse.kura.tools</groupId>
 	<artifactId>archetype</artifactId>
-	<version>4.1.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Eclipse Kura Archetypes</name>
 

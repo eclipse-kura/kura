@@ -40,17 +40,18 @@ public class Emulator {
             String mode = System.getProperty(KURA_MODE);
             if (EMULATOR.equals(mode)) {
                 System.out.println("Framework is running in emulation mode");
-                final String snapshotFolderPath = System.getProperty(KURA_SNAPSHOTS_PATH);
-                if (snapshotFolderPath == null || snapshotFolderPath.isEmpty()) {
-                    throw new IllegalStateException("System property 'kura.snapshots' is not set");
-                }
-                final File snapshotFolder = new File(snapshotFolderPath);
-                if (!snapshotFolder.exists() || snapshotFolder.list().length == 0) {
-                    snapshotFolder.mkdirs();
-                    copySnapshot(snapshotFolderPath);
-                }
             } else {
                 System.out.println("Framework is not running in emulation mode");
+            }
+            final String snapshotFolderPath = System.getProperty(KURA_SNAPSHOTS_PATH);
+            if (snapshotFolderPath == null || snapshotFolderPath.isEmpty()) {
+                throw new IllegalStateException("System property 'kura.snapshots' is not set");
+            }
+            final File snapshotFolder = new File(snapshotFolderPath);
+            if (!snapshotFolder.exists()
+                    || snapshotFolder.list((File dir, String name) -> name.equals(SNAPSHOT_0_NAME)).length == 0) {
+                snapshotFolder.mkdirs();
+                copySnapshot(snapshotFolderPath);
             }
 
         } catch (Exception e) {

@@ -4,7 +4,7 @@ Bundle-Name: org.eclipse.kura.stress
 Bundle-SymbolicName: org.eclipse.kura.stress;singleton:=true
 Bundle-Version: 1.0.300.qualifier
 Bundle-Vendor: Eclipse Kura
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Service-Component: OSGI-INF/*.xml
 Bundle-ActivationPolicy: lazy
 Import-Package: org.eclipse.kura; version="[1.0,2.0)",
@@ -12,5 +12,6 @@ Import-Package: org.eclipse.kura; version="[1.0,2.0)",
  org.eclipse.kura.configuration; version="[1.0,2.0)",
  org.eclipse.kura.message; version="[1.0,2.0)",
  org.osgi.service.component;version="1.2.0",
- org.slf4j;version="1.6.4"
+ org.slf4j;version="[1.7.0,2.0.0)"
 Bundle-ClassPath: .
+Automatic-Module-Name: org.eclipse.kura.stress

@@ -35,6 +35,7 @@ import org.eclipse.kura.net.admin.modem.EvdoCellularModem;
 import org.eclipse.kura.net.admin.modem.sierra.CnS;
 import org.eclipse.kura.net.admin.modem.sierra.CnsAppIDs;
 import org.eclipse.kura.net.admin.modem.sierra.CnsOpTypes;
+import org.eclipse.kura.net.modem.CellularModem.SerialPortType;
 import org.eclipse.kura.net.modem.ModemCdmaServiceProvider;
 import org.eclipse.kura.net.modem.ModemDevice;
 import org.eclipse.kura.net.modem.ModemPdpContext;
@@ -132,11 +133,11 @@ public class SierraUsb598 implements EvdoCellularModem {
      * SierraUsb598 modem constructor
      *
      * @param usbDevice
-     *            - modem USB device as {@link UsbModemDevice}
+     *                              - modem USB device as {@link UsbModemDevice}
      * @param connectionFactory
-     *            - connection factory as {@link ConnectionFactory}
+     *                              - connection factory as {@link ConnectionFactory}
      * @param technologyType
-     *            - cellular technology type as {@link ModemTechnologyType}
+     *                              - cellular technology type as {@link ModemTechnologyType}
      */
     public SierraUsb598(ModemDevice device, ConnectionFactory connectionFactory) {
 
@@ -571,7 +572,7 @@ public class SierraUsb598 implements EvdoCellularModem {
         CommConnection connection = null;
         if (this.connectionFactory != null) {
             String uri = new CommURI.Builder(port).withBaudRate(115200).withDataBits(8).withStopBits(1).withParity(0)
-                    .withTimeout(2000).build().toString();
+                    .withOpenTimeout(2000).build().toString();
 
             try {
                 connection = (CommConnection) this.connectionFactory.createConnection(uri, 1, false);

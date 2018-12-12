@@ -28,6 +28,10 @@
         <Logger name="org.eclipse" level="info" additivity="false">
             <AppenderRef ref="Console"/>
         </Logger>
+        <Logger name="org.apache.felix.ipojo" level="debug" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        
         <Root level="info">
             <AppenderRef ref="Console"/>
         </Root>

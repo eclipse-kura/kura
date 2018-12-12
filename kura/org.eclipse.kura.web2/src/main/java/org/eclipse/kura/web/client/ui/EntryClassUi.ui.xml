@@ -122,7 +122,7 @@
                             <b:Panel>
                                 <b:Panel addStyleNames="{style.image} headerLogo" />
                                 <b:PanelHeader>
-                                    <b:Heading size="H3" text="System" />
+                                    <b:Heading size="H3" text="{msgs.sysapp}" />
                                 </b:PanelHeader>
                                 <b:PanelBody ui:field='systemPanel' b:id="systemPanel">
                                     <b:NavPills stacked="true">

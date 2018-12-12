@@ -23,3 +23,4 @@ Import-Package: org.eclipse.kura;version="[1.2,2.0)",
  org.osgi.service.cm;version="1.4",
  org.osgi.service.component;version="1.2"
 Bundle-ActivationPolicy: lazy
+Automatic-Module-Name: org.eclipse.kura.core.configuration.test

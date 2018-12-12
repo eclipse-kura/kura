@@ -24,7 +24,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <tycho-version>0.26.0</tycho-version>
+        <tycho-version>1.1.0</tycho-version>
 
         <!-- SCM: Note that we are in the "kura" sub-dir here already -->
         <tycho.scmUrl>scm:git:ssh://github.com/eclipse/kura/kura</tycho.scmUrl>
@@ -36,7 +36,7 @@
 
         <skip.can.example>true</skip.can.example>
 
-        <osgi-dp-plugin-version>0.3.0</osgi-dp-plugin-version>
+        <osgi-dp-plugin-version>0.4.0</osgi-dp-plugin-version>
         <check.plugins.exist.remote>false</check.plugins.exist.remote>
     </properties>
 
@@ -167,7 +167,7 @@
             <extension>
                 <groupId>org.apache.maven.wagon</groupId>
                 <artifactId>wagon-ssh</artifactId>
-                <version>1.0-beta-6</version>
+                <version>3.2.0</version>
             </extension>
         </extensions>
 
@@ -175,17 +175,17 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>2.17</version>
+                <version>3.0.0</version>
                 <dependencies>
                     <dependency>
                         <groupId>org.slf4j</groupId>
                         <artifactId>jcl-over-slf4j</artifactId>
-                        <version>1.7.5</version>
+                        <version>1.7.25</version>
                     </dependency>
                     <dependency>
                         <groupId>org.slf4j</groupId>
                         <artifactId>slf4j-jdk14</artifactId>
-                        <version>1.7.5</version>
+                        <version>1.7.25</version>
                     </dependency>
                 </dependencies>
                 <executions>
@@ -208,7 +208,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.3</version>
+                <version>3.8.0</version>
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
@@ -217,7 +217,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>findbugs-maven-plugin</artifactId>
-                <version>3.0.1</version>
+                <version>3.0.5</version>
                 <configuration>
                     <findbugsXmlOutput>true</findbugsXmlOutput>
                     <findbugsXmlWithMessages>true</findbugsXmlWithMessages>
@@ -227,7 +227,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-eclipse-plugin</artifactId>
-                <version>2.9</version>
+                <version>2.10</version>
                 <configuration>
                     <skip>true</skip>
                 </configuration>
@@ -235,7 +235,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-deploy-plugin</artifactId>
-                <version>2.8.1</version>
+                <version>2.8.2</version>
                 <configuration>
                     <skip>false</skip>
                 </configuration>
@@ -329,7 +329,7 @@
                 <!-- license:format to add license:check to check -->
                 <groupId>com.mycila</groupId>
                 <artifactId>license-maven-plugin</artifactId>
-                <version>2.2</version>
+                <version>3.0</version>
                 <configuration>
                     <header>distrib/eclipse_license.txt</header>
                     <properties>

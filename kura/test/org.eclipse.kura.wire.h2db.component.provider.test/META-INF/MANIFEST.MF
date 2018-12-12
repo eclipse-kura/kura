@@ -14,5 +14,6 @@ Import-Package: org.eclipse.kura.core.testutil;version="1.0.0",
  org.mockito;version="1.10.19",
  org.mockito.invocation;version="1.10.19",
  org.mockito.stubbing;version="1.10.19",
- org.slf4j;version="1.6.4"
+ org.slf4j;version="[1.7.0,2.0.0)"
 Fragment-Host: org.eclipse.kura.wire.h2db.component.provider;bundle-version="1.0.300"
+Automatic-Module-Name: org.eclipse.kura.wire.h2db.component.provider.test

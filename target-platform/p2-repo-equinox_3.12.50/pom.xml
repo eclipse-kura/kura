@@ -12,7 +12,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <equinox.download.url>http://archive.eclipse.org/equinox/drops/R-Oxygen.2-201711300510/equinox-SDK-Oxygen.2.zip</equinox.download.url>
+        <equinox.download.url>http://mirrors.neusoft.edu.cn/eclipse/equinox/drops/R-4.9-201809060745/equinox-SDK-4.9.zip</equinox.download.url>
     </properties>
 
     <build>
@@ -57,15 +57,11 @@
                                     <version>${org.apache.felix.deploymentadmin.version}</version>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.knowhowlab</groupId>
-                                    <artifactId>org.knowhowlab.osgi.monitoradmin</artifactId>
+                                    <groupId>org.knowhowlab.osgi</groupId>
+                                    <artifactId>monitoradmin</artifactId>
                                     <version>${org.knowhowlab.osgi.monitoradmin.version}</version>
                                 </artifactItem>
-                                <artifactItem>
-                                    <groupId>osgi</groupId>
-                                    <artifactId>osgi.cmpn</artifactId>
-                                    <version>${osgi.cmpn.version}</version>
-                                </artifactItem>
+                                
                                 <artifactItem>
                                     <groupId>org.eclipse.jetty</groupId>
                                     <artifactId>jetty-http</artifactId>
@@ -104,11 +100,14 @@
                                 <!--
                                     use wireadming 1.0.800, remove this on full Equinox upgrade
                                 -->
+                                <!-- 
                                 <artifactItem>
                                     <groupId>org.eclipse.platform</groupId>
                                     <artifactId>org.eclipse.equinox.wireadmin</artifactId>
                                     <version>1.0.800</version>
                                 </artifactItem>
+                                 -->
+                                
                             </artifactItems>
                             <stripVersion>true</stripVersion>
                             <outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>
@@ -119,7 +118,7 @@
             <plugin>
                 <groupId>org.eclipse.tycho.extras</groupId>
                 <artifactId>tycho-p2-extras-plugin</artifactId>
-                <version>0.26.0</version>
+                <version>1.1.0</version>
                 <executions>
                     <execution>
                         <phase>prepare-package</phase>
@@ -165,7 +164,9 @@
                                         <!--
                                             use wireadming 1.0.800, remove this on full Equinox upgrade
                                         -->
+                                        <!--  
                                         <exclude name="plugins/org.eclipse.equinox.wireadmin*.jar" />
+                                        -->
 
                                         <include name="plugins/org.eclipse.equinox.launcher_*.jar" />
                                         <include name="plugins/org.eclipse.equinox.launcher.source_*.jar" />
@@ -199,10 +200,8 @@
                                     tofile="${project.build.directory}/source/plugins/org.apache.felix.dependencymanager_${org.apache.felix.dependencymanager.version}.jar" />
                                 <move file="${project.build.directory}/source/plugins/org.apache.felix.deploymentadmin.jar"
                                     tofile="${project.build.directory}/source/plugins/org.apache.felix.deploymentadmin_${org.apache.felix.deploymentadmin.version}.jar" />
-                                <move file="${project.build.directory}/source/plugins/org.knowhowlab.osgi.monitoradmin.jar"
+                                <move file="${project.build.directory}/source/plugins/monitoradmin.jar"
                                     tofile="${project.build.directory}/source/plugins/org.knowhowlab.osgi.monitoradmin_${org.knowhowlab.osgi.monitoradmin.version}.jar" />
-                                <move file="${project.build.directory}/source/plugins/osgi.cmpn.jar"
-                                    tofile="${project.build.directory}/source/plugins/osgi.cmpn_${osgi.cmpn.version}.jar" />
                                 <move file="${project.build.directory}/source/plugins/jetty-http.jar"
                                     tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.http_${org.eclipse.jetty.http.version}.jar" />
                                 <move file="${project.build.directory}/source/plugins/jetty-continuation.jar"
@@ -220,8 +219,11 @@
                                 <!--
                                     use wireadming 1.0.800, remove this on full Equinox upgrade
                                 -->
+                                <!--
                                 <move file="${project.build.directory}/source/plugins/org.eclipse.equinox.wireadmin.jar"
                                     tofile="${project.build.directory}/source/plugins/org.eclipse.equinox.wireadmin_${org.eclipse.equinox.wireadmin.version}.jar" />
+                                -->
+                                    
                             </target>
                         </configuration>
                     </execution>
@@ -260,7 +262,7 @@
             <!-- profile for falling back to non-mirror download links -->
             <id>no-mirror</id>
             <properties>
-                <equinox.download.url>http://archive.eclipse.org/equinox/drops/R-Oxygen.2-201711300510/equinox-SDK-Oxygen.2.zip</equinox.download.url>
+                <equinox.download.url>http://mirrors.neusoft.edu.cn/eclipse/equinox/drops/R-4.9-201809060745/equinox-SDK-4.9.zip</equinox.download.url>
             </properties>
         </profile>
     </profiles>

@@ -591,6 +591,9 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
                             break;
                         }
                     }
+                    if (macAddress == null && !interfaces.isEmpty()) {
+                        macAddress = NetUtil.hardwareAddressToString(interfaces.get(0).getHardwareAddress());
+                    }
                 }
             } catch (KuraException e) {
                 logger.error("Failed to get network interfaces", e);
@@ -604,7 +607,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
      * Returns ip of the first interface name of which begins with <code>prefix</code>.
      *
      * @param prefix
-     *            network interface name prefix e.g. eth, wlan
+     *                   network interface name prefix e.g. eth, wlan
      * @return ip of the first interface name of which begins with prefix; null if none found with ip
      * @throws SocketException
      */

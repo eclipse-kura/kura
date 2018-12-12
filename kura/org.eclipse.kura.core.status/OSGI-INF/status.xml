@@ -25,7 +25,7 @@
               unbind="unsetSystemService"
               interface="org.eclipse.kura.system.SystemService"/>
    <reference name="GPIOService" 
-              cardinality="1..1" 
+              cardinality="0..1" 
               policy="static"
               bind="setGPIOService"
               unbind="unsetGPIOService"

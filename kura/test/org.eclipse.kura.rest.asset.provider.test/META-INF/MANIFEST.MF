@@ -16,3 +16,4 @@ Import-Package: org.eclipse.kura.core.testutil;version="1.0.0",
  org.mockito.stubbing;version="1.10.19",
  org.osgi.framework;version="1.7"
 Bundle-ActivationPolicy: lazy
+Automatic-Module-Name: org.eclipse.kura.rest.asset.provider.test

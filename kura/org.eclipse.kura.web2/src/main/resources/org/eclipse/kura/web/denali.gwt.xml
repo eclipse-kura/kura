@@ -39,8 +39,8 @@
   <inherits name="com.google.gwt.http.HTTP" />
 
   <!-- Locales: English language, independent of country -->
-  <extend-property name="locale" values="en"/>
-  <set-property-fallback name="locale" value="en"/>
+  <extend-property name="locale" values="zh_CN"/>
+  <set-property-fallback name="locale" value="zh_CN"/>
   
   <!-- Specify the app entry point class.                         -->
   <entry-point class='org.eclipse.kura.web.client.denali' />

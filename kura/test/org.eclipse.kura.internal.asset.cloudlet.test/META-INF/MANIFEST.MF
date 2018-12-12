@@ -16,3 +16,4 @@ Import-Package: org.eclipse.kura.core.testutil;version="1.0.0",
  org.osgi.framework;version="1.7",
  org.osgi.service.component;version="1.2.2"
 Bundle-ActivationPolicy: lazy
+Automatic-Module-Name: org.eclipse.kura.internal.asset.cloudlet.test

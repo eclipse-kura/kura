@@ -12,6 +12,7 @@ Import-Package: org.eclipse.kura.example.testutil,
  org.mockito;version="1.10.19",
  org.mockito.invocation;version="1.10.19",
  org.mockito.stubbing;version="1.10.19",
- org.slf4j;version="1.6.4"
+ org.slf4j;version="[1.7.0,2.0.0)"
 Fragment-Host: org.eclipse.kura.example.ble.tisensortag.tinyb
 Require-Bundle: org.eclipse.kura.api
+Automatic-Module-Name: org.eclipse.kura.example.ble.tisensortag.tinyb.test

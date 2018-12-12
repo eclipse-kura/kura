@@ -1023,14 +1023,14 @@ Packages panel dropzone END
 
 div.copyright:after {
 	content:
-		' Eurotech and others. EPL v1.0';
+		' 长飞光纤光缆股份有限公司 何幼林 ';
 }
 
 div.headerLogo { 
 	height: 			38px;
 	margin: 			5px 0px 5px 15px;
 	vertical-align: 	baseline;
-	background: 		url(eclipse/kura/icons/kura_logo_small.png);
+	background: 		url(eclipse/kura/icons/yofc_logo_small.png);
 	background-repeat: 	no-repeat;
 	background-size: 	contain;
 	background-position: center !important;

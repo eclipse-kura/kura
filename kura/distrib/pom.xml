@@ -30,7 +30,7 @@
     <name>distrib</name>
     <url>http://maven.apache.org</url>
     <properties>
-        <tycho-version>0.26.0</tycho-version>
+        <tycho-version>1.1.0</tycho-version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <zip_workspace.prefix>user_workspace_archive_${project.version}</zip_workspace.prefix>
 
@@ -76,19 +76,19 @@
             <extension>
                 <groupId>org.apache.maven.wagon</groupId>
                 <artifactId>wagon-ssh</artifactId>
-                <version>1.0-beta-6</version>
+                <version>3.2.0</version>
             </extension>
             <extension>
                 <groupId>org.apache.maven.wagon</groupId>
                 <artifactId>wagon-webdav-jackrabbit</artifactId>
-                <version>2.2</version>
+                <version>3.2.0</version>
             </extension>
         </extensions>
         <plugins>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>properties-maven-plugin</artifactId>
-                <version>1.0-alpha-1</version>
+                <version>1.0.0</version>
                 <executions>
                     <execution>
                         <phase>initialize</phase>
@@ -107,7 +107,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
-                <version>1.9</version>
+                <version>3.0.0</version>
                 <executions>
                     <execution>
                         <id>set-deployment-package-version</id>
@@ -127,7 +127,7 @@
             <plugin>
 				<!-- get kura bundles from (release or local) repository -->
                 <artifactId>maven-dependency-plugin</artifactId>
-                <version>2.8</version>
+                <version>3.1.1</version>
                 <executions>
                     <execution>
                         <id>get-kura-bundles</id>
@@ -454,11 +454,6 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>org.moka7</artifactId>
-                                    <version>${org.moka7.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.rest.provider</artifactId>
                                     <version>${org.eclipse.kura.rest.provider.version}</version>
                                 </artifactItem>
@@ -692,8 +687,6 @@
                                     tofile="target/plugins/org.eclipse.kura.wire.script.filter.provider_${org.eclipse.kura.wire.script.filter.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.driver.gpio.provider.jar"
                                     tofile="target/plugins/org.eclipse.kura.driver.gpio.provider_${org.eclipse.kura.driver.gpio.provider.version}.jar" />
-                                <move file="target/plugins/org.moka7.jar"
-                                    tofile="target/plugins/org.moka7_${org.moka7.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.rest.provider.jar"
                                     tofile="target/plugins/org.eclipse.kura.rest.provider_${org.eclipse.kura.rest.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.rest.asset.provider.jar"
@@ -992,7 +985,7 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>3.8.1</version>
+            <version>4.12</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

@@ -160,6 +160,8 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
 
         s_logger.info("Asserting default values...");
 
+        // ConfigurationServiceTest.configService.rollback(0l);// Reset partial success of previous tests broken
+
         //
         // test the default properties
         assertDefaultValues(s_properties);
@@ -169,8 +171,7 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
         s_logger.info("configService 2:" + ConfigurationServiceTest.configService);
         s_logger.info("Taking snapshot...");
 
-        long sid;
-        sid = ConfigurationServiceTest.configService.snapshot();
+        long sid = ConfigurationServiceTest.configService.snapshot();
 
         //
         // test a positive update flow
@@ -222,7 +223,7 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
             assertFalse("Configuration update should have failed", false);
         } catch (KuraException e) {
             assertTrue("Configuration update has failed as expected", true);
-            assertEquals(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID, e.getCode());
+            assertEquals(KuraErrorCode.PARTIAL_SUCCESS, e.getCode());
         }
 
         // test a negative update flow

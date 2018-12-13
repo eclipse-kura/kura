@@ -39,7 +39,7 @@ Copyright (c) 2017 Eurotech and/or its affiliates and others
                     <argLine>${tycho.argline}
                         -DbuildingWithTycho=true -Dosgi.locking=none
                         -Dds.showtrace=true -Djava.io.tmpdir=/tmp
-                        -Dorg.osgi.framework.storage=/tmp/osgi/framework_storage
+                        -Dosgi.configuration.area=/tmp/osgi/framework_storage
                         -Dosgi.clean=true
                         -Dorg.eclipse.kura.mode=emulator
                         -Dkura.snapshots=${project.basedir}/target/

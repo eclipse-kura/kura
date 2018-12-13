@@ -128,7 +128,7 @@
                     <parallel>both</parallel>
 		    -->
                     <useUnlimitedThreads>true</useUnlimitedThreads>
-                    <argLine>${tycho.argline} -Dds.showtrace=true -Dorg.osgi.framework.storage=/tmp/osgi/framework_storage -Dosgi.clean=true -Deurotech.framework.mode=emulator -Dkura.configuration=file:../org.eclipse.kura.emulator/src/main/resources/kura.properties -Ddpa.configuration=/tmp/kura/dpa.properties</argLine>
+                    <argLine>${tycho.argline} -Dds.showtrace=true -Dosgi.configuration.area=/tmp/osgi/framework_storage -Dosgi.clean=true -Deurotech.framework.mode=emulator -Dkura.configuration=file:../org.eclipse.kura.emulator/src/main/resources/kura.properties -Ddpa.configuration=/tmp/kura/dpa.properties</argLine>
                     <!-- This can be uncommented to debug the test in the event of a failure by telneting to port 5002 and seeing the state of the OSGi runtime 		    
                     <appArgLine>-consoleLog -console 5002 -noExit</appArgLine>
             -->
@@ -233,11 +233,7 @@
                             <level>4</level>
                             <autoStart>true</autoStart>
                         </bundle>
-                        <bundle>
-                            <id>osgi.cmpn</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
+                        
                         <bundle>
                             <id>org.eclipse.equinox.launcher</id>
                             <level>4</level>
@@ -419,10 +415,7 @@
                             <type>p2-installable-unit</type>
                             <artifactId>org.hamcrest.core</artifactId>
                         </dependency>
-                        <dependency>
-                            <type>p2-installable-unit</type>
-                            <artifactId>osgi.cmpn</artifactId>
-                        </dependency>
+                        
                         <dependency>
                             <type>p2-installable-unit</type>
                             <artifactId>org.eclipse.equinox.launcher</artifactId>

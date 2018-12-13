@@ -43,7 +43,7 @@ Copyright (c) 2017, 2018 Eurotech and/or its affiliates and others
                         -Dosgi.locking=none
                         -Dds.showtrace=true
                         -Djava.io.tmpdir=/tmp
-                        -Dorg.osgi.framework.storage=/tmp/osgi/framework_storage
+                        -Dosgi.configuration.area=/tmp/osgi/framework_storage
                         -Dosgi.clean=true
                         -Dorg.eclipse.kura.mode=emulator
                         -Dkura.snapshots=${project.basedir}/target/
@@ -120,11 +120,7 @@ Copyright (c) 2017, 2018 Eurotech and/or its affiliates and others
                             <level>4</level>
                             <autoStart>true</autoStart>
                         </bundle>
-                        <bundle>
-                            <id>osgi.cmpn</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
+                        
                         <bundle>
                             <id>org.eclipse.equinox.launcher</id>
                             <level>4</level>
@@ -266,10 +262,7 @@ Copyright (c) 2017, 2018 Eurotech and/or its affiliates and others
                             <type>p2-installable-unit</type>
                             <artifactId>org.hamcrest.core</artifactId>
                         </dependency>
-                        <dependency>
-                            <type>p2-installable-unit</type>
-                            <artifactId>osgi.cmpn</artifactId>
-                        </dependency>
+                        
                         <dependency>
                             <type>p2-installable-unit</type>
                             <artifactId>org.eclipse.equinox.launcher</artifactId>

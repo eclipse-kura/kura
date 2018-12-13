@@ -11,7 +11,7 @@ package org.eclipse.kura.core.data;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
@@ -346,7 +346,7 @@ public class DataServiceImplTest {
         verify(wsMock, times(1)).unregisterCriticalComponent(svc);
         verify(wsMock, times(1)).registerCriticalComponent(svc);
         verify(ccssMock, times(1)).updateStatus(svc, CloudConnectionStatusEnum.SLOW_BLINKING);
-        verify(cmeMock, times(1)).scheduleAtFixedRate(anyObject(), anyInt(), eq(10L), eq(TimeUnit.SECONDS));
+        verify(cmeMock, times(1)).scheduleAtFixedRate(anyObject(), anyLong(), eq(10L), eq(TimeUnit.SECONDS));
 
         // future is reset to scheduler result (null)
         assertNull(TestUtil.getFieldValue(svc, "connectionMonitorFuture"));

@@ -90,8 +90,8 @@ The following steps should be performed on the device, this guide is based on Ku
     ```
     sudo mkdir /opt/eclipse/kura/security
     cd /opt/eclipse/kura/security
-    curl https://www.symantec.com/content/en/us/enterprise/verisign/roots/VeriSign-Class%203-Public-Primary-Certification-Authority-G5.pem > /tmp/root-CA.pem
-    sudo keytool -import -trustcacerts -alias verisign -file /tmp/root-CA.pem -keystore cacerts.ks -storepass changeit
+    curl https://www.amazontrust.com/repository/AmazonRootCA1.pem > /tmp/root-CA.pem
+    sudo keytool -import -trustcacerts -alias aws -file /tmp/root-CA.pem -keystore cacerts.ks -storepass changeit
     ```
 
     If the last command reports that the certificate already exist in the system-wide store type `yes` to proceed.

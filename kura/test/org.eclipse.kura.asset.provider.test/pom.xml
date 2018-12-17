@@ -120,7 +120,11 @@
                             <level>4</level>
                             <autoStart>true</autoStart>
                         </bundle>
-                        
+                        <bundle>
+                            <id>org.eclipse.equinox.launcher</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
                         <bundle>
                             <id>slf4j.api</id>
                             <level>4</level>

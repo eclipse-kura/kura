@@ -43,7 +43,16 @@
 					<archive>
 						<manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
 						<manifestEntries>
-							<Export-Package>sun.misc, com.sun, com.sun.source.tree, com.sun.source.util, com.sun.tools, com.sun.tools.javac.code, com.sun.tools.javac.tree, com.sun.tools.javac.util</Export-Package>
+							<Export-Package>
+                                sun.misc,
+                                com.sun,
+                                com.sun.source.tree,
+                                com.sun.source.util,
+                                com.sun.tools,
+                                com.sun.tools.javac.code,
+                                com.sun.tools.javac.tree,
+                                com.sun.tools.javac.util
+                             </Export-Package>
 						</manifestEntries>
 					</archive>
 				</configuration>

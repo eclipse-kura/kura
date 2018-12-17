@@ -92,7 +92,7 @@ public final class AssetTest {
         // Wait for OSGi dependencies
         logger.info("Setting Up The Testcase....");
         try {
-            boolean ok = dependencyLatch.await(0, TimeUnit.SECONDS);
+            boolean ok = dependencyLatch.await(10, TimeUnit.SECONDS);
             assertTrue("Dependencies should be OK", ok);
         } catch (final InterruptedException e) {
             Thread.currentThread().interrupt();

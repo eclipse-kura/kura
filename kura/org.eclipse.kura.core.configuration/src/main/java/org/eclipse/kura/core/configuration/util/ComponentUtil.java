@@ -17,9 +17,15 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.MissingResourceException;
+import java.util.PropertyResourceBundle;
+import java.util.ResourceBundle;
 
 import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLStreamException;
@@ -32,6 +38,7 @@ import org.eclipse.kura.configuration.metatype.Designate;
 import org.eclipse.kura.configuration.metatype.MetaData;
 import org.eclipse.kura.configuration.metatype.OCD;
 import org.eclipse.kura.configuration.metatype.Scalar;
+import org.eclipse.kura.core.configuration.metatype.Tad;
 import org.eclipse.kura.core.configuration.metatype.Tmetadata;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
 import org.eclipse.kura.core.util.IOUtil;
@@ -40,6 +47,7 @@ import org.eclipse.kura.marshalling.Unmarshaller;
 import org.eclipse.kura.util.service.ServiceUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
@@ -56,6 +64,11 @@ import org.slf4j.LoggerFactory;
 public class ComponentUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(ComponentUtil.class);
+
+    private static final char LOCALE_SEP = '_';
+    private static final String RESOURCE_FILE_EXT = ".properties";
+    private static final char DIRECTORY_SEP = '/';
+    private static final char KEY_SIGN = '%';
 
     /**
      * Returns a Map with all the MetaType Object Class Definitions contained in the bundle.
@@ -187,20 +200,23 @@ public class ComponentUtil {
      * @return
      */
     public static ObjectClassDefinition getObjectClassDefinition(BundleContext ctx, String pid) {
-        //
+
         ServiceReference<MetaTypeService> ref = ctx.getServiceReference(MetaTypeService.class);
         MetaTypeService metaTypeService = ctx.getService(ref);
-        MetaTypeInformation mti = metaTypeService.getMetaTypeInformation(ctx.getBundle());
 
-        ObjectClassDefinition ocd = null;
-        try {
-            if (mti != null) {
-                ocd = mti.getObjectClassDefinition(pid, null); // default locale
+        for (Bundle bundle : ctx.getBundles()) {
+            MetaTypeInformation mti = metaTypeService.getMetaTypeInformation(bundle);
+            if (mti == null) {
+                continue;
             }
-        } catch (IllegalArgumentException iae) {
-            // ignore: OCD for the specified pid is not found
+            String[] pids = mti.getPids();
+            for (String cPid : pids) {
+                if (cPid.equals(pid)) {
+                    return mti.getObjectClassDefinition(cPid, null);
+                }
+            }
         }
-        return ocd;
+        return null;
     }
 
     /**
@@ -211,7 +227,7 @@ public class ComponentUtil {
      *
      * @param ctx
      * @param pid
-     *            ID of the service whose OCD should be loaded
+     *                ID of the service whose OCD should be loaded
      * @return
      * @throws IOException
      * @throws XMLStreamException
@@ -228,7 +244,140 @@ public class ComponentUtil {
         if (metatypeXml != null) {
             metaData = unmarshal(metatypeXml, Tmetadata.class);
         }
+        if (metaData != null) {
+            String locale = System.getProperty("osgi.nl");
+            ResourceBundle rb = getResourceBundle(metaData.getLocalization(), locale, bundle);
+            List<OCD> ocds = metaData.getOCD();
+            for (OCD ocd : ocds) {
+                Tocd tocd = (Tocd) ocd;
+                tocd.setName(getLocalized(rb, tocd.getName()));
+                tocd.setDescription(getLocalized(rb, tocd.getDescription()));
+                List<AD> ads = tocd.getAD();
+                for (AD ad : ads) {
+                    Tad tad = (Tad) ad;
+                    tad.setName(getLocalized(rb, tad.getName()));
+                    tad.setDescription(getLocalized(rb, tad.getDescription()));
+                }
+            }
+
+        }
         return metaData;
+    }
+
+    private static ResourceBundle getResourceBundle(String localization, String locale, final Bundle bundle) {
+
+        String resourceBase = (localization == null ? Constants.BUNDLE_LOCALIZATION_DEFAULT_BASENAME : localization);
+
+        String[] searchCandidates = new String[7];
+
+        if (locale != null && locale.length() > 0) {
+            int idx1_first = locale.indexOf(LOCALE_SEP);
+            if (idx1_first == -1) {
+                searchCandidates[2] = LOCALE_SEP + locale;
+            } else {
+                searchCandidates[2] = LOCALE_SEP + locale.substring(0, idx1_first);
+                int idx1_second = locale.indexOf(LOCALE_SEP, idx1_first + 1);
+                if (idx1_second == -1) {
+                    searchCandidates[1] = LOCALE_SEP + locale;
+                } else {
+                    searchCandidates[1] = LOCALE_SEP + locale.substring(0, idx1_second);
+                    searchCandidates[0] = LOCALE_SEP + locale;
+                }
+            }
+        }
+
+        String defaultLocale = Locale.getDefault().toString();
+        int idx2_first = defaultLocale.indexOf(LOCALE_SEP);
+        int idx2_second = defaultLocale.indexOf(LOCALE_SEP, idx2_first + 1);
+        if (idx2_second != -1) {
+            searchCandidates[3] = LOCALE_SEP + defaultLocale;
+            if (searchCandidates[3].equalsIgnoreCase(searchCandidates[0])) {
+                searchCandidates[3] = null;
+            }
+        }
+        if ((idx2_first != -1) && (idx2_second != idx2_first + 1)) {
+            searchCandidates[4] = LOCALE_SEP
+                    + ((idx2_second == -1) ? defaultLocale : defaultLocale.substring(0, idx2_second));
+            if (searchCandidates[4].equalsIgnoreCase(searchCandidates[1])) {
+                searchCandidates[4] = null;
+            }
+        }
+        if ((idx2_first == -1) && (defaultLocale.length() > 0)) {
+            searchCandidates[5] = LOCALE_SEP + defaultLocale;
+        } else if (idx2_first > 0) {
+            searchCandidates[5] = LOCALE_SEP + defaultLocale.substring(0, idx2_first);
+        }
+        if (searchCandidates[5] != null && searchCandidates[5].equalsIgnoreCase(searchCandidates[2])) {
+            searchCandidates[5] = null;
+        }
+
+        searchCandidates[6] = "";
+
+        URL resourceUrl = null;
+        URL[] urls = null;
+
+        for (int idx = 0; (idx < searchCandidates.length) && (resourceUrl == null); idx++) {
+            urls = (searchCandidates[idx] == null ? null
+                    : findEntries(bundle, resourceBase + searchCandidates[idx] + RESOURCE_FILE_EXT));
+            if (urls != null && urls.length > 0)
+                resourceUrl = urls[0];
+        }
+
+        if (resourceUrl != null) {
+            try {
+                return new PropertyResourceBundle(resourceUrl.openStream());
+            } catch (IOException ioe) {
+                // Exception when creating PropertyResourceBundle object.
+            }
+        }
+        return null;
+    }
+
+    private static URL[] findEntries(Bundle bundle, String path) {
+        String directory = "/";
+        String file = "*";
+        int index = path.lastIndexOf(DIRECTORY_SEP);
+        switch (index) {
+        case -1:
+            file = path;
+            break;
+        case 0:
+            if (path.length() > 1)
+                file = path.substring(1);
+            break;
+        default:
+            directory = path.substring(0, index);
+            file = path.substring(index + 1);
+        }
+        Enumeration<URL> entries = bundle.findEntries(directory, file, false);
+        if (entries == null)
+            return null;
+        List<URL> list = Collections.list(entries);
+        return list.toArray(new URL[list.size()]);
+    }
+
+    private static String getLocalized(ResourceBundle rb, String key) {
+
+        if (key == null) {
+            return null;
+        }
+
+        if ((key.charAt(0) == KEY_SIGN) && (key.length() > 1)) {
+            if (rb != null) {
+                try {
+                    String transfered = rb.getString(key.substring(1));
+                    if (transfered != null) {
+                        return transfered;
+                    }
+                } catch (MissingResourceException mre) {
+                    // Nothing found for this key.
+                }
+            }
+            // If no localization file available or no localized value found
+            // for the key, then return the raw data without the key-sign.
+            return key.substring(1);
+        }
+        return key;
     }
 
     /**
@@ -238,7 +387,7 @@ public class ComponentUtil {
      * contain any extra post-processing of the loaded information.
      *
      * @param resourceUrl
-     *            Url of the MetaData XML file which needs to be loaded
+     *                        Url of the MetaData XML file which needs to be loaded
      * @return
      * @throws IOException
      * @throws XMLStreamException
@@ -266,7 +415,7 @@ public class ComponentUtil {
      * contain any extra post-processing of the loaded information.
      *
      * @param pid
-     *            ID of the service whose OCD should be loaded
+     *                ID of the service whose OCD should be loaded
      * @return
      * @throws IOException
      * @throws XMLStreamException
@@ -299,7 +448,7 @@ public class ComponentUtil {
      *
      * @param ctx
      * @param pid
-     *            ID of the service whose OCD should be loaded
+     *                ID of the service whose OCD should be loaded
      * @return
      * @throws IOException
      * @throws XMLStreamException

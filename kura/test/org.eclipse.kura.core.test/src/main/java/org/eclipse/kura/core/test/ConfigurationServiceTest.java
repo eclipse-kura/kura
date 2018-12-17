@@ -222,7 +222,7 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
             assertFalse("Configuration update should have failed", false);
         } catch (KuraException e) {
             assertTrue("Configuration update has failed as expected", true);
-            assertEquals(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID, e.getCode());
+            assertEquals(KuraErrorCode.PARTIAL_SUCCESS, e.getCode());
         }
 
         // test a negative update flow

@@ -1488,7 +1488,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
             // load the ocd to do the validation
             BundleContext ctx = this.ctx.getBundleContext();
-            // FIXME: why the returned ocd is always null?
+            // why the returned ocd is always null? --- Fixed in issue 2240 by heyoulin
             ObjectClassDefinition ocd = ComponentUtil.getObjectClassDefinition(ctx, this.servicePidByPid.get(pid));
 
             // Validate the properties to be applied and set them
@@ -1660,7 +1660,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
      * Convert property value to string
      *
      * @param value
-     *            the input value
+     *                  the input value
      * @return the string property value, or {@code null}
      */
     private static String makeString(Object value) {

@@ -39,7 +39,7 @@ public class OpcUaChannelDescriptorTest {
         List<Tad> description = (List<Tad>) descriptor.getDescriptor();
 
         assertNotNull(description);
-        assertEquals(8, description.size());
+        assertEquals(9, description.size());
 
         assertEquals(NODE_ID, description.get(0).getName());
         assertEquals(NODE_NAMESPACE_INDEX, description.get(1).getName());

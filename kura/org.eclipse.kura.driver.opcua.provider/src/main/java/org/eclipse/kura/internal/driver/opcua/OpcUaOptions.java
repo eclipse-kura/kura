@@ -141,6 +141,8 @@ final class OpcUaOptions {
 
     private static final String FORCE_ENDPOINT_URL = "force.endpoint.url";
 
+    private static final String SUBTREE_SUBSCRIPTION_CHANNEL_NAME_FORMAT = "subtree.subscription.name.format";
+
     /** The Crypto Service dependency. */
     private final CryptoService cryptoService;
 
@@ -444,5 +446,13 @@ final class OpcUaOptions {
         }
 
         return certificateManager;
+    }
+
+    ChannelNameFormat getSubtreeSubscriptionChannelNameFormat() {
+        try {
+            return ChannelNameFormat.valueOf((String) this.properties.get(SUBTREE_SUBSCRIPTION_CHANNEL_NAME_FORMAT));
+        } catch (final Exception e) {
+            return ChannelNameFormat.BROWSE_PATH;
+        }
     }
 }

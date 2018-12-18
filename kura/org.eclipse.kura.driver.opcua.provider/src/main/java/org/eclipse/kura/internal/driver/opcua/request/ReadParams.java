@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2019 Eurotech and/or its affiliates and others
  *
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
@@ -24,6 +24,10 @@ import org.eclipse.milo.opcua.stack.core.types.structured.ReadValueId;
 public class ReadParams {
 
     private final ReadValueId readValueId;
+
+    public ReadParams(final ReadValueId readValueId) {
+        this.readValueId = readValueId;
+    }
 
     public ReadParams(final Map<String, Object> channelConfig) {
         final int nodeNamespaceIndex = Utils.tryExtract(channelConfig, OpcUaChannelDescriptor::getNodeNamespaceIndex,

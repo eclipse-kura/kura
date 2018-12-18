@@ -185,6 +185,19 @@
 			required="true" 
 			default="200"
 			description="Maximum number of items that will be included in a single request to the server." />
+			
+		<AD id="subtree.subscription.name.format" 
+			name="Subtree subscription events channel name format"
+			type="String" 
+			cardinality="0" 
+			required="true" 
+			default="BROWSE_PATH"
+			description="The format to be used for channel name for subtree subscriptions. 
+			If set to BROWSE_PATH, the channel name will contain the browse path of the source node relative to the subscription root. 
+			If set to NODE_ID, the name will contain the node id of the source node.">
+			<Option label="BROWSE_PATH" value="BROWSE_PATH" />
+			<Option label="NODE_ID" value="NODE_ID" />
+		</AD>
         
     </OCD>
     

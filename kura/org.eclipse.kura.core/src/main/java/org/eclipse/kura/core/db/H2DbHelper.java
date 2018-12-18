@@ -63,6 +63,6 @@ public class H2DbHelper {
     
  	
 	protected void deactivate() {
-		stopDefaultDbServiceInstance();
+		//stopDefaultDbServiceInstance();
 	}
 }

@@ -87,6 +87,8 @@ import org.slf4j.LoggerFactory;
  */
 public class ConfigurationServiceImpl implements ConfigurationService, OCDService {
 
+    private static final String OSGI_CLEAN_PROPERTY = "osgi.clean";
+
     private static final Logger logger = LoggerFactory.getLogger(ConfigurationServiceImpl.class);
 
     private ComponentContext ctx;
@@ -209,11 +211,27 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         this.ctx = componentContext;
         this.bundleContext = componentContext.getBundleContext();
 
-        // Load the latest snapshot and push it to ConfigurationAdmin
+        boolean cleanStart = Boolean.parseBoolean(this.systemService.getProperties().getProperty(OSGI_CLEAN_PROPERTY))
+                || Boolean.parseBoolean(this.bundleContext.getProperty(OSGI_CLEAN_PROPERTY));
+
         try {
-            loadLatestSnapshotInConfigAdmin();
+            Configuration[] configAdminPersistedConfigs = this.configurationAdmin.listConfigurations(null);
+            if (configAdminPersistedConfigs.length != 0 && !cleanStart) {
+                cleanStart = false;
+            }
         } catch (Exception e) {
-            throw new ComponentException("Error loading latest snapshot", e);
+            logger.error("Failed to list configs from ConfigAdmin or ConfigAdmin is empty. Starting clean.");
+            cleanStart = true;
+        }
+
+        logger.info("cleanStart?: {}", cleanStart);
+        // Load the latest snapshot and push it to ConfigurationAdmin
+        if (cleanStart) {
+            try {
+                loadLatestSnapshotInConfigAdmin();
+            } catch (Exception e) {
+                throw new ComponentException("Error loading latest snapshot", e);
+            }
         }
 
         this.bundleTracker = new ComponentMetaTypeBundleTracker(this.ctx.getBundleContext(), this);
@@ -818,7 +836,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
                     configs.add(cc);
                 }
             } catch (Exception e) {
-                logger.error("Error getting configuration for component " + pid, e);
+                logger.error("Error getting configuration for component {}", pid, e);
                 throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, e,
                         "Error getting configuration for component " + pid);
             }

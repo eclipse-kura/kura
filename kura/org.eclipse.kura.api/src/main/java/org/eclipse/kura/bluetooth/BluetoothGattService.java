@@ -14,12 +14,17 @@ package org.eclipse.kura.bluetooth;
 import java.util.List;
 import java.util.UUID;
 
+import org.eclipse.kura.bluetooth.le.BluetoothLeGattService;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * @noimplement This interface is not intended to be implemented by clients.
+ * 
+ * @deprecated This class is deprecated in favor of {@link BluetoothLeGattService}
+ * 
  */
 @ProviderType
+@Deprecated
 public interface BluetoothGattService {
 
     /*

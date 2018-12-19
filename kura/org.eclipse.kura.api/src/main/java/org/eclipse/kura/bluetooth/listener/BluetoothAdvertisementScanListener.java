@@ -17,8 +17,11 @@ import org.osgi.annotation.versioning.ConsumerType;
  * BluetoothAdvertisementScanListener must be implemented by any class
  * wishing to receive BLE advertisement data
  *
+ * @deprecated
+ * 
  */
 @ConsumerType
+@Deprecated
 public interface BluetoothAdvertisementScanListener {
 
     /**

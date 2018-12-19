@@ -18,8 +18,11 @@ import org.osgi.annotation.versioning.ConsumerType;
  * wishing to receive notifications on Bluetooth Beacon
  * command results.
  *
+ * @deprecated
+ * 
  */
 @ConsumerType
+@Deprecated
 public interface BluetoothBeaconCommandListener {
 
     /**

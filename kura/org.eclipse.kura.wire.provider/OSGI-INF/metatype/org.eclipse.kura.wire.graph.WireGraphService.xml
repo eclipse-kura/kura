@@ -15,7 +15,7 @@
         <AD id="WireGraph"
             name="WireGraph"
             type="String"
-            cardinality="0"
+            cardinality="65535"
             required="true"
             default="{&quot;components&quot;:[]\,&quot;wires&quot;:[]}"
             description="The default wire graph JSON">

@@ -120,7 +120,6 @@
                             <level>4</level>
                             <autoStart>true</autoStart>
                         </bundle>
-                        
                         <bundle>
                             <id>org.eclipse.equinox.launcher</id>
                             <level>4</level>
@@ -271,7 +270,6 @@
                             <type>p2-installable-unit</type>
                             <artifactId>org.hamcrest.core</artifactId>
                         </dependency>
-                        
                         <dependency>
                             <type>p2-installable-unit</type>
                             <artifactId>org.eclipse.equinox.launcher</artifactId>

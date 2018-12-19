@@ -61,7 +61,10 @@
                                     <artifactId>monitoradmin</artifactId>
                                     <version>${org.knowhowlab.osgi.monitoradmin.version}</version>
                                 </artifactItem>
+<<<<<<< HEAD
                                 
+=======
+>>>>>>> branch 'develop' of https://github.com/eclipse/kura.git
                                 <artifactItem>
                                     <groupId>org.eclipse.jetty</groupId>
                                     <artifactId>jetty-http</artifactId>

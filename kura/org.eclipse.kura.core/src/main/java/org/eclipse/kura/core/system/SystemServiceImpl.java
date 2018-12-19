@@ -54,6 +54,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
     private static final String CLOUDBEES_SECURITY_SETTINGS_PATH = "/private/eurotech/settings-security.xml";
     private static final String KURA_PATH = "/opt/eclipse/kura";
+    private static final String OS_WINDOWS = "windows";
 
     private static boolean onCloudbees = false;
 
@@ -559,7 +560,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
                     ProcessUtil.destroy(proc);
                 }
             }
-        } else if (getOsName().contains("Windows")) {
+        } else if (getOsName().toLowerCase().startsWith(OS_WINDOWS)) {
             try {
                 logger.info("executing: InetAddress.getLocalHost {}", primaryNetworkInterfaceName);
                 ip = InetAddress.getLocalHost();
@@ -638,7 +639,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
                 return "en0";
             } else if (OS_LINUX.equals(getOsName())) {
                 return "eth0";
-            } else if (getOsName().contains("Windows")) {
+            } else if (getOsName().toLowerCase().startsWith(OS_WINDOWS)) {
                 return "windows";
             } else {
                 logger.error("Unsupported platform");
@@ -958,7 +959,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             if (biosTmp.contains(": ")) {
                 biosVersion = biosTmp.split(":\\s+")[1];
             }
-        } else if (getOsName().contains("Windows")) {
+        } else if (getOsName().toLowerCase().startsWith(OS_WINDOWS)) {
             String[] cmds = { "wmic", "bios", "get", "smbiosbiosversion" };
             String biosTmp = runSystemCommand(cmds);
             if (biosTmp.contains("SMBIOSBIOSVersion")) {
@@ -983,7 +984,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             if (displayTmp.length() > 0) {
                 deviceName = displayTmp;
             }
-        } else if (OS_LINUX.equals(getOsName()) || OS_CLOUDBEES.equals(getOsName())) {
+        } else if (OS_LINUX.equals(getOsName()) || OS_CLOUDBEES.equals(getOsName()) || getOsName().toLowerCase().startsWith(OS_WINDOWS)) {
             String displayTmp = runSystemCommand("hostname");
             if (displayTmp.length() > 0) {
                 deviceName = displayTmp;
@@ -1031,6 +1032,13 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             if (modelTmp.contains("Version: ")) {
                 modelId = modelTmp.split("Version:\\s+")[1].split("\n")[0];
             }
+        } else if (getOsName().toLowerCase().startsWith(OS_WINDOWS)) {
+            String[] cmds = { "wmic", "baseboard", "get", "Version" };
+            String biosTmp = runSystemCommand(cmds);
+            if (biosTmp.contains("Version")) {
+                modelId = biosTmp.split("Version\\s+")[1];
+                modelId = modelId.trim();
+            }
         }
 
         return modelId;
@@ -1055,6 +1063,13 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             String modelTmp = runSystemCommand("dmidecode -t system");
             if (modelTmp.contains("Product Name: ")) {
                 modelName = modelTmp.split("Product Name:\\s+")[1].split("\n")[0];
+            }
+        } else if (getOsName().toLowerCase().startsWith(OS_WINDOWS)) {
+            String[] cmds = { "wmic", "baseboard", "get", "Product" };
+            String biosTmp = runSystemCommand(cmds);
+            if (biosTmp.contains("Product")) {
+                modelName = biosTmp.split("Product\\s+")[1];
+                modelName = modelName.trim();
             }
         }
 
@@ -1099,6 +1114,13 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             String serialTmp = runSystemCommand("dmidecode -t system");
             if (serialTmp.contains("Serial Number: ")) {
                 serialNum = serialTmp.split("Serial Number:\\s+")[1].split("\n")[0];
+            }
+        } else if (getOsName().toLowerCase().startsWith(OS_WINDOWS)) {
+            String[] cmds = { "wmic", "bios", "get", "SerialNumber" };
+            String biosTmp = runSystemCommand(cmds);
+            if (biosTmp.contains("SerialNumber")) {
+                serialNum = biosTmp.split("SerialNumber\\s+")[1];
+                serialNum = serialNum.trim();
             }
         }
 
@@ -1173,7 +1195,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
         if (OS_MAC_OSX.equals(getOsName())) {
             hostname = runSystemCommand("scutil --get ComputerName");
-        } else if (OS_LINUX.equals(getOsName()) || OS_CLOUDBEES.equals(getOsName())) {
+        } else if (OS_LINUX.equals(getOsName()) || OS_CLOUDBEES.equals(getOsName()) || getOsName().toLowerCase().startsWith(OS_WINDOWS)) {
             hostname = runSystemCommand("hostname");
         }
 

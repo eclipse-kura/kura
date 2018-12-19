@@ -17,8 +17,11 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -27,6 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.web.server.util.ServiceLocator;
+import org.eclipse.kura.web.shared.GwtKuraException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,128 +40,69 @@ public class SkinServlet extends HttpServlet {
 
     private static Logger logger = LoggerFactory.getLogger(SkinServlet.class);
 
-    private static final Pattern filenamePattern = Pattern.compile("^[\\w,\\s-]+\\.[A-Za-z]+$");
-
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
         String resourceName = request.getPathInfo();
+
+        File fResourceFile;
+        try {
+            fResourceFile = checkFile(resourceName);
+        } catch (GwtKuraException | IOException e1) {
+            return;
+        }
+
         if (resourceName.endsWith(".css")) {
             response.setContentType("text/css");
-            streamText(resourceName, response.getWriter());
+            streamText(fResourceFile, response);
         } else if (resourceName.endsWith(".js")) {
             response.setContentType("text/javascript");
-            streamText(resourceName, response.getWriter());
+            streamText(fResourceFile, response);
         } else if (resourceName.endsWith(".jpg") || resourceName.endsWith(".png")) {
             response.setContentType("image/png");
-            streamBinary(resourceName, response.getOutputStream());
+            streamBinary(fResourceFile, response);
         }
 
     }
 
-    private void streamText(String resourceName, PrintWriter w) throws ServletException, IOException {
-        FileReader fr = null;
-
-        try {
-            // check to see if we have an external resource directory configured
-            SystemService systemService = ServiceLocator.getInstance().getService(SystemService.class);
-
-            File fResourceDir = checkDir(systemService.getKuraStyleDirectory());
-            if (fResourceDir == null) {
-                return;
-            }
-
-            File fResourceFile = checkFile(fResourceDir, resourceName);
-            if (fResourceFile == null) {
-                return;
-            }
-
-            // write the requested resource
-            fr = new FileReader(fResourceFile);
+    private void streamText(File fResourceFile, HttpServletResponse response) {
+        try (FileReader fr = new FileReader(fResourceFile); PrintWriter w = response.getWriter();) {
             char[] buffer = new char[1024];
             int iRead = fr.read(buffer);
             while (iRead != -1) {
                 w.write(buffer, 0, iRead);
                 iRead = fr.read(buffer);
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
             logger.error("Error loading skin resource", e);
-        } finally {
-            if (fr != null) {
-                fr.close();
-            }
-            if (w != null) {
-                w.close();
-            }
         }
-
     }
 
-    private void streamBinary(String resourceName, OutputStream o) throws ServletException, IOException {
-        FileInputStream in = null;
-
-        try {
-            // check to see if we have an external resource directory configured
-            SystemService systemService = ServiceLocator.getInstance().getService(SystemService.class);
-
-            File fResourceDir = checkDir(systemService.getKuraStyleDirectory());
-            if (fResourceDir == null) {
-                return;
-            }
-
-            File fResourceFile = checkFile(fResourceDir, resourceName);
-            if (fResourceFile == null) {
-                return;
-            }
-
-            // write the requested resource
-            in = new FileInputStream(fResourceFile);
+    private void streamBinary(File fResourceFile, HttpServletResponse response) {
+        try (FileInputStream in = new FileInputStream(fResourceFile); OutputStream o = response.getOutputStream();) {
             byte[] buf = new byte[1024];
             int len = 0;
             while ((len = in.read(buf)) >= 0) {
                 o.write(buf, 0, len);
             }
 
-        } catch (Exception e) {
+        } catch (IOException e) {
             logger.error("Error loading skin resource", e);
-        } finally {
-            if (in != null) {
-                in.close();
+        }
+    }
+
+    private File checkFile(String resourceName) throws GwtKuraException, IOException {
+        SystemService systemService = ServiceLocator.getInstance().getService(SystemService.class);
+
+        try (Stream<Path> kuraStyleDirStream = Files.list(Paths.get(systemService.getKuraStyleDirectory()));) {
+            Optional<Path> fResourcePath = kuraStyleDirStream.filter(filePath -> filePath.toFile().isFile())
+                    .filter(filePath -> filePath.toFile().getAbsolutePath().endsWith(resourceName)).findFirst();
+
+            if (!fResourcePath.isPresent()) {
+                logger.warn("Resource File {} does not exist", resourceName);
+                throw new IOException("Resource File " + resourceName + " does not exist");
             }
-            if (o != null) {
-                o.close();
-            }
-        }
 
+            return fResourcePath.get().toFile();
+        }
     }
-
-    private File checkDir(String resourceDir) {
-        if (resourceDir == null || resourceDir.trim().length() == 0) {
-            return null;
-        }
-
-        File fResourceDir = new File(resourceDir);
-        if (!fResourceDir.exists()) {
-            logger.warn("Resource Directory {} does not exist", fResourceDir.getAbsolutePath());
-            return null;
-        }
-        return fResourceDir;
-    }
-
-    private File checkFile(File resourceDir, String resourceName) {
-        Matcher fileMatcher = filenamePattern.matcher(resourceName);
-
-        if (!fileMatcher.matches()) {
-            return null;
-        }
-
-        File fResourceFile = new File(resourceDir, resourceName);
-        if (!fResourceFile.exists()) {
-            logger.warn("Resource File {} does not exist", fResourceFile.getAbsolutePath());
-            return null;
-        }
-
-        return fResourceFile;
-    }
-
 }

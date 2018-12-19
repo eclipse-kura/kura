@@ -18,8 +18,12 @@ import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * @noextend This class is not intended to be subclassed by clients.
+ * 
+ * @deprecated
+ * 
  */
 @ProviderType
+@Deprecated
 public class BluetoothAdvertisementData {
 
     private byte[] rawData;

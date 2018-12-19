@@ -72,7 +72,7 @@ public class SystemAdminServiceImpl extends SuperSystemService implements System
         String uptimeStr = UNKNOWN;
         long uptime = 0;
 
-        if (getOsName().toLowerCase().contains(OS_WINDOWS)) {
+        if (getOsName().toLowerCase().startsWith(OS_WINDOWS)) {
             try {
                 String[] lastBootUpTime = runSystemCommand("wmic os get LastBootUpTime ").split("\n");
                 if (lastBootUpTime[0].toLowerCase().startsWith("lastbootuptime")) {
@@ -163,7 +163,7 @@ public class SystemAdminServiceImpl extends SuperSystemService implements System
         String cmd = "";
         if (OS_LINUX.equals(getOsName()) || OS_MAC_OSX.equals(getOsName())) {
             cmd = "reboot";
-        } else if (getOsName().startsWith(OS_WINDOWS)) {
+        } else if (getOsName().toLowerCase().startsWith(OS_WINDOWS)) {
             cmd = "shutdown -r";
         } else {
             s_logger.error("Unsupported OS for reboot()");

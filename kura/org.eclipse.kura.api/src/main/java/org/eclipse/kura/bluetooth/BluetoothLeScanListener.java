@@ -20,8 +20,11 @@ import org.osgi.annotation.versioning.ConsumerType;
  * wishing to receive notifications on Bluetooth LE
  * scan events.
  *
+ * @deprecated
+ * 
  */
 @ConsumerType
+@Deprecated
 public interface BluetoothLeScanListener {
 
     /**

@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.eclipse.kura.bluetooth;
 
+import org.eclipse.kura.bluetooth.le.BluetoothLeService;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -18,8 +19,12 @@ import org.osgi.annotation.versioning.ProviderType;
  * Bluetooth and Bluetooth LE devices.
  *
  * @noimplement This interface is not intended to be implemented by clients.
+ * 
+ * @deprecated This class is deprecated in favor of {@link BluetoothLeService}
+ * 
  */
 @ProviderType
+@Deprecated
 public interface BluetoothService {
 
     /**

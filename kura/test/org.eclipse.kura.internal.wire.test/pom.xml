@@ -115,7 +115,6 @@ Copyright (c) 2017 Eurotech and/or its affiliates and others
                             <level>4</level>
                             <autoStart>true</autoStart>
                         </bundle>
-                        
                         <bundle>
                             <id>org.eclipse.equinox.launcher</id>
                             <level>4</level>
@@ -253,7 +252,6 @@ Copyright (c) 2017 Eurotech and/or its affiliates and others
                             <type>p2-installable-unit</type>
                             <artifactId>org.hamcrest.core</artifactId>
                         </dependency>
-                        
                         <dependency>
                             <type>p2-installable-unit</type>
                             <artifactId>org.eclipse.equinox.launcher</artifactId>

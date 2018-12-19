@@ -165,7 +165,10 @@
                             <level>4</level>
                             <autoStart>true</autoStart>
                         </bundle>
+<<<<<<< HEAD
                         
+=======
+>>>>>>> branch 'develop' of https://github.com/eclipse/kura.git
                         <bundle>
                             <id>org.eclipse.equinox.launcher</id>
                             <level>4</level>
@@ -421,7 +424,10 @@
                             <type>p2-installable-unit</type>
                             <artifactId>org.hamcrest.core</artifactId>
                         </dependency>
+<<<<<<< HEAD
                         
+=======
+>>>>>>> branch 'develop' of https://github.com/eclipse/kura.git
                         <dependency>
                             <type>p2-installable-unit</type>
                             <artifactId>org.eclipse.equinox.launcher</artifactId>

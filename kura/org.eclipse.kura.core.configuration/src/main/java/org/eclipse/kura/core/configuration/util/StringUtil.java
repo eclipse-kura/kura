@@ -249,7 +249,7 @@ public class StringUtil {
             result = sb.toString();
         } else if (value instanceof Password[]) {
             StringBuilder sb = new StringBuilder();
-            String[] ss = (String[]) value;
+            Password[] ss = (Password[]) value;
             for (int i = 0; i < ss.length; i++) {
                 if (ss[i] != null) {
                     sb.append(escapeString(ss[i].toString()));

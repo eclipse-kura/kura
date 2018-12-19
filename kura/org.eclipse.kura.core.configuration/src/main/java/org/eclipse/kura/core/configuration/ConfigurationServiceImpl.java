@@ -1488,7 +1488,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
             // load the ocd to do the validation
             BundleContext ctx = this.ctx.getBundleContext();
-            // why the returned ocd is always null? --- Fixed in issue 2240 by heyoulin
+            // FIXME: why the returned ocd is always null?
             ObjectClassDefinition ocd = ComponentUtil.getObjectClassDefinition(ctx, this.servicePidByPid.get(pid));
 
             // Validate the properties to be applied and set them

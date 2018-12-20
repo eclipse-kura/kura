@@ -182,10 +182,6 @@ Copyright (c) 2017 Eurotech and/or its affiliates and others
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>
-                            <artifactId>osgi.cmpn</artifactId>
-                        </dependency>
-                        <dependency>
-                            <type>p2-installable-unit</type>
                             <artifactId>org.eclipse.equinox.launcher</artifactId>
                         </dependency>
                         <dependency>

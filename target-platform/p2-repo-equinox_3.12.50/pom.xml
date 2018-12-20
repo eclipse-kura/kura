@@ -62,11 +62,6 @@
                                     <version>${org.knowhowlab.osgi.monitoradmin.version}</version>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>osgi</groupId>
-                                    <artifactId>osgi.cmpn</artifactId>
-                                    <version>${osgi.cmpn.version}</version>
-                                </artifactItem>
-                                <artifactItem>
                                     <groupId>org.eclipse.jetty</groupId>
                                     <artifactId>jetty-http</artifactId>
                                     <version>${org.eclipse.jetty.http.version}</version>
@@ -201,8 +196,6 @@
                                     tofile="${project.build.directory}/source/plugins/org.apache.felix.deploymentadmin_${org.apache.felix.deploymentadmin.version}.jar" />
                                 <move file="${project.build.directory}/source/plugins/org.knowhowlab.osgi.monitoradmin.jar"
                                     tofile="${project.build.directory}/source/plugins/org.knowhowlab.osgi.monitoradmin_${org.knowhowlab.osgi.monitoradmin.version}.jar" />
-                                <move file="${project.build.directory}/source/plugins/osgi.cmpn.jar"
-                                    tofile="${project.build.directory}/source/plugins/osgi.cmpn_${osgi.cmpn.version}.jar" />
                                 <move file="${project.build.directory}/source/plugins/jetty-http.jar"
                                     tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.http_${org.eclipse.jetty.http.version}.jar" />
                                 <move file="${project.build.directory}/source/plugins/jetty-continuation.jar"

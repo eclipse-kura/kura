@@ -50,7 +50,8 @@ public class SkinServlet extends HttpServlet {
         } catch (GwtKuraException | IOException e1) {
             return;
         }
-
+        if (fResourceFile == null)
+            return;
         if (resourceName.endsWith(".css")) {
             response.setContentType("text/css");
             streamText(fResourceFile, response);
@@ -92,14 +93,16 @@ public class SkinServlet extends HttpServlet {
 
     private File checkFile(String resourceName) throws GwtKuraException, IOException {
         SystemService systemService = ServiceLocator.getInstance().getService(SystemService.class);
-
-        try (Stream<Path> kuraStyleDirStream = Files.list(Paths.get(systemService.getKuraStyleDirectory()));) {
+        String path = systemService.getKuraStyleDirectory();
+        if (path == null)
+            return null;
+        try (Stream<Path> kuraStyleDirStream = Files.list(Paths.get(path));) {
             Optional<Path> fResourcePath = kuraStyleDirStream.filter(filePath -> filePath.toFile().isFile())
                     .filter(filePath -> filePath.toFile().getAbsolutePath().endsWith(resourceName)).findFirst();
 
             if (!fResourcePath.isPresent()) {
-                logger.warn("Resource File {} does not exist", resourceName);
-                throw new IOException("Resource File " + resourceName + " does not exist");
+                logger.warn("Resource File {} does not exist in dir {}", resourceName, path);
+                throw new IOException("Resource File " + resourceName + " does not exist in " + path);
             }
 
             return fResourcePath.get().toFile();

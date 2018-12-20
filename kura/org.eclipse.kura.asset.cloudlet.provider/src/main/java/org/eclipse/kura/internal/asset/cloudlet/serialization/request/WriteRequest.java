@@ -26,8 +26,8 @@ import com.eclipsesource.json.JsonObject;
 
 public class WriteRequest {
 
-    private String assetName;
-    private List<ChannelRecord> channelRecords = new ArrayList<>();
+    private final String assetName;
+    private final List<ChannelRecord> channelRecords = new ArrayList<>();
     private static final Decoder BASE64_DECODER = Base64.getDecoder();
 
     public WriteRequest(JsonObject object) {
@@ -38,16 +38,16 @@ public class WriteRequest {
             final String name = obj.get(SerializationConstants.CHANNEL_NAME_PROPERTY).asString();
             final String type = obj.get(SerializationConstants.CHANNEL_TYPE_PROPERTY).asString();
             final String value = obj.get(SerializationConstants.CHANNEL_VALUE_PROPERTY).asString();
-            channelRecords.add(ChannelRecord.createWriteRecord(name, parseTypedValue(value, type)));
+            this.channelRecords.add(ChannelRecord.createWriteRecord(name, parseTypedValue(value, type)));
         });
     }
 
     public String getAssetName() {
-        return assetName;
+        return this.assetName;
     }
 
     public List<ChannelRecord> getChannelRecords() {
-        return channelRecords;
+        return this.channelRecords;
     }
 
     public static List<WriteRequest> parseAll(JsonArray array) {

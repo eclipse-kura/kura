@@ -22,20 +22,20 @@ public final class Property<T> {
     }
 
     public String getKey() {
-        return key;
+        return this.key;
     }
 
     public T getDefaultValue() {
-        return defaultValue;
+        return this.defaultValue;
     }
 
     @SuppressWarnings("unchecked")
     public T get(final Map<String, Object> properties) {
-        final Object value = properties.get(key);
+        final Object value = properties.get(this.key);
 
-        if (defaultValue.getClass().isInstance(value)) {
+        if (this.defaultValue.getClass().isInstance(value)) {
             return (T) value;
         }
-        return defaultValue;
+        return this.defaultValue;
     }
 }

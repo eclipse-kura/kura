@@ -166,8 +166,7 @@ public class HttpDownloadCountingOutputStream extends GenericDownloadCountingOut
     private void testConnectionProtocol(URLConnection urlConnection) throws IOException, KuraConnectException {
         try {
             if (urlConnection instanceof HttpsURLConnection) {
-                ((HttpsURLConnection) urlConnection)
-                        .setSSLSocketFactory(this.sslManagerService.getSSLSocketFactory());
+                ((HttpsURLConnection) urlConnection).setSSLSocketFactory(this.sslManagerService.getSSLSocketFactory());
             } else if (!(urlConnection instanceof HttpURLConnection)) {
                 postProgressEvent(this.options.getClientId(), getByteCount(), this.totalBytes, DownloadStatus.FAILED,
                         "The request URL is not supported");

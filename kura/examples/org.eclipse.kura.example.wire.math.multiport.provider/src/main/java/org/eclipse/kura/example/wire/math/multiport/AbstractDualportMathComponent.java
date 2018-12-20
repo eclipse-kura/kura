@@ -75,22 +75,22 @@ public abstract class AbstractDualportMathComponent implements WireEmitter, Mult
 
     @Override
     public Object polled(Wire wire) {
-        return wireSupport.polled(wire);
+        return this.wireSupport.polled(wire);
     }
 
     @Override
     public void consumersConnected(Wire[] wires) {
-        wireSupport.consumersConnected(wires);
+        this.wireSupport.consumersConnected(wires);
     }
 
     @Override
     public void updated(Wire wire, Object value) {
-        wireSupport.updated(wire, value);
+        this.wireSupport.updated(wire, value);
     }
 
     @Override
     public void producersConnected(Wire[] wires) {
-        wireSupport.producersConnected(wires);
+        this.wireSupport.producersConnected(wires);
     }
 
     private TypedValue<?> extractOperand(WireEnvelope wireEnvelope, String operandName) {
@@ -121,7 +121,7 @@ public abstract class AbstractDualportMathComponent implements WireEmitter, Mult
         if (firstOperand == null || secondOperand == null) {
             return;
         }
-        final TypedValue<?> result = this.apply(firstOperand, secondOperand);
+        final TypedValue<?> result = apply(firstOperand, secondOperand);
         this.wireSupport.emit(Collections
                 .singletonList(new WireRecord(Collections.singletonMap(this.options.getResultName(), result))));
     }

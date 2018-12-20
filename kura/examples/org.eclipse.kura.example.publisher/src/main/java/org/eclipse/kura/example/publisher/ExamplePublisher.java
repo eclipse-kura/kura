@@ -37,7 +37,8 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ExamplePublisher implements ConfigurableComponent, CloudSubscriberListener, CloudConnectionListener, CloudDeliveryListener {
+public class ExamplePublisher
+        implements ConfigurableComponent, CloudSubscriberListener, CloudConnectionListener, CloudDeliveryListener {
 
     private static final Logger logger = LoggerFactory.getLogger(ExamplePublisher.class);
 

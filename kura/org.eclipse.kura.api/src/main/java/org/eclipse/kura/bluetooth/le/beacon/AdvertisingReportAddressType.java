@@ -15,7 +15,7 @@ package org.eclipse.kura.bluetooth.le.beacon;
  * 0x00 : Public Device Address
  * 0x01 : Random Device Address
  * 0x05 - 0xFF : Reserved for future use
- * 
+ *
  * @since 1.3
  */
 public enum AdvertisingReportAddressType {

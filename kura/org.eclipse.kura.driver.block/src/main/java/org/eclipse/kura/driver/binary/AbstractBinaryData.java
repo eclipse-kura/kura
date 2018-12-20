@@ -38,6 +38,7 @@ public abstract class AbstractBinaryData<T> implements BinaryData<T> {
     /**
      * @return the endianness of the data
      */
+    @Override
     public Endianness getEndianness() {
         return this.endianness;
     }
@@ -45,6 +46,7 @@ public abstract class AbstractBinaryData<T> implements BinaryData<T> {
     /**
      * @return the size of the data
      */
+    @Override
     public int getSize() {
         return this.size;
     }

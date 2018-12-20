@@ -985,7 +985,7 @@ class MultiStepCSValidator implements CSValidator {
 
         if (this.configs == null) { // first pass
             assertTrue("At least one configuration expected",
-                    configurations != null ? (configurations.getConfigurations().size() >= 1) : false);
+                    configurations != null ? configurations.getConfigurations().size() >= 1 : false);
             boolean found = false;
             for (ComponentConfiguration cfg : configurations.getConfigurations()) {
                 if (this.pid.compareTo(cfg.getPid()) == 0) {

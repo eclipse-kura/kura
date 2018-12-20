@@ -85,7 +85,7 @@ public class DriversAndAssetsUi extends Composite implements DriversAndAssetsLis
     @UiField
     AlertDialog confirmDialog;
 
-    private Configurations configurations = new Configurations();
+    private final Configurations configurations = new Configurations();
 
     public DriversAndAssetsUi() {
         initWidget(uiBinder.createAndBindUi(this));
@@ -94,19 +94,19 @@ public class DriversAndAssetsUi extends Composite implements DriversAndAssetsLis
         initNewDriverModal();
         initNewAssetModal();
 
-        this.driverAndAssetsListUi.setConfigurations(configurations);
+        this.driverAndAssetsListUi.setConfigurations(this.configurations);
         this.driverAndAssetsListUi.setListener(this);
     }
 
     public void refresh() {
-        configurations.clear();
+        this.configurations.clear();
         DriversAndAssetsRPC.loadStaticInfo(new DriversAndAssetsRPC.Callback<GwtWireComposerStaticInfo>() {
 
             @Override
             public void onSuccess(GwtWireComposerStaticInfo result) {
-                configurations.setChannelDescriptiors(result.getDriverDescriptors());
-                configurations.setBaseChannelDescriptor(result.getBaseChannelDescriptor());
-                configurations.setComponentDefinitions(result.getComponentDefinitions());
+                DriversAndAssetsUi.this.configurations.setChannelDescriptiors(result.getDriverDescriptors());
+                DriversAndAssetsUi.this.configurations.setBaseChannelDescriptor(result.getBaseChannelDescriptor());
+                DriversAndAssetsUi.this.configurations.setComponentDefinitions(result.getComponentDefinitions());
                 DriversAndAssetsRPC
                         .loadWiresConfiguration(new DriversAndAssetsRPC.Callback<GwtWireGraphConfiguration>() {
 
@@ -120,8 +120,8 @@ public class DriversAndAssetsUi extends Composite implements DriversAndAssetsLis
 
                                 configurationList.addAll(result.getAdditionalConfigurations());
 
-                                configurations.setComponentConfigurations(configurationList);
-                                configurations.setAllActivePids(result.getAllActivePids());
+                                DriversAndAssetsUi.this.configurations.setComponentConfigurations(configurationList);
+                                DriversAndAssetsUi.this.configurations.setAllActivePids(result.getAllActivePids());
 
                                 init();
                             }
@@ -133,12 +133,12 @@ public class DriversAndAssetsUi extends Composite implements DriversAndAssetsLis
     private void init() {
         DriversAndAssetsUi.this.driverFactoriesList.clear();
         DriversAndAssetsUi.this.driverFactoriesList.addItem(SELECT_COMPONENT);
-        for (String driverFactoryPid : configurations.getDriverFactoryPids()) {
+        for (String driverFactoryPid : this.configurations.getDriverFactoryPids()) {
             DriversAndAssetsUi.this.driverFactoriesList.addItem(driverFactoryPid);
         }
 
         clearDirtyState();
-        driverAndAssetsListUi.refresh();
+        this.driverAndAssetsListUi.refresh();
     }
 
     public void clearDirtyState() {
@@ -146,7 +146,7 @@ public class DriversAndAssetsUi extends Composite implements DriversAndAssetsLis
     }
 
     public boolean isDirty() {
-        return driverAndAssetsListUi.isDirty();
+        return this.driverAndAssetsListUi.isDirty();
     }
 
     private void initButtonBar() {
@@ -164,7 +164,8 @@ public class DriversAndAssetsUi extends Composite implements DriversAndAssetsLis
 
             @Override
             public void onClick(ClickEvent event) {
-                DriversAndAssetsUi.this.driverPid.setValue(driverAndAssetsListUi.getSelectedItem().getPid());
+                DriversAndAssetsUi.this.driverPid
+                        .setValue(DriversAndAssetsUi.this.driverAndAssetsListUi.getSelectedItem().getPid());
                 DriversAndAssetsUi.this.newAssetModal.show();
             }
         });
@@ -173,7 +174,7 @@ public class DriversAndAssetsUi extends Composite implements DriversAndAssetsLis
 
             @Override
             public void onClick(ClickEvent event) {
-                final DriverAssetInfo info = driverAndAssetsListUi.getSelectedItem();
+                final DriverAssetInfo info = DriversAndAssetsUi.this.driverAndAssetsListUi.getSelectedItem();
 
                 if (info == null) {
                     return;
@@ -193,24 +194,24 @@ public class DriversAndAssetsUi extends Composite implements DriversAndAssetsLis
 
             @Override
             public void onSuccess(Void result) {
-                configurations.deleteConfiguration(pid);
-                driverAndAssetsListUi.refresh();
+                DriversAndAssetsUi.this.configurations.deleteConfiguration(pid);
+                DriversAndAssetsUi.this.driverAndAssetsListUi.refresh();
             }
         });
     }
 
     private void deleteDriver(final String pid) {
 
-        for (HasConfiguration hasConfiguration : configurations.getConfigurations()) {
+        for (HasConfiguration hasConfiguration : this.configurations.getConfigurations()) {
             final GwtConfigComponent gwtConfig = hasConfiguration.getConfiguration();
             final String driverPid = gwtConfig.getParameterValue(AssetConstants.ASSET_DRIVER_PROP.value());
             if (pid.equals(driverPid)) {
-                confirmDialog.show(MSGS.driversAssetsDeletingDriverWithAssets(), AlertDialog.Severity.ALERT, null);
+                this.confirmDialog.show(MSGS.driversAssetsDeletingDriverWithAssets(), AlertDialog.Severity.ALERT, null);
                 return;
             }
         }
 
-        confirmDialog.show(MSGS.driversAssetsConfirmDeleteDriver(), new AlertDialog.Listener() {
+        this.confirmDialog.show(MSGS.driversAssetsConfirmDeleteDriver(), new AlertDialog.Listener() {
 
             @Override
             public void onConfirm() {
@@ -224,11 +225,11 @@ public class DriversAndAssetsUi extends Composite implements DriversAndAssetsLis
         final GwtConfigComponent gwtConfig = config.getConfiguration();
 
         if (gwtConfig.isWireComponent()) {
-            confirmDialog.show(MSGS.driversAssetsAssetInComposer(), AlertDialog.Severity.ALERT, null);
+            this.confirmDialog.show(MSGS.driversAssetsAssetInComposer(), AlertDialog.Severity.ALERT, null);
             return;
         }
 
-        confirmDialog.show(MSGS.driversAssetsConfirmDeleteAsset(), new AlertDialog.Listener() {
+        this.confirmDialog.show(MSGS.driversAssetsConfirmDeleteAsset(), new AlertDialog.Listener() {
 
             @Override
             public void onConfirm() {
@@ -238,16 +239,16 @@ public class DriversAndAssetsUi extends Composite implements DriversAndAssetsLis
     }
 
     private void createAsset(final String pid, final String driverPid) {
-        final HasConfiguration assetConfig = configurations.createConfiguration(pid, ASSET_FACTORY_PID);
+        final HasConfiguration assetConfig = this.configurations.createConfiguration(pid, ASSET_FACTORY_PID);
         assetConfig.getConfiguration().getParameter(AssetConstants.ASSET_DRIVER_PROP.value()).setValue(driverPid);
         DriversAndAssetsRPC.createFactoryConfiguration(pid, ASSET_FACTORY_PID, assetConfig.getConfiguration(),
                 new DriversAndAssetsRPC.Callback<Void>() {
 
                     @Override
                     public void onSuccess(Void result) {
-                        configurations.setConfiguration(assetConfig.getConfiguration());
-                        newAssetModal.hide();
-                        driverAndAssetsListUi.refresh();
+                        DriversAndAssetsUi.this.configurations.setConfiguration(assetConfig.getConfiguration());
+                        DriversAndAssetsUi.this.newAssetModal.hide();
+                        DriversAndAssetsUi.this.driverAndAssetsListUi.refresh();
                     }
                 });
     }
@@ -263,13 +264,15 @@ public class DriversAndAssetsUi extends Composite implements DriversAndAssetsLis
                     return;
                 }
 
-                if (driverFactoriesList.getSelectedIndex() == 0) {
-                    confirmDialog.show(MSGS.driversAssetsInvalidDriverFactory(), AlertDialog.Severity.ALERT, null);
+                if (DriversAndAssetsUi.this.driverFactoriesList.getSelectedIndex() == 0) {
+                    DriversAndAssetsUi.this.confirmDialog.show(MSGS.driversAssetsInvalidDriverFactory(),
+                            AlertDialog.Severity.ALERT, null);
                     return;
                 }
 
-                if (configurations.isPidExisting(pid)) {
-                    confirmDialog.show(MSGS.wiresComponentNameAlreadyUsed(pid), AlertDialog.Severity.ALERT, null);
+                if (DriversAndAssetsUi.this.configurations.isPidExisting(pid)) {
+                    DriversAndAssetsUi.this.confirmDialog.show(MSGS.wiresComponentNameAlreadyUsed(pid),
+                            AlertDialog.Severity.ALERT, null);
                     return;
                 }
 
@@ -280,10 +283,10 @@ public class DriversAndAssetsUi extends Composite implements DriversAndAssetsLis
 
                             @Override
                             public void onSuccess(GwtConfigComponent result) {
-                                configurations.createAndRegisterConfiguration(pid, factoryPid);
-                                configurations.setChannelDescriptor(pid, result);
-                                newDriverModal.hide();
-                                driverAndAssetsListUi.refresh();
+                                DriversAndAssetsUi.this.configurations.createAndRegisterConfiguration(pid, factoryPid);
+                                DriversAndAssetsUi.this.configurations.setChannelDescriptor(pid, result);
+                                DriversAndAssetsUi.this.newDriverModal.hide();
+                                DriversAndAssetsUi.this.driverAndAssetsListUi.refresh();
                             }
                         });
             }
@@ -296,18 +299,19 @@ public class DriversAndAssetsUi extends Composite implements DriversAndAssetsLis
 
             @Override
             public void onClick(ClickEvent event) {
-                final String pid = assetName.getPid();
+                final String pid = DriversAndAssetsUi.this.assetName.getPid();
 
                 if (pid == null) {
                     return;
                 }
 
-                if (configurations.isPidExisting(pid)) {
-                    confirmDialog.show(MSGS.wiresComponentNameAlreadyUsed(pid), AlertDialog.Severity.ALERT, null);
+                if (DriversAndAssetsUi.this.configurations.isPidExisting(pid)) {
+                    DriversAndAssetsUi.this.confirmDialog.show(MSGS.wiresComponentNameAlreadyUsed(pid),
+                            AlertDialog.Severity.ALERT, null);
                     return;
                 }
 
-                final String newDriverPid = driverAndAssetsListUi.getSelectedItem().getPid();
+                final String newDriverPid = DriversAndAssetsUi.this.driverAndAssetsListUi.getSelectedItem().getPid();
 
                 createAsset(pid, newDriverPid);
             }

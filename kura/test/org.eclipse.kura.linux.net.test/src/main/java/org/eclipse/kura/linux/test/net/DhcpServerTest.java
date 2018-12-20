@@ -137,18 +137,18 @@ public class DhcpServerTest extends TestCase {
             String rangeTo = ip_parts[0] + "." + ip_parts[1] + "." + ip_parts[2] + ".255";
 
             try {
-				DhcpServerCfg dhcpServerCfg = new DhcpServerCfg(s_testInterface, true, 3600, 10000, false);
-				DhcpServerCfgIP4 dhcpServerCfgIP4 = new DhcpServerCfgIP4(
-						(IP4Address) IPAddress.parseHostAddress(subnet),
-						(IP4Address) IPAddress.parseHostAddress("255.255.255.0"), (short) 24, null,
-						(IP4Address) IPAddress.parseHostAddress(rangeFrom),
-						(IP4Address) IPAddress.parseHostAddress(rangeTo), null);
-				
-	            s_dhcpServer.setConfig(new DhcpServerConfigIP4(dhcpServerCfg, dhcpServerCfgIP4));
-	            s_dhcpServer.enable();
-	            assertTrue("dhcp server is enabled", s_dhcpServer.isRunning());
+                DhcpServerCfg dhcpServerCfg = new DhcpServerCfg(s_testInterface, true, 3600, 10000, false);
+                DhcpServerCfgIP4 dhcpServerCfgIP4 = new DhcpServerCfgIP4(
+                        (IP4Address) IPAddress.parseHostAddress(subnet),
+                        (IP4Address) IPAddress.parseHostAddress("255.255.255.0"), (short) 24, null,
+                        (IP4Address) IPAddress.parseHostAddress(rangeFrom),
+                        (IP4Address) IPAddress.parseHostAddress(rangeTo), null);
+
+                s_dhcpServer.setConfig(new DhcpServerConfigIP4(dhcpServerCfg, dhcpServerCfgIP4));
+                s_dhcpServer.enable();
+                assertTrue("dhcp server is enabled", s_dhcpServer.isRunning());
             } catch (KuraException e) {
-            	fail("testEnable failed: " + e);
+                fail("testEnable failed: " + e);
             }
         } catch (Exception e) {
             fail("testEnable failed: " + e);
@@ -172,21 +172,22 @@ public class DhcpServerTest extends TestCase {
             IP4Address subnet = (IP4Address) IPAddress.parseHostAddress(
                     NetworkUtil.calculateNetwork(routerAddress.getHostAddress(), subnetMask.getHostAddress()));
             short prefix = NetworkUtil.getNetmaskShortForm(subnetMask.getHostAddress());
-            List<IP4Address> dnsServers = new ArrayList<IP4Address>();
+            List<IP4Address> dnsServers = new ArrayList<>();
             dnsServers.add((IP4Address) IPAddress.parseHostAddress("8.8.8.8"));
- 
+
             try {
-            	DhcpServerCfg dhcpServerCfg = new DhcpServerCfg(s_testInterface, enabled, defaultLeaseTime, maximumLeaseTime, passDns);
-				DhcpServerCfgIP4 dhcpServerCfgIP4 = new DhcpServerCfgIP4(subnet, subnetMask, prefix,
-						routerAddress, rangeFrom, rangeTo, dnsServers);
-				
-				// This assumes an existing subnet config from the previous test
-				DhcpServerConfigIP4 dhcpServerConfig4 = new DhcpServerConfigIP4(dhcpServerCfg, dhcpServerCfgIP4);
-				s_dhcpServer.setConfig(dhcpServerConfig4);
-            	s_dhcpServer.enable();
-            	 assertEquals(dhcpServerConfig4, s_dhcpServer.getDhcpServerConfig(enabled, passDns));
+                DhcpServerCfg dhcpServerCfg = new DhcpServerCfg(s_testInterface, enabled, defaultLeaseTime,
+                        maximumLeaseTime, passDns);
+                DhcpServerCfgIP4 dhcpServerCfgIP4 = new DhcpServerCfgIP4(subnet, subnetMask, prefix, routerAddress,
+                        rangeFrom, rangeTo, dnsServers);
+
+                // This assumes an existing subnet config from the previous test
+                DhcpServerConfigIP4 dhcpServerConfig4 = new DhcpServerConfigIP4(dhcpServerCfg, dhcpServerCfgIP4);
+                s_dhcpServer.setConfig(dhcpServerConfig4);
+                s_dhcpServer.enable();
+                assertEquals(dhcpServerConfig4, s_dhcpServer.getDhcpServerConfig(enabled, passDns));
             } catch (KuraException e) {
-            	 fail("testEnable failed: " + e);
+                fail("testEnable failed: " + e);
             }
         } catch (Exception e) {
             fail("testEnable failed: " + e);

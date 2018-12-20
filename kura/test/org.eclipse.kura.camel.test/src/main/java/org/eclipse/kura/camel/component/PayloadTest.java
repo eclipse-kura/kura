@@ -32,7 +32,7 @@ public class PayloadTest extends AbstractRouterTest {
         getMockEndpoint("mock:foo-string").expectedBodiesReceived("bar");
         getMockEndpoint("mock:foo-int").expectedBodiesReceived(42);
         getMockEndpoint("mock:foo-boolean").expectedBodiesReceived(true);
-        
+
         // When
 
         this.router.modified(properties);

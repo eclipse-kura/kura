@@ -30,7 +30,7 @@ public class UsbSerial {
     private static void getInfo() throws Exception {
 
         BufferedReader in = new BufferedReader(new FileReader(FILENAME));
-        s_entries = new ArrayList<UsbSerialEntry>();
+        s_entries = new ArrayList<>();
 
         int ttyUsbNo = 0;
         String vendor = null;
@@ -80,7 +80,7 @@ public class UsbSerial {
         getInfo();
 
         UsbSerialEntry entry = null;
-        ArrayList<UsbSerialEntry> matches = new ArrayList<UsbSerialEntry>();
+        ArrayList<UsbSerialEntry> matches = new ArrayList<>();
 
         for (int i = 0; i < s_entries.size(); i++) {
             entry = s_entries.get(i);

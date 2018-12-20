@@ -38,7 +38,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * <li>body: it is an optional part of the payload that allows additional information to be transmitted in any format
  * determined by the user.
  * </ul>
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 @ProviderType

@@ -15,7 +15,7 @@ package org.eclipse.kura.cloudconnection.request;
  * @since 2.0
  */
 public enum RequestHandlerContextConstants {
-    
+
     TENANT_ID,
     DEVICE_ID,
     NOTIFICATION_PUBLISHER_PID;

@@ -520,7 +520,7 @@ public class FileServlet extends HttpServlet {
             ConfigurationService cs = locator.getService(ConfigurationService.class);
             List<ComponentConfiguration> configImpls = xmlConfigs.getConfigurations();
             Set<String> allPids = cs.getConfigurableComponentPids();
-            Set<String> pids = new HashSet<String>();
+            Set<String> pids = new HashSet<>();
             pids.addAll(allPids);
             for (String pid : pids) {
                 boolean find = false;

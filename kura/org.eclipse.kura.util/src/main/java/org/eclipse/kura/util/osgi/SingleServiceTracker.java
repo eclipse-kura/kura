@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Track the highest ranking service instance.
- * 
+ *
  * @param <T>
  *            The service type to track
  */
@@ -73,7 +73,7 @@ public class SingleServiceTracker<T> {
     private final Consumer<T> consumer;
     private final ServiceTracker<T, T> tracker;
 
-    private LinkedList<Entry<T>> entries = new LinkedList<>();
+    private final LinkedList<Entry<T>> entries = new LinkedList<>();
     private Entry<T> currentEntry;
 
     public SingleServiceTracker(final BundleContext context, final Class<T> clazz, final Consumer<T> consumer) {

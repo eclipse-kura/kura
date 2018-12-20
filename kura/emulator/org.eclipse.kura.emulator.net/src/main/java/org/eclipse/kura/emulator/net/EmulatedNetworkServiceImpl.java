@@ -102,7 +102,7 @@ public class EmulatedNetworkServiceImpl implements NetworkService {
 
     @Override
     public List<String> getAllNetworkInterfaceNames() throws KuraException {
-        List<String> interfaceNames = new ArrayList<String>();
+        List<String> interfaceNames = new ArrayList<>();
 
         java.net.NetworkInterface jnInterface = null;
         Enumeration<java.net.NetworkInterface> interfaces = null;
@@ -125,7 +125,7 @@ public class EmulatedNetworkServiceImpl implements NetworkService {
         IPAddress netAddress = null;
         NetInterfaceAddressImpl addressImpl = null;
         List<NetInterfaceAddress> addresses = null;
-        List<NetInterface<? extends NetInterfaceAddress>> interfaces = new ArrayList<NetInterface<? extends NetInterfaceAddress>>();
+        List<NetInterface<? extends NetInterfaceAddress>> interfaces = new ArrayList<>();
 
         EthernetInterfaceImpl ethInterface = null;
         java.net.NetworkInterface jnInterface = null;
@@ -166,7 +166,7 @@ public class EmulatedNetworkServiceImpl implements NetworkService {
                 ethInterface.setSupportsMulticast(multi);
                 ethInterface.setUp(isUp);
 
-                addresses = new ArrayList<NetInterfaceAddress>();
+                addresses = new ArrayList<>();
                 jnInterfaceAddresses = jnInterface.getInterfaceAddresses();
                 for (java.net.InterfaceAddress jnInterfaceAddress : jnInterfaceAddresses) {
 
@@ -206,7 +206,7 @@ public class EmulatedNetworkServiceImpl implements NetworkService {
         IPAddress netAddress = null;
         NetInterfaceAddressImpl addressImpl = null;
         List<NetInterfaceAddress> addresses = null;
-        List<NetInterface<? extends NetInterfaceAddress>> interfaces = new ArrayList<NetInterface<? extends NetInterfaceAddress>>();
+        List<NetInterface<? extends NetInterfaceAddress>> interfaces = new ArrayList<>();
 
         EthernetInterfaceImpl ethInterface = null;
         java.net.NetworkInterface jnInterface = null;
@@ -252,7 +252,7 @@ public class EmulatedNetworkServiceImpl implements NetworkService {
                         ethInterface.setSupportsMulticast(multi);
                         ethInterface.setUp(isUp);
 
-                        addresses = new ArrayList<NetInterfaceAddress>();
+                        addresses = new ArrayList<>();
                         jnInterfaceAddresses = jnInterface.getInterfaceAddresses();
                         for (java.net.InterfaceAddress jnInterfaceAddress : jnInterfaceAddresses) {
 

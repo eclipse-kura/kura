@@ -46,7 +46,7 @@ public class FramebufferRequest {
     }
 
     public void transform(int rotation) {
-        rotation = (rotation % 360) / 90;
+        rotation = rotation % 360 / 90;
         if (rotation == 1) {
             transform(Transform.ROTATE_90);
         } else if (rotation == 2) {
@@ -97,47 +97,47 @@ public class FramebufferRequest {
     }
 
     public Optional<String> getMessage() {
-        return message;
+        return this.message;
     }
 
     public Optional<byte[]> getRGB565Pixels() {
-        return pixelsRGB565;
+        return this.pixelsRGB565;
     }
 
     public Optional<byte[]> getMonochromePixels() {
-        return pixelsMonochrome;
+        return this.pixelsMonochrome;
     }
 
     public Optional<Transform> getTransform() {
-        return transform;
+        return this.transform;
     }
 
     public boolean shouldClear() {
-        return clear;
+        return this.clear;
     }
 
     public Optional<Float> getFrontColorRed() {
-        return frontColorRed;
+        return this.frontColorRed;
     }
 
     public Optional<Float> getFrontColorGreen() {
-        return frontColorGreen;
+        return this.frontColorGreen;
     }
 
     public Optional<Float> getFrontColorBlue() {
-        return frontColorBlue;
+        return this.frontColorBlue;
     }
 
     public Optional<Float> getBackColorRed() {
-        return backColorRed;
+        return this.backColorRed;
     }
 
     public Optional<Float> getBackColorGreen() {
-        return backColorGreen;
+        return this.backColorGreen;
     }
 
     public Optional<Float> getBackColorBlue() {
-        return backColorBlue;
+        return this.backColorBlue;
     }
 
     private void assertBufferLength(byte[] buf, int expectedLen) {

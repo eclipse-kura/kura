@@ -38,7 +38,7 @@ public class SingleServiceTrackerTest {
         }
 
         public T getService() {
-            return service;
+            return this.service;
         }
     }
 
@@ -47,7 +47,7 @@ public class SingleServiceTrackerTest {
 
     private BundleContext context;
 
-    private List<ServiceRegistration<?>> registrations = new LinkedList<>();
+    private final List<ServiceRegistration<?>> registrations = new LinkedList<>();
 
     @Before
     public void setup() {
@@ -85,8 +85,8 @@ public class SingleServiceTrackerTest {
         final MockService service1 = new MockService();
         final MockService service2 = new MockService();
 
-        final ServiceRegistration<MockService> handle2 = register(MockService.class, service2, withRanking(2));
-        final ServiceRegistration<MockService> handle1 = register(MockService.class, service1, withRanking(1));
+        register(MockService.class, service2, withRanking(2));
+        register(MockService.class, service1, withRanking(1));
 
         tracker.open();
         Assert.assertEquals(service2, consumer.getService());
@@ -111,7 +111,7 @@ public class SingleServiceTrackerTest {
         final MockService service2 = new MockService();
 
         final ServiceRegistration<MockService> handle2 = register(MockService.class, service2, withRanking(2));
-        final ServiceRegistration<MockService> handle1 = register(MockService.class, service1, withRanking(1));
+        register(MockService.class, service1, withRanking(1));
 
         tracker.open();
         Assert.assertEquals(service2, consumer.getService());
@@ -137,12 +137,12 @@ public class SingleServiceTrackerTest {
         final MockService service1 = new MockService();
         final MockService service2 = new MockService();
 
-        final ServiceRegistration<MockService> handle1 = register(MockService.class, service1, withRanking(1));
+        register(MockService.class, service1, withRanking(1));
 
         tracker.open();
         Assert.assertEquals(service1, consumer.getService());
 
-        final ServiceRegistration<MockService> handle2 = register(MockService.class, service2, withRanking(2));
+        register(MockService.class, service2, withRanking(2));
 
         Assert.assertEquals(service2, consumer.getService());
         tracker.close();
@@ -168,12 +168,12 @@ public class SingleServiceTrackerTest {
         final MockService service1 = new MockService();
         final MockService service2 = new MockService();
 
-        final ServiceRegistration<MockService> handle1 = register(MockService.class, service1, withRanking(1));
+        register(MockService.class, service1, withRanking(1));
 
         tracker.open();
         Assert.assertEquals(service1, consumer.getService());
 
-        final ServiceRegistration<MockService> handle2 = register(MockService.class, service2, withRanking(1));
+        register(MockService.class, service2, withRanking(1));
 
         Assert.assertEquals(service1, consumer.getService());
         tracker.close();
@@ -200,13 +200,13 @@ public class SingleServiceTrackerTest {
         final MockService service2 = new MockService();
         final MockService service3 = new MockService();
 
-        final ServiceRegistration<MockService> handle1 = register(MockService.class, service1, withRanking(null));
-        final ServiceRegistration<MockService> handle2 = register(MockService.class, service2, withRanking(null));
+        register(MockService.class, service1, withRanking(null));
+        register(MockService.class, service2, withRanking(null));
 
         tracker.open();
         Assert.assertEquals(service1, consumer.getService());
 
-        final ServiceRegistration<MockService> handle3 = register(MockService.class, service3, withRanking(-1));
+        register(MockService.class, service3, withRanking(-1));
 
         Assert.assertEquals(service1, consumer.getService());
         tracker.close();
@@ -229,7 +229,7 @@ public class SingleServiceTrackerTest {
         final MockService service1 = new MockService();
         final MockService service2 = new MockService();
 
-        final ServiceRegistration<MockService> handle2 = register(MockService.class, service2, withRanking(2));
+        register(MockService.class, service2, withRanking(2));
         final ServiceRegistration<MockService> handle1 = register(MockService.class, service1, withRanking(1));
 
         tracker.open();
@@ -257,7 +257,7 @@ public class SingleServiceTrackerTest {
         final MockService service2 = new MockService();
 
         final ServiceRegistration<MockService> handle1 = register(MockService.class, service1, withRanking(null));
-        final ServiceRegistration<MockService> handle2 = register(MockService.class, service2, withRanking(2));
+        register(MockService.class, service2, withRanking(2));
 
         tracker.open();
         Assert.assertEquals(service2, consumer.getService());
@@ -326,8 +326,8 @@ public class SingleServiceTrackerTest {
         final MockService service2 = new MockService();
         final MockService service3 = new MockService();
 
-        final ServiceRegistration<MockService> handle1 = register(MockService.class, service1, withRanking(1));
-        final ServiceRegistration<MockService> handle2 = register(MockService.class, service2, withRanking(1));
+        register(MockService.class, service1, withRanking(1));
+        register(MockService.class, service2, withRanking(1));
         final ServiceRegistration<MockService> handle3 = register(MockService.class, service3, withRanking(2));
 
         tracker.open();

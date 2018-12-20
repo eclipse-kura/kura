@@ -28,7 +28,7 @@ public class VarianceComponent extends AbstractSingleportMathComponent {
 
     @Override
     public TypedValue<?> apply(TypedValue<?> t) {
-        if (avg == null) {
+        if (this.avg == null) {
             init();
         }
         final double value = ((Number) t.getValue()).doubleValue();

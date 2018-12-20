@@ -321,8 +321,8 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
     private List<String> findFactoryHideComponents() throws GwtKuraException {
         return ServiceLocator.applyToServiceOptionally(ServiceComponentRuntime.class,
                 scr -> scr.getComponentDescriptionDTOs().stream()
-                        .filter(dto -> dto.properties.containsKey("kura.ui.factory.hide"))
-                        .map(dto -> (String) dto.name).collect(Collectors.toList()));
+                        .filter(dto -> dto.properties.containsKey("kura.ui.factory.hide")).map(dto -> dto.name)
+                        .collect(Collectors.toList()));
     }
 
     private List<ComponentConfiguration> sortConfigurationsByName(List<ComponentConfiguration> configs) {
@@ -666,7 +666,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
                 while (enumeration.hasMoreElements()) {
                     final URL entry = enumeration.nextElement();
                     try (InputStreamReader inputStream = new InputStreamReader(entry.openConnection().getInputStream());
-                            BufferedReader reader= new BufferedReader(inputStream);){
+                            BufferedReader reader = new BufferedReader(inputStream);) {
                         final StringBuilder contents = new StringBuilder();
                         String line;
                         while ((line = reader.readLine()) != null) {
@@ -716,16 +716,15 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
         try {
             final ServiceComponentRuntime scrService = context.getService(scrServiceRef);
 
-            final Set<String> referenceInterfaces = scrService.getComponentDescriptionDTOs().stream()
-                    .map(component -> {
-                        ReferenceDTO[] references = component.references;
-                        for (ReferenceDTO reference : references) {
-                            if (targetRef.equals(reference.name)) {
-                                return reference.interfaceName;
-                            }
-                        }
-                        return null;
-                    }).filter(Objects::nonNull).collect(Collectors.toSet());
+            final Set<String> referenceInterfaces = scrService.getComponentDescriptionDTOs().stream().map(component -> {
+                ReferenceDTO[] references = component.references;
+                for (ReferenceDTO reference : references) {
+                    if (targetRef.equals(reference.name)) {
+                        return reference.interfaceName;
+                    }
+                }
+                return null;
+            }).filter(Objects::nonNull).collect(Collectors.toSet());
 
             referenceInterfaces.forEach(reference -> {
                 try {

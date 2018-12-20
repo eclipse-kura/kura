@@ -28,7 +28,7 @@ public class ScriptRunnerTest {
         final Object result = runner.run();
 
         Assert.assertTrue(result instanceof Number);
-        Assert.assertEquals(42.0, ((Number) result).doubleValue(),0.001);
+        Assert.assertEquals(42.0, ((Number) result).doubleValue(), 0.001);
     }
 
     /**

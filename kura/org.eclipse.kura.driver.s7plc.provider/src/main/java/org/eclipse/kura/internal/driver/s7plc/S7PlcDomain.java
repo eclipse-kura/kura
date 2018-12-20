@@ -21,23 +21,26 @@ public class S7PlcDomain {
     }
 
     public int getDB() {
-        return db;
+        return this.db;
     }
 
     @Override
     public int hashCode() {
-        return db;
+        return this.db;
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == null)
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         S7PlcDomain other = (S7PlcDomain) obj;
-        if (db != other.db)
+        if (this.db != other.db) {
             return false;
+        }
         return true;
     }
 }

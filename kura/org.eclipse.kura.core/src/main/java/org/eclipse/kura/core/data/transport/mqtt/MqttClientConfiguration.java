@@ -21,7 +21,8 @@ public class MqttClientConfiguration {
     private final MqttConnectOptions connectOptions;
 
     public enum PersistenceType {
-        FILE, MEMORY
+        FILE,
+        MEMORY
     };
 
     public MqttClientConfiguration(String brokerUrl, String clientId, PersistenceType persistenceType,

@@ -24,7 +24,7 @@ public class Test {
     private final List<Method> tests;
 
     public Test() {
-        this.tests = new ArrayList<Method>();
+        this.tests = new ArrayList<>();
     }
 
     public Method getBeforeClass() {

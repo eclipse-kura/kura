@@ -32,7 +32,7 @@ public interface BluetoothLeAdapter {
      * seconds or until the device is found. It will return a Future instance and the discovered device can be
      * retrieved using the get() method. The get(long timeout, TimeUnit unit) is not supported and acts as the get()
      * method.
-     * 
+     *
      * @param timeout
      *            timeout in seconds for device discovery
      * @param address
@@ -46,7 +46,7 @@ public interface BluetoothLeAdapter {
      * seconds or until the device is found. It will return a Future instance and the discovered device can be
      * retrieved using the get() method. The get(long timeout, TimeUnit unit) is not supported and acts as the get()
      * method.
-     * 
+     *
      * @param timeout
      *            timeout in seconds for device discovery
      * @param name
@@ -59,7 +59,7 @@ public interface BluetoothLeAdapter {
      * Search for a BLE device with the specified address. The method will perform a BLE discovery for at most timeout
      * seconds or until the device is found. When the device is found or the timeout is reached the consumer is used to
      * get the device.
-     * 
+     *
      * @param timeout
      *            timeout in seconds for device discovery
      * @param address
@@ -73,7 +73,7 @@ public interface BluetoothLeAdapter {
      * Search for a BLE device with the specified name. The method will perform a BLE discovery for at most timeout
      * seconds or until the device is found. When the device is found or the timeout is reached the consumer is used to
      * get the device.
-     * 
+     *
      * @param timeout
      *            timeout in seconds for device discovery
      * @param name
@@ -87,7 +87,7 @@ public interface BluetoothLeAdapter {
      * Search for BLE devices. The method will perform a BLE discovery for timeout seconds. It will return a Future
      * instance and the discovered devices can be retrieved using the get() method. The get(long timeout, TimeUnit unit)
      * is not supported and acts as the get() method.
-     * 
+     *
      * @param timeout
      *            timeout in seconds for device discovery
      * @return Future
@@ -97,7 +97,7 @@ public interface BluetoothLeAdapter {
     /**
      * Search for BLE devices. The method will perform a BLE discovery for timeout seconds. When the timeout is reached
      * the consumer is used to get the devices.
-     * 
+     *
      * @param timeout
      *            timeout in seconds for device discovery
      * @param consumer
@@ -107,62 +107,62 @@ public interface BluetoothLeAdapter {
 
     /**
      * Stops a BLE discovery.
-     * 
+     *
      * @throws KuraBluetoothDiscoveryException
      */
     public void stopDiscovery() throws KuraBluetoothDiscoveryException;
 
     /**
      * Returns the hardware address of this adapter.
-     * 
+     *
      * @return The hardware address of this adapter.
      */
     public String getAddress();
 
     /**
      * Returns the system name of this adapter.
-     * 
+     *
      * @return The system name of this adapter.
      */
     public String getName();
 
     /**
      * Returns the interface name of this adapter.
-     * 
+     *
      * @return The interface name of this adapter.
      */
     public String getInterfaceName();
 
     /**
      * Returns the local ID of the adapter.
-     * 
+     *
      * @return The local ID of the adapter.
      */
     public String getModalias();
 
     /**
      * Returns the friendly name of this adapter.
-     * 
+     *
      * @return The friendly name of this adapter, or NULL if not set.
      */
     public String getAlias();
 
     /**
      * Sets the friendly name of this adapter.
-     * 
+     *
      */
     public void setAlias(String value);
 
     /**
      * Returns the Bluetooth class of the adapter.
-     * 
+     *
      * @return The Bluetooth class of the adapter.
      */
     public long getBluetoothClass();
 
     /**
      * Returns the power state the adapter.
-     * 
+     *
      * @return The power state of the adapter.
      */
     public boolean isPowered();
@@ -174,7 +174,7 @@ public interface BluetoothLeAdapter {
 
     /**
      * Returns the discoverable state the adapter.
-     * 
+     *
      * @return The discoverable state of the adapter.
      */
     public boolean isDiscoverable();
@@ -186,7 +186,7 @@ public interface BluetoothLeAdapter {
 
     /**
      * Returns the discoverable timeout the adapter.
-     * 
+     *
      * @return The discoverable timeout of the adapter.
      */
     public long getDiscoverableTimeout();
@@ -199,7 +199,7 @@ public interface BluetoothLeAdapter {
 
     /**
      * Returns the pairable state the adapter.
-     * 
+     *
      * @return The pairable state of the adapter.
      */
     public boolean isPairable();
@@ -212,7 +212,7 @@ public interface BluetoothLeAdapter {
     /**
      * Returns the timeout in seconds after which pairable state turns off
      * automatically, 0 means never.
-     * 
+     *
      * @return The pairable timeout of the adapter.
      */
     public long getPairableTimeout();
@@ -224,14 +224,14 @@ public interface BluetoothLeAdapter {
 
     /**
      * Returns the discovering state the adapter.
-     * 
+     *
      * @return The discovering state of the adapter.
      */
     public boolean isDiscovering();
 
     /**
      * Returns the UUIDs of the adapter.
-     * 
+     *
      * @return Array containing the UUIDs of the adapter.
      */
     public UUID[] getUUIDs();
@@ -239,17 +239,17 @@ public interface BluetoothLeAdapter {
     /**
      * Remove all the known devices from the system. Be aware that after the removing the objects representing the
      * devices will not be valid anymore and any operation on them will have no effect.
-     * 
+     *
      * @return The number of devices removed from internal list
      * @throws KuraBluetoothRemoveException
-     * 
+     *
      * @since 2.0
      */
     public int removeDevices() throws KuraBluetoothRemoveException;
 
     /**
      * Sets a scan filter for this adapter.
-     * 
+     *
      * <p>
      * When a remote device is found that advertises any UUID from UUIDs, it will be reported if:
      * <ul>
@@ -263,9 +263,9 @@ public interface BluetoothLeAdapter {
      * <p>
      * If "auto" transport is requested, scan will use LE, BREDR, or both, depending on what's
      * currently enabled on the controller.
-     * 
+     *
      * To remove the filter, call this method with empty parameters.
-     * 
+     *
      * @param uuids
      *            the uuids advertised by the devices
      * @param rssi
@@ -274,7 +274,7 @@ public interface BluetoothLeAdapter {
      *            the pathloss value
      * @param trasportType
      *            the trasportType (LE or BREDR)
-     * 
+     *
      * @since 2.0
      */
     public void setDiscoveryFilter(List<UUID> uuids, int rssi, int pathloss, BluetoothTransportType transportType);
@@ -282,10 +282,10 @@ public interface BluetoothLeAdapter {
     /**
      * Set a device discovery filter based on RSSI value. Only devices with rssi greater than the provided value will be
      * reported. Set it to 0 to remove the filter.
-     * 
+     *
      * @param rssi
      *            the Receiver Signal Strength Indication value used by the filter
-     * 
+     *
      * @since 2.0
      */
     public void setRssiDiscoveryFilter(int rssi);

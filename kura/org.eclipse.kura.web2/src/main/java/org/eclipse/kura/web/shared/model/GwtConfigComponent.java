@@ -22,12 +22,12 @@ public class GwtConfigComponent extends KuraBaseModel implements Serializable {
     private List<GwtConfigParameter> m_parameters;
 
     public GwtConfigComponent() {
-        this.m_parameters = new ArrayList<GwtConfigParameter>();
+        this.m_parameters = new ArrayList<>();
     }
 
     public GwtConfigComponent(GwtConfigComponent other) {
         this();
-        data.putAll(other.data);
+        this.data.putAll(other.data);
         for (GwtConfigParameter parameter : other.m_parameters) {
             this.m_parameters.add(new GwtConfigParameter(parameter));
         }
@@ -88,27 +88,27 @@ public class GwtConfigComponent extends KuraBaseModel implements Serializable {
     }
 
     public void setComponentDescription(final String componentDescription) {
-        this.set("componentDescription", componentDescription);
+        set("componentDescription", componentDescription);
     }
 
     public void setComponentIcon(final String componentIcon) {
-        this.set("componentIcon", componentIcon);
+        set("componentIcon", componentIcon);
     }
 
     public void setComponentId(final String componentId) {
-        this.set("componentId", componentId);
+        set("componentId", componentId);
     }
 
     public void setComponentName(final String componentName) {
-        this.set("componentName", componentName);
+        set("componentName", componentName);
     }
 
     public void setFactoryComponent(final boolean isFactory) {
-        this.set("factoryComponent", isFactory);
+        set("factoryComponent", isFactory);
     }
 
     public void setFactoryPid(final String factoryPid) {
-        this.set("factoryPid", factoryPid);
+        set("factoryPid", factoryPid);
     }
 
     public void setParameters(final List<GwtConfigParameter> parameters) {
@@ -116,15 +116,15 @@ public class GwtConfigComponent extends KuraBaseModel implements Serializable {
     }
 
     public void setIsWireComponent(final boolean isWireComponent) {
-        this.set("isWireComponent", isWireComponent);
+        set("isWireComponent", isWireComponent);
     }
 
     public void setIsDriver(final boolean isDriver) {
-        this.set("isDriver", isDriver);
+        set("isDriver", isDriver);
     }
 
     public boolean isValid() {
-        return getComponentId() != null && this.getFactoryId() != null && this.getParameters() != null;
+        return getComponentId() != null && getFactoryId() != null && getParameters() != null;
     }
 
     public String getParameterValue(String id) {

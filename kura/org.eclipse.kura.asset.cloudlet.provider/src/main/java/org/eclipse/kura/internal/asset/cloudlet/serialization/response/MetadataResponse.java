@@ -38,6 +38,6 @@ public class MetadataResponse extends AbstractResponse {
         }
 
         assetObject.add(SerializationConstants.CHANNELS_PROPERTY, channels);
-        serialized.add(assetObject);
+        this.serialized.add(assetObject);
     }
 }

@@ -21,8 +21,8 @@ public class GainOffsetComponentOptions {
     private static final boolean EMIT_RECEIVED_PROPERTIES_DEFAULT = false;
     private static final String CONFIGURATION_DEFAULT = "";
 
-    private List<GainOffsetEntry> entries;
-    private boolean emitReceivedProperties;
+    private final List<GainOffsetEntry> entries;
+    private final boolean emitReceivedProperties;
 
     public GainOffsetComponentOptions(final Map<String, Object> properties) {
         this.emitReceivedProperties = getSafe(properties.get(EMIT_RECEIVED_PROPERTIES_PROP_NAME),
@@ -32,11 +32,11 @@ public class GainOffsetComponentOptions {
     }
 
     public List<GainOffsetEntry> getEntries() {
-        return entries;
+        return this.entries;
     }
 
     public boolean shouldEmitReceivedProperties() {
-        return emitReceivedProperties;
+        return this.emitReceivedProperties;
     }
 
     @SuppressWarnings("unchecked")

@@ -31,11 +31,10 @@ public class S7CpInfo {
     public int MaxMpiRate;
     public int MaxBusRate;
 
-    protected void Update(byte[] Src, int Pos)
-    {
-        MaxPduLength = S7.GetShortAt(Src, 2);
-        MaxConnections = S7.GetShortAt(Src, 4);
-        MaxMpiRate = S7.GetDIntAt(Src, 6);
-        MaxBusRate = S7.GetDIntAt(Src, 10);                      
-    }         
+    protected void Update(byte[] Src, int Pos) {
+        this.MaxPduLength = S7.GetShortAt(Src, 2);
+        this.MaxConnections = S7.GetShortAt(Src, 4);
+        this.MaxMpiRate = S7.GetDIntAt(Src, 6);
+        this.MaxBusRate = S7.GetDIntAt(Src, 10);
+    }
 }

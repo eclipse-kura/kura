@@ -222,7 +222,7 @@ public class ComponentUtil {
      *
      * @param ctx
      * @param pid
-     *                ID of the service whose OCD should be loaded
+     *            ID of the service whose OCD should be loaded
      * @return
      * @throws IOException
      * @throws XMLStreamException
@@ -266,7 +266,7 @@ public class ComponentUtil {
 
     private static ResourceBundle getResourceBundle(String localization, String locale, final Bundle bundle) {
 
-        String resourceBase = (localization == null ? Constants.BUNDLE_LOCALIZATION_DEFAULT_BASENAME : localization);
+        String resourceBase = localization == null ? Constants.BUNDLE_LOCALIZATION_DEFAULT_BASENAME : localization;
 
         // There are seven searching candidates possible:
         // baseName +
@@ -315,15 +315,15 @@ public class ComponentUtil {
                 searchCandidates[3] = null;
             }
         }
-        if ((idx2_first != -1) && (idx2_second != idx2_first + 1)) {
+        if (idx2_first != -1 && idx2_second != idx2_first + 1) {
             // default-locale is format of [language]_country[_variation].
             searchCandidates[4] = LOCALE_SEP
-                    + ((idx2_second == -1) ? defaultLocale : defaultLocale.substring(0, idx2_second));
+                    + (idx2_second == -1 ? defaultLocale : defaultLocale.substring(0, idx2_second));
             if (searchCandidates[4].equalsIgnoreCase(searchCandidates[1])) {
                 searchCandidates[4] = null;
             }
         }
-        if ((idx2_first == -1) && (defaultLocale.length() > 0)) {
+        if (idx2_first == -1 && defaultLocale.length() > 0) {
             // default-locale has only language.
             searchCandidates[5] = LOCALE_SEP + defaultLocale;
         } else if (idx2_first > 0) {
@@ -340,11 +340,12 @@ public class ComponentUtil {
         URL resourceUrl = null;
         URL[] urls = null;
 
-        for (int idx = 0; (idx < searchCandidates.length) && (resourceUrl == null); idx++) {
-            urls = (searchCandidates[idx] == null ? null
-                    : findEntries(bundle, resourceBase + searchCandidates[idx] + RESOURCE_FILE_EXT));
-            if (urls != null && urls.length > 0)
+        for (int idx = 0; idx < searchCandidates.length && resourceUrl == null; idx++) {
+            urls = searchCandidates[idx] == null ? null
+                    : findEntries(bundle, resourceBase + searchCandidates[idx] + RESOURCE_FILE_EXT);
+            if (urls != null && urls.length > 0) {
                 resourceUrl = urls[0];
+            }
         }
 
         if (resourceUrl != null) {
@@ -366,16 +367,18 @@ public class ComponentUtil {
             file = path;
             break;
         case 0:
-            if (path.length() > 1)
+            if (path.length() > 1) {
                 file = path.substring(1);
+            }
             break;
         default:
             directory = path.substring(0, index);
             file = path.substring(index + 1);
         }
         Enumeration<URL> entries = bundle.findEntries(directory, file, false);
-        if (entries == null)
+        if (entries == null) {
             return null;
+        }
         List<URL> list = Collections.list(entries);
         return list.toArray(new URL[list.size()]);
     }
@@ -386,7 +389,7 @@ public class ComponentUtil {
             return null;
         }
 
-        if ((key.charAt(0) == KEY_SIGN) && (key.length() > 1)) {
+        if (key.charAt(0) == KEY_SIGN && key.length() > 1) {
             if (rb != null) {
                 try {
                     String transfered = rb.getString(key.substring(1));
@@ -411,7 +414,7 @@ public class ComponentUtil {
      * contain any extra post-processing of the loaded information.
      *
      * @param resourceUrl
-     *                        Url of the MetaData XML file which needs to be loaded
+     *            Url of the MetaData XML file which needs to be loaded
      * @return
      * @throws IOException
      * @throws XMLStreamException
@@ -439,7 +442,7 @@ public class ComponentUtil {
      * contain any extra post-processing of the loaded information.
      *
      * @param pid
-     *                ID of the service whose OCD should be loaded
+     *            ID of the service whose OCD should be loaded
      * @return
      * @throws IOException
      * @throws XMLStreamException
@@ -472,7 +475,7 @@ public class ComponentUtil {
      *
      * @param ctx
      * @param pid
-     *                ID of the service whose OCD should be loaded
+     *            ID of the service whose OCD should be loaded
      * @return
      * @throws IOException
      * @throws XMLStreamException

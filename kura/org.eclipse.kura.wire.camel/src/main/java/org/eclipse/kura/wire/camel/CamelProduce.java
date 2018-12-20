@@ -23,9 +23,10 @@ public class CamelProduce extends AbstractReceiverWireComponent {
     @Override
     protected void processReceive(final CamelContext context, final String endpointUri, final WireEnvelope envelope)
             throws Exception {
-        if (template == null)
+        if (this.template == null) {
             return;
-        template //
+        }
+        this.template //
                 .withBody(envelope) //
                 .to(endpointUri) //
                 .asyncSend();

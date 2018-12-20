@@ -152,21 +152,21 @@ public class ApplicationCertsTabUi extends Composite implements Tab {
                                 ApplicationCertsTabUi.this.formCert.getValue(),
                                 ApplicationCertsTabUi.this.formStorageAlias.getValue(), new AsyncCallback<Integer>() {
 
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                FailureHandler.handle(caught);
-                                EntryClassUi.hideWaitModal();
-                            }
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        FailureHandler.handle(caught);
+                                        EntryClassUi.hideWaitModal();
+                                    }
 
-                            @Override
-                            public void onSuccess(Integer certsStored) {
-                                reset();
-                                setDirty(false);
-                                ApplicationCertsTabUi.this.apply.setEnabled(false);
-                                ApplicationCertsTabUi.this.reset.setEnabled(false);
-                                EntryClassUi.hideWaitModal();
-                            }
-                        });
+                                    @Override
+                                    public void onSuccess(Integer certsStored) {
+                                        reset();
+                                        setDirty(false);
+                                        ApplicationCertsTabUi.this.apply.setEnabled(false);
+                                        ApplicationCertsTabUi.this.reset.setEnabled(false);
+                                        EntryClassUi.hideWaitModal();
+                                    }
+                                });
                     }
                 });
             }

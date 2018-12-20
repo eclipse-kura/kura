@@ -53,23 +53,23 @@ public class BluetoothLeOptions {
     private static final String PROPERTY_TOPIC_DEFAULT = "data";
     private static final String PROPERTY_INAME_DEFAULT = "hci0";
 
-    private int scantime;
-    private int period;
-    private String topic;
-    private String iname;
-    private boolean enableScan;
-    private boolean enableTemp;
-    private boolean enableAcc;
-    private boolean enableHum;
-    private boolean enableMag;
-    private boolean enablePres;
-    private boolean enableGyro;
-    private boolean enableOpto;
-    private boolean enableButtons;
-    private boolean enableRedLed;
-    private boolean enableGreenLed;
-    private boolean enableBuzzer;
-    private boolean enableServicesDiscovery;
+    private final int scantime;
+    private final int period;
+    private final String topic;
+    private final String iname;
+    private final boolean enableScan;
+    private final boolean enableTemp;
+    private final boolean enableAcc;
+    private final boolean enableHum;
+    private final boolean enableMag;
+    private final boolean enablePres;
+    private final boolean enableGyro;
+    private final boolean enableOpto;
+    private final boolean enableButtons;
+    private final boolean enableRedLed;
+    private final boolean enableGreenLed;
+    private final boolean enableBuzzer;
+    private final boolean enableServicesDiscovery;
 
     public BluetoothLeOptions(Map<String, Object> properties) {
         requireNonNull(properties, "Required not null");

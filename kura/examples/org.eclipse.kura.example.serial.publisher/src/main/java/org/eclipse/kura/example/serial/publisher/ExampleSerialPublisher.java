@@ -79,7 +79,7 @@ public class ExampleSerialPublisher implements ConfigurableComponent, CloudSubsc
     public void unsetCloudPublisher(CloudPublisher cloudPublisher) {
         this.cloudPublisher = null;
     }
-    
+
     public void setCloudSubscriber(CloudSubscriber cloudSubscriber) {
         this.cloudSubscriber = cloudSubscriber;
         this.cloudSubscriber.registerCloudSubscriberListener(ExampleSerialPublisher.this);
@@ -286,7 +286,7 @@ public class ExampleSerialPublisher implements ConfigurableComponent, CloudSubsc
 
                     // on reception of CR, publish the received sentence
                     if (c == 13) {
-                        
+
                         if (this.cloudPublisher == null) {
                             logger.info("No cloud publisher selected. Cannot publish!");
                             continue;
@@ -306,7 +306,7 @@ public class ExampleSerialPublisher implements ConfigurableComponent, CloudSubsc
                             this.cloudPublisher.publish(message);
                             logger.info("Published message: {}", payload);
                         } catch (Exception e) {
-                            logger.error("Cannot publish message: {}",message,  e);
+                            logger.error("Cannot publish message: {}", message, e);
                         }
 
                         sb = new StringBuilder();
@@ -320,7 +320,7 @@ public class ExampleSerialPublisher implements ConfigurableComponent, CloudSubsc
             } finally {
                 try {
                     if (this.commIs != null) {
-                    this.commIs.close();
+                        this.commIs.close();
                     }
                 } catch (IOException e) {
                     logger.error("Cannot close buffered reader", e);
@@ -332,6 +332,6 @@ public class ExampleSerialPublisher implements ConfigurableComponent, CloudSubsc
     @Override
     public void onMessageArrived(KuraMessage message) {
         // TODO Auto-generated method stub
-        
+
     }
 }

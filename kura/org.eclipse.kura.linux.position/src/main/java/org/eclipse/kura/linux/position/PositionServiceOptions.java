@@ -35,43 +35,43 @@ public class PositionServiceOptions {
     }
 
     public boolean isEnabled() {
-        return IS_ENABLED.get(properties);
+        return IS_ENABLED.get(this.properties);
     }
 
     public boolean isStatic() {
-        return IS_STATIC.get(properties);
+        return IS_STATIC.get(this.properties);
     }
 
     public double getStaticLatitude() {
-        return STATIC_LATITUDE.get(properties);
+        return STATIC_LATITUDE.get(this.properties);
     }
 
     public double getStaticLongitude() {
-        return STATIC_LONGITUDE.get(properties);
+        return STATIC_LONGITUDE.get(this.properties);
     }
 
     public double getStaticAltitude() {
-        return STATIC_ALTITUDE.get(properties);
+        return STATIC_ALTITUDE.get(this.properties);
     }
 
     public int getBaudRate() {
-        return BAUD_RATE.get(properties);
+        return BAUD_RATE.get(this.properties);
     }
 
     public int getBitsPerWord() {
-        return BITS_PER_WORD.get(properties);
+        return BITS_PER_WORD.get(this.properties);
     }
 
     public int getStopBits() {
-        return STOP_BITS.get(properties);
+        return STOP_BITS.get(this.properties);
     }
 
     public int getParity() {
-        return PARITY.get(properties);
+        return PARITY.get(this.properties);
     }
 
     public String getPort() {
-        return PORT.get(properties);
+        return PORT.get(this.properties);
     }
 
     public CommURI getGpsDeviceUri() {
@@ -117,12 +117,12 @@ public class PositionServiceOptions {
 
         @SuppressWarnings("unchecked")
         T get(final Map<String, Object> properties) {
-            final Object value = properties.get(key);
+            final Object value = properties.get(this.key);
 
-            if (defaultValue.getClass().isInstance(value)) {
+            if (this.defaultValue.getClass().isInstance(value)) {
                 return (T) value;
             }
-            return defaultValue;
+            return this.defaultValue;
         }
     }
 }

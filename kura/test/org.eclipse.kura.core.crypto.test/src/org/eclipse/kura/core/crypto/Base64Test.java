@@ -16,6 +16,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class Base64Test {
+
     private CryptoServiceImpl cryptoService;
 
     @Before

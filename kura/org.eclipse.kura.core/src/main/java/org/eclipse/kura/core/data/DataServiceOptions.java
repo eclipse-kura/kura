@@ -117,7 +117,7 @@ public class DataServiceOptions {
     }
 
     long getRateLimitTimeUnit() {
-        String timeUnitString = (String) properties.getOrDefault(RATE_LIMIT_TIME_UNIT_PROP_NAME,
+        String timeUnitString = (String) this.properties.getOrDefault(RATE_LIMIT_TIME_UNIT_PROP_NAME,
                 RATE_LIMIT_TIME_UNIT_DEFAULT);
         TimeUnit timeUnit;
 

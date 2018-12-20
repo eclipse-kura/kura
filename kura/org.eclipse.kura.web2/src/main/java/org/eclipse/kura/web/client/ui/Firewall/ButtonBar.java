@@ -56,8 +56,8 @@ public class ButtonBar extends Composite {
 
             @Override
             public void onClick(ClickEvent event) {
-                if (listener != null) {
-                    listener.onApply();
+                if (ButtonBar.this.listener != null) {
+                    ButtonBar.this.listener.onApply();
                 }
             }
         });
@@ -66,8 +66,8 @@ public class ButtonBar extends Composite {
 
             @Override
             public void onClick(ClickEvent event) {
-                if (listener != null) {
-                    listener.onCancel();
+                if (ButtonBar.this.listener != null) {
+                    ButtonBar.this.listener.onCancel();
                 }
             }
         });
@@ -76,8 +76,8 @@ public class ButtonBar extends Composite {
 
             @Override
             public void onClick(ClickEvent event) {
-                if (listener != null) {
-                    listener.onCreate();
+                if (ButtonBar.this.listener != null) {
+                    ButtonBar.this.listener.onCreate();
                 }
             }
         });
@@ -86,8 +86,8 @@ public class ButtonBar extends Composite {
 
             @Override
             public void onClick(ClickEvent event) {
-                if (listener != null) {
-                    listener.onEdit();
+                if (ButtonBar.this.listener != null) {
+                    ButtonBar.this.listener.onEdit();
                 }
             }
         });
@@ -96,8 +96,8 @@ public class ButtonBar extends Composite {
 
             @Override
             public void onClick(ClickEvent event) {
-                if (listener != null) {
-                    listener.onDelete();
+                if (ButtonBar.this.listener != null) {
+                    ButtonBar.this.listener.onDelete();
                 }
             }
         });

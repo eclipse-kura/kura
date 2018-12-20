@@ -35,8 +35,8 @@ public class UnsignedIntegerLE extends AbstractBinaryData<BigInteger> {
 
         final byte[] raw = new byte[sizeBytes];
 
-        int srcBit = offset * 8 + startBitOffset;
-        final int srcEnd = srcBit + sizeBits;
+        int srcBit = offset * 8 + this.startBitOffset;
+        final int srcEnd = srcBit + this.sizeBits;
 
         int dstBit = 0;
 
@@ -44,8 +44,8 @@ public class UnsignedIntegerLE extends AbstractBinaryData<BigInteger> {
             final int srcByte = srcBit / 8;
             final int dstByte = dstBit / 8;
 
-            if ((buf.get(srcByte) & 0xff & (1 << (srcBit % 8))) != 0) {
-                raw[dstByte] |= (1 << (dstBit % 8));
+            if ((buf.get(srcByte) & 0xff & 1 << srcBit % 8) != 0) {
+                raw[dstByte] |= 1 << dstBit % 8;
             }
 
             srcBit++;

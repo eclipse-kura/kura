@@ -31,12 +31,12 @@ public class ReadTask {
 
     public void exec(SenseHatInterface sensehat) {
         try {
-            record.setValue(this.reader.apply(sensehat));
-            record.setChannelStatus(CHANNEL_STATUS_OK);
+            this.record.setValue(this.reader.apply(sensehat));
+            this.record.setChannelStatus(CHANNEL_STATUS_OK);
         } catch (Exception e) {
-            record.setChannelStatus(new ChannelStatus(ChannelFlag.FAILURE, e.getMessage(), e));
+            this.record.setChannelStatus(new ChannelStatus(ChannelFlag.FAILURE, e.getMessage(), e));
         }
-        record.setTimestamp(System.currentTimeMillis());
+        this.record.setTimestamp(System.currentTimeMillis());
     }
 
 }

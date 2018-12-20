@@ -36,15 +36,15 @@ class WireAssetOptions {
     }
 
     public boolean emitAllChannels() {
-        return emitAllChannels;
+        return this.emitAllChannels;
     }
 
     public TimestampMode getTimestampMode() {
-        return timestampMode;
+        return this.timestampMode;
     }
 
     public boolean emitErrors() {
-        return emitErrors;
+        return this.emitErrors;
     }
 
     private static TimestampMode extractTimestampMode(final Map<String, Object> properties) {

@@ -33,7 +33,7 @@ public class ModemInterfaceConfigImpl extends ModemInterfaceImpl<ModemInterfaceA
 
         // Copy the NetInterfaceAddresses
         List<? extends ModemInterfaceAddress> otherNetInterfaceAddresses = other.getNetInterfaceAddresses();
-        ArrayList<ModemInterfaceAddressConfig> interfaceAddresses = new ArrayList<ModemInterfaceAddressConfig>();
+        ArrayList<ModemInterfaceAddressConfig> interfaceAddresses = new ArrayList<>();
         if (otherNetInterfaceAddresses != null) {
             for (ModemInterfaceAddress modemInterfaceAddress : otherNetInterfaceAddresses) {
                 ModemInterfaceAddressConfigImpl copiedInterfaceAddressImpl = new ModemInterfaceAddressConfigImpl(

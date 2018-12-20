@@ -31,7 +31,7 @@ public class WifiInterfaceConfigImpl extends WifiInterfaceImpl<WifiInterfaceAddr
 
         // Copy the NetInterfaceAddresses
         List<? extends WifiInterfaceAddress> otherNetInterfaceAddresses = other.getNetInterfaceAddresses();
-        ArrayList<WifiInterfaceAddressConfig> interfaceAddresses = new ArrayList<WifiInterfaceAddressConfig>();
+        ArrayList<WifiInterfaceAddressConfig> interfaceAddresses = new ArrayList<>();
 
         if (otherNetInterfaceAddresses != null) {
             for (WifiInterfaceAddress wifiInterfaceAddress : otherNetInterfaceAddresses) {

@@ -161,8 +161,8 @@ public class WireConfiguration {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = (prime * result) + ((this.emitterPid == null) ? 0 : this.emitterPid.hashCode());
-        result = (prime * result) + ((this.receiverPid == null) ? 0 : this.receiverPid.hashCode());
+        result = prime * result + (this.emitterPid == null ? 0 : this.emitterPid.hashCode());
+        result = prime * result + (this.receiverPid == null ? 0 : this.receiverPid.hashCode());
         return result;
     }
 

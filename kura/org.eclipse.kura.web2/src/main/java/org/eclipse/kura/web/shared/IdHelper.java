@@ -15,14 +15,15 @@ public final class IdHelper {
 
     /**
      * Get the last component of an OSGi ID.
-     * 
+     *
      * @param pid
      *            The ID, may be {@code null}.
      * @return The last component or {@code null} if the input was {@code null}.
      */
     public static String getLastIdComponent(final String pid) {
-        if (pid == null)
+        if (pid == null) {
             return null;
+        }
 
         final String[] toks = pid.split("\\.");
         if (toks.length > 1) {

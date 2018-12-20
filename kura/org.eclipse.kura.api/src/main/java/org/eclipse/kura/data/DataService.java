@@ -46,7 +46,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * is used to notify the service users about events such as message arrived, connection lost etc.
  * through the {@link DataServiceListener}.
  * {@see DataServiceListener}
- * 
+ *
  * @noimplement This interface is not intended to be implemented by clients.
  */
 @ProviderType

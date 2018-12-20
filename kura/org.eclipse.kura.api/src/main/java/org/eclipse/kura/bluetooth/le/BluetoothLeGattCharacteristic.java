@@ -31,7 +31,7 @@ public interface BluetoothLeGattCharacteristic {
 
     /**
      * Find a BluetoothLeGattDescriptor specifying the UUID of the descriptor.
-     * 
+     *
      * @param uuid
      *            The UUID of the GATT descriptor
      * @return The BluetoothLeGattDescriptor
@@ -41,7 +41,7 @@ public interface BluetoothLeGattCharacteristic {
 
     /**
      * Find a BluetoothLeGattDescriptor specifying the UUID of the descriptor and the timeout in seconds.
-     * 
+     *
      * @since 1.4
      * @param uuid
      *            The UUID of the GATT descriptor
@@ -55,7 +55,7 @@ public interface BluetoothLeGattCharacteristic {
 
     /**
      * Returns a list of BluetoothLeGattDescriptors available on this characteristic.
-     * 
+     *
      * @return A list of BluetoothLeGattDescriptor
      * @throws KuraBluetoothResourceNotFoundException
      */
@@ -63,7 +63,7 @@ public interface BluetoothLeGattCharacteristic {
 
     /**
      * Reads the value of this characteristic.
-     * 
+     *
      * @return A byte[] containing the value of this characteristic.
      * @throws KuraBluetoothIOException
      */
@@ -74,11 +74,11 @@ public interface BluetoothLeGattCharacteristic {
      * object. It enables notifications for this characteristic at BLE level.
      * If an application uses value notifications, it has to keep a reference to the corresponding GATT characteristic
      * to avoid that the garbage collector deletes it and removes the associated consumer.
-     * 
+     *
      * @param callback
      *            A Consumer<byte[]> object. Its accept function will be called
      *            when a notification is issued.
-     * 
+     *
      * @throws KuraBluetoothNotificationException
      */
     public void enableValueNotifications(Consumer<byte[]> callback) throws KuraBluetoothNotificationException;
@@ -87,38 +87,38 @@ public interface BluetoothLeGattCharacteristic {
      * Disables notifications of the value and unregisters the consumer object
      * passed through the corresponding enable method. It disables notifications
      * at BLE level for this characteristic.
-     * 
+     *
      * @throws KuraBluetoothNotificationException
      */
     public void disableValueNotifications() throws KuraBluetoothNotificationException;
 
     /**
      * Writes the value of this characteristic.
-     * 
+     *
      * @param value
      *            The data as byte[] to be written
-     * 
+     *
      * @throws KuraBluetoothIOException
      */
     public void writeValue(byte[] value) throws KuraBluetoothIOException;
 
     /**
      * Get the UUID of this characteristic.
-     * 
+     *
      * @return The 128 byte UUID of this characteristic, NULL if an error occurred
      */
     public UUID getUUID();
 
     /**
      * Returns the service to which this characteristic belongs to.
-     * 
+     *
      * @return The BluetoothLeGattService.
      */
     public BluetoothLeGattService getService();
 
     /**
      * Returns the cached value of this characteristic, if any.
-     * 
+     *
      * @return The cached value of this characteristic.
      */
     public byte[] getValue();
@@ -126,14 +126,14 @@ public interface BluetoothLeGattCharacteristic {
     /**
      * Returns true if notification for changes of this characteristic are
      * activated.
-     * 
+     *
      * @return True if notificatios are activated.
      */
     public boolean isNotifying();
 
     /**
      * Returns the list of BluetoothLeGattCharacteristicProperties this characteristic has.
-     * 
+     *
      * @return A list of BluetoothLeGattCharacteristicProperties for this characteristic.
      */
     public List<BluetoothLeGattCharacteristicProperties> getProperties();

@@ -97,7 +97,7 @@ public class RemoteTargetTest {
         s_logger.debug("m_systemService.getPlatform(): " + this.m_systemService.getPlatform());
         this.testExtender = new TestExtender(this.m_systemService.getPlatform(), componentContext.getBundleContext());
 
-        this.bundleTracker = new BundleTracker<Object>(componentContext.getBundleContext(),
+        this.bundleTracker = new BundleTracker<>(componentContext.getBundleContext(),
                 Bundle.RESOLVED | Bundle.ACTIVE | Bundle.INSTALLED, this.testExtender);
         this.bundleTracker.open();
 
@@ -198,7 +198,7 @@ public class RemoteTargetTest {
         // hijack the settings
         try {
             Configuration mqttConfig = this.m_configAdmin
-                    .getConfiguration("org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport",  "?");
+                    .getConfiguration("org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport", "?");
             Dictionary<String, Object> mqttProps = mqttConfig.getProperties();
             mqttProps.put("broker-url", "mqtt://broker-sandbox.everyware-cloud.com:1883/");
             mqttProps.put("topic.context.account-name", "EDC-KURA-CI");

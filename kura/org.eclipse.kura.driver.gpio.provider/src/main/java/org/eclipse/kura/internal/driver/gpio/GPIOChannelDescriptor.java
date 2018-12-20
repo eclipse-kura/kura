@@ -43,7 +43,7 @@ public final class GPIOChannelDescriptor implements ChannelDescriptor {
     private static final String RESOURCE_DIRECTION = "resource.direction";
     private static final String RESOURCE_TRIGGER = "resource.trigger";
 
-    private List<GPIOService> gpioServices;
+    private final List<GPIOService> gpioServices;
 
     public GPIOChannelDescriptor(List<GPIOService> gpioServices) {
         this.gpioServices = gpioServices;

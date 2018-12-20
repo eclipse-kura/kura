@@ -24,7 +24,7 @@ import org.osgi.annotation.versioning.ProviderType;
 /**
  * The Class TypedValues is an utility class to quickly create different
  * {@link TypedValue}
- * 
+ *
  * @since 1.2
  */
 @ProviderType
@@ -117,7 +117,7 @@ public final class TypedValues {
 
     /**
      * Creates new TypedValue inferring the type from the argument.
-     * 
+     *
      * @param value
      *            an object that needs to be represented as {@link TypedValue}
      * @return a {@link TypedValue} that represents the conversion of {@code value}
@@ -146,7 +146,7 @@ public final class TypedValues {
 
     /**
      * Parses a TypedValue of given type from a String.
-     * 
+     *
      * @param value
      *            the String to be parsed into a {@link TypedValue}
      * @param type

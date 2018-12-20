@@ -143,32 +143,32 @@ public class DeploymentPackageInstallOptions extends DeploymentPackageOptions {
     }
 
     public String getRequestType() {
-        return requestType;
+        return this.requestType;
     }
 
     public Map<String, Object> getHookProperties() {
-        return hookProperties;
+        return this.hookProperties;
     }
 
     public DeploymentHook getDeploymentHook() {
-        return deploymentHook;
+        return this.deploymentHook;
     }
 
     public String getDownloadDirectory() {
-        return downloadDirectory;
+        return this.downloadDirectory;
     }
 
     public RequestContext getHookRequestContext() {
-        return hookRequestContext;
+        return this.hookRequestContext;
     }
 
     protected void parseHookRelatedOptions(KuraPayload request, DeploymentHookManager hookManager) throws IOException {
         Object metric = request.getMetric(METRIC_REQUEST_TYPE);
         if (metric != null) {
             setRequestType((String) metric);
-            setDeploymentHook(hookManager.getHook(requestType));
-            setHookRequestContext(
-                    new RequestContext(DownloadFileUtilities.getDpDownloadFile(this).getAbsolutePath(), requestType));
+            setDeploymentHook(hookManager.getHook(this.requestType));
+            setHookRequestContext(new RequestContext(DownloadFileUtilities.getDpDownloadFile(this).getAbsolutePath(),
+                    this.requestType));
         } else {
             setDeploymentHook(null);
         }

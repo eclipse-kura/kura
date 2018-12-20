@@ -5,7 +5,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *******************************************************************************/
 package org.eclipse.kura;
 
@@ -13,7 +13,7 @@ import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * KuraBluetoothCommandException is raised when a command returns an error.
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  * @since 1.3
  */

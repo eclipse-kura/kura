@@ -50,19 +50,19 @@ public class AbstractDualportMathComponentOptions {
     }
 
     public String getFirstOperandName() {
-        return firstOperandName;
+        return this.firstOperandName;
     }
 
     public String getSecondOperandName() {
-        return secondOperandName;
+        return this.secondOperandName;
     }
 
     public String getResultName() {
-        return resultName;
+        return this.resultName;
     }
 
     public PortAggregatorFactory getPortAggregatorFactory() {
-        return portAggregatorFactory;
+        return this.portAggregatorFactory;
     }
 
     @SuppressWarnings("unchecked")

@@ -10,22 +10,22 @@
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
     <parent>
         <groupId>org.eclipse.kura</groupId>
         <artifactId>tinyb-parent</artifactId>
         <version>1.0.300-SNAPSHOT</version>
         <relativePath>..</relativePath>
     </parent>
-	
-	<artifactId>tinyb</artifactId>
-	<packaging>bundle</packaging>
-	
-	<name>Tiny Bluetooth LE Library</name>
+
+    <artifactId>tinyb</artifactId>
+    <packaging>bundle</packaging>
+
+    <name>Tiny Bluetooth LE Library</name>
     <description>TinyB exposes the BLE GATT API for C++, Java and other languages, using BlueZ over DBus</description>
-    
+
     <dependencies>
         <dependency>
             <groupId>tinyb</groupId>
@@ -34,17 +34,17 @@
             <scope>runtime</scope>
         </dependency>
     </dependencies>
-    
-	<build>
+
+    <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-						<Export-Package>tinyb.*;version=1.0.100</Export-Package>
-						<Import-Package></Import-Package>
-						<Embed-Dependency>
+                        <Export-Package>tinyb.*;version=1.0.100</Export-Package>
+                        <Import-Package></Import-Package>
+                        <Embed-Dependency>
                             tinyb;groupId=tinyb;artifactId=tinyb;version=1.0.100
                         </Embed-Dependency>
                         <Specification-Version>0.5</Specification-Version>
@@ -56,6 +56,6 @@
                 </configuration>
             </plugin>
         </plugins>
-	</build>
-	
+    </build>
+
 </project>

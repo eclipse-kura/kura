@@ -234,7 +234,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
             }
         }
 
-        if (this.timedOutOn == null || (System.nanoTime()) - this.timedOutOn < GRACE_PERIOD) {
+        if (this.timedOutOn == null || System.nanoTime() - this.timedOutOn < GRACE_PERIOD) {
             logger.debug("Refreshing watchdog.");
             refreshWatchdog();
         }

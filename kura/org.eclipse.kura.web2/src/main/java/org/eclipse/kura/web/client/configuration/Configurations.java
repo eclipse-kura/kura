@@ -22,18 +22,18 @@ import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 
 public class Configurations {
 
-    private final Set<String> allActivePids = new HashSet<String>();
+    private final Set<String> allActivePids = new HashSet<>();
     private final Map<String, GwtConfigComponent> componentDefinitions = new HashMap<>();
     private final Map<String, HasConfiguration> currentConfigurations = new HashMap<>();
     private final Map<String, GwtConfigComponent> channelDescriptors = new HashMap<>();
     private GwtConfigComponent baseChannelDescriptor = null;
 
     public GwtConfigComponent getFactoryDefinition(String factoryPid) {
-        return componentDefinitions.get(factoryPid);
+        return this.componentDefinitions.get(factoryPid);
     }
 
     public HasConfiguration getConfiguration(String pid) {
-        return currentConfigurations.get(pid);
+        return this.currentConfigurations.get(pid);
     }
 
     private GwtConfigComponent createConfigurationFromDefinition(String pid, String factoryPid,
@@ -86,7 +86,7 @@ public class Configurations {
     }
 
     public Collection<HasConfiguration> getConfigurations() {
-        return currentConfigurations.values();
+        return this.currentConfigurations.values();
     }
 
     public void clear() {
@@ -117,7 +117,7 @@ public class Configurations {
     }
 
     public GwtConfigComponent getBaseChannelDescriptor() {
-        return baseChannelDescriptor;
+        return this.baseChannelDescriptor;
     }
 
     public void setBaseChannelDescriptor(GwtConfigComponent baseChannelDescriptor) {
@@ -134,7 +134,7 @@ public class Configurations {
     }
 
     public List<String> getInvalidConfigurationPids() {
-        final List<String> result = new ArrayList<String>();
+        final List<String> result = new ArrayList<>();
         for (Entry<String, HasConfiguration> entry : this.currentConfigurations.entrySet()) {
             if (!entry.getValue().isValid()) {
                 result.add(entry.getKey());
@@ -199,7 +199,7 @@ public class Configurations {
     }
 
     public boolean isPidExisting(String pid) {
-        return currentConfigurations.containsKey(pid) || allActivePids.contains(pid);
+        return this.currentConfigurations.containsKey(pid) || this.allActivePids.contains(pid);
     }
 
     public void invalidateConfiguration(String pid) {
@@ -212,7 +212,7 @@ public class Configurations {
     private class ConfigurationWrapper implements HasConfiguration {
 
         private boolean isDirty;
-        private GwtConfigComponent configuration;
+        private final GwtConfigComponent configuration;
 
         public ConfigurationWrapper(GwtConfigComponent configuration) {
             this.configuration = configuration;
@@ -220,27 +220,27 @@ public class Configurations {
 
         @Override
         public GwtConfigComponent getConfiguration() {
-            return configuration;
+            return this.configuration;
         }
 
         @Override
         public void clearDirtyState() {
-            isDirty = false;
+            this.isDirty = false;
         }
 
         @Override
         public boolean isValid() {
-            return configuration != null && configuration.isValid();
+            return this.configuration != null && this.configuration.isValid();
         }
 
         @Override
         public boolean isDirty() {
-            return isDirty;
+            return this.isDirty;
         }
 
         @Override
         public void markAsDirty() {
-            isDirty = true;
+            this.isDirty = true;
         }
 
         @Override
@@ -258,12 +258,12 @@ public class Configurations {
 
         @Override
         public GwtConfigComponent getConfiguration() {
-            return wrapped.getConfiguration();
+            return this.wrapped.getConfiguration();
         }
 
         @Override
         public void clearDirtyState() {
-            wrapped.clearDirtyState();
+            this.wrapped.clearDirtyState();
         }
 
         @Override
@@ -273,17 +273,17 @@ public class Configurations {
 
         @Override
         public boolean isDirty() {
-            return wrapped.isDirty();
+            return this.wrapped.isDirty();
         }
 
         @Override
         public void markAsDirty() {
-            wrapped.markAsDirty();
+            this.wrapped.markAsDirty();
         }
 
         @Override
         public void setListener(Listener listener) {
-            wrapped.setListener(listener);
+            this.wrapped.setListener(listener);
         }
     }
 }

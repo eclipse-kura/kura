@@ -51,7 +51,7 @@ final class ExamplePublisherOptions {
         }
         return cloudPublisherPid;
     }
-    
+
     String getCloudSubscriberPid() {
         String cloudSubscriberPid = DEFAULT_CLOUD_SUBSCRIBER_PID;
         Object configCloudSubscriberPid = this.properties.get(CLOUD_SUBSCRIBER_PROP_NAME);

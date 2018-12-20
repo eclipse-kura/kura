@@ -46,7 +46,7 @@ public class TestExtender implements BundleTrackerCustomizer<Object> {
     private final String m_platform;
 
     public TestExtender(String platform, BundleContext bundleContext) {
-        this.m_bundles = new HashMap<Long, Bundle>();
+        this.m_bundles = new HashMap<>();
         this.m_bundleContext = bundleContext;
         this.m_platform = platform;
 
@@ -107,7 +107,7 @@ public class TestExtender implements BundleTrackerCustomizer<Object> {
 
     public List<Class<?>> getTestClass(Bundle bundle) {
         try {
-            List<Class<?>> clazzs = new ArrayList<Class<?>>();
+            List<Class<?>> clazzs = new ArrayList<>();
             Enumeration<?> entrs = bundle.findEntries("/", "*Test.class", true);
             if (entrs == null || !entrs.hasMoreElements()) {
                 return Collections.emptyList();

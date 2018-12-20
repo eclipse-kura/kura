@@ -32,8 +32,8 @@ public class GatewayRouter extends AbstractJavaCamelComponent implements Configu
     private static final int DEFAULT_MINIMUM = 0;
     private static final int DEFAULT_MAXIMUM = 40;
 
-    private RandomTemperatureGenerator randomTemperatureGenerator = new RandomTemperatureGenerator(DEFAULT_MINIMUM,
-            DEFAULT_MAXIMUM);
+    private final RandomTemperatureGenerator randomTemperatureGenerator = new RandomTemperatureGenerator(
+            DEFAULT_MINIMUM, DEFAULT_MAXIMUM);
 
     @Override
     public void configure() throws Exception {

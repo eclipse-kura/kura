@@ -179,6 +179,7 @@ public class ModemConfig implements NetConfig {
      * @return password as {@link String}
      * @deprecated
      */
+    @Deprecated
     public String getPassword() {
         return this.password.toString();
     }

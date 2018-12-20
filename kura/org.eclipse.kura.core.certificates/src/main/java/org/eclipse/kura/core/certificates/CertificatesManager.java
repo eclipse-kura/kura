@@ -23,8 +23,8 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.certificate.CertificatesService;
 import org.eclipse.kura.crypto.CryptoService;
-import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraApplicationTopic;
+import org.eclipse.kura.message.KuraPayload;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -115,17 +115,17 @@ public class CertificatesManager implements CertificatesService {
         return true;
     }
 
-	protected Certificate getCertificateFromKeyStore(char[] keyStorePassword, String alias)
-			throws NoSuchAlgorithmException, CertificateException, KeyStoreException, IOException {
-		KeyStore ks = KeyStoreManagement.loadKeyStore(keyStorePassword);
-		return ks.getCertificate(alias);
-	}
+    protected Certificate getCertificateFromKeyStore(char[] keyStorePassword, String alias)
+            throws NoSuchAlgorithmException, CertificateException, KeyStoreException, IOException {
+        KeyStore ks = KeyStoreManagement.loadKeyStore(keyStorePassword);
+        return ks.getCertificate(alias);
+    }
 
-	protected Enumeration<String> getAliasesFromKeyStore(char[] keyStorePassword)
-			throws NoSuchAlgorithmException, CertificateException, KeyStoreException, IOException {
-		KeyStore ks = KeyStoreManagement.loadKeyStore(keyStorePassword);
-		return ks.aliases();
-	}
+    protected Enumeration<String> getAliasesFromKeyStore(char[] keyStorePassword)
+            throws NoSuchAlgorithmException, CertificateException, KeyStoreException, IOException {
+        KeyStore ks = KeyStoreManagement.loadKeyStore(keyStorePassword);
+        return ks.aliases();
+    }
 
     private Enumeration<String> listStoredCertificatesAliases() {
         try {

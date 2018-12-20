@@ -11,9 +11,8 @@
  *******************************************************************************/
 package org.eclipse.kura.core.cloud;
 
-
 public interface CloudPublisherDeliveryListener {
-    
+
     public void onMessageConfirmed(String messageId, String topic);
 
 }

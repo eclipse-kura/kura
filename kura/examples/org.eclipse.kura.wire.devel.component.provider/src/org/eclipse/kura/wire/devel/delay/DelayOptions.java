@@ -25,10 +25,10 @@ public class DelayOptions {
     }
 
     public int getAverageDelay() {
-        return DELAY_AVERAGE.get(properties);
+        return DELAY_AVERAGE.get(this.properties);
     }
 
     public int getDelayStdDev() {
-        return DELAY_STD_DEV.get(properties);
+        return DELAY_STD_DEV.get(this.properties);
     }
 }

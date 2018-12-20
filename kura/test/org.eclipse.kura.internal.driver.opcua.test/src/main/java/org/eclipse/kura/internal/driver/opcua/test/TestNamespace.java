@@ -9,7 +9,7 @@
  *   http://www.eclipse.org/legal/epl-v10.html
  * and the Eclipse Distribution License is available at
  *   http://www.eclipse.org/org/documents/edl-v10.html.
- *   
+ *
  *  Contributors:
  *  Kevin Herron
  *  Eurotech
@@ -108,8 +108,8 @@ public class TestNamespace implements Namespace {
             { "XmlElementArray", Identifiers.XmlElement, new Variant(new XmlElement("<a>hello</a>")) },
             { "LocalizedTextArray", Identifiers.LocalizedText, new Variant(LocalizedText.english("localized text")) },
             { "QualifiedNameArray", Identifiers.QualifiedName, new Variant(new QualifiedName(1234, "defg")) },
-            { "NodeIdArray", Identifiers.NodeId, new Variant(new NodeId(1234, "abcd")) } };  
-    
+            { "NodeIdArray", Identifiers.NodeId, new Variant(new NodeId(1234, "abcd")) } };
+
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private final SubscriptionModel subscriptionModel;
@@ -121,14 +121,15 @@ public class TestNamespace implements Namespace {
         this.server = server;
         this.namespaceIndex = namespaceIndex;
 
-        subscriptionModel = new SubscriptionModel(server, this);
+        this.subscriptionModel = new SubscriptionModel(server, this);
 
         try {
             // Create a "HelloWorld" folder and add it to the node manager
             NodeId folderNodeId = new NodeId(namespaceIndex, IDENTIFIER_HELLO_WORLD);
 
             UaFolderNode folderNode = new UaFolderNode(server.getNodeMap(), folderNodeId,
-                    new QualifiedName(namespaceIndex, IDENTIFIER_HELLO_WORLD), LocalizedText.english(IDENTIFIER_HELLO_WORLD));
+                    new QualifiedName(namespaceIndex, IDENTIFIER_HELLO_WORLD),
+                    LocalizedText.english(IDENTIFIER_HELLO_WORLD));
 
             server.getNodeMap().addNode(folderNode);
 
@@ -140,13 +141,13 @@ public class TestNamespace implements Namespace {
             addVariableNodes(folderNode);
 
         } catch (UaException e) {
-            logger.error("Error adding nodes: {}", e.getMessage(), e);
+            this.logger.error("Error adding nodes: {}", e.getMessage(), e);
         }
     }
 
     @Override
     public UShort getNamespaceIndex() {
-        return namespaceIndex;
+        return this.namespaceIndex;
     }
 
     @Override
@@ -160,11 +161,11 @@ public class TestNamespace implements Namespace {
     }
 
     private void addArrayNodes(UaFolderNode rootNode) {
-        UaFolderNode arrayTypesFolder = new UaFolderNode(server.getNodeMap(),
-                new NodeId(namespaceIndex, "HelloWorld/ArrayTypes"), new QualifiedName(namespaceIndex, "ArrayTypes"),
-                LocalizedText.english("ArrayTypes"));
+        UaFolderNode arrayTypesFolder = new UaFolderNode(this.server.getNodeMap(),
+                new NodeId(this.namespaceIndex, "HelloWorld/ArrayTypes"),
+                new QualifiedName(this.namespaceIndex, "ArrayTypes"), LocalizedText.english("ArrayTypes"));
 
-        server.getNodeMap().addNode(arrayTypesFolder);
+        this.server.getNodeMap().addNode(arrayTypesFolder);
         rootNode.addOrganizes(arrayTypesFolder);
 
         for (Object[] os : STATIC_ARRAY_NODES) {
@@ -177,28 +178,28 @@ public class TestNamespace implements Namespace {
             }
             Variant variant = new Variant(array);
 
-            UaVariableNode node = new UaVariableNode.UaVariableNodeBuilder(server.getNodeMap())
-                    .setNodeId(new NodeId(namespaceIndex, name))
+            UaVariableNode node = new UaVariableNode.UaVariableNodeBuilder(this.server.getNodeMap())
+                    .setNodeId(new NodeId(this.namespaceIndex, name))
                     .setAccessLevel(ubyte(AccessLevel.getMask(AccessLevel.READ_WRITE)))
                     .setUserAccessLevel(ubyte(AccessLevel.getMask(AccessLevel.READ_WRITE)))
-                    .setBrowseName(new QualifiedName(namespaceIndex, name)).setDisplayName(LocalizedText.english(name))
-                    .setDataType(typeId).setTypeDefinition(Identifiers.BaseDataVariableType)
-                    .setValueRank(ValueRank.OneDimension.getValue()).setArrayDimensions(new UInteger[] { uint(0) })
-                    .build();
+                    .setBrowseName(new QualifiedName(this.namespaceIndex, name))
+                    .setDisplayName(LocalizedText.english(name)).setDataType(typeId)
+                    .setTypeDefinition(Identifiers.BaseDataVariableType).setValueRank(ValueRank.OneDimension.getValue())
+                    .setArrayDimensions(new UInteger[] { uint(0) }).build();
 
             node.setValue(new DataValue(variant));
 
-            server.getNodeMap().addNode(node);
+            this.server.getNodeMap().addNode(node);
             arrayTypesFolder.addOrganizes(node);
         }
     }
 
     private void addScalarNodes(UaFolderNode rootNode) {
-        UaFolderNode scalarTypesFolder = new UaFolderNode(server.getNodeMap(),
-                new NodeId(namespaceIndex, "HelloWorld/ScalarTypes"), new QualifiedName(namespaceIndex, "ScalarTypes"),
-                LocalizedText.english("ScalarTypes"));
+        UaFolderNode scalarTypesFolder = new UaFolderNode(this.server.getNodeMap(),
+                new NodeId(this.namespaceIndex, "HelloWorld/ScalarTypes"),
+                new QualifiedName(this.namespaceIndex, "ScalarTypes"), LocalizedText.english("ScalarTypes"));
 
-        server.getNodeMap().addNode(scalarTypesFolder);
+        this.server.getNodeMap().addNode(scalarTypesFolder);
         rootNode.addOrganizes(scalarTypesFolder);
 
         for (Object[] os : STATIC_SCALAR_NODES) {
@@ -206,23 +207,24 @@ public class TestNamespace implements Namespace {
             NodeId typeId = (NodeId) os[1];
             Variant variant = (Variant) os[2];
 
-            UaVariableNode node = new UaVariableNode.UaVariableNodeBuilder(server.getNodeMap())
-                    .setNodeId(new NodeId(namespaceIndex, name))
+            UaVariableNode node = new UaVariableNode.UaVariableNodeBuilder(this.server.getNodeMap())
+                    .setNodeId(new NodeId(this.namespaceIndex, name))
                     .setAccessLevel(ubyte(AccessLevel.getMask(AccessLevel.READ_WRITE)))
                     .setUserAccessLevel(ubyte(AccessLevel.getMask(AccessLevel.READ_WRITE)))
-                    .setBrowseName(new QualifiedName(namespaceIndex, name)).setDisplayName(LocalizedText.english(name))
-                    .setDataType(typeId).setTypeDefinition(Identifiers.BaseDataVariableType).build();
+                    .setBrowseName(new QualifiedName(this.namespaceIndex, name))
+                    .setDisplayName(LocalizedText.english(name)).setDataType(typeId)
+                    .setTypeDefinition(Identifiers.BaseDataVariableType).build();
 
             node.setValue(new DataValue(variant));
 
-            server.getNodeMap().addNode(node);
+            this.server.getNodeMap().addNode(node);
             scalarTypesFolder.addOrganizes(node);
         }
     }
 
     @Override
     public CompletableFuture<List<Reference>> browse(AccessContext context, NodeId nodeId) {
-        ServerNode node = server.getNodeMap().get(nodeId);
+        ServerNode node = this.server.getNodeMap().get(nodeId);
 
         if (node != null) {
             return CompletableFuture.completedFuture(node.getReferences());
@@ -238,7 +240,7 @@ public class TestNamespace implements Namespace {
         List<DataValue> results = Lists.newArrayListWithCapacity(readValueIds.size());
 
         for (ReadValueId readValueId : readValueIds) {
-            ServerNode node = server.getNodeMap().get(readValueId.getNodeId());
+            ServerNode node = this.server.getNodeMap().get(readValueId.getNodeId());
 
             if (node != null) {
                 DataValue value = node.readAttribute(new AttributeContext(context), readValueId.getAttributeId(),
@@ -258,7 +260,7 @@ public class TestNamespace implements Namespace {
         List<StatusCode> results = Lists.newArrayListWithCapacity(writeValues.size());
 
         for (WriteValue writeValue : writeValues) {
-            ServerNode node = server.getNodeMap().get(writeValue.getNodeId());
+            ServerNode node = this.server.getNodeMap().get(writeValue.getNodeId());
 
             if (node != null) {
                 try {
@@ -267,11 +269,11 @@ public class TestNamespace implements Namespace {
 
                     results.add(StatusCode.GOOD);
 
-                    logger.info("Wrote value {} to {} attribute of {}", writeValue.getValue().getValue(),
+                    this.logger.info("Wrote value {} to {} attribute of {}", writeValue.getValue().getValue(),
                             AttributeId.from(writeValue.getAttributeId()).map(Object::toString).orElse("unknown"),
                             node.getNodeId());
                 } catch (UaException e) {
-                    logger.error("Unable to write value={}", writeValue.getValue(), e);
+                    this.logger.error("Unable to write value={}", writeValue.getValue(), e);
                     results.add(e.getStatusCode());
                 }
             } else {
@@ -284,27 +286,27 @@ public class TestNamespace implements Namespace {
 
     @Override
     public void onDataItemsCreated(List<DataItem> dataItems) {
-        subscriptionModel.onDataItemsCreated(dataItems);
+        this.subscriptionModel.onDataItemsCreated(dataItems);
     }
 
     @Override
     public void onDataItemsModified(List<DataItem> dataItems) {
-        subscriptionModel.onDataItemsModified(dataItems);
+        this.subscriptionModel.onDataItemsModified(dataItems);
     }
 
     @Override
     public void onDataItemsDeleted(List<DataItem> dataItems) {
-        subscriptionModel.onDataItemsDeleted(dataItems);
+        this.subscriptionModel.onDataItemsDeleted(dataItems);
     }
 
     @Override
     public void onMonitoringModeChanged(List<MonitoredItem> monitoredItems) {
-        subscriptionModel.onMonitoringModeChanged(monitoredItems);
+        this.subscriptionModel.onMonitoringModeChanged(monitoredItems);
     }
 
     @Override
     public Optional<MethodInvocationHandler> getInvocationHandler(NodeId methodId) {
-        Optional<ServerNode> node = server.getNodeMap().getNode(methodId);
+        Optional<ServerNode> node = this.server.getNodeMap().getNode(methodId);
 
         return node.flatMap(n -> {
             if (n instanceof UaMethodNode) {

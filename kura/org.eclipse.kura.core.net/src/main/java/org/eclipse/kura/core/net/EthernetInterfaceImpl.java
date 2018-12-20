@@ -34,7 +34,7 @@ public class EthernetInterfaceImpl<T extends NetInterfaceAddress> extends Abstra
 
         // Copy the NetInterfaceAddresses
         List<? extends NetInterfaceAddress> otherNetInterfaceAddresses = other.getNetInterfaceAddresses();
-        ArrayList<T> interfaceAddresses = new ArrayList<T>();
+        ArrayList<T> interfaceAddresses = new ArrayList<>();
 
         if (otherNetInterfaceAddresses != null) {
             for (NetInterfaceAddress netInterfaceAddress : otherNetInterfaceAddresses) {
@@ -70,7 +70,7 @@ public class EthernetInterfaceImpl<T extends NetInterfaceAddress> extends Abstra
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + (linkUp ? 1231 : 1237);
+        result = prime * result + (this.linkUp ? 1231 : 1237);
         return result;
     }
 
@@ -86,7 +86,7 @@ public class EthernetInterfaceImpl<T extends NetInterfaceAddress> extends Abstra
             return false;
         }
         EthernetInterfaceImpl<?> other = (EthernetInterfaceImpl<?>) obj;
-        if (linkUp != other.linkUp) {
+        if (this.linkUp != other.linkUp) {
             return false;
         }
         return true;

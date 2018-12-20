@@ -33,44 +33,50 @@ public class ListenParams extends ReadParams {
     }
 
     public double getSamplingInterval() {
-        return samplingInterval;
+        return this.samplingInterval;
     }
 
     public long getQueueSize() {
-        return queueSize;
+        return this.queueSize;
     }
 
     public boolean getDiscardOldest() {
-        return discardOldest;
+        return this.discardOldest;
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + (discardOldest ? 1231 : 1237);
-        result = prime * result + (int) (queueSize ^ (queueSize >>> 32));
+        result = prime * result + (this.discardOldest ? 1231 : 1237);
+        result = prime * result + (int) (this.queueSize ^ this.queueSize >>> 32);
         long temp;
-        temp = Double.doubleToLongBits(samplingInterval);
-        result = prime * result + (int) (temp ^ (temp >>> 32));
+        temp = Double.doubleToLongBits(this.samplingInterval);
+        result = prime * result + (int) (temp ^ temp >>> 32);
         return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (!super.equals(obj))
+        }
+        if (!super.equals(obj)) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         ListenParams other = (ListenParams) obj;
-        if (discardOldest != other.discardOldest)
+        if (this.discardOldest != other.discardOldest) {
             return false;
-        if (queueSize != other.queueSize)
+        }
+        if (this.queueSize != other.queueSize) {
             return false;
-        if (Double.doubleToLongBits(samplingInterval) != Double.doubleToLongBits(other.samplingInterval))
+        }
+        if (Double.doubleToLongBits(this.samplingInterval) != Double.doubleToLongBits(other.samplingInterval)) {
             return false;
+        }
         return true;
     }
 

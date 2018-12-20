@@ -33,8 +33,7 @@ public class ChannelOperationResponse extends AbstractResponse {
     private ChannelStatus getChannelStatus(ChannelRecord record) {
         ChannelStatus status = record.getChannelStatus();
 
-        if (status == null
-                || (status.getChannelFlag() == ChannelFlag.FAILURE && status.getExceptionMessage() == null)) {
+        if (status == null || status.getChannelFlag() == ChannelFlag.FAILURE && status.getExceptionMessage() == null) {
             status = new ChannelStatus(ChannelFlag.FAILURE, "Unknown error", null);
         }
 
@@ -57,7 +56,7 @@ public class ChannelOperationResponse extends AbstractResponse {
 
         assetObject.add(SerializationConstants.CHANNELS_PROPERTY, channels);
 
-        serialized.add(assetObject);
+        this.serialized.add(assetObject);
     }
 
     public void reportResult(String assetName, List<ChannelRecord> list) {
@@ -97,7 +96,7 @@ public class ChannelOperationResponse extends AbstractResponse {
 
         assetObject.add(SerializationConstants.CHANNELS_PROPERTY, channels);
 
-        serialized.add(assetObject);
+        this.serialized.add(assetObject);
     }
 
 }

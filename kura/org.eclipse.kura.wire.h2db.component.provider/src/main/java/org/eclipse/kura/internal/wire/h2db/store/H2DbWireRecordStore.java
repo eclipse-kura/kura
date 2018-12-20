@@ -230,7 +230,7 @@ public class H2DbWireRecordStore implements WireEmitter, WireReceiver, Configura
         final String tableName = this.wireRecordStoreOptions.getTableName();
         final String sqlTableName = this.dbHelper.sanitizeSqlTableAndColumnName(tableName);
 
-        return dbHelper.withConnection(c -> {
+        return this.dbHelper.withConnection(c -> {
             try (final Statement stmt = c.createStatement();
                     final ResultSet rset = stmt.executeQuery(MessageFormat.format(SQL_ROW_COUNT_TABLE, sqlTableName))) {
                 rset.next();
@@ -345,7 +345,7 @@ public class H2DbWireRecordStore implements WireEmitter, WireReceiver, Configura
         requireNonNull(tableName, "Table name cannot be null");
         final String sqlTableName = this.dbHelper.sanitizeSqlTableAndColumnName(tableName);
 
-        dbHelper.withConnection(c -> {
+        this.dbHelper.withConnection(c -> {
             // check for the table that would collect the data of this emitter
             final String catalog = c.getCatalog();
             final DatabaseMetaData dbMetaData = c.getMetaData();

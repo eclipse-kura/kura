@@ -19,7 +19,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * getNetInterfaceAddresses() method.
  * NetInterfaceAddressConfig complements NetInterfaceAddress, which provides the current addresses associated to the
  * interface, with the NetConfig objects.
- * 
+ *
  * @noimplement This interface is not intended to be implemented by clients.
  */
 @ProviderType

@@ -183,19 +183,19 @@ public class SenseHatInterface implements Closeable {
     }
 
     public float getPressure() {
-        return pressure;
+        return this.pressure;
     }
 
     public float getHumidity() {
-        return humidity;
+        return this.humidity;
     }
 
     public float getTemperatureFromHumidity() {
-        return temperatureFromHumidity;
+        return this.temperatureFromHumidity;
     }
 
     public float getTemperatureFromPressure() {
-        return temperatureFromPerssure;
+        return this.temperatureFromPerssure;
     }
 
     public Long getLastJoystickEventTimestamp(Resource event) {
@@ -203,7 +203,7 @@ public class SenseHatInterface implements Closeable {
     }
 
     public synchronized void runReadRequest(SenseHatReadRequest request) {
-        this.fetch(request.getInvolvedSensors());
+        fetch(request.getInvolvedSensors());
         request.getTasks().forEach(task -> task.exec(this));
     }
 
@@ -232,15 +232,15 @@ public class SenseHatInterface implements Closeable {
         }
 
         public EnumSet<Sensor> getInvolvedSensors() {
-            return involvedSensors;
+            return this.involvedSensors;
         }
 
         public List<ChannelRecord> getRecords() {
-            return records;
+            return this.records;
         }
 
         public List<ReadTask> getTasks() {
-            return tasks;
+            return this.tasks;
         }
     }
 

@@ -26,15 +26,15 @@ public class RunningAverage {
     }
 
     public double updateAndGet(double value) {
-        if (this.window.size() >= windowSize) {
+        if (this.window.size() >= this.windowSize) {
             this.last = this.window.removeFirst();
         }
         this.window.addLast(value);
-        this.sum = value + sum - last;
-        return this.sum / window.size();
+        this.sum = value + this.sum - this.last;
+        return this.sum / this.window.size();
     }
 
     public int getActualWindowSize() {
-        return window.size();
+        return this.window.size();
     }
 }

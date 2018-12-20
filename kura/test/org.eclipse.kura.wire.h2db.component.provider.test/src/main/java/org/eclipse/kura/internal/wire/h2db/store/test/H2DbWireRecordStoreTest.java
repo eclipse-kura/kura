@@ -55,7 +55,7 @@ public class H2DbWireRecordStoreTest {
 
     private static Object dbstoreLock = new Object();
 
-    private String tableName = "H2_STORE_TEST";
+    private final String tableName = "H2_STORE_TEST";
 
     @BeforeClass
     public static void setup() throws KuraException {
@@ -79,8 +79,8 @@ public class H2DbWireRecordStoreTest {
 
     protected void activate() throws KuraException {
         if (cfgsvc != null) {
-            Map<String, Object> props = new HashMap<String, Object>();
-            props.put("table.name", tableName);
+            Map<String, Object> props = new HashMap<>();
+            props.put("table.name", this.tableName);
             props.put("maximum.table.size", maxSize);
             props.put("cleanup.records.keep", cleanupSize);
 
@@ -99,13 +99,13 @@ public class H2DbWireRecordStoreTest {
     public void testReceive() throws SQLException {
         Connection connection = dbsvc.getConnection();
 
-        ResultSet resultSet = connection.prepareStatement("SELECT count(*) FROM " + tableName).executeQuery();
+        ResultSet resultSet = connection.prepareStatement("SELECT count(*) FROM " + this.tableName).executeQuery();
         resultSet.next();
         int startCount = resultSet.getInt(1);
 
         String emitterPid = "emitter";
-        List<WireRecord> wireRecords = new ArrayList<WireRecord>();
-        Map<String, TypedValue<?>> recordProps = new HashMap<String, TypedValue<?>>();
+        List<WireRecord> wireRecords = new ArrayList<>();
+        Map<String, TypedValue<?>> recordProps = new HashMap<>();
         TypedValue<?> val = new StringValue("val");
         recordProps.put("key", val);
         WireRecord record = new WireRecord(recordProps);
@@ -117,20 +117,20 @@ public class H2DbWireRecordStoreTest {
 
         // check the results
         DatabaseMetaData metaData = connection.getMetaData();
-        ResultSet tables = metaData.getTables(null, null, tableName, null);
+        ResultSet tables = metaData.getTables(null, null, this.tableName, null);
         tables.first();
         String dbTableName = tables.getString("TABLE_NAME");
 
         // only one table was created with the correct name
         assertTrue("Only one table was expected", tables.isLast());
-        assertEquals(tableName, dbTableName);
+        assertEquals(this.tableName, dbTableName);
 
-        resultSet = connection.prepareStatement("SELECT count(*) FROM " + tableName).executeQuery();
+        resultSet = connection.prepareStatement("SELECT count(*) FROM " + this.tableName).executeQuery();
         resultSet.next();
         int count = resultSet.getInt(1);
         assertEquals("Unexpected number of records in the database.", startCount + 1L, count);
 
-        resultSet = connection.prepareStatement("SELECT * FROM " + tableName).executeQuery();
+        resultSet = connection.prepareStatement("SELECT * FROM " + this.tableName).executeQuery();
         resultSet.next();
         long tim = resultSet.getLong(1);
         String strval = resultSet.getString("key");
@@ -141,12 +141,12 @@ public class H2DbWireRecordStoreTest {
         // add couple more
         dbstore.onWireReceive(wireEvelope);
 
-        recordProps = new HashMap<String, TypedValue<?>>();
+        recordProps = new HashMap<>();
         val = new ByteArrayValue("val".getBytes());
         recordProps.put("blobkey", val);
         record = new WireRecord(recordProps);
         wireRecords.add(record);
-        recordProps = new HashMap<String, TypedValue<?>>();
+        recordProps = new HashMap<>();
         val = new BooleanValue(true);
         recordProps.put("boolkey", val);
         val = new DoubleValue(1.234);
@@ -161,7 +161,7 @@ public class H2DbWireRecordStoreTest {
         wireRecords.add(record);
         dbstore.onWireReceive(wireEvelope); // adds 3, now
 
-        resultSet = connection.prepareStatement("SELECT count(*) FROM " + tableName).executeQuery();
+        resultSet = connection.prepareStatement("SELECT count(*) FROM " + this.tableName).executeQuery();
         resultSet.next();
         count = resultSet.getInt(1);
         assertEquals("Unexpected number of records", startCount + 5L, count);
@@ -172,11 +172,11 @@ public class H2DbWireRecordStoreTest {
         // create DB, insert a few wire records, check they are actually in there and clean the DB
         Connection connection = dbsvc.getConnection();
 
-        connection.prepareStatement("TRUNCATE TABLE " + tableName).execute();
+        connection.prepareStatement("TRUNCATE TABLE " + this.tableName).execute();
 
         String emitterPid = "emitter";
-        List<WireRecord> wireRecords = new ArrayList<WireRecord>();
-        Map<String, TypedValue<?>> recordProps = new HashMap<String, TypedValue<?>>();
+        List<WireRecord> wireRecords = new ArrayList<>();
+        Map<String, TypedValue<?>> recordProps = new HashMap<>();
         TypedValue<?> val = new StringValue("val");
         recordProps.put("key", val);
         WireRecord record = new WireRecord(recordProps);
@@ -194,7 +194,7 @@ public class H2DbWireRecordStoreTest {
             Thread.currentThread().interrupt();
         }
 
-        ResultSet resultSet = connection.prepareStatement("SELECT count(*) FROM " + tableName).executeQuery();
+        ResultSet resultSet = connection.prepareStatement("SELECT count(*) FROM " + this.tableName).executeQuery();
         resultSet.next();
         int count = resultSet.getInt(1);
         assertEquals("Unexpected number of records", maxSize, count);
@@ -210,7 +210,7 @@ public class H2DbWireRecordStoreTest {
             Thread.currentThread().interrupt();
         }
 
-        resultSet = connection.prepareStatement("SELECT count(*) FROM " + tableName).executeQuery();
+        resultSet = connection.prepareStatement("SELECT count(*) FROM " + this.tableName).executeQuery();
         resultSet.next();
         count = resultSet.getInt(1);
         assertEquals("Unexpected number of records", cleanupSize + 5L, count);

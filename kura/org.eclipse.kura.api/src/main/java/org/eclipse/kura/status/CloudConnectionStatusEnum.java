@@ -16,7 +16,11 @@ package org.eclipse.kura.status;
  *
  */
 public enum CloudConnectionStatusEnum {
-    OFF, FAST_BLINKING, SLOW_BLINKING, HEARTBEAT, ON;
+    OFF,
+    FAST_BLINKING,
+    SLOW_BLINKING,
+    HEARTBEAT,
+    ON;
 
     /**
      * Delays in ms for Fast Blinking

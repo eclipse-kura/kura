@@ -34,9 +34,9 @@ public class NetUtil {
 
         StringJoiner sj = new StringJoiner(":");
         for (byte item : macAddress) {
-        	sj.add(String.format("%02X", item));
+            sj.add(String.format("%02X", item));
         }
-        
+
         return sj.toString();
     }
 
@@ -44,7 +44,7 @@ public class NetUtil {
         if (macAddress == null || macAddress.isEmpty()) {
             return new byte[] { 0, 0, 0, 0, 0, 0 };
         }
-        
+
         String[] items = macAddress.split("\\:");
 
         if (items.length != 6) {
@@ -54,7 +54,7 @@ public class NetUtil {
         byte[] bytes = new byte[6];
         for (int i = 0; i < 6; i++) {
             String item = items[i];
-            if (item.isEmpty() || (item.length() > 2)) {
+            if (item.isEmpty() || item.length() > 2) {
                 throw new IllegalArgumentException("mac is invalid: " + macAddress);
             }
 

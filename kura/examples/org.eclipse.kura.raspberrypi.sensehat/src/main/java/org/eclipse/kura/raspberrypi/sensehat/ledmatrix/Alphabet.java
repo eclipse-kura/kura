@@ -30,7 +30,7 @@ public class Alphabet {
 
     public Alphabet(URL url) {
 
-        letters = new HashMap<String, short[][][]>();
+        letters = new HashMap<>();
         short[][][] letter = new short[8][8][3];
         int c;
         try {

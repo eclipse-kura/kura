@@ -26,7 +26,7 @@ public class AverageComponent extends AbstractSingleportMathComponent {
 
     @Override
     public TypedValue<?> apply(TypedValue<?> t) {
-        if (runningAverage == null) {
+        if (this.runningAverage == null) {
             this.runningAverage = new RunningAverage(this.options.getWindowSize());
         }
         final double value = ((Number) t.getValue()).doubleValue();

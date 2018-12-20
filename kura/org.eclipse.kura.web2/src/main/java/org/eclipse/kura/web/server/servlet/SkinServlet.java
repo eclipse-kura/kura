@@ -50,8 +50,9 @@ public class SkinServlet extends HttpServlet {
         } catch (GwtKuraException | IOException e1) {
             return;
         }
-        if (fResourceFile == null)
+        if (fResourceFile == null) {
             return;
+        }
         if (resourceName.endsWith(".css")) {
             response.setContentType("text/css");
             streamText(fResourceFile, response);
@@ -94,8 +95,9 @@ public class SkinServlet extends HttpServlet {
     private File checkFile(String resourceName) throws GwtKuraException, IOException {
         SystemService systemService = ServiceLocator.getInstance().getService(SystemService.class);
         String path = systemService.getKuraStyleDirectory();
-        if (path == null)
+        if (path == null) {
             return null;
+        }
         try (Stream<Path> kuraStyleDirStream = Files.list(Paths.get(path));) {
             Optional<Path> fResourcePath = kuraStyleDirStream.filter(filePath -> filePath.toFile().isFile())
                     .filter(filePath -> filePath.toFile().getAbsolutePath().endsWith(resourceName)).findFirst();

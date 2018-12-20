@@ -110,20 +110,21 @@ public final class WiresRPC {
 
             @Override
             public void onSuccess(GwtXSRFToken result) {
-                gwtWireGraphService.updateWireConfiguration(result, wireGraph, additionalConfigs, new AsyncCallback<Void>() {
+                gwtWireGraphService.updateWireConfiguration(result, wireGraph, additionalConfigs,
+                        new AsyncCallback<Void>() {
 
-                    @Override
-                    public void onFailure(Throwable ex) {
-                        EntryClassUi.hideWaitModal();
-                        FailureHandler.handle(ex);
-                    }
+                            @Override
+                            public void onFailure(Throwable ex) {
+                                EntryClassUi.hideWaitModal();
+                                FailureHandler.handle(ex);
+                            }
 
-                    @Override
-                    public void onSuccess(Void result) {
-                        EntryClassUi.hideWaitModal();
-                        callback.onSuccess(null);
-                    }
-                });
+                            @Override
+                            public void onSuccess(Void result) {
+                                EntryClassUi.hideWaitModal();
+                                callback.onSuccess(null);
+                            }
+                        });
             }
         });
     }

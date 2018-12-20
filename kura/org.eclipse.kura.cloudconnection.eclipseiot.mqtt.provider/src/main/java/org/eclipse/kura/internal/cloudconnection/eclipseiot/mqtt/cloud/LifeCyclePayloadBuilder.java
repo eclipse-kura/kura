@@ -15,9 +15,9 @@ import java.util.List;
 
 import org.eclipse.kura.core.util.NetUtil;
 import org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.KuraBirthPayload;
+import org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.KuraBirthPayload.KuraBirthPayloadBuilder;
 import org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.KuraDeviceProfile;
 import org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.KuraDisconnectPayload;
-import org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.KuraBirthPayload.KuraBirthPayloadBuilder;
 import org.eclipse.kura.message.KuraPosition;
 import org.eclipse.kura.net.NetInterface;
 import org.eclipse.kura.net.NetInterfaceAddress;
@@ -60,7 +60,8 @@ public class LifeCyclePayloadBuilder {
             deviceName = this.cloudConnectionManagerImpl.getSystemService().getDeviceName();
         }
 
-        String payloadEncoding = this.cloudConnectionManagerImpl.getCloudConnectionManagerOptions().getPayloadEncoding().name();
+        String payloadEncoding = this.cloudConnectionManagerImpl.getCloudConnectionManagerOptions().getPayloadEncoding()
+                .name();
 
         // build birth certificate
         KuraBirthPayloadBuilder birthPayloadBuilder = new KuraBirthPayloadBuilder();

@@ -36,7 +36,7 @@ class DataServiceListenerS implements DataServiceListener {
     public DataServiceListenerS(ComponentContext ctx) {
         this.m_ctx = ctx;
         // thread-safe list implementation
-        this.m_listeners = new CopyOnWriteArrayList<DataServiceListener>();
+        this.m_listeners = new CopyOnWriteArrayList<>();
     }
 
     @Override

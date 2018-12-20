@@ -150,7 +150,7 @@ public class NetworkButtonBarUi extends Composite {
             }
         });
     }
-    
+
     private void scheduleRefresh(GwtNetInterfaceConfig prevNetIf, final GwtNetInterfaceConfig updatedNetIf,
             String newNetwork, String prevNetwork) {
         if (isRefreshNeeded(prevNetIf, updatedNetIf, newNetwork, prevNetwork)) {
@@ -164,7 +164,7 @@ public class NetworkButtonBarUi extends Composite {
             t.schedule(500);
         }
     }
-    
+
     private void updateNetConfiguration(final GwtNetInterfaceConfig updatedNetIf) {
         NetworkButtonBarUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 

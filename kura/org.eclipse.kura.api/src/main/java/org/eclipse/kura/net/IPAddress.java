@@ -19,7 +19,7 @@ import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * This class represents an Internet Protocol (IP) address.
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 @ProviderType

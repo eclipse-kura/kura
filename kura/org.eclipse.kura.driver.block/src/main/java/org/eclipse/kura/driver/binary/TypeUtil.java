@@ -57,7 +57,8 @@ public final class TypeUtil {
                 + TO_KURA_DATA_TYPE_MESSAGE + targetType.name());
     }
 
-    private static <T> Function<T, TypedValue<?>> toNumericalTypedValue(final Class<T> sourceType, final DataType targetType) {
+    private static <T> Function<T, TypedValue<?>> toNumericalTypedValue(final Class<T> sourceType,
+            final DataType targetType) {
         if (targetType == DataType.INTEGER) {
             return value -> new IntegerValue(((Number) value).intValue());
         } else if (targetType == DataType.LONG) {
@@ -68,10 +69,11 @@ public final class TypeUtil {
             return value -> new DoubleValue(((Number) value).doubleValue());
         }
         throw new IllegalArgumentException(CANNOT_CONVERT_FROM_NATIVE_TYPE_MESSAGE + sourceType.getSimpleName()
-        + TO_KURA_DATA_TYPE_MESSAGE + targetType.name());
+                + TO_KURA_DATA_TYPE_MESSAGE + targetType.name());
     }
 
-    private static <T> Function<T, TypedValue<?>> toBooleanTypedValue(final Class<T> sourceType, final DataType targetType) {
+    private static <T> Function<T, TypedValue<?>> toBooleanTypedValue(final Class<T> sourceType,
+            final DataType targetType) {
         if (sourceType == Boolean.class) {
             return value -> new BooleanValue((Boolean) value);
         } else if (sourceType == String.class) {
@@ -80,7 +82,7 @@ public final class TypeUtil {
             return value -> new BooleanValue(((Number) value).doubleValue() != 0);
         }
         throw new IllegalArgumentException(CANNOT_CONVERT_FROM_NATIVE_TYPE_MESSAGE + sourceType.getSimpleName()
-        + TO_KURA_DATA_TYPE_MESSAGE + targetType.name());
+                + TO_KURA_DATA_TYPE_MESSAGE + targetType.name());
     }
 
     private static <T> Function<T, TypedValue<?>> toStringTypedValue(final Class<T> sourceType) {
@@ -136,7 +138,7 @@ public final class TypeUtil {
             return value -> (T) (Boolean) (((Number) value.getValue()).doubleValue() != 0);
         }
         throw new IllegalArgumentException("Cannot convert from Kura data type " + sourceType.name()
-        + " to native type " + targetType.getSimpleName());
+                + " to native type " + targetType.getSimpleName());
     }
 
     @SuppressWarnings("unchecked")

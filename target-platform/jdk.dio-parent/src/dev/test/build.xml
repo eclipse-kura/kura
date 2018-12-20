@@ -25,25 +25,21 @@
 -->
 <project name="DIOTests" default="default" basedir=".">
     <description>Builds, tests, and runs DIO tests.</description>
-    <import file="nbproject/build-impl.xml"/>
+    <import file="nbproject/build-impl.xml" />
     <loadproperties srcfile="build.properties" />
-    <property environment="env"/>
-               
+    <property environment="env" />
+
     <target name="clean">
         <delete dir="${build.dir}" />
         <delete dir="${dist.dir}" />
     </target>
-    
+
     <target name="compile" depends="check-and-copy-libs">
         <mkdir dir="${classes.dir}" />
-        <javac srcdir="${tests.dir}"
-               destdir="${classes.dir}"
-               includeantruntime="false"
-               debug="true"
-               classpath="${javatest.jar}${path.separator}${dio.jar}${path.separator}${gson.jar}">
+        <javac srcdir="${tests.dir}" destdir="${classes.dir}" includeantruntime="false" debug="true"
+            classpath="${javatest.jar}${path.separator}${dio.jar}${path.separator}${gson.jar}">
         </javac>
-        <copy file="${i18nsrcpath}"
-              todir="${i18ndistpath}">
+        <copy file="${i18nsrcpath}" todir="${i18ndistpath}">
         </copy>
     </target>
 
@@ -52,97 +48,99 @@
         <jar basedir="${classes.dir}" destfile="${dist.dir}/${dist.jar}">
         </jar>
     </target>
-    
+
     <target name="check-and-copy-libs">
         <copy file="${src.build.dir.jar}" todir="${libs.dir}" />
         <fail message="Required libraries are missing">
             <condition>
                 <or>
                     <not>
-                        <available file="${gson.jar}"/>
+                        <available file="${gson.jar}" />
                     </not>
                     <not>
-                        <available file="${javatest.jar}"/>
+                        <available file="${javatest.jar}" />
                     </not>
                     <not>
-                        <available file="${jh.jar}"/>
+                        <available file="${jh.jar}" />
                     </not>
                 </or>
             </condition>
         </fail>
     </target>
 
-    <pathconvert property="javahomefixed" dirsep="/">          
-        <path location="${env.JAVA_HOME}${file.separator}bin${file.separator}java.exe"/> 
-    </pathconvert>
-    
-    <pathconvert property="i18nsrcpath" dirsep="/">          
-        <path location="${basedir}${file.separator}${tests.dir}${file.separator}${i18n.file.path}${file.separator}${i18n.file.name}"/> 
-    </pathconvert>    
-    
-    <pathconvert property="i18ndistpath" dirsep="/">          
-        <path location="${basedir}${file.separator}${classes.dir}${file.separator}${i18n.file.path}"/> 
+    <pathconvert property="javahomefixed" dirsep="/">
+        <path location="${env.JAVA_HOME}${file.separator}bin${file.separator}java.exe" />
     </pathconvert>
 
-    <pathconvert property="librarypathfixed" dirsep="/">          
-        <path location="${basedir}${file.separator}${src.build.dir.so}"/> 
+    <pathconvert property="i18nsrcpath" dirsep="/">
+        <path
+            location="${basedir}${file.separator}${tests.dir}${file.separator}${i18n.file.path}${file.separator}${i18n.file.name}" />
     </pathconvert>
-    
-    <pathconvert property="policyfilepathfixed" dirsep="/">          
-        <path location="${basedir}${file.separator}${java.policy.file}"/> 
+
+    <pathconvert property="i18ndistpath" dirsep="/">
+        <path location="${basedir}${file.separator}${classes.dir}${file.separator}${i18n.file.path}" />
     </pathconvert>
-    
-    <pathconvert property="diopropertiesfilepathfixed" dirsep="/">          
-        <path location="${basedir}${file.separator}${dio.properties.file.raspberry}"/> 
+
+    <pathconvert property="librarypathfixed" dirsep="/">
+        <path location="${basedir}${file.separator}${src.build.dir.so}" />
     </pathconvert>
-    
+
+    <pathconvert property="policyfilepathfixed" dirsep="/">
+        <path location="${basedir}${file.separator}${java.policy.file}" />
+    </pathconvert>
+
+    <pathconvert property="diopropertiesfilepathfixed" dirsep="/">
+        <path location="${basedir}${file.separator}${dio.properties.file.raspberry}" />
+    </pathconvert>
+
     <target name="prepare">
-        <property name="testsuite_path" value="${basedir}/${tests.dir}"/>
+        <property name="testsuite_path" value="${basedir}/${tests.dir}" />
         <property name="test.basedir" value="${build.dir}" />
-        <property name="tests.classpath" value="${classes.dir}${path.separator}${javatest.jar}${path.separator}${jh.jar}${path.separator}${dio.jar}${path.separator}${gson.jar}"/>
-        <property name="workdir" value="${test.basedir}${file.separator}${workdir.folder.name}"/>
-        <property name="javatest.java" value="${javahomefixed}"/> 
-        <property name="librarypath" value="${librarypathfixed}"/>
-        <property name="policyfilepath" value="${policyfilepathfixed}"/>
-        <property name="diopropertiesfilepath" value="${diopropertiesfilepathfixed}"/>
-        <property name="javatest.jti" value="${test.basedir}${file.separator}${jti.file.name}"/> 
+        <property name="tests.classpath"
+            value="${classes.dir}${path.separator}${javatest.jar}${path.separator}${jh.jar}${path.separator}${dio.jar}${path.separator}${gson.jar}" />
+        <property name="workdir" value="${test.basedir}${file.separator}${workdir.folder.name}" />
+        <property name="javatest.java" value="${javahomefixed}" />
+        <property name="librarypath" value="${librarypathfixed}" />
+        <property name="policyfilepath" value="${policyfilepathfixed}" />
+        <property name="diopropertiesfilepath" value="${diopropertiesfilepathfixed}" />
+        <property name="javatest.jti" value="${test.basedir}${file.separator}${jti.file.name}" />
     </target>
 
     <target name="filter">
         <filter filtersfile="${javatest.jti.template}" />
-        <filter token="testsuite" value="${testsuite_path}"/>
-        <filter token="workdir" value="${workdir}"/>
-        <filter token="classpath" value="${tests.classpath}"/>
-        <filter token="java" value="${javatest.java}"/>        
-        <filter token="javalibrarypath" value="${librarypath}"/>
-        <filter token="javapolicyfilepath" value="${policyfilepath}"/>
-        <filter token="diopropertiesfilepath" value="${diopropertiesfilepath}"/>
+        <filter token="testsuite" value="${testsuite_path}" />
+        <filter token="workdir" value="${workdir}" />
+        <filter token="classpath" value="${tests.classpath}" />
+        <filter token="java" value="${javatest.java}" />
+        <filter token="javalibrarypath" value="${librarypath}" />
+        <filter token="javapolicyfilepath" value="${policyfilepath}" />
+        <filter token="diopropertiesfilepath" value="${diopropertiesfilepath}" />
         <!--<filter token="vmOptions" value="-Ddeviceaccess.uart.prefix=${uart.device}"/>-->
-        <filter token="vmOptions" value=""/>
-        <copy filtering="true" file="${javatest.jti.template}" tofile="${javatest.jti}"/>
-        <property name="javatest.mode.batch" value="true"/>
+        <filter token="vmOptions" value="" />
+        <copy filtering="true" file="${javatest.jti.template}" tofile="${javatest.jti}" />
+        <property name="javatest.mode.batch" value="true" />
     </target>
 
     <target name="check-java-home">
         <fail message="JAVA_HOME is not set">
             <condition>
                 <not>
-                    <isset property="env.JAVA_HOME"/>
+                    <isset property="env.JAVA_HOME" />
                 </not>
             </condition>
         </fail>
     </target>
 
     <target name="javatest-mode-warning" if="${batch.mode}" depends="get-batch-mode">
-        <echo message="Tests will be run in batch mode. For UI mode use flag -Djavatest.mode.batch=false"  />
+        <echo message="Tests will be run in batch mode. For UI mode use flag -Djavatest.mode.batch=false" />
     </target>
-            
+
     <target name="get-batch-mode" depends="get-javatest-opt">
         <condition property="batch.mode" value="true" else="false">
             <equals arg1="${javatest.opt}" arg2="-batch" />
         </condition>
     </target>
-    
+
     <target name="get-javatest-opt">
         <condition property="javatest.opt" value="-batch" else="">
             <equals arg1="${javatest.mode.batch}" arg2="true" />
@@ -150,17 +148,18 @@
     </target>
 
     <target name="run-javatest" depends="check-java-home, init, prepare, jar, filter, javatest-mode-warning">
-        <mkdir dir="${workdir}"/>
+        <mkdir dir="${workdir}" />
 
-        <java classpath="${classes.dir}${path.separator}${javatest.jar}${path.separator}${jh.jar}${path.separator}${gson.jar}" 
-              classname="com.sun.javatest.tool.Main" fork="true" failonerror="false" jvm="${javatest.java}">
-            <arg line="-testsuite"/>
-            <arg line="${testsuite_path}"/>
-            <arg line="-workdir"/>
-            <arg line="${workdir}"/>
-            <arg line="-config"/>
-            <arg line="${javatest.jti}"/>
-            <arg line="${javatest.opt}"/>
+        <java
+            classpath="${classes.dir}${path.separator}${javatest.jar}${path.separator}${jh.jar}${path.separator}${gson.jar}"
+            classname="com.sun.javatest.tool.Main" fork="true" failonerror="false" jvm="${javatest.java}">
+            <arg line="-testsuite" />
+            <arg line="${testsuite_path}" />
+            <arg line="-workdir" />
+            <arg line="${workdir}" />
+            <arg line="-config" />
+            <arg line="${javatest.jti}" />
+            <arg line="${javatest.opt}" />
         </java>
     </target>
 

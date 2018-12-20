@@ -20,7 +20,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * where a network must be specified to provide addresses on.
  *
  * @param <T>
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 @ProviderType

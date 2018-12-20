@@ -50,7 +50,7 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
     @Override
     public ArrayList<GwtGroupedNVPair> findDeviceConfiguration(GwtXSRFToken xsrfToken) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
-        List<GwtGroupedNVPair> pairs = new ArrayList<GwtGroupedNVPair>();
+        List<GwtGroupedNVPair> pairs = new ArrayList<>();
 
         SystemService systemService = ServiceLocator.getInstance().getService(SystemService.class);
         SystemAdminService systemAdminService = ServiceLocator.getInstance().getService(SystemAdminService.class);
@@ -108,7 +108,7 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
         } catch (Exception e) {
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
         }
-        return new ArrayList<GwtGroupedNVPair>(pairs);
+        return new ArrayList<>(pairs);
     }
 
     @SuppressWarnings("unchecked")
@@ -183,7 +183,7 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
     @Override
     public ArrayList<GwtGroupedNVPair> findSystemProperties(GwtXSRFToken xsrfToken) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
-        List<GwtGroupedNVPair> pairs = new ArrayList<GwtGroupedNVPair>();
+        List<GwtGroupedNVPair> pairs = new ArrayList<>();
         // kura properties
         SystemService systemService = ServiceLocator.getInstance().getService(SystemService.class);
         Properties kuraProps = systemService.getProperties();
@@ -192,13 +192,13 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
             Object key = ki.next();
             pairs.add(new GwtGroupedNVPair("propsKura", key.toString(), kuraProps.get(key).toString()));
         }
-        return new ArrayList<GwtGroupedNVPair>(pairs);
+        return new ArrayList<>(pairs);
     }
 
     @Override
     public ArrayList<GwtGroupedNVPair> findBundles(GwtXSRFToken xsrfToken) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
-        List<GwtGroupedNVPair> pairs = new ArrayList<GwtGroupedNVPair>();
+        List<GwtGroupedNVPair> pairs = new ArrayList<>();
 
         SystemService systemService = ServiceLocator.getInstance().getService(SystemService.class);
         Bundle[] bundles = systemService.getBundles();
@@ -218,7 +218,7 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
                 }
             }
         }
-        return new ArrayList<GwtGroupedNVPair>(pairs);
+        return new ArrayList<>(pairs);
     }
 
     @Override

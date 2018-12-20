@@ -85,7 +85,7 @@ public final class H2DbServiceHelper {
     }
 
     public <T> T withConnection(final H2DbService.ConnectionCallable<T> callable) throws SQLException {
-        return dbService.withConnection(callable);
+        return this.dbService.withConnection(callable);
     }
 
     /**

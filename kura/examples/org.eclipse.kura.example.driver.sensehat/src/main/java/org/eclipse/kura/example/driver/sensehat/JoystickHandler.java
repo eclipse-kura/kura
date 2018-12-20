@@ -32,7 +32,7 @@ public class JoystickHandler implements Closeable {
     private final Set<JoystickEventListener> joystickListeners = new CopyOnWriteArraySet<>();
     private final JoystickEventDispatcher joystickEventDispatcher;
     private final Map<Resource, Long> lastJoystickEventTimestamps = new HashMap<>();
-    private Joystick joystick;
+    private final Joystick joystick;
 
     public JoystickHandler(Joystick joystick) {
         this.joystick = joystick;
@@ -50,12 +50,13 @@ public class JoystickHandler implements Closeable {
 
     private class JoystickEventDispatcher extends Thread {
 
-        private AtomicBoolean run = new AtomicBoolean(true);
+        private final AtomicBoolean run = new AtomicBoolean(true);
 
+        @Override
         public void run() {
             logger.info("JoystickEventDispatcher - starting...");
-            while (run.get()) {
-                final JoystickEvent event = joystick.read();
+            while (this.run.get()) {
+                final JoystickEvent event = JoystickHandler.this.joystick.read();
                 if (event == null) {
                     logger.warn("JoystickEventDispatcher - got null event");
                     continue;
@@ -65,15 +66,16 @@ public class JoystickHandler implements Closeable {
                     continue;
                 }
                 final long timestamp = event.getTimeSec() * 1000 + event.getTimeUSec() / 1000;
-                lastJoystickEventTimestamps.put(resource.get(), timestamp);
-                joystickListeners.forEach(listener -> listener.onJoystickEvent(resource.get(), timestamp));
+                JoystickHandler.this.lastJoystickEventTimestamps.put(resource.get(), timestamp);
+                JoystickHandler.this.joystickListeners
+                        .forEach(listener -> listener.onJoystickEvent(resource.get(), timestamp));
             }
             logger.info("JoystickEventDispatcher - exiting...");
         }
 
         private void cancel() {
             this.run.getAndSet(false);
-            this.interrupt();
+            interrupt();
         }
     }
 

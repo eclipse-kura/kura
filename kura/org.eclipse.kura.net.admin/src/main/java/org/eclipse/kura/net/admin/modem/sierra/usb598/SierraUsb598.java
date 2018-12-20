@@ -133,11 +133,11 @@ public class SierraUsb598 implements EvdoCellularModem {
      * SierraUsb598 modem constructor
      *
      * @param usbDevice
-     *                              - modem USB device as {@link UsbModemDevice}
+     *            - modem USB device as {@link UsbModemDevice}
      * @param connectionFactory
-     *                              - connection factory as {@link ConnectionFactory}
+     *            - connection factory as {@link ConnectionFactory}
      * @param technologyType
-     *                              - cellular technology type as {@link ModemTechnologyType}
+     *            - cellular technology type as {@link ModemTechnologyType}
      */
     public SierraUsb598(ModemDevice device, ConnectionFactory connectionFactory) {
 

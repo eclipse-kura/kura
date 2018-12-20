@@ -21,16 +21,16 @@ import com.eclipsesource.json.JsonValue;
 
 public class MetadataRequest {
 
-    private List<String> assetNames = new ArrayList<String>();
+    private final List<String> assetNames = new ArrayList<>();
 
     public MetadataRequest(JsonArray array) {
         for (JsonValue value : array) {
             JsonObject object = value.asObject();
-            assetNames.add(object.get(SerializationConstants.ASSET_NAME_PROPERTY).asString());
+            this.assetNames.add(object.get(SerializationConstants.ASSET_NAME_PROPERTY).asString());
         }
     }
 
     public List<String> getAssetNames() {
-        return assetNames;
+        return this.assetNames;
     }
 }

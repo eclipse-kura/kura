@@ -45,13 +45,13 @@ public class TokenBucket {
             this.remainingTokens = (int) Math.min(this.capacity,
                     this.remainingTokens + (now - this.lastRefillTime) / this.refillPeriod);
             this.remainingTokens = Math.max(1, this.remainingTokens);
-            this.lastRefillTime += ((now - lastRefillTime) / refillPeriod) * refillPeriod;
+            this.lastRefillTime += (now - this.lastRefillTime) / this.refillPeriod * this.refillPeriod;
         }
     }
 
     public long getTokenWaitTime() {
         long now = System.currentTimeMillis();
-        long timeToRefill = (this.lastRefillTime + this.refillPeriod) - now;
+        long timeToRefill = this.lastRefillTime + this.refillPeriod - now;
         return Math.max(0, timeToRefill);
     }
 }

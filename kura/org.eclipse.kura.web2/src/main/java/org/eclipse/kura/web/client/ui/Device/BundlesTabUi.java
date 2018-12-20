@@ -69,9 +69,9 @@ public class BundlesTabUi extends Composite implements Tab {
     Button bundleStop;
 
     @UiField
-    CellTable<GwtGroupedNVPair> bundlesGrid = new CellTable<GwtGroupedNVPair>();
-    private final ListDataProvider<GwtGroupedNVPair> bundlesDataProvider = new ListDataProvider<GwtGroupedNVPair>();
-    private final SingleSelectionModel<GwtGroupedNVPair> selectionModel = new SingleSelectionModel<GwtGroupedNVPair>();
+    CellTable<GwtGroupedNVPair> bundlesGrid = new CellTable<>();
+    private final ListDataProvider<GwtGroupedNVPair> bundlesDataProvider = new ListDataProvider<>();
+    private final SingleSelectionModel<GwtGroupedNVPair> selectionModel = new SingleSelectionModel<>();
 
     private final GwtDeviceServiceAsync deviceService = GWT.create(GwtDeviceService.class);
     private final GwtSecurityTokenServiceAsync securityTokenService = GWT.create(GwtSecurityTokenService.class);
@@ -166,18 +166,18 @@ public class BundlesTabUi extends Composite implements Tab {
                 BundlesTabUi.this.deviceService.startBundle(token,
                         BundlesTabUi.this.selectionModel.getSelectedObject().getId(), new AsyncCallback<Void>() {
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        EntryClassUi.hideWaitModal();
-                        FailureHandler.handle(caught);
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                EntryClassUi.hideWaitModal();
+                                FailureHandler.handle(caught);
 
-                    }
+                            }
 
-                    @Override
-                    public void onSuccess(Void result) {
-                        EntryClassUi.hideWaitModal();
-                    }
-                });
+                            @Override
+                            public void onSuccess(Void result) {
+                                EntryClassUi.hideWaitModal();
+                            }
+                        });
 
             }
 
@@ -204,18 +204,18 @@ public class BundlesTabUi extends Composite implements Tab {
                 BundlesTabUi.this.deviceService.stopBundle(token,
                         BundlesTabUi.this.selectionModel.getSelectedObject().getId(), new AsyncCallback<Void>() {
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        EntryClassUi.hideWaitModal();
-                        FailureHandler.handle(caught);
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                EntryClassUi.hideWaitModal();
+                                FailureHandler.handle(caught);
 
-                    }
+                            }
 
-                    @Override
-                    public void onSuccess(Void result) {
-                        EntryClassUi.hideWaitModal();
-                    }
-                });
+                            @Override
+                            public void onSuccess(Void result) {
+                                EntryClassUi.hideWaitModal();
+                            }
+                        });
             }
         });
     }

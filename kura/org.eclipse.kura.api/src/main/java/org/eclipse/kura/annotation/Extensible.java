@@ -5,7 +5,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *******************************************************************************/
 package org.eclipse.kura.annotation;
 
@@ -19,6 +19,7 @@ import java.lang.annotation.Target;
 /**
  * This annotation denotes that the annotated type can be extended by others for
  * special purpose functionalities
+ *
  * @since 1.2
  */
 @Target(TYPE)

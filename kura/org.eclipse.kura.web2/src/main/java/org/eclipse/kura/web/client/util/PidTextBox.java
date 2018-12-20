@@ -58,12 +58,12 @@ public class PidTextBox extends TextBox {
 
         @Override
         public int getPriority() {
-            return wrapped.getPriority();
+            return this.wrapped.getPriority();
         }
 
         @Override
         public List<EditorError> validate(Editor<String> editor, String value) {
-            return wrapped.validate(editor, value);
+            return this.wrapped.validate(editor, value);
         }
     }
 }

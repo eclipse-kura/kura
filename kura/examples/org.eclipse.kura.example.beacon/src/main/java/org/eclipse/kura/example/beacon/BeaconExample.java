@@ -206,9 +206,9 @@ public class BeaconExample implements ConfigurableComponent, BluetoothBeaconComm
 
             if (this.uuid != null && this.major != null && this.minor != null && this.companyCode != null
                     && this.txPower != null) {
-                this.bluetoothAdapter.setBeaconAdvertisingData(this.uuid, this.major, this.minor,
-                        this.companyCode, this.txPower, this.leLimited, this.leLimited ? false : true,
-                        this.brSupported, this.brController, this.brHost);
+                this.bluetoothAdapter.setBeaconAdvertisingData(this.uuid, this.major, this.minor, this.companyCode,
+                        this.txPower, this.leLimited, this.leLimited ? false : true, this.brSupported,
+                        this.brController, this.brHost);
             }
 
         } else {

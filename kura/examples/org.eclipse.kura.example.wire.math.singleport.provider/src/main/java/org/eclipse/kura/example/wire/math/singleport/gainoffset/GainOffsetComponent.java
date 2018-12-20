@@ -68,27 +68,27 @@ public class GainOffsetComponent implements WireEmitter, WireReceiver, Configura
 
     @Override
     public Object polled(Wire wire) {
-        return wireSupport.polled(wire);
+        return this.wireSupport.polled(wire);
     }
 
     @Override
     public void consumersConnected(Wire[] wires) {
-        wireSupport.consumersConnected(wires);
+        this.wireSupport.consumersConnected(wires);
     }
 
     @Override
     public void updated(Wire wire, Object value) {
-        wireSupport.updated(wire, value);
+        this.wireSupport.updated(wire, value);
     }
 
     @Override
     public void producersConnected(Wire[] wires) {
-        wireSupport.producersConnected(wires);
+        this.wireSupport.producersConnected(wires);
     }
 
     @Override
     public void onWireReceive(WireEnvelope wireEnvelope) {
-        if (options == null) {
+        if (this.options == null) {
             logger.warn("Invalid configuration, please review");
         }
         final List<WireRecord> inputRecords = wireEnvelope.getRecords();

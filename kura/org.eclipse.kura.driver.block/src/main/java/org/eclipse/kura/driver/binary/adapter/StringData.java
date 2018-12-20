@@ -29,32 +29,32 @@ public class StringData implements BinaryData<String> {
 
     @Override
     public Endianness getEndianness() {
-        return wrapped.getEndianness();
+        return this.wrapped.getEndianness();
     }
 
     @Override
     public int getSize() {
-        return wrapped.getSize();
+        return this.wrapped.getSize();
     }
 
     @Override
     public void write(Buffer buf, int offset, String value) {
-        final byte[] raw = value.getBytes(charset);
-        int amount = wrapped.getSize();
+        final byte[] raw = value.getBytes(this.charset);
+        int amount = this.wrapped.getSize();
         int size = value.length();
         byte[] sendByte = new byte[amount + 2];
         sendByte[0] = (byte) amount;
         sendByte[1] = (byte) size;
         System.arraycopy(raw, 0, sendByte, 2, size);
 
-        wrapped.write(buf, offset, sendByte);
+        this.wrapped.write(buf, offset, sendByte);
     }
 
     @Override
     public String read(Buffer buf, int offset) {
-        final byte[] raw = wrapped.read(buf, offset);
-        int size = (int) raw[1]; // Current length of the string
-        return new String(raw, 2, size, charset);
+        final byte[] raw = this.wrapped.read(buf, offset);
+        int size = raw[1]; // Current length of the string
+        return new String(raw, 2, size, this.charset);
     }
 
     @Override

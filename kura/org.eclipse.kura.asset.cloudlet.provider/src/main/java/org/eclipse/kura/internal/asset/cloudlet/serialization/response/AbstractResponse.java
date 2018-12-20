@@ -26,10 +26,10 @@ public abstract class AbstractResponse {
         JsonObject assetObject = Json.object();
         assetObject.add(SerializationConstants.ASSET_NAME_PROPERTY, name);
         assetObject.add(SerializationConstants.ERROR_PROPERTY, "Asset not found");
-        serialized.add(assetObject);
+        this.serialized.add(assetObject);
     }
 
     public byte[] serialize() {
-        return serialized.toString().getBytes(StandardCharsets.UTF_8);
+        return this.serialized.toString().getBytes(StandardCharsets.UTF_8);
     }
 }

@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
 public class DataServiceTest implements DataServiceListener {
 
     private static final Logger s_logger = LoggerFactory.getLogger(DataServiceTest.class);
-    
+
     private static CountDownLatch s_dependencyLatch = new CountDownLatch(1);	// initialize with number of
     // dependencies
     private static DataService s_dataService;
@@ -272,7 +272,8 @@ public class DataServiceTest implements DataServiceListener {
             synchronized (s_qos12MsgIds) {
                 synchronized (s_qos12HighPriorityMsgIds) {
                     s_logger.info("confirm check round {}", i);
-                    s_qos12HighPriorityMsgIds.forEach(element -> s_logger.info("To confirm s_qos12HighPriorityMsgIds: {}", element));
+                    s_qos12HighPriorityMsgIds
+                            .forEach(element -> s_logger.info("To confirm s_qos12HighPriorityMsgIds: {}", element));
                     s_qos12MsgIds.forEach(element -> s_logger.info("To confirm s_qos12MsgIds: {}", element));
                     if (!s_qos12HighPriorityMsgIds.isEmpty() && s_qos12MsgIds.isEmpty()) {
                         fail("High priority messages should be confirmed before default priority messages");

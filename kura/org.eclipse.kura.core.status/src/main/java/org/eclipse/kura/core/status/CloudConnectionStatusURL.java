@@ -26,7 +26,7 @@ public class CloudConnectionStatusURL {
     public static final String NONE = "none";
 
     public static final String INVERTED = ":inverted";
-    
+
     private static final String CASE_INSENSITIVE_PREFIX = "(?i)";
     private static final String CCS_NOTIFICATION_URLS_SEPARATOR = ";";
 
@@ -41,9 +41,9 @@ public class CloudConnectionStatusURL {
         Properties props = new Properties();
 
         if (urlImage.toLowerCase(Locale.ENGLISH).startsWith(CCS)) {
-        	urlImage = urlImage.replaceAll(CASE_INSENSITIVE_PREFIX+CCS, "");
+            urlImage = urlImage.replaceAll(CASE_INSENSITIVE_PREFIX + CCS, "");
             props.put("url", ccsUrl);
-            
+
             String[] urls = urlImage.split(CCS_NOTIFICATION_URLS_SEPARATOR);
             for (String url : urls) {
                 props.putAll(parseUrlType(url));
@@ -67,8 +67,8 @@ public class CloudConnectionStatusURL {
                 } else {
                     props.put("inverted", false);
                 }
-                
-                //in case of typo
+
+                // in case of typo
                 if (ledString.contains(":")) {
                     ledString = ledString.substring(0, ledString.indexOf(":"));
                 }

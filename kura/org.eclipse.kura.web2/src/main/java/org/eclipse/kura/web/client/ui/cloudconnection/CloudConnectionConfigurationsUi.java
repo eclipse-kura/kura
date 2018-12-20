@@ -66,7 +66,8 @@ public class CloudConnectionConfigurationsUi extends Composite {
                 .getWidgetCount(); connectionTabIndex++) {
             TabPane pane = (TabPane) this.connectionTabContent.getWidget(connectionTabIndex);
             for (int paneIndex = 0; paneIndex < pane.getWidgetCount(); paneIndex++) {
-                CloudConnectionConfigurationUi serviceConfigUi = (CloudConnectionConfigurationUi) pane.getWidget(paneIndex);
+                CloudConnectionConfigurationUi serviceConfigUi = (CloudConnectionConfigurationUi) pane
+                        .getWidget(paneIndex);
                 serviceConfigUi.setDirty(dirty);
             }
         }
@@ -77,7 +78,8 @@ public class CloudConnectionConfigurationsUi extends Composite {
                 .getWidgetCount(); connectionTabIndex++) {
             TabPane pane = (TabPane) this.connectionTabContent.getWidget(connectionTabIndex);
             for (int paneIndex = 0; paneIndex < pane.getWidgetCount(); paneIndex++) {
-                CloudConnectionConfigurationUi serviceConfigUi = (CloudConnectionConfigurationUi) pane.getWidget(paneIndex);
+                CloudConnectionConfigurationUi serviceConfigUi = (CloudConnectionConfigurationUi) pane
+                        .getWidget(paneIndex);
                 this.dirty = this.dirty || serviceConfigUi.isDirty();
             }
         }
@@ -89,7 +91,8 @@ public class CloudConnectionConfigurationsUi extends Composite {
                 .getWidgetCount(); connectionTabIndex++) {
             TabPane pane = (TabPane) this.connectionTabContent.getWidget(connectionTabIndex);
             for (int paneIndex = 0; paneIndex < pane.getWidgetCount(); paneIndex++) {
-                CloudConnectionConfigurationUi serviceConfigUi = (CloudConnectionConfigurationUi) pane.getWidget(paneIndex);
+                CloudConnectionConfigurationUi serviceConfigUi = (CloudConnectionConfigurationUi) pane
+                        .getWidget(paneIndex);
                 if (serviceConfigUi.isDirty()) {
                     return serviceConfigUi;
                 }
@@ -124,21 +127,22 @@ public class CloudConnectionConfigurationsUi extends Composite {
     }
 
     private void getPubSubConfiguration(final String pid) {
-        RequestQueue.submit(context -> gwtXSRFService.generateSecurityToken(context.callback(
-                token -> gwtComponentService.findFilteredComponentConfiguration(token, pid, context.callback(confs -> {
-                    connectionNavtabs.clear();
-                    renderTabs(confs.get(0), true);
-                })))));
+        RequestQueue.submit(
+                context -> this.gwtXSRFService.generateSecurityToken(context.callback(token -> this.gwtComponentService
+                        .findFilteredComponentConfiguration(token, pid, context.callback(confs -> {
+                            this.connectionNavtabs.clear();
+                            renderTabs(confs.get(0), true);
+                        })))));
     }
 
     private void getCloudStackConfigurations(final String factoryPid, final String cloudServicePid) {
 
-        RequestQueue.submit(context -> gwtCloudService.findStackPidsByFactory(factoryPid, cloudServicePid,
-                context.callback(
-                        pidsResult -> gwtXSRFService.generateSecurityToken(context.callback(token -> gwtComponentService
+        RequestQueue.submit(context -> this.gwtCloudService.findStackPidsByFactory(factoryPid, cloudServicePid,
+                context.callback(pidsResult -> this.gwtXSRFService
+                        .generateSecurityToken(context.callback(token -> this.gwtComponentService
                                 .findFilteredComponentConfigurations(token, context.callback(result -> {
                                     boolean isFirstEntry = true;
-                                    connectionNavtabs.clear();
+                                    this.connectionNavtabs.clear();
                                     for (GwtConfigComponent pair : result) {
                                         if (pidsResult.contains(pair.getComponentId())) {
                                             renderTabs(pair, isFirstEntry);

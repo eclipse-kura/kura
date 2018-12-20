@@ -20,7 +20,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * gateways or DNS but the interface itself may not be active. If this is the case the ConnectionInfo
  * class is used to keep all relevant information in the event that this interface should become the
  * active one. This is necessary because many operating systems to not persist this information.
- * 
+ *
  * @noimplement This interface is not intended to be implemented by clients.
  */
 @ProviderType

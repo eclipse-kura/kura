@@ -213,7 +213,7 @@ public class EntryClassUi extends Composite {
         initWaitModal();
         initNewComponentErrorModal();
         initExceptionReportModal();
-        contentPanelHeader.setId("contentPanelHeader");
+        this.contentPanelHeader.setId("contentPanelHeader");
 
         Date now = new Date();
         @SuppressWarnings("deprecation")
@@ -837,7 +837,7 @@ public class EntryClassUi extends Composite {
     }
 
     private void showStatusPanel() {
-        this.setSelectedAnchorListItem(this.status);
+        setSelectedAnchorListItem(this.status);
         this.contentPanel.setVisible(true);
         this.contentPanelHeader.setText("Status");
         this.contentPanelBody.clear();

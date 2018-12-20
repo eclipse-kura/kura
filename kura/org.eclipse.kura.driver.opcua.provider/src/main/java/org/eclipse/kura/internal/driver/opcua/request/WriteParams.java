@@ -50,6 +50,6 @@ public class WriteParams {
     }
 
     public WriteValue getWriteValue() {
-        return writeValue;
+        return this.writeValue;
     }
 }

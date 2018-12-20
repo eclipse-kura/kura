@@ -82,7 +82,7 @@ public class MessageHandlerCallable implements Callable<Void> {
         contextProperties.put(NOTIFICATION_PUBLISHER_PID.name(), notificationPublisherPid);
         contextProperties.put(TENANT_ID.name(), connectionProperties.get("Account"));
         contextProperties.put(DEVICE_ID.name(), connectionProperties.get("Client ID"));
-        
+
         this.requestHandlerContext = new RequestHandlerContext(notificationPublisher, contextProperties);
     }
 

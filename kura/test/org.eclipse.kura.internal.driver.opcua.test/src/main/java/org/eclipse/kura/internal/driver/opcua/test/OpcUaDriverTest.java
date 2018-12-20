@@ -59,7 +59,7 @@ public class OpcUaDriverTest {
     private static ConfigurationService cfgsvc;
 
     private static Driver driver;
-    private Object driverLock = new Object();
+    private final Object driverLock = new Object();
 
     private static OpcUaServer server;
 
@@ -84,9 +84,7 @@ public class OpcUaDriverTest {
         List<String> endpointAddresses = new ArrayList<>();
         endpointAddresses.add("localhost");
         OpcUaServerConfig config = new OpcUaServerConfigBuilder().setBindPort(12685).setApplicationUri("opcsvr")
-                .setBindAddresses(bindAddresses)
-                .setEndpointAddresses(endpointAddresses)
-                .setServerName("opcsvr")
+                .setBindAddresses(bindAddresses).setEndpointAddresses(endpointAddresses).setServerName("opcsvr")
                 .setApplicationName(LocalizedText.english("opcsvr")).setCertificateManager(certificateManager)
                 .setCertificateValidator(certificateValidator)
                 .setUserTokenPolicies(Arrays.asList(OpcUaServerConfig.USER_TOKEN_POLICY_ANONYMOUS)).build();
@@ -105,8 +103,8 @@ public class OpcUaDriverTest {
     @Before
     public void init() throws InterruptedException {
         if (driver == null) {
-            synchronized (driverLock) {
-                driverLock.wait(3000);
+            synchronized (this.driverLock) {
+                this.driverLock.wait(3000);
             }
         }
     }
@@ -280,7 +278,7 @@ public class OpcUaDriverTest {
         final VariableType opcuaType = VariableType.UINT16;
 
         testRead(nodeId, 0, applicableTypes);
-        testReadWrite(nodeId, applicableTypes, opcuaType, 0, 10, 20, ((int) Short.MAX_VALUE) * 2 + 1);
+        testReadWrite(nodeId, applicableTypes, opcuaType, 0, 10, 20, Short.MAX_VALUE * 2 + 1);
     }
 
     @Test
@@ -290,9 +288,8 @@ public class OpcUaDriverTest {
 
         testRead(nodeId, 0, EnumSet.of(DataType.INTEGER, DataType.LONG, DataType.FLOAT, DataType.DOUBLE));
         testReadWrite(nodeId, EnumSet.of(DataType.INTEGER, DataType.LONG, DataType.FLOAT, DataType.DOUBLE), opcuaType,
-                0, 10, 20, ((int) Short.MAX_VALUE) * 2 + 1);
-        testReadWrite(nodeId, EnumSet.of(DataType.LONG, DataType.DOUBLE), opcuaType,
-                ((long) Integer.MAX_VALUE) * 2 + 1);
+                0, 10, 20, Short.MAX_VALUE * 2 + 1);
+        testReadWrite(nodeId, EnumSet.of(DataType.LONG, DataType.DOUBLE), opcuaType, (long) Integer.MAX_VALUE * 2 + 1);
     }
 
     @Test
@@ -302,9 +299,8 @@ public class OpcUaDriverTest {
 
         testRead(nodeId, 0, EnumSet.of(DataType.INTEGER, DataType.LONG, DataType.FLOAT, DataType.DOUBLE));
         testReadWrite(nodeId, EnumSet.of(DataType.INTEGER, DataType.LONG, DataType.FLOAT, DataType.DOUBLE), opcuaType,
-                0, 10, 20, ((int) Short.MAX_VALUE) * 2 + 1);
-        testReadWrite(nodeId, EnumSet.of(DataType.LONG, DataType.DOUBLE), opcuaType,
-                ((long) Integer.MAX_VALUE) * 2 + 1);
+                0, 10, 20, Short.MAX_VALUE * 2 + 1);
+        testReadWrite(nodeId, EnumSet.of(DataType.LONG, DataType.DOUBLE), opcuaType, (long) Integer.MAX_VALUE * 2 + 1);
         testReadWrite(nodeId, EnumSet.of(DataType.LONG, DataType.DOUBLE), opcuaType, Long.MAX_VALUE);
     }
 
@@ -435,8 +431,8 @@ public class OpcUaDriverTest {
     protected void bindDriver(Driver driver) {
         OpcUaDriverTest.driver = driver;
 
-        synchronized (driverLock) {
-            driverLock.notifyAll();
+        synchronized (this.driverLock) {
+            this.driverLock.notifyAll();
         }
     }
 

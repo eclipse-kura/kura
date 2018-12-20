@@ -53,7 +53,7 @@ public class WpaSupplicantTest extends TestCase {
             WpaSupplicantManager.start(IFACE_NAME, WifiMode.INFRA, null);
             assertTrue("wpa_supplicant is started", WpaSupplicantManager.isRunning(IFACE_NAME));
 
-            boolean validPid = (WpaSupplicantManager.getPid(IFACE_NAME) > 0) ? true : false;
+            boolean validPid = WpaSupplicantManager.getPid(IFACE_NAME) > 0 ? true : false;
             assertTrue("Valid wpa_supplicant PID", validPid);
         } catch (Exception e) {
             fail("testEnable failed: " + e);

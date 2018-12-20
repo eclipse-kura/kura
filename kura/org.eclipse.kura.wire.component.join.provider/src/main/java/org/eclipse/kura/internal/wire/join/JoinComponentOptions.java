@@ -37,12 +37,12 @@ public class JoinComponentOptions {
     }
 
     PortAggregatorFactory getPortAggregatorFactory() { // TODO fix service reference count
-        final boolean useBarrier = (Boolean) properties.getOrDefault(BARRIER_MODALITY_PROPERTY_KEY,
+        final boolean useBarrier = (Boolean) this.properties.getOrDefault(BARRIER_MODALITY_PROPERTY_KEY,
                 BARRIER_MODALITY_PROPERTY_DEFAULT);
         if (useBarrier) {
-            return context.getService(context.getServiceReference(BarrierAggregatorFactory.class));
+            return this.context.getService(this.context.getServiceReference(BarrierAggregatorFactory.class));
         } else {
-            return context.getService(context.getServiceReference(CachingAggregatorFactory.class));
+            return this.context.getService(this.context.getServiceReference(CachingAggregatorFactory.class));
         }
     }
 

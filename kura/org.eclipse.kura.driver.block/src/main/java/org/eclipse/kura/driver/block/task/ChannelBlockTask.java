@@ -47,7 +47,7 @@ public abstract class ChannelBlockTask extends BlockTask {
     }
 
     public ChannelRecord getRecord() {
-        return record;
+        return this.record;
     }
 
     /**

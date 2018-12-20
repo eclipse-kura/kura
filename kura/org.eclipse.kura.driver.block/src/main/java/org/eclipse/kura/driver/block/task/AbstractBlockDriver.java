@@ -318,11 +318,11 @@ public abstract class AbstractBlockDriver<T> implements Driver {
         }
 
         public U getFirst() {
-            return first;
+            return this.first;
         }
 
         public V getSecond() {
-            return second;
+            return this.second;
         }
     }
 }

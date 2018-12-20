@@ -1660,7 +1660,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
      * Convert property value to string
      *
      * @param value
-     *                  the input value
+     *            the input value
      * @return the string property value, or {@code null}
      */
     private static String makeString(Object value) {

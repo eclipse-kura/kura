@@ -10,44 +10,44 @@ public abstract class ChannelBlockTaskWrapper extends ChannelBlockTask {
     }
 
     public ChannelBlockTask getWrappedTask() {
-        return wrapped;
+        return this.wrapped;
     }
 
     @Override
     public void setParent(final ToplevelBlockTask parent) {
         super.setParent(parent);
-        wrapped.setParent(parent);
+        this.wrapped.setParent(parent);
     }
 
     @Override
     public int getStart() {
-        return wrapped.getStart();
+        return this.wrapped.getStart();
     }
 
     @Override
     public int getEnd() {
-        return wrapped.getEnd();
+        return this.wrapped.getEnd();
     }
 
     @Override
     public void setEnd(int end) {
         super.setEnd(end);
-        wrapped.setEnd(end);
+        this.wrapped.setEnd(end);
     }
 
     @Override
     public void setStart(int start) {
         super.setStart(start);
-        wrapped.setStart(start);
+        this.wrapped.setStart(start);
     }
 
     @Override
     public void onSuccess() {
-        wrapped.onSuccess();
+        this.wrapped.onSuccess();
     }
 
     @Override
     public void onFailure(final Exception exception) {
-        wrapped.onFailure(exception);
+        this.wrapped.onFailure(exception);
     }
 }

@@ -23,18 +23,18 @@ public interface CanConnectionService {
 
     /**
      * Establishes a RAW CAN socket connection
-     * 
+     *
      * @throws IOException
      */
     public void connectCanSocket() throws IOException;
-    
+
     /**
      * Disconnects a CAN socket connection
-     * 
+     *
      * @throws IOException
      */
     public void disconnectCanSocket() throws IOException;
-    
+
     /**
      * Sends an array of bytes on a CAN socket
      *

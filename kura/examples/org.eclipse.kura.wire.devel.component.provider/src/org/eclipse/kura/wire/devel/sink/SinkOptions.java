@@ -24,7 +24,7 @@ public class SinkOptions {
     }
 
     public boolean shouldMeasureTimings() {
-        return MEASURE_TIMINGS.get(properties);
+        return MEASURE_TIMINGS.get(this.properties);
     }
 
 }

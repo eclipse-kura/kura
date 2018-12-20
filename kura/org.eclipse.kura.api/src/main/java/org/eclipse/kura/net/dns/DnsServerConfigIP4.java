@@ -23,7 +23,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * @noextend This class is not intended to be subclassed by clients.
  */
 @ProviderType
-public class DnsServerConfigIP4 extends DnsServerConfigIP<IP4Address>implements DnsServerConfig4 {
+public class DnsServerConfigIP4 extends DnsServerConfigIP<IP4Address> implements DnsServerConfig4 {
 
     public DnsServerConfigIP4(Set<IP4Address> forwarders, Set<NetworkPair<IP4Address>> allowedNetworks) {
         super(forwarders, allowedNetworks);

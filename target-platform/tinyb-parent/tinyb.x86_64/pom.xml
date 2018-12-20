@@ -10,38 +10,38 @@
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
     <parent>
         <groupId>org.eclipse.kura</groupId>
         <artifactId>tinyb-parent</artifactId>
         <version>1.0.300-SNAPSHOT</version>
         <relativePath>..</relativePath>
     </parent>
-	
-	<artifactId>tinyb.x86_64</artifactId>
-	<packaging>bundle</packaging>
+
+    <artifactId>tinyb.x86_64</artifactId>
+    <packaging>bundle</packaging>
 
     <name>Native libraries for 'tinyb' on X86 64</name>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-bundle-plugin</artifactId>
-				<configuration>
-					<instructions>
-						<Fragment-Host>tinyb;bundle-version="[1.0.0,2.0.0)"</Fragment-Host>
-						<Include-Resource>
-						    lib=${project.basedir}/src/main/lib,
-						    ${project.basedir}/about.html,
-						    about_files=${project.basedir}/about_files/
-						</Include-Resource>
-						<Bundle-NativeCode>lib/libtinyb.so; lib/libjavatinyb.so; osname=Linux; processor=x86_64</Bundle-NativeCode>
-					</instructions>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <configuration>
+                    <instructions>
+                        <Fragment-Host>tinyb;bundle-version="[1.0.0,2.0.0)"</Fragment-Host>
+                        <Include-Resource>
+                            lib=${project.basedir}/src/main/lib,
+                            ${project.basedir}/about.html,
+                            about_files=${project.basedir}/about_files/
+                        </Include-Resource>
+                        <Bundle-NativeCode>lib/libtinyb.so; lib/libjavatinyb.so; osname=Linux; processor=x86_64</Bundle-NativeCode>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

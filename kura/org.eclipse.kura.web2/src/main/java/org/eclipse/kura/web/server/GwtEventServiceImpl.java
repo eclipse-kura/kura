@@ -33,8 +33,8 @@ public class GwtEventServiceImpl extends OsgiRemoteServiceServlet implements Gwt
 
     private static final int MAX_EVENT_COUNT = 50;
 
-    private LinkedList<String> topics = new LinkedList<String>();
-    private LinkedList<GwtEventInfo> events = new LinkedList<GwtEventInfo>();
+    private final LinkedList<String> topics = new LinkedList<>();
+    private final LinkedList<GwtEventInfo> events = new LinkedList<>();
     private ServiceRegistration<EventHandler> registration;
 
     public GwtEventServiceImpl() {
@@ -48,19 +48,19 @@ public class GwtEventServiceImpl extends OsgiRemoteServiceServlet implements Gwt
 
         GwtEventInfo eventInfo = serialize(event);
 
-        if (events.size() >= MAX_EVENT_COUNT) {
-            events.removeLast();
+        if (this.events.size() >= MAX_EVENT_COUNT) {
+            this.events.removeLast();
         }
 
-        events.push(eventInfo);
+        this.events.push(eventInfo);
 
-        this.notifyAll();
+        notifyAll();
     }
 
     private List<GwtEventInfo> getEvents(long fromTimestamp) {
-        LinkedList<GwtEventInfo> result = new LinkedList<GwtEventInfo>();
+        LinkedList<GwtEventInfo> result = new LinkedList<>();
 
-        Iterator<GwtEventInfo> i = events.iterator();
+        Iterator<GwtEventInfo> i = this.events.iterator();
 
         while (i.hasNext()) {
             GwtEventInfo next = i.next();
@@ -76,18 +76,18 @@ public class GwtEventServiceImpl extends OsgiRemoteServiceServlet implements Gwt
     public void start() {
         stop();
 
-        Dictionary<String, Object> map = new Hashtable<String, Object>();
+        Dictionary<String, Object> map = new Hashtable<>();
 
-        map.put(EventConstants.EVENT_TOPIC, topics.toArray(new String[topics.size()]));
+        map.put(EventConstants.EVENT_TOPIC, this.topics.toArray(new String[this.topics.size()]));
 
         BundleContext bundleContext = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
-        registration = bundleContext.registerService(EventHandler.class, this, map);
+        this.registration = bundleContext.registerService(EventHandler.class, this, map);
     }
 
     public void stop() {
-        if (registration != null) {
-            registration.unregister();
-            registration = null;
+        if (this.registration != null) {
+            this.registration.unregister();
+            this.registration = null;
         }
     }
 
@@ -104,7 +104,7 @@ public class GwtEventServiceImpl extends OsgiRemoteServiceServlet implements Gwt
         try {
             this.wait(POLL_TIMEOUT_SECONDS * 1000);
         } catch (InterruptedException e) {
-            return new LinkedList<GwtEventInfo>();
+            return new LinkedList<>();
         }
 
         return getEvents(timestamp);
@@ -112,10 +112,10 @@ public class GwtEventServiceImpl extends OsgiRemoteServiceServlet implements Gwt
 
     @Override
     public synchronized String getLastEventTimestamp() {
-        if (events.isEmpty()) {
+        if (this.events.isEmpty()) {
             return "0";
         }
-        return events.getFirst().getTimestamp();
+        return this.events.getFirst().getTimestamp();
     }
 
     public GwtEventInfo serialize(Event event) {

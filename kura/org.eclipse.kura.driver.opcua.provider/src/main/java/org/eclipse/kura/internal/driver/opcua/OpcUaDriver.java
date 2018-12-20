@@ -64,7 +64,7 @@ public final class OpcUaDriver implements Driver, ConfigurableComponent {
 
     private Optional<ConnectionManager> connectionManager = Optional.empty();
     private Optional<CompletableFuture<ConnectionManager>> connectTask = Optional.empty();
-    private ListenerRegistrations registrations = new ListenerRegistrations();
+    private final ListenerRegistrations registrations = new ListenerRegistrations();
 
     private volatile CryptoService cryptoService;
     private OpcUaOptions options;
@@ -76,7 +76,7 @@ public final class OpcUaDriver implements Driver, ConfigurableComponent {
     protected synchronized void activate(final Map<String, Object> properties) {
         this.connectionMonitorExecutor = Executors.newSingleThreadScheduledExecutor();
         logger.info("Activating OPC-UA Driver...");
-        this.extractProperties(properties);
+        extractProperties(properties);
         logger.info("Activating OPC-UA Driver... Done");
     }
 
@@ -93,16 +93,16 @@ public final class OpcUaDriver implements Driver, ConfigurableComponent {
     }
 
     protected synchronized CompletableFuture<ConnectionManager> connectAsync() {
-        if (connectionManager.isPresent()) {
+        if (this.connectionManager.isPresent()) {
             return CompletableFuture.completedFuture(this.connectionManager.get());
         }
-        if (connectTask.isPresent() && !connectTask.get().isDone()) {
+        if (this.connectTask.isPresent() && !this.connectTask.get().isDone()) {
             return this.connectTask.get();
         }
         this.connectAttempt++;
         final long currentConnectAttempt = this.connectAttempt;
         final CompletableFuture<ConnectionManager> currentConnectTask = ConnectionManager
-                .connect(options, this::onFailure, registrations).thenApply(manager -> {
+                .connect(this.options, this::onFailure, this.registrations).thenApply(manager -> {
                     synchronized (this) {
                         if (this.connectAttempt != currentConnectAttempt) {
                             manager.close();
@@ -136,7 +136,7 @@ public final class OpcUaDriver implements Driver, ConfigurableComponent {
     protected synchronized void deactivate() {
         logger.info("Deactivating OPC-UA Driver...");
         try {
-            this.disconnect();
+            disconnect();
         } catch (final ConnectionException e) {
             logger.error("Error while disconnecting....", e);
         }
@@ -174,7 +174,7 @@ public final class OpcUaDriver implements Driver, ConfigurableComponent {
     /** {@inheritDoc} */
     @Override
     public void write(final List<ChannelRecord> records) throws ConnectionException {
-        final ConnectionManager connection = this.connectSync();
+        final ConnectionManager connection = connectSync();
         try {
             connection.write(Request.extractWriteRequests(records));
         } catch (Exception e) {
@@ -185,7 +185,7 @@ public final class OpcUaDriver implements Driver, ConfigurableComponent {
     /** {@inheritDoc} */
     @Override
     public void read(final List<ChannelRecord> records) throws ConnectionException {
-        final ConnectionManager connection = this.connectSync();
+        final ConnectionManager connection = connectSync();
         try {
             connection.read(Request.extractReadRequests(records));
         } catch (Exception e) {
@@ -217,14 +217,14 @@ public final class OpcUaDriver implements Driver, ConfigurableComponent {
     public synchronized void updated(final Map<String, Object> properties) {
         logger.info("Updating OPC-UA Driver...");
 
-        this.extractProperties(properties);
+        extractProperties(properties);
 
         try {
-            final boolean reconnect = connectionManager.isPresent();
-            this.disconnect();
+            final boolean reconnect = this.connectionManager.isPresent();
+            disconnect();
 
             if (reconnect) {
-                this.connectAsync();
+                connectAsync();
             }
         } catch (ConnectionException e) {
             logger.warn("Unable to Disconnect...");
@@ -234,11 +234,11 @@ public final class OpcUaDriver implements Driver, ConfigurableComponent {
     }
 
     private synchronized void onFailure(final ConnectionManager manager, final Throwable ex) {
-        if (connectionManager.isPresent() && connectionManager.get() == manager) {
+        if (this.connectionManager.isPresent() && this.connectionManager.get() == manager) {
             logger.warn("Unrecoverable failure, forcing disconnect", ex);
             try {
-                this.disconnect();
-                this.startConnectionMonitorTask();
+                disconnect();
+                startConnectionMonitorTask();
             } catch (ConnectionException e) {
                 logger.warn("Unable to Disconnect...");
             }
@@ -266,14 +266,14 @@ public final class OpcUaDriver implements Driver, ConfigurableComponent {
                 String originalName = Thread.currentThread().getName();
                 Thread.currentThread().setName("OpcUaDriver:ReconnectTask");
                 try {
-                    if (!connectionManager.isPresent()) {
+                    if (!OpcUaDriver.this.connectionManager.isPresent()) {
                         connectAsync();
                     }
                 } catch (Exception e) {
                     logger.warn("Connect failed", e);
                 } finally {
                     Thread.currentThread().setName(originalName);
-                    if (connectionManager.isPresent()) {
+                    if (OpcUaDriver.this.connectionManager.isPresent()) {
                         logger.info("Connected. Reconnect task will be terminated.");
                         throw new RuntimeException("OpcUaDriver Connected. Reconnect task will be terminated.");
                     }
@@ -307,8 +307,8 @@ public final class OpcUaDriver implements Driver, ConfigurableComponent {
         public List<ChannelRecord> execute() throws ConnectionException {
             try {
                 final ConnectionManager connection = connectSync();
-                connection.read(requests);
-                return Collections.unmodifiableList(channelRecords);
+                connection.read(this.requests);
+                return Collections.unmodifiableList(this.channelRecords);
             } catch (Exception e) {
                 throw new ConnectionException(e);
             }
@@ -316,7 +316,7 @@ public final class OpcUaDriver implements Driver, ConfigurableComponent {
 
         @Override
         public List<ChannelRecord> getChannelRecords() {
-            return Collections.unmodifiableList(channelRecords);
+            return Collections.unmodifiableList(this.channelRecords);
         }
 
         @Override

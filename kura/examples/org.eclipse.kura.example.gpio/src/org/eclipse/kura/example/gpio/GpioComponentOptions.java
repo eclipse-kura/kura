@@ -35,12 +35,12 @@ final class GpioComponentOptions {
     private static final Integer[] DEFAULT_GPIO_MODES = { -1, -1, -1, -1, -1 };
     private static final Integer[] DEFAULT_GPIO_TRIGGERS = { -1, -1, -1, -1, -1 };
 
-    private String gpioServicePid;
-    private String inputReadMode;
-    private String[] pins;
-    private Integer[] directions;
-    private Integer[] modes;
-    private Integer[] triggers;
+    private final String gpioServicePid;
+    private final String inputReadMode;
+    private final String[] pins;
+    private final Integer[] directions;
+    private final Integer[] modes;
+    private final Integer[] triggers;
 
     public GpioComponentOptions(Map<String, Object> properties) {
         requireNonNull(properties, "Required not null");
@@ -53,27 +53,27 @@ final class GpioComponentOptions {
     }
 
     public String getGpioServicePid() {
-        return gpioServicePid;
+        return this.gpioServicePid;
     }
 
     public String getInputReadMode() {
-        return inputReadMode;
+        return this.inputReadMode;
     }
 
     public String[] getPins() {
-        return pins;
+        return this.pins;
     }
 
     public Integer[] getDirections() {
-        return directions;
+        return this.directions;
     }
 
     public Integer[] getModes() {
-        return modes;
+        return this.modes;
     }
 
     public Integer[] getTriggers() {
-        return triggers;
+        return this.triggers;
     }
 
     @SuppressWarnings("unchecked")

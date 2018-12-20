@@ -33,9 +33,9 @@ public class SensorReadTask extends ReadTask {
         } else if (targetType == DataType.LONG) {
             return sensehat -> TypedValues.newLongValue((long) reader.read(sensehat));
         } else if (targetType == DataType.FLOAT) {
-            return sensehat -> TypedValues.newFloatValue((float) reader.read(sensehat));
+            return sensehat -> TypedValues.newFloatValue(reader.read(sensehat));
         } else if (targetType == DataType.DOUBLE) {
-            return sensehat -> TypedValues.newDoubleValue((double) reader.read(sensehat));
+            return sensehat -> TypedValues.newDoubleValue(reader.read(sensehat));
         }
 
         throw new IllegalArgumentException(

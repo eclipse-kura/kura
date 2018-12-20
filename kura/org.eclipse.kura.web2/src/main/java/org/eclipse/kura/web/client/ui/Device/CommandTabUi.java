@@ -178,27 +178,27 @@ public class CommandTabUi extends Composite {
                                     CommandTabUi.this.formExecute.getText(), CommandTabUi.this.formPassword.getText(),
                                     new AsyncCallback<String>() {
 
-                                @Override
-                                public void onFailure(Throwable caught) {
-                                    if (caught.getLocalizedMessage()
-                                            .equals(GwtKuraErrorCode.SERVICE_NOT_ENABLED.toString())) {
-                                        display(MSGS.error() + "\n" + MSGS.commandServiceNotEnabled());
-                                    } else if (caught.getLocalizedMessage()
-                                            .equals(GwtKuraErrorCode.ILLEGAL_ARGUMENT.toString())) {
-                                        display(MSGS.error() + "\n" + MSGS.commandPasswordNotCorrect());
-                                    } else {
-                                        display(MSGS.error() + "\n" + caught.getLocalizedMessage());
-                                    }
-                                    EntryClassUi.hideWaitModal();
-                                }
+                                        @Override
+                                        public void onFailure(Throwable caught) {
+                                            if (caught.getLocalizedMessage()
+                                                    .equals(GwtKuraErrorCode.SERVICE_NOT_ENABLED.toString())) {
+                                                display(MSGS.error() + "\n" + MSGS.commandServiceNotEnabled());
+                                            } else if (caught.getLocalizedMessage()
+                                                    .equals(GwtKuraErrorCode.ILLEGAL_ARGUMENT.toString())) {
+                                                display(MSGS.error() + "\n" + MSGS.commandPasswordNotCorrect());
+                                            } else {
+                                                display(MSGS.error() + "\n" + caught.getLocalizedMessage());
+                                            }
+                                            EntryClassUi.hideWaitModal();
+                                        }
 
-                                @Override
-                                public void onSuccess(String result) {
-                                    display(result);
-                                    EntryClassUi.hideWaitModal();
-                                }
+                                        @Override
+                                        public void onSuccess(String result) {
+                                            display(result);
+                                            EntryClassUi.hideWaitModal();
+                                        }
 
-                            });
+                                    });
                         }
 
                     });

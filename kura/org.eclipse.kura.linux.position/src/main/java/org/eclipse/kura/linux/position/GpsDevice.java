@@ -118,7 +118,7 @@ public class GpsDevice {
                 throw new PositionException("Failed to open serial port", e);
             }
 
-            this.start();
+            start();
         }
 
         @Override
@@ -132,8 +132,8 @@ public class GpsDevice {
         }
 
         public void disconnect() {
-            run = false;
-            this.interrupt();
+            this.run = false;
+            interrupt();
             try {
                 this.join(TERMINATION_TIMEOUT_MS);
             } catch (InterruptedException e) {
@@ -141,7 +141,7 @@ public class GpsDevice {
                 Thread.currentThread().interrupt();
             }
 
-            if (this.isAlive()) {
+            if (isAlive()) {
                 logger.warn("GPS receiver thread did not terminate after {} milliseconds", TERMINATION_TIMEOUT_MS);
                 closeSerialPort();
             }
@@ -173,7 +173,7 @@ public class GpsDevice {
             final StringBuilder readBuffer = new StringBuilder();
             int c = -1;
             while (c != 10) {
-                if (!run) {
+                if (!this.run) {
                     logger.debug("Shutdown requested, exiting");
                     return false;
                 }
@@ -208,18 +208,18 @@ public class GpsDevice {
                 GpsDevice.this.listener.newNmeaSentence(sentence);
             }
 
-            final boolean isLastPositionValid = nmeaParser.isValidPosition();
+            final boolean isLastPositionValid = GpsDevice.this.nmeaParser.isValidPosition();
 
             try {
                 final boolean isValid;
 
                 synchronized (this) {
-                    isValid = nmeaParser.parseSentence(sentence);
+                    isValid = GpsDevice.this.nmeaParser.parseSentence(sentence);
                     GpsDevice.this.lastSentence = sentence;
                 }
 
                 if (isValid != isLastPositionValid && GpsDevice.this.listener != null) {
-                    listener.onLockStatusChanged(isValid);
+                    GpsDevice.this.listener.onLockStatusChanged(isValid);
                     logger.info("{}", GpsDevice.this);
                 }
 

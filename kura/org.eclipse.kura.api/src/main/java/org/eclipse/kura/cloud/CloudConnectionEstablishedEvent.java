@@ -18,7 +18,7 @@ import org.osgi.service.event.Event;
 
 /**
  * CloudConnectionEstablishedEvent is raised with the Cloud Connection is established.
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 @ProviderType

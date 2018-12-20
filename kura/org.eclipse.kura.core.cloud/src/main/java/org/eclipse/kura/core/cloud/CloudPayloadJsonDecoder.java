@@ -54,7 +54,7 @@ public class CloudPayloadJsonDecoder {
      * {@link KuraPayload}.
      *
      * @param array
-     *                  a Json encoded as a byte array.
+     *            a Json encoded as a byte array.
      * @return a {@link KuraPayload} that directly maps the received array.
      */
     public static KuraPayload buildFromByteArray(byte[] array) {
@@ -90,13 +90,14 @@ public class CloudPayloadJsonDecoder {
     private static void decodeTimestamp(KuraPayload payload, JsonValue timestampValue) {
         if (timestampValue != null) {
             String timestampString = "";
-            if (timestampValue.isNumber())
+            if (timestampValue.isNumber()) {
                 timestampString = timestampValue.toString();
-            else if (timestampValue.isObject()) {
+            } else if (timestampValue.isObject()) {
                 timestampString = getTypedValueString(timestampValue);
             }
-            if (!"".equals(timestampString))
+            if (!"".equals(timestampString)) {
                 payload.setTimestamp(new Date(Long.parseLong(timestampString)));
+            }
         }
     }
 
@@ -114,12 +115,13 @@ public class CloudPayloadJsonDecoder {
             String name = member.getName();
             JsonValue value = member.getValue();
             String valueString = "";
-            if (value.isNumber())
+            if (value.isNumber()) {
                 valueString = value.toString();
-            else if (value.isObject())
+            } else if (value.isObject()) {
                 valueString = getTypedValueString(value);
-            else
+            } else {
                 throw new IllegalArgumentException(String.format("Cannot parse position: %s.", name));
+            }
 
             if (LATITUDE.value().equalsIgnoreCase(name)) {
                 position.setLatitude(Double.parseDouble(valueString));
@@ -178,33 +180,36 @@ public class CloudPayloadJsonDecoder {
 
     private static Object getTypedValue(JsonValue value) {
         Object javaValue = null;
-        if (!value.isObject())
+        if (!value.isObject()) {
             throw new IllegalArgumentException(String.format("metric typed object %s is incorrect!", value));
+        }
         JsonObject.Member member = value.asObject().iterator().next();
         String name = member.getName();
         JsonValue value0 = member.getValue();
-        if (name.equalsIgnoreCase("string"))
+        if (name.equalsIgnoreCase("string")) {
             javaValue = value0.asString();
-        else if (name.equalsIgnoreCase("double"))
+        } else if (name.equalsIgnoreCase("double")) {
             javaValue = value0.asDouble();
-        else if (name.equalsIgnoreCase("float"))
+        } else if (name.equalsIgnoreCase("float")) {
             javaValue = value0.asFloat();
-        else if (name.equalsIgnoreCase("int") || name.equalsIgnoreCase("int32") || name.equalsIgnoreCase("int64"))
+        } else if (name.equalsIgnoreCase("int") || name.equalsIgnoreCase("int32") || name.equalsIgnoreCase("int64")) {
             javaValue = value0.asInt();
-        else if (name.equalsIgnoreCase("bool"))
+        } else if (name.equalsIgnoreCase("bool")) {
             javaValue = value0.asBoolean();
-        else if (name.equalsIgnoreCase("long"))
+        } else if (name.equalsIgnoreCase("long")) {
             javaValue = value0.asLong();
-        else if (name.equalsIgnoreCase("bytes"))
+        } else if (name.equalsIgnoreCase("bytes")) {
             javaValue = Base64.getDecoder().decode(value0.asString());
-        else
+        } else {
             throw new IllegalArgumentException(String.format("metric typed object %s is incorrect!", value));
+        }
         return javaValue;
     }
 
     private static String getTypedValueString(JsonValue value) {
-        if (!value.isObject())
+        if (!value.isObject()) {
             throw new IllegalArgumentException(String.format("metric typed object %s is incorrect!", value));
+        }
         JsonObject.Member member = value.asObject().iterator().next();
         JsonValue value0 = member.getValue();
         return value0.toString();

@@ -61,10 +61,10 @@ public interface DeploymentAgentService {
      * The result of the package installation is notified asynchronously
      * posting an {@linkplain org.osgi.service.event.Event Event}
      * on the topic {@linkplain #EVENT_INSTALLED_TOPIC}
-     * 
+     *
      * @see org.osgi.service.deploymentadmin.DeploymentAdmin#installDeploymentPackage installDeploymentPackage
-     * 
-     * 
+     *
+     *
      * @param url
      *            The URL of the deployment package
      * @throws Exception
@@ -78,10 +78,10 @@ public interface DeploymentAgentService {
      * The result of the package uninstallation is notified asynchronously
      * posting an {@linkplain org.osgi.service.event.Event Event}
      * on the topic {@linkplain #EVENT_UNINSTALLED_TOPIC}
-     * 
+     *
      * @see org.osgi.service.deploymentadmin.DeploymentAdmin#uninstallDeploymentPackage uninstallDeploymentPackage
-     * 
-     * 
+     *
+     *
      * @param name
      *            The symbolic name of the deployment package
      * @throws Exception
@@ -91,7 +91,7 @@ public interface DeploymentAgentService {
 
     /**
      * Asks if the installation of a deployment package at the given URL is pending.
-     * 
+     *
      * @param url
      *            The URL of the deployment package
      * @return true if the installation of a deployment package at URL is pending
@@ -100,7 +100,7 @@ public interface DeploymentAgentService {
 
     /**
      * Asks if the uninstallation of a deployment package with the given symbolic name is pending.
-     * 
+     *
      * @param name
      *            The symbolic name of the deployment package
      * @return true if the uninstallation of a deployment package at URL is pending

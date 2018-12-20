@@ -38,19 +38,19 @@ public class AbstractSingleportMathComponentOptions {
     }
 
     public String getOperandName() {
-        return operandName;
+        return this.operandName;
     }
 
     public String getResultName() {
-        return resultName;
+        return this.resultName;
     }
 
     public int getWindowSize() {
-        return windowSize;
+        return this.windowSize;
     }
 
     public boolean shouldEmitReceivedProperties() {
-        return emitReceivedProperties;
+        return this.emitReceivedProperties;
     }
 
     @SuppressWarnings("unchecked")

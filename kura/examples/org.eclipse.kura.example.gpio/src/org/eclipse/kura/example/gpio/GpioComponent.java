@@ -82,8 +82,8 @@ public class GpioComponent implements ConfigurableComponent {
     private BundleContext bundleContext;
     private GPIOService gpioService;
 
-    private List<KuraGPIOPin> acquiredOutputPins = new ArrayList<>();
-    private List<KuraGPIOPin> acquiredInputPins = new ArrayList<>();
+    private final List<KuraGPIOPin> acquiredOutputPins = new ArrayList<>();
+    private final List<KuraGPIOPin> acquiredInputPins = new ArrayList<>();
 
     private ScheduledFuture<?> blinkTask = null;
     private ScheduledFuture<?> pollTask = null;
@@ -155,17 +155,17 @@ public class GpioComponent implements ConfigurableComponent {
         this.value = false;
         acquirePins();
 
-        if (!acquiredOutputPins.isEmpty()) {
-            submitBlinkTask(2000, acquiredOutputPins);
+        if (!this.acquiredOutputPins.isEmpty()) {
+            submitBlinkTask(2000, this.acquiredOutputPins);
         }
 
-        if (!acquiredInputPins.isEmpty()) {
+        if (!this.acquiredInputPins.isEmpty()) {
             String inputReadMode = this.gpioComponentOptions.getInputReadMode();
 
             if (GpioComponentOptions.INPUT_READ_MODE_PIN_STATUS_LISTENER.equals(inputReadMode)) {
-                attachPinListeners(acquiredInputPins);
+                attachPinListeners(this.acquiredInputPins);
             } else if (GpioComponentOptions.INPUT_READ_MODE_POLLING.equals(inputReadMode)) {
-                submitPollTask(500, acquiredInputPins);
+                submitPollTask(500, this.acquiredInputPins);
             }
         }
 
@@ -201,9 +201,9 @@ public class GpioComponent implements ConfigurableComponent {
                     p.open();
                     logger.info("GPIO pin {} acquired", pins[i]);
                     if (p.getDirection() == KuraGPIODirection.OUTPUT) {
-                        acquiredOutputPins.add(p);
+                        this.acquiredOutputPins.add(p);
                     } else {
-                        acquiredInputPins.add(p);
+                        this.acquiredInputPins.add(p);
                     }
                 } else {
                     logger.info("GPIO pin {} not found", pins[i]);
@@ -287,7 +287,7 @@ public class GpioComponent implements ConfigurableComponent {
     }
 
     private void releasePins() {
-        Stream.concat(acquiredInputPins.stream(), acquiredOutputPins.stream()).forEach(pin -> {
+        Stream.concat(this.acquiredInputPins.stream(), this.acquiredOutputPins.stream()).forEach(pin -> {
             try {
                 logger.warn("Closing GPIO pin {}", pin);
                 pin.close();
@@ -295,8 +295,8 @@ public class GpioComponent implements ConfigurableComponent {
                 logger.warn("Cannot close pin!");
             }
         });
-        acquiredInputPins.clear();
-        acquiredOutputPins.clear();
+        this.acquiredInputPins.clear();
+        this.acquiredOutputPins.clear();
     }
 
     private KuraGPIODirection getPinDirection(int direction) {

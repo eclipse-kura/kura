@@ -71,22 +71,22 @@ public abstract class AbstractSingleportMathComponent
 
     @Override
     public Object polled(Wire wire) {
-        return wireSupport.polled(wire);
+        return this.wireSupport.polled(wire);
     }
 
     @Override
     public void consumersConnected(Wire[] wires) {
-        wireSupport.consumersConnected(wires);
+        this.wireSupport.consumersConnected(wires);
     }
 
     @Override
     public void updated(Wire wire, Object value) {
-        wireSupport.updated(wire, value);
+        this.wireSupport.updated(wire, value);
     }
 
     @Override
     public void producersConnected(Wire[] wires) {
-        wireSupport.producersConnected(wires);
+        this.wireSupport.producersConnected(wires);
     }
 
     @Override
@@ -106,7 +106,7 @@ public abstract class AbstractSingleportMathComponent
             logger.warn("Not a number: {}", operand);
             return;
         }
-        final TypedValue<?> result = this.apply(operand);
+        final TypedValue<?> result = apply(operand);
         if (this.options.shouldEmitReceivedProperties()) {
             final Map<String, TypedValue<?>> resultProperties = new HashMap<>(properties);
             resultProperties.put(this.options.getResultName(), result);

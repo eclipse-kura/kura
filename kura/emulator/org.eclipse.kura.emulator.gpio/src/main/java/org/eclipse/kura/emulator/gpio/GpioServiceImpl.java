@@ -27,7 +27,7 @@ public class GpioServiceImpl implements GPIOService {
 
     private static final Logger s_logger = LoggerFactory.getLogger(GpioServiceImpl.class);
 
-    private static final HashMap<Integer, String> pins = new HashMap<Integer, String>();
+    private static final HashMap<Integer, String> pins = new HashMap<>();
 
     protected void activate(ComponentContext componentContext) {
         s_logger.debug("activating emulated GPIOService");

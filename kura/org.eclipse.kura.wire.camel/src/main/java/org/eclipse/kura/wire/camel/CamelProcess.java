@@ -31,9 +31,10 @@ public class CamelProcess extends AbstractReceiverWireComponent implements WireE
     protected void processReceive(final CamelContext context, final String endpointUri, final WireEnvelope envelope)
             throws Exception {
 
-        if (template == null)
+        if (this.template == null) {
             return;
-        final WireRecord[] result = template //
+        }
+        final WireRecord[] result = this.template //
                 .withBody(envelope) //
                 .to(endpointUri) //
                 .request(WireRecord[].class);

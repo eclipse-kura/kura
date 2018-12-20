@@ -33,7 +33,7 @@ public class GwtSnapshotServiceImpl extends OsgiRemoteServiceServlet implements 
     @Override
     public ArrayList<GwtSnapshot> findDeviceSnapshots(GwtXSRFToken xsrfToken) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
-        List<GwtSnapshot> snapshots = new ArrayList<GwtSnapshot>();
+        List<GwtSnapshot> snapshots = new ArrayList<>();
         try {
 
             // execute the command
@@ -55,7 +55,7 @@ public class GwtSnapshotServiceImpl extends OsgiRemoteServiceServlet implements 
             KuraExceptionHandler.handle(t);
         }
 
-        return new ArrayList<GwtSnapshot>(snapshots);
+        return new ArrayList<>(snapshots);
     }
 
     @Override

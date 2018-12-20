@@ -183,7 +183,7 @@ public class EddystoneScanner implements ConfigurableComponent, BluetoothLeBeaco
                 logger.info("No cloud publisher selected. Cannot publish!");
                 return;
             }
-            
+
             // Publish the beacon data to the beacon's topic
             KuraPayload kp = new KuraPayload();
             kp.setTimestamp(new Date());

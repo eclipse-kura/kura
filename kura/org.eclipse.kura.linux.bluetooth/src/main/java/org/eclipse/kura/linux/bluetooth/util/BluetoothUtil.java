@@ -64,7 +64,7 @@ public class BluetoothUtil {
      * Use hciconfig utility to return information about the bluetooth adapter
      */
     public static Map<String, String> getConfig(String name) throws KuraException {
-        Map<String, String> props = new HashMap<String, String>();
+        Map<String, String> props = new HashMap<>();
         BluetoothSafeProcess proc = null;
         BufferedReader br = null;
         StringBuilder sb = null;
@@ -518,7 +518,7 @@ public class BluetoothUtil {
      */
     public static List<BluetoothBeaconData> parseLEAdvertisingReport(byte[] b, String companyName) {
 
-        List<BluetoothBeaconData> results = new LinkedList<BluetoothBeaconData>();
+        List<BluetoothBeaconData> results = new LinkedList<>();
 
         // Packet Type: Event OR Event Type: LE Advertisement Report
         if (b[0] != 0x04 || b[1] != 0x3E) {

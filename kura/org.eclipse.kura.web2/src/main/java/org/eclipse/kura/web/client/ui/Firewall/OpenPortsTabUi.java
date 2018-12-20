@@ -392,7 +392,7 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
                     setVisibility();
                     OpenPortsTabUi.this.buttonBar.setDirty(true);
                 } else {
-                    existingRule.show();
+                    this.existingRule.show();
                 }
             }
         });
@@ -422,7 +422,7 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
                     OpenPortsTabUi.this.editOpenPortEntry = null;
                     setVisibility();
                 } else {
-                    existingRule.show();
+                    this.existingRule.show();
                     OpenPortsTabUi.this.openPortsDataProvider.getList().add(oldEntry);
                     OpenPortsTabUi.this.openPortsDataProvider.flush();
                 }

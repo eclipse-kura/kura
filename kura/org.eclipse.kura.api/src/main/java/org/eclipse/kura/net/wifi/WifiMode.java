@@ -16,9 +16,12 @@ package org.eclipse.kura.net.wifi;
  */
 public enum WifiMode {
     /** Mode is unknown. */
-    UNKNOWN(0x00), /** Uncoordinated network without central infrastructure. */
-    ADHOC(0x01), /** Client mode - Coordinated network with one or more central controllers. */
-    INFRA(0x02), /** Access Point Mode - Coordinated network with one or more central controllers. */
+    UNKNOWN(0x00),
+    /** Uncoordinated network without central infrastructure. */
+    ADHOC(0x01),
+    /** Client mode - Coordinated network with one or more central controllers. */
+    INFRA(0x02),
+    /** Access Point Mode - Coordinated network with one or more central controllers. */
     MASTER(0x03);
 
     private int m_code;

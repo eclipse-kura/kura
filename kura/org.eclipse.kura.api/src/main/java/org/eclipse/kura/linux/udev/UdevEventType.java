@@ -13,5 +13,6 @@ package org.eclipse.kura.linux.udev;
 
 public enum UdevEventType {
 
-    ATTACHED, DETACHED;
+    ATTACHED,
+    DETACHED;
 }

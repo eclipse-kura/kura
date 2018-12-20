@@ -24,7 +24,7 @@ public class ValidationUtil {
 
     /**
      * Throws an KuraException if the string value for the specified argument is empty, null, or whitespace.
-     * 
+     *
      * @param obj
      * @param argumentName
      * @throws KuraException
@@ -37,7 +37,7 @@ public class ValidationUtil {
 
     /**
      * Throws an KuraException if the value for the specified argument is null.
-     * 
+     *
      * @param obj
      * @param argumentName
      * @throws KuraException
@@ -50,7 +50,7 @@ public class ValidationUtil {
 
     /**
      * Throws an KuraException if the value for the specified argument is null.
-     * 
+     *
      * @param obj
      * @param argumentName
      * @throws KuraException
@@ -63,7 +63,7 @@ public class ValidationUtil {
 
     /**
      * Throws an KuraException if the value for the specified argument is null.
-     * 
+     *
      * @param obj
      * @param argumentName
      * @throws KuraException

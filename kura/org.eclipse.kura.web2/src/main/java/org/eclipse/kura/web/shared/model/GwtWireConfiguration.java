@@ -5,7 +5,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *******************************************************************************/
 package org.eclipse.kura.web.shared.model;
 
@@ -42,7 +42,7 @@ public final class GwtWireConfiguration extends GwtBaseModel implements Serializ
     }
 
     public int getEmitterPort() {
-        return emitterPort;
+        return this.emitterPort;
     }
 
     public void setEmitterPort(int emitterPort) {
@@ -50,7 +50,7 @@ public final class GwtWireConfiguration extends GwtBaseModel implements Serializ
     }
 
     public int getReceiverPort() {
-        return receiverPort;
+        return this.receiverPort;
     }
 
     public void setReceiverPort(int receiverPort) {

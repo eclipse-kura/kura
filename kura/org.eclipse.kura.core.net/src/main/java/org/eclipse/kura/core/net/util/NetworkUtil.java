@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 public final class NetworkUtil {
 
     private static final Logger s_logger = LoggerFactory.getLogger(NetworkUtil.class);
-    
+
     private NetworkUtil() {
     }
 
@@ -108,13 +108,13 @@ public final class NetworkUtil {
     }
 
     public static int packIp4AddressBytes(short[] bytes) {
-        if ((bytes == null) || (bytes.length != 4)) {
+        if (bytes == null || bytes.length != 4) {
             throw new IllegalArgumentException("bytes is null or invalid");
         }
 
         int val = 0;
         for (int i = 0; i < 4; i++) {
-            if ((bytes[i] < 0) || (bytes[i] > 255)) {
+            if (bytes[i] < 0 || bytes[i] > 255) {
                 throw new IllegalArgumentException(
                         "bytes is invalid; value is out of range: " + Integer.toString(bytes[i]));
             }
@@ -154,12 +154,12 @@ public final class NetworkUtil {
                 String octet = ip6Split[i];
                 int value = Integer.parseInt(octet, 16);
 
-                if ((value < 0) || (value > 0xFFFF)) {
+                if (value < 0 || value > 0xFFFF) {
                     throw new IllegalArgumentException("fullFormIP6Address is invalid: " + fullFormIP6Address);
                 }
 
                 int k = i * 2;
-                retVal[k] = (byte) ((value >>> 8) & 0xFF);
+                retVal[k] = (byte) (value >>> 8 & 0xFF);
                 retVal[k + 1] = (byte) (value & 0xFF);
             } catch (NumberFormatException e) {
                 throw new IllegalArgumentException("fullFormIP6Address is invalid: " + fullFormIP6Address, e);
@@ -170,14 +170,14 @@ public final class NetworkUtil {
     }
 
     public static String convertIP6Address(byte[] bytes) {
-        if ((bytes == null) || (bytes.length != 16)) {
+        if (bytes == null || bytes.length != 16) {
             throw new IllegalArgumentException("bytes is null or invalid");
         }
 
         String[] items = new String[8];
         for (int i = 0; i < 8; i++) {
             int k = i * 2;
-            int value = (bytes[k] << 8) & 0xFF00;
+            int value = bytes[k] << 8 & 0xFF00;
             value |= bytes[k + 1] & 0xFF;
             items[i] = Integer.toHexString(value);
         }
@@ -186,7 +186,7 @@ public final class NetworkUtil {
     }
 
     public static String macToString(byte[] mac) {
-        if ((mac == null) || (mac.length != 6)) {
+        if (mac == null || mac.length != 6) {
             throw new IllegalArgumentException("mac is null or invalid");
         }
 
@@ -217,7 +217,7 @@ public final class NetworkUtil {
         byte[] bytes = new byte[6];
         for (int i = 0; i < 6; i++) {
             String item = items[i];
-            if (item.isEmpty() || (item.length() > 2)) {
+            if (item.isEmpty() || item.length() > 2) {
                 throw new IllegalArgumentException("mac is invalid: " + mac);
             }
 

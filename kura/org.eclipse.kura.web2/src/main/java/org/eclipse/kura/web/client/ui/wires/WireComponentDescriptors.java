@@ -20,7 +20,7 @@ import org.eclipse.kura.web.shared.model.GwtWireComponentDescriptor;
 
 public class WireComponentDescriptors {
 
-    private Map<String, GwtWireComponentDescriptor> descriptors = new HashMap<>();
+    private final Map<String, GwtWireComponentDescriptor> descriptors = new HashMap<>();
 
     public void setDescriptors(List<GwtWireComponentDescriptor> descriptors) {
         this.descriptors.clear();
@@ -30,15 +30,15 @@ public class WireComponentDescriptors {
     }
 
     public GwtWireComponentDescriptor getDescriptor(String factoryPid) {
-        return descriptors.get(factoryPid);
+        return this.descriptors.get(factoryPid);
     }
 
     public Map<String, GwtWireComponentDescriptor> getDescriptors() {
-        return descriptors;
+        return this.descriptors;
     }
 
     public WireComponent createNewComponent(String pid, String factoryPid) {
-        final GwtWireComponentDescriptor descriptor = descriptors.get(factoryPid);
+        final GwtWireComponentDescriptor descriptor = this.descriptors.get(factoryPid);
         if (descriptor == null) {
             return null;
         }

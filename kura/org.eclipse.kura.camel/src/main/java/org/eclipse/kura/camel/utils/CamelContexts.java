@@ -29,7 +29,7 @@ public final class CamelContexts {
 
     /**
      * Run an init script on a camel context
-     * 
+     *
      * @param context
      *            the context to work on
      * @param initCode

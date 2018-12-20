@@ -57,7 +57,7 @@ public class ByteArrayValue implements TypedValue<byte[]> {
     public int compareTo(final TypedValue<byte[]> otherTypedValue) {
         requireNonNull(otherTypedValue, "Typed Value cannot be null");
         final byte[] otherValue = otherTypedValue.getValue();
-        for (int i = 0, j = 0; (i < this.value.length) && (j < otherValue.length); i++, j++) {
+        for (int i = 0, j = 0; i < this.value.length && j < otherValue.length; i++, j++) {
             final int a = this.value[i] & 0xff;
             final int b = otherValue[j] & 0xff;
             if (a != b) {
@@ -103,7 +103,7 @@ public class ByteArrayValue implements TypedValue<byte[]> {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = (prime * result) + Arrays.hashCode(this.value);
+        result = prime * result + Arrays.hashCode(this.value);
         return result;
     }
 

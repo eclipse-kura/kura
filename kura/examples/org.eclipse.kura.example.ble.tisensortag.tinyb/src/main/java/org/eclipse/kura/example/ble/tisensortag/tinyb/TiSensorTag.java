@@ -58,7 +58,7 @@ public class TiSensorTag {
     private BluetoothLeDevice device;
     private boolean cc2650;
     private byte[] pressureCalibration;
-    private Map<String, TiSensorTagGattResources> gattResources;
+    private final Map<String, TiSensorTagGattResources> gattResources;
 
     public TiSensorTag(BluetoothLeDevice bluetoothLeDevice) {
         this.device = bluetoothLeDevice;
@@ -422,7 +422,7 @@ public class TiSensorTag {
     public void setAccelerometerPeriod(int period) {
         byte[] periodBytes = { ByteBuffer.allocate(4).putInt(period).array()[3] };
         try {
-            if (this.isCC2650()) {
+            if (isCC2650()) {
                 this.gattResources.get(MOVEMENT).getGattService()
                         .findCharacteristic(TiSensorTagGatt.UUID_MOV_SENSOR_PERIOD).writeValue(periodBytes);
             } else {
@@ -435,7 +435,7 @@ public class TiSensorTag {
     }
 
     public boolean isAccelerometerNotifying() {
-        if (this.isCC2650()) {
+        if (isCC2650()) {
             return isNotifying(MOVEMENT);
         } else {
             return isNotifying(ACCELEROMETER);
@@ -690,7 +690,7 @@ public class TiSensorTag {
     public void setMagnetometerPeriod(int period) {
         byte[] periodBytes = { ByteBuffer.allocate(4).putInt(period).array()[3] };
         try {
-            if (this.isCC2650()) {
+            if (isCC2650()) {
                 this.gattResources.get(MOVEMENT).getGattService()
                         .findCharacteristic(TiSensorTagGatt.UUID_MOV_SENSOR_PERIOD).writeValue(periodBytes);
             } else {
@@ -703,7 +703,7 @@ public class TiSensorTag {
     }
 
     public boolean isMagnetometerNotifying() {
-        if (this.isCC2650()) {
+        if (isCC2650()) {
             return isNotifying(MOVEMENT);
         } else {
             return isNotifying(MAGNETOMETER);
@@ -1026,7 +1026,7 @@ public class TiSensorTag {
     public void setGyroscopePeriod(int period) {
         byte[] periodBytes = { ByteBuffer.allocate(4).putInt(period).array()[3] };
         try {
-            if (this.isCC2650()) {
+            if (isCC2650()) {
                 this.gattResources.get(MOVEMENT).getGattService()
                         .findCharacteristic(TiSensorTagGatt.UUID_MOV_SENSOR_PERIOD).writeValue(periodBytes);
             }
@@ -1036,7 +1036,7 @@ public class TiSensorTag {
     }
 
     public boolean isGyroscopeNotifying() {
-        if (this.isCC2650()) {
+        if (isCC2650()) {
             return isNotifying(MOVEMENT);
         } else {
             return isNotifying(GYROSCOPE);
@@ -1167,7 +1167,7 @@ public class TiSensorTag {
     public void setLuxometerPeriod(int period) {
         byte[] periodBytes = { ByteBuffer.allocate(4).putInt(period).array()[3] };
         try {
-            if (this.isCC2650()) {
+            if (isCC2650()) {
                 this.gattResources.get(OPTO).getGattService()
                         .findCharacteristic(TiSensorTagGatt.UUID_OPTO_SENSOR_PERIOD).writeValue(periodBytes);
             }
@@ -1177,7 +1177,7 @@ public class TiSensorTag {
     }
 
     public boolean isLuxometerNotifying() {
-        if (this.isCC2650()) {
+        if (isCC2650()) {
             return isNotifying(OPTO);
         } else {
             return false;
@@ -1447,31 +1447,31 @@ public class TiSensorTag {
 
     private void getGattResources() throws KuraBluetoothConnectionException {
         try {
-            if (gattResources != null) {
-                gattResources.put(DEVINFO, new TiSensorTagGattResources(DEVINFO,
+            if (this.gattResources != null) {
+                this.gattResources.put(DEVINFO, new TiSensorTagGattResources(DEVINFO,
                         this.device.findService(TiSensorTagGatt.UUID_DEVINFO_SERVICE), null));
 
                 BluetoothLeGattService tempService = this.device.findService(TiSensorTagGatt.UUID_TEMP_SENSOR_SERVICE);
                 if (tempService != null) {
-                    gattResources.put(TEMPERATURE, new TiSensorTagGattResources(TEMPERATURE, tempService,
+                    this.gattResources.put(TEMPERATURE, new TiSensorTagGattResources(TEMPERATURE, tempService,
                             tempService.findCharacteristic(TiSensorTagGatt.UUID_TEMP_SENSOR_VALUE)));
                 }
 
                 BluetoothLeGattService humService = this.device.findService(TiSensorTagGatt.UUID_HUM_SENSOR_SERVICE);
                 if (humService != null) {
-                    gattResources.put(HUMIDITY, new TiSensorTagGattResources(HUMIDITY, humService,
+                    this.gattResources.put(HUMIDITY, new TiSensorTagGattResources(HUMIDITY, humService,
                             humService.findCharacteristic(TiSensorTagGatt.UUID_HUM_SENSOR_VALUE)));
                 }
 
                 BluetoothLeGattService presService = this.device.findService(TiSensorTagGatt.UUID_PRE_SENSOR_SERVICE);
                 if (presService != null) {
-                    gattResources.put(PRESSURE, new TiSensorTagGattResources(PRESSURE, presService,
+                    this.gattResources.put(PRESSURE, new TiSensorTagGattResources(PRESSURE, presService,
                             presService.findCharacteristic(TiSensorTagGatt.UUID_PRE_SENSOR_VALUE)));
                 }
 
                 BluetoothLeGattService keysService = this.device.findService(TiSensorTagGatt.UUID_KEYS_SERVICE);
                 if (keysService != null) {
-                    gattResources.put(KEYS, new TiSensorTagGattResources(KEYS, keysService,
+                    this.gattResources.put(KEYS, new TiSensorTagGattResources(KEYS, keysService,
                             keysService.findCharacteristic(TiSensorTagGatt.UUID_KEYS_STATUS)));
                 }
 
@@ -1490,19 +1490,19 @@ public class TiSensorTag {
     private void getCC2541GattResources() throws KuraBluetoothResourceNotFoundException {
         BluetoothLeGattService accService = this.device.findService(TiSensorTagGatt.UUID_ACC_SENSOR_SERVICE);
         if (accService != null) {
-            gattResources.put(ACCELEROMETER, new TiSensorTagGattResources(ACCELEROMETER, accService,
+            this.gattResources.put(ACCELEROMETER, new TiSensorTagGattResources(ACCELEROMETER, accService,
                     accService.findCharacteristic(TiSensorTagGatt.UUID_ACC_SENSOR_VALUE)));
         }
 
         BluetoothLeGattService magService = this.device.findService(TiSensorTagGatt.UUID_MAG_SENSOR_SERVICE);
         if (magService != null) {
-            gattResources.put(MAGNETOMETER, new TiSensorTagGattResources(MAGNETOMETER, magService,
+            this.gattResources.put(MAGNETOMETER, new TiSensorTagGattResources(MAGNETOMETER, magService,
                     magService.findCharacteristic(TiSensorTagGatt.UUID_MAG_SENSOR_VALUE)));
         }
 
         BluetoothLeGattService gyrService = this.device.findService(TiSensorTagGatt.UUID_GYR_SENSOR_SERVICE);
         if (gyrService != null) {
-            gattResources.put(GYROSCOPE, new TiSensorTagGattResources(GYROSCOPE, gyrService,
+            this.gattResources.put(GYROSCOPE, new TiSensorTagGattResources(GYROSCOPE, gyrService,
                     gyrService.findCharacteristic(TiSensorTagGatt.UUID_GYR_SENSOR_VALUE)));
         }
     }
@@ -1510,19 +1510,19 @@ public class TiSensorTag {
     private void getCC2650GattResources() throws KuraBluetoothResourceNotFoundException {
         BluetoothLeGattService optoService = this.device.findService(TiSensorTagGatt.UUID_OPTO_SENSOR_SERVICE);
         if (optoService != null) {
-            gattResources.put(OPTO, new TiSensorTagGattResources(OPTO, optoService,
+            this.gattResources.put(OPTO, new TiSensorTagGattResources(OPTO, optoService,
                     optoService.findCharacteristic(TiSensorTagGatt.UUID_OPTO_SENSOR_VALUE)));
         }
 
         BluetoothLeGattService movService = this.device.findService(TiSensorTagGatt.UUID_MOV_SENSOR_SERVICE);
         if (movService != null) {
-            gattResources.put(MOVEMENT, new TiSensorTagGattResources(MOVEMENT, movService,
+            this.gattResources.put(MOVEMENT, new TiSensorTagGattResources(MOVEMENT, movService,
                     movService.findCharacteristic(TiSensorTagGatt.UUID_MOV_SENSOR_VALUE)));
         }
 
         BluetoothLeGattService ioService = this.device.findService(TiSensorTagGatt.UUID_IO_SENSOR_SERVICE);
         if (ioService != null) {
-            gattResources.put(IO, new TiSensorTagGattResources(IO, ioService,
+            this.gattResources.put(IO, new TiSensorTagGattResources(IO, ioService,
                     ioService.findCharacteristic(TiSensorTagGatt.UUID_IO_SENSOR_VALUE)));
         }
     }

@@ -13,7 +13,10 @@ package org.eclipse.kura.net.modem;
 
 public enum ModemCdmaServiceProvider {
 
-    UNKNOWN(0), SPRINT(1), AERIS(2), VERIZON(3);
+    UNKNOWN(0),
+    SPRINT(1),
+    AERIS(2),
+    VERIZON(3);
 
     private int m_provider;
 

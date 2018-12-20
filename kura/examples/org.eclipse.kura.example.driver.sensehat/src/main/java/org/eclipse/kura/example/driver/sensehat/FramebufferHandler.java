@@ -35,36 +35,36 @@ public class FramebufferHandler implements Closeable {
     private Future<?> writeMessageTask;
 
     private void cancelWriteMessage() {
-        if (writeMessageTask != null) {
-            writeMessageTask.cancel(true);
-            writeMessageTask = null;
+        if (this.writeMessageTask != null) {
+            this.writeMessageTask.cancel(true);
+            this.writeMessageTask = null;
         }
     }
 
     public synchronized void runFramebufferRequest(final FramebufferRequest request) throws IOException {
 
         request.getFrontColorRed().ifPresent(color -> {
-            fb.setFrontColorRed(color);
+            this.fb.setFrontColorRed(color);
         });
         request.getFrontColorGreen().ifPresent(color -> {
-            fb.setFrontColorGreen(color);
+            this.fb.setFrontColorGreen(color);
         });
         request.getFrontColorBlue().ifPresent(color -> {
-            fb.setFrontColorBlue(color);
+            this.fb.setFrontColorBlue(color);
         });
 
         request.getBackColorRed().ifPresent(color -> {
-            fb.setBackColorRed(color);
+            this.fb.setBackColorRed(color);
         });
         request.getBackColorGreen().ifPresent(color -> {
-            fb.setBackColorGreen(color);
+            this.fb.setBackColorGreen(color);
         });
         request.getBackColorBlue().ifPresent(color -> {
-            fb.setBackColorBlue(color);
+            this.fb.setBackColorBlue(color);
         });
 
         request.getTransform().ifPresent(transform -> {
-            fb.setTransform(transform);
+            this.fb.setTransform(transform);
         });
 
         final Optional<String> writeMessage = request.getMessage();
@@ -73,18 +73,18 @@ public class FramebufferHandler implements Closeable {
 
         if (request.shouldClear()) {
             cancelWriteMessage();
-            fb.clearFrameBuffer();
+            this.fb.clearFrameBuffer();
         } else if (writeRGB565Pixels.isPresent()) {
             cancelWriteMessage();
-            fb.setPixelsRGB565(writeRGB565Pixels.get());
+            this.fb.setPixelsRGB565(writeRGB565Pixels.get());
         } else if (writeMonochromePixels.isPresent()) {
             cancelWriteMessage();
-            fb.setPixelsMonochrome(writeMonochromePixels.get());
+            this.fb.setPixelsMonochrome(writeMonochromePixels.get());
         } else if (writeMessage.isPresent()) {
             cancelWriteMessage();
-            this.writeMessageTask = executor.submit(() -> {
+            this.writeMessageTask = this.executor.submit(() -> {
                 try {
-                    fb.showMessage(writeMessage.get());
+                    this.fb.showMessage(writeMessage.get());
                 } catch (IOException e) {
                     logger.warn("Failed to write message", e);
                 }
@@ -94,7 +94,7 @@ public class FramebufferHandler implements Closeable {
 
     @Override
     public synchronized void close() throws IOException {
-        fb.closeFrameBuffer();
+        this.fb.closeFrameBuffer();
         this.executor.shutdown();
     }
 

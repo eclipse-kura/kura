@@ -106,7 +106,7 @@ public class SecureBasicHttpContext implements HttpContext {
             return failAuthorization(response);
         }
 
-        final String credentials = new String ( getDecoder().decode(tokens.nextToken()), StandardCharsets.UTF_8 );
+        final String credentials = new String(getDecoder().decode(tokens.nextToken()), StandardCharsets.UTF_8);
 
         int colon = credentials.indexOf(':');
         String userid = credentials.substring(0, colon);
@@ -160,11 +160,11 @@ public class SecureBasicHttpContext implements HttpContext {
         if (session.isNew()) {
             String sessionid = session.getId();
             response.setHeader("SET-COOKIE", "JSESSIONID=" + sessionid + "; HttpOnly");  // TODO: this response header
-  // is highly discouraged. Find
-  // a better solution (that
-  // probably will require a new
-  // version of Jetty). See here:
-  // https://www.owasp.org/index.php/HttpOnly#Using_Java_to_Set_HttpOnly
+            // is highly discouraged. Find
+            // a better solution (that
+            // probably will require a new
+            // version of Jetty). See here:
+            // https://www.owasp.org/index.php/HttpOnly#Using_Java_to_Set_HttpOnly
         }
         return subject;
 

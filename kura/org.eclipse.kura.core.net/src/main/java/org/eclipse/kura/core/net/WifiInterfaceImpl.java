@@ -36,7 +36,7 @@ public class WifiInterfaceImpl<T extends WifiInterfaceAddress> extends AbstractN
 
         // Copy the NetInterfaceAddresses
         List<? extends WifiInterfaceAddress> otherNetInterfaceAddresses = other.getNetInterfaceAddresses();
-        ArrayList<T> interfaceAddresses = new ArrayList<T>();
+        ArrayList<T> interfaceAddresses = new ArrayList<>();
 
         if (otherNetInterfaceAddresses != null) {
             for (WifiInterfaceAddress wifiInterfaceAddress : otherNetInterfaceAddresses) {

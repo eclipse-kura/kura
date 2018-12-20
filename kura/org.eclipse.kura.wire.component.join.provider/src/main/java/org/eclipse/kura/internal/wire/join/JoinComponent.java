@@ -72,9 +72,9 @@ public final class JoinComponent implements MultiportWireReceiver, WireEmitter, 
 
     public void updated(final Map<String, Object> properties) {
         logger.debug("Updating Join Wire Component...");
-        this.joinComponentOptions = new JoinComponentOptions(properties, context.getBundleContext());
+        this.joinComponentOptions = new JoinComponentOptions(properties, this.context.getBundleContext());
 
-        this.joinComponentOptions.getPortAggregatorFactory().build(wireSupport.getReceiverPorts())
+        this.joinComponentOptions.getPortAggregatorFactory().build(this.wireSupport.getReceiverPorts())
                 .onWireReceive(this::onWireReceive);
 
         logger.debug("Updating Join Wire Component... Done");

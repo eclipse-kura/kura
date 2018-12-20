@@ -14,9 +14,9 @@ import java.util.function.IntBinaryOperator;
 
 public enum Transform {
     IDENTITY((x, y) -> y * 8 + x),
-    ROTATE_90((x, y) -> (x) * 8 + (8 - 1 - y)),
-    ROTATE_180((x, y) -> (8 - 1 - y) * 8 + (8 - 1 - x)),
-    ROTATE_270((x, y) -> (8 - 1 - x) * 8 + (y));
+    ROTATE_90((x, y) -> x * 8 + 8 - 1 - y),
+    ROTATE_180((x, y) -> (8 - 1 - y) * 8 + 8 - 1 - x),
+    ROTATE_270((x, y) -> (8 - 1 - x) * 8 + y);
 
     private final IntBinaryOperator func;
 

@@ -50,7 +50,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
         } else {
             logger.debug("activating WatchdogService with {}", properties.toString());
         }
-        criticalServiceList = new ArrayList<CriticalServiceImpl>();
+        criticalServiceList = new ArrayList<>();
         this.enabled = false;
 
         // clean up if this is not our first run

@@ -74,7 +74,7 @@ public class ExampleTest implements DataServiceListener {
 
     private static Lock s_lock = new ReentrantLock();
     private static Condition s_condition = s_lock.newCondition();
-    private static Set<Integer> s_messageIds = new HashSet<Integer>();
+    private static Set<Integer> s_messageIds = new HashSet<>();
 
     public ExampleTest() {
         super();

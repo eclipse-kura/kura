@@ -12,9 +12,9 @@
 package org.eclipse.kura.core.cloud;
 
 import static org.eclipse.kura.core.cloud.CloudPayloadJsonFields.BODY;
+import static org.eclipse.kura.core.cloud.CloudPayloadJsonFields.METRICS;
 import static org.eclipse.kura.core.cloud.CloudPayloadJsonFields.POSITION;
 import static org.eclipse.kura.core.cloud.CloudPayloadJsonFields.SENTON;
-import static org.eclipse.kura.core.cloud.CloudPayloadJsonFields.METRICS;
 import static org.eclipse.kura.core.cloud.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.ALTITUDE;
 import static org.eclipse.kura.core.cloud.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.HEADING;
 import static org.eclipse.kura.core.cloud.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.LATITUDE;

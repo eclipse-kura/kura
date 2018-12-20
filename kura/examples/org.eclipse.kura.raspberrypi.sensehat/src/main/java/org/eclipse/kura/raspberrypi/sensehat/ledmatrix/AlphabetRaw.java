@@ -30,7 +30,7 @@ public class AlphabetRaw {
 
     public AlphabetRaw(URL url) {
 
-        letters = new HashMap<Character, byte[]>();
+        letters = new HashMap<>();
         int c;
         try {
             is = url.openStream();
@@ -38,7 +38,7 @@ public class AlphabetRaw {
                 final byte[] letter = new byte[LETTER_SIZE];
                 for (int y = 0; y < 8; y++) {
                     for (int x = 0; x < 8; x++) {
-                        final int off = (8 - 1 - x) * 8 + (y);
+                        final int off = (8 - 1 - x) * 8 + y;
                         if (y == 0 || y == 6 || y == 7) {
                             // Add whitespaces
                             letter[off] = 0;

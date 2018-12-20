@@ -53,34 +53,36 @@ public class ConfigurationUiButtons extends Composite implements HasConfiguratio
 
             @Override
             public void onClick(ClickEvent event) {
-                if (listener == null) {
+                if (ConfigurationUiButtons.this.listener == null) {
                     return;
                 }
                 if (!target.isValid()) {
-                    confirmDialog.show(MSGS.formWithErrorsOrIncomplete(), AlertDialog.Severity.ALERT, null);
+                    ConfigurationUiButtons.this.confirmDialog.show(MSGS.formWithErrorsOrIncomplete(),
+                            AlertDialog.Severity.ALERT, null);
                     return;
                 }
-                confirmDialog.show(MSGS.deviceConfigConfirmationNoName(), new AlertDialog.Listener() {
+                ConfigurationUiButtons.this.confirmDialog.show(MSGS.deviceConfigConfirmationNoName(),
+                        new AlertDialog.Listener() {
 
-                    @Override
-                    public void onConfirm() {
-                        listener.onApply();
-                    }
-                });
+                            @Override
+                            public void onConfirm() {
+                                ConfigurationUiButtons.this.listener.onApply();
+                            }
+                        });
             }
         });
         this.btnReset.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
-                if (listener == null) {
+                if (ConfigurationUiButtons.this.listener == null) {
                     return;
                 }
-                confirmDialog.show(MSGS.deviceConfigDirty(), new AlertDialog.Listener() {
+                ConfigurationUiButtons.this.confirmDialog.show(MSGS.deviceConfigDirty(), new AlertDialog.Listener() {
 
                     @Override
                     public void onConfirm() {
-                        listener.onReset();
+                        ConfigurationUiButtons.this.listener.onReset();
                     }
                 });
             }
@@ -98,8 +100,8 @@ public class ConfigurationUiButtons extends Composite implements HasConfiguratio
     @Override
     public void onDirtyStateChanged(HasConfiguration hasConfiguration) {
         boolean isDirty = hasConfiguration.isDirty();
-        btnApply.setEnabled(isDirty);
-        btnReset.setEnabled(isDirty);
+        this.btnApply.setEnabled(isDirty);
+        this.btnReset.setEnabled(isDirty);
     }
 
     public interface Listener {

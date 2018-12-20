@@ -8,7 +8,7 @@
  *
  * Contributors:
  *  Eurotech
- * 
+ *
  *******************************************************************************/
 
 package org.eclipse.kura.internal.wire.helper;
@@ -33,20 +33,20 @@ public class BarrierAggregator implements PortAggregator {
 
     public BarrierAggregator(List<ReceiverPort> ports) {
         requireNonNull(ports);
-        envelopes = new ArrayList<>(ports.size());
+        this.envelopes = new ArrayList<>(ports.size());
 
         for (int i = 0; i < ports.size(); i++) {
-            envelopes.add(null);
+            this.envelopes.add(null);
             final Integer port = i;
 
             ports.get(i).onWireReceive(envelope -> {
-                synchronized (envelopes) {
-                    if (envelopes.get(port) == null) {
-                        fullSlots++;
+                synchronized (this.envelopes) {
+                    if (this.envelopes.get(port) == null) {
+                        this.fullSlots++;
                     }
-                    envelopes.set(port, envelope);
-                    if (fullSlots == envelopes.size()) {
-                        consumer.accept(envelopes);
+                    this.envelopes.set(port, envelope);
+                    if (this.fullSlots == this.envelopes.size()) {
+                        this.consumer.accept(this.envelopes);
                         clearSlots();
                     }
                 }
@@ -55,9 +55,9 @@ public class BarrierAggregator implements PortAggregator {
     }
 
     private void clearSlots() {
-        fullSlots = 0;
-        for (int i = 0; i < envelopes.size(); i++) {
-            envelopes.set(i, null);
+        this.fullSlots = 0;
+        for (int i = 0; i < this.envelopes.size(); i++) {
+            this.envelopes.set(i, null);
         }
     }
 

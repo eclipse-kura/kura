@@ -587,7 +587,7 @@ public class KuraDeviceProfile {
 
     /**
      * Returns the Application Framework.
-     * 
+     *
      * @return A String representing the Application Framework
      */
     public String getApplicationFramework() {
@@ -596,7 +596,7 @@ public class KuraDeviceProfile {
 
     /**
      * Returns the Application Framework version.
-     * 
+     *
      * @return A String representing the Application Framework version
      */
     public String getApplicationFrameworkVersion() {

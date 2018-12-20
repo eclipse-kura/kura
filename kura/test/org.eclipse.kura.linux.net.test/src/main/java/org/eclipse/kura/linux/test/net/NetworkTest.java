@@ -70,7 +70,7 @@ public class NetworkTest extends TestCase implements EventHandler {
         FrameworkUtil.getBundle(this.getClass()).getBundleContext();
 
         // install event listener for network events
-        Dictionary<String, String[]> eventProps = new Hashtable<String, String[]>();
+        Dictionary<String, String[]> eventProps = new Hashtable<>();
         String[] topic = { UsbDeviceAddedEvent.USB_EVENT_DEVICE_ADDED_TOPIC,
                 UsbDeviceRemovedEvent.USB_EVENT_DEVICE_REMOVED_TOPIC };
         eventProps.put(EventConstants.EVENT_TOPIC, topic);

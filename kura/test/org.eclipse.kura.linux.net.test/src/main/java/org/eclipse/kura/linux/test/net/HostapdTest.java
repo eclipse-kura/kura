@@ -53,7 +53,7 @@ public class HostapdTest extends TestCase {
             HostapdManager.start(IFACE_NAME);
             assertTrue("hostapd is started", HostapdManager.isRunning(IFACE_NAME));
 
-            boolean validPid = (HostapdManager.getPid(IFACE_NAME) > 0) ? true : false;
+            boolean validPid = HostapdManager.getPid(IFACE_NAME) > 0 ? true : false;
             assertTrue("Valid hostapd PID", validPid);
         } catch (Exception e) {
             fail("testEnable failed: " + e);

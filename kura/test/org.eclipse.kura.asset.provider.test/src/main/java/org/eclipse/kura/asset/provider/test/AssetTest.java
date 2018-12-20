@@ -85,7 +85,7 @@ public final class AssetTest {
      * JUnit Callback to be triggered before creating the instance of this suite
      *
      * @throws Exception
-     *                       if the dependent services are null
+     *             if the dependent services are null
      */
     @BeforeClass
     public static void setUpClass() throws Exception {
@@ -155,7 +155,7 @@ public final class AssetTest {
 
     protected void activate() throws KuraException {
         if (cfgsvc != null) {
-            Map<String, Object> props = new HashMap<String, Object>();
+            Map<String, Object> props = new HashMap<>();
             props.put("driver.pid", "org.eclipse.kura.asset.stub.driver");
 
             cfgsvc.createFactoryConfiguration("org.eclipse.kura.asset", "testAsset", props, false);
@@ -423,7 +423,7 @@ public final class AssetTest {
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testRead() throws KuraException {
-        final List<ChannelRecord> records = asset.read(new HashSet<String>(Arrays.asList("1.CH")));
+        final List<ChannelRecord> records = asset.read(new HashSet<>(Arrays.asList("1.CH")));
 
         assertNotNull(records);
         assertEquals(1, records.size());
@@ -436,7 +436,7 @@ public final class AssetTest {
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testReadChannelNotReadable() throws KuraException {
-        List<ChannelRecord> result = asset.read(new HashSet<String>(Arrays.asList("2.CH")));
+        List<ChannelRecord> result = asset.read(new HashSet<>(Arrays.asList("2.CH")));
 
         assertNotNull(result);
         assertEquals(1, result.size());
@@ -512,9 +512,9 @@ public final class AssetTest {
         String[] expectedValues = { "#+enabled", "#+name", "#+type", "#+value.type", "#unit.id" };
 
         final int expectedChannelCount = 4;
-        for (int i = 0; i < expectedValues.length; i++) {
+        for (String expectedValue : expectedValues) {
             for (int j = 0; j < expectedChannelCount; j++) {
-                final String id = (j + 1) + ".CH" + expectedValues[i];
+                final String id = j + 1 + ".CH" + expectedValue;
                 assertEquals(1, ads.parallelStream().filter(ad -> ad.getId().equals(id)).count());
             }
         }
@@ -526,7 +526,7 @@ public final class AssetTest {
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testReadChannelDisabled() throws KuraException {
-        List<ChannelRecord> result = asset.read(new HashSet<String>(Arrays.asList("3.CH")));
+        List<ChannelRecord> result = asset.read(new HashSet<>(Arrays.asList("3.CH")));
 
         assertNotNull(result);
         assertEquals(1, result.size());

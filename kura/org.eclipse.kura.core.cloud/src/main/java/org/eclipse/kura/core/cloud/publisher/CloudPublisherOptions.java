@@ -17,7 +17,8 @@ import org.eclipse.kura.core.message.MessageType;
 public class CloudPublisherOptions {
 
     private static final Property<String> PROPERTY_CLOUD_SERVICE_PID = new Property<>(
-            CloudConnectionConstants.CLOUD_ENDPOINT_SERVICE_PID_PROP_NAME.value(), "org.eclipse.kura.cloud.CloudService");
+            CloudConnectionConstants.CLOUD_ENDPOINT_SERVICE_PID_PROP_NAME.value(),
+            "org.eclipse.kura.cloud.CloudService");
     private static final Property<String> PROPERTY_APP_ID = new Property<>("appId", "W1");
     private static final Property<String> PROPERTY_APP_TOPIC = new Property<>("app.topic", "A1/$assetName");
     private static final Property<Integer> PROPERTY_QOS = new Property<>("qos", 0);

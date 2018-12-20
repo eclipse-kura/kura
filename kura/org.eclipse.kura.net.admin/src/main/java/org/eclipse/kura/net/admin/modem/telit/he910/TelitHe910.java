@@ -180,9 +180,8 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
                 throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
             }
             try {
-                reply = commAtConnection.sendCommand(
-                        TelitHe910AtCommands.GET_GPRS_SESSION_DATA_VOLUME.getCommand().getBytes(StandardCharsets.US_ASCII),
-                        1000, 100);
+                reply = commAtConnection.sendCommand(TelitHe910AtCommands.GET_GPRS_SESSION_DATA_VOLUME.getCommand()
+                        .getBytes(StandardCharsets.US_ASCII), 1000, 100);
             } catch (IOException e) {
                 closeSerialPort(commAtConnection);
                 throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
@@ -224,9 +223,8 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
                 throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
             }
             try {
-                reply = commAtConnection.sendCommand(
-                        TelitHe910AtCommands.GET_GPRS_SESSION_DATA_VOLUME.getCommand().getBytes(StandardCharsets.US_ASCII),
-                        1000, 100);
+                reply = commAtConnection.sendCommand(TelitHe910AtCommands.GET_GPRS_SESSION_DATA_VOLUME.getCommand()
+                        .getBytes(StandardCharsets.US_ASCII), 1000, 100);
             } catch (IOException e) {
                 closeSerialPort(commAtConnection);
                 throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);

@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This class defines DHCP client lease block
- * 
+ *
  */
 public class DhcpClientLeaseBlock {
 
@@ -57,7 +57,7 @@ public class DhcpClientLeaseBlock {
 
     /**
      * DhcpClientLeaseBlock
-     * 
+     *
      * @param leaseBlock
      *            - lease block
      */
@@ -95,7 +95,7 @@ public class DhcpClientLeaseBlock {
 
     /**
      * Reports if supplied interface name and IP address match respective fields
-     * 
+     *
      * @param ifaceName
      *            - interface name
      * @param address
@@ -112,7 +112,7 @@ public class DhcpClientLeaseBlock {
 
     /**
      * Reports interface name
-     * 
+     *
      * @return interface name
      */
     public String getIface() {
@@ -121,7 +121,7 @@ public class DhcpClientLeaseBlock {
 
     /**
      * Reports IP address
-     * 
+     *
      * @return Fixed IP address
      */
     public IPAddress getFixedAddress() {
@@ -130,7 +130,7 @@ public class DhcpClientLeaseBlock {
 
     /**
      * Reports subnet mask
-     * 
+     *
      * @return subnet mask
      */
     public IPAddress getSubnetMask() {
@@ -139,7 +139,7 @@ public class DhcpClientLeaseBlock {
 
     /**
      * Reports list of routers
-     * 
+     *
      * @return list of routers
      */
     public List<IPAddress> getRouters() {
@@ -148,7 +148,7 @@ public class DhcpClientLeaseBlock {
 
     /**
      * Reports DHCP lease time
-     * 
+     *
      * @return DHCP lease time
      */
     public long getDhcpLeaseTime() {
@@ -157,7 +157,7 @@ public class DhcpClientLeaseBlock {
 
     /**
      * Reports DHCP message type
-     * 
+     *
      * @return DHCP message type
      */
     public int getDhcpMessageType() {
@@ -166,7 +166,7 @@ public class DhcpClientLeaseBlock {
 
     /**
      * Reports list of DNS servers
-     * 
+     *
      * @return list of DNS servers
      */
     public List<IPAddress> getDnsServers() {
@@ -175,7 +175,7 @@ public class DhcpClientLeaseBlock {
 
     /**
      * Reports DHCP server
-     * 
+     *
      * @return DHCP server
      */
     public IPAddress getDhcpServer() {
@@ -184,7 +184,7 @@ public class DhcpClientLeaseBlock {
 
     /**
      * Reports DHCP renewal time
-     * 
+     *
      * @return DHCP renewal time
      */
     public long getDhcpRenewalTime() {
@@ -193,7 +193,7 @@ public class DhcpClientLeaseBlock {
 
     /**
      * Reports DHCP rebinding time
-     * 
+     *
      * @return DHCP rebinding time
      */
     public long getDhcpRebindingTime() {
@@ -202,7 +202,7 @@ public class DhcpClientLeaseBlock {
 
     /**
      * Reports domain name
-     * 
+     *
      * @return domain name
      */
     public String getDomainName() {

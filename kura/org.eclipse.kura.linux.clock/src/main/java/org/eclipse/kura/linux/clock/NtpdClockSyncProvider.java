@@ -18,7 +18,6 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.util.ProcessUtil;
 import org.eclipse.kura.core.util.SafeProcess;
-import org.eclipse.kura.linux.clock.AbstractNtpClockSyncProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

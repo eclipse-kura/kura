@@ -27,7 +27,7 @@ import de.entropia.can.CanSocket.Mode;
 public class CanConnectionServiceImpl implements CanConnectionService {
 
     private static final Logger s_logger = LoggerFactory.getLogger(CanConnectionServiceImpl.class);
-    
+
     private CanSocket socket = null;
 
     protected void activate() {
@@ -50,14 +50,14 @@ public class CanConnectionServiceImpl implements CanConnectionService {
         this.socket.setLoopbackMode(false);
         this.socket.bind(CanSocket.CAN_ALL_INTERFACES);
     }
-    
+
     @Override
     public void disconnectCanSocket() throws IOException {
         if (this.socket != null) {
             this.socket.close();
         }
     }
-    
+
     @Override
     public void sendCanMessage(String ifName, int canId, byte[] message) throws KuraException, IOException {
         if (message.length > 8) {
@@ -66,8 +66,8 @@ public class CanConnectionServiceImpl implements CanConnectionService {
 
         try {
             CanInterface canif = new CanInterface(this.socket, ifName);
-            socket.bind(canif);
-            socket.send(new CanFrame(canif, new CanId(canId), message));
+            this.socket.bind(canif);
+            this.socket.send(new CanFrame(canif, new CanId(canId), message));
         } catch (IOException e) {
             s_logger.error("Error on CanSocket in sendCanMessage: {}", e.getMessage());
             throw e;

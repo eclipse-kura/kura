@@ -52,7 +52,7 @@ public final class StubDriver implements Driver {
     @Override
     public void read(List<ChannelRecord> records) throws ConnectionException {
         if (!this.isConnected) {
-            this.connect();
+            connect();
         }
 
         for (final ChannelRecord record : records) {
@@ -115,7 +115,7 @@ public final class StubDriver implements Driver {
     @Override
     public void write(List<ChannelRecord> records) throws ConnectionException {
         if (!this.isConnected) {
-            this.connect();
+            connect();
         }
 
         for (final ChannelRecord record : records) {

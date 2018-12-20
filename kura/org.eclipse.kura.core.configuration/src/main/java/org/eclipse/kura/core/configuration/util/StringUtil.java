@@ -40,7 +40,7 @@ public class StringUtil {
         // whitespace characters. Whitespace between two non-whitespace
         // characters may or may not be escaped. Also, any character may be
         // escaped. The escape character is '\'. The delimiter is ','.
-        List<String> values = new ArrayList<String>();
+        List<String> values = new ArrayList<>();
         StringBuilder buffer = new StringBuilder();
         // Loop over the characters within the input string and extract each
         // value token.

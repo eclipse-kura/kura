@@ -43,7 +43,8 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
         if (instance == null) {
             instance = new IfcfgConfigWriter();
             BundleContext context = FrameworkUtil.getBundle(IfcfgConfigWriter.class).getBundleContext();
-            ServiceReference<NetInterfaceConfigSerializationService> netConfigManagerSR = context.getServiceReference(NetInterfaceConfigSerializationService.class);
+            ServiceReference<NetInterfaceConfigSerializationService> netConfigManagerSR = context
+                    .getServiceReference(NetInterfaceConfigSerializationService.class);
             netConfigManager = context.getService(netConfigManagerSR);
         }
 

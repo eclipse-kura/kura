@@ -5,7 +5,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *******************************************************************************/
 package org.eclipse.kura.annotation;
 
@@ -25,6 +25,7 @@ import java.lang.annotation.Target;
  * If the author of the type believes that the consumer can make such
  * assumptions of thread-safety for types even though the types are not, it is
  * better to annotate the type with this annotation.
+ *
  * @since 1.2
  */
 @Documented

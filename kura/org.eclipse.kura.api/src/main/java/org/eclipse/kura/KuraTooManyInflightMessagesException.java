@@ -13,22 +13,22 @@ package org.eclipse.kura;
 
 import org.osgi.annotation.versioning.ProviderType;
 
-
 /**
- * KuraTooManyInflightMessagesException is raised if a publish is attempted when there are already too many messages queued for publishing.
- * 
+ * KuraTooManyInflightMessagesException is raised if a publish is attempted when there are already too many messages
+ * queued for publishing.
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 @ProviderType
-public class KuraTooManyInflightMessagesException extends KuraException 
-{
-	private static final long serialVersionUID = 8759879149959567323L;
+public class KuraTooManyInflightMessagesException extends KuraException {
 
-	public KuraTooManyInflightMessagesException(Object argument) {
-		super(KuraErrorCode.TOO_MANY_INFLIGHT_MESSAGES, null, argument);
-	}
-	
-	public KuraTooManyInflightMessagesException(Throwable cause, Object argument) {
-		super(KuraErrorCode.TOO_MANY_INFLIGHT_MESSAGES, cause, argument);
-	}
+    private static final long serialVersionUID = 8759879149959567323L;
+
+    public KuraTooManyInflightMessagesException(Object argument) {
+        super(KuraErrorCode.TOO_MANY_INFLIGHT_MESSAGES, null, argument);
+    }
+
+    public KuraTooManyInflightMessagesException(Throwable cause, Object argument) {
+        super(KuraErrorCode.TOO_MANY_INFLIGHT_MESSAGES, cause, argument);
+    }
 }

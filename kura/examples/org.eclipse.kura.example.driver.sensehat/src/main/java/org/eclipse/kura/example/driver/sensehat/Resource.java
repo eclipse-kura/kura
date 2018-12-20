@@ -135,23 +135,23 @@ public enum Resource {
     }
 
     public Optional<Sensor> getAssociatedSensor() {
-        return associatedSensor;
+        return this.associatedSensor;
     }
 
     public Optional<Integer> getJoystickKey() {
-        return joystickKey;
+        return this.joystickKey;
     }
 
     public Optional<Integer> getJoystickState() {
-        return joystickState;
+        return this.joystickState;
     }
 
     public boolean isSensorResource() {
-        return associatedSensor.isPresent();
+        return this.associatedSensor.isPresent();
     }
 
     public boolean isJoystickEvent() {
-        return joystickKey.isPresent();
+        return this.joystickKey.isPresent();
     }
 
     public boolean isFramebufferResource() {

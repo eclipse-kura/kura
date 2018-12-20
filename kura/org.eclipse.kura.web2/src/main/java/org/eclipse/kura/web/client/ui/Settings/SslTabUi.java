@@ -84,9 +84,9 @@ public class SslTabUi extends AbstractServicesUi {
     public SslTabUi() {
         initWidget(uiBinder.createAndBindUi(this));
         this.initialized = false;
-        
-        apply.setText(MSGS.apply());
-        apply.addClickHandler(new ClickHandler() {
+
+        this.apply.setText(MSGS.apply());
+        this.apply.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
@@ -94,8 +94,8 @@ public class SslTabUi extends AbstractServicesUi {
             }
         });
 
-        reset.setText(MSGS.reset());
-        reset.addClickHandler(new ClickHandler() {
+        this.reset.setText(MSGS.reset());
+        this.reset.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
@@ -103,9 +103,9 @@ public class SslTabUi extends AbstractServicesUi {
             }
         });
     }
-    
+
     public void load() {
-        gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+        this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
             @Override
             public void onFailure(Throwable ex) {
@@ -115,8 +115,8 @@ public class SslTabUi extends AbstractServicesUi {
 
             @Override
             public void onSuccess(GwtXSRFToken token) {
-                gwtComponentService.findFilteredComponentConfiguration(token, "org.eclipse.kura.ssl.SslManagerService",
-                        new AsyncCallback<List<GwtConfigComponent>>() {
+                SslTabUi.this.gwtComponentService.findFilteredComponentConfiguration(token,
+                        "org.eclipse.kura.ssl.SslManagerService", new AsyncCallback<List<GwtConfigComponent>>() {
 
                             @Override
                             public void onFailure(Throwable caught) {
@@ -127,17 +127,17 @@ public class SslTabUi extends AbstractServicesUi {
                             @Override
                             public void onSuccess(List<GwtConfigComponent> result) {
                                 for (GwtConfigComponent config : result) {
-                                    originalConfig = config;
+                                    SslTabUi.this.originalConfig = config;
 
-                                    restoreConfiguration(originalConfig);
-                                    fields.clear();
+                                    restoreConfiguration(SslTabUi.this.originalConfig);
+                                    SslTabUi.this.fields.clear();
 
                                     renderForm();
                                     initInvalidDataModal();
 
                                     setDirty(false);
-                                    apply.setEnabled(false);
-                                    reset.setEnabled(false);
+                                    SslTabUi.this.apply.setEnabled(false);
+                                    SslTabUi.this.reset.setEnabled(false);
                                 }
                             }
                         });

@@ -117,7 +117,7 @@ public class BeaconScannerExample implements ConfigurableComponent, BluetoothBea
 
     private void setup() {
 
-        this.publishTimes = new HashMap<String, Long>();
+        this.publishTimes = new HashMap<>();
 
         this.bluetoothAdapter = this.bluetoothService.getBluetoothAdapter(this.adapterName);
         if (this.bluetoothAdapter != null) {
@@ -158,7 +158,7 @@ public class BeaconScannerExample implements ConfigurableComponent, BluetoothBea
 
             // Store the publish time against the address
             this.publishTimes.put(beaconData.address, now);
-            
+
             if (this.cloudPublisher == null) {
                 logger.info("No cloud publisher selected. Cannot publish!");
                 return;
@@ -174,9 +174,9 @@ public class BeaconScannerExample implements ConfigurableComponent, BluetoothBea
             kp.addMetric("minor", beaconData.minor);
             kp.addMetric("distance", calculateDistance(beaconData.rssi, beaconData.txpower));
 
-            Map<String, Object> properties = new HashMap<String, Object>();
+            Map<String, Object> properties = new HashMap<>();
             properties.put("address", beaconData.address);
-            
+
             KuraMessage message = new KuraMessage(kp, properties);
             try {
                 this.cloudPublisher.publish(message);

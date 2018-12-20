@@ -92,10 +92,10 @@ public class GwtSslServiceImpl extends OsgiRemoteServiceServlet implements GwtSs
     }
 
     private SslManagerServiceOptions getSslConfiguration() throws KuraException {
-        SslManagerServiceOptions options=null;
+        SslManagerServiceOptions options = null;
         try {
             SslManagerService sslService = ServiceLocator.getInstance().getService(SslManagerService.class);
-            //TODO: options = sslService.getConfigurationOptions();
+            // TODO: options = sslService.getConfigurationOptions();
             return options;
         } catch (GwtKuraException e) {
             throw new KuraException(KuraErrorCode.SECURITY_EXCEPTION);

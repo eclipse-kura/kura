@@ -32,15 +32,15 @@ public class GainOffsetEntry {
     }
 
     public String getPropertyName() {
-        return propertyName;
+        return this.propertyName;
     }
 
     public double getGain() {
-        return gain;
+        return this.gain;
     }
 
     public double getOffset() {
-        return offset;
+        return this.offset;
     }
 
     private static void clear(String[] entryArray) {

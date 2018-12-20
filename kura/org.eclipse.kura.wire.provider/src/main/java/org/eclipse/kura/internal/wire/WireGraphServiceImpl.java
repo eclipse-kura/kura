@@ -497,8 +497,8 @@ public class WireGraphServiceImpl implements ConfigurableComponent, WireGraphSer
                 .getComponentConfiguration(CONF_PID);
         wireGraphServiceComponentConfig.getConfigurationProperties().put(NEW_WIRE_GRAPH_PROPERTY, jsonConfig);
 
-        this.configurationService.updateConfiguration(CONF_PID, wireGraphServiceComponentConfig.getConfigurationProperties(),
-                true);
+        this.configurationService.updateConfiguration(CONF_PID,
+                wireGraphServiceComponentConfig.getConfigurationProperties(), true);
         this.currentConfiguration = newWireGraphConfiguration;
     }
 

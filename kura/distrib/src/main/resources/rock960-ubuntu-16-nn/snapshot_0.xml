@@ -12,7 +12,8 @@
       Eurotech
 
 -->
-<esf:configurations xmlns:ocd="http://www.osgi.org/xmlns/metatype/v1.2.0" xmlns:esf="http://eurotech.com/esf/2.0">
+<esf:configurations xmlns:ocd="http://www.osgi.org/xmlns/metatype/v1.2.0"
+    xmlns:esf="http://eurotech.com/esf/2.0">
     <esf:configuration pid="org.eclipse.kura.watchdog.WatchdogService">
         <esf:properties>
             <esf:property name="enabled" array="false" encrypted="false" type="Boolean">
@@ -40,7 +41,8 @@
             <esf:property array="false" encrypted="false" name="service.factoryPid" type="String">
                 <esf:value>org.eclipse.kura.core.db.H2DbService</esf:value>
             </esf:property>
-            <esf:property array="false" encrypted="false" name="db.checkpoint.interval.seconds" type="Integer">
+            <esf:property array="false" encrypted="false" name="db.checkpoint.interval.seconds"
+                type="Integer">
                 <esf:value>900</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="kura.service.pid" type="String">
@@ -114,20 +116,22 @@
             <esf:property name="lwt.qos" array="false" encrypted="false" type="Integer">
                 <esf:value>0</esf:value>
             </esf:property>
-           	<esf:property name="protocol-version" array="false" encrypted="false" type="Integer">
+            <esf:property name="protocol-version" array="false" encrypted="false" type="Integer">
                 <esf:value>4</esf:value>
             </esf:property>
         </esf:properties>
     </esf:configuration>
     <esf:configuration pid="org.eclipse.kura.data.DataService">
         <esf:properties>
-            <esf:property name="in-flight-messages.congestion-timeout" array="false" encrypted="false" type="Integer">
+            <esf:property name="in-flight-messages.congestion-timeout" array="false" encrypted="false"
+                type="Integer">
                 <esf:value>0</esf:value>
             </esf:property>
             <esf:property name="store.purge-age" array="false" encrypted="false" type="Integer">
                 <esf:value>60</esf:value>
             </esf:property>
-            <esf:property name="in-flight-messages.republish-on-new-session" array="false" encrypted="false" type="Boolean">
+            <esf:property name="in-flight-messages.republish-on-new-session" array="false"
+                encrypted="false" type="Boolean">
                 <esf:value>true</esf:value>
             </esf:property>
             <esf:property name="store.capacity" array="false" encrypted="false" type="Integer">
@@ -145,7 +149,8 @@
             <esf:property name="service.pid" array="false" encrypted="false" type="String">
                 <esf:value>org.eclipse.kura.data.DataService</esf:value>
             </esf:property>
-            <esf:property name="in-flight-messages.max-number" array="false" encrypted="false" type="Integer">
+            <esf:property name="in-flight-messages.max-number" array="false" encrypted="false"
+                type="Integer">
                 <esf:value>9</esf:value>
             </esf:property>
             <esf:property name="store.housekeeper-interval" array="false" encrypted="false" type="Integer">

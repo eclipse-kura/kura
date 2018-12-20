@@ -158,7 +158,7 @@ public final class Conditional implements WireReceiver, WireEmitter, Configurabl
     }
 
     private CompiledScript tryCompileScript(final String script) throws ScriptException {
-        final Compilable engine = ((Compilable) this.scriptEngine);
+        final Compilable engine = (Compilable) this.scriptEngine;
         return engine.compile(script);
     }
 

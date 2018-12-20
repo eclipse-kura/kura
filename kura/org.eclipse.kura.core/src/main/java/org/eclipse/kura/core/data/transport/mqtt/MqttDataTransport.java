@@ -117,8 +117,8 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
     private PersistenceType persistenceType;
     private MqttClientPersistence persistence;
 
-    private final Map<String, String> topicContext = new HashMap<String, String>();
-    private final Map<String, Object> properties = new HashMap<String, Object>();
+    private final Map<String, String> topicContext = new HashMap<>();
+    private final Map<String, Object> properties = new HashMap<>();
 
     private CryptoService cryptoService;
 
@@ -171,7 +171,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 
         // We need to catch the configuration exception and activate anyway.
         // Otherwise the ConfigurationService will not be able to track us.
-        HashMap<String, Object> decryptedPropertiesMap = new HashMap<String, Object>();
+        HashMap<String, Object> decryptedPropertiesMap = new HashMap<>();
 
         for (Map.Entry<String, Object> entry : properties.entrySet()) {
             String key = entry.getKey();
@@ -224,7 +224,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 
         this.properties.clear();
 
-        HashMap<String, Object> decryptedPropertiesMap = new HashMap<String, Object>();
+        HashMap<String, Object> decryptedPropertiesMap = new HashMap<>();
 
         for (Map.Entry<String, Object> entry : properties.entrySet()) {
             String key = entry.getKey();

@@ -51,8 +51,8 @@ public class WireComponentsAnchorListItem extends AnchorListItem {
 
             @Override
             public void onClick(final ClickEvent event) {
-                if (listener != null) {
-                    listener.onClick(factoryPid);
+                if (WireComponentsAnchorListItem.this.listener != null) {
+                    WireComponentsAnchorListItem.this.listener.onClick(factoryPid);
                 }
             }
         });

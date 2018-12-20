@@ -21,7 +21,7 @@ import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * This interface extends {@link WireSupport} to provide multi-port support in Wires.
- * 
+ *
  * @since 1.4
  */
 @ProviderType
@@ -29,20 +29,24 @@ public interface MultiportWireSupport extends WireSupport {
 
     /**
      * Returns the list of EmitterPorts of a Wire Component
+     *
      * @return a list of {@link EmitterPort}
      */
     public List<EmitterPort> getEmitterPorts();
 
     /**
      * Returns the list of ReceiverPorts associated to a Wire Component
+     *
      * @return a list of {@link ReceiverPort}
      */
     public List<ReceiverPort> getReceiverPorts();
 
     /**
      * This method allows to create a {@link WireEnvelope} from the list of {@link WireRecord} passed as an argument.
-     * @param records a list of {@link WireRecord}s that will be wrapped into a {@link WireEnvelope}
-     * @return a {@link WireEnvelope} that wraps the list of {@link WireRecord}s passed. 
+     *
+     * @param records
+     *            a list of {@link WireRecord}s that will be wrapped into a {@link WireEnvelope}
+     * @return a {@link WireEnvelope} that wraps the list of {@link WireRecord}s passed.
      */
     public WireEnvelope createWireEnvelope(List<WireRecord> records);
 

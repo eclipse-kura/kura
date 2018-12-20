@@ -48,12 +48,12 @@ public class SenseHatChannelDescriptor implements ChannelDescriptor {
 
         addOptions(value, Resource.values());
 
-        properties.add(value);
+        this.properties.add(value);
     }
 
     @Override
     public Object getDescriptor() {
-        return properties;
+        return this.properties;
     }
 
     public static SenseHatChannelDescriptor instance() {

@@ -35,8 +35,8 @@ public class CloudSubscriptionRecord {
     }
 
     public boolean matches(final String topic) {
-        if (topicFilter == null) {
-            topicFilter = this.topic.replaceAll(CloudServiceOptions.getTopicAccountToken(), "+")
+        if (this.topicFilter == null) {
+            this.topicFilter = this.topic.replaceAll(CloudServiceOptions.getTopicAccountToken(), "+")
                     .replaceAll(CloudServiceOptions.getTopicClientIdToken(), "+");
         }
         return MqttTopicUtil.isMatched(this.topicFilter, topic);
@@ -44,7 +44,7 @@ public class CloudSubscriptionRecord {
 
     @Override
     public int hashCode() {
-        return topic.hashCode();
+        return this.topic.hashCode();
     }
 
     @Override
@@ -52,6 +52,6 @@ public class CloudSubscriptionRecord {
         if (!(obj instanceof CloudSubscriptionRecord)) {
             return false;
         }
-        return ((CloudSubscriptionRecord) obj).topic.equals(topic);
+        return ((CloudSubscriptionRecord) obj).topic.equals(this.topic);
     }
 }

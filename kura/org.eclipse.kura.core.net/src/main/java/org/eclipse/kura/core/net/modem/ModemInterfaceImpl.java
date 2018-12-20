@@ -62,7 +62,7 @@ public class ModemInterfaceImpl<T extends ModemInterfaceAddress> extends Abstrac
 
         // Copy the NetInterfaceAddresses
         List<? extends ModemInterfaceAddress> otherNetInterfaceAddresses = other.getNetInterfaceAddresses();
-        ArrayList<T> interfaceAddresses = new ArrayList<T>();
+        ArrayList<T> interfaceAddresses = new ArrayList<>();
 
         if (otherNetInterfaceAddresses != null) {
             for (ModemInterfaceAddress modemInterfaceAddress : otherNetInterfaceAddresses) {

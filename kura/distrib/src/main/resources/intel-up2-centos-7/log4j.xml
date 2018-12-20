@@ -17,29 +17,30 @@
     <Properties>
         <Property name="filename">/var/log/kura</Property>
     </Properties>
-    <Filter type="ThresholdFilter" level="trace"/>
- 
+    <Filter type="ThresholdFilter" level="trace" />
+
     <Appenders>
-        <RollingFile name="RollingFile" fileName="${filename}.log" filePattern="${filename}-%d{MM-dd-yy-HH-mm-ss}-%i.log.gz">
+        <RollingFile name="RollingFile" fileName="${filename}.log"
+            filePattern="${filename}-%d{MM-dd-yy-HH-mm-ss}-%i.log.gz">
             <PatternLayout>
                 <Pattern>%d{ISO8601} [%t] %-5p %c{1.} - %m%n</Pattern>
             </PatternLayout>
             <Policies>
-                <SizeBasedTriggeringPolicy size="20 MB"/>
+                <SizeBasedTriggeringPolicy size="20 MB" />
             </Policies>
-            <DefaultRolloverStrategy max="10"/>
+            <DefaultRolloverStrategy max="10" />
         </RollingFile>
     </Appenders>
- 
+
     <Loggers>
         <Logger name="org.eclipse" level="info" additivity="false">
-            <AppenderRef ref="RollingFile"/>
+            <AppenderRef ref="RollingFile" />
         </Logger>
- 
+
         <Root level="info">
-            <AppenderRef ref="RollingFile"/>
+            <AppenderRef ref="RollingFile" />
         </Root>
-  </Loggers>
- 
+    </Loggers>
+
 </Configuration>
 

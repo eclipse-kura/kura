@@ -16,7 +16,10 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -367,6 +370,17 @@ public class LinuxDns {
 
     private synchronized void writeDnsFile(Set<IPAddress> servers) {
         logger.debug("Writing DNS servers to file");
+        // Check if DNS_FILE_NAME is a symlink and it is broken or points to unmanaged location.
+        // In this case, delete it.
+        try {
+            if (Files.isSymbolicLink(Paths.get(DNS_FILE_NAME))
+                    && !Files.readSymbolicLink(Paths.get(DNS_FILE_NAME)).equals(Paths.get(getPppDnsFileName()))) {
+                Files.delete(Paths.get(DNS_FILE_NAME));
+            }
+        } catch (IOException e) {
+            logger.error("Cannot read symlink", e);
+        }
+
         try (FileOutputStream fos = new FileOutputStream(DNS_FILE_NAME); PrintWriter pw = new PrintWriter(fos);) {
             String[] existingFile = getModifiedFile();
             for (String element : existingFile) {
@@ -378,8 +392,8 @@ public class LinuxDns {
             }
             pw.flush();
             fos.getFD().sync();
-        } catch (Exception e) {
-            logger.error("writeDnsFile() :: failed to write the {} file ", DNS_FILE_NAME, e);
+        } catch (Exception e1) {
+            logger.error("writeDnsFile() :: failed to write the {} file ", DNS_FILE_NAME, e1);
         }
     }
 

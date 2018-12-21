@@ -60,6 +60,8 @@ public class ListenParams extends ReadParams {
     public boolean equals(Object obj) {
         if (this == obj)
             return true;
+        if (obj == null)
+            return false;
         if (!super.equals(obj))
             return false;
         if (getClass() != obj.getClass())

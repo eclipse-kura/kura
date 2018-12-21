@@ -227,8 +227,8 @@ public abstract class TelitModem {
             String atPort = getAtPort();
             String gpsPort = getGpsPort();
             if ((atPort.equals(getDataPort()) || atPort.equals(gpsPort) && this.gpsEnabled) && this.rssi < 0) {
-                logger.trace(
-                        "getSignalStrength() :: returning previously obtained RSSI={} :: m_gpsEnabled={}, m_rssi, m_gpsEnabled");
+                logger.trace("getSignalStrength() :: returning previously obtained RSSI={} :: m_gpsEnabled={}",
+                        this.rssi, this.gpsEnabled);
                 return this.rssi;
             }
 

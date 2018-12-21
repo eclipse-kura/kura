@@ -19,7 +19,7 @@ import org.eclipse.kura.web.shared.model.GwtChannelOperationResult;
 import org.eclipse.kura.web.shared.model.GwtChannelRecord;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtWireComposerStaticInfo;
-import org.eclipse.kura.web.shared.model.GwtWireGraphConfiguration;
+import org.eclipse.kura.web.shared.model.GwtWireGraph;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtAssetService;
 import org.eclipse.kura.web.shared.service.GwtAssetServiceAsync;
@@ -65,6 +65,36 @@ public final class DriversAndAssetsRPC {
 
                     @Override
                     public void onSuccess(GwtWireComposerStaticInfo result) {
+                        EntryClassUi.hideWaitModal();
+                        callback.onSuccess(result);
+                    }
+                });
+            }
+        });
+    }
+
+    public static void loadWireGraph(final Callback<GwtWireGraph> callback) {
+        EntryClassUi.showWaitModal();
+        gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+
+            @Override
+            public void onFailure(Throwable ex) {
+                EntryClassUi.hideWaitModal();
+                FailureHandler.handle(ex);
+            }
+
+            @Override
+            public void onSuccess(GwtXSRFToken result) {
+                gwtWireGraphService.getWireGraph(result, new AsyncCallback<GwtWireGraph>() {
+
+                    @Override
+                    public void onFailure(Throwable ex) {
+                        EntryClassUi.hideWaitModal();
+                        FailureHandler.handle(ex);
+                    }
+
+                    @Override
+                    public void onSuccess(GwtWireGraph result) {
                         EntryClassUi.hideWaitModal();
                         callback.onSuccess(result);
                     }
@@ -157,36 +187,6 @@ public final class DriversAndAssetsRPC {
 
                     @Override
                     public void onSuccess(Void result) {
-                        EntryClassUi.hideWaitModal();
-                        callback.onSuccess(result);
-                    }
-                });
-            }
-        });
-    }
-
-    public static void loadWiresConfiguration(final Callback<GwtWireGraphConfiguration> callback) {
-        EntryClassUi.showWaitModal();
-        gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-
-            @Override
-            public void onFailure(Throwable ex) {
-                EntryClassUi.hideWaitModal();
-                FailureHandler.handle(ex);
-            }
-
-            @Override
-            public void onSuccess(GwtXSRFToken result) {
-                gwtWireGraphService.getWiresConfiguration(result, new AsyncCallback<GwtWireGraphConfiguration>() {
-
-                    @Override
-                    public void onFailure(Throwable ex) {
-                        EntryClassUi.hideWaitModal();
-                        FailureHandler.handle(ex);
-                    }
-
-                    @Override
-                    public void onSuccess(GwtWireGraphConfiguration result) {
                         EntryClassUi.hideWaitModal();
                         callback.onSuccess(result);
                     }

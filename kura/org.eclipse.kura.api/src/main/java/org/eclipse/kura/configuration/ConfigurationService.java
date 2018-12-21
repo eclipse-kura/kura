@@ -17,6 +17,7 @@ import java.util.Set;
 
 import org.eclipse.kura.KuraException;
 import org.osgi.annotation.versioning.ProviderType;
+import org.osgi.framework.Filter;
 
 /**
  * The Configuration Service is used to manage the configuration of OSGi Declarative Services
@@ -169,6 +170,18 @@ public interface ConfigurationService {
      * @return list of registered ConfigurableComponents
      */
     public List<ComponentConfiguration> getComponentConfigurations() throws KuraException;
+
+    /**
+     * Returns the list of ConfigurableComponents currently registered with the ConfigurationService that match the
+     * provided OSGi filter.
+     *
+     * @param filter
+     *            the filter to be applied
+     * @return list of registered ConfigurableComponents
+     * 
+     * @since 2.1
+     */
+    public List<ComponentConfiguration> getComponentConfigurations(Filter filter) throws KuraException;
 
     /**
      * Returns the ComponentConfiguration for the component identified with specified PID.

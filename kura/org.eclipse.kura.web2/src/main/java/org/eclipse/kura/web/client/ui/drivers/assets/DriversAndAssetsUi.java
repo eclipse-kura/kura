@@ -100,33 +100,27 @@ public class DriversAndAssetsUi extends Composite implements DriversAndAssetsLis
 
     public void refresh() {
         configurations.clear();
-        DriversAndAssetsRPC.loadStaticInfo(new DriversAndAssetsRPC.Callback<GwtWireComposerStaticInfo>() {
+        DriversAndAssetsRPC.loadWireGraph(result -> {
+            final GwtWireComposerStaticInfo staticInfo = result.getStaticInfo();
 
-            @Override
-            public void onSuccess(GwtWireComposerStaticInfo result) {
-                configurations.setChannelDescriptiors(result.getDriverDescriptors());
-                configurations.setBaseChannelDescriptor(result.getBaseChannelDescriptor());
-                configurations.setComponentDefinitions(result.getComponentDefinitions());
-                DriversAndAssetsRPC
-                        .loadWiresConfiguration(new DriversAndAssetsRPC.Callback<GwtWireGraphConfiguration>() {
+            configurations.setChannelDescriptiors(staticInfo.getDriverDescriptors());
+            configurations.setBaseChannelDescriptor(staticInfo.getBaseChannelDescriptor());
+            configurations.setComponentDefinitions(staticInfo.getComponentDefinitions());
 
-                            @Override
-                            public void onSuccess(GwtWireGraphConfiguration result) {
-                                final List<GwtConfigComponent> configurationList = new ArrayList<>();
+            final GwtWireGraphConfiguration wireConfigurations = result.getWireGraphConfiguration();
 
-                                for (GwtWireComponentConfiguration config : result.getWireComponentConfigurations()) {
-                                    configurationList.add(config.getConfiguration());
-                                }
+            final List<GwtConfigComponent> configurationList = new ArrayList<>();
 
-                                configurationList.addAll(result.getAdditionalConfigurations());
-
-                                configurations.setComponentConfigurations(configurationList);
-                                configurations.setAllActivePids(result.getAllActivePids());
-
-                                init();
-                            }
-                        });
+            for (GwtWireComponentConfiguration config : wireConfigurations.getWireComponentConfigurations()) {
+                configurationList.add(config.getConfiguration());
             }
+
+            configurationList.addAll(wireConfigurations.getAdditionalConfigurations());
+
+            configurations.setComponentConfigurations(configurationList);
+            configurations.setAllActivePids(wireConfigurations.getAllActivePids());
+
+            init();
         });
     }
 

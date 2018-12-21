@@ -18,6 +18,7 @@ import java.util.List;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtWireComposerStaticInfo;
+import org.eclipse.kura.web.shared.model.GwtWireGraph;
 import org.eclipse.kura.web.shared.model.GwtWireGraphConfiguration;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 
@@ -59,4 +60,6 @@ public interface GwtWireGraphService extends RemoteService {
             List<GwtConfigComponent> additionalConfigs) throws GwtKuraException;
 
     public GwtWireComposerStaticInfo getWireComposerStaticInfo(GwtXSRFToken xsrfToken) throws GwtKuraException;
+
+    public GwtWireGraph getWireGraph(GwtXSRFToken xsrfToken) throws GwtKuraException;
 }

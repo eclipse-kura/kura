@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -815,175 +815,173 @@ public class PppPeer {
     public void write(String filename) throws Exception {
 
         // open output stream
-        FileOutputStream fos = new FileOutputStream(filename);
-        PrintWriter writer = new PrintWriter(fos);
+        try (FileOutputStream fos = new FileOutputStream(filename); PrintWriter writer = new PrintWriter(fos);) {
 
-        // set baud rate
-        if (this.baudRate != -1) {
-            writer.println(this.baudRate);
-        }
-
-        if (this.pppUnitNumber != -1) {
-            writer.print("unit ");
-            writer.println(this.pppUnitNumber);
-        }
-
-        // set logfile
-        if (this.logfile != null) {
-            writer.print("logfile ");
-            writer.println(this.logfile);
-        }
-
-        if (this.enableDebug) {
-            writer.println("debug");
-        }
-
-        if (this.connectScriptFilename != null) {
-            StringBuffer connectLine = new StringBuffer("connect '");
-            connectLine.append(CHAT_PROGRAM);
-            connectLine.append(" -v -f ");
-            connectLine.append(this.connectScriptFilename);
-            connectLine.append("'");
-            writer.println(connectLine.toString());
-        }
-
-        if (this.disconnectScriptFilename != null) {
-            StringBuffer disconnectLine = new StringBuffer("disconnect '");
-            disconnectLine.append(CHAT_PROGRAM);
-            disconnectLine.append(" -v -f ");
-            disconnectLine.append(this.disconnectScriptFilename);
-            disconnectLine.append("'");
-            writer.println(disconnectLine.toString());
-        }
-
-        if (this.useModemControlLines) {
-            writer.println("modem");
-        }
-
-        if (this.useRtsCtsFlowControl) {
-            writer.println("crtscts");
-        }
-
-        if (this.lockSerialDevice) {
-            writer.println("lock");
-        }
-
-        if (!this.peerMustAuthenticateItself) {
-            writer.println("noauth");
-        }
-
-        ChapLinux chapLinux = ChapLinux.getInstance();
-        PapLinux papLinux = PapLinux.getInstance();
-
-        if (getAuthType() != AuthType.NONE) {
-            writer.print("user \"");
-            writer.print(this.username);
-            writer.println("\"");
-
-            writer.println("hide-password");
-
-            switch (getAuthType()) {
-            case AUTO:
-                if (!papLinux.checkForEntry(this.provider, this.username, "*", this.password.toString(), "*")) {
-                    papLinux.addEntry(this.provider, this.username, "*", this.password.toString(), "*");
-                }
-                if (!chapLinux.checkForEntry(this.provider, this.username, "*", this.password.toString(), "*")) {
-                    chapLinux.addEntry(this.provider, this.username, "*", this.password.toString(), "*");
-                }
-                break;
-            case PAP:
-                // remove CHAP entry if exists
-                chapLinux.removeEntry(AUTH_SECRETS_TYPE_PROVIDER, this.provider);
-                if (!papLinux.checkForEntry(this.provider, this.username, "*", this.password.toString(), "*")) {
-                    papLinux.addEntry(this.provider, this.username, "*", this.password.toString(), "*");
-                }
-                break;
-            case CHAP:
-                // remove PAP entry if exists
-                papLinux.removeEntry(AUTH_SECRETS_TYPE_PROVIDER, this.provider);
-                if (!chapLinux.checkForEntry(this.provider, this.username, "*", this.password.toString(), "*")) {
-                    chapLinux.addEntry(this.provider, this.username, "*", this.password.toString(), "*");
-                }
-                break;
-            case NONE:
-                break;
+            // set baud rate
+            if (this.baudRate != -1) {
+                writer.println(this.baudRate);
             }
-        } else {
-            // remove CHAP/PAP entries if exist
-            chapLinux.removeEntry(AUTH_SECRETS_TYPE_PROVIDER, this.provider);
-            papLinux.removeEntry(AUTH_SECRETS_TYPE_PROVIDER, this.provider);
+
+            if (this.pppUnitNumber != -1) {
+                writer.print("unit ");
+                writer.println(this.pppUnitNumber);
+            }
+
+            // set logfile
+            if (this.logfile != null) {
+                writer.print("logfile ");
+                writer.println(this.logfile);
+            }
+
+            if (this.enableDebug) {
+                writer.println("debug");
+            }
+
+            if (this.connectScriptFilename != null) {
+                StringBuilder connectLine = new StringBuilder("connect '");
+                connectLine.append(CHAT_PROGRAM);
+                connectLine.append(" -v -f ");
+                connectLine.append(this.connectScriptFilename);
+                connectLine.append("'");
+                writer.println(connectLine.toString());
+            }
+
+            if (this.disconnectScriptFilename != null) {
+                StringBuilder disconnectLine = new StringBuilder("disconnect '");
+                disconnectLine.append(CHAT_PROGRAM);
+                disconnectLine.append(" -v -f ");
+                disconnectLine.append(this.disconnectScriptFilename);
+                disconnectLine.append("'");
+                writer.println(disconnectLine.toString());
+            }
+
+            if (this.useModemControlLines) {
+                writer.println("modem");
+            }
+
+            if (this.useRtsCtsFlowControl) {
+                writer.println("crtscts");
+            }
+
+            if (this.lockSerialDevice) {
+                writer.println("lock");
+            }
+
+            if (!this.peerMustAuthenticateItself) {
+                writer.println("noauth");
+            }
+
+            ChapLinux chapLinux = ChapLinux.getInstance();
+            PapLinux papLinux = PapLinux.getInstance();
+
+            if (getAuthType() != AuthType.NONE) {
+                writer.print("user \"");
+                writer.print(this.username);
+                writer.println("\"");
+
+                writer.println("hide-password");
+
+                switch (getAuthType()) {
+                case AUTO:
+                    if (!papLinux.checkForEntry(this.provider, this.username, "*", this.password.toString(), "*")) {
+                        papLinux.addEntry(this.provider, this.username, "*", this.password.toString(), "*");
+                    }
+                    if (!chapLinux.checkForEntry(this.provider, this.username, "*", this.password.toString(), "*")) {
+                        chapLinux.addEntry(this.provider, this.username, "*", this.password.toString(), "*");
+                    }
+                    break;
+                case PAP:
+                    // remove CHAP entry if exists
+                    chapLinux.removeEntry(AUTH_SECRETS_TYPE_PROVIDER, this.provider);
+                    if (!papLinux.checkForEntry(this.provider, this.username, "*", this.password.toString(), "*")) {
+                        papLinux.addEntry(this.provider, this.username, "*", this.password.toString(), "*");
+                    }
+                    break;
+                case CHAP:
+                    // remove PAP entry if exists
+                    papLinux.removeEntry(AUTH_SECRETS_TYPE_PROVIDER, this.provider);
+                    if (!chapLinux.checkForEntry(this.provider, this.username, "*", this.password.toString(), "*")) {
+                        chapLinux.addEntry(this.provider, this.username, "*", this.password.toString(), "*");
+                    }
+                    break;
+                case NONE:
+                    break;
+                }
+            } else {
+                // remove CHAP/PAP entries if exist
+                chapLinux.removeEntry(AUTH_SECRETS_TYPE_PROVIDER, this.provider);
+                papLinux.removeEntry(AUTH_SECRETS_TYPE_PROVIDER, this.provider);
+            }
+
+            if (this.peerToSupplyLocalIP) {
+                writer.println("noipdefault");
+            }
+
+            if (this.addDefaultRoute) {
+                writer.println("defaultroute");
+            } else {
+                writer.println("nodefaultroute");
+            }
+
+            if (this.usePeerDns) {
+                writer.println("usepeerdns");
+            }
+
+            if (!this.allowProxyArps) {
+                writer.println("noproxyarp");
+            }
+
+            if (!this.allowVanJacobsonTcpIpHdrCompression) {
+                writer.println("novj");
+            }
+
+            if (!this.allowVanJacobsonConnectionIDCompression) {
+                writer.println("novjccomp");
+            }
+
+            if (!this.allowBsdCompression) {
+                writer.println("nobsdcomp");
+            }
+
+            if (!this.allowDeflateCompression) {
+                writer.println("nodeflate");
+            }
+
+            if (!this.allowMagic) {
+                writer.println("nomagic");
+            }
+
+            if (this.idle > 0) {
+                writer.println("idle " + this.idle);
+            }
+
+            if (this.idle > 0 && this.activeFilter != null && this.activeFilter.length() > 0) {
+                writer.println("active-filter '" + this.activeFilter + "'");
+            }
+
+            if (this.persist) {
+                writer.println("persist");
+                writer.println("holdoff 1");
+            } else {
+                writer.println("nopersist");
+            }
+
+            writer.println("maxfail " + this.maxFail);
+
+            if (this.connectDelay != -1) {
+                writer.println("connect-delay " + this.connectDelay);
+            }
+
+            if (this.lcpEchoFailure > 0) {
+                writer.println("lcp-echo-failure " + this.lcpEchoFailure);
+            }
+
+            if (this.lcpEchoInterval > 0) {
+                writer.println("lcp-echo-interval " + this.lcpEchoInterval);
+            }
+
+            writer.flush();
+            fos.getFD().sync();
         }
-
-        if (this.peerToSupplyLocalIP) {
-            writer.println("noipdefault");
-        }
-
-        if (this.addDefaultRoute) {
-            writer.println("defaultroute");
-        } else {
-            writer.println("nodefaultroute");
-        }
-
-        if (this.usePeerDns) {
-            writer.println("usepeerdns");
-        }
-
-        if (!this.allowProxyArps) {
-            writer.println("noproxyarp");
-        }
-
-        if (!this.allowVanJacobsonTcpIpHdrCompression) {
-            writer.println("novj");
-        }
-
-        if (!this.allowVanJacobsonConnectionIDCompression) {
-            writer.println("novjccomp");
-        }
-
-        if (!this.allowBsdCompression) {
-            writer.println("nobsdcomp");
-        }
-
-        if (!this.allowDeflateCompression) {
-            writer.println("nodeflate");
-        }
-
-        if (!this.allowMagic) {
-            writer.println("nomagic");
-        }
-
-        if (this.idle > 0) {
-            writer.println("idle " + this.idle);
-        }
-
-        if (this.idle > 0 && this.activeFilter != null && this.activeFilter.length() > 0) {
-            writer.println("active-filter '" + this.activeFilter + "'");
-        }
-
-        if (this.persist) {
-            writer.println("persist");
-            writer.println("holdoff 1");
-        } else {
-            writer.println("nopersist");
-        }
-
-        writer.println("maxfail " + this.maxFail);
-
-        if (this.connectDelay != -1) {
-            writer.println("connect-delay " + this.connectDelay);
-        }
-
-        if (this.lcpEchoFailure > 0) {
-            writer.println("lcp-echo-failure " + this.lcpEchoFailure);
-        }
-
-        if (this.lcpEchoInterval > 0) {
-            writer.println("lcp-echo-interval " + this.lcpEchoInterval);
-        }
-
-        writer.flush();
-        fos.getFD().sync();
-        writer.close();
-        fos.close();
     }
 }

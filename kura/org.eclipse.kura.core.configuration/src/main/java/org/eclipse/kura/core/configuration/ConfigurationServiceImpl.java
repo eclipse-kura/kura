@@ -228,7 +228,9 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
             return;
         }
 
-        final String kuraPid = makeString(reference.getProperty(ConfigurationService.KURA_SERVICE_PID));
+        String kuraPid = makeString(reference.getProperty(ConfigurationService.KURA_SERVICE_PID));
+        if (kuraPid == null)
+            kuraPid = servicePid;
         final String factoryPid = makeString(reference.getProperty(ConfigurationAdmin.SERVICE_FACTORYPID));
 
         registerComponentConfiguration(kuraPid, servicePid, factoryPid);
@@ -763,13 +765,13 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         for (ComponentConfiguration config : configs) {
             for (ComponentConfiguration configToUpdate : configsToUpdate) {
                 if (config.getPid().equals(configToUpdate.getPid())) {
-                    try {
-                        updateConfigurationInternal(config.getPid(), config.getConfigurationProperties(),
-                                snapshotOnConfirmation);
-                    } catch (KuraException e) {
-                        logger.warn("Error during updateConfigurations for component " + config.getPid(), e);
-                        causes.add(e);
-                    }
+                    // try {
+                    updateConfigurationInternal(config.getPid(), config.getConfigurationProperties(),
+                            snapshotOnConfirmation);
+                    // } catch (KuraException e) {
+                    // logger.warn("Error during updateConfigurations for component " + config.getPid(), e);
+                    // causes.add(e);
+                    // }
                     break;
                 }
             }
@@ -1553,7 +1555,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
                 // validate the attribute value
                 Object objectValue = property.getValue();
                 String stringValue = StringUtil.valueToString(objectValue);
-                if (stringValue != null) {
+                if (attrDef.getType() != AttributeDefinition.STRING && stringValue != null) {
                     String result = attrDef.validate(stringValue);
                     if (result != null && !result.isEmpty()) {
                         throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID, attrDef.getID(),

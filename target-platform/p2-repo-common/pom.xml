@@ -580,12 +580,12 @@
                                 <artifactItem>
                                     <groupId>org.yaml</groupId>
                                     <artifactId>snakeyaml</artifactId>
-                                    <version>${org.yaml.snakeyaml.version}</version>
+                                    <version>${org.yaml.snakeyaml.mvn.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.javassist</groupId>
                                     <artifactId>javassist</artifactId>
-                                    <version>${org.javassist.version}</version>
+                                    <version>${org.javassist.mvn.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.apache.servicemix.bundles</groupId>
@@ -839,7 +839,7 @@
                                 <move file="target/source/plugins/org.apache.servicemix.bundles.reflections.jar"
                                     tofile="target/source/plugins/org.apache.servicemix.bundles.reflections_${org.apache.servicemix.bundles.reflections.version}.jar" />
                                 <move file="target/source/plugins/javassist.jar"
-                                    tofile="target/source/plugins/org.javassist_${org.javassist.version}.jar" />
+                                    tofile="target/source/plugins/javassist_${org.javassist.version}.jar" />
                                 <move file="target/source/plugins/snakeyaml.jar"
                                     tofile="target/source/plugins/org.yaml.snakeyaml_${org.yaml.snakeyaml.version}.jar" />
                                 <!-- Artemis Broker -->

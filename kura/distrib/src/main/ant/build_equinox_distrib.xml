@@ -1174,8 +1174,10 @@ fi]]>
         <propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
             <entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.camel.sun.misc_${org.eclipse.kura.camel.sun.misc.version}.jar@3" />
-            <entry key="osgi.bundles" operation="+"
+            <!--
+        	<entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.camel.camel-amqp_${org.apache.camel.camel-amqp.version}.jar@4:start" />
+            -->
             <entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.camel.camel-core_${org.apache.camel.camel-core.version}.jar@3:start" />
             <entry key="osgi.bundles" operation="+"
@@ -1205,13 +1207,11 @@ fi]]>
             <entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.camel.camel-core-xml_${org.apache.camel.camel-core-xml.version}.jar@3:start" />
             <entry key="osgi.bundles" operation="+"
-                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.camel.camel-blueprint_${org.apache.camel.camel-blueprint.version}.jar@3:start" />
-            <entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.camel.camel-jackson_${org.apache.camel.camel-jackson.version}.jar@3:start" />
             <entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.servicemix.bundles.reflections_${org.apache.servicemix.bundles.reflections.version}.jar@3:start" />
             <entry key="osgi.bundles" operation="+"
-                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.javassist_${org.javassist.version}.jar@3:start" />
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/javassist_${org.javassist.version}.jar@3:start" />
             <entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.yaml.snakeyaml_${org.yaml.snakeyaml.version}.jar@3:start" />
             <entry key="osgi.bundles" operation="+"
@@ -1288,15 +1288,15 @@ fi]]>
             <entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/io.netty.transport-native-unix-common_${io.netty.version}.jar@3" />
             <entry key="osgi.bundles" operation="+"
-                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/io.netty.netty-codec-http2_${io.netty.version}.jar@3" />
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/io.netty.codec-http2_${io.netty.version}.jar@3" />
             <entry key="osgi.bundles" operation="+"
-                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/io.netty.netty-resolver-dns_${io.netty.version}.jar@3" />
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/io.netty.resolver-dns_${io.netty.version}.jar@3" />
             <entry key="osgi.bundles" operation="+"
-                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/io.netty.netty-handler-proxy_${io.netty.version}.jar@3" />
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/io.netty.handler-proxy_${io.netty.version}.jar@3" />
             <entry key="osgi.bundles" operation="+"
-                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/io.netty.netty-codec-socks_${io.netty.version}.jar@3" />
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/io.netty.codec-socks_${io.netty.version}.jar@3" />
             <entry key="osgi.bundles" operation="+"
-                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/io.netty.netty-codec-dns_${io.netty.version}.jar@3" />
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/io.netty.codec-dns_${io.netty.version}.jar@3" />
             <entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/com.fasterxml.jackson.core.jackson-core_${com.fasterxml.jackson.core.version}.jar@3" />
             <entry key="osgi.bundles" operation="+"

@@ -102,7 +102,7 @@
             type="String"
             cardinality="0"
             required="true"
-            default="kura-protobuf"
+            default="simple-json"
             description="Specify the message payload encoding.">
             <Option label="Kura Protobuf" value="kura-protobuf" />
             <Option label="Simple JSON" value="simple-json" />

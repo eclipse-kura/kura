@@ -27,7 +27,7 @@ import org.junit.runners.Suite.SuiteClasses;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.moquette.server.Server;
+import io.moquette.broker.Server;
 
 @RunWith(Suite.class)
 @SuiteClasses({ DataServiceTest.class, CloudDeploymentHandlerTest.class, CloudServiceTest.class, CommURITest.class,

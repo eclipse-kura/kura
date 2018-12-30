@@ -965,7 +965,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
                     try {
                         this.persistence.close();
                     } catch (MqttPersistenceException e) {
-                        logger.warn("Failed to close persistence. Ignoring exception.", e);
+                        // logger.warn("Failed to close persistence. Ignoring exception.", e);
                     }
                 }
                 this.persistence = new MqttDefaultFilePersistence(dir);

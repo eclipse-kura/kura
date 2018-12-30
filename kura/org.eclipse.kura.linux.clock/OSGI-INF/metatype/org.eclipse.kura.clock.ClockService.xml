@@ -24,7 +24,7 @@
             type="Boolean"
             cardinality="0"
             required="true"
-            default="true"
+            default="false"
             description="Whether or not to enable the ClockService"/>
             
         <AD id="clock.set.hwclock"  

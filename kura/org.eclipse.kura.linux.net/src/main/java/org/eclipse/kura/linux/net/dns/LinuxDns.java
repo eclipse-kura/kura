@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -368,13 +368,22 @@ public class LinuxDns {
         return path;
     }
 
+    private boolean isLinkToPppDnsFile(final String dnsFileName) throws IOException {
+        final String pppDnsFileName = getPppDnsFileName();
+
+        if (pppDnsFileName == null) {
+            return false;
+        }
+
+        return Files.readSymbolicLink(Paths.get(DNS_FILE_NAME)).equals(Paths.get(pppDnsFileName));
+    }
+
     private synchronized void writeDnsFile(Set<IPAddress> servers) {
         logger.debug("Writing DNS servers to file");
         // Check if DNS_FILE_NAME is a symlink and it is broken or points to unmanaged location.
         // In this case, delete it.
         try {
-            if (Files.isSymbolicLink(Paths.get(DNS_FILE_NAME))
-                    && !Files.readSymbolicLink(Paths.get(DNS_FILE_NAME)).equals(Paths.get(getPppDnsFileName()))) {
+            if (Files.isSymbolicLink(Paths.get(DNS_FILE_NAME)) && !isLinkToPppDnsFile(DNS_FILE_NAME)) {
                 Files.delete(Paths.get(DNS_FILE_NAME));
             }
         } catch (IOException e) {

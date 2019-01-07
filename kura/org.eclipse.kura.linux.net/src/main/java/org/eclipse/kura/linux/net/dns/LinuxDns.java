@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -16,7 +16,10 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -365,8 +368,26 @@ public class LinuxDns {
         return path;
     }
 
+    private boolean isLinkToPppDnsFile(final String dnsFileName) throws IOException {
+        final String pppDnsFileName = getPppDnsFileName();
+
+        if (pppDnsFileName == null) {
+            return false;
+        }
+
+        return Files.readSymbolicLink(Paths.get(DNS_FILE_NAME)).equals(Paths.get(pppDnsFileName));
+    }
+
     private synchronized void writeDnsFile(Set<IPAddress> servers) {
         logger.debug("Writing DNS servers to file");
+        try {
+            if (Files.isSymbolicLink(Paths.get(DNS_FILE_NAME)) && !isLinkToPppDnsFile(DNS_FILE_NAME)) {
+                Files.delete(Paths.get(DNS_FILE_NAME));
+            }
+        } catch (IOException e) {
+            logger.error("Cannot read symlink", e);
+        }
+
         try (FileOutputStream fos = new FileOutputStream(DNS_FILE_NAME); PrintWriter pw = new PrintWriter(fos);) {
             String[] existingFile = getModifiedFile();
             for (String element : existingFile) {
@@ -378,8 +399,8 @@ public class LinuxDns {
             }
             pw.flush();
             fos.getFD().sync();
-        } catch (Exception e) {
-            logger.error("writeDnsFile() :: failed to write the {} file ", DNS_FILE_NAME, e);
+        } catch (Exception e1) {
+            logger.error("writeDnsFile() :: failed to write the {} file ", DNS_FILE_NAME, e1);
         }
     }
 

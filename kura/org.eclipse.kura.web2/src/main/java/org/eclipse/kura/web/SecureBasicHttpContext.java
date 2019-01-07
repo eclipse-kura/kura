@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -36,19 +36,19 @@ import org.slf4j.LoggerFactory;
 public class SecureBasicHttpContext implements HttpContext {
 
     // Logger
-    private static Logger s_logger = LoggerFactory.getLogger(SecureBasicHttpContext.class);
+    private static Logger logger = LoggerFactory.getLogger(SecureBasicHttpContext.class);
 
     /**
      * The HttpContext where we delegate calls to getResource() and getMimeType()
      */
     private final HttpContext delegate;
-    private final AuthenticationManager m_authMgr;
-    private final String m_appRoot;
+    private final AuthenticationManager authMgr;
+    private final String appRoot;
 
     public SecureBasicHttpContext(HttpContext delegate, AuthenticationManager authMgr) {
         this.delegate = delegate;
-        this.m_authMgr = authMgr;
-        this.m_appRoot = Console.getApplicationRoot();
+        this.authMgr = authMgr;
+        this.appRoot = Console.getApplicationRoot();
     }
 
     @Override
@@ -74,13 +74,13 @@ public class SecureBasicHttpContext implements HttpContext {
         response.setHeader("Pragma", "no-cache");
 
         // If a trailing "/" is used when accesssing the app, redirect
-        if (request.getRequestURI().equals(this.m_appRoot + "/")) {
-            response.sendRedirect(this.m_appRoot);
+        if (request.getRequestURI().equals(this.appRoot + "/")) {
+            response.sendRedirect(this.appRoot);
         }
 
         // If using root context, redirect
         if (request.getRequestURI().equals("/")) {
-            response.sendRedirect(this.m_appRoot);
+            response.sendRedirect(this.appRoot);
         }
 
         HttpSession session = request.getSession(false);
@@ -95,14 +95,14 @@ public class SecureBasicHttpContext implements HttpContext {
 
         String authHeader = request.getHeader("Authorization");
         if (authHeader == null) {
-            s_logger.debug("Missing 'Authorization' HTTP header");
+            logger.debug("Missing 'Authorization' HTTP header");
             return failAuthorization(response);
         }
 
         StringTokenizer tokens = new StringTokenizer(authHeader);
         String authScheme = tokens.nextToken();
         if (!"Basic".equals(authScheme)) {
-            s_logger.error("The authentication scheme is not 'Basic'");
+            logger.error("The authentication scheme is not 'Basic'");
             return failAuthorization(response);
         }
 
@@ -180,15 +180,15 @@ public class SecureBasicHttpContext implements HttpContext {
      * @return An empty Subject if the user is authorized, null otherwise.
      */
     private Subject authorize(String userid, String password) {
-        s_logger.debug("Authenticating user [{}]", userid);
+        logger.debug("Authenticating user [{}]", userid);
         try {
-            if (this.m_authMgr.authenticate(userid, password)) {
+            if (this.authMgr.authenticate(userid, password)) {
                 // TODO : We are temporarily returning an empty Subject,
                 // but we should return something more significant
                 return new Subject();
             }
         } catch (Exception e) {
-            s_logger.error("Error during authentication", e);
+            logger.error("Error during authentication", e);
         }
 
         return null;

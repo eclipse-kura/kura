@@ -380,8 +380,6 @@ public class LinuxDns {
 
     private synchronized void writeDnsFile(Set<IPAddress> servers) {
         logger.debug("Writing DNS servers to file");
-        // Check if DNS_FILE_NAME is a symlink and it is broken or points to unmanaged location.
-        // In this case, delete it.
         try {
             if (Files.isSymbolicLink(Paths.get(DNS_FILE_NAME)) && !isLinkToPppDnsFile(DNS_FILE_NAME)) {
                 Files.delete(Paths.get(DNS_FILE_NAME));

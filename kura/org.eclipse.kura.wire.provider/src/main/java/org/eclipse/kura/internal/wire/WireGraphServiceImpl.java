@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2019 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -48,6 +48,8 @@ import org.eclipse.kura.wire.graph.WireComponentConfiguration;
 import org.eclipse.kura.wire.graph.WireGraphConfiguration;
 import org.eclipse.kura.wire.graph.WireGraphService;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Filter;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
@@ -79,6 +81,8 @@ public class WireGraphServiceImpl implements ConfigurableComponent, WireGraphSer
     private BundleContext bundleContext;
 
     private WireGraphConfiguration currentConfiguration;
+
+    private static final Filter WIRE_COMPONENT_FILTER = getWireComponentConfigurationFilter();
 
     /**
      * Binds the {@link WireAdmin} dependency
@@ -497,8 +501,8 @@ public class WireGraphServiceImpl implements ConfigurableComponent, WireGraphSer
                 .getComponentConfiguration(CONF_PID);
         wireGraphServiceComponentConfig.getConfigurationProperties().put(NEW_WIRE_GRAPH_PROPERTY, jsonConfig);
 
-        this.configurationService.updateConfiguration(CONF_PID, wireGraphServiceComponentConfig.getConfigurationProperties(),
-                true);
+        this.configurationService.updateConfiguration(CONF_PID,
+                wireGraphServiceComponentConfig.getConfigurationProperties(), true);
         this.currentConfiguration = newWireGraphConfiguration;
     }
 
@@ -506,7 +510,7 @@ public class WireGraphServiceImpl implements ConfigurableComponent, WireGraphSer
     public WireGraphConfiguration get() throws KuraException {
 
         List<ComponentConfiguration> configServiceComponentConfigurations = this.configurationService
-                .getComponentConfigurations();
+                .getComponentConfigurations(WIRE_COMPONENT_FILTER);
 
         WireGraphConfiguration wireGraphConfiguration = this.currentConfiguration;
 
@@ -605,4 +609,13 @@ public class WireGraphServiceImpl implements ConfigurableComponent, WireGraphSer
         return unmarshal(jsonWireGraph, WireGraphConfiguration.class);
     }
 
+    private static Filter getWireComponentConfigurationFilter() {
+        try {
+            return FrameworkUtil.createFilter(
+                    "(|(objectClass=org.eclipse.kura.wire.WireComponent)(objectClass=org.eclipse.kura.wire.WireEmitter)(objectClass=org.eclipse.kura.wire.WireReceiver))");
+        } catch (final Exception e) {
+            logger.warn("failed to init wire component configuration filter", e);
+            return null;
+        }
+    }
 }

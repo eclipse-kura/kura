@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -16,6 +16,7 @@ import org.eclipse.kura.web.client.util.DownloadHelper;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtWireComposerStaticInfo;
+import org.eclipse.kura.web.shared.model.GwtWireGraph;
 import org.eclipse.kura.web.shared.model.GwtWireGraphConfiguration;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtComponentService;
@@ -97,6 +98,36 @@ public final class WiresRPC {
         });
     }
 
+    public static void loadWireGraph(final Callback<GwtWireGraph> callback) {
+        EntryClassUi.showWaitModal();
+        gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+
+            @Override
+            public void onFailure(Throwable ex) {
+                EntryClassUi.hideWaitModal();
+                FailureHandler.handle(ex);
+            }
+
+            @Override
+            public void onSuccess(GwtXSRFToken result) {
+                gwtWireGraphService.getWireGraph(result, new AsyncCallback<GwtWireGraph>() {
+
+                    @Override
+                    public void onFailure(Throwable ex) {
+                        EntryClassUi.hideWaitModal();
+                        FailureHandler.handle(ex);
+                    }
+
+                    @Override
+                    public void onSuccess(GwtWireGraph result) {
+                        EntryClassUi.hideWaitModal();
+                        callback.onSuccess(result);
+                    }
+                });
+            }
+        });
+    }
+
     public static void updateWiresConfiguration(final GwtWireGraphConfiguration wireGraph,
             final List<GwtConfigComponent> additionalConfigs, final Callback<Void> callback) {
         EntryClassUi.showWaitModal();
@@ -110,20 +141,21 @@ public final class WiresRPC {
 
             @Override
             public void onSuccess(GwtXSRFToken result) {
-                gwtWireGraphService.updateWireConfiguration(result, wireGraph, additionalConfigs, new AsyncCallback<Void>() {
+                gwtWireGraphService.updateWireConfiguration(result, wireGraph, additionalConfigs,
+                        new AsyncCallback<Void>() {
 
-                    @Override
-                    public void onFailure(Throwable ex) {
-                        EntryClassUi.hideWaitModal();
-                        FailureHandler.handle(ex);
-                    }
+                            @Override
+                            public void onFailure(Throwable ex) {
+                                EntryClassUi.hideWaitModal();
+                                FailureHandler.handle(ex);
+                            }
 
-                    @Override
-                    public void onSuccess(Void result) {
-                        EntryClassUi.hideWaitModal();
-                        callback.onSuccess(null);
-                    }
-                });
+                            @Override
+                            public void onSuccess(Void result) {
+                                EntryClassUi.hideWaitModal();
+                                callback.onSuccess(null);
+                            }
+                        });
             }
         });
     }

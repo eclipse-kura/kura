@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2019 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -142,14 +142,16 @@ public class WiresPanelUi extends Composite
             confirmDialog.show(MSGS.wiresSave(), () -> WiresRPC.updateWiresConfiguration(getGwtWireGraphConfiguration(),
                     getModifiedDriverConfigurations(), result -> clearDirtyState()));
         });
-        this.btnReset.addClickHandler(event -> WiresPanelUi.this.confirmDialog.show(MSGS.deviceConfigDirty(), WiresPanelUi.this::load));
+        this.btnReset.addClickHandler(
+                event -> WiresPanelUi.this.confirmDialog.show(MSGS.deviceConfigDirty(), WiresPanelUi.this::load));
         this.btnDelete.addClickHandler(event -> confirmDialog.show(MSGS.wiresComponentDeleteAlert(), () -> {
             final WireComponent component = wireComposer.getSelectedWireComponent();
             if (component != null) {
                 wireComposer.deleteWireComponent(component);
             }
         }));
-        this.btnGraphDelete.addClickHandler(event -> confirmDialog.show(MSGS.wiresGraphDeleteAlert(), () -> wireComposer.clear()));
+        this.btnGraphDelete
+                .addClickHandler(event -> confirmDialog.show(MSGS.wiresGraphDeleteAlert(), () -> wireComposer.clear()));
         this.btnDownload.addClickHandler(event -> {
             final List<String> invalidConfigurationPids = configurations.getInvalidConfigurationPids();
             if (!invalidConfigurationPids.isEmpty()) {
@@ -169,17 +171,16 @@ public class WiresPanelUi extends Composite
 
     public void load() {
 
-        WiresRPC.loadStaticInfo(result -> {
-            loadStaticInformation(result);
-            WiresRPC.loadWiresConfiguration(result1 -> {
-                loadGraph(result1);
-                dialogs.setDriverPids(configurations.getDriverPids());
-                dialogs.setAssetPids(getAssetsNotInComposer());
-                configurations.setAllActivePids(result1.getAllActivePids());
-                blinkEffect.setEnabled(true);
-                clearDirtyState();
-            });
+        WiresRPC.loadWireGraph(result -> {
+            loadStaticInformation(result.getStaticInfo());
+            loadGraph(result.getWireGraphConfiguration());
+            dialogs.setDriverPids(configurations.getDriverPids());
+            dialogs.setAssetPids(getAssetsNotInComposer());
+            configurations.setAllActivePids(result.getWireGraphConfiguration().getAllActivePids());
+            blinkEffect.setEnabled(true);
+            clearDirtyState();
         });
+
     }
 
     private void populateComponentsPanel() {
@@ -193,8 +194,9 @@ public class WiresPanelUi extends Composite
             sortedDescriptors.add(descriptor.getValue());
         }
 
-        Collections.sort(sortedDescriptors, (o1, o2) -> Integer.compare(o1.getMinInputPorts() * 2 + o1.getMinOutputPorts(),
-                o2.getMinInputPorts() * 2 + o2.getMinOutputPorts()));
+        Collections.sort(sortedDescriptors,
+                (o1, o2) -> Integer.compare(o1.getMinInputPorts() * 2 + o1.getMinOutputPorts(),
+                        o2.getMinInputPorts() * 2 + o2.getMinOutputPorts()));
 
         for (GwtWireComponentDescriptor descriptor : sortedDescriptors) {
             final WireComponentsAnchorListItem item = new WireComponentsAnchorListItem(getComponentLabel(descriptor),

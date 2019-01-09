@@ -215,7 +215,6 @@ public class S7PlcDriver extends AbstractBlockDriver<S7PlcDomain> implements Con
         }
     }
 
-    @SuppressWarnings("serial")
     static final class Moka7Exception extends IOException {
 
         /**

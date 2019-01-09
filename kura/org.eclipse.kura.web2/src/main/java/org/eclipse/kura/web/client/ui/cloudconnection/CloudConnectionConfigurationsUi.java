@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2019 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -12,7 +12,11 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.cloudconnection;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+
 import org.eclipse.kura.web.client.util.request.RequestQueue;
+import org.eclipse.kura.web.shared.FilterUtil;
 import org.eclipse.kura.web.shared.model.GwtCloudConnectionEntry;
 import org.eclipse.kura.web.shared.model.GwtCloudEntry;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
@@ -127,29 +131,32 @@ public class CloudConnectionConfigurationsUi extends Composite {
     }
 
     private void getPubSubConfiguration(final String pid) {
-        RequestQueue.submit(
-                context -> this.gwtXSRFService.generateSecurityToken(context.callback(token -> this.gwtComponentService
-                        .findFilteredComponentConfiguration(token, pid, context.callback(confs -> {
-                            this.connectionNavtabs.clear();
-                            renderTabs(confs.get(0), true);
-                        })))));
+        RequestQueue.submit(context -> gwtXSRFService.generateSecurityToken(context.callback(
+                token -> gwtComponentService.findFilteredComponentConfiguration(token, pid, context.callback(confs -> {
+                    connectionNavtabs.clear();
+                    renderTabs(confs.get(0), true);
+                })))));
     }
 
     private void getCloudStackConfigurations(final String factoryPid, final String cloudServicePid) {
 
-        RequestQueue.submit(context -> this.gwtCloudService.findStackPidsByFactory(factoryPid, cloudServicePid,
-                context.callback(pidsResult -> this.gwtXSRFService
-                        .generateSecurityToken(context.callback(token -> this.gwtComponentService
-                                .findFilteredComponentConfigurations(token, context.callback(result -> {
-                                    boolean isFirstEntry = true;
-                                    this.connectionNavtabs.clear();
-                                    for (GwtConfigComponent pair : result) {
-                                        if (pidsResult.contains(pair.getComponentId())) {
-                                            renderTabs(pair, isFirstEntry);
-                                            isFirstEntry = false;
+        RequestQueue.submit(context -> gwtCloudService.findStackPidsByFactory(factoryPid, cloudServicePid,
+                context.callback(pidsResult -> {
+                    final ArrayList<String> sorted = new ArrayList<>(pidsResult);
+                    sorted.sort(Comparator.comparing(s -> s));
+                    gwtXSRFService.generateSecurityToken(
+                            context.callback(token -> gwtComponentService.findComponentConfigurations(token,
+                                    FilterUtil.getPidFilter(sorted.iterator()), context.callback(result -> {
+                                        boolean isFirstEntry = true;
+                                        connectionNavtabs.clear();
+                                        for (GwtConfigComponent pair : result) {
+                                            if (pidsResult.contains(pair.getComponentId())) {
+                                                renderTabs(pair, isFirstEntry);
+                                                isFirstEntry = false;
+                                            }
                                         }
-                                    }
-                                })))))));
+                                    }))));
+                })));
 
     }
 

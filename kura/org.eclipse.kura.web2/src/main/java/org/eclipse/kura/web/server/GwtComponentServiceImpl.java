@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
@@ -61,6 +60,7 @@ import org.eclipse.kura.wire.graph.WireComponentDefinition;
 import org.eclipse.kura.wire.graph.WireComponentDefinitionService;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -105,15 +105,13 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
             throws GwtKuraException {
         checkXSRFToken(xsrfToken);
         try {
-            final BundleContext context = FrameworkUtil.getBundle(GwtComponentServiceImpl.class).getBundleContext();
-            final Set<String> matchingPids = Arrays.stream(context.getServiceReferences((String) null, osgiFilter))
-                    .map(reference -> (String) reference.getProperty(KURA_SERVICE_PID)).collect(Collectors.toSet());
-            return ServiceLocator
-                    .applyToServiceOptionally(ConfigurationService.class,
-                            configurationService -> configurationService.getComponentConfigurations().stream()
-                                    .filter(config -> matchingPids.contains(config.getPid())))
-                    .map(this::createMetatypeOnlyGwtComponentConfigurationInternal).filter(Objects::nonNull)
-                    .collect(Collectors.toList());
+            final Filter filter = FrameworkUtil.createFilter(osgiFilter);
+            return ServiceLocator.applyToServiceOptionally(ConfigurationService.class,
+                    configurationService -> configurationService.getComponentConfigurations(filter) //
+                            .stream() //
+                            .map(this::createMetatypeOnlyGwtComponentConfigurationInternal) //
+                            .filter(Objects::nonNull) //
+                            .collect(Collectors.toList()));
         } catch (InvalidSyntaxException e) {
             throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
         } catch (Exception e) {

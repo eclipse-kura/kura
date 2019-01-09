@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 Eurotech and others
+ * Copyright (c) 2011, 2019 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -67,6 +67,7 @@ import org.eclipse.kura.system.SystemService;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
@@ -303,6 +304,41 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
     @Override
     public List<ComponentConfiguration> getComponentConfigurations() throws KuraException {
         return getComponentConfigurationsInternal();
+    }
+
+    @Override
+    public List<ComponentConfiguration> getComponentConfigurations(final Filter filter) throws KuraException {
+
+        if (filter == null) {
+            return getComponentConfigurationsInternal();
+        }
+
+        try {
+            final ServiceReference<?>[] refs = bundleContext.getAllServiceReferences(null, null);
+            final List<ComponentConfiguration> result = new ArrayList<>(refs.length);
+
+            for (final ServiceReference<?> ref : refs) {
+
+                if (!filter.match(ref)) {
+                    continue;
+                }
+
+                final Object kuraServicePid = ref.getProperty(KURA_SERVICE_PID);
+
+                if (kuraServicePid instanceof String) {
+                    final ComponentConfiguration config = getComponentConfigurationInternal((String) kuraServicePid);
+
+                    if (config != null) {
+                        result.add(config);
+                    }
+                }
+            }
+
+            return result;
+        } catch (final Exception e) {
+            throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, e);
+        }
+
     }
 
     // Don't perform internal calls to this method

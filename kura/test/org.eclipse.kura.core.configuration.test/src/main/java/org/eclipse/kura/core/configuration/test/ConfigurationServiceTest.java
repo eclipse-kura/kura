@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2019 Eurotech and/or its affiliates and others
  *
  *   All rights reserved. This program and the accompanying materials
  *   are made available under the terms of the Eclipse Public License v1.0
@@ -56,6 +56,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
 public class ConfigurationServiceTest {
@@ -492,6 +493,27 @@ public class ConfigurationServiceTest {
         }
 
         assertTrue("Should have found new configuration", found);
+    }
+
+    @Test
+    public void testGetComponentConfigurationsFilter() throws KuraException, InvalidSyntaxException {
+
+        List<ComponentConfiguration> configurations = configurationService.getComponentConfigurations(
+                FrameworkUtil.createFilter("(kura.service.pid=" + TEST_COMPONENT_PID + ")"));
+
+        assertEquals(1, configurations.size());
+        assertEquals(TEST_COMPONENT_PID, configurations.get(0).getPid());
+
+        List<ComponentConfiguration> configurationsEmpty = configurationService
+                .getComponentConfigurations(FrameworkUtil.createFilter("(kura.service.pid=foo)"));
+
+        assertTrue(configurationsEmpty.isEmpty());
+
+        List<ComponentConfiguration> configurationsEmpty2 = configurationService.getComponentConfigurations(
+                FrameworkUtil.createFilter("(service.pid=org.eclipse.kura.configuration.ConfigurationService)"));
+
+        assertTrue(configurationsEmpty2.isEmpty());
+
     }
 
     @Test

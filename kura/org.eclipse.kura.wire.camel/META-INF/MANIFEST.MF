@@ -10,7 +10,7 @@ Service-Component: OSGI-INF/*.xml
 Import-Package: org.apache.camel;version="[2.21,3.0)",
  org.apache.camel.builder;version="[2.21,3.0)",
  org.eclipse.kura.camel.component;version="[1.1,2.0)",
- org.eclipse.kura.configuration;version="[1.1.2,1.2)",
+ org.eclipse.kura.configuration;version="[1.2,2.0)",
  org.eclipse.kura.type;version="[1.1,2.0)",
  org.eclipse.kura.util.base;version="[1.0,2.0)",
  org.eclipse.kura.util.osgi;version="[1.0,2.0)",

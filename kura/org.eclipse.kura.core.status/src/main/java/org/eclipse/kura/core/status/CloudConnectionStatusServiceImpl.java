@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -22,6 +22,7 @@ import org.eclipse.kura.core.status.runnables.BlinkStatusRunnable;
 import org.eclipse.kura.core.status.runnables.HeartbeatStatusRunnable;
 import org.eclipse.kura.core.status.runnables.LogStatusRunnable;
 import org.eclipse.kura.core.status.runnables.OnOffStatusRunnable;
+import org.eclipse.kura.core.status.runnables.StatusRunnable;
 import org.eclipse.kura.gpio.GPIOService;
 import org.eclipse.kura.status.CloudConnectionStatusComponent;
 import org.eclipse.kura.status.CloudConnectionStatusEnum;
@@ -50,6 +51,8 @@ public class CloudConnectionStatusServiceImpl implements CloudConnectionStatusSe
     private final HashSet<CloudConnectionStatusComponent> componentRegistry = new HashSet<>();
 
     private Properties properties;
+
+    private StatusRunnable statusRunnable;
 
     // ----------------------------------------------------------------
     //
@@ -151,6 +154,9 @@ public class CloudConnectionStatusServiceImpl implements CloudConnectionStatusSe
         if (this.currentStatus == null || this.currentStatus != maxPriorityComponent.getNotificationStatus()) {
             this.currentStatus = maxPriorityComponent.getNotificationStatus();
 
+            if (this.statusRunnable != null) {
+                this.statusRunnable.stopRunnable();
+            }
             if (this.notificationWorker != null) {
                 this.notificationWorker.cancel(true);
                 this.notificationWorker = null;
@@ -160,12 +166,13 @@ public class CloudConnectionStatusServiceImpl implements CloudConnectionStatusSe
             // Defaults to OFF
             this.currentStatus = this.currentStatus == null ? CloudConnectionStatusEnum.OFF : this.currentStatus;
 
-            this.notificationWorker = this.notificationExecutor.submit(getWorker(this.currentStatus));
+            this.statusRunnable = getRunnable(this.currentStatus);
+            this.notificationWorker = this.notificationExecutor.submit(this.statusRunnable);
         }
     }
 
-    private Runnable getWorker(CloudConnectionStatusEnum status) {
-        Runnable runnable = null;
+    private StatusRunnable getRunnable(CloudConnectionStatusEnum status) {
+        StatusRunnable runnable = null;
 
         StatusNotificationTypeEnum notificationType = (StatusNotificationTypeEnum) this.properties
                 .get(CloudConnectionStatusURL.NOTIFICATION_TYPE);
@@ -178,9 +185,10 @@ public class CloudConnectionStatusServiceImpl implements CloudConnectionStatusSe
             if (runnable == null && this.properties.get("led") != null && this.gpioService != null) {
                 runnable = getGpioStatusWorker(status);
             }
-            if (runnable != null) {
-                break;
+            if (runnable == null) {
+                runnable = getLogStatusWorker(status);
             }
+            break;
         case LOG:
             runnable = getLogStatusWorker(status);
             break;
@@ -190,21 +198,26 @@ public class CloudConnectionStatusServiceImpl implements CloudConnectionStatusSe
         return runnable;
     }
 
-    private Runnable getNoneStatusWorker() {
-        return new Runnable() {
+    private StatusRunnable getNoneStatusWorker() {
+        return new StatusRunnable() {
 
             @Override
             public void run() {
                 /* Empty runnable */ }
+
+            @Override
+            public void stopRunnable() {
+                /* Empty runnable */
+            }
         };
     }
 
-    private Runnable getLogStatusWorker(CloudConnectionStatusEnum status) {
+    private StatusRunnable getLogStatusWorker(CloudConnectionStatusEnum status) {
         return new LogStatusRunnable(status);
     }
 
-    private Runnable getLinuxStatusWorker(CloudConnectionStatusEnum status) {
-        Runnable runnable = null;
+    private StatusRunnable getLinuxStatusWorker(CloudConnectionStatusEnum status) {
+        StatusRunnable runnable = null;
 
         String ledPath = this.properties.getProperty("linux_led");
         File f = new File(ledPath);
@@ -215,7 +228,7 @@ public class CloudConnectionStatusServiceImpl implements CloudConnectionStatusSe
         return runnable;
     }
 
-    private Runnable getGpioStatusWorker(CloudConnectionStatusEnum status) {
+    private StatusRunnable getGpioStatusWorker(CloudConnectionStatusEnum status) {
         int gpioLed = (Integer) this.properties.get("led");
         boolean inverted = (Boolean) this.properties.get("inverted");
         LedManager gpioLedManager = new GpioLedManager(this.gpioService, gpioLed, inverted);
@@ -223,8 +236,8 @@ public class CloudConnectionStatusServiceImpl implements CloudConnectionStatusSe
         return createLedRunnable(status, gpioLedManager);
     }
 
-    private Runnable createLedRunnable(CloudConnectionStatusEnum status, LedManager linuxLedManager) {
-        Runnable runnable;
+    private StatusRunnable createLedRunnable(CloudConnectionStatusEnum status, LedManager linuxLedManager) {
+        StatusRunnable runnable;
         switch (status) {
         case ON:
             runnable = new OnOffStatusRunnable(linuxLedManager, true);

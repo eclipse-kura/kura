@@ -141,22 +141,20 @@ public class CloudConnectionConfigurationsUi extends Composite {
     private void getCloudStackConfigurations(final String factoryPid, final String cloudServicePid) {
 
         RequestQueue.submit(context -> gwtCloudService.findStackPidsByFactory(factoryPid, cloudServicePid,
-                context.callback(pidsResult -> {
-                    final ArrayList<String> sorted = new ArrayList<>(pidsResult);
-                    sorted.sort(Comparator.comparing(s -> s));
-                    gwtXSRFService.generateSecurityToken(
-                            context.callback(token -> gwtComponentService.findComponentConfigurations(token,
-                                    FilterUtil.getPidFilter(sorted.iterator()), context.callback(result -> {
-                                        boolean isFirstEntry = true;
-                                        connectionNavtabs.clear();
-                                        for (GwtConfigComponent pair : result) {
-                                            if (pidsResult.contains(pair.getComponentId())) {
-                                                renderTabs(pair, isFirstEntry);
-                                                isFirstEntry = false;
-                                            }
+                context.callback(pidsResult -> gwtXSRFService.generateSecurityToken(
+                        context.callback(token -> gwtComponentService.findComponentConfigurations(token,
+                                FilterUtil.getPidFilter(pidsResult.iterator()), context.callback(result -> {
+                                    final ArrayList<GwtConfigComponent> sorted = new ArrayList<>(result);
+                                    sorted.sort(Comparator.comparing(this::getSimplifiedComponentName));
+                                    boolean isFirstEntry = true;
+                                    connectionNavtabs.clear();
+                                    for (GwtConfigComponent pair : sorted) {
+                                        if (pidsResult.contains(pair.getComponentId())) {
+                                            renderTabs(pair, isFirstEntry);
+                                            isFirstEntry = false;
                                         }
-                                    }))));
-                })));
+                                    }
+                                })))))));
 
     }
 

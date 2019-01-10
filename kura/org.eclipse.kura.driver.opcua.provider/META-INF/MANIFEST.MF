@@ -30,15 +30,14 @@ Import-Package: javax.crypto,
 Service-Component: OSGI-INF/*.xml
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .,
- lib/guava-19.0.jar,
- lib/jool-0.9.10.jar,
- lib/jsr305-3.0.1.jar,
- lib/protonpack-1.8.jar,
- lib/sdk-client-0.2.1.jar,
- lib/sdk-core-0.2.1.jar,
- lib/stack-client-0.2.1.jar,
- lib/stack-core-0.2.1.jar,
- lib/bsd-parser-core-0.2.1.jar,
- lib/bsd-parser-gson-0.2.1.jar,
- lib/netty-all-4.0.36.Final.jar
-
+ lib/guava.jar,
+ lib/jool.jar,
+ lib/jsr305.jar,
+ lib/protonpack.jar,
+ lib/sdk-client.jar,
+ lib/sdk-core.jar,
+ lib/stack-client.jar,
+ lib/stack-core.jar,
+ lib/bsd-parser-core.jar,
+ lib/bsd-parser-gson.jar,
+ lib/netty-all.jar

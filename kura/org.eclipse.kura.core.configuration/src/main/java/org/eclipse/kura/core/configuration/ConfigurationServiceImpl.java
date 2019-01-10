@@ -14,7 +14,6 @@ package org.eclipse.kura.core.configuration;
 
 import static java.util.Objects.requireNonNull;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -996,7 +995,22 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         }
     }
 
-    private void encryptPlainSnapshots() throws Exception {
+    private static String readFully(final File file) throws IOException {
+        final char[] buf = new char[4096];
+        final StringBuilder builder = new StringBuilder();
+
+        try (final FileReader r = new FileReader(file)) {
+            int rd;
+
+            while ((rd = r.read(buf, 0, buf.length)) > 0) {
+                builder.append(buf, 0, rd);
+            }
+        }
+
+        return builder.toString();
+    }
+
+    private void encryptPlainSnapshots() throws KuraException, IOException {
         Set<Long> snapshotIDs = getSnapshots();
         if (snapshotIDs == null || snapshotIDs.isEmpty()) {
             return;
@@ -1009,30 +1023,10 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
                 throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, snapshot);
             }
 
-            //
-            // Unmarshall
-            XmlComponentConfigurations xmlConfigs = null;
-            FileReader fr = null;
-            BufferedReader br = null;
-            try {
-                fr = new FileReader(fSnapshot);
-                br = new BufferedReader(fr);
-                String line = "";
-                StringBuilder entireFile = new StringBuilder();
-                while ((line = br.readLine()) != null) {
-                    entireFile.append(line);
-                }                    // end while
-                xmlConfigs = unmarshal(entireFile.toString(), XmlComponentConfigurations.class);
-            } finally {
-                if (br != null) {
-                    br.close();
-                }
-                if (fr != null) {
-                    fr.close();
-                }
-            }
-            List<ComponentConfiguration> configs = xmlConfigs.getConfigurations();
-            encryptConfigs(configs);
+            final XmlComponentConfigurations xmlConfigs = unmarshal(readFully(fSnapshot),
+                    XmlComponentConfigurations.class);
+
+            encryptConfigs(xmlConfigs.getConfigurations());
 
             // Writes an encrypted snapshot with encrypted passwords.
             writeSnapshot(snapshot, xmlConfigs);
@@ -1403,19 +1397,16 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
                     fSnapshot != null ? fSnapshot.getAbsolutePath() : "null");
         }
 
-        StringBuilder entireFile = new StringBuilder();
-        try (FileReader fr = new FileReader(fSnapshot); BufferedReader br = new BufferedReader(fr)) {
-            String line = "";
-            while ((line = br.readLine()) != null) {
-                entireFile.append(line);
-            }
+        final String rawSnapshot;
+        try {
+            rawSnapshot = readFully(fSnapshot);
         } catch (IOException e) {
             logger.error("Error loading file from disk", e);
             return null;
         }
 
         // File loaded, try to decrypt and unmarshall
-        char[] decryptAes = this.cryptoService.decryptAes(entireFile.toString().toCharArray());
+        char[] decryptAes = this.cryptoService.decryptAes(rawSnapshot.toCharArray());
         if (decryptAes == null) {
             throw new KuraException(KuraErrorCode.DECODER_ERROR);
         }

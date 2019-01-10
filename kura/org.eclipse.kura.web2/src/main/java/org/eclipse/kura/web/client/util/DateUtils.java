@@ -23,6 +23,10 @@ public class DateUtils {
     private static final String YYYY_MM_DD_HH_MM_SS_SSS = "yyyy.MM.dd.HH.mm.ss.SSS";
     private static final Messages MSGS = GWT.create(Messages.class);
 
+    private DateUtils() {
+
+    }
+
     /**
      * formatDate takes a date an return its string representation
      */

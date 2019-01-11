@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2019 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -61,6 +61,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
 
 public class CloudInstancesUi extends Composite {
 
+    private static final String STATUS_TABLE_ROW = "status-table-row";
     private static final int REFRESH_DELAY_MS = 2000;
     private static CloudConnectionsUiUiBinder uiBinder = GWT.create(CloudConnectionsUiUiBinder.class);
     private static final Messages MSGS = GWT.create(Messages.class);
@@ -307,126 +308,140 @@ public class CloudInstancesUi extends Composite {
 
     private void initConnectionsTable() {
 
-        {
+        initPidColumn();
 
-            TextColumn<GwtCloudEntry> col = new TextColumn<GwtCloudEntry>() {
+        initTypeColumn();
 
-                @Override
-                public String getValue(GwtCloudEntry object) {
-                    final String pid = object.getPid();
+        initCloudConnectionStatusColumn();
 
-                    if (object instanceof GwtCloudPubSubEntry) {
-                        return " -> " + pid;
-                    } else {
-                        return pid;
-                    }
-                }
-
-                @Override
-                public void render(Context context, GwtCloudEntry object, SafeHtmlBuilder sb) {
-                    final String pid = object.getPid();
-
-                    if (object instanceof GwtCloudPubSubEntry) {
-
-                        final String iconStyle = ((GwtCloudPubSubEntry) object)
-                                .getType() == GwtCloudPubSubEntry.Type.PUBLISHER ? "fa-arrow-up" : "fa-arrow-down";
-
-                        sb.append(() -> "&ensp;<i class=\"fa assets-status-icon " + iconStyle + "\"></i>" + pid);
-                    } else {
-                        sb.append(() -> "<i class=\"fa assets-status-icon fa-cloud\"></i>" + pid);
-                    }
-                }
-            };
-            col.setCellStyleNames("status-table-row");
-            this.connectionsGrid.addColumn(col, MSGS.connectionCloudConnectionPidHeader());
-        }
-
-        {
-
-            TextColumn<GwtCloudEntry> col = new TextColumn<GwtCloudEntry>() {
-
-                @Override
-                public String getValue(GwtCloudEntry object) {
-
-                    if (object instanceof GwtCloudConnectionEntry) {
-                        return "Cloud connection";
-                    }
-
-                    return ((GwtCloudPubSubEntry) object).getType() == GwtCloudPubSubEntry.Type.PUBLISHER ? "Publisher"
-                            : "Subscriber";
-                }
-
-            };
-            col.setCellStyleNames("status-table-row");
-            this.connectionsGrid.addColumn(col, MSGS.typeLabel());
-        }
-
-        {
-            TextColumn<GwtCloudEntry> col = new TextColumn<GwtCloudEntry>() {
-
-                @Override
-                public String getValue(GwtCloudEntry object) {
-
-                    if (!(object instanceof GwtCloudConnectionEntry)) {
-                        return "";
-                    }
-
-                    final GwtCloudConnectionEntry entry = (GwtCloudConnectionEntry) object;
-
-                    switch (entry.getState()) {
-                    case UNREGISTERED:
-                        return MSGS.unregistered();
-                    case CONNECTED:
-                        return MSGS.connected();
-                    case DISCONNECTED:
-                        return MSGS.disconnected();
-                    default:
-                        return entry.getState().toString();
-                    }
-                }
-
-                @Override
-                public String getCellStyleNames(Context context, GwtCloudEntry object) {
-                    final String defaultStyle = "status-table-row";
-
-                    if (!(object instanceof GwtCloudConnectionEntry)) {
-                        return defaultStyle;
-                    }
-
-                    final GwtCloudConnectionEntry entry = (GwtCloudConnectionEntry) object;
-
-                    switch (entry.getState()) {
-                    case CONNECTED:
-                        return defaultStyle + " text-success";
-                    case DISCONNECTED:
-                        return defaultStyle + " text-danger";
-                    default:
-                        return defaultStyle;
-                    }
-                }
-            };
-
-            this.connectionsGrid.addColumn(col, MSGS.netIPv4Status());
-        }
-
-        {
-            TextColumn<GwtCloudEntry> col = new TextColumn<GwtCloudEntry>() {
-
-                @Override
-                public String getValue(GwtCloudEntry object) {
-
-                    if (object instanceof GwtCloudConnectionEntry) {
-                        return ((GwtCloudConnectionEntry) object).getCloudConnectionFactoryPid();
-                    }
-
-                    return object.getFactoryPid();
-                }
-            };
-            col.setCellStyleNames("status-table-row");
-            this.connectionsGrid.addColumn(col, MSGS.connectionCloudConnectionFactoryPidHeader());
-        }
+        initCloudConnectionFactoryPidColumn();
 
         this.cloudServicesDataProvider.addDataDisplay(this.connectionsGrid);
+    }
+
+    private void initPidColumn() {
+
+        TextColumn<GwtCloudEntry> col = new TextColumn<GwtCloudEntry>() {
+
+            @Override
+            public String getValue(GwtCloudEntry object) {
+                final String pid = object.getPid();
+
+                if (object instanceof GwtCloudPubSubEntry) {
+                    return " -> " + pid;
+                } else {
+                    return pid;
+                }
+            }
+
+            @Override
+            public void render(Context context, GwtCloudEntry object, SafeHtmlBuilder sb) {
+                final String pid = object.getPid();
+
+                if (object instanceof GwtCloudPubSubEntry) {
+
+                    final String iconStyle = ((GwtCloudPubSubEntry) object)
+                            .getType() == GwtCloudPubSubEntry.Type.PUBLISHER ? "fa-arrow-up" : "fa-arrow-down";
+
+                    sb.append(() -> "&ensp;<i class=\"fa assets-status-icon " + iconStyle + "\"></i>" + pid);
+                } else {
+                    sb.append(() -> "<i class=\"fa assets-status-icon fa-cloud\"></i>" + pid);
+                }
+            }
+        };
+        col.setCellStyleNames(STATUS_TABLE_ROW);
+        this.connectionsGrid.addColumn(col, MSGS.connectionCloudConnectionPidHeader());
+
+    }
+
+    private void initTypeColumn() {
+
+        TextColumn<GwtCloudEntry> col = new TextColumn<GwtCloudEntry>() {
+
+            @Override
+            public String getValue(GwtCloudEntry object) {
+
+                if (object instanceof GwtCloudConnectionEntry) {
+                    return "Cloud connection";
+                }
+
+                return ((GwtCloudPubSubEntry) object).getType() == GwtCloudPubSubEntry.Type.PUBLISHER ? "Publisher"
+                        : "Subscriber";
+            }
+
+        };
+        col.setCellStyleNames(STATUS_TABLE_ROW);
+        this.connectionsGrid.addColumn(col, MSGS.typeLabel());
+
+    }
+
+    private void initCloudConnectionStatusColumn() {
+
+        TextColumn<GwtCloudEntry> col = new TextColumn<GwtCloudEntry>() {
+
+            @Override
+            public String getValue(GwtCloudEntry object) {
+
+                if (!(object instanceof GwtCloudConnectionEntry)) {
+                    return "";
+                }
+
+                final GwtCloudConnectionEntry entry = (GwtCloudConnectionEntry) object;
+
+                switch (entry.getState()) {
+                case UNREGISTERED:
+                    return MSGS.unregistered();
+                case CONNECTED:
+                    return MSGS.connected();
+                case DISCONNECTED:
+                    return MSGS.disconnected();
+                default:
+                    return entry.getState().toString();
+                }
+            }
+
+            @Override
+            public String getCellStyleNames(Context context, GwtCloudEntry object) {
+                final String defaultStyle = STATUS_TABLE_ROW;
+
+                if (!(object instanceof GwtCloudConnectionEntry)) {
+                    return defaultStyle;
+                }
+
+                final GwtCloudConnectionEntry entry = (GwtCloudConnectionEntry) object;
+
+                switch (entry.getState()) {
+                case CONNECTED:
+                    return defaultStyle + " text-success";
+                case DISCONNECTED:
+                    return defaultStyle + " text-danger";
+                default:
+                    return defaultStyle;
+                }
+            }
+        };
+
+        this.connectionsGrid.addColumn(col, MSGS.netIPv4Status());
+
+    }
+
+    private void initCloudConnectionFactoryPidColumn() {
+
+        TextColumn<GwtCloudEntry> col = new TextColumn<GwtCloudEntry>() {
+
+            @Override
+            public String getValue(GwtCloudEntry object) {
+
+                if (object instanceof GwtCloudConnectionEntry) {
+                    return ((GwtCloudConnectionEntry) object).getCloudConnectionFactoryPid();
+                }
+
+                return object.getFactoryPid();
+            }
+        };
+        col.setCellStyleNames(STATUS_TABLE_ROW);
+        this.connectionsGrid.addColumn(col, MSGS.connectionCloudConnectionFactoryPidHeader());
+
     }
 
     private void createPubSub() {
@@ -444,12 +459,10 @@ public class CloudInstancesUi extends Composite {
             return;
         }
 
-        final String cloudConnectionPid = entry.getPid();
         final String factoryPid = this.pubSubFactoriesPids.getSelectedValue();
 
-        RequestQueue.submit(context -> this.gwtXSRFService
-                .generateSecurityToken(context.callback(token -> this.gwtCloudConnection.createPubSubInstance(token,
-                        kuraServicePid, factoryPid, cloudConnectionPid,
+        RequestQueue.submit(context -> this.gwtXSRFService.generateSecurityToken(context.callback(
+                token -> this.gwtCloudConnection.createPubSubInstance(token, kuraServicePid, factoryPid, entry.getPid(),
                         context.callback(v -> context.defer(REFRESH_DELAY_MS, this.cloudServicesUi::refresh))))));
     }
 
@@ -646,7 +659,7 @@ public class CloudInstancesUi extends Composite {
         this.pubSubPid.setEnabled(false);
         this.pubSubPid.setVisible(true);
 
-        final List<GwtCloudEntry> providerList = cloudComponentFactories.getPubSubFactories();
+        final List<GwtCloudEntry> providerList = this.cloudComponentFactories.getPubSubFactories();
 
         for (final GwtCloudEntry entry : providerList) {
             if (pubSubPid.equals(entry.getPid())) {

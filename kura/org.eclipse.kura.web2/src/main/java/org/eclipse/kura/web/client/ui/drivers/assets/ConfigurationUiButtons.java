@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -17,8 +17,6 @@ import org.eclipse.kura.web.client.ui.AlertDialog;
 import org.gwtbootstrap3.client.ui.Button;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -49,41 +47,21 @@ public class ConfigurationUiButtons extends Composite implements HasConfiguratio
         this.btnReset.setEnabled(target.isDirty());
         target.setListener(this);
 
-        this.btnApply.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                if (listener == null) {
-                    return;
-                }
-                if (!target.isValid()) {
-                    confirmDialog.show(MSGS.formWithErrorsOrIncomplete(), AlertDialog.Severity.ALERT, null);
-                    return;
-                }
-                confirmDialog.show(MSGS.deviceConfigConfirmationNoName(), new AlertDialog.Listener() {
-
-                    @Override
-                    public void onConfirm() {
-                        listener.onApply();
-                    }
-                });
+        this.btnApply.addClickHandler(event -> {
+            if (listener == null) {
+                return;
             }
+            if (!target.isValid()) {
+                confirmDialog.show(MSGS.formWithErrorsOrIncomplete(), AlertDialog.Severity.ALERT, null);
+                return;
+            }
+            confirmDialog.show(MSGS.deviceConfigConfirmationNoName(), () -> listener.onApply());
         });
-        this.btnReset.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                if (listener == null) {
-                    return;
-                }
-                confirmDialog.show(MSGS.deviceConfigDirty(), new AlertDialog.Listener() {
-
-                    @Override
-                    public void onConfirm() {
-                        listener.onReset();
-                    }
-                });
+        this.btnReset.addClickHandler(event -> {
+            if (listener == null) {
+                return;
             }
+            confirmDialog.show(MSGS.deviceConfigDirty(), () -> listener.onReset());
         });
     }
 
@@ -93,6 +71,7 @@ public class ConfigurationUiButtons extends Composite implements HasConfiguratio
 
     @Override
     public void onConfigurationChanged(HasConfiguration hasConfiguration) {
+        //Not needed
     }
 
     @Override

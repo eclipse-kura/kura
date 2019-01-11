@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -23,7 +23,6 @@ import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -41,13 +40,13 @@ public class SkinServlet extends HttpServlet {
     private static Logger logger = LoggerFactory.getLogger(SkinServlet.class);
 
     @Override
-    public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    public void doGet(HttpServletRequest request, HttpServletResponse response) {
         String resourceName = request.getPathInfo();
 
         File fResourceFile;
         try {
             fResourceFile = checkFile(resourceName);
-        } catch (GwtKuraException | IOException e1) {
+        } catch (GwtKuraException | IOException e) {
             return;
         }
 

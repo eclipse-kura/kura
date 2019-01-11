@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -21,14 +21,14 @@ import java.util.Date;
 import java.util.List;
 
 import org.eclipse.kura.web.client.messages.Messages;
-import org.eclipse.kura.web.client.ui.Device.DevicePanelUi;
-import org.eclipse.kura.web.client.ui.Firewall.FirewallPanelUi;
-import org.eclipse.kura.web.client.ui.Network.NetworkPanelUi;
-import org.eclipse.kura.web.client.ui.Packages.PackagesPanelUi;
-import org.eclipse.kura.web.client.ui.Settings.SettingsPanelUi;
-import org.eclipse.kura.web.client.ui.Status.StatusPanelUi;
 import org.eclipse.kura.web.client.ui.cloudconnection.CloudConnectionsUi;
+import org.eclipse.kura.web.client.ui.device.DevicePanelUi;
 import org.eclipse.kura.web.client.ui.drivers.assets.DriversAndAssetsUi;
+import org.eclipse.kura.web.client.ui.firewall.FirewallPanelUi;
+import org.eclipse.kura.web.client.ui.network.NetworkPanelUi;
+import org.eclipse.kura.web.client.ui.packages.PackagesPanelUi;
+import org.eclipse.kura.web.client.ui.settings.SettingsPanelUi;
+import org.eclipse.kura.web.client.ui.status.StatusPanelUi;
 import org.eclipse.kura.web.client.ui.wires.WiresPanelUi;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.util.FilterBuilder;
@@ -213,7 +213,7 @@ public class EntryClassUi extends Composite {
         initWaitModal();
         initNewComponentErrorModal();
         initExceptionReportModal();
-        contentPanelHeader.setId("contentPanelHeader");
+        this.contentPanelHeader.setId("contentPanelHeader");
 
         Date now = new Date();
         @SuppressWarnings("deprecation")
@@ -285,45 +285,142 @@ public class EntryClassUi extends Composite {
             this.firewall.setVisible(false);
         }
 
-        // Status Panel
-        this.status.addClickHandler(event -> {
+        initStatusPanel(instanceReference);
+
+        initDevicePanel();
+
+        initNetworkPanel();
+
+        initFirewallPanel();
+
+        initPackagesPanel();
+
+        initSettingsPanel();
+
+        initCloudServicesPanel();
+
+        initWiresPanel();
+
+        initDriversAndAssetsPanel();
+
+    }
+
+    private void initDriversAndAssetsPanel() {
+        this.driversAndAssetsServices.addClickHandler(event -> {
             Button b = new Button(MSGS.yesButton(), event1 -> {
                 forceTabsCleaning();
                 if (EntryClassUi.this.modal != null) {
                     EntryClassUi.this.modal.hide();
                 }
-                EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.status);
+                EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.driversAndAssetsServices);
                 EntryClassUi.this.contentPanel.setVisible(true);
-                setHeader("Status", null);
+                setHeader(MSGS.driversAndAssetsServices(), null);
                 EntryClassUi.this.contentPanelBody.clear();
-                EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.statusBinder);
-                EntryClassUi.this.statusBinder.setSession(EntryClassUi.this.currentSession);
-                EntryClassUi.this.statusBinder.setParent(instanceReference);
-                EntryClassUi.this.statusBinder.loadStatusData();
-            });
+                EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.driversAndTwinsBinder);
+                EntryClassUi.this.driversAndTwinsBinder.refresh();
 
+            });
             renderDirtyConfigModal(b);
         });
+    }
 
-        // Device Panel
-        this.device.addClickHandler(event -> {
+    private void initWiresPanel() {
+        this.wires.addClickHandler(event -> {
             Button b = new Button(MSGS.yesButton(), event1 -> {
                 forceTabsCleaning();
                 if (EntryClassUi.this.modal != null) {
                     EntryClassUi.this.modal.hide();
                 }
-                EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.device);
+                EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.wires);
                 EntryClassUi.this.contentPanel.setVisible(true);
-                setHeader(MSGS.device(), null);
+                setHeader(MSGS.wires(), null);
                 EntryClassUi.this.contentPanelBody.clear();
-                EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.deviceBinder);
-                EntryClassUi.this.deviceBinder.setSession(EntryClassUi.this.currentSession);
-                EntryClassUi.this.deviceBinder.initDevicePanel();
+                EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.wiresBinder);
+                EntryClassUi.this.wiresBinder.load();
             });
             renderDirtyConfigModal(b);
         });
+    }
 
-        // Network Panel
+    private void initCloudServicesPanel() {
+        this.cloudServices.addClickHandler(event -> {
+            Button b = new Button(MSGS.yesButton(), event1 -> {
+                forceTabsCleaning();
+                if (EntryClassUi.this.modal != null) {
+                    EntryClassUi.this.modal.hide();
+                }
+                EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.cloudServices);
+                EntryClassUi.this.contentPanel.setVisible(true);
+                setHeader(MSGS.cloudServices(), null);
+                EntryClassUi.this.contentPanelBody.clear();
+                EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.cloudServicesBinder);
+                EntryClassUi.this.cloudServicesBinder.refresh();
+
+            });
+            renderDirtyConfigModal(b);
+        });
+    }
+
+    private void initSettingsPanel() {
+        this.settings.addClickHandler(event -> {
+            Button b = new Button(MSGS.yesButton(), event1 -> {
+                forceTabsCleaning();
+                if (EntryClassUi.this.modal != null) {
+                    EntryClassUi.this.modal.hide();
+                }
+                EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.settings);
+                EntryClassUi.this.contentPanel.setVisible(true);
+                setHeader(MSGS.settings(), null);
+                EntryClassUi.this.contentPanelBody.clear();
+                EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.settingsBinder);
+                EntryClassUi.this.settingsBinder.setSession(EntryClassUi.this.currentSession);
+                EntryClassUi.this.settingsBinder.load();
+            });
+            renderDirtyConfigModal(b);
+        });
+    }
+
+    private void initPackagesPanel() {
+        this.packages.addClickHandler(event -> {
+            Button b = new Button(MSGS.yesButton(), event1 -> {
+                forceTabsCleaning();
+                if (EntryClassUi.this.modal != null) {
+                    EntryClassUi.this.modal.hide();
+                }
+                EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.packages);
+                EntryClassUi.this.contentPanel.setVisible(true);
+                setHeader(MSGS.packages(), null);
+                EntryClassUi.this.contentPanelBody.clear();
+                EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.packagesBinder);
+                EntryClassUi.this.packagesBinder.setSession(EntryClassUi.this.currentSession);
+                EntryClassUi.this.packagesBinder.setMainUi(EntryClassUi.this.ui);
+                EntryClassUi.this.packagesBinder.refresh();
+            });
+            renderDirtyConfigModal(b);
+        });
+    }
+
+    private void initFirewallPanel() {
+        if (this.firewall.isVisible()) {
+            this.firewall.addClickHandler(event -> {
+                Button b = new Button(MSGS.yesButton(), event1 -> {
+                    forceTabsCleaning();
+                    if (EntryClassUi.this.modal != null) {
+                        EntryClassUi.this.modal.hide();
+                    }
+                    EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.firewall);
+                    EntryClassUi.this.contentPanel.setVisible(true);
+                    setHeader(MSGS.firewall(), null);
+                    EntryClassUi.this.contentPanelBody.clear();
+                    EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.firewallBinder);
+                    EntryClassUi.this.firewallBinder.initFirewallPanel();
+                });
+                renderDirtyConfigModal(b);
+            });
+        }
+    }
+
+    private void initNetworkPanel() {
         if (this.network.isVisible()) {
             this.network.addClickHandler(event -> {
                 Button b = new Button(MSGS.yesButton(), event1 -> {
@@ -342,116 +439,46 @@ public class EntryClassUi extends Composite {
                 renderDirtyConfigModal(b);
             });
         }
+    }
 
-        // Firewall Panel
-        if (this.firewall.isVisible()) {
-            this.firewall.addClickHandler(event -> {
-                Button b = new Button(MSGS.yesButton(), event1 -> {
-                    forceTabsCleaning();
-                    if (EntryClassUi.this.modal != null) {
-                        EntryClassUi.this.modal.hide();
-                    }
-                    EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.firewall);
-                    EntryClassUi.this.contentPanel.setVisible(true);
-                    setHeader(MSGS.firewall(), null);
-                    EntryClassUi.this.contentPanelBody.clear();
-                    EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.firewallBinder);
-                    EntryClassUi.this.firewallBinder.initFirewallPanel();
-                });
-                renderDirtyConfigModal(b);
-            });
-        }
-
-        // Packages Panel
-        this.packages.addClickHandler(event -> {
+    private void initDevicePanel() {
+        this.device.addClickHandler(event -> {
             Button b = new Button(MSGS.yesButton(), event1 -> {
                 forceTabsCleaning();
                 if (EntryClassUi.this.modal != null) {
                     EntryClassUi.this.modal.hide();
                 }
-                EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.packages);
+                EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.device);
                 EntryClassUi.this.contentPanel.setVisible(true);
-                setHeader(MSGS.packages(), null);
+                setHeader(MSGS.device(), null);
                 EntryClassUi.this.contentPanelBody.clear();
-                EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.packagesBinder);
-                EntryClassUi.this.packagesBinder.setSession(EntryClassUi.this.currentSession);
-                EntryClassUi.this.packagesBinder.setMainUi(EntryClassUi.this.ui);
-                EntryClassUi.this.packagesBinder.refresh();
+                EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.deviceBinder);
+                EntryClassUi.this.deviceBinder.setSession(EntryClassUi.this.currentSession);
+                EntryClassUi.this.deviceBinder.initDevicePanel();
             });
             renderDirtyConfigModal(b);
         });
+    }
 
-        // Settings Panel
-        this.settings.addClickHandler(event -> {
+    private void initStatusPanel(final EntryClassUi instanceReference) {
+        this.status.addClickHandler(event -> {
             Button b = new Button(MSGS.yesButton(), event1 -> {
                 forceTabsCleaning();
                 if (EntryClassUi.this.modal != null) {
                     EntryClassUi.this.modal.hide();
                 }
-                EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.settings);
+                EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.status);
                 EntryClassUi.this.contentPanel.setVisible(true);
-                setHeader(MSGS.settings(), null);
+                setHeader("Status", null);
                 EntryClassUi.this.contentPanelBody.clear();
-                EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.settingsBinder);
-                EntryClassUi.this.settingsBinder.setSession(EntryClassUi.this.currentSession);
-                EntryClassUi.this.settingsBinder.load();
+                EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.statusBinder);
+                EntryClassUi.this.statusBinder.setSession(EntryClassUi.this.currentSession);
+                EntryClassUi.this.statusBinder.setParent(instanceReference);
+                EntryClassUi.this.statusBinder.loadStatusData();
             });
+
             renderDirtyConfigModal(b);
         });
-
-        // Cloud services Panel
-        this.cloudServices.addClickHandler(event -> {
-            Button b = new Button(MSGS.yesButton(), event1 -> {
-                forceTabsCleaning();
-                if (EntryClassUi.this.modal != null) {
-                    EntryClassUi.this.modal.hide();
-                }
-                EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.cloudServices);
-                EntryClassUi.this.contentPanel.setVisible(true);
-                setHeader(MSGS.cloudServices(), null);
-                EntryClassUi.this.contentPanelBody.clear();
-                EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.cloudServicesBinder);
-                EntryClassUi.this.cloudServicesBinder.refresh();
-
-            });
-            renderDirtyConfigModal(b);
-        });
-
-        // Wires Panel
-        this.wires.addClickHandler(event -> {
-            Button b = new Button(MSGS.yesButton(), event1 -> {
-                forceTabsCleaning();
-                if (EntryClassUi.this.modal != null) {
-                    EntryClassUi.this.modal.hide();
-                }
-                EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.wires);
-                EntryClassUi.this.contentPanel.setVisible(true);
-                setHeader(MSGS.wires(), null);
-                EntryClassUi.this.contentPanelBody.clear();
-                EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.wiresBinder);
-                EntryClassUi.this.wiresBinder.load();
-            });
-            renderDirtyConfigModal(b);
-        });
-
-        // Drivers and Twins services Panel
-        this.driversAndAssetsServices.addClickHandler(event -> {
-            Button b = new Button(MSGS.yesButton(), event1 -> {
-                forceTabsCleaning();
-                if (EntryClassUi.this.modal != null) {
-                    EntryClassUi.this.modal.hide();
-                }
-                EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.driversAndAssetsServices);
-                EntryClassUi.this.contentPanel.setVisible(true);
-                setHeader(MSGS.driversAndAssetsServices(), null);
-                EntryClassUi.this.contentPanelBody.clear();
-                EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.driversAndTwinsBinder);
-                EntryClassUi.this.driversAndTwinsBinder.refresh();
-
-            });
-            renderDirtyConfigModal(b);
-        });
-
     }
 
     private void filterAvailableServices(String serviceName) {
@@ -478,11 +505,8 @@ public class EntryClassUi extends Composite {
     private void filterByServiceName(String tmpServiceName) {
         for (int i = 0; i < this.servicesMenu.getWidgetCount(); i++) {
             ServicesAnchorListItem sl = (ServicesAnchorListItem) this.servicesMenu.getWidget(i);
-            if (tmpServiceName == null || sl.getServiceName().toLowerCase().indexOf(tmpServiceName) != -1) {
-                sl.setVisible(true);
-            } else {
-                sl.setVisible(false);
-            }
+
+            sl.setVisible(tmpServiceName == null || sl.getServiceName().toLowerCase().indexOf(tmpServiceName) != -1);
         }
     }
 
@@ -766,7 +790,7 @@ public class EntryClassUi extends Composite {
         }
     }
 
-    private void initWaitModal() {
+    private static void initWaitModal() {
         waitModal = new PopupPanel(false, true);
         Icon icon = new Icon();
         icon.setId("cog");
@@ -837,7 +861,7 @@ public class EntryClassUi extends Composite {
     }
 
     private void showStatusPanel() {
-        this.setSelectedAnchorListItem(this.status);
+        setSelectedAnchorListItem(this.status);
         this.contentPanel.setVisible(true);
         this.contentPanelHeader.setText("Status");
         this.contentPanelBody.clear();

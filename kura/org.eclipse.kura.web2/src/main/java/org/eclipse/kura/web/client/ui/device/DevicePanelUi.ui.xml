@@ -1,0 +1,62 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+
+<!--
+
+    Copyright (c) 2011, 2019 Eurotech and/or its affiliates
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Eurotech
+
+-->
+
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+    xmlns:b="urn:import:org.gwtbootstrap3.client.ui" xmlns:b.html="urn:import:org.gwtbootstrap3.client.ui.html"
+    xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt"
+    xmlns:device="urn:import:org.eclipse.kura.web.client.ui.device">
+
+    <b:Container fluid="true" addStyleNames="device-panel">
+        <b:Row>
+            <g:HTMLPanel ui:field="deviceIntro">
+            </g:HTMLPanel>
+        </b:Row>
+
+        <b:Row>
+            <b:Well addStyleNames="device-well" size="SMALL">
+                <b:NavTabs>
+                    <b:TabListItem dataTarget="#profilePanel" text="Profile"
+                        ui:field="profile" active="true"/>
+                    <b:TabListItem dataTarget="#bundlesPanel" text="Bundles"
+                        ui:field="bundles" />
+                    <b:TabListItem dataTarget="#threadsPanel" text="Threads"
+                        ui:field="threads" />
+                    <b:TabListItem dataTarget="#systemPropertiesPanel" text="System Properties"
+                        ui:field="systemProperties" />
+                    <b:TabListItem dataTarget="#commandPanel" text="Command"
+                        ui:field="command" />
+                </b:NavTabs>
+                <b:TabContent>
+                    <b:TabPane b:id="profilePanel" active="true">
+                        <device:ProfileTabUi ui:field="profilePanel"></device:ProfileTabUi>
+                    </b:TabPane>
+                    <b:TabPane b:id="bundlesPanel">
+                        <device:BundlesTabUi ui:field="bundlesPanel"></device:BundlesTabUi>
+                    </b:TabPane>
+                    <b:TabPane b:id="threadsPanel">
+                        <device:ThreadsTabUi ui:field="threadsPanel"></device:ThreadsTabUi>
+                    </b:TabPane>
+                    <b:TabPane b:id="systemPropertiesPanel">
+                        <device:SystemPropertiesTabUi ui:field="systemPropertiesPanel"></device:SystemPropertiesTabUi>
+                    </b:TabPane>
+                    <b:TabPane b:id="commandPanel">
+                        <device:CommandTabUi ui:field="commandPanel"></device:CommandTabUi>
+                    </b:TabPane>
+                </b:TabContent>
+            </b:Well>
+        </b:Row>
+    </b:Container>
+</ui:UiBinder> 

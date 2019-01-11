@@ -128,7 +128,7 @@ public class Console implements ConfigurableComponent {
             logger.info("Web interface disabled in Kura properties file.");
             return;
         }
-        
+
         try {
             logger.info("activate...");
 

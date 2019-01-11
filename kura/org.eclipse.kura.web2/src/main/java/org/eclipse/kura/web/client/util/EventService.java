@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2016, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -33,7 +33,7 @@ public final class EventService {
     private static final EventService instance = new EventService();
 
     private final GwtEventServiceAsync gwtEventService = GWT.create(GwtEventService.class);
-    private HashMap<String, LinkedList<Handler>> subscribedHandlers = new HashMap<String, LinkedList<Handler>>();
+    private HashMap<String, LinkedList<Handler>> subscribedHandlers = new HashMap<>();
     private long lastEventTimestamp = 0;
     private Timer resendTimer;
 
@@ -59,6 +59,7 @@ public final class EventService {
 
             @Override
             public void onFailure(Throwable caught) {
+                // Nothing to do
             }
         });
     }
@@ -68,8 +69,9 @@ public final class EventService {
         @Override
         public void onSuccess(List<GwtEventInfo> result) {
 
-            for (GwtEventInfo event : result)
+            for (GwtEventInfo event : result) {
                 processEvent(event);
+            }
 
             stopResendTimer();
 
@@ -80,50 +82,50 @@ public final class EventService {
         public void onFailure(Throwable caught) {
             startResendTimer(ON_FAILURE_RESEND_DELAY);
         }
+        
+        private void processEvent(GwtEventInfo event) {
+
+            if (event == null) {
+                return;
+            }
+
+            lastEventTimestamp = Long.parseLong(event.getTimestamp());
+
+            LinkedList<Handler> topicHandlers = subscribedHandlers.get(event.getTopic());
+
+            if (topicHandlers != null) {
+                for (Handler handler : topicHandlers) {
+                    handler.handleEvent(event);
+                }
+            }
+        }
+        
+        private void startResendTimer(int timeout) {
+            stopResendTimer();
+
+            resendTimer = new Timer() {
+
+                @Override
+                public void run() {
+                    gwtEventService.getNextEvents(Long.toString(lastEventTimestamp), eventCallback);
+                }
+            };
+            resendTimer.schedule(timeout);
+        }
+        
+        private void stopResendTimer() {
+            if (resendTimer != null) {
+                resendTimer.cancel();
+            }
+
+            resendTimer = null;
+        }
     };
-
-    private void stopResendTimer() {
-        if (resendTimer != null) {
-            resendTimer.cancel();
-        }
-
-        resendTimer = null;
-    }
-
-    private void startResendTimer(int timeout) {
-        stopResendTimer();
-
-        resendTimer = new Timer() {
-
-            @Override
-            public void run() {
-                gwtEventService.getNextEvents(Long.toString(lastEventTimestamp), eventCallback);
-            }
-        };
-        resendTimer.schedule(timeout);
-    }
-
-    private void processEvent(GwtEventInfo event) {
-
-        if (event == null) {
-            return;
-        }
-
-        lastEventTimestamp = Long.parseLong(event.getTimestamp());
-
-        LinkedList<Handler> topicHandlers = subscribedHandlers.get(event.getTopic());
-
-        if (topicHandlers != null) {
-            for (Handler handler : topicHandlers) {
-                handler.handleEvent(event);
-            }
-        }
-    }
 
     public static void subscribe(ForwardedEventTopic topic, Handler handler) {
         LinkedList<Handler> topicHandlers = instance.subscribedHandlers.get(topic.toString());
         if (topicHandlers == null) {
-            topicHandlers = new LinkedList<Handler>();
+            topicHandlers = new LinkedList<>();
             instance.subscribedHandlers.put(topic.toString(), topicHandlers);
         }
         topicHandlers.push(handler);
@@ -137,7 +139,6 @@ public final class EventService {
     }
 
     public interface Handler {
-
         public void handleEvent(GwtEventInfo eventInfo);
     }
 }

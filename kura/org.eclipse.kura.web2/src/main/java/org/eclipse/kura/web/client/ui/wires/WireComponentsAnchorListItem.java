@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2019 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -14,12 +14,8 @@
 package org.eclipse.kura.web.client.ui.wires;
 
 import org.eclipse.kura.web.client.util.DragSupport;
-import org.eclipse.kura.web.client.util.DragSupport.DragEvent;
 import org.gwtbootstrap3.client.ui.AnchorListItem;
 import org.gwtbootstrap3.client.ui.constants.IconType;
-
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 
 public class WireComponentsAnchorListItem extends AnchorListItem {
 
@@ -38,22 +34,12 @@ public class WireComponentsAnchorListItem extends AnchorListItem {
         DragSupport drag = DragSupport.addIfSupported(this);
 
         if (drag != null) {
-            drag.setListener(new DragSupport.Listener() {
-
-                @Override
-                public void onDragStart(DragEvent event) {
-                    event.setTextData(WiresPanelUi.FACTORY_PID_DROP_PREFIX + factoryPid);
-                }
-            });
+            drag.setListener(event -> event.setTextData(WiresPanelUi.FACTORY_PID_DROP_PREFIX + factoryPid));
         }
 
-        super.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(final ClickEvent event) {
-                if (listener != null) {
-                    listener.onClick(factoryPid);
-                }
+        super.addClickHandler(event -> {
+            if (listener != null) {
+                listener.onClick(factoryPid);
             }
         });
     }

@@ -30,12 +30,12 @@ public class AssetModelImpl implements AssetModel {
 
     public static final LabelComparator<LegacyChannelModel> CHANNEL_LABEL_COMPARATOR = new LabelComparator<>();
 
-    private final GwtConfigComponent assetConfiguration;
-    private final GwtConfigComponent channelDescriptor;
+    private GwtConfigComponent assetConfiguration;
+    private GwtConfigComponent channelDescriptor;
 
     private Set<String> channelNames = new HashSet<>();
-    private final Map<String, Integer> paramIndexes = new HashMap<>();
-    private final List<ChannelModel> channelModels = new ArrayList<>();
+    private Map<String, Integer> paramIndexes = new HashMap<>();
+    private List<ChannelModel> channelModels = new ArrayList<>();
 
     public AssetModelImpl(GwtConfigComponent assetConfiguration, GwtConfigComponent channelDescriptor,
             GwtConfigComponent baseChannelDescriptor) {
@@ -76,7 +76,7 @@ public class AssetModelImpl implements AssetModel {
 
     private void findChannelNames() {
         final Set<String> result = new HashSet<>();
-        for (GwtConfigParameter param : this.assetConfiguration.getParameters()) {
+        for (GwtConfigParameter param : assetConfiguration.getParameters()) {
             final String name = getChannelName(param.getId());
             if (name != null && !result.contains(name)) {
                 result.add(name);
@@ -89,7 +89,7 @@ public class AssetModelImpl implements AssetModel {
 
         final HashMap<String, Integer> channelIndexes = new HashMap<>();
         int i = 0;
-        for (GwtConfigParameter param : this.channelDescriptor.getParameters()) {
+        for (GwtConfigParameter param : channelDescriptor.getParameters()) {
             channelIndexes.put(param.getId(), i);
             i++;
         }
@@ -125,16 +125,15 @@ public class AssetModelImpl implements AssetModel {
 
     @Override
     public ChannelModel createNewChannel(String channelName) {
-        final LegacyChannelModel result = new LegacyChannelModel(channelName,
-                this.channelDescriptor.getParameters().size());
+        final LegacyChannelModel result = new LegacyChannelModel(channelName, channelDescriptor.getParameters().size());
         int i = 0;
-        for (GwtConfigParameter param : this.channelDescriptor.getParameters()) {
+        for (GwtConfigParameter param : channelDescriptor.getParameters()) {
             final GwtConfigParameter cloned = new GwtConfigParameter(param);
             final String paramId = channelName + AssetConstants.CHANNEL_PROPERTY_SEPARATOR.value() + param.getId();
             cloned.setId(paramId);
             cloned.setName(paramId);
             cloned.setValue(cloned.getDefault());
-            this.assetConfiguration.getParameters().add(cloned);
+            assetConfiguration.getParameters().add(cloned);
             result.parameters[i] = cloned;
             i++;
         }
@@ -151,13 +150,13 @@ public class AssetModelImpl implements AssetModel {
 
     @Override
     public GwtConfigComponent getChannelDescriptor() {
-        return this.channelDescriptor;
+        return channelDescriptor;
     }
 
     @Override
     public void deleteChannel(String channelName) {
         this.channelNames.remove(channelName);
-        final Iterator<ChannelModel> iter = this.channelModels.iterator();
+        final Iterator<ChannelModel> iter = channelModels.iterator();
         while (iter.hasNext()) {
             final ChannelModel model = iter.next();
             if (model.getChannelName().equals(channelName)) {
@@ -180,7 +179,7 @@ public class AssetModelImpl implements AssetModel {
 
         @Override
         public String getChannelName() {
-            return this.channelName;
+            return channelName;
         }
 
         @Override
@@ -190,29 +189,28 @@ public class AssetModelImpl implements AssetModel {
 
         @Override
         public void setValue(String id, String value) {
-            final Integer index = AssetModelImpl.this.paramIndexes.get(id);
+            final Integer index = paramIndexes.get(id);
             if (index == null) {
                 return;
             }
-            this.parameters[index].setValue(value);
+            parameters[index].setValue(value);
         }
 
         @Override
         public String getValue(String id) {
-            final Integer index = AssetModelImpl.this.paramIndexes.get(id);
+            final Integer index = paramIndexes.get(id);
             if (index == null) {
                 return null;
             }
-            return this.parameters[index].getValue();
+            return parameters[index].getValue();
         }
 
         private void remove() {
-            final Iterator<GwtConfigParameter> iterator = AssetModelImpl.this.assetConfiguration.getParameters()
-                    .iterator();
+            final Iterator<GwtConfigParameter> iterator = assetConfiguration.getParameters().iterator();
             while (iterator.hasNext()) {
                 final GwtConfigParameter param = iterator.next();
-                for (GwtConfigParameter parameter : this.parameters) {
-                    if (parameter == param) {
+                for (int i = 0; i < this.parameters.length; i++) {
+                    if (this.parameters[i] == param) {
                         iterator.remove();
                     }
                 }
@@ -222,12 +220,12 @@ public class AssetModelImpl implements AssetModel {
 
     @Override
     public GwtConfigComponent getConfiguration() {
-        return this.assetConfiguration;
+        return assetConfiguration;
     }
 
     @Override
     public String getAssetPid() {
-        return this.assetConfiguration.getComponentId();
+        return assetConfiguration.getComponentId();
     }
 
 }

@@ -257,7 +257,7 @@ public class ServiceLocator {
             Collection<ServiceReference<T>> serviceReferences = getServiceReferences(serviceClass, filter);
 
             if (serviceReferences != null) {
-                services = new ArrayList<>(serviceReferences.size());
+                services = new ArrayList<T>(serviceReferences.size());
                 for (ServiceReference<T> sr : serviceReferences) {
                     services.add(getService(sr));
                 }

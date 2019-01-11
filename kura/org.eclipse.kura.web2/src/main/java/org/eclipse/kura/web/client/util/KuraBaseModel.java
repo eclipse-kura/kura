@@ -38,10 +38,9 @@ public class KuraBaseModel extends GwtBaseModel {
         this.unescaped = unescaped;
     }
 
-    @Override
     @SuppressWarnings("unchecked")
     public <X> X get(String key) {
-        if (this.unescaped) {
+        if (unescaped) {
             Object value = super.get(key);
             if (value instanceof String) {
                 return (X) GwtSafeHtmlUtils.htmlUnescape((String) value);

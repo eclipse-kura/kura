@@ -26,11 +26,11 @@ public class GwtCloudConnectionEntry extends GwtCloudEntry {
     public void setState(GwtCloudConnectionState state) {
         set("state", state.name());
     }
-
+    
     public GwtCloudConnectionType getConnectionType() {
         return GwtCloudConnectionType.valueOf(get("type"));
     }
-
+    
     public void setConnectionType(GwtCloudConnectionType type) {
         set("type", type.name());
     }
@@ -48,7 +48,7 @@ public class GwtCloudConnectionEntry extends GwtCloudEntry {
         DISCONNECTED,
         CONNECTED;
     }
-
+    
     public enum GwtCloudConnectionType {
         ENDPOINT,
         CONNECTION;

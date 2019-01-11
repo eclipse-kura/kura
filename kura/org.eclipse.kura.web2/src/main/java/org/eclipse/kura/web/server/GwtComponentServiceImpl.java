@@ -319,7 +319,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
     private List<String> findFactoryHideComponents() throws GwtKuraException {
         return ServiceLocator.applyToServiceOptionally(ServiceComponentRuntime.class,
                 scr -> scr.getComponentDescriptionDTOs().stream()
-                        .filter(dto -> dto.properties.containsKey("kura.ui.factory.hide")).map(dto -> dto.name)
+                        .filter(dto -> dto.properties.containsKey("kura.ui.factory.hide")).map(dto -> (String) dto.name)
                         .collect(Collectors.toList()));
     }
 

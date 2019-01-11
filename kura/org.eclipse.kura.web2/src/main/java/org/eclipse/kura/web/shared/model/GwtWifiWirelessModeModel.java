@@ -11,13 +11,12 @@
  *******************************************************************************/
 package org.eclipse.kura.web.shared.model;
 
+import org.eclipse.kura.web.client.util.KuraBaseModel;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.eclipse.kura.web.client.util.KuraBaseModel;
-
 public class GwtWifiWirelessModeModel extends KuraBaseModel {
-
+    
     private static final Logger logger = Logger.getLogger(GwtWifiWirelessModeModel.class.getSimpleName());
 
     private static final long serialVersionUID = -6095963356000494663L;

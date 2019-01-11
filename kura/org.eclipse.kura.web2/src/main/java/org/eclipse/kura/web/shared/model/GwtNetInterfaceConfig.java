@@ -14,10 +14,10 @@ package org.eclipse.kura.web.shared.model;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.util.KuraBaseModel;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class GwtNetInterfaceConfig extends KuraBaseModel implements Serializable {
 
@@ -293,14 +293,13 @@ public class GwtNetInterfaceConfig extends KuraBaseModel implements Serializable
                 logger.log(Level.FINER, "Sizes differ");
                 return false;
             }
-
+            
             for (Entry<String, Object> entry : properties.entrySet()) {
                 final Object oldVal = entry.getValue();
                 final Object newVal = otherProps.get(entry.getKey());
                 if (oldVal != null) {
                     if (!oldVal.equals(newVal)) {
-                        logger.log(Level.FINER, () -> "Values differ - Key: " + entry.getKey() + " oldVal: " + oldVal
-                                + ", newVal: " + newVal);
+                        logger.log(Level.FINER, () -> "Values differ - Key: " + entry.getKey() + " oldVal: " + oldVal + ", newVal: " + newVal);
                         return false;
                     }
                 } else if (newVal != null) {

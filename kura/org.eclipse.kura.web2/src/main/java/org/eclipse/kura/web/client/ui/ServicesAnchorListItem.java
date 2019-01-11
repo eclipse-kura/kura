@@ -42,7 +42,7 @@ public class ServicesAnchorListItem extends AnchorListItem {
         this.item = service;
         this.instance = this;
 
-        IconType icon = getIcon(this.item);
+        IconType icon = getIcon(item);
         if (icon == null) {
             String imageURL = getImagePath();
             if (imageURL != null) {
@@ -181,13 +181,13 @@ public class ServicesAnchorListItem extends AnchorListItem {
             return null;
         }
 
-        if (icon.toLowerCase().startsWith("http://") || icon.toLowerCase().startsWith("https://")) {
+        if ((icon.toLowerCase().startsWith("http://") || icon.toLowerCase().startsWith("https://"))) {
 
             return icon;
 
         } else {
 
-            final String factoryId = this.item.getFactoryId();
+            final String factoryId = item.getFactoryId();
             if (factoryId != null) {
                 return SERVLET_URL + "factoryId=" + URL.encodeQueryString(factoryId);
             }

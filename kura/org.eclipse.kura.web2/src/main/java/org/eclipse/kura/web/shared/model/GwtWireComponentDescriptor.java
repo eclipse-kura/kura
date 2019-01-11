@@ -5,7 +5,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- *
+ * 
  *******************************************************************************/
 
 package org.eclipse.kura.web.shared.model;
@@ -48,35 +48,35 @@ public final class GwtWireComponentDescriptor extends GwtBaseModel implements Se
     }
 
     public String getName() {
-        return this.name;
+        return name;
     }
 
     public String getFactoryPid() {
-        return this.factoryPid;
+        return factoryPid;
     }
 
     public int getMinInputPorts() {
-        return this.minInputPorts;
+        return minInputPorts;
     }
 
     public int getMaxInputPorts() {
-        return this.maxInputPorts;
+        return maxInputPorts;
     }
 
     public int getMinOutputPorts() {
-        return this.minOutputPorts;
+        return minOutputPorts;
     }
 
     public int getMaxOutputPorts() {
-        return this.maxOutputPorts;
+        return maxOutputPorts;
     }
 
     public int getDefaultInputPorts() {
-        return this.defaultInputPorts;
+        return defaultInputPorts;
     }
 
     public int getDefaultOutputPorts() {
-        return this.defaultOutputPorts;
+        return defaultOutputPorts;
     }
 
     public void setFactoryPid(String factoryPid) {
@@ -108,7 +108,7 @@ public final class GwtWireComponentDescriptor extends GwtBaseModel implements Se
     }
 
     public Map<Integer, String> getInputPortNames() {
-        return this.inputPortNames;
+        return inputPortNames;
     }
 
     public void setInputPortNames(Map<Integer, String> inputPortNames) {
@@ -116,7 +116,7 @@ public final class GwtWireComponentDescriptor extends GwtBaseModel implements Se
     }
 
     public Map<Integer, String> getOutputPortNames() {
-        return this.outputPortNames;
+        return outputPortNames;
     }
 
     public void setOutputPortNames(Map<Integer, String> outputPortNames) {

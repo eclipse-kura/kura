@@ -15,7 +15,7 @@ import java.io.Serializable;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-public enum GwtWifiCiphers implements Serializable, IsSerializable {
+public enum GwtWifiCiphers implements Serializable,IsSerializable {
     netWifiCiphers_NONE,
     netWifiCiphers_CCMP_TKIP,
     netWifiCiphers_CCMP,

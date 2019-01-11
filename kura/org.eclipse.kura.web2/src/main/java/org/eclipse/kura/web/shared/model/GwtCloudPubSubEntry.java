@@ -12,7 +12,7 @@ package org.eclipse.kura.web.shared.model;
 public class GwtCloudPubSubEntry extends GwtCloudEntry {
 
     /**
-     *
+     * 
      */
     private static final long serialVersionUID = -6307778385963106457L;
 

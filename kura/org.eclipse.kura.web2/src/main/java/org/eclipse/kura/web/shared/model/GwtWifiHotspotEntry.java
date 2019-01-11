@@ -12,15 +12,15 @@
 package org.eclipse.kura.web.shared.model;
 
 import java.io.Serializable;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.util.KuraBaseModel;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class GwtWifiHotspotEntry extends KuraBaseModel implements Serializable {
 
     private static final Logger logger = Logger.getLogger(GwtWifiHotspotEntry.class.getSimpleName());
-
+    
     private static final String FREQUENCY = "frequency";
     private static final String CHANNEL = "channel";
     private static final String SIGNAL_STRENGTH = "signalStrength";

@@ -5,7 +5,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- *
+ * 
  *******************************************************************************/
 package org.eclipse.kura.web.shared.model;
 
@@ -27,7 +27,7 @@ public final class GwtWireComponentConfiguration extends GwtBaseModel implements
     private double positionY;
 
     public GwtConfigComponent getConfiguration() {
-        return this.configuration;
+        return configuration;
     }
 
     public void setConfiguration(GwtConfigComponent configuration) {
@@ -35,7 +35,7 @@ public final class GwtWireComponentConfiguration extends GwtBaseModel implements
     }
 
     public int getInputPortCount() {
-        return this.inputPortCount;
+        return inputPortCount;
     }
 
     public void setInputPortCount(int inputPortCount) {
@@ -43,7 +43,7 @@ public final class GwtWireComponentConfiguration extends GwtBaseModel implements
     }
 
     public int getOutputPortCount() {
-        return this.outputPortCount;
+        return outputPortCount;
     }
 
     public void setOutputPortCount(int outputPortCount) {
@@ -51,7 +51,7 @@ public final class GwtWireComponentConfiguration extends GwtBaseModel implements
     }
 
     public double getPositionX() {
-        return this.positionX;
+        return positionX;
     }
 
     public void setPositionX(double positionX) {
@@ -59,7 +59,7 @@ public final class GwtWireComponentConfiguration extends GwtBaseModel implements
     }
 
     public double getPositionY() {
-        return this.positionY;
+        return positionY;
     }
 
     public void setPositionY(double positionY) {

@@ -73,7 +73,7 @@ import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FormPanel;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.Hidden;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
@@ -395,7 +395,7 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
         }
 
         if (param.getType() == GwtConfigParameterType.BOOLEAN) {
-            result.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+            result.setHorizontalAlignment(HasAlignment.ALIGN_CENTER);
         }
 
         return result;

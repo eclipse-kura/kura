@@ -5,7 +5,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- *
+ * 
  *******************************************************************************/
 package org.eclipse.kura.web.client.util.request;
 
@@ -24,7 +24,7 @@ public class RequestQueue {
 
     private static final RequestQueue instance = new RequestQueue();
 
-    private final LinkedList<PendingRequest> requests = new LinkedList<>();
+    private final LinkedList<PendingRequest> requests = new LinkedList<PendingRequest>();
     private PendingRequest pending;
 
     public static void submit(final Request request) {
@@ -41,21 +41,21 @@ public class RequestQueue {
     }
 
     private void runNext() {
-        if (this.pending != null) {
+        if (pending != null) {
             return;
         }
-        if (this.requests.isEmpty()) {
+        if (requests.isEmpty()) {
             return;
         }
 
-        this.pending = this.requests.pop();
+        pending = requests.pop();
 
         try {
-            this.pending.request.run(this.pending.context);
+            pending.request.run(pending.context);
         } catch (Exception e) {
             FailureHandler.handle(e);
             EntryClassUi.hideWaitModal();
-            this.pending = null;
+            pending = null;
         }
     }
 
@@ -69,23 +69,23 @@ public class RequestQueue {
         }
 
         private void completed() {
-            if (this.enableWaitModal) {
+            if (enableWaitModal) {
                 EntryClassUi.hideWaitModal();
             }
-            RequestQueue.this.pending = null;
+            pending = null;
             runNext();
         }
 
         private void newRequest() {
-            this.requests++;
-            if (this.enableWaitModal) {
+            requests++;
+            if (enableWaitModal) {
                 EntryClassUi.showWaitModal();
             }
         }
 
         private void requestCompleted() {
-            this.requests--;
-            if (this.requests == 0) {
+            requests--;
+            if (requests == 0) {
                 completed();
             }
         }

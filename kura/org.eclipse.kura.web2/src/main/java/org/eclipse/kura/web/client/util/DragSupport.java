@@ -38,15 +38,15 @@ public class DragSupport {
     }
 
     private void dispatchDragStart(JavaScriptObject nativeObject) {
-        if (this.listener == null) {
+        if (listener == null) {
             return;
         }
-        this.listener.onDragStart(new DragEvent(nativeObject));
+        listener.onDragStart(new DragEvent(nativeObject));
     }
 
     private native void attachNativeEventHandlers(Element element)
     /*-{
-        element.setAttribute('draggable', 'true')
+        element.setAttribute('draggable', 'true') 
         var self = this
         element.addEventListener('dragstart', function (event) {
         self.@org.eclipse.kura.web.client.util.DragSupport::dispatchDragStart(Lcom/google/gwt/core/client/JavaScriptObject;)(event.dataTransfer)
@@ -65,7 +65,7 @@ public class DragSupport {
 
     public static class DragEvent {
 
-        private final JavaScriptObject nativeDataTransfer;
+        private JavaScriptObject nativeDataTransfer;
 
         private DragEvent(JavaScriptObject nativeDataTransfer) {
             this.nativeDataTransfer = nativeDataTransfer;
@@ -77,7 +77,7 @@ public class DragSupport {
         }-*/;
 
         public void setTextData(String data) {
-            setDataNative(this.nativeDataTransfer, "Text", data);
+            setDataNative(nativeDataTransfer, "Text", data);
         }
     }
 }

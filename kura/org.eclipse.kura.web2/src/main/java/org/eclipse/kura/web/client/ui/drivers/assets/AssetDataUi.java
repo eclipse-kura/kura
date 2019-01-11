@@ -108,7 +108,8 @@ public class AssetDataUi extends Composite {
     }
 
     private void initTable() {
-        this.assetDataTable.setHeaderBuilder(new DefaultHeaderOrFooterBuilder<>(this.assetDataTable, false));
+        this.assetDataTable.setHeaderBuilder(
+                new DefaultHeaderOrFooterBuilder<AssetModel.ChannelModel>(this.assetDataTable, false));
 
         this.assetDataTable.addColumn(new StaticColumn(AssetConstants.NAME.value()),
                 new TextHeader(MSGS.wiresChannelName()));
@@ -123,7 +124,7 @@ public class AssetDataUi extends Composite {
             @Override
             public void onBrowserEvent(Context context, Element elem, ChannelModel object, NativeEvent event) {
                 if (getChannelStatus(object) == ChannelStatus.FAILURE) {
-                    final GwtChannelRecord record = AssetDataUi.this.channelValues.get(object.getChannelName());
+                    final GwtChannelRecord record = channelValues.get(object.getChannelName());
                     showFailureDetails(record);
                 }
             }
@@ -142,31 +143,15 @@ public class AssetDataUi extends Composite {
             public void render(final Context context, final ChannelModel object, final SafeHtmlBuilder sb) {
                 final ChannelStatus status = getChannelStatus(object);
 
-<<<<<<< HEAD
-                sb.append(new SafeHtml() {
-
-                    /**
-                     *
-                     */
-                    private static final long serialVersionUID = -8071387019990361093L;
-
-                    @Override
-                    public String asString() {
-                        return "<i class=\"fa assets-status-icon " + status.getIconStyle() + "\"></i><span>"
-                                + SafeHtmlUtils.htmlEscape(getValue(object)) + "</span>";
-                    }
-                });
-=======
                 sb.append(() -> "<i class=\"fa assets-status-icon " + status.getIconStyle() + "\"></i><span>"
                         + SafeHtmlUtils.htmlEscape(getValue(object)) + "</span>");
->>>>>>> refs/remotes/eclipse_kura/develop
             }
         };
 
         this.assetDataTable.addColumn(statusColumn, new TextHeader(MSGS.wiresChannelStatus()));
 
         final Column<AssetModel.ChannelModel, String> valueColumn = new Column<AssetModel.ChannelModel, String>(
-                this.valuesCell) {
+                valuesCell) {
 
             @Override
             public void onBrowserEvent(Context context, Element elem, ChannelModel object, NativeEvent event) {
@@ -186,7 +171,7 @@ public class AssetDataUi extends Composite {
             @Override
             public String getValue(final AssetModel.ChannelModel object) {
                 if (getChannelStatus(object) == ChannelStatus.SUCCESS) {
-                    final GwtChannelRecord result = AssetDataUi.this.channelValues.get(object.getChannelName());
+                    final GwtChannelRecord result = channelValues.get(object.getChannelName());
                     return result.getValue();
                 }
                 return "Not available";
@@ -199,7 +184,7 @@ public class AssetDataUi extends Composite {
                     return;
                 }
                 if (!isDirty(object.getChannelName())) {
-                    AssetDataUi.this.valuesCell.clearViewData(context.getKey());
+                    valuesCell.clearViewData(context.getKey());
                 }
                 super.render(context, object, sb);
             }
@@ -212,13 +197,7 @@ public class AssetDataUi extends Composite {
             result.setValue(value);
             channelValues.put(channelName, result);
 
-<<<<<<< HEAD
-                GwtChannelRecord result = createWriteRecord(object);
-                result.setValue(value);
-                AssetDataUi.this.channelValues.put(channelName, result);
-=======
             markAsDirty(channelName);
->>>>>>> refs/remotes/eclipse_kura/develop
 
             AssetDataUi.this.assetDataTable.redraw();
         });
@@ -253,8 +232,8 @@ public class AssetDataUi extends Composite {
 
         final ArrayList<GwtChannelRecord> writeRecords = new ArrayList<>();
 
-        for (final String channelName : this.modifiedWriteChannels) {
-            final GwtChannelRecord record = this.channelValues.get(channelName);
+        for (final String channelName : modifiedWriteChannels) {
+            final GwtChannelRecord record = channelValues.get(channelName);
             if (record == null) {
                 continue;
             }
@@ -265,41 +244,10 @@ public class AssetDataUi extends Composite {
             return;
         }
 
-<<<<<<< HEAD
-        this.alertDialog.show(MSGS.driversAssetsWriteConfirm(this.model.getAssetPid()), new AlertDialog.Listener() {
-=======
         alertDialog.show(MSGS.driversAssetsWriteConfirm(model.getAssetPid()), () -> DriversAndAssetsRPC.write(model.getAssetPid(), writeRecords,
                 result -> {
                     final List<GwtChannelRecord> records = result.getRecords();
->>>>>>> refs/remotes/eclipse_kura/develop
 
-<<<<<<< HEAD
-            @Override
-            public void onConfirm() {
-                DriversAndAssetsRPC.write(AssetDataUi.this.model.getAssetPid(), writeRecords,
-                        new DriversAndAssetsRPC.Callback<GwtChannelOperationResult>() {
-
-                            @Override
-                            public void onSuccess(final GwtChannelOperationResult result) {
-                                final List<GwtChannelRecord> records = result.getRecords();
-
-                                if (records != null) {
-                                    AssetDataUi.this.setDirty(false);
-                                    for (GwtChannelRecord channelRecord : records) {
-                                        AssetDataUi.this.channelValues.put(channelRecord.getName(), channelRecord);
-                                    }
-                                    AssetDataUi.this.channelsDataProvider.refresh();
-                                    AssetDataUi.this.assetDataTable.redraw();
-                                } else {
-                                    FailureHandler.showErrorMessage("Channel operation failed",
-                                            result.getExceptionMessage(), result.getStackTrace());
-                                }
-                            }
-
-                        });
-            }
-        });
-=======
                     if (records != null) {
                         AssetDataUi.this.setDirty(false);
                         for (GwtChannelRecord channelRecord : records) {
@@ -312,11 +260,10 @@ public class AssetDataUi extends Composite {
                                 result.getExceptionMessage(), result.getStackTrace());
                     }
                 }));
->>>>>>> refs/remotes/eclipse_kura/develop
     }
 
     private boolean isDirty(final String channelName) {
-        return this.modifiedWriteChannels.contains(channelName);
+        return modifiedWriteChannels.contains(channelName);
     }
 
     private void markAsDirty(final String channelName) {
@@ -339,47 +286,20 @@ public class AssetDataUi extends Composite {
 
     public void renderForm() {
 
-        setDirty(false);
+        this.setDirty(false);
         this.channelValues.clear();
         this.applyDataChanges.setEnabled(false);
         this.channelsDataProvider.getList().clear();
         this.channelsDataProvider.refresh();
 
         EntryClassUi.showWaitModal();
-<<<<<<< HEAD
-        DriversAndAssetsRPC.readAllChannels(this.model.getAssetPid(),
-                new DriversAndAssetsRPC.Callback<GwtChannelOperationResult>() {
-=======
         DriversAndAssetsRPC.readAllChannels(model.getAssetPid(),
                 result -> {
                     final List<GwtChannelRecord> records = result.getRecords();
->>>>>>> refs/remotes/eclipse_kura/develop
 
-<<<<<<< HEAD
-                    @Override
-                    public void onSuccess(final GwtChannelOperationResult result) {
-                        final List<GwtChannelRecord> records = result.getRecords();
-
-                        if (records != null) {
-                            for (final GwtChannelRecord record : records) {
-                                AssetDataUi.this.channelValues.put(record.getName(), record);
-                            }
-                            AssetDataUi.this.channelsDataProvider.getList()
-                                    .addAll(AssetDataUi.this.model.getChannels());
-                            AssetDataUi.this.channelsDataProvider.refresh();
-
-                            int size = AssetDataUi.this.channelsDataProvider.getList().size();
-                            AssetDataUi.this.assetDataTable.setVisibleRange(0, size);
-
-                            AssetDataUi.this.assetDataTable.redraw();
-                        } else {
-                            FailureHandler.showErrorMessage("Channel operation failed", result.getExceptionMessage(),
-                                    result.getStackTrace());
-=======
                     if (records != null) {
                         for (final GwtChannelRecord record : records) {
                             channelValues.put(record.getName(), record);
->>>>>>> refs/remotes/eclipse_kura/develop
                         }
                         AssetDataUi.this.channelsDataProvider.getList().addAll(model.getChannels());
                         AssetDataUi.this.channelsDataProvider.refresh();
@@ -397,11 +317,11 @@ public class AssetDataUi extends Composite {
 
     private ChannelStatus getChannelStatus(final ChannelModel model) {
         final String channelName = model.getChannelName();
-        final GwtChannelRecord record = this.channelValues.get(model.getChannelName());
+        final GwtChannelRecord record = channelValues.get(model.getChannelName());
 
         if ("false".equals(model.getValue(AssetConstants.ENABLED.value()))) {
             return ChannelStatus.DISABLED;
-        } else if (this.modifiedWriteChannels.contains(channelName)) {
+        } else if (modifiedWriteChannels.contains(channelName)) {
             return ChannelStatus.DIRTY;
         } else if (record == null) {
             return ChannelStatus.UNKNOWN;
@@ -423,7 +343,7 @@ public class AssetDataUi extends Composite {
 
         @Override
         public String getValue(final AssetModel.ChannelModel object) {
-            return object.getValue(this.key);
+            return object.getValue(key);
         }
     }
 
@@ -456,15 +376,15 @@ public class AssetDataUi extends Composite {
         }
 
         public String getLabel() {
-            return this.label;
+            return label;
         }
 
         public String getIconStyle() {
-            return this.iconStyle;
+            return iconStyle;
         }
 
         public String getCellStyle() {
-            return this.cellStyle;
+            return cellStyle;
         }
     }
 }

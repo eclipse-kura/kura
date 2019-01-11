@@ -47,32 +47,9 @@ public class ConfigurationUiButtons extends Composite implements HasConfiguratio
         this.btnReset.setEnabled(target.isDirty());
         target.setListener(this);
 
-<<<<<<< HEAD
-        this.btnApply.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                if (ConfigurationUiButtons.this.listener == null) {
-                    return;
-                }
-                if (!target.isValid()) {
-                    ConfigurationUiButtons.this.confirmDialog.show(MSGS.formWithErrorsOrIncomplete(),
-                            AlertDialog.Severity.ALERT, null);
-                    return;
-                }
-                ConfigurationUiButtons.this.confirmDialog.show(MSGS.deviceConfigConfirmationNoName(),
-                        new AlertDialog.Listener() {
-
-                            @Override
-                            public void onConfirm() {
-                                ConfigurationUiButtons.this.listener.onApply();
-                            }
-                        });
-=======
         this.btnApply.addClickHandler(event -> {
             if (listener == null) {
                 return;
->>>>>>> refs/remotes/eclipse_kura/develop
             }
             if (!target.isValid()) {
                 confirmDialog.show(MSGS.formWithErrorsOrIncomplete(), AlertDialog.Severity.ALERT, null);
@@ -80,26 +57,9 @@ public class ConfigurationUiButtons extends Composite implements HasConfiguratio
             }
             confirmDialog.show(MSGS.deviceConfigConfirmationNoName(), () -> listener.onApply());
         });
-<<<<<<< HEAD
-        this.btnReset.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                if (ConfigurationUiButtons.this.listener == null) {
-                    return;
-                }
-                ConfigurationUiButtons.this.confirmDialog.show(MSGS.deviceConfigDirty(), new AlertDialog.Listener() {
-
-                    @Override
-                    public void onConfirm() {
-                        ConfigurationUiButtons.this.listener.onReset();
-                    }
-                });
-=======
         this.btnReset.addClickHandler(event -> {
             if (listener == null) {
                 return;
->>>>>>> refs/remotes/eclipse_kura/develop
             }
             confirmDialog.show(MSGS.deviceConfigDirty(), () -> listener.onReset());
         });
@@ -117,8 +77,8 @@ public class ConfigurationUiButtons extends Composite implements HasConfiguratio
     @Override
     public void onDirtyStateChanged(HasConfiguration hasConfiguration) {
         boolean isDirty = hasConfiguration.isDirty();
-        this.btnApply.setEnabled(isDirty);
-        this.btnReset.setEnabled(isDirty);
+        btnApply.setEnabled(isDirty);
+        btnReset.setEnabled(isDirty);
     }
 
     public interface Listener {

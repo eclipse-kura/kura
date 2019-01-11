@@ -25,11 +25,9 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -437,12 +435,11 @@ public class FileServlet extends HttpServlet {
             ConfigurationService cs = locator.getService(ConfigurationService.class);
 
             if (doReplace) {
-                String fp = cs.getComponentConfiguration(assetPid).getConfigurationProperties()
-                        .get("service.factoryPid").toString();
+                String fp = cs.getComponentConfiguration(assetPid).getConfigurationProperties().get("service.factoryPid").toString();
                 cs.deleteFactoryConfiguration(assetPid, false);
                 newProps.put("driver.pid", driverPid);
                 cs.createFactoryConfiguration(fp, assetPid, newProps, true);
-            } else {
+            }else{
                 cs.updateConfiguration(assetPid, newProps);
             }
 
@@ -519,21 +516,7 @@ public class FileServlet extends HttpServlet {
 
             ConfigurationService cs = locator.getService(ConfigurationService.class);
             List<ComponentConfiguration> configImpls = xmlConfigs.getConfigurations();
-            Set<String> allPids = cs.getConfigurableComponentPids();
-            Set<String> pids = new HashSet<>();
-            pids.addAll(allPids);
-            for (String pid : pids) {
-                boolean find = false;
-                for (ComponentConfiguration conf : configImpls) {
-                    if (conf.getPid().equals(pid)) {
-                        find = true;
-                        break;
-                    }
-                }
-                if (!find) {
-                    cs.deleteFactoryConfiguration(pid, false);
-                }
-            }
+
             List<ComponentConfiguration> configs = new ArrayList<>();
             configs.addAll(configImpls);
 
@@ -554,7 +537,8 @@ public class FileServlet extends HttpServlet {
         }
     }
 
-    private void doPostDeployUpload(HttpServletRequest req) throws ServletException, IOException {
+    private void doPostDeployUpload(HttpServletRequest req)
+            throws ServletException, IOException {
         ServiceLocator locator = ServiceLocator.getInstance();
         DeploymentAgentService deploymentAgentService;
         try {

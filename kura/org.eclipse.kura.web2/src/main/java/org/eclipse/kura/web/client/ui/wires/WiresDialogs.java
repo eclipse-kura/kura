@@ -110,8 +110,8 @@ public class WiresDialogs extends Composite {
             this.driverInstance.addItem(driverPid);
         }
 
-        this.driverInstance.setEnabled(!driverPids.isEmpty());
-        this.buttonSelectDriverOk.setEnabled(!driverPids.isEmpty());
+        driverInstance.setEnabled(!driverPids.isEmpty());
+        buttonSelectDriverOk.setEnabled(!driverPids.isEmpty());
     }
 
     public void setDriverFactoryPids(List<String> driverFactoryPids) {
@@ -120,8 +120,8 @@ public class WiresDialogs extends Composite {
             this.newDriverFactory.addItem(driverPid);
         }
 
-        this.newDriverFactory.setEnabled(!driverFactoryPids.isEmpty());
-        this.newDriverOk.setEnabled(!driverFactoryPids.isEmpty());
+        newDriverFactory.setEnabled(!driverFactoryPids.isEmpty());
+        newDriverOk.setEnabled(!driverFactoryPids.isEmpty());
     }
 
     public void setAssetPids(List<String> assetPids) {
@@ -130,7 +130,7 @@ public class WiresDialogs extends Composite {
             this.assetInstance.addItem(assetPid);
         }
 
-        this.buttonSelectAssetOk.setEnabled(!assetPids.isEmpty());
+        buttonSelectAssetOk.setEnabled(!assetPids.isEmpty());
     }
 
     private void initSelectAssetModal() {
@@ -147,19 +147,18 @@ public class WiresDialogs extends Composite {
 
             @Override
             public void onClick(ClickEvent event) {
-                if (WiresDialogs.this.pickCallback != null) {
-                    WiresDialogs.this.pickCallback
-                            .onNewComponentCreated(WiresDialogs.this.assetInstance.getSelectedValue());
+                if (pickCallback != null) {
+                    pickCallback.onNewComponentCreated(WiresDialogs.this.assetInstance.getSelectedValue());
                 }
-                WiresDialogs.this.selectAssetModal.hide();
+                selectAssetModal.hide();
             }
         });
         this.buttonSelectAssetCancel.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
-                if (WiresDialogs.this.pickCallback != null) {
-                    WiresDialogs.this.pickCallback.onCancel();
+                if (pickCallback != null) {
+                    pickCallback.onCancel();
                 }
             }
         });
@@ -190,8 +189,8 @@ public class WiresDialogs extends Composite {
 
             @Override
             public void onClick(ClickEvent event) {
-                if (WiresDialogs.this.pickCallback != null) {
-                    WiresDialogs.this.pickCallback.onCancel();
+                if (pickCallback != null) {
+                    pickCallback.onCancel();
                 }
             }
         });
@@ -205,13 +204,13 @@ public class WiresDialogs extends Composite {
             @Override
             public void onClick(ClickEvent event) {
                 String wireAssetPid = WiresDialogs.this.newAssetName.getPid();
-                if (wireAssetPid == null || !WiresDialogs.this.listener.onNewPidInserted(wireAssetPid)) {
+                if (wireAssetPid == null || !listener.onNewPidInserted(wireAssetPid)) {
                     return;
                 }
                 String driverPid = WiresDialogs.this.newAssetDriverInstance.getText();
                 WiresDialogs.this.newAssetModal.hide();
-                if (WiresDialogs.this.pickCallback != null) {
-                    WiresDialogs.this.pickCallback.onNewAssetCreated(wireAssetPid, driverPid);
+                if (pickCallback != null) {
+                    pickCallback.onNewAssetCreated(wireAssetPid, driverPid);
                 }
             }
         });
@@ -220,8 +219,8 @@ public class WiresDialogs extends Composite {
 
             @Override
             public void onClick(ClickEvent event) {
-                if (WiresDialogs.this.pickCallback != null) {
-                    WiresDialogs.this.pickCallback.onCancel();
+                if (pickCallback != null) {
+                    pickCallback.onCancel();
                 }
             }
         });
@@ -237,7 +236,7 @@ public class WiresDialogs extends Composite {
                 if (pid == null) {
                     return;
                 }
-                if (WiresDialogs.this.listener == null || !WiresDialogs.this.listener.onNewPidInserted(pid)) {
+                if (listener == null || !listener.onNewPidInserted(pid)) {
                     return;
                 }
                 final String factoryPid = WiresDialogs.this.newDriverFactory.getSelectedValue();
@@ -245,12 +244,12 @@ public class WiresDialogs extends Composite {
 
                     @Override
                     public void onSuccess(GwtConfigComponent result) {
-                        WiresDialogs.this.newDriverModal.hide();
-                        WiresDialogs.this.newAssetDriverInstance.setText(pid);
-                        WiresDialogs.this.newAssetName.setText("");
-                        WiresDialogs.this.newAssetModal.show();
-                        if (WiresDialogs.this.listener != null) {
-                            WiresDialogs.this.listener.onNewDriverCreated(pid, factoryPid, result);
+                        newDriverModal.hide();
+                        newAssetDriverInstance.setText(pid);
+                        newAssetName.setText("");
+                        newAssetModal.show();
+                        if (listener != null) {
+                            listener.onNewDriverCreated(pid, factoryPid, result);
                         }
                     }
                 });
@@ -261,8 +260,8 @@ public class WiresDialogs extends Composite {
 
             @Override
             public void onClick(ClickEvent event) {
-                if (WiresDialogs.this.pickCallback != null) {
-                    WiresDialogs.this.pickCallback.onCancel();
+                if (pickCallback != null) {
+                    pickCallback.onCancel();
                 }
             }
 
@@ -277,14 +276,14 @@ public class WiresDialogs extends Composite {
             public void onClick(ClickEvent event) {
                 String value = WiresDialogs.this.componentName.getPid();
                 if (value != null) {
-                    if (WiresDialogs.this.listener == null || !WiresDialogs.this.listener.onNewPidInserted(value)) {
+                    if (listener == null || !listener.onNewPidInserted(value)) {
                         return;
                     }
-                    if (WiresDialogs.this.pickCallback != null) {
-                        WiresDialogs.this.pickCallback.onNewComponentCreated(value);
+                    if (pickCallback != null) {
+                        pickCallback.onNewComponentCreated(value);
                     }
-                    WiresDialogs.this.genericCompModal.hide();
-                    WiresDialogs.this.componentName.clear();
+                    genericCompModal.hide();
+                    componentName.clear();
                 }
             }
         });
@@ -292,8 +291,8 @@ public class WiresDialogs extends Composite {
 
             @Override
             public void onClick(ClickEvent event) {
-                if (WiresDialogs.this.pickCallback != null) {
-                    WiresDialogs.this.pickCallback.onCancel();
+                if (pickCallback != null) {
+                    pickCallback.onCancel();
                 }
             }
         });

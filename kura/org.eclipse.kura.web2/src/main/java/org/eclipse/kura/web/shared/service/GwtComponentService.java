@@ -5,7 +5,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- *
+ * 
  * Contributors:
  *  Eurotech
  *  Amit Kumar Mondal
@@ -37,9 +37,9 @@ public interface GwtComponentService extends RemoteService {
      *
      * @param xsrfToken
      *            the cross site request forgery token.
-     *
+     * 
      * @return list of PIDs for the registered components.
-     *
+     * 
      * @throws GwtKuraException
      *             if the list of components registered in the framework cannot be extracted.
      */
@@ -50,7 +50,7 @@ public interface GwtComponentService extends RemoteService {
      * the components tracked are not complete but mapped to the respective component metatype. This means that eventual
      * additional properties of the component that are tracked by the ConfigurationAdmin will not be reflected in the
      * resulting GwtConfigComponent returned.
-     *
+     * 
      * @param xsrfToken
      *            the cross site request forgery token.
      * @return a list of GwtConfigComponent.
@@ -67,7 +67,7 @@ public interface GwtComponentService extends RemoteService {
      * Returns a list containing the component configuration of the requested component specified by the provided PID.
      * As for {@link #findFilteredComponentConfigurations(GwtXSRFToken)}, the returned configuration is filtered because
      * contains only the properties that can be mapped to the component metatype.
-     *
+     * 
      * @param xsrfToken
      *            the cross site request forgery token.
      * @param pid
@@ -87,7 +87,7 @@ public interface GwtComponentService extends RemoteService {
     /**
      * This method returns the list of component configurations as extracted from the
      * {@link org.osgi.service.cm.ConfigurationAdmin}.
-     *
+     * 
      * @param xsrfToken
      *            the cross site request forgery token.
      * @return a list of GwtConfigComponent.
@@ -106,7 +106,7 @@ public interface GwtComponentService extends RemoteService {
     /**
      * This method returns a list containing the component configuration associated to the specified PID and tracked by
      * the {@link org.osgi.service.cm.ConfigurationAdmin}.
-     *
+     * 
      * @param xsrfToken
      *            the cross site request forgery token.
      * @param pid
@@ -125,7 +125,7 @@ public interface GwtComponentService extends RemoteService {
     /**
      * This method gets an updated component configuration in form of a {@link GwtConfigComponent} and applies those
      * changes using the {@link org.eclipse.kura.configuration.ConfigurationService}
-     *
+     * 
      * @param xsrfToken
      *            the cross site request forgery token.
      * @param configComponent
@@ -143,9 +143,8 @@ public interface GwtComponentService extends RemoteService {
             throws GwtKuraException;
 
     public void createFactoryComponent(GwtXSRFToken xsrfToken, String factoryPid, String pid) throws GwtKuraException;
-
-    public void createFactoryComponent(GwtXSRFToken xsrfToken, String factoryPid, String pid,
-            GwtConfigComponent properties) throws GwtKuraException;
+    
+    public void createFactoryComponent(GwtXSRFToken xsrfToken, String factoryPid, String pid, GwtConfigComponent properties) throws GwtKuraException;
 
     public void deleteFactoryConfiguration(GwtXSRFToken xsrfToken, String pid, boolean takeSnapshot)
             throws GwtKuraException;

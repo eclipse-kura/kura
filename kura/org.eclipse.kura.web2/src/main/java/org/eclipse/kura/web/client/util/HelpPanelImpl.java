@@ -43,7 +43,7 @@ class HelpPanelImpl extends Composite {
 
     public HelpPanelImpl() {
         initWidget(uiBinder.createAndBindUi(this));
-        this.hideButton.addClickHandler(new ClickHandler() {
+        hideButton.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
@@ -53,15 +53,15 @@ class HelpPanelImpl extends Composite {
     }
 
     public void setContent(String content) {
-        this.helpContent.clear();
-        this.helpContent.add(new Span(content));
+        helpContent.clear();
+        helpContent.add(new Span(content));
     }
 
     public void show() {
-        this.helpPanel.addStyleName(HELP_PANEL_VISIBLE_CLASS_NAME);
+        helpPanel.addStyleName(HELP_PANEL_VISIBLE_CLASS_NAME);
     }
 
     public void hide() {
-        this.helpPanel.removeStyleName(HELP_PANEL_VISIBLE_CLASS_NAME);
+        helpPanel.removeStyleName(HELP_PANEL_VISIBLE_CLASS_NAME);
     }
 }

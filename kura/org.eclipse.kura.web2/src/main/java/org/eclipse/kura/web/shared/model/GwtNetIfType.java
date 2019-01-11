@@ -15,7 +15,7 @@ import java.io.Serializable;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-public enum GwtNetIfType implements Serializable, IsSerializable {
+public enum GwtNetIfType implements Serializable,IsSerializable {
 
     /** The device type is unknown. */
     UNKNOWN,

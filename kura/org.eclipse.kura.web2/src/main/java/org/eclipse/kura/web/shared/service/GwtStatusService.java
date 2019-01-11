@@ -53,6 +53,6 @@ public interface GwtStatusService extends RemoteService {
      * @throws GwtKuraException
      */
     public void disconnectDataService(GwtXSRFToken xsrfToken, String connectionId) throws GwtKuraException;
-
+    
     public boolean isConnected(GwtXSRFToken xsrfToken, String connectionId) throws GwtKuraException;
 }

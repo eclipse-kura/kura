@@ -5,7 +5,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- *
+ * 
  *******************************************************************************/
 package org.eclipse.kura.web.shared.model;
 
@@ -30,7 +30,7 @@ public final class GwtWireGraphConfiguration extends GwtBaseModel implements Ser
     }
 
     public List<GwtConfigComponent> getAdditionalConfigurations() {
-        return this.additionalConfigurations;
+        return additionalConfigurations;
     }
 
     public void setAdditionalConfigurations(List<GwtConfigComponent> additionalConfigurations) {
@@ -38,7 +38,7 @@ public final class GwtWireGraphConfiguration extends GwtBaseModel implements Ser
     }
 
     public List<GwtWireConfiguration> getWires() {
-        return this.wires;
+        return wires;
     }
 
     public void setWires(List<GwtWireConfiguration> wires) {
@@ -46,7 +46,7 @@ public final class GwtWireGraphConfiguration extends GwtBaseModel implements Ser
     }
 
     public List<GwtWireComponentConfiguration> getWireComponentConfigurations() {
-        return this.wireComponentConfigurations;
+        return wireComponentConfigurations;
     }
 
     public void setWireComponentConfigurations(List<GwtWireComponentConfiguration> wireComponentConfigurations) {
@@ -54,7 +54,7 @@ public final class GwtWireGraphConfiguration extends GwtBaseModel implements Ser
     }
 
     public List<String> getAllActivePids() {
-        return this.allActivePids;
+        return allActivePids;
     }
 
     public void setAllActivePids(List<String> allActivePids) {

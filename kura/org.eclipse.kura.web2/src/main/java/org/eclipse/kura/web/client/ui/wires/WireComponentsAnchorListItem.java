@@ -37,19 +37,9 @@ public class WireComponentsAnchorListItem extends AnchorListItem {
             drag.setListener(event -> event.setTextData(WiresPanelUi.FACTORY_PID_DROP_PREFIX + factoryPid));
         }
 
-<<<<<<< HEAD
-        super.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(final ClickEvent event) {
-                if (WireComponentsAnchorListItem.this.listener != null) {
-                    WireComponentsAnchorListItem.this.listener.onClick(factoryPid);
-                }
-=======
         super.addClickHandler(event -> {
             if (listener != null) {
                 listener.onClick(factoryPid);
->>>>>>> refs/remotes/eclipse_kura/develop
             }
         });
     }

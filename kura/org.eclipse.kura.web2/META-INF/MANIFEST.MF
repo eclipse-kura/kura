@@ -82,4 +82,3 @@ Import-Package: com.eclipsesource.json;version="0.9.4",
  org.w3c.dom,
  org.xml.sax
 Require-Bundle: com.gwt.user;bundle-version="[1.1.0,2.0.0)"
-Automatic-Module-Name: org.eclipse.kura.web2

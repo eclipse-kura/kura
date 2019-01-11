@@ -21,47 +21,47 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 
 public class BooleanInputCell extends AbstractCell<String> {
 
-    private final CheckboxCell inner = new CheckboxCell(false, false);
+    private CheckboxCell inner = new CheckboxCell(false, false);
 
     @Override
     public void render(Context context, String value, SafeHtmlBuilder sb) {
-        this.inner.render(context, toBoolean(value), sb);
+        inner.render(context, toBoolean(value), sb);
     }
 
     @Override
     public void onBrowserEvent(Context context, Element parent, String value, NativeEvent event,
             ValueUpdater<String> valueUpdater) {
-        this.inner.onBrowserEvent(context, parent, toBoolean(value), event, new ValueUpdaterWrapper(valueUpdater));
+        inner.onBrowserEvent(context, parent, toBoolean(value), event, new ValueUpdaterWrapper(valueUpdater));
     }
 
     @Override
     public Set<String> getConsumedEvents() {
-        return this.inner.getConsumedEvents();
+        return inner.getConsumedEvents();
     }
 
     @Override
     public boolean dependsOnSelection() {
-        return this.inner.dependsOnSelection();
+        return inner.dependsOnSelection();
     }
 
     @Override
     public boolean handlesSelection() {
-        return this.inner.handlesSelection();
+        return inner.handlesSelection();
     }
 
     @Override
     public boolean isEditing(Context context, Element parent, String value) {
-        return this.inner.isEditing(context, parent, toBoolean(value));
+        return inner.isEditing(context, parent, toBoolean(value));
     }
 
     @Override
     public boolean resetFocus(Context context, Element parent, String value) {
-        return this.inner.resetFocus(context, parent, toBoolean(value));
+        return inner.resetFocus(context, parent, toBoolean(value));
     }
 
     @Override
     public void setValue(Context context, Element parent, String value) {
-        this.inner.setValue(context, parent, toBoolean(value));
+        inner.setValue(context, parent, toBoolean(value));
     }
 
     private static boolean toBoolean(final String value) {
@@ -78,7 +78,7 @@ public class BooleanInputCell extends AbstractCell<String> {
 
         @Override
         public void update(Boolean value) {
-            this.wrapped.update(Boolean.toString(value));
+            wrapped.update(Boolean.toString(value));
         }
     }
 }

@@ -37,14 +37,14 @@ public class HelpButton extends Composite {
 
     public HelpButton() {
         initWidget(uiBinder.createAndBindUi(this));
-        this.helpButton.addClickHandler(new ClickHandler() {
+        helpButton.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
-                if (HelpButton.this.helpTextProvider != null) {
-                    HelpPanel.show(HelpButton.this.helpTextProvider.getHelpText());
+                if (helpTextProvider != null) {
+                    HelpPanel.show(helpTextProvider.getHelpText());
                 } else {
-                    HelpPanel.show(HelpButton.this.helpText);
+                    HelpPanel.show(helpText);
                 }
             }
         });
@@ -59,10 +59,10 @@ public class HelpButton extends Composite {
     }
 
     public void updateHelpText() {
-        if (this.helpTextProvider != null) {
-            HelpPanel.setHelpText(this.helpTextProvider.getHelpText());
+        if (helpTextProvider != null) {
+            HelpPanel.setHelpText(helpTextProvider.getHelpText());
         } else {
-            HelpPanel.setHelpText(this.helpText);
+            HelpPanel.setHelpText(helpText);
         }
     }
 
@@ -72,6 +72,6 @@ public class HelpButton extends Composite {
     }
 
     public void setVisibleOn(DeviceSize deviceSize) {
-        this.helpButton.setVisibleOn(deviceSize);
+        helpButton.setVisibleOn(deviceSize);
     }
 }

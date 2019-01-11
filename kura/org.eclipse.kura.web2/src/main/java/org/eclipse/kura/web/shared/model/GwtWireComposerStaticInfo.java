@@ -16,7 +16,7 @@ public final class GwtWireComposerStaticInfo extends GwtBaseModel implements Ser
     private GwtConfigComponent baseChannelDescriptor;
 
     public List<GwtConfigComponent> getComponentDefinitions() {
-        return this.componentDefinitions;
+        return componentDefinitions;
     }
 
     public void setComponentDefinitions(List<GwtConfigComponent> componentDefinitions) {
@@ -24,7 +24,7 @@ public final class GwtWireComposerStaticInfo extends GwtBaseModel implements Ser
     }
 
     public List<GwtWireComponentDescriptor> getWireComponentDescriptors() {
-        return this.wireComponentDescriptors;
+        return wireComponentDescriptors;
     }
 
     public void setWireComponentDescriptors(List<GwtWireComponentDescriptor> wireComponentDescriptors) {
@@ -32,7 +32,7 @@ public final class GwtWireComposerStaticInfo extends GwtBaseModel implements Ser
     }
 
     public List<GwtConfigComponent> getDriverDescriptors() {
-        return this.driverDescriptors;
+        return driverDescriptors;
     }
 
     public void setDriverDescriptors(List<GwtConfigComponent> driverDescriptors) {
@@ -40,7 +40,7 @@ public final class GwtWireComposerStaticInfo extends GwtBaseModel implements Ser
     }
 
     public GwtConfigComponent getBaseChannelDescriptor() {
-        return this.baseChannelDescriptor;
+        return baseChannelDescriptor;
     }
 
     public void setBaseChannelDescriptor(GwtConfigComponent baseChannelDescriptor) {

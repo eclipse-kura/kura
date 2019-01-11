@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -9,7 +9,7 @@
  * Contributors:
  *     Eurotech
  *******************************************************************************/
-package org.eclipse.kura.web.client.ui.Device;
+package org.eclipse.kura.web.client.ui.device;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.Tab;
@@ -39,7 +39,13 @@ public class DevicePanelUi extends Composite {
     HTMLPanel deviceIntro;
 
     @UiField
-    TabListItem profile, bundles, threads, systemProperties;
+    TabListItem profile;
+    @UiField
+    TabListItem bundles;
+    @UiField
+    TabListItem threads;
+    @UiField
+    TabListItem systemProperties;
 
     @UiField
     ProfileTabUi profilePanel;

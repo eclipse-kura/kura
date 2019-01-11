@@ -9,7 +9,7 @@
  * Contributors:
  *     Eurotech
  *******************************************************************************/
-package org.eclipse.kura.web.client.ui.Settings;
+package org.eclipse.kura.web.client.ui.settings;
 
 import java.util.Iterator;
 import java.util.List;
@@ -84,9 +84,9 @@ public class SslTabUi extends AbstractServicesUi {
     public SslTabUi() {
         initWidget(uiBinder.createAndBindUi(this));
         this.initialized = false;
-
-        this.apply.setText(MSGS.apply());
-        this.apply.addClickHandler(new ClickHandler() {
+        
+        apply.setText(MSGS.apply());
+        apply.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
@@ -94,8 +94,8 @@ public class SslTabUi extends AbstractServicesUi {
             }
         });
 
-        this.reset.setText(MSGS.reset());
-        this.reset.addClickHandler(new ClickHandler() {
+        reset.setText(MSGS.reset());
+        reset.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
@@ -103,9 +103,9 @@ public class SslTabUi extends AbstractServicesUi {
             }
         });
     }
-
+    
     public void load() {
-        this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+        gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
             @Override
             public void onFailure(Throwable ex) {
@@ -115,8 +115,8 @@ public class SslTabUi extends AbstractServicesUi {
 
             @Override
             public void onSuccess(GwtXSRFToken token) {
-                SslTabUi.this.gwtComponentService.findFilteredComponentConfiguration(token,
-                        "org.eclipse.kura.ssl.SslManagerService", new AsyncCallback<List<GwtConfigComponent>>() {
+                gwtComponentService.findFilteredComponentConfiguration(token, "org.eclipse.kura.ssl.SslManagerService",
+                        new AsyncCallback<List<GwtConfigComponent>>() {
 
                             @Override
                             public void onFailure(Throwable caught) {
@@ -127,17 +127,17 @@ public class SslTabUi extends AbstractServicesUi {
                             @Override
                             public void onSuccess(List<GwtConfigComponent> result) {
                                 for (GwtConfigComponent config : result) {
-                                    SslTabUi.this.originalConfig = config;
+                                    originalConfig = config;
 
-                                    restoreConfiguration(SslTabUi.this.originalConfig);
-                                    SslTabUi.this.fields.clear();
+                                    restoreConfiguration(originalConfig);
+                                    fields.clear();
 
                                     renderForm();
                                     initInvalidDataModal();
 
                                     setDirty(false);
-                                    SslTabUi.this.apply.setEnabled(false);
-                                    SslTabUi.this.reset.setEnabled(false);
+                                    apply.setEnabled(false);
+                                    reset.setEnabled(false);
                                 }
                             }
                         });

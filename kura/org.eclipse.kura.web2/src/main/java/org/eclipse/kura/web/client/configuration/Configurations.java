@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -203,10 +203,8 @@ public class Configurations {
     }
 
     public void invalidateConfiguration(String pid) {
-        final HasConfiguration config = this.currentConfigurations.get(pid);
-        if (config != null) {
-            this.currentConfigurations.put(pid, new InvalidConfigurationWrapper(config));
-        }
+        this.currentConfigurations.computeIfPresent(pid,
+                (p, configuration) -> new InvalidConfigurationWrapper(configuration));
     }
 
     private class ConfigurationWrapper implements HasConfiguration {
@@ -245,6 +243,7 @@ public class Configurations {
 
         @Override
         public void setListener(Listener listener) {
+            // Not needed
         }
     }
 

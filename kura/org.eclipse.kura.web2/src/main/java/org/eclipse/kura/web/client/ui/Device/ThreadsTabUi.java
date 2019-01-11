@@ -9,7 +9,7 @@
  * Contributors:
  *     Eurotech
  *******************************************************************************/
-package org.eclipse.kura.web.client.ui.Device;
+package org.eclipse.kura.web.client.ui.device;
 
 import java.util.ArrayList;
 
@@ -59,7 +59,7 @@ public class ThreadsTabUi extends Composite implements Tab {
 
     private void loadProfileTable(CellTable<GwtGroupedNVPair> threadsGrid2,
 
-            ListDataProvider<GwtGroupedNVPair> dataProvider) {
+    ListDataProvider<GwtGroupedNVPair> dataProvider) {
 
         TextColumn<GwtGroupedNVPair> col1 = new TextColumn<GwtGroupedNVPair>() {
 

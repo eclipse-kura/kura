@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -22,8 +22,6 @@ import org.gwtbootstrap3.client.ui.TabListItem;
 import org.gwtbootstrap3.client.ui.TabPane;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -75,19 +73,15 @@ public class AssetMgmtUi extends Composite {
         this.tab1Pane.add(panel);
         this.tab2Pane.add(this.assetDataUi);
 
-        this.tab2NavTab.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                if (AssetMgmtUi.this.assetConfigUi.isDirty()) {
-                    AssetMgmtUi.this.alertDialog.show(MSGS.driversAssetsAssetConfigDirty(), AlertDialog.Severity.ALERT,
-                            null);
-                    event.stopPropagation();
-                    event.preventDefault();
-                    return;
-                }
-                AssetMgmtUi.this.assetDataUi.renderForm();
+        this.tab2NavTab.addClickHandler(event -> {
+            if (AssetMgmtUi.this.assetConfigUi.isDirty()) {
+                AssetMgmtUi.this.alertDialog.show(MSGS.driversAssetsAssetConfigDirty(), AlertDialog.Severity.ALERT,
+                        null);
+                event.stopPropagation();
+                event.preventDefault();
+                return;
             }
+            AssetMgmtUi.this.assetDataUi.renderForm();
         });
     }
 
@@ -129,22 +123,11 @@ public class AssetMgmtUi extends Composite {
             public void onApply() {
                 final GwtConfigComponent newConfig = assetUi.getConfiguration();
                 DriversAndAssetsRPC.deleteFactoryConfiguration(newConfig.getComponentId(),
-                        new DriversAndAssetsRPC.Callback<Void>() {
-
-                            @Override
-                            public void onSuccess(Void result) {
-                                DriversAndAssetsRPC.createFactoryConfiguration(newConfig.getComponentId(),
-                                        newConfig.getFactoryId(), newConfig, new DriversAndAssetsRPC.Callback<Void>() {
-
-                                            @Override
-                                            public void onSuccess(Void result) {
-                                                configurations.setConfiguration(new GwtConfigComponent(newConfig));
-                                                assetUi.setDirty(false);
-                                            }
-
-                                        });
-                            }
-                        });
+                        result2 -> DriversAndAssetsRPC.createFactoryConfiguration(newConfig.getComponentId(),
+                                newConfig.getFactoryId(), newConfig, result1 -> {
+                                    configurations.setConfiguration(new GwtConfigComponent(newConfig));
+                                    assetUi.setDirty(false);
+                                }));
             }
         });
         return result;

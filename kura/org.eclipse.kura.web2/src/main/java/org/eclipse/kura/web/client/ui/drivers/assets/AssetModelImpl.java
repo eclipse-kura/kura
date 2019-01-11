@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -98,18 +98,13 @@ public class AssetModelImpl implements AssetModel {
 
         for (GwtConfigParameter param : this.assetConfiguration.getParameters()) {
             final String channelName = getChannelName(param.getId());
-            if (channelName == null) {
-                continue;
-            }
             final String propertyName = getChannelPropertyName(param.getId());
-            if (propertyName == null) {
+            if (channelName == null || propertyName == null) {
                 continue;
             }
-            LegacyChannelModel model = models.get(channelName);
-            if (model == null) {
-                model = new LegacyChannelModel(channelName, i);
-                models.put(channelName, model);
-            }
+            
+            final int index = i;
+            LegacyChannelModel model = models.computeIfAbsent(channelName, name -> new LegacyChannelModel(name, index));
             model.parameters[channelIndexes.get(propertyName)] = param;
         }
         ArrayList<Entry<String, LegacyChannelModel>> sortedModels = new ArrayList<>(models.entrySet());

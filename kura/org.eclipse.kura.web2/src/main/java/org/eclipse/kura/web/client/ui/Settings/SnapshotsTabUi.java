@@ -10,7 +10,7 @@
  *     Eurotech
  *     Red Hat Inc
  *******************************************************************************/
-package org.eclipse.kura.web.client.ui.Settings;
+package org.eclipse.kura.web.client.ui.settings;
 
 import java.util.ArrayList;
 import java.util.logging.Level;

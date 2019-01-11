@@ -9,7 +9,7 @@
  * Contributors:
  *     Eurotech
  *******************************************************************************/
-package org.eclipse.kura.web.client.ui.Network;
+package org.eclipse.kura.web.client.ui.network;
 
 import java.util.Comparator;
 import java.util.List;
@@ -63,10 +63,10 @@ public class NetworkInterfacesTableUi extends Composite {
     Alert notification;
     @UiField
 
-    CellTable<GwtNetInterfaceConfig> interfacesGrid = new CellTable<>();
+    CellTable<GwtNetInterfaceConfig> interfacesGrid = new CellTable<GwtNetInterfaceConfig>();
 
-    private final ListDataProvider<GwtNetInterfaceConfig> interfacesProvider = new ListDataProvider<>();
-    final SingleSelectionModel<GwtNetInterfaceConfig> selectionModel = new SingleSelectionModel<>();
+    private final ListDataProvider<GwtNetInterfaceConfig> interfacesProvider = new ListDataProvider<GwtNetInterfaceConfig>();
+    final SingleSelectionModel<GwtNetInterfaceConfig> selectionModel = new SingleSelectionModel<GwtNetInterfaceConfig>();
     TextColumn<GwtNetInterfaceConfig> col1;
 
     public NetworkInterfacesTableUi(GwtSession s, NetworkTabsUi tabsPanel) {
@@ -211,24 +211,24 @@ public class NetworkInterfacesTableUi extends Composite {
 
             @Override
             public void onSuccess(List<GwtNetInterfaceConfig> result) {
-                ListHandler<GwtNetInterfaceConfig> columnSortHandler = new ListHandler<>(
+                ListHandler<GwtNetInterfaceConfig> columnSortHandler = new ListHandler<GwtNetInterfaceConfig>(
                         NetworkInterfacesTableUi.this.interfacesProvider.getList());
                 columnSortHandler.setComparator(NetworkInterfacesTableUi.this.col1,
                         new Comparator<GwtNetInterfaceConfig>() {
 
-                            @Override
-                            public int compare(GwtNetInterfaceConfig o1, GwtNetInterfaceConfig o2) {
-                                if (o1 == o2) {
-                                    return 0;
-                                }
+                    @Override
+                    public int compare(GwtNetInterfaceConfig o1, GwtNetInterfaceConfig o2) {
+                        if (o1 == o2) {
+                            return 0;
+                        }
 
-                                // Compare the name columns.
-                                if (o1 != null) {
-                                    return o2 != null ? compareFromName(o1.getName(), o2.getName()) : 1;
-                                }
-                                return -1;
-                            }
-                        });
+                        // Compare the name columns.
+                        if (o1 != null) {
+                            return o2 != null ? compareFromName(o1.getName(), o2.getName()) : 1;
+                        }
+                        return -1;
+                    }
+                });
                 NetworkInterfacesTableUi.this.interfacesGrid.addColumnSortHandler(columnSortHandler);
 
                 NetworkInterfacesTableUi.this.interfacesProvider.getList().addAll(result);

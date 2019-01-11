@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -24,23 +24,18 @@ import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.ui.drivers.assets.AssetModel.ChannelModel;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.AssetConstants;
-import org.eclipse.kura.web.shared.model.GwtChannelOperationResult;
 import org.eclipse.kura.web.shared.model.GwtChannelRecord;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.PanelBody;
 import org.gwtbootstrap3.client.ui.gwt.CellTable;
 
 import com.google.gwt.cell.client.Cell.Context;
-import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.cell.client.TextInputCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -106,21 +101,9 @@ public class AssetDataUi extends Composite {
     }
 
     private void initButtons() {
-        this.applyDataChanges.addClickHandler(new ClickHandler() {
+        this.applyDataChanges.addClickHandler(event -> write());
 
-            @Override
-            public void onClick(ClickEvent event) {
-                write();
-            }
-        });
-
-        this.refreshData.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                renderForm();
-            }
-        });
+        this.refreshData.addClickHandler(event -> renderForm());
         this.applyDataChanges.setEnabled(false);
     }
 
@@ -155,11 +138,11 @@ public class AssetDataUi extends Composite {
                 return getChannelStatus(object).getCellStyle();
             }
 
-            @SuppressWarnings("serial")
             @Override
             public void render(final Context context, final ChannelModel object, final SafeHtmlBuilder sb) {
                 final ChannelStatus status = getChannelStatus(object);
 
+<<<<<<< HEAD
                 sb.append(new SafeHtml() {
 
                     /**
@@ -173,6 +156,10 @@ public class AssetDataUi extends Composite {
                                 + SafeHtmlUtils.htmlEscape(getValue(object)) + "</span>";
                     }
                 });
+=======
+                sb.append(() -> "<i class=\"fa assets-status-icon " + status.getIconStyle() + "\"></i><span>"
+                        + SafeHtmlUtils.htmlEscape(getValue(object)) + "</span>");
+>>>>>>> refs/remotes/eclipse_kura/develop
             }
         };
 
@@ -218,20 +205,22 @@ public class AssetDataUi extends Composite {
             }
         };
 
-        valueColumn.setFieldUpdater(new FieldUpdater<AssetModel.ChannelModel, String>() {
+        valueColumn.setFieldUpdater((index, object, value) -> {
+            final String channelName = object.getChannelName();
 
-            @Override
-            public void update(final int index, final AssetModel.ChannelModel object, final String value) {
-                final String channelName = object.getChannelName();
+            GwtChannelRecord result = createWriteRecord(object);
+            result.setValue(value);
+            channelValues.put(channelName, result);
 
+<<<<<<< HEAD
                 GwtChannelRecord result = createWriteRecord(object);
                 result.setValue(value);
                 AssetDataUi.this.channelValues.put(channelName, result);
+=======
+            markAsDirty(channelName);
+>>>>>>> refs/remotes/eclipse_kura/develop
 
-                markAsDirty(channelName);
-
-                AssetDataUi.this.assetDataTable.redraw();
-            }
+            AssetDataUi.this.assetDataTable.redraw();
         });
 
         this.assetDataTable.addColumn(valueColumn, new TextHeader(MSGS.devicePropValue()));
@@ -276,8 +265,15 @@ public class AssetDataUi extends Composite {
             return;
         }
 
+<<<<<<< HEAD
         this.alertDialog.show(MSGS.driversAssetsWriteConfirm(this.model.getAssetPid()), new AlertDialog.Listener() {
+=======
+        alertDialog.show(MSGS.driversAssetsWriteConfirm(model.getAssetPid()), () -> DriversAndAssetsRPC.write(model.getAssetPid(), writeRecords,
+                result -> {
+                    final List<GwtChannelRecord> records = result.getRecords();
+>>>>>>> refs/remotes/eclipse_kura/develop
 
+<<<<<<< HEAD
             @Override
             public void onConfirm() {
                 DriversAndAssetsRPC.write(AssetDataUi.this.model.getAssetPid(), writeRecords,
@@ -303,6 +299,20 @@ public class AssetDataUi extends Composite {
                         });
             }
         });
+=======
+                    if (records != null) {
+                        AssetDataUi.this.setDirty(false);
+                        for (GwtChannelRecord channelRecord : records) {
+                            channelValues.put(channelRecord.getName(), channelRecord);
+                        }
+                        AssetDataUi.this.channelsDataProvider.refresh();
+                        AssetDataUi.this.assetDataTable.redraw();
+                    } else {
+                        FailureHandler.showErrorMessage("Channel operation failed",
+                                result.getExceptionMessage(), result.getStackTrace());
+                    }
+                }));
+>>>>>>> refs/remotes/eclipse_kura/develop
     }
 
     private boolean isDirty(final String channelName) {
@@ -336,9 +346,16 @@ public class AssetDataUi extends Composite {
         this.channelsDataProvider.refresh();
 
         EntryClassUi.showWaitModal();
+<<<<<<< HEAD
         DriversAndAssetsRPC.readAllChannels(this.model.getAssetPid(),
                 new DriversAndAssetsRPC.Callback<GwtChannelOperationResult>() {
+=======
+        DriversAndAssetsRPC.readAllChannels(model.getAssetPid(),
+                result -> {
+                    final List<GwtChannelRecord> records = result.getRecords();
+>>>>>>> refs/remotes/eclipse_kura/develop
 
+<<<<<<< HEAD
                     @Override
                     public void onSuccess(final GwtChannelOperationResult result) {
                         final List<GwtChannelRecord> records = result.getRecords();
@@ -358,7 +375,22 @@ public class AssetDataUi extends Composite {
                         } else {
                             FailureHandler.showErrorMessage("Channel operation failed", result.getExceptionMessage(),
                                     result.getStackTrace());
+=======
+                    if (records != null) {
+                        for (final GwtChannelRecord record : records) {
+                            channelValues.put(record.getName(), record);
+>>>>>>> refs/remotes/eclipse_kura/develop
                         }
+                        AssetDataUi.this.channelsDataProvider.getList().addAll(model.getChannels());
+                        AssetDataUi.this.channelsDataProvider.refresh();
+
+                        int size = AssetDataUi.this.channelsDataProvider.getList().size();
+                        AssetDataUi.this.assetDataTable.setVisibleRange(0, size);
+
+                        AssetDataUi.this.assetDataTable.redraw();
+                    } else {
+                        FailureHandler.showErrorMessage("Channel operation failed", result.getExceptionMessage(),
+                                result.getStackTrace());
                     }
                 });
     }

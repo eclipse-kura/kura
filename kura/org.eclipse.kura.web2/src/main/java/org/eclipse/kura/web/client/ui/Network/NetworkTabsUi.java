@@ -9,7 +9,7 @@
  * Contributors:
  *     Eurotech
  *******************************************************************************/
-package org.eclipse.kura.web.client.ui.Network;
+package org.eclipse.kura.web.client.ui.network;
 
 import java.util.ArrayList;
 
@@ -77,7 +77,7 @@ public class NetworkTabsUi extends Composite {
     PanelBody content;
 
     public NetworkTabsUi(GwtSession session) {
-        this.visibleTabs = new ArrayList<>();
+        this.visibleTabs = new ArrayList<AnchorListItem>();
         initWidget(uiBinder.createAndBindUi(this));
         this.session = session;
         initTabs();

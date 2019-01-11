@@ -9,7 +9,7 @@
  * Contributors:
  *     Eurotech
  *******************************************************************************/
-package org.eclipse.kura.web.client.ui.Firewall;
+package org.eclipse.kura.web.client.ui.firewall;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -207,23 +207,23 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
                 PortForwardingTabUi.this.gwtNetworkService.findDeviceFirewallPortForwards(token,
                         new AsyncCallback<List<GwtFirewallPortForwardEntry>>() {
 
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                EntryClassUi.hideWaitModal();
-                                FailureHandler.handle(caught);
-                            }
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        EntryClassUi.hideWaitModal();
+                        FailureHandler.handle(caught);
+                    }
 
-                            @Override
-                            public void onSuccess(List<GwtFirewallPortForwardEntry> result) {
-                                for (GwtFirewallPortForwardEntry pair : result) {
-                                    PortForwardingTabUi.this.portForwardDataProvider.getList().add(pair);
-                                }
-                                refreshTable();
+                    @Override
+                    public void onSuccess(List<GwtFirewallPortForwardEntry> result) {
+                        for (GwtFirewallPortForwardEntry pair : result) {
+                            PortForwardingTabUi.this.portForwardDataProvider.getList().add(pair);
+                        }
+                        refreshTable();
 
-                                PortForwardingTabUi.this.buttonBar.setDirty(false);
-                                EntryClassUi.hideWaitModal();
-                            }
-                        });
+                        PortForwardingTabUi.this.buttonBar.setDirty(false);
+                        EntryClassUi.hideWaitModal();
+                    }
+                });
             }
 
         });
@@ -304,7 +304,7 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
         };
         col4.setCellStyleNames("status-table-row");
         this.portForwardGrid.addColumn(col4, MSGS.firewallPortForwardProtocol());
-
+        
         TextColumn<GwtFirewallPortForwardEntry> col5 = new TextColumn<GwtFirewallPortForwardEntry>() {
 
             @Override
@@ -432,20 +432,20 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
                 PortForwardingTabUi.this.gwtNetworkService.updateDeviceFirewallPortForwards(token,
                         updatedPortForwardConf, new AsyncCallback<Void>() {
 
-                            @Override
-                            public void onFailure(Throwable ex) {
-                                FailureHandler.handle(ex);
-                                EntryClassUi.hideWaitModal();
-                            }
+                    @Override
+                    public void onFailure(Throwable ex) {
+                        FailureHandler.handle(ex);
+                        EntryClassUi.hideWaitModal();
+                    }
 
-                            @Override
-                            public void onSuccess(Void result) {
-                                PortForwardingTabUi.this.buttonBar.setDirty(false);
-                                EntryClassUi.hideWaitModal();
+                    @Override
+                    public void onSuccess(Void result) {
+                        PortForwardingTabUi.this.buttonBar.setDirty(false);
+                        EntryClassUi.hideWaitModal();
 
-                                setDirty(false);
-                            }
-                        });
+                        setDirty(false);
+                    }
+                });
             }
         });
 
@@ -846,16 +846,13 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
                     String permittedNetwork = entry.getPermittedNetwork() != null ? entry.getPermittedNetwork()
                             : "0.0.0.0/0";
                     String newPermittedNetwork = portForwardEntry.getPermittedNetwork() != null
-                            ? portForwardEntry.getPermittedNetwork()
-                            : "0.0.0.0/0";
+                            ? portForwardEntry.getPermittedNetwork() : "0.0.0.0/0";
                     String permittedMAC = entry.getPermittedMAC() != null ? entry.getPermittedMAC().toUpperCase() : "";
                     String newPermittedMAC = portForwardEntry.getPermittedMAC() != null
-                            ? portForwardEntry.getPermittedMAC().toUpperCase()
-                            : "";
+                            ? portForwardEntry.getPermittedMAC().toUpperCase() : "";
                     String sourcePortRange = entry.getSourcePortRange() != null ? entry.getSourcePortRange() : "";
                     String newSourcePortRange = portForwardEntry.getSourcePortRange() != null
-                            ? portForwardEntry.getSourcePortRange()
-                            : "";
+                            ? portForwardEntry.getSourcePortRange() : "";
 
                     if (permittedNetwork.equals(newPermittedNetwork) && permittedMAC.equals(newPermittedMAC)
                             && sourcePortRange.equals(newSourcePortRange)) {

@@ -9,7 +9,7 @@
  * Contributors:
  *     Eurotech
  *******************************************************************************/
-package org.eclipse.kura.web.client.ui.Network;
+package org.eclipse.kura.web.client.ui.network;
 
 import java.util.List;
 import java.util.logging.Level;

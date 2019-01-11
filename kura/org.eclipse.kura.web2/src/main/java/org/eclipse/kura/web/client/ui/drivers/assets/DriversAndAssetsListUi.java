@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -43,10 +43,11 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
-import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 
 public class DriversAndAssetsListUi extends Composite {
+
+    private static final String CELL_NOT_VALID = "cell-not-valid";
 
     private static DriversAndAssetsListUiUiBinder uiBinder = GWT.create(DriversAndAssetsListUiUiBinder.class);
 
@@ -86,13 +87,15 @@ public class DriversAndAssetsListUi extends Composite {
 
         initTable();
 
-        this.selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+        initSelectionModel();
+    }
 
-            @Override
-            public void onSelectionChange(SelectionChangeEvent event) {
-                final DriverAssetInfo selectedInstanceEntry = DriversAndAssetsListUi.this.selectionModel
-                        .getSelectedObject();
+    private void initSelectionModel() {
+        this.selectionModel.addSelectionChangeHandler(event -> {
+            final DriverAssetInfo selectedInstanceEntry = DriversAndAssetsListUi.this.selectionModel
+                    .getSelectedObject();
 
+<<<<<<< HEAD
                 if (DriversAndAssetsListUi.this.listener != null) {
                     DriversAndAssetsListUi.this.listener.onSelectionChanged(selectedInstanceEntry);
                 }
@@ -139,8 +142,55 @@ public class DriversAndAssetsListUi extends Composite {
                     }
                 }
                 DriversAndAssetsListUi.this.configurationArea.setVisible(true);
+=======
+            if (listener != null) {
+                listener.onSelectionChanged(selectedInstanceEntry);
+>>>>>>> refs/remotes/eclipse_kura/develop
             }
+
+            cleanConfigurationArea();
+
+            if (selectedInstanceEntry == null) {
+                return;
+            }
+
+            final String pid = selectedInstanceEntry.getPid();
+
+            HasConfiguration hasConfiguration = configurations.getConfiguration(pid);
+
+            if (hasConfiguration == null) {
+                showWarning(selectedInstanceEntry.getPid(), MSGS.errorComponentConfigurationMissing(pid));
+            } else {
+
+                fillWithConfiguration(selectedInstanceEntry, pid, hasConfiguration);
+            }
+            configurationArea.setVisible(true);
         });
+    }
+
+    private void fillWithConfiguration(final DriverAssetInfo selectedInstanceEntry, final String pid,
+            HasConfiguration hasConfiguration) {
+        if (!selectedInstanceEntry.isAsset()) {
+            ConfigurableComponentUi driverUi = new ConfigurableComponentUi(
+                    hasConfiguration.getConfiguration());
+            ConfigurationUiButtons buttonBar = createDriverConfigButtonBar(driverUi);
+            driverUi.renderForm();
+            driverConfigUi = driverUi;
+            contentPanelHeader.setText(MSGS.driverLabel(selectedInstanceEntry.getPid()));
+            driversAndAssetsMgmtPanel.add(buttonBar);
+            if (selectedInstanceEntry.getChannelDescriptor() == null) {
+                showWarning(null, MSGS.errorDriverDescriptorMissing(pid));
+            }
+            driversAndAssetsMgmtPanel.add(driverConfigUi);
+        } else if (selectedInstanceEntry.getChannelDescriptor() != null) {
+            final AssetMgmtUi assetUi = new AssetMgmtUi(hasConfiguration, configurations);
+            assetMgmtUi = assetUi;
+            contentPanelHeader.setText(MSGS.assetLabel(selectedInstanceEntry.getPid()));
+            driversAndAssetsMgmtPanel.add(assetMgmtUi);
+        } else {
+            showWarning(MSGS.assetLabel(selectedInstanceEntry.getPid()),
+                    MSGS.errorDriverDescriptorMissingForAsset(pid, selectedInstanceEntry.getDriverPid()));
+        }
     }
 
     private void showWarning(String caption, String message) {
@@ -162,7 +212,7 @@ public class DriversAndAssetsListUi extends Composite {
 
             @Override
             public String getCellStyleNames(Context context, DriverAssetInfo object) {
-                return object.isValid() ? null : "cell-not-valid";
+                return object.isValid() ? null : CELL_NOT_VALID;
             }
 
             @Override
@@ -177,7 +227,7 @@ public class DriversAndAssetsListUi extends Composite {
 
             @Override
             public String getCellStyleNames(Context context, DriverAssetInfo object) {
-                return object.isValid() ? null : "cell-not-valid";
+                return object.isValid() ? null : CELL_NOT_VALID;
             }
 
             @Override
@@ -192,7 +242,7 @@ public class DriversAndAssetsListUi extends Composite {
 
             @Override
             public String getCellStyleNames(Context context, DriverAssetInfo object) {
-                return object.isValid() ? null : "cell-not-valid";
+                return object.isValid() ? null : CELL_NOT_VALID;
             }
 
             @Override
@@ -207,12 +257,7 @@ public class DriversAndAssetsListUi extends Composite {
 
     private List<DriverAssetInfo> getAssetsForDriver(final Map<String, List<DriverAssetInfo>> map,
             final String driverPid) {
-        List<DriverAssetInfo> result = map.get(driverPid);
-        if (result == null) {
-            result = new ArrayList<>();
-            map.put(driverPid, result);
-        }
-        return result;
+        return map.computeIfAbsent(driverPid, pid -> new ArrayList<DriverAssetInfo>());
     }
 
     private DriverAssetInfo getDriverEntry(String driverPid) {
@@ -330,6 +375,7 @@ public class DriversAndAssetsListUi extends Composite {
             @Override
             public void onApply() {
                 final GwtConfigComponent configuration = driverUi.getConfiguration();
+<<<<<<< HEAD
                 DriversAndAssetsRPC.updateConfiguration(configuration, new DriversAndAssetsRPC.Callback<Void>() {
 
                     @Override
@@ -337,6 +383,11 @@ public class DriversAndAssetsListUi extends Composite {
                         DriversAndAssetsListUi.this.configurations.setConfiguration(configuration);
                         driverUi.setDirty(false);
                     }
+=======
+                DriversAndAssetsRPC.updateConfiguration(configuration, result1 -> {
+                    configurations.setConfiguration(configuration);
+                    driverUi.setDirty(false);
+>>>>>>> refs/remotes/eclipse_kura/develop
                 });
             }
         });

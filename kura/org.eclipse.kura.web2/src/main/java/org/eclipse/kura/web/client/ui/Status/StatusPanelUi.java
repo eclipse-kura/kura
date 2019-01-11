@@ -9,7 +9,7 @@
  * Contributors:
  *     Eurotech
  *******************************************************************************/
-package org.eclipse.kura.web.client.ui.Status;
+package org.eclipse.kura.web.client.ui.status;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -65,7 +65,7 @@ public class StatusPanelUi extends Composite {
     private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
 
     private GwtSession currentSession;
-    private final ListDataProvider<GwtGroupedNVPair> statusGridProvider = new ListDataProvider<>();
+    private final ListDataProvider<GwtGroupedNVPair> statusGridProvider = new ListDataProvider<GwtGroupedNVPair>();
     private EntryClassUi parent;
 
     @UiField
@@ -73,7 +73,7 @@ public class StatusPanelUi extends Composite {
     @UiField
     Button statusRefresh;
     @UiField
-    CellTable<GwtGroupedNVPair> statusGrid = new CellTable<>();
+    CellTable<GwtGroupedNVPair> statusGrid = new CellTable<GwtGroupedNVPair>();
 
     public StatusPanelUi() {
         logger.log(Level.FINER, "Initializing StatusPanelUi...");
@@ -168,35 +168,35 @@ public class StatusPanelUi extends Composite {
                         StatusPanelUi.this.currentSession.isNetAdminAvailable(),
                         new AsyncCallback<ArrayList<GwtGroupedNVPair>>() {
 
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                FailureHandler.handle(caught);
-                                StatusPanelUi.this.statusGridProvider.flush();
-                                EntryClassUi.hideWaitModal();
-                            }
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        FailureHandler.handle(caught);
+                        StatusPanelUi.this.statusGridProvider.flush();
+                        EntryClassUi.hideWaitModal();
+                    }
 
-                            @Override
-                            public void onSuccess(ArrayList<GwtGroupedNVPair> result) {
-                                String title = "cloudStatus";
+                    @Override
+                    public void onSuccess(ArrayList<GwtGroupedNVPair> result) {
+                        String title = "cloudStatus";
+                        StatusPanelUi.this.statusGridProvider.getList()
+                                .add(new GwtGroupedNVPair(" ", msgs.getString(title), " "));
+
+                        Iterator<GwtGroupedNVPair> it = result.iterator();
+                        while (it.hasNext()) {
+                            GwtGroupedNVPair connectionName = it.next();
+                            if (!title.equals(connectionName.getGroup())) {
+                                title = connectionName.getGroup();
                                 StatusPanelUi.this.statusGridProvider.getList()
                                         .add(new GwtGroupedNVPair(" ", msgs.getString(title), " "));
-
-                                Iterator<GwtGroupedNVPair> it = result.iterator();
-                                while (it.hasNext()) {
-                                    GwtGroupedNVPair connectionName = it.next();
-                                    if (!title.equals(connectionName.getGroup())) {
-                                        title = connectionName.getGroup();
-                                        StatusPanelUi.this.statusGridProvider.getList()
-                                                .add(new GwtGroupedNVPair(" ", msgs.getString(title), " "));
-                                    }
-                                    StatusPanelUi.this.statusGridProvider.getList().add(connectionName);
-                                }
-                                int size = StatusPanelUi.this.statusGridProvider.getList().size();
-                                StatusPanelUi.this.statusGrid.setVisibleRange(0, size);
-                                StatusPanelUi.this.statusGridProvider.flush();
-                                EntryClassUi.hideWaitModal();
                             }
-                        });
+                            StatusPanelUi.this.statusGridProvider.getList().add(connectionName);
+                        }
+                        int size = StatusPanelUi.this.statusGridProvider.getList().size();
+                        StatusPanelUi.this.statusGrid.setVisibleRange(0, size);
+                        StatusPanelUi.this.statusGridProvider.flush();
+                        EntryClassUi.hideWaitModal();
+                    }
+                });
             }
         });
     }

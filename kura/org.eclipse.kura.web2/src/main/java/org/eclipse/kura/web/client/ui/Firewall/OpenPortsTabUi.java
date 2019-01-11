@@ -9,7 +9,7 @@
  * Contributors:
  *     Eurotech
  *******************************************************************************/
-package org.eclipse.kura.web.client.ui.Firewall;
+package org.eclipse.kura.web.client.ui.firewall;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -392,7 +392,7 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
                     setVisibility();
                     OpenPortsTabUi.this.buttonBar.setDirty(true);
                 } else {
-                    this.existingRule.show();
+                    existingRule.show();
                 }
             }
         });
@@ -422,7 +422,7 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
                     OpenPortsTabUi.this.editOpenPortEntry = null;
                     setVisibility();
                 } else {
-                    this.existingRule.show();
+                    existingRule.show();
                     OpenPortsTabUi.this.openPortsDataProvider.getList().add(oldEntry);
                     OpenPortsTabUi.this.openPortsDataProvider.flush();
                 }

@@ -9,7 +9,7 @@
  * Contributors:
  *     Eurotech
  *******************************************************************************/
-package org.eclipse.kura.web.client.ui.Device;
+package org.eclipse.kura.web.client.ui.device;
 
 import java.util.ArrayList;
 
@@ -50,8 +50,8 @@ public class SystemPropertiesTabUi extends Composite implements Tab {
     private final GwtDeviceServiceAsync gwtDeviceService = GWT.create(GwtDeviceService.class);
 
     @UiField
-    CellTable<GwtGroupedNVPair> systemPropertiesGrid = new CellTable<>();
-    private final ListDataProvider<GwtGroupedNVPair> systemPropertiesDataProvider = new ListDataProvider<>();
+    CellTable<GwtGroupedNVPair> systemPropertiesGrid = new CellTable<GwtGroupedNVPair>();
+    private final ListDataProvider<GwtGroupedNVPair> systemPropertiesDataProvider = new ListDataProvider<GwtGroupedNVPair>();
 
     public SystemPropertiesTabUi() {
         initWidget(uiBinder.createAndBindUi(this));
@@ -128,26 +128,26 @@ public class SystemPropertiesTabUi extends Composite implements Tab {
                 SystemPropertiesTabUi.this.gwtDeviceService.findSystemProperties(token,
                         new AsyncCallback<ArrayList<GwtGroupedNVPair>>() {
 
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                EntryClassUi.hideWaitModal();
-                                SystemPropertiesTabUi.this.systemPropertiesDataProvider.getList().clear();
-                                FailureHandler.handle(caught);
-                                SystemPropertiesTabUi.this.systemPropertiesDataProvider.flush();
-                            }
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        EntryClassUi.hideWaitModal();
+                        SystemPropertiesTabUi.this.systemPropertiesDataProvider.getList().clear();
+                        FailureHandler.handle(caught);
+                        SystemPropertiesTabUi.this.systemPropertiesDataProvider.flush();
+                    }
 
-                            @Override
-                            public void onSuccess(ArrayList<GwtGroupedNVPair> result) {
-                                for (GwtGroupedNVPair resultPair : result) {
-                                    SystemPropertiesTabUi.this.systemPropertiesDataProvider.getList().add(resultPair);
-                                }
-                                int size = SystemPropertiesTabUi.this.systemPropertiesDataProvider.getList().size();
-                                SystemPropertiesTabUi.this.systemPropertiesGrid.setVisibleRange(0, size);
-                                SystemPropertiesTabUi.this.systemPropertiesDataProvider.flush();
-                                EntryClassUi.hideWaitModal();
-                            }
+                    @Override
+                    public void onSuccess(ArrayList<GwtGroupedNVPair> result) {
+                        for (GwtGroupedNVPair resultPair : result) {
+                            SystemPropertiesTabUi.this.systemPropertiesDataProvider.getList().add(resultPair);
+                        }
+                        int size = SystemPropertiesTabUi.this.systemPropertiesDataProvider.getList().size();
+                        SystemPropertiesTabUi.this.systemPropertiesGrid.setVisibleRange(0, size);
+                        SystemPropertiesTabUi.this.systemPropertiesDataProvider.flush();
+                        EntryClassUi.hideWaitModal();
+                    }
 
-                        });
+                });
             }
 
         });

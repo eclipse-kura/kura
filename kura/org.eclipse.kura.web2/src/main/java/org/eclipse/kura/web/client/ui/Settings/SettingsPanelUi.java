@@ -9,7 +9,7 @@
  * Contributors:
  *     Eurotech
  *******************************************************************************/
-package org.eclipse.kura.web.client.ui.Settings;
+package org.eclipse.kura.web.client.ui.settings;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;

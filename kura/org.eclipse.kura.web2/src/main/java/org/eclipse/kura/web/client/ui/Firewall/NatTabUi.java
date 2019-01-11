@@ -9,7 +9,7 @@
  * Contributors:
  *     Eurotech
  *******************************************************************************/
-package org.eclipse.kura.web.client.ui.Firewall;
+package org.eclipse.kura.web.client.ui.firewall;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -133,17 +133,17 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
     TextBox source;
     @UiField
     TextBox destination;
-
+    
     @UiField
     ListBox protocol;
     @UiField
     ListBox enable;
-
+    
     @UiField
     Button submit;
     @UiField
     Button cancel;
-
+    
     @UiField
     AlertDialog alertDialog;
 
@@ -178,23 +178,23 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
                 NatTabUi.this.gwtNetworkService.findDeviceFirewallNATs(token,
                         new AsyncCallback<List<GwtFirewallNatEntry>>() {
 
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                EntryClassUi.hideWaitModal();
-                                FailureHandler.handle(caught);
-                            }
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        EntryClassUi.hideWaitModal();
+                        FailureHandler.handle(caught);
+                    }
 
-                            @Override
-                            public void onSuccess(List<GwtFirewallNatEntry> result) {
-                                for (GwtFirewallNatEntry pair : result) {
-                                    NatTabUi.this.natDataProvider.getList().add(pair);
-                                }
-                                refreshTable();
+                    @Override
+                    public void onSuccess(List<GwtFirewallNatEntry> result) {
+                        for (GwtFirewallNatEntry pair : result) {
+                            NatTabUi.this.natDataProvider.getList().add(pair);
+                        }
+                        refreshTable();
 
-                                NatTabUi.this.buttonBar.setDirty(false);
-                                EntryClassUi.hideWaitModal();
-                            }
-                        });
+                        NatTabUi.this.buttonBar.setDirty(false);
+                        EntryClassUi.hideWaitModal();
+                    }
+                });
             }
         });
     }
@@ -327,7 +327,7 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
     public void onApply() {
         List<GwtFirewallNatEntry> intermediateList = NatTabUi.this.natDataProvider.getList();
 
-        final List<GwtFirewallNatEntry> updatedNatConf = new ArrayList<>();
+        final List<GwtFirewallNatEntry> updatedNatConf = new ArrayList<GwtFirewallNatEntry>();
         for (GwtFirewallNatEntry entry : intermediateList) {
             updatedNatConf.add(entry);
         }
@@ -346,19 +346,19 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
                 NatTabUi.this.gwtNetworkService.updateDeviceFirewallNATs(token, updatedNatConf,
                         new AsyncCallback<Void>() {
 
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                EntryClassUi.hideWaitModal();
-                                FailureHandler.handle(caught);
-                            }
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        EntryClassUi.hideWaitModal();
+                        FailureHandler.handle(caught);
+                    }
 
-                            @Override
-                            public void onSuccess(Void result) {
-                                setDirty(false);
-                                NatTabUi.this.buttonBar.setDirty(false);
-                                EntryClassUi.hideWaitModal();
-                            }
-                        });
+                    @Override
+                    public void onSuccess(Void result) {
+                        setDirty(false);
+                        NatTabUi.this.buttonBar.setDirty(false);
+                        EntryClassUi.hideWaitModal();
+                    }
+                });
             }
         });
 
@@ -646,11 +646,9 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
                 String destinationNetwork = entry.getDestinationNetwork() != null ? entry.getDestinationNetwork()
                         : "0.0.0.0/0";
                 String newSourceNetwork = firewallNatEntry.getSourceNetwork() != null
-                        ? firewallNatEntry.getSourceNetwork()
-                        : "0.0.0.0/0";
+                        ? firewallNatEntry.getSourceNetwork() : "0.0.0.0/0";
                 String newDestinationNetwork = firewallNatEntry.getDestinationNetwork() != null
-                        ? firewallNatEntry.getDestinationNetwork()
-                        : "0.0.0.0/0";
+                        ? firewallNatEntry.getDestinationNetwork() : "0.0.0.0/0";
 
                 if (entry.getInInterface().equals(firewallNatEntry.getInInterface())
                         && entry.getOutInterface().equals(firewallNatEntry.getOutInterface())

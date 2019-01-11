@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -17,8 +17,6 @@ import org.eclipse.kura.web.client.ui.AlertDialog;
 import org.gwtbootstrap3.client.ui.Button;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -49,6 +47,7 @@ public class ConfigurationUiButtons extends Composite implements HasConfiguratio
         this.btnReset.setEnabled(target.isDirty());
         target.setListener(this);
 
+<<<<<<< HEAD
         this.btnApply.addClickHandler(new ClickHandler() {
 
             @Override
@@ -69,8 +68,19 @@ public class ConfigurationUiButtons extends Composite implements HasConfiguratio
                                 ConfigurationUiButtons.this.listener.onApply();
                             }
                         });
+=======
+        this.btnApply.addClickHandler(event -> {
+            if (listener == null) {
+                return;
+>>>>>>> refs/remotes/eclipse_kura/develop
             }
+            if (!target.isValid()) {
+                confirmDialog.show(MSGS.formWithErrorsOrIncomplete(), AlertDialog.Severity.ALERT, null);
+                return;
+            }
+            confirmDialog.show(MSGS.deviceConfigConfirmationNoName(), () -> listener.onApply());
         });
+<<<<<<< HEAD
         this.btnReset.addClickHandler(new ClickHandler() {
 
             @Override
@@ -85,7 +95,13 @@ public class ConfigurationUiButtons extends Composite implements HasConfiguratio
                         ConfigurationUiButtons.this.listener.onReset();
                     }
                 });
+=======
+        this.btnReset.addClickHandler(event -> {
+            if (listener == null) {
+                return;
+>>>>>>> refs/remotes/eclipse_kura/develop
             }
+            confirmDialog.show(MSGS.deviceConfigDirty(), () -> listener.onReset());
         });
     }
 
@@ -95,6 +111,7 @@ public class ConfigurationUiButtons extends Composite implements HasConfiguratio
 
     @Override
     public void onConfigurationChanged(HasConfiguration hasConfiguration) {
+        //Not needed
     }
 
     @Override

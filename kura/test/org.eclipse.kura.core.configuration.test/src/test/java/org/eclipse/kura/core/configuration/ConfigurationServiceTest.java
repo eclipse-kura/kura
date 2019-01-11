@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2019 Eurotech and/or its affiliates and others
  *
  *   All rights reserved. This program and the accompanying materials
  *   are made available under the terms of the Eclipse Public License v1.0
@@ -29,6 +29,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1700,22 +1701,22 @@ public class ConfigurationServiceTest {
         d1.delete();
     }
 
-    private String prepareSnapshotXML() throws Exception {
-        XmlComponentConfigurations cfgs = prepareSnapshot();
-
+    private String prepareSnapshotXml(final XmlComponentConfigurations configs) throws KuraException {
         XmlMarshallUnmarshallImpl xmlMarshaller = new XmlMarshallUnmarshallImpl();
-        return xmlMarshaller.marshal(cfgs);
+        return xmlMarshaller.marshal(configs);
     }
 
-    private XmlComponentConfigurations prepareSnapshot() {
+    private String prepareSnapshotXML() throws Exception {
+        return prepareSnapshotXml(prepareSnapshot());
+    }
+
+    private XmlComponentConfigurations prepareSnapshot(final Map<String, Object> configProps) {
         XmlComponentConfigurations cfgs = new XmlComponentConfigurations();
 
         List<ComponentConfiguration> cfglist = new ArrayList<>();
         ComponentConfigurationImpl cfg = new ComponentConfigurationImpl();
         cfg.setPid("123");
-        Map<String, Object> props = new HashMap<>();
-        props.put("pass", "pass");
-        cfg.setProperties(props);
+        cfg.setProperties(configProps);
         Tocd definition = new Tocd();
         definition.setDescription("description");
         cfg.setDefinition(definition);
@@ -1723,6 +1724,10 @@ public class ConfigurationServiceTest {
         cfgs.setConfigurations(cfglist);
 
         return cfgs;
+    }
+
+    private XmlComponentConfigurations prepareSnapshot() {
+        return prepareSnapshot(Collections.singletonMap("pass", "pass"));
     }
 
     @Test
@@ -2327,6 +2332,76 @@ public class ConfigurationServiceTest {
 
         f1.delete();
         d1.delete();
+    }
+
+    @Test
+    public void testLineBreakHandling() throws KuraException, IOException {
+        final CryptoService csMock = mock(CryptoService.class);
+
+        when(csMock.encryptAes(Mockito.any(char[].class))).thenAnswer(invocation -> {
+            return invocation.getArgumentAt(0, char[].class);
+        });
+
+        when(csMock.decryptAes(Mockito.any(char[].class))).thenAnswer(invocation -> {
+            return invocation.getArgumentAt(0, char[].class);
+        });
+
+        final File snapshotsDir = new File("/tmp/snapshot_test_dir_" + System.currentTimeMillis());
+        snapshotsDir.mkdir();
+        snapshotsDir.deleteOnExit();
+
+        final SystemService ssMock = mock(SystemService.class);
+        when(ssMock.getKuraSnapshotsDirectory()).thenReturn(snapshotsDir.getAbsolutePath().toString());
+
+        final Map<String, Object> expectedConfig = Collections.singletonMap("prop", "contains\nline\nbreaks\n");
+
+        final String snapshot = prepareSnapshotXml(prepareSnapshot(expectedConfig));
+
+        final File snapshotFile = new File(snapshotsDir, "snapshot_0.xml");
+        snapshotFile.deleteOnExit();
+
+        try (final FileWriter fw = new FileWriter(snapshotFile)) {
+            fw.write(snapshot);
+            fw.flush();
+        }
+
+        ConfigurationServiceImpl configurationService = new ConfigurationServiceImpl() {
+
+            @Override
+            public Set<Long> getSnapshots() throws KuraException {
+                return Collections.singleton(0L);
+            }
+
+            @Override
+            String getSnapshotsDirectory() {
+                return snapshotsDir.getAbsolutePath().toString();
+            }
+
+            @Override
+            protected <T> T unmarshal(String xmlString, Class<T> clazz) throws KuraException {
+                XmlMarshallUnmarshallImpl xmlMarshaller = new XmlMarshallUnmarshallImpl();
+
+                return xmlMarshaller.unmarshal(xmlString, clazz);
+            }
+
+            @Override
+            protected String marshal(Object object) {
+                XmlMarshallUnmarshallImpl xmlMarshaller = new XmlMarshallUnmarshallImpl();
+                try {
+                    return xmlMarshaller.marshal(object);
+                } catch (KuraException e) {
+
+                }
+                return null;
+            }
+        };
+
+        configurationService.setCryptoService(csMock);
+
+        final List<ComponentConfiguration> loadedSnapshot = configurationService.getSnapshot(0);
+
+        assertEquals(expectedConfig.get("prop"), loadedSnapshot.get(0).getConfigurationProperties().get("prop"));
+
     }
 
     @Test
@@ -3090,7 +3165,7 @@ public class ConfigurationServiceTest {
     }
 
     private OCDService createMockConfigurationServiceForOCDTests(List<String> registeredFactories,
-            List<Tocd> registeredOcds, List<ComponentDescriptionDTO> registeredComponents) 
+            List<Tocd> registeredOcds, List<ComponentDescriptionDTO> registeredComponents)
             throws NoSuchFieldException, KuraException {
 
         assertEquals(registeredFactories.size(), registeredOcds.size());

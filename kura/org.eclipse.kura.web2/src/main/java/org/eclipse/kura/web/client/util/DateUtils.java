@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -20,7 +20,12 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 
 public class DateUtils {
 
+    private static final String YYYY_MM_DD_HH_MM_SS_SSS = "yyyy.MM.dd.HH.mm.ss.SSS";
     private static final Messages MSGS = GWT.create(Messages.class);
+
+    private DateUtils() {
+
+    }
 
     /**
      * formatDate takes a date an return its string representation
@@ -42,37 +47,21 @@ public class DateUtils {
         // if more in the future than tomorrow than format the date
         // even if it's just 2 days from today at midnight (day diff of 2 exactly)
         if (dDayDiff >= 2) {
-
-            DateTimeFormat dtf = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_TIME_MEDIUM);
-            date = dtf.format(d);
+            date = formatDateTimeInternal(d);
         }
 
         // if the modification time is still tomorrow, or
         // exactly at midnight tomorrow, then
         // return something like "Tomorrow 10:30 am"
         else if (dDayDiff >= 1) {
-
             DateTimeFormat dtf = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.TIME_MEDIUM);
             date = MSGS.tomorrow(dtf.format(d));
         }
-
-        // if the time difference is less than 1 hour
-        // return something like "30 minutes ago"
-        // else if (lSecDiff >= 0 && lSecDiff < 3600) {
-        //
-        // if ((lSecDiff / 60) < 1) {
-        // date = lCtx.format(LocaleContext.RB.STR_LESS_THAN_ONE_MIN_AGO);
-        // } else {
-        // String mins = String.valueOf(lSecDiff / 60);
-        // date = lCtx.format(LocaleContext.RB.STR_N_MIN_AGO, mins);
-        // }
-        // }
 
         // if the modification time is still today, or it is midnight
         // this same day (this morning), then
         // return something like "Today 10:30 am"
         else if (dDayDiff >= 0) {
-
             DateTimeFormat dtf = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.TIME_MEDIUM);
             date = MSGS.today(dtf.format(d));
         }
@@ -81,15 +70,19 @@ public class DateUtils {
         // or exactly 1 day ago at midnight, then
         // return something like "Yesterday 10:30 am"
         else if (dDayDiff >= -1) {
-
             DateTimeFormat dtf = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.TIME_MEDIUM);
             date = MSGS.yesterday(dtf.format(d));
         } else {
-
-            DateTimeFormat dtf = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_TIME_MEDIUM);
-            date = dtf.format(d);
+            date = formatDateTimeInternal(d);
         }
 
+        return date;
+    }
+
+    private static String formatDateTimeInternal(Date d) {
+        String date;
+        DateTimeFormat dtf = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_TIME_MEDIUM);
+        date = dtf.format(d);
         return date;
     }
 
@@ -124,17 +117,17 @@ public class DateUtils {
     }
 
     public static Date setYear(Date date, int year) {
-        String dateString = DateTimeFormat.getFormat("yyyy.MM.dd.HH.mm.ss.SSS").format(date);
+        String dateString = DateTimeFormat.getFormat(YYYY_MM_DD_HH_MM_SS_SSS).format(date);
 
         StringBuilder sb = new StringBuilder();
         sb.append(pad(Integer.toString(year), 4));
         sb.append(dateString.substring(5));
 
-        return DateTimeFormat.getFormat("yyyy.MM.dd.HH.mm.ss.SSS").parse(sb.toString());
+        return DateTimeFormat.getFormat(YYYY_MM_DD_HH_MM_SS_SSS).parse(sb.toString());
     }
 
     public static Date setMonth(Date date, int month) {
-        String dateString = DateTimeFormat.getFormat("yyyy.MM.dd.HH.mm.ss.SSS").format(date);
+        String dateString = DateTimeFormat.getFormat(YYYY_MM_DD_HH_MM_SS_SSS).format(date);
 
         StringBuilder sb = new StringBuilder();
         sb.append(dateString.substring(0, 5));
@@ -143,22 +136,22 @@ public class DateUtils {
         sb.append(pad(Integer.toString(month + 1), 2));
         sb.append(dateString.substring(7));
 
-        return DateTimeFormat.getFormat("yyyy.MM.dd.HH.mm.ss.SSS").parse(sb.toString());
+        return DateTimeFormat.getFormat(YYYY_MM_DD_HH_MM_SS_SSS).parse(sb.toString());
     }
 
     public static Date setDayOfMonth(Date date, int dayOfMonth) {
-        String dateString = DateTimeFormat.getFormat("yyyy.MM.dd.HH.mm.ss.SSS").format(date);
+        String dateString = DateTimeFormat.getFormat(YYYY_MM_DD_HH_MM_SS_SSS).format(date);
 
         StringBuilder sb = new StringBuilder();
         sb.append(dateString.substring(0, 8));
         sb.append(pad(Integer.toString(dayOfMonth), 2));
         sb.append(dateString.substring(10));
 
-        return DateTimeFormat.getFormat("yyyy.MM.dd.HH.mm.ss.SSS").parse(sb.toString());
+        return DateTimeFormat.getFormat(YYYY_MM_DD_HH_MM_SS_SSS).parse(sb.toString());
     }
 
     public static Date setToLastDayOfMonth(Date date) {
-        String dateString = DateTimeFormat.getFormat("yyyy.MM.dd.HH.mm.ss.SSS").format(date);
+        String dateString = DateTimeFormat.getFormat(YYYY_MM_DD_HH_MM_SS_SSS).format(date);
 
         StringBuilder sb = new StringBuilder();
         sb.append(dateString.substring(0, 8));
@@ -210,55 +203,55 @@ public class DateUtils {
 
         sb.append(dateString.substring(10));
 
-        return DateTimeFormat.getFormat("yyyy.MM.dd.HH.mm.ss.SSS").parse(sb.toString());
+        return DateTimeFormat.getFormat(YYYY_MM_DD_HH_MM_SS_SSS).parse(sb.toString());
     }
 
     public static Date setHour(Date date, int hour) {
-        String dateString = DateTimeFormat.getFormat("yyyy.MM.dd.HH.mm.ss.SSS").format(date);
+        String dateString = DateTimeFormat.getFormat(YYYY_MM_DD_HH_MM_SS_SSS).format(date);
 
         StringBuilder sb = new StringBuilder();
         sb.append(dateString.substring(0, 11));
         sb.append(pad(Integer.toString(hour), 2));
         sb.append(dateString.substring(13));
 
-        return DateTimeFormat.getFormat("yyyy.MM.dd.HH.mm.ss.SSS").parse(sb.toString());
+        return DateTimeFormat.getFormat(YYYY_MM_DD_HH_MM_SS_SSS).parse(sb.toString());
     }
 
     public static Date setMinute(Date date, int minute) {
-        String dateString = DateTimeFormat.getFormat("yyyy.MM.dd.HH.mm.ss.SSS").format(date);
+        String dateString = DateTimeFormat.getFormat(YYYY_MM_DD_HH_MM_SS_SSS).format(date);
 
         StringBuilder sb = new StringBuilder();
         sb.append(dateString.substring(0, 14));
         sb.append(pad(Integer.toString(minute), 2));
         sb.append(dateString.substring(16));
 
-        return DateTimeFormat.getFormat("yyyy.MM.dd.HH.mm.ss.SSS").parse(sb.toString());
+        return DateTimeFormat.getFormat(YYYY_MM_DD_HH_MM_SS_SSS).parse(sb.toString());
     }
 
     public static Date setSecond(Date date, int second) {
-        String dateString = DateTimeFormat.getFormat("yyyy.MM.dd.HH.mm.ss.SSS").format(date);
+        String dateString = DateTimeFormat.getFormat(YYYY_MM_DD_HH_MM_SS_SSS).format(date);
 
         StringBuilder sb = new StringBuilder();
         sb.append(dateString.substring(0, 17));
         sb.append(pad(Integer.toString(second), 2));
         sb.append(dateString.substring(19));
 
-        return DateTimeFormat.getFormat("yyyy.MM.dd.HH.mm.ss.SSS").parse(sb.toString());
+        return DateTimeFormat.getFormat(YYYY_MM_DD_HH_MM_SS_SSS).parse(sb.toString());
     }
 
     public static Date setMillisecond(Date date, int millisecond) {
-        String dateString = DateTimeFormat.getFormat("yyyy.MM.dd.HH.mm.ss.SSS").format(date);
+        String dateString = DateTimeFormat.getFormat(YYYY_MM_DD_HH_MM_SS_SSS).format(date);
 
         StringBuilder sb = new StringBuilder();
         sb.append(dateString.substring(0, 20));
         sb.append(pad(Integer.toString(millisecond), 3));
 
-        return DateTimeFormat.getFormat("yyyy.MM.dd.HH.mm.ss.SSS").parse(sb.toString());
+        return DateTimeFormat.getFormat(YYYY_MM_DD_HH_MM_SS_SSS).parse(sb.toString());
     }
 
     private static String pad(String data, int size) {
         if (data.length() < size) {
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             for (int i = 0; i < size - data.length(); i++) {
                 sb.append("0");
             }
@@ -270,10 +263,6 @@ public class DateUtils {
     }
 
     private static boolean isLeapYear(int year) {
-        if (year % 4 == 0) {
-            return true;
-        } else {
-            return false;
-        }
+        return year % 4 == 0;
     }
 }

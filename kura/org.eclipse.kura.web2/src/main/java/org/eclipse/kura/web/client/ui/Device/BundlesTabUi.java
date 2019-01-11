@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -9,7 +9,7 @@
  * Contributors:
  *     Eurotech
  *******************************************************************************/
-package org.eclipse.kura.web.client.ui.Device;
+package org.eclipse.kura.web.client.ui.device;
 
 import java.util.ArrayList;
 
@@ -20,7 +20,6 @@ import org.eclipse.kura.web.client.ui.Tab;
 import org.eclipse.kura.web.client.util.EventService;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.ForwardedEventTopic;
-import org.eclipse.kura.web.shared.model.GwtEventInfo;
 import org.eclipse.kura.web.shared.model.GwtGroupedNVPair;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtDeviceService;
@@ -31,8 +30,6 @@ import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.gwt.CellTable;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -41,7 +38,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
-import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 
 public class BundlesTabUi extends Composite implements Tab {
@@ -52,7 +48,7 @@ public class BundlesTabUi extends Composite implements Tab {
     }
 
     private static final Messages MSGS = GWT.create(Messages.class);
-    private static final ValidationMessages msgs = GWT.create(ValidationMessages.class);
+    private static final ValidationMessages validationMessages = GWT.create(ValidationMessages.class);
     private static final String ROW_HEADER_STYLE = "rowHeader";
     private static final String STATUS_TABLE_ROW_STYLE = "status-table-row";
 
@@ -87,46 +83,14 @@ public class BundlesTabUi extends Composite implements Tab {
         updateButtons();
 
         this.bundlesGrid.setSelectionModel(this.selectionModel);
-        this.selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+        this.selectionModel.addSelectionChangeHandler(event -> updateButtons());
+        this.bundlesRefresh.addClickHandler(event -> refresh());
+        this.bundleStart.addClickHandler(event -> startSelectedBundle());
+        this.bundleStop.addClickHandler(event -> stopSelectedBundle());
 
-            @Override
-            public void onSelectionChange(SelectionChangeEvent event) {
-                updateButtons();
-            }
-        });
-        this.bundlesRefresh.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
+        EventService.Handler onBundleUpdatedHandler = eventInfo -> {
+            if (BundlesTabUi.this.isVisible() && BundlesTabUi.this.isAttached()) {
                 refresh();
-
-            }
-        });
-        this.bundleStart.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                startSelectedBundle();
-
-            }
-        });
-        this.bundleStop.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                stopSelectedBundle();
-
-            }
-        });
-        // loadBundlesData();
-
-        EventService.Handler onBundleUpdatedHandler = new EventService.Handler() {
-
-            @Override
-            public void handleEvent(GwtEventInfo eventInfo) {
-                if (BundlesTabUi.this.isVisible() && BundlesTabUi.this.isAttached()) {
-                    refresh();
-                }
             }
         };
 
@@ -166,18 +130,18 @@ public class BundlesTabUi extends Composite implements Tab {
                 BundlesTabUi.this.deviceService.startBundle(token,
                         BundlesTabUi.this.selectionModel.getSelectedObject().getId(), new AsyncCallback<Void>() {
 
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                EntryClassUi.hideWaitModal();
-                                FailureHandler.handle(caught);
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        EntryClassUi.hideWaitModal();
+                        FailureHandler.handle(caught);
 
-                            }
+                    }
 
-                            @Override
-                            public void onSuccess(Void result) {
-                                EntryClassUi.hideWaitModal();
-                            }
-                        });
+                    @Override
+                    public void onSuccess(Void result) {
+                        EntryClassUi.hideWaitModal();
+                    }
+                });
 
             }
 
@@ -204,18 +168,18 @@ public class BundlesTabUi extends Composite implements Tab {
                 BundlesTabUi.this.deviceService.stopBundle(token,
                         BundlesTabUi.this.selectionModel.getSelectedObject().getId(), new AsyncCallback<Void>() {
 
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                EntryClassUi.hideWaitModal();
-                                FailureHandler.handle(caught);
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        EntryClassUi.hideWaitModal();
+                        FailureHandler.handle(caught);
 
-                            }
+                    }
 
-                            @Override
-                            public void onSuccess(Void result) {
-                                EntryClassUi.hideWaitModal();
-                            }
-                        });
+                    @Override
+                    public void onSuccess(Void result) {
+                        EntryClassUi.hideWaitModal();
+                    }
+                });
             }
         });
     }
@@ -251,7 +215,7 @@ public class BundlesTabUi extends Composite implements Tab {
 
             @Override
             public String getValue(GwtGroupedNVPair object) {
-                return msgs.getString(object.getStatus());
+                return validationMessages.getString(object.getStatus());
             }
         };
         col3.setCellStyleNames(STATUS_TABLE_ROW_STYLE);
@@ -276,6 +240,7 @@ public class BundlesTabUi extends Composite implements Tab {
 
     @Override
     public void setDirty(boolean flag) {
+        // Not needed
     }
 
     @Override

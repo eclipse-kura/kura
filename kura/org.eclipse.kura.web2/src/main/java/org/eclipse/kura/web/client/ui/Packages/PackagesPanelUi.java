@@ -9,7 +9,7 @@
  * Contributors:
  *     Eurotech
  *******************************************************************************/
-package org.eclipse.kura.web.client.ui.Packages;
+package org.eclipse.kura.web.client.ui.packages;
 
 import java.util.List;
 import java.util.logging.Level;
@@ -259,47 +259,45 @@ public class PackagesPanelUi extends Composite {
     }
 
     private void initModalHandlers() {
-        this.fileSubmit.addClickHandler(
-                event -> PackagesPanelUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+        this.fileSubmit.addClickHandler(event -> PackagesPanelUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
-                    @Override
-                    public void onFailure(Throwable ex) {
-                        FailureHandler.handle(ex);
-                    }
+            @Override
+            public void onFailure(Throwable ex) {
+                FailureHandler.handle(ex);
+            }
 
-                    @Override
-                    public void onSuccess(GwtXSRFToken token) {
-                        PackagesPanelUi.this.xsrfTokenFieldFile.setValue(token.getToken());
-                        if (!"".equals(PackagesPanelUi.this.filePath.getFilename())) {
-                            PackagesPanelUi.this.packagesFormFile.submit();
-                        } else {
-                            PackagesPanelUi.this.uploadModal.hide();
-                            PackagesPanelUi.this.uploadErrorModal.show();
-                        }
-                    }
-                }));
+            @Override
+            public void onSuccess(GwtXSRFToken token) {
+                PackagesPanelUi.this.xsrfTokenFieldFile.setValue(token.getToken());
+                if (!"".equals(PackagesPanelUi.this.filePath.getFilename())) {
+                    PackagesPanelUi.this.packagesFormFile.submit();
+                } else {
+                    PackagesPanelUi.this.uploadModal.hide();
+                    PackagesPanelUi.this.uploadErrorModal.show();
+                }
+            }
+        }));
 
         this.fileCancel.addClickHandler(event -> PackagesPanelUi.this.uploadModal.hide());
 
-        this.urlSubmit.addClickHandler(
-                event -> PackagesPanelUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+        this.urlSubmit.addClickHandler(event -> PackagesPanelUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
-                    @Override
-                    public void onFailure(Throwable ex) {
-                        FailureHandler.handle(ex);
-                    }
+            @Override
+            public void onFailure(Throwable ex) {
+                FailureHandler.handle(ex);
+            }
 
-                    @Override
-                    public void onSuccess(GwtXSRFToken token) {
-                        if (!"".equals(PackagesPanelUi.this.formUrl.getValue())) {
-                            PackagesPanelUi.this.xsrfTokenFieldUrl.setValue(token.getToken());
-                            PackagesPanelUi.this.packagesFormUrl.submit();
-                        } else {
-                            PackagesPanelUi.this.uploadModal.hide();
-                            PackagesPanelUi.this.uploadErrorModal.show();
-                        }
-                    }
-                }));
+            @Override
+            public void onSuccess(GwtXSRFToken token) {
+                if (!"".equals(PackagesPanelUi.this.formUrl.getValue())) {
+                    PackagesPanelUi.this.xsrfTokenFieldUrl.setValue(token.getToken());
+                    PackagesPanelUi.this.packagesFormUrl.submit();
+                } else {
+                    PackagesPanelUi.this.uploadModal.hide();
+                    PackagesPanelUi.this.uploadErrorModal.show();
+                }
+            }
+        }));
 
         this.urlCancel.addClickHandler(event -> PackagesPanelUi.this.uploadModal.hide());
 
@@ -589,23 +587,22 @@ public class PackagesPanelUi extends Composite {
                 @Override
                 public boolean onDrop(DropEvent event) {
                     final String url = event.getAsText();
-                    PackagesPanelUi.this.packagesDropzone.removeStyleName(DROPZONE_ACTIVE_STYLE_NAME);
+                    packagesDropzone.removeStyleName(DROPZONE_ACTIVE_STYLE_NAME);
                     if (isEclipseMarketplaceUrl(url)) {
-                        PackagesPanelUi.this.confirmDialog.show(MSGS.packagesMarketplaceInstallConfirmMessage(),
-                                () -> eclipseMarketplaceInstall(url));
+                        confirmDialog.show(MSGS.packagesMarketplaceInstallConfirmMessage(), () -> eclipseMarketplaceInstall(url));
                     }
                     return true;
                 }
 
                 @Override
                 public boolean onDragOver(DropEvent event) {
-                    PackagesPanelUi.this.packagesDropzone.addStyleName(DROPZONE_ACTIVE_STYLE_NAME);
+                    packagesDropzone.addStyleName(DROPZONE_ACTIVE_STYLE_NAME);
                     return true;
                 }
 
                 @Override
                 public void onDragExit(DropEvent event) {
-                    PackagesPanelUi.this.packagesDropzone.removeStyleName(DROPZONE_ACTIVE_STYLE_NAME);
+                    packagesDropzone.removeStyleName(DROPZONE_ACTIVE_STYLE_NAME);
                 }
             });
         } else {

@@ -1,0 +1,32 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+
+<!--
+
+    Copyright (c) 2017 Eurotech and/or its affiliates
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+-->
+
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+    xmlns:b="urn:import:org.gwtbootstrap3.client.ui" xmlns:b.html="urn:import:org.gwtbootstrap3.client.ui.html"
+    xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt">
+
+    <b:Row b:id="buttonBar">
+        <b:Panel>
+            <b:NavPills justified="true">
+                <b:ButtonGroup size="SMALL">
+                    <b:Button ui:field="apply" addStyleNames="fa fa-check"></b:Button>
+                    <b:Button ui:field="reset" addStyleNames="fa fa-times"></b:Button>
+                    <b:Button ui:field="create" addStyleNames="fa fa-plus"></b:Button>
+                    <b:Button ui:field="edit" addStyleNames="fa fa-pencil"></b:Button>
+                    <b:Button ui:field="delete" addStyleNames="fa fa-trash"></b:Button>
+                </b:ButtonGroup>
+            </b:NavPills>
+        </b:Panel>
+    </b:Row>
+
+</ui:UiBinder>

@@ -16,7 +16,7 @@ import org.osgi.annotation.versioning.ConsumerType;
  * The listener interface ChannelListener is mainly for receiving channel events.
  * The class that is interested in processing a channel event implements this
  * interface.
- *
+ * 
  * @see ChannelEvent
  * @since 1.2
  */

@@ -18,9 +18,9 @@ import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * @noextend This class is not intended to be subclassed by clients.
- *
+ * 
  * @deprecated
- *
+ * 
  */
 @ProviderType
 @Deprecated
@@ -90,7 +90,7 @@ public class BluetoothAdvertisementData {
 
     public void addReportRecord(AdvertisingReportRecord advertisingReportRecord) {
         if (this.reportRecords == null) {
-            this.reportRecords = new ArrayList<>();
+            this.reportRecords = new ArrayList<AdvertisingReportRecord>();
         }
         this.reportRecords.add(advertisingReportRecord);
     }

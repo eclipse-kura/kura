@@ -14,7 +14,7 @@ import org.osgi.annotation.versioning.ConsumerType;
 /**
  * Implementors of this interface will be able to handle cloud stack related
  * events that deal with message delivery.
- *
+ * 
  * All the registered listeners are called synchronously at the occurrence of the event.
  * It is expected that implementors of this interface do NOT perform long running tasks in the implementation of this
  * interface.

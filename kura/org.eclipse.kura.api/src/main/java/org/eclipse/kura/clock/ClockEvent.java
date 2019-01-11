@@ -19,7 +19,7 @@ import org.osgi.service.event.Event;
 
 /**
  * ClockEvent is raised when a clock synchronization has been performed.
- *
+ * 
  * @noextend This class is not intended to be subclassed by clients.
  */
 @ProviderType

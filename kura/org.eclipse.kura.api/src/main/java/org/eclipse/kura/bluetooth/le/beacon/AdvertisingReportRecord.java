@@ -13,7 +13,7 @@ import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * AdvertisingReportRecord contains all the fields of a advertising record.
- *
+ * 
  * @noextend This class is not intended to be subclassed by clients.
  * @since 1.3
  */
@@ -68,7 +68,7 @@ public class AdvertisingReportRecord {
     }
 
     public int getRssi() {
-        return this.rssi;
+        return rssi;
     }
 
     public void setRssi(int rssi) {

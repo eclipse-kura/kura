@@ -21,7 +21,7 @@ import org.osgi.annotation.versioning.ConsumerType;
  * scan events.
  *
  * @deprecated
- *
+ * 
  */
 @ConsumerType
 @Deprecated

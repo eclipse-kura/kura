@@ -19,9 +19,9 @@ import org.osgi.annotation.versioning.ProviderType;
  * BluetoothAdapter represents the physical Bluetooth adapter on the host machine (ex: hci0).
  *
  * @noimplement This interface is not intended to be implemented by clients.
- *
+ * 
  * @deprecated This class is deprecated in favor of {@link BluetoothLeAdapter}
- *
+ * 
  */
 @ProviderType
 @Deprecated

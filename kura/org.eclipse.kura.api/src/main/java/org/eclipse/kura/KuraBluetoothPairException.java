@@ -13,7 +13,7 @@ import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * KuraBluetoothPairException is raised when an error is detected during the device pairing.
- *
+ * 
  * @noextend This class is not intended to be subclassed by clients.
  * @since 1.3
  */

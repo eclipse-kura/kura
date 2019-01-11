@@ -30,7 +30,7 @@ public interface BluetoothLeService {
     /**
      * Search for a Bluetooth adapter with the specified interface name (i.e. hci0).
      * If the adapter is not available, it returns null.
-     *
+     * 
      * @param interfaceName
      *            the name of the adapter (i.e. hci0)
      */

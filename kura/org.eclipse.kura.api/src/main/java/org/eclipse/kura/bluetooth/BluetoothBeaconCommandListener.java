@@ -19,7 +19,7 @@ import org.osgi.annotation.versioning.ConsumerType;
  * command results.
  *
  * @deprecated
- *
+ * 
  */
 @ConsumerType
 @Deprecated

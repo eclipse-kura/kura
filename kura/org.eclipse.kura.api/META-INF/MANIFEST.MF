@@ -76,4 +76,3 @@ Import-Package: javax.comm;version="1.2.0",
  org.osgi.util.measurement;version="1.0.1",
  org.osgi.util.position;version="1.0.1"
 Bundle-ActivationPolicy: lazy
-Automatic-Module-Name: org.eclipse.kura.api

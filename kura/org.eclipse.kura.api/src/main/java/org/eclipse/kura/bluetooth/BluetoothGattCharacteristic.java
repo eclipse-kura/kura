@@ -18,9 +18,9 @@ import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * @noimplement This interface is not intended to be implemented by clients.
- *
+ * 
  * @deprecated This class is deprecated in favor of {@link BluetoothLeGattCharacteristic}
- *
+ * 
  */
 @ProviderType
 @Deprecated

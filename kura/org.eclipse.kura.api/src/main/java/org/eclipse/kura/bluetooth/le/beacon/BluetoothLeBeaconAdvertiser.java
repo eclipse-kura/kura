@@ -26,7 +26,7 @@ public interface BluetoothLeBeaconAdvertiser<T extends BluetoothLeBeacon> {
      * Start Beacon advertising.
      * If the advertising has been already started or an error is detected, this method throws a
      * KuraBluetoothCommandException.
-     *
+     * 
      * @throw KuraBluetoothCommandException
      */
     public void startBeaconAdvertising() throws KuraBluetoothCommandException;
@@ -67,7 +67,7 @@ public interface BluetoothLeBeaconAdvertiser<T extends BluetoothLeBeacon> {
 
     /**
      * Get the bluetooth adapter this advertiser is associated to.
-     *
+     * 
      * @return BluetoothLeAdapter
      */
     public BluetoothLeAdapter getAdapter();

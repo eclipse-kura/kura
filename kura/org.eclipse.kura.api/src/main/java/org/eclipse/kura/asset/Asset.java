@@ -77,7 +77,7 @@ public interface Asset {
     /**
      * Performs a read on all READ or READ_WRITE channels that are defined on this asset and returns
      * the result as a list of {@link ChannelRecord} instances.
-     *
+     * 
      * @see Asset#read(List)
      *
      * @throws KuraRuntimeException

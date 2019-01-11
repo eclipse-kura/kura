@@ -18,7 +18,7 @@ package org.eclipse.kura.bluetooth.le.beacon;
  * 0x03 : Non connectable undirected advertising
  * 0x04 : Scan Response
  * 0x05 - 0xFF : Reserved for future use
- *
+ * 
  * @since 1.3
  */
 public enum AdvertisingReportEventType {

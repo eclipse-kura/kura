@@ -21,7 +21,7 @@ public interface BluetoothLeBeaconDecoder<T extends BluetoothLeBeacon> {
 
     /**
      * Decodes a byte array into a BluetoothLeBeacon object
-     *
+     * 
      * @param data
      *            the byte array acquired by a scanner
      * @return BluetoothLeBeacon
@@ -30,9 +30,9 @@ public interface BluetoothLeBeaconDecoder<T extends BluetoothLeBeacon> {
 
     /**
      * Get the type of beacon this decoder can manage
-     *
+     * 
      * @return Class<T> the type of beacon (i.e. BlueoothLeIBeacon)
-     *
+     * 
      */
     public Class<T> getBeaconType();
 }

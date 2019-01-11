@@ -40,7 +40,7 @@ public abstract class BluetoothLeBeacon {
     }
 
     public boolean isLeBrHost() {
-        return this.leBrHost;
+        return leBrHost;
     }
 
     public void setLeBrHost(boolean leBrHost) {
@@ -48,7 +48,7 @@ public abstract class BluetoothLeBeacon {
     }
 
     public boolean isLeBrController() {
-        return this.leBrController;
+        return leBrController;
     }
 
     public void setLeBrController(boolean leBrController) {
@@ -56,7 +56,7 @@ public abstract class BluetoothLeBeacon {
     }
 
     public boolean isBrEdrSupported() {
-        return this.brEdrSupported;
+        return brEdrSupported;
     }
 
     public void setBrEdrSupported(boolean brEdrSupported) {
@@ -64,7 +64,7 @@ public abstract class BluetoothLeBeacon {
     }
 
     public boolean isLeGeneral() {
-        return this.leGeneral;
+        return leGeneral;
     }
 
     public void setLeGeneral(boolean leGeneral) {
@@ -72,7 +72,7 @@ public abstract class BluetoothLeBeacon {
     }
 
     public boolean isLeLimited() {
-        return this.leLimited;
+        return leLimited;
     }
 
     public void setLeLimited(boolean leLimited) {
@@ -80,7 +80,7 @@ public abstract class BluetoothLeBeacon {
     }
 
     public String getAddress() {
-        return this.address;
+        return address;
     }
 
     public void setAddress(String address) {
@@ -88,7 +88,7 @@ public abstract class BluetoothLeBeacon {
     }
 
     public int getRssi() {
-        return this.rssi;
+        return rssi;
     }
 
     public void setRssi(int rssi) {

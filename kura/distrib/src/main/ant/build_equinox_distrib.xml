@@ -1,6 +1,6 @@
 <!--
 
-    Copyright (c) 2011, 2018 Eurotech and others
+    Copyright (c) 2011, 2019 Eurotech and others
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -44,6 +44,20 @@
 						<prefixlines prefix="@{prefix}"/>
 					</filterchain>
 				</loadproperties>
+			</sequential>
+		</macrodef>
+
+		<macrodef name="find-jar-version">
+			<attribute name="dir"/>
+			<attribute name="prefix"/>
+			<attribute name="property"/>
+			<sequential>
+				<fileset dir="@{dir}" id="target.path">
+					<include name="@{prefix}_*.jar"/>
+				</fileset>
+				<pathconvert property="@{property}" refid="target.path">
+					<mapper type="regexp" from=".*/@{prefix}_(.*).jar" to="\1"/>
+				</pathconvert>
 			</sequential>
 		</macrodef>
 
@@ -1142,10 +1156,13 @@ fi]]>
 
 	<!-- Artemis config targets -->
 	<target name="artemis-config">
-		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
+		<find-jar-version dir="../target-definition/common/repository/plugins"
+			prefix="com.google.guava"
+			property="guava.distrib.version"/>
 
+		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
-				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/com.google.guava_${guava.version}.jar@3" />
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/com.google.guava_${guava.distrib.version}.jar@3" />
 
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/io.netty.buffer_${io.netty.version}.jar@3" />

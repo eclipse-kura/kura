@@ -137,7 +137,12 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 
         this.dataTransportService.addDataTransportListener(this);
 
-        startConnectionMonitorTask();
+        // startConnectionMonitorTask();
+        try {
+            this.dataTransportService.connect();
+        } catch (KuraConnectException e) {
+            startConnectionMonitorTask();
+        }
     }
 
     private void restartDbServiceTracker(String kuraServicePid) {

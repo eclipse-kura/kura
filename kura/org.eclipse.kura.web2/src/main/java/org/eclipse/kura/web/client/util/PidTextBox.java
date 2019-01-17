@@ -53,7 +53,7 @@ public class PidTextBox extends TextBox {
     // this allows to optionally add another RegExValidator
     private static class SymbolicNameValidator implements Validator<String> {
 
-        private static final String SYMBOLIC_NAME_PATTERN = "^[\\w\\-]+([\\.][\\w\\-]+)*$";
+        private static final String SYMBOLIC_NAME_PATTERN = "^[\\w\\u4e00-\\u9fa5\\[\\]\\-]+([\\.][\\w\\u4e00-\\u9fa5\\[\\]\\-]+)*$";
         private final Validator<String> wrapped = new RegExValidator(SYMBOLIC_NAME_PATTERN, messages.invalidPid());
 
         @Override

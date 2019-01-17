@@ -1,6 +1,5 @@
 <?xml version="1.0"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.eclipse.kura</groupId>
@@ -172,7 +171,6 @@
                                     <artifactId>slf4j-api</artifactId>
                                     <version>${slf4j.api.version}</version>
                                 </artifactItem>
-
                                 <artifactItem>
                                     <groupId>org.slf4j</groupId>
                                     <artifactId>jcl-over-slf4j</artifactId>
@@ -449,7 +447,7 @@
                                 <artifactItem>
                                     <groupId>com.google.guava</groupId>
                                     <artifactId>guava</artifactId>
-                                    <version>${guava-mvn.version}</version>
+									<version>${guava.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.apache.activemq</groupId>
@@ -922,13 +920,13 @@
                         </goals>
                         <configuration>
                             <tasks>
-                                <delete dir="../../kura/target-definition/common/" />
-                                <mkdir dir="../../kura/target-definition/common/repository" />
+                                <delete dir="../../kura/target-definition/common/"/>
+                                <mkdir dir="../../kura/target-definition/common/repository"/>
                                 <copy todir="../../kura/target-definition/common/repository">
-                                    <fileset dir="${project.build.directory}/repository" />
+                                    <fileset dir="${project.build.directory}/repository"/>
                                 </copy>
                                 <copy todir="../../kura/target-definition/common/source">
-                                    <fileset dir="${project.build.directory}/source" />
+                                    <fileset dir="${project.build.directory}/source"/>
                                 </copy>
                             </tasks>
                         </configuration>

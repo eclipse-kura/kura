@@ -25,21 +25,18 @@ Import-Package: javax.crypto,
  org.eclipse.kura.type;version="[1.0,2.0)",
  org.eclipse.kura.util.base;version="[1.0,2.0)",
  org.eclipse.kura.util.collection;version="[1.0,2.0)",
+ com.google.common.collect,
  org.slf4j;version="[1.7.0,2.0.0)",
  org.xml.sax
 Service-Component: OSGI-INF/*.xml
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .,
- lib/guava-19.0.jar,
- lib/jool-0.9.12.jar,
- lib/jsr305-3.0.2.jar,
- lib/protonpack-1.15.jar,
- lib/sdk-client-0.2.4.jar,
- lib/sdk-core-0.2.4.jar,
- lib/stack-client-0.2.4.jar,
- lib/stack-core-0.2.4.jar,
- lib/bsd-parser-core-0.2.4.jar,
- lib/bsd-parser-gson-0.2.4.jar,
- lib/netty-all-4.1.30.Final.jar
-Automatic-Module-Name: org.eclipse.kura.driver.opcua.provider
-
+ lib/jool.jar,
+ lib/jsr305.jar,
+ lib/protonpack.jar,
+ lib/sdk-client.jar,
+ lib/sdk-core.jar,
+ lib/stack-client.jar,
+ lib/stack-core.jar,
+ lib/bsd-parser-core.jar,
+ lib/bsd-parser-gson.jar

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
+    Copyright (c) 2016, 2019 Eurotech and/or its affiliates and others
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -11,7 +11,9 @@
       Eurotech
       Amit Kumar Mondal
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
@@ -24,116 +26,115 @@
 	<artifactId>org.eclipse.kura.driver.opcua.provider</artifactId>
 	<version>1.0.400-SNAPSHOT</version>
 	<packaging>eclipse-plugin</packaging>
-	
+
 	<properties>
 		<kura.basedir>${project.basedir}/..</kura.basedir>
+		<org.eclipse.milo.version>0.2.4</org.eclipse.milo.version>
+		<com.codepoetics.protonpack.version>1.8</com.codepoetics.protonpack.version>
+		<org.jooq.jool.version>0.9.10</org.jooq.jool.version>
+		<com.google.code.findbugs.jsr305.version>3.0.1</com.google.code.findbugs.jsr305.version>
 	</properties>
-    <dependencies>
-        <dependency>
-            <groupId>org.eclipse.milo</groupId>
-            <artifactId>bsd-parser-core</artifactId>
-            <version>0.2.4</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.milo</groupId>
-            <artifactId>bsd-parser-gson</artifactId>
-            <version>0.2.4</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>19.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jooq</groupId>
-            <artifactId>jool</artifactId>
-            <version>0.9.12</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>jsr305</artifactId>
-            <version>3.0.2</version>
-        </dependency>
-        <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-all</artifactId>
-            <version>4.1.30.Final</version>
-        </dependency>
-        <dependency>
-            <groupId>com.codepoetics</groupId>
-            <artifactId>protonpack</artifactId>
-            <version>1.15</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.milo</groupId>
-            <artifactId>sdk-client</artifactId>
-            <version>0.2.4</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.milo</groupId>
-            <artifactId>sdk-core</artifactId>
-            <version>0.2.4</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.milo</groupId>
-            <artifactId>stack-client</artifactId>
-            <version>0.2.4</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.milo</groupId>
-            <artifactId>stack-core</artifactId>
-            <version>0.2.4</version>
-        </dependency>
-    </dependencies>
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <version>2.1</version>
-                <executions>
-                    <execution>
-                        <id>copy-dependencies</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>lib</outputDirectory>
-                            <excludeGroupIds>p2.eclipse-plugin,org.eclipse.kura</excludeGroupIds>
-                            <excludeTransitive>true</excludeTransitive>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
 
-            <plugin>
-                <artifactId>maven-clean-plugin</artifactId>
-                <version>2.4.1</version>
-                <configuration>
-                    <verbose>true</verbose>
-                    <filesets>
-                        <fileset>
-                            <directory>lib</directory>
-                            <followSymlinks>false</followSymlinks>
-                            <!-- <includes> <include>abc</include> </includes> -->
-                        </fileset>
-                    </filesets>
-                </configuration>
-            </plugin>
-            
-            <plugin>
-                <groupId>de.dentrassi.maven</groupId>
-                <artifactId>osgi-dp</artifactId>
-                <version>${osgi-dp-plugin-version}</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>build</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>	
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>3.0.0</version>
+				<executions>
+					<execution>
+						<phase>generate-sources</phase>
+						<configuration>
+							<outputDirectory>${project.basedir}/lib</outputDirectory>
+							<artifactItems>
+								<artifactItem>
+									<groupId>org.eclipse.milo</groupId>
+									<artifactId>bsd-parser-core</artifactId>
+									<version>${org.eclipse.milo.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.milo</groupId>
+									<artifactId>bsd-parser-gson</artifactId>
+									<version>${org.eclipse.milo.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.milo</groupId>
+									<artifactId>sdk-client</artifactId>
+									<version>${org.eclipse.milo.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.milo</groupId>
+									<artifactId>sdk-core</artifactId>
+									<version>${org.eclipse.milo.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.milo</groupId>
+									<artifactId>stack-client</artifactId>
+									<version>${org.eclipse.milo.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.milo</groupId>
+									<artifactId>stack-core</artifactId>
+									<version>${org.eclipse.milo.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>com.codepoetics</groupId>
+									<artifactId>protonpack</artifactId>
+									<version>${com.codepoetics.protonpack.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.jooq</groupId>
+									<artifactId>jool</artifactId>
+									<version>${org.jooq.jool.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>com.google.code.findbugs</groupId>
+									<artifactId>jsr305</artifactId>
+									<version>${com.google.code.findbugs.jsr305.version}</version>
+								</artifactItem>
+							</artifactItems>
+						</configuration>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.8</version>
+				<executions>
+					<execution>
+						<phase>generate-sources</phase>
+						<id>strip-versions</id>
+						<configuration>
+							<target>
+								<move todir="lib" includeemptydirs="false">
+									<fileset dir="lib" />
+									<mapper type="regexp" from="(.*)-[\d]+\.[\.\w-]*.jar"
+										to="\1.jar" />
+								</move>
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+					<execution>
+						<phase>clean</phase>
+						<id>clean-libs</id>
+						<configuration>
+							<target>
+								<delete dir="lib"/>
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 </project>

@@ -28,6 +28,7 @@ import org.eclipse.kura.internal.driver.opcua.auth.CertificateManager;
 import org.eclipse.kura.internal.driver.opcua.request.ReadParams;
 import org.eclipse.kura.internal.driver.opcua.request.Request;
 import org.eclipse.kura.internal.driver.opcua.request.WriteParams;
+import org.eclipse.kura.util.base.StringUtil;
 import org.eclipse.milo.opcua.sdk.client.OpcUaClient;
 import org.eclipse.milo.opcua.sdk.client.api.UaClient;
 import org.eclipse.milo.opcua.sdk.client.api.config.OpcUaClientConfig;
@@ -45,8 +46,6 @@ import org.eclipse.milo.opcua.stack.core.types.structured.WriteResponse;
 import org.eclipse.milo.opcua.stack.core.types.structured.WriteValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import io.netty.util.internal.StringUtil;
 
 public class ConnectionManager {
 

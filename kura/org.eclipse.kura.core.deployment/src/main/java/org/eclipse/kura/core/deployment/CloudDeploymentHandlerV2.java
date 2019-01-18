@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 Eurotech and others
+ * Copyright (c) 2011, 2019 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -483,7 +483,6 @@ public class CloudDeploymentHandlerV2 implements ConfigurableComponent, RequestH
             options = new DeploymentPackageDownloadOptions(request, this.deploymentHookManager,
                     this.componentOptions.getDownloadsDirectory());
             options.setClientId(this.dataTransportService.getClientId());
-            downloadImplementation = createDownloadImpl(options);
         } catch (Exception ex) {
             logger.info("Malformed download request!");
             throw new KuraException(KuraErrorCode.BAD_REQUEST);
@@ -509,6 +508,8 @@ public class CloudDeploymentHandlerV2 implements ConfigurableComponent, RequestH
             }
             return response;
         }
+
+        downloadImplementation = createDownloadImpl(options);
 
         boolean alreadyDownloaded = false;
 

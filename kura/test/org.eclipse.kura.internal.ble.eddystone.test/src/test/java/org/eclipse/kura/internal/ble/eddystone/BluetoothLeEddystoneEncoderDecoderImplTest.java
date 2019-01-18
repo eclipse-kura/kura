@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2019 Eurotech and/or its affiliates and others
  *
  *   All rights reserved. This program and the accompanying materials
  *   are made available under the terms of the Eclipse Public License v1.0
@@ -65,6 +65,74 @@ public class BluetoothLeEddystoneEncoderDecoderImplTest {
     }
 
     @Test
+    public void testEncodeUIDTxPowerAboveMax() {
+        BluetoothLeEddystoneEncoderImpl encoder = new BluetoothLeEddystoneEncoderImpl();
+
+        BluetoothLeEddystone beacon = null;
+
+        byte[] encoded = null;
+        try {
+            encoded = encoder.encode(beacon);
+        } catch (NullPointerException e) {
+            // expected
+        }
+
+        beacon = new BluetoothLeEddystone();
+        beacon.setBrEdrSupported(true);
+        beacon.setLeBrController(true);
+        beacon.setLeBrHost(true);
+        beacon.setLeGeneral(true);
+        beacon.setLeLimited(true);
+        beacon.setTxPower((short) 180);
+        beacon.setFrameType(EddystoneFrameType.UID.name());
+        byte[] namespace = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+        beacon.setNamespace(namespace);
+        byte[] instance = { 0, 1, 2, 3, 4, 5 };
+        beacon.setInstance(instance);
+
+        encoded = encoder.encode(beacon);
+
+        byte[] expected = { 31, 2, 1, 31, 3, 3, (byte) 0xAA, (byte) 0xFE, 23, 22, (byte) 0xAA, (byte) 0xFE, 0, 126, 0,
+                1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 0, 0 };
+
+        assertArrayEquals(expected, encoded);
+    }
+
+    @Test
+    public void testEncodeUIDTxPowerBelowMin() {
+        BluetoothLeEddystoneEncoderImpl encoder = new BluetoothLeEddystoneEncoderImpl();
+
+        BluetoothLeEddystone beacon = null;
+
+        byte[] encoded = null;
+        try {
+            encoded = encoder.encode(beacon);
+        } catch (NullPointerException e) {
+            // expected
+        }
+
+        beacon = new BluetoothLeEddystone();
+        beacon.setBrEdrSupported(true);
+        beacon.setLeBrController(true);
+        beacon.setLeBrHost(true);
+        beacon.setLeGeneral(true);
+        beacon.setLeLimited(true);
+        beacon.setTxPower((short) -190);
+        beacon.setFrameType(EddystoneFrameType.UID.name());
+        byte[] namespace = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+        beacon.setNamespace(namespace);
+        byte[] instance = { 0, 1, 2, 3, 4, 5 };
+        beacon.setInstance(instance);
+
+        encoded = encoder.encode(beacon);
+
+        byte[] expected = { 31, 2, 1, 31, 3, 3, (byte) 0xAA, (byte) 0xFE, 23, 22, (byte) 0xAA, (byte) 0xFE, 0, -127, 0,
+                1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 0, 0 };
+
+        assertArrayEquals(expected, encoded);
+    }
+
+    @Test
     public void testEncodeURLTooLong() {
         BluetoothLeEddystoneEncoderImpl encoder = new BluetoothLeEddystoneEncoderImpl();
 
@@ -111,6 +179,56 @@ public class BluetoothLeEddystoneEncoderDecoderImplTest {
         byte[] encoded = encoder.encode(beacon);
 
         byte[] expected = { 30, 2, 1, 31, 3, 3, (byte) 0xAA, (byte) 0xFE, 22, 22, (byte) 0xAA, (byte) 0xFE, 16, 50, 2,
+                104, 116, 116, 112, 58, 47, 47, 101, 117, 114, 111, 116, 101, 99, 104, 7, 0 };
+
+        assertArrayEquals(expected, encoded);
+    }
+
+    @Test
+    public void testEncodeURLTxPowerAboveMax() {
+        BluetoothLeEddystoneEncoderImpl encoder = new BluetoothLeEddystoneEncoderImpl();
+
+        BluetoothLeEddystone beacon = new BluetoothLeEddystone();
+        beacon.setBrEdrSupported(true);
+        beacon.setLeBrController(true);
+        beacon.setLeBrHost(true);
+        beacon.setLeGeneral(true);
+        beacon.setLeLimited(true);
+        beacon.setTxPower((short) 190);
+        beacon.setFrameType(EddystoneFrameType.URL.name());
+        String scheme = "http://";
+        beacon.setUrlScheme(scheme);
+        String url = "http://eurotech.com";
+        beacon.setUrl(url);
+
+        byte[] encoded = encoder.encode(beacon);
+
+        byte[] expected = { 30, 2, 1, 31, 3, 3, (byte) 0xAA, (byte) 0xFE, 22, 22, (byte) 0xAA, (byte) 0xFE, 16, 126, 2,
+                104, 116, 116, 112, 58, 47, 47, 101, 117, 114, 111, 116, 101, 99, 104, 7, 0 };
+
+        assertArrayEquals(expected, encoded);
+    }
+
+    @Test
+    public void testEncodeURLTxPowerBellowMin() {
+        BluetoothLeEddystoneEncoderImpl encoder = new BluetoothLeEddystoneEncoderImpl();
+
+        BluetoothLeEddystone beacon = new BluetoothLeEddystone();
+        beacon.setBrEdrSupported(true);
+        beacon.setLeBrController(true);
+        beacon.setLeBrHost(true);
+        beacon.setLeGeneral(true);
+        beacon.setLeLimited(true);
+        beacon.setTxPower((short) -175);
+        beacon.setFrameType(EddystoneFrameType.URL.name());
+        String scheme = "http://";
+        beacon.setUrlScheme(scheme);
+        String url = "http://eurotech.com";
+        beacon.setUrl(url);
+
+        byte[] encoded = encoder.encode(beacon);
+
+        byte[] expected = { 30, 2, 1, 31, 3, 3, (byte) 0xAA, (byte) 0xFE, 22, 22, (byte) 0xAA, (byte) 0xFE, 16, -127, 2,
                 104, 116, 116, 112, 58, 47, 47, 101, 117, 114, 111, 116, 101, 99, 104, 7, 0 };
 
         assertArrayEquals(expected, encoded);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2019 Eurotech and/or its affiliates and others
  *
  *   All rights reserved. This program and the accompanying materials
  *   are made available under the terms of the Eclipse Public License v1.0
@@ -95,6 +95,72 @@ public class BluetoothLeIBeaconEncoderDecoderImplTest {
 
         byte[] expected = { 30, 2, 1, 0x1F, 0x1A, (byte) 0xFF, 76, 0, 2, 21, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17,
                 17, 17, 17, 17, 17, 0, 5, 0, 2, 50, 0 };
+
+        assertArrayEquals(expected, encoded);
+    }
+
+    @Test
+    public void testEncodeTxPowerAboveMax() {
+        BluetoothLeIBeaconEncoderImpl encoder = new BluetoothLeIBeaconEncoderImpl();
+
+        BluetoothLeIBeacon beacon = null;
+
+        byte[] encoded = null;
+        try {
+            encoded = encoder.encode(beacon);
+        } catch (NullPointerException e) {
+            // expected
+        }
+
+        beacon = new BluetoothLeIBeacon();
+        beacon.setBrEdrSupported(true);
+        beacon.setLeBrController(true);
+        beacon.setLeBrHost(true);
+        beacon.setLeGeneral(true);
+        beacon.setLeLimited(true);
+        beacon.setMajor((short) 5);
+        beacon.setMinor((short) 2);
+        beacon.setRssi(10);
+        beacon.setTxPower((short) 190);
+        beacon.setUuid(UUID.fromString("11111111-1111-1111-1111-111111111111"));
+
+        encoded = encoder.encode(beacon);
+
+        byte[] expected = { 30, 2, 1, 0x1F, 0x1A, (byte) 0xFF, 76, 0, 2, 21, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17,
+                17, 17, 17, 17, 17, 0, 5, 0, 2, 126, 0 };
+
+        assertArrayEquals(expected, encoded);
+    }
+
+    @Test
+    public void testEncodeTxPowerBelowMin() {
+        BluetoothLeIBeaconEncoderImpl encoder = new BluetoothLeIBeaconEncoderImpl();
+
+        BluetoothLeIBeacon beacon = null;
+
+        byte[] encoded = null;
+        try {
+            encoded = encoder.encode(beacon);
+        } catch (NullPointerException e) {
+            // expected
+        }
+
+        beacon = new BluetoothLeIBeacon();
+        beacon.setBrEdrSupported(true);
+        beacon.setLeBrController(true);
+        beacon.setLeBrHost(true);
+        beacon.setLeGeneral(true);
+        beacon.setLeLimited(true);
+        beacon.setMajor((short) 5);
+        beacon.setMinor((short) 2);
+        beacon.setRssi(10);
+        beacon.setTxPower((short) -183);
+        beacon.setUuid(UUID.fromString("11111111-1111-1111-1111-111111111111"));
+
+        encoded = encoder.encode(beacon);
+
+        byte[] expected = { 30, 2, 1, 0x1F, 0x1A, (byte) 0xFF, 76, 0, 2, 21, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17,
+                17, 17, 17, 17, 17, 0, 5, 0, 2, -127, 0 };
 
         assertArrayEquals(expected, encoded);
     }

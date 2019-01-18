@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -20,6 +20,14 @@ public class BluetoothAdvertisingData {
     private static final String MANUFACTURER_AD = "ff";
     private static final String BEACON_ID = "0215";
 
+    private static final int MAJOR_MAX = 65535;
+    private static final int MAJOR_MIN = 0;
+    private static final int MINOR_MAX = 65535;
+    private static final int MINOR_MIN = 0;
+    private static final short TX_POWER_MAX = 126;
+    private static final short TX_POWER_MIN = -127;
+    private static final String UUID_DEFAULT = "aaaaaaaabbbbccccddddeeeeeeeeeeee";
+
     public static String getData(String uuid, Integer major, Integer minor, String companyCode, Integer txPower,
             boolean LELimited, boolean LEGeneral, boolean BR_EDRSupported, boolean LE_BRController, boolean LE_BRHost) {
 
@@ -37,16 +45,11 @@ public class BluetoothAdvertisingData {
             flagsString = "0" + flagsString;
         }
 
-        // Convert TxPower
-        String txPowerString;
-        if (txPower >= 0) {
-            txPowerString = Integer.toHexString(txPower);
-            if (txPowerString.length() == 1) {
-                txPowerString = "0" + txPowerString;
-            }
-        } else {
-            txPowerString = Integer.toHexString(txPower);
-            txPowerString = txPowerString.substring(txPowerString.length() - 2, txPowerString.length());
+        txPower = inSetRange(txPower, TX_POWER_MAX, TX_POWER_MIN);
+
+        String txPowerString = Integer.toHexString(txPower & 0xFF);
+        if (txPowerString.length() == 1) {
+            txPowerString = "0" + txPowerString;
         }
 
         // Create Advertising data
@@ -59,17 +62,36 @@ public class BluetoothAdvertisingData {
         data += companyCode.substring(2, 4);
         data += companyCode.substring(0, 2);
         data += BEACON_ID;
-        data += uuid.toString();
-        data += to2BytesHex(major);
-        data += to2BytesHex(minor);
+        if (uuid.length() == 32) {
+            data += inSetHex(uuid.toString(), UUID_DEFAULT);
+        } else {
+            data += UUID_DEFAULT;
+        }
+        data += to2BytesHex(inSetRange(major, MAJOR_MAX, MAJOR_MIN));
+        data += to2BytesHex(inSetRange(minor, MINOR_MAX, MINOR_MIN));
         data += txPowerString;
         data += "00";
 
         return data;
     }
 
-    public static String to2BytesHex(Integer in) {
+    private static String inSetHex(String uuid, String defaultUuid) {
+        if (!uuid.matches("^[0-9a-fA-F]+$")) {
+            return defaultUuid;
+        } else {
+            return uuid;
+        }
+    }
 
+    private static int inSetRange(int value, int max, int min) {
+        if (value <= max && value >= min) {
+            return value;
+        } else {
+            return (value > max) ? max : min;
+        }
+    }
+
+    public static String to2BytesHex(Integer in) {
         String out = Integer.toHexString(in);
         if (out.length() == 1) {
             out = "000" + out;
@@ -77,10 +99,11 @@ public class BluetoothAdvertisingData {
             out = "00" + out;
         } else if (out.length() == 3) {
             out = "0" + out;
+        } else if (out.length() > 4) {
+            out = out.substring(out.length() - 4);
         }
 
         return out;
-
     }
 
 }

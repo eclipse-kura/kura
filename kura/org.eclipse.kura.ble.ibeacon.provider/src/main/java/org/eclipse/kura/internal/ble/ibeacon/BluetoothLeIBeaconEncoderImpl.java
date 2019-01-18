@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -28,6 +28,8 @@ public class BluetoothLeIBeaconEncoderImpl implements BluetoothLeIBeaconEncoder 
     private static final byte MANUFACTURER_AD = (byte) 0xff;
     private static final byte[] BEACON_ID = { (byte) 0x02, (byte) 0x15 };
     private static final byte[] COMPANY_CODE = { (byte) 0x00, (byte) 0x4c };
+    private static final short TX_POWER_MAX = 126;
+    private static final short TX_POWER_MIN = -127;
 
     protected void activate(ComponentContext context) {
         logger.info("Activating Bluetooth Le IBeacon Codec...");
@@ -64,7 +66,7 @@ public class BluetoothLeIBeaconEncoderImpl implements BluetoothLeIBeaconEncoder 
         data[27] = (byte) (beacon.getMajor() & 0xff);
         data[28] = (byte) (beacon.getMinor() >> 8 & 0xff);
         data[29] = (byte) (beacon.getMinor() & 0xff);
-        data[30] = (byte) (beacon.getTxPower() & 0xff);
+        data[30] = (byte) (setInRange(beacon.getTxPower(), TX_POWER_MAX, TX_POWER_MIN) & 0xff);
         data[31] = 0x00;
 
         return data;
@@ -88,4 +90,11 @@ public class BluetoothLeIBeaconEncoderImpl implements BluetoothLeIBeaconEncoder 
         return byteBuffer.array();
     }
 
+    private short setInRange(short value, short max, short min) {
+        if (value <= max && value >= min) {
+            return value;
+        } else {
+            return (value > max) ? max : min;
+        }
+    }
 }

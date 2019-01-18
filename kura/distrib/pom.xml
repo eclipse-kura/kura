@@ -419,6 +419,11 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.driver.block</artifactId>
+                                    <version>${org.eclipse.kura.driver.block.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.driver.s7plc.provider</artifactId>
                                     <version>${org.eclipse.kura.driver.s7plc.provider.version}</version>
                                 </artifactItem>
@@ -675,6 +680,8 @@
                                     tofile="target/plugins/org.eclipse.kura.wire.provider_${org.eclipse.kura.wire.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.driver.opcua.provider.jar"
                                     tofile="target/plugins/org.eclipse.kura.driver.opcua.provider_${org.eclipse.kura.driver.opcua.provider.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.driver.block.jar"
+                                    tofile="target/plugins/org.eclipse.kura.driver.block_${org.eclipse.kura.driver.block.version}.jar" />    
                                 <move file="target/plugins/org.eclipse.kura.driver.s7plc.provider.jar"
                                     tofile="target/plugins/org.eclipse.kura.driver.s7plc.provider_${org.eclipse.kura.driver.s7plc.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.driver.ble.sensortag.provider.jar"

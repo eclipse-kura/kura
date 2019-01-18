@@ -29,7 +29,7 @@
 
 	<properties>
 		<kura.basedir>${project.basedir}/..</kura.basedir>
-		<org.eclipse.milo.version>0.2.4</org.eclipse.milo.version>
+		<org.eclipse.milo.version>0.2.5-SNAPSHOT</org.eclipse.milo.version>
 		<com.codepoetics.protonpack.version>1.8</com.codepoetics.protonpack.version>
 		<org.jooq.jool.version>0.9.10</org.jooq.jool.version>
 		<com.google.code.findbugs.jsr305.version>3.0.1</com.google.code.findbugs.jsr305.version>

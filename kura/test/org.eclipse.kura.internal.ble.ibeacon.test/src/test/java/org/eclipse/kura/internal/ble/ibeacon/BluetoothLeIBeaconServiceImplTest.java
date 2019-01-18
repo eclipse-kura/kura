@@ -25,7 +25,6 @@ import org.eclipse.kura.bluetooth.le.beacon.BluetoothLeBeaconManager;
 import org.eclipse.kura.bluetooth.le.beacon.BluetoothLeBeaconScanner;
 import org.junit.Test;
 
-
 public class BluetoothLeIBeaconServiceImplTest {
 
     @Test

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -13,6 +13,9 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.Map;
 import java.util.UUID;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class IBeaconAdvertiserOptions {
 
@@ -34,6 +37,13 @@ public class IBeaconAdvertiserOptions {
     private static final int PROPERTY_TX_POWER_DEFAULT = 0;
     private static final String PROPERTY_INAME_DEFAULT = "hci0";
 
+    private static final int PROPERTY_MAJOR_MAX = 65535;
+    private static final int PROPERTY_MAJOR_MIN = 0;
+    private static final int PROPERTY_MINOR_MAX = 65535;
+    private static final int PROPERTY_MINOR_MIN = 0;
+    private static final short PROPERTY_TX_POWER_MAX = 126;
+    private static final short PROPERTY_TX_POWER_MIN = -127;
+
     private final boolean enable;
     private final Integer minInterval;
     private final Integer maxInterval;
@@ -43,6 +53,8 @@ public class IBeaconAdvertiserOptions {
     private final Integer txPower;
     private final String iname;
 
+    private static final Logger logger = LoggerFactory.getLogger(IBeaconAdvertiserOptions.class);
+
     public IBeaconAdvertiserOptions(Map<String, Object> properties) {
         requireNonNull(properties, "Required not null");
         this.enable = getProperty(properties, PROPERTY_ENABLE, PROPERTY_ENABLE_DEFAULT);
@@ -50,16 +62,19 @@ public class IBeaconAdvertiserOptions {
                 / 0.625);
         this.maxInterval = (int) (getProperty(properties, PROPERTY_MAX_INTERVAL, PROPERTY_MAX_INTERVAL_DEFAULT)
                 / 0.625);
-        this.major = getProperty(properties, PROPERTY_MAJOR, PROPERTY_MAJOR_DEFAULT);
-        this.minor = getProperty(properties, PROPERTY_MINOR, PROPERTY_MINOR_DEFAULT);
-        this.txPower = getProperty(properties, PROPERTY_TX_POWER, PROPERTY_TX_POWER_DEFAULT);
+        this.major = setInRange(getProperty(properties, PROPERTY_MAJOR, PROPERTY_MAJOR_DEFAULT), PROPERTY_MAJOR_MAX,
+                PROPERTY_MAJOR_MIN);
+        this.minor = setInRange(getProperty(properties, PROPERTY_MINOR, PROPERTY_MINOR_DEFAULT), PROPERTY_MINOR_MAX,
+                PROPERTY_MINOR_MIN);
+        this.txPower = setInRange(getProperty(properties, PROPERTY_TX_POWER, PROPERTY_TX_POWER_DEFAULT),
+                PROPERTY_TX_POWER_MAX, PROPERTY_TX_POWER_MIN);
         this.iname = getProperty(properties, PROPERTY_INAME, PROPERTY_INAME_DEFAULT);
-
         String uuidString = getProperty(properties, PROPERTY_UUID, PROPERTY_UUID_DEFAULT);
         if (uuidString.trim().replace("-", "").length() != 32) {
+            logger.warn("UUID is too short or too long!");
             this.uuid = UUID.fromString(PROPERTY_UUID_DEFAULT);
         } else {
-            this.uuid = UUID.fromString(uuidString);
+            this.uuid = UUID.fromString(setInHex(uuidString, PROPERTY_UUID_DEFAULT));
         }
     }
 
@@ -93,6 +108,22 @@ public class IBeaconAdvertiserOptions {
 
     public String getIname() {
         return this.iname;
+    }
+
+    private int setInRange(int value, int max, int min) {
+        if (value <= max && value >= min) {
+            return value;
+        } else {
+            return (value > max) ? max : min;
+        }
+    }
+
+    private String setInHex(String value, String defaultValue) {
+        if (!value.trim().replace("-", "").matches("^[0-9a-fA-F]+$")) {
+            return defaultValue;
+        } else {
+            return value;
+        }
     }
 
     @SuppressWarnings("unchecked")

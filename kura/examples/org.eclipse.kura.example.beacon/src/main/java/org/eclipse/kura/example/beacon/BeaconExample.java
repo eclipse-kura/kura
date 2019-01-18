@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -38,6 +38,13 @@ public class BeaconExample implements ConfigurableComponent, BluetoothBeaconComm
     private static final String PROPERTY_BR_CONTROLLER = "LE_BRController";
     private static final String PROPERTY_BR_HOST = "LE_BRHost";
     private static final String PROPERTY_INAME = "iname";
+
+    private static final int PROPERTY_MAJOR_MAX = 65535;
+    private static final int PROPERTY_MAJOR_MIN = 0;
+    private static final int PROPERTY_MINOR_MAX = 65535;
+    private static final int PROPERTY_MINOR_MIN = 0;
+    private static final short PROPERTY_TX_POWER_MAX = 126;
+    private static final short PROPERTY_TX_POWER_MIN = -127;
 
     private BluetoothService bluetoothService;
     private BluetoothAdapter bluetoothAdapter;
@@ -154,21 +161,26 @@ public class BeaconExample implements ConfigurableComponent, BluetoothBeaconComm
             if (properties.get(PROPERTY_UUID) != null) {
                 if (((String) properties.get(PROPERTY_UUID)).trim().replace("-", "").length() == 32) {
                     this.uuid = ((String) properties.get(PROPERTY_UUID)).replace("-", "");
+                    if (!this.uuid.matches("^[0-9a-fA-F]+$")) {
+                        logger.warn("UUID contains invalid value!");
+                        this.uuid = null;
+                    }
                 } else {
-                    logger.warn("UUID is too short!");
+                    logger.warn("UUID is too short or too long!");
                 }
             }
             if (properties.get(PROPERTY_MAJOR) != null) {
-                this.major = (Integer) properties.get(PROPERTY_MAJOR);
+                this.major = setInRange((int) properties.get(PROPERTY_MAJOR), PROPERTY_MAJOR_MAX, PROPERTY_MAJOR_MIN);
             }
             if (properties.get(PROPERTY_MINOR) != null) {
-                this.minor = (Integer) properties.get(PROPERTY_MINOR);
+                this.minor = setInRange((int) properties.get(PROPERTY_MINOR), PROPERTY_MINOR_MAX, PROPERTY_MINOR_MIN);
             }
             if (properties.get(PROPERTY_COMPANY) != null) {
                 this.companyCode = (String) properties.get(PROPERTY_COMPANY);
             }
             if (properties.get(PROPERTY_TX_POWER) != null) {
-                this.txPower = (Integer) properties.get(PROPERTY_TX_POWER);
+                this.txPower = setInRange((int) properties.get(PROPERTY_TX_POWER), PROPERTY_TX_POWER_MAX,
+                        PROPERTY_TX_POWER_MIN);
             }
             if (properties.get(PROPERTY_LIMITED) != null) {
                 this.leLimited = (Boolean) properties.get(PROPERTY_LIMITED);
@@ -206,13 +218,21 @@ public class BeaconExample implements ConfigurableComponent, BluetoothBeaconComm
 
             if (this.uuid != null && this.major != null && this.minor != null && this.companyCode != null
                     && this.txPower != null) {
-                this.bluetoothAdapter.setBeaconAdvertisingData(this.uuid, this.major, this.minor,
-                        this.companyCode, this.txPower, this.leLimited, this.leLimited ? false : true,
-                        this.brSupported, this.brController, this.brHost);
+                this.bluetoothAdapter.setBeaconAdvertisingData(this.uuid, this.major, this.minor, this.companyCode,
+                        this.txPower, this.leLimited, this.leLimited ? false : true, this.brSupported,
+                        this.brController, this.brHost);
             }
 
         } else {
             this.bluetoothAdapter.stopBeaconAdvertising();
+        }
+    }
+
+    private Integer setInRange(int value, int max, int min) {
+        if (value <= max && value >= min) {
+            return value;
+        } else {
+            return (value > max) ? max : min;
         }
     }
 

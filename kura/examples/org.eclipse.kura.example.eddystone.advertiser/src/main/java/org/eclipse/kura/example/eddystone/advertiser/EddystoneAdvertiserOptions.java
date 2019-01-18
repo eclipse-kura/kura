@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -35,6 +35,9 @@ public class EddystoneAdvertiserOptions {
     private static final int PROPERTY_TX_POWER_DEFAULT = 0;
     private static final String PROPERTY_INAME_DEFAULT = "hci0";
 
+    private static final int PROPERTY_TX_POWER_MAX = 126;
+    private static final int PROPERTY_TX_POWER_MIN = -127;
+
     private final boolean enable;
     private final Integer minInterval;
     private final Integer maxInterval;
@@ -54,20 +57,21 @@ public class EddystoneAdvertiserOptions {
                 / 0.625);
         this.eddystoneFrametype = getProperty(properties, PROPERTY_TYPE, PROPERTY_TYPE_DEFAULT);
         this.urlUrl = getProperty(properties, PROPERTY_URL, PROPERTY_URL_DEFAULT);
-        this.txPower = getProperty(properties, PROPERTY_TX_POWER, PROPERTY_TX_POWER_DEFAULT);
+
+        int txPowerInt = getProperty(properties, PROPERTY_TX_POWER, PROPERTY_TX_POWER_DEFAULT);
+        if (txPowerInt <= PROPERTY_TX_POWER_MAX && txPowerInt >= PROPERTY_TX_POWER_MIN) {
+            this.txPower = getProperty(properties, PROPERTY_TX_POWER, PROPERTY_TX_POWER_DEFAULT);
+        } else {
+            if (txPowerInt > PROPERTY_TX_POWER_MAX) {
+                this.txPower = PROPERTY_TX_POWER_MAX;
+            } else {
+                this.txPower = PROPERTY_TX_POWER_MIN;
+            }
+        }
+
         this.iname = getProperty(properties, PROPERTY_INAME, PROPERTY_INAME_DEFAULT);
-        String namespace = getProperty(properties, PROPERTY_NAMESPACE, PROPERTY_NAMESPACE_DEFAULT);
-        if (namespace.length() == 20) {
-            this.uidNamespace = namespace;
-        } else {
-            this.uidNamespace = PROPERTY_NAMESPACE_DEFAULT;
-        }
-        String instance = getProperty(properties, PROPERTY_INSTANCE, PROPERTY_INSTANCE_DEFAULT);
-        if (instance.length() == 12) {
-            this.uidInstance = instance;
-        } else {
-            this.uidInstance = PROPERTY_INSTANCE_DEFAULT;
-        }
+        this.uidNamespace = setInPropertyLimit(properties, PROPERTY_NAMESPACE, PROPERTY_NAMESPACE_DEFAULT, 20);
+        this.uidInstance = setInPropertyLimit(properties, PROPERTY_INSTANCE, PROPERTY_INSTANCE_DEFAULT, 12);
     }
 
     public boolean isEnabled() {
@@ -104,6 +108,24 @@ public class EddystoneAdvertiserOptions {
 
     public String getIname() {
         return this.iname;
+    }
+
+    private String setInPropertyLimit(Map<String, Object> properties, String propertyName, String propertyDefault,
+            int lengthLimit) {
+        String property = getProperty(properties, propertyName, propertyDefault);
+        if (property.length() == lengthLimit) {
+            return setInHex(property, propertyDefault);
+        } else {
+            return propertyDefault;
+        }
+    }
+
+    private String setInHex(String value, String defaultValue) {
+        if (!value.matches("^[0-9a-fA-F]+$")) {
+            return defaultValue;
+        } else {
+            return value;
+        }
     }
 
     @SuppressWarnings("unchecked")

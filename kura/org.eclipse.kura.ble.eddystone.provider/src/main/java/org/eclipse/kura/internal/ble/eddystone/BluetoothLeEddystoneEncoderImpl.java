@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -28,6 +28,8 @@ public class BluetoothLeEddystoneEncoderImpl implements BluetoothLeEddystoneEnco
     private static final byte EDDYSTONE_UID_PAYLOAD_LENGTH = (byte) 0x17;
     private static final byte SERVICE_DATA = (byte) 0x16;
     private static final Integer URL_MAX_LENGTH = 17;
+    private static final short TX_POWER_MAX = 126;
+    private static final short TX_POWER_MIN = -127;
 
     protected void activate(ComponentContext context) {
         logger.info("Activating Bluetooth Le Eddystone Codec...");
@@ -88,7 +90,7 @@ public class BluetoothLeEddystoneEncoderImpl implements BluetoothLeEddystoneEnco
         data[10] = EDDYSTONE_UUID[1];
         data[11] = EDDYSTONE_UUID[0];
         data[12] = EddystoneFrameType.UID.getFrameTypeCode();
-        data[13] = (byte) (beacon.getTxPower() & 0xff);
+        data[13] = (byte) (setInRange(beacon.getTxPower(), TX_POWER_MAX, TX_POWER_MIN) & 0xff);
         System.arraycopy(beacon.getNamespace(), 0, data, 14, 10);
         System.arraycopy(beacon.getInstance(), 0, data, 24, 6);
         data[30] = (byte) 0x00;
@@ -115,7 +117,7 @@ public class BluetoothLeEddystoneEncoderImpl implements BluetoothLeEddystoneEnco
             data[10] = EDDYSTONE_UUID[1];
             data[11] = EDDYSTONE_UUID[0];
             data[12] = EddystoneFrameType.URL.getFrameTypeCode();
-            data[13] = (byte) (beacon.getTxPower() & 0xff);
+            data[13] = (byte) (setInRange(beacon.getTxPower(), TX_POWER_MAX, TX_POWER_MIN) & 0xff);
             data[14] = EddystoneURLScheme.encodeURLScheme(beacon.getUrlScheme()).getUrlSchemeCode();
             System.arraycopy(hexUrl, 0, data, 15, hexUrl.length);
             for (int i = hexUrl.length; i < URL_MAX_LENGTH; i++) {
@@ -137,4 +139,11 @@ public class BluetoothLeEddystoneEncoderImpl implements BluetoothLeEddystoneEnco
         return new byte[1];
     }
 
+    private short setInRange(short value, short max, short min) {
+        if (value <= max && value >= min) {
+            return value;
+        } else {
+            return (value > max) ? max : min;
+        }
+    }
 }

@@ -12,7 +12,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <equinox.download.url>http://mirrors.neusoft.edu.cn/eclipse/equinox/drops/R-4.9-201809060745/equinox-SDK-4.9.zip</equinox.download.url>
+        <equinox.download.url>http://mirrors.neusoft.edu.cn/eclipse/equinox/drops/R-4.10-201812060815/equinox-SDK-4.10.zip</equinox.download.url>
     </properties>
 
     <build>
@@ -265,7 +265,7 @@
             <!-- profile for falling back to non-mirror download links -->
             <id>no-mirror</id>
             <properties>
-                <equinox.download.url>http://mirrors.neusoft.edu.cn/eclipse/equinox/drops/R-4.9-201809060745/equinox-SDK-4.9.zip</equinox.download.url>
+                <equinox.download.url>http://mirrors.neusoft.edu.cn/eclipse/equinox/drops/R-4.10-201812060815/equinox-SDK-4.10.zip</equinox.download.url>
             </properties>
         </profile>
     </profiles>

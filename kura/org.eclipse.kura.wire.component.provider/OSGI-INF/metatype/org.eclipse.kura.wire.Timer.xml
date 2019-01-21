@@ -7,10 +7,10 @@
      which accompanies this distribution, and is available at
      http://www.eclipse.org/legal/epl-v10.html
 -->
-<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="OSGI-INF/l10n/Timer">
     <OCD id="org.eclipse.kura.wire.Timer" 
-         name="Timer" 
-         description="A wire component that fires a ticking event on every configured interval">
+         name="%name" 
+         description="%description">
 
         <AD id="type"
             name="type"

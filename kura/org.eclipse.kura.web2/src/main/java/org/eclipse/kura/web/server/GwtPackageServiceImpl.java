@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -182,6 +182,7 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
             checkCompatibility(descriptor, kuraVersion);
 
         } catch (Exception e) {
+            logger.warn("failed to get deployment package descriptior from Eclipse Marketplace", e);
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
         } finally {
             if (connection != null) {
@@ -249,6 +250,7 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
             });
 
         } catch (Exception e) {
+            logger.warn("failed to start package install from Eclipse Marketplace", e);
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
         }
     }

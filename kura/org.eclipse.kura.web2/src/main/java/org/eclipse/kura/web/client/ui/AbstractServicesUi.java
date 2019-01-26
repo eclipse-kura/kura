@@ -292,7 +292,7 @@ public abstract class AbstractServicesUi extends Composite {
     private TextBoxBase createTextBox(final GwtConfigParameter param) {
         if (param.getDescription() != null && param.getDescription().contains("\u200B\u200B\u200B\u200B\u200B")) {
             final TextArea result = createTextArea();
-            result.setHeight("120px");
+            result.setHeight("500px");
             return result;
         }
         if (isTextArea(param)) {

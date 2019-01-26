@@ -338,6 +338,41 @@
                                     <artifactId>groovy</artifactId>
                                     <version>${org.codehaus.groovy.groovy.version}</version>
                                 </dependency>
+                                <dependency>
+                                    <groupId>org.codehaus.groovy</groupId>
+                                    <artifactId>groovy-xml</artifactId>
+                                    <version>${org.codehaus.groovy.groovy.version}</version>
+                                </dependency>
+                                <dependency>
+                                    <groupId>org.codehaus.groovy</groupId>
+                                    <artifactId>groovy-templates</artifactId>
+                                    <version>${org.codehaus.groovy.groovy.version}</version>
+                                </dependency>
+                                <dependency>
+                                    <groupId>org.codehaus.groovy</groupId>
+                                    <artifactId>groovy-sql</artifactId>
+                                    <version>${org.codehaus.groovy.groovy.version}</version>
+                                </dependency>
+                                <dependency>
+                                    <groupId>org.codehaus.groovy</groupId>
+                                    <artifactId>groovy-json</artifactId>
+                                    <version>${org.codehaus.groovy.groovy.version}</version>
+                                </dependency>
+                                <dependency>
+                                    <groupId>org.codehaus.groovy</groupId>
+                                    <artifactId>groovy-datetime</artifactId>
+                                    <version>${org.codehaus.groovy.groovy.version}</version>
+                                </dependency>
+                                <dependency>
+                                    <groupId>org.codehaus.groovy</groupId>
+                                    <artifactId>groovy-dateutil</artifactId>
+                                    <version>${org.codehaus.groovy.groovy.version}</version>
+                                </dependency>
+                                <dependency>
+                                    <groupId>org.codehaus.groovy</groupId>
+                                    <artifactId>groovy-jsr223</artifactId>
+                                    <version>${org.codehaus.groovy.groovy.version}</version>
+                                </dependency>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
                                     <artifactId>commons-pool</artifactId>
@@ -787,6 +822,24 @@
                                     tofile="target/source/plugins/org.apache.camel.camel-core-xml_${org.apache.camel.camel-core-xml.version}.jar" />
                                 <move file="target/source/plugins/groovy.jar"
                                     tofile="target/source/plugins/groovy_${org.codehaus.groovy.groovy-all.version}.jar" />
+                                    
+                                    
+                                <move file="target/source/plugins/groovy-xml.jar"
+                                    tofile="target/source/plugins/groovy-xml_${org.codehaus.groovy.groovy.version}.jar" />
+                                <move file="target/source/plugins/groovy-templates.jar"
+                                    tofile="target/source/plugins/groovy-templates_${org.codehaus.groovy.groovy.version}.jar" />
+                                <move file="target/source/plugins/groovy-sql.jar"
+                                    tofile="target/source/plugins/groovy-sql_${org.codehaus.groovy.groovy.version}.jar" />
+                                <move file="target/source/plugins/groovy-json.jar"
+                                    tofile="target/source/plugins/groovy-json_${org.codehaus.groovy.groovy.version}.jar" />
+                                <move file="target/source/plugins/groovy-datetime.jar"
+                                    tofile="target/source/plugins/groovy-datetime_${org.codehaus.groovy.groovy.version}.jar" />
+                                <move file="target/source/plugins/groovy-dateutil.jar"
+                                    tofile="target/source/plugins/groovy-dateutil_${org.codehaus.groovy.groovy.version}.jar" />
+                                <move file="target/source/plugins/groovy-jsr223.jar"
+                                    tofile="target/source/plugins/groovy-jsr223_${org.codehaus.groovy.groovy.version}.jar" />
+                                    
+                                   
                                 <move file="target/source/plugins/commons-pool.jar"
                                     tofile="target/source/plugins/commons-pool_${org.eclipse.kura.commons-pool.version}.jar" />
                                 <move file="target/source/plugins/httpclient-osgi.jar"

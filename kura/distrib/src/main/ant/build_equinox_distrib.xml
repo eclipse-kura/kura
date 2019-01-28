@@ -116,7 +116,11 @@
 		<!-- Populate config.ini with correct versions -->
 		<replace file="${project.build.directory}/${build.output.name}/config.ini"
                  token="{kura.build.version}" value="${kura.build.version}"/>
-
+		
+		
+		<condition property="is.docker">
+			<contains string="${build.name}" substring="-docker"/>
+		</condition>
 		<!-- Populate config.ini with correct Kura bundles -->
 		<antcall target="api-config" />
 		<antcall target="core-config" />
@@ -940,7 +944,7 @@ fi]]>
 		</propertyfile>
 	</target>
 
-	<target name="linux.bluetooth-config">
+	<target name="linux.bluetooth-config" unless="is.docker">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
 			      value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.linux.bluetooth_${org.eclipse.kura.linux.bluetooth.version}.jar@4:start" />

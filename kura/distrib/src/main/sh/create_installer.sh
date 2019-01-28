@@ -19,9 +19,12 @@ BUILD_NAME=$4
 INSTALL_DIR=$5
 
 # Select the no networking extract file if necessary
-if [[ $BUILD_NAME =~ .*-nn$ ]]
+if [[ $BUILD_NAME =~ .*-docker-nn$ ]]
 then
-	EXTRACT_NAME="extract_nn.sh"
+	EXTRACT_NAME="extract.sh"
+elif [[ $BUILD_NAME =~ .*-nn$ ]]
+then
+    EXTRACT_NAME="extract_nn.sh"
 else
 	EXTRACT_NAME="extract.sh"
 fi

@@ -1,0 +1,26 @@
+
+module selinuxKura 1.1;
+
+require {
+    type NetworkManager_t;
+    type initrc_tmp_t;
+    type openvpn_t;
+    class file open;
+    class sock_file write;
+        type bluetooth_t;
+        type initrc_t;
+        class dbus send_msg;
+}
+
+#============= NetworkManager_t ==============
+allow NetworkManager_t initrc_tmp_t:file open;
+allow NetworkManager_t initrc_tmp_t:sock_file write;
+
+#============= openvpn_t ==============
+allow openvpn_t initrc_tmp_t:file open;
+
+#============= bluetooth_t ==============
+allow bluetooth_t initrc_t:dbus send_msg;
+
+#============= initrc_t ==============
+allow initrc_t bluetooth_t:dbus send_msg;

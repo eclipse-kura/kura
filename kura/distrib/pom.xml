@@ -871,7 +871,7 @@
                 <plugin>
                     <groupId>de.dentrassi.maven</groupId>
                     <artifactId>rpm</artifactId>
-                    <version>0.10.2</version>
+                    <version>1.1.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.eclipse.tycho</groupId>
@@ -1561,7 +1561,128 @@
                 </plugins>
             </build>
         </profile>
-
+        <profile>
+            <id>intel-up2-centos-7-docker-nn</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <resources>
+                    <resource>
+                        <directory>src/main/resources</directory>
+                        <filtering>true</filtering>
+                    </resource>
+                </resources>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>buildnumber-maven-plugin</artifactId>
+                        <version>1.0</version>
+                        <executions>
+                            <execution>
+                                <phase>validate</phase>
+                                <goals>
+                                    <goal>create-timestamp</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>1.7</version>
+                        <executions>
+                            <execution>
+                                <id>intel-up2-centos-7-docker-nn-jars</id>
+                                <phase>prepare-package</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <property name="buildNumber" value="buildNumber" />
+                                        <property name="project.version" value="${project.version}" />
+                                        <property name="project.build.profile" value="${project.build.profile}" />
+                                        <property name="project.build.directory"
+                                            value="${project.build.directory}" />
+                                        <property name="build.name" value="intel-up2-centos-7-docker-nn" />
+                                        <property name="target.device" value="intel-up2-docker-nn" />
+                                        <property name="native.tag" value="x86_64" />
+                                        <property name="kura.os.version" value="centos" />
+                                        <property name="kura.arch" value="intel-up2-centos-7-docker" />
+                                        <property name="service.manager" value="systemd" />
+                                        <property name="os.base" value="redhat" />
+                                        <property name="kura.mem.size" value="1024m" />
+                                        <property name="kura.install.dir" value="/opt/eclipse" />
+                                        <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"
+                                            target="dist-linux" />
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>de.dentrassi.maven</groupId>
+                        <artifactId>rpm</artifactId>
+                        <executions>
+                            <execution>
+                                <id>intel-up2-centos-7-docker-nn-rpm</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>rpm</goal>
+                                </goals>
+                                <configuration>
+                                    <packageName>kura-intel-up2-centos-7-docker-nn</packageName>
+                                    <attach>true</attach>
+                                    <group>Application/Misc</group>
+                                    <license>EPL 1.0</license>
+                                    <architecture>x86_64</architecture>
+                                    <prerequisites>
+                                        <prerequisite>bash</prerequisite>
+                                        <prerequisite>sed</prerequisite>
+                                        <prerequisite>which</prerequisite>
+                                    </prerequisites>
+                                    <requires>
+                                        <require>java</require>
+                                        <require>setserial</require>
+                                        <require>iptables</require>
+                                        <require>iptables-services</require>
+                                        <require>openssl</require>
+                                        <require>openssh</require>
+                                        <require>procps</require>
+                                        <require>gzip</require>
+                                        <require>cronie</require>
+                                        <require>logrotate</require>
+                                        <require>telnet</require>
+                                        <require>bluez</require>
+                                        <require>socat</require>
+                                        <require>usbutils</require>
+                                        <require>unzip</require>
+                                        <require>psmisc</require>
+                                        <require>tar</require>
+                                        <require>dos2unix</require>
+                                        <require>net-tools</require>
+                                    </requires>
+                                    <entries>
+                                        <entry>
+                                            <name>/tmp/kura_${project.version}_installer.sh</name>
+                                            <file>${project.build.directory}/kura_${project.version}_intel-up2-centos-7-docker-nn_installer.sh</file>
+                                            <user>root</user>
+                                            <group>root</group>
+                                            <mode>0755</mode>
+                                        </entry>
+                                    </entries>
+                                    <afterInstallation>
+                                        <script>/tmp/kura_${project.version}_installer.sh</script>
+                                    </afterInstallation>
+                                    <skipSigning>true</skipSigning>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
         <profile>
             <id>rock960-ubuntu-16-nn</id>
             <properties>

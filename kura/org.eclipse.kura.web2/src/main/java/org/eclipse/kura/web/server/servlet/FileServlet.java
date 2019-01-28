@@ -396,6 +396,7 @@ public class FileServlet extends HttpServlet {
 
     private void doPostAsset(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         UploadRequest upload = new UploadRequest(this.diskFileItemFactory);
+        upload.setHeaderEncoding("UTF-8");
         List<String> errors = new ArrayList<>();
 
         try {
@@ -435,11 +436,12 @@ public class FileServlet extends HttpServlet {
             ConfigurationService cs = locator.getService(ConfigurationService.class);
 
             if (doReplace) {
-                String fp = cs.getComponentConfiguration(assetPid).getConfigurationProperties().get("service.factoryPid").toString();
+                String fp = cs.getComponentConfiguration(assetPid).getConfigurationProperties()
+                        .get("service.factoryPid").toString();
                 cs.deleteFactoryConfiguration(assetPid, false);
                 newProps.put("driver.pid", driverPid);
                 cs.createFactoryConfiguration(fp, assetPid, newProps, true);
-            }else{
+            } else {
                 cs.updateConfiguration(assetPid, newProps);
             }
 
@@ -537,8 +539,7 @@ public class FileServlet extends HttpServlet {
         }
     }
 
-    private void doPostDeployUpload(HttpServletRequest req)
-            throws ServletException, IOException {
+    private void doPostDeployUpload(HttpServletRequest req) throws ServletException, IOException {
         ServiceLocator locator = ServiceLocator.getInstance();
         DeploymentAgentService deploymentAgentService;
         try {
@@ -822,7 +823,7 @@ class UploadRequest extends ServletFileUpload {
         this.fileItems = new ArrayList<>();
     }
 
-    public void parse(HttpServletRequest req) throws FileUploadException {
+    public void parse(HttpServletRequest req) throws FileUploadException, UnsupportedEncodingException {
 
         logger.debug("upload.getFileSizeMax(): {}", getFileSizeMax());
         logger.debug("upload.getSizeMax(): {}", getSizeMax());
@@ -838,7 +839,7 @@ class UploadRequest extends ServletFileUpload {
 
             if (item.isFormField()) {
                 String name = item.getFieldName();
-                String value = item.getString();
+                String value = item.getString("UTF-8");
 
                 logger.debug("Form field item name: {}, value: {}", name, value);
 

@@ -15,6 +15,7 @@
 package org.eclipse.kura.web.server;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -256,13 +257,19 @@ public final class GwtWireGraphServiceImpl extends OsgiRemoteServiceServlet impl
                         .map(GwtConfigComponent::getComponentId))
                 .iterator();
 
-        final Filter receivedConfigurationPidsFilter = getFilter(FilterUtil.getPidFilter(receivedConfigurationPids));
+        final Map<String, ComponentConfiguration> originalConfigs;
 
-        final Map<String, ComponentConfiguration> originalConfigs = ServiceLocator
-                .applyToServiceOptionally(ConfigurationService.class, cs -> cs //
-                        .getComponentConfigurations(receivedConfigurationPidsFilter) //
-                        .stream() //
-                        .collect(Collectors.toMap(ComponentConfiguration::getPid, c -> c)));
+        if (receivedConfigurationPids.hasNext()) {
+            final Filter receivedConfigurationPidsFilter = getFilter(
+                    FilterUtil.getPidFilter(receivedConfigurationPids));
+
+            originalConfigs = ServiceLocator.applyToServiceOptionally(ConfigurationService.class, cs -> cs //
+                    .getComponentConfigurations(receivedConfigurationPidsFilter) //
+                    .stream() //
+                    .collect(Collectors.toMap(ComponentConfiguration::getPid, c -> c)));
+        } else {
+            originalConfigs = Collections.emptyMap();
+        }
 
         final List<WireComponentConfiguration> wireComponentConfigurations = gwtConfigurations
                 .getWireComponentConfigurations() //

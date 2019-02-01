@@ -14,6 +14,7 @@ package org.eclipse.kura.web.server;
 import static java.lang.String.format;
 import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_PID;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Base64.Decoder;
@@ -193,7 +194,7 @@ public class GwtAssetServiceImpl extends OsgiRemoteServiceServlet implements Gwt
             return TypedValues.newStringValue(userValue);
         }
         if (DataType.BYTE_ARRAY == dataType) {
-            return TypedValues.newByteArrayValue(BASE64_DECODER.decode(userValue));
+            return TypedValues.newByteArrayValue(BASE64_DECODER.decode(userValue.getBytes(StandardCharsets.UTF_8)));
         }
 
         throw new IllegalArgumentException();
@@ -201,7 +202,7 @@ public class GwtAssetServiceImpl extends OsgiRemoteServiceServlet implements Gwt
 
     private static String typedValueToString(TypedValue<?> typedValue) {
         if (typedValue.getType() == DataType.BYTE_ARRAY) {
-            return BASE64_ENCODER.encodeToString((byte[]) typedValue.getValue());
+            return new String(BASE64_ENCODER.encode((byte[]) typedValue.getValue()), StandardCharsets.UTF_8);
         }
         return typedValue.getValue().toString();
     }

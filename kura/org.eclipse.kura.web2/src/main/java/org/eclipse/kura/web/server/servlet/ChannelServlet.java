@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -68,16 +69,21 @@ public class ChannelServlet extends HttpServlet {
             // END XSRF security check
             String assetPid = req.getParameter("assetPid");
             String driverPid = req.getParameter("driverPid");
-
+            String userAgent = req.getHeader("User-Agent");
             Writer out = new StringWriter();
             CSVPrinter printer = new CSVPrinter(out, CSVFormat.RFC4180);
-
+            String formFileName = assetPid;
+            if (userAgent.contains("MSIE") || userAgent.contains("Trident")) {
+                formFileName = URLEncoder.encode(formFileName, "UTF-8");
+            } else {
+                formFileName = new String(formFileName.getBytes("UTF-8"), "ISO-8859-1");
+            }
             if (!fillCsvFields(printer, assetPid, driverPid)) {
                 resp.getWriter().write("Error generating CSV output!");
             } else {
                 resp.setCharacterEncoding("UTF-8");
-                resp.setContentType("text/csv");
-                resp.setHeader("Content-Disposition", "attachment; filename=asset_" + assetPid + ".csv");
+                resp.setContentType("text/csv;charset=utf-8");
+                resp.setHeader("Content-Disposition", "attachment; filename=asset_" + formFileName + ".csv");
                 resp.setHeader("Cache-Control", "no-transform, max-age=0");
                 try (PrintWriter writer = resp.getWriter()) {
                     writer.write(out.toString());

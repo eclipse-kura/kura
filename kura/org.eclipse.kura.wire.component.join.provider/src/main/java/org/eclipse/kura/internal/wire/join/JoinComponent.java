@@ -85,7 +85,7 @@ public final class JoinComponent implements MultiportWireReceiver, WireEmitter, 
         final WireEnvelope secondEnvelope = envelopes.get(1);
         final List<WireRecord> firstRecords = firstEnvelope != null ? firstEnvelope.getRecords()
                 : Collections.emptyList();
-        final List<WireRecord> secondRecords = firstEnvelope != null ? secondEnvelope.getRecords()
+        final List<WireRecord> secondRecords = secondEnvelope != null ? secondEnvelope.getRecords()
                 : Collections.emptyList();
         final List<WireRecord> result = new ArrayList<>();
         forEachPair(firstRecords.iterator(), secondRecords.iterator(), (first, second) -> {

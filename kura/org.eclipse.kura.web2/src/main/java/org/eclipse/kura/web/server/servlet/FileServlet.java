@@ -276,6 +276,7 @@ public class FileServlet extends HttpServlet {
 
     private void doPostCommand(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         UploadRequest upload = new UploadRequest(this.diskFileItemFactory);
+        upload.setHeaderEncoding("UTF-8");
 
         try {
             upload.parse(req);

@@ -319,7 +319,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
     private List<String> findFactoryHideComponents() throws GwtKuraException {
         return ServiceLocator.applyToServiceOptionally(ServiceComponentRuntime.class,
                 scr -> scr.getComponentDescriptionDTOs().stream()
-                        .filter(dto -> dto.properties.containsKey("kura.ui.factory.hide")).map(dto -> (String) dto.name)
+                        .filter(dto -> dto.properties.containsKey("kura.ui.factory.hide")).map(dto -> dto.name)
                         .collect(Collectors.toList()));
     }
 
@@ -676,7 +676,13 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
                                 || contents.toString()
                                         .contains(GwtServerUtil.PATTERN_SERVICE_PROVIDE_CONFIGURABLE_COMP))
                                 && contents.toString().contains(GwtServerUtil.PATTERN_CONFIGURATION_REQUIRE)) {
-                            final Document dom = DocumentBuilderFactory.newInstance().newDocumentBuilder()
+                            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+                            dbf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+                            dbf.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+                            dbf.setXIncludeAware(false);
+                            dbf.setExpandEntityReferences(false);
+
+                            final Document dom = dbf.newDocumentBuilder()
                                     .parse(entry.openConnection().getInputStream());
                             final NodeList nl = dom.getElementsByTagName("property");
                             for (int i = 0; i < nl.getLength(); i++) {

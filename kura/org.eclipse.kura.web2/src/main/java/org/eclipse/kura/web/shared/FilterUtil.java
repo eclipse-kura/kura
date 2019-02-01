@@ -18,7 +18,7 @@ public final class FilterUtil {
 
     public static String getPidFilter(final Iterator<String> pids) {
         if (!pids.hasNext()) {
-            return "()";
+            throw new IllegalArgumentException("pids list must be non empty");
         }
         final StringBuilder builder = new StringBuilder();
         builder.append("(|");

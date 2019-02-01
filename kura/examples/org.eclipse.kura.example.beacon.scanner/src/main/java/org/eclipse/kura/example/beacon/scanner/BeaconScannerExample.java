@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -33,6 +33,8 @@ public class BeaconScannerExample implements ConfigurableComponent, BluetoothBea
     private static final String PROPERTY_INAME = "iname";
     private static final String PROPERTY_RATE_LIMIT = "rate_limit";
     private static final String PROPERTY_COMPANY_CODE = "companyCode";
+
+    private static final String DEFAULT_COMPANY_CODE = "004c";
 
     // Configurable State
     private String adapterName;		// eg. hci0
@@ -99,7 +101,8 @@ public class BeaconScannerExample implements ConfigurableComponent, BluetoothBea
                 } else if (key.equals(PROPERTY_RATE_LIMIT)) {
                     this.rateLimit = (Integer) value;
                 } else if (key.equals(PROPERTY_COMPANY_CODE)) {
-                    this.companyCode = (String) value;
+                    this.companyCode = inSetHex(inSetRange((String) value, 4, DEFAULT_COMPANY_CODE),
+                            DEFAULT_COMPANY_CODE);
                 } else if (key.equals(PROPERTY_ENABLE)) {
                     this.enableScanning = (Boolean) value;
                 }
@@ -113,6 +116,22 @@ public class BeaconScannerExample implements ConfigurableComponent, BluetoothBea
             setup();
         }
 
+    }
+
+    private String inSetRange(String value, int range, String defaultValue) {
+        if (value.length() != range) {
+            return defaultValue;
+        } else {
+            return value;
+        }
+    }
+
+    private String inSetHex(String value, String defaultValue) {
+        if (!value.matches("^[0-9a-fA-F]+$")) {
+            return defaultValue;
+        } else {
+            return value;
+        }
     }
 
     private void setup() {
@@ -158,7 +177,6 @@ public class BeaconScannerExample implements ConfigurableComponent, BluetoothBea
 
             // Store the publish time against the address
             this.publishTimes.put(beaconData.address, now);
-            
             if (this.cloudPublisher == null) {
                 logger.info("No cloud publisher selected. Cannot publish!");
                 return;
@@ -176,7 +194,6 @@ public class BeaconScannerExample implements ConfigurableComponent, BluetoothBea
 
             Map<String, Object> properties = new HashMap<String, Object>();
             properties.put("address", beaconData.address);
-            
             KuraMessage message = new KuraMessage(kp, properties);
             try {
                 this.cloudPublisher.publish(message);

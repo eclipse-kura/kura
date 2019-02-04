@@ -524,10 +524,10 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
     @Override
     public int publish(String topic, byte[] payload, int qos, boolean retain, int priority) throws KuraStoreException {
 
-        logger.info("Storing message on topic :{}, priority: {}", topic, priority);
+        logger.info("Storing message on topic: {}, priority: {}", topic, priority);
 
         DataMessage dataMsg = this.store.store(topic, payload, qos, retain, priority);
-        logger.info("Stored message on topic :{}, priority: {}", topic, priority);
+        logger.info("Stored message on topic: {}, priority: {}", topic, priority);
 
         signalPublisher();
 

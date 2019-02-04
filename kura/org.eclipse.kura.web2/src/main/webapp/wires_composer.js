@@ -215,8 +215,22 @@ WireComposer.prototype.addWireComponent = function (component) {
 			'.body' : {
 				'rx' : 6,
 				'ry' : 6,
-				'clip-path': 'url(#component-clip)'
-			}
+				'clip-path': 'url(#component-clip)',
+				'fill' : '#009ae0'
+			},
+			'.inPorts .port-body' : {
+				fill : 'PaleGreen',
+				magnet : 'passive',
+				type : 'input'
+			},
+			'.outPorts .port-body' : {
+				fill : 'Tomato',
+				type : 'output'
+			},
+		},
+		size : {
+			width : 120,
+			height : 40
 		},
 		inPorts : inputPorts,
 		outPorts : outputPorts,
@@ -657,6 +671,10 @@ DragHandler.prototype.initTempElement = function () {
 		position : {
 			x : 0,
 			y : 0
+		},
+		size : {
+			width : 120,
+			height : 40
 		}
 	});
 

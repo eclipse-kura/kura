@@ -300,7 +300,9 @@ public class CloudDeploymentHandlerV2 implements ConfigurableComponent, RequestH
             KuraMessage message = new KuraMessage(messagePayload, properties);
 
             CloudNotificationPublisher notificationPublisher = options.getNotificationPublisher();
-            notificationPublisher.publish(message);
+            if (notificationPublisher != null) {
+                notificationPublisher.publish(message);
+            }
         } catch (KuraException e) {
             logger.error("Error publishing response for command {}", messageType, e);
         }

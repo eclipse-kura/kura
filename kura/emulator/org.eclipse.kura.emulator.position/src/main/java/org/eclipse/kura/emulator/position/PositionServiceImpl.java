@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+import javax.xml.stream.XMLInputFactory;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.position.NmeaPosition;
@@ -155,8 +156,11 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
 
         GpsXmlHandler handler = new GpsXmlHandler();
         SAXParserFactory factory = SAXParserFactory.newInstance();
-        factory.setValidating(false);
         try {
+            factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+            factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            factory.setValidating(false);
+
             // Create the builder and parse the file
             SAXParser parser = factory.newSAXParser();
             logger.debug("Parsing: {}", fileName);

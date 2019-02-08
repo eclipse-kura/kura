@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -45,6 +45,8 @@ public class BluetoothUtil {
     private static final String HCI_VERSION = "HCI Version:";
     private static final String HCICONFIG = "hciconfig";
     private static final String GATTTOOL = "gatttool";
+
+    private static final String DEFAULT_COMPANY_CODE = "004c";
 
     // Write bluetooth dumping script into /tmp
     static {
@@ -406,6 +408,7 @@ public class BluetoothUtil {
 
                 int prefixPtr = ptr + 2;
                 byte[] prefix = new byte[4];
+                companyName = inSetHex(inSetRange(companyName, 4, DEFAULT_COMPANY_CODE), DEFAULT_COMPANY_CODE);
                 prefix[0] = (byte) Integer.parseInt(companyName.substring(2, 4), 16);
                 prefix[1] = (byte) Integer.parseInt(companyName.substring(0, 2), 16);
                 prefix[2] = 0x02;
@@ -440,6 +443,22 @@ public class BluetoothUtil {
         }
 
         return null;
+    }
+
+    private static String inSetRange(String value, int range, String defaultValue) {
+        if (value.length() != range) {
+            return defaultValue;
+        } else {
+            return value;
+        }
+    }
+
+    private static String inSetHex(String value, String defaultValue) {
+        if (!value.matches("^[0-9a-fA-F]+$")) {
+            return defaultValue;
+        } else {
+            return value;
+        }
     }
 
     /**

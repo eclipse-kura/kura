@@ -138,7 +138,13 @@ public class ServiceComponent implements ConfigurableComponent {
     private String createBrokerXml(final Map<String, Object> properties) throws Exception {
 
         try (final InputStream input = Resources.getResource(ServiceComponent.class, "broker.xml").openStream()) {
-            final Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(input);
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            dbf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            dbf.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+            dbf.setXIncludeAware(false);
+            dbf.setExpandEntityReferences(false);
+            
+            final Document document = dbf.newDocumentBuilder().parse(input);
 
             customizeDocument(document, properties);
 

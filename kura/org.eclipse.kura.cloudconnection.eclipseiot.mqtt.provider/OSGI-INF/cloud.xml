@@ -58,6 +58,20 @@
               bind="setEventAdmin" 
               unbind="unsetEventAdmin"
               interface="org.osgi.service.event.EventAdmin"/>
+   <reference bind="setJsonUnmarshaller"
+              cardinality="1..1"
+              interface="org.eclipse.kura.marshalling.Unmarshaller"
+              name="Unmarshaller"
+              policy="static"
+              target="(kura.service.pid=org.eclipse.kura.json.marshaller.unmarshaller.provider)"
+              unbind="unsetJsonUnmarshaller"/>
+   <reference bind="setJsonMarshaller"
+              cardinality="1..1"
+              interface="org.eclipse.kura.marshalling.Marshaller"
+              name="Marshaller"
+              policy="static"
+              target="(kura.service.pid=org.eclipse.kura.json.marshaller.unmarshaller.provider)"
+              unbind="unsetJsonMarshaller"/>
    <property name="kura.ui.service.hide" type="Boolean" value="true"/>
    <property name="kura.ui.factory.hide" type="String" value="true"/>
 </scr:component>

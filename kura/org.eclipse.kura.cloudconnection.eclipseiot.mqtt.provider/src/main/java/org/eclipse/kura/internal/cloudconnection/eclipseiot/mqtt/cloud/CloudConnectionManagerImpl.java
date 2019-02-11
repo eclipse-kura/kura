@@ -20,6 +20,7 @@ import static org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -607,6 +608,8 @@ public class CloudConnectionManagerImpl
         // has been published (i.e. written to the socket).
         synchronized (this.messageId) {
             this.messageId.set(-1);
+            // add a timestamp to the message
+            payload.setTimestamp(new Date());
             byte[] encodedPayload = encodePayload(payload);
             int localMessageId = this.dataService.publish(topic, encodedPayload, this.options.getLifeCycleMessageQos(),
                     this.options.getLifeCycleMessageRetain(), this.options.getLifeCycleMessagePriority());

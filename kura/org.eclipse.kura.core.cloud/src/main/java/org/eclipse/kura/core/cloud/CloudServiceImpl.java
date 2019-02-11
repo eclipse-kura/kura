@@ -27,6 +27,7 @@ import static org.osgi.framework.Constants.SERVICE_PID;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -801,6 +802,8 @@ public class CloudServiceImpl
         // has been published (i.e. written to the socket).
         synchronized (this.messageId) {
             this.messageId.set(-1);
+            // add a timestamp to the message
+            payload.setTimestamp(new Date());
             byte[] encodedPayload = encodePayload(payload);
             int messageId = this.dataService.publish(topic, encodedPayload,
                     CloudServiceOptions.getLifeCycleMessageQos(), CloudServiceOptions.getLifeCycleMessageRetain(),

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -10,11 +10,15 @@
  *     Eurotech
  *     Red Hat Inc
  *******************************************************************************/
-package org.eclipse.kura.core.message;
+package org.eclipse.kura.message;
 
-import org.eclipse.kura.message.KuraPayload;
-import org.eclipse.kura.message.KuraPosition;
-
+/**
+ * The KuraBirthPayload is an extension of {@link KuraPayload} that contains the parameters that allow to define the
+ * form of a device. The message is usually published when connecting to the broker.
+ *
+ * @noextend This class is not intended to be subclassed by clients.
+ * @since 2.1
+ */
 public class KuraBirthPayload extends KuraPayload {
 
     private static final String UPTIME = "uptime";

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -10,7 +10,7 @@
  *     Eurotech
  *     Red Hat Inc
  *******************************************************************************/
-package org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message;
+package org.eclipse.kura.message;
 
 import java.util.Properties;
 
@@ -18,6 +18,9 @@ import java.util.Properties;
  * The KuraDeviceProfile is a container class that holds the parameters that make up the from of a device.
  * This information is used to build the birth and disconnect certificates that are published when
  * connecting to and disconnecting from the broker.
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
+ * @since 2.1
  *
  */
 public class KuraDeviceProfile {
@@ -587,7 +590,7 @@ public class KuraDeviceProfile {
 
     /**
      * Returns the Application Framework.
-     *
+     * 
      * @return A String representing the Application Framework
      */
     public String getApplicationFramework() {
@@ -596,7 +599,7 @@ public class KuraDeviceProfile {
 
     /**
      * Returns the Application Framework version.
-     *
+     * 
      * @return A String representing the Application Framework version
      */
     public String getApplicationFrameworkVersion() {

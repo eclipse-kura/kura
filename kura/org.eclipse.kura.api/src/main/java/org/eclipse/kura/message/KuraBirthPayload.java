@@ -12,6 +12,31 @@
  *******************************************************************************/
 package org.eclipse.kura.message;
 
+import static org.eclipse.kura.message.KuraDeviceProfile.DISPLAY_NAME;
+import static org.eclipse.kura.message.KuraDeviceProfile.UPTIME;
+import static org.eclipse.kura.message.KuraDeviceProfile.MODEL_NAME;
+import static org.eclipse.kura.message.KuraDeviceProfile.MODEL_ID;
+import static org.eclipse.kura.message.KuraDeviceProfile.PART_NUMBER;
+import static org.eclipse.kura.message.KuraDeviceProfile.SERIAL_NUMBER;
+import static org.eclipse.kura.message.KuraDeviceProfile.AVAILABLE_PROCESSORS;
+import static org.eclipse.kura.message.KuraDeviceProfile.TOTAL_MEMORY;
+import static org.eclipse.kura.message.KuraDeviceProfile.FIRMWARE_VERSION;
+import static org.eclipse.kura.message.KuraDeviceProfile.BIOS_VERSION;
+import static org.eclipse.kura.message.KuraDeviceProfile.OS;
+import static org.eclipse.kura.message.KuraDeviceProfile.OS_VERSION;
+import static org.eclipse.kura.message.KuraDeviceProfile.OS_ARCH;
+import static org.eclipse.kura.message.KuraDeviceProfile.JVM_NAME;
+import static org.eclipse.kura.message.KuraDeviceProfile.JVM_VERSION;
+import static org.eclipse.kura.message.KuraDeviceProfile.JVM_PROFILE;
+import static org.eclipse.kura.message.KuraDeviceProfile.KURA_VERSION;
+import static org.eclipse.kura.message.KuraDeviceProfile.APPLICATION_FRAMEWORK;
+import static org.eclipse.kura.message.KuraDeviceProfile.APPLICATION_FRAMEWORK_VERSION;
+import static org.eclipse.kura.message.KuraDeviceProfile.OSGI_FRAMEWORK;
+import static org.eclipse.kura.message.KuraDeviceProfile.OSGI_FRAMEWORK_VERSION;
+import static org.eclipse.kura.message.KuraDeviceProfile.CONNECTION_INTERFACE;
+import static org.eclipse.kura.message.KuraDeviceProfile.CONNECTION_IP;
+import static org.eclipse.kura.message.KuraDeviceProfile.DEFAULT_APPLICATION_FRAMEWORK;
+
 /**
  * The KuraBirthPayload is an extension of {@link KuraPayload} that contains the parameters that allow to define the
  * form of a device. The message is usually published when connecting to the broker.
@@ -21,29 +46,6 @@ package org.eclipse.kura.message;
  */
 public class KuraBirthPayload extends KuraPayload {
 
-    private static final String UPTIME = "uptime";
-    private static final String DISPLAY_NAME = "display_name";
-    private static final String MODEL_NAME = "model_name";
-    private static final String MODEL_ID = "model_id";
-    private static final String PART_NUMBER = "part_number";
-    private static final String SERIAL_NUMBER = "serial_number";
-    private static final String AVAILABLE_PROCESSORS = "available_processors";
-    private static final String TOTAL_MEMORY = "total_memory";
-    private static final String FIRMWARE_VERSION = "firmware_version";
-    private static final String BIOS_VERSION = "bios_version";
-    private static final String OS = "os";
-    private static final String OS_VERSION = "os_version";
-    private static final String OS_ARCH = "os_arch";
-    private static final String JVM_NAME = "jvm_name";
-    private static final String JVM_VERSION = "jvm_version";
-    private static final String JVM_PROFILE = "jvm_profile";
-    private static final String KURA_VERSION = "kura_version";
-    private static final String APPLICATION_FRAMEWORK = "application_framework";
-    private static final String APPLICATION_FRAMEWORK_VERSION = "application_framework_version";
-    private static final String OSGI_FRAMEWORK = "osgi_framework";
-    private static final String OSGI_FRAMEWORK_VERSION = "osgi_framework_version";
-    private static final String CONNECTION_INTERFACE = "connection_interface";
-    private static final String CONNECTION_IP = "connection_ip";
     private static final String ACCEPT_ENCODING = "accept_encoding";
     private static final String APPLICATION_IDS = "application_ids";
     private static final String MODEM_IMEI = "modem_imei";
@@ -51,8 +53,6 @@ public class KuraBirthPayload extends KuraPayload {
     private static final String MODEM_ICCID = "modem_iccid";
     private static final String MODEM_RSSI = "modem_rssi";
     private static final String PAYLOAD_ENCODING = "payload_encoding";
-
-    private static final String DEFAULT_APPLICATION_FRAMEWORK = "Kura";
 
     public String getUptime() {
         return (String) getMetric(UPTIME);

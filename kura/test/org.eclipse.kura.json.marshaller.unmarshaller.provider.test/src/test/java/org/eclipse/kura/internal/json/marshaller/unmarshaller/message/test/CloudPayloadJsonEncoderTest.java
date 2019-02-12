@@ -1,12 +1,23 @@
-package org.eclipse.kura.core.cloud;
+/*******************************************************************************
+ * Copyright (c) 2017, 2019 Eurotech and/or its affiliates and others
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *******************************************************************************/
+package org.eclipse.kura.internal.json.marshaller.unmarshaller.message.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Date;
 
+import org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonDecoder;
+import org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonEncoder;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraPosition;
 import org.junit.Assert;
@@ -21,18 +32,18 @@ public class CloudPayloadJsonEncoderTest {
 
     @Test(expected = NullPointerException.class)
     public void testToJsonNullKuraPayload() {
-        CloudPayloadJsonEncoder.getBytes(null);
+        CloudPayloadJsonEncoder.marshal(null);
     }
 
     @Test
     public void testToJsonEmptyKuraPayload() {
         KuraPayload payload = new KuraPayload();
-        byte[] byteArray = CloudPayloadJsonEncoder.getBytes(payload);
+        String result = CloudPayloadJsonEncoder.marshal(payload);
 
-        assertNotNull(byteArray);
-        assertTrue(byteArray.length != 0);
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
 
-        KuraPayload decodedPayload = CloudPayloadJsonDecoder.buildFromByteArray(byteArray);
+        KuraPayload decodedPayload = CloudPayloadJsonDecoder.buildFromString(result);
 
         assertEquals(payload.getPosition(), decodedPayload.getPosition());
         assertEquals(payload.getBody(), decodedPayload.getBody());
@@ -44,12 +55,12 @@ public class CloudPayloadJsonEncoderTest {
     public void testToJsonKuraPayloadOnlyTimestamp() {
         KuraPayload payload = new KuraPayload();
         payload.setTimestamp(new Date());
-        byte[] byteArray = CloudPayloadJsonEncoder.getBytes(payload);
+        String result = CloudPayloadJsonEncoder.marshal(payload);
 
-        assertNotNull(byteArray);
-        assertTrue(byteArray.length != 0);
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
 
-        KuraPayload decodedPayload = CloudPayloadJsonDecoder.buildFromByteArray(byteArray);
+        KuraPayload decodedPayload = CloudPayloadJsonDecoder.buildFromString(result);
 
         assertNull(decodedPayload.getPosition());
         assertNull(decodedPayload.getBody());
@@ -68,7 +79,7 @@ public class CloudPayloadJsonEncoderTest {
 
         payload.setBody("Test body".getBytes());
 
-        CloudPayloadJsonEncoder.getBytes(payload);
+        CloudPayloadJsonEncoder.marshal(payload);
     }
 
     @Test
@@ -100,12 +111,12 @@ public class CloudPayloadJsonEncoderTest {
 
         payload.setBody("Test body".getBytes());
 
-        byte[] byteArray = CloudPayloadJsonEncoder.getBytes(payload);
+        String result = CloudPayloadJsonEncoder.marshal(payload);
 
-        assertNotNull(byteArray);
-        assertTrue(byteArray.length != 0);
-
-        KuraPayload decodedPayload = CloudPayloadJsonDecoder.buildFromByteArray(byteArray);
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
+        
+        KuraPayload decodedPayload = CloudPayloadJsonDecoder.buildFromString(result);
 
         assertEquals(payload.getTimestamp(), decodedPayload.getTimestamp());
 

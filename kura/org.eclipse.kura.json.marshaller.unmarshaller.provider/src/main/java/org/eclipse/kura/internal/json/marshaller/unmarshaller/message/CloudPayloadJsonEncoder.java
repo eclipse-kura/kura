@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -9,22 +9,21 @@
  * Contributors:
  *     Eurotech
  *******************************************************************************/
-package org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.cloud;
+package org.eclipse.kura.internal.json.marshaller.unmarshaller.message;
 
-import static org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.cloud.CloudPayloadJsonFields.BODY;
-import static org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.cloud.CloudPayloadJsonFields.METRICS;
-import static org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.cloud.CloudPayloadJsonFields.POSITION;
-import static org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.cloud.CloudPayloadJsonFields.SENTON;
-import static org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.cloud.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.ALTITUDE;
-import static org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.cloud.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.HEADING;
-import static org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.cloud.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.LATITUDE;
-import static org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.cloud.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.LONGITUDE;
-import static org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.cloud.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.PRECISION;
-import static org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.cloud.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.SATELLITES;
-import static org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.cloud.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.SPEED;
-import static org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.cloud.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.STATUS;
+import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.BODY;
+import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.METRICS;
+import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.POSITION;
+import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.SENTON;
+import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.ALTITUDE;
+import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.HEADING;
+import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.LATITUDE;
+import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.LONGITUDE;
+import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.PRECISION;
+import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.SATELLITES;
+import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.SPEED;
+import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.STATUS;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Date;
 
@@ -44,15 +43,15 @@ public class CloudPayloadJsonEncoder {
     }
 
     /**
-     * This static method takes a {@link KuraPayload} and converts it into a {@code byte[]}
+     * This static method takes a {@link KuraPayload} and converts it into a {@code String}
      *
      * @param kuraPayload
      *            a {@link KuraPayload} object that has to be converted.
-     * @return a byte[] that maps the received {@link KuraPayload} object
+     * @return a String that maps the received {@link KuraPayload} object
      * @throws IllegalArgumentException
      *             if the conversion fails
      */
-    public static byte[] getBytes(KuraPayload kuraPayload) {
+    public static String marshal(KuraPayload kuraPayload) {
         JsonObject json = Json.object();
 
         encodeTimestamp(kuraPayload, json);
@@ -63,7 +62,7 @@ public class CloudPayloadJsonEncoder {
 
         encodeBody(kuraPayload, json);
 
-        return json.toString().getBytes(StandardCharsets.UTF_8);
+        return json.toString();
     }
 
     private static void encodeBody(KuraPayload kuraPayload, JsonObject json) {

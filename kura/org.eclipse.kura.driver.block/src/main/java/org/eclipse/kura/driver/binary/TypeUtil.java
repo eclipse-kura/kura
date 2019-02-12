@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2018, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.function.Function;
 
 import org.eclipse.kura.type.BooleanValue;
+import org.eclipse.kura.type.ByteArrayValue;
 import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.type.DoubleValue;
 import org.eclipse.kura.type.FloatValue;
@@ -26,6 +27,8 @@ import org.eclipse.kura.type.TypedValue;
 
 public final class TypeUtil {
 
+    private static final String TO_NATIVE_TYPE_MESSAGE = " to native type ";
+    private static final String CANNOT_CONVERT_FROM_KURA_DATA_TYPE_MESSAGE = "Cannot convert from Kura data type ";
     private static final String TO_KURA_DATA_TYPE_MESSAGE = " to Kura data type ";
     private static final String CANNOT_CONVERT_FROM_NATIVE_TYPE_MESSAGE = "Cannot convert from native type ";
 
@@ -42,6 +45,9 @@ public final class TypeUtil {
         if (Number.class.isAssignableFrom(sourceType)) {
             return toNumericalTypedValue(sourceType, targetType);
         }
+        if (targetType == DataType.BYTE_ARRAY) {
+            return toByteArrayTypedValue(sourceType, targetType);
+        }
         if (sourceType == String.class) {
             if (targetType == DataType.INTEGER) {
                 return value -> new IntegerValue(Integer.parseInt((String) value));
@@ -53,11 +59,13 @@ public final class TypeUtil {
                 return value -> new DoubleValue(java.lang.Double.parseDouble((String) value));
             }
         }
+
         throw new IllegalArgumentException(CANNOT_CONVERT_FROM_NATIVE_TYPE_MESSAGE + sourceType.getSimpleName()
                 + TO_KURA_DATA_TYPE_MESSAGE + targetType.name());
     }
 
-    private static <T> Function<T, TypedValue<?>> toNumericalTypedValue(final Class<T> sourceType, final DataType targetType) {
+    private static <T> Function<T, TypedValue<?>> toNumericalTypedValue(final Class<T> sourceType,
+            final DataType targetType) {
         if (targetType == DataType.INTEGER) {
             return value -> new IntegerValue(((Number) value).intValue());
         } else if (targetType == DataType.LONG) {
@@ -68,10 +76,11 @@ public final class TypeUtil {
             return value -> new DoubleValue(((Number) value).doubleValue());
         }
         throw new IllegalArgumentException(CANNOT_CONVERT_FROM_NATIVE_TYPE_MESSAGE + sourceType.getSimpleName()
-        + TO_KURA_DATA_TYPE_MESSAGE + targetType.name());
+                + TO_KURA_DATA_TYPE_MESSAGE + targetType.name());
     }
 
-    private static <T> Function<T, TypedValue<?>> toBooleanTypedValue(final Class<T> sourceType, final DataType targetType) {
+    private static <T> Function<T, TypedValue<?>> toBooleanTypedValue(final Class<T> sourceType,
+            final DataType targetType) {
         if (sourceType == Boolean.class) {
             return value -> new BooleanValue((Boolean) value);
         } else if (sourceType == String.class) {
@@ -80,7 +89,7 @@ public final class TypeUtil {
             return value -> new BooleanValue(((Number) value).doubleValue() != 0);
         }
         throw new IllegalArgumentException(CANNOT_CONVERT_FROM_NATIVE_TYPE_MESSAGE + sourceType.getSimpleName()
-        + TO_KURA_DATA_TYPE_MESSAGE + targetType.name());
+                + TO_KURA_DATA_TYPE_MESSAGE + targetType.name());
     }
 
     private static <T> Function<T, TypedValue<?>> toStringTypedValue(final Class<T> sourceType) {
@@ -91,6 +100,15 @@ public final class TypeUtil {
         }
     }
 
+    private static <T> Function<T, TypedValue<?>> toByteArrayTypedValue(final Class<T> sourceType,
+            final DataType targetType) {
+        if (sourceType == byte[].class) {
+            return value -> new ByteArrayValue((byte[]) value);
+        }
+        throw new IllegalArgumentException(CANNOT_CONVERT_FROM_NATIVE_TYPE_MESSAGE + sourceType.getSimpleName()
+                + TO_KURA_DATA_TYPE_MESSAGE + targetType.name());
+    }
+
     @SuppressWarnings("unchecked")
     public static <T> Function<TypedValue<?>, T> fromTypedValue(final Class<T> targetType, final DataType sourceType) {
         if (targetType == String.class) {
@@ -98,6 +116,9 @@ public final class TypeUtil {
         }
         if (targetType == Boolean.class) {
             return toBooleanValue(targetType, sourceType);
+        }
+        if (targetType == byte[].class) {
+            return toByteArrayValue(targetType, sourceType);
         }
         if (sourceType == DataType.STRING) {
             if (targetType == Integer.class) {
@@ -122,8 +143,8 @@ public final class TypeUtil {
                 return value -> (T) BigInteger.valueOf(((Number) value.getValue()).longValue());
             }
         }
-        throw new IllegalArgumentException("Cannot convert from Kura data type " + sourceType.name()
-                + " to native type " + targetType.getSimpleName());
+        throw new IllegalArgumentException(CANNOT_CONVERT_FROM_KURA_DATA_TYPE_MESSAGE + sourceType.name()
+                + TO_NATIVE_TYPE_MESSAGE + targetType.getSimpleName());
     }
 
     @SuppressWarnings("unchecked")
@@ -135,8 +156,8 @@ public final class TypeUtil {
         } else if (sourceType != DataType.BYTE_ARRAY) {
             return value -> (T) (Boolean) (((Number) value.getValue()).doubleValue() != 0);
         }
-        throw new IllegalArgumentException("Cannot convert from Kura data type " + sourceType.name()
-        + " to native type " + targetType.getSimpleName());
+        throw new IllegalArgumentException(CANNOT_CONVERT_FROM_KURA_DATA_TYPE_MESSAGE + sourceType.name()
+                + TO_NATIVE_TYPE_MESSAGE + targetType.getSimpleName());
     }
 
     @SuppressWarnings("unchecked")
@@ -146,5 +167,15 @@ public final class TypeUtil {
         } else {
             return value -> (T) value.toString();
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> Function<TypedValue<?>, T> toByteArrayValue(final Class<T> targetType,
+            final DataType sourceType) {
+        if (sourceType == DataType.BYTE_ARRAY) {
+            return value -> (T) (byte[]) value.getValue();
+        }
+        throw new IllegalArgumentException(CANNOT_CONVERT_FROM_KURA_DATA_TYPE_MESSAGE + sourceType.name()
+                + TO_NATIVE_TYPE_MESSAGE + targetType.getSimpleName());
     }
 }

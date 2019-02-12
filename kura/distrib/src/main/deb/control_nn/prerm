@@ -54,16 +54,19 @@ function preRemove {
     #Remove INIT scripts
     rm /etc/init.d/kura
     update-rc.d kura remove
-    
+
+    rm -f  /etc/logrotate.d/kura
+    rm -f  /var/log/kura*.log
+    rm -rf /tmp/.kura
+    rm -rf /tmp/kura
+
     #Delete Eclipse directory if present
-    if [ -d "${INSTALL_DIR}/kura/data" ] ; then
-      rm -rf ${INSTALL_DIR}/kura/data
-    fi
-    
     if [ -d "${INSTALL_DIR}/kura" ] ; then
+      PARENT=`readlink -f ${INSTALL_DIR}/kura`
       rm -rf ${INSTALL_DIR}/kura
+      rm -rf $PARENT
     fi
-    
+
     echo ""
     echo "Uninstalling KURA... Done!"
 }

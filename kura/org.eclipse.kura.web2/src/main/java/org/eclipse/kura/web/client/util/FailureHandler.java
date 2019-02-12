@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -57,17 +57,16 @@ public class FailureHandler {
 
         if (stackTrace == null) {
             stackTraceContainer.setVisible(false);
-            return;
-        }
+        } else {
+            errorStackTrace.clear();
 
-        errorStackTrace.clear();
-
-        for (StackTraceElement element : stackTrace) {
-            Label tempLabel = new Label();
-            tempLabel.setText(element.toString());
-            errorStackTrace.add(tempLabel);
+            for (StackTraceElement element : stackTrace) {
+                Label tempLabel = new Label();
+                tempLabel.setText(element.toString());
+                errorStackTrace.add(tempLabel);
+            }
+            stackTraceContainer.setVisible(true);
         }
-        stackTraceContainer.setVisible(true);
         popup.show();
     }
 

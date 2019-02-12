@@ -71,7 +71,7 @@ public class LifeCyclePayloadBuilder {
                 .withFirmwareVersion(deviceProfile.getFirmwareVersion()).withBiosVersion(deviceProfile.getBiosVersion())
                 .withOs(deviceProfile.getOs()).withOsVersion(deviceProfile.getOsVersion())
                 .withJvmName(deviceProfile.getJvmName()).withJvmVersion(deviceProfile.getJvmVersion())
-                .withJvmProfile(deviceProfile.getJvmProfile()).withKuraVersion(deviceProfile.getKuraVersion())
+                .withJvmProfile(deviceProfile.getJvmProfile()).withKuraVersion(deviceProfile.getApplicationFrameworkVersion())
                 .withConnectionInterface(deviceProfile.getConnectionInterface())
                 .withConnectionIp(deviceProfile.getConnectionIp()).withAcceptEncoding(acceptEncoding)
                 .withAvailableProcessors(deviceProfile.getAvailableProcessors())

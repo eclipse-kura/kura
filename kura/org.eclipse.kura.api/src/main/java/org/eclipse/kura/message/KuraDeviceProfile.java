@@ -23,29 +23,29 @@ package org.eclipse.kura.message;
  */
 public class KuraDeviceProfile {
 
-    public static final String UPTIME = "uptime";
-    public static final String DISPLAY_NAME = "display_name";
-    public static final String MODEL_NAME = "model_name";
-    public static final String MODEL_ID = "model_id";
-    public static final String PART_NUMBER = "part_number";
-    public static final String SERIAL_NUMBER = "serial_number";
-    public static final String AVAILABLE_PROCESSORS = "available_processors";
-    public static final String TOTAL_MEMORY = "total_memory";
-    public static final String FIRMWARE_VERSION = "firmware_version";
-    public static final String BIOS_VERSION = "bios_version";
-    public static final String OS = "os";
-    public static final String OS_VERSION = "os_version";
-    public static final String OS_ARCH = "os_arch";
-    public static final String JVM_NAME = "jvm_name";
-    public static final String JVM_VERSION = "jvm_version";
-    public static final String JVM_PROFILE = "jvm_profile";
-    public static final String KURA_VERSION = "kura_version";
-    public static final String APPLICATION_FRAMEWORK = "application_framework";
-    public static final String APPLICATION_FRAMEWORK_VERSION = "application_framework_version";
-    public static final String OSGI_FRAMEWORK = "osgi_framework";
-    public static final String OSGI_FRAMEWORK_VERSION = "osgi_framework_version";
-    public static final String CONNECTION_INTERFACE = "connection_interface";
-    public static final String CONNECTION_IP = "connection_ip";
+    public static final String UPTIME_KEY = "uptime";
+    public static final String DISPLAY_NAME_KEY = "display_name";
+    public static final String MODEL_NAME_KEY = "model_name";
+    public static final String MODEL_ID_KEY = "model_id";
+    public static final String PART_NUMBER_KEY = "part_number";
+    public static final String SERIAL_NUMBER_KEY = "serial_number";
+    public static final String AVAILABLE_PROCESSORS_KEY = "available_processors";
+    public static final String TOTAL_MEMORY_KEY = "total_memory";
+    public static final String FIRMWARE_VERSION_KEY = "firmware_version";
+    public static final String BIOS_VERSION_KEY = "bios_version";
+    public static final String OS_KEY = "os";
+    public static final String OS_VERSION_KEY = "os_version";
+    public static final String OS_ARCH_KEY = "os_arch";
+    public static final String JVM_NAME_KEY = "jvm_name";
+    public static final String JVM_VERSION_KEY = "jvm_version";
+    public static final String JVM_PROFILE_KEY = "jvm_profile";
+    public static final String KURA_VERSION_KEY = "kura_version";
+    public static final String APPLICATION_FRAMEWORK_KEY = "application_framework";
+    public static final String APPLICATION_FRAMEWORK_VERSION_KEY = "application_framework_version";
+    public static final String OSGI_FRAMEWORK_KEY = "osgi_framework";
+    public static final String OSGI_FRAMEWORK_VERSION_KEY = "osgi_framework_version";
+    public static final String CONNECTION_INTERFACE_KEY = "connection_interface";
+    public static final String CONNECTION_IP_KEY = "connection_ip";
 
     public static final String DEFAULT_APPLICATION_FRAMEWORK = "Kura";
 
@@ -76,9 +76,10 @@ public class KuraDeviceProfile {
     private Double altitude;
 
     /**
-     * Empty constructor for an KuraDeviceProfile.
+     * Empty constructor for a KuraDeviceProfile.
      */
     public KuraDeviceProfile() {
+        // Values filled with setters
     }
 
     /**
@@ -202,6 +203,7 @@ public class KuraDeviceProfile {
      * Returns the Kura version.
      *
      * @return A String representing the Kura version
+     * @deprecated use {@link #getApplicationFrameworkVersion()} instead
      */
     @Deprecated
     public String getKuraVersion() {
@@ -458,12 +460,11 @@ public class KuraDeviceProfile {
     public void setAvailableProcessors(String availableProcessors) {
         this.availableProcessors = availableProcessors;
     }
-    
+
     public void setApplicationFramework(String applicationFramework) {
         this.applicationFramework = applicationFramework;
     }
 
-    
     public void setApplicationFrameworkVersion(String applicationFrameworkVersion) {
         this.applicationFrameworkVersion = applicationFrameworkVersion;
     }

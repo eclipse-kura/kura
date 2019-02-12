@@ -12,30 +12,30 @@
  *******************************************************************************/
 package org.eclipse.kura.message;
 
-import static org.eclipse.kura.message.KuraDeviceProfile.DISPLAY_NAME;
-import static org.eclipse.kura.message.KuraDeviceProfile.UPTIME;
-import static org.eclipse.kura.message.KuraDeviceProfile.MODEL_NAME;
-import static org.eclipse.kura.message.KuraDeviceProfile.MODEL_ID;
-import static org.eclipse.kura.message.KuraDeviceProfile.PART_NUMBER;
-import static org.eclipse.kura.message.KuraDeviceProfile.SERIAL_NUMBER;
-import static org.eclipse.kura.message.KuraDeviceProfile.AVAILABLE_PROCESSORS;
-import static org.eclipse.kura.message.KuraDeviceProfile.TOTAL_MEMORY;
-import static org.eclipse.kura.message.KuraDeviceProfile.FIRMWARE_VERSION;
-import static org.eclipse.kura.message.KuraDeviceProfile.BIOS_VERSION;
-import static org.eclipse.kura.message.KuraDeviceProfile.OS;
-import static org.eclipse.kura.message.KuraDeviceProfile.OS_VERSION;
-import static org.eclipse.kura.message.KuraDeviceProfile.OS_ARCH;
-import static org.eclipse.kura.message.KuraDeviceProfile.JVM_NAME;
-import static org.eclipse.kura.message.KuraDeviceProfile.JVM_VERSION;
-import static org.eclipse.kura.message.KuraDeviceProfile.JVM_PROFILE;
-import static org.eclipse.kura.message.KuraDeviceProfile.KURA_VERSION;
-import static org.eclipse.kura.message.KuraDeviceProfile.APPLICATION_FRAMEWORK;
-import static org.eclipse.kura.message.KuraDeviceProfile.APPLICATION_FRAMEWORK_VERSION;
-import static org.eclipse.kura.message.KuraDeviceProfile.OSGI_FRAMEWORK;
-import static org.eclipse.kura.message.KuraDeviceProfile.OSGI_FRAMEWORK_VERSION;
-import static org.eclipse.kura.message.KuraDeviceProfile.CONNECTION_INTERFACE;
-import static org.eclipse.kura.message.KuraDeviceProfile.CONNECTION_IP;
+import static org.eclipse.kura.message.KuraDeviceProfile.APPLICATION_FRAMEWORK_KEY;
+import static org.eclipse.kura.message.KuraDeviceProfile.APPLICATION_FRAMEWORK_VERSION_KEY;
+import static org.eclipse.kura.message.KuraDeviceProfile.AVAILABLE_PROCESSORS_KEY;
+import static org.eclipse.kura.message.KuraDeviceProfile.BIOS_VERSION_KEY;
+import static org.eclipse.kura.message.KuraDeviceProfile.CONNECTION_INTERFACE_KEY;
+import static org.eclipse.kura.message.KuraDeviceProfile.CONNECTION_IP_KEY;
 import static org.eclipse.kura.message.KuraDeviceProfile.DEFAULT_APPLICATION_FRAMEWORK;
+import static org.eclipse.kura.message.KuraDeviceProfile.DISPLAY_NAME_KEY;
+import static org.eclipse.kura.message.KuraDeviceProfile.FIRMWARE_VERSION_KEY;
+import static org.eclipse.kura.message.KuraDeviceProfile.JVM_NAME_KEY;
+import static org.eclipse.kura.message.KuraDeviceProfile.JVM_PROFILE_KEY;
+import static org.eclipse.kura.message.KuraDeviceProfile.JVM_VERSION_KEY;
+import static org.eclipse.kura.message.KuraDeviceProfile.KURA_VERSION_KEY;
+import static org.eclipse.kura.message.KuraDeviceProfile.MODEL_ID_KEY;
+import static org.eclipse.kura.message.KuraDeviceProfile.MODEL_NAME_KEY;
+import static org.eclipse.kura.message.KuraDeviceProfile.OSGI_FRAMEWORK_KEY;
+import static org.eclipse.kura.message.KuraDeviceProfile.OSGI_FRAMEWORK_VERSION_KEY;
+import static org.eclipse.kura.message.KuraDeviceProfile.OS_ARCH_KEY;
+import static org.eclipse.kura.message.KuraDeviceProfile.OS_KEY;
+import static org.eclipse.kura.message.KuraDeviceProfile.OS_VERSION_KEY;
+import static org.eclipse.kura.message.KuraDeviceProfile.PART_NUMBER_KEY;
+import static org.eclipse.kura.message.KuraDeviceProfile.SERIAL_NUMBER_KEY;
+import static org.eclipse.kura.message.KuraDeviceProfile.TOTAL_MEMORY_KEY;
+import static org.eclipse.kura.message.KuraDeviceProfile.UPTIME_KEY;
 
 /**
  * The KuraBirthPayload is an extension of {@link KuraPayload} that contains the parameters that allow to define the
@@ -46,64 +46,64 @@ import static org.eclipse.kura.message.KuraDeviceProfile.DEFAULT_APPLICATION_FRA
  */
 public class KuraBirthPayload extends KuraPayload {
 
-    private static final String ACCEPT_ENCODING = "accept_encoding";
-    private static final String APPLICATION_IDS = "application_ids";
-    private static final String MODEM_IMEI = "modem_imei";
-    private static final String MODEM_IMSI = "modem_imsi";
-    private static final String MODEM_ICCID = "modem_iccid";
-    private static final String MODEM_RSSI = "modem_rssi";
-    private static final String PAYLOAD_ENCODING = "payload_encoding";
+    private static final String ACCEPT_ENCODING_KEY = "accept_encoding";
+    private static final String APPLICATION_IDS_KEY = "application_ids";
+    private static final String MODEM_IMEI_KEY = "modem_imei";
+    private static final String MODEM_IMSI_KEY = "modem_imsi";
+    private static final String MODEM_ICCID_KEY = "modem_iccid";
+    private static final String MODEM_RSSI_KEY = "modem_rssi";
+    private static final String PAYLOAD_ENCODING_KEY = "payload_encoding";
 
     public String getUptime() {
-        return (String) getMetric(UPTIME);
+        return (String) getMetric(UPTIME_KEY);
     }
 
     public String getDisplayName() {
-        return (String) getMetric(DISPLAY_NAME);
+        return (String) getMetric(DISPLAY_NAME_KEY);
     }
 
     public String getModelName() {
-        return (String) getMetric(MODEL_NAME);
+        return (String) getMetric(MODEL_NAME_KEY);
     }
 
     public String getModelId() {
-        return (String) getMetric(MODEL_ID);
+        return (String) getMetric(MODEL_ID_KEY);
     }
 
     public String getPartNumber() {
-        return (String) getMetric(PART_NUMBER);
+        return (String) getMetric(PART_NUMBER_KEY);
     }
 
     public String getSerialNumber() {
-        return (String) getMetric(SERIAL_NUMBER);
+        return (String) getMetric(SERIAL_NUMBER_KEY);
     }
 
     public String getFirmwareVersion() {
-        return (String) getMetric(FIRMWARE_VERSION);
+        return (String) getMetric(FIRMWARE_VERSION_KEY);
     }
 
     public String getBiosVersion() {
-        return (String) getMetric(BIOS_VERSION);
+        return (String) getMetric(BIOS_VERSION_KEY);
     }
 
     public String getOs() {
-        return (String) getMetric(OS);
+        return (String) getMetric(OS_KEY);
     }
 
     public String getOsVersion() {
-        return (String) getMetric(OS_VERSION);
+        return (String) getMetric(OS_VERSION_KEY);
     }
 
     public String getJvmName() {
-        return (String) getMetric(JVM_NAME);
+        return (String) getMetric(JVM_NAME_KEY);
     }
 
     public String getJvmVersion() {
-        return (String) getMetric(JVM_VERSION);
+        return (String) getMetric(JVM_VERSION_KEY);
     }
 
     public String getJvmProfile() {
-        return (String) getMetric(JVM_PROFILE);
+        return (String) getMetric(JVM_PROFILE_KEY);
     }
 
     /**
@@ -111,11 +111,11 @@ public class KuraBirthPayload extends KuraPayload {
      */
     @Deprecated
     public String getKuraVersion() {
-        return (String) getMetric(KURA_VERSION);
+        return (String) getMetric(KURA_VERSION_KEY);
     }
 
     public String getApplicationFramework() {
-        final String value = (String) getMetric(APPLICATION_FRAMEWORK);
+        final String value = (String) getMetric(APPLICATION_FRAMEWORK_KEY);
         if (value != null) {
             return value;
         }
@@ -123,67 +123,67 @@ public class KuraBirthPayload extends KuraPayload {
     }
 
     public String getApplicationFrameworkVersion() {
-        final String value = (String) getMetric(APPLICATION_FRAMEWORK_VERSION);
+        final String value = (String) getMetric(APPLICATION_FRAMEWORK_VERSION_KEY);
         if (value != null) {
             return value;
         }
-        return getKuraVersion();
+        return (String) getMetric(KURA_VERSION_KEY);
     }
 
     public String getConnectionInterface() {
-        return (String) getMetric(CONNECTION_INTERFACE);
+        return (String) getMetric(CONNECTION_INTERFACE_KEY);
     }
 
     public String getConnectionIp() {
-        return (String) getMetric(CONNECTION_IP);
+        return (String) getMetric(CONNECTION_IP_KEY);
     }
 
     public String getAcceptEncoding() {
-        return (String) getMetric(ACCEPT_ENCODING);
+        return (String) getMetric(ACCEPT_ENCODING_KEY);
     }
 
     public String getApplicationIdentifiers() {
-        return (String) getMetric(APPLICATION_IDS);
+        return (String) getMetric(APPLICATION_IDS_KEY);
     }
 
     public String getAvailableProcessors() {
-        return (String) getMetric(AVAILABLE_PROCESSORS);
+        return (String) getMetric(AVAILABLE_PROCESSORS_KEY);
     }
 
     public String getTotalMemory() {
-        return (String) getMetric(TOTAL_MEMORY);
+        return (String) getMetric(TOTAL_MEMORY_KEY);
     }
 
     public String getOsArch() {
-        return (String) getMetric(OS_ARCH);
+        return (String) getMetric(OS_ARCH_KEY);
     }
 
     public String getOsgiFramework() {
-        return (String) getMetric(OSGI_FRAMEWORK);
+        return (String) getMetric(OSGI_FRAMEWORK_KEY);
     }
 
     public String getOsgiFrameworkVersion() {
-        return (String) getMetric(OSGI_FRAMEWORK_VERSION);
+        return (String) getMetric(OSGI_FRAMEWORK_VERSION_KEY);
     }
 
     public String getModemImei() {
-        return (String) getMetric(MODEM_IMEI);
+        return (String) getMetric(MODEM_IMEI_KEY);
     }
 
     public String getModemImsi() {
-        return (String) getMetric(MODEM_IMSI);
+        return (String) getMetric(MODEM_IMSI_KEY);
     }
 
     public String getModemIccid() {
-        return (String) getMetric(MODEM_ICCID);
+        return (String) getMetric(MODEM_ICCID_KEY);
     }
 
     public String getModemRssi() {
-        return (String) getMetric(MODEM_RSSI);
+        return (String) getMetric(MODEM_RSSI_KEY);
     }
 
     public String getPayloadEncoding() {
-        return (String) getMetric(PAYLOAD_ENCODING);
+        return (String) getMetric(PAYLOAD_ENCODING_KEY);
     }
 
     @Override
@@ -206,7 +206,7 @@ public class KuraBirthPayload extends KuraPayload {
         sb.append("getJvmName()=").append(getJvmName()).append(", ");
         sb.append("getJvmVersion()=").append(getJvmVersion()).append(", ");
         sb.append("getJvmProfile()=").append(getJvmProfile()).append(", ");
-        sb.append("getKuraVersion()=").append(getKuraVersion()).append(", ");
+        sb.append("getKuraVersion()=").append(getApplicationFrameworkVersion()).append(", ");
         sb.append("getApplicationFramework()=").append(getApplicationFramework()).append(", ");
         sb.append("getApplicationFrameworkVersion()=").append(getApplicationFrameworkVersion()).append(", ");
         sb.append("getOsgiFramework()=").append(getOsgiFramework()).append(", ");
@@ -220,6 +220,13 @@ public class KuraBirthPayload extends KuraPayload {
         sb.append("]");
 
         return sb.toString();
+    }
+
+    @Override
+    public void addMetric(String name, Object value) {
+        if (value != null) {
+            super.addMetric(name, value);
+        }
     }
 
     public static class KuraBirthPayloadBuilder {
@@ -416,102 +423,43 @@ public class KuraBirthPayload extends KuraPayload {
         public KuraBirthPayload build() {
             KuraBirthPayload birthPayload = new KuraBirthPayload();
 
-            if (this.uptime != null) {
-                birthPayload.addMetric(UPTIME, this.uptime);
-            }
-            if (this.displayName != null) {
-                birthPayload.addMetric(DISPLAY_NAME, this.displayName);
-            }
-            if (this.modelName != null) {
-                birthPayload.addMetric(MODEL_NAME, this.modelName);
-            }
-            if (this.modelId != null) {
-                birthPayload.addMetric(MODEL_ID, this.modelId);
-            }
-            if (this.partNumber != null) {
-                birthPayload.addMetric(PART_NUMBER, this.partNumber);
-            }
-            if (this.serialNumber != null) {
-                birthPayload.addMetric(SERIAL_NUMBER, this.serialNumber);
-            }
-            if (this.firmwareVersion != null) {
-                birthPayload.addMetric(FIRMWARE_VERSION, this.firmwareVersion);
-            }
-            if (this.biosVersion != null) {
-                birthPayload.addMetric(BIOS_VERSION, this.biosVersion);
-            }
-            if (this.os != null) {
-                birthPayload.addMetric(OS, this.os);
-            }
-            if (this.osVersion != null) {
-                birthPayload.addMetric(OS_VERSION, this.osVersion);
-            }
-            if (this.jvmName != null) {
-                birthPayload.addMetric(JVM_NAME, this.jvmName);
-            }
-            if (this.jvmVersion != null) {
-                birthPayload.addMetric(JVM_VERSION, this.jvmVersion);
-            }
-            if (this.jvmProfile != null) {
-                birthPayload.addMetric(JVM_PROFILE, this.jvmProfile);
-            }
-            if (this.kuraVersion != null) {
-                birthPayload.addMetric(KURA_VERSION, this.kuraVersion);
-            }
+            birthPayload.addMetric(UPTIME_KEY, this.uptime);
+
+            birthPayload.addMetric(DISPLAY_NAME_KEY, this.displayName);
+            birthPayload.addMetric(MODEL_NAME_KEY, this.modelName);
+            birthPayload.addMetric(MODEL_ID_KEY, this.modelId);
+            birthPayload.addMetric(PART_NUMBER_KEY, this.partNumber);
+            birthPayload.addMetric(SERIAL_NUMBER_KEY, this.serialNumber);
+            birthPayload.addMetric(FIRMWARE_VERSION_KEY, this.firmwareVersion);
+            birthPayload.addMetric(BIOS_VERSION_KEY, this.biosVersion);
+            birthPayload.addMetric(OS_KEY, this.os);
+            birthPayload.addMetric(OS_VERSION_KEY, this.osVersion);
+            birthPayload.addMetric(JVM_NAME_KEY, this.jvmName);
+            birthPayload.addMetric(JVM_VERSION_KEY, this.jvmVersion);
+            birthPayload.addMetric(JVM_PROFILE_KEY, this.jvmProfile);
+            birthPayload.addMetric(KURA_VERSION_KEY, this.kuraVersion);
             if (this.applicationFramework != null) {
-                birthPayload.addMetric(APPLICATION_FRAMEWORK, this.applicationFramework);
+                birthPayload.addMetric(APPLICATION_FRAMEWORK_KEY, this.applicationFramework);
             } else {
-                birthPayload.addMetric(APPLICATION_FRAMEWORK, DEFAULT_APPLICATION_FRAMEWORK);
+                birthPayload.addMetric(APPLICATION_FRAMEWORK_KEY, DEFAULT_APPLICATION_FRAMEWORK);
             }
-            if (this.applicationFrameworkVersion != null) {
-                birthPayload.addMetric(KURA_VERSION, this.applicationFrameworkVersion);
-                birthPayload.addMetric(APPLICATION_FRAMEWORK_VERSION, this.applicationFrameworkVersion);
-            }
-            if (this.connectionInterface != null) {
-                birthPayload.addMetric(CONNECTION_INTERFACE, this.connectionInterface);
-            }
-            if (this.connectionIp != null) {
-                birthPayload.addMetric(CONNECTION_IP, this.connectionIp);
-            }
-            if (this.acceptEncoding != null) {
-                birthPayload.addMetric(ACCEPT_ENCODING, this.acceptEncoding);
-            }
-            if (this.applicationIdentifiers != null) {
-                birthPayload.addMetric(APPLICATION_IDS, this.applicationIdentifiers);
-            }
-            if (this.availableProcessors != null) {
-                birthPayload.addMetric(AVAILABLE_PROCESSORS, this.availableProcessors);
-            }
-            if (this.totalMemory != null) {
-                birthPayload.addMetric(TOTAL_MEMORY, this.totalMemory);
-            }
-            if (this.osArch != null) {
-                birthPayload.addMetric(OS_ARCH, this.osArch);
-            }
-            if (this.osgiFramework != null) {
-                birthPayload.addMetric(OSGI_FRAMEWORK, this.osgiFramework);
-            }
-            if (this.osgiFrameworkVersion != null) {
-                birthPayload.addMetric(OSGI_FRAMEWORK_VERSION, this.osgiFrameworkVersion);
-            }
-            if (this.modemImei != null) {
-                birthPayload.addMetric(MODEM_IMEI, this.modemImei);
-            }
-            if (this.modemIccid != null) {
-                birthPayload.addMetric(MODEM_ICCID, this.modemIccid);
-            }
-            if (this.modemImsi != null) {
-                birthPayload.addMetric(MODEM_IMSI, this.modemImsi);
-            }
-            if (this.modemRssi != null) {
-                birthPayload.addMetric(MODEM_RSSI, this.modemRssi);
-            }
-            if (this.payloadEncoding != null) {
-                birthPayload.addMetric(PAYLOAD_ENCODING, this.payloadEncoding);
-            }
-            if (this.position != null) {
-                birthPayload.setPosition(this.position);
-            }
+            birthPayload.addMetric(KURA_VERSION_KEY, this.applicationFrameworkVersion);
+            birthPayload.addMetric(APPLICATION_FRAMEWORK_VERSION_KEY, this.applicationFrameworkVersion);
+            birthPayload.addMetric(CONNECTION_INTERFACE_KEY, this.connectionInterface);
+            birthPayload.addMetric(CONNECTION_IP_KEY, this.connectionIp);
+            birthPayload.addMetric(ACCEPT_ENCODING_KEY, this.acceptEncoding);
+            birthPayload.addMetric(APPLICATION_IDS_KEY, this.applicationIdentifiers);
+            birthPayload.addMetric(AVAILABLE_PROCESSORS_KEY, this.availableProcessors);
+            birthPayload.addMetric(TOTAL_MEMORY_KEY, this.totalMemory);
+            birthPayload.addMetric(OS_ARCH_KEY, this.osArch);
+            birthPayload.addMetric(OSGI_FRAMEWORK_KEY, this.osgiFramework);
+            birthPayload.addMetric(OSGI_FRAMEWORK_VERSION_KEY, this.osgiFrameworkVersion);
+            birthPayload.addMetric(MODEM_IMEI_KEY, this.modemImei);
+            birthPayload.addMetric(MODEM_ICCID_KEY, this.modemIccid);
+            birthPayload.addMetric(MODEM_IMSI_KEY, this.modemImsi);
+            birthPayload.addMetric(MODEM_RSSI_KEY, this.modemRssi);
+            birthPayload.addMetric(PAYLOAD_ENCODING_KEY, this.payloadEncoding);
+            birthPayload.setPosition(this.position);
 
             return birthPayload;
         }

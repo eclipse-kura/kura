@@ -1,4 +1,12 @@
-package org.eclipse.kura.core.cloud;
+/*******************************************************************************
+ * Copyright (c) 2017, 2019 Eurotech and/or its affiliates and others
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *******************************************************************************/
+package org.eclipse.kura.internal.json.marshaller.unmarshaller.message.test;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -11,6 +19,7 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.Map.Entry;
 
+import org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonDecoder;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraPosition;
 import org.junit.Before;
@@ -25,32 +34,29 @@ public class CloudPayloadJsonDecoderTest {
     }
 
     @Test
-    public void testByteToJson() {
-        byte[] byteToConvert = "{\"ts\":1490196349868,\"metric.string\":\"string.value\",\"metric.long\":9223372036854774999,\"metric.char\":\"a\",\"metric.string.oneof\":\"string.value.option.1\",\"metric.password\":\"xea2sebrvKJQEW1YRDEEGg==\",\"metric.float\":32766.98,\"metric.integer.fixed\":101,\"metric.byte\":119,\"metric.boolean\":false,\"temperature\":127.19863,\"metric.integer\":2147483599,\"metric.short\":32759,\"metric.double\":4.29496729599998E9}"
-                .getBytes();
-        KuraPayload kuraPayload = CloudPayloadJsonDecoder.buildFromByteArray(byteToConvert);
+    public void testStringToJson() {
+        String stringToConvert = "{\"ts\":1490196349868,\"metric.string\":\"string.value\",\"metric.long\":9223372036854774999,\"metric.char\":\"a\",\"metric.string.oneof\":\"string.value.option.1\",\"metric.password\":\"xea2sebrvKJQEW1YRDEEGg==\",\"metric.float\":32766.98,\"metric.integer.fixed\":101,\"metric.byte\":119,\"metric.boolean\":false,\"temperature\":127.19863,\"metric.integer\":2147483599,\"metric.short\":32759,\"metric.double\":4.29496729599998E9}";
+        KuraPayload kuraPayload = CloudPayloadJsonDecoder.buildFromString(stringToConvert);
         assertNotNull(kuraPayload);
     }
-
+    
     @Test(expected = ParseException.class)
-    public void testByteToJsonEmptyByteFailure() {
-        byte[] byteToConvert = new byte[0];
-        CloudPayloadJsonDecoder.buildFromByteArray(byteToConvert);
+    public void testStringToJsonEmptyStringFailure() {
+        String stringToConvert = "";
+        CloudPayloadJsonDecoder.buildFromString(stringToConvert);
     }
 
     @Test(expected = ParseException.class)
-    public void testByteToJsonIncompleteFailure() {
-        byte[] byteToConvert = "{\"TIMESTAMP\":,\"POSITION\":{\"LATITUDE\":10,\"LONGITUDE\":20,\"ALTITUDE\":200,\"HEADING\":30,\"PRECISION\":1,\"SATELLITES\":3,\"SPEED\":50,\"TIMESTAMP\":123456789,\"STATUS\":0},\"metric.name\":{\"type\":\"STRING\",\"value\":\"metric.value\"},\"metric.int\":{\"type\":\"INTEGER\",\"value\":1},\"metric.character\":{\"type\":\"CHARACTER\",\"value\":99},\"metric.float\":{\"type\":\"FLOAT\",\"value\":1.2},\"metric.bytearray\":{\"type\":\"BYTEARRAY\",\"value\":\"VGVzdA==\"},\"metric.double\":{\"type\":\"DOUBLE\",\"value\":1.7976931348623157E308}}"
-                .getBytes();
-        CloudPayloadJsonDecoder.buildFromByteArray(byteToConvert);
+    public void testStringToJsonIncompleteFailure() {
+        String stringToConvert = "{\"TIMESTAMP\":,\"POSITION\":{\"LATITUDE\":10,\"LONGITUDE\":20,\"ALTITUDE\":200,\"HEADING\":30,\"PRECISION\":1,\"SATELLITES\":3,\"SPEED\":50,\"TIMESTAMP\":123456789,\"STATUS\":0},\"metric.name\":{\"type\":\"STRING\",\"value\":\"metric.value\"},\"metric.int\":{\"type\":\"INTEGER\",\"value\":1},\"metric.character\":{\"type\":\"CHARACTER\",\"value\":99},\"metric.float\":{\"type\":\"FLOAT\",\"value\":1.2},\"metric.bytearray\":{\"type\":\"BYTEARRAY\",\"value\":\"VGVzdA==\"},\"metric.double\":{\"type\":\"DOUBLE\",\"value\":1.7976931348623157E308}}";
+        CloudPayloadJsonDecoder.buildFromString(stringToConvert);
     }
 
     @Test
-    public void testByteToJsonUnparsableMetric() {
-        byte[] byteToConvert = "{\"SENTON\":1490275324619,\"METRICS\":{\"metric.name\":{\"metric.value\":\"value\"}}}"
-                .getBytes();
+    public void testStringToJsonUnparsableMetric() {
+        String stringToConvert = "{\"SENTON\":1490275324619,\"METRICS\":{\"metric.name\":{\"metric.value\":\"value\"}}}";
 
-        KuraPayload payload = CloudPayloadJsonDecoder.buildFromByteArray(byteToConvert);
+        KuraPayload payload = CloudPayloadJsonDecoder.buildFromString(stringToConvert);
 
         assertNull(payload.getTimestamp());
 
@@ -63,10 +69,10 @@ public class CloudPayloadJsonDecoderTest {
     }
 
     @Test
-    public void testByteToJsonUnparsablePosition() {
-        byte[] byteToConvert = "{\"SENTON\":1490275324619,\"POSITION\":{\"LATITUDE\":10,\"LON\":20}}".getBytes();
+    public void testToJsonUnparsablePosition() {
+        String stringToConvert = "{\"SENTON\":1490275324619,\"POSITION\":{\"LATITUDE\":10,\"LON\":20}}";
 
-        KuraPayload payload = CloudPayloadJsonDecoder.buildFromByteArray(byteToConvert);
+        KuraPayload payload = CloudPayloadJsonDecoder.buildFromString(stringToConvert);
 
         assertNull(payload.getTimestamp());
 
@@ -80,13 +86,12 @@ public class CloudPayloadJsonDecoderTest {
 
     @Test
     public void testByteToJsonComplete() {
-        byte[] byteToConvert = ("{\"SENTON\":1490275324619,"
+        String stringToConvert = ("{\"SENTON\":1490275324619,"
                 + "\"POSITION\":{\"LATITUDE\":10,\"LONGITUDE\":20,\"ALTITUDE\":200,\"HEADING\":30,\"PRECISION\":1,\"SATELLITES\":3,\"SPEED\":50,\"TIMESTAMP\":123456789,\"STATUS\":0},"
                 + "\"METRICS\":{\"metric.name\":\"metric.value\",\"metric.int\":1,\"metric.long\":12345,\"metric.boolean\":true,\"metric.character\":\"c\",\"metric.float\":1.2,\"metric.bytearray\":\"VGVzdA==\",\"metric.double\":1.7976931348623157E308},"
-                + "\"BODY\":\"" + Base64.getEncoder().encodeToString("test".getBytes()) + "\"}")
-                .getBytes();
+                + "\"BODY\":\"" + Base64.getEncoder().encodeToString("test".getBytes()) + "\"}");
 
-        KuraPayload payload = CloudPayloadJsonDecoder.buildFromByteArray(byteToConvert);
+        KuraPayload payload = CloudPayloadJsonDecoder.buildFromString(stringToConvert);
 
         assertEquals(1490275324619L, payload.getTimestamp().getTime());
 
@@ -123,9 +128,8 @@ public class CloudPayloadJsonDecoderTest {
     // this test is prepared for one of the new format possibilities with better decoding options - currently invalid
     // @Test
     public void testFromJson() {
-        byte[] byteToConvert = "{\"TIMESTAMP\":1490275324619,\"metric.name\":{\"type\":\"STRING\",\"value\":\"metric.value\"},\"metric.int\":{\"type\":\"INTEGER\",\"value\":1},\"metric.character\":{\"type\":\"CHARACTER\",\"value\":99},\"metric.float\":{\"type\":\"FLOAT\",\"value\":1.2},\"metric.bytearray\":{\"type\":\"BYTEARRAY\",\"value\":\"VGVzdA==\"},\"metric.double\":{\"type\":\"DOUBLE\",\"value\":1.7976931348623157E308}}"
-                .getBytes();
-        KuraPayload payload = CloudPayloadJsonDecoder.buildFromByteArray(byteToConvert);
+        String stringToConvert = "{\"TIMESTAMP\":1490275324619,\"metric.name\":{\"type\":\"STRING\",\"value\":\"metric.value\"},\"metric.int\":{\"type\":\"INTEGER\",\"value\":1},\"metric.character\":{\"type\":\"CHARACTER\",\"value\":99},\"metric.float\":{\"type\":\"FLOAT\",\"value\":1.2},\"metric.bytearray\":{\"type\":\"BYTEARRAY\",\"value\":\"VGVzdA==\"},\"metric.double\":{\"type\":\"DOUBLE\",\"value\":1.7976931348623157E308}}";
+        KuraPayload payload = CloudPayloadJsonDecoder.buildFromString(stringToConvert);
         assertNotNull(payload);
 
         // timestamp
@@ -147,14 +151,13 @@ public class CloudPayloadJsonDecoderTest {
 
     @Test(expected = NullPointerException.class)
     public void testFromJsonNullInput() {
-        CloudPayloadJsonDecoder.buildFromByteArray(null);
+        CloudPayloadJsonDecoder.buildFromString(null);
     }
 
     @Test
     public void testFromJsonUnknownJson() {
-        byte[] byteToConvert = "{\"stuff\": {\"onetype\": [{\"id\":1,\"name\":\"John Doe\"},{\"id\":2,\"name\":\"Don Joeh\"}],\"othertype\": {\"id\":2,\"company\":\"ACME\"}}, \"otherstuff\": {\"thing\": [[1,42],[2,2]]}}"
-                .getBytes();
-        KuraPayload payload = CloudPayloadJsonDecoder.buildFromByteArray(byteToConvert);
+        String stringToConvert = "{\"stuff\": {\"onetype\": [{\"id\":1,\"name\":\"John Doe\"},{\"id\":2,\"name\":\"Don Joeh\"}],\"othertype\": {\"id\":2,\"company\":\"ACME\"}}, \"otherstuff\": {\"thing\": [[1,42],[2,2]]}}";
+        KuraPayload payload = CloudPayloadJsonDecoder.buildFromString(stringToConvert);
         assertNotNull(payload);
 
         // timestamp

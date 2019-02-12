@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -9,21 +9,22 @@
  * Contributors:
  *     Eurotech
  *******************************************************************************/
-package org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.cloud;
+package org.eclipse.kura.internal.json.marshaller.unmarshaller.message;
 
-import static org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.cloud.CloudPayloadJsonFields.BODY;
-import static org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.cloud.CloudPayloadJsonFields.METRICS;
-import static org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.cloud.CloudPayloadJsonFields.POSITION;
-import static org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.cloud.CloudPayloadJsonFields.SENTON;
-import static org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.cloud.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.ALTITUDE;
-import static org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.cloud.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.HEADING;
-import static org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.cloud.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.LATITUDE;
-import static org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.cloud.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.LONGITUDE;
-import static org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.cloud.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.PRECISION;
-import static org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.cloud.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.SATELLITES;
-import static org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.cloud.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.SPEED;
-import static org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.cloud.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.STATUS;
+import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.BODY;
+import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.METRICS;
+import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.POSITION;
+import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.SENTON;
+import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.ALTITUDE;
+import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.HEADING;
+import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.LATITUDE;
+import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.LONGITUDE;
+import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.PRECISION;
+import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.SATELLITES;
+import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.SPEED;
+import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.STATUS;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Date;
 
@@ -48,17 +49,16 @@ public class CloudPayloadJsonDecoder {
     }
 
     /**
-     * Builds a {@link KuraPayload} from a Json byte array. The method will try to parse the received Json in order to
+     * Builds a {@link KuraPayload} from a Json string. The method will try to parse the received Json in order to
      * fill the corresponding {@link KuraPayload} fields.
-     * If the mapping fails, the entire byte array, received as argument, will be placed in the body of the returned
+     * If the mapping fails, the entire string, received as argument, will be placed in the body of the returned
      * {@link KuraPayload}.
      *
-     * @param array
-     *            a Json encoded as a byte array.
+     * @param stringJson
+     *            a Json encoded as a String.
      * @return a {@link KuraPayload} that directly maps the received array.
      */
-    public static KuraPayload buildFromByteArray(byte[] array) {
-        String stringJson = new String(array);
+    public static KuraPayload buildFromString(String stringJson) {
         JsonObject json = Json.parse(stringJson).asObject();
 
         KuraPayload payload = new KuraPayload();
@@ -82,7 +82,7 @@ public class CloudPayloadJsonDecoder {
         } catch (Exception e) {
             logger.warn("Cannot parse Json", e);
             payload = new KuraPayload();
-            payload.setBody(array);
+            payload.setBody(stringJson.getBytes(StandardCharsets.UTF_8));
         }
         return payload;
     }
@@ -132,7 +132,7 @@ public class CloudPayloadJsonDecoder {
         }
     }
 
-    // FIXME doesn't properly decode characters, ints, floats and byte arrays - the supported format has no metadata
+    // TODO: doesn't properly decode characters, ints, floats and byte arrays - the supported format has no metadata
     private static void decodeMetric(KuraPayload payload, JsonObject metricsObject) {
         if (metricsObject == null) {
             throw new IllegalArgumentException("Cannot parse metric object!");

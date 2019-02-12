@@ -1,4 +1,5 @@
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+<project
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
     xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <modelVersion>4.0.0</modelVersion>
 
@@ -10,6 +11,18 @@
 
     <artifactId>p2-repo-tests-deps</artifactId>
     <packaging>pom</packaging>
+
+    <properties>
+        <io.dropwizard.metrics.version>3.2.2</io.dropwizard.metrics.version>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>Metrics</id>
+            <name>Metrics Repository</name>
+            <url>https://mvnrepository.com/artifact/</url>
+        </repository>
+    </repositories>
 
     <build>
         <plugins>
@@ -31,12 +44,12 @@
                     </execution>
                 </executions>
             </plugin>
-			<!-- Copying common artifacts across all platforms into a known location 
-				${project.build.directory}/plugins/common is only one way how to create content 
-				to be published. Any other source of bundles and/or features can be used 
-				to be published as long as it end up in ${project.basedir}/target/source/plugins 
-				and or ~/features The publisher will use every content that is located in 
-				this directory -->
+            <!-- Copying common artifacts across all platforms into a known location
+                ${project.build.directory}/plugins/common is only one way how to create content
+                to be published. Any other source of bundles and/or features can be used
+                to be published as long as it end up in ${project.basedir}/target/source/plugins
+                and or ~/features The publisher will use every content that is located in
+                this directory -->
             <plugin>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <version>2.9</version>
@@ -49,6 +62,11 @@
                         </goals>
                         <configuration>
                             <artifactItems>
+                                <artifactItem>
+                                    <groupId>io.dropwizard.metrics</groupId>
+                                    <artifactId>metrics-core</artifactId>
+                                    <version>${io.dropwizard.metrics.version}</version>
+                                </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
                                     <artifactId>moquette-broker</artifactId>
@@ -83,16 +101,6 @@
                                     <groupId>org.objenesis</groupId>
                                     <artifactId>objenesis</artifactId>
                                     <version>${objenesis.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.slf4j</groupId>
-                                    <artifactId>slf4j-log4j12</artifactId>
-                                    <version>1.7.25</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>log4j</groupId>
-                                    <artifactId>log4j</artifactId>
-                                    <version>1.2.17</version>
                                 </artifactItem>
                             </artifactItems>
                             <stripVersion>true</stripVersion>

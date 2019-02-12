@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2019 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -23,6 +23,7 @@ import org.eclipse.kura.channel.ChannelFlag;
 import org.eclipse.kura.channel.ChannelRecord;
 import org.eclipse.kura.driver.binary.BinaryDataTypes;
 import org.eclipse.kura.driver.binary.Buffer;
+import org.eclipse.kura.driver.binary.ByteArray;
 import org.eclipse.kura.driver.binary.ByteArrayBuffer;
 import org.eclipse.kura.driver.block.task.BinaryDataTask;
 import org.eclipse.kura.driver.block.task.BitTask;
@@ -72,6 +73,9 @@ public class BlockTaskTest {
                 DataType.STRING, mode), new byte[] { 0x47, (byte) 0x80, 0, 0 }, "65536.0");
         testReadWrite((record, offset, mode) -> new BinaryDataTask<>(record, offset, BinaryDataTypes.DOUBLE_BE,
                 DataType.STRING, mode), new byte[] { 0x40, (byte) 0xf0, 0, 0, 0, 0, 0, 0 }, "65536.0");
+
+        testReadWrite((record, offset, mode) -> new BinaryDataTask<>(record, offset, new ByteArray(4),
+                DataType.BYTE_ARRAY, mode), new byte[] { 1, 2, 3, 4 }, new byte[] { 1, 2, 3, 4 });
     }
 
     @Test
@@ -110,6 +114,14 @@ public class BlockTaskTest {
         final byte[] testByteArray = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
         testReadWrite((record, offset, mode) -> new ByteArrayTask(record, offset, offset + testByteArray.length, mode),
                 testByteArray, Arrays.copyOf(testByteArray, testByteArray.length));
+    }
+
+    @Test
+    public void shouldSupportByteArrayTaskWithBinaryData() throws IOException {
+        final byte[] testByteArray = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+        testReadWrite((record, offset, mode) -> new BinaryDataTask<>(record, offset,
+                new ByteArray(testByteArray.length), DataType.BYTE_ARRAY, mode), testByteArray,
+                Arrays.copyOf(testByteArray, testByteArray.length));
     }
 
     private ToplevelBlockTask getToplevelBlockTask(byte[] buf, Mode mode) {

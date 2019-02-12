@@ -25,6 +25,7 @@ import static org.eclipse.kura.core.message.MessageConstants.RETAIN;
 import static org.osgi.framework.Constants.SERVICE_PID;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Dictionary;
@@ -70,6 +71,8 @@ import org.eclipse.kura.core.cloud.subscriber.CloudSubscriptionRecord;
 import org.eclipse.kura.core.data.DataServiceImpl;
 import org.eclipse.kura.data.DataService;
 import org.eclipse.kura.data.listener.DataServiceListener;
+import org.eclipse.kura.marshalling.Marshaller;
+import org.eclipse.kura.marshalling.Unmarshaller;
 import org.eclipse.kura.message.KuraApplicationTopic;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.net.NetworkService;
@@ -116,6 +119,8 @@ public class CloudServiceImpl
     private PositionService positionService;
     private EventAdmin eventAdmin;
     private CertificatesService certificatesService;
+    private Unmarshaller jsonUnmarshaller;
+    private Marshaller jsonMarshaller;
 
     // use a synchronized implementation for the list
     private final List<CloudClientImpl> cloudClients;
@@ -227,6 +232,22 @@ public class CloudServiceImpl
         this.eventAdmin = null;
     }
 
+    public void setJsonUnmarshaller(Unmarshaller jsonUnmarshaller) {
+        this.jsonUnmarshaller = jsonUnmarshaller;
+    }
+
+    public void unsetJsonUnmarshaller(Unmarshaller jsonUnmarshaller) {
+        this.jsonUnmarshaller = null;
+    }
+
+    public void setJsonMarshaller(Marshaller jsonMarshaller) {
+        this.jsonMarshaller = jsonMarshaller;
+    }
+
+    public void unsetJsonMarshaller(Marshaller jsonMarshaller) {
+        this.jsonMarshaller = null;
+    }
+
     // ----------------------------------------------------------------
     //
     // Activation APIs
@@ -274,7 +295,7 @@ public class CloudServiceImpl
     }
 
     public void updated(Map<String, Object> properties) {
-        logger.info("updated {}...: {}", properties.get(ConfigurationService.KURA_SERVICE_PID), properties);
+        logger.info("updated {}...", properties.get(ConfigurationService.KURA_SERVICE_PID));
 
         // Update properties and re-publish Birth certificate
         this.options = new CloudServiceOptions(properties, this.systemService);
@@ -512,13 +533,7 @@ public class CloudServiceImpl
         if (TOPIC_MQTT_APP.equals(kuraTopic.getApplicationId()) || TOPIC_BA_APP.equals(kuraTopic.getApplicationId())) {
             logger.info("Ignoring feedback message from {}", topic);
         } else {
-            KuraPayload kuraPayload = null;
-
-            if (this.options.getPayloadEncoding() == SIMPLE_JSON) {
-                kuraPayload = createKuraPayloadFromJson(payload);
-            } else if (this.options.getPayloadEncoding() == KURA_PROTOBUF) {
-                kuraPayload = createKuraPayloadFromProtoBuf(topic, payload);
-            }
+            KuraPayload kuraPayload = encodeKuraPayload(topic, payload);
 
             try {
                 if (this.options.getTopicControlPrefix().equals(kuraTopic.getPrefix())) {
@@ -537,6 +552,20 @@ public class CloudServiceImpl
             }
         }
 
+    }
+
+    private KuraPayload encodeKuraPayload(String topic, byte[] payload) {
+        KuraPayload kuraPayload = null;
+        if (this.options.getPayloadEncoding() == SIMPLE_JSON) {
+            try {
+                kuraPayload = createKuraPayloadFromJson(payload);
+            } catch (KuraException e) {
+                logger.warn("Error creating Kura Payload from Json", e);
+            }
+        } else if (this.options.getPayloadEncoding() == KURA_PROTOBUF) {
+            kuraPayload = createKuraPayloadFromProtoBuf(topic, payload);
+        }
+        return kuraPayload;
     }
 
     private void dispatchControlMessage(int qos, boolean retained, KuraTopicImpl kuraTopic, KuraPayload kuraPayload) {
@@ -834,12 +863,12 @@ public class CloudServiceImpl
         return bytes;
     }
 
-    private byte[] encodeJsonPayload(KuraPayload payload) {
-        return CloudPayloadJsonEncoder.getBytes(payload);
+    private byte[] encodeJsonPayload(KuraPayload payload) throws KuraException {
+        return this.jsonMarshaller.marshal(payload).getBytes(StandardCharsets.UTF_8);
     }
 
-    private KuraPayload createKuraPayloadFromJson(byte[] payload) {
-        return CloudPayloadJsonDecoder.buildFromByteArray(payload);
+    private KuraPayload createKuraPayloadFromJson(byte[] payload) throws KuraException {
+        return this.jsonUnmarshaller.unmarshal(new String(payload), KuraPayload.class);
     }
 
     private KuraPayload createKuraPayloadFromProtoBuf(String topic, byte[] payload) {

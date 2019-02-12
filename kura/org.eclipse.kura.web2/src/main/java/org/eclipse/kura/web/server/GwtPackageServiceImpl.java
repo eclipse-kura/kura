@@ -188,7 +188,7 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
 
         } catch (Exception e) {
             logger.warn("failed to get deployment package descriptior from Eclipse Marketplace", e);
-            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
         } finally {
             if (connection != null) {
                 connection.disconnect();
@@ -256,7 +256,7 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
 
         } catch (Exception e) {
             logger.warn("failed to start package install from Eclipse Marketplace", e);
-            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
         }
     }
 

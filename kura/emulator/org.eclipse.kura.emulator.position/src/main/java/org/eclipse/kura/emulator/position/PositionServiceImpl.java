@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -23,7 +23,6 @@ import java.util.concurrent.TimeUnit;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-import javax.xml.stream.XMLInputFactory;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.position.NmeaPosition;
@@ -45,7 +44,7 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
 
     private static final Logger logger = LoggerFactory.getLogger(PositionServiceImpl.class);
 
-    private static String LOCATION = "boston";
+    private static final String LOCATION = "boston";
 
     private ComponentContext ctx;
     private EventAdmin eventAdmin;

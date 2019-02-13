@@ -165,10 +165,9 @@ public class WireGraphJsonMarshallUnmarshallImpl {
 
     private static List<MultiportWireConfiguration> unmarshalWireConfiguration(JsonArray array) {
         List<MultiportWireConfiguration> wireConfigurationList = new ArrayList<>();
-
-        Iterator<JsonValue> jsonIterator = array.iterator();
-        while (jsonIterator.hasNext()) {
-            JsonObject jsonWireConfig = jsonIterator.next().asObject();
+        
+        array.forEach(jsonWireConfigValue -> {
+            JsonObject jsonWireConfig = jsonWireConfigValue.asObject();
 
             String emitterPid = null;
             String receiverPid = null;
@@ -195,7 +194,7 @@ public class WireGraphJsonMarshallUnmarshallImpl {
                         emitterPort, receiverPort);
                 wireConfigurationList.add(wireConfiguration);
             }
-        }
+        });
 
         return wireConfigurationList;
     }

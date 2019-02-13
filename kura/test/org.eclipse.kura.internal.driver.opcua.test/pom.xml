@@ -24,7 +24,7 @@ Copyright (c) 2017, 2019 Eurotech and/or its affiliates and others
 
     <properties>
         <kura.basedir>${project.basedir}/../..</kura.basedir>
-        <org.eclipse.milo.version>0.2.1</org.eclipse.milo.version>
+        <org.eclipse.milo.version>0.2.4</org.eclipse.milo.version>
         <io.dropwizard.metrics.version>3.2.2</io.dropwizard.metrics.version>
     </properties>
 

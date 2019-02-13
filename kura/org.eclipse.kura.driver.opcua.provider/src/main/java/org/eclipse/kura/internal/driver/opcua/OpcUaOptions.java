@@ -115,6 +115,8 @@ final class OpcUaOptions {
      */
     private static final String REQUEST_TIMEOUT = "request.timeout";
 
+    private static final String ACKNOWLEDGE_TIMEOUT = "acknowledge.timeout";
+
     /**
      * Configurable property specifying the Security Policy
      */
@@ -334,6 +336,15 @@ final class OpcUaOptions {
             requestTimeout = (Integer) reqTimeout;
         }
         return requestTimeout * 1000;
+    }
+
+    int getAcknowledgeTimeout() {
+        int acknowledgeTimeout = 40;
+        final Object ackTimeout = this.properties.get(ACKNOWLEDGE_TIMEOUT);
+        if (nonNull(ackTimeout) && (ackTimeout instanceof Integer)) {
+            acknowledgeTimeout = (Integer) ackTimeout;
+        }
+        return acknowledgeTimeout * 1000;
     }
 
     /**

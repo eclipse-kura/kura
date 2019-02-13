@@ -32,8 +32,7 @@
         <tycho-version>0.26.0</tycho-version>
         <com.google.guava.version>25.0-jre</com.google.guava.version>
         <io.netty.version>4.0.36.Final</io.netty.version>
-        <org.eclipse.milo.version>0.2.1</org.eclipse.milo.version>
-        <com.codepoetics.protonpack.version>1.8</com.codepoetics.protonpack.version>
+        <org.eclipse.milo.version>0.2.4</org.eclipse.milo.version>
         <org.jooq.jool.version>0.9.10</org.jooq.jool.version>
         <com.google.code.findbugs.jsr305.version>3.0.1</com.google.code.findbugs.jsr305.version>
     </properties>
@@ -85,11 +84,6 @@
                                     <groupId>org.eclipse.milo</groupId>
                                     <artifactId>stack-core</artifactId>
                                     <version>${org.eclipse.milo.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>com.codepoetics</groupId>
-                                    <artifactId>protonpack</artifactId>
-                                    <version>${com.codepoetics.protonpack.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.jooq</groupId>

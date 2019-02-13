@@ -269,6 +269,7 @@ public class ConnectionManager {
                     .setApplicationName(LocalizedText.english(options.getApplicationName()))
                     .setApplicationUri(options.getApplicationUri())
                     .setRequestTimeout(UInteger.valueOf(options.getRequestTimeout()))
+                    .setAcknowledgeTimeout(UInteger.valueOf(options.getAcknowledgeTimeout()))
                     .setSessionTimeout(UInteger.valueOf(options.getSessionTimeout()))
                     .setIdentityProvider(options.getIdentityProvider())
                     .setKeyPair(certificateManager.getClientKeyPair())

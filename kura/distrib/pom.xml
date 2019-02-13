@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2011, 2018 Eurotech and/or its affiliates and others
+    Copyright (c) 2011, 2019 Eurotech and/or its affiliates and others
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -40,6 +40,9 @@
         <kura.skip.can>true</kura.skip.can>
         <kura.skip.web>false</kura.skip.web>
         <kura.skip.examples>true</kura.skip.examples>
+
+        <!-- used for RPM uninstallation -->
+        <kura.install.link>/opt/eclipse/kura</kura.install.link>
     </properties>
 
     <organization>
@@ -63,7 +66,7 @@
             <id>kura_addons</id>
             <name>Eclipse Kura Addons Maven Repository</name>
             <url>https://raw.github.com/eurotech/kura_addons/mvn-repo/
-			</url>
+            </url>
             <snapshots>
                 <enabled>true</enabled>
                 <updatePolicy>always</updatePolicy>
@@ -125,7 +128,7 @@
                 </executions>
             </plugin>
             <plugin>
-				<!-- get kura bundles from (release or local) repository -->
+                <!-- get kura bundles from (release or local) repository -->
                 <artifactId>maven-dependency-plugin</artifactId>
                 <version>2.8</version>
                 <executions>
@@ -548,7 +551,7 @@
                 </executions>
             </plugin>
             <plugin>
-				<!--  rename bundles with version appended -->
+                <!--  rename bundles with version appended -->
                 <artifactId>maven-antrun-plugin</artifactId>
                 <executions>
                     <execution>
@@ -740,73 +743,73 @@
                         </goals>
                         <configuration>
                             <target name="distrib-store-files" if="${is.not.snapshot}">
-								<!-- Copy distrib/config/kura.build.properties in distrib/RELEASE_INFO/${project.version}/config -->
+                                <!-- Copy distrib/config/kura.build.properties in distrib/RELEASE_INFO/${project.version}/config -->
                                 <copy file="config/kura.build.properties" todir="RELEASE_INFO/${project.version}/config"
                                     overwrite="true" />
 
-                				<!-- Copy target-platform/config/kura.target-platform.build.properties in distrib/RELEASE_INFO/${project.version}/config -->
+                                <!-- Copy target-platform/config/kura.target-platform.build.properties in distrib/RELEASE_INFO/${project.version}/config -->
                                 <copy
                                     file="${kura.basedir}/../../target-platform/config/kura.target-platform.build.properties"
                                     todir="RELEASE_INFO/${project.version}/config" overwrite="true" />
 
-							    <!-- Copy src/main/resources/common/previous-version-pom-template.xml in distrib/RELEASE_INFO/${project.version}/pom.xml -->
+                                <!-- Copy src/main/resources/common/previous-version-pom-template.xml in distrib/RELEASE_INFO/${project.version}/pom.xml -->
                                 <copy file="src/main/resources/common/release-info.root.pom.xml" tofile="RELEASE_INFO/${project.version}/pom.xml"
                                     overwrite="true" />
-								<!-- replace kura version -->
+                                <!-- replace kura version -->
                                 <replace token="&lt;version&gt;[kura-version]&lt;/version&gt;" value="&lt;version&gt;${project.version}&lt;/version&gt;"
                                     dir="RELEASE_INFO/${project.version}">
                                     <include name="pom.xml" />
                                 </replace>
 
-								<!-- Copy src/main/resources/common/kura-bundles-pom.xml in distrib/RELEASE_INFO/${project.version}/kura-bundles/pom.xml -->
+                                <!-- Copy src/main/resources/common/kura-bundles-pom.xml in distrib/RELEASE_INFO/${project.version}/kura-bundles/pom.xml -->
                                 <copy file="src/main/resources/common/kura-bundles-pom.xml" tofile="RELEASE_INFO/${project.version}/kura-bundles/pom.xml"
                                     overwrite="true" />
-								<!-- replace kura version -->
+                                <!-- replace kura version -->
                                 <replace token="&lt;version&gt;[kura-version]&lt;/version&gt;" value="&lt;version&gt;${project.version}&lt;/version&gt;"
                                     dir="RELEASE_INFO/${project.version}/kura-bundles">
                                     <include name="pom.xml" />
                                 </replace>
-								<!-- execute script to add artifacts to pom file -->
+                                <!-- execute script to add artifacts to pom file -->
                                 <exec executable="bash" output="RELEASE_INFO/${project.version}/kura-bundles/pom.xml"
                                     append="true">
                                     <arg value="src/main/sh/generate_kura_bundles_pom.sh" />
                                     <arg value="RELEASE_INFO/${project.version}/config/kura.build.properties" />
                                 </exec>
 
-								<!-- Copy target-platform/p2-repo-common/pom.xml in distrib/RELEASE_INFO/${project.version}/p2-repo-common/pom.xml -->
+                                <!-- Copy target-platform/p2-repo-common/pom.xml in distrib/RELEASE_INFO/${project.version}/p2-repo-common/pom.xml -->
                                 <copy file="${kura.basedir}/../../target-platform/p2-repo-common/pom.xml"
                                     tofile="RELEASE_INFO/${project.version}/p2-repo-common/pom.xml" overwrite="true" />
-								<!-- replace artifactId -->
+                                <!-- replace artifactId -->
                                 <replace token="&lt;artifactId&gt;target-platform&lt;/artifactId&gt;" value="&lt;artifactId&gt;target-platform-previous&lt;/artifactId&gt;"
                                     dir="RELEASE_INFO/${project.version}/p2-repo-common">
                                     <include name="pom.xml" />
                                 </replace>
-								<!-- Add strip version -->
+                                <!-- Add strip version -->
                                 <replace token="&lt;/artifactItems&gt;"
                                     value="&lt;/artifactItems&gt;&lt;stripVersion&gt;true&lt;/stripVersion&gt;" dir="RELEASE_INFO/${project.version}/p2-repo-common">
                                     <include name="pom.xml" />
                                 </replace>
-								<!-- execute script to add artifacts to pom file - need to have different input/output files (Win) -->
+                                <!-- execute script to add artifacts to pom file - need to have different input/output files (Win) -->
                                 <exec executable="bash" output="RELEASE_INFO/${project.version}/p2-repo-common/pom_.xml">
                                     <arg value="src/main/sh/generate_p2_repo_pom.sh" />
                                     <arg value="RELEASE_INFO/${project.version}/p2-repo-common/pom.xml" />
                                 </exec>
                                 <move file="RELEASE_INFO/${project.version}/p2-repo-common/pom_.xml" tofile="RELEASE_INFO/${project.version}/p2-repo-common/pom.xml" />
 
-								<!-- Copy target-platform/p2-repo-equinox_3.12.50/pom.xml in distrib/RELEASE_INFO/${project.version}/p2-repo-equinox_3.12.50/pom.xml -->
+                                <!-- Copy target-platform/p2-repo-equinox_3.12.50/pom.xml in distrib/RELEASE_INFO/${project.version}/p2-repo-equinox_3.12.50/pom.xml -->
                                 <copy file="${kura.basedir}/../../target-platform/p2-repo-equinox_3.12.50/pom.xml"
                                     tofile="RELEASE_INFO/${project.version}/p2-repo-equinox_3.12.50/pom.xml" overwrite="true" />
-								<!-- replace artifactId -->
+                                <!-- replace artifactId -->
                                 <replace token="&lt;artifactId&gt;target-platform&lt;/artifactId&gt;" value="&lt;artifactId&gt;target-platform-previous&lt;/artifactId&gt;"
                                     dir="RELEASE_INFO/${project.version}/p2-repo-equinox_3.12.50">
                                     <include name="pom.xml" />
                                 </replace>
-								<!-- Add strip version -->
+                                <!-- Add strip version -->
                                 <replace token="&lt;/artifactItems&gt;"
                                     value="&lt;/artifactItems&gt;&lt;stripVersion&gt;true&lt;/stripVersion&gt;" dir="RELEASE_INFO/${project.version}/p2-repo-equinox_3.12.50">
                                     <include name="pom.xml" />
                                 </replace>
-								<!-- execute script to add artifacts to pom file - need to have different input/output files (Win) -->
+                                <!-- execute script to add artifacts to pom file - need to have different input/output files (Win) -->
                                 <exec executable="bash" output="RELEASE_INFO/${project.version}/p2-repo-equinox_3.12.50/pom_.xml">
                                     <arg value="src/main/sh/generate_p2_repo_pom.sh" />
                                     <arg value="RELEASE_INFO/${project.version}/p2-repo-equinox_3.12.50/pom.xml" />
@@ -868,8 +871,8 @@
                         <format>${kura.build.version}</format>
                     </configuration>
                 </plugin>
-				<!--This plugin's configuration is used to store Eclipse m2e settings
-					only. It has no influence on the Maven build itself. -->
+                <!--This plugin's configuration is used to store Eclipse m2e settings
+                    only. It has no influence on the Maven build itself. -->
                 <plugin>
                     <groupId>org.eclipse.m2e</groupId>
                     <artifactId>lifecycle-mapping</artifactId>
@@ -1185,10 +1188,10 @@
                     </plugin>
                 </plugins>
             </build>
-        </profile>       
-		<profile>
+        </profile>
+        <profile>
             <id>intel-up2-ubuntu-16</id>
-			<properties>
+            <properties>
                 <project.raspbian.dependencies>hostapd, isc-dhcp-server, iw, dos2unix, bind9, unzip, ethtool, telnet, bluez-hcidump,
                     wireless-tools, java8-runtime-headless | java8-runtime</project.raspbian.dependencies>
             </properties>
@@ -1248,7 +1251,7 @@
                             </execution>
                         </executions>
                     </plugin>
-					<plugin>
+                    <plugin>
                         <groupId>org.vafer</groupId>
                         <artifactId>jdeb</artifactId>
                         <version>1.0</version>
@@ -1339,7 +1342,7 @@
                             </execution>
                         </executions>
                     </plugin>
-	                <plugin>
+                    <plugin>
                         <groupId>de.dentrassi.maven</groupId>
                         <artifactId>rpm</artifactId>
                         <executions>
@@ -1405,6 +1408,26 @@
                                     <afterInstallation>
                                         <script>/tmp/kura_${project.version}_installer.sh</script>
                                     </afterInstallation>
+                                    <beforeRemoval>
+                                        <script>
+    systemctl stop kura
+    systemctl disable kura
+    rm -f /usr/lib/systemd/system/kura.service
+    systemctl daemon-reload
+    systemctl reset-failed
+
+    rm -f  /etc/logrotate.d/kura
+    rm -f  /var/log/kura*.log
+    rm -rf /tmp/.kura
+    rm -rf /tmp/kura
+
+    if [ -d "${kura.install.link}" ] ; then
+      PARENT=`readlink -f ${kura.install.link}`
+      rm -rf ${kura.install.link}
+      rm -rf $PARENT
+    fi
+                                        </script>
+                                    </beforeRemoval>
                                     <skipSigning>true</skipSigning>
                                 </configuration>
                             </execution>
@@ -1472,7 +1495,7 @@
                             </execution>
                         </executions>
                     </plugin>
-	                <plugin>
+                    <plugin>
                         <groupId>de.dentrassi.maven</groupId>
                         <artifactId>rpm</artifactId>
                         <executions>
@@ -1526,6 +1549,26 @@
                                     <afterInstallation>
                                         <script>/tmp/kura_${project.version}_installer.sh</script>
                                     </afterInstallation>
+                                    <beforeRemoval>
+                                        <script>
+    systemctl stop kura
+    systemctl disable kura
+    rm -f /usr/lib/systemd/system/kura.service
+    systemctl daemon-reload
+    systemctl reset-failed
+
+    rm -f  /etc/logrotate.d/kura
+    rm -f  /var/log/kura*.log
+    rm -rf /tmp/.kura
+    rm -rf /tmp/kura
+
+    if [ -d "${kura.install.link}" ] ; then
+      PARENT=`readlink -f ${kura.install.link}`
+      rm -rf ${kura.install.link}
+      rm -rf $PARENT
+    fi
+                                        </script>
+                                    </beforeRemoval>
                                     <skipSigning>true</skipSigning>
                                 </configuration>
                             </execution>
@@ -1534,7 +1577,7 @@
                 </plugins>
             </build>
         </profile>
-        
+
         <profile>
             <id>rock960-ubuntu-16-nn</id>
             <properties>
@@ -1627,7 +1670,7 @@
                     </plugin>
                 </plugins>
             </build>
-        </profile>  
+        </profile>
 
         <profile>
             <id>dev-env</id>
@@ -1687,20 +1730,20 @@
                                 </goals>
                                 <configuration>
                                     <target>
-										<!-- Kura User Workspace -->
+                                        <!-- Kura User Workspace -->
                                         <echo message="Preparing target platform..." />
 
-										<!-- Copy the mtoolkit plugin to the target directory -->
+                                        <!-- Copy the mtoolkit plugin to the target directory -->
                                         <copy
                                             file="src/main/resources/common/org.tigris.mtoolkit.sdk-3.1.8-20110411-0918.zip"
                                             todir="${project.build.directory}" />
 
-										<!-- Add the deployment agent and core packages to the target platform
-											which is required for the emulator -->
+                                        <!-- Add the deployment agent and core packages to the target platform
+                                            which is required for the emulator -->
                                         <copy todir="${project.build.directory}/staging/target-definition">
                                             <fileset dir="../target-definition" />
                                         </copy>
-										<!-- Add individual emulator bundles-->
+                                        <!-- Add individual emulator bundles-->
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.emulator.clock_${org.eclipse.kura.emulator.clock.version}.jar"
                                             todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
@@ -1846,21 +1889,21 @@
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.broker.artemis.xml_${org.eclipse.kura.broker.artemis.xml.version}.jar"
                                             todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
-                                        
+
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.wire.component.conditional.provider_${org.eclipse.kura.wire.component.conditional.provider.version}.jar"
                                             todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.wire.component.join.provider_${org.eclipse.kura.wire.component.join.provider.version}.jar"
                                             todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
-                                            
+
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.json.marshaller.unmarshaller.provider_${org.eclipse.kura.json.marshaller.unmarshaller.provider.version}.jar"
                                             todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.xml.marshaller.unmarshaller.provider_${org.eclipse.kura.xml.marshaller.unmarshaller.provider.version}.jar"
                                             todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
-                                            
+
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider_${org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider.version}.jar"
                                             todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
@@ -1875,7 +1918,7 @@
                                 </goals>
                                 <configuration>
                                     <target>
-										<!-- Stage the emulator -->
+                                        <!-- Stage the emulator -->
                                         <copy todir="${project.build.directory}/staging/emulator">
                                             <fileset dir="../emulator/org.eclipse.kura.emulator" />
                                         </copy>
@@ -1903,7 +1946,7 @@
                                         <move file="${project.build.directory}/staging/emulator/emulator.classpath"
                                             tofile="${project.build.directory}/staging/emulator/.classpath" />
 
-										<!-- Stage the Demo Heater Project -->
+                                        <!-- Stage the Demo Heater Project -->
                                         <copy todir="${project.build.directory}/staging/demo_heater">
                                             <fileset dir="../examples/org.eclipse.kura.demo.heater" />
                                         </copy>
@@ -1943,7 +1986,7 @@
                                         <move file="${project.build.directory}/staging/beacon.scanner/beacon.scanner.classpath"
                                             tofile="${project.build.directory}/staging/beacon.scanner/.classpath" />
 
-										<!-- Stage the org.eclipse.kura.example.ibeacon.advertiser Project -->
+                                        <!-- Stage the org.eclipse.kura.example.ibeacon.advertiser Project -->
                                         <copy todir="${project.build.directory}/staging/ibeacon.advertiser">
                                             <fileset dir="../examples/org.eclipse.kura.example.ibeacon.advertiser" />
                                         </copy>
@@ -1995,7 +2038,7 @@
                                         <move file="${project.build.directory}/staging/eddystone.scanner/eddystone.scanner.classpath"
                                             tofile="${project.build.directory}/staging/eddystone.scanner/.classpath" />
 
-										<!-- Stage the org.eclipse.kura.example.ble.tisensortag Project -->
+                                        <!-- Stage the org.eclipse.kura.example.ble.tisensortag Project -->
                                         <copy todir="${project.build.directory}/staging/tisensortag">
                                             <fileset dir="../examples/org.eclipse.kura.example.ble.tisensortag" />
                                         </copy>
@@ -2023,7 +2066,7 @@
                                         <move file="${project.build.directory}/staging/tisensortag.tinyb/tisensortag.tinyb.classpath"
                                             tofile="${project.build.directory}/staging/tisensortag.tinyb/.classpath" />
 
-										<!-- Stage the org.eclipse.kura.example.publisher Project -->
+                                        <!-- Stage the org.eclipse.kura.example.publisher Project -->
                                         <copy todir="${project.build.directory}/staging/publisher">
                                             <fileset dir="../examples/org.eclipse.kura.example.publisher" />
                                         </copy>
@@ -2082,7 +2125,7 @@
                                             file="${project.build.directory}/staging/camel_aggregation/camel_aggregation.classpath"
                                             tofile="${project.build.directory}/staging/camel_aggregation/.classpath" />
 
-										<!-- Create the archive file with the components -->
+                                        <!-- Create the archive file with the components -->
                                         <zip destfile="${project.build.directory}/${zip_workspace.prefix}.zip">
                                             <zipfileset dir="${project.build.directory}/staging/target-definition/"
                                                 prefix="target-definition/" />

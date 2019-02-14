@@ -88,9 +88,16 @@ public class CloudPayloadJsonDecoder {
     }
 
     private static void decodeTimestamp(KuraPayload payload, JsonValue timestampValue) {
-        if (timestampValue != null && timestampValue.isNumber()) {
-            long timestamp = timestampValue.asLong();
-            payload.setTimestamp(new Date(timestamp));
+        if (timestampValue != null) {
+            String timestampString = "";
+            if (timestampValue.isNumber()) {
+                timestampString = timestampValue.toString();
+            } else if (timestampValue.isObject()) {
+                timestampString = getTypedValueString(timestampValue);
+            }
+            if (!"".equals(timestampString)) {
+                payload.setTimestamp(new Date(Long.parseLong(timestampString)));
+            }
         }
     }
 
@@ -107,32 +114,39 @@ public class CloudPayloadJsonDecoder {
         for (JsonObject.Member member : positionObject) {
             String name = member.getName();
             JsonValue value = member.getValue();
-            if (LATITUDE.value().equalsIgnoreCase(name) && value.isNumber()) {
-                position.setLatitude(value.asDouble());
-            } else if (LONGITUDE.value().equalsIgnoreCase(name) && value.isNumber()) {
-                position.setLongitude(value.asDouble());
-            } else if (ALTITUDE.value().equalsIgnoreCase(name) && value.isNumber()) {
-                position.setAltitude(value.asDouble());
-            } else if (HEADING.value().equalsIgnoreCase(name) && value.isNumber()) {
-                position.setHeading(value.asDouble());
-            } else if (PRECISION.value().equalsIgnoreCase(name) && value.isNumber()) {
-                position.setPrecision(value.asDouble());
-            } else if (SATELLITES.value().equalsIgnoreCase(name) && value.isNumber()) {
-                position.setSatellites(value.asInt());
-            } else if (SPEED.value().equalsIgnoreCase(name) && value.isNumber()) {
-                position.setSpeed(value.asDouble());
-            } else if (CloudPayloadJsonFields.CloudPayloadJsonPositionFields.TIMESTAMP.value().equalsIgnoreCase(name)
-                    && value.isNumber()) {
-                position.setTimestamp(new Date(value.asLong()));
-            } else if (STATUS.value().equalsIgnoreCase(name) && value.isNumber()) {
-                position.setStatus(value.asInt());
+            String valueString = "";
+            if (value.isNumber()) {
+                valueString = value.toString();
+            } else if (value.isObject()) {
+                valueString = getTypedValueString(value);
+            } else {
+                throw new IllegalArgumentException(String.format("Cannot parse position: %s.", name));
+            }
+
+            if (LATITUDE.value().equalsIgnoreCase(name)) {
+                position.setLatitude(Double.parseDouble(valueString));
+            } else if (LONGITUDE.value().equalsIgnoreCase(name)) {
+                position.setLongitude(Double.parseDouble(valueString));
+            } else if (ALTITUDE.value().equalsIgnoreCase(name)) {
+                position.setAltitude(Double.parseDouble(valueString));
+            } else if (HEADING.value().equalsIgnoreCase(name)) {
+                position.setHeading(Double.parseDouble(valueString));
+            } else if (PRECISION.value().equalsIgnoreCase(name)) {
+                position.setPrecision(Double.parseDouble(valueString));
+            } else if (SATELLITES.value().equalsIgnoreCase(name)) {
+                position.setSatellites(Integer.parseInt(valueString));
+            } else if (SPEED.value().equalsIgnoreCase(name)) {
+                position.setSpeed(Integer.parseInt(valueString));
+            } else if (CloudPayloadJsonFields.CloudPayloadJsonPositionFields.TIMESTAMP.value().equalsIgnoreCase(name)) {
+                position.setTimestamp(new Date(Long.parseLong(valueString)));
+            } else if (STATUS.value().equalsIgnoreCase(name)) {
+                position.setStatus(Integer.parseInt(valueString));
             } else {
                 throw new IllegalArgumentException(String.format("Cannot parse position: %s.", name));
             }
         }
     }
 
-    // TODO: doesn't properly decode characters, ints, floats and byte arrays - the supported format has no metadata
     private static void decodeMetric(KuraPayload payload, JsonObject metricsObject) {
         if (metricsObject == null) {
             throw new IllegalArgumentException("Cannot parse metric object!");
@@ -142,7 +156,7 @@ public class CloudPayloadJsonDecoder {
             String name = member.getName();
             JsonValue value = member.getValue();
 
-            Object javaValue;
+            Object javaValue = null;
             if (value.isNumber()) {
                 try {
                     javaValue = value.asLong();
@@ -153,10 +167,50 @@ public class CloudPayloadJsonDecoder {
                 javaValue = value.asBoolean();
             } else if (value.isString()) {
                 javaValue = value.asString();
-            } else {
+            } else if (value.isObject()) {
+                javaValue = getTypedValue(value);
+            }
+            if (javaValue == null) {
                 throw new IllegalArgumentException(String.format("Unparsable metric %s", name));
             }
             payload.addMetric(name, javaValue);
         }
+    }
+
+    private static Object getTypedValue(JsonValue value) {
+        Object javaValue = null;
+        if (!value.isObject()) {
+            throw new IllegalArgumentException(String.format("metric typed object %s is incorrect!", value));
+        }
+        JsonObject.Member member = value.asObject().iterator().next();
+        String name = member.getName();
+        JsonValue value0 = member.getValue();
+        if (name.equalsIgnoreCase("string")) {
+            javaValue = value0.asString();
+        } else if (name.equalsIgnoreCase("double")) {
+            javaValue = value0.asDouble();
+        } else if (name.equalsIgnoreCase("float")) {
+            javaValue = value0.asFloat();
+        } else if (name.equalsIgnoreCase("int") || name.equalsIgnoreCase("int32") || name.equalsIgnoreCase("int64")) {
+            javaValue = value0.asInt();
+        } else if (name.equalsIgnoreCase("bool")) {
+            javaValue = value0.asBoolean();
+        } else if (name.equalsIgnoreCase("long")) {
+            javaValue = value0.asLong();
+        } else if (name.equalsIgnoreCase("bytes")) {
+            javaValue = Base64.getDecoder().decode(value0.asString());
+        } else {
+            throw new IllegalArgumentException(String.format("metric typed object %s is incorrect!", value));
+        }
+        return javaValue;
+    }
+
+    private static String getTypedValueString(JsonValue value) {
+        if (!value.isObject()) {
+            throw new IllegalArgumentException(String.format("metric typed object %s is incorrect!", value));
+        }
+        JsonObject.Member member = value.asObject().iterator().next();
+        JsonValue value0 = member.getValue();
+        return value0.toString();
     }
 }

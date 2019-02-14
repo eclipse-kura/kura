@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -163,12 +163,29 @@ public class GwtAssetServiceImpl extends OsgiRemoteServiceServlet implements Gwt
 
     private static void fillErrorData(final ChannelStatus status, final GwtChannelRecord record) {
         record.setValue(null);
-        record.setExceptionMessage(status.getExceptionMessage());
 
-        final Exception e = status.getException();
+        final Exception exception = status.getException();
 
-        if (e != null) {
-            record.setExceptionStackTrace(e.getStackTrace());
+        final String userMessage = status.getExceptionMessage();
+        final String exceptionMessage = exception != null ? exception.getMessage() : null;
+
+        final StringBuilder exceptionMessageBuilder = new StringBuilder();
+
+        if (userMessage != null) {
+            exceptionMessageBuilder.append(userMessage);
+        }
+
+        if (exceptionMessage != null && !exceptionMessage.equals(userMessage)) {
+            if (userMessage != null) {
+                exceptionMessageBuilder.append(" - ");
+            }
+            exceptionMessageBuilder.append(exceptionMessage);
+        }
+
+        record.setExceptionMessage(exceptionMessageBuilder.toString());
+
+        if (exception != null) {
+            record.setExceptionStackTrace(exception.getStackTrace());
         }
     }
 

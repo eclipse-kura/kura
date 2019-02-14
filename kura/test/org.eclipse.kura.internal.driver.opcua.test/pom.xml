@@ -28,6 +28,46 @@ Copyright (c) 2017, 2019 Eurotech and/or its affiliates and others
         <io.dropwizard.metrics.version>3.2.2</io.dropwizard.metrics.version>
     </properties>
 
+    <dependencies>
+        <dependency>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-core</artifactId>
+            <version>${io.dropwizard.metrics.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.milo</groupId>
+            <artifactId>sdk-client</artifactId>
+            <version>${org.eclipse.milo.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.milo</groupId>
+            <artifactId>sdk-core</artifactId>
+            <version>${org.eclipse.milo.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.milo</groupId>
+            <artifactId>sdk-server</artifactId>
+            <version>${org.eclipse.milo.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.milo</groupId>
+            <artifactId>stack-core</artifactId>
+            <version>${org.eclipse.milo.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.milo</groupId>
+            <artifactId>stack-server</artifactId>
+            <version>${org.eclipse.milo.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+
     <build>
         <plugins>
             <plugin>
@@ -372,6 +412,11 @@ Copyright (c) 2017, 2019 Eurotech and/or its affiliates and others
                                     <groupId>io.dropwizard.metrics</groupId>
                                     <artifactId>metrics-core</artifactId>
                                     <version>${io.dropwizard.metrics.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.milo</groupId>
+                                    <artifactId>sdk-client</artifactId>
+                                    <version>${org.eclipse.milo.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.milo</groupId>

@@ -63,7 +63,7 @@ public class WireAssetOCD extends BaseAssetOCD {
         timestampModeAd.setType(Tscalar.STRING);
         timestampModeAd.setDescription(TIMESTAMP_MODE_DESCRIPTION);
         timestampModeAd.setRequired(true);
-        timestampModeAd.setDefault(TimestampMode.PER_CHANNEL.name());
+        timestampModeAd.setDefault(TimestampMode.NO_TIMESTAMPS.name());
 
         addOptions(timestampModeAd, TimestampMode.values());
 

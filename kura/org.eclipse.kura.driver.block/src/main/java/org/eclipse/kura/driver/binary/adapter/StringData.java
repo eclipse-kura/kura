@@ -53,8 +53,8 @@ public class StringData implements BinaryData<String> {
     @Override
     public String read(Buffer buf, int offset) {
         final byte[] raw = this.wrapped.read(buf, offset);
-        int size = raw[1]; // Current length of the string
-        return new String(raw, 2, size, this.charset);
+        // int size = raw[1]; // Current length of the string
+        return new String(raw, 2, raw.length - 2, this.charset);
     }
 
     @Override

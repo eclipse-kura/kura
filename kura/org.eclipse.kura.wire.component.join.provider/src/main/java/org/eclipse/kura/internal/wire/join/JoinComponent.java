@@ -21,6 +21,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.type.TypedValue;
@@ -41,7 +42,7 @@ public final class JoinComponent implements MultiportWireReceiver, WireEmitter, 
 
     private static final Logger logger = LoggerFactory.getLogger(JoinComponent.class);
 
-    private volatile WireHelperService wireHelperService;
+    private WireHelperService wireHelperService;
 
     private MultiportWireSupport wireSupport;
     private ComponentContext context;
@@ -59,6 +60,7 @@ public final class JoinComponent implements MultiportWireReceiver, WireEmitter, 
         }
     }
 
+    @SuppressWarnings("unchecked")
     protected void activate(final ComponentContext componentContext, final Map<String, Object> properties) {
         logger.debug("Activating Join Wire Component...");
         this.context = componentContext;
@@ -71,6 +73,8 @@ public final class JoinComponent implements MultiportWireReceiver, WireEmitter, 
     }
 
     public void updated(final Map<String, Object> properties) {
+        if (this.joinComponentOptions != null)
+            this.joinComponentOptions.dispose();
         logger.debug("Updating Join Wire Component...");
         this.joinComponentOptions = new JoinComponentOptions(properties, this.context.getBundleContext());
 
@@ -90,15 +94,15 @@ public final class JoinComponent implements MultiportWireReceiver, WireEmitter, 
         final List<WireRecord> result = new ArrayList<>();
         forEachPair(firstRecords.iterator(), secondRecords.iterator(), (first, second) -> {
             if (first == null) {
-                result.add(new WireRecord(second.getProperties()));
+                result.add(new WireRecord(covertProperies(second.getProperties())));
                 return;
             }
             if (second == null) {
-                result.add(new WireRecord(first.getProperties()));
+                result.add(new WireRecord(covertProperies(first.getProperties())));
                 return;
             }
-            final Map<String, TypedValue<?>> resultProperties = new HashMap<>(first.getProperties());
-            resultProperties.putAll(second.getProperties());
+            final Map<String, TypedValue<?>> resultProperties = new HashMap<>(covertProperies(first.getProperties()));
+            resultProperties.putAll(covertProperies(second.getProperties()));
             result.add(new WireRecord(resultProperties));
         });
         this.wireSupport.emit(result);
@@ -113,6 +117,8 @@ public final class JoinComponent implements MultiportWireReceiver, WireEmitter, 
     }
 
     protected void deactivate(final ComponentContext componentContext) {
+        if (this.joinComponentOptions != null)
+            this.joinComponentOptions.dispose();
         logger.debug("Deactivating Join Wire Component...");
         // remained for debugging purposes
         logger.debug("Deactivating Join Wire Component... Done");
@@ -138,5 +144,15 @@ public final class JoinComponent implements MultiportWireReceiver, WireEmitter, 
     @Override
     public void consumersConnected(Wire[] wires) {
         this.wireSupport.consumersConnected(wires);
+    }
+
+    private static Map<String, TypedValue<?>> covertProperies(final Map<String, TypedValue<?>> properties) {
+        TypedValue<?> assertName = properties.get("assetName");
+        if (assertName == null)
+            return properties;
+        return properties.entrySet().stream().filter(v -> {
+            return !v.getKey().equals("assetName");
+        }).collect(Collectors.toMap(k -> assertName.getValue().toString() + "." + k.getKey(), Map.Entry::getValue));
+
     }
 }

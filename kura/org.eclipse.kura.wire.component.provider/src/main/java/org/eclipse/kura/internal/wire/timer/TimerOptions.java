@@ -35,13 +35,15 @@ final class TimerOptions {
 
     private static final String PROP_INTERVAL_TYPE = "type";
 
+    private static final String PROP_THREAD_COUNT = "threadCount";
+
     private final Map<String, Object> properties;
 
     /**
      * Instantiates a new Timer options.
      *
      * @param properties
-     *            the provided properties
+     *                       the provided properties
      */
     TimerOptions(final Map<String, Object> properties) {
         requireNonNull(properties, "Properties cannot be null");
@@ -67,6 +69,15 @@ final class TimerOptions {
      *
      * @return the simple interval
      */
+    int getThreadCount() {
+        int threadCount = 0;
+        final Object threadCountObj = this.properties.get(PROP_THREAD_COUNT);
+        if (nonNull(threadCountObj) && threadCountObj instanceof Integer) {
+            threadCount = (Integer) threadCountObj;
+        }
+        return threadCount;
+    }
+
     int getSimpleInterval() {
         int interval = 0;
         final Object simpleInterval = this.properties.get(PROP_SIMPLE_INTERVAL);

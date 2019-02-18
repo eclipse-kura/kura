@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2011, 2018 Eurotech and/or its affiliates and others
+    Copyright (c) 2011, 2019 Eurotech and/or its affiliates and others
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -40,6 +40,9 @@
         <kura.skip.can>true</kura.skip.can>
         <kura.skip.web>false</kura.skip.web>
         <kura.skip.examples>true</kura.skip.examples>
+
+        <!-- used for RPM uninstallation -->
+        <kura.install.link>/opt/eclipse/kura</kura.install.link>
     </properties>
 
     <organization>
@@ -63,7 +66,7 @@
             <id>kura_addons</id>
             <name>Eclipse Kura Addons Maven Repository</name>
             <url>https://raw.github.com/eurotech/kura_addons/mvn-repo/
-			</url>
+            </url>
             <snapshots>
                 <enabled>true</enabled>
                 <updatePolicy>always</updatePolicy>
@@ -125,7 +128,7 @@
                 </executions>
             </plugin>
             <plugin>
-				<!-- get kura bundles from (release or local) repository -->
+                <!-- get kura bundles from (release or local) repository -->
                 <artifactId>maven-dependency-plugin</artifactId>
                 <version>3.1.1</version>
                 <executions>
@@ -419,11 +422,6 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>org.eclipse.kura.driver.block</artifactId>
-                                    <version>${org.eclipse.kura.driver.block.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.driver.s7plc.provider</artifactId>
                                     <version>${org.eclipse.kura.driver.s7plc.provider.version}</version>
                                 </artifactItem>
@@ -447,7 +445,7 @@
                                     <artifactId>org.eclipse.kura.wire.script.filter.provider</artifactId>
                                     <version>${org.eclipse.kura.wire.script.filter.provider.version}</version>
                                 </artifactItem>
-                                <artifactItem>
+                               <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.driver.gpio.provider</artifactId>
                                     <version>${org.eclipse.kura.driver.gpio.provider.version}</version>
@@ -548,7 +546,7 @@
                 </executions>
             </plugin>
             <plugin>
-				<!--  rename bundles with version appended -->
+                <!--  rename bundles with version appended -->
                 <artifactId>maven-antrun-plugin</artifactId>
                 <executions>
                     <execution>
@@ -622,15 +620,15 @@
                                 <move file="target/plugins/org.eclipse.kura.linux.usb.x86_64.jar"
                                     tofile="target/plugins/org.eclipse.kura.linux.usb.x86_64_${org.eclipse.kura.linux.usb.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.linux.usb.aarch64.jar"
-                                    tofile="target/plugins/org.eclipse.kura.linux.usb.aarch64_${org.eclipse.kura.linux.usb.version}.jar" />
+                                    tofile="target/plugins/org.eclipse.kura.linux.usb.aarch64_${org.eclipse.kura.linux.usb.version}.jar"/>
                                 <move file="target/plugins/org.eclipse.kura.linux.bluetooth.jar"
                                     tofile="target/plugins/org.eclipse.kura.linux.bluetooth_${org.eclipse.kura.linux.bluetooth.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.ble.provider.jar"
-                                    tofile="target/plugins/org.eclipse.kura.ble.provider_${org.eclipse.kura.ble.provider.version}.jar" />
+                                    tofile="target/plugins/org.eclipse.kura.ble.provider_${org.eclipse.kura.ble.provider.version}.jar"/>
                                 <move file="target/plugins/org.eclipse.kura.ble.ibeacon.provider.jar"
-                                    tofile="target/plugins/org.eclipse.kura.ble.ibeacon.provider_${org.eclipse.kura.ble.ibeacon.provider.version}.jar" />
+                                    tofile="target/plugins/org.eclipse.kura.ble.ibeacon.provider_${org.eclipse.kura.ble.ibeacon.provider.version}.jar"/>
                                 <move file="target/plugins/org.eclipse.kura.ble.eddystone.provider.jar"
-                                    tofile="target/plugins/org.eclipse.kura.ble.eddystone.provider_${org.eclipse.kura.ble.eddystone.provider.version}.jar" />
+                                    tofile="target/plugins/org.eclipse.kura.ble.eddystone.provider_${org.eclipse.kura.ble.eddystone.provider.version}.jar"/>
                                 <move file="target/plugins/org.eclipse.kura.linux.watchdog.jar"
                                     tofile="target/plugins/org.eclipse.kura.linux.watchdog_${org.eclipse.kura.linux.watchdog.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.localization.jar"
@@ -680,8 +678,6 @@
                                     tofile="target/plugins/org.eclipse.kura.wire.provider_${org.eclipse.kura.wire.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.driver.opcua.provider.jar"
                                     tofile="target/plugins/org.eclipse.kura.driver.opcua.provider_${org.eclipse.kura.driver.opcua.provider.version}.jar" />
-                                <move file="target/plugins/org.eclipse.kura.driver.block.jar"
-                                    tofile="target/plugins/org.eclipse.kura.driver.block_${org.eclipse.kura.driver.block.version}.jar" />    
                                 <move file="target/plugins/org.eclipse.kura.driver.s7plc.provider.jar"
                                     tofile="target/plugins/org.eclipse.kura.driver.s7plc.provider_${org.eclipse.kura.driver.s7plc.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.driver.ble.sensortag.provider.jar"
@@ -702,19 +698,15 @@
                                     tofile="target/plugins/org.eclipse.kura.hook.file.move.provider_${org.eclipse.kura.hook.file.move.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.misc.cloudcat.jar"
                                     tofile="target/plugins/org.eclipse.kura.misc.cloudcat_${org.eclipse.kura.misc.cloudcat.version}.jar" />
-                                <move
-                                    file="target/plugins/org.eclipse.kura.json.marshaller.unmarshaller.provider.jar"
+                                <move file="target/plugins/org.eclipse.kura.json.marshaller.unmarshaller.provider.jar"
                                     tofile="target/plugins/org.eclipse.kura.json.marshaller.unmarshaller.provider_${org.eclipse.kura.json.marshaller.unmarshaller.provider.version}.jar" />
-                                <move
-                                    file="target/plugins/org.eclipse.kura.xml.marshaller.unmarshaller.provider.jar"
+                                <move file="target/plugins/org.eclipse.kura.xml.marshaller.unmarshaller.provider.jar"
                                     tofile="target/plugins/org.eclipse.kura.xml.marshaller.unmarshaller.provider_${org.eclipse.kura.xml.marshaller.unmarshaller.provider.version}.jar" />
-                                <move
-                                    file="target/plugins/org.eclipse.kura.wire.component.conditional.provider.jar"
+                                <move file="target/plugins/org.eclipse.kura.wire.component.conditional.provider.jar"
                                     tofile="target/plugins/org.eclipse.kura.wire.component.conditional.provider_${org.eclipse.kura.wire.component.conditional.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.wire.component.join.provider.jar"
                                     tofile="target/plugins/org.eclipse.kura.wire.component.join.provider_${org.eclipse.kura.wire.component.join.provider.version}.jar" />
-                                <move
-                                    file="target/plugins/org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider.jar"
+                                <move file="target/plugins/org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider.jar"
                                     tofile="target/plugins/org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider_${org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider.version}.jar" />
                             </tasks>
                         </configuration>
@@ -744,84 +736,74 @@
                         </goals>
                         <configuration>
                             <target name="distrib-store-files" if="${is.not.snapshot}">
-								<!-- Copy distrib/config/kura.build.properties in distrib/RELEASE_INFO/${project.version}/config -->
-                                <copy file="config/kura.build.properties"
-                                    todir="RELEASE_INFO/${project.version}/config" overwrite="true" />
+                                <!-- Copy distrib/config/kura.build.properties in distrib/RELEASE_INFO/${project.version}/config -->
+                                <copy file="config/kura.build.properties" todir="RELEASE_INFO/${project.version}/config"
+                                    overwrite="true" />
 
-                				<!-- Copy target-platform/config/kura.target-platform.build.properties in distrib/RELEASE_INFO/${project.version}/config -->
+                                <!-- Copy target-platform/config/kura.target-platform.build.properties in distrib/RELEASE_INFO/${project.version}/config -->
                                 <copy
                                     file="${kura.basedir}/../../target-platform/config/kura.target-platform.build.properties"
                                     todir="RELEASE_INFO/${project.version}/config" overwrite="true" />
 
-							    <!-- Copy src/main/resources/common/previous-version-pom-template.xml in distrib/RELEASE_INFO/${project.version}/pom.xml -->
-                                <copy file="src/main/resources/common/release-info.root.pom.xml"
-                                    tofile="RELEASE_INFO/${project.version}/pom.xml" overwrite="true" />
-								<!-- replace kura version -->
-                                <replace token="&lt;version&gt;[kura-version]&lt;/version&gt;"
-                                    value="&lt;version&gt;${project.version}&lt;/version&gt;"
+                                <!-- Copy src/main/resources/common/previous-version-pom-template.xml in distrib/RELEASE_INFO/${project.version}/pom.xml -->
+                                <copy file="src/main/resources/common/release-info.root.pom.xml" tofile="RELEASE_INFO/${project.version}/pom.xml"
+                                    overwrite="true" />
+                                <!-- replace kura version -->
+                                <replace token="&lt;version&gt;[kura-version]&lt;/version&gt;" value="&lt;version&gt;${project.version}&lt;/version&gt;"
                                     dir="RELEASE_INFO/${project.version}">
                                     <include name="pom.xml" />
                                 </replace>
 
-								<!-- Copy src/main/resources/common/kura-bundles-pom.xml in distrib/RELEASE_INFO/${project.version}/kura-bundles/pom.xml -->
-                                <copy file="src/main/resources/common/kura-bundles-pom.xml"
-                                    tofile="RELEASE_INFO/${project.version}/kura-bundles/pom.xml" overwrite="true" />
-								<!-- replace kura version -->
-                                <replace token="&lt;version&gt;[kura-version]&lt;/version&gt;"
-                                    value="&lt;version&gt;${project.version}&lt;/version&gt;"
+                                <!-- Copy src/main/resources/common/kura-bundles-pom.xml in distrib/RELEASE_INFO/${project.version}/kura-bundles/pom.xml -->
+                                <copy file="src/main/resources/common/kura-bundles-pom.xml" tofile="RELEASE_INFO/${project.version}/kura-bundles/pom.xml"
+                                    overwrite="true" />
+                                <!-- replace kura version -->
+                                <replace token="&lt;version&gt;[kura-version]&lt;/version&gt;" value="&lt;version&gt;${project.version}&lt;/version&gt;"
                                     dir="RELEASE_INFO/${project.version}/kura-bundles">
                                     <include name="pom.xml" />
                                 </replace>
-								<!-- execute script to add artifacts to pom file -->
-                                <exec executable="bash"
-                                    output="RELEASE_INFO/${project.version}/kura-bundles/pom.xml" append="true">
+                                <!-- execute script to add artifacts to pom file -->
+                                <exec executable="bash" output="RELEASE_INFO/${project.version}/kura-bundles/pom.xml"
+                                    append="true">
                                     <arg value="src/main/sh/generate_kura_bundles_pom.sh" />
                                     <arg value="RELEASE_INFO/${project.version}/config/kura.build.properties" />
                                 </exec>
 
-								<!-- Copy target-platform/p2-repo-common/pom.xml in distrib/RELEASE_INFO/${project.version}/p2-repo-common/pom.xml -->
+                                <!-- Copy target-platform/p2-repo-common/pom.xml in distrib/RELEASE_INFO/${project.version}/p2-repo-common/pom.xml -->
                                 <copy file="${kura.basedir}/../../target-platform/p2-repo-common/pom.xml"
                                     tofile="RELEASE_INFO/${project.version}/p2-repo-common/pom.xml" overwrite="true" />
-								<!-- replace artifactId -->
-                                <replace token="&lt;artifactId&gt;target-platform&lt;/artifactId&gt;"
-                                    value="&lt;artifactId&gt;target-platform-previous&lt;/artifactId&gt;"
+                                <!-- replace artifactId -->
+                                <replace token="&lt;artifactId&gt;target-platform&lt;/artifactId&gt;" value="&lt;artifactId&gt;target-platform-previous&lt;/artifactId&gt;"
                                     dir="RELEASE_INFO/${project.version}/p2-repo-common">
                                     <include name="pom.xml" />
                                 </replace>
-								<!-- Add strip version -->
+                                <!-- Add strip version -->
                                 <replace token="&lt;/artifactItems&gt;"
-                                    value="&lt;/artifactItems&gt;&lt;stripVersion&gt;true&lt;/stripVersion&gt;"
-                                    dir="RELEASE_INFO/${project.version}/p2-repo-common">
+                                    value="&lt;/artifactItems&gt;&lt;stripVersion&gt;true&lt;/stripVersion&gt;" dir="RELEASE_INFO/${project.version}/p2-repo-common">
                                     <include name="pom.xml" />
                                 </replace>
-								<!-- execute script to add artifacts to pom file - need to have different input/output files (Win) -->
-                                <exec executable="bash"
-                                    output="RELEASE_INFO/${project.version}/p2-repo-common/pom_.xml">
+                                <!-- execute script to add artifacts to pom file - need to have different input/output files (Win) -->
+                                <exec executable="bash" output="RELEASE_INFO/${project.version}/p2-repo-common/pom_.xml">
                                     <arg value="src/main/sh/generate_p2_repo_pom.sh" />
                                     <arg value="RELEASE_INFO/${project.version}/p2-repo-common/pom.xml" />
                                 </exec>
-                                <move file="RELEASE_INFO/${project.version}/p2-repo-common/pom_.xml"
-                                    tofile="RELEASE_INFO/${project.version}/p2-repo-common/pom.xml" />
+                                <move file="RELEASE_INFO/${project.version}/p2-repo-common/pom_.xml" tofile="RELEASE_INFO/${project.version}/p2-repo-common/pom.xml" />
 
-								<!-- Copy target-platform/p2-repo-equinox_3.12.50/pom.xml in distrib/RELEASE_INFO/${project.version}/p2-repo-equinox_3.12.50/pom.xml -->
+                                <!-- Copy target-platform/p2-repo-equinox_3.12.50/pom.xml in distrib/RELEASE_INFO/${project.version}/p2-repo-equinox_3.12.50/pom.xml -->
                                 <copy file="${kura.basedir}/../../target-platform/p2-repo-equinox_3.12.50/pom.xml"
-                                    tofile="RELEASE_INFO/${project.version}/p2-repo-equinox_3.12.50/pom.xml"
-                                    overwrite="true" />
-								<!-- replace artifactId -->
-                                <replace token="&lt;artifactId&gt;target-platform&lt;/artifactId&gt;"
-                                    value="&lt;artifactId&gt;target-platform-previous&lt;/artifactId&gt;"
+                                    tofile="RELEASE_INFO/${project.version}/p2-repo-equinox_3.12.50/pom.xml" overwrite="true" />
+                                <!-- replace artifactId -->
+                                <replace token="&lt;artifactId&gt;target-platform&lt;/artifactId&gt;" value="&lt;artifactId&gt;target-platform-previous&lt;/artifactId&gt;"
                                     dir="RELEASE_INFO/${project.version}/p2-repo-equinox_3.12.50">
                                     <include name="pom.xml" />
                                 </replace>
-								<!-- Add strip version -->
+                                <!-- Add strip version -->
                                 <replace token="&lt;/artifactItems&gt;"
-                                    value="&lt;/artifactItems&gt;&lt;stripVersion&gt;true&lt;/stripVersion&gt;"
-                                    dir="RELEASE_INFO/${project.version}/p2-repo-equinox_3.12.50">
+                                    value="&lt;/artifactItems&gt;&lt;stripVersion&gt;true&lt;/stripVersion&gt;" dir="RELEASE_INFO/${project.version}/p2-repo-equinox_3.12.50">
                                     <include name="pom.xml" />
                                 </replace>
-								<!-- execute script to add artifacts to pom file - need to have different input/output files (Win) -->
-                                <exec executable="bash"
-                                    output="RELEASE_INFO/${project.version}/p2-repo-equinox_3.12.50/pom_.xml">
+                                <!-- execute script to add artifacts to pom file - need to have different input/output files (Win) -->
+                                <exec executable="bash" output="RELEASE_INFO/${project.version}/p2-repo-equinox_3.12.50/pom_.xml">
                                     <arg value="src/main/sh/generate_p2_repo_pom.sh" />
                                     <arg value="RELEASE_INFO/${project.version}/p2-repo-equinox_3.12.50/pom.xml" />
                                 </exec>
@@ -882,8 +864,8 @@
                         <format>${kura.build.version}</format>
                     </configuration>
                 </plugin>
-				<!--This plugin's configuration is used to store Eclipse m2e settings
-					only. It has no influence on the Maven build itself. -->
+                <!--This plugin's configuration is used to store Eclipse m2e settings
+                    only. It has no influence on the Maven build itself. -->
                 <plugin>
                     <groupId>org.eclipse.m2e</groupId>
                     <artifactId>lifecycle-mapping</artifactId>
@@ -1015,8 +997,7 @@
         <profile>
             <id>raspberry-pi-2-3</id>
             <properties>
-                <project.raspbian.dependencies>hostapd, isc-dhcp-server, iw, dos2unix, bind9, unzip, ethtool, telnet,
-                    bluez-hcidump,
+                <project.raspbian.dependencies>hostapd, isc-dhcp-server, iw, dos2unix, bind9, unzip, ethtool, telnet, bluez-hcidump,
                     wireless-tools, java8-runtime-headless | java8-runtime</project.raspbian.dependencies>
             </properties>
             <activation>
@@ -1059,8 +1040,7 @@
                                         <property name="buildNumber" value="buildNumber" />
                                         <property name="project.version" value="${project.version}" />
                                         <property name="project.build.profile" value="${project.build.profile}" />
-                                        <property name="project.build.directory"
-                                            value="${project.build.directory}" />
+                                        <property name="project.build.directory" value="${project.build.directory}" />
                                         <property name="build.name" value="raspberry-pi-2" />
                                         <property name="target.device" value="raspberry-pi-2" />
                                         <property name="native.tag" value="armv6hf" />
@@ -1070,8 +1050,7 @@
                                         <property name="os.base" value="debian" />
                                         <property name="kura.mem.size" value="512m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
-                                        <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"
-                                            target="dist-linux" />
+                                        <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
                                     </target>
                                 </configuration>
                             </execution>
@@ -1113,8 +1092,7 @@
         <profile>
             <id>raspberry-pi-2-3-nn</id>
             <properties>
-                <project.raspbian.dependencies.nn>dos2unix, unzip, telnet, bluez-hcidump, java8-runtime-headless |
-                    java8-runtime</project.raspbian.dependencies.nn>
+                <project.raspbian.dependencies.nn>dos2unix, unzip, telnet, bluez-hcidump, java8-runtime-headless | java8-runtime</project.raspbian.dependencies.nn>
             </properties>
             <activation>
                 <activeByDefault>true</activeByDefault>
@@ -1156,8 +1134,7 @@
                                         <property name="buildNumber" value="buildNumber" />
                                         <property name="project.version" value="${project.version}" />
                                         <property name="project.build.profile" value="${project.build.profile}" />
-                                        <property name="project.build.directory"
-                                            value="${project.build.directory}" />
+                                        <property name="project.build.directory" value="${project.build.directory}" />
                                         <property name="build.name" value="raspberry-pi-2-nn" />
                                         <property name="target.device" value="raspberry-pi-2-nn" />
                                         <property name="native.tag" value="armv6hf" />
@@ -1167,8 +1144,7 @@
                                         <property name="os.base" value="debian" />
                                         <property name="kura.mem.size" value="512m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
-                                        <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"
-                                            target="dist-linux" />
+                                        <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
                                     </target>
                                 </configuration>
                             </execution>
@@ -1209,8 +1185,7 @@
         <profile>
             <id>intel-up2-ubuntu-16</id>
             <properties>
-                <project.raspbian.dependencies>hostapd, isc-dhcp-server, iw, dos2unix, bind9, unzip, ethtool, telnet,
-                    bluez-hcidump,
+                <project.raspbian.dependencies>hostapd, isc-dhcp-server, iw, dos2unix, bind9, unzip, ethtool, telnet, bluez-hcidump,
                     wireless-tools, java8-runtime-headless | java8-runtime</project.raspbian.dependencies>
             </properties>
             <activation>
@@ -1253,8 +1228,7 @@
                                         <property name="buildNumber" value="buildNumber" />
                                         <property name="project.version" value="${project.version}" />
                                         <property name="project.build.profile" value="${project.build.profile}" />
-                                        <property name="project.build.directory"
-                                            value="${project.build.directory}" />
+                                        <property name="project.build.directory" value="${project.build.directory}" />
                                         <property name="build.name" value="intel-up2-ubuntu-16" />
                                         <property name="target.device" value="intel-up2" />
                                         <property name="native.tag" value="x86_64" />
@@ -1264,8 +1238,7 @@
                                         <property name="os.base" value="debian" />
                                         <property name="kura.mem.size" value="1024m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
-                                        <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"
-                                            target="dist-linux" />
+                                        <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
                                     </target>
                                 </configuration>
                             </execution>
@@ -1346,8 +1319,7 @@
                                         <property name="buildNumber" value="buildNumber" />
                                         <property name="project.version" value="${project.version}" />
                                         <property name="project.build.profile" value="${project.build.profile}" />
-                                        <property name="project.build.directory"
-                                            value="${project.build.directory}" />
+                                        <property name="project.build.directory" value="${project.build.directory}" />
                                         <property name="build.name" value="intel-up2-centos-7" />
                                         <property name="target.device" value="intel-up2" />
                                         <property name="native.tag" value="x86_64" />
@@ -1357,8 +1329,7 @@
                                         <property name="os.base" value="redhat" />
                                         <property name="kura.mem.size" value="1024m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
-                                        <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"
-                                            target="dist-linux" />
+                                        <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
                                     </target>
                                 </configuration>
                             </execution>
@@ -1430,6 +1401,26 @@
                                     <afterInstallation>
                                         <script>/tmp/kura_${project.version}_installer.sh</script>
                                     </afterInstallation>
+                                    <beforeRemoval>
+                                        <script>
+    systemctl stop kura
+    systemctl disable kura
+    rm -f /usr/lib/systemd/system/kura.service
+    systemctl daemon-reload
+    systemctl reset-failed
+
+    rm -f  /etc/logrotate.d/kura
+    rm -f  /var/log/kura*.log
+    rm -rf /tmp/.kura
+    rm -rf /tmp/kura
+
+    if [ -d "${kura.install.link}" ] ; then
+      PARENT=`readlink -f ${kura.install.link}`
+      rm -rf ${kura.install.link}
+      rm -rf $PARENT
+    fi
+                                        </script>
+                                    </beforeRemoval>
                                     <skipSigning>true</skipSigning>
                                 </configuration>
                             </execution>
@@ -1481,8 +1472,7 @@
                                         <property name="buildNumber" value="buildNumber" />
                                         <property name="project.version" value="${project.version}" />
                                         <property name="project.build.profile" value="${project.build.profile}" />
-                                        <property name="project.build.directory"
-                                            value="${project.build.directory}" />
+                                        <property name="project.build.directory" value="${project.build.directory}" />
                                         <property name="build.name" value="intel-up2-centos-7-nn" />
                                         <property name="target.device" value="intel-up2-nn" />
                                         <property name="native.tag" value="x86_64" />
@@ -1492,8 +1482,7 @@
                                         <property name="os.base" value="redhat" />
                                         <property name="kura.mem.size" value="1024m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
-                                        <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"
-                                            target="dist-linux" />
+                                        <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
                                     </target>
                                 </configuration>
                             </execution>
@@ -1553,6 +1542,26 @@
                                     <afterInstallation>
                                         <script>/tmp/kura_${project.version}_installer.sh</script>
                                     </afterInstallation>
+                                    <beforeRemoval>
+                                        <script>
+    systemctl stop kura
+    systemctl disable kura
+    rm -f /usr/lib/systemd/system/kura.service
+    systemctl daemon-reload
+    systemctl reset-failed
+
+    rm -f  /etc/logrotate.d/kura
+    rm -f  /var/log/kura*.log
+    rm -rf /tmp/.kura
+    rm -rf /tmp/kura
+
+    if [ -d "${kura.install.link}" ] ; then
+      PARENT=`readlink -f ${kura.install.link}`
+      rm -rf ${kura.install.link}
+      rm -rf $PARENT
+    fi
+                                        </script>
+                                    </beforeRemoval>
                                     <skipSigning>true</skipSigning>
                                 </configuration>
                             </execution>
@@ -1561,6 +1570,7 @@
                 </plugins>
             </build>
         </profile>
+
         <profile>
             <id>intel-up2-centos-7-docker-nn</id>
             <activation>
@@ -1603,8 +1613,7 @@
                                         <property name="buildNumber" value="buildNumber" />
                                         <property name="project.version" value="${project.version}" />
                                         <property name="project.build.profile" value="${project.build.profile}" />
-                                        <property name="project.build.directory"
-                                            value="${project.build.directory}" />
+                                        <property name="project.build.directory" value="${project.build.directory}" />
                                         <property name="build.name" value="intel-up2-centos-7-docker-nn" />
                                         <property name="target.device" value="intel-up2-docker-nn" />
                                         <property name="native.tag" value="x86_64" />
@@ -1614,8 +1623,7 @@
                                         <property name="os.base" value="redhat" />
                                         <property name="kura.mem.size" value="1024m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
-                                        <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"
-                                            target="dist-linux" />
+                                        <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
                                     </target>
                                 </configuration>
                             </execution>
@@ -1675,6 +1683,26 @@
                                     <afterInstallation>
                                         <script>/tmp/kura_${project.version}_installer.sh</script>
                                     </afterInstallation>
+                                    <beforeRemoval>
+                                        <script>
+    systemctl stop kura
+    systemctl disable kura
+    rm -f /usr/lib/systemd/system/kura.service
+    systemctl daemon-reload
+    systemctl reset-failed
+
+    rm -f  /etc/logrotate.d/kura
+    rm -f  /var/log/kura*.log
+    rm -rf /tmp/.kura
+    rm -rf /tmp/kura
+
+    if [ -d "${kura.install.link}" ] ; then
+      PARENT=`readlink -f ${kura.install.link}`
+      rm -rf ${kura.install.link}
+      rm -rf $PARENT
+    fi
+                                        </script>
+                                    </beforeRemoval>
                                     <skipSigning>true</skipSigning>
                                 </configuration>
                             </execution>
@@ -1683,11 +1711,11 @@
                 </plugins>
             </build>
         </profile>
+
         <profile>
             <id>rock960-ubuntu-16-nn</id>
             <properties>
-                <project.raspbian.dependencies.nn>dos2unix, unzip, telnet, bluez-hcidump, java8-runtime-headless |
-                    java8-runtime</project.raspbian.dependencies.nn>
+                <project.raspbian.dependencies.nn>dos2unix, unzip, telnet, bluez-hcidump, java8-runtime-headless | java8-runtime</project.raspbian.dependencies.nn>
             </properties>
             <activation>
                 <activeByDefault>true</activeByDefault>
@@ -1729,8 +1757,7 @@
                                         <property name="buildNumber" value="buildNumber" />
                                         <property name="project.version" value="${project.version}" />
                                         <property name="project.build.profile" value="${project.build.profile}" />
-                                        <property name="project.build.directory"
-                                            value="${project.build.directory}" />
+                                        <property name="project.build.directory" value="${project.build.directory}" />
                                         <property name="build.name" value="rock960-ubuntu-16-nn" />
                                         <property name="target.device" value="rock960-ubuntu-16-nn" />
                                         <property name="native.tag" value="aarch64" />
@@ -1740,8 +1767,7 @@
                                         <property name="os.base" value="debian" />
                                         <property name="kura.mem.size" value="1024m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
-                                        <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"
-                                            target="dist-linux" />
+                                        <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
                                     </target>
                                 </configuration>
                             </execution>
@@ -1838,20 +1864,20 @@
                                 </goals>
                                 <configuration>
                                     <target>
-										<!-- Kura User Workspace -->
+                                        <!-- Kura User Workspace -->
                                         <echo message="Preparing target platform..." />
 
-										<!-- Copy the mtoolkit plugin to the target directory -->
+                                        <!-- Copy the mtoolkit plugin to the target directory -->
                                         <copy
                                             file="src/main/resources/common/org.tigris.mtoolkit.sdk-3.1.8-20110411-0918.zip"
                                             todir="${project.build.directory}" />
 
-										<!-- Add the deployment agent and core packages to the target platform
-											which is required for the emulator -->
+                                        <!-- Add the deployment agent and core packages to the target platform
+                                            which is required for the emulator -->
                                         <copy todir="${project.build.directory}/staging/target-definition">
                                             <fileset dir="../target-definition" />
                                         </copy>
-										<!-- Add individual emulator bundles-->
+                                        <!-- Add individual emulator bundles-->
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.emulator.clock_${org.eclipse.kura.emulator.clock.version}.jar"
                                             todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
@@ -1871,10 +1897,8 @@
                                             file="${project.build.directory}/plugins/org.eclipse.kura.emulator.watchdog_${org.eclipse.kura.emulator.watchdog.version}.jar"
                                             todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
 
-                                        <delete
-                                            file="${project.build.directory}/staging/target-definition/pom.xml" />
-                                        <delete
-                                            dir="${project.build.directory}/staging/target-definition/common/source" />
+                                        <delete file="${project.build.directory}/staging/target-definition/pom.xml" />
+                                        <delete dir="${project.build.directory}/staging/target-definition/common/source" />
                                         <delete
                                             file="${project.build.directory}/staging/target-definition/kura-equinox_3.12.50.target" />
                                         <delete
@@ -1886,10 +1910,8 @@
                                         <delete dir="${project.build.directory}/staging/target-definition/target" />
 
                                         <copy overwrite="true"
-                                            file="src/main/resources/common/projects/target_definition.project"
-                                            tofile="${project.build.directory}/staging/target-definition/.project" />
-                                        <copy file="src/main/resources/common/kura-equinox_3.12.50.target"
-                                            todir="${project.build.directory}/staging/target-definition" />
+                                            file="src/main/resources/common/projects/target_definition.project" tofile="${project.build.directory}/staging/target-definition/.project" />
+                                        <copy file="src/main/resources/common/kura-equinox_3.12.50.target" todir="${project.build.directory}/staging/target-definition" />
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.api_${org.eclipse.kura.api.version}.jar"
                                             todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
@@ -2030,32 +2052,27 @@
                                 </goals>
                                 <configuration>
                                     <target>
-										<!-- Stage the emulator -->
+                                        <!-- Stage the emulator -->
                                         <copy todir="${project.build.directory}/staging/emulator">
                                             <fileset dir="../emulator/org.eclipse.kura.emulator" />
                                         </copy>
                                         <delete file="${project.build.directory}/staging/emulator/pom.xml" />
                                         <delete dir="${project.build.directory}/staging/emulator/bin" />
                                         <delete dir="${project.build.directory}/staging/emulator/target" />
-                                        <delete
-                                            file="${project.build.directory}/staging/emulator/emulator-assembly.xml" />
+                                        <delete file="${project.build.directory}/staging/emulator/emulator-assembly.xml" />
                                         <delete
                                             file="${project.build.directory}/staging/emulator/src/main/resources/Kura_Core_Test.launch" />
                                         <delete
                                             file="${project.build.directory}/staging/emulator/src/main/resources/Kura_Emulator_Linux.launch" />
                                         <delete
                                             file="${project.build.directory}/staging/emulator/src/main/resources/Kura_Emulator_OSX.launch" />
-                                        <copy file="RELEASE_NOTES.txt"
-                                            todir="${project.build.directory}/staging/emulator/src/main/resources" />
-                                        <mkdir dir="${project.build.directory}/staging/emulator/launch_configs" />
-                                        <copy file="src/main/resources/common/Kura_Emulator_Linux.launch"
-                                            todir="${project.build.directory}/staging/emulator/launch_configs" />
-                                        <copy file="src/main/resources/common/Kura_Emulator_OSX.launch"
-                                            todir="${project.build.directory}/staging/emulator/launch_configs" />
+                                        <copy file="RELEASE_NOTES.txt" todir="${project.build.directory}/staging/emulator/src/main/resources" />
+                                        <mkdir dir="${project.build.directory}/staging/emulator/launch_configs"/>
+                                        <copy file="src/main/resources/common/Kura_Emulator_Linux.launch" todir="${project.build.directory}/staging/emulator/launch_configs" />
+                                        <copy file="src/main/resources/common/Kura_Emulator_OSX.launch" todir="${project.build.directory}/staging/emulator/launch_configs" />
                                         <copy file="src/main/resources/common/classpaths/emulator.classpath"
                                             tofile="${project.build.directory}/staging/emulator/emulator.classpath" />
-                                        <copy overwrite="true"
-                                            file="src/main/resources/common/projects/emulator.project"
+                                        <copy overwrite="true" file="src/main/resources/common/projects/emulator.project"
                                             tofile="${project.build.directory}/staging/emulator/.project" />
                                         <replace
                                             file="${project.build.directory}/staging/emulator/src/main/resources/kura.properties"
@@ -2063,7 +2080,7 @@
                                         <move file="${project.build.directory}/staging/emulator/emulator.classpath"
                                             tofile="${project.build.directory}/staging/emulator/.classpath" />
 
-										<!-- Stage the Demo Heater Project -->
+                                        <!-- Stage the Demo Heater Project -->
                                         <copy todir="${project.build.directory}/staging/demo_heater">
                                             <fileset dir="../examples/org.eclipse.kura.demo.heater" />
                                         </copy>
@@ -2072,11 +2089,9 @@
                                         <delete dir="${project.build.directory}/staging/demo_heater/target" />
                                         <copy file="src/main/resources/common/classpaths/demo_heater.classpath"
                                             tofile="${project.build.directory}/staging/demo_heater/demo_heater.classpath" />
-                                        <copy overwrite="true"
-                                            file="src/main/resources/common/projects/demo_heater.project"
+                                        <copy overwrite="true" file="src/main/resources/common/projects/demo_heater.project"
                                             tofile="${project.build.directory}/staging/demo_heater/.project" />
-                                        <move
-                                            file="${project.build.directory}/staging/demo_heater/demo_heater.classpath"
+                                        <move file="${project.build.directory}/staging/demo_heater/demo_heater.classpath"
                                             tofile="${project.build.directory}/staging/demo_heater/.classpath" />
 
                                         <!-- Stage the org.eclipse.kura.example.beacon Project -->
@@ -2086,10 +2101,8 @@
                                         <delete file="${project.build.directory}/staging/beacon/pom.xml" />
                                         <delete dir="${project.build.directory}/staging/beacon/bin" />
                                         <delete dir="${project.build.directory}/staging/beacon/target" />
-                                        <copy file="src/main/resources/common/classpaths/beacon.classpath"
-                                            tofile="${project.build.directory}/staging/beacon/beacon.classpath" />
-                                        <copy overwrite="true"
-                                            file="src/main/resources/common/projects/beacon.project"
+                                        <copy file="src/main/resources/common/classpaths/beacon.classpath" tofile="${project.build.directory}/staging/beacon/beacon.classpath" />
+                                        <copy overwrite="true" file="src/main/resources/common/projects/beacon.project"
                                             tofile="${project.build.directory}/staging/beacon/.project" />
                                         <move file="${project.build.directory}/staging/beacon/beacon.classpath"
                                             tofile="${project.build.directory}/staging/beacon/.classpath" />
@@ -2101,33 +2114,23 @@
                                         <delete file="${project.build.directory}/staging/beacon.scanner/pom.xml" />
                                         <delete dir="${project.build.directory}/staging/beacon.scanner/bin" />
                                         <delete dir="${project.build.directory}/staging/beacon.scanner/target" />
-                                        <copy file="src/main/resources/common/classpaths/beacon.scanner.classpath"
-                                            tofile="${project.build.directory}/staging/beacon.scanner/beacon.scanner.classpath" />
-                                        <copy overwrite="true"
-                                            file="src/main/resources/common/projects/beacon.scanner.project"
+                                        <copy file="src/main/resources/common/classpaths/beacon.scanner.classpath" tofile="${project.build.directory}/staging/beacon.scanner/beacon.scanner.classpath" />
+                                        <copy overwrite="true" file="src/main/resources/common/projects/beacon.scanner.project"
                                             tofile="${project.build.directory}/staging/beacon.scanner/.project" />
-                                        <move
-                                            file="${project.build.directory}/staging/beacon.scanner/beacon.scanner.classpath"
+                                        <move file="${project.build.directory}/staging/beacon.scanner/beacon.scanner.classpath"
                                             tofile="${project.build.directory}/staging/beacon.scanner/.classpath" />
 
-										<!-- Stage the org.eclipse.kura.example.ibeacon.advertiser Project -->
+                                        <!-- Stage the org.eclipse.kura.example.ibeacon.advertiser Project -->
                                         <copy todir="${project.build.directory}/staging/ibeacon.advertiser">
-                                            <fileset
-                                                dir="../examples/org.eclipse.kura.example.ibeacon.advertiser" />
+                                            <fileset dir="../examples/org.eclipse.kura.example.ibeacon.advertiser" />
                                         </copy>
-                                        <delete
-                                            file="${project.build.directory}/staging/ibeacon.advertiser/pom.xml" />
+                                        <delete file="${project.build.directory}/staging/ibeacon.advertiser/pom.xml" />
                                         <delete dir="${project.build.directory}/staging/ibeacon.advertiser/bin" />
-                                        <delete
-                                            dir="${project.build.directory}/staging/ibeacon.advertiser/target" />
-                                        <copy
-                                            file="src/main/resources/common/classpaths/ibeacon.advertiser.classpath"
-                                            tofile="${project.build.directory}/staging/ibeacon.advertiser/ibeacon.advertiser.classpath" />
-                                        <copy overwrite="true"
-                                            file="src/main/resources/common/projects/ibeacon.advertiser.project"
+                                        <delete dir="${project.build.directory}/staging/ibeacon.advertiser/target" />
+                                        <copy file="src/main/resources/common/classpaths/ibeacon.advertiser.classpath" tofile="${project.build.directory}/staging/ibeacon.advertiser/ibeacon.advertiser.classpath" />
+                                        <copy overwrite="true" file="src/main/resources/common/projects/ibeacon.advertiser.project"
                                             tofile="${project.build.directory}/staging/ibeacon.advertiser/.project" />
-                                        <move
-                                            file="${project.build.directory}/staging/ibeacon.advertiser/ibeacon.advertiser.classpath"
+                                        <move file="${project.build.directory}/staging/ibeacon.advertiser/ibeacon.advertiser.classpath"
                                             tofile="${project.build.directory}/staging/ibeacon.advertiser/.classpath" />
 
                                         <!-- Stage the org.eclipse.kura.example.ibeacon.scanner Project -->
@@ -2137,55 +2140,39 @@
                                         <delete file="${project.build.directory}/staging/ibeacon.scanner/pom.xml" />
                                         <delete dir="${project.build.directory}/staging/ibeacon.scanner/bin" />
                                         <delete dir="${project.build.directory}/staging/ibeacon.scanner/target" />
-                                        <copy file="src/main/resources/common/classpaths/ibeacon.scanner.classpath"
-                                            tofile="${project.build.directory}/staging/ibeacon.scanner/ibeacon.scanner.classpath" />
-                                        <copy overwrite="true"
-                                            file="src/main/resources/common/projects/ibeacon.scanner.project"
+                                        <copy file="src/main/resources/common/classpaths/ibeacon.scanner.classpath" tofile="${project.build.directory}/staging/ibeacon.scanner/ibeacon.scanner.classpath" />
+                                        <copy overwrite="true" file="src/main/resources/common/projects/ibeacon.scanner.project"
                                             tofile="${project.build.directory}/staging/ibeacon.scanner/.project" />
-                                        <move
-                                            file="${project.build.directory}/staging/ibeacon.scanner/ibeacon.scanner.classpath"
+                                        <move file="${project.build.directory}/staging/ibeacon.scanner/ibeacon.scanner.classpath"
                                             tofile="${project.build.directory}/staging/ibeacon.scanner/.classpath" />
 
                                         <!-- Stage the org.eclipse.kura.example.eddystone.advertiser Project -->
                                         <copy todir="${project.build.directory}/staging/eddystone.advertiser">
-                                            <fileset
-                                                dir="../examples/org.eclipse.kura.example.eddystone.advertiser" />
+                                            <fileset dir="../examples/org.eclipse.kura.example.eddystone.advertiser" />
                                         </copy>
-                                        <delete
-                                            file="${project.build.directory}/staging/eddystone.advertiser/pom.xml" />
+                                        <delete file="${project.build.directory}/staging/eddystone.advertiser/pom.xml" />
                                         <delete dir="${project.build.directory}/staging/eddystone.advertiser/bin" />
-                                        <delete
-                                            dir="${project.build.directory}/staging/eddystone.advertiser/target" />
-                                        <copy
-                                            file="src/main/resources/common/classpaths/eddystone.advertiser.classpath"
-                                            tofile="${project.build.directory}/staging/eddystone.advertiser/eddystone.advertiser.classpath" />
-                                        <copy overwrite="true"
-                                            file="src/main/resources/common/projects/eddystone.advertiser.project"
+                                        <delete dir="${project.build.directory}/staging/eddystone.advertiser/target" />
+                                        <copy file="src/main/resources/common/classpaths/eddystone.advertiser.classpath" tofile="${project.build.directory}/staging/eddystone.advertiser/eddystone.advertiser.classpath" />
+                                        <copy overwrite="true" file="src/main/resources/common/projects/eddystone.advertiser.project"
                                             tofile="${project.build.directory}/staging/eddystone.advertiser/.project" />
-                                        <move
-                                            file="${project.build.directory}/staging/eddystone.advertiser/eddystone.advertiser.classpath"
+                                        <move file="${project.build.directory}/staging/eddystone.advertiser/eddystone.advertiser.classpath"
                                             tofile="${project.build.directory}/staging/eddystone.advertiser/.classpath" />
 
                                         <!-- Stage the org.eclipse.kura.example.eddystone.scanner Project -->
                                         <copy todir="${project.build.directory}/staging/eddystone.scanner">
-                                            <fileset
-                                                dir="../examples/org.eclipse.kura.example.eddystone.scanner" />
+                                            <fileset dir="../examples/org.eclipse.kura.example.eddystone.scanner" />
                                         </copy>
-                                        <delete
-                                            file="${project.build.directory}/staging/eddystone.scanner/pom.xml" />
+                                        <delete file="${project.build.directory}/staging/eddystone.scanner/pom.xml" />
                                         <delete dir="${project.build.directory}/staging/eddystone.scanner/bin" />
                                         <delete dir="${project.build.directory}/staging/eddystone.scanner/target" />
-                                        <copy
-                                            file="src/main/resources/common/classpaths/eddystone.scanner.classpath"
-                                            tofile="${project.build.directory}/staging/eddystone.scanner/eddystone.scanner.classpath" />
-                                        <copy overwrite="true"
-                                            file="src/main/resources/common/projects/eddystone.scanner.project"
+                                        <copy file="src/main/resources/common/classpaths/eddystone.scanner.classpath" tofile="${project.build.directory}/staging/eddystone.scanner/eddystone.scanner.classpath" />
+                                        <copy overwrite="true" file="src/main/resources/common/projects/eddystone.scanner.project"
                                             tofile="${project.build.directory}/staging/eddystone.scanner/.project" />
-                                        <move
-                                            file="${project.build.directory}/staging/eddystone.scanner/eddystone.scanner.classpath"
+                                        <move file="${project.build.directory}/staging/eddystone.scanner/eddystone.scanner.classpath"
                                             tofile="${project.build.directory}/staging/eddystone.scanner/.classpath" />
 
-										<!-- Stage the org.eclipse.kura.example.ble.tisensortag Project -->
+                                        <!-- Stage the org.eclipse.kura.example.ble.tisensortag Project -->
                                         <copy todir="${project.build.directory}/staging/tisensortag">
                                             <fileset dir="../examples/org.eclipse.kura.example.ble.tisensortag" />
                                         </copy>
@@ -2194,33 +2181,26 @@
                                         <delete dir="${project.build.directory}/staging/tisensortag/target" />
                                         <copy file="src/main/resources/common/classpaths/tisensortag.classpath"
                                             tofile="${project.build.directory}/staging/tisensortag/tisensortag.classpath" />
-                                        <copy overwrite="true"
-                                            file="src/main/resources/common/projects/tisensortag.project"
+                                        <copy overwrite="true" file="src/main/resources/common/projects/tisensortag.project"
                                             tofile="${project.build.directory}/staging/tisensortag/.project" />
-                                        <move
-                                            file="${project.build.directory}/staging/tisensortag/tisensortag.classpath"
+                                        <move file="${project.build.directory}/staging/tisensortag/tisensortag.classpath"
                                             tofile="${project.build.directory}/staging/tisensortag/.classpath" />
 
                                         <!-- Stage the org.eclipse.kura.example.ble.tisensortag.tinyb Project -->
                                         <copy todir="${project.build.directory}/staging/tisensortag.tinyb">
-                                            <fileset
-                                                dir="../examples/org.eclipse.kura.example.ble.tisensortag.tinyb" />
+                                            <fileset dir="../examples/org.eclipse.kura.example.ble.tisensortag.tinyb" />
                                         </copy>
-                                        <delete
-                                            file="${project.build.directory}/staging/tisensortag.tinyb/pom.xml" />
+                                        <delete file="${project.build.directory}/staging/tisensortag.tinyb/pom.xml" />
                                         <delete dir="${project.build.directory}/staging/tisensortag.tinyb/bin" />
                                         <delete dir="${project.build.directory}/staging/tisensortag.tinyb/target" />
-                                        <copy
-                                            file="src/main/resources/common/classpaths/tisensortag.tinyb.classpath"
+                                        <copy file="src/main/resources/common/classpaths/tisensortag.tinyb.classpath"
                                             tofile="${project.build.directory}/staging/tisensortag.tinyb/tisensortag.tinyb.classpath" />
-                                        <copy overwrite="true"
-                                            file="src/main/resources/common/projects/tisensortag.tinyb.project"
+                                        <copy overwrite="true" file="src/main/resources/common/projects/tisensortag.tinyb.project"
                                             tofile="${project.build.directory}/staging/tisensortag.tinyb/.project" />
-                                        <move
-                                            file="${project.build.directory}/staging/tisensortag.tinyb/tisensortag.tinyb.classpath"
+                                        <move file="${project.build.directory}/staging/tisensortag.tinyb/tisensortag.tinyb.classpath"
                                             tofile="${project.build.directory}/staging/tisensortag.tinyb/.classpath" />
 
-										<!-- Stage the org.eclipse.kura.example.publisher Project -->
+                                        <!-- Stage the org.eclipse.kura.example.publisher Project -->
                                         <copy todir="${project.build.directory}/staging/publisher">
                                             <fileset dir="../examples/org.eclipse.kura.example.publisher" />
                                         </copy>
@@ -2229,27 +2209,22 @@
                                         <delete dir="${project.build.directory}/staging/publisher/target" />
                                         <copy file="src/main/resources/common/classpaths/publisher.classpath"
                                             tofile="${project.build.directory}/staging/publisher/publisher.classpath" />
-                                        <copy overwrite="true"
-                                            file="src/main/resources/common/projects/publisher.project"
+                                        <copy overwrite="true" file="src/main/resources/common/projects/publisher.project"
                                             tofile="${project.build.directory}/staging/publisher/.project" />
-                                        <move
-                                            file="${project.build.directory}/staging/publisher/publisher.classpath"
+                                        <move file="${project.build.directory}/staging/publisher/publisher.classpath"
                                             tofile="${project.build.directory}/staging/publisher/.classpath" />
 
                                         <!-- Stage the org.eclipse.kura.example.camel.quickstart Project -->
                                         <copy todir="${project.build.directory}/staging/camel_quickstart">
                                             <fileset dir="../examples/org.eclipse.kura.example.camel.quickstart" />
                                         </copy>
-                                        <delete
-                                            file="${project.build.directory}/staging/camel_quickstart/pom.xml" />
+                                        <delete file="${project.build.directory}/staging/camel_quickstart/pom.xml" />
                                         <delete dir="${project.build.directory}/staging/camel_quickstart/bin" />
                                         <delete dir="${project.build.directory}/staging/camel_quickstart/target" />
-                                        <copy
-                                            file="src/main/resources/common/classpaths/camel_quickstart.classpath"
+                                        <copy file="src/main/resources/common/classpaths/camel_quickstart.classpath"
                                             tofile="${project.build.directory}/staging/camel_quickstart/camel_quickstart.classpath" />
                                         <copy overwrite="true"
-                                            file="src/main/resources/common/projects/camel_quickstart.project"
-                                            tofile="${project.build.directory}/staging/camel_quickstart/.project" />
+                                            file="src/main/resources/common/projects/camel_quickstart.project" tofile="${project.build.directory}/staging/camel_quickstart/.project" />
                                         <move
                                             file="${project.build.directory}/staging/camel_quickstart/camel_quickstart.classpath"
                                             tofile="${project.build.directory}/staging/camel_quickstart/.classpath" />
@@ -2264,35 +2239,29 @@
                                         <copy file="src/main/resources/common/classpaths/camel_publisher.classpath"
                                             tofile="${project.build.directory}/staging/camel_publisher/camel_publisher.classpath" />
                                         <copy overwrite="true"
-                                            file="src/main/resources/common/projects/camel_publisher.project"
-                                            tofile="${project.build.directory}/staging/camel_publisher/.project" />
+                                            file="src/main/resources/common/projects/camel_publisher.project" tofile="${project.build.directory}/staging/camel_publisher/.project" />
                                         <move
                                             file="${project.build.directory}/staging/camel_publisher/camel_publisher.classpath"
                                             tofile="${project.build.directory}/staging/camel_publisher/.classpath" />
 
                                         <!-- Stage the org.eclipse.kura.example.camel.aggregation Project -->
                                         <copy todir="${project.build.directory}/staging/camel_aggregation">
-                                            <fileset
-                                                dir="../examples/org.eclipse.kura.example.camel.aggregation" />
+                                            <fileset dir="../examples/org.eclipse.kura.example.camel.aggregation" />
                                         </copy>
-                                        <delete
-                                            file="${project.build.directory}/staging/camel_aggregation/pom.xml" />
+                                        <delete file="${project.build.directory}/staging/camel_aggregation/pom.xml" />
                                         <delete dir="${project.build.directory}/staging/camel_aggregation/bin" />
                                         <delete dir="${project.build.directory}/staging/camel_aggregation/target" />
-                                        <copy
-                                            file="src/main/resources/common/classpaths/camel_aggregation.classpath"
+                                        <copy file="src/main/resources/common/classpaths/camel_aggregation.classpath"
                                             tofile="${project.build.directory}/staging/camel_aggregation/camel_aggregation.classpath" />
                                         <copy overwrite="true"
-                                            file="src/main/resources/common/projects/camel_aggregation.project"
-                                            tofile="${project.build.directory}/staging/camel_aggregation/.project" />
+                                            file="src/main/resources/common/projects/camel_aggregation.project" tofile="${project.build.directory}/staging/camel_aggregation/.project" />
                                         <move
                                             file="${project.build.directory}/staging/camel_aggregation/camel_aggregation.classpath"
                                             tofile="${project.build.directory}/staging/camel_aggregation/.classpath" />
 
-										<!-- Create the archive file with the components -->
+                                        <!-- Create the archive file with the components -->
                                         <zip destfile="${project.build.directory}/${zip_workspace.prefix}.zip">
-                                            <zipfileset
-                                                dir="${project.build.directory}/staging/target-definition/"
+                                            <zipfileset dir="${project.build.directory}/staging/target-definition/"
                                                 prefix="target-definition/" />
                                             <zipfileset dir="${project.build.directory}/staging/emulator/"
                                                 prefix="org.eclipse.kura.emulator/" />
@@ -2300,36 +2269,27 @@
                                                 prefix="org.eclipse.kura.demo.heater/" />
                                             <zipfileset dir="${project.build.directory}/staging/beacon/"
                                                 prefix="org.eclipse.kura.example.beacon/" />
-                                            <zipfileset
-                                                dir="${project.build.directory}/staging/beacon.scanner/"
+                                            <zipfileset dir="${project.build.directory}/staging/beacon.scanner/"
                                                 prefix="org.eclipse.kura.example.beacon.scanner/" />
-                                            <zipfileset
-                                                dir="${project.build.directory}/staging/ibeacon.advertiser/"
+                                            <zipfileset dir="${project.build.directory}/staging/ibeacon.advertiser/"
                                                 prefix="org.eclipse.kura.example.ibeacon.advertiser/" />
-                                            <zipfileset
-                                                dir="${project.build.directory}/staging/ibeacon.scanner/"
+                                            <zipfileset dir="${project.build.directory}/staging/ibeacon.scanner/"
                                                 prefix="org.eclipse.kura.example.ibeacon.scanner/" />
-                                            <zipfileset
-                                                dir="${project.build.directory}/staging/eddystone.advertiser/"
+                                            <zipfileset dir="${project.build.directory}/staging/eddystone.advertiser/"
                                                 prefix="org.eclipse.kura.example.eddystone.advertiser/" />
-                                            <zipfileset
-                                                dir="${project.build.directory}/staging/eddystone.scanner/"
+                                            <zipfileset dir="${project.build.directory}/staging/eddystone.scanner/"
                                                 prefix="org.eclipse.kura.example.eddystone.scanner/" />
                                             <zipfileset dir="${project.build.directory}/staging/tisensortag/"
                                                 prefix="org.eclipse.kura.example.ble.tisensortag/" />
-                                            <zipfileset
-                                                dir="${project.build.directory}/staging/tisensortag.tinyb/"
+                                            <zipfileset dir="${project.build.directory}/staging/tisensortag.tinyb/"
                                                 prefix="org.eclipse.kura.example.ble.tisensortag.tinyb/" />
                                             <zipfileset dir="${project.build.directory}/staging/publisher/"
                                                 prefix="org.eclipse.kura.example.publisher/" />
-                                            <zipfileset
-                                                dir="${project.build.directory}/staging/camel_quickstart/"
+                                            <zipfileset dir="${project.build.directory}/staging/camel_quickstart/"
                                                 prefix="org.eclipse.kura.example.camel.quickstart/" />
-                                            <zipfileset
-                                                dir="${project.build.directory}/staging/camel_publisher/"
+                                            <zipfileset dir="${project.build.directory}/staging/camel_publisher/"
                                                 prefix="org.eclipse.kura.example.camel.publisher/" />
-                                            <zipfileset
-                                                dir="${project.build.directory}/staging/camel_aggregation/"
+                                            <zipfileset dir="${project.build.directory}/staging/camel_aggregation/"
                                                 prefix="org.eclipse.kura.example.camel.aggregation/" />
                                         </zip>
                                     </target>
@@ -2344,16 +2304,14 @@
                                 <configuration>
                                     <target unless="${org.eclipse.kura.dio.include}">
                                         <zip destfile="${project.build.directory}/tmp_ws.zip">
-                                            <zipfileset
-                                                src="${project.build.directory}/${zip_workspace.prefix}.zip">
+                                            <zipfileset src="${project.build.directory}/${zip_workspace.prefix}.zip">
                                                 <exclude
                                                     name="target-definition/common/repository/plugins/jdk.dio_${jdk.dio.version}.jar" />
                                                 <exclude
                                                     name="target-definition/common/repository/plugins/jdk.dio.*_${jdk.dio.version}.jar" />
                                             </zipfileset>
                                         </zip>
-                                        <move file="${project.build.directory}/tmp_ws.zip"
-                                            tofile="${project.build.directory}/${zip_workspace.prefix}.zip" />
+                                        <move file="${project.build.directory}/tmp_ws.zip" tofile="${project.build.directory}/${zip_workspace.prefix}.zip" />
                                     </target>
                                 </configuration>
                             </execution>
@@ -2363,115 +2321,115 @@
             </build>
         </profile>
         <profile>
-            <id>core-dp</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-dependency-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>core-dp</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>copy</goal>
-                                </goals>
-                                <configuration>
-                                    <artifactItems>
-                                        <artifactItem>
-                                            <groupId>org.eclipse.kura</groupId>
-                                            <artifactId>org.eclipse.kura.protocol.modbus</artifactId>
-                                            <version>${org.eclipse.kura.protocol.modbus.version}</version>
-                                            <type>dp</type>
-                                        </artifactItem>
-                                        <artifactItem>
-                                            <groupId>org.eclipse.kura.feature</groupId>
-                                            <artifactId>org.eclipse.kura.driver.opcua</artifactId>
-                                            <version>${org.eclipse.kura.driver.opcua.version}</version>
-                                            <type>dp</type>
-                                        </artifactItem>
-                                        <artifactItem>
-                                            <groupId>org.eclipse.kura.feature</groupId>
-                                            <artifactId>org.eclipse.kura.driver.s7plc</artifactId>
-                                            <version>${org.eclipse.kura.driver.s7plc.version}</version>
-                                            <type>dp</type>
-                                        </artifactItem>
-                                        <artifactItem>
-                                            <groupId>org.eclipse.kura.feature</groupId>
-                                            <artifactId>org.eclipse.kura.driver.ble.sensortag</artifactId>
-                                            <version>${org.eclipse.kura.driver.ble.sensortag.version}</version>
-                                            <type>dp</type>
-                                        </artifactItem>
-                                        <artifactItem>
-                                            <groupId>org.eclipse.kura.feature</groupId>
-                                            <artifactId>org.eclipse.kura.driver.eddystone</artifactId>
-                                            <version>${org.eclipse.kura.driver.eddystone.version}</version>
-                                            <type>dp</type>
-                                        </artifactItem>
-                                        <artifactItem>
-                                            <groupId>org.eclipse.kura.feature</groupId>
-                                            <artifactId>org.eclipse.kura.driver.ibeacon</artifactId>
-                                            <version>${org.eclipse.kura.driver.ibeacon.version}</version>
-                                            <type>dp</type>
-                                        </artifactItem>
-                                        <artifactItem>
-                                            <groupId>org.eclipse.kura.feature</groupId>
-                                            <artifactId>org.eclipse.kura.wire.script.filter</artifactId>
-                                            <version>${org.eclipse.kura.wire.script.filter.version}</version>
-                                            <type>dp</type>
-                                        </artifactItem>
-                                        <artifactItem>
-                                            <groupId>org.eclipse.kura.feature</groupId>
-                                            <artifactId>org.eclipse.kura.driver.gpio</artifactId>
-                                            <version>${org.eclipse.kura.driver.gpio.version}</version>
-                                            <type>dp</type>
-                                        </artifactItem>
-                                    </artifactItems>
-                                    <outputDirectory>${project.build.directory}</outputDirectory>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
+          <id>core-dp</id>
+          <activation>
+            <activeByDefault>true</activeByDefault>
+          </activation>
+          <build>
+            <plugins>
+              <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                  <execution>
+                      <id>core-dp</id>
+                      <phase>package</phase>
+                      <goals>
+                          <goal>copy</goal>
+                      </goals>
+                      <configuration>
+                        <artifactItems>
+                          <artifactItem>
+                            <groupId>org.eclipse.kura</groupId>
+                            <artifactId>org.eclipse.kura.protocol.modbus</artifactId>
+                            <version>${org.eclipse.kura.protocol.modbus.version}</version>
+                            <type>dp</type>
+                          </artifactItem>
+                          <artifactItem>
+                            <groupId>org.eclipse.kura.feature</groupId>
+                            <artifactId>org.eclipse.kura.driver.opcua</artifactId>
+                            <version>${org.eclipse.kura.driver.opcua.version}</version>
+                            <type>dp</type>
+                          </artifactItem>
+                          <artifactItem>
+                            <groupId>org.eclipse.kura.feature</groupId>
+                            <artifactId>org.eclipse.kura.driver.s7plc</artifactId>
+                            <version>${org.eclipse.kura.driver.s7plc.version}</version>
+                            <type>dp</type>
+                          </artifactItem>
+                          <artifactItem>
+                            <groupId>org.eclipse.kura.feature</groupId>
+                            <artifactId>org.eclipse.kura.driver.ble.sensortag</artifactId>
+                            <version>${org.eclipse.kura.driver.ble.sensortag.version}</version>
+                            <type>dp</type>
+                          </artifactItem>
+                          <artifactItem>
+                            <groupId>org.eclipse.kura.feature</groupId>
+                            <artifactId>org.eclipse.kura.driver.eddystone</artifactId>
+                            <version>${org.eclipse.kura.driver.eddystone.version}</version>
+                            <type>dp</type>
+                          </artifactItem>
+                          <artifactItem>
+                            <groupId>org.eclipse.kura.feature</groupId>
+                            <artifactId>org.eclipse.kura.driver.ibeacon</artifactId>
+                            <version>${org.eclipse.kura.driver.ibeacon.version}</version>
+                            <type>dp</type>
+                          </artifactItem>
+                          <artifactItem>
+                            <groupId>org.eclipse.kura.feature</groupId>
+                            <artifactId>org.eclipse.kura.wire.script.filter</artifactId>
+                            <version>${org.eclipse.kura.wire.script.filter.version}</version>
+                            <type>dp</type>
+                          </artifactItem>
+                          <artifactItem>
+                            <groupId>org.eclipse.kura.feature</groupId>
+                            <artifactId>org.eclipse.kura.driver.gpio</artifactId>
+                            <version>${org.eclipse.kura.driver.gpio.version}</version>
+                            <type>dp</type>
+                          </artifactItem>
+                        </artifactItems>
+                        <outputDirectory>${project.build.directory}</outputDirectory>
+                      </configuration>
+                  </execution>
+                </executions>
+              </plugin>
+            </plugins>
+          </build>
         </profile>
         <profile>
-            <id>can-dp</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-dependency-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>can-dp</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>copy</goal>
-                                </goals>
-                                <configuration>
-                                    <skip>${kura.skip.can}</skip>
-                                    <artifactItems>
-                                        <artifactItem>
-                                            <groupId>org.eclipse.kura</groupId>
-                                            <artifactId>org.eclipse.kura.protocol.can</artifactId>
-                                            <version>${org.eclipse.kura.protocol.can.version}</version>
-                                            <type>dp</type>
-                                        </artifactItem>
-                                    </artifactItems>
-                                    <outputDirectory>${project.build.directory}</outputDirectory>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
+          <id>can-dp</id>
+          <activation>
+            <activeByDefault>true</activeByDefault>
+          </activation>
+          <build>
+            <plugins>
+              <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>can-dp</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                          <skip>${kura.skip.can}</skip>
+                          <artifactItems>
+                            <artifactItem>
+                              <groupId>org.eclipse.kura</groupId>
+                              <artifactId>org.eclipse.kura.protocol.can</artifactId>
+                              <version>${org.eclipse.kura.protocol.can.version}</version>
+                              <type>dp</type>
+                            </artifactItem>
+                          </artifactItems>
+                          <outputDirectory>${project.build.directory}</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+              </plugin>
+            </plugins>
+          </build>
         </profile>
     </profiles>
 </project>

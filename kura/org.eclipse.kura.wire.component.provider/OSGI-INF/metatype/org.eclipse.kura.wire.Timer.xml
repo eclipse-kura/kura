@@ -22,7 +22,14 @@
             <Option label="SIMPLE" value="SIMPLE" />
             <Option label="CRON" value="CRON" />
         </AD>
-        
+        <AD id="threadCount"
+            name="threadCount"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="2"
+            description="Timer thread count"
+            min="1"/>
         <AD id="simple.interval"
             name="simple.interval"
             type="Integer"

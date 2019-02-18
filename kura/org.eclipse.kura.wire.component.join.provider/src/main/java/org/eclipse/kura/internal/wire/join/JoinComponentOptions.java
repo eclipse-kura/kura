@@ -20,6 +20,7 @@ import org.eclipse.kura.wire.graph.BarrierAggregatorFactory;
 import org.eclipse.kura.wire.graph.CachingAggregatorFactory;
 import org.eclipse.kura.wire.graph.PortAggregatorFactory;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 
 public class JoinComponentOptions {
 
@@ -29,6 +30,7 @@ public class JoinComponentOptions {
 
     private final Map<String, Object> properties;
     private final BundleContext context;
+    private ServiceReference<?> serviceReference;
 
     JoinComponentOptions(final Map<String, Object> properties, BundleContext context) {
         requireNonNull(properties, "Properties must be not null");
@@ -36,14 +38,22 @@ public class JoinComponentOptions {
         this.context = context;
     }
 
-    PortAggregatorFactory getPortAggregatorFactory() { // TODO fix service reference count
+    PortAggregatorFactory getPortAggregatorFactory() {
         final boolean useBarrier = (Boolean) this.properties.getOrDefault(BARRIER_MODALITY_PROPERTY_KEY,
                 BARRIER_MODALITY_PROPERTY_DEFAULT);
         if (useBarrier) {
-            return this.context.getService(this.context.getServiceReference(BarrierAggregatorFactory.class));
+            serviceReference = this.context.getServiceReference(BarrierAggregatorFactory.class);
+            return (PortAggregatorFactory) this.context.getService(serviceReference);
         } else {
-            return this.context.getService(this.context.getServiceReference(CachingAggregatorFactory.class));
+            serviceReference = this.context.getServiceReference(CachingAggregatorFactory.class);
+            return (PortAggregatorFactory) this.context.getService(serviceReference);
         }
+    }
+
+    public void dispose() {
+        if (serviceReference != null)
+            this.context.ungetService(serviceReference);
+        serviceReference = null;
     }
 
 }

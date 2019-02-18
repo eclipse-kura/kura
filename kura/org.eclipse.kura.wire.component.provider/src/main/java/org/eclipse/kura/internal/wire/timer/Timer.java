@@ -18,6 +18,7 @@ import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.logging.log4j.LogManager;
@@ -65,14 +66,13 @@ public class Timer implements WireEmitter, ConfigurableComponent {
 
     private WireSupport wireSupport;
 
-    private static final AtomicInteger instanceCount = new AtomicInteger(0);
-    private static Scheduler scheduler = null;
+    private Scheduler scheduler = null;
 
     /**
      * Binds the Wire Helper Service.
      *
      * @param wireHelperService
-     *            the new Wire Helper Service
+     *                              the new Wire Helper Service
      */
     public void bindWireHelperService(final WireHelperService wireHelperService) {
         if (isNull(this.wireHelperService)) {
@@ -84,7 +84,7 @@ public class Timer implements WireEmitter, ConfigurableComponent {
      * Unbinds the Wire Helper Service.
      *
      * @param wireHelperService
-     *            the new Wire Helper Service
+     *                              the new Wire Helper Service
      */
     public void unbindWireHelperService(final WireHelperService wireHelperService) {
         if (this.wireHelperService == wireHelperService) {
@@ -96,13 +96,12 @@ public class Timer implements WireEmitter, ConfigurableComponent {
      * OSGi service component activation callback
      *
      * @param ctx
-     *            the component context
+     *                       the component context
      * @param properties
-     *            the configured properties
+     *                       the configured properties
      */
     protected void activate(final ComponentContext ctx, final Map<String, Object> properties) {
         logger.debug("Activating Timer...");
-        instanceCount.incrementAndGet();
         this.wireSupport = this.wireHelperService.newWireSupport(this,
                 (ServiceReference<WireComponent>) ctx.getServiceReference());
         this.timerOptions = new TimerOptions(properties);
@@ -118,7 +117,7 @@ public class Timer implements WireEmitter, ConfigurableComponent {
      * OSGi service component modification callback
      *
      * @param properties
-     *            the updated properties
+     *                       the updated properties
      */
     protected void updated(final Map<String, Object> properties) {
         logger.debug("Updating Timer...");
@@ -135,11 +134,17 @@ public class Timer implements WireEmitter, ConfigurableComponent {
      * OSGi service component deactivation callback
      *
      * @param ctx
-     *            the component context
+     *                the component context
      */
     protected void deactivate(final ComponentContext ctx) {
         logger.debug("Dectivating Timer...");
 
+        deleteJob();
+
+        logger.debug("Dectivating Timer... Done");
+    }
+
+    private void deleteJob() {
         try {
             if (nonNull(this.jobKey)) {
                 getScheduler().deleteJob(this.jobKey);
@@ -147,34 +152,37 @@ public class Timer implements WireEmitter, ConfigurableComponent {
         } catch (final SchedulerException e) {
             logger.error("Scheduler exception.", e);
         } finally {
-            if (instanceCount.decrementAndGet() == 0) {
-                shutdownScheduler();
-            }
+            shutdownScheduler();
         }
-
-        logger.debug("Dectivating Timer... Done");
     }
 
     protected Scheduler getScheduler() throws SchedulerException {
-        synchronized (instanceCount) {
-            if (scheduler == null) {
-                scheduler = new StdSchedulerFactory().getScheduler();
-                scheduler.start();
-            }
+        if (scheduler == null) {
+            Properties props = new Properties();
+            props.put("org.quartz.scheduler.instanceName", "Wires_Timer_" + this.jobKey);
+            props.put("org.quartz.scheduler.rmi.export", "false");
+            props.put("org.quartz.scheduler.rmi.proxy", "false");
+            props.put("org.quartz.scheduler.wrapJobExecutionInUserTransaction", "false");
+            props.put("org.quartz.jobStore.misfireThreshold", "6000");
+            props.put("org.quartz.jobStore.class", "org.quartz.simpl.RAMJobStore");
+            props.put("org.quartz.threadPool.threadCount", String.valueOf(this.timerOptions.getThreadCount()));
+            props.put("org.quartz.threadPool.class", "org.quartz.simpl.SimpleThreadPool");
+            props.put("org.quartz.threadPool.threadPriority", "5");
+            props.put("org.quartz.threadPool.threadsInheritContextClassLoaderOfInitializingThread", "true");
+            scheduler = new StdSchedulerFactory(props).getScheduler();
+            scheduler.start();
         }
         return scheduler;
     }
 
-    private static void shutdownScheduler() {
-        synchronized (instanceCount) {
-            if (scheduler != null) {
-                try {
-                    scheduler.shutdown();
-                } catch (SchedulerException e) {
-                    logger.warn("Scheduler exception.", e);
-                }
-                scheduler = null;
+    private void shutdownScheduler() {
+        if (scheduler != null) {
+            try {
+                scheduler.shutdown();
+            } catch (SchedulerException e) {
+                logger.warn("Scheduler exception.", e);
             }
+            scheduler = null;
         }
     }
 
@@ -183,9 +191,10 @@ public class Timer implements WireEmitter, ConfigurableComponent {
      * interval
      *
      * @throws SchedulerException
-     *             if job scheduling fails
+     *                                if job scheduling fails
      */
     private void doUpdate() throws SchedulerException {
+        deleteJob();
         if ("SIMPLE".equalsIgnoreCase(this.timerOptions.getType())) {
             scheduleSimpleInterval(
                     this.timerOptions.getSimpleInterval() * this.timerOptions.getSimpleTimeUnitMultiplier());
@@ -199,23 +208,23 @@ public class Timer implements WireEmitter, ConfigurableComponent {
      * Creates a trigger based on the provided interval
      *
      * @param interval
-     *            the interval in milliseconds
+     *                     the interval in milliseconds
      * @throws SchedulerException
-     *             if scheduling fails
+     *                                      if scheduling fails
      * @throws IllegalArgumentException
-     *             if the interval is less than or equal to zero
+     *                                      if the interval is less than or equal to zero
      */
     private void scheduleSimpleInterval(final long interval) throws SchedulerException {
         if (interval <= 0) {
             throw new IllegalArgumentException("Interval cannot be less than or equal to zero");
         }
-        final Scheduler scheduler = getScheduler();
 
         final int id = nextJobId.incrementAndGet();
-        if (nonNull(this.jobKey)) {
+        if (nonNull(this.jobKey) && nonNull(scheduler)) {
             scheduler.deleteJob(this.jobKey);
         }
         this.jobKey = new JobKey("emitJob" + id, GROUP_ID);
+        scheduler = getScheduler();
         final Trigger trigger = TriggerBuilder.newTrigger().withIdentity("emitTrigger" + id, GROUP_ID)
                 .withSchedule(
                         SimpleScheduleBuilder.simpleSchedule().withIntervalInMilliseconds(interval).repeatForever())
@@ -232,21 +241,21 @@ public class Timer implements WireEmitter, ConfigurableComponent {
      * Creates a cron trigger based on the provided interval
      *
      * @param expression
-     *            the CRON expression
+     *                       the CRON expression
      * @throws SchedulerException
-     *             if scheduling fails
+     *                                  if scheduling fails
      * @throws NullPointerException
-     *             if the argument is null
+     *                                  if the argument is null
      */
     private void scheduleCronInterval(final String expression) throws SchedulerException {
         requireNonNull(expression, "Cron Expression cannot be null");
-        final Scheduler scheduler = getScheduler();
 
         final int id = nextJobId.incrementAndGet();
-        if (nonNull(this.jobKey)) {
+        if (nonNull(this.jobKey) && nonNull(scheduler)) {
             scheduler.deleteJob(this.jobKey);
         }
         this.jobKey = new JobKey("emitJob" + id, GROUP_ID);
+        scheduler = getScheduler();
         final Trigger trigger = TriggerBuilder.newTrigger().withIdentity("emitTrigger" + id, GROUP_ID)
                 .withSchedule(CronScheduleBuilder.cronSchedule(expression)).build();
 

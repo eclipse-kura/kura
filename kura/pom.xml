@@ -50,7 +50,6 @@
         <module>org.eclipse.kura.hook.file.move.provider</module>
         <module>org.eclipse.kura.driver.helper.provider</module>
         <module>org.eclipse.kura.driver.opcua.provider</module>
-        <module>org.eclipse.kura.driver.block</module>
         <module>org.eclipse.kura.driver.s7plc.provider</module>
         <module>org.eclipse.kura.driver.ble.sensortag.provider</module>
         <module>org.eclipse.kura.driver.ibeacon.provider</module>

@@ -271,6 +271,7 @@ if [ -z "$KURA_RUNNING" ] ; then
         -Djdk.dio.registry=${DIR}/framework/jdk.dio.properties \
         -Djdk.tls.trustNameService=true \
         -Dosgi.console \
+		-Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.Log4j2LogDelegateFactory \
         -Declipse.consoleLog=true \
         -jar ${DIR}/plugins/org.eclipse.equinox.launcher_${org.eclipse.equinox.launcher.version}.jar \
         -configuration  /tmp/.kura/configuration
@@ -314,6 +315,7 @@ if [ -z "$KURA_RUNNING" ] ; then
         -Djdk.dio.registry=${DIR}/framework/jdk.dio.properties \
         -Djdk.tls.trustNameService=true \
         -Dosgi.console \
+		-Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.Log4j2LogDelegateFactory \
         -Declipse.consoleLog=true \
         -jar ${DIR}/plugins/org.eclipse.equinox.launcher_${org.eclipse.equinox.launcher.version}.jar \
         -configuration  /tmp/.kura/configuration
@@ -355,6 +357,7 @@ if [ -z "$KURA_RUNNING" ] ; then
         -Djdk.dio.registry=${DIR}/framework/jdk.dio.properties \
         -Djdk.tls.trustNameService=true \
         -Dosgi.console=5002 \
+		-Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.Log4j2LogDelegateFactory \
         -Declipse.consoleLog=true >> /var/log/kura-console.log 2>> /var/log/kura-console.log \
         -jar ${DIR}/plugins/org.eclipse.equinox.launcher_${org.eclipse.equinox.launcher.version}.jar \
         -configuration /tmp/.kura/configuration &

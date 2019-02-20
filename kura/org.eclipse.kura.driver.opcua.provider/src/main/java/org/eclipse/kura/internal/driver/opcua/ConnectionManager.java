@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2019 Eurotech and/or its affiliates and others
  *
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
@@ -56,21 +56,28 @@ public class ConnectionManager {
     private final BiConsumer<ConnectionManager, Throwable> failureHandler;
     private final AsyncTaskQueue queue;
 
-    private SubscriptionManager subscriptionManager;
-    private OpcUaOptions options;
+    private final SubscriptionManager subscriptionManager;
+    private final SubtreeSubscriptionManager subtreeSubscriptionManager;
+    private final OpcUaOptions options;
 
     public ConnectionManager(final OpcUaClient client, final OpcUaOptions options,
-            final BiConsumer<ConnectionManager, Throwable> failureHandler, final ListenerRegistrations registrations) {
+            final BiConsumer<ConnectionManager, Throwable> failureHandler,
+            final ListenerRegistrationRegistry registrations,
+            final ListenerRegistrationRegistry subtreeListenerRegistrations) {
         this.options = options;
         this.client = client;
         this.queue = new AsyncTaskQueue();
         this.failureHandler = failureHandler;
         this.queue.onFailure(ex -> failureHandler.accept(this, ex));
         this.subscriptionManager = new SubscriptionManager(options, client, queue, registrations);
+        this.subtreeSubscriptionManager = new SubtreeSubscriptionManager(options, client, queue,
+                subtreeListenerRegistrations);
     }
 
     public static CompletableFuture<ConnectionManager> connect(final OpcUaOptions options,
-            final BiConsumer<ConnectionManager, Throwable> failureHandler, final ListenerRegistrations registrations) {
+            final BiConsumer<ConnectionManager, Throwable> failureHandler,
+            final ListenerRegistrationRegistry registrations,
+            final ListenerRegistrationRegistry subtreeListenerRegistrations) {
 
         logger.info("Connecting to OPC-UA...");
 
@@ -79,9 +86,15 @@ public class ConnectionManager {
         logger.debug("Fetching endpoint list for: {}", endpointString);
 
         return UaTcpStackClient.getEndpoints(endpointString)
-                .thenCompose(endpoints -> tryConnectToEndpoints(options, endpoints)).thenApply(client -> {
-                    logger.info("Connecting to OPC-UA...Done");
-                    return new ConnectionManager((OpcUaClient) client, options, failureHandler, registrations);
+                .thenCompose(endpoints -> tryConnectToEndpoints(options, endpoints)) //
+                .thenApply(client -> new ConnectionManager((OpcUaClient) client, options, failureHandler, registrations,
+                        subtreeListenerRegistrations)) //
+                .whenComplete((ok, err) -> {
+                    if (err != null) {
+                        logger.warn("Connecting to OPC-UA...failed", err);
+                    } else {
+                        logger.info("Connectiong to OPC-UA...done");
+                    }
                 });
     }
 
@@ -150,14 +163,17 @@ public class ConnectionManager {
     public synchronized void close() {
 
         logger.info("Disconnecting from OPC-UA...");
-        queue.close(() -> subscriptionManager.close().thenCompose(ok -> client.disconnect()).handle((ok, err) -> {
-            if (err == null) {
-                logger.info("Disconnecting from OPC-UA...Done");
-            } else {
-                logger.info("Unable to Disconnect...");
-            }
-            return (Void) null;
-        }));
+
+        queue.close(() -> CompletableFuture.allOf(subscriptionManager.close(), subtreeSubscriptionManager.close()) //
+                .whenComplete((ok, ex) -> client.disconnect() //
+                        .handle((o, e) -> {
+                            if (e == null) {
+                                logger.info("Disconnecting from OPC-UA...Done");
+                            } else {
+                                logger.warn("Failed to close client", e);
+                            }
+                            return (Void) null;
+                        })));
     }
 
     private static String getEndpointString(final OpcUaOptions options) {
@@ -217,10 +233,9 @@ public class ConnectionManager {
             logger.debug("Failed to load certificates", e);
         }
 
-        final ConnectionHelper helper = new ConnectionHelper(options, certificateManager, endpoints);
-        helper.tryNextEndpoint();
+        final ConnectionAttempt connection = new ConnectionAttempt(options, certificateManager, endpoints);
 
-        return helper.future;
+        return connection.connect();
     }
 
     private static List<EndpointDescription> filterEndpoints(final OpcUaOptions options,
@@ -237,19 +252,24 @@ public class ConnectionManager {
                 original.getTransportProfileUri(), original.getSecurityLevel());
     }
 
-    private static final class ConnectionHelper {
+    private static final class ConnectionAttempt {
 
         private final Iterator<EndpointDescription> endpoints;
         private final CertificateManager certificateManager;
         private final CompletableFuture<UaClient> future;
         private final OpcUaOptions options;
 
-        public ConnectionHelper(final OpcUaOptions options, final CertificateManager certificateManager,
+        public ConnectionAttempt(final OpcUaOptions options, final CertificateManager certificateManager,
                 final List<EndpointDescription> endpoints) {
             this.certificateManager = certificateManager;
             this.endpoints = endpoints.iterator();
             this.options = options;
             this.future = new CompletableFuture<>();
+        }
+
+        public CompletableFuture<UaClient> connect() {
+            tryNextEndpoint();
+            return future;
         }
 
         private void tryNextEndpoint() {
@@ -269,6 +289,7 @@ public class ConnectionManager {
                     .setApplicationName(LocalizedText.english(options.getApplicationName()))
                     .setApplicationUri(options.getApplicationUri())
                     .setRequestTimeout(UInteger.valueOf(options.getRequestTimeout()))
+                    .setAcknowledgeTimeout(UInteger.valueOf(options.getAcknowledgeTimeout()))
                     .setSessionTimeout(UInteger.valueOf(options.getSessionTimeout()))
                     .setIdentityProvider(options.getIdentityProvider())
                     .setKeyPair(certificateManager.getClientKeyPair())
@@ -276,20 +297,21 @@ public class ConnectionManager {
 
             final OpcUaClient cl = new OpcUaClient(clientConfigBuilder.build());
 
-            cl.connect().whenComplete((c, err) -> {
-                if (err != null) {
-                    logger.warn("failed to connect to endpoint", err);
-                    tryNextEndpoint();
-                    return;
-                }
+            cl.connect() //
+                    .whenComplete((c, err) -> {
+                        if (err != null) {
+                            logger.warn("failed to connect to endpoint", err);
+                            tryNextEndpoint();
+                            return;
+                        }
 
-                if (!endpoints.hasNext() && !options.shouldForceEndpointUrl()) {
-                    logger.info(
-                            "Connection has been established by forcing endpoint URL from configuration, setting \"Force endpoint URL\" to true in driver configuration might reduce connection time for this server.");
-                }
+                        if (!endpoints.hasNext() && !options.shouldForceEndpointUrl()) {
+                            logger.info("Connection has been established by forcing endpoint URL from configuration, "
+                                    + "setting \"Force endpoint URL\" to true in driver configuration might reduce connection time for this server.");
+                        }
 
-                future.complete(c);
-            });
+                        future.complete(c);
+                    });
         }
 
     }

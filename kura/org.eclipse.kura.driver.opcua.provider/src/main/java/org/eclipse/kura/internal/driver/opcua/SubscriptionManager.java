@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2019 Eurotech and/or its affiliates and others
  *
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
@@ -19,13 +19,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import org.eclipse.kura.internal.driver.opcua.ListenerRegistrations.Dispatcher;
+import org.eclipse.kura.channel.listener.ChannelListener;
+import org.eclipse.kura.internal.driver.opcua.ListenerRegistrationRegistry.Dispatcher;
 import org.eclipse.kura.internal.driver.opcua.request.ListenParams;
+import org.eclipse.kura.internal.driver.opcua.request.ListenRequest;
 import org.eclipse.milo.opcua.sdk.client.OpcUaClient;
 import org.eclipse.milo.opcua.sdk.client.api.subscriptions.UaMonitoredItem;
 import org.eclipse.milo.opcua.sdk.client.api.subscriptions.UaSubscription;
@@ -37,6 +40,7 @@ import org.eclipse.milo.opcua.stack.core.Identifiers;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DateTime;
 import org.eclipse.milo.opcua.stack.core.types.builtin.ExtensionObject;
+import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.QualifiedName;
 import org.eclipse.milo.opcua.stack.core.types.builtin.StatusCode;
 import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
@@ -52,22 +56,22 @@ import org.eclipse.milo.opcua.stack.core.types.structured.SimpleAttributeOperand
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SubscriptionManager implements SubscriptionListener, ListenerRegistrations.Listener {
+public class SubscriptionManager implements SubscriptionListener, ListenerRegistrationRegistry.Listener {
 
     private static final Logger logger = LoggerFactory.getLogger(SubscriptionManager.class);
-
-    private static ExtensionObject defaultEventFilter = ExtensionObject
+    private static final ExtensionObject DEFAULT_EVENT_FILTER = ExtensionObject
             .encode(new EventFilter(new SimpleAttributeOperand[] {
                     new SimpleAttributeOperand(Identifiers.BaseEventType,
-                            new QualifiedName[] { new QualifiedName(0, BaseEventType.TIME.getBrowseName()) }, AttributeId.Value.uid(), null),
+                            new QualifiedName[] { new QualifiedName(0, BaseEventType.TIME.getBrowseName()) },
+                            AttributeId.Value.uid(), null),
                     new SimpleAttributeOperand(Identifiers.BaseEventType,
-                            new QualifiedName[] { new QualifiedName(0,BaseEventType.MESSAGE.getBrowseName()) }, AttributeId.Value.uid(),
-                            null) },
+                            new QualifiedName[] { new QualifiedName(0, BaseEventType.MESSAGE.getBrowseName()) },
+                            AttributeId.Value.uid(), null) },
                     new ContentFilter(null)));
 
     private final OpcUaClient client;
     private final OpcUaOptions options;
-    private ListenerRegistrations registrations;
+    private ListenerRegistrationRegistry registrations;
     private final AsyncTaskQueue queue;
 
     private long currentRegistrationState;
@@ -76,7 +80,7 @@ public class SubscriptionManager implements SubscriptionListener, ListenerRegist
     private State state;
 
     public SubscriptionManager(final OpcUaOptions options, final OpcUaClient client, final AsyncTaskQueue queue,
-            final ListenerRegistrations registrations) {
+            final ListenerRegistrationRegistry registrations) {
         this.queue = queue;
         this.options = options;
         this.client = client;
@@ -152,17 +156,18 @@ public class SubscriptionManager implements SubscriptionListener, ListenerRegist
         public CompletableFuture<Void> updateSubscriptionState() {
 
             synchronized (SubscriptionManager.this) {
-                logger.debug("Updating subscription state...");
+                logger.info("Updating subscription state...");
                 final long targetState = SubscriptionManager.this.targetRegistrationState;
 
                 if (currentRegistrationState == targetState) {
-                    logger.debug("Target state reached, nothing to do");
+                    logger.info("Target state reached, nothing to do");
                     return completedFuture(null);
                 }
 
                 final Consumer<Void> onCompletion = ok -> {
-                    logger.debug("Updating subscription state...done");
+                    logger.info("Updating subscription state...done");
                     synchronized (this) {
+                        logger.info("Monitoring {} items", monitoredItemHandlers.size());
                         currentRegistrationState = targetState;
                     }
                 };
@@ -171,11 +176,12 @@ public class SubscriptionManager implements SubscriptionListener, ListenerRegist
                 final List<MonitoredItemHandler> toBeDeleted = new ArrayList<>();
 
                 registrations.computeDifferences(monitoredItemHandlers.keySet(),
-                        item -> toBeCreated.add(new MonitoredItemHandler(item)),
+                        item -> toBeCreated.add(new MonitoredItemHandler(registrations.getDispatcher(item))),
                         item -> toBeDeleted.add(monitoredItemHandlers.get(item)));
 
                 if (toBeCreated.isEmpty() && toBeDeleted.size() == monitoredItemHandlers.size()) {
-                    return state.unsubscribe().thenAccept(onCompletion);
+                    return state.unsubscribe() //
+                            .thenAccept(onCompletion);
                 }
 
                 toBeDeleted.removeIf(handler -> {
@@ -215,36 +221,38 @@ public class SubscriptionManager implements SubscriptionListener, ListenerRegist
 
         protected CompletableFuture<Void> createMonitoredItems(final UaSubscription subscription,
                 final List<MonitoredItemCreateRequest> requests, final List<MonitoredItemHandler> handlers) {
-            return subscription.createMonitoredItems(TimestampsToReturn.Source, requests).thenAccept(monitoredItems -> {
-                for (int i = 0; i < handlers.size(); i++) {
-                    final MonitoredItemHandler handler = handlers.get(i);
-                    handler.setMonitoredItem(monitoredItems.get(i));
-                    synchronized (SubscriptionManager.this) {
-                        monitoredItemHandlers.put(handler.getParams(), handler);
-                    }
-                }
-            });
+
+            return subscription.createMonitoredItems(TimestampsToReturn.Source, requests) //
+                    .thenAccept(monitoredItems -> {
+                        for (int i = 0; i < handlers.size(); i++) {
+                            final MonitoredItemHandler handler = handlers.get(i);
+                            handler.setMonitoredItem(monitoredItems.get(i));
+                            synchronized (SubscriptionManager.this) {
+                                monitoredItemHandlers.put(handler.getParams(), handler);
+                            }
+                        }
+                    });
         }
 
         protected CompletableFuture<Void> deleteMonitoredItems(final UaSubscription subscription,
                 final List<MonitoredItemHandler> handlers) {
-            final List<UaMonitoredItem> requests = handlers.stream().map(handler -> handler.getMonitoredItem().get())
+
+            final List<UaMonitoredItem> requests = handlers.stream()
+                    .map(handler -> handler.getMonitoredItem().orElse(null)).filter(Objects::nonNull)
                     .collect(Collectors.toList());
+
+            for (final MonitoredItemHandler handler : handlers) {
+                handler.close();
+                monitoredItemHandlers.remove(handler.getParams());
+            }
 
             logger.debug("Deleting {} monitored items", requests.size());
 
             if (!requests.isEmpty()) {
                 final ArrayList<CompletableFuture<?>> tasks = new ArrayList<>();
 
-                splitInMultipleRequests(options.getMaxItemCountPerRequest(), requests.size(), (start, end) -> tasks
-                        .add(subscription.deleteMonitoredItems(requests.subList(start, end)).thenAccept(ok -> {
-                            synchronized (SubscriptionManager.this) {
-                                for (final MonitoredItemHandler handler : handlers) {
-                                    handler.close();
-                                    monitoredItemHandlers.remove(handler.getParams());
-                                }
-                            }
-                        })));
+                splitInMultipleRequests(options.getMaxItemCountPerRequest(), requests.size(),
+                        (start, end) -> tasks.add(subscription.deleteMonitoredItems(requests.subList(start, end))));
 
                 return CompletableFuture.allOf(tasks.toArray(new CompletableFuture<?>[tasks.size()]));
             } else {
@@ -267,7 +275,8 @@ public class SubscriptionManager implements SubscriptionListener, ListenerRegist
         public CompletableFuture<Void> subscribe() {
             logger.debug("Subscribing...");
 
-            return client.getSubscriptionManager().createSubscription(options.getSubsciptionPublishInterval())
+            return client.getSubscriptionManager() //
+                    .createSubscription(options.getSubsciptionPublishInterval()) //
                     .thenAccept(subscription -> {
                         logger.debug("Subscribing...done, max notifications per publish: {}",
                                 subscription.getMaxNotificationsPerPublish());
@@ -283,17 +292,23 @@ public class SubscriptionManager implements SubscriptionListener, ListenerRegist
                 logger.debug("No need to subscribe");
                 return CompletableFuture.completedFuture(null);
             }
-            return this.subscribe().thenCompose(ok -> state.updateSubscriptionState());
+            return this.subscribe() //
+                    .thenCompose(ok -> state.updateSubscriptionState());
         }
     }
 
-    private class MonitoredItemHandler {
+    private static class MonitoredItemHandler {
+
+        private static final Consumer<Variant[]> NOP_VARIANT_CONSUMER = v -> {
+        };
+        private static final Consumer<DataValue> NOP_VALUE_CONSUMER = v -> {
+        };
 
         Optional<UaMonitoredItem> monitoredItem = Optional.empty();
         final Dispatcher dispatcher;
 
-        public MonitoredItemHandler(final ListenParams params) {
-            this.dispatcher = registrations.getDispatcher(params);
+        public MonitoredItemHandler(final Dispatcher dispatcher) {
+            this.dispatcher = dispatcher;
         }
 
         public MonitoredItemCreateRequest getMonitoredItemCreateRequest(final UInteger requestHandle) {
@@ -301,7 +316,7 @@ public class SubscriptionManager implements SubscriptionListener, ListenerRegist
             final ReadValueId readValueId = params.getReadValueId();
             final boolean isEventNotifier = AttributeId.EventNotifier.uid().equals(readValueId.getAttributeId());
             final MonitoringParameters monitoringParams = new MonitoringParameters(requestHandle,
-                    isEventNotifier ? 0.0 : params.getSamplingInterval(), isEventNotifier ? defaultEventFilter : null,
+                    isEventNotifier ? 0.0 : params.getSamplingInterval(), isEventNotifier ? DEFAULT_EVENT_FILTER : null,
                     UInteger.valueOf(params.getQueueSize()), params.getDiscardOldest());
             return new MonitoredItemCreateRequest(params.getReadValueId(), MonitoringMode.Reporting, monitoringParams);
         }
@@ -320,9 +335,13 @@ public class SubscriptionManager implements SubscriptionListener, ListenerRegist
 
         public void setMonitoredItem(final UaMonitoredItem item) {
             final StatusCode code = item.getStatusCode();
+            final NodeId nodeId = item.getReadValueId().getNodeId();
             if (!code.isGood()) {
-                logger.debug("Got bad status code for monitored item - code: {}, item: {}", code, item);
+                logger.warn("Got bad status code for monitored item - code: {}, item: {}", code, nodeId);
                 return;
+            }
+            if (logger.isTraceEnabled()) {
+                logger.trace("Added monitored item for {}", nodeId);
             }
             this.monitoredItem = Optional.of(item);
             item.setEventConsumer(this::dispatchEvent);
@@ -348,10 +367,20 @@ public class SubscriptionManager implements SubscriptionListener, ListenerRegist
 
         public void close() {
             this.monitoredItem.ifPresent(item -> {
-                item.setEventConsumer((Consumer<Variant[]>) null);
-                item.setValueConsumer((Consumer<DataValue>) null);
+                item.setValueConsumer(NOP_VALUE_CONSUMER);
+                item.setEventConsumer(NOP_VARIANT_CONSUMER);
             });
             this.monitoredItem = Optional.empty();
         }
+    }
+
+    @Override
+    public void onListenerRegistered(ListenRequest request) {
+        // no need
+    }
+
+    @Override
+    public void onListenerUnregistered(ChannelListener listener) {
+        // no need
     }
 }

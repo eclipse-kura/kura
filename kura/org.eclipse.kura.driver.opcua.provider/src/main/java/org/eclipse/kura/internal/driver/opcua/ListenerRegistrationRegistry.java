@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2019 Eurotech and/or its affiliates and others
  *
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -25,40 +26,82 @@ import org.eclipse.kura.channel.listener.ChannelEvent;
 import org.eclipse.kura.channel.listener.ChannelListener;
 import org.eclipse.kura.internal.driver.opcua.request.ListenParams;
 import org.eclipse.kura.internal.driver.opcua.request.ListenRequest;
+import org.eclipse.kura.internal.driver.opcua.request.SingleNodeListenParams;
 
-public class ListenerRegistrations {
+public class ListenerRegistrationRegistry {
 
     private final Map<ListenParams, Collection<ListenRequest>> registeredListeners = new HashMap<>();
     private List<Listener> itemListeners = new CopyOnWriteArrayList<>();
     private long state;
 
-    public synchronized void registerListener(final ListenRequest request) {
+    public synchronized void registerListeners(final Collection<ListenRequest> requests) {
+        boolean subscriptionsChanged = false;
+        for (final ListenRequest request : requests) {
+            subscriptionsChanged |= registerListenerInternal(request);
+        }
+        if (subscriptionsChanged) {
+            notifyChanged();
+        }
+    }
 
+    public synchronized void unregisterListeners(final Collection<ChannelListener> listeners) {
+        boolean subscriptionsChanged = false;
+        for (final ChannelListener listener : listeners) {
+            subscriptionsChanged |= unregisterListenerInternal(listener);
+        }
+        if (subscriptionsChanged) {
+            notifyChanged();
+        }
+    }
+
+    public synchronized void registerListener(final ListenRequest request) {
+        if (registerListenerInternal(request)) {
+            notifyChanged();
+        }
+    }
+
+    public synchronized void unregisterListener(final ChannelListener listener) {
+        if (unregisterListenerInternal(listener)) {
+            notifyChanged();
+        }
+    }
+
+    public Collection<ListenRequest> getRequests(final SingleNodeListenParams params) {
+        return registeredListeners.get(params);
+    }
+
+    public Map<ListenParams, Collection<ListenRequest>> getRegisteredListeners() {
+        return registeredListeners;
+    }
+
+    private boolean registerListenerInternal(final ListenRequest request) {
         final ListenParams params = request.getParameters();
         Collection<ListenRequest> listeners = registeredListeners.get(params);
         if (listeners == null) {
             listeners = new CopyOnWriteArrayList<>();
             listeners.add(request);
             registeredListeners.put(params, listeners);
-            notifyChanged();
+            itemListeners.forEach(l -> l.onListenerRegistered(request));
+            return true;
         } else {
             if (listeners.stream().anyMatch(req -> req.getChannelListener() == request.getChannelListener()
-                    && req.getRecord().getChannelName() == request.getRecord().getChannelName())) {
-                return;
+                    && Objects.equals(req.getRecord().getChannelName(), request.getRecord().getChannelName()))) {
+                return false;
             }
             listeners.add(request);
+            itemListeners.forEach(l -> l.onListenerRegistered(request));
+            return false;
         }
     }
 
-    public synchronized void unregisterListener(final ChannelListener listener) {
+    private boolean unregisterListenerInternal(final ChannelListener listener) {
         final boolean removed = registeredListeners.entrySet().removeIf(e -> {
             final Collection<ListenRequest> listeners = e.getValue();
             listeners.removeIf(req -> req.getChannelListener() == listener);
             return listeners.isEmpty();
         });
-        if (removed) {
-            notifyChanged();
-        }
+        itemListeners.forEach(l -> l.onListenerUnregistered(listener));
+        return removed;
     }
 
     private void notifyChanged() {
@@ -104,6 +147,10 @@ public class ListenerRegistrations {
     public interface Listener {
 
         public void onRegistrationsChanged();
+
+        public void onListenerRegistered(final ListenRequest request);
+
+        public void onListenerUnregistered(final ChannelListener listener);
     }
 
     public final class Dispatcher {
@@ -112,13 +159,13 @@ public class ListenerRegistrations {
         private Optional<Collection<ListenRequest>> channelListeners = Optional.empty();
         private long currentState = -1;
 
-        private Dispatcher(ListenParams params) {
+        private Dispatcher(final ListenParams params) {
             this.params = params;
             sync();
         }
 
         private void sync() {
-            synchronized (ListenerRegistrations.this) {
+            synchronized (ListenerRegistrationRegistry.this) {
                 if (state != currentState) {
                     currentState = state;
                     channelListeners = Optional.ofNullable(registeredListeners.get(params));

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2019 Eurotech and/or its affiliates and others
  *
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
@@ -47,6 +47,7 @@ public final class OpcUaChannelDescriptor implements ChannelDescriptor {
     private static final String LISTEN_SAMPLING_INTERVAL_PROP_NAME = "listen.sampling.interval";
     private static final String LISTEN_QUEUE_SIZE_PROP_NAME = "listen.queue.size";
     private static final String LISTEN_DISCARD_OLDEST_PROP_NAME = "listen.discard.oldest";
+    private static final String LISTEN_SUBSCRIBE_TO_CHILDREN_PROP_NAME = "listen.subscribe.to.children";
 
     private static final String NODE_ID_DEFAULT = "MyNode";
     private static final String NODE_NAMESPACE_INDEX_DEFAULT = "2";
@@ -56,6 +57,7 @@ public final class OpcUaChannelDescriptor implements ChannelDescriptor {
     private static final String LISTEN_SAMPLING_INTERVAL_DEFAULT = "1000";
     private static final String LISTEN_QUEUE_SIZE_DEFAULT = "10";
     private static final String LISTEN_DISCARD_OLDEST_DEFAULT = "true";
+    private static final String LISTEN_SUBSCRIBE_TO_CHILDREN_DEFAULT = "false";
 
     private static void addOptions(Tad target, Enum<?>[] values) {
         final List<Option> options = target.getOption();
@@ -157,6 +159,16 @@ public final class OpcUaChannelDescriptor implements ChannelDescriptor {
 
         elements.add(discardOldest);
 
+        final Tad subscribeToChildren = new Tad();
+        subscribeToChildren.setName(LISTEN_SUBSCRIBE_TO_CHILDREN_PROP_NAME);
+        subscribeToChildren.setId(LISTEN_SUBSCRIBE_TO_CHILDREN_PROP_NAME);
+        subscribeToChildren.setDescription(LISTEN_SUBSCRIBE_TO_CHILDREN_PROP_NAME);
+        subscribeToChildren.setType(Tscalar.BOOLEAN);
+        subscribeToChildren.setRequired(true);
+        subscribeToChildren.setDefault(LISTEN_SUBSCRIBE_TO_CHILDREN_DEFAULT);
+
+        elements.add(subscribeToChildren);
+
         return elements;
     }
 
@@ -216,6 +228,11 @@ public final class OpcUaChannelDescriptor implements ChannelDescriptor {
 
     public static boolean getDiscardOldest(Map<String, Object> properties) {
         String discardOldest = properties.get(LISTEN_DISCARD_OLDEST_PROP_NAME).toString();
+        return Boolean.valueOf(discardOldest);
+    }
+
+    public static boolean getSubscribeToChildren(Map<String, Object> properties) {
+        String discardOldest = properties.get(LISTEN_SUBSCRIBE_TO_CHILDREN_PROP_NAME).toString();
         return Boolean.valueOf(discardOldest);
     }
 }

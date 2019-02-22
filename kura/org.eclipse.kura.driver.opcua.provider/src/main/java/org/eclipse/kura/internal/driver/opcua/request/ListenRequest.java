@@ -55,6 +55,6 @@ public class ListenRequest extends Request<ListenParams> {
     }
 
     public ChannelListener getChannelListener() {
-        return this.listener;
+        return listener;
     }
 }

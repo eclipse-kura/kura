@@ -92,7 +92,7 @@ public class SubscriptionManager implements SubscriptionListener, ListenerRegist
     @Override
     public synchronized void onRegistrationsChanged() {
         this.targetRegistrationState++;
-        this.queue.push(() -> this.state.updateSubscriptionState());
+        queue.push(() -> this.state.updateSubscriptionState());
     }
 
     @Override
@@ -103,7 +103,7 @@ public class SubscriptionManager implements SubscriptionListener, ListenerRegist
     }
 
     public synchronized CompletableFuture<Void> close() {
-        this.registrations.removeRegistrationItemListener(this);
+        registrations.removeRegistrationItemListener(this);
         return this.state.unsubscribe();
     }
 
@@ -123,7 +123,7 @@ public class SubscriptionManager implements SubscriptionListener, ListenerRegist
 
         Subscribed(final UaSubscription subscription) {
             this.subscription = subscription;
-            SubscriptionManager.this.client.getSubscriptionManager().addSubscriptionListener(SubscriptionManager.this);
+            client.getSubscriptionManager().addSubscriptionListener(SubscriptionManager.this);
         }
 
         @Override
@@ -134,19 +134,19 @@ public class SubscriptionManager implements SubscriptionListener, ListenerRegist
         @Override
         public CompletableFuture<Void> unsubscribe() {
             logger.debug("Unsubscribing..");
-            final OpcUaSubscriptionManager manager = SubscriptionManager.this.client.getSubscriptionManager();
+            final OpcUaSubscriptionManager manager = client.getSubscriptionManager();
             manager.removeSubscriptionListener(SubscriptionManager.this);
-            for (final MonitoredItemHandler handler : this.monitoredItemHandlers.values()) {
+            for (final MonitoredItemHandler handler : monitoredItemHandlers.values()) {
                 handler.close();
             }
-            this.monitoredItemHandlers.clear();
-            return manager.deleteSubscription(this.subscription.getSubscriptionId()).handle((ok, e) -> {
+            monitoredItemHandlers.clear();
+            return manager.deleteSubscription(subscription.getSubscriptionId()).handle((ok, e) -> {
                 if (e != null) {
                     logger.debug("Failed to delete subscription", e);
                 }
                 logger.debug("Unsubscribing..done");
                 synchronized (SubscriptionManager.this) {
-                    SubscriptionManager.this.state = new Unsubscribed();
+                    state = new Unsubscribed();
                 }
                 return (Void) null;
             });
@@ -186,23 +186,22 @@ public class SubscriptionManager implements SubscriptionListener, ListenerRegist
 
                 toBeDeleted.removeIf(handler -> {
                     if (!handler.isValid()) {
-                        this.monitoredItemHandlers.remove(handler.getParams());
+                        monitoredItemHandlers.remove(handler.getParams());
                         return true;
                     } else {
                         return false;
                     }
                 });
 
-                return CompletableFuture.allOf(createMonitoredItems(this.subscription, toBeCreated),
-                        deleteMonitoredItems(this.subscription, toBeDeleted)).thenAccept(onCompletion);
+                return CompletableFuture.allOf(createMonitoredItems(subscription, toBeCreated),
+                        deleteMonitoredItems(subscription, toBeDeleted)).thenAccept(onCompletion);
             }
         }
 
         protected CompletableFuture<Void> createMonitoredItems(final UaSubscription subscription,
                 final List<MonitoredItemHandler> handlers) {
             final List<MonitoredItemCreateRequest> requests = handlers.stream()
-                    .map(handler -> handler
-                            .getMonitoredItemCreateRequest(SubscriptionManager.this.client.nextRequestHandle()))
+                    .map(handler -> handler.getMonitoredItemCreateRequest(client.nextRequestHandle()))
                     .collect(Collectors.toList());
 
             logger.debug("Creating {} monitored items", handlers.size());
@@ -210,7 +209,7 @@ public class SubscriptionManager implements SubscriptionListener, ListenerRegist
             if (!requests.isEmpty()) {
                 final ArrayList<CompletableFuture<?>> tasks = new ArrayList<>();
 
-                splitInMultipleRequests(SubscriptionManager.this.options.getMaxItemCountPerRequest(), requests.size(),
+                splitInMultipleRequests(options.getMaxItemCountPerRequest(), requests.size(),
                         (start, end) -> tasks.add(createMonitoredItems(subscription, requests.subList(start, end),
                                 handlers.subList(start, end))));
 
@@ -282,14 +281,14 @@ public class SubscriptionManager implements SubscriptionListener, ListenerRegist
                         logger.debug("Subscribing...done, max notifications per publish: {}",
                                 subscription.getMaxNotificationsPerPublish());
                         synchronized (SubscriptionManager.this) {
-                            SubscriptionManager.this.state = new Subscribed(subscription);
+                            state = new Subscribed(subscription);
                         }
                     });
         }
 
         @Override
         public CompletableFuture<Void> updateSubscriptionState() {
-            if (SubscriptionManager.this.registrations.isEmpty()) {
+            if (registrations.isEmpty()) {
                 logger.debug("No need to subscribe");
                 return CompletableFuture.completedFuture(null);
             }
@@ -313,7 +312,7 @@ public class SubscriptionManager implements SubscriptionListener, ListenerRegist
         }
 
         public MonitoredItemCreateRequest getMonitoredItemCreateRequest(final UInteger requestHandle) {
-            final ListenParams params = this.dispatcher.getParams();
+            final ListenParams params = dispatcher.getParams();
             final ReadValueId readValueId = params.getReadValueId();
             final boolean isEventNotifier = AttributeId.EventNotifier.uid().equals(readValueId.getAttributeId());
             final MonitoringParameters monitoringParams = new MonitoringParameters(requestHandle,
@@ -323,15 +322,15 @@ public class SubscriptionManager implements SubscriptionListener, ListenerRegist
         }
 
         public Optional<UaMonitoredItem> getMonitoredItem() {
-            return this.monitoredItem;
+            return monitoredItem;
         }
 
         public ListenParams getParams() {
-            return this.dispatcher.getParams();
+            return dispatcher.getParams();
         }
 
         public boolean isValid() {
-            return this.monitoredItem.isPresent();
+            return monitoredItem.isPresent();
         }
 
         public void setMonitoredItem(final UaMonitoredItem item) {
@@ -350,7 +349,7 @@ public class SubscriptionManager implements SubscriptionListener, ListenerRegist
         }
 
         public void dispatchEvent(final Variant[] values) {
-            this.dispatcher.dispatch(record -> {
+            dispatcher.dispatch(record -> {
                 fillValue(values[1], record);
 
                 try {
@@ -363,7 +362,7 @@ public class SubscriptionManager implements SubscriptionListener, ListenerRegist
         }
 
         public void dispatchValue(final DataValue value) {
-            this.dispatcher.dispatch(record -> fillRecord(value, record));
+            dispatcher.dispatch(record -> fillRecord(value, record));
         }
 
         public void close() {

@@ -28,7 +28,6 @@ import org.eclipse.kura.internal.driver.opcua.auth.CertificateManager;
 import org.eclipse.kura.internal.driver.opcua.request.ReadParams;
 import org.eclipse.kura.internal.driver.opcua.request.Request;
 import org.eclipse.kura.internal.driver.opcua.request.WriteParams;
-import org.eclipse.kura.util.base.StringUtil;
 import org.eclipse.milo.opcua.sdk.client.OpcUaClient;
 import org.eclipse.milo.opcua.sdk.client.api.UaClient;
 import org.eclipse.milo.opcua.sdk.client.api.config.OpcUaClientConfig;
@@ -46,6 +45,8 @@ import org.eclipse.milo.opcua.stack.core.types.structured.WriteResponse;
 import org.eclipse.milo.opcua.stack.core.types.structured.WriteValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import io.netty.util.internal.StringUtil;
 
 public class ConnectionManager {
 
@@ -128,7 +129,7 @@ public class ConnectionManager {
             tempList.add(request.getParameters().getReadValueId());
         }
 
-        final ReadResponse response = runSafe(this.client.read(0.0, TimestampsToReturn.Both, tempList),
+        final ReadResponse response = runSafe(client.read(0.0, TimestampsToReturn.Both, tempList),
                 this.options.getRequestTimeout(), ex -> this.failureHandler.accept(this, ex));
 
         final DataValue[] results = response.getResults();
@@ -146,7 +147,7 @@ public class ConnectionManager {
             tempList.add(request.getParameters().getWriteValue());
         }
 
-        final WriteResponse response = runSafe(this.client.write(tempList), this.options.getRequestTimeout(),
+        final WriteResponse response = runSafe(client.write(tempList), this.options.getRequestTimeout(),
                 ex -> this.failureHandler.accept(this, ex));
 
         final StatusCode[] results = response.getResults();
@@ -272,13 +273,13 @@ public class ConnectionManager {
         }
 
         private void tryNextEndpoint() {
-            if (!this.endpoints.hasNext()) {
-                this.future.completeExceptionally(
+            if (!endpoints.hasNext()) {
+                future.completeExceptionally(
                         new IllegalStateException("failed to connect to any of the matching endpoints"));
                 return;
             }
 
-            final EndpointDescription endpoint = this.endpoints.next();
+            final EndpointDescription endpoint = endpoints.next();
 
             logger.info("connecting to endpoint: {}", endpoint.getEndpointUrl());
 

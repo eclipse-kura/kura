@@ -5,7 +5,7 @@
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
- *
+ *  
  */
 
 package org.eclipse.kura.internal.driver.opcua.auth;
@@ -46,7 +46,7 @@ public class ExternalKeystoreCertificateManager extends CertificateManager {
     @Override
     public synchronized void load() throws Exception {
 
-        if (this.loaded) {
+        if (loaded) {
             return;
         }
 
@@ -66,7 +66,7 @@ public class ExternalKeystoreCertificateManager extends CertificateManager {
 
         super.load(getTrustedCertificates(keyStore), clientKeyPair, clientCertificate);
 
-        this.loaded = true;
+        loaded = true;
     }
 
     private static X509Certificate[] getTrustedCertificates(final KeyStore keyStore)

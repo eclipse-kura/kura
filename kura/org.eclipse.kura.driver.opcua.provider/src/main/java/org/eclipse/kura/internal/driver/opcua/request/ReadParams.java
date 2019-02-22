@@ -46,33 +46,30 @@ public class ReadParams {
     }
 
     public ReadValueId getReadValueId() {
-        return this.readValueId;
+        return readValueId;
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + this.readValueId.getNodeId().hashCode();
-        result = prime * result + this.readValueId.getAttributeId().hashCode();
+        result = prime * result + readValueId.getNodeId().hashCode();
+        result = prime * result + readValueId.getAttributeId().hashCode();
         return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) {
+        if (this == obj)
             return true;
-        }
-        if (obj == null) {
+        if (obj == null)
             return false;
-        }
-        if (getClass() != obj.getClass()) {
+        if (getClass() != obj.getClass())
             return false;
-        }
         ReadParams other = (ReadParams) obj;
 
-        return other.readValueId.getAttributeId() == this.readValueId.getAttributeId()
-                && other.readValueId.getNodeId().equals(this.readValueId.getNodeId());
+        return other.readValueId.getAttributeId() == readValueId.getAttributeId()
+                && other.readValueId.getNodeId().equals(readValueId.getNodeId());
     }
 
 }

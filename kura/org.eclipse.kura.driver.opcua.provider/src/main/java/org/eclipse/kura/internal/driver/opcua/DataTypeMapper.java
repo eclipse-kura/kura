@@ -50,7 +50,7 @@ public final class DataTypeMapper {
     public static Variant map(final Object value, final VariableType targetType) {
 
         if (targetType == VariableType.DEFINED_BY_JAVA_TYPE
-                || value instanceof Boolean && targetType == VariableType.BOOLEAN) {
+                || (value instanceof Boolean && targetType == VariableType.BOOLEAN)) {
             return new Variant(value);
         }
         if (value instanceof byte[]) {

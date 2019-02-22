@@ -5,7 +5,7 @@
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
- *
+ *  
  */
 
 package org.eclipse.kura.internal.driver.opcua.auth;
@@ -43,16 +43,16 @@ public abstract class CertificateManager implements CertificateValidator {
     public abstract void load() throws Exception;
 
     public KeyPair getClientKeyPair() {
-        return this.clientKeyPair;
+        return clientKeyPair;
     }
 
     public X509Certificate getClientCertificate() {
-        return this.clientCertificate;
+        return clientCertificate;
     }
 
     @Override
     public void validate(X509Certificate certificate) throws UaException {
-        if (!this.enabled) {
+        if (!enabled) {
             logger.debug("skipping certificate validation");
             return;
         }
@@ -66,14 +66,14 @@ public abstract class CertificateManager implements CertificateValidator {
 
     @Override
     public void verifyTrustChain(List<X509Certificate> certificateChain) throws UaException {
-        if (!this.enabled) {
+        if (!enabled) {
             logger.debug("skipping certificate chain verification");
             return;
         }
 
         logger.debug("verifiyng certificate chain: {}", certificateChain);
 
-        CertificateValidationUtil.verifyTrustChain(certificateChain, this.trustedCertificates, this.issuerCertificates);
+        CertificateValidationUtil.verifyTrustChain(certificateChain, trustedCertificates, issuerCertificates);
 
         logger.debug("certificate chain verification successful");
     }

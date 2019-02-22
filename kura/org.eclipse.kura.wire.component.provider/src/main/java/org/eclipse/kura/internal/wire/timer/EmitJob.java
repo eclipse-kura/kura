@@ -27,6 +27,8 @@ import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The Class EmitJob is responsible for emitting {@link WireRecord} every specified
@@ -37,14 +39,15 @@ public final class EmitJob implements Job {
 
     /** Timer Field Constant */
     private static final String PROP = "TIMER";
+    private static final Logger logger = LoggerFactory.getLogger(EmitJob.class);
 
     /**
      * Emits a {@link WireRecord} every specified interval.
      *
      * @param context
-     *            the Job Execution context
+     *                    the Job Execution context
      * @throws JobExecutionException
-     *             the job execution exception
+     *                                   the job execution exception
      */
     @Override
     public void execute(final JobExecutionContext context) throws JobExecutionException {
@@ -59,7 +62,10 @@ public final class EmitJob implements Job {
         final WireRecord timerWireRecord = new WireRecord(timerProperties);
         final List<WireRecord> timerWireRecords = new ArrayList<>();
         timerWireRecords.add(timerWireRecord);
-
-        wireSupport.emit(timerWireRecords);
+        try {
+            wireSupport.emit(timerWireRecords);
+        } catch (Exception e) {
+            logger.error("Timer thread excutting error:{}", e);
+        }
     }
 }

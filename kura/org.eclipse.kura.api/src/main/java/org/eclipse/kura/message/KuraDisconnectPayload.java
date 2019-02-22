@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -9,12 +9,17 @@
  * Contributors:
  *     Eurotech
  *******************************************************************************/
-package org.eclipse.kura.core.message;
+package org.eclipse.kura.message;
 
 import java.util.Iterator;
 
-import org.eclipse.kura.message.KuraPayload;
-
+/**
+ * The KuraDisconnectPayload is an extension of {@link KuraPayload} that contains the parameters stored in a message
+ * that is usually published when disconnecting from the broker.
+ *
+ * @noextend This class is not intended to be subclassed by clients.
+ * @since 2.1
+ */
 public class KuraDisconnectPayload extends KuraPayload {
 
     private static final String UPTIME = "uptime";

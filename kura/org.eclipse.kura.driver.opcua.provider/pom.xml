@@ -29,7 +29,6 @@
 
     <properties>
         <kura.basedir>${project.basedir}/..</kura.basedir>
-        <tycho-version>0.26.0</tycho-version>
         <org.eclipse.milo.version>0.2.4</org.eclipse.milo.version>
         <org.jooq.jool.version>0.9.10</org.jooq.jool.version>
         <com.google.code.findbugs.jsr305.version>3.0.1</com.google.code.findbugs.jsr305.version>

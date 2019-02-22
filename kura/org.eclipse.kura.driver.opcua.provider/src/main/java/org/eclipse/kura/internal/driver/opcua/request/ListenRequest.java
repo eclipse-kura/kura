@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2019 Eurotech and/or its affiliates and others
  *
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
@@ -14,6 +14,7 @@ import java.util.Map;
 
 import org.eclipse.kura.channel.ChannelRecord;
 import org.eclipse.kura.channel.listener.ChannelListener;
+import org.eclipse.kura.internal.driver.opcua.OpcUaChannelDescriptor;
 import org.eclipse.kura.internal.driver.opcua.Utils;
 import org.eclipse.kura.type.DataType;
 
@@ -21,7 +22,7 @@ public class ListenRequest extends Request<ListenParams> {
 
     private final ChannelListener listener;
 
-    protected ListenRequest(final ListenParams params, final ChannelRecord record, final ChannelListener listener) {
+    public ListenRequest(final ListenParams params, final ChannelRecord record, final ChannelListener listener) {
         super(params, record);
         this.listener = listener;
     }
@@ -33,7 +34,23 @@ public class ListenRequest extends Request<ListenParams> {
         final DataType valueType = Utils.tryExtract(channelConfig,
                 config -> DataType.valueOf((String) config.get("+value.type")), "Error while retrieving value type");
 
-        final ListenParams params = new ListenParams(channelConfig);
+        final boolean subscribeToChildren = Utils.tryExtract(channelConfig,
+                OpcUaChannelDescriptor::getSubscribeToChildren,
+                "Error while retrieving Subscribe to Children property");
+
+        final SingleNodeListenParams params;
+
+        if (subscribeToChildren) {
+
+            if (valueType != DataType.STRING) {
+                throw new IllegalArgumentException("Only String is supported as value type for subtree subscriptions");
+            }
+
+            params = new TreeListenParams(channelConfig);
+        } else {
+            params = new SingleNodeListenParams(channelConfig);
+        }
+
         return new ListenRequest(params, ChannelRecord.createReadRecord(channelName, valueType), listener);
     }
 

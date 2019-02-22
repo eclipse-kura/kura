@@ -45,7 +45,6 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .,
  lib/jool.jar,
  lib/jsr305.jar,
- lib/protonpack.jar,
  lib/sdk-client.jar,
  lib/sdk-core.jar,
  lib/stack-client.jar,

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2019 Eurotech and/or its affiliates and others
  *
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
@@ -35,6 +35,7 @@ import org.eclipse.kura.driver.PreparedRead;
 import org.eclipse.kura.internal.driver.opcua.request.ListenRequest;
 import org.eclipse.kura.internal.driver.opcua.request.ReadParams;
 import org.eclipse.kura.internal.driver.opcua.request.Request;
+import org.eclipse.kura.internal.driver.opcua.request.TreeListenParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,9 +65,11 @@ public final class OpcUaDriver implements Driver, ConfigurableComponent {
 
     private Optional<ConnectionManager> connectionManager = Optional.empty();
     private Optional<CompletableFuture<ConnectionManager>> connectTask = Optional.empty();
-    private final ListenerRegistrations registrations = new ListenerRegistrations();
 
-    private volatile CryptoService cryptoService;
+    private final ListenerRegistrationRegistry nodeListeneresRegistrations = new ListenerRegistrationRegistry();
+    private final ListenerRegistrationRegistry subtreeListenerRegistrations = new ListenerRegistrationRegistry();
+
+    private CryptoService cryptoService;
     private OpcUaOptions options;
     private long connectAttempt = 0;
 
@@ -102,7 +105,8 @@ public final class OpcUaDriver implements Driver, ConfigurableComponent {
         this.connectAttempt++;
         final long currentConnectAttempt = this.connectAttempt;
         final CompletableFuture<ConnectionManager> currentConnectTask = ConnectionManager
-                .connect(this.options, this::onFailure, this.registrations).thenApply(manager -> {
+                .connect(options, this::onFailure, nodeListeneresRegistrations, subtreeListenerRegistrations)
+                .thenApply(manager -> {
                     synchronized (this) {
                         if (this.connectAttempt != currentConnectAttempt) {
                             manager.close();
@@ -123,7 +127,6 @@ public final class OpcUaDriver implements Driver, ConfigurableComponent {
         try {
             return connectAsync().get(this.options.getRequestTimeout(), TimeUnit.SECONDS);
         } catch (final Exception e) {
-            logger.debug("Unable to Connect...", e);
             throw new ConnectionException(e);
         }
     }
@@ -197,7 +200,14 @@ public final class OpcUaDriver implements Driver, ConfigurableComponent {
     @Override
     public void registerChannelListener(final Map<String, Object> channelConfig, final ChannelListener listener)
             throws ConnectionException {
-        this.registrations.registerListener(ListenRequest.extractListenRequest(channelConfig, listener));
+        final ListenRequest listenRequest = ListenRequest.extractListenRequest(channelConfig, listener);
+
+        if (listenRequest.getParameters() instanceof TreeListenParams) {
+            this.subtreeListenerRegistrations.registerListener(listenRequest);
+        } else {
+            this.nodeListeneresRegistrations.registerListener(listenRequest);
+        }
+
         connectAsync();
         startConnectionMonitorTask();
     }
@@ -205,14 +215,15 @@ public final class OpcUaDriver implements Driver, ConfigurableComponent {
     /** {@inheritDoc} */
     @Override
     public void unregisterChannelListener(final ChannelListener listener) throws ConnectionException {
-        this.registrations.unregisterListener(listener);
+        this.nodeListeneresRegistrations.unregisterListener(listener);
+        this.subtreeListenerRegistrations.unregisterListener(listener);
     }
 
     /**
      * OSGi service component callback while updating.
      *
      * @param properties
-     *            the properties
+     *                       the properties
      */
     public synchronized void updated(final Map<String, Object> properties) {
         logger.info("Updating OPC-UA Driver...");

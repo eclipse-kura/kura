@@ -115,6 +115,8 @@ final class OpcUaOptions {
      */
     private static final String REQUEST_TIMEOUT = "request.timeout";
 
+    private static final String ACKNOWLEDGE_TIMEOUT = "acknowledge.timeout";
+
     /**
      * Configurable property specifying the Security Policy
      */
@@ -138,6 +140,8 @@ final class OpcUaOptions {
     private static final String MAX_REQUEST_ITEMS = "max.request.items";
 
     private static final String FORCE_ENDPOINT_URL = "force.endpoint.url";
+
+    private static final String SUBTREE_SUBSCRIPTION_CHANNEL_NAME_FORMAT = "subtree.subscription.name.format";
 
     /** The Crypto Service dependency. */
     private final CryptoService cryptoService;
@@ -336,6 +340,15 @@ final class OpcUaOptions {
         return requestTimeout * 1000;
     }
 
+    int getAcknowledgeTimeout() {
+        int acknowledgeTimeout = 40;
+        final Object ackTimeout = this.properties.get(ACKNOWLEDGE_TIMEOUT);
+        if (nonNull(ackTimeout) && (ackTimeout instanceof Integer)) {
+            acknowledgeTimeout = (Integer) ackTimeout;
+        }
+        return acknowledgeTimeout * 1000;
+    }
+
     /**
      * Returns the Security Policy
      *
@@ -433,5 +446,13 @@ final class OpcUaOptions {
         }
 
         return this.certificateManager;
+    }
+
+    ChannelNameFormat getSubtreeSubscriptionChannelNameFormat() {
+        try {
+            return ChannelNameFormat.valueOf((String) this.properties.get(SUBTREE_SUBSCRIPTION_CHANNEL_NAME_FORMAT));
+        } catch (final Exception e) {
+            return ChannelNameFormat.BROWSE_PATH;
+        }
     }
 }

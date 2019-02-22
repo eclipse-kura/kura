@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2018, 2019 Eurotech and/or its affiliates and others
+ * Copyright (c) 2019 Eurotech and/or its affiliates and others
  *
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
@@ -14,19 +14,14 @@ import java.util.Map;
 
 import org.eclipse.milo.opcua.stack.core.types.structured.ReadValueId;
 
-public abstract class ListenParams extends ReadParams {
+public class TreeListenParams extends SingleNodeListenParams {
 
-    public ListenParams(final Map<String, Object> channelConfig) {
+    public TreeListenParams(Map<String, Object> channelConfig) {
         super(channelConfig);
     }
 
-    public ListenParams(final ReadValueId readValueId) {
-        super(readValueId);
+    public TreeListenParams(final ReadValueId readValueId, final double samplingInterval, final long queueSize,
+            final boolean discardOldest) {
+        super(readValueId, samplingInterval, queueSize, discardOldest);
     }
-
-    public abstract double getSamplingInterval();
-
-    public abstract long getQueueSize();
-
-    public abstract boolean getDiscardOldest();
 }

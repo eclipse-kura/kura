@@ -41,15 +41,15 @@ public class FrameBufferRaw {
 
     private Transform transform;
 
-    private final AlphabetRaw alphabet;
+    private AlphabetRaw alphabet;
 
-    private final ByteBuffer frontColor = ByteBuffer.allocate(2).order(ByteOrder.LITTLE_ENDIAN);
-    private final ByteBuffer backColor = ByteBuffer.allocate(2).order(ByteOrder.LITTLE_ENDIAN);
+    private ByteBuffer frontColor = ByteBuffer.allocate(2).order(ByteOrder.LITTLE_ENDIAN);
+    private ByteBuffer backColor = ByteBuffer.allocate(2).order(ByteOrder.LITTLE_ENDIAN);
 
     private final byte[] tempBuffer = new byte[RGB565_BUFFER_SIZE];
 
     private FrameBufferRaw(ComponentContext ctx) throws IOException {
-        setTransform(Transform.IDENTITY);
+        this.setTransform(Transform.IDENTITY);
 
         this.alphabet = new AlphabetRaw(
                 ctx.getBundleContext().getBundle().getResource("src/main/resources/sense_hat_text.pbm"));
@@ -61,8 +61,7 @@ public class FrameBufferRaw {
                     currentLine = br.readLine();
                     if (null != currentLine && currentLine.equals(SENSE_HAT_FB_NAME)) {
                         String eventFolderPath = fbFolder.getAbsolutePath();
-                        this.frameBufferFile = new File(
-                                "/dev/fb" + eventFolderPath.substring(eventFolderPath.length() - 1));
+                        frameBufferFile = new File("/dev/fb" + eventFolderPath.substring(eventFolderPath.length() - 1));
                         br.close();
                         break;
                     }
@@ -71,7 +70,7 @@ public class FrameBufferRaw {
         }
 
         try {
-            this.raf = new RandomAccessFile(this.frameBufferFile, "rw");
+            raf = new RandomAccessFile(frameBufferFile, "rw");
         } catch (FileNotFoundException e) {
             s_logger.error("FrameBuffer not found!", e);
         }
@@ -95,11 +94,11 @@ public class FrameBufferRaw {
             throw new IllegalArgumentException("Data length must be: " + RGB565_BUFFER_SIZE);
         }
 
-        if (this.transform == Transform.IDENTITY) {
+        if (transform == Transform.IDENTITY) {
             writeFramebuffer(data);
         } else {
-            transformAndMove(data, this.tempBuffer);
-            writeFramebuffer(this.tempBuffer);
+            transformAndMove(data, tempBuffer);
+            writeFramebuffer(tempBuffer);
         }
 
     }
@@ -134,7 +133,7 @@ public class FrameBufferRaw {
     private void setBlue(final ByteBuffer dst, final float blueFloat) {
         short value = dst.getShort(0);
 
-        final short mask = (1 << 5) - 1;
+        final short mask = ((1 << 5) - 1);
         final short red = (short) (blueFloat * mask);
         value &= ~mask;
         value |= red & mask;
@@ -145,12 +144,12 @@ public class FrameBufferRaw {
     private void setGreen(final ByteBuffer dst, final float greenFloat) {
         short value = dst.getShort(0);
 
-        final short max = (1 << 6) - 1;
+        final short max = ((1 << 6) - 1);
         final short mask = max << 5;
         final short green = (short) (greenFloat * max);
 
         value &= ~mask;
-        value |= green << 5 & mask;
+        value |= (green << 5) & mask;
 
         dst.putShort(0, value);
     }
@@ -158,38 +157,38 @@ public class FrameBufferRaw {
     private void setRed(final ByteBuffer dst, final float redFloat) {
         short value = dst.getShort(0);
 
-        final int max = (1 << 5) - 1;
+        final int max = ((1 << 5) - 1);
         final int mask = max << 11;
         final int red = (int) (redFloat * max);
 
         value &= (short) (~mask & 0xffff);
-        value |= (short) (red << 11 & mask & 0xffff);
+        value |= (short) (((red << 11) & mask) & 0xffff);
 
         dst.putShort(0, value);
     }
 
     public void setFrontColorRed(float color) {
-        setRed(this.frontColor, color);
+        setRed(frontColor, color);
     }
 
     public void setFrontColorGreen(float color) {
-        setGreen(this.frontColor, color);
+        setGreen(frontColor, color);
     }
 
     public void setFrontColorBlue(float color) {
-        setBlue(this.frontColor, color);
+        setBlue(frontColor, color);
     }
 
     public void setBackColorRed(float color) {
-        setRed(this.backColor, color);
+        setRed(backColor, color);
     }
 
     public void setBackColorGreen(float color) {
-        setGreen(this.backColor, color);
+        setGreen(backColor, color);
     }
 
     public void setBackColorBlue(float color) {
-        setBlue(this.backColor, color);
+        setBlue(backColor, color);
     }
 
     public void showMessage(String text) throws IOException {
@@ -216,13 +215,13 @@ public class FrameBufferRaw {
 
     public void showLetter(char letter) throws IOException {
 
-        if (!this.alphabet.isAvailable(letter)) {
+        if (!alphabet.isAvailable(letter)) {
             clearFrameBuffer();
             s_logger.warn("Letter not available");
             return;
         }
 
-        byte[] letterData = this.alphabet.getLetter(letter);
+        byte[] letterData = alphabet.getLetter(letter);
         render(letterData, this.frontColor.array(), this.backColor.array(), this.tempBuffer);
         writeFramebuffer(this.tempBuffer);
     }
@@ -241,9 +240,9 @@ public class FrameBufferRaw {
 
     public void closeFrameBuffer() throws IOException {
 
-        if (this.raf != null) {
-            this.raf.close();
-            this.raf = null;
+        if (raf != null) {
+            raf.close();
+            raf = null;
         }
     }
 
@@ -268,7 +267,7 @@ public class FrameBufferRaw {
     }
 
     private void writeFramebuffer(byte[] data) throws IOException {
-        this.raf.seek(0);
-        this.raf.write(data);
+        raf.seek(0);
+        raf.write(data);
     }
 }

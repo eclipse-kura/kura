@@ -25,8 +25,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * register itself as a {@link CloudSubscriberListener}, in order to be notified when a message is received from the
  * associated cloud stack.
  *
- * In most cases, the consumers are not interested in the header of the received message and assume to always receive
- * the
+ * In most cases, the consumers are not interested in the header of the received message and assume to always receive the
  * same kind of message. In order to receive different kinds of messages, the consumer should register to multiple
  * subscribers.
  *

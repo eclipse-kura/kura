@@ -51,6 +51,6 @@ public final class DummyChannelDescriptor implements ChannelDescriptor {
 
     @Override
     public Object getDescriptor() {
-        return this.ads;
+        return ads;
     }
 }

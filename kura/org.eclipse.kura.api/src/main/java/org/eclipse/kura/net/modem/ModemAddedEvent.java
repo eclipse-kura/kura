@@ -18,7 +18,7 @@ import org.osgi.service.event.Event;
 
 /**
  * Emitted when a modem is inserted into the gateway
- *
+ * 
  * @noextend This class is not intended to be subclassed by clients.
  */
 @ProviderType

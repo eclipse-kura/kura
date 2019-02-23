@@ -186,7 +186,7 @@ public class BluetoothLeScanner implements BluetoothProcessListener, BTSnoopList
         }
 
     }
-
+    
     @Override
     public void processErrorStream(String string) {
     }

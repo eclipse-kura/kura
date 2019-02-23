@@ -236,7 +236,7 @@ public final class GPIODriver implements Driver, ConfigurableComponent {
                 KuraGPIOPin pin = getPin(requestInfo.resourceName, requestInfo.resourceDirection,
                         requestInfo.resourceMode, requestInfo.resourceTrigger);
                 if (pin != null) {
-                    pin.setValue(value.getValue());
+                    pin.setValue((boolean) value.getValue());
                     record.setChannelStatus(new ChannelStatus(SUCCESS));
                     record.setTimestamp(System.currentTimeMillis());
                 }
@@ -305,13 +305,13 @@ public final class GPIODriver implements Driver, ConfigurableComponent {
         try {
             switch (value.getType()) {
             case LONG:
-                return TypedValues.newBooleanValue((long) value.getValue() > 0);
+                return TypedValues.newBooleanValue(((long) value.getValue()) > 0);
             case FLOAT:
-                return TypedValues.newBooleanValue((float) value.getValue() > 0);
+                return TypedValues.newBooleanValue(((float) value.getValue()) > 0);
             case DOUBLE:
-                return TypedValues.newBooleanValue((double) value.getValue() > 0);
+                return TypedValues.newBooleanValue(((double) value.getValue()) > 0);
             case INTEGER:
-                return TypedValues.newBooleanValue((int) value.getValue() > 0);
+                return TypedValues.newBooleanValue(((int) value.getValue()) > 0);
             case BOOLEAN:
                 return TypedValues.newBooleanValue((Boolean) value.getValue());
             case STRING:

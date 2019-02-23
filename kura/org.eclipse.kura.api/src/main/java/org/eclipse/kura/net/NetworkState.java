@@ -16,20 +16,14 @@ package org.eclipse.kura.net;
  */
 public enum NetworkState {
     /** Networking state is unknown. */
-    UNKNOWN(0),
-    /** Networking is inactive and all devices are disabled. */
-    ASLEEP(10),
-    /** There is no active network connection. */
-    DISCONNECTED(20),
-    /** Network connections are being cleaned up. */
-    DISCONNECTING(30),
-    /** A network device is connecting to a network and there is no other available network connection. */
-    CONNECTING(40),
-    /** A network device is connected, but there is only link-local connectivity. */
-    CONNECTED_LOCAL(50),
-    /** A network device is connected, but there is only site-local connectivity. */
-    CONNECTED_SITE(60),
-    /** A network device is connected, with global network connectivity. */
+    UNKNOWN(0), /** Networking is inactive and all devices are disabled. */
+    ASLEEP(10), /** There is no active network connection. */
+    DISCONNECTED(20), /** Network connections are being cleaned up. */
+    DISCONNECTING(
+            30), /** A network device is connecting to a network and there is no other available network connection. */
+    CONNECTING(40), /** A network device is connected, but there is only link-local connectivity. */
+    CONNECTED_LOCAL(50), /** A network device is connected, but there is only site-local connectivity. */
+    CONNECTED_SITE(60), /** A network device is connected, with global network connectivity. */
     CONNECTED_GLOBAL(70);
 
     private int m_code;

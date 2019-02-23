@@ -16,7 +16,6 @@ import java.util.Arrays;
 
 /**
  * Utilities to quickly sort an array of values
- * 
  * @deprecated Use sort methods from {@link Arrays} instead
  */
 @Deprecated

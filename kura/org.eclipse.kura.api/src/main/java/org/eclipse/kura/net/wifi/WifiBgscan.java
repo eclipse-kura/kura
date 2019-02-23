@@ -15,7 +15,7 @@ import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Background Scan container class
- *
+ * 
  * @noextend This class is not intended to be subclassed by clients.
  */
 @ProviderType

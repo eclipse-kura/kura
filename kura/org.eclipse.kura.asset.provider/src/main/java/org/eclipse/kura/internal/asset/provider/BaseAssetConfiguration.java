@@ -58,8 +58,8 @@ public final class BaseAssetConfiguration {
     private Map<String, Object> properties;
     private Tocd ocd;
     private AssetConfiguration assetConfiguration;
-    private final boolean hasReadChannels;
-    private final String kuraServicePid;
+    private boolean hasReadChannels;
+    private String kuraServicePid;
 
     public BaseAssetConfiguration(final Map<String, Object> properties) {
         this.properties = properties;
@@ -70,23 +70,23 @@ public final class BaseAssetConfiguration {
     }
 
     public Map<String, Object> getProperties() {
-        return this.properties;
+        return properties;
     }
 
     public Tocd getDefinition() {
-        return this.ocd;
+        return ocd;
     }
 
     public AssetConfiguration getAssetConfiguration() {
-        return this.assetConfiguration;
+        return assetConfiguration;
     }
 
     public boolean hasReadChannels() {
-        return this.hasReadChannels;
+        return hasReadChannels;
     }
 
     public String getKuraServicePid() {
-        return this.kuraServicePid;
+        return kuraServicePid;
     }
 
     public List<ChannelRecord> getAllReadRecords() {
@@ -132,13 +132,13 @@ public final class BaseAssetConfiguration {
         logger.info("updating asset configuration...");
         final long start = System.currentTimeMillis();
         final Map<String, Object> updatedConfiguration = updateConfiguration(context, assetDescriptor,
-                new HashMap<>(this.properties), driverDescriptor);
+                new HashMap<>(properties), driverDescriptor);
         logger.info("updating asset configuration...done in {} ms", System.currentTimeMillis() - start);
 
         if (updatedConfiguration != null) {
             this.properties = updatedConfiguration;
-            this.assetConfiguration = new AssetConfiguration(getDescription(this.properties),
-                    getDriverPid(this.properties), retreiveChannelList(this.properties));
+            this.assetConfiguration = new AssetConfiguration(getDescription(properties), getDriverPid(properties),
+                    retreiveChannelList(properties));
         }
 
         this.ocd = buildDefinition(baseOcd, assetDescriptor, driverDescriptor);
@@ -147,12 +147,12 @@ public final class BaseAssetConfiguration {
     private Tocd buildDefinition(final Tocd baseOcd, final List<Tad> assetDescriptor,
             final List<Tad> driverDescriptor) {
         Stream.concat(assetDescriptor.stream(), driverDescriptor.stream()).forEach(attribute -> {
-            for (final Entry<String, Channel> entry : this.assetConfiguration.getAssetChannels().entrySet()) {
+            for (final Entry<String, Channel> entry : assetConfiguration.getAssetChannels().entrySet()) {
                 final String channelName = entry.getKey();
                 if (!(attribute instanceof Tad)) {
                     return;
                 }
-                final Tad newAttribute = cloneAd(attribute, channelName);
+                final Tad newAttribute = cloneAd((Tad) attribute, channelName);
                 baseOcd.addAD(newAttribute);
             }
         });
@@ -170,7 +170,7 @@ public final class BaseAssetConfiguration {
 
         final Map<String, Object> defaultValues = ComponentUtil.getDefaultProperties(tempOcd, context);
 
-        final Map<String, Channel> channels = this.assetConfiguration.getAssetChannels();
+        final Map<String, Channel> channels = assetConfiguration.getAssetChannels();
 
         for (AD tad : tempOcd.getAD()) {
             if (!tad.isRequired()) {
@@ -254,9 +254,8 @@ public final class BaseAssetConfiguration {
         }
 
         private static boolean isValidChannelName(String channelName) {
-            if (isNull(channelName)) {
+            if (isNull(channelName))
                 return false;
-            }
 
             final String prohibitedChars = CHANNEL_NAME_PROHIBITED_CHARS.value();
 
@@ -293,7 +292,7 @@ public final class BaseAssetConfiguration {
         final Map<String, Map<String, Object>> channels = new HashMap<>();
 
         private Map<String, Object> getChannelProperties(final String channelName) {
-            return this.channels.computeIfAbsent(channelName, k -> new HashMap<>());
+            return channels.computeIfAbsent(channelName, k -> new HashMap<>());
         }
 
         void process(final ChannelProperty property, final Object value) {
@@ -301,7 +300,7 @@ public final class BaseAssetConfiguration {
         }
 
         final Map<String, Channel> getChannelList() {
-            return this.channels.entrySet().parallelStream().map(e -> extractChannel(e.getKey(), e.getValue()))
+            return channels.entrySet().parallelStream().map(e -> extractChannel(e.getKey(), e.getValue()))
                     .filter(Objects::nonNull).collect(Collectors.toMap(Channel::getName, c -> c));
         }
 

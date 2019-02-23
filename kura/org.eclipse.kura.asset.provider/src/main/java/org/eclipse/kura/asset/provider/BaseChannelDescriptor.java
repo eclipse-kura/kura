@@ -9,7 +9,7 @@
  * Contributors:
  *     Eurotech
  *     Amit Kumar Mondal
- *
+ *     
  *******************************************************************************/
 package org.eclipse.kura.asset.provider;
 

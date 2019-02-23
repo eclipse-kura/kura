@@ -33,7 +33,7 @@ Import-Package:
  org.osgi.service.event;version="1.3.0",
  org.osgi.service.io;version="1.0.0",
  org.osgi.util.tracker;version="[1.5.0,2.0.0)",
- org.slf4j;version="[1.7.0,2.0.0)"
+ org.slf4j;version="1.7.0"
 Export-Package: org.eclipse.kura.internal.board;version="1.0.0";x-internal:=true,
  org.eclipse.kura.internal.linux.net;version="1.0.0";x-internal:=true,
  org.eclipse.kura.internal.linux.net.dns;version="1.0.0";x-internal:=true,
@@ -53,4 +53,3 @@ Export-Package: org.eclipse.kura.internal.board;version="1.0.0";x-internal:=true
  org.eclipse.kura.linux.net.route;version="1.0.1";uses:="org.eclipse.kura.net,org.eclipse.kura.net.route",
  org.eclipse.kura.linux.net.util;version="1.0.2";uses:="org.eclipse.kura.net.wifi,org.eclipse.kura.net",
  org.eclipse.kura.linux.net.wifi;version="1.1.0";uses:="org.eclipse.kura.net.wifi"
-Automatic-Module-Name: org.eclipse.kura.linux.net

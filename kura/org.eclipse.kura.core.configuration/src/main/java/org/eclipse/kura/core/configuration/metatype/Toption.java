@@ -58,7 +58,7 @@ public class Toption implements Option {
     protected List<Object> any;
     protected String label;
     protected String value;
-    private final Map<QName, String> otherAttributes = new HashMap<>();
+    private final Map<QName, String> otherAttributes = new HashMap<QName, String>();
 
     /**
      * Gets the value of the any property.
@@ -86,14 +86,14 @@ public class Toption implements Option {
      */
     public List<Object> getAny() {
         if (this.any == null) {
-            this.any = new ArrayList<>();
+            this.any = new ArrayList<Object>();
         }
         return this.any;
     }
 
     public void setAny(Object o) {
         if (this.any == null) {
-            this.any = new ArrayList<>();
+            this.any = new ArrayList<Object>();
         }
         this.any.add(o);
     }

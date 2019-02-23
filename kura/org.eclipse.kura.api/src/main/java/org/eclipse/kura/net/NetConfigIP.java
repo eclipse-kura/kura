@@ -30,7 +30,7 @@ import org.osgi.annotation.versioning.ProviderType;
  *
  * @param <T>
  *            IPv4 or IPv6 address
- *
+ * 
  * @noextend This class is not intended to be subclassed by clients.
  */
 @ProviderType

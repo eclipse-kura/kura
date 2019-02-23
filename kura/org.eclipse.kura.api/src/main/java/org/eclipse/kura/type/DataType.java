@@ -16,7 +16,6 @@ package org.eclipse.kura.type;
 /**
  * This contains all the required data type constants required for representing
  * Java data types as {@link TypedValue}
- *
  * @since 1.2
  */
 public enum DataType {

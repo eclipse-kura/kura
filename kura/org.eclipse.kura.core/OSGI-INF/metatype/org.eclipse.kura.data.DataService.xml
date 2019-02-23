@@ -32,7 +32,7 @@
             type="Integer"
             cardinality="0" 
             required="true"
-            default="10"
+            default="60"
             min="1"
             description="Frequency in seconds to retry a connection of the Data Publishers after a disconnect (Minimum value 1)."/>
             

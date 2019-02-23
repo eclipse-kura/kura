@@ -83,7 +83,7 @@ public final class FilterUtil {
 
     /**
      * Quote a value for being used in LDAP style OSGi filter.
-     *
+     * 
      * @param value
      *            The value to quote, may be {@code null}.
      * @return The quoted value, is {@code null} if the input was {@code null}.

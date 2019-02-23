@@ -20,7 +20,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * associated to a KuraPayload to geotag a KuraMessage before sending to a
  * remote cloud platform. Refer to the description of each of the fields for more
  * information on the model of KuraPosition.
- *
+ * 
  * @noextend This class is not intended to be subclassed by clients.
  */
 @ProviderType

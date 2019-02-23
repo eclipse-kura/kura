@@ -14,4 +14,3 @@ Import-Package: org.eclipse.kura.asset;version="[1.0,1.1)",
  org.osgi.framework;version="1.8"
 Service-Component: OSGI-INF/*.xml
 Bundle-ActivationPolicy: lazy
-Automatic-Module-Name: org.eclipse.kura.asset.helper.provider

@@ -48,7 +48,7 @@ public class ServiceConfiguration {
     }
 
     public boolean isEnableJmx() {
-        return this.enableJmx;
+        return enableJmx;
     }
 
     public boolean isValid() {

@@ -22,29 +22,29 @@ public class WriteRequest implements Validable {
     private String value;
 
     public String getName() {
-        return this.name;
+        return name;
     }
 
     public DataType getType() {
-        return this.type;
+        return type;
     }
 
     public TypedValue<?> getValue() {
-        return TypedValues.parseTypedValue(this.type, this.value);
+        return TypedValues.parseTypedValue(type, value);
     }
 
     public ChannelRecord toChannelRecord() {
-        return ChannelRecord.createWriteRecord(this.name, getValue());
+        return ChannelRecord.createWriteRecord(name, getValue());
     }
 
     @Override
     public String toString() {
-        return "WriteRequest [name=" + this.name + ", type=" + this.type + ", value=" + getValue() + "]";
+        return "WriteRequest [name=" + name + ", type=" + type + ", value=" + getValue() + "]";
     }
 
     @Override
     public boolean isValid() {
-        return this.name != null && this.type != null && this.value != null;
+        return name != null && type != null && value != null;
     }
 
 }

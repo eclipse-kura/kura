@@ -51,7 +51,7 @@ public class Stress implements ConfigurableComponent {
     public Stress() {
         super();
         this.m_worker = Executors.newScheduledThreadPool(5);
-        this.m_handle = new ArrayList<>();
+        this.m_handle = new ArrayList<ScheduledFuture<?>>();
     }
 
     // ----------------------------------------------------------------

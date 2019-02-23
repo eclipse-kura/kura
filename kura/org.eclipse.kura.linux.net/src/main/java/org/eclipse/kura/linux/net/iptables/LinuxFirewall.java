@@ -101,12 +101,12 @@ public class LinuxFirewall {
                 logger.debug("permittedNetworkPrefix: {}", permittedNetworkPrefix);
 
                 newLocalRule = new LocalRule(port, protocol,
-                        new NetworkPair<>((IP4Address) IPAddress.parseHostAddress(permittedNetwork),
+                        new NetworkPair<IP4Address>((IP4Address) IPAddress.parseHostAddress(permittedNetwork),
                                 Short.parseShort(permittedNetworkPrefix)),
                         permittedInterfaceName, unpermittedInterfaceName, permittedMAC, sourcePortRange);
             } else {
                 newLocalRule = new LocalRule(port, protocol,
-                        new NetworkPair<>((IP4Address) IPAddress.parseHostAddress("0.0.0.0"), (short) 0),
+                        new NetworkPair<IP4Address>((IP4Address) IPAddress.parseHostAddress("0.0.0.0"), (short) 0),
                         permittedInterfaceName, permittedInterfaceName, permittedMAC, sourcePortRange);
             }
 

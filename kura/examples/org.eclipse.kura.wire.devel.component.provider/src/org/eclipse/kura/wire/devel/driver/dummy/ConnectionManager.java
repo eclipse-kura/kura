@@ -33,15 +33,15 @@ public class ConnectionManager {
     public Future<?> connectAsync() {
         synchronized (this) {
             if (isConnecting()) {
-                return this.connectionAttempt;
+                return connectionAttempt;
             }
 
             this.connectionAttempt = this.executor.submit(() -> {
-                if (this.isShuttingDown.get()) {
-                    return null;
+                if (isShuttingDown.get()) {
+                    return (Void) null;
                 }
-                connectInternal();
-                return null;
+                this.connectInternal();
+                return (Void) null;
             });
             return this.connectionAttempt;
         }
@@ -49,10 +49,10 @@ public class ConnectionManager {
 
     public Future<?> disconnectAsync() {
         return this.executor.submit(() -> {
-            if (this.isShuttingDown.get()) {
+            if (isShuttingDown.get()) {
                 return;
             }
-            disconnectInternal();
+            this.disconnectInternal();
         });
     }
 
@@ -75,14 +75,14 @@ public class ConnectionManager {
 
     public void disconnectSync() throws ConnectionException {
         try {
-            disconnectAsync().get();
+            this.disconnectAsync().get();
         } catch (final Exception e) {
             throw new ConnectionException(e);
         }
     }
 
     private void connectInternal() throws ConnectionException {
-        if (this.isConnected.get()) {
+        if (isConnected.get()) {
             logger.debug("already connected");
             return;
         }
@@ -105,18 +105,18 @@ public class ConnectionManager {
             }
         }
 
-        this.isConnected.set(true);
+        isConnected.set(true);
         logger.info("connecting...done");
     }
 
     private void disconnectInternal() {
-        if (!this.isConnected.get()) {
+        if (!isConnected.get()) {
             logger.debug("already disconnected");
             return;
         }
 
         logger.info("disconnecting...");
-        this.isConnected.set(false);
+        isConnected.set(false);
 
         final int connectionDelay = this.options.getConnectionDelay();
 
@@ -132,7 +132,7 @@ public class ConnectionManager {
     }
 
     public boolean isConnected() {
-        return this.isConnected.get();
+        return isConnected.get();
     }
 
     public boolean isConnecting() {
@@ -144,7 +144,7 @@ public class ConnectionManager {
     }
 
     public void shutdown() {
-        this.isShuttingDown.set(true);
+        isShuttingDown.set(true);
         try {
             this.executor.submit(this::disconnectInternal).get();
         } catch (Exception e) {

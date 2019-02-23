@@ -22,7 +22,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * Base class for DNS proxy configurations
  *
  * @param <T>
- *
+ * 
  * @noextend This class is not intended to be subclassed by clients.
  */
 @ProviderType

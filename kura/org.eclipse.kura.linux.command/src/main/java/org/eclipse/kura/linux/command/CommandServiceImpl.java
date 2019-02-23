@@ -40,11 +40,11 @@ public class CommandServiceImpl implements CommandService {
 
     @Override
     public String execute(final String cmd) throws KuraException {
-
+        
         if (cmd == null || cmd.isEmpty()) {
             return "<empty command>";
         }
-
+        
         try {
             final Path scriptFile = Files.createTempFile("script-", ".sh");
             try {

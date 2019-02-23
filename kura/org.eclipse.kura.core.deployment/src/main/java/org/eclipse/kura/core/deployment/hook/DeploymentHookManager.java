@@ -43,7 +43,7 @@ public class DeploymentHookManager {
 
         final String hookId = (String) rawHookId;
 
-        if (this.registeredHooks.containsKey(hookId)) {
+        if (registeredHooks.containsKey(hookId)) {
             logger.warn("Found duplicated hook with id {}, not registering", ConfigurationService.KURA_SERVICE_PID);
             return;
         }
@@ -102,7 +102,7 @@ public class DeploymentHookManager {
 
     private void updateAssociations() {
         for (HookAssociation association : this.associations.values()) {
-            final DeploymentHook hook = this.registeredHooks.get(association.hookId);
+            final DeploymentHook hook = registeredHooks.get(association.hookId);
             association.hook = hook;
             logger.info("Association updated: {}", association);
         }
@@ -128,8 +128,8 @@ public class DeploymentHookManager {
 
     public static class HookAssociation {
 
-        private final String type;
-        private final String hookId;
+        private String type;
+        private String hookId;
         private DeploymentHook hook;
 
         public HookAssociation(String type, String hookId) {
@@ -138,22 +138,21 @@ public class DeploymentHookManager {
         }
 
         public String getRequestType() {
-            return this.type;
+            return type;
         }
 
         public String getHookId() {
-            return this.hookId;
+            return hookId;
         }
 
         public DeploymentHook getDeploymentHook() {
-            return this.hook;
+            return hook;
         }
 
-        @Override
         public String toString() {
             StringBuilder builder = new StringBuilder();
-            builder.append("request type: ").append(this.type).append(" hook id: ").append(this.hookId)
-                    .append(" status: ").append(this.hook == null ? "NOT BOUND" : "BOUND");
+            builder.append("request type: ").append(type).append(" hook id: ").append(hookId).append(" status: ")
+                    .append(hook == null ? "NOT BOUND" : "BOUND");
             return builder.toString();
         }
     }

@@ -73,7 +73,7 @@ public class BluetoothAdapterImpl implements BluetoothAdapter {
     // --------------------------------------------------------------------
     private void buildAdapter(String name) throws KuraException {
         s_logger.debug("Creating new Bluetooth adapter: {}", name);
-        Map<String, String> props = new HashMap<>();
+        Map<String, String> props = new HashMap<String, String>();
         props = BluetoothUtil.getConfig(name);
         this.m_address = props.get("address");
         this.m_leReady = Boolean.parseBoolean(props.get("leReady"));
@@ -93,7 +93,7 @@ public class BluetoothAdapterImpl implements BluetoothAdapter {
     // --------------------------------------------------------------------
     public static void addConnectedDevice(BluetoothDevice bd) {
         if (s_connectedDevices == null) {
-            s_connectedDevices = new ArrayList<>();
+            s_connectedDevices = new ArrayList<BluetoothDevice>();
         }
         s_connectedDevices.add(bd);
     }

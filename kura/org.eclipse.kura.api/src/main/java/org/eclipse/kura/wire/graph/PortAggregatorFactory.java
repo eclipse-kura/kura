@@ -8,7 +8,7 @@
  *
  * Contributors:
  *  Eurotech
- *
+ * 
  *******************************************************************************/
 
 package org.eclipse.kura.wire.graph;
@@ -18,9 +18,9 @@ import java.util.List;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
- *
+ * 
  * Defines a factory service API that can be used to instantiate a specific {@link PortAggregator} strategy.
- *
+ * 
  * @since 1.4
  */
 @ProviderType

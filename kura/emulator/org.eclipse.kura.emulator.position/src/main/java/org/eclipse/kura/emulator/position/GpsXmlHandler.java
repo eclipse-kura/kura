@@ -37,7 +37,7 @@ public class GpsXmlHandler extends DefaultHandler {
     private boolean foundTime = false;
 
     public GpsXmlHandler() {
-        this.gpsPoints = new ArrayList<>();
+        this.gpsPoints = new ArrayList<GpsPoint>();
         this.latitude = null;
         this.longitude = null;
         this.elevation = null;

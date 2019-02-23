@@ -16,7 +16,7 @@ public class ControlTopic extends KuraApplicationTopic {
     public ControlTopic(String fullTopic) {
         this(fullTopic, MessageType.CONTROL.getTopicPrefix());
     }
-
+    
     public ControlTopic(String fullTopic, String controlPrefix) {
         this.fullTopic = fullTopic;
         if (fullTopic.compareTo("#") == 0) {
@@ -59,13 +59,13 @@ public class ControlTopic extends KuraApplicationTopic {
             index++;
         }
 
-        // reqId
+        //reqId
         if (index < this.topicParts.length) {
             this.reqId = this.topicParts[index];
             offset += this.reqId.length() + 1;
             index++;
         }
-
+        
         // applicationId
         if (index < this.topicParts.length) {
             this.applicationId = this.topicParts[index];

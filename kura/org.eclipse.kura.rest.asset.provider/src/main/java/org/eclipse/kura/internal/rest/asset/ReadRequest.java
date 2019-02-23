@@ -17,11 +17,11 @@ public class ReadRequest implements Validable {
     private Set<String> channels;
 
     public Set<String> getChannelNames() {
-        return this.channels;
+        return channels;
     }
 
     @Override
     public boolean isValid() {
-        return this.channels != null;
+        return channels != null;
     }
 }

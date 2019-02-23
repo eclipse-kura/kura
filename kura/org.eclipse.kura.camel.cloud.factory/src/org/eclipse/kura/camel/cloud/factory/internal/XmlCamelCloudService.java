@@ -84,7 +84,7 @@ public class XmlCamelCloudService {
         // new router
 
         this.router = new OsgiDefaultCamelContext(this.context, registry);
-        if (!this.configuration.isEnableJmx()) {
+        if (!configuration.isEnableJmx()) {
             this.router.disableJMX();
         }
 
@@ -139,7 +139,7 @@ public class XmlCamelCloudService {
     }
 
     private void callInitCode(final CamelContext router) throws ScriptException {
-        scriptInitCamelContext(router, this.configuration.getInitCode(), XmlCamelCloudService.class.getClassLoader());
+        scriptInitCamelContext(router, configuration.getInitCode(), XmlCamelCloudService.class.getClassLoader());
     }
 
 }

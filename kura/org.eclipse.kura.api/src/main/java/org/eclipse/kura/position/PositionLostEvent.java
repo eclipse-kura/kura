@@ -18,7 +18,7 @@ import org.osgi.service.event.Event;
 
 /**
  * PositionLostEvent is raised when GPS position has been lost.
- *
+ * 
  * @noextend This class is not intended to be subclassed by clients.
  */
 @ProviderType

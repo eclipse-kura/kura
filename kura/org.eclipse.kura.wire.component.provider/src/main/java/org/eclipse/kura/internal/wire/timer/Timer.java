@@ -72,7 +72,7 @@ public class Timer implements WireEmitter, ConfigurableComponent {
      * Binds the Wire Helper Service.
      *
      * @param wireHelperService
-     *                              the new Wire Helper Service
+     *            the new Wire Helper Service
      */
     public void bindWireHelperService(final WireHelperService wireHelperService) {
         if (isNull(this.wireHelperService)) {
@@ -84,7 +84,7 @@ public class Timer implements WireEmitter, ConfigurableComponent {
      * Unbinds the Wire Helper Service.
      *
      * @param wireHelperService
-     *                              the new Wire Helper Service
+     *            the new Wire Helper Service
      */
     public void unbindWireHelperService(final WireHelperService wireHelperService) {
         if (this.wireHelperService == wireHelperService) {
@@ -96,9 +96,9 @@ public class Timer implements WireEmitter, ConfigurableComponent {
      * OSGi service component activation callback
      *
      * @param ctx
-     *                       the component context
+     *            the component context
      * @param properties
-     *                       the configured properties
+     *            the configured properties
      */
     @SuppressWarnings("unchecked")
     protected void activate(final ComponentContext ctx, final Map<String, Object> properties) {
@@ -118,7 +118,7 @@ public class Timer implements WireEmitter, ConfigurableComponent {
      * OSGi service component modification callback
      *
      * @param properties
-     *                       the updated properties
+     *            the updated properties
      */
     protected void updated(final Map<String, Object> properties) {
         logger.debug("Updating Timer...");
@@ -135,7 +135,7 @@ public class Timer implements WireEmitter, ConfigurableComponent {
      * OSGi service component deactivation callback
      *
      * @param ctx
-     *                the component context
+     *            the component context
      */
     protected void deactivate(final ComponentContext ctx) {
         logger.debug("Dectivating Timer...");
@@ -189,7 +189,7 @@ public class Timer implements WireEmitter, ConfigurableComponent {
      * interval
      *
      * @throws SchedulerException
-     *                                if job scheduling fails
+     *             if job scheduling fails
      */
     private void doUpdate() throws SchedulerException {
         shutdownScheduler();
@@ -218,11 +218,11 @@ public class Timer implements WireEmitter, ConfigurableComponent {
      * Creates a trigger based on the provided interval
      *
      * @param interval
-     *                     the interval in milliseconds
+     *            the interval in milliseconds
      * @throws SchedulerException
-     *                                      if scheduling fails
+     *             if scheduling fails
      * @throws IllegalArgumentException
-     *                                      if the interval is less than or equal to zero
+     *             if the interval is less than or equal to zero
      */
     private void scheduleSimpleInterval(final long interval) throws SchedulerException {
         if (interval <= 0) {
@@ -251,11 +251,11 @@ public class Timer implements WireEmitter, ConfigurableComponent {
      * Creates a cron trigger based on the provided interval
      *
      * @param expression
-     *                       the CRON expression
+     *            the CRON expression
      * @throws SchedulerException
-     *                                  if scheduling fails
+     *             if scheduling fails
      * @throws NullPointerException
-     *                                  if the argument is null
+     *             if the argument is null
      */
     private void scheduleCronInterval(final String expression) throws SchedulerException {
         requireNonNull(expression, "Cron Expression cannot be null");

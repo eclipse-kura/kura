@@ -8,13 +8,13 @@
  *
  * Contributors:
  *  Eurotech
- *
+ * 
  *******************************************************************************/
 package org.eclipse.kura.wire.graph;
 
 /**
  * Wire Graph related constants.
- *
+ * 
  * @since 1.4
  */
 public enum Constants {

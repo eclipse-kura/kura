@@ -43,7 +43,7 @@ public class Sink implements WireReceiver, ConfigurableComponent {
         logger.info("activating...");
 
         this.kuraServicePid = (String) properties.get(ConfigurationService.KURA_SERVICE_PID);
-        this.wireSupport = this.wireHelperService.newWireSupport(this,
+        this.wireSupport = wireHelperService.newWireSupport(this,
                 (ServiceReference<WireComponent>) context.getServiceReference());
         updated(properties);
 
@@ -87,13 +87,13 @@ public class Sink implements WireReceiver, ConfigurableComponent {
 
     @Override
     public void onWireReceive(final WireEnvelope wireEnvelope) {
-        if (this.measureTimings) {
+        if (measureTimings) {
             final long currentTimestamp = System.currentTimeMillis();
-            if (this.lastTimestamp != 0) {
-                long diff = currentTimestamp - this.lastTimestamp;
+            if (lastTimestamp != 0) {
+                long diff = currentTimestamp - lastTimestamp;
                 logger.info("{}: {} ms", this.kuraServicePid, diff);
             }
-            this.lastTimestamp = currentTimestamp;
+            lastTimestamp = currentTimestamp;
         }
     }
 }

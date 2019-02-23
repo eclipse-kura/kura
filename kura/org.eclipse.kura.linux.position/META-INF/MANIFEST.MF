@@ -21,5 +21,4 @@ Import-Package: javax.microedition.io;resolution:=optional,
  org.osgi.service.io;version="1.0.0",
  org.osgi.util.measurement;version="1.0.1",
  org.osgi.util.position;version="1.0.1",
- org.slf4j;version="[1.7.0,2.0.0)"
-Automatic-Module-Name: org.eclipse.kura.linux.position
+ org.slf4j;version="1.7.0"

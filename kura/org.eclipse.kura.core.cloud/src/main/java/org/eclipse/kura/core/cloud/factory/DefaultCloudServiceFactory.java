@@ -228,7 +228,7 @@ public class DefaultCloudServiceFactory implements CloudServiceFactory, CloudCon
                     false);
 
             // create the DataService layer and set the selective dependency on the DataTransportService PID
-            Map<String, Object> dataServiceProperties = new HashMap<>();
+            Map<String, Object> dataServiceProperties = new HashMap<String, Object>();
             name = DATA_TRANSPORT_SERVICE_REFERENCE_NAME + ComponentConstants.REFERENCE_TARGET_SUFFIX;
             dataServiceProperties.put(name, String.format(REFERENCE_TARGET_VALUE_FORMAT, dataTransportServicePid));
 
@@ -267,7 +267,7 @@ public class DefaultCloudServiceFactory implements CloudServiceFactory, CloudCon
 
     @Override
     public List<String> getStackComponentsPids(String pid) throws KuraException {
-        List<String> componentPids = new ArrayList<>();
+        List<String> componentPids = new ArrayList<String>();
         String[] parts = pid.split("-");
         if (parts.length != 0 && CLOUD_SERVICE_PID.equals(parts[0])) {
             String suffix = null;

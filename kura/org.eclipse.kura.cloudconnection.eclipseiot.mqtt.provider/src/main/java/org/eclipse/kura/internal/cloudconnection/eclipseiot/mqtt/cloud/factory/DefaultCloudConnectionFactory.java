@@ -172,8 +172,8 @@ public class DefaultCloudConnectionFactory implements CloudConnectionFactory {
 
     private static final String REFERENCE_TARGET_VALUE_FORMAT = "(" + ConfigurationService.KURA_SERVICE_PID + "=%s)";
 
-    private static final Pattern MANAGED_CLOUD_SERVICE_PID_PATTERN = Pattern.compile(
-            "^org\\.eclipse\\.kura\\.cloudconnection\\.eclipseiot\\.mqtt\\.ConnectionManager(-[a-zA-Z0-9]+)?$");
+    private static final Pattern MANAGED_CLOUD_SERVICE_PID_PATTERN = Pattern
+            .compile("^org\\.eclipse\\.kura\\.cloudconnection\\.eclipseiot\\.mqtt\\.ConnectionManager(-[a-zA-Z0-9]+)?$");
 
     private ConfigurationService configurationService;
 
@@ -295,7 +295,7 @@ public class DefaultCloudConnectionFactory implements CloudConnectionFactory {
                 }
 
                 return MANAGED_CLOUD_SERVICE_PID_PATTERN.matcher((String) kuraServicePid).matches()
-                        && FACTORY_PID.equals(ref.getProperty(KURA_CLOUD_CONNECTION_FACTORY_PID));
+                        && (FACTORY_PID.equals(ref.getProperty(KURA_CLOUD_CONNECTION_FACTORY_PID)));
             }).map(ref -> (String) ref.getProperty(ConfigurationService.KURA_SERVICE_PID)).collect(Collectors.toSet());
         } catch (InvalidSyntaxException e) {
             throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID, e);

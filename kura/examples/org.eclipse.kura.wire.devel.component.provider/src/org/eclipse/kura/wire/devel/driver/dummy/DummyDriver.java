@@ -56,7 +56,7 @@ public class DummyDriver implements Driver, ConfigurableComponent {
     public void deactivate() {
         logger.info("deactivating...");
 
-        this.connectionManager.shutdown();
+        connectionManager.shutdown();
         this.channelListenerManager.shutdown();
 
         logger.info("deactivating...done");
@@ -65,10 +65,10 @@ public class DummyDriver implements Driver, ConfigurableComponent {
     public void updated(Map<String, Object> properties) {
         logger.info("updating..");
 
-        this.values.clear();
+        values.clear();
         this.options = new DummyDriverOptions(properties);
 
-        this.connectionManager.setOptions(this.options);
+        this.connectionManager.setOptions(options);
 
         // some drivers might need to reconnect due to changes to connection parameters
         // in configuration, driver should not block the configuration update thread
@@ -79,12 +79,12 @@ public class DummyDriver implements Driver, ConfigurableComponent {
 
     @Override
     public void connect() throws ConnectionException {
-        this.connectionManager.connectSync();
+        connectionManager.connectSync();
     }
 
     @Override
     public void disconnect() throws ConnectionException {
-        this.connectionManager.disconnectSync();
+        connectionManager.disconnectSync();
     }
 
     @Override
@@ -155,7 +155,7 @@ public class DummyDriver implements Driver, ConfigurableComponent {
                 logger.debug("channel name: {}", channelName);
                 logger.debug("value: {}", value);
 
-                this.values.put(record.getChannelName(), record.getValue());
+                values.put(record.getChannelName(), record.getValue());
                 record.setChannelStatus(SUCCESS);
             } catch (Exception e) {
                 record.setChannelStatus(new ChannelStatus(FAILURE, "failed to write channel", e));
@@ -213,7 +213,7 @@ public class DummyDriver implements Driver, ConfigurableComponent {
             for (final ChannelRecord record : records) {
                 try {
                     // records with valid configuration will be processed during the execute() method
-                    this.validRequests.add(new ReadRequest(record));
+                    validRequests.add(new ReadRequest(record));
                 } catch (Exception e) {
                     // requests with invalid configuration can be immediately marked as failed
                     // invalid records should be returned by execute() anyway
@@ -232,7 +232,7 @@ public class DummyDriver implements Driver, ConfigurableComponent {
         public List<ChannelRecord> execute() throws ConnectionException, KuraException {
             connect();
 
-            for (final ReadRequest request : this.validRequests) {
+            for (final ReadRequest request : validRequests) {
                 try {
                     request.record.setValue(readInternal(request));
                     request.record.setChannelStatus(SUCCESS);
@@ -243,12 +243,12 @@ public class DummyDriver implements Driver, ConfigurableComponent {
                 }
             }
             // returns all records, not only the ones with valid configuration
-            return this.records;
+            return records;
         }
 
         @Override
         public List<ChannelRecord> getChannelRecords() {
-            return this.records;
+            return records;
         }
 
     }

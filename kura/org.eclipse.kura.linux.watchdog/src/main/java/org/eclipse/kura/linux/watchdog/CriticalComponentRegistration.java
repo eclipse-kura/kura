@@ -25,7 +25,7 @@ public class CriticalComponentRegistration {
 
     public boolean isTimedOut() {
         long now = System.nanoTime();
-        return this.criticalComponent.getCriticalComponentTimeout() * 1000000L < now - this.updated;
+        return (this.criticalComponent.getCriticalComponentTimeout() * 1000000L) < now - this.updated;
     }
 
     public void update() {

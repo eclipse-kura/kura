@@ -483,7 +483,7 @@ public interface SystemService {
 
     /**
      * Returns the device hostname
-     *
+     * 
      * @return a String that represents the device hostname
      * @since 2.0
      */

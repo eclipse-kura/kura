@@ -228,9 +228,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
             return;
         }
 
-        String kuraPid = makeString(reference.getProperty(ConfigurationService.KURA_SERVICE_PID));
-        if (kuraPid == null)
-            kuraPid = servicePid;
+        final String kuraPid = makeString(reference.getProperty(ConfigurationService.KURA_SERVICE_PID));
         final String factoryPid = makeString(reference.getProperty(ConfigurationAdmin.SERVICE_FACTORYPID));
 
         registerComponentConfiguration(kuraPid, servicePid, factoryPid);

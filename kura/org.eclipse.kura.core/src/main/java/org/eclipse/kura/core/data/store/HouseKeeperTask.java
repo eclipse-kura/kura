@@ -25,7 +25,7 @@ public class HouseKeeperTask implements Runnable {
     private static final Logger s_logger = LoggerFactory.getLogger(HouseKeeperTask.class);
 
     private final int m_purgeAge;
-    private final boolean doRepair;
+    private boolean doRepair;
     private final DataStore m_store;
 
     public HouseKeeperTask(DataStore store, int purgeAge, boolean doRepair) {
@@ -42,7 +42,7 @@ public class HouseKeeperTask implements Runnable {
 
             //
             // check and attempt to repair the store
-            if (this.doRepair) {
+            if (doRepair) {
                 s_logger.info("HouseKeeperTask: Check store...");
                 this.m_store.repair();
             }

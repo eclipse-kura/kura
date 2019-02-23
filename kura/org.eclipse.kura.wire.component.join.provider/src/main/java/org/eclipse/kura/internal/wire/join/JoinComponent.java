@@ -42,7 +42,7 @@ public final class JoinComponent implements MultiportWireReceiver, WireEmitter, 
 
     private static final Logger logger = LoggerFactory.getLogger(JoinComponent.class);
 
-    private WireHelperService wireHelperService;
+    private volatile WireHelperService wireHelperService;
 
     private MultiportWireSupport wireSupport;
     private ComponentContext context;

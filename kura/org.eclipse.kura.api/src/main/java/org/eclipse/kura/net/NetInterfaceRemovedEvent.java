@@ -18,7 +18,7 @@ import org.osgi.service.event.Event;
 
 /**
  * An event raised when a network interface has been removed from the system.
- *
+ * 
  * @noextend This class is not intended to be subclassed by clients.
  */
 @ProviderType

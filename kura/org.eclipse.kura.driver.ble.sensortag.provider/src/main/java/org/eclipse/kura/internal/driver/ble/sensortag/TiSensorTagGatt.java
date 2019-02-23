@@ -19,7 +19,7 @@ public class TiSensorTagGatt {
     // Refer to http://processors.wiki.ti.com/images/archive/a/a8/20130111154127!BLE_SensorTag_GATT_Server.pdf for the
     // CC2541
     // and http://www.ti.com/ww/en/wireless_connectivity/sensortag2015/tearDown.html#main for the CC2560
-
+    
     // Firmware revision
     public static final UUID UUID_DEVINFO_SERVICE = UUID.fromString("0000180a-0000-1000-8000-00805f9b34fb");
     public static final UUID UUID_DEVINFO_FIRMWARE_REVISION = UUID.fromString("00002a26-0000-1000-8000-00805f9b34fb");

@@ -10,8 +10,7 @@ Import-Package: org.eclipse.kura;version="[1.0,2.0)",
  org.eclipse.kura.bluetooth.le.beacon.listener;version="[1.0,1.1)",
  org.osgi.framework;version="1.7.0",
  org.osgi.service.component;version="1.2.0",
- org.slf4j;version="[1.7.0,2.0.0)"
+ org.slf4j;version="1.7.25"
 Service-Component: OSGI-INF/*.xml
 Bundle-ActivationPolicy: lazy
 Export-Package: org.eclipse.kura.ble.ibeacon;version="1.0.0"
-Automatic-Module-Name: org.eclipse.kura.ble.ibeacon.provider

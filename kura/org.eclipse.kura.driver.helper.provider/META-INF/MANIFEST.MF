@@ -15,7 +15,6 @@ Import-Package: org.eclipse.kura.asset;version="[1.0,2.0)",
  org.osgi.framework;version="1.8",
  org.osgi.service.cm;version="1.5.0",
  org.osgi.service.component;version="1.2.2",
- org.slf4j;version="[1.7.0,2.0.0)"
+ org.slf4j;version="1.7.0"
 Service-Component: OSGI-INF/*.xml
 Bundle-ActivationPolicy: lazy
-Automatic-Module-Name: org.eclipse.kura.driver.helper.provider

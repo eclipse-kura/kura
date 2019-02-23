@@ -62,7 +62,7 @@ public class Tmetadata implements MetaData {
     protected List<Tdesignate> designate;
     protected List<Object> any;
     protected String localization;
-    private final Map<QName, String> otherAttributes = new HashMap<>();
+    private final Map<QName, String> otherAttributes = new HashMap<QName, String>();
 
     /**
      * Gets the value of the ocd property.
@@ -90,14 +90,14 @@ public class Tmetadata implements MetaData {
     @Override
     public List<OCD> getOCD() {
         if (this.ocd == null) {
-            this.ocd = new ArrayList<>();
+            this.ocd = new ArrayList<Tocd>();
         }
-        return new ArrayList<>(this.ocd);
+        return new ArrayList<OCD>(this.ocd);
     }
 
     public void setOCD(Tocd element) {
         if (this.ocd == null) {
-            this.ocd = new ArrayList<>();
+            this.ocd = new ArrayList<Tocd>();
         }
         this.ocd.add(element);
     }
@@ -128,14 +128,14 @@ public class Tmetadata implements MetaData {
     @Override
     public List<Designate> getDesignate() {
         if (this.designate == null) {
-            this.designate = new ArrayList<>();
+            this.designate = new ArrayList<Tdesignate>();
         }
-        return new ArrayList<>(this.designate);
+        return new ArrayList<Designate>(this.designate);
     }
 
     public void setDesignate(Tdesignate td) {
         if (this.designate == null) {
-            this.designate = new ArrayList<>();
+            this.designate = new ArrayList<Tdesignate>();
         }
         this.designate.add(td);
     }
@@ -166,14 +166,14 @@ public class Tmetadata implements MetaData {
      */
     public List<Object> getAny() {
         if (this.any == null) {
-            this.any = new ArrayList<>();
+            this.any = new ArrayList<Object>();
         }
         return this.any;
     }
 
     public void getAny(Object o) {
         if (this.any == null) {
-            this.any = new ArrayList<>();
+            this.any = new ArrayList<Object>();
         }
         this.any.add(o);
     }

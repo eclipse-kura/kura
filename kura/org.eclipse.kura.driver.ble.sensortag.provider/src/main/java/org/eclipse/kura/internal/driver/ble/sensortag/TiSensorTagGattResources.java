@@ -16,9 +16,9 @@ import org.eclipse.kura.bluetooth.le.BluetoothLeGattService;
 
 public class TiSensorTagGattResources {
 
-    private final String name;
-    private final BluetoothLeGattService gattService;
-    private final BluetoothLeGattCharacteristic gattValueCharacteristic;
+    private String name;
+    private BluetoothLeGattService gattService;
+    private BluetoothLeGattCharacteristic gattValueCharacteristic;
 
     public TiSensorTagGattResources(String name, BluetoothLeGattService gattService,
             BluetoothLeGattCharacteristic gattValueChar) {
@@ -28,14 +28,14 @@ public class TiSensorTagGattResources {
     }
 
     public String getName() {
-        return this.name;
+        return name;
     }
 
     public BluetoothLeGattService getGattService() {
-        return this.gattService;
+        return gattService;
     }
 
     public BluetoothLeGattCharacteristic getGattValueCharacteristic() {
-        return this.gattValueCharacteristic;
+        return gattValueCharacteristic;
     }
 }

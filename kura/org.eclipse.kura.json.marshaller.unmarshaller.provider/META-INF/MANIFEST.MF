@@ -18,4 +18,3 @@ Import-Package: com.eclipsesource.json;version="0.9.4",
 Service-Component: OSGI-INF/*.xml
 Bundle-ActivationPolicy: lazy
 Export-Package: org.eclipse.kura.internal.json.marshaller.unmarshaller;version="1.0.0"
-Automatic-Module-Name: org.eclipse.kura.json.marshaller.unmarshaller.provider

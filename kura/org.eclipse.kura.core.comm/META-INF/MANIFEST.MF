@@ -16,4 +16,3 @@ Import-Package: javax.comm;version="1.2.0",
  org.eclipse.kura.comm;version="[1.1,1.2)",
  org.osgi.service.component;version="1.2.0",
  org.osgi.service.io;version="1.0.0"
-Automatic-Module-Name: org.eclipse.kura.core.comm

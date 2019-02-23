@@ -39,36 +39,36 @@ public class ModemInterfaceAddressConfigImpl extends ModemInterfaceAddressImpl i
     }
 
     @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + (this.m_configs == null ? 0 : this.m_configs.hashCode());
-        return result;
-    }
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((m_configs == null) ? 0 : m_configs.hashCode());
+		return result;
+	}
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!(obj instanceof ModemInterfaceAddressConfigImpl)) {
-            return false;
-        }
-        if (!super.equals(obj)) {
-            return false;
-        }
-        ModemInterfaceAddressConfigImpl other = (ModemInterfaceAddressConfigImpl) obj;
-        if (this.m_configs == null) {
-            if (other.m_configs != null) {
-                return false;
-            }
-        } else if (!this.m_configs.equals(other.m_configs)) {
-            return false;
-        }
-        return true;
-    }
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!(obj instanceof ModemInterfaceAddressConfigImpl)) {
+			return false;
+		}
+		if (!super.equals(obj)) {
+			return false;
+		}
+		ModemInterfaceAddressConfigImpl other = (ModemInterfaceAddressConfigImpl) obj;
+		if (m_configs == null) {
+			if (other.m_configs != null) {
+				return false;
+			}
+		} else if (!m_configs.equals(other.m_configs)) {
+			return false;
+		}
+		return true;
+	}
 
-    @Override
+	@Override
     public String toString() {
         if (this.m_configs != null) {
             StringBuffer sb = new StringBuffer();

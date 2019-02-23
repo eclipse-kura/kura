@@ -76,11 +76,11 @@ final class WireSupportImpl implements WireSupport, MultiportWireSupport {
         this.receiverPortByWire = new HashMap<>();
 
         for (int i = 0; i < inputPortCount; i++) {
-            this.receiverPorts.add(new ReceiverPortImpl());
+            receiverPorts.add(new ReceiverPortImpl());
         }
 
         for (int i = 0; i < outputPortCount; i++) {
-            this.emitterPorts.add(new EmitterPortImpl());
+            emitterPorts.add(new EmitterPortImpl());
         }
     }
 
@@ -157,7 +157,7 @@ final class WireSupportImpl implements WireSupport, MultiportWireSupport {
             return;
         }
         final WireEnvelope envelope = (WireEnvelope) value;
-        if (this.wireComponent instanceof WireReceiver) {
+        if (wireComponent instanceof WireReceiver) {
             ((WireReceiver) this.wireComponent).onWireReceive(envelope);
         } else {
             final ReceiverPortImpl receiverPort = this.receiverPortByWire.get(wire);
@@ -181,7 +181,7 @@ final class WireSupportImpl implements WireSupport, MultiportWireSupport {
 
         @Override
         public List<Wire> listConnectedWires() {
-            return Collections.unmodifiableList(this.connectedWires);
+            return Collections.unmodifiableList(connectedWires);
         }
     }
 
@@ -210,6 +210,6 @@ final class WireSupportImpl implements WireSupport, MultiportWireSupport {
 
     @Override
     public WireEnvelope createWireEnvelope(List<WireRecord> records) {
-        return new WireEnvelope(this.servicePid, records);
+        return new WireEnvelope(servicePid, records);
     }
 }

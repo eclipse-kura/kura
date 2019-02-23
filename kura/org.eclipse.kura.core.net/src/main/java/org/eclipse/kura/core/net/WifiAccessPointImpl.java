@@ -142,82 +142,82 @@ public class WifiAccessPointImpl implements WifiAccessPoint {
         }
         return sb.toString();
     }
-
+    
     @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + (this.bitrate == null ? 0 : this.bitrate.hashCode());
-        result = prime * result + (this.capabilities == null ? 0 : this.capabilities.hashCode());
-        result = prime * result + (int) (this.frequency ^ this.frequency >>> 32);
-        result = prime * result + Arrays.hashCode(this.hardwareAddress);
-        result = prime * result + (this.mode == null ? 0 : this.mode.hashCode());
-        result = prime * result + (this.rsnSecurity == null ? 0 : this.rsnSecurity.hashCode());
-        result = prime * result + (this.ssid == null ? 0 : this.ssid.hashCode());
-        result = prime * result + this.strength;
-        result = prime * result + (this.wpaSecurity == null ? 0 : this.wpaSecurity.hashCode());
-        return result;
-    }
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((bitrate == null) ? 0 : bitrate.hashCode());
+		result = prime * result + ((capabilities == null) ? 0 : capabilities.hashCode());
+		result = prime * result + (int) (frequency ^ (frequency >>> 32));
+		result = prime * result + Arrays.hashCode(hardwareAddress);
+		result = prime * result + ((mode == null) ? 0 : mode.hashCode());
+		result = prime * result + ((rsnSecurity == null) ? 0 : rsnSecurity.hashCode());
+		result = prime * result + ((ssid == null) ? 0 : ssid.hashCode());
+		result = prime * result + strength;
+		result = prime * result + ((wpaSecurity == null) ? 0 : wpaSecurity.hashCode());
+		return result;
+	}
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (!(obj instanceof WifiAccessPointImpl)) {
-            return false;
-        }
-        WifiAccessPointImpl other = (WifiAccessPointImpl) obj;
-        if (this.bitrate == null) {
-            if (other.bitrate != null) {
-                return false;
-            }
-        } else if (!this.bitrate.equals(other.bitrate)) {
-            return false;
-        }
-        if (this.capabilities == null) {
-            if (other.capabilities != null) {
-                return false;
-            }
-        } else if (!this.capabilities.equals(other.capabilities)) {
-            return false;
-        }
-        if (this.frequency != other.frequency) {
-            return false;
-        }
-        if (!Arrays.equals(this.hardwareAddress, other.hardwareAddress)) {
-            return false;
-        }
-        if (this.mode != other.mode) {
-            return false;
-        }
-        if (this.rsnSecurity == null) {
-            if (other.rsnSecurity != null) {
-                return false;
-            }
-        } else if (!this.rsnSecurity.equals(other.rsnSecurity)) {
-            return false;
-        }
-        if (this.ssid == null) {
-            if (other.ssid != null) {
-                return false;
-            }
-        } else if (!this.ssid.equals(other.ssid)) {
-            return false;
-        }
-        if (this.strength != other.strength) {
-            return false;
-        }
-        if (this.wpaSecurity == null) {
-            if (other.wpaSecurity != null) {
-                return false;
-            }
-        } else if (!this.wpaSecurity.equals(other.wpaSecurity)) {
-            return false;
-        }
-        return true;
-    }
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (!(obj instanceof WifiAccessPointImpl)) {
+			return false;
+		}
+		WifiAccessPointImpl other = (WifiAccessPointImpl) obj;
+		if (bitrate == null) {
+			if (other.bitrate != null) {
+				return false;
+			}
+		} else if (!bitrate.equals(other.bitrate)) {
+			return false;
+		}
+		if (capabilities == null) {
+			if (other.capabilities != null) {
+				return false;
+			}
+		} else if (!capabilities.equals(other.capabilities)) {
+			return false;
+		}
+		if (frequency != other.frequency) {
+			return false;
+		}
+		if (!Arrays.equals(hardwareAddress, other.hardwareAddress)) {
+			return false;
+		}
+		if (mode != other.mode) {
+			return false;
+		}
+		if (rsnSecurity == null) {
+			if (other.rsnSecurity != null) {
+				return false;
+			}
+		} else if (!rsnSecurity.equals(other.rsnSecurity)) {
+			return false;
+		}
+		if (ssid == null) {
+			if (other.ssid != null) {
+				return false;
+			}
+		} else if (!ssid.equals(other.ssid)) {
+			return false;
+		}
+		if (strength != other.strength) {
+			return false;
+		}
+		if (wpaSecurity == null) {
+			if (other.wpaSecurity != null) {
+				return false;
+			}
+		} else if (!wpaSecurity.equals(other.wpaSecurity)) {
+			return false;
+		}
+		return true;
+	}
 }

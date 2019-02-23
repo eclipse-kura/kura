@@ -20,7 +20,7 @@ import org.osgi.annotation.versioning.ProviderType;
 /**
  * Routing agent service is used to control the static routing table. The service is used to specify
  * which interfaces should be used in considering routes and what their priorities should be.
- *
+ * 
  * @noimplement This interface is not intended to be implemented by clients.
  */
 @ProviderType

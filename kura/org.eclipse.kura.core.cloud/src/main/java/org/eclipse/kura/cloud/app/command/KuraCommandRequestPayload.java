@@ -43,7 +43,7 @@ public class KuraCommandRequestPayload extends KuraRequestPayload {
     }
 
     public String[] getArguments() {
-        Vector<String> v = new Vector<>();
+        Vector<String> v = new Vector<String>();
 
         for (int i = 0;; i++) {
             String value = (String) getMetric(METRIC_ARG + i);
@@ -70,7 +70,7 @@ public class KuraCommandRequestPayload extends KuraRequestPayload {
     }
 
     public String[] getEnvironmentPairs() {
-        Vector<String> v = new Vector<>();
+        Vector<String> v = new Vector<String>();
 
         for (int i = 0;; i++) {
             String value = (String) getMetric(METRIC_ENVP + i);

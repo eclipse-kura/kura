@@ -243,8 +243,7 @@ public class CloudPublisherImpl
     @Override
     public void onMessageConfirmed(String messageId, String topic) {
         if (topic.contains(this.cloudPublisherOptions.getAppId())) {
-            this.cloudDeliveryListeners
-                    .forEach(listener -> this.worker.execute(() -> listener.onMessageConfirmed(messageId)));
+            this.cloudDeliveryListeners.forEach(listener -> this.worker.execute(() -> listener.onMessageConfirmed(messageId)));
         }
     }
 

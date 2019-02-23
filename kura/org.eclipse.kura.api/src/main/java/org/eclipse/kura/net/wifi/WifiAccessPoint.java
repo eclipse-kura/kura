@@ -18,7 +18,7 @@ import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * The WifiAccessPoint models an access point for a Wifi network.
- *
+ * 
  * @noimplement This interface is not intended to be implemented by clients.
  */
 @ProviderType

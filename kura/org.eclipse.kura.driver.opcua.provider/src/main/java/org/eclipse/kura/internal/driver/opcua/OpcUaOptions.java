@@ -394,7 +394,7 @@ final class OpcUaOptions {
     int getSessionTimeout() {
         int sessionTimeout = 0;
         final Object timeout = this.properties.get(SESSION_TIMEOUT);
-        if (nonNull(timeout) && timeout instanceof Integer) {
+        if (nonNull(timeout) && (timeout instanceof Integer)) {
             sessionTimeout = (Integer) timeout;
         }
         return sessionTimeout * 1000;

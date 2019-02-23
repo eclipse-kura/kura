@@ -25,7 +25,7 @@ import org.osgi.framework.ServiceReference;
 
 /**
  * The class provides a compatibility layer for the older API
- *
+ * 
  * @deprecated Use the {@link CamelRunner}, one of the abstract implementations from
  *             {@link org.eclipse.kura.camel.component} or the native {@link OsgiDefaultCamelContext}
  */

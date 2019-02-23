@@ -9,4 +9,3 @@ Bundle-Category: Localization
 Fragment-Host: org.eclipse.kura.localization;bundle-version="[1.0,2.0)"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: org.eclipse.kura.localization.resources;version="1.2.0"
-Automatic-Module-Name: org.eclipse.kura.localization.resources

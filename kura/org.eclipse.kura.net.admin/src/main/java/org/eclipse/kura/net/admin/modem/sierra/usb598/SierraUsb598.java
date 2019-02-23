@@ -35,7 +35,6 @@ import org.eclipse.kura.net.admin.modem.EvdoCellularModem;
 import org.eclipse.kura.net.admin.modem.sierra.CnS;
 import org.eclipse.kura.net.admin.modem.sierra.CnsAppIDs;
 import org.eclipse.kura.net.admin.modem.sierra.CnsOpTypes;
-import org.eclipse.kura.net.modem.CellularModem.SerialPortType;
 import org.eclipse.kura.net.modem.ModemCdmaServiceProvider;
 import org.eclipse.kura.net.modem.ModemDevice;
 import org.eclipse.kura.net.modem.ModemPdpContext;
@@ -572,7 +571,7 @@ public class SierraUsb598 implements EvdoCellularModem {
         CommConnection connection = null;
         if (this.connectionFactory != null) {
             String uri = new CommURI.Builder(port).withBaudRate(115200).withDataBits(8).withStopBits(1).withParity(0)
-                    .withOpenTimeout(2000).build().toString();
+                    .withTimeout(2000).build().toString();
 
             try {
                 connection = (CommConnection) this.connectionFactory.createConnection(uri, 1, false);

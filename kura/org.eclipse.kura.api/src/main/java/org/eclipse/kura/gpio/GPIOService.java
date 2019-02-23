@@ -20,7 +20,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * {@link KuraGPIOPin}s can be accessed by name or by terminal index.<br>
  * <br>
  * Operations on the pins can be done using the acquired {@link KuraGPIOPin} class.
- *
+ * 
  * @noimplement This interface is not intended to be implemented by clients.
  */
 @ProviderType

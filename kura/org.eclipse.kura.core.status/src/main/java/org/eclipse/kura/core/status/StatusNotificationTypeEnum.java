@@ -12,7 +12,7 @@
 package org.eclipse.kura.core.status;
 
 public enum StatusNotificationTypeEnum {
-
+    
     LED,
     LOG,
     NONE;

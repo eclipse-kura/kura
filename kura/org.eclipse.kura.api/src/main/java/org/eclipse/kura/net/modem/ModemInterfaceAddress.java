@@ -16,7 +16,7 @@ import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Modem Interface Address represents the modem state
- *
+ * 
  * @noimplement This interface is not intended to be implemented by clients.
  */
 @ProviderType

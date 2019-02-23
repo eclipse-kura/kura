@@ -92,7 +92,7 @@ public class DoubleValue implements TypedValue<Double> {
         int result = 1;
         long temp;
         temp = Double.doubleToLongBits(this.value);
-        result = prime * result + (int) (temp ^ temp >>> 32);
+        result = (prime * result) + (int) (temp ^ (temp >>> 32));
         return result;
     }
 

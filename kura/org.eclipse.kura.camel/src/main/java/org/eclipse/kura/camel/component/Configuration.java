@@ -72,8 +72,7 @@ public final class Configuration {
      *            the default value, may be {@code null}
      * @return the string value or the default value
      */
-    public static String asStringNotEmpty(final Map<String, ?> properties, final String key,
-            final String defaultValue) {
+    public static String asStringNotEmpty(final Map<String, ?> properties, final String key, final String defaultValue) {
         if (properties == null) {
             return defaultValue;
         }

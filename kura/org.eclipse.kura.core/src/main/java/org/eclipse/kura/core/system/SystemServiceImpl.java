@@ -984,8 +984,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             if (displayTmp.length() > 0) {
                 deviceName = displayTmp;
             }
-        } else if (OS_LINUX.equals(getOsName()) || OS_CLOUDBEES.equals(getOsName())
-                || getOsName().toLowerCase().startsWith(OS_WINDOWS)) {
+        } else if (OS_LINUX.equals(getOsName()) || OS_CLOUDBEES.equals(getOsName()) || getOsName().toLowerCase().startsWith(OS_WINDOWS)) {
             String displayTmp = runSystemCommand("hostname");
             if (displayTmp.length() > 0) {
                 deviceName = displayTmp;
@@ -1196,8 +1195,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
         if (OS_MAC_OSX.equals(getOsName())) {
             hostname = runSystemCommand("scutil --get ComputerName");
-        } else if (OS_LINUX.equals(getOsName()) || OS_CLOUDBEES.equals(getOsName())
-                || getOsName().toLowerCase().startsWith(OS_WINDOWS)) {
+        } else if (OS_LINUX.equals(getOsName()) || OS_CLOUDBEES.equals(getOsName()) || getOsName().toLowerCase().startsWith(OS_WINDOWS)) {
             hostname = runSystemCommand("hostname");
         }
 

@@ -66,7 +66,7 @@ enum TimestampMode {
 
         @Override
         public void fillSingleTimestamp() {
-            this.wireRecordProperties.put(WireAssetConstants.PROP_SINGLE_TIMESTAMP_NAME.value(),
+            wireRecordProperties.put(WireAssetConstants.PROP_SINGLE_TIMESTAMP_NAME.value(),
                     TypedValues.newLongValue(System.currentTimeMillis()));
         }
     }
@@ -83,13 +83,13 @@ enum TimestampMode {
 
         @Override
         public void processRecord(ChannelRecord record) {
-            this.timestamp = Math.max(this.timestamp, record.getTimestamp());
+            timestamp = Math.max(timestamp, record.getTimestamp());
         }
 
         @Override
         public void fillSingleTimestamp() {
-            this.wireRecordProperties.put(WireAssetConstants.PROP_SINGLE_TIMESTAMP_NAME.value(),
-                    TypedValues.newLongValue(this.timestamp));
+            wireRecordProperties.put(WireAssetConstants.PROP_SINGLE_TIMESTAMP_NAME.value(),
+                    TypedValues.newLongValue(timestamp));
         }
     }
 
@@ -105,13 +105,13 @@ enum TimestampMode {
 
         @Override
         public void processRecord(ChannelRecord record) {
-            this.timestamp = Math.min(this.timestamp, record.getTimestamp());
+            timestamp = Math.min(timestamp, record.getTimestamp());
         }
 
         @Override
         public void fillSingleTimestamp() {
-            this.wireRecordProperties.put(WireAssetConstants.PROP_SINGLE_TIMESTAMP_NAME.value(),
-                    TypedValues.newLongValue(this.timestamp));
+            wireRecordProperties.put(WireAssetConstants.PROP_SINGLE_TIMESTAMP_NAME.value(),
+                    TypedValues.newLongValue(timestamp));
         }
     }
 }

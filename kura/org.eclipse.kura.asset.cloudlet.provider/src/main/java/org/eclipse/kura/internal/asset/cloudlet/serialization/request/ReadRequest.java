@@ -24,14 +24,14 @@ import com.eclipsesource.json.JsonValue;
 
 public class ReadRequest {
 
-    private final String assetName;
-    private final Set<String> channelNames = new HashSet<>();
+    private String assetName;
+    private Set<String> channelNames = new HashSet<>();
 
     public ReadRequest(JsonObject object) {
         this.assetName = object.get(SerializationConstants.ASSET_NAME_PROPERTY).asString();
         Optional.ofNullable(object.get(SerializationConstants.CHANNELS_PROPERTY)).ifPresent((channels) -> {
             channels.asArray().forEach((value) -> {
-                this.channelNames.add(value.asObject().get(SerializationConstants.CHANNEL_NAME_PROPERTY).asString());
+                channelNames.add(value.asObject().get(SerializationConstants.CHANNEL_NAME_PROPERTY).asString());
             });
         });
     }
@@ -45,10 +45,10 @@ public class ReadRequest {
     }
 
     public String getAssetName() {
-        return this.assetName;
+        return assetName;
     }
 
     public Set<String> getChannelNames() {
-        return this.channelNames;
+        return channelNames;
     }
 }

@@ -76,17 +76,17 @@ public class GpsDeviceTracker implements EventHandler {
     }
 
     public synchronized CommURI getGpsDeviceUri() {
-        if (this.trackedUri == null) {
+        if (trackedUri == null) {
             return null;
         }
 
-        final CommURI uri = resolve(this.trackedUri);
+        final CommURI uri = resolve(trackedUri);
         if (!serialPortExists(uri)) {
-            this.isTrackedDeviceValid = false;
+            isTrackedDeviceValid = false;
             return null;
         }
 
-        this.isTrackedDeviceValid = true;
+        isTrackedDeviceValid = true;
         return uri;
     }
 
@@ -99,7 +99,7 @@ public class GpsDeviceTracker implements EventHandler {
         String actualPort = port;
 
         if (!port.contains("/dev/") && !port.contains("COM")) {
-            final Optional<UsbTtyDevice> portDevice = this.usbService.getUsbTtyDevices().stream()
+            final Optional<UsbTtyDevice> portDevice = usbService.getUsbTtyDevices().stream()
                     .filter(ttyDev -> ttyDev.getUsbPort().equals(port)).findAny();
             if (portDevice.isPresent()) {
                 actualPort = portDevice.get().getDeviceNode();

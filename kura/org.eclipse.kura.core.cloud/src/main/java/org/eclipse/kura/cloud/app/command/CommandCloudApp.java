@@ -77,8 +77,7 @@ public class CommandCloudApp implements ConfigurableComponent, PasswordCommandSe
         try {
             requestHandlerRegistry.registerRequestHandler(APP_ID, this);
         } catch (KuraException e) {
-            logger.info("Unable to register request handler {} in {}", APP_ID,
-                    requestHandlerRegistry.getClass().getName());
+            logger.info("Unable to register request handler {} in {}", APP_ID, requestHandlerRegistry.getClass().getName());
         }
     }
 
@@ -86,8 +85,7 @@ public class CommandCloudApp implements ConfigurableComponent, PasswordCommandSe
         try {
             requestHandlerRegistry.unregister(APP_ID);
         } catch (KuraException e) {
-            logger.info("Unable to register request handler {} in {}", APP_ID,
-                    requestHandlerRegistry.getClass().getName());
+            logger.info("Unable to register request handler {} in {}", APP_ID, requestHandlerRegistry.getClass().getName());
         }
     }
 

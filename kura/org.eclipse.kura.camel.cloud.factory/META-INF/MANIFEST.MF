@@ -27,8 +27,7 @@ Import-Package: javax.script,
  org.eclipse.kura.core.configuration.metatype;version="[1.0,2.0)",
  org.osgi.framework;version="1.7.0",
  org.osgi.service.component;version="1.2.0",
- org.slf4j;version="[1.7.0,2.0.0)"
+ org.slf4j;version="1.7.0"
 Service-Component: OSGI-INF/factory.xml,
  OSGI-INF/serviceFactory.xml
 DynamicImport-Package: *
-Automatic-Module-Name: org.eclipse.kura.camel.cloud.factory

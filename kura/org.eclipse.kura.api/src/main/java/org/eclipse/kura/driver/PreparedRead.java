@@ -22,9 +22,9 @@ import org.osgi.annotation.versioning.ProviderType;
  * This interface represents an optimized request that can be performed by a driver.
  * Implementations of this interface are returned by a driver as a result of
  * a call to the {@link Driver#prepareRead(java.util.List)} method.
- *
+ * 
  * @see Driver#prepareRead(java.util.List)
- *
+ * 
  * @noimplement This interface is not intended to be implemented by clients.
  * @since 1.2
  */
@@ -37,7 +37,7 @@ public interface PreparedRead extends AutoCloseable {
      * as arguments to the {@link Driver#prepareRead(List)} call that created this {@link PreparedRead}.
      * The returned records should not be modified while a valid (not closed) {@link PreparedRead} holds a
      * reference to them, otherwise unpredictable behavior can occur.
-     *
+     * 
      * @return the result of the request as a list of {@link ChannelRecord} instances.
      * @throws KuraException
      *             if the provided {@link PreparedRead} is not valid (for example if it has been closed)
@@ -52,7 +52,7 @@ public interface PreparedRead extends AutoCloseable {
      * as arguments to the {@link Driver#prepareRead(List)} call that created this {@link PreparedRead}.
      * The returned records should not be modified while a valid (not closed) {@link PreparedRead} holds a
      * reference to them, otherwise unpredictable behavior can occur.
-     *
+     * 
      * @return The list of channel records associated with this prepared read.
      */
     public List<ChannelRecord> getChannelRecords();

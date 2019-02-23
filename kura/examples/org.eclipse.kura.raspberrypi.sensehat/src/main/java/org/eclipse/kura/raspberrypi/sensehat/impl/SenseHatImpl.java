@@ -71,7 +71,7 @@ public class SenseHatImpl implements SenseHat {
     @Override
     public FrameBufferRaw getFrameBufferRaw() {
         try {
-            return FrameBufferRaw.getFrameBuffer(this.m_ctx);
+            return FrameBufferRaw.getFrameBuffer(m_ctx);
         } catch (IOException e) {
             return null;
         }

@@ -38,7 +38,7 @@ public final class TypeUtil {
         result[0] = (byte) (value >> 24);
         result[1] = (byte) (value >> 16);
         result[2] = (byte) (value >> 8);
-        result[3] = (byte) value;
+        result[3] = (byte) (value);
         return result;
     }
 

@@ -44,7 +44,7 @@ public class UsbTtyDevice extends AbstractUsbDevice {
 
     /**
      * Returns the tty device node name
-     *
+     * 
      * @return the device node
      */
     public String getDeviceNode() {
@@ -53,9 +53,9 @@ public class UsbTtyDevice extends AbstractUsbDevice {
 
     /**
      * Returns the tty interface number
-     *
+     * 
      * @since 1.4
-     *
+     * 
      * @return the interface number
      */
     public Integer getInterfaceNumber() {

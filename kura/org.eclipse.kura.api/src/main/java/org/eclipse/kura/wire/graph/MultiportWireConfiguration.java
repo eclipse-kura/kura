@@ -17,7 +17,7 @@ import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * This POJO is used to represent, in the Wires context, the configuration of a Wire used in a multi-port composer.
- *
+ * 
  * @since 1.4
  */
 @ProviderType
@@ -33,7 +33,7 @@ public class MultiportWireConfiguration extends WireConfiguration {
     }
 
     public int getEmitterPort() {
-        return this.emitterPort;
+        return emitterPort;
     }
 
     public void setEmitterPort(int emitterPort) {
@@ -41,7 +41,7 @@ public class MultiportWireConfiguration extends WireConfiguration {
     }
 
     public int getReceiverPort() {
-        return this.receiverPort;
+        return receiverPort;
     }
 
     public void setReceiverPort(int receiverPort) {
@@ -52,29 +52,24 @@ public class MultiportWireConfiguration extends WireConfiguration {
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + this.emitterPort;
-        result = prime * result + this.receiverPort;
+        result = prime * result + emitterPort;
+        result = prime * result + receiverPort;
         return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) {
+        if (this == obj)
             return true;
-        }
-        if (!super.equals(obj)) {
+        if (!super.equals(obj))
             return false;
-        }
-        if (getClass() != obj.getClass()) {
+        if (getClass() != obj.getClass())
             return false;
-        }
         MultiportWireConfiguration other = (MultiportWireConfiguration) obj;
-        if (this.emitterPort != other.emitterPort) {
+        if (emitterPort != other.emitterPort)
             return false;
-        }
-        if (this.receiverPort != other.receiverPort) {
+        if (receiverPort != other.receiverPort)
             return false;
-        }
         return true;
     }
 

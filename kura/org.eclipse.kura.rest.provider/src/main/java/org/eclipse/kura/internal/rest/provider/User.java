@@ -7,7 +7,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  *******************************************************************************/
-
+ 
 package org.eclipse.kura.internal.rest.provider;
 
 import java.security.Principal;
@@ -34,15 +34,15 @@ public class User implements Principal {
 
     @Override
     public String getName() {
-        return this.name;
+        return name;
     }
 
     public Password getPassword() {
-        return this.password;
+        return password;
     }
 
     public Set<String> getRoles() {
-        return this.roles;
+        return roles;
     }
 
     public static Map<String, User> fromOptions(RestServiceOptions options) {
@@ -92,29 +92,24 @@ public class User implements Principal {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + (this.name == null ? 0 : this.name.hashCode());
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
         return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) {
+        if (this == obj)
             return true;
-        }
-        if (obj == null) {
+        if (obj == null)
             return false;
-        }
-        if (getClass() != obj.getClass()) {
+        if (getClass() != obj.getClass())
             return false;
-        }
         User other = (User) obj;
-        if (this.name == null) {
-            if (other.name != null) {
+        if (name == null) {
+            if (other.name != null)
                 return false;
-            }
-        } else if (!this.name.equals(other.name)) {
+        } else if (!name.equals(other.name))
             return false;
-        }
         return true;
     }
 }

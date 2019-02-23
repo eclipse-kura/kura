@@ -36,7 +36,7 @@ public class GPIOServiceImpl implements GPIOService {
 
     private static final Logger logger = LoggerFactory.getLogger(GPIOServiceImpl.class);
 
-    private static final HashSet<JdkDioPin> pins = new HashSet<>();
+    private static final HashSet<JdkDioPin> pins = new HashSet<JdkDioPin>();
 
     private SystemService systemService;
 
@@ -232,7 +232,7 @@ public class GPIOServiceImpl implements GPIOService {
 
     @Override
     public Map<Integer, String> getAvailablePins() {
-        HashMap<Integer, String> result = new HashMap<>();
+        HashMap<Integer, String> result = new HashMap<Integer, String>();
         for (JdkDioPin p : pins) {
             result.put(p.getIndex(), p.getName());
         }

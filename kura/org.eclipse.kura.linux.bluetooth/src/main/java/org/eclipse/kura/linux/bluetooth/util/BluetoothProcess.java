@@ -104,7 +104,7 @@ public class BluetoothProcess {
                 }
             }
         });
-
+        
         // process the error stream
         this.m_futureErrorGobbler = s_streamGobblers.submit(new Runnable() {
 
@@ -190,7 +190,7 @@ public class BluetoothProcess {
         listener.processErrorStream(stringBuilder.toString());
         s_logger.debug("End of stream!");
     }
-
+    
     private void readBTErrorStreamFully(InputStream is, BTSnoopListener listener) throws IOException {
         int ch;
 

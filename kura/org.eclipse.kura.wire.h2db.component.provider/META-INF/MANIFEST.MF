@@ -23,4 +23,3 @@ Bundle-ActivationPolicy: lazy
 Service-Component: OSGI-INF/*.xml
 Export-Package: org.eclipse.kura.internal.wire.h2db.filter,
  org.eclipse.kura.internal.wire.h2db.store
-Automatic-Module-Name: org.eclipse.kura.wire.h2db.component.provider

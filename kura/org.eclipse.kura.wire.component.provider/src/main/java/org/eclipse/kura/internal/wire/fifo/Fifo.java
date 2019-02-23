@@ -62,7 +62,7 @@ public class Fifo implements WireEmitter, WireReceiver, ConfigurableComponent {
 
     public void activate(final Map<String, Object> properties, ComponentContext componentContext) {
         logger.info("Activating Fifo...");
-        this.wireSupport = this.wireHelperService.newWireSupport(this,
+        wireSupport = this.wireHelperService.newWireSupport(this,
                 (ServiceReference<WireComponent>) componentContext.getServiceReference());
         updated(properties);
         logger.info("Activating Fifo... Done");
@@ -88,9 +88,9 @@ public class Fifo implements WireEmitter, WireReceiver, ConfigurableComponent {
     }
 
     private synchronized void stopEmitterThread() {
-        if (this.emitterThread != null) {
-            this.emitterThread.shutdown();
-            this.emitterThread = null;
+        if (emitterThread != null) {
+            emitterThread.shutdown();
+            emitterThread = null;
         }
     }
 
@@ -99,15 +99,15 @@ public class Fifo implements WireEmitter, WireReceiver, ConfigurableComponent {
 
         logger.debug("Creating new emitter thread: {}, queue capacity: {}, discard envelopes: {}", threadName,
                 queueCapacity, discardEnvelopes);
-        this.emitterThread = new FifoEmitterThread(threadName, queueCapacity, discardEnvelopes);
-        this.emitterThread.start();
+        emitterThread = new FifoEmitterThread(threadName, queueCapacity, discardEnvelopes);
+        emitterThread.start();
     }
 
     @Override
     public void onWireReceive(WireEnvelope wireEnvelope) {
         requireNonNull(wireEnvelope, "Wire Envelope cannot be null");
-        if (this.emitterThread != null) {
-            this.emitterThread.submit(wireEnvelope);
+        if (emitterThread != null) {
+            emitterThread.submit(wireEnvelope);
         }
     }
 
@@ -133,14 +133,14 @@ public class Fifo implements WireEmitter, WireReceiver, ConfigurableComponent {
 
     private class FifoEmitterThread extends Thread {
 
-        private final Lock lock = new ReentrantLock();
+        private Lock lock = new ReentrantLock();
 
-        private final Condition producer = this.lock.newCondition();
-        private final Condition consumer = this.lock.newCondition();
+        private Condition producer = lock.newCondition();
+        private Condition consumer = lock.newCondition();
 
         private boolean run = true;
-        private final ArrayList<WireEnvelope> queue;
-        private final int queueCapacity;
+        private ArrayList<WireEnvelope> queue;
+        private int queueCapacity;
 
         private Consumer<WireEnvelope> submitter;
 
@@ -149,26 +149,26 @@ public class Fifo implements WireEmitter, WireReceiver, ConfigurableComponent {
             this.queueCapacity = queueCapacity;
             setName(threadName);
             if (discardEnvelopes) {
-                this.submitter = getEnvelopeDiscardingSubmitter();
+                submitter = getEnvelopeDiscardingSubmitter();
             } else {
-                this.submitter = getEmitterBlockingSubmitter();
+                submitter = getEmitterBlockingSubmitter();
             }
         }
 
         private Consumer<WireEnvelope> getEnvelopeDiscardingSubmitter() {
             return (envelope) -> {
                 try {
-                    this.lock.lock();
-                    if (!this.run || this.queue.size() >= this.queueCapacity) {
+                    lock.lock();
+                    if (!run || queue.size() >= queueCapacity) {
                         logger.debug("envelope discarded");
                         return;
                     } else {
-                        this.queue.add(envelope);
-                        this.producer.signal();
+                        queue.add(envelope);
+                        producer.signal();
                         logger.debug("envelope submitted");
                     }
                 } finally {
-                    this.lock.unlock();
+                    lock.unlock();
                 }
             };
         }
@@ -176,59 +176,59 @@ public class Fifo implements WireEmitter, WireReceiver, ConfigurableComponent {
         private Consumer<WireEnvelope> getEmitterBlockingSubmitter() {
             return (envelope) -> {
                 try {
-                    this.lock.lock();
-                    while (this.run && this.queue.size() >= this.queueCapacity) {
-                        this.consumer.await();
+                    lock.lock();
+                    while (run && queue.size() >= queueCapacity) {
+                        consumer.await();
                     }
-                    if (!this.run) {
+                    if (!run) {
                         return;
                     }
-                    this.queue.add(envelope);
-                    this.producer.signal();
+                    queue.add(envelope);
+                    producer.signal();
                     logger.debug("envelope submitted");
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     logger.warn("Interrupted while adding new envelope to queue", e);
                 } finally {
-                    this.lock.unlock();
+                    lock.unlock();
                 }
             };
         }
 
         public void shutdown() {
             try {
-                this.lock.lock();
-                this.run = false;
-                this.producer.signalAll();
-                this.consumer.signalAll();
+                lock.lock();
+                run = false;
+                producer.signalAll();
+                consumer.signalAll();
             } finally {
-                this.lock.unlock();
+                lock.unlock();
             }
         }
 
         public void submit(WireEnvelope envelope) {
-            this.submitter.accept(envelope);
+            submitter.accept(envelope);
         }
 
         @Override
         public void run() {
-            while (this.run) {
+            while (run) {
                 try {
                     WireEnvelope next = null;
                     try {
-                        this.lock.lock();
-                        while (this.run && this.queue.isEmpty()) {
-                            this.producer.await();
+                        lock.lock();
+                        while (run && queue.isEmpty()) {
+                            producer.await();
                         }
-                        if (!this.run) {
+                        if (!run) {
                             break;
                         }
-                        next = this.queue.remove(0);
-                        this.consumer.signal();
+                        next = queue.remove(0);
+                        consumer.signal();
                     } finally {
-                        this.lock.unlock();
+                        lock.unlock();
                     }
-                    Fifo.this.wireSupport.emit(next.getRecords());
+                    wireSupport.emit(next.getRecords());
                 } catch (Exception e) {
                     logger.warn("Unexpected exception while dispatching envelope", e);
                 }

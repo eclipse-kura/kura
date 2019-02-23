@@ -425,8 +425,7 @@ public class LocalRule {
                 int portStart = Integer.parseInt(rangeParts[0]);
                 int portEnd = Integer.parseInt(rangeParts[1]);
                 return portStart > 0 && portStart < 65535 && portEnd > 0 && portEnd < 65535 && portStart < portEnd
-                        ? true
-                        : false;
+                        ? true : false;
             } else {
                 return false;
             }

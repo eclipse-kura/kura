@@ -59,7 +59,7 @@ public class Tobject implements TObject {
     protected List<Tattribute> attribute;
     protected List<Object> any;
     protected String ocdref;
-    private final Map<QName, String> otherAttributes = new HashMap<>();
+    private final Map<QName, String> otherAttributes = new HashMap<QName, String>();
 
     /**
      * Gets the value of the attribute property.
@@ -87,9 +87,9 @@ public class Tobject implements TObject {
     @Override
     public List<Attribute> getAttribute() {
         if (this.attribute == null) {
-            this.attribute = new ArrayList<>();
+            this.attribute = new ArrayList<Tattribute>();
         }
-        return new ArrayList<>(this.attribute);
+        return new ArrayList<Attribute>(this.attribute);
     }
 
     /**
@@ -118,7 +118,7 @@ public class Tobject implements TObject {
      */
     public List<Object> getAny() {
         if (this.any == null) {
-            this.any = new ArrayList<>();
+            this.any = new ArrayList<Object>();
         }
         return this.any;
     }

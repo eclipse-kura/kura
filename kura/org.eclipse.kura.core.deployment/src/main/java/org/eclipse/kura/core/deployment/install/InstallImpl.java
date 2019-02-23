@@ -207,8 +207,7 @@ public class InstallImpl {
         this.callback.publishMessage(options, notify, RESOURCE_INSTALL);
     }
 
-    public void sendInstallConfirmations(String notificationPublisherPid,
-            CloudNotificationPublisher notificationPublisher) {
+    public void sendInstallConfirmations(String notificationPublisherPid, CloudNotificationPublisher notificationPublisher) {
         s_logger.info("Ready to send Confirmations");
 
         File verificationDir = new File(this.m_installVerifDir);
@@ -371,8 +370,7 @@ public class InstallImpl {
         }
     }
 
-    private void sendSysUpdateSuccess(String verificationFileName, CloudNotificationPublisher notificationPublisher)
-            throws KuraException {
+    private void sendSysUpdateSuccess(String verificationFileName, CloudNotificationPublisher notificationPublisher) throws KuraException {
         s_logger.info("Ready to send success after install");
         String executableName = verificationFileName.split("_verifier")[0];
         File installDir = new File(this.m_installPersistanceDir);
@@ -415,8 +413,7 @@ public class InstallImpl {
         }
     }
 
-    private void sendSysUpdateFailure(String verificationFileName, CloudNotificationPublisher notificationPublisher)
-            throws KuraException {
+    private void sendSysUpdateFailure(String verificationFileName, CloudNotificationPublisher notificationPublisher) throws KuraException {
         File installDir = new File(this.m_installPersistanceDir);
         for (final File fileEntry : installDir.listFiles()) {
             if (fileEntry.isFile() && fileEntry.getName().endsWith(PERSISTANCE_SUFFIX)
@@ -431,7 +428,7 @@ public class InstallImpl {
                 String fileSystemFileName = downloadProperties.getProperty(PERSISTANCE_FILE_NAME);
                 String requestClientId = downloadProperties
                         .getProperty(CloudDeploymentHandlerV2.METRIC_REQUESTER_CLIENT_ID);
-
+                
                 String notificationPid = downloadProperties
                         .getProperty(DeploymentPackageOptions.NOTIFICATION_PUBLISHER_PID_KEY);
 

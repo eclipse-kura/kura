@@ -7,7 +7,7 @@ package org.eclipse.kura.asset.provider;
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- *
+ *     
  *******************************************************************************/
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
@@ -27,7 +27,7 @@ public class BaseAssetExecutor {
     private final ExecutorService configExecutor;
     private final boolean isConfigExecutorShared;
 
-    private final AtomicReference<CompletableFuture<Void>> queue = new AtomicReference<>(
+    private AtomicReference<CompletableFuture<Void>> queue = new AtomicReference<>(
             CompletableFuture.completedFuture(null));
 
     public BaseAssetExecutor(final ExecutorService ioExecutor, final ExecutorService configExecutor) {
@@ -45,7 +45,7 @@ public class BaseAssetExecutor {
     public <T> CompletableFuture<T> runIO(final Callable<T> task) {
         final CompletableFuture<T> result = new CompletableFuture<>();
 
-        this.ioExecutor.execute(() -> {
+        ioExecutor.execute(() -> {
             try {
                 result.complete(task.call());
             } catch (Exception e) {
@@ -59,9 +59,9 @@ public class BaseAssetExecutor {
     public CompletableFuture<Void> runConfig(final Runnable task) {
 
         final CompletableFuture<Void> next = new CompletableFuture<>();
-        final CompletableFuture<Void> previous = this.queue.getAndSet(next);
+        final CompletableFuture<Void> previous = queue.getAndSet(next);
 
-        previous.whenComplete((ok, err) -> this.configExecutor.execute(() -> {
+        previous.whenComplete((ok, err) -> configExecutor.execute(() -> {
             try {
                 task.run();
                 next.complete(null);
@@ -75,11 +75,11 @@ public class BaseAssetExecutor {
     }
 
     public void shutdown() {
-        if (!this.isIoExecutorShared) {
-            this.ioExecutor.shutdown();
+        if (!isIoExecutorShared) {
+            ioExecutor.shutdown();
         }
-        if (!this.isConfigExecutorShared) {
-            this.configExecutor.shutdown();
+        if (!isConfigExecutorShared) {
+            configExecutor.shutdown();
         }
     }
 

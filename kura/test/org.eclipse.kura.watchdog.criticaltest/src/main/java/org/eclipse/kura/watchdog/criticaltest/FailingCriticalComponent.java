@@ -28,7 +28,7 @@ public class FailingCriticalComponent implements ConfigurableComponent, Critical
 
     private String pid;
 
-    private final int timeout = 30000;
+    private int timeout = 30000;
 
     private WatchdogService watchdogService;
 

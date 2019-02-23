@@ -41,27 +41,27 @@ final class S7PlcOptions {
     }
 
     String getIp() {
-        return this.ip;
+        return ip;
     }
 
     boolean shouldAuthenticate() {
-        return this.authenticate;
+        return authenticate;
     }
 
     String getPassword() {
-        return this.password;
+        return password;
     }
 
     int getRack() {
-        return this.rack;
+        return rack;
     }
 
     int getSlot() {
-        return this.slot;
+        return slot;
     }
 
     int getMinimumGapSize() {
-        return this.minimumGapSize;
+        return minimumGapSize;
     }
 
     private static class Property<T> {
@@ -80,7 +80,7 @@ final class S7PlcOptions {
             if (this.defaultValue.getClass().isInstance(value)) {
                 return (T) value;
             }
-            return this.defaultValue;
+            return defaultValue;
         }
     }
 

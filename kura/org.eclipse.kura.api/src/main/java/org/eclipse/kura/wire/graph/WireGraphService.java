@@ -28,7 +28,7 @@ public interface WireGraphService {
     /**
      * This method allows to create and update the graph, by providing a
      * {@link WireGraphConfiguration}.
-     *
+     * 
      * @param graphConfiguration
      *            A {@link WireGraphConfiguration} object that represents an updated
      *            status of the Wire Graph
@@ -39,7 +39,7 @@ public interface WireGraphService {
 
     /**
      * This method allows to delete the current Wire Graph.
-     *
+     * 
      * @throws {@link
      *             KuraException} if the delete operation fails
      */
@@ -47,7 +47,7 @@ public interface WireGraphService {
 
     /**
      * This method returns the current Wire Graph configuration.
-     *
+     * 
      * @return a {@link WireGraphConfiguration} object that represents the current
      *         configuration of the Wire Graph
      * @throws {@link

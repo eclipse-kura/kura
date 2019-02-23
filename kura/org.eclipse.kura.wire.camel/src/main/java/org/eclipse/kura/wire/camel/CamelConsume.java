@@ -47,7 +47,7 @@ public class CamelConsume extends AbstractEndpointWireComponent implements WireE
 
     @Override
     public void setEndpointUri(final String endpointUri) {
-        if (this.endpointUri == null || !this.endpointUri.equals(endpointUri)) {
+        if (this.endpointUri == null || !this.endpointUri.equals(endpointUri))
             try {
                 stopConsumer();
                 super.setEndpointUri(endpointUri);
@@ -55,7 +55,6 @@ public class CamelConsume extends AbstractEndpointWireComponent implements WireE
             } catch (final Exception e) {
                 logger.warn("Failed to set endpoint URI", e);
             }
-        }
     }
 
     private void startConsumer() throws Exception {
@@ -106,7 +105,7 @@ public class CamelConsume extends AbstractEndpointWireComponent implements WireE
         logger.debug("Consumed: {}", (Object) records);
 
         if (records != null) {
-            this.wireSupport.emit(asList(records));
+            wireSupport.emit(asList(records));
         }
     }
 }

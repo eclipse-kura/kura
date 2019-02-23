@@ -11,8 +11,9 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.cloud;
 
-public interface CloudPublisherDeliveryListener {
 
+public interface CloudPublisherDeliveryListener {
+    
     public void onMessageConfirmed(String messageId, String topic);
 
 }

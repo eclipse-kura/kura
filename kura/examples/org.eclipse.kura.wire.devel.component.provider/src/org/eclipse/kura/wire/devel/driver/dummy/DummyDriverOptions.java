@@ -30,12 +30,12 @@ public class DummyDriverOptions {
     }
 
     public int getConnectionDelay() {
-        return CONNECTION_DELAY.get(this.properties);
+        return CONNECTION_DELAY.get(properties);
     }
 
     public ChannelDescriptorIssue getChannelDescriptorIssues() {
         try {
-            return ChannelDescriptorIssue.valueOf(CHANNEL_DESCRIPTOR_ISSUES.get(this.properties));
+            return ChannelDescriptorIssue.valueOf(CHANNEL_DESCRIPTOR_ISSUES.get(properties));
         } catch (Exception e) {
             return ChannelDescriptorIssue.NONE;
         }
@@ -43,7 +43,7 @@ public class DummyDriverOptions {
 
     public PreparedReadIssue getPreparedReadIssues() {
         try {
-            return PreparedReadIssue.valueOf(PREPARED_READ_ISSUES.get(this.properties));
+            return PreparedReadIssue.valueOf(PREPARED_READ_ISSUES.get(properties));
         } catch (Exception e) {
             return PreparedReadIssue.NONE;
         }
@@ -51,7 +51,7 @@ public class DummyDriverOptions {
 
     public ConnectionIssue getConnectionIssues() {
         try {
-            return ConnectionIssue.valueOf(CONNECTION_ISSUES.get(this.properties));
+            return ConnectionIssue.valueOf(CONNECTION_ISSUES.get(properties));
         } catch (Exception e) {
             return ConnectionIssue.NONE;
         }

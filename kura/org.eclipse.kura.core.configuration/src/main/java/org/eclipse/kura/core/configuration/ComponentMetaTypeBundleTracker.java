@@ -63,7 +63,7 @@ public class ComponentMetaTypeBundleTracker extends BundleTracker<Bundle> {
     @Override
     public void removedBundle(Bundle bundle, BundleEvent event, Bundle object) {
         super.removedBundle(bundle, event, object);
-        this.m_configurationService.onBundleRemoved(bundle);
+        m_configurationService.onBundleRemoved(bundle);
     }
     // ----------------------------------------------------------------
     //

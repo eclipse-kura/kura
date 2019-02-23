@@ -102,7 +102,7 @@ public class CloudClientImpl implements CloudClient, CloudClientListener {
     @Override
     public int publish(String appTopic, KuraPayload payload, int qos, boolean retain) throws KuraException {
         CloudServiceOptions options = this.cloudServiceImpl.getCloudServiceOptions();
-        return publish(CloudServiceOptions.getTopicClientIdToken(), appTopic, payload, qos, retain);
+        return publish(options.getTopicClientIdToken(), appTopic, payload, qos, retain);
     }
 
     @Override
@@ -115,7 +115,7 @@ public class CloudClientImpl implements CloudClient, CloudClientListener {
     public int publish(String appTopic, KuraPayload payload, int qos, boolean retain, int priority)
             throws KuraException {
         CloudServiceOptions options = this.cloudServiceImpl.getCloudServiceOptions();
-        return publish(CloudServiceOptions.getTopicClientIdToken(), appTopic, payload, qos, retain, priority);
+        return publish(options.getTopicClientIdToken(), appTopic, payload, qos, retain, priority);
     }
 
     @Override
@@ -128,7 +128,7 @@ public class CloudClientImpl implements CloudClient, CloudClientListener {
     @Override
     public int publish(String appTopic, byte[] payload, int qos, boolean retain, int priority) throws KuraException {
         CloudServiceOptions options = this.cloudServiceImpl.getCloudServiceOptions();
-        return publish(CloudServiceOptions.getTopicClientIdToken(), appTopic, payload, qos, retain, priority);
+        return publish(options.getTopicClientIdToken(), appTopic, payload, qos, retain, priority);
     }
 
     @Override
@@ -143,7 +143,7 @@ public class CloudClientImpl implements CloudClient, CloudClientListener {
     public int controlPublish(String appTopic, KuraPayload payload, int qos, boolean retain, int priority)
             throws KuraException {
         CloudServiceOptions options = this.cloudServiceImpl.getCloudServiceOptions();
-        return controlPublish(CloudServiceOptions.getTopicClientIdToken(), appTopic, payload, qos, retain, priority);
+        return controlPublish(options.getTopicClientIdToken(), appTopic, payload, qos, retain, priority);
     }
 
     @Override
@@ -164,7 +164,7 @@ public class CloudClientImpl implements CloudClient, CloudClientListener {
     @Override
     public void subscribe(String appTopic, int qos) throws KuraException {
         CloudServiceOptions options = this.cloudServiceImpl.getCloudServiceOptions();
-        subscribe(CloudServiceOptions.getTopicClientIdToken(), appTopic, qos);
+        subscribe(options.getTopicClientIdToken(), appTopic, qos);
     }
 
     @Override
@@ -177,7 +177,7 @@ public class CloudClientImpl implements CloudClient, CloudClientListener {
     @Override
     public void controlSubscribe(String appTopic, int qos) throws KuraException {
         CloudServiceOptions options = this.cloudServiceImpl.getCloudServiceOptions();
-        controlSubscribe(CloudServiceOptions.getTopicClientIdToken(), appTopic, qos);
+        controlSubscribe(options.getTopicClientIdToken(), appTopic, qos);
     }
 
     @Override
@@ -190,7 +190,7 @@ public class CloudClientImpl implements CloudClient, CloudClientListener {
     @Override
     public void unsubscribe(String appTopic) throws KuraException {
         CloudServiceOptions options = this.cloudServiceImpl.getCloudServiceOptions();
-        unsubscribe(CloudServiceOptions.getTopicClientIdToken(), appTopic);
+        unsubscribe(options.getTopicClientIdToken(), appTopic);
     }
 
     @Override
@@ -203,7 +203,7 @@ public class CloudClientImpl implements CloudClient, CloudClientListener {
     @Override
     public void controlUnsubscribe(String appTopic) throws KuraException {
         CloudServiceOptions options = this.cloudServiceImpl.getCloudServiceOptions();
-        controlUnsubscribe(CloudServiceOptions.getTopicClientIdToken(), appTopic);
+        controlUnsubscribe(options.getTopicClientIdToken(), appTopic);
     }
 
     @Override
@@ -290,14 +290,14 @@ public class CloudClientImpl implements CloudClient, CloudClientListener {
         CloudServiceOptions options = this.cloudServiceImpl.getCloudServiceOptions();
         StringBuilder sb = new StringBuilder();
         if (isControl) {
-            sb.append(options.getTopicControlPrefix()).append(CloudServiceOptions.getTopicSeparator());
+            sb.append(options.getTopicControlPrefix()).append(options.getTopicSeparator());
         }
 
-        sb.append(CloudServiceOptions.getTopicAccountToken()).append(CloudServiceOptions.getTopicSeparator())
-                .append(deviceId).append(CloudServiceOptions.getTopicSeparator()).append(this.applicationId);
+        sb.append(options.getTopicAccountToken()).append(options.getTopicSeparator()).append(deviceId)
+                .append(options.getTopicSeparator()).append(this.applicationId);
 
         if (appTopic != null && !appTopic.isEmpty()) {
-            sb.append(CloudServiceOptions.getTopicSeparator()).append(appTopic);
+            sb.append(options.getTopicSeparator()).append(appTopic);
         }
 
         return sb.toString();
@@ -312,12 +312,11 @@ public class CloudClientImpl implements CloudClient, CloudClientListener {
         // Optional control prefix
         sb.append("^(")
                 // .append(options.getTopicControlPrefix())
-                .append("\\$EDC").append(CloudServiceOptions.getTopicSeparator()).append(")?")
+                .append("\\$EDC").append(options.getTopicSeparator()).append(")?")
 
-                .append(CloudServiceOptions.getTopicAccountToken()).append(CloudServiceOptions.getTopicSeparator())
-                .append(".+") // Any device
-                // ID
-                .append(CloudServiceOptions.getTopicSeparator()).append(this.applicationId).append("(/.+)?");
+                .append(options.getTopicAccountToken()).append(options.getTopicSeparator()).append(".+") // Any device
+                                                                                                         // ID
+                .append(options.getTopicSeparator()).append(this.applicationId).append("(/.+)?");
 
         return sb.toString();
     }

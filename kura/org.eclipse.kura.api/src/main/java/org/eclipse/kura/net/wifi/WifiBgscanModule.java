@@ -16,9 +16,7 @@ package org.eclipse.kura.net.wifi;
  */
 public enum WifiBgscanModule {
 
-    NONE(0x00),
-    SIMPLE(0x01),
-    LEARN(0x02);
+    NONE(0x00), SIMPLE(0x01), LEARN(0x02);
 
     private int m_code;
 

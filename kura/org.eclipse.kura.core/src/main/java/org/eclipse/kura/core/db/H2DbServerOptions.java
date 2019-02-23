@@ -41,23 +41,23 @@ class H2DbServerOptions {
         final String serverTypeString = (String) properties.getOrDefault(DB_SERVER_TYPE_PROP_NAME, "TCP");
 
         if (ServerType.WEB.name().equals(serverTypeString)) {
-            this.serverType = ServerType.WEB;
+            serverType = ServerType.WEB;
         } else if (ServerType.PG.name().equals(serverTypeString)) {
-            this.serverType = ServerType.PG;
+            serverType = ServerType.PG;
         } else {
-            this.serverType = ServerType.TCP;
+            serverType = ServerType.TCP;
         }
     }
 
     public Boolean isServerEnabled() {
-        return this.isServerEnabled;
+        return isServerEnabled;
     }
 
     public ServerType getServerType() {
-        return this.serverType;
+        return serverType;
     }
 
     public String getServerCommandLine() {
-        return this.serverCommandLine;
+        return serverCommandLine;
     }
 }

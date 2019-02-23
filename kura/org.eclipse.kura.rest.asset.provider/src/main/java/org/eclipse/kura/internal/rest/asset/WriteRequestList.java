@@ -17,15 +17,15 @@ public class WriteRequestList implements Validable {
     private List<WriteRequest> channels;
 
     public List<WriteRequest> getRequests() {
-        return this.channels;
+        return channels;
     }
 
     @Override
     public boolean isValid() {
-        if (this.channels == null) {
+        if (channels == null) {
             return false;
         }
-        for (WriteRequest request : this.channels) {
+        for (WriteRequest request : channels) {
             if (!request.isValid()) {
                 return false;
             }

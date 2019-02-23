@@ -17,16 +17,7 @@ package org.eclipse.kura.core.configuration;
 public class XmlConfigPropertyAdapted {
 
     public enum ConfigPropertyType {
-        STRING_TYPE,
-        LONG_TYPE,
-        DOUBLE_TYPE,
-        FLOAT_TYPE,
-        INTEGER_TYPE,
-        BYTE_TYPE,
-        CHAR_TYPE,
-        BOOLEAN_TYPE,
-        SHORT_TYPE,
-        PASSWORD_TYPE
+        STRING_TYPE, LONG_TYPE, DOUBLE_TYPE, FLOAT_TYPE, INTEGER_TYPE, BYTE_TYPE, CHAR_TYPE, BOOLEAN_TYPE, SHORT_TYPE, PASSWORD_TYPE
     }
 
     private String name;

@@ -16,12 +16,8 @@ package org.eclipse.kura.net.wifi;
  */
 public enum WifiRadioMode {
 
-    RADIO_MODE_80211a(0x00),
-    RADIO_MODE_80211b(0x01),
-    RADIO_MODE_80211g(0x02),
-    RADIO_MODE_80211nHT20(0x03),
-    RADIO_MODE_80211nHT40below(0x04),
-    RADIO_MODE_80211nHT40above(0x05);
+    RADIO_MODE_80211a(0x00), RADIO_MODE_80211b(0x01), RADIO_MODE_80211g(0x02), RADIO_MODE_80211nHT20(
+            0x03), RADIO_MODE_80211nHT40below(0x04), RADIO_MODE_80211nHT40above(0x05);
 
     private int m_code;
 

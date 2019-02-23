@@ -96,37 +96,30 @@ public class ChannelListenerManager {
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + (this.request.channelName == null ? 0 : this.request.channelName.hashCode());
-            result = prime * result + (this.listener == null ? 0 : this.listener.hashCode());
+            result = prime * result + ((request.channelName == null) ? 0 : request.channelName.hashCode());
+            result = prime * result + ((listener == null) ? 0 : listener.hashCode());
             return result;
         }
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj) {
+            if (this == obj)
                 return true;
-            }
-            if (obj == null) {
+            if (obj == null)
                 return false;
-            }
-            if (getClass() != obj.getClass()) {
+            if (getClass() != obj.getClass())
                 return false;
-            }
             ChannelListenerRegistration other = (ChannelListenerRegistration) obj;
-            if (this.request.channelName == null) {
-                if (other.request.channelName != null) {
+            if (request.channelName == null) {
+                if (other.request.channelName != null)
                     return false;
-                }
-            } else if (!this.request.channelName.equals(other.request.channelName)) {
+            } else if (!request.channelName.equals(other.request.channelName))
                 return false;
-            }
-            if (this.listener == null) {
-                if (other.listener != null) {
+            if (listener == null) {
+                if (other.listener != null)
                     return false;
-                }
-            } else if (!this.listener.equals(other.listener)) {
+            } else if (!listener.equals(other.listener))
                 return false;
-            }
             return true;
         }
     }

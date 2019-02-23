@@ -10,6 +10,5 @@
 package org.eclipse.kura.internal.wire.regexfilter;
 
 public enum FilterType {
-    RETAIN,
-    REMOVE
+    RETAIN, REMOVE
 }

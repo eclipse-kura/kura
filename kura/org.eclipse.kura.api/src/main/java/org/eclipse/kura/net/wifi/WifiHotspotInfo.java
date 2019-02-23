@@ -81,15 +81,15 @@ public class WifiHotspotInfo {
     }
 
     /**
-     * @since 1.2
-     */
+	 * @since 1.2
+	 */
     public void setPairCiphers(EnumSet<WifiSecurity> pairCiphers) {
         this.pairCiphers = pairCiphers;
     }
 
     /**
-     * @since 1.2
-     */
+	 * @since 1.2
+	 */
     public void setGroupCiphers(EnumSet<WifiSecurity> groupCiphers) {
         this.groupCiphers = groupCiphers;
     }

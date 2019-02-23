@@ -13,7 +13,7 @@ package org.eclipse.kura.usb;
  * UsbDeviceType represents the type of USB device.
  * Possible values are:
  * UsbBlockDevice, UsbModemDevice, UsbNetDevice and UsbTtyDevice
- *
+ * 
  * @since 1.4
  */
 public enum UsbDeviceType {

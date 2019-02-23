@@ -88,14 +88,14 @@ public class RestService implements ConfigurableComponent, AuthenticationHandler
         String userName = credentials.substring(0, colon);
         String requestPassword = credentials.substring(colon + 1);
 
-        final User user = this.users.get(userName);
+        final User user = users.get(userName);
 
         try {
             final char[] userPassword = user.getPassword().getPassword();
             if (userPassword.length == 0 && requestPassword.isEmpty()) {
                 return user;
             }
-            if (Arrays.equals(userPassword, this.cryptoService.encryptAes(requestPassword.toCharArray()))) {
+            if (Arrays.equals(userPassword, cryptoService.encryptAes(requestPassword.toCharArray()))) {
                 return user;
             }
         } catch (Exception e) {

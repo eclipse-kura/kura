@@ -8,7 +8,7 @@
  *
  * Contributors:
  *  Eurotech
- *
+ * 
  *******************************************************************************/
 
 package org.eclipse.kura.wire.graph;
@@ -22,7 +22,7 @@ import org.osgi.annotation.versioning.ProviderType;
 /**
  * Allows to implement an aggregation strategy for a given set of ports. See {@link BarrierAggregatorFactory} and
  * {@link CachingAggregatorFactory} for examples of possible strategies.
- *
+ * 
  * @since 1.4
  */
 @ProviderType

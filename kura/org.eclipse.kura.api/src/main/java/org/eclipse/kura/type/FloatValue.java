@@ -66,7 +66,7 @@ public class FloatValue implements TypedValue<Float> {
             return false;
         }
         FloatValue other = (FloatValue) obj;
-        if (Float.floatToIntBits(this.value) != Float.floatToIntBits(other.value)) {
+        if (Float.floatToIntBits(value) != Float.floatToIntBits(other.value)) {
             return false;
         }
         return true;
@@ -89,7 +89,7 @@ public class FloatValue implements TypedValue<Float> {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + Float.floatToIntBits(this.value);
+        result = prime * result + Float.floatToIntBits(value);
         return result;
     }
 

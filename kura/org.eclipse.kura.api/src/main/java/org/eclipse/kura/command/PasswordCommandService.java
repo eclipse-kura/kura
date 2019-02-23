@@ -51,7 +51,7 @@ public interface PasswordCommandService {
     public default KuraResponsePayload execute(KuraRequestPayload commandReq) {
         throw new UnsupportedOperationException();
     }
-
+    
     /**
      * Password protected command execution service
      *

@@ -59,18 +59,16 @@ public class S7PlcDriver extends AbstractBlockDriver<S7PlcDomain> implements Con
     private static final Logger logger = LoggerFactory.getLogger(S7PlcDriver.class);
 
     private S7ClientState state = new S7ClientState(new S7PlcOptions(Collections.emptyMap()));
-    private final AtomicReference<S7PlcOptions> options = new AtomicReference<>();
+    private AtomicReference<S7PlcOptions> options = new AtomicReference<>();
 
     private CryptoService cryptoService;
 
-    public void setCryptoService(final CryptoService cryptoService) {
+    public void setCryptoService(CryptoService cryptoService) {
         this.cryptoService = cryptoService;
     }
 
-    public void unsetCryptoService(final CryptoService cryptoService) {
-        if (this.cryptoService == cryptoService) {
-            this.cryptoService = null;
-        }
+    public void unsetCryptoService() {
+        this.cryptoService = null;
     }
 
     public void activate(final Map<String, Object> properties) {
@@ -82,7 +80,7 @@ public class S7PlcDriver extends AbstractBlockDriver<S7PlcDomain> implements Con
     public synchronized void deactivate() {
         logger.debug("Deactivating S7 PLC Driver...");
         try {
-            disconnect();
+            this.disconnect();
         } catch (final ConnectionException e) {
             logger.error("Error while disconnecting...", e);
         }
@@ -96,7 +94,7 @@ public class S7PlcDriver extends AbstractBlockDriver<S7PlcDomain> implements Con
     }
 
     private String decryptPassword(char[] encryptedPassword) throws KuraException {
-        final char[] decodedPasswordChars = this.cryptoService.decryptAes(encryptedPassword);
+        final char[] decodedPasswordChars = cryptoService.decryptAes(encryptedPassword);
         return new String(decodedPasswordChars);
     }
 
@@ -215,12 +213,9 @@ public class S7PlcDriver extends AbstractBlockDriver<S7PlcDomain> implements Con
         }
     }
 
+    @SuppressWarnings("serial")
     static final class Moka7Exception extends IOException {
 
-        /**
-         *
-         */
-        private static final long serialVersionUID = -6118257067654374279L;
         private final int statusCode;
 
         public Moka7Exception(String message, int statusCode) {
@@ -229,7 +224,7 @@ public class S7PlcDriver extends AbstractBlockDriver<S7PlcDomain> implements Con
         }
 
         public int getStatusCode() {
-            return this.statusCode;
+            return statusCode;
         }
     }
 

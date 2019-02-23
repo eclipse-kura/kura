@@ -18,11 +18,11 @@ import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * The implementation of IPv4 firewall open port configurations
- *
+ * 
  * @noextend This class is not intended to be subclassed by clients.
  */
 @ProviderType
-public class FirewallOpenPortConfigIP4 extends FirewallOpenPortConfigIP<IP4Address> implements FirewallOpenPortConfig4 {
+public class FirewallOpenPortConfigIP4 extends FirewallOpenPortConfigIP<IP4Address>implements FirewallOpenPortConfig4 {
 
     public FirewallOpenPortConfigIP4() {
         super();

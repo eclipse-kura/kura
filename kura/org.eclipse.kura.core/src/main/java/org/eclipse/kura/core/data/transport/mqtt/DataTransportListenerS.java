@@ -36,7 +36,7 @@ class DataTransportListenerS implements DataTransportListener {
 
     public DataTransportListenerS(ComponentContext ctx) {
         this.m_ctx = ctx;
-        this.m_listeners = new CopyOnWriteArrayList<>();
+        this.m_listeners = new CopyOnWriteArrayList<DataTransportListener>();
     }
 
     @Override

@@ -17,6 +17,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.SyncFailedException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -234,17 +235,17 @@ public class DnsServerServiceImpl implements DnsServerService {
                 PrintWriter pw = new PrintWriter(fos);) {
             // build up the file
             if (isConfigured()) {
-                logger.debug("writing custom named.conf to {} with: {}",
-                        DnsServerServiceImpl.PERSISTENT_CONFIG_FILE_NAME, this.dnsServerConfigIP4);
+                logger.debug("writing custom named.conf to {} with: {}", DnsServerServiceImpl.PERSISTENT_CONFIG_FILE_NAME,
+                        this.dnsServerConfigIP4);
                 pw.print(getForwardingNamedFile());
             } else {
-                logger.debug("writing default named.conf to {} with: {}",
-                        DnsServerServiceImpl.PERSISTENT_CONFIG_FILE_NAME, this.dnsServerConfigIP4);
+                logger.debug("writing default named.conf to {} with: {}", DnsServerServiceImpl.PERSISTENT_CONFIG_FILE_NAME,
+                        this.dnsServerConfigIP4);
                 pw.print(getDefaultNamedFile());
             }
             pw.flush();
             fos.getFD().sync();
-        }
+        } 
     }
 
     private String getForwardingNamedFile() {

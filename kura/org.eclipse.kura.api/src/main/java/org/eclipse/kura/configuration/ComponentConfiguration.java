@@ -23,7 +23,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * does not provide access to certain aspects such as the required attribute,
  * the min and max values. Instead it returns the raw ObjectClassDefintion as parsed
  * from the MetaType Information XML resource associated to this Component.
- *
+ * 
  * @noimplement This interface is not intended to be implemented by clients.
  */
 @ProviderType

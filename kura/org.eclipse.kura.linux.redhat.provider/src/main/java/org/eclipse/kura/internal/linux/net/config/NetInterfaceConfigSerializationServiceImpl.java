@@ -217,7 +217,7 @@ public class NetInterfaceConfigSerializationServiceImpl implements NetInterfaceC
     private void writeConfigFile(String tmpFileName, String dstFileName, StringBuilder sb) throws KuraException {
         File srcFile = new File(tmpFileName);
         File dstFile = new File(dstFileName);
-
+        
         // write tmp configuration file
         try (FileOutputStream fos = new FileOutputStream(srcFile); PrintWriter pw = new PrintWriter(fos)) {
             pw.write(sb.toString());

@@ -15,7 +15,7 @@ import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Representation of USB network devices
- *
+ * 
  * @noextend This class is not intended to be subclassed by clients.
  */
 @ProviderType

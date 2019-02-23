@@ -31,7 +31,7 @@ public class LoopbackInterfaceImpl<T extends NetInterfaceAddress> extends Abstra
 
         // Copy the NetInterfaceAddresses
         List<? extends NetInterfaceAddress> otherNetInterfaceAddresses = other.getNetInterfaceAddresses();
-        ArrayList<T> interfaceAddresses = new ArrayList<>();
+        ArrayList<T> interfaceAddresses = new ArrayList<T>();
 
         if (otherNetInterfaceAddresses != null) {
             for (NetInterfaceAddress netInterfaceAddress : otherNetInterfaceAddresses) {

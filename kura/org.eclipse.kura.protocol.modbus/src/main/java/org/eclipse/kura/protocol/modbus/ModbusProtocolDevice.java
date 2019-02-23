@@ -126,10 +126,10 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
     /**
      * two connection types are available:
      * <ul>
-     * <li>serial mode (PROTOCOL_CONNECTION_TYPE_SERIAL)
-     *
-     * <li>Ethernet with 2 possible modes : RTU over TCP/IP (PROTOCOL_CONNECTION_TYPE_ETHER_RTU) or real MODBUS-TCP/IP
-     * (PROTOCOL_CONNECTION_TYPE_ETHER_TCP).
+     * <li> serial mode (PROTOCOL_CONNECTION_TYPE_SERIAL)
+     * 
+     * <li> Ethernet with 2 possible modes : RTU over TCP/IP (PROTOCOL_CONNECTION_TYPE_ETHER_RTU) or real MODBUS-TCP/IP
+     * (PROTOCOL_CONNECTION_TYPE_ETHER_TCP). 
      * <ul>
      * <p>
      * <h4>PROTOCOL_CONNECTION_TYPE_SERIAL</h4>
@@ -240,7 +240,7 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
 
     /**
      * get the name "modbus" for this protocol
-     *
+     * 
      * @return "modbus"
      */
     @Override
@@ -671,8 +671,8 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
                 if (!this.connected) {
                     try {
                         this.socket = new Socket();
-                        this.socket.connect(new InetSocketAddress(this.ipAddress, this.port),
-                                ModbusProtocolDevice.this.m_respTout);
+                        this.socket.connect(new InetSocketAddress(this.ipAddress, this.port), 
+                            ModbusProtocolDevice.this.m_respTout);
                         try {
                             this.inputStream = this.socket.getInputStream();
                             this.outputStream = this.socket.getOutputStream();
@@ -692,7 +692,7 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
 
         @Override
         public void disconnect() {
-            if (this.socket == null) {
+            if(this.socket==null){
                 return;
             }
             if (ModbusProtocolDevice.this.m_connConfigd) {
@@ -785,8 +785,8 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
                 // Assume this means the socket is closed...make sure it is
                 s_logger.error("Socket disconnect in send: " + e);
                 disconnect();
-                throw new ModbusProtocolException(ModbusProtocolErrorCode.TRANSACTION_FAILURE,
-                        "Send failure: " + e.getMessage());
+                throw new ModbusProtocolException(ModbusProtocolErrorCode.TRANSACTION_FAILURE, "Send failure: "
+                        + e.getMessage());
             }
 
             // ---------------------------------------------- Receive response
@@ -821,9 +821,9 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
                                 }
                             } else if (respIndex == 9) {
                                 // Check first for an Exception response
-                                if ((response[7] & 0x80) == 0x80) {
-                                    throw new ModbusProtocolException(ModbusProtocolErrorCode.TRANSACTION_FAILURE,
-                                            "Modbus responds an error = " + String.format("%02X", response[8]));
+                            	if ((response[7] & 0x80) == 0x80) {                                    
+                            		throw new ModbusProtocolException(ModbusProtocolErrorCode.TRANSACTION_FAILURE,
+                            				"Modbus responds an error = " + String.format("%02X", response[8]));
                                 } else {
                                     if (response[7] == ModbusFunctionCodes.FORCE_SINGLE_COIL
                                             || response[7] == ModbusFunctionCodes.PRESET_SINGLE_REG
@@ -1405,7 +1405,7 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
 
     /**
      * Calculates and returns the next transaction index for Modbus TCP.
-     *
+     * 
      * @return the next transaction index.
      */
     private int getNextTransactionIndex() {

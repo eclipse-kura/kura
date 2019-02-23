@@ -149,7 +149,7 @@ public class DhcpClientLeases {
                 } else if ("}".equals(line.trim())) {
                     addLeaseBlock(leaseBlock, leaseBlocks);
                     leaseBlock = null;
-                } else if (leaseBlock != null && !line.trim().isEmpty()) {
+                } else if ((leaseBlock != null) && !line.trim().isEmpty()) {
                     leaseBlock.add(line.trim());
                 }
             }

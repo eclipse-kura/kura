@@ -11,7 +11,7 @@ public interface BTSnoopListener {
      * @param record
      */
     public void processBTSnoopRecord(byte[] record);
-
+    
     public void processErrorStream(String string);
 
 }

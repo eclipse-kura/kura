@@ -22,7 +22,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * Compared to the standard Java API, this class provides additional information
  * such as the NetworkInterfaceType, whether the interface is provided to the system
  * through a USB Adapter, and additional low-level characteristics of the interface.
- *
+ * 
  * @noimplement This interface is not intended to be implemented by clients.
  */
 @ProviderType

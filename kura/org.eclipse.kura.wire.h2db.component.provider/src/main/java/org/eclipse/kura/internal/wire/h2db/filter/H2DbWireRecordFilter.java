@@ -255,7 +255,7 @@ public class H2DbWireRecordFilter implements WireEmitter, WireReceiver, Configur
             result = Collections.unmodifiableList(new ArrayList<WireRecord>());
         }
 
-        if (!result.isEmpty() || this.options.emitOnEmptyResult()) {
+        if (!result.isEmpty() || options.emitOnEmptyResult()) {
             this.wireSupport.emit(result);
         }
     }

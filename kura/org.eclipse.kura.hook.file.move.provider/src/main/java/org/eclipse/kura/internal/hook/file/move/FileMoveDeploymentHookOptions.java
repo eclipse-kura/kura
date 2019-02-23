@@ -21,7 +21,7 @@ public class FileMoveDeploymentHookOptions {
     private static final String MODE_PROPERTY_NAME = "mode";
     private static final String OVERWRITE_DESTINATION = "overwrite";
 
-    private final String destinationPath;
+    private String destinationPath;
     private boolean overwrite;
     private Mode mode;
 
@@ -40,7 +40,7 @@ public class FileMoveDeploymentHookOptions {
         this.destinationPath = rawDestinationPath.toString();
 
         if (rawMode == null) {
-            this.mode = Mode.COPY;
+            mode = Mode.COPY;
         } else {
             final String modeString = rawMode.toString();
             if (modeString.equalsIgnoreCase(Mode.COPY.name())) {
@@ -59,20 +59,20 @@ public class FileMoveDeploymentHookOptions {
             try {
                 this.overwrite = Boolean.parseBoolean(rawOverwrite.toString());
             } catch (Exception e) {
-                throw new IllegalArgumentException("Invalid value for overwrite field: " + this.overwrite);
+                throw new IllegalArgumentException("Invalid value for overwrite field: " + overwrite);
             }
         }
     }
 
     public String getDestinationPath() {
-        return this.destinationPath;
+        return destinationPath;
     }
 
     public Mode getMode() {
-        return this.mode;
+        return mode;
     }
 
     public boolean shouldOverwrite() {
-        return this.overwrite;
+        return overwrite;
     }
 }

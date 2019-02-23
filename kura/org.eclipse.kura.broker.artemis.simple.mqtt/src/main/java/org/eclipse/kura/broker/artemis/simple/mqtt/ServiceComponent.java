@@ -121,7 +121,7 @@ public class ServiceComponent implements ConfigurableComponent {
             auth.defaultUser(user);
             password = "";
         } else {
-            password = String.valueOf(this.cryptoService.decryptAes(password.toCharArray()));
+            password = String.valueOf(cryptoService.decryptAes(password.toCharArray()));
         }
 
         auth.addUser(user, password, Collections.singleton("amq"));
@@ -150,7 +150,7 @@ public class ServiceComponent implements ConfigurableComponent {
 
             final TransformerFactory factory = TransformerFactory.newInstance();
             factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-
+            
             final Transformer transformer = factory.newTransformer();
             final StringWriter sw = new StringWriter();
             final StreamResult result = new StreamResult(sw);

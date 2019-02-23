@@ -16,9 +16,9 @@ package org.eclipse.kura.net.modem;
  */
 public class ModemPdpContext {
 
-    private final int number;
-    private final ModemPdpContextType type;
-    private final String apn;
+    private int number;
+    private ModemPdpContextType type;
+    private String apn;
 
     public ModemPdpContext(int number, ModemPdpContextType type, String apn) {
         this.number = number;
@@ -37,14 +37,14 @@ public class ModemPdpContext {
     }
 
     public int getNumber() {
-        return this.number;
+        return number;
     }
 
     public ModemPdpContextType getType() {
-        return this.type;
+        return type;
     }
 
     public String getApn() {
-        return this.apn;
+        return apn;
     }
 }

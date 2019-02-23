@@ -11,35 +11,35 @@
       Eurotech
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-    <modelVersion>4.0.0</modelVersion>
+	<modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>org.eclipse.kura.feature</groupId>
-        <artifactId>features</artifactId>
-        <version>4.1.0-SNAPSHOT</version>
-        <relativePath>..</relativePath>
-    </parent>
+	<parent>
+		<groupId>org.eclipse.kura.feature</groupId>
+		<artifactId>features</artifactId>
+		<version>4.1.0-SNAPSHOT</version>
+		<relativePath>..</relativePath>
+	</parent>
 
-    <artifactId>org.eclipse.kura.driver.eddystone</artifactId>
-    <version>1.0.100-SNAPSHOT</version>
-    <packaging>eclipse-feature</packaging>
+	<artifactId>org.eclipse.kura.driver.eddystone</artifactId>
+	<version>1.0.100-SNAPSHOT</version>
+	<packaging>eclipse-feature</packaging>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>de.dentrassi.maven</groupId>
-                <artifactId>osgi-dp</artifactId>
-                <version>${osgi-dp-plugin-version}</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>build</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>de.dentrassi.maven</groupId>
+				<artifactId>osgi-dp</artifactId>
+				<version>${osgi-dp-plugin-version}</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>build</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 </project>

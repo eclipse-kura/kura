@@ -59,7 +59,7 @@ public class Tattribute implements Attribute {
     protected List<Object> any;
     protected String adref;
     protected String content;
-    private final Map<QName, String> otherAttributes = new HashMap<>();
+    private final Map<QName, String> otherAttributes = new HashMap<QName, String>();
 
     /**
      * Gets the value of the value property.
@@ -87,7 +87,7 @@ public class Tattribute implements Attribute {
     @Override
     public List<String> getValue() {
         if (this.value == null) {
-            this.value = new ArrayList<>();
+            this.value = new ArrayList<String>();
         }
         return this.value;
     }
@@ -118,7 +118,7 @@ public class Tattribute implements Attribute {
      */
     public List<Object> getAny() {
         if (this.any == null) {
-            this.any = new ArrayList<>();
+            this.any = new ArrayList<Object>();
         }
         return this.any;
     }

@@ -129,7 +129,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
 
     private BaseAssetExecutor executor;
 
-    private final AtomicReference<DriverState> driverState = new AtomicReference<>();
+    private AtomicReference<DriverState> driverState = new AtomicReference<>();
 
     /**
      * OSGi service component callback while activation.
@@ -180,7 +180,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
             this.driverServiceTracker.close();
         }
 
-        this.executor.shutdown();
+        executor.shutdown();
 
         logger.debug("deactivating...done");
     }
@@ -202,8 +202,8 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
             this.driverServiceTracker.close();
             this.driverServiceTracker = null;
         }
-        final DriverTrackerCustomizer driverTrackerCustomizer = new DriverTrackerCustomizer(
-                this.context.getBundleContext(), this, driverId);
+        final DriverTrackerCustomizer driverTrackerCustomizer = new DriverTrackerCustomizer(context.getBundleContext(),
+                this, driverId);
         this.driverServiceTracker = new ServiceTracker<>(this.context.getBundleContext(), Driver.class.getName(),
                 driverTrackerCustomizer);
         this.driverServiceTracker.open();
@@ -222,11 +222,11 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         final DriverState newState = new DriverState(driver);
         final DriverState oldState = this.driverState.getAndSet(newState);
 
-        this.executor.runConfig(() -> {
+        executor.runConfig(() -> {
             if (oldState != null) {
                 oldState.shutdown();
             }
-            this.config.complete(getOCD(), this.context, getAssetChannelDescriptor(), newState.getDriver());
+            this.config.complete(getOCD(), context, getAssetChannelDescriptor(), newState.getDriver());
             final List<ChannelRecord> readRecords = this.config.getAllReadRecords();
             if (!readRecords.isEmpty()) {
                 final PreparedRead preparedRead = newState.tryPrepareRead(readRecords);
@@ -235,8 +235,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
                 }
             }
             updateChannelListenerRegistrations(this.channelListeners, this.config.getAssetConfiguration());
-            newState.syncChannelListeners(this.channelListeners,
-                    this.config.getAssetConfiguration().getAssetChannels());
+            newState.syncChannelListeners(this.channelListeners, config.getAssetConfiguration().getAssetChannels());
         });
     }
 
@@ -244,7 +243,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         final DriverState oldState = this.driverState.getAndSet(null);
 
         if (oldState != null) {
-            this.executor.runConfig(() -> {
+            executor.runConfig(() -> {
                 final PreparedRead preparedRead = oldState.getPreparedRead();
                 if (preparedRead != null) {
                     onPreparedReadReleased(preparedRead);
@@ -272,7 +271,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
 
         final String componentName = properties.get(ConfigurationService.KURA_SERVICE_PID).toString();
 
-        Tocd ocd = this.config.getDefinition();
+        Tocd ocd = config.getDefinition();
 
         if (ocd == null) {
             ocd = getOCD();
@@ -291,7 +290,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
     }
 
     protected String getKuraServicePid() throws KuraException {
-        return this.config.getKuraServicePid();
+        return config.getKuraServicePid();
     }
 
     /** {@inheritDoc} */
@@ -307,7 +306,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
 
         final BaseAssetConfiguration conf = this.config;
 
-        final List<ChannelRecord> channelRecords = unwrap(this.executor.runIO(() -> {
+        final List<ChannelRecord> channelRecords = unwrap(executor.runIO(() -> {
             final List<ChannelRecord> records;
             final PreparedRead preparedRead = state.getPreparedRead();
             if (preparedRead != null) {
@@ -370,9 +369,9 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         }
 
         if (!validRecords.isEmpty()) {
-            unwrap(this.executor.runIO(() -> {
+            unwrap(executor.runIO(() -> {
                 state.getDriver().read(validRecords);
-                return null;
+                return (Void) null;
             }));
         }
         logger.debug("Reading asset channels...Done");
@@ -413,7 +412,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
             return;
         }
 
-        this.executor.runConfig(() -> state.syncChannelListeners(this.channelListeners, channels));
+        executor.runConfig(() -> state.syncChannelListeners(this.channelListeners, channels));
     }
 
     /** {@inheritDoc} */
@@ -436,9 +435,9 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
             return;
         }
 
-        final Map<String, Channel> channels = this.config.getAssetConfiguration().getAssetChannels();
+        final Map<String, Channel> channels = config.getAssetConfiguration().getAssetChannels();
 
-        this.executor.runConfig(() -> state.syncChannelListeners(this.channelListeners, channels));
+        executor.runConfig(() -> state.syncChannelListeners(this.channelListeners, channels));
     }
 
     protected void onPreparedReadCreated(PreparedRead preparedRead) {
@@ -450,7 +449,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
     }
 
     public BaseAssetExecutor getBaseAssetExecutor() {
-        return this.executor;
+        return executor;
     }
 
     protected BaseAssetExecutor initBaseAssetExecutor() {
@@ -498,9 +497,9 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         }
 
         if (!validRecords.isEmpty()) {
-            unwrap(this.executor.runIO(() -> {
+            unwrap(executor.runIO(() -> {
                 state.getDriver().write(validRecords);
-                return null;
+                return (Void) null;
             }));
         }
         logger.debug("Writing to channels...Done");
@@ -572,36 +571,30 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + (this.channelName == null ? 0 : this.channelName.hashCode());
-            result = prime * result + (this.listener == null ? 0 : this.listener.hashCode());
+            result = prime * result + ((channelName == null) ? 0 : channelName.hashCode());
+            result = prime * result + ((listener == null) ? 0 : listener.hashCode());
             return result;
         }
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj) {
+            if (this == obj)
                 return true;
-            }
-            if (obj == null) {
+            if (obj == null)
                 return false;
-            }
-            if (getClass() != obj.getClass()) {
+            if (getClass() != obj.getClass())
                 return false;
-            }
             ChannelListenerRegistration other = (ChannelListenerRegistration) obj;
-            if (this.channelName == null) {
-                if (other.channelName != null) {
+            if (channelName == null) {
+                if (other.channelName != null)
                     return false;
-                }
-            } else if (!this.channelName.equals(other.channelName)) {
+            } else if (!channelName.equals(other.channelName))
                 return false;
-            }
-            if (this.listener == null) {
-                if (other.listener != null) {
+            if (listener == null) {
+                if (other.listener != null)
                     return false;
-                }
             }
-            return this.listener == other.listener;
+            return listener == other.listener;
         }
     }
 }

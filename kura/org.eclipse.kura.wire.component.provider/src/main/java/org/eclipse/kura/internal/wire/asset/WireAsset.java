@@ -296,7 +296,7 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
         if (this.preparedEmit != null) {
             wireRecordProperties = this.preparedEmit.execute(channelRecords);
         } else {
-            wireRecordProperties = Utils.toWireRecordProperties(channelRecords, this.options);
+            wireRecordProperties = Utils.toWireRecordProperties(channelRecords, options);
         }
 
         try {
@@ -399,7 +399,7 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
 
         @Override
         public void onChannelEvent(ChannelEvent event) {
-            if (WireAsset.this.options.emitAllChannels()) {
+            if (options.emitAllChannels()) {
                 emitAllReadChannels();
             } else {
                 emitChannelRecords(Collections.singletonList(event.getChannelRecord()));
@@ -418,18 +418,18 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
 
         PreparedEmit(final List<ChannelRecord> records) {
             this.preparedRecords = records;
-            this.recordFillers = RecordFillers.create(this.preparedRecords, WireAsset.this.options);
+            this.recordFillers = RecordFillers.create(preparedRecords, options);
         }
 
         Map<String, TypedValue<?>> execute(final List<ChannelRecord> channelRecords) {
 
-            if (channelRecords != this.preparedRecords) {
+            if (channelRecords != preparedRecords) {
                 // driver changed the record list
                 // fallback to slow mode
-                return Utils.toWireRecordProperties(channelRecords, WireAsset.this.options);
+                return Utils.toWireRecordProperties(channelRecords, options);
             }
 
-            return Utils.toWireRecordProperties(channelRecords, WireAsset.this.options, this.recordFillers);
+            return Utils.toWireRecordProperties(channelRecords, options, recordFillers);
         }
 
     }

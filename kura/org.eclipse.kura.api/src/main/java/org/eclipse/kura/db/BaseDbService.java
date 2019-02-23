@@ -25,7 +25,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * The usage of API is typical for JDBC Connections; the connection is first acquired with getConnection(),
  * and it must be released when the operation is completed with close(). The implementation of the
  * DbService and the returned JdbcConnection will manage the concurrent access into the database appropriately.
- *
+ * 
  * @since 1.3
  * @noimplement This interface is not intended to be implemented by clients.
  */

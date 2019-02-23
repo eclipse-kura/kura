@@ -18,7 +18,7 @@ public class CriticalServiceImpl {
     private long updated;
 
     /**
-     *
+     * 
      * @param name
      * @param timeout
      *            timeout for reporting interval in seconds

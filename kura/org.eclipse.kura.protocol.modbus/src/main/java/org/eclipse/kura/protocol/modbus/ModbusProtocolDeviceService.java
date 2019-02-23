@@ -93,11 +93,10 @@ public interface ModbusProtocolDeviceService {
      * @param connectionConfig
      *            (key/value pairing directly from configuration file)
      *            <ul>
-     *            <li>connectionType : serial = "RS232" or Ethernet = "TCP-RTU" = RTU over TCP/IP or
+     *            <li>connectionType : serial = "RS232" or Ethernet = "TCP-RTU" = RTU over TCP/IP or 
      *            "TCP/IP" = real MODBUS-TCP/IP
      *            </ul>
-     *            <br>
-     *            for SERIAL mode :
+     *            <br>for SERIAL mode :
      *            <ul>
      *            <li>port : Name of the port ("/dev/ttyUSB0")
      *            <li>baudRate : baudrate
@@ -105,22 +104,19 @@ public interface ModbusProtocolDeviceService {
      *            <li>parity : parity mode (0=none, 1=odd, 2=even)
      *            <li>bitsPerWord : number of bits per word
      *            </ul>
-     *            <br>
-     *            for ETHERNET mode :
+     *            <br>for ETHERNET mode :
      *            <ul>
      *            <li>port : TCP port to be used
      *            <li>ipAddress : the 4 bytes IP address of the field device (xxx.xxx.xxx.xxx)
      *            </ul>
-     *            <br>
-     *            Modbus properties :
+     *            <br>Modbus properties :
      *            <ul>
      *            <li>transmissionMode : modbus transmission mode, can be RTU or ASCII, in Ethernet mode only RTU is
      *            supported
      *            <li>respTimeout : Timeout in milliseconds on a question/response request.
      *            </ul>
-     * 
-     * @throws ModbusProtocolException
-     *             with a {@link ModbusProtocolErrorCode#INVALID_CONFIGURATION}
+     *            
+     * @throws ModbusProtocolException with a {@link ModbusProtocolErrorCode#INVALID_CONFIGURATION}
      *             unspecified problem with the configuration
      */
     public void configureConnection(Properties connectionConfig) throws ModbusProtocolException;
@@ -149,8 +145,7 @@ public interface ModbusProtocolDeviceService {
      * <p>
      * All protocols must implement this method.
      *
-     * @throws ModbusProtocolException
-     *             with a {@link ModbusProtocolErrorCode#INVALID_CONFIGURATION}
+     * @throws ModbusProtocolException with a {@link ModbusProtocolErrorCode#INVALID_CONFIGURATION}
      *             this operates on the basic assumption that access to a device
      *             should exist, if the device is unreachable, it is interpreted
      *             as a failure of the configuration.
@@ -184,11 +179,9 @@ public interface ModbusProtocolDeviceService {
      * @return an array of booleans representing the requested data points.
      *         <b>true</b> for a given point if the point is set, <b>false</b>
      *         otherwise.
-     * @throws ModbusProtocolException
-     *             with a {@link ModbusProtocolErrorCode#NOT_CONNECTED}
+     * @throws ModbusProtocolException with a {@link ModbusProtocolErrorCode#NOT_CONNECTED}
      *             current connection is in a status other than <b>CONNECTED</b>
-     * @throws ModbusProtocolException
-     *             with a {@link ModbusProtocolErrorCode#TRANSACTION_FAILURE}
+     * @throws ModbusProtocolException with a {@link ModbusProtocolErrorCode#TRANSACTION_FAILURE}
      *             should include a protocol specific message to help clarify
      *             the cause of the exception
      */
@@ -208,11 +201,9 @@ public interface ModbusProtocolDeviceService {
      * @return an array of booleans representing the requested data points.
      *         <b>true</b> for a given point if the point is set, <b>false</b>
      *         otherwise.
-     * @throws ModbusProtocolException
-     *             with a {@link ModbusProtocolErrorCode#NOT_CONNECTED}
+     * @throws ModbusProtocolException with a {@link ModbusProtocolErrorCode#NOT_CONNECTED}
      *             current connection is in a status other than <b>CONNECTED</b>
-     * @throws ModbusProtocolException
-     *             with a {@link ModbusProtocolErrorCode#TRANSACTION_FAILURE}
+     * @throws ModbusProtocolException with a {@link ModbusProtocolErrorCode#TRANSACTION_FAILURE}
      *             should include a protocol specific message to help clarify
      *             the cause of the exception
      */
@@ -229,11 +220,9 @@ public interface ModbusProtocolDeviceService {
      *            Output address.
      * @param data
      *            Output value (boolean) to write.
-     * @throws ModbusProtocolException
-     *             with a {@link ModbusProtocolErrorCode#NOT_CONNECTED}
+     * @throws ModbusProtocolException with a {@link ModbusProtocolErrorCode#NOT_CONNECTED}
      *             current connection is in a status other than <b>CONNECTED</b>
-     * @throws ModbusProtocolException
-     *             with a {@link ModbusProtocolErrorCode#TRANSACTION_FAILURE}
+     * @throws ModbusProtocolException with a {@link ModbusProtocolErrorCode#TRANSACTION_FAILURE}
      *             should include a protocol specific message to help clarify
      *             the cause of the exception
      */
@@ -250,11 +239,9 @@ public interface ModbusProtocolDeviceService {
      *            Starting Output address.
      * @param data
      *            Outputs value (array of boolean) to write.
-     * @throws ModbusProtocolException
-     *             with a {@link ModbusProtocolErrorCode#NOT_CONNECTED}
+     * @throws ModbusProtocolException with a {@link ModbusProtocolErrorCode#NOT_CONNECTED}
      *             current connection is in a status other than <b>CONNECTED</b>
-     * @throws ModbusProtocolException
-     *             with a {@link ModbusProtocolErrorCode#TRANSACTION_FAILURE}
+     * @throws ModbusProtocolException with a {@link ModbusProtocolErrorCode#TRANSACTION_FAILURE}
      *             should include a protocol specific message to help clarify
      *             the cause of the exception
      */
@@ -272,11 +259,9 @@ public interface ModbusProtocolDeviceService {
      * @param count
      *            quantity of registers (maximum 0x7D)
      * @return an array of int representing the requested data points (data registers on 2 bytes).
-     * @throws ModbusProtocolException
-     *             with a {@link ModbusProtocolErrorCode#NOT_CONNECTED}
+     * @throws ModbusProtocolException with a {@link ModbusProtocolErrorCode#NOT_CONNECTED}
      *             current connection is in a status other than <b>CONNECTED</b>
-     * @throws ModbusProtocolException
-     *             with a {@link ModbusProtocolErrorCode#TRANSACTION_FAILURE}
+     * @throws ModbusProtocolException with a {@link ModbusProtocolErrorCode#TRANSACTION_FAILURE}
      *             should include a protocol specific message to help clarify
      *             the cause of the exception
      */
@@ -294,11 +279,9 @@ public interface ModbusProtocolDeviceService {
      * @param count
      *            quantity of registers (maximum 0x7D)
      * @return an array of int representing the requested data points (data registers on 2 bytes).
-     * @throws ModbusProtocolException
-     *             with a {@link ModbusProtocolErrorCode#NOT_CONNECTED}
+     * @throws ModbusProtocolException with a {@link ModbusProtocolErrorCode#NOT_CONNECTED}
      *             current connection is in a status other than <b>CONNECTED</b>
-     * @throws ModbusProtocolException
-     *             with a {@link ModbusProtocolErrorCode#TRANSACTION_FAILURE}
+     * @throws ModbusProtocolException with a {@link ModbusProtocolErrorCode#TRANSACTION_FAILURE}
      *             should include a protocol specific message to help clarify
      *             the cause of the exception
      */
@@ -315,11 +298,9 @@ public interface ModbusProtocolDeviceService {
      *            Output address.
      * @param data
      *            Output value (2 bytes) to write.
-     * @throws ModbusProtocolException
-     *             with a {@link ModbusProtocolErrorCode#NOT_CONNECTED}
+     * @throws ModbusProtocolException with a {@link ModbusProtocolErrorCode#NOT_CONNECTED}
      *             current connection is in a status other than <b>CONNECTED</b>
-     * @throws ModbusProtocolException
-     *             with a {@link ModbusProtocolErrorCode#TRANSACTION_FAILURE}
+     * @throws ModbusProtocolException with a {@link ModbusProtocolErrorCode#TRANSACTION_FAILURE}
      *             should include a protocol specific message to help clarify
      *             the cause of the exception
      */
@@ -332,11 +313,9 @@ public interface ModbusProtocolDeviceService {
      *
      * @param unitAddr
      *            modbus slave address (must be unique in the range 1 - 247)
-     * @throws ModbusProtocolException
-     *             with a {@link ModbusProtocolErrorCode#NOT_CONNECTED}
+     * @throws ModbusProtocolException with a {@link ModbusProtocolErrorCode#NOT_CONNECTED}
      *             current connection is in a status other than <b>CONNECTED</b>
-     * @throws ModbusProtocolException
-     *             with a {@link ModbusProtocolErrorCode#TRANSACTION_FAILURE}
+     * @throws ModbusProtocolException with a {@link ModbusProtocolErrorCode#TRANSACTION_FAILURE}
      *             should include a protocol specific message to help clarify
      *             the cause of the exception
      */
@@ -347,14 +326,12 @@ public interface ModbusProtocolDeviceService {
      * Get a status word and an event count from the device.<br>
      * Return values in a ModbusCommEvent.
      * <p>
-     *
+     * 
      * @param unitAddr
      *            modbus slave address (must be unique in the range 1 - 247)
-     * @throws ModbusProtocolException
-     *             with a {@link ModbusProtocolErrorCode#NOT_CONNECTED}
+     * @throws ModbusProtocolException with a {@link ModbusProtocolErrorCode#NOT_CONNECTED}
      *             current connection is in a status other than <b>CONNECTED</b>
-     * @throws ModbusProtocolException
-     *             with a {@link ModbusProtocolErrorCode#TRANSACTION_FAILURE}
+     * @throws ModbusProtocolException with a {@link ModbusProtocolErrorCode#TRANSACTION_FAILURE}
      *             should include a protocol specific message to help clarify
      *             the cause of the exception
      * @see ModbusCommEvent
@@ -367,14 +344,12 @@ public interface ModbusProtocolDeviceService {
      * from the device.<br>
      * Return values in a ModbusCommEvent.
      * <p>
-     *
+     * 
      * @param unitAddr
      *            modbus slave address (must be unique in the range 1 - 247)
-     * @throws ModbusProtocolException
-     *             with a {@link ModbusProtocolErrorCode#NOT_CONNECTED}
+     * @throws ModbusProtocolException with a {@link ModbusProtocolErrorCode#NOT_CONNECTED}
      *             current connection is in a status other than <b>CONNECTED</b>
-     * @throws ModbusProtocolException
-     *             with a {@link ModbusProtocolErrorCode#TRANSACTION_FAILURE}
+     * @throws ModbusProtocolException with a {@link ModbusProtocolErrorCode#TRANSACTION_FAILURE}
      *             should include a protocol specific message to help clarify
      *             the cause of the exception
      * @see ModbusCommEvent
@@ -392,11 +367,9 @@ public interface ModbusProtocolDeviceService {
      *            Output address.
      * @param data
      *            Registers value (array of int converted in 2 bytes values) to write.
-     * @throws ModbusProtocolException
-     *             with a {@link ModbusProtocolErrorCode#NOT_CONNECTED}
+     * @throws ModbusProtocolException with a {@link ModbusProtocolErrorCode#NOT_CONNECTED}
      *             current connection is in a status other than <b>CONNECTED</b>
-     * @throws ModbusProtocolException
-     *             with a {@link ModbusProtocolErrorCode#TRANSACTION_FAILURE}
+     * @throws ModbusProtocolException with a {@link ModbusProtocolErrorCode#TRANSACTION_FAILURE}
      *             should include a protocol specific message to help clarify
      *             the cause of the exception
      */

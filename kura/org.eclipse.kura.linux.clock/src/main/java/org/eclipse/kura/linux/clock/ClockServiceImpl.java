@@ -152,7 +152,7 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
             this.provider = new JavaNtpClockSyncProvider();
         } else if ("ntpd".equals(sprovider)) {
             this.provider = new NtpdClockSyncProvider();
-        }
+        }         
         if (this.provider != null) {
             this.provider.init(this.properties, this);
             this.provider.start();

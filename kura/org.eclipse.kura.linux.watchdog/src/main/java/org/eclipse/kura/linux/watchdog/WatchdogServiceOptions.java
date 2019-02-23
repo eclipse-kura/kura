@@ -23,8 +23,8 @@ public class WatchdogServiceOptions {
             "rebootCauseFilePath", "/opt/eclipse/kura/data/kura-reboot-cause");
 
     private static final String WD_ENABLED_TEMPORARY_FILE_PATH = "/tmp/watchdog";
-
-    private final Map<String, Object> properties;
+    
+    private Map<String, Object> properties;
 
     public WatchdogServiceOptions(Map<String, Object> properties) {
         this.properties = properties;
@@ -47,9 +47,9 @@ public class WatchdogServiceOptions {
     }
 
     public String getWatchdogEnabledTemporaryFilePath() {
-        return WD_ENABLED_TEMPORARY_FILE_PATH;
+    		return WD_ENABLED_TEMPORARY_FILE_PATH;
     }
-
+    
     private static class ConfigurationProperty<T> {
 
         private final String key;
@@ -66,7 +66,7 @@ public class WatchdogServiceOptions {
             if (this.defaultValue.getClass().isInstance(value)) {
                 return (T) value;
             }
-            return this.defaultValue;
+            return defaultValue;
         }
     }
 }

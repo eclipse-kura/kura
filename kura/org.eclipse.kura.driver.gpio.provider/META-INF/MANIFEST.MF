@@ -21,8 +21,7 @@ Import-Package: javax.security.cert,
  org.eclipse.kura.type;version="[1.0,2.0)",
  org.eclipse.kura.util.base;version="[1.0,2.0)",
  org.eclipse.kura.util.collection;version="[1.0,2.0)",
- org.slf4j;version="[1.7.0,2.0.0)"
+ org.slf4j;version="1.7.0"
 Service-Component: OSGI-INF/*.xml
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .
-Automatic-Module-Name: org.eclipse.kura.driver.gpio.provider

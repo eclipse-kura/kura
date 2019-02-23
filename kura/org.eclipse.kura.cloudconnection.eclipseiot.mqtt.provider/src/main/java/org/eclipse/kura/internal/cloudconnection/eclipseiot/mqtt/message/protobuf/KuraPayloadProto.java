@@ -67,8 +67,7 @@ public final class KuraPayloadProto {
          * can be zero, so optional
          * </pre>
          */
-        org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.protobuf.KuraPayloadProto.KuraPayload.KuraMetric getMetric(
-                int index);
+        org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.protobuf.KuraPayloadProto.KuraPayload.KuraMetric getMetric(int index);
 
         /**
          * <code>repeated .kuradatatypes.KuraPayload.KuraMetric metric = 5000;</code>
@@ -148,7 +147,7 @@ public final class KuraPayloadProto {
 
         private KuraPayload(com.google.protobuf.CodedInputStream input,
                 com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                throws com.google.protobuf.InvalidProtocolBufferException {
+                        throws com.google.protobuf.InvalidProtocolBufferException {
             initFields();
             int mutable_bitField0_ = 0;
             com.google.protobuf.UnknownFieldSet.Builder unknownFields = com.google.protobuf.UnknownFieldSet
@@ -189,7 +188,7 @@ public final class KuraPayloadProto {
                     }
                     case 40002: {
                         if (!((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
-                            this.metric_ = new java.util.ArrayList<>();
+                            this.metric_ = new java.util.ArrayList<org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.protobuf.KuraPayloadProto.KuraPayload.KuraMetric>();
                             mutable_bitField0_ |= 0x00000004;
                         }
                         this.metric_.add(input.readMessage(
@@ -234,7 +233,7 @@ public final class KuraPayloadProto {
             @Override
             public KuraPayload parsePartialFrom(com.google.protobuf.CodedInputStream input,
                     com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                    throws com.google.protobuf.InvalidProtocolBufferException {
+                            throws com.google.protobuf.InvalidProtocolBufferException {
                 return new KuraPayload(input, extensionRegistry);
             }
         };
@@ -386,7 +385,7 @@ public final class KuraPayloadProto {
 
             private KuraMetric(com.google.protobuf.CodedInputStream input,
                     com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                    throws com.google.protobuf.InvalidProtocolBufferException {
+                            throws com.google.protobuf.InvalidProtocolBufferException {
                 initFields();
                 com.google.protobuf.UnknownFieldSet.Builder unknownFields = com.google.protobuf.UnknownFieldSet
                         .newBuilder();
@@ -488,7 +487,7 @@ public final class KuraPayloadProto {
                 @Override
                 public KuraMetric parsePartialFrom(com.google.protobuf.CodedInputStream input,
                         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                        throws com.google.protobuf.InvalidProtocolBufferException {
+                                throws com.google.protobuf.InvalidProtocolBufferException {
                     return new KuraMetric(input, extensionRegistry);
                 }
             };
@@ -505,30 +504,24 @@ public final class KuraPayloadProto {
                 /**
                  * <code>DOUBLE = 0;</code>
                  */
-                DOUBLE(0, 0),
-                /**
-                 * <code>FLOAT = 1;</code>
-                 */
-                FLOAT(1, 1),
-                /**
-                 * <code>INT64 = 2;</code>
-                 */
-                INT64(2, 2),
-                /**
-                 * <code>INT32 = 3;</code>
-                 */
-                INT32(3, 3),
-                /**
-                 * <code>BOOL = 4;</code>
-                 */
-                BOOL(4, 4),
-                /**
-                 * <code>STRING = 5;</code>
-                 */
-                STRING(5, 5),
-                /**
-                 * <code>BYTES = 6;</code>
-                 */
+                DOUBLE(0, 0), /**
+                               * <code>FLOAT = 1;</code>
+                               */
+                FLOAT(1, 1), /**
+                              * <code>INT64 = 2;</code>
+                              */
+                INT64(2, 2), /**
+                              * <code>INT32 = 3;</code>
+                              */
+                INT32(3, 3), /**
+                              * <code>BOOL = 4;</code>
+                              */
+                BOOL(4, 4), /**
+                             * <code>STRING = 5;</code>
+                             */
+                STRING(5, 5), /**
+                               * <code>BYTES = 6;</code>
+                               */
                 BYTES(6, 6),;
 
                 /**
@@ -982,7 +975,7 @@ public final class KuraPayloadProto {
 
             public static org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.protobuf.KuraPayloadProto.KuraPayload.KuraMetric parseFrom(
                     com.google.protobuf.ByteString data, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                    throws com.google.protobuf.InvalidProtocolBufferException {
+                            throws com.google.protobuf.InvalidProtocolBufferException {
                 return PARSER.parseFrom(data, extensionRegistry);
             }
 
@@ -993,7 +986,7 @@ public final class KuraPayloadProto {
 
             public static org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.protobuf.KuraPayloadProto.KuraPayload.KuraMetric parseFrom(
                     byte[] data, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                    throws com.google.protobuf.InvalidProtocolBufferException {
+                            throws com.google.protobuf.InvalidProtocolBufferException {
                 return PARSER.parseFrom(data, extensionRegistry);
             }
 
@@ -1004,7 +997,7 @@ public final class KuraPayloadProto {
 
             public static org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.protobuf.KuraPayloadProto.KuraPayload.KuraMetric parseFrom(
                     java.io.InputStream input, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                    throws java.io.IOException {
+                            throws java.io.IOException {
                 return PARSER.parseFrom(input, extensionRegistry);
             }
 
@@ -1015,7 +1008,7 @@ public final class KuraPayloadProto {
 
             public static org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.protobuf.KuraPayloadProto.KuraPayload.KuraMetric parseDelimitedFrom(
                     java.io.InputStream input, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                    throws java.io.IOException {
+                            throws java.io.IOException {
                 return PARSER.parseDelimitedFrom(input, extensionRegistry);
             }
 
@@ -1058,7 +1051,7 @@ public final class KuraPayloadProto {
             /**
              * Protobuf type {@code kuradatatypes.KuraPayload.KuraMetric}
              */
-            public static final class Builder extends com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+            public static final class Builder extends com.google.protobuf.GeneratedMessage.Builder<Builder>implements
                     // @@protoc_insertion_point(builder_implements:kuradatatypes.KuraPayload.KuraMetric)
                     org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.protobuf.KuraPayloadProto.KuraPayload.KuraMetricOrBuilder {
 
@@ -1891,7 +1884,7 @@ public final class KuraPayloadProto {
 
             private KuraPosition(com.google.protobuf.CodedInputStream input,
                     com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                    throws com.google.protobuf.InvalidProtocolBufferException {
+                            throws com.google.protobuf.InvalidProtocolBufferException {
                 initFields();
                 com.google.protobuf.UnknownFieldSet.Builder unknownFields = com.google.protobuf.UnknownFieldSet
                         .newBuilder();
@@ -1984,7 +1977,7 @@ public final class KuraPayloadProto {
                 @Override
                 public KuraPosition parsePartialFrom(com.google.protobuf.CodedInputStream input,
                         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                        throws com.google.protobuf.InvalidProtocolBufferException {
+                                throws com.google.protobuf.InvalidProtocolBufferException {
                     return new KuraPosition(input, extensionRegistry);
                 }
             };
@@ -2331,7 +2324,7 @@ public final class KuraPayloadProto {
 
             public static org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.protobuf.KuraPayloadProto.KuraPayload.KuraPosition parseFrom(
                     com.google.protobuf.ByteString data, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                    throws com.google.protobuf.InvalidProtocolBufferException {
+                            throws com.google.protobuf.InvalidProtocolBufferException {
                 return PARSER.parseFrom(data, extensionRegistry);
             }
 
@@ -2342,7 +2335,7 @@ public final class KuraPayloadProto {
 
             public static org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.protobuf.KuraPayloadProto.KuraPayload.KuraPosition parseFrom(
                     byte[] data, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                    throws com.google.protobuf.InvalidProtocolBufferException {
+                            throws com.google.protobuf.InvalidProtocolBufferException {
                 return PARSER.parseFrom(data, extensionRegistry);
             }
 
@@ -2353,7 +2346,7 @@ public final class KuraPayloadProto {
 
             public static org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.protobuf.KuraPayloadProto.KuraPayload.KuraPosition parseFrom(
                     java.io.InputStream input, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                    throws java.io.IOException {
+                            throws java.io.IOException {
                 return PARSER.parseFrom(input, extensionRegistry);
             }
 
@@ -2364,7 +2357,7 @@ public final class KuraPayloadProto {
 
             public static org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.protobuf.KuraPayloadProto.KuraPayload.KuraPosition parseDelimitedFrom(
                     java.io.InputStream input, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                    throws java.io.IOException {
+                            throws java.io.IOException {
                 return PARSER.parseDelimitedFrom(input, extensionRegistry);
             }
 
@@ -2407,7 +2400,7 @@ public final class KuraPayloadProto {
             /**
              * Protobuf type {@code kuradatatypes.KuraPayload.KuraPosition}
              */
-            public static final class Builder extends com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+            public static final class Builder extends com.google.protobuf.GeneratedMessage.Builder<Builder>implements
                     // @@protoc_insertion_point(builder_implements:kuradatatypes.KuraPayload.KuraPosition)
                     org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.protobuf.KuraPayloadProto.KuraPayload.KuraPositionOrBuilder {
 
@@ -3147,8 +3140,7 @@ public final class KuraPayloadProto {
          * </pre>
          */
         @Override
-        public org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.protobuf.KuraPayloadProto.KuraPayload.KuraMetric getMetric(
-                int index) {
+        public org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.protobuf.KuraPayloadProto.KuraPayload.KuraMetric getMetric(int index) {
             return this.metric_.get(index);
         }
 
@@ -3286,18 +3278,18 @@ public final class KuraPayloadProto {
 
         public static org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.protobuf.KuraPayloadProto.KuraPayload parseFrom(
                 com.google.protobuf.ByteString data, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                throws com.google.protobuf.InvalidProtocolBufferException {
+                        throws com.google.protobuf.InvalidProtocolBufferException {
             return PARSER.parseFrom(data, extensionRegistry);
         }
 
-        public static org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.protobuf.KuraPayloadProto.KuraPayload parseFrom(
-                byte[] data) throws com.google.protobuf.InvalidProtocolBufferException {
+        public static org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.protobuf.KuraPayloadProto.KuraPayload parseFrom(byte[] data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
             return PARSER.parseFrom(data);
         }
 
-        public static org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.protobuf.KuraPayloadProto.KuraPayload parseFrom(
-                byte[] data, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                throws com.google.protobuf.InvalidProtocolBufferException {
+        public static org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.protobuf.KuraPayloadProto.KuraPayload parseFrom(byte[] data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                        throws com.google.protobuf.InvalidProtocolBufferException {
             return PARSER.parseFrom(data, extensionRegistry);
         }
 
@@ -3308,7 +3300,7 @@ public final class KuraPayloadProto {
 
         public static org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.protobuf.KuraPayloadProto.KuraPayload parseFrom(
                 java.io.InputStream input, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                throws java.io.IOException {
+                        throws java.io.IOException {
             return PARSER.parseFrom(input, extensionRegistry);
         }
 
@@ -3319,7 +3311,7 @@ public final class KuraPayloadProto {
 
         public static org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.protobuf.KuraPayloadProto.KuraPayload parseDelimitedFrom(
                 java.io.InputStream input, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                throws java.io.IOException {
+                        throws java.io.IOException {
             return PARSER.parseDelimitedFrom(input, extensionRegistry);
         }
 
@@ -3330,7 +3322,7 @@ public final class KuraPayloadProto {
 
         public static org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.protobuf.KuraPayloadProto.KuraPayload parseFrom(
                 com.google.protobuf.CodedInputStream input, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                throws java.io.IOException {
+                        throws java.io.IOException {
             return PARSER.parseFrom(input, extensionRegistry);
         }
 
@@ -3436,8 +3428,7 @@ public final class KuraPayloadProto {
 
             @Override
             public org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.protobuf.KuraPayloadProto.KuraPayload getDefaultInstanceForType() {
-                return org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.protobuf.KuraPayloadProto.KuraPayload
-                        .getDefaultInstance();
+                return org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.protobuf.KuraPayloadProto.KuraPayload.getDefaultInstance();
             }
 
             @Override
@@ -3488,18 +3479,15 @@ public final class KuraPayloadProto {
             @Override
             public Builder mergeFrom(com.google.protobuf.Message other) {
                 if (other instanceof org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.protobuf.KuraPayloadProto.KuraPayload) {
-                    return mergeFrom(
-                            (org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.protobuf.KuraPayloadProto.KuraPayload) other);
+                    return mergeFrom((org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.protobuf.KuraPayloadProto.KuraPayload) other);
                 } else {
                     super.mergeFrom(other);
                     return this;
                 }
             }
 
-            public Builder mergeFrom(
-                    org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.protobuf.KuraPayloadProto.KuraPayload other) {
-                if (other == org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.protobuf.KuraPayloadProto.KuraPayload
-                        .getDefaultInstance()) {
+            public Builder mergeFrom(org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.protobuf.KuraPayloadProto.KuraPayload other) {
+                if (other == org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.protobuf.KuraPayloadProto.KuraPayload.getDefaultInstance()) {
                     return this;
                 }
                 if (other.hasTimestamp()) {
@@ -3527,8 +3515,7 @@ public final class KuraPayloadProto {
                             this.metric_ = other.metric_;
                             this.bitField0_ = this.bitField0_ & ~0x00000004;
                             this.metricBuilder_ = com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders
-                                    ? getMetricFieldBuilder()
-                                    : null;
+                                    ? getMetricFieldBuilder() : null;
                         } else {
                             this.metricBuilder_.addAllMessages(other.metric_);
                         }
@@ -3741,8 +3728,8 @@ public final class KuraPayloadProto {
              */
             private com.google.protobuf.SingleFieldBuilder<org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.protobuf.KuraPayloadProto.KuraPayload.KuraPosition, org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.protobuf.KuraPayloadProto.KuraPayload.KuraPosition.Builder, org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.protobuf.KuraPayloadProto.KuraPayload.KuraPositionOrBuilder> getPositionFieldBuilder() {
                 if (this.positionBuilder_ == null) {
-                    this.positionBuilder_ = new com.google.protobuf.SingleFieldBuilder<>(getPosition(),
-                            getParentForChildren(), isClean());
+                    this.positionBuilder_ = new com.google.protobuf.SingleFieldBuilder<org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.protobuf.KuraPayloadProto.KuraPayload.KuraPosition, org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.protobuf.KuraPayloadProto.KuraPayload.KuraPosition.Builder, org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.protobuf.KuraPayloadProto.KuraPayload.KuraPositionOrBuilder>(
+                            getPosition(), getParentForChildren(), isClean());
                     this.position_ = null;
                 }
                 return this.positionBuilder_;
@@ -3753,7 +3740,8 @@ public final class KuraPayloadProto {
 
             private void ensureMetricIsMutable() {
                 if (!((this.bitField0_ & 0x00000004) == 0x00000004)) {
-                    this.metric_ = new java.util.ArrayList<>(this.metric_);
+                    this.metric_ = new java.util.ArrayList<org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.protobuf.KuraPayloadProto.KuraPayload.KuraMetric>(
+                            this.metric_);
                     this.bitField0_ |= 0x00000004;
                 }
             }
@@ -3800,8 +3788,7 @@ public final class KuraPayloadProto {
              * </pre>
              */
             @Override
-            public org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.protobuf.KuraPayloadProto.KuraPayload.KuraMetric getMetric(
-                    int index) {
+            public org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.protobuf.KuraPayloadProto.KuraPayload.KuraMetric getMetric(int index) {
                 if (this.metricBuilder_ == null) {
                     return this.metric_.get(index);
                 } else {
@@ -4040,8 +4027,8 @@ public final class KuraPayloadProto {
              * </pre>
              */
             public org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.protobuf.KuraPayloadProto.KuraPayload.KuraMetric.Builder addMetricBuilder() {
-                return getMetricFieldBuilder().addBuilder(
-                        org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.protobuf.KuraPayloadProto.KuraPayload.KuraMetric
+                return getMetricFieldBuilder()
+                        .addBuilder(org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.protobuf.KuraPayloadProto.KuraPayload.KuraMetric
                                 .getDefaultInstance());
             }
 
@@ -4072,8 +4059,9 @@ public final class KuraPayloadProto {
 
             private com.google.protobuf.RepeatedFieldBuilder<org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.protobuf.KuraPayloadProto.KuraPayload.KuraMetric, org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.protobuf.KuraPayloadProto.KuraPayload.KuraMetric.Builder, org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.protobuf.KuraPayloadProto.KuraPayload.KuraMetricOrBuilder> getMetricFieldBuilder() {
                 if (this.metricBuilder_ == null) {
-                    this.metricBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<>(this.metric_,
-                            (this.bitField0_ & 0x00000004) == 0x00000004, getParentForChildren(), isClean());
+                    this.metricBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.protobuf.KuraPayloadProto.KuraPayload.KuraMetric, org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.protobuf.KuraPayloadProto.KuraPayload.KuraMetric.Builder, org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.protobuf.KuraPayloadProto.KuraPayload.KuraMetricOrBuilder>(
+                            this.metric_, (this.bitField0_ & 0x00000004) == 0x00000004, getParentForChildren(),
+                            isClean());
                     this.metric_ = null;
                 }
                 return this.metricBuilder_;

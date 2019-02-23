@@ -9,7 +9,7 @@
  * Contributors:
  *  Eurotech
  *  Amit Kumar Mondal
- *
+ *  
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.timer;
 
@@ -43,7 +43,7 @@ final class TimerOptions {
      * Instantiates a new Timer options.
      *
      * @param properties
-     *                       the provided properties
+     *            the provided properties
      */
     TimerOptions(final Map<String, Object> properties) {
         requireNonNull(properties, "Properties cannot be null");
@@ -102,7 +102,7 @@ final class TimerOptions {
     }
 
     long getSimpleTimeUnitMultiplier() throws IllegalArgumentException {
-        String timeUnitString = (String) this.properties.getOrDefault(PROP_SIMPLE_TIME_UNIT, "SECONDS");
+        String timeUnitString = (String) properties.getOrDefault(PROP_SIMPLE_TIME_UNIT, "SECONDS");
         TimeUnit timeUnit = TimeUnit.SECONDS;
 
         if (TimeUnit.MILLISECONDS.name().equals(timeUnitString)) {

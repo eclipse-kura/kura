@@ -62,7 +62,7 @@ public class FirewallConfiguration {
                 for (String sop : astr) {
                     try {
                         String[] sa = sop.split(",");
-                        if (sa.length == 8 && "#".equals(sa[7])) {
+                        if ((sa.length == 8) && "#".equals(sa[7])) {
                             NetProtocol protocol = NetProtocol.valueOf(sa[1]);
                             String permittedNetwork = sa[2];
                             short permittedNetworkMask = 0;
@@ -92,13 +92,15 @@ public class FirewallConfiguration {
                             if (sa[0].indexOf(':') > 0) {
                                 portRange = sa[0];
                                 openPortEntry = new FirewallOpenPortConfigIP4(portRange, protocol,
-                                        new NetworkPair<>((IP4Address) IPAddress.parseHostAddress(permittedNetwork),
+                                        new NetworkPair<IP4Address>(
+                                                (IP4Address) IPAddress.parseHostAddress(permittedNetwork),
                                                 permittedNetworkMask),
                                         permittedIface, unpermittedIface, permittedMAC, sourcePortRange);
                             } else {
                                 port = Integer.parseInt(sa[0]);
                                 openPortEntry = new FirewallOpenPortConfigIP4(port, protocol,
-                                        new NetworkPair<>((IP4Address) IPAddress.parseHostAddress(permittedNetwork),
+                                        new NetworkPair<IP4Address>(
+                                                (IP4Address) IPAddress.parseHostAddress(permittedNetwork),
                                                 permittedNetworkMask),
                                         permittedIface, unpermittedIface, permittedMAC, sourcePortRange);
                             }
@@ -117,7 +119,7 @@ public class FirewallConfiguration {
                 for (String sop : astr) {
                     try {
                         String[] sa = sop.split(",");
-                        if (sa.length == 11 && "#".equals(sa[10])) {
+                        if ((sa.length == 11) && "#".equals(sa[10])) {
                             String inboundIface = null;
                             if (!sa[0].isEmpty()) {
                                 inboundIface = sa[0];
@@ -147,7 +149,8 @@ public class FirewallConfiguration {
                             }
                             FirewallPortForwardConfigIP<? extends IPAddress> portForwardEntry = new FirewallPortForwardConfigIP4(
                                     inboundIface, outboundIface, address, protocol, inPort, outPort, masquerade,
-                                    new NetworkPair<>((IP4Address) IPAddress.parseHostAddress(permittedNetwork),
+                                    new NetworkPair<IP4Address>(
+                                            (IP4Address) IPAddress.parseHostAddress(permittedNetwork),
                                             permittedNetworkMask),
                                     permittedMAC, sourcePortRange);
                             this.portForwardConfigs.add(portForwardEntry);
@@ -164,7 +167,7 @@ public class FirewallConfiguration {
                 astr = str.split(";");
                 for (String sop : astr) {
                     String[] sa = sop.split(",");
-                    if (sa.length == 7 && "#".equals(sa[6])) {
+                    if ((sa.length == 7) && "#".equals(sa[6])) {
                         String srcIface = null;
                         if (!sa[0].isEmpty()) {
                             srcIface = sa[0];

@@ -31,7 +31,7 @@ public class EthernetInterfaceConfigImpl extends EthernetInterfaceImpl<NetInterf
 
         // Copy the NetInterfaceAddresses into NetInterfaceAddressesConfig instances
         List<? extends NetInterfaceAddress> otherNetInterfaceAddresses = other.getNetInterfaceAddresses();
-        ArrayList<NetInterfaceAddressConfig> interfaceAddresses = new ArrayList<>();
+        ArrayList<NetInterfaceAddressConfig> interfaceAddresses = new ArrayList<NetInterfaceAddressConfig>();
         if (otherNetInterfaceAddresses != null) {
             for (NetInterfaceAddress netInterfaceAddress : otherNetInterfaceAddresses) {
                 NetInterfaceAddressConfigImpl copiedInterfaceAddressImpl = new NetInterfaceAddressConfigImpl(

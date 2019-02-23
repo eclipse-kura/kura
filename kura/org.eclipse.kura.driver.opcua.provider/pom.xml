@@ -47,7 +47,6 @@
                             <outputDirectory>${project.basedir}/lib</outputDirectory>
                             <stripVersion>true</stripVersion>
                             <artifactItems>
-                                
                                 <artifactItem>
                                     <groupId>org.eclipse.milo</groupId>
                                     <artifactId>bsd-parser-core</artifactId>

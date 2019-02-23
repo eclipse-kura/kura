@@ -520,41 +520,41 @@ public final class SensorTagDriver implements Driver, ConfigurableComponent {
     private void registerNotification(SensorListener sensorListener) {
         switch (sensorListener.getSensorType()) {
         case "TEMP":
-            sensorListener.getSensorTag().setTermometerPeriod(sensorListener.getPeriod() / 10);
+            sensorListener.getSensorTag().setTermometerPeriod((int) (sensorListener.getPeriod() / 10));
             unregisterTemperatureNotification(sensorListener);
             sensorListener.getSensorTag()
                     .enableTemperatureNotifications(SensorListener.getSensorConsumer(sensorListener));
             break;
         case "ACCELERATION":
-            sensorListener.getSensorTag().setAccelerometerPeriod(sensorListener.getPeriod() / 10);
+            sensorListener.getSensorTag().setAccelerometerPeriod((int) (sensorListener.getPeriod() / 10));
             unregisterAccelerationNotification(sensorListener);
             sensorListener.getSensorTag()
                     .enableAccelerationNotifications(SensorListener.getSensorConsumer(sensorListener));
             break;
         case "GYROSCOPE":
-            sensorListener.getSensorTag().setGyroscopePeriod(sensorListener.getPeriod() / 10);
+            sensorListener.getSensorTag().setGyroscopePeriod((int) (sensorListener.getPeriod() / 10));
             unregisterGyroscopeNotification(sensorListener);
             sensorListener.getSensorTag()
                     .enableGyroscopeNotifications(SensorListener.getSensorConsumer(sensorListener));
             break;
         case "MAGNETIC":
-            sensorListener.getSensorTag().setMagnetometerPeriod(sensorListener.getPeriod() / 10);
+            sensorListener.getSensorTag().setMagnetometerPeriod((int) (sensorListener.getPeriod() / 10));
             unregisterMagneticNotification(sensorListener);
             sensorListener.getSensorTag()
                     .enableMagneticFieldNotifications(SensorListener.getSensorConsumer(sensorListener));
             break;
         case "HUMIDITY":
-            sensorListener.getSensorTag().setHygrometerPeriod(sensorListener.getPeriod() / 10);
+            sensorListener.getSensorTag().setHygrometerPeriod((int) (sensorListener.getPeriod() / 10));
             unregisterHumidityNotification(sensorListener);
             sensorListener.getSensorTag().enableHumidityNotifications(SensorListener.getSensorConsumer(sensorListener));
             break;
         case "LIGHT":
-            sensorListener.getSensorTag().setLuxometerPeriod(sensorListener.getPeriod() / 10);
+            sensorListener.getSensorTag().setLuxometerPeriod((int) (sensorListener.getPeriod() / 10));
             unregisterLightNotification(sensorListener);
             sensorListener.getSensorTag().enableLightNotifications(SensorListener.getSensorConsumer(sensorListener));
             break;
         case "PRESSURE":
-            sensorListener.getSensorTag().setBarometerPeriod(sensorListener.getPeriod() / 10);
+            sensorListener.getSensorTag().setBarometerPeriod((int) (sensorListener.getPeriod() / 10));
             unregisterPressureNotification(sensorListener);
             sensorListener.getSensorTag().enablePressureNotifications(SensorListener.getSensorConsumer(sensorListener));
             break;

@@ -7,18 +7,18 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  *******************************************************************************/
-
+ 
 package org.eclipse.kura.internal.rest.provider;
 
 import java.util.Map;
 
 public class RestServiceOptions {
 
-    private final ConfigurationProperty<String[]> PROPERTY_USER_NAMES = new ConfigurationProperty<>("user.name",
+    private ConfigurationProperty<String[]> PROPERTY_USER_NAMES = new ConfigurationProperty<>("user.name",
             new String[] {});
-    private final ConfigurationProperty<String[]> PROPERTY_PASSWORDS = new ConfigurationProperty<>("password",
+    private ConfigurationProperty<String[]> PROPERTY_PASSWORDS = new ConfigurationProperty<>("password",
             new String[] {});
-    private final ConfigurationProperty<String[]> PROPERTY_ROLES = new ConfigurationProperty<>("roles",
+    private ConfigurationProperty<String[]> PROPERTY_ROLES = new ConfigurationProperty<String[]>("roles",
             new String[] {});
 
     private final Map<String, Object> properties;
@@ -28,15 +28,15 @@ public class RestServiceOptions {
     }
 
     public String[] getUserNames() {
-        return this.PROPERTY_USER_NAMES.get(this.properties);
+        return PROPERTY_USER_NAMES.get(properties);
     }
 
     public String[] getPasswords() {
-        return this.PROPERTY_PASSWORDS.get(this.properties);
+        return PROPERTY_PASSWORDS.get(properties);
     }
 
     public String[] getRoles() {
-        return this.PROPERTY_ROLES.get(this.properties);
+        return PROPERTY_ROLES.get(properties);
     }
 
     private static class ConfigurationProperty<T> {
@@ -55,7 +55,7 @@ public class RestServiceOptions {
             if (this.defaultValue.getClass().isInstance(value)) {
                 return (T) value;
             }
-            return this.defaultValue;
+            return defaultValue;
         }
     }
 }

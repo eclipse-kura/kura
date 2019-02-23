@@ -250,6 +250,7 @@ public class AssetDataUi extends Composite {
 
                     if (records != null) {
                         AssetDataUi.this.setDirty(false);
+                        AssetDataUi.this.applyDataChanges.setEnabled(false);
                         for (GwtChannelRecord channelRecord : records) {
                             channelValues.put(channelRecord.getName(), channelRecord);
                         }

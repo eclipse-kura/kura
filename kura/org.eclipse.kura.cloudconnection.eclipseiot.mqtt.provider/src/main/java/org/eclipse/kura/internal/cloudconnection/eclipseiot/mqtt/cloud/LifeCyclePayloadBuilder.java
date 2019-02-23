@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -14,10 +14,10 @@ package org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.cloud;
 import java.util.List;
 
 import org.eclipse.kura.core.util.NetUtil;
-import org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.KuraBirthPayload;
-import org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.KuraBirthPayload.KuraBirthPayloadBuilder;
-import org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.KuraDeviceProfile;
-import org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.KuraDisconnectPayload;
+import org.eclipse.kura.message.KuraBirthPayload;
+import org.eclipse.kura.message.KuraBirthPayload.KuraBirthPayloadBuilder;
+import org.eclipse.kura.message.KuraDeviceProfile;
+import org.eclipse.kura.message.KuraDisconnectPayload;
 import org.eclipse.kura.message.KuraPosition;
 import org.eclipse.kura.net.NetInterface;
 import org.eclipse.kura.net.NetInterfaceAddress;
@@ -71,7 +71,8 @@ public class LifeCyclePayloadBuilder {
                 .withFirmwareVersion(deviceProfile.getFirmwareVersion()).withBiosVersion(deviceProfile.getBiosVersion())
                 .withOs(deviceProfile.getOs()).withOsVersion(deviceProfile.getOsVersion())
                 .withJvmName(deviceProfile.getJvmName()).withJvmVersion(deviceProfile.getJvmVersion())
-                .withJvmProfile(deviceProfile.getJvmProfile()).withKuraVersion(deviceProfile.getKuraVersion())
+                .withJvmProfile(deviceProfile.getJvmProfile())
+                .withKuraVersion(deviceProfile.getApplicationFrameworkVersion())
                 .withConnectionInterface(deviceProfile.getConnectionInterface())
                 .withConnectionIp(deviceProfile.getConnectionIp()).withAcceptEncoding(acceptEncoding)
                 .withAvailableProcessors(deviceProfile.getAvailableProcessors())
@@ -173,17 +174,39 @@ public class LifeCyclePayloadBuilder {
             }
         }
 
-        //
-        // build the profile
-        return new KuraDeviceProfile(sysAdminService.getUptime(), systemService.getDeviceName(),
-                systemService.getModelName(), systemService.getModelId(), systemService.getPartNumber(),
-                systemService.getSerialNumber(), systemService.getFirmwareVersion(), systemService.getBiosVersion(),
-                systemService.getOsName(), systemService.getOsVersion(), systemService.getJavaVmName(),
-                systemService.getJavaVmVersion() + " " + systemService.getJavaVmInfo(),
-                systemService.getJavaVendor() + " " + systemService.getJavaVersion(), systemService.getKuraVersion(),
-                connectionInterface, connectionIp, latitude, longitude, altitude,
-                String.valueOf(systemService.getNumberOfProcessors()), String.valueOf(systemService.getTotalMemory()),
-                systemService.getOsArch(), systemService.getOsgiFwName(), systemService.getOsgiFwVersion());
+        return buildKuraDeviceProfile(systemService, sysAdminService, connectionIp, connectionInterface, latitude,
+                longitude, altitude);
+    }
+
+    private KuraDeviceProfile buildKuraDeviceProfile(SystemService systemService, SystemAdminService sysAdminService,
+            String connectionIp, String connectionInterface, double latitude, double longitude, double altitude) {
+        KuraDeviceProfile kuraDeviceProfile = new KuraDeviceProfile();
+        kuraDeviceProfile.setUptime(sysAdminService.getUptime());
+        kuraDeviceProfile.setDisplayName(systemService.getDeviceName());
+        kuraDeviceProfile.setModelName(systemService.getModelName());
+        kuraDeviceProfile.setModelId(systemService.getModelId());
+        kuraDeviceProfile.setPartNumber(systemService.getPartNumber());
+        kuraDeviceProfile.setSerialNumber(systemService.getSerialNumber());
+        kuraDeviceProfile.setFirmwareVersion(systemService.getFirmwareVersion());
+        kuraDeviceProfile.setBiosVersion(systemService.getBiosVersion());
+        kuraDeviceProfile.setOs(systemService.getOsName());
+        kuraDeviceProfile.setOsVersion(systemService.getOsVersion());
+        kuraDeviceProfile.setJvmName(systemService.getJavaVmName());
+        kuraDeviceProfile.setJvmVersion(systemService.getJavaVmVersion() + " " + systemService.getJavaVmInfo());
+        kuraDeviceProfile.setJvmProfile(systemService.getJavaVendor() + " " + systemService.getJavaVersion());
+        kuraDeviceProfile.setApplicationFramework(KuraDeviceProfile.DEFAULT_APPLICATION_FRAMEWORK);
+        kuraDeviceProfile.setApplicationFrameworkVersion(systemService.getKuraVersion());
+        kuraDeviceProfile.setConnectionInterface(connectionInterface);
+        kuraDeviceProfile.setConnectionIp(connectionIp);
+        kuraDeviceProfile.setLatitude(latitude);
+        kuraDeviceProfile.setLongitude(longitude);
+        kuraDeviceProfile.setAltitude(altitude);
+        kuraDeviceProfile.setAvailableProcessors(String.valueOf(systemService.getNumberOfProcessors()));
+        kuraDeviceProfile.setTotalMemory(String.valueOf(systemService.getTotalMemory()));
+        kuraDeviceProfile.setOsArch(systemService.getOsArch());
+        kuraDeviceProfile.setOsgiFramework(systemService.getOsgiFwName());
+        kuraDeviceProfile.setOsgiFrameworkVersion(systemService.getOsgiFwVersion());
+        return kuraDeviceProfile;
     }
 
     private String buildConnectionIp(NetInterface<? extends NetInterfaceAddress> ni) {

@@ -40,7 +40,7 @@
    <reference name="WatchdogService"
    			  bind="setWatchdogService" 
    			  unbind="unsetWatchdogService"
-   			  cardinality="1..1" 
+   			  cardinality="0..1" 
    			  interface="org.eclipse.kura.watchdog.WatchdogService"  
    			  policy="static"/>   
 </scr:component>

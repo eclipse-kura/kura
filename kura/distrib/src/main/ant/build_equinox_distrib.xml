@@ -605,9 +605,6 @@ fi]]>
                 file="${project.build.directory}/plugins/org.eclipse.kura.driver.opcua.provider_${org.eclipse.kura.driver.opcua.provider.version}.jar"
                 prefix="${build.output.name}/${plugins.folder}" />
 			<zipfileset
-                file="${project.build.directory}/plugins/org.eclipse.kura.driver.block_${org.eclipse.kura.driver.block.version}.jar"
-                prefix="${build.output.name}/${plugins.folder}" />
-			<zipfileset
                 file="${project.build.directory}/plugins/org.eclipse.kura.driver.s7plc.provider_${org.eclipse.kura.driver.s7plc.provider.version}.jar"
                 prefix="${build.output.name}/${plugins.folder}" />
             <zipfileset
@@ -829,8 +826,6 @@ fi]]>
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.felix.fileinstall_${org.apache.felix.fileinstall.version}.jar@3:start" />
             <entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.driver.opcua.provider_${org.eclipse.kura.driver.opcua.provider.version}.jar@4:start" />
-			<entry key="osgi.bundles" operation="+"
-				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.driver.block_${org.eclipse.kura.driver.block.version}.jar@4:start" />
 			<entry key="osgi.bundles" operation="+"
 			    value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.driver.s7plc.provider_${org.eclipse.kura.driver.s7plc.provider.version}.jar@4:start" />
             <entry key="osgi.bundles" operation="+"

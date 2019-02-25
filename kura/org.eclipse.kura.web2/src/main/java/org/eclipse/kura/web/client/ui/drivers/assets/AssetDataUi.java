@@ -244,8 +244,8 @@ public class AssetDataUi extends Composite {
             return;
         }
 
-        alertDialog.show(MSGS.driversAssetsWriteConfirm(model.getAssetPid()), () -> DriversAndAssetsRPC.write(model.getAssetPid(), writeRecords,
-                result -> {
+        alertDialog.show(MSGS.driversAssetsWriteConfirm(model.getAssetPid()),
+                () -> DriversAndAssetsRPC.write(model.getAssetPid(), writeRecords, result -> {
                     final List<GwtChannelRecord> records = result.getRecords();
 
                     if (records != null) {
@@ -256,8 +256,8 @@ public class AssetDataUi extends Composite {
                         AssetDataUi.this.channelsDataProvider.refresh();
                         AssetDataUi.this.assetDataTable.redraw();
                     } else {
-                        FailureHandler.showErrorMessage("Channel operation failed",
-                                result.getExceptionMessage(), result.getStackTrace());
+                        FailureHandler.showErrorMessage("Channel operation failed", result.getExceptionMessage(),
+                                result.getStackTrace());
                     }
                 }));
     }
@@ -293,26 +293,26 @@ public class AssetDataUi extends Composite {
         this.channelsDataProvider.refresh();
 
         EntryClassUi.showWaitModal();
-        DriversAndAssetsRPC.readAllChannels(model.getAssetPid(),
-                result -> {
-                    final List<GwtChannelRecord> records = result.getRecords();
+        DriversAndAssetsRPC.readAllChannels(model.getAssetPid(), result -> {
+            final List<GwtChannelRecord> records = result.getRecords();
 
-                    if (records != null) {
-                        for (final GwtChannelRecord record : records) {
-                            channelValues.put(record.getName(), record);
-                        }
-                        AssetDataUi.this.channelsDataProvider.getList().addAll(model.getChannels());
-                        AssetDataUi.this.channelsDataProvider.refresh();
+            if (records != null) {
+                for (final GwtChannelRecord record : records) {
+                    record.setUnescaped(true);
+                    channelValues.put(record.getName(), record);
+                }
+                AssetDataUi.this.channelsDataProvider.getList().addAll(model.getChannels());
+                AssetDataUi.this.channelsDataProvider.refresh();
 
-                        int size = AssetDataUi.this.channelsDataProvider.getList().size();
-                        AssetDataUi.this.assetDataTable.setVisibleRange(0, size);
+                int size = AssetDataUi.this.channelsDataProvider.getList().size();
+                AssetDataUi.this.assetDataTable.setVisibleRange(0, size);
 
-                        AssetDataUi.this.assetDataTable.redraw();
-                    } else {
-                        FailureHandler.showErrorMessage("Channel operation failed", result.getExceptionMessage(),
-                                result.getStackTrace());
-                    }
-                });
+                AssetDataUi.this.assetDataTable.redraw();
+            } else {
+                FailureHandler.showErrorMessage("Channel operation failed", result.getExceptionMessage(),
+                        result.getStackTrace());
+            }
+        });
     }
 
     private ChannelStatus getChannelStatus(final ChannelModel model) {

@@ -57,8 +57,8 @@
                                     <version>${org.apache.felix.deploymentadmin.version}</version>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.knowhowlab</groupId>
-                                    <artifactId>org.knowhowlab.osgi.monitoradmin</artifactId>
+                                    <groupId>org.knowhowlab.osgi</groupId>
+                                    <artifactId>monitoradmin</artifactId>
                                     <version>${org.knowhowlab.osgi.monitoradmin.version}</version>
                                 </artifactItem>
                                 <artifactItem>
@@ -199,7 +199,7 @@
                                     tofile="${project.build.directory}/source/plugins/org.apache.felix.dependencymanager_${org.apache.felix.dependencymanager.version}.jar" />
                                 <move file="${project.build.directory}/source/plugins/org.apache.felix.deploymentadmin.jar"
                                     tofile="${project.build.directory}/source/plugins/org.apache.felix.deploymentadmin_${org.apache.felix.deploymentadmin.version}.jar" />
-                                <move file="${project.build.directory}/source/plugins/org.knowhowlab.osgi.monitoradmin.jar"
+                                <move file="${project.build.directory}/source/plugins/monitoradmin.jar"
                                     tofile="${project.build.directory}/source/plugins/org.knowhowlab.osgi.monitoradmin_${org.knowhowlab.osgi.monitoradmin.version}.jar" />
                                 <move file="${project.build.directory}/source/plugins/jetty-http.jar"
                                     tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.http_${org.eclipse.jetty.http.version}.jar" />

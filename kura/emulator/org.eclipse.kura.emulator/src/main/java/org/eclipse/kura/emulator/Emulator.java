@@ -19,6 +19,8 @@ import java.net.URL;
 
 import org.apache.commons.io.IOUtils;
 import org.osgi.service.component.ComponentContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Emulator {
 
@@ -29,33 +31,33 @@ public class Emulator {
     private static final String KURA_MODE = "org.eclipse.kura.mode";
 
     private static final String SNAPSHOT_0_NAME = "snapshot_0.xml";
-
+    private static final Logger logger = LoggerFactory.getLogger(Emulator.class);
     private ComponentContext m_componentContext;
 
     protected void activate(ComponentContext componentContext) {
         this.m_componentContext = componentContext;
 
         try {
-            // Properties props = System.getProperties();
             String mode = System.getProperty(KURA_MODE);
             if (EMULATOR.equals(mode)) {
-                System.out.println("Framework is running in emulation mode");
-                final String snapshotFolderPath = System.getProperty(KURA_SNAPSHOTS_PATH);
-                if (snapshotFolderPath == null || snapshotFolderPath.isEmpty()) {
-                    throw new IllegalStateException("System property 'kura.snapshots' is not set");
-                }
-                final File snapshotFolder = new File(snapshotFolderPath);
-                if (!snapshotFolder.exists() || snapshotFolder.list().length == 0) {
-                    snapshotFolder.mkdirs();
-                    copySnapshot(snapshotFolderPath);
-                }
+                logger.info("Framework is running in emulation mode");
             } else {
-                System.out.println("Framework is not running in emulation mode");
+                logger.info("Framework is not running in emulation mode");
+            }
+            final String snapshotFolderPath = System.getProperty(KURA_SNAPSHOTS_PATH);
+            if (snapshotFolderPath == null || snapshotFolderPath.isEmpty()) {
+                throw new IllegalStateException("System property 'kura.snapshots' is not set");
+            }
+            final File snapshotFolder = new File(snapshotFolderPath);
+            if (!snapshotFolder.exists()
+                    || snapshotFolder.list((File dir, String name) -> name.equals(SNAPSHOT_0_NAME)).length == 0) {
+                snapshotFolder.mkdirs();
+                logger.warn("No init snapshot file,copy one.");
+                copySnapshot(snapshotFolderPath);
             }
 
         } catch (Exception e) {
-            System.out
-                    .println("Framework is not running in emulation mode or initialization failed!: " + e.getMessage());
+            logger.error("Framework is not running in emulation mode or initialization failed!: " + e.getMessage());
         }
     }
 

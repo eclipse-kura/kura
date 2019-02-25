@@ -469,7 +469,7 @@
     <esf:configuration pid="org.eclipse.kura.clock.ClockService">
         <esf:properties>
             <esf:property name="enabled" array="false" encrypted="false" type="Boolean">
-                <esf:value>true</esf:value>
+                <esf:value>false</esf:value>
             </esf:property>
             <esf:property name="clock.ntp.port" array="false" encrypted="false" type="Integer">
                 <esf:value>123</esf:value>

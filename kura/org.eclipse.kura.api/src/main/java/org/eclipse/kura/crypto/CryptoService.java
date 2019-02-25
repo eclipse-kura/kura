@@ -162,4 +162,6 @@ public interface CryptoService {
     public boolean isFrameworkSecure();
 
     public ByteBuffer encryptAes(ByteBuffer value) throws KuraException;
+
+    public ByteBuffer decryptAes(ByteBuffer value) throws KuraException;
 }

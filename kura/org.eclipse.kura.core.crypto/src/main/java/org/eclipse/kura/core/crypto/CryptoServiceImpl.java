@@ -101,8 +101,9 @@ public class CryptoServiceImpl implements CryptoService {
             Key key = generateKey();
             Cipher c = Cipher.getInstance(ALGORITHM);
             c.init(Cipher.ENCRYPT_MODE, key);
-            ByteBuffer ouputBuffer = ByteBuffer.allocate(value.capacity() + 2048);
+            ByteBuffer ouputBuffer = ByteBuffer.allocate(c.getOutputSize(value.limit()));
             c.doFinal(value, ouputBuffer);
+            ouputBuffer.flip();
             encryptedValue = base64Encode(ouputBuffer);
         } catch (NoSuchAlgorithmException e) {
             throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
@@ -125,12 +126,43 @@ public class CryptoServiceImpl implements CryptoService {
         return Base64.getDecoder().decode(internalStringValue);
     }
 
+    private ByteBuffer base64Decode(ByteBuffer buffer) {
+        return Base64.getDecoder().decode(buffer);
+    }
+
     private String base64Encode(byte[] encryptedBytes) {
         return Base64.getEncoder().encodeToString(encryptedBytes);
     }
 
     private ByteBuffer base64Encode(ByteBuffer buffer) {
         return Base64.getEncoder().encode(buffer);
+    }
+
+    @Override
+    public ByteBuffer decryptAes(ByteBuffer value) throws KuraException {
+        Key key = generateKey();
+        Cipher c;
+        try {
+            c = Cipher.getInstance(ALGORITHM);
+            c.init(Cipher.DECRYPT_MODE, key);
+            ByteBuffer decodeBudder = base64Decode(value);
+            ByteBuffer ouputBuffer = ByteBuffer.allocate(c.getOutputSize(decodeBudder.limit()));
+            c.doFinal(decodeBudder, ouputBuffer);
+            ouputBuffer.flip();
+            return ouputBuffer;
+        } catch (NoSuchAlgorithmException e) {
+            throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
+        } catch (NoSuchPaddingException e) {
+            throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
+        } catch (InvalidKeyException e) {
+            throw new KuraException(KuraErrorCode.DECODER_ERROR);
+        } catch (BadPaddingException e) {
+            throw new KuraException(KuraErrorCode.DECODER_ERROR);
+        } catch (IllegalBlockSizeException e) {
+            throw new KuraException(KuraErrorCode.DECODER_ERROR);
+        } catch (ShortBufferException e) {
+            throw new KuraException(KuraErrorCode.DECODER_ERROR);
+        }
     }
 
     @Override

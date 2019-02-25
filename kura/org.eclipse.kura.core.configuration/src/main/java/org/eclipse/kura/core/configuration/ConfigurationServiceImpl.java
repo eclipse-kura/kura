@@ -14,16 +14,20 @@ package org.eclipse.kura.core.configuration;
 
 import static java.util.Objects.requireNonNull;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -1013,6 +1017,20 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         return builder.toString();
     }
 
+    private static ByteBuffer readFully(String fileName) throws IOException {
+
+        RandomAccessFile file = new RandomAccessFile(fileName, "r");
+        FileChannel inChannel = file.getChannel();
+        long fileSize = inChannel.size();
+        ByteBuffer buffer = ByteBuffer.allocate((int) fileSize);
+        inChannel.read(buffer);
+        buffer.flip();
+        inChannel.close();
+        file.close();
+
+        return buffer;
+    }
+
     private void encryptPlainSnapshots() throws KuraException, IOException {
         Set<Long> snapshotIDs = getSnapshots();
         if (snapshotIDs == null || snapshotIDs.isEmpty()) {
@@ -1074,6 +1092,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         ByteArrayOutputStream buffer;
         try {
             buffer = (ByteArrayOutputStream) marshal(conf, new ByteArrayOutputStream());
+            buffer.flush();
         } catch (KuraException e) {
             throw e;
         } catch (Exception e) {
@@ -1386,31 +1405,36 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
     }
 
     XmlComponentConfigurations loadEncryptedSnapshotFileContent(long snapshotID) throws KuraException {
-        File fSnapshot = getSnapshotFile(snapshotID);
-        if (fSnapshot == null || !fSnapshot.exists()) {
+        String configDir = getSnapshotsDirectory();
+
+        if (configDir == null) {
             throw new KuraException(KuraErrorCode.CONFIGURATION_SNAPSHOT_NOT_FOUND,
-                    fSnapshot != null ? fSnapshot.getAbsolutePath() : "null");
+                    configDir != null ? configDir : "null");
         }
 
-        final String rawSnapshot;
+        StringBuilder sbSnapshot = new StringBuilder(configDir);
+        sbSnapshot.append(File.separator).append("snapshot_").append(snapshotID).append(".xml");
+
+        String snapshot = sbSnapshot.toString();
+
+        ByteBuffer rawSnapshot;
         try {
-            rawSnapshot = readFully(fSnapshot);
+            rawSnapshot = readFully(snapshot);
         } catch (IOException e) {
             logger.error("Error loading file from disk", e);
             return null;
         }
 
         // File loaded, try to decrypt and unmarshall
-        char[] decryptAes = this.cryptoService.decryptAes(rawSnapshot.toCharArray());
-        if (decryptAes == null) {
+        ByteBuffer decryptAes = this.cryptoService.decryptAes(rawSnapshot);
+        if (decryptAes.limit() == 0) {
             throw new KuraException(KuraErrorCode.DECODER_ERROR);
         }
-        String decryptedContent = new String(decryptAes);
 
         XmlComponentConfigurations xmlConfigs = null;
 
         try {
-            xmlConfigs = unmarshal(decryptedContent, XmlComponentConfigurations.class);
+            xmlConfigs = unmarshal(decryptAes, XmlComponentConfigurations.class);
         } catch (KuraException e) {
             logger.warn("Error parsing xml", e);
         }
@@ -1767,6 +1791,17 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
     protected <T> T unmarshal(final File file, final Class<T> clazz) throws KuraException {
         try {
             return requireNonNull(this.xmlUnmarshaller.unmarshal(new FileReader(file), clazz));
+        } catch (final Exception e) {
+            throw new KuraException(KuraErrorCode.DECODER_ERROR, e);
+        }
+    }
+
+    protected <T> T unmarshal(final ByteBuffer buffer, final Class<T> clazz) throws KuraException {
+        try {
+            byte[] b = new byte[buffer.remaining()];
+            buffer.get(b, 0, b.length);
+            return requireNonNull(
+                    this.xmlUnmarshaller.unmarshal(new InputStreamReader(new ByteArrayInputStream(b)), clazz));
         } catch (final Exception e) {
             throw new KuraException(KuraErrorCode.DECODER_ERROR, e);
         }

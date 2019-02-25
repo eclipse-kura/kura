@@ -1,54 +1,54 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <artifactId>org.apache.log4j2-api-config</artifactId>
-    <version>1.0.100-SNAPSHOT</version>
-    <packaging>bundle</packaging>
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>org.apache.log4j2-api-config</artifactId>
+	<version>1.0.100-SNAPSHOT</version>
+	<packaging>bundle</packaging>
 
-    <parent>
-        <groupId>org.eclipse.kura</groupId>
-        <artifactId>target-platform</artifactId>
-        <version>4.1.0-SNAPSHOT</version>
-    </parent>
+	<parent>
+		<groupId>org.eclipse.kura</groupId>
+		<artifactId>target-platform</artifactId>
+		<version>4.1.0-SNAPSHOT</version>
+	</parent>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>3.0.0</version>
-                <executions>
-                    <execution>
-                        <id>checkstyle-validation</id>
-                        <phase>process-sources</phase>
-                        <configuration>
-                            <skip>true</skip>
-                        </configuration>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <extensions>true</extensions>
-                <configuration>
-                    <manifestLocation>META-INF</manifestLocation>
-                    <instructions>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<version>3.0.0</version>
+				<executions>
+					<execution>
+						<id>checkstyle-validation</id>
+						<phase>process-sources</phase>
+						<configuration>
+							<skip>true</skip>
+						</configuration>
+						<goals>
+							<goal>check</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<manifestLocation>META-INF</manifestLocation>
+					<instructions>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-                        <Bundle-Name>${project.artifactId}</Bundle-Name>
-                        <Bundle-Version>${project.version}</Bundle-Version>
+						<Bundle-Name>${project.artifactId}</Bundle-Name>
+						<Bundle-Version>${project.version}</Bundle-Version>
                         <Fragment-Host>org.apache.logging.log4j.api</Fragment-Host>
                         <DynamicImport-Package>
                             *;resolution:=optional
                         </DynamicImport-Package>
                     </instructions>
-                </configuration>
-            </plugin>
-        </plugins>
-        <resources>
+				</configuration>
+			</plugin>
+		</plugins>
+		<resources>
             <resource>
                 <directory>.</directory>
                 <includes>
@@ -64,5 +64,5 @@
                 <targetPath>.</targetPath>
             </resource>
         </resources>
-    </build>
+	</build>
 </project>

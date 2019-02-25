@@ -151,11 +151,11 @@ public final class IBeaconDriver
         extractProperties(properties);
 
         this.bluetoothLeAdapter = this.bluetoothLeService.getAdapter(this.options.getBluetoothInterfaceName());
-        if (this.bluetoothLeAdapter != null) {
-            if (!this.bluetoothLeAdapter.isPowered()) {
-                this.bluetoothLeAdapter.setPowered(true);
+        if (bluetoothLeAdapter != null) {
+            if (!bluetoothLeAdapter.isPowered()) {
+                bluetoothLeAdapter.setPowered(true);
             }
-            this.bluetoothLeIBeaconScanner = this.bluetoothLeIBeaconService.newBeaconScanner(this.bluetoothLeAdapter);
+            this.bluetoothLeIBeaconScanner = this.bluetoothLeIBeaconService.newBeaconScanner(bluetoothLeAdapter);
             this.bluetoothLeIBeaconScanner.addBeaconListener(this);
             this.worker = Executors.newSingleThreadScheduledExecutor();
             // Setup a task that monitor the scan every 30 seconds
@@ -266,13 +266,13 @@ public final class IBeaconDriver
         StringBuilder sb = new StringBuilder();
         sb.append(iBeacon.getUuid().toString());
         sb.append(";");
-        sb.append(iBeacon.getTxPower());
+        sb.append((int) iBeacon.getTxPower());
         sb.append(";");
         sb.append(iBeacon.getRssi());
         sb.append(";");
-        sb.append(iBeacon.getMajor());
+        sb.append((int) iBeacon.getMajor());
         sb.append(";");
-        sb.append(iBeacon.getMinor());
+        sb.append((int) iBeacon.getMinor());
         sb.append(";");
         sb.append(calculateDistance(iBeacon.getRssi(), iBeacon.getTxPower()));
 

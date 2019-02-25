@@ -53,7 +53,7 @@ final class IBeaconOptions {
     String getBluetoothInterfaceName() {
         String interfaceName = null;
         final Object iname = this.properties.get(INAME);
-        if (nonNull(iname) && iname instanceof String) {
+        if (nonNull(iname) && (iname instanceof String)) {
             interfaceName = iname.toString();
         }
         return interfaceName;

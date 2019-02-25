@@ -798,13 +798,13 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         for (ComponentConfiguration config : configs) {
             for (ComponentConfiguration configToUpdate : configsToUpdate) {
                 if (config.getPid().equals(configToUpdate.getPid())) {
-                    // try {
-                    updateConfigurationInternal(config.getPid(), config.getConfigurationProperties(),
-                            snapshotOnConfirmation);
-                    // } catch (KuraException e) {
-                    // logger.warn("Error during updateConfigurations for component " + config.getPid(), e);
-                    // causes.add(e);
-                    // }
+                    try {
+                        updateConfigurationInternal(config.getPid(), config.getConfigurationProperties(),
+                                snapshotOnConfirmation);
+                    } catch (KuraException e) {
+                        logger.warn("Error during updateConfigurations for component " + config.getPid(), e);
+                        causes.add(e);
+                    }
                     break;
                 }
             }

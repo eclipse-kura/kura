@@ -24,7 +24,7 @@
         <module>moquette-broker</module>
         <module>org.apache.log4j2-api-config</module>
         <module>org.eclipse.kura.jetty.customizer</module>
-        <module>p2-repo-common</module>
+		<module>p2-repo-common</module>
         <module>p2-repo-equinox_3.12.50</module>
         <module>p2-repo-test-deps</module>
     </modules>
@@ -72,22 +72,22 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <check.plugins.exist.remote>false</check.plugins.exist.remote>
     </properties>
-
+    
     <profiles>
         <profile>
             <id>check-exists-plugin</id>
             <properties>
-                <check.plugins.exist.remote>true</check.plugins.exist.remote>
+            	<check.plugins.exist.remote>true</check.plugins.exist.remote>
             </properties>
         </profile>
     </profiles>
-
+    
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-site-plugin</artifactId>
-                <version>3.7.1</version>
+                <version>3.3</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

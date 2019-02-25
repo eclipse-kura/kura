@@ -11,6 +11,8 @@
  *******************************************************************************/
 package org.eclipse.kura.marshalling;
 
+import java.io.OutputStream;
+
 import org.eclipse.kura.KuraException;
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -33,4 +35,6 @@ public interface Marshaller {
      *             when the marshalling operation fails.
      */
     public String marshal(Object object) throws KuraException;
+
+    public void marshal(Object object, OutputStream w) throws Exception;
 }

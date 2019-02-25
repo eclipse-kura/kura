@@ -13,6 +13,7 @@ package org.eclipse.kura.crypto;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
@@ -159,4 +160,6 @@ public interface CryptoService {
      * @return true if the framework is running in security mode.
      */
     public boolean isFrameworkSecure();
+
+    public ByteBuffer encryptAes(ByteBuffer value) throws KuraException;
 }

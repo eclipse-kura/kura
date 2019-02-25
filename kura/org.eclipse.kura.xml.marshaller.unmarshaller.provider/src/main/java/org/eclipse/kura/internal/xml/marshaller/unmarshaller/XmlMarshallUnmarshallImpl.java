@@ -11,11 +11,11 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.xml.marshaller.unmarshaller;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.Reader;
 import java.io.StringReader;
-import java.io.StringWriter;
-import java.io.Writer;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
@@ -51,16 +51,17 @@ public class XmlMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
 
     @Override
     public String marshal(Object object) throws KuraException {
-        StringWriter sw = new StringWriter();
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         try {
-            marshal(object, sw);
+            marshal(object, buffer);
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.ENCODE_ERROR);
         }
-        return sw.toString();
+        return buffer.toString();
     }
 
-    private void marshal(Object object, Writer w) throws Exception {
+    @Override
+    public void marshal(Object object, OutputStream w) throws Exception {
         try {
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             docFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
@@ -120,7 +121,7 @@ public class XmlMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
             // write the content into xml file
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             transformerFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-            
+
             Transformer transformer = transformerFactory.newTransformer();
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
             transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
@@ -142,7 +143,8 @@ public class XmlMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
         return unmarshal(sr, clazz);
     }
 
-    private <T> T unmarshal(Reader r, Class<T> clazz) throws KuraException {
+    @Override
+    public <T> T unmarshal(Reader r, Class<T> clazz) throws KuraException {
         DocumentBuilderFactory factory = null;
         DocumentBuilder parser = null;
 

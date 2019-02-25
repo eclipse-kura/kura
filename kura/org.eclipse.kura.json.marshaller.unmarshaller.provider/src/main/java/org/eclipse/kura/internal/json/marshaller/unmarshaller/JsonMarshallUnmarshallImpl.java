@@ -8,6 +8,9 @@
  ******************************************************************************/
 package org.eclipse.kura.internal.json.marshaller.unmarshaller;
 
+import java.io.OutputStream;
+import java.io.Reader;
+
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonDecoder;
@@ -43,6 +46,16 @@ public class JsonMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
             return (T) CloudPayloadJsonDecoder.buildFromString(s);
         }
         throw new IllegalArgumentException("Invalid parameter!");
+    }
+
+    @Override
+    public <T> T unmarshal(Reader r, Class<T> clazz) throws KuraException {
+        return null;
+    }
+
+    @Override
+    public void marshal(Object object, OutputStream w) throws Exception {
+
     }
 
 }

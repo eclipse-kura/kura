@@ -14,13 +14,16 @@ package org.eclipse.kura.core.configuration;
 
 import static java.util.Objects.requireNonNull;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -1023,8 +1026,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
                 throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, snapshot);
             }
 
-            final XmlComponentConfigurations xmlConfigs = unmarshal(readFully(fSnapshot),
-                    XmlComponentConfigurations.class);
+            final XmlComponentConfigurations xmlConfigs = unmarshal(fSnapshot, XmlComponentConfigurations.class);
 
             encryptConfigs(xmlConfigs.getConfigurations());
 
@@ -1068,22 +1070,17 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         if (fSnapshot == null) {
             throw new KuraException(KuraErrorCode.CONFIGURATION_SNAPSHOT_NOT_FOUND);
         }
-
         // Marshall the configuration into an XML
-        String xmlResult;
+        ByteArrayOutputStream buffer;
         try {
-            xmlResult = marshal(conf);
-            if (xmlResult == null || xmlResult.trim().isEmpty()) {
-                throw new KuraException(KuraErrorCode.INVALID_PARAMETER, conf);
-            }
+            buffer = (ByteArrayOutputStream) marshal(conf, new ByteArrayOutputStream());
         } catch (KuraException e) {
             throw e;
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
         }
-
         // Encrypt the XML
-        char[] encryptedXML = this.cryptoService.encryptAes(xmlResult.toCharArray());
+        ByteBuffer encryptedBytes = this.cryptoService.encryptAes(ByteBuffer.wrap(buffer.toByteArray()));
 
         // Write the snapshot
         FileOutputStream fos = null;
@@ -1091,9 +1088,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         try {
             logger.info("Writing snapshot - Saving {}...", fSnapshot.getAbsolutePath());
             fos = new FileOutputStream(fSnapshot);
-            osw = new OutputStreamWriter(fos, "UTF-8");
-            osw.append(new String(encryptedXML));
-            osw.flush();
+            fos.write(encryptedBytes.array());
             fos.flush();
             fos.getFD().sync();
             logger.info("Writing snapshot - Saving {}... Done.", fSnapshot.getAbsolutePath());
@@ -1687,7 +1682,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
      * Convert property value to string
      *
      * @param value
-     *            the input value
+     *                  the input value
      * @return the string property value, or {@code null}
      */
     private static String makeString(Object value) {
@@ -1769,9 +1764,26 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         }
     }
 
+    protected <T> T unmarshal(final File file, final Class<T> clazz) throws KuraException {
+        try {
+            return requireNonNull(this.xmlUnmarshaller.unmarshal(new FileReader(file), clazz));
+        } catch (final Exception e) {
+            throw new KuraException(KuraErrorCode.DECODER_ERROR, e);
+        }
+    }
+
     protected String marshal(final Object object) throws KuraException {
         try {
             return requireNonNull(this.xmlMarshaller.marshal(object));
+        } catch (Exception e) {
+            throw new KuraException(KuraErrorCode.ENCODE_ERROR, e);
+        }
+    }
+
+    protected OutputStream marshal(Object object, OutputStream outputBuffer) throws KuraException {
+        try {
+            this.xmlMarshaller.marshal(object, outputBuffer);
+            return outputBuffer;
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.ENCODE_ERROR, e);
         }

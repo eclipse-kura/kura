@@ -24,7 +24,7 @@ then
 	EXTRACT_NAME="extract.sh"
 elif [[ $BUILD_NAME =~ .*-nn$ ]]
 then
-    EXTRACT_NAME="extract_nn.sh"
+	EXTRACT_NAME="extract_nn.sh"
 else
 	EXTRACT_NAME="extract.sh"
 fi

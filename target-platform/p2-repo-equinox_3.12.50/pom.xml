@@ -57,11 +57,10 @@
                                     <version>${org.apache.felix.deploymentadmin.version}</version>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.knowhowlab.osgi</groupId>
-                                    <artifactId>monitoradmin</artifactId>
+                                    <groupId>org.knowhowlab</groupId>
+                                    <artifactId>org.knowhowlab.osgi.monitoradmin</artifactId>
                                     <version>${org.knowhowlab.osgi.monitoradmin.version}</version>
                                 </artifactItem>
-
                                 <artifactItem>
                                     <groupId>org.eclipse.jetty</groupId>
                                     <artifactId>jetty-http</artifactId>
@@ -147,13 +146,12 @@
                                 <!--
                                     - direct mirror link: http://www.eclipse.org/downloads/download.php?file=/equinox/drops/R-Neon.1-201609071200/equinox-SDK-Neon.1.zip&amp;r=1
                                 -->
-                                <get src="${equinox.download.url}"
-                                    dest="${project.build.directory}/download/equinox.zip" usetimestamp="true" />
+                                <get src="${equinox.download.url}" dest="${project.build.directory}/download/equinox.zip"
+                                    usetimestamp="true" />
 
                                 <delete dir="${project.build.directory}/source/plugins" />
                                 <mkdir dir="${project.build.directory}/source/plugins" />
-                                <unzip src="${project.build.directory}/download/equinox.zip"
-                                    dest="${project.build.directory}/source/plugins">
+                                <unzip src="${project.build.directory}/download/equinox.zip" dest="${project.build.directory}/source/plugins">
                                     <patternset>
                                         <exclude name="plugins/org.eclipse.osgi.compatibility.state*.jar" />
                                         <exclude name="plugins/org.eclipse.equinox.*servletbridge*.jar" />
@@ -197,13 +195,11 @@
                         </goals>
                         <configuration>
                             <target>
-                                <move
-                                    file="${project.build.directory}/source/plugins/org.apache.felix.dependencymanager.jar"
+                                <move file="${project.build.directory}/source/plugins/org.apache.felix.dependencymanager.jar"
                                     tofile="${project.build.directory}/source/plugins/org.apache.felix.dependencymanager_${org.apache.felix.dependencymanager.version}.jar" />
-                                <move
-                                    file="${project.build.directory}/source/plugins/org.apache.felix.deploymentadmin.jar"
+                                <move file="${project.build.directory}/source/plugins/org.apache.felix.deploymentadmin.jar"
                                     tofile="${project.build.directory}/source/plugins/org.apache.felix.deploymentadmin_${org.apache.felix.deploymentadmin.version}.jar" />
-                                <move file="${project.build.directory}/source/plugins/monitoradmin.jar"
+                                <move file="${project.build.directory}/source/plugins/org.knowhowlab.osgi.monitoradmin.jar"
                                     tofile="${project.build.directory}/source/plugins/org.knowhowlab.osgi.monitoradmin_${org.knowhowlab.osgi.monitoradmin.version}.jar" />
                                 <move file="${project.build.directory}/source/plugins/jetty-http.jar"
                                     tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.http_${org.eclipse.jetty.http.version}.jar" />

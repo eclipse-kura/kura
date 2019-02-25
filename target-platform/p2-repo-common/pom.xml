@@ -943,7 +943,7 @@
                                 <move file="target/source/plugins/jboss-logging.jar"
                                     tofile="target/source/plugins/jboss-logging_${org.jboss.logging.version}.jar" />
                                 <move file="target/source/plugins/commons-beanutils.jar"
-                                    tofile="target/source/plugins/commons-beanutils_${commons-beanutils.version}.jar" />
+									tofile="target/source/plugins/commons-beanutils_${commons-beanutils.version}.jar" />
                                 <move file="target/source/plugins/commons-collections.jar"
                                     tofile="target/source/plugins/commons-collections_${commons-collections.version}.jar" />
                                 <move file="target/source/plugins/geronimo-json_1.0_spec.jar"

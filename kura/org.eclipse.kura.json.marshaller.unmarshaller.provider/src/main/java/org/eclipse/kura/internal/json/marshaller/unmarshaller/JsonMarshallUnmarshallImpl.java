@@ -8,8 +8,8 @@
  ******************************************************************************/
 package org.eclipse.kura.internal.json.marshaller.unmarshaller;
 
+import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.Reader;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -49,13 +49,13 @@ public class JsonMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
     }
 
     @Override
-    public <T> T unmarshal(Reader r, Class<T> clazz) throws KuraException {
-        return null;
+    public void marshal(Object object, OutputStream w) throws Exception {
+
     }
 
     @Override
-    public void marshal(Object object, OutputStream w) throws Exception {
-
+    public <T> T unmarshal(InputStream inputStream, Class<T> clazz) throws KuraException {
+        return null;
     }
 
 }

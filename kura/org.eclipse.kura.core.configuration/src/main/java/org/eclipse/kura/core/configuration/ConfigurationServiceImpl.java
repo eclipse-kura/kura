@@ -14,18 +14,14 @@ package org.eclipse.kura.core.configuration;
 
 import static java.util.Objects.requireNonNull;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.RandomAccessFile;
-import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
@@ -1076,7 +1072,6 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         ByteArrayOutputStream buffer;
         try {
             buffer = (ByteArrayOutputStream) marshal(conf, new ByteArrayOutputStream());
-            buffer.flush();
         } catch (KuraException e) {
             throw e;
         } catch (Exception e) {
@@ -1084,38 +1079,12 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         }
         // Encrypt the XML
         ByteBuffer encryptedBytes = this.cryptoService.encryptAes(ByteBuffer.wrap(buffer.toByteArray()));
+        try (FileOutputStream file = new FileOutputStream(fSnapshot)) {
+            FileChannel inChannel = file.getChannel();
+            inChannel.write(encryptedBytes);
 
-        // Write the snapshot
-        FileOutputStream fos = null;
-        OutputStreamWriter osw = null;
-        try {
-            logger.info("Writing snapshot - Saving {}...", fSnapshot.getAbsolutePath());
-            fos = new FileOutputStream(fSnapshot);
-            fos.write(encryptedBytes.array());
-            fos.flush();
-            fos.getFD().sync();
-            logger.info("Writing snapshot - Saving {}... Done.", fSnapshot.getAbsolutePath());
-        } catch (FileNotFoundException e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-        } catch (UnsupportedEncodingException e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
         } catch (IOException e) {
             throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-        } finally {
-            if (osw != null) {
-                try {
-                    osw.close();
-                } catch (IOException e) {
-
-                }
-            }
-            if (fos != null) {
-                try {
-                    fos.close();
-                } catch (IOException e) {
-
-                }
-            }
         }
     }
 
@@ -1764,17 +1733,9 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         return getServiceProviderOCDs(classNames);
     }
 
-    protected <T> T unmarshal(final String string, final Class<T> clazz) throws KuraException {
-        try {
-            return requireNonNull(this.xmlUnmarshaller.unmarshal(string, clazz));
-        } catch (final Exception e) {
-            throw new KuraException(KuraErrorCode.DECODER_ERROR, e);
-        }
-    }
-
     protected <T> T unmarshal(final File file, final Class<T> clazz) throws KuraException {
         try {
-            return requireNonNull(this.xmlUnmarshaller.unmarshal(new FileReader(file), clazz));
+            return requireNonNull(this.xmlUnmarshaller.unmarshal(new FileInputStream(file), clazz));
         } catch (final Exception e) {
             throw new KuraException(KuraErrorCode.DECODER_ERROR, e);
         }
@@ -1782,10 +1743,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
     protected <T> T unmarshal(final ByteBuffer buffer, final Class<T> clazz) throws KuraException {
         try {
-            byte[] b = new byte[buffer.remaining()];
-            buffer.get(b, 0, b.length);
-            return requireNonNull(
-                    this.xmlUnmarshaller.unmarshal(new InputStreamReader(new ByteArrayInputStream(b)), clazz));
+            return requireNonNull(this.xmlUnmarshaller.unmarshal(new ByteBufferInputStream(buffer), clazz));
         } catch (final Exception e) {
             throw new KuraException(KuraErrorCode.DECODER_ERROR, e);
         }
@@ -1854,6 +1812,51 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
                 return false;
             }
             return true;
+        }
+    }
+
+    class ByteBufferInputStream extends InputStream {
+
+        private ByteBuffer byteBuffer;
+
+        public ByteBufferInputStream() {
+        }
+
+        public ByteBufferInputStream(int bufferSize) {
+            this(ByteBuffer.allocate(bufferSize));
+            byteBuffer.flip();
+        }
+
+        public ByteBufferInputStream(ByteBuffer byteBuffer) {
+            this.byteBuffer = byteBuffer;
+        }
+
+        public ByteBuffer getByteBuffer() {
+            return byteBuffer;
+        }
+
+        public void setByteBuffer(ByteBuffer byteBuffer) {
+            this.byteBuffer = byteBuffer;
+        }
+
+        public int read() throws IOException {
+            if (!byteBuffer.hasRemaining())
+                return -1;
+            return byteBuffer.get() & 0xFF;
+        }
+
+        public int read(byte[] bytes, int offset, int length) throws IOException {
+            if (length == 0)
+                return 0;
+            int count = Math.min(byteBuffer.remaining(), length);
+            if (count == 0)
+                return -1;
+            byteBuffer.get(bytes, offset, count);
+            return count;
+        }
+
+        public int available() throws IOException {
+            return byteBuffer.remaining();
         }
     }
 }

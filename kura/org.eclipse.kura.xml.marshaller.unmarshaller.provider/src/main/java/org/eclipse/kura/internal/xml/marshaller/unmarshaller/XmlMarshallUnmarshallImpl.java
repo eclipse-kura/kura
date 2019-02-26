@@ -11,11 +11,11 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.xml.marshaller.unmarshaller;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.Reader;
-import java.io.StringReader;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
@@ -42,7 +42,6 @@ import org.eclipse.kura.marshalling.Unmarshaller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 public class XmlMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
@@ -61,7 +60,7 @@ public class XmlMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
     }
 
     @Override
-    public void marshal(Object object, OutputStream w) throws Exception {
+    public void marshal(Object object, OutputStream outputStream) throws Exception {
         try {
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             docFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
@@ -127,8 +126,9 @@ public class XmlMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
             transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
             DOMSource source = new DOMSource(doc);
 
-            StreamResult result = new StreamResult(w); // System.out
+            StreamResult result = new StreamResult(outputStream); // System.out
             transformer.transform(source, result);
+            outputStream.flush();
         } catch (ParserConfigurationException pce) {
             logger.warn("Parser Exception", pce);
         } catch (TransformerException tfe) {
@@ -139,12 +139,12 @@ public class XmlMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
     // un-marshalling
     @Override
     public <T> T unmarshal(String s, Class<T> clazz) throws KuraException {
-        StringReader sr = new StringReader(s);
+        ByteArrayInputStream sr = new ByteArrayInputStream(s.getBytes());
         return unmarshal(sr, clazz);
     }
 
     @Override
-    public <T> T unmarshal(Reader r, Class<T> clazz) throws KuraException {
+    public <T> T unmarshal(InputStream inputStream, Class<T> clazz) throws KuraException {
         DocumentBuilderFactory factory = null;
         DocumentBuilder parser = null;
 
@@ -165,8 +165,7 @@ public class XmlMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
         // parse the document
         Document doc = null;
         try {
-            InputSource is = new InputSource(r);
-            doc = parser.parse(is);
+            doc = parser.parse(inputStream);
             doc.getDocumentElement().normalize();
         } catch (SAXException | IOException | IllegalArgumentException se) {
             throw new KuraException(KuraErrorCode.DECODER_ERROR, se);

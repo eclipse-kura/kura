@@ -1002,36 +1002,20 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         }
     }
 
-    private static String readFully(final File file) throws IOException {
-        final char[] buf = new char[4096];
-        final StringBuilder builder = new StringBuilder();
-
-        try (final FileReader r = new FileReader(file)) {
-            int rd;
-
-            while ((rd = r.read(buf, 0, buf.length)) > 0) {
-                builder.append(buf, 0, rd);
-            }
-        }
-
-        return builder.toString();
-    }
-
     private static ByteBuffer readFully(String fileName) throws IOException {
 
-        RandomAccessFile file = new RandomAccessFile(fileName, "r");
-        FileChannel inChannel = file.getChannel();
-        long fileSize = inChannel.size();
-        ByteBuffer buffer = ByteBuffer.allocate((int) fileSize);
-        inChannel.read(buffer);
-        buffer.flip();
-        inChannel.close();
-        file.close();
-
-        return buffer;
+        try (RandomAccessFile file = new RandomAccessFile(fileName, "r")) {
+            FileChannel inChannel = file.getChannel();
+            long fileSize = inChannel.size();
+            ByteBuffer buffer = ByteBuffer.allocate((int) fileSize);
+            inChannel.read(buffer);
+            buffer.flip();
+            inChannel.close();
+            return buffer;
+        }
     }
 
-    private void encryptPlainSnapshots() throws KuraException, IOException {
+    private void encryptPlainSnapshots() throws KuraException {
         Set<Long> snapshotIDs = getSnapshots();
         if (snapshotIDs == null || snapshotIDs.isEmpty()) {
             return;

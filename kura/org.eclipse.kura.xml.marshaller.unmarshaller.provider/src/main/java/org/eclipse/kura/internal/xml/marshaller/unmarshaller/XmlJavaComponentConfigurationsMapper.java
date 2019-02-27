@@ -15,6 +15,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.metatype.OCD;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
@@ -45,6 +49,85 @@ public class XmlJavaComponentConfigurationsMapper implements XmlJavaDataMapper {
     private static final String CONFIGURATIONS_CONFIGURATION_PROPERTY_VALUE = "value";
 
     private Document marshallDoc = null;
+
+    public ComponentConfiguration paraConfiguration(XMLStreamReader r) throws Exception {
+        String pid = r.getAttributeValue("", CONFIGURATION_PID);
+        while (r.hasNext()) {
+            int event = r.getEventType();
+            switch (event) {
+            case XMLStreamConstants.START_ELEMENT:
+                if (r.getLocalName().equals(PROPERTIES)) {
+                    XmlConfigPropertiesAdapter xmlPropAdapter = new XmlConfigPropertiesAdapter();
+                    XmlConfigPropertiesAdapted xmlPropertiesAdapted = paraProperties(r);
+                    Map<String, Object> propertiesMap = xmlPropAdapter.unmarshal(xmlPropertiesAdapted);
+                    return new ComponentConfigurationImpl(pid, null, propertiesMap);
+                }
+            }
+            r.next();
+        }
+        return null;
+    }
+
+    private String[] paraValues(XMLStreamReader r) throws XMLStreamException {
+        r.next();
+        List<String> valueList = new ArrayList<>();
+        String value = null;
+        while (r.hasNext()) {
+            int event = r.getEventType();
+            switch (event) {
+            case XMLStreamConstants.START_ELEMENT:
+                if (r.getLocalName().equals(CONFIGURATIONS_CONFIGURATION_PROPERTY_VALUE)) {
+                    value = r.getElementText();
+                    valueList.add(value);
+                }
+                break;
+
+            case XMLStreamConstants.END_ELEMENT:
+                if (r.getLocalName().equals(CONFIGURATIONS_CONFIGURATION_PROPERTY)) {
+                    return valueList.toArray(new String[0]);
+                }
+                break;
+
+            default:
+            }
+            r.next();
+        }
+        return new String[0];
+    }
+
+    private XmlConfigPropertiesAdapted paraProperties(XMLStreamReader r) throws XMLStreamException {
+        r.next();
+        List<XmlConfigPropertyAdapted> proAdas = new ArrayList<>();
+        while (r.hasNext()) {
+            int event = r.getEventType();
+            switch (event) {
+            case XMLStreamConstants.START_ELEMENT:
+                if (r.getLocalName().equals(CONFIGURATIONS_CONFIGURATION_PROPERTY)) {
+                    String name = r.getAttributeValue("", CONFIGURATIONS_CONFIGURATION_PROPERTY_NAME);
+                    String type = r.getAttributeValue("", CONFIGURATIONS_CONFIGURATION_PROPERTY_TYPE);
+                    String array = r.getAttributeValue("", CONFIGURATIONS_CONFIGURATION_PROPERTY_ARRAY);
+                    String encrypted = r.getAttributeValue("", CONFIGURATIONS_CONFIGURATION_PROPERTY_ENCRYPTED);
+                    ConfigPropertyType cct = getType(type);
+                    String[] values = paraValues(r);
+                    XmlConfigPropertyAdapted xmlProperty = new XmlConfigPropertyAdapted(name, cct, values);
+                    xmlProperty.setArray(Boolean.parseBoolean(array));
+                    xmlProperty.setEncrypted(Boolean.parseBoolean(encrypted));
+                    proAdas.add(xmlProperty);
+                }
+                break;
+            case XMLStreamConstants.END_ELEMENT:
+                if (r.getLocalName().equals(PROPERTIES)) {
+                    XmlConfigPropertiesAdapted xmlPropertiesAdapted = new XmlConfigPropertiesAdapted();
+                    xmlPropertiesAdapted.setProperties(proAdas.toArray(new XmlConfigPropertyAdapted[0]));
+                    return xmlPropertiesAdapted;
+                }
+                break;
+            default:
+            }
+            r.next();
+        }
+        return new XmlConfigPropertiesAdapted();
+    }
 
     @Override
     public Element marshal(Document doc, Object object) throws Exception {

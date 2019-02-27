@@ -16,12 +16,17 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.FactoryConfigurationError;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -31,6 +36,7 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.metatype.MetaData;
 import org.eclipse.kura.core.configuration.XmlComponentConfigurations;
 import org.eclipse.kura.core.configuration.XmlSnapshotIdResult;
@@ -145,6 +151,27 @@ public class XmlMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
 
     @Override
     public <T> T unmarshal(InputStream inputStream, Class<T> clazz) throws KuraException {
+        if (clazz.equals(XmlComponentConfigurations.class)) {
+            try {
+                XMLInputFactory factory = XMLInputFactory.newInstance();
+                factory.setProperty(XMLInputFactory.IS_COALESCING, true);
+                XMLStreamReader r = factory.createXMLStreamReader(inputStream);
+                List<ComponentConfiguration> cnfs = new ArrayList<>();
+                while (r.hasNext()) {
+                    int event = r.getEventType();
+                    if (event == XMLStreamConstants.START_ELEMENT && r.getLocalName().equals("configuration")) {
+                        ComponentConfiguration cnf = new XmlJavaComponentConfigurationsMapper().paraConfiguration(r);
+                        cnfs.add(cnf);
+                    }
+                    r.next();
+                }
+                XmlComponentConfigurations xcc = new XmlComponentConfigurations();
+                xcc.setConfigurations(cnfs);
+                return (T) xcc;
+            } catch (Exception e) {
+                throw new KuraException(KuraErrorCode.DECODER_ERROR, e);
+            }
+        }
         DocumentBuilderFactory factory = null;
         DocumentBuilder parser = null;
 
@@ -172,14 +199,7 @@ public class XmlMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
         }
 
         // identify the correct parser that has to execute
-        if (clazz.equals(XmlComponentConfigurations.class)) {
-            try {
-                // Snapshot parser
-                return new XmlJavaComponentConfigurationsMapper().unmarshal(doc);
-            } catch (Exception e) {
-                throw new KuraException(KuraErrorCode.DECODER_ERROR, e);
-            }
-        } else if (clazz.equals(MetaData.class) || clazz.equals(Tmetadata.class)) {
+        if (clazz.equals(MetaData.class) || clazz.equals(Tmetadata.class)) {
             // MetaData parser
             return new XmlJavaMetadataMapper().unmarshal(doc);
         } else {

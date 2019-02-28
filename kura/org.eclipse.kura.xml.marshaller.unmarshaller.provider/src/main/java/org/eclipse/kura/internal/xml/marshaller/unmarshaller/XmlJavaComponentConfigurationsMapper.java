@@ -11,22 +11,33 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.xml.marshaller.unmarshaller;
 
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamWriter;
 
 import org.eclipse.kura.configuration.ComponentConfiguration;
+import org.eclipse.kura.configuration.metatype.AD;
+import org.eclipse.kura.configuration.metatype.Icon;
 import org.eclipse.kura.configuration.metatype.OCD;
+import org.eclipse.kura.configuration.metatype.Option;
+import org.eclipse.kura.configuration.metatype.Scalar;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.core.configuration.XmlComponentConfigurations;
 import org.eclipse.kura.core.configuration.XmlConfigPropertiesAdapted;
 import org.eclipse.kura.core.configuration.XmlConfigPropertiesAdapter;
 import org.eclipse.kura.core.configuration.XmlConfigPropertyAdapted;
 import org.eclipse.kura.core.configuration.XmlConfigPropertyAdapted.ConfigPropertyType;
+import org.eclipse.kura.core.configuration.metatype.Tocd;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -148,6 +159,160 @@ public class XmlJavaComponentConfigurationsMapper implements XmlJavaDataMapper {
             }
         }
         return configurations;
+    }
+
+    public void marshal(OutputStream outputStream, Object object) throws Exception {
+        XMLOutputFactory factory = XMLOutputFactory.newFactory();
+        XMLStreamWriter xml = new IndentingXMLStreamWriter(
+                factory.createXMLStreamWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8)));
+        xml.writeStartDocument("UTF-8", "1.0");
+        xml.writeStartElement("esf", "configurations", "");
+        xml.setPrefix("esf", "http://eurotech.com/esf/2.0");
+        xml.writeNamespace("esf", "http://eurotech.com/esf/2.0");
+        xml.setPrefix("ocd", "http://www.osgi.org/xmlns/metatype/v1.2.0");
+        xml.writeNamespace("ocd", "http://www.osgi.org/xmlns/metatype/v1.2.0");
+        XmlComponentConfigurations xmlCompConfig = (XmlComponentConfigurations) object;
+        List<ComponentConfiguration> configs = xmlCompConfig.getConfigurations();
+        for (ComponentConfiguration config : configs) {
+            String configPid = config.getPid();
+            Map<String, Object> configProperty = config.getConfigurationProperties();
+            OCD configOCD = config.getDefinition();
+            xml.writeStartElement("esf", "configuration", "");
+            xml.writeAttribute("pid", configPid);
+            if (configOCD != null)
+                if (configOCD instanceof Tocd) {
+                    Tocd configTOCD = (Tocd) configOCD;
+
+                    String ocdName = configTOCD.getName();
+                    String ocdDescription = configTOCD.getDescription();
+                    String ocdID = configTOCD.getId();
+                    List<Icon> ocdIcons = configTOCD.getIcon();
+                    List<AD> ocdADs = configTOCD.getAD();
+                    configTOCD.getAny();
+                    configTOCD.getOtherAttributes();
+                    xml.writeStartElement("ocd", "OCD", "");
+                    if (ocdDescription != null && !ocdDescription.trim().isEmpty()) {
+                        xml.writeAttribute("description", ocdDescription);
+                    }
+                    if (ocdID != null && !ocdID.trim().isEmpty()) {
+                        xml.writeAttribute("id", ocdID);
+                    }
+                    if (ocdName != null && !ocdName.trim().isEmpty()) {
+                        xml.writeAttribute("name", ocdName);
+                    }
+                    if (ocdADs != null) {
+                        for (AD ocdAD : ocdADs) {
+                            xml.writeStartElement("ocd", "AD", "");
+                            marshallAD(ocdAD, xml);
+                            xml.writeEndElement();
+                        }
+                    }
+
+                    if (ocdIcons != null) {
+                        for (Icon ocdIcon : ocdIcons) {
+                            String iconResource = ocdIcon.getResource();
+                            BigInteger iconSize = ocdIcon.getSize();
+                            xml.writeStartElement("ocd", "AD", "");
+                            if (iconResource != null && !iconResource.trim().isEmpty()) {
+                                xml.writeAttribute("resource", iconResource);
+                            }
+                            if (iconSize != null) {
+                                xml.writeAttribute("size", iconSize.toString());
+                            }
+                            xml.writeEndElement();
+                        }
+                    }
+                    xml.writeEndElement();
+                }
+            if (configProperty != null) {
+                xml.writeStartElement("esf", "properties", "");
+                XmlConfigPropertiesAdapter xmlPropAdapter = new XmlConfigPropertiesAdapter();
+                XmlConfigPropertiesAdapted configPropAdapted = xmlPropAdapter.marshal(configProperty);
+
+                XmlConfigPropertyAdapted[] propArray = configPropAdapted.getProperties();
+                for (XmlConfigPropertyAdapted propertyObj : propArray) {
+                    String name = propertyObj.getName();
+                    Boolean array = propertyObj.getArray();
+                    Boolean encrypted = propertyObj.isEncrypted();
+                    ConfigPropertyType cpt = propertyObj.getType();
+                    String[] values = propertyObj.getValues();
+
+                    if (values != null) {
+                        xml.writeStartElement("esf", "property", "");
+                        xml.writeAttribute("array", array.toString());
+                        xml.writeAttribute("encrypted", encrypted.toString());
+                        xml.writeAttribute("name", name);
+                        xml.writeAttribute("type", getStringValue(cpt));
+                        for (String value : values) {
+                            xml.writeStartElement("esf", "value", "");
+                            xml.writeCharacters(value);
+                            xml.writeEndElement();
+                        }
+                        xml.writeEndElement();
+                    }
+                }
+                xml.writeEndElement();
+            }
+            xml.writeEndElement();
+        }
+        xml.writeEndElement();
+        xml.writeEndDocument();
+        xml.flush();
+    }
+
+    private void marshallAD(AD ocdAD, XMLStreamWriter xml) throws XMLStreamException {
+        String adId = ocdAD.getId();
+        String adName = ocdAD.getName();
+        Scalar adType = ocdAD.getType();
+        Integer adCardinality = ocdAD.getCardinality();
+        Boolean adRequired = ocdAD.isRequired();
+        String adDefault = ocdAD.getDefault();
+        String adDescription = ocdAD.getDescription();
+        String adMin = ocdAD.getMin();
+        String adMax = ocdAD.getMax();
+        List<Option> adOptions = ocdAD.getOption();
+        if (adCardinality != null) {
+            xml.writeAttribute("cardinality", adCardinality.toString());
+        }
+        if (adDefault != null) {
+            xml.writeAttribute("default", adDefault);
+        }
+        if (adDescription != null) {
+            xml.writeAttribute("description", adDescription);
+        }
+        if (adId != null) {
+            xml.writeAttribute("id", adId);
+        }
+        if (adName != null) {
+            xml.writeAttribute("name", adName);
+        }
+        if (adRequired != null) {
+            xml.writeAttribute("required", adRequired.toString());
+        }
+        if (adType != null) {
+            xml.writeAttribute("type", adType.value());
+        }
+        if (adMin != null) {
+            xml.writeAttribute("min", adMin);
+        }
+        if (adMax != null) {
+            xml.writeAttribute("max", adMax);
+        }
+
+        if (adOptions != null) {
+            for (Option adOption : adOptions) {
+                xml.writeEmptyElement("ocd", "Option", "");
+                String label = adOption.getLabel();
+                String value = adOption.getValue();
+                if (!label.trim().isEmpty()) {
+                    xml.writeAttribute("label", label);
+                }
+                if (!value.trim().isEmpty()) {
+                    xml.writeAttribute("value", value);
+                }
+            }
+        }
+
     }
 
     @SuppressWarnings("unchecked")

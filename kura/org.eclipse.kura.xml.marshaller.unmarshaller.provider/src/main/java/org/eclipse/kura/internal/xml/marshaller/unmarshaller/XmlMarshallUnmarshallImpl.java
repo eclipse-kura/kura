@@ -67,6 +67,11 @@ public class XmlMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
 
     @Override
     public void marshal(Object object, OutputStream outputStream) throws Exception {
+        if (object instanceof XmlComponentConfigurations) {
+            new XmlJavaComponentConfigurationsMapper().marshal(outputStream, object);
+            outputStream.flush();
+            return;
+        }
         try {
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             docFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
@@ -149,11 +154,14 @@ public class XmlMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
         return unmarshal(sr, clazz);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <T> T unmarshal(InputStream inputStream, Class<T> clazz) throws KuraException {
         if (clazz.equals(XmlComponentConfigurations.class)) {
             try {
                 XMLInputFactory factory = XMLInputFactory.newInstance();
+                factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE);
+                factory.setProperty(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE);
                 factory.setProperty(XMLInputFactory.IS_COALESCING, true);
                 XMLStreamReader r = factory.createXMLStreamReader(inputStream);
                 List<ComponentConfiguration> cnfs = new ArrayList<>();

@@ -12,7 +12,7 @@
 package org.eclipse.kura.web.server.servlet;
 
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,7 +58,7 @@ public class DeviceSnapshotsServlet extends HttpServlet {
         response.setContentType("application/xml");
         response.setHeader("Content-Disposition", "attachment; filename=snapshot_" + snapshotId + ".xml");
         response.setHeader("Cache-Control", "no-transform, max-age=0");
-        PrintWriter writer = response.getWriter();
+        OutputStream outputStream = response.getOutputStream();
         try {
 
             ServiceLocator locator = ServiceLocator.getInstance();
@@ -78,15 +78,18 @@ public class DeviceSnapshotsServlet extends HttpServlet {
 
                 //
                 // marshall the response and write it
-                String result = marshal(xmlConfigs);
-                writer.write(result);
+                marshal(xmlConfigs, outputStream);
             }
         } catch (Exception e) {
             logger.error("Error creating Excel export", e);
             throw new ServletException(e);
         } finally {
-            if (writer != null) {
-                writer.close();
+            if (outputStream != null) {
+                try {
+                    outputStream.close();
+                } catch (IOException e) {
+                    logger.warn("Cannot close output stream", e);
+                }
             }
         }
     }
@@ -104,23 +107,23 @@ public class DeviceSnapshotsServlet extends HttpServlet {
                 refs);
     }
 
-    protected String marshal(Object object) {
-        String result = null;
+    protected void marshal(Object object, OutputStream outputStream) {
         ServiceReference<Marshaller>[] marshallerSRs = getXmlMarshallers();
         try {
             for (final ServiceReference<Marshaller> marshallerSR : marshallerSRs) {
                 Marshaller marshaller = FrameworkUtil.getBundle(DeviceSnapshotsServlet.class).getBundleContext()
                         .getService(marshallerSR);
-                result = marshaller.marshal(object);
-                if (result != null) {
-                    break;
+                try {
+                    marshaller.marshal(object, outputStream);
+                } catch (IllegalArgumentException e) {
+                    continue;
                 }
+                break;
             }
         } catch (Exception e) {
             logger.warn("Failed to marshal configuration.");
         } finally {
             ungetServiceReferences(marshallerSRs);
         }
-        return result;
     }
 }

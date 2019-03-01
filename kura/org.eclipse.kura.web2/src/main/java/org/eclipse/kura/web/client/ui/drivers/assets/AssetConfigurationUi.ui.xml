@@ -1,7 +1,7 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <!--
 
-    Copyright (c) 2017, 2018 Eurotech and/or its affiliates and others
+    Copyright (c) 2017, 2019 Eurotech and/or its affiliates and others
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -37,7 +37,7 @@
     <b:Container fluid="true">
         <b:Column size="MD_12">
             <b:Row>
-                <b:Well addStyleNames="{style.center-panel}">
+                <b:Well addStyleNames="{style.center-panel} asset-configuration-ui">
                     <g:ScrollPanel>
                         <b:Form ui:field="form">
                             <b:Panel ui:field="channelPanel">

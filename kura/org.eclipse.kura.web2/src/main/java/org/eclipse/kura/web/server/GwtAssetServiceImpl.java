@@ -77,6 +77,7 @@ public class GwtAssetServiceImpl extends OsgiRemoteServiceServlet implements Gwt
             final Map<String, GwtChannelRecord> groupedRecords = new HashMap<>(gwtChannelRecords.size());
 
             for (final GwtChannelRecord record : gwtChannelRecords) {
+                record.setUnescaped(true);
                 groupedRecords.put(record.getName(), record);
             }
 

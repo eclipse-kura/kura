@@ -17,8 +17,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.nio.ByteBuffer;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.MessageDigest;
@@ -28,9 +29,10 @@ import java.util.Properties;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
+import javax.crypto.CipherInputStream;
+import javax.crypto.CipherOutputStream;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import javax.crypto.ShortBufferException;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.eclipse.kura.KuraErrorCode;
@@ -94,74 +96,84 @@ public class CryptoServiceImpl implements CryptoService {
     }
 
     @Override
-    public ByteBuffer encryptAes(ByteBuffer value) throws KuraException {
-        ByteBuffer encryptedValue = null;
-
+    public void encryptAes(InputStream value, OutputStream out) throws KuraException {
+        CipherOutputStream cipherOutputStream = null;
         try {
             Key key = generateKey();
-            Cipher c = Cipher.getInstance(ALGORITHM);
-            c.init(Cipher.ENCRYPT_MODE, key);
-            ByteBuffer ouputBuffer = ByteBuffer.allocate(c.getOutputSize(value.limit()));
-            c.doFinal(value, ouputBuffer);
-            ouputBuffer.flip();
-            encryptedValue = base64Encode(ouputBuffer);
+            Cipher cipher = Cipher.getInstance(ALGORITHM);
+            cipher.init(Cipher.ENCRYPT_MODE, key);
+            OutputStream wrapOut = Base64.getEncoder().wrap(out);
+            cipherOutputStream = new CipherOutputStream(wrapOut, cipher);
+
+            byte[] tmpBytes = new byte[8192];
+            int numberOfBytedRead;
+            while ((numberOfBytedRead = value.read(tmpBytes)) >= 0) {
+                if (numberOfBytedRead > 0) {
+                    cipherOutputStream.write(tmpBytes, 0, numberOfBytedRead);
+                    cipherOutputStream.flush();
+                    out.flush();
+                }
+            }
+
         } catch (NoSuchAlgorithmException e) {
             throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
         } catch (NoSuchPaddingException e) {
             throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
         } catch (InvalidKeyException e) {
             throw new KuraException(KuraErrorCode.ENCODE_ERROR);
-        } catch (IllegalBlockSizeException e) {
+        } catch (IOException e) {
             throw new KuraException(KuraErrorCode.ENCODE_ERROR);
-        } catch (BadPaddingException e) {
-            throw new KuraException(KuraErrorCode.ENCODE_ERROR);
-        } catch (ShortBufferException e) {
-            throw new KuraException(KuraErrorCode.ENCODE_ERROR);
-        }
+        } finally {
+            if (cipherOutputStream != null)
+                try {
+                    cipherOutputStream.close();
+                } catch (IOException e) {
 
-        return encryptedValue;
+                }
+        }
     }
 
     private byte[] base64Decode(String internalStringValue) {
         return Base64.getDecoder().decode(internalStringValue);
     }
 
-    private ByteBuffer base64Decode(ByteBuffer buffer) {
-        return Base64.getDecoder().decode(buffer);
-    }
-
     private String base64Encode(byte[] encryptedBytes) {
         return Base64.getEncoder().encodeToString(encryptedBytes);
     }
 
-    private ByteBuffer base64Encode(ByteBuffer buffer) {
-        return Base64.getEncoder().encode(buffer);
-    }
-
     @Override
-    public ByteBuffer decryptAes(ByteBuffer value) throws KuraException {
-        Key key = generateKey();
-        Cipher c;
+    public void decryptAes(InputStream value, OutputStream out) throws KuraException {
+        CipherInputStream cipherInputStream = null;
         try {
-            c = Cipher.getInstance(ALGORITHM);
-            c.init(Cipher.DECRYPT_MODE, key);
-            ByteBuffer decodeBudder = base64Decode(value);
-            ByteBuffer ouputBuffer = ByteBuffer.allocate(c.getOutputSize(decodeBudder.limit()));
-            c.doFinal(decodeBudder, ouputBuffer);
-            ouputBuffer.flip();
-            return ouputBuffer;
+            Key key = generateKey();
+            Cipher cipher = Cipher.getInstance(ALGORITHM);
+            cipher.init(Cipher.DECRYPT_MODE, key);
+            InputStream wrapValue = Base64.getDecoder().wrap(value);
+            cipherInputStream = new CipherInputStream(wrapValue, cipher);
+
+            byte[] tmpBytes = new byte[8192];
+            int numberOfBytedRead;
+            while ((numberOfBytedRead = cipherInputStream.read(tmpBytes)) >= 0) {
+                if (numberOfBytedRead > 0) {
+                    out.write(tmpBytes, 0, numberOfBytedRead);
+                    out.flush();
+                }
+            }
         } catch (NoSuchAlgorithmException e) {
-            throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
+            throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED, e);
         } catch (NoSuchPaddingException e) {
-            throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
+            throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED, e);
         } catch (InvalidKeyException e) {
-            throw new KuraException(KuraErrorCode.DECODER_ERROR);
-        } catch (BadPaddingException e) {
-            throw new KuraException(KuraErrorCode.DECODER_ERROR);
-        } catch (IllegalBlockSizeException e) {
-            throw new KuraException(KuraErrorCode.DECODER_ERROR);
-        } catch (ShortBufferException e) {
-            throw new KuraException(KuraErrorCode.DECODER_ERROR);
+            throw new KuraException(KuraErrorCode.DECODER_ERROR, e);
+        } catch (IOException e) {
+            throw new KuraException(KuraErrorCode.DECODER_ERROR, e);
+        } finally {
+            if (cipherInputStream != null)
+                try {
+                    cipherInputStream.close();
+                } catch (IOException e) {
+
+                }
         }
     }
 

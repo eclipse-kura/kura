@@ -254,6 +254,8 @@ public class XmlJavaComponentConfigurationsMapper implements XmlJavaDataMapper {
                 xml.writeEndElement();
             }
             xml.writeEndElement();
+            xml.flush();
+            outputStream.flush();
         }
         xml.writeEndElement();
         xml.writeEndDocument();

@@ -14,16 +14,13 @@ package org.eclipse.kura.core.configuration;
 
 import static java.util.Objects.requireNonNull;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -987,27 +984,14 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
                 try {
                     // Verify if the current snapshot is encrypted
-                    loadEncryptedSnapshotFileContent(snapshot);
-                    return false;
+                    if (testEncryptedSnapshotFileContent(snapshot))
+                        return false;
                 } catch (Exception e) {
                 }
             }
             return true;
         } catch (Exception e) {
             return false;
-        }
-    }
-
-    private static ByteBuffer readFully(String fileName) throws IOException {
-
-        try (RandomAccessFile file = new RandomAccessFile(fileName, "r")) {
-            FileChannel inChannel = file.getChannel();
-            long fileSize = inChannel.size();
-            ByteBuffer buffer = ByteBuffer.allocate((int) fileSize);
-            inChannel.read(buffer);
-            buffer.flip();
-            inChannel.close();
-            return buffer;
         }
     }
 
@@ -1068,23 +1052,43 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         if (fSnapshot == null) {
             throw new KuraException(KuraErrorCode.CONFIGURATION_SNAPSHOT_NOT_FOUND);
         }
-        // Marshall the configuration into an XML
-        ByteArrayOutputStream buffer;
+        File tempFile;
         try {
-            buffer = (ByteArrayOutputStream) marshal(conf, new ByteArrayOutputStream());
-        } catch (KuraException e) {
-            throw e;
-        } catch (Exception e) {
+            tempFile = File.createTempFile("snapshot_write_" + sid + "_", ".temp");
+        } catch (IOException e1) {
+            throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+        }
+        List<ComponentConfiguration> configImpls = new ArrayList<>();
+        for (ComponentConfiguration config : conf.getConfigurations()) {
+            configImpls.add(new ComponentConfigurationImpl(config.getPid(), null, config.getConfigurationProperties()));
+        }
+        XmlComponentConfigurations xmlConfigs = new XmlComponentConfigurations();
+        xmlConfigs.setConfigurations(configImpls);
+
+        // Encrypt the XML
+        try (FileOutputStream tempOutputfile = new FileOutputStream(tempFile)) {
+            marshal(xmlConfigs, tempOutputfile);
+        } catch (IOException e) {
+            try {
+                Files.delete(tempFile.toPath());
+            } catch (IOException e1) {
+                logger.warn("delete temporary fiel {} failed", tempFile.getName(), e);
+            }
             throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
         }
-        // Encrypt the XML
-        ByteBuffer encryptedBytes = this.cryptoService.encryptAes(ByteBuffer.wrap(buffer.toByteArray()));
-        try (FileOutputStream file = new FileOutputStream(fSnapshot)) {
-            FileChannel inChannel = file.getChannel();
-            inChannel.write(encryptedBytes);
+
+        try (FileInputStream temInputFile = new FileInputStream(tempFile);
+                FileOutputStream outputfile = new FileOutputStream(fSnapshot)) {
+            this.cryptoService.encryptAes(temInputFile, outputfile);
 
         } catch (IOException e) {
             throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+        } finally {
+            try {
+                Files.delete(tempFile.toPath());
+            } catch (IOException e) {
+                logger.warn("delete temporary fiel {} failed", tempFile.getName(), e);
+            }
         }
     }
 
@@ -1347,11 +1351,35 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
             try {
                 if (allSnapshotsUnencrypted()) {
                     encryptPlainSnapshots();
-                    configs = loadLatestSnapshotConfigurations();
+                    configs = loadEncryptLatestSnapshotConfigurations();
                 }
             } catch (Exception ex) {
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, ex);
+                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
             }
+        }
+
+        return configs;
+    }
+
+    private List<ComponentConfiguration> loadEncryptLatestSnapshotConfigurations() throws KuraException {
+        //
+        // Get the latest snapshot file to use as initialization
+        Set<Long> snapshotIDs = getSnapshots();
+        if (snapshotIDs == null || snapshotIDs.isEmpty()) {
+            return null;
+        }
+
+        Long[] snapshots = snapshotIDs.toArray(new Long[] {});
+        Long lastestID = snapshots[snapshotIDs.size() - 1];
+
+        //
+        // Unmarshall
+        logger.info("Loading init configurations from: {}...", lastestID);
+
+        List<ComponentConfiguration> configs = null;
+        XmlComponentConfigurations xmlConfigs = loadEncryptedSnapshotFileContent(lastestID);
+        if (xmlConfigs != null) {
+            configs = xmlConfigs.getConfigurations();
         }
 
         return configs;
@@ -1370,29 +1398,75 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
         String snapshot = sbSnapshot.toString();
 
-        ByteBuffer rawSnapshot;
+        File tempFile;
         try {
-            rawSnapshot = readFully(snapshot);
-        } catch (IOException e) {
-            logger.error("Error loading file from disk", e);
-            return null;
+            tempFile = File.createTempFile("snapshot_read_" + snapshotID + "_", ".temp");
+        } catch (IOException e1) {
+            throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
         }
-
-        // File loaded, try to decrypt and unmarshall
-        ByteBuffer decryptAes = this.cryptoService.decryptAes(rawSnapshot);
-        if (decryptAes.limit() == 0) {
-            throw new KuraException(KuraErrorCode.DECODER_ERROR);
+        try (FileInputStream snapInputStream = new FileInputStream(snapshot);
+                FileOutputStream tmpOutputStream = new FileOutputStream(tempFile)) {
+            this.cryptoService.decryptAes(snapInputStream, tmpOutputStream);
+        } catch (Exception e) {
+            try {
+                Files.delete(tempFile.toPath());
+            } catch (IOException e1) {
+                logger.warn("delete temporary file {} failed", tempFile.getName(), e);
+            }
+            throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
         }
 
         XmlComponentConfigurations xmlConfigs = null;
 
         try {
-            xmlConfigs = unmarshal(decryptAes, XmlComponentConfigurations.class);
+            xmlConfigs = unmarshal(tempFile, XmlComponentConfigurations.class);
         } catch (KuraException e) {
             logger.warn("Error parsing xml", e);
+        } finally {
+            try {
+                Files.delete(tempFile.toPath());
+            } catch (IOException e) {
+                logger.warn("delete temporary fiel {} failed", tempFile.getName(), e);
+            }
         }
 
         return xmlConfigs;
+    }
+
+    boolean testEncryptedSnapshotFileContent(long snapshotID) throws KuraException {
+        String configDir = getSnapshotsDirectory();
+
+        if (configDir == null) {
+            throw new KuraException(KuraErrorCode.CONFIGURATION_SNAPSHOT_NOT_FOUND,
+                    configDir != null ? configDir : "null");
+        }
+
+        StringBuilder sbSnapshot = new StringBuilder(configDir);
+        sbSnapshot.append(File.separator).append("snapshot_").append(snapshotID).append(".xml");
+
+        String snapshot = sbSnapshot.toString();
+
+        File tempFile;
+        try {
+            tempFile = File.createTempFile("snapshot_test_" + snapshotID + "_", ".temp");
+        } catch (IOException e1) {
+            throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+        }
+        try (FileInputStream snapInputStream = new FileInputStream(snapshot);
+                FileOutputStream tmpOutputStream = new FileOutputStream(tempFile)) {
+            this.cryptoService.decryptAes(snapInputStream, tmpOutputStream);
+        } catch (KuraException e) {
+            return false;
+        } catch (IOException e) {
+            throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+        } finally {
+            try {
+                Files.delete(tempFile.toPath());
+            } catch (IOException e) {
+                logger.warn("delete temporary fiel {} failed", tempFile.getName(), e);
+            }
+        }
+        return true;
     }
 
     private void updateConfigurationInternal(String pid, Map<String, Object> properties, boolean snapshotOnConfirmation)
@@ -1741,14 +1815,6 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         }
     }
 
-    protected <T> T unmarshal(final ByteBuffer buffer, final Class<T> clazz) throws KuraException {
-        try {
-            return requireNonNull(this.xmlUnmarshaller.unmarshal(new ByteBufferInputStream(buffer), clazz));
-        } catch (final Exception e) {
-            throw new KuraException(KuraErrorCode.DECODER_ERROR, e);
-        }
-    }
-
     protected String marshal(final Object object) throws KuraException {
         try {
             return requireNonNull(this.xmlMarshaller.marshal(object));
@@ -1757,10 +1823,9 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         }
     }
 
-    protected OutputStream marshal(Object object, OutputStream outputBuffer) throws KuraException {
+    protected void marshal(Object object, OutputStream outputBuffer) throws KuraException {
         try {
             this.xmlMarshaller.marshal(object, outputBuffer);
-            return outputBuffer;
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.ENCODE_ERROR, e);
         }

@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.core.configuration.XmlConfigPropertyAdapted.ConfigPropertyType;
 import org.eclipse.kura.crypto.CryptoService;
@@ -82,12 +81,16 @@ public class XmlConfigPropertiesAdapter {
                     BundleContext bundleContext = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
                     ServiceReference<CryptoService> cryptoServiceRef = bundleContext
                             .getServiceReference(CryptoService.class);
-                    CryptoService cryptoService = bundleContext.getService(cryptoServiceRef);
+                    try {
+                        CryptoService cryptoService = bundleContext.getService(cryptoServiceRef);
 
-                    adaptedValue.setArray(false);
-                    adaptedValue.setEncrypted(true);
-                    adaptedValue.setType(ConfigPropertyType.PASSWORD_TYPE);
-                    adaptedValue.setValues(new String[] { cryptoService.encodeBase64(value.toString()) });
+                        adaptedValue.setArray(false);
+                        adaptedValue.setEncrypted(true);
+                        adaptedValue.setType(ConfigPropertyType.PASSWORD_TYPE);
+                        adaptedValue.setValues(new String[] { cryptoService.encodeBase64(value.toString()) });
+                    } finally {
+                        bundleContext.ungetService(cryptoServiceRef);
+                    }
                 } else if (value instanceof String[]) {
                     adaptedValue.setArray(true);
                     adaptedValue.setType(ConfigPropertyType.STRING_TYPE);
@@ -184,19 +187,23 @@ public class XmlConfigPropertiesAdapter {
                     BundleContext bundleContext = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
                     ServiceReference<CryptoService> cryptoServiceRef = bundleContext
                             .getServiceReference(CryptoService.class);
-                    CryptoService cryptoService = bundleContext.getService(cryptoServiceRef);
+                    try {
+                        CryptoService cryptoService = bundleContext.getService(cryptoServiceRef);
 
-                    adaptedValue.setArray(true);
-                    adaptedValue.setEncrypted(true);
-                    adaptedValue.setType(ConfigPropertyType.PASSWORD_TYPE);
-                    Password[] nativeValues = (Password[]) value;
-                    String[] stringValues = new String[nativeValues.length];
-                    for (int i = 0; i < nativeValues.length; i++) {
-                        if (nativeValues[i] != null) {
-                            stringValues[i] = cryptoService.encodeBase64(nativeValues[i].toString());
+                        adaptedValue.setArray(true);
+                        adaptedValue.setEncrypted(true);
+                        adaptedValue.setType(ConfigPropertyType.PASSWORD_TYPE);
+                        Password[] nativeValues = (Password[]) value;
+                        String[] stringValues = new String[nativeValues.length];
+                        for (int i = 0; i < nativeValues.length; i++) {
+                            if (nativeValues[i] != null) {
+                                stringValues[i] = cryptoService.encodeBase64(nativeValues[i].toString());
+                            }
                         }
+                        adaptedValue.setValues(stringValues);
+                    } finally {
+                        bundleContext.ungetService(cryptoServiceRef);
                     }
-                    adaptedValue.setValues(stringValues);
                 }
 
                 if (adaptedValue.getValues() == null || adaptedValue.getValues().length > 0) {
@@ -255,17 +262,17 @@ public class XmlConfigPropertiesAdapter {
                         BundleContext bundleContext = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
                         ServiceReference<CryptoService> cryptoServiceRef = bundleContext
                                 .getServiceReference(CryptoService.class);
-                        CryptoService cryptoService = bundleContext.getService(cryptoServiceRef);
+                        try {
+                            CryptoService cryptoService = bundleContext.getService(cryptoServiceRef);
 
-                        propvalue = adaptedProp.getValues()[0];
-                        if (adaptedProp.isEncrypted()) {
-                            try {
-                                propvalue = new Password(cryptoService.decryptAes(((String) propvalue).toCharArray()));
-                            } catch (KuraException e) {
+                            propvalue = adaptedProp.getValues()[0];
+                            if (adaptedProp.isEncrypted()) {
                                 propvalue = new Password(cryptoService.decodeBase64((String) propvalue));
+                            } else {
+                                propvalue = new Password((String) propvalue);
                             }
-                        } else {
-                            propvalue = new Password((String) propvalue);
+                        } finally {
+                            bundleContext.ungetService(cryptoServiceRef);
                         }
                         break;
                     }
@@ -357,24 +364,22 @@ public class XmlConfigPropertiesAdapter {
                         ServiceReference<CryptoService> cryptoServiceRef = bundleContext
                                 .getServiceReference(CryptoService.class);
                         CryptoService cryptoService = bundleContext.getService(cryptoServiceRef);
-
-                        Password[] pwdValues = new Password[adaptedProp.getValues().length];
-                        for (int i = 0; i < adaptedProp.getValues().length; i++) {
-                            if (adaptedProp.getValues()[i] != null) {
-                                if (adaptedProp.isEncrypted()) {
-                                    try {
-                                        pwdValues[i] = new Password(
-                                                cryptoService.decryptAes(adaptedProp.getValues()[i].toCharArray()));
-                                    } catch (KuraException e) {
+                        try {
+                            Password[] pwdValues = new Password[adaptedProp.getValues().length];
+                            for (int i = 0; i < adaptedProp.getValues().length; i++) {
+                                if (adaptedProp.getValues()[i] != null) {
+                                    if (adaptedProp.isEncrypted()) {
                                         pwdValues[i] = new Password(
                                                 cryptoService.decodeBase64(adaptedProp.getValues()[i]));
+                                    } else {
+                                        pwdValues[i] = new Password(adaptedProp.getValues()[i]);
                                     }
-                                } else {
-                                    pwdValues[i] = new Password(adaptedProp.getValues()[i]);
                                 }
                             }
+                            propvalue = pwdValues;
+                        } finally {
+                            bundleContext.ungetService(cryptoServiceRef);
                         }
-                        propvalue = pwdValues;
                         break;
                     }
                 }

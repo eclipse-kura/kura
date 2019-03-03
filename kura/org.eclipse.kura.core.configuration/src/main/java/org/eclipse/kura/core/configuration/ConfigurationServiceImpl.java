@@ -1052,19 +1052,29 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         if (fSnapshot == null) {
             throw new KuraException(KuraErrorCode.CONFIGURATION_SNAPSHOT_NOT_FOUND);
         }
-        File tempFile;
-        try {
-            tempFile = File.createTempFile("snapshot_write_" + sid + "_", ".temp");
-        } catch (IOException e1) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
-        }
+
         List<ComponentConfiguration> configImpls = new ArrayList<>();
         for (ComponentConfiguration config : conf.getConfigurations()) {
             configImpls.add(new ComponentConfigurationImpl(config.getPid(), null, config.getConfigurationProperties()));
         }
         XmlComponentConfigurations xmlConfigs = new XmlComponentConfigurations();
         xmlConfigs.setConfigurations(configImpls);
-
+        Boolean isEncrypt = Boolean
+                .valueOf(this.systemService.getProperties().getProperty("kura.snapshots.encrypt", "true"));
+        if (!isEncrypt) {
+            try (FileOutputStream outputfile = new FileOutputStream(fSnapshot)) {
+                marshal(xmlConfigs, outputfile);
+            } catch (IOException e) {
+                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+            }
+            return;
+        }
+        File tempFile;
+        try {
+            tempFile = File.createTempFile("snapshot_write_" + sid + "_", ".temp");
+        } catch (IOException e1) {
+            throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+        }
         // Encrypt the XML
         try (FileOutputStream tempOutputfile = new FileOutputStream(tempFile)) {
             marshal(xmlConfigs, tempOutputfile);
@@ -1347,6 +1357,11 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
                 configs = xmlConfigs.getConfigurations();
             }
         } catch (Exception e) {
+            Boolean isEncrypt = Boolean
+                    .valueOf(this.systemService.getProperties().getProperty("kura.snapshots.encrypt", "true"));
+            if (!isEncrypt) {
+                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+            }
             logger.info("Unable to decrypt snapshot! Fallback to unencrypted snapshots mode.");
             try {
                 if (allSnapshotsUnencrypted()) {
@@ -1397,12 +1412,24 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         sbSnapshot.append(File.separator).append("snapshot_").append(snapshotID).append(".xml");
 
         String snapshot = sbSnapshot.toString();
+        Boolean isEncrypt = Boolean
+                .valueOf(this.systemService.getProperties().getProperty("kura.snapshots.encrypt", "true"));
+        if (!isEncrypt) {
+            XmlComponentConfigurations xmlConfigs = null;
 
+            try (FileInputStream snapInputStream = new FileInputStream(snapshot)) {
+                xmlConfigs = this.xmlUnmarshaller.unmarshal(snapInputStream, XmlComponentConfigurations.class);
+            } catch (IOException e) {
+                logger.error("Error parsing xml", e);
+                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+            }
+            return xmlConfigs;
+        }
         File tempFile;
         try {
             tempFile = File.createTempFile("snapshot_read_" + snapshotID + "_", ".temp");
         } catch (IOException e1) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e1);
         }
         try (FileInputStream snapInputStream = new FileInputStream(snapshot);
                 FileOutputStream tmpOutputStream = new FileOutputStream(tempFile)) {
@@ -1413,7 +1440,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
             } catch (IOException e1) {
                 logger.warn("delete temporary file {} failed", tempFile.getName(), e);
             }
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
         }
 
         XmlComponentConfigurations xmlConfigs = null;
@@ -1421,7 +1448,8 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         try {
             xmlConfigs = unmarshal(tempFile, XmlComponentConfigurations.class);
         } catch (KuraException e) {
-            logger.warn("Error parsing xml", e);
+            logger.error("Error parsing xml", e);
+            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
         } finally {
             try {
                 Files.delete(tempFile.toPath());

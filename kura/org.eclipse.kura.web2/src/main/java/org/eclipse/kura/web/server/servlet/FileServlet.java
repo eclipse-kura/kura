@@ -432,27 +432,26 @@ public class FileServlet extends HttpServlet {
 
             Map<String, Object> newProps = AssetConfigValidator.get().validateCsv(csvString, driverPid, errors);
 
-            ServiceLocator locator = ServiceLocator.getInstance();
-
-            ConfigurationService cs = locator.getService(ConfigurationService.class);
-
-            if (doReplace) {
-                String fp = cs.getComponentConfiguration(assetPid).getConfigurationProperties()
-                        .get("service.factoryPid").toString();
-                cs.deleteFactoryConfiguration(assetPid, false);
-                newProps.put("driver.pid", driverPid);
-                cs.createFactoryConfiguration(fp, assetPid, newProps, true);
-            } else {
-                cs.updateConfiguration(assetPid, newProps);
-            }
+            ServiceLocator.applyToAllServices(ConfigurationService.class, cs -> {
+                if (doReplace) {
+                    String fp = cs.getComponentConfiguration(assetPid).getConfigurationProperties()
+                            .get("service.factoryPid").toString();
+                    cs.deleteFactoryConfiguration(assetPid, false);
+                    newProps.put("driver.pid", driverPid);
+                    cs.createFactoryConfiguration(fp, assetPid, newProps, true);
+                } else {
+                    cs.updateConfiguration(assetPid, newProps);
+                }
+            });
 
             // Add an additional delay after the configuration update
             // to give the time to the device to apply the received configuration
-            SystemService ss = locator.getService(SystemService.class);
-            long delay = Long.parseLong(ss.getProperties().getProperty("console.updateConfigDelay", "5000"));
-            if (delay > 0) {
-                Thread.sleep(delay);
-            }
+            ServiceLocator.applyToAllServices(SystemService.class, ss -> {
+                long delay = Long.parseLong(ss.getProperties().getProperty("console.updateConfigDelay", "5000"));
+                if (delay > 0) {
+                    Thread.sleep(delay);
+                }
+            });
         } catch (KuraException | GwtKuraException | InterruptedException e) {
             logger.error("Error updating device configuration", e);
         } catch (ServletException ex) {
@@ -504,11 +503,10 @@ public class FileServlet extends HttpServlet {
         }
 
         FileItem fileItem = fileItems.get(0);
-        byte[] data = fileItem.get();
-        String xmlString = new String(data, "UTF-8");
+        InputStream data = fileItem.getInputStream();
         XmlComponentConfigurations xmlConfigs;
         try {
-            xmlConfigs = unmarshal(xmlString, XmlComponentConfigurations.class);
+            xmlConfigs = unmarshal(data, XmlComponentConfigurations.class);
         } catch (Exception e) {
             logger.error("Error unmarshaling device configuration", e);
             throw new ServletException("Error unmarshaling device configuration", e);
@@ -537,6 +535,19 @@ public class FileServlet extends HttpServlet {
         } catch (Exception e) {
             logger.error("Error updating device configuration: {}", e);
             throw new ServletException("Error updating device configuration", e);
+        } finally {
+            if (data != null) {
+                try {
+                    data.close();
+                } catch (IOException e) {
+                    logger.warn(CANNOT_CLOSE_INPUT_STREAM, e);
+                }
+            }
+            if (fileItems != null) {
+                for (FileItem fileItem0 : fileItems) {
+                    fileItem0.delete();
+                }
+            }
         }
     }
 
@@ -789,14 +800,14 @@ public class FileServlet extends HttpServlet {
         ServiceUtil.ungetServiceReferences(FrameworkUtil.getBundle(FileServlet.class).getBundleContext(), refs);
     }
 
-    protected <T> T unmarshal(String xmlString, Class<T> clazz) throws KuraException {
+    protected <T> T unmarshal(InputStream inputStream, Class<T> clazz) throws KuraException {
         T result = null;
         ServiceReference<Unmarshaller>[] unmarshallerSRs = getXmlUnmarshallers();
         try {
             for (final ServiceReference<Unmarshaller> unmarshallerSR : unmarshallerSRs) {
                 Unmarshaller unmarshaller = FrameworkUtil.getBundle(FileServlet.class).getBundleContext()
                         .getService(unmarshallerSR);
-                result = unmarshaller.unmarshal(xmlString, clazz);
+                result = unmarshaller.unmarshal(inputStream, clazz);
             }
         } catch (Exception e) {
             logger.warn("Failed to extract persisted configuration.");

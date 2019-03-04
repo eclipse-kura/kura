@@ -19,7 +19,6 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -53,7 +52,6 @@ public class Timer implements WireEmitter, ConfigurableComponent {
     private static final String GROUP_ID = "wires";
 
     /** This is required to generate unique ID for the Quartz Trigger and Job */
-    private static AtomicInteger nextJobId = new AtomicInteger(0);
 
     private static final Logger logger = LogManager.getLogger(Timer.class);
 
@@ -228,14 +226,13 @@ public class Timer implements WireEmitter, ConfigurableComponent {
         if (interval <= 0) {
             throw new IllegalArgumentException("Interval cannot be less than or equal to zero");
         }
-
-        final int id = nextJobId.incrementAndGet();
         if (nonNull(this.jobKey) && nonNull(scheduler)) {
             shutdownScheduler();
         }
-        this.jobKey = new JobKey("emitJob" + id, GROUP_ID);
+        this.jobKey = new JobKey("emitJob_" + timerOptions.getServicePid(), GROUP_ID);
         scheduler = getScheduler();
-        final Trigger trigger = TriggerBuilder.newTrigger().withIdentity("emitTrigger" + id, GROUP_ID)
+        final Trigger trigger = TriggerBuilder.newTrigger()
+                .withIdentity("emitTrigger_" + timerOptions.getServicePid(), GROUP_ID)
                 .withSchedule(
                         SimpleScheduleBuilder.simpleSchedule().withIntervalInMilliseconds(interval).repeatForever())
                 .build();
@@ -260,13 +257,13 @@ public class Timer implements WireEmitter, ConfigurableComponent {
     private void scheduleCronInterval(final String expression) throws SchedulerException {
         requireNonNull(expression, "Cron Expression cannot be null");
 
-        final int id = nextJobId.incrementAndGet();
         if (nonNull(this.jobKey) || nonNull(scheduler)) {
             shutdownScheduler();
         }
-        this.jobKey = new JobKey("emitJob_" + id, GROUP_ID);
+        this.jobKey = new JobKey("emitJob_" + timerOptions.getServicePid(), GROUP_ID);
         scheduler = getScheduler();
-        final Trigger trigger = TriggerBuilder.newTrigger().withIdentity("emitTrigger_" + id, GROUP_ID)
+        final Trigger trigger = TriggerBuilder.newTrigger()
+                .withIdentity("emitTrigger_" + timerOptions.getServicePid(), GROUP_ID)
                 .withSchedule(CronScheduleBuilder.cronSchedule(expression)).build();
 
         final TimerJobDataMap jobDataMap = new TimerJobDataMap();

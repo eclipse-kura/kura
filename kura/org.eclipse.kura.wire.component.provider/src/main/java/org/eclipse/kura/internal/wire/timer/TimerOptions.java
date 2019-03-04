@@ -37,7 +37,19 @@ final class TimerOptions {
 
     private static final String PROP_THREAD_COUNT = "threadCount";
 
+    private static final String KURA_SERVICE_PID = "kura.service.pid";
+
     private final Map<String, Object> properties;
+
+    String getServicePid() {
+        String servicePid = null;
+        final Object servicePidObj = this.properties.get(KURA_SERVICE_PID);
+        if (nonNull(servicePidObj) && servicePidObj instanceof String) {
+            servicePid = (String) servicePidObj;
+        }
+        requireNonNull(servicePid, "Service Pid cannot be null");
+        return servicePid;
+    }
 
     /**
      * Instantiates a new Timer options.
@@ -65,9 +77,9 @@ final class TimerOptions {
     }
 
     /**
-     * Returns the simple interval as configured.
+     * Returns the thread count as configured.
      *
-     * @return the simple interval
+     * @return the thread count
      */
     int getThreadCount() {
         int threadCount = 0;
@@ -78,6 +90,11 @@ final class TimerOptions {
         return threadCount;
     }
 
+    /**
+     * Returns the simple interval as configured.
+     *
+     * @return the simple interval
+     */
     int getSimpleInterval() {
         int interval = 0;
         final Object simpleInterval = this.properties.get(PROP_SIMPLE_INTERVAL);

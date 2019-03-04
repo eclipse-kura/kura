@@ -220,6 +220,7 @@ public class AssetDataUi extends Composite {
 
     private GwtChannelRecord createWriteRecord(AssetModel.ChannelModel channel) {
         final GwtChannelRecord result = new GwtChannelRecord();
+        result.setUnescaped(true);
         result.setName(channel.getChannelName());
         result.setValueType(channel.getValue(AssetConstants.VALUE_TYPE.value()));
         return result;
@@ -252,6 +253,7 @@ public class AssetDataUi extends Composite {
                         AssetDataUi.this.setDirty(false);
                         AssetDataUi.this.applyDataChanges.setEnabled(false);
                         for (GwtChannelRecord channelRecord : records) {
+                            channelRecord.setUnescaped(true);
                             channelValues.put(channelRecord.getName(), channelRecord);
                         }
                         AssetDataUi.this.channelsDataProvider.refresh();

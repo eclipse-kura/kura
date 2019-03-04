@@ -1,6 +1,6 @@
 /**
  *
- * Copyright (c) 2011, 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates and others
  *
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
@@ -250,6 +250,10 @@ Upload panel END
 /**********************
 Channel Table Validation START
 ***********************/
+
+.asset-configuration-ui input, .asset-data-ui input {
+	width: 100%;
+}
 
 .cell-not-valid:not(.active), .cell-not-valid:not(.active) *{
 	background-color: rgb(239, 214, 214) !important;

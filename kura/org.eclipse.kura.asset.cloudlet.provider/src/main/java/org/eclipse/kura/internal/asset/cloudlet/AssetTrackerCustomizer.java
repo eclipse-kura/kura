@@ -15,7 +15,6 @@ import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_P
 import java.util.Map;
 
 import org.eclipse.kura.asset.Asset;
-import org.eclipse.kura.asset.AssetService;
 import org.eclipse.kura.util.collection.CollectionUtil;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -35,9 +34,6 @@ final class AssetTrackerCustomizer implements ServiceTrackerCustomizer<Asset, As
     /** The map of assets present in the OSGi service registry. */
     private final Map<String, Asset> assets;
 
-    /** The Asset Service dependency. */
-    private final AssetService assetService;
-
     /** Bundle Context */
     private final BundleContext context;
 
@@ -49,13 +45,11 @@ final class AssetTrackerCustomizer implements ServiceTrackerCustomizer<Asset, As
      * @throws NullPointerException
      *             if any of the arguments is null
      */
-    AssetTrackerCustomizer(final BundleContext context, final AssetService assetService) {
+    AssetTrackerCustomizer(final BundleContext context) {
         requireNonNull(context, "Bundle context cannot be null");
-        requireNonNull(context, "Asset service instance cannot be null");
 
         this.assets = CollectionUtil.newConcurrentHashMap();
         this.context = context;
-        this.assetService = assetService;
     }
 
     /** {@inheritDoc} */
@@ -64,7 +58,7 @@ final class AssetTrackerCustomizer implements ServiceTrackerCustomizer<Asset, As
         final Asset service = this.context.getService(reference);
         logger.info("Asset has been found by Asset Cloudlet Tracker... ==> adding service");
         if (service != null) {
-            return addService(service);
+            return addService(service, reference);
         }
         return null;
     }
@@ -78,9 +72,9 @@ final class AssetTrackerCustomizer implements ServiceTrackerCustomizer<Asset, As
      *             if provided service is null
      * @return Asset service instance
      */
-    private Asset addService(final Asset service) {
+    private Asset addService(final Asset service, final ServiceReference<Asset> reference) {
         requireNonNull(service, "Asset service instance cannot be null");
-        final String assetPid = this.assetService.getAssetPid(service);
+        final String assetPid = reference.getProperty(KURA_SERVICE_PID).toString();
         this.assets.put(assetPid, service);
         return service;
     }

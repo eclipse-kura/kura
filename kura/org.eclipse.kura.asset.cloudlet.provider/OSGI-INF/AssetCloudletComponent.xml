@@ -15,10 +15,4 @@
               bind="setRequestHandlerRegistry"
               unbind="unsetRequestHandlerRegistry"
               interface="org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry"/>
-   	<reference bind="bindAssetService" 
-   		cardinality="1..1" 
-   		interface="org.eclipse.kura.asset.AssetService" 
-   		name="AssetService" 
-   		policy="static" 
-   		unbind="unbindAssetService"/>
 </scr:component>

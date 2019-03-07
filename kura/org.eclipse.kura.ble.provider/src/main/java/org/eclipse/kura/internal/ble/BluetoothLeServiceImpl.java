@@ -31,7 +31,7 @@ public class BluetoothLeServiceImpl implements BluetoothLeService {
 
     protected void activate(ComponentContext context) {
         logger.info("Activating Bluetooth Le Service...");
-        if (!startBluetoothSystemd() && !startBluetoothInitd()) {
+        if (!startBluetoothUbuntuSnap() && !startBluetoothSystemd() && !startBluetoothInitd()) {
             startBluetoothDaemon();
         }
         try {
@@ -111,6 +111,17 @@ public class BluetoothLeServiceImpl implements BluetoothLeService {
             Runtime.getRuntime().exec(daemonCommand);
         } catch (IOException e) {
             logger.error("Failed to start linux bluetooth service", e);
+        }
+    }
+
+    private boolean startBluetoothUbuntuSnap() {
+        String snap_name = System.getProperty("kura.os.snap.name");
+        if (snap_name != null && snap_name.length() != 0 ) {
+          // when running as snap, we assume bluez is installed as snap and running
+          logger.info("We are running as snap, assume bluetooth is running");
+          return true;
+        } else {
+          return false;
         }
     }
 }

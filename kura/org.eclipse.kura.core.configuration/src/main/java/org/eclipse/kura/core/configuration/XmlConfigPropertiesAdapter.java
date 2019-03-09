@@ -225,38 +225,43 @@ public class XmlConfigPropertiesAdapter {
         }
         for (XmlConfigPropertyAdapted adaptedProp : adaptedProps) {
             String propName = adaptedProp.getName();
+            String[] values = adaptedProp.getValues();
+            if (values == null || values.length == 0) {
+                properties.put(propName, null);
+                continue;
+            }
             ConfigPropertyType type = adaptedProp.getType();
             if (type != null) {
                 Object propvalue = null;
                 if (adaptedProp.getArray() == false) {
                     switch (adaptedProp.getType()) {
                     case STRING_TYPE:
-                        propvalue = adaptedProp.getValues()[0];
+                        propvalue = values[0];
                         break;
                     case LONG_TYPE:
-                        propvalue = Long.parseLong(adaptedProp.getValues()[0]);
+                        propvalue = Long.parseLong(values[0]);
                         break;
                     case DOUBLE_TYPE:
-                        propvalue = Double.parseDouble(adaptedProp.getValues()[0]);
+                        propvalue = Double.parseDouble(values[0]);
                         break;
                     case FLOAT_TYPE:
-                        propvalue = Float.parseFloat(adaptedProp.getValues()[0]);
+                        propvalue = Float.parseFloat(values[0]);
                         break;
                     case INTEGER_TYPE:
-                        propvalue = Integer.parseInt(adaptedProp.getValues()[0]);
+                        propvalue = Integer.parseInt(values[0]);
                         break;
                     case BYTE_TYPE:
-                        propvalue = Byte.parseByte(adaptedProp.getValues()[0]);
+                        propvalue = Byte.parseByte(values[0]);
                         break;
                     case CHAR_TYPE:
-                        String s = adaptedProp.getValues()[0];
+                        String s = values[0];
                         propvalue = Character.valueOf(s.charAt(0));
                         break;
                     case BOOLEAN_TYPE:
-                        propvalue = Boolean.parseBoolean(adaptedProp.getValues()[0]);
+                        propvalue = Boolean.parseBoolean(values[0]);
                         break;
                     case SHORT_TYPE:
-                        propvalue = Short.parseShort(adaptedProp.getValues()[0]);
+                        propvalue = Short.parseShort(values[0]);
                         break;
                     case PASSWORD_TYPE:
                         BundleContext bundleContext = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
@@ -265,7 +270,7 @@ public class XmlConfigPropertiesAdapter {
                         try {
                             CryptoService cryptoService = bundleContext.getService(cryptoServiceRef);
 
-                            propvalue = adaptedProp.getValues()[0];
+                            propvalue = values[0];
                             if (adaptedProp.isEncrypted()) {
                                 propvalue = new Password(cryptoService.decodeBase64((String) propvalue));
                             } else {
@@ -279,82 +284,79 @@ public class XmlConfigPropertiesAdapter {
                 } else {
                     // If we are dealing with an empty array, skip this element.
                     // Starting from 1.2.0 an empty array will never be present in a snapshot.
-                    if (adaptedProp.getValues() == null) {
-                        continue;
-                    }
                     switch (adaptedProp.getType()) {
                     case STRING_TYPE:
-                        propvalue = adaptedProp.getValues();
+                        propvalue = values;
                         break;
                     case LONG_TYPE:
-                        Long[] longValues = new Long[adaptedProp.getValues().length];
-                        for (int i = 0; i < adaptedProp.getValues().length; i++) {
-                            if (adaptedProp.getValues()[i] != null) {
-                                longValues[i] = Long.parseLong(adaptedProp.getValues()[i]);
+                        Long[] longValues = new Long[values.length];
+                        for (int i = 0; i < values.length; i++) {
+                            if (values[i] != null) {
+                                longValues[i] = Long.parseLong(values[i]);
                             }
                         }
                         propvalue = longValues;
                         break;
                     case DOUBLE_TYPE:
-                        Double[] doubleValues = new Double[adaptedProp.getValues().length];
-                        for (int i = 0; i < adaptedProp.getValues().length; i++) {
-                            if (adaptedProp.getValues()[i] != null) {
-                                doubleValues[i] = Double.parseDouble(adaptedProp.getValues()[i]);
+                        Double[] doubleValues = new Double[values.length];
+                        for (int i = 0; i < values.length; i++) {
+                            if (values[i] != null) {
+                                doubleValues[i] = Double.parseDouble(values[i]);
                             }
                         }
                         propvalue = doubleValues;
                         break;
                     case FLOAT_TYPE:
-                        Float[] floatValues = new Float[adaptedProp.getValues().length];
-                        for (int i = 0; i < adaptedProp.getValues().length; i++) {
-                            if (adaptedProp.getValues()[i] != null) {
-                                floatValues[i] = Float.parseFloat(adaptedProp.getValues()[i]);
+                        Float[] floatValues = new Float[values.length];
+                        for (int i = 0; i < values.length; i++) {
+                            if (values[i] != null) {
+                                floatValues[i] = Float.parseFloat(values[i]);
                             }
                         }
                         propvalue = floatValues;
                         break;
                     case INTEGER_TYPE:
-                        Integer[] intValues = new Integer[adaptedProp.getValues().length];
-                        for (int i = 0; i < adaptedProp.getValues().length; i++) {
-                            if (adaptedProp.getValues()[i] != null) {
-                                intValues[i] = Integer.parseInt(adaptedProp.getValues()[i]);
+                        Integer[] intValues = new Integer[values.length];
+                        for (int i = 0; i < values.length; i++) {
+                            if (values[i] != null) {
+                                intValues[i] = Integer.parseInt(values[i]);
                             }
                         }
                         propvalue = intValues;
                         break;
                     case BYTE_TYPE:
-                        Byte[] byteValues = new Byte[adaptedProp.getValues().length];
-                        for (int i = 0; i < adaptedProp.getValues().length; i++) {
-                            if (adaptedProp.getValues()[i] != null) {
-                                byteValues[i] = Byte.parseByte(adaptedProp.getValues()[i]);
+                        Byte[] byteValues = new Byte[values.length];
+                        for (int i = 0; i < values.length; i++) {
+                            if (values[i] != null) {
+                                byteValues[i] = Byte.parseByte(values[i]);
                             }
                         }
                         propvalue = byteValues;
                         break;
                     case CHAR_TYPE:
-                        Character[] charValues = new Character[adaptedProp.getValues().length];
-                        for (int i = 0; i < adaptedProp.getValues().length; i++) {
-                            if (adaptedProp.getValues()[i] != null) {
-                                String s = adaptedProp.getValues()[i];
+                        Character[] charValues = new Character[values.length];
+                        for (int i = 0; i < values.length; i++) {
+                            if (values[i] != null) {
+                                String s = values[i];
                                 charValues[i] = Character.valueOf(s.charAt(0));
                             }
                         }
                         propvalue = charValues;
                         break;
                     case BOOLEAN_TYPE:
-                        Boolean[] booleanValues = new Boolean[adaptedProp.getValues().length];
-                        for (int i = 0; i < adaptedProp.getValues().length; i++) {
-                            if (adaptedProp.getValues()[i] != null) {
-                                booleanValues[i] = Boolean.parseBoolean(adaptedProp.getValues()[i]);
+                        Boolean[] booleanValues = new Boolean[values.length];
+                        for (int i = 0; i < values.length; i++) {
+                            if (values[i] != null) {
+                                booleanValues[i] = Boolean.parseBoolean(values[i]);
                             }
                         }
                         propvalue = booleanValues;
                         break;
                     case SHORT_TYPE:
-                        Short[] shortValues = new Short[adaptedProp.getValues().length];
-                        for (int i = 0; i < adaptedProp.getValues().length; i++) {
-                            if (adaptedProp.getValues()[i] != null) {
-                                shortValues[i] = Short.parseShort(adaptedProp.getValues()[i]);
+                        Short[] shortValues = new Short[values.length];
+                        for (int i = 0; i < values.length; i++) {
+                            if (values[i] != null) {
+                                shortValues[i] = Short.parseShort(values[i]);
                             }
                         }
                         propvalue = shortValues;
@@ -365,14 +367,13 @@ public class XmlConfigPropertiesAdapter {
                                 .getServiceReference(CryptoService.class);
                         CryptoService cryptoService = bundleContext.getService(cryptoServiceRef);
                         try {
-                            Password[] pwdValues = new Password[adaptedProp.getValues().length];
-                            for (int i = 0; i < adaptedProp.getValues().length; i++) {
-                                if (adaptedProp.getValues()[i] != null) {
+                            Password[] pwdValues = new Password[values.length];
+                            for (int i = 0; i < values.length; i++) {
+                                if (values[i] != null) {
                                     if (adaptedProp.isEncrypted()) {
-                                        pwdValues[i] = new Password(
-                                                cryptoService.decodeBase64(adaptedProp.getValues()[i]));
+                                        pwdValues[i] = new Password(cryptoService.decodeBase64(values[i]));
                                     } else {
-                                        pwdValues[i] = new Password(adaptedProp.getValues()[i]);
+                                        pwdValues[i] = new Password(values[i]);
                                     }
                                 }
                             }

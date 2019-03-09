@@ -116,8 +116,14 @@ public class XmlJavaComponentConfigurationsMapper implements XmlJavaDataMapper {
                 if (r.getLocalName().equals(CONFIGURATIONS_CONFIGURATION_PROPERTY)) {
                     String name = r.getAttributeValue("", CONFIGURATIONS_CONFIGURATION_PROPERTY_NAME);
                     String type = r.getAttributeValue("", CONFIGURATIONS_CONFIGURATION_PROPERTY_TYPE);
+                    if (type == null)
+                        type = "String";
                     String array = r.getAttributeValue("", CONFIGURATIONS_CONFIGURATION_PROPERTY_ARRAY);
+                    if (array == null)
+                        array = "false";
                     String encrypted = r.getAttributeValue("", CONFIGURATIONS_CONFIGURATION_PROPERTY_ENCRYPTED);
+                    if (encrypted == null)
+                        encrypted = "false";
                     ConfigPropertyType cct = getType(type);
                     String[] values = paraValues(r);
                     XmlConfigPropertyAdapted xmlProperty = new XmlConfigPropertyAdapted(name, cct, values);
@@ -236,20 +242,24 @@ public class XmlJavaComponentConfigurationsMapper implements XmlJavaDataMapper {
                     Boolean encrypted = propertyObj.isEncrypted();
                     ConfigPropertyType cpt = propertyObj.getType();
                     String[] values = propertyObj.getValues();
-
-                    if (values != null) {
+                    boolean hasValue = (values != null && values.length > 0);
+                    if (hasValue)
                         xml.writeStartElement("esf", "property", "");
-                        xml.writeAttribute("array", array.toString());
-                        xml.writeAttribute("encrypted", encrypted.toString());
-                        xml.writeAttribute("name", name);
-                        xml.writeAttribute("type", getStringValue(cpt));
+                    else
+                        xml.writeEmptyElement("esf", "property", "");
+                    xml.writeAttribute("array", array.toString());
+                    xml.writeAttribute("encrypted", encrypted.toString());
+                    xml.writeAttribute("name", name);
+                    xml.writeAttribute("type", getStringValue(cpt));
+                    if (hasValue) {
                         for (String value : values) {
                             xml.writeStartElement("esf", "value", "");
                             xml.writeCharacters(value);
                             xml.writeEndElement();
                         }
-                        xml.writeEndElement();
                     }
+                    if (hasValue)
+                        xml.writeEndElement();
                 }
                 xml.writeEndElement();
             }

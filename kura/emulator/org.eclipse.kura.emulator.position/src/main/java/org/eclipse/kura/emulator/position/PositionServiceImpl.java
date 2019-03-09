@@ -87,9 +87,11 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
     }
 
     public void updated(Map<String, Object> properties) {
+        logger.info("Updating position service");
         stop();
         doUpdate(properties);
         start();
+        logger.info("Updating position service. Done.");
     }
 
     protected void deactivate(ComponentContext componentContext) {
@@ -228,6 +230,6 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
 
     @Override
     public void unregisterListener(String listenerId) {
-     // Not supported
+        // Not supported
     }
 }

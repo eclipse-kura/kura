@@ -693,7 +693,11 @@
                                     <artifactId>osgi.cmpn</artifactId>
                                     <version>${osgi.cmpn-mvn.version}</version>
                                 </artifactItem>
-
+                                <artifactItem>
+                                    <groupId>org.apache.aries.spifly</groupId>
+                                    <artifactId>org.apache.aries.spifly.dynamic.bundle</artifactId>
+                                    <version>${org.apache.aries.spifly-mvn.version}</version>
+                                </artifactItem>
                             </artifactItems>
                             <stripVersion>true</stripVersion>
                             <outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>

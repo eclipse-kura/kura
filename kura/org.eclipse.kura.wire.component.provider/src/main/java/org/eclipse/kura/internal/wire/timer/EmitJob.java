@@ -24,9 +24,10 @@ import org.eclipse.kura.type.TypedValues;
 import org.eclipse.kura.wire.WireRecord;
 import org.eclipse.kura.wire.WireSupport;
 import org.quartz.DisallowConcurrentExecution;
-import org.quartz.Job;
+import org.quartz.InterruptableJob;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.quartz.UnableToInterruptJobException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,11 +36,12 @@ import org.slf4j.LoggerFactory;
  * interval (or specified CRON job interval)
  */
 @DisallowConcurrentExecution
-public final class EmitJob implements Job {
+public final class EmitJob implements InterruptableJob {
 
     /** Timer Field Constant */
     private static final String PROP = "TIMER";
     private static final Logger logger = LoggerFactory.getLogger(EmitJob.class);
+    private Thread currentThread;
 
     /**
      * Emits a {@link WireRecord} every specified interval.
@@ -51,21 +53,30 @@ public final class EmitJob implements Job {
      */
     @Override
     public void execute(final JobExecutionContext context) throws JobExecutionException {
-        final TimerJobDataMap dataMap = (TimerJobDataMap) context.getJobDetail().getJobDataMap();
-        final WireSupport wireSupport = dataMap.getWireSupport();
-
-        final long currentTime = new Date().getTime();
-        final TypedValue<Long> timestamp = TypedValues.newLongValue(currentTime);
-        final Map<String, TypedValue<?>> timerProperties = new HashMap<>();
-        timerProperties.put(PROP, timestamp);
-
-        final WireRecord timerWireRecord = new WireRecord(timerProperties);
-        final List<WireRecord> timerWireRecords = new ArrayList<>();
-        timerWireRecords.add(timerWireRecord);
         try {
+            final TimerJobDataMap dataMap = (TimerJobDataMap) context.getJobDetail().getJobDataMap();
+            final WireSupport wireSupport = dataMap.getWireSupport();
+
+            final long currentTime = new Date().getTime();
+            final TypedValue<Long> timestamp = TypedValues.newLongValue(currentTime);
+            final Map<String, TypedValue<?>> timerProperties = new HashMap<>();
+            timerProperties.put(PROP, timestamp);
+
+            final WireRecord timerWireRecord = new WireRecord(timerProperties);
+            final List<WireRecord> timerWireRecords = new ArrayList<>();
+            timerWireRecords.add(timerWireRecord);
             wireSupport.emit(timerWireRecords);
         } catch (Exception e) {
             logger.error("Timer thread excutting error:{}", e);
+        } finally {
+            currentThread = null;
+        }
+    }
+
+    @Override
+    public void interrupt() throws UnableToInterruptJobException {
+        if (currentThread != null && !currentThread.isInterrupted()) {
+            currentThread.interrupt();
         }
     }
 }

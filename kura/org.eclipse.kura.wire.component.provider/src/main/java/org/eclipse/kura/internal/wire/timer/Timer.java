@@ -146,19 +146,20 @@ public class Timer implements WireEmitter, ConfigurableComponent {
     private void shutdownScheduler() {
         try {
             if (nonNull(this.scheduler) && nonNull(this.jobKey)) {
-                getScheduler().deleteJob(this.jobKey);
+                this.scheduler.interrupt(this.jobKey);
+                this.scheduler.deleteJob(this.jobKey);
                 this.jobKey = null;
             }
         } catch (final SchedulerException e) {
             logger.error("Scheduler exception.", e);
         } finally {
-            if (scheduler != null) {
+            if (this.scheduler != null) {
                 try {
-                    scheduler.shutdown();
+                    this.scheduler.shutdown();
                 } catch (SchedulerException e) {
                     logger.warn("Scheduler exception.", e);
                 }
-                scheduler = null;
+                this.scheduler = null;
             }
         }
     }

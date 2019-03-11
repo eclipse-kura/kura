@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 
@@ -119,9 +120,15 @@ final class WireSupportImpl implements WireSupport, MultiportWireSupport {
     public synchronized void emit(final List<WireRecord> wireRecords) {
         requireNonNull(wireRecords, "Wire Records cannot be null");
         final WireEnvelope envelope = createWireEnvelope(wireRecords);
+        List<CompletableFuture<Void>> futures = new ArrayList<>();
         for (EmitterPort emitterPort : this.emitterPorts) {
-            emitterPort.emit(envelope);
+            CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+                emitterPort.emit(envelope);
+            });
+            futures.add(future);
         }
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+
     }
 
     /** {@inheritDoc} */

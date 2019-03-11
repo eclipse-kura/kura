@@ -53,6 +53,7 @@ public final class EmitJob implements InterruptableJob {
      */
     @Override
     public void execute(final JobExecutionContext context) throws JobExecutionException {
+        currentThread = Thread.currentThread();
         try {
             final TimerJobDataMap dataMap = (TimerJobDataMap) context.getJobDetail().getJobDataMap();
             final WireSupport wireSupport = dataMap.getWireSupport();

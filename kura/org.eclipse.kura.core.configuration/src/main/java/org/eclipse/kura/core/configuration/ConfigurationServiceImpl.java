@@ -1139,8 +1139,8 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
                                     cc = selfConfigComp.getConfiguration();
                                     if (cc.getPid() == null || !cc.getPid().equals(pid)) {
                                         logger.error(
-                                                "Invalid pid for returned Configuration of SelfConfiguringComponent with pid: "
-                                                        + pid + ". Ignoring it.");
+                                                "Invalid pid for returned Configuration of SelfConfiguringComponent with pid: {} . Ignoring it.",
+                                                pid);
                                         return null;
                                     }
 
@@ -1761,7 +1761,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
      * Convert property value to string
      *
      * @param value
-     *                  the input value
+     *            the input value
      * @return the string property value, or {@code null}
      */
     private static String makeString(Object value) {

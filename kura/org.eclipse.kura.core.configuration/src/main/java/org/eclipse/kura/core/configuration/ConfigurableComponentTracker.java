@@ -83,9 +83,8 @@ public class ConfigurableComponentTracker extends ServiceTracker {
                                 s_logger.info("Could not find service for: {}", ref);
                             } else if (obj instanceof ConfigurableComponent) {
                                 s_logger.info(
-                                        "Adding ConfigurableComponent with pid {}, service pid {} and factory pid "
-                                                + factoryPid,
-                                        pid, servicePid);
+                                        "Adding ConfigurableComponent with pid {}, service pid {} and factory pid {}",
+                                        pid, servicePid, factoryPid);
                                 this.m_confService.registerComponentConfiguration(pid, servicePid, factoryPid);
                             } else if (obj instanceof SelfConfiguringComponent) {
                                 s_logger.info("Adding SelfConfiguringComponent with pid {} and service pid {}", pid,
@@ -114,8 +113,8 @@ public class ConfigurableComponentTracker extends ServiceTracker {
 
         if (servicePid != null) {
             if (service instanceof ConfigurableComponent) {
-                s_logger.info("Adding ConfigurableComponent with pid {}, service pid {} and factory pid " + factoryPid,
-                        pid, servicePid);
+                s_logger.info("Adding ConfigurableComponent with pid {}, service pid {} and factory pid {}", pid,
+                        servicePid, factoryPid);
                 this.m_confService.registerComponentConfiguration(pid, servicePid, factoryPid);
             } else if (service instanceof SelfConfiguringComponent) {
                 s_logger.info("Adding SelfConfiguringComponent with pid {} and service pid {}", pid, servicePid);

@@ -44,16 +44,9 @@ public class PositionServiceImplTest {
 
         PositionServiceImpl svc = new PositionServiceImpl();
 
-        Bundle bMock = mock(Bundle.class);
-        String name = "boston.gpx";
-        URL url = new URL("file:../../emulator/org.eclipse.kura.emulator.position/src/main/resources/" + name);
-        when(bMock.getResource(name)).thenReturn(url);
+        Bundle bMock = initBundleMock();
 
-        BundleContext bcMock = mock(BundleContext.class);
-        when(bcMock.getBundle()).thenReturn(bMock);
-
-        ComponentContext ccMock = mock(ComponentContext.class);
-        when(ccMock.getBundleContext()).thenReturn(bcMock);
+        ComponentContext ccMock = initComponentContextMock(bMock);
 
         EventAdmin eaMock = mock(EventAdmin.class);
         svc.setEventAdmin(eaMock);
@@ -63,7 +56,7 @@ public class PositionServiceImplTest {
 
         svc.activate(ccMock, properties);
 
-        while (((int) TestUtil.getFieldValue(svc, "index")) < 1) {
+        while ((int) TestUtil.getFieldValue(svc, "index") < 1) {
             try {
                 Thread.sleep(10);
             } catch (InterruptedException e) {
@@ -73,7 +66,7 @@ public class PositionServiceImplTest {
 
         svc.deactivate(ccMock);
 
-        assumeTrue(((int) TestUtil.getFieldValue(svc, "index")) == 1);
+        assumeTrue((int) TestUtil.getFieldValue(svc, "index") == 1);
 
         verify(eaMock, times(1)).postEvent(isA(PositionLockedEvent.class));
 
@@ -99,17 +92,42 @@ public class PositionServiceImplTest {
 
         PositionServiceImpl svc = new PositionServiceImpl();
 
+        Bundle bMock = initBundleMock();
+
+        ComponentContext ccMock = initComponentContextMock(bMock);
+
+        EventAdmin eaMock = mock(EventAdmin.class);
+        svc.setEventAdmin(eaMock);
+
         Map<String, Object> properties = new HashMap<>();
         properties.put(USE_GPSD, true);
+        svc.activate(ccMock, properties);
 
+        properties = new HashMap<>();
+        properties.put(USE_GPSD, true);
         svc.updated(properties);
 
         assertTrue((boolean) TestUtil.getFieldValue(svc, "useGpsd"));
 
         properties.put(USE_GPSD, false);
-
         svc.updated(properties);
 
         assertFalse((boolean) TestUtil.getFieldValue(svc, "useGpsd"));
+    }
+
+    private ComponentContext initComponentContextMock(Bundle bMock) {
+        BundleContext bcMock = mock(BundleContext.class);
+        when(bcMock.getBundle()).thenReturn(bMock);
+        ComponentContext ccMock = mock(ComponentContext.class);
+        when(ccMock.getBundleContext()).thenReturn(bcMock);
+        return ccMock;
+    }
+
+    private Bundle initBundleMock() throws MalformedURLException {
+        Bundle bMock = mock(Bundle.class);
+        String name = "boston.gpx";
+        URL url = new URL("file:../../emulator/org.eclipse.kura.emulator.position/src/main/resources/" + name);
+        when(bMock.getResource(name)).thenReturn(url);
+        return bMock;
     }
 }

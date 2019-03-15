@@ -1383,7 +1383,14 @@ fi]]>
 		<zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux.snapctl.provider_${org.eclipse.kura.linux.snapctl.provider.version}.jar"
                         prefix="${build.output.name}/${plugins.folder}" />
+			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux.usb.*_${org.eclipse.kura.linux.usb.version}.jar"
+                        prefix="${build.output.name}/${plugins.folder}" />
 		</zip>
+		<condition property="is.tinyb.snapshot" value="">
+			<contains string="${tinyb.version}" substring="SNAPSHOT"/>
+		</condition>
+			<antcall target="tinyb-snapshot-jars-all" />
+			<antcall target="tinyb-no-snapshot-jars-all" />
 	</target>
 
 	<target name="tinyb-jars">
@@ -1415,6 +1422,28 @@ fi]]>
                 prefix="${build.output.name}/${plugins.folder}" />
 	    </zip>
 	</target>
+
+    <target name="tinyb-snapshot-jars-all" if="is.tinyb.snapshot">
+        <zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
+            <mappedresources>
+                <fileset dir="../target-definition/common/repository/plugins" includes="tinyb.*_*.jar" />
+                <globmapper from="*.SNAPSHOT.jar" to="${build.output.name}/${plugins.folder}/*-SNAPSHOT.jar" />
+            </mappedresources>
+            <mappedresources>
+                <fileset dir="../target-definition/common/repository/plugins" includes="tinyb_*.jar" />
+                <globmapper from="*.SNAPSHOT.jar" to="${build.output.name}/${plugins.folder}/*-SNAPSHOT.jar" />
+            </mappedresources>
+        </zip>
+    </target>
+
+    <target name="tinyb-no-snapshot-jars-all" unless="is.tinyb.snapshot">
+        <zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
+            <zipfileset file="../target-definition/common/repository/plugins/tinyb.*_${tinyb.version}.jar"
+                prefix="${build.output.name}/${plugins.folder}" />
+            <zipfileset file="../target-definition/common/repository/plugins/tinyb_${tinyb.version}.jar"
+                prefix="${build.output.name}/${plugins.folder}" />
+        </zip>
+    </target>
 
 	<target name="web2-jar-win" if="is.web2.jar.available">
     	<echo message="web2-jar-win ${project.build.directory}/${build.output.name}/config.ini..." />

@@ -1,15 +1,21 @@
 /*******************************************************************************
- * Copyright (c) 2017 Red Hat Inc
+ * Copyright (c) 2017, 2019 Red Hat Inc
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * Contributors:
+ *  Red Hat
+ *  Eurotech
  *******************************************************************************/
 package org.eclipse.kura.broker.artemis.core.internal;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -23,16 +29,13 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
-
 public class ProtocolTracker {
 
     private static final Logger logger = LoggerFactory.getLogger(ProtocolTracker.class);
 
     private final BundleContext context;
 
-    private final Multimap<String, ProtocolManagerFactory<?>> protocols = HashMultimap.create();
+    private final Map<String, Collection<ProtocolManagerFactory<?>>> protocols = new HashMap<>();
 
     @SuppressWarnings("rawtypes")
     private final ServiceTrackerCustomizer<ProtocolManagerFactory, ProtocolManagerFactory> customizer = new ServiceTrackerCustomizer<ProtocolManagerFactory, ProtocolManagerFactory>() {
@@ -78,28 +81,28 @@ public class ProtocolTracker {
     }
 
     protected synchronized void addProtocols(final ProtocolManagerFactory<?> factory) {
-        final Set<String> protocols = new HashSet<>(Arrays.asList(factory.getProtocols()));
+        final Set<String> referencedProtocols = new HashSet<>(Arrays.asList(factory.getProtocols()));
 
-        for (final String protocol : protocols) {
+        for (final String protocol : referencedProtocols) {
             logger.info("Adding protocol - {} -> {}", protocol, factory);
-            this.protocols.put(protocol, factory);
+            addProtocol(protocol, factory);
         }
 
         if (this.listener != null) {
-            this.listener.protocolsAdded(protocols);
+            this.listener.protocolsAdded(referencedProtocols);
         }
     }
 
     protected synchronized void removeProtocols(final ProtocolManagerFactory<?> factory) {
-        final Set<String> protocols = new HashSet<>(Arrays.asList(factory.getProtocols()));
+        final Set<String> referencedProtocols = new HashSet<>(Arrays.asList(factory.getProtocols()));
 
-        for (final String protocol : protocols) {
+        for (final String protocol : referencedProtocols) {
             logger.info("Removing protocol - {} -> {}", protocol, factory);
-            this.protocols.remove(protocol, factory);
+            removeProtocol(protocol, factory);
         }
 
         if (this.listener != null) {
-            this.listener.protocolsRemoved(protocols);
+            this.listener.protocolsRemoved(referencedProtocols);
         }
     }
 
@@ -107,7 +110,8 @@ public class ProtocolTracker {
         final Map<String, ProtocolManagerFactory<?>> result = new HashMap<>();
 
         for (final String required : requiredProtocols) {
-            final Collection<ProtocolManagerFactory<?>> factories = this.protocols.get(required);
+            final Collection<ProtocolManagerFactory<?>> factories = this.protocols.getOrDefault(required,
+                    Collections.emptyList());
             if (factories.isEmpty()) {
                 // return "unresolved"
                 return null;
@@ -119,14 +123,37 @@ public class ProtocolTracker {
 
         // we are resolved now ... add all others
 
-        for (final Map.Entry<String, ProtocolManagerFactory<?>> entry : this.protocols.entries()) {
-            if (!result.containsKey(entry.getKey())) {
-                result.put(entry.getKey(), entry.getValue());
+        for (final Map.Entry<String, Collection<ProtocolManagerFactory<?>>> entry : this.protocols.entrySet()) {
+
+            final String protocol = entry.getKey();
+            final Collection<ProtocolManagerFactory<?>> factories = entry.getValue();
+
+            for (final ProtocolManagerFactory<?> factory : factories) {
+                if (!result.containsKey(protocol)) {
+                    result.put(protocol, factory);
+                    break;
+                }
             }
         }
 
         // return the result
 
         return result.values();
+    }
+
+    private void addProtocol(final String protocol, final ProtocolManagerFactory<?> factory) {
+        this.protocols.computeIfAbsent(protocol, p -> new ArrayList<>()).add(factory);
+    }
+
+    private void removeProtocol(final String protocol, final ProtocolManagerFactory<?> factory) {
+
+        this.protocols.compute(protocol, (p, factories) -> {
+            if (factories == null) {
+                return null;
+            }
+            factories.remove(factory);
+            return factories.isEmpty() ? null : factories;
+        });
+
     }
 }

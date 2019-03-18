@@ -89,14 +89,11 @@
                         <Embed-Dependency>*</Embed-Dependency>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Import-Package>
-                            com.google.common.*,
-
                             org.apache.activemq.artemis.jdbc.store.*;version="[${org.apache.activemq.artemis.upstream.version},3)";resolution:=optional,
                             org.apache.xpath.*;resolution:=optional,
                             org.jboss.logmanager;resolution:=optional,
                             org.jboss.logmanager.*;resolution:=optional,
                             org.jgroups.*;resolution:=optional,
-
                             *
                         </Import-Package>
                         <_exportcontents>org.apache.*</_exportcontents>

@@ -1,26 +1,29 @@
 /*******************************************************************************
- * Copyright (c) 2017 Red Hat Inc
+ * Copyright (c) 2017, 2019 Red Hat Inc
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * Contributors:
+ *  Red Hat
+ *  Eurotech
  *******************************************************************************/
 package org.eclipse.kura.broker.artemis.core;
 
-import static com.google.common.collect.Lists.reverse;
-import static com.google.common.io.ByteStreams.copy;
-import static java.nio.charset.StandardCharsets.UTF_8;
-
-import java.io.ByteArrayInputStream;
-import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.Writer;
 import java.lang.management.ManagementFactory;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 
 import org.apache.activemq.artemis.core.config.FileDeploymentManager;
@@ -56,8 +59,9 @@ public class ServerRunner {
     public void start() throws Exception {
         final Path file = Files.createTempFile("broker-", ".xml");
         try {
-            try (OutputStream out = Files.newOutputStream(file)) {
-                copy(new ByteArrayInputStream(this.configuration.getBrokerXml().getBytes(UTF_8)), out);
+            try (final Writer writer = new PrintWriter(
+                    new OutputStreamWriter(Files.newOutputStream(file), StandardCharsets.UTF_8), true)) {
+                writer.write(this.configuration.getBrokerXml());
             }
             createArtemis(file);
         } finally {
@@ -151,8 +155,11 @@ public class ServerRunner {
     }
 
     private void stopComponents() throws Exception {
-        for (final ActiveMQComponent component : reverse(getComponents())) {
-            component.stop();
+        final List<ActiveMQComponent> currentComponents = getComponents();
+        final ListIterator<ActiveMQComponent> iter = currentComponents.listIterator(currentComponents.size());
+
+        while (iter.hasPrevious()) {
+            iter.previous().stop();
         }
     }
 }

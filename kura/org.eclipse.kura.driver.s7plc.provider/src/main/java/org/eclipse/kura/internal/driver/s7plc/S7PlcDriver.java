@@ -200,16 +200,16 @@ public class S7PlcDriver extends AbstractBlockDriver<S7PlcDomain> implements Con
     public synchronized void write(int db, int offset, byte[] data) throws IOException {
         int result = this.state.client.WriteArea(S7.S7AreaDB, db, offset, data.length, data);
         if (result != 0) {
-            throw new Moka7Exception("DB: " + db + " off: " + offset + " len: " + data.length + " status: " + result,
-                    result);
+            throw new Moka7Exception("DB: " + db + " off: " + offset + " len: " + data.length + " status: " + result
+                    + " Error:" + S7Client.ErrorText(result), result);
         }
     }
 
     public synchronized void read(int db, int offset, byte[] data) throws IOException {
         int result = this.state.client.ReadArea(S7.S7AreaDB, db, offset, data.length, data);
         if (result != 0) {
-            throw new Moka7Exception("DB: " + db + " off: " + offset + " len: " + data.length + " status: " + result,
-                    result);
+            throw new Moka7Exception("DB: " + db + " off: " + offset + " len: " + data.length + " status: " + result
+                    + " Error:" + S7Client.ErrorText(result), result);
         }
     }
 

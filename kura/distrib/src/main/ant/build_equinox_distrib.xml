@@ -1330,6 +1330,10 @@ fi]]>
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
 					value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.linux.snapctl.provider_${org.eclipse.kura.linux.snapctl.provider.version}.jar@4" />
+			<entry key="osgi.bundles" operation="+"
+					value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.emulator_${org.eclipse.kura.emulator.version}.jar@4" />
+			<entry key="osgi.bundles" operation="+"
+					value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.emulator.net_${org.eclipse.kura.emulator.net.version}.jar@4" />
 		</propertyfile>
 	</target>
 
@@ -1384,6 +1388,10 @@ fi]]>
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux.snapctl.provider_${org.eclipse.kura.linux.snapctl.provider.version}.jar"
                         prefix="${build.output.name}/${plugins.folder}" />
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux.usb.*_${org.eclipse.kura.linux.usb.version}.jar"
+                        prefix="${build.output.name}/${plugins.folder}" />
+			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.emulator_${org.eclipse.kura.emulator.version}.jar"
+                        prefix="${build.output.name}/${plugins.folder}" />
+			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.emulator.net_${org.eclipse.kura.emulator.net.version}.jar"
                         prefix="${build.output.name}/${plugins.folder}" />
 		</zip>
 		<condition property="is.tinyb.snapshot" value="">

@@ -1,10 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2017 Red Hat Inc
+ * Copyright (c) 2017, 2019 Red Hat Inc
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * Contributors:
+ *  Red Hat
+ *  Eurotech
  *******************************************************************************/
 package org.eclipse.kura.broker.artemis.simple.mqtt;
 
@@ -33,8 +37,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
-
-import com.google.common.io.Resources;
 
 public class ServiceComponent implements ConfigurableComponent {
 
@@ -137,20 +139,21 @@ public class ServiceComponent implements ConfigurableComponent {
 
     private String createBrokerXml(final Map<String, Object> properties) throws Exception {
 
-        try (final InputStream input = Resources.getResource(ServiceComponent.class, "broker.xml").openStream()) {
+        try (final InputStream input = Objects
+                .requireNonNull(ServiceComponent.class.getResourceAsStream("broker.xml"))) {
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             dbf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
             dbf.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
             dbf.setXIncludeAware(false);
             dbf.setExpandEntityReferences(false);
-            
+
             final Document document = dbf.newDocumentBuilder().parse(input);
 
             customizeDocument(document, properties);
 
             final TransformerFactory factory = TransformerFactory.newInstance();
             factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-            
+
             final Transformer transformer = factory.newTransformer();
             final StringWriter sw = new StringWriter();
             final StreamResult result = new StreamResult(sw);

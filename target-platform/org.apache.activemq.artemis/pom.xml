@@ -18,16 +18,15 @@
     </parent>
 
     <artifactId>org.apache.activemq.artemis</artifactId>
-    <version>2.6.3</version>
+    <version>2.6.4</version>
     <packaging>bundle</packaging>
 
     <description>ActiveMQ Artemis dependencies for Eclipse Kura</description>
 
     <properties>
         <!--  keep this aligned with the value in: kura.target-platform.build.properties -->
-        <org.apache.activemq.artemis.upstream.version>2.6.3</org.apache.activemq.artemis.upstream.version>
+        <org.apache.activemq.artemis.upstream.version>2.6.4</org.apache.activemq.artemis.upstream.version>
     </properties>
-
     <dependencies>
         <dependency>
             <groupId>org.apache.activemq</groupId>
@@ -89,13 +88,11 @@
                         <Embed-Dependency>*</Embed-Dependency>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Import-Package>
-                            com.google.common.*;version="19.0.0",
-
                             org.apache.activemq.artemis.jdbc.store.*;version="[${org.apache.activemq.artemis.upstream.version},3)";resolution:=optional,
                             org.apache.xpath.*;resolution:=optional,
                             org.jboss.logmanager;resolution:=optional,
+                            org.jboss.logmanager.*;resolution:=optional,
                             org.jgroups.*;resolution:=optional,
-
                             *
                         </Import-Package>
                         <_exportcontents>org.apache.*</_exportcontents>

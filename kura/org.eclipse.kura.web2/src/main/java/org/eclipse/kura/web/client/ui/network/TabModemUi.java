@@ -652,7 +652,7 @@ public class TabModemUi extends Composite implements NetworkTab {
             setDirty(true);
             if (TabModemUi.this.maxfail.getText().trim() != null
                     && (!TabModemUi.this.maxfail.getText().trim().matches(REGEX_NUM)
-                            || Integer.parseInt(TabModemUi.this.maxfail.getText()) <= 0)
+                            || Integer.parseInt(TabModemUi.this.maxfail.getText()) < 0)
                     || TabModemUi.this.maxfail.getText().trim().length() <= 0) {
                 TabModemUi.this.helpMaxfail.setText(MSGS.netModemInvalidMaxFail());
                 TabModemUi.this.groupMaxfail.setValidationState(ValidationState.ERROR);

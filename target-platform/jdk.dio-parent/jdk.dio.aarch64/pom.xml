@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.eclipse.kura</groupId>
         <artifactId>jdk.dio-parent</artifactId>
-        <version>1.0.500-SNAPSHOT</version>
+        <version>1.0.500</version>
         <relativePath>..</relativePath>
     </parent>
 	

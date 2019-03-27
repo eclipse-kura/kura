@@ -17,10 +17,9 @@
     <parent>
         <groupId>org.eclipse.kura</groupId>
         <artifactId>test</artifactId>
-        <version>3.0.0-SNAPSHOT</version>
+        <version>4.1.0</version>
     </parent>
     <artifactId>org.eclipse.kura.protocol.can.test</artifactId>
-    <version>3.1.0-SNAPSHOT</version>
     <packaging>eclipse-test-plugin</packaging>
     <properties>
         <kura.basedir>${project.basedir}/../..</kura.basedir>

@@ -248,7 +248,8 @@ public class XmlJavaComponentConfigurationsMapper implements XmlJavaDataMapper {
                     else
                         xml.writeEmptyElement("esf", "property", "");
                     xml.writeAttribute("array", array.toString());
-                    xml.writeAttribute("encrypted", encrypted.toString());
+                    if (encrypted)
+                        xml.writeAttribute("encrypted", encrypted.toString());
                     xml.writeAttribute("name", name);
                     xml.writeAttribute("type", getStringValue(cpt));
                     if (hasValue) {

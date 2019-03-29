@@ -66,7 +66,7 @@ public class DeploymentPackageDownloadOptions extends DeploymentPackageInstallOp
         if (tempDeployUri == null) {
             throw new KuraInvalidMessageException("Missing deployment package URL!");
         }
-        String[] deployUriParts = tempDeployUri.split("?");
+        String[] deployUriParts = tempDeployUri.split("\\?");
         setDeployUri(deployUriParts[0]);
 
         super.setDpName((String) request.getMetric(METRIC_DP_NAME));

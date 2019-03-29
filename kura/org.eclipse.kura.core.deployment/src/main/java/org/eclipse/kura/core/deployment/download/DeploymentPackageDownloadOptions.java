@@ -12,6 +12,8 @@
 
 package org.eclipse.kura.core.deployment.download;
 
+import java.io.IOException;
+
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraInvalidMessageException;
@@ -60,10 +62,12 @@ public class DeploymentPackageDownloadOptions extends DeploymentPackageInstallOp
 
         setDownloadDirectory(downloadDirectory);
 
-        setDeployUri((String) request.getMetric(METRIC_DP_DOWNLOAD_URI));
-        if (getDeployUri() == null) {
+        String tempDeployUri = (String) request.getMetric(METRIC_DP_DOWNLOAD_URI);
+        if (tempDeployUri == null) {
             throw new KuraInvalidMessageException("Missing deployment package URL!");
         }
+        String[] deployUriParts = tempDeployUri.split("?");
+        setDeployUri(deployUriParts[0]);
 
         super.setDpName((String) request.getMetric(METRIC_DP_NAME));
         if (super.getDpName() == null) {
@@ -93,70 +97,74 @@ public class DeploymentPackageDownloadOptions extends DeploymentPackageInstallOp
             throw new KuraInvalidMessageException("Missing SystemUpdate!");
         }
 
+        manageOptionalProperties(request, hookManager);
+    }
+
+    private void manageOptionalProperties(KuraPayload request, DeploymentHookManager hookManager) throws KuraException {
+        Object metric = request.getMetric(METRIC_DP_DOWNLOAD_BLOCK_SIZE);
+        if (metric != null) {
+            this.blockSize = (Integer) metric;
+        }
+        metric = request.getMetric(METRIC_DP_DOWNLOAD_BLOCK_DELAY);
+        if (metric != null) {
+            this.blockDelay = (Integer) metric;
+        }
+        metric = request.getMetric(METRIC_DP_DOWNLOAD_TIMEOUT);
+        if (metric != null) {
+            this.timeout = (Integer) metric;
+        }
+        metric = request.getMetric(METRIC_DP_DOWNLOAD_RESUME);
+        if (metric != null) {
+            super.setResume((Boolean) metric);
+        }
+        metric = request.getMetric(METRIC_DP_DOWNLOAD_USER);
+        if (metric != null) {
+            this.username = (String) metric;
+        }
+        metric = request.getMetric(METRIC_DP_DOWNLOAD_PASSWORD);
+        if (metric != null) {
+            this.password = (String) metric;
+        }
+        metric = request.getMetric(METRIC_DP_DOWNLOAD_HASH);
+        if (metric != null) {
+            this.hash = (String) metric;
+        }
+        metric = request.getMetric(METRIC_DP_INSTALL);
+        if (metric != null) {
+            super.setInstall((Boolean) metric);
+        }
+        metric = request.getMetric(METRIC_DP_REBOOT);
+        if (metric != null) {
+            super.setReboot((Boolean) metric);
+        }
+        metric = request.getMetric(METRIC_DP_REBOOT_DELAY);
+        if (metric != null) {
+            super.setRebootDelay((Integer) metric);
+        }
+        metric = request.getMetric(METRIC_DP_DOWNLOAD_FORCE_DOWNLOAD);
+        if (metric != null) {
+            this.forceDownload = (Boolean) metric;
+        }
+
+        metric = request.getMetric(METRIC_DP_DOWNLOAD_NOTIFY_BLOCK_SIZE);
+        if (metric != null) {
+            this.notifyBlockSize = (Integer) metric;
+        }
+
+        metric = request.getMetric(KuraRequestPayload.REQUESTER_CLIENT_ID);
+        if (metric != null) {
+            super.setRequestClientId((String) metric);
+        }
+
+        metric = request.getMetric(METRIC_INSTALL_VERIFIER_URI);
+        if (metric != null) {
+            super.setVerifierURI((String) metric);
+        }
+
         try {
-            Object metric = request.getMetric(METRIC_DP_DOWNLOAD_BLOCK_SIZE);
-            if (metric != null) {
-                this.blockSize = (Integer) metric;
-            }
-            metric = request.getMetric(METRIC_DP_DOWNLOAD_BLOCK_DELAY);
-            if (metric != null) {
-                this.blockDelay = (Integer) metric;
-            }
-            metric = request.getMetric(METRIC_DP_DOWNLOAD_TIMEOUT);
-            if (metric != null) {
-                this.timeout = (Integer) metric;
-            }
-            metric = request.getMetric(METRIC_DP_DOWNLOAD_RESUME);
-            if (metric != null) {
-                super.setResume((Boolean) metric);
-            }
-            metric = request.getMetric(METRIC_DP_DOWNLOAD_USER);
-            if (metric != null) {
-                this.username = (String) metric;
-            }
-            metric = request.getMetric(METRIC_DP_DOWNLOAD_PASSWORD);
-            if (metric != null) {
-                this.password = (String) metric;
-            }
-            metric = request.getMetric(METRIC_DP_DOWNLOAD_HASH);
-            if (metric != null) {
-                this.hash = (String) metric;
-            }
-            metric = request.getMetric(METRIC_DP_INSTALL);
-            if (metric != null) {
-                super.setInstall((Boolean) metric);
-            }
-            metric = request.getMetric(METRIC_DP_REBOOT);
-            if (metric != null) {
-                super.setReboot((Boolean) metric);
-            }
-            metric = request.getMetric(METRIC_DP_REBOOT_DELAY);
-            if (metric != null) {
-                super.setRebootDelay((Integer) metric);
-            }
-            metric = request.getMetric(METRIC_DP_DOWNLOAD_FORCE_DOWNLOAD);
-            if (metric != null) {
-                this.forceDownload = (Boolean) metric;
-            }
-
-            metric = request.getMetric(METRIC_DP_DOWNLOAD_NOTIFY_BLOCK_SIZE);
-            if (metric != null) {
-                this.notifyBlockSize = (Integer) metric;
-            }
-
-            metric = request.getMetric(KuraRequestPayload.REQUESTER_CLIENT_ID);
-            if (metric != null) {
-                super.setRequestClientId((String) metric);
-            }
-
-            metric = request.getMetric(METRIC_INSTALL_VERIFIER_URI);
-            if (metric != null) {
-                super.setVerifierURI((String) metric);
-            }
-
             parseHookRelatedOptions(request, hookManager);
 
-        } catch (Exception ex) {
+        } catch (IOException ex) {
             throw new KuraException(KuraErrorCode.INTERNAL_ERROR, ex);
         }
     }

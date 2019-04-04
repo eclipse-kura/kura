@@ -58,7 +58,6 @@ systemctl start iptables
 #set up networking configuration
 mac_addr=$(head /sys/class/net/enp2s0/address | tr '[:lower:]' '[:upper:]')
 sed "s/^ssid=kura_gateway.*/ssid=kura_gateway_${mac_addr}/" < ${INSTALL_DIR}/kura/install/hostapd.conf > /etc/hostapd-wlp4s0.conf
-sed -i "s/^interface=wlan0/interface=wlp4s0/" /etc/hostapd-wlp4s0.conf
 cp /etc/hostapd-wlp4s0.conf ${INSTALL_DIR}/kura/.data/hostapd-wlp4s0.conf
 
 cp ${INSTALL_DIR}/kura/install/dhcpd-enp2s0.conf /etc/dhcpd-enp2s0.conf

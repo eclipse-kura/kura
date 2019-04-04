@@ -15,3 +15,8 @@ iface enp2s0 inet static
 
 auto enp3s0
 iface enp3s0 inet dhcp
+
+auto wlp4s0
+iface wlp4s0 inet static
+    address 172.16.1.1
+    netmask 255.255.255.0

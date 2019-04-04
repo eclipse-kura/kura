@@ -9,7 +9,7 @@ The main procedure is presented in the following.
 
 ### Install Ubuntu on Intel Up² board
 
-- To install the OS, you need a Intel Up² board, an USB stick with at least 8Gb of space, a keyboard, a mouse, a screen and an internet connection.
+- To install the OS, you need a Intel Up² board, an USB stick with at least 8Gb of space, a keyboard, a mouse, a screen and an Internet connection.
 
 - Download Ubuntu 18.04.2 ISO from the Ubuntu download page (works with desktop and server edition)
 
@@ -33,20 +33,9 @@ sudo add-apt-repository ppa:ubilinux/up
 sudo apt update
 ```
 
-- Remove all the generic installed kernel
+- Upgrade packages
 ```
-sudo apt-get autoremove --purge 'linux-.*generic'
-```
-
-- Install the new kernel:
-```
-sudo apt-get install linux-image-generic-hwe-18.04-upboard
-```
-
-- Install the updates
-```
-sudo apt dist-upgrade -y
-sudo reboot
+sudo apt upgrade
 ```
 
 - Install the firmware driver for up core wifi chip
@@ -54,7 +43,19 @@ sudo reboot
 sudo apt install firmware-ampak
 ```
 
-To install Intel graphic card drivers and to enable the HAT functionalities, please refer to [the complete guide](https://wiki.up-community.org/Ubuntu).
+- Install drivers to enable the HAT functionalities (gpio, spi, i2c, ecc)
+```
+sudo apt install upboard-extras
+```
+
+- Add the user that need to access the HAT functionality to the corresponding groups
+```
+sudo usermod -a -G gpio ${USER}
+sudo usermod -a -G leds ${USER}
+sudo usermod -a -G spi ${USER}
+sudo usermod -a -G i2c ${USER}
+sudo usermod -a -G dialout ${USER}
+```
 
 ## Install Kura
 
@@ -64,12 +65,11 @@ sudo systemctl disable networking
 ```
 The following packages must be installed before installing Kura:
 ```
-sudo apt-get install gdebi-core
-sudo apt-get install openjdk-8-jre-headless
+sudo apt install openssh-server hostapd isc-dhcp-server dos2unix bind9 ethtool bluez-hcidump openjdk-8-jdk  
 ```
 Install Kura:
 ```
-sudo gdebi kura_4.1.0_intel-up2-ubuntu_installer.deb
+sudo dpkg -i kura_4.1.0_intel-up2-ubuntu_installer.deb
 ```
 After the installation is complete, reboot the machine by executing:
 ```

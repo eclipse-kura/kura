@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -68,6 +68,7 @@ import org.eclipse.kura.net.modem.ModemInterfaceAddress;
 import org.eclipse.kura.net.modem.ModemRemovedEvent;
 import org.eclipse.kura.net.modem.SerialModemDevice;
 import org.eclipse.kura.net.wifi.WifiAccessPoint;
+import org.eclipse.kura.net.wifi.WifiInterface.Capability;
 import org.eclipse.kura.net.wifi.WifiInterfaceAddress;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
@@ -563,7 +564,14 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
             wifiInterface.setUsbDevice(getUsbDevice(interfaceName));
             wifiInterface.setState(getState(interfaceName, isUp));
             wifiInterface.setNetInterfaceAddresses(getWifiInterfaceAddresses(interfaceName, isUp));
-            wifiInterface.setCapabilities(LinuxNetworkUtil.getWifiCapabilities(interfaceName));
+
+            try {
+                wifiInterface.setCapabilities(LinuxNetworkUtil.getWifiCapabilities(interfaceName));
+            } catch (final Exception e) {
+                logger.warn("failed to get capabilities for {}", interfaceName);
+                logger.debug("excepton", e);
+                wifiInterface.setCapabilities(EnumSet.noneOf(Capability.class));
+            }
 
             return wifiInterface;
         } else if (type == NetInterfaceType.MODEM) {

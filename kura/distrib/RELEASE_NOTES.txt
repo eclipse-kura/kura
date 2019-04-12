@@ -20,7 +20,7 @@ New and Noteworthy:
     * Apache Artemis 2.6.4
     * Eclipse Paho 1.2.1
 
-  * Various bug fixes and cleanups
+  * Bug fixes and cleanups
     * Fixed unnecessary escaping in Drivers and Assets UI
     * Fixed issue where asset failure messages were not displayed
     * Fixed a bug where the user could not set cellular attempts option to 0

@@ -61,6 +61,7 @@ Bug Fixes :
     * #2423: [Kura QA 4.1.0] Emulator in Oomph installer
     * #2421: Artemis Server manager NullPointer exception
     * #2418: Kura does not support systems without iwlist
+    * #2417: [Kura 4.1.0 QA] Asset configuration radio buttons
     * #2412: Paho issue with WS broker
     * #2407: Can't set cellular connection attempts to 0
     * #2399: Update Paho to latest version available

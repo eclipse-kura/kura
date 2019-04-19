@@ -1,0 +1,66 @@
+#!/bin/bash
+echo "This script performs rollback to factory default configuration."
+echo "If you run this script, all configuration snapshots, except snapshot_0, will be removed."
+read -r -p "Are you sure? [y/N] " response
+case $response in
+    [yY][eE][sS]|[yY]) 
+        script_dir=$(dirname $0)
+	user_config_dir=$script_dir/../user
+	snapshots_dir=$user_config_dir/snapshots
+	dflt_data_dir=$script_dir/../.data
+	
+	for snapshot_file in "$snapshots_dir"/*
+	do
+	    if [ $snapshot_file != $snapshots_dir"/snapshot_0.xml" ]; then 
+  		echo Removing the $snapshot_file configuration file ...
+		rm -f $snapshot_file
+		if [ "$?" = "0" ]; then
+            	    echo "  done"
+	        fi
+	    fi
+	done
+	
+	echo Copying the $dflt_data_dir/dhcpd-eth0.conf file to the /etc directory ...
+	cp $dflt_data_dir/dhcpd-eth0.conf /etc
+	if [ "$?" = "0" ]; then
+		echo "  done"
+	fi
+
+	echo Copying the $dflt_data_dir/dhcpd-wlan0.conf file to the /etc directory ...
+	cp $dflt_data_dir/dhcpd-wlan0.conf /etc
+	if [ "$?" = "0" ]; then
+                echo "  done"
+        fi
+
+	echo Copying the $dflt_data_dir/hostapd-wlan0.conf file to the /etc directory ...
+	cp $dflt_data_dir/hostapd-wlan0.conf /etc
+	if [ "$?" = "0" ]; then
+                echo "  done"
+        fi
+	
+	echo Copying the $dflt_data_dir/interfaces file to the /etc/network directory ...
+	cp $dflt_data_dir/interfaces /etc/network
+	if [ "$?" = "0" ]; then
+                echo "  done"
+        fi
+
+	echo Copying the $dflt_data_dir/iptables file to the /etc/sysconfig directory ...
+	cp $dflt_data_dir/iptables /etc/sysconfig
+	if [ "$?" = "0" ]; then
+                echo "  done"
+        fi
+
+	echo Copying the $dflt_data_dir/kuranet.conf file to the $user_config_dir directory ...
+	cp $dflt_data_dir/kuranet.conf $user_config_dir
+	if [ "$?" = "0" ]; then
+                echo "  done"
+        fi
+	echo
+	echo "Default configuration has been restored. Please reboot the unit for configuration to take effect."
+        ;;
+    *)
+	echo
+        echo "Configuration rollback aborted."
+        ;;
+esac
+

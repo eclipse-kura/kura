@@ -1,0 +1,30 @@
+#!/bin/bash
+### BEGIN INIT INFO
+# Provides:      firewall
+# Required-Start:   $network $remote_fs $syslog
+# Required-Stop:
+# Default-Start:   2 3 4 5
+# Default-Stop:    0 1 6
+# Short-Description:   Activate iptables.
+### END INIT INFO
+
+# iptables-restore script
+iptables_config_file=/etc/sysconfig/iptables
+ipforward_file=/proc/sys/net/ipv4/ip_forward
+enable_ipforwarding=false;
+iptables-restore < $iptables_config_file
+while IFS='' read -r line || [[ -n "$line" ]]; do
+    if [[ $line =~ "-A FORWARD" ]]; then
+	enable_ipforwarding=true
+	break
+    fi
+done < $iptables_config_file
+if [ $enable_ipforwarding = true ]; then
+    echo "1" > $ipforward_file
+else
+    echo "0" > $ipforward_file
+fi
+# source a custom firewall script
+if [ -f /etc/init.d/firewall_cust ]; then
+    source /etc/init.d/firewall_cust 2> /dev/null
+fi

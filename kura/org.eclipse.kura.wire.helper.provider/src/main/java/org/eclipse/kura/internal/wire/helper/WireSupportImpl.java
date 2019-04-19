@@ -127,7 +127,11 @@ final class WireSupportImpl implements WireSupport, MultiportWireSupport {
             });
             futures.add(future);
         }
-        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+        try {
+            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).get();
+        } catch (Exception e) {
+            logger.error("emit error", e);
+        }
 
     }
 

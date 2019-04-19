@@ -691,7 +691,7 @@
                                 <artifactItem>
                                     <groupId>org.osgi</groupId>
                                     <artifactId>osgi.cmpn</artifactId>
-                                    <version>${osgi.cmpn-mvn.version}</version>
+                                    <version>${osgi.cmpn.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.apache.aries.spifly</groupId>

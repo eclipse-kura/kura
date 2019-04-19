@@ -104,7 +104,7 @@ public class ScriptFilterTest {
             return null;
         }).when(wire).update(anyObject());
 
-        final Dictionary<Object, Object> wireProperties = new Hashtable<>();
+        final Dictionary<String, Object> wireProperties = new Hashtable<>();
         wireProperties.put("emitter.port", 0);
 
         when(wire.getProperties()).thenReturn(wireProperties);

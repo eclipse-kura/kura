@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+#
+# Copyright (c) 2018, 2019 Eurotech and/or its affiliates
+#
+#  All rights reserved. This program and the accompanying materials
+#  are made available under the terms of the Eclipse Public License v1.0
+#  which accompanies this distribution, and is available at
+#  http://www.eclipse.org/legal/epl-v10.html
+#
+# Contributors:
+#   Eurotech
+#
+-->
+<Configuration status="warn" strict="true" name="KuraConfig" monitorInterval="30">
+
+    <Properties>
+        <Property name="filename">/var/log/kura</Property>
+    </Properties>
+    <Filter type="ThresholdFilter" level="trace"/>
+ 
+    <Appenders>
+        <RollingFile name="RollingFile" fileName="${filename}.log" filePattern="${filename}-%d{MM-dd-yy-HH-mm-ss}-%i.log.gz">
+            <PatternLayout>
+                <Pattern>%d{ISO8601} [%t] %-5p %c{1.} - %m%n%throwable{full}</Pattern>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="20 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="10"/>
+        </RollingFile>
+    </Appenders>
+ 
+    <Loggers>
+        <Logger name="org.eclipse" level="info" additivity="false">
+            <AppenderRef ref="RollingFile"/>
+        </Logger>
+ 
+        <Root level="info">
+            <AppenderRef ref="RollingFile"/>
+        </Root>
+  </Loggers>
+ 
+</Configuration>
+

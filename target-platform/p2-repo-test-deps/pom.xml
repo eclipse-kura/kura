@@ -112,7 +112,7 @@
             <plugin>
                 <groupId>org.eclipse.tycho.extras</groupId>
                 <artifactId>tycho-p2-extras-plugin</artifactId>
-                <version>1.1.0</version>
+                <version>1.4.0</version>
                 <executions>
                     <execution>
                         <phase>prepare-package</phase>

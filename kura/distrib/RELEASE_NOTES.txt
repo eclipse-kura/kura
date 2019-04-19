@@ -84,6 +84,7 @@ Bug Fixes :
     * #362:  Uninstaller leaves most of the files
 
   * Merged no issue-related Pull Requests:
+    * #2429: Fixed NPE on DhcpClientLeaseBlock
     * #2416: Fixed issues for Kura on Intel UP2 Ubuntu
     * #2395: Removed wrong if section in emulator position.
     * #2394: Fixed lint issues
@@ -136,6 +137,7 @@ Know Issues :
   * Hardware watchdog: not implemented on all platforms
   * Only one WAN interface is currently supported. A warning in displayed
     in the WEB UI if the user attempts to enable more than one WAN interface
+  * #2414: Rock 960: cannot get client id
   * #2038: [Kura 3.2.0 QA] Package uninstallation log
   * #2013: Unsaved changes dialog triggers incorrectly
   * #1993: Search Domains Are Not Supported

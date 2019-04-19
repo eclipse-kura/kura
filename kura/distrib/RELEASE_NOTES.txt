@@ -1,3 +1,170 @@
+Eclipse Kura - 4.1.0
+-------------------------------------------------------------------------
+Description:
+Eclipse Kura 4.1.0 is a minor release dedicated to introduce several new features and continue the process of overall usability improvement.
+The development team spent also a lot of effort trying to refactor and improve the overall code quality.
+
+
+New and Noteworthy:
+  * APIs
+    * New APIs for KuraBirthPayload, KuraDeviceProfile, KuraDisconnectPayload
+  
+  * Features and Enhancements
+    * Enhanced the JSON Service with JSON Message marshalling/unmarshalling
+    * Added timestamp to Lifecycle Messages
+
+  * Target Platform Updates
+    * Google Guava 25.0-jre
+    * Eclipse Milo 0.2.4
+    * Apache Fileupload 1.3.3
+    * Apache Artemis 2.6.4
+    * Eclipse Paho 1.2.1
+
+  * Bug fixes and cleanups
+    * Fixed unnecessary escaping in Drivers and Assets UI
+    * Fixed issue where asset failure messages were not displayed
+    * Fixed a bug where the user could not set cellular attempts option to 0
+    * Fixed incompatibility with systems without iwlist
+    * Solved a possible OSGi framework refresh when a dp is uninstalled or reinstalled 
+    * DEPLOY-V2 cloudlet fixes for GET calls
+
+
+Deprecated APIs:
+  * Deprecated old Bluetooth APIs not based on tinyB
+
+
+Compatibility:
+  * Eclipse Kura v4.1.0 does not introduce API breakage with previous releases.
+  * The Command Service is now disabled by default. To use it, the user needs to opt-in to this feature, enabling the service
+    from configuration.
+
+
+Target Environments:
+  * Kura is released as pre-compiled binary installers for the following platforms:
+    * Raspberry Pi 2/3 based on Raspbian
+    * Intel Up Squared board running Ubuntu 16  
+    * Intel Up Squared board running Centos 7 (Experimental)
+    * Rock960 ARM_64 running Ubuntu 16 (NN version only)
+  * Kura is also available as a pre-built Docker container 
+  
+
+Security Fixes:
+  * CVE-2016-1000031
+  * CVE-2018-10237
+  * CVE-2019-10242
+  * CVE-2019-10243
+  * CVE-2019-10244
+
+
+Bug Fixes :
+  * Fixed github issues:
+    * #2423: [Kura QA 4.1.0] Emulator in Oomph installer
+    * #2421: Artemis Server manager NullPointer exception
+    * #2418: Kura does not support systems without iwlist
+    * #2417: [Kura 4.1.0 QA] Asset configuration radio buttons
+    * #2412: Paho issue with WS broker
+    * #2407: Can't set cellular connection attempts to 0
+    * #2399: Update Paho to latest version available
+    * #2389: Unnecessary escaping in Drivers and Assets data UI
+    * #2388: Update Artemis to 2.6.4
+    * #2382: Asset operation failure messages are not always shown
+    * #2372: Add Timestamp to Lifecycle Messages
+    * #2353: [ConfigurationService] Loading unencrypted snapshots discards line breaks
+    * #2352: Guava CVE-2018-10237
+    * #2334: The old Bluetooth APIs should be deprecated
+    * #2330: BLE Beacon data assembly overflow
+    * #2324: Possible OSGi framework refresh when a dp is reinstalled
+    * #2313: Typos in ExamplePublisher metric name and descriptions
+    * #2301: kura.data.dir unused
+    * #2300: Drivers and Assets description is appended
+    * #2296: The BluetoothLE example fails when the cloudPublisher is undefined
+    * #2290: [Kura 4.0.0 QA] Shutdown issue when started multiple times
+    * #2256: Deploy-V2 cloudlet GET status stops responding
+    * #2069: Marketplace install when LAN-only
+    * #362:  Uninstaller leaves most of the files
+
+  * Merged no issue-related Pull Requests:
+    * #2429: Fixed NPE on DhcpClientLeaseBlock
+    * #2416: Fixed issues for Kura on Intel UP2 Ubuntu
+    * #2395: Removed wrong if section in emulator position.
+    * #2394: Fixed lint issues
+    * #2387: CentOS/RPM uninstallation cleanup
+    * #2386: OPCUA Driver updates
+    * #2385: Solved some new lint issues.
+    * #2380: Fixed lint issues
+    * #2379: Moved KuraBirthPayload, KuraDeviceProfile and KuraDisconnectPayload to APIs
+    * #2377: Added missing byte array conversion in optimiser library
+    * #2376: Changes to expose simple message creation in corresponding JSON service
+    * #2373: Added support for null notification publisher in deploy-v2.
+    * #2370: Cleanup Kura folders
+    * #2368: Implemented fixes for possible XXE attacks to XML parsers.
+    * #2366: Changed joint shapes file to default and applied corresponding changes in wires_composer.js file.
+    * #2362: Fixed regression when saving empty wire graph
+    * #2358: Fixed few more lint issues.
+    * #2357: Fixed notification publisher topic.
+    * #2355: Fixed regression in CloudService tab ordering
+    * #2349: Added check for resolv.conf symlink
+    * #2348: Improved Web UI configuration loading
+    * #2347: Solved some blocking lint issues
+    * #2346: Changes to solve lint issues in CloudConnectionStatus.
+    * #2345: Fixed lint issue
+    * #2344: Solved some major lint issues in MqttDataTransport.java
+    * #2343: Removed stale cmpn references. 
+    * #2342: Refactored console code in web2 bundle.
+    * #2333: Another tentative fix to solve lint issue in file check
+    * #2331: Removed osgi.cmpn api bundle.
+    * #2329: Updated retrieving of system parameters on Windows
+    * #2328: Solved some more lint issues
+    * #2327: Changes to fix possible path injection attack in skinServlet.
+    * #2325: Few lint issues fixes
+    * #2309: Always use double as GainOffset return type
+    * #2305: Remove the Jetty version from Server reply.
+    * #2306: Removed unnecessary jaxb imports 
+    * #2302: Provide class to LogManager.getLogger()
+    
+    
+Know Issues :
+  * The implementation of the CryptoService performs encryption using a
+    password that is hardcoded and published.
+  * Modem: Ublox Lisa U201 may not be able to establish PPP connection when CHAP/PAP authentication is required.
+  * BLE also tested on the Raspberry Pi B with a Broadcom BCM20702 USB dongle and the TI SensorTag. The kernel version was
+    "Linux raspberrypi 3.18.11-v7+ #781 SMP PREEMPT Tue Apr 21 18:07:59 BST 2015 armv7l GNU/Linux".
+    Note that on the kernel "Linux version 4.1.7-v7+ (dc4@dc4-XPS13-9333) (gcc version 4.8.3 20140303 (prerelease)
+    (crosstool-NG linaro-1.13.1+bzr2650 - Linaro GCC 2014.03) ) #817 SMP PREEMPT Sat Sep 19 15:32:00 BST 2015" has a bug on
+    gatttool and the BLE connection will encounter a failure.
+  * WiFi on Raspberry Pi 2 has only been tested with WiPi WiFi Dongle (Realink RT5370 chipset) and official Pi USB WiFi Dongle (Broadcom BCM43143 chipset).
+    AccessPoint WiFi mode not working for Broadcom chipset.
+  * Hardware watchdog: not implemented on all platforms
+  * Only one WAN interface is currently supported. A warning in displayed
+    in the WEB UI if the user attempts to enable more than one WAN interface
+  * #2414: Rock 960: cannot get client id
+  * #2038: [Kura 3.2.0 QA] Package uninstallation log
+  * #2013: Unsaved changes dialog triggers incorrectly
+  * #1993: Search Domains Are Not Supported
+  * #1932: SystemAdminService.getUptime() returns SystemAdminService#UNKNOWN on MacOS when locale is not English
+  * #1663: Authentication Issue with Deploy V2
+  * #1572: serial modbus has errors on some hardware
+  * #1533: MqttDataTransport client-id illegal character
+  * #1529: OSGI console is not redirected to Eclipse IDE with Kura 3.0
+  * #1201: Wifi password incorrectly read from snapshot in Access Point mode
+  * #1195: [Net] Firewall IP Forwarding rules entered in the Web UI lost on reboot
+  * #1161: Incorrectly configuring a component can be irreversable.
+  * #1128: [Kura 3.0.0 M1 QA] Unable to delete manually added CamelFactory services
+  * #1016: ConfigurationServiceImpl creates duplicate instances
+  * #797:  Design of ServiceUtil is broken
+  * #771:  Web UI fails with INTERNAL_ERROR when WireHelperService is not registered
+  * #654:  Clean up static initialization around "modem" functionality
+  * #645:  Clean up internal dependencies in Kura
+  * #522:  [Net] Modem monitor should monitor interfaces, not modems
+  * #486:  Build environment broken on Windows
+  * #406:  Replace System.get* with calls to SystemService.getProperties
+  * #348:  WpaSupplicantConfigReader.getWifiClientConfig() should support cases where key_mgmt scheme is not set
+  * #329:  [DEPLOY-V2] Review/refactoring needed
+  * #297:  [Status led] What connection instance controls the status led?
+  * #253:  Check if bundle contexes correctly unget services after invoking getService
+  * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
+
+
 Eclipse Kura - 4.0.0
 -------------------------------------------------------------------------
 Description:

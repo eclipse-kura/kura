@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -111,7 +111,11 @@ public class TelitHe910ConfigGenerator implements ModemPppConfigGenerator {
     }
 
     private int getPdpContextNumber(String dialString) {
-        return Integer.parseInt(dialString.substring("atd*99***".length(), dialString.length() - 1));
+        int pdpPid = 1;
+        if (!dialString.isEmpty() && dialString.contains("atd*99***")) {
+            pdpPid = Integer.parseInt(dialString.substring("atd*99***".length(), dialString.length() - 1));
+        }
+        return pdpPid;
     }
 
     /*

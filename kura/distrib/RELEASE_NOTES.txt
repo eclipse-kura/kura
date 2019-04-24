@@ -84,6 +84,7 @@ Bug Fixes :
     * #362:  Uninstaller leaves most of the files
 
   * Merged no issue-related Pull Requests:
+    * #2432: Fix GPS enable when PPP is not configured
     * #2429: Fixed NPE on DhcpClientLeaseBlock
     * #2416: Fixed issues for Kura on Intel UP2 Ubuntu
     * #2395: Removed wrong if section in emulator position.

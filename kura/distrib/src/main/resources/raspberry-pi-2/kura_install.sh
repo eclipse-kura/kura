@@ -32,8 +32,8 @@ if [ ! -d /etc/sysconfig ]; then
 fi
 
 #set up default networking file
-cp ${INSTALL_DIR}/kura/install/network.interfaces.raspbian /etc/network/interfaces
-cp ${INSTALL_DIR}/kura/install/network.interfaces.raspbian ${INSTALL_DIR}/kura/.data/interfaces
+cp ${INSTALL_DIR}/kura/install/network.interfaces /etc/network/interfaces
+cp ${INSTALL_DIR}/kura/install/network.interfaces ${INSTALL_DIR}/kura/.data/interfaces
 
 #set up network helper scripts
 cp ${INSTALL_DIR}/kura/install/ifup-local.raspbian /etc/network/if-up.d/ifup-local

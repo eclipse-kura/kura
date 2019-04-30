@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.kura.driver.ibeacon"
       label="%featureName"
-      version="1.0.100.qualifier"
+      version="1.0.200.qualifier"
       provider-name="%providerName"
       license-feature="org.eclipse.license"
       license-feature-version="0.0.0">

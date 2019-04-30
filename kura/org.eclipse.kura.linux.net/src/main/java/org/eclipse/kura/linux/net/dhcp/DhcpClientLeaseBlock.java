@@ -46,10 +46,10 @@ public class DhcpClientLeaseBlock {
     private String iface;
     private IPAddress fixedAddress;
     private IPAddress subnetMask;
-    private List<IPAddress> routers;
+    private List<IPAddress> routers = new ArrayList<>();
     private long dhcpLeaseTime;
     private int dhcpMessageType;
-    private List<IPAddress> dnsServers;
+    private List<IPAddress> dnsServers = new ArrayList<>();
     private IPAddress dhcpServer;
     private long dhcpRenewalTime;
     private long dhcpRebindingTime;

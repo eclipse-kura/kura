@@ -52,9 +52,15 @@ function stopWatchdog {
 # Pre-remove script
 function preRemove {
     #Remove INIT scripts
-    rm /etc/init.d/kura
-    update-rc.d kura remove
-
+    if [ -f /etc/init.d/kura ] ; then
+        rm /etc/init.d/kura
+        update-rc.d kura remove
+    fi
+    if [ -f /lib/systemd/system/kura.service ] ; then
+        systemctl disable kura
+        rm /lib/systemd/system/kura.service
+    fi
+    
     rm -f  /etc/logrotate.d/kura
     rm -f  /var/log/kura*.log
     rm -rf /tmp/.kura

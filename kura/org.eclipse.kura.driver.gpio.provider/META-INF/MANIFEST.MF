@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: GPIO Driver
 Bundle-SymbolicName: org.eclipse.kura.driver.gpio.provider;singleton:=true
-Bundle-Version: 1.0.200
+Bundle-Version: 1.0.300.qualifier
 Bundle-Vendor: Eclipse Kura
 Bundle-License: Eclipse Public License v1.0
 Bundle-Category: Asset-Driver Management

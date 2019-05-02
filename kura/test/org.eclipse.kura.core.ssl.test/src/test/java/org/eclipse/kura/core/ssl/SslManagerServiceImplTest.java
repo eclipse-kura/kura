@@ -554,6 +554,12 @@ public class SslManagerServiceImplTest {
                     throws NoSuchAlgorithmException, UnsupportedEncodingException {
                 throw new UnsupportedOperationException();
             }
+
+            @Override
+            public String hash(String s, String algorithm)
+                    throws NoSuchAlgorithmException, UnsupportedEncodingException {
+                throw new UnsupportedOperationException();
+            }
         };
 
         result.setKeyStorePassword(KEY_STORE_PATH, "cryptoPassword".toCharArray());

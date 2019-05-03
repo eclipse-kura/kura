@@ -129,29 +129,19 @@ public class Console implements ConfigurableComponent {
             return;
         }
 
-        try {
-            logger.info("activate...");
+        logger.info("activate...");
 
-            setComponentContext(context);
-            setServletRoot((String) properties.get(SERVLET_ALIAS_ROOT));
-            setAppRoot((String) properties.get(APP_ROOT));
+        setComponentContext(context);
+        this.authMgr = AuthenticationManager.getInstance();
+        this.eventService = new GwtEventServiceImpl();
 
-            this.authMgr = AuthenticationManager.getInstance();
+        doUpdate(properties);
 
-            updateAuthenticationManager(properties);
-
-            this.eventService = new GwtEventServiceImpl();
-
-            initHTTPService();
-
-            Map<String, Object> props = new HashMap<>();
-            props.put("kura.version", this.systemService.getKuraVersion());
-            EventProperties eventProps = new EventProperties(props);
-            logger.info("postInstalledEvent() :: posting KuraConfigReadyEvent");
-            this.eventAdmin.postEvent(new Event(KuraConfigReadyEvent.KURA_CONFIG_EVENT_READY_TOPIC, eventProps));
-        } catch (Exception e) {
-            logger.warn("Error Registering Web Resources", e);
-        }
+        Map<String, Object> props = new HashMap<>();
+        props.put("kura.version", this.systemService.getKuraVersion());
+        EventProperties eventProps = new EventProperties(props);
+        logger.info("postInstalledEvent() :: posting KuraConfigReadyEvent");
+        this.eventAdmin.postEvent(new Event(KuraConfigReadyEvent.KURA_CONFIG_EVENT_READY_TOPIC, eventProps));
     }
 
     private void updateAuthenticationManager(Map<String, Object> properties)
@@ -184,10 +174,24 @@ public class Console implements ConfigurableComponent {
             return;
         }
 
+        unregisterServlet();
+        doUpdate(properties);
+    }
+
+    private void doUpdate(Map<String, Object> properties) {
         try {
             updateAuthenticationManager(properties);
         } catch (Exception e) {
             logger.warn("Error Updating Web properties", e);
+        }
+
+        setServletRoot((String) properties.get(SERVLET_ALIAS_ROOT));
+        setAppRoot((String) properties.get(APP_ROOT));
+
+        try {
+            initHTTPService();
+        } catch (NamespaceException | ServletException e) {
+            logger.warn("Error Registering Web Resources", e);
         }
     }
 
@@ -205,8 +209,9 @@ public class Console implements ConfigurableComponent {
 
     private void unregisterServlet() {
         this.httpService.unregister("/");
-        this.httpService.unregister(appRoot);
+        this.httpService.unregister("/admin");
         this.httpService.unregister(servletRoot);
+        this.httpService.unregister(servletRoot + "/xsrf");
         this.httpService.unregister(servletRoot + "/status");
         this.httpService.unregister(servletRoot + "/device");
         this.httpService.unregister(servletRoot + "/network");
@@ -214,11 +219,17 @@ public class Console implements ConfigurableComponent {
         this.httpService.unregister(servletRoot + "/package");
         this.httpService.unregister(servletRoot + "/snapshot");
         this.httpService.unregister(servletRoot + "/setting");
+        this.httpService.unregister(servletRoot + "/certificate");
+        this.httpService.unregister(servletRoot + "/security");
         this.httpService.unregister(servletRoot + "/file");
         this.httpService.unregister(servletRoot + "/device_snapshots");
         this.httpService.unregister(servletRoot + "/assetsUpDownload");
         this.httpService.unregister(servletRoot + "/skin");
+        this.httpService.unregister(servletRoot + "/ssl");
+        this.httpService.unregister(servletRoot + "/cloudservices");
         this.httpService.unregister(servletRoot + "/wires");
+        this.httpService.unregister(servletRoot + "/wiresSnapshot");
+        this.httpService.unregister(servletRoot + "/assetservices");
         this.httpService.unregister("/sse");
         this.eventService.stop();
         this.httpService.unregister(servletRoot + "/event");
@@ -241,7 +252,7 @@ public class Console implements ConfigurableComponent {
 
         HttpContext httpCtx = new SecureBasicHttpContext(this.httpService.createDefaultHttpContext(), this.authMgr);
         this.httpService.registerResources("/", "www", httpCtx);
-        this.httpService.registerResources(appRoot, "www/denali.html", httpCtx);
+        this.httpService.registerResources("/admin", "www/denali.html", httpCtx);
         this.httpService.registerResources(servletRoot, "www" + servletRoot, httpCtx);
 
         this.httpService.registerServlet(servletRoot + "/xsrf", new GwtSecurityTokenServiceImpl(), null, httpCtx);

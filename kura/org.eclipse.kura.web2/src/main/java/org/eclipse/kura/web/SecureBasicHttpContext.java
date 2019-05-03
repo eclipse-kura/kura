@@ -73,7 +73,7 @@ public class SecureBasicHttpContext implements HttpContext {
         response.setHeader("Cache-Control", "no-cache,no-store");
         response.setHeader("Pragma", "no-cache");
 
-        // If a trailing "/" is used when accesssing the app, redirect
+        // If a trailing "/" is used when accessing the app, redirect
         if (request.getRequestURI().equals(this.appRoot + "/")) {
             response.sendRedirect(this.appRoot);
         }

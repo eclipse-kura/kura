@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--
 
-    Copyright (c) 2011, 2018 Red Hat Inc and others
+    Copyright (c) 2011, 2019 Red Hat Inc and others
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -13,7 +13,7 @@
     <esf:configuration pid="org.eclipse.kura.net.admin.FirewallConfigurationService">
         <esf:properties>
             <esf:property array="false" encrypted="false" name="firewall.open.ports" type="String">
-                <esf:value>22,tcp,,,,,,#;80,tcp,,enp2s0,,,,#;80,tcp,,enp3s0,,,,#;80,tcp,,wlp4s0,,,,#;80,tcp,10.234.0.0/16,,,,,#;1450,tcp,,enp2s0,,,,#;1450,tcp,,enp3s0,,,,#;1450,tcp,,wlp4s0,,,,#;5002,tcp,127.0.0.1/32,,,,,#;53,udp,,enp2s0,,,,#;53,udp,,enp3s0,,,,#;53,udp,,wlp4s0,,,,#;67,udp,,enp2s0,,,,#;67,udp,,enp3s0,,,,#;67,udp,,wlp4s0,,,,#;8000,tcp,,enp2s0,,,,#;8000,tcp,,enp3s0,,,,#;8000,tcp,,wlp4s0,,,,#</esf:value>
+                <esf:value>22,tcp,,,,,,#;443,tcp,,enp2s0,,,,#;443,tcp,,enp3s0,,,,#;443,tcp,,wlp4s0,,,,#;443,tcp,10.234.0.0/16,,,,,#;1450,tcp,,enp2s0,,,,#;1450,tcp,,enp3s0,,,,#;1450,tcp,,wlp4s0,,,,#;5002,tcp,127.0.0.1/32,,,,,#;53,udp,,enp2s0,,,,#;53,udp,,enp3s0,,,,#;53,udp,,wlp4s0,,,,#;67,udp,,enp2s0,,,,#;67,udp,,enp3s0,,,,#;67,udp,,wlp4s0,,,,#;8000,tcp,,enp2s0,,,,#;8000,tcp,,enp3s0,,,,#;8000,tcp,,wlp4s0,,,,#</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="firewall.port.forwarding" type="String">
                 <esf:value></esf:value>
@@ -638,6 +638,34 @@
             </esf:property>
             <esf:property name="ssl.default.trustStore" array="false" encrypted="false" type="String">
                 <esf:value>/opt/eclipse/kura/user/security/cacerts.ks</esf:value>
+            </esf:property>
+        </esf:properties>
+    </esf:configuration>
+    <esf:configuration pid="org.eclipse.kura.http.server.manager.HttpService">
+        <esf:properties>
+            <esf:property array="false" encrypted="false" name="https.port" type="Integer">
+                <esf:value>443</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="https.enabled" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="http.enabled" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="http.port" type="Integer">
+                <esf:value>80</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="https.keystore.path" type="String">
+                <esf:value>/opt/eclipse/kura/user/security/httpskeystore.ks</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="true" name="https.keystore.password" type="Password">
+                <esf:value>Y2hhbmdlaXQ=</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="kura.service.pid" type="String">
+                <esf:value>org.eclipse.kura.http.server.manager.HttpService</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="service.pid" type="String">
+                <esf:value>org.eclipse.kura.http.server.manager.HttpService</esf:value>
             </esf:property>
         </esf:properties>
     </esf:configuration>

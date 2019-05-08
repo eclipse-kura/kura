@@ -251,7 +251,7 @@ Upload panel END
 Channel Table Validation START
 ***********************/
 
-.asset-configuration-ui input, .asset-data-ui input {
+.channel-configuration-table input, .channel-data-table input {
 	width: 100%;
 }
 

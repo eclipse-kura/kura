@@ -56,7 +56,7 @@
                                         </b:ButtonGroup>
                                     </b:ButtonToolBar>
                                 </b:PanelHeader>
-                                <b:PanelBody b:id="channelTable">
+                                <b:PanelBody b:id="channelTable" addStyleNames="channel-configuration-table">
                                     <gwt:CellTable bordered="true" condensed="true" striped="true" hover="true"
                                         ui:field="channelTable" />
                                 </b:PanelBody>

@@ -24,7 +24,7 @@
         <dependency>
             <groupId>org.eclipse.kura</groupId>
             <artifactId>org.eclipse.kura.api</artifactId>
-            <version>1.4.0</version>
+            <version>2.1.0</version>
         </dependency>
         <dependency>
             <groupId>org.osgi</groupId>

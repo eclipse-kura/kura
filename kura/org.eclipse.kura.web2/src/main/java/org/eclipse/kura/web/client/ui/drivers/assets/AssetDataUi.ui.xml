@@ -47,7 +47,7 @@
                                         <b:Panel ui:field="channelPanel">
                                             <b:PanelHeader>
                                             </b:PanelHeader>
-                                            <b:PanelBody b:id="assetDataTable">
+                                            <b:PanelBody b:id="assetDataTable" addStyleNames="channel-data-table">
                                                 <gwt:CellTable bordered="true" condensed="true" striped="true"
                                                     hover="true" height="100%" width="100%" ui:field="assetDataTable" />
                                             </b:PanelBody>

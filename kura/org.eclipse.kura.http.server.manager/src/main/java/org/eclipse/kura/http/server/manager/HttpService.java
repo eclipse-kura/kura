@@ -8,14 +8,39 @@
  *
  * Contributors:
  *     Eurotech
- *     
+ *
  *******************************************************************************/
 package org.eclipse.kura.http.server.manager;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.math.BigInteger;
+import java.security.KeyStore;
+import java.security.KeyStore.Entry;
+import java.security.KeyStore.PasswordProtection;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.UnrecoverableEntryException;
+import java.security.cert.CertificateException;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.configuration.ConfigurableComponent;
+import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.crypto.CryptoService;
+import org.eclipse.kura.system.SystemService;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -23,15 +48,23 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class HttpService {
+public class HttpService implements ConfigurableComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(HttpService.class);
 
-    private CryptoService cryptoService;
-    
+    private ComponentContext componentContext;
     private BundleContext bundleContext;
     private HttpServiceOptions options;
-    
+
+    private CryptoService cryptoService;
+    private SystemService systemService;
+    private ConfigurationService configurationService;
+
+    private Map<String, Object> properties;
+
+    private ScheduledExecutorService selfUpdaterExecutor;
+    private ScheduledFuture<?> selfUpdaterFuture;
+
     public void setCryptoService(CryptoService cryptoService) {
         this.cryptoService = cryptoService;
     }
@@ -39,27 +72,60 @@ public class HttpService {
     public void unsetCryptoService(CryptoService cryptoService) {
         this.cryptoService = null;
     }
-    
+
+    public void setSystemService(SystemService systemService) {
+        this.systemService = systemService;
+    }
+
+    public void unsetSystemService(SystemService systemService) {
+        this.systemService = null;
+    }
+
+    public void setConfigurationService(ConfigurationService configurationService) {
+        this.configurationService = configurationService;
+    }
+
+    public void unsetConfigurationService(ConfigurationService configurationService) {
+        this.configurationService = null;
+    }
 
     public void activate(ComponentContext context, Map<String, Object> properties) {
         logger.info("Activating {}", this.getClass().getSimpleName());
+        this.componentContext = context;
+        this.bundleContext = context.getBundleContext();
+
+        this.properties = properties;
 
         this.options = new HttpServiceOptions(properties);
+        this.selfUpdaterExecutor = Executors.newSingleThreadScheduledExecutor();
 
-        setSystemProperties();
+        if (isFirstBoot()) {
+            accessKeystore();
+        } else {
+            setSystemProperties();
 
-        this.bundleContext = context.getBundleContext();
-        activateHttpService();
+            activateHttpService();
+        }
 
+        logger.info("Activating... Done.");
     }
 
     public void updated(Map<String, Object> properties) {
         logger.info("Updating {}", this.getClass().getSimpleName());
 
-        this.options = new HttpServiceOptions(properties);
+        this.properties = properties;
+        HttpServiceOptions updatedOptions = new HttpServiceOptions(properties);
 
-        deactivateHttpService();
-        activateHttpService();
+        if (!this.options.equals(updatedOptions)) {
+            this.options = updatedOptions;
+
+            deactivateHttpService();
+
+            accessKeystore();
+
+            setSystemProperties();
+            activateHttpService();
+        }
 
         logger.info("Updating... Done.");
     }
@@ -68,6 +134,13 @@ public class HttpService {
         logger.info("Deactivating {}", this.getClass().getSimpleName());
 
         deactivateHttpService();
+
+        if (this.selfUpdaterFuture != null && !this.selfUpdaterFuture.isDone()) {
+
+            logger.info("Self updater task running. Stopping it");
+
+            this.selfUpdaterFuture.cancel(true);
+        }
     }
 
     private void setSystemProperties() {
@@ -76,7 +149,7 @@ public class HttpService {
                 Boolean.toString(this.options.isHttpsEnabled()));
         System.setProperty("org.eclipse.equinox.http.jetty.https.host", "0.0.0.0");
         System.setProperty("org.eclipse.equinox.http.jetty.ssl.keystore", this.options.getHttpsKeystorePath());
-        
+
         char[] decryptedPassword;
         try {
             decryptedPassword = this.cryptoService.decryptAes(this.options.getHttpsKeystorePassword());
@@ -84,9 +157,9 @@ public class HttpService {
             logger.warn("Unable to decrypt property password");
             decryptedPassword = this.options.getHttpsKeystorePassword();
         }
-        System.setProperty("org.eclipse.equinox.http.jetty.ssl.password",
-                new String(decryptedPassword));
-        
+
+        System.setProperty("org.eclipse.equinox.http.jetty.ssl.password", new String(decryptedPassword));
+
         System.setProperty("org.osgi.service.http.port", Integer.toString(this.options.getHttpPort()));
         System.setProperty("org.eclipse.equinox.http.jetty.http.enabled",
                 Boolean.toString(this.options.isHttpEnabled()));
@@ -98,7 +171,7 @@ public class HttpService {
                 try {
                     bundle.start();
                 } catch (BundleException e) {
-                    logger.error("Could not start Jetty Web server", e);
+                    logger.error("Could not start Jetty Web server");
                 }
             }
         }
@@ -110,9 +183,195 @@ public class HttpService {
                 try {
                     bundle.stop();
                 } catch (BundleException e) {
-                    logger.error("Could not start Jetty Web server", e);
+                    logger.error("Could not stop Jetty Web server");
                 }
             }
+        }
+    }
+
+    private void accessKeystore() {
+        String keystorePath = this.options.getHttpsKeystorePath();
+        File fKeyStore = new File(keystorePath);
+        if (!fKeyStore.exists()) {
+            return;
+        }
+
+        if (isFirstBoot()) {
+            changeDefaultKeystorePassword();
+        } else {
+            char[] oldPassword = getOldKeystorePassword(keystorePath);
+
+            char[] newPassword = null;
+            try {
+                newPassword = this.cryptoService.decryptAes(this.options.getHttpsKeystorePassword());
+            } catch (KuraException e) {
+                logger.warn("Failed to decrypt keystore password");
+            }
+            updateKeystorePassword(oldPassword, newPassword);
+        }
+    }
+
+    private char[] getOldKeystorePassword(String keystorePath) {
+        char[] password = this.cryptoService.getKeyStorePassword(keystorePath);
+        if (password != null && isKeyStoreAccessible(this.options.getHttpsKeystorePath(), password)) {
+            return password;
+        }
+
+        try {
+            password = this.cryptoService.decryptAes(this.options.getHttpsKeystorePassword());
+        } catch (KuraException e) {
+            password = new char[0];
+        }
+
+        return password;
+    }
+
+    private void updateKeystorePassword(char[] oldPassword, char[] newPassword) {
+        try {
+            changeKeyStorePassword(this.options.getHttpsKeystorePath(), oldPassword, newPassword);
+
+            this.cryptoService.setKeyStorePassword(this.options.getHttpsKeystorePath(), newPassword);
+        } catch (NoSuchAlgorithmException | CertificateException | KeyStoreException | UnrecoverableEntryException
+                | IOException e) {
+            logger.warn("Failed to change keystore password", e);
+        } catch (KuraException e) {
+            logger.warn("Failed to persist keystore password", e);
+        }
+    }
+
+    private void changeDefaultKeystorePassword() {
+
+        char[] oldPassword = this.systemService.getJavaKeyStorePassword(); // TODO: Change this with a new specific
+                                                                           // property
+
+        if (isDefaultFromCrypto()) {
+            oldPassword = this.cryptoService.getKeyStorePassword(this.options.getHttpsKeystorePath());
+        }
+
+        char[] newPassword = new BigInteger(160, new SecureRandom()).toString(32).toCharArray();
+
+        try {
+            changeKeyStorePassword(this.options.getHttpsKeystorePath(), oldPassword, newPassword);
+
+            this.cryptoService.setKeyStorePassword(this.options.getHttpsKeystorePath(), newPassword);
+
+            updatePasswordInConfigService(newPassword);
+        } catch (Exception e) {
+            logger.warn("Keystore password change failed", e);
+        }
+    }
+
+    private void updatePasswordInConfigService(char[] newPassword) {
+        // update our configuration with the newly generated password
+        final String pid = (String) this.properties.get("service.pid");
+
+        Map<String, Object> props = new HashMap<>(this.properties);
+        props.put(HttpServiceOptions.PROP_HTTPS_KEYSTORE_PASSWORD, new Password(newPassword));
+
+        this.selfUpdaterFuture = this.selfUpdaterExecutor.scheduleAtFixedRate(() -> {
+            try {
+                if (HttpService.this.componentContext.getServiceReference() != null
+                        && HttpService.this.configurationService.getComponentConfiguration(pid) != null) {
+                    HttpService.this.configurationService.updateConfiguration(pid, props);
+                    throw new RuntimeException("Updated. The task will be terminated.");
+                } else {
+                    logger.info("No service or configuration available yet.");
+                }
+            } catch (KuraException e) {
+                logger.warn("Cannot get/update configuration for pid: {}", pid, e);
+            }
+        }, 1000, 1000, TimeUnit.MILLISECONDS);
+    }
+
+    private boolean isFirstBoot() {
+        boolean result = false;
+        if (isSnapshotPasswordDefault() && (isDefaultFromUser() || isDefaultFromCrypto())) {
+            result = true;
+        }
+        return result;
+    }
+
+    private boolean isSnapshotPasswordDefault() {
+        boolean result = false;
+
+        char[] snapshotPassword = getUnencryptedSslKeystorePassword();
+        if (Arrays.equals(HttpServiceOptions.DEFAULT_HTTPS_KEYSTORE_PASSWORD.toCharArray(), snapshotPassword)) {
+            result = true;
+        }
+
+        return result;
+    }
+
+    private char[] getUnencryptedSslKeystorePassword() {
+        char[] snapshotPassword = this.options.getHttpsKeystorePassword();
+        try {
+            snapshotPassword = this.cryptoService.decryptAes(snapshotPassword);
+        } catch (KuraException e) {
+            // Nothing to do
+        }
+        return snapshotPassword;
+    }
+
+    private boolean isDefaultFromCrypto() {
+        char[] cryptoPassword = this.cryptoService.getKeyStorePassword(this.options.getHttpsKeystorePath());
+
+        if (cryptoPassword == null) {
+            return false;
+        }
+        return isKeyStoreAccessible(this.options.getHttpsKeystorePath(), cryptoPassword);
+    }
+
+    private boolean isDefaultFromUser() {
+        return isKeyStoreAccessible(this.options.getHttpsKeystorePath(), this.systemService.getJavaKeyStorePassword());
+    }
+
+    private void changeKeyStorePassword(String location, char[] oldPassword, char[] newPassword) throws IOException,
+            NoSuchAlgorithmException, CertificateException, KeyStoreException, UnrecoverableEntryException {
+
+        KeyStore keystore = loadKeystore(location, oldPassword);
+
+        updateKeyEntiesPasswords(keystore, oldPassword, newPassword);
+        saveKeystore(location, newPassword, keystore);
+    }
+
+    private static void updateKeyEntiesPasswords(KeyStore keystore, char[] oldPassword, char[] newPassword)
+            throws KeyStoreException, NoSuchAlgorithmException, UnrecoverableEntryException {
+        Enumeration<String> aliases = keystore.aliases();
+        while (aliases.hasMoreElements()) {
+            String alias = aliases.nextElement();
+            if (keystore.isKeyEntry(alias)) { // TODO: not sure why this check
+                PasswordProtection oldPP = new PasswordProtection(oldPassword);
+                Entry entry = keystore.getEntry(alias, oldPP);
+                PasswordProtection newPP = new PasswordProtection(newPassword);
+                keystore.setEntry(alias, entry, newPP);
+            }
+        }
+    }
+
+    private void saveKeystore(String keyStoreFileName, char[] keyStorePassword, KeyStore ks)
+            throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException {
+        try (FileOutputStream tsOutStream = new FileOutputStream(keyStoreFileName);) {
+            ks.store(tsOutStream, keyStorePassword);
+        }
+    }
+
+    private KeyStore loadKeystore(String keyStore, char[] keyStorePassword)
+            throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException {
+        KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+
+        try (InputStream tsReadStream = new FileInputStream(keyStore);) {
+            ks.load(tsReadStream, keyStorePassword);
+        }
+
+        return ks;
+    }
+
+    private boolean isKeyStoreAccessible(String location, char[] password) {
+        try {
+            loadKeystore(location, password);
+            return true;
+        } catch (Exception e) {
+            return false;
         }
     }
 

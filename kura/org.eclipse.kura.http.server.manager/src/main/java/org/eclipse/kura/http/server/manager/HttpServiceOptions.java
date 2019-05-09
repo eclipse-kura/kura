@@ -8,20 +8,32 @@
  *
  * Contributors:
  *     Eurotech
- *     
+ *
  *******************************************************************************/
 package org.eclipse.kura.http.server.manager;
 
+import java.util.Arrays;
 import java.util.Map;
 
 public class HttpServiceOptions {
 
-    public static final Property<Boolean> HTTP_ENABLED = new Property<>("http.enabled", true);
-    public static final Property<Integer> HTTP_PORT = new Property<>("http.port", 80);
-    public static final Property<Boolean> HTTPS_ENABLED = new Property<>("https.enabled", false);
-    private static final Property<Integer> HTTPS_PORT = new Property<>("https.port", 443);
-    private static final Property<String> HTTPS_KEYSTORE_PATH = new Property<>("https.keystore.path", "/opt/eclipse/kura/user/security/httpskeystore.ks");
-    private static final Property<String> HTTPS_KEYSTORE_PASSWORD = new Property<>("https.keystore.password", "changeit");
+    static final String PROP_HTTP_ENABLED = "http.enabled";
+    static final String PROP_HTTP_PORT = "http.port";
+    static final String PROP_HTTPS_ENABLED = "https.enabled";
+    static final String PROP_HTTPS_PORT = "https.port";
+    static final String PROP_HTTPS_KEYSTORE_PATH = "https.keystore.path";
+    static final String PROP_HTTPS_KEYSTORE_PASSWORD = "https.keystore.password";
+
+    static final String DEFAULT_HTTPS_KEYSTORE_PASSWORD = "changeit";
+
+    private static final Property<Boolean> HTTP_ENABLED = new Property<>(PROP_HTTP_ENABLED, true);
+    private static final Property<Integer> HTTP_PORT = new Property<>(PROP_HTTP_PORT, 80);
+    private static final Property<Boolean> HTTPS_ENABLED = new Property<>(PROP_HTTPS_ENABLED, false);
+    private static final Property<Integer> HTTPS_PORT = new Property<>(PROP_HTTPS_PORT, 443);
+    private static final Property<String> HTTPS_KEYSTORE_PATH = new Property<>(PROP_HTTPS_KEYSTORE_PATH,
+            "/opt/eclipse/kura/user/security/httpskeystore.ks");
+    private static final Property<String> HTTPS_KEYSTORE_PASSWORD = new Property<>(PROP_HTTPS_KEYSTORE_PASSWORD,
+            DEFAULT_HTTPS_KEYSTORE_PASSWORD);
 
     private final boolean httpEnabled;
     private final int httpPort;
@@ -62,4 +74,57 @@ public class HttpServiceOptions {
     public char[] getHttpsKeystorePassword() {
         return this.httpsKeystorePasswordArray;
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + (this.httpEnabled ? 1231 : 1237);
+        result = prime * result + this.httpPort;
+        result = prime * result + (this.httpsEnabled ? 1231 : 1237);
+        result = prime * result + Arrays.hashCode(this.httpsKeystorePasswordArray);
+        result = prime * result + (this.httpsKeystorePath == null ? 0 : this.httpsKeystorePath.hashCode());
+        result = prime * result + this.httpsPort;
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        HttpServiceOptions other = (HttpServiceOptions) obj;
+        if (this.httpEnabled != other.httpEnabled) {
+            return false;
+        }
+        if (this.httpPort != other.httpPort) {
+            return false;
+        }
+        if (this.httpsEnabled != other.httpsEnabled) {
+            return false;
+        }
+        if (!Arrays.equals(this.httpsKeystorePasswordArray, other.httpsKeystorePasswordArray)) {
+            return false;
+        }
+        if (this.httpsKeystorePath == null) {
+            if (other.httpsKeystorePath != null) {
+                return false;
+            }
+        } else if (!this.httpsKeystorePath.equals(other.httpsKeystorePath)) {
+            return false;
+        }
+        
+        boolean result = true;
+        if (this.httpsPort != other.httpsPort) {
+            result = false;
+        }
+        return result;
+    }
+
 }

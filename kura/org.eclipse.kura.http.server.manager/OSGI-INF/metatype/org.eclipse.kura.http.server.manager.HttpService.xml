@@ -15,7 +15,7 @@
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
     <OCD id="org.eclipse.kura.http.server.manager.HttpService"
          name="HttpService" 
-         description="This service allows to manage the Http service, enabling secure and unsecure Http connectors and allowing to configure them.">
+         description="This service allows the user to enable and configure the http and https connectors in Kura web server. Every change to this service will determine a restart of the web server.">
 
         <AD id="http.enabled"
             name="HTTP Enabled"
@@ -32,7 +32,7 @@
             cardinality="0" 
             required="true"
             default="80" 
-            description="Allows to specify the port used by the http service for plain, unencrypted communication.">
+            description="Allows to specify the port used by the http service for plain, encrypted communication.">
         </AD>
         
         <AD id="https.enabled"

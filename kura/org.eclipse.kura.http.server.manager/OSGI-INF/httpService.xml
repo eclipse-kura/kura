@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" configuration-policy="require" deactivate="deactivate" immediate="true" modified="updated" name="org.eclipse.kura.http.server.manager.HttpService">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" configuration-policy="require" deactivate="deactivate" enabled="true" immediate="true" modified="updated" name="org.eclipse.kura.http.server.manager.HttpService">
    <implementation class="org.eclipse.kura.http.server.manager.HttpService"/>
    <property name="service.pid" type="String" value="org.eclipse.kura.http.server.manager.HttpService"/>
    <service>
@@ -10,4 +10,14 @@
    			  bind="setCryptoService"
    			  unbind="unsetCryptoService"
    			  interface="org.eclipse.kura.crypto.CryptoService"/>
+   <reference name="SystemService"
+              bind="setSystemService"
+              unbind="unsetSystemService"
+              cardinality="1..1"
+              policy="static"
+              interface="org.eclipse.kura.system.SystemService"/>
+   <reference name="ConfigurationService" 
+              bind="setConfigurationService"
+              unbind="unsetConfigurationService"
+              interface="org.eclipse.kura.configuration.ConfigurationService"/> 
 </scr:component>

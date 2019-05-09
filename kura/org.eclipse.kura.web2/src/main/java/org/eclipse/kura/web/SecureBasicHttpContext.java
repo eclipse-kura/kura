@@ -112,7 +112,7 @@ public class SecureBasicHttpContext implements HttpContext {
         String userid = credentials.substring(0, colon);
         String password = credentials.substring(colon + 1);
 
-        Subject subject = login(request, response, userid, password);
+        Subject subject = login(request, userid, password);
         if (subject == null) {
             return failAuthorization(response);
         }
@@ -140,31 +140,19 @@ public class SecureBasicHttpContext implements HttpContext {
      * Authenticates a user against an LDAP directory if he does not have an active session.
      *
      * @param request
-     * @param response
      * @param userid
      * @param password
      * @return A Subject Object if the credentials are valid, null otherwise.
      */
-    private Subject login(HttpServletRequest request, HttpServletResponse response, String userid, String password) {
+    private Subject login(HttpServletRequest request, String userid, String password) {
         Subject subject = null;
         HttpSession session = request.getSession(true);
-        // subject = (Subject) session.getAttribute("subject");
-        // if (subject != null) {
-        // // The user has already been authenticated
-        // return subject;
-        // }
 
         subject = authorize(userid, password);
         session.setAttribute("subject", subject);
         session.setAttribute("username", userid);
         if (session.isNew()) {
-            String sessionid = session.getId();
-            response.setHeader("SET-COOKIE", "JSESSIONID=" + sessionid + "; HttpOnly");  // TODO: this response header
-  // is highly discouraged. Find
-  // a better solution (that
-  // probably will require a new
-  // version of Jetty). See here:
-  // https://www.owasp.org/index.php/HttpOnly#Using_Java_to_Set_HttpOnly
+            session.getServletContext().getSessionCookieConfig().setHttpOnly(true);
         }
         return subject;
 

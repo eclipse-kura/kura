@@ -2170,7 +2170,7 @@
                                             tofile="${project.build.directory}/staging/emulator/.project" />
                                         <replace
                                             file="${project.build.directory}/staging/emulator/src/main/resources/kura.properties"
-                                            token="kura.version=kura_emulator" value="kura.version=KYOFC IOT GATEWAY V${kura.version}" />
+                                            token="kura.version=kura_emulator" value="kura.version=YOFC SMART IOT EDGE GATEWAY V${kura.version}" />
                                         <move file="${project.build.directory}/staging/emulator/emulator.classpath"
                                             tofile="${project.build.directory}/staging/emulator/.classpath" />
 

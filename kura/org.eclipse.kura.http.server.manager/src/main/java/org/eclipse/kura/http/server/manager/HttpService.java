@@ -50,6 +50,8 @@ import org.slf4j.LoggerFactory;
 
 public class HttpService implements ConfigurableComponent {
 
+    private static final String KURA_HTTPS_KEY_STORE_PASSWORD_KEY = "kura.https.keyStorePassword";
+
     private static final Logger logger = LoggerFactory.getLogger(HttpService.class);
 
     private ComponentContext componentContext;
@@ -99,12 +101,16 @@ public class HttpService implements ConfigurableComponent {
         this.options = new HttpServiceOptions(properties);
         this.selfUpdaterExecutor = Executors.newSingleThreadScheduledExecutor();
 
-        if (isFirstBoot()) {
-            accessKeystore();
-        } else {
-            setSystemProperties();
+        if (keystoreExists(this.options.getHttpsKeystorePath())) {
+            if (isFirstBoot()) {
+                logger.info("Activating, first boot");
+                changeDefaultKeystorePassword();
+            } else {
+                logger.info("Activating, not first boot");
+                setSystemProperties();
 
-            activateHttpService();
+                activateHttpService();
+            }
         }
 
         logger.info("Activating... Done.");
@@ -114,17 +120,25 @@ public class HttpService implements ConfigurableComponent {
         logger.info("Updating {}", this.getClass().getSimpleName());
 
         this.properties = properties;
+        for (java.util.Map.Entry<String, Object> entry : properties.entrySet()) {
+            logger.info("Updating, key: {}, value: {}", entry.getKey(), entry.getValue());
+        }
+
         HttpServiceOptions updatedOptions = new HttpServiceOptions(properties);
 
         if (!this.options.equals(updatedOptions)) {
+            logger.info("Updating, new props");
             this.options = updatedOptions;
 
-            deactivateHttpService();
+            if (keystoreExists(this.options.getHttpsKeystorePath())) {
 
-            accessKeystore();
+                deactivateHttpService();
 
-            setSystemProperties();
-            activateHttpService();
+                accessKeystore();
+
+                setSystemProperties();
+                activateHttpService();
+            }
         }
 
         logger.info("Updating... Done.");
@@ -171,7 +185,7 @@ public class HttpService implements ConfigurableComponent {
                 try {
                     bundle.start();
                 } catch (BundleException e) {
-                    logger.error("Could not start Jetty Web server");
+                    logger.error("Could not start Jetty Web server", e);
                 }
             }
         }
@@ -191,24 +205,27 @@ public class HttpService implements ConfigurableComponent {
 
     private void accessKeystore() {
         String keystorePath = this.options.getHttpsKeystorePath();
-        File fKeyStore = new File(keystorePath);
-        if (!fKeyStore.exists()) {
+        if (!keystoreExists(keystorePath)) {
             return;
         }
 
-        if (isFirstBoot()) {
-            changeDefaultKeystorePassword();
-        } else {
-            char[] oldPassword = getOldKeystorePassword(keystorePath);
+        char[] oldPassword = getOldKeystorePassword(keystorePath);
 
-            char[] newPassword = null;
-            try {
-                newPassword = this.cryptoService.decryptAes(this.options.getHttpsKeystorePassword());
-            } catch (KuraException e) {
-                logger.warn("Failed to decrypt keystore password");
-            }
-            updateKeystorePassword(oldPassword, newPassword);
+        char[] newPassword = null;
+        try {
+            newPassword = this.cryptoService.decryptAes(this.options.getHttpsKeystorePassword());
+        } catch (KuraException e) {
+            logger.warn("Failed to decrypt keystore password");
         }
+        updateKeystorePassword(oldPassword, newPassword);
+    }
+
+    private boolean keystoreExists(String keystorePath) {
+        File fKeyStore = new File(keystorePath);
+        if (fKeyStore.exists()) {
+            return true;
+        }
+        return false;
     }
 
     private char[] getOldKeystorePassword(String keystorePath) {
@@ -241,8 +258,8 @@ public class HttpService implements ConfigurableComponent {
 
     private void changeDefaultKeystorePassword() {
 
-        char[] oldPassword = this.systemService.getJavaKeyStorePassword(); // TODO: Change this with a new specific
-                                                                           // property
+        char[] oldPassword = this.systemService.getProperties().getProperty(KURA_HTTPS_KEY_STORE_PASSWORD_KEY)
+                .toCharArray();
 
         if (isDefaultFromCrypto()) {
             oldPassword = this.cryptoService.getKeyStorePassword(this.options.getHttpsKeystorePath());
@@ -322,7 +339,8 @@ public class HttpService implements ConfigurableComponent {
     }
 
     private boolean isDefaultFromUser() {
-        return isKeyStoreAccessible(this.options.getHttpsKeystorePath(), this.systemService.getJavaKeyStorePassword());
+        return isKeyStoreAccessible(this.options.getHttpsKeystorePath(),
+                (char[]) this.systemService.getProperties().get(KURA_HTTPS_KEY_STORE_PASSWORD_KEY));
     }
 
     private void changeKeyStorePassword(String location, char[] oldPassword, char[] newPassword) throws IOException,

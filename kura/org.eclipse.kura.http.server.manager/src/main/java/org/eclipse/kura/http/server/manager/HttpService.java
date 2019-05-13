@@ -103,10 +103,8 @@ public class HttpService implements ConfigurableComponent {
 
         if (keystoreExists(this.options.getHttpsKeystorePath())) {
             if (isFirstBoot()) {
-                logger.info("Activating, first boot");
                 changeDefaultKeystorePassword();
             } else {
-                logger.info("Activating, not first boot");
                 setSystemProperties();
 
                 activateHttpService();
@@ -120,14 +118,11 @@ public class HttpService implements ConfigurableComponent {
         logger.info("Updating {}", this.getClass().getSimpleName());
 
         this.properties = properties;
-        for (java.util.Map.Entry<String, Object> entry : properties.entrySet()) {
-            logger.info("Updating, key: {}, value: {}", entry.getKey(), entry.getValue());
-        }
 
         HttpServiceOptions updatedOptions = new HttpServiceOptions(properties);
 
         if (!this.options.equals(updatedOptions)) {
-            logger.info("Updating, new props");
+            logger.debug("Updating, new props");
             this.options = updatedOptions;
 
             if (keystoreExists(this.options.getHttpsKeystorePath())) {
@@ -221,11 +216,12 @@ public class HttpService implements ConfigurableComponent {
     }
 
     private boolean keystoreExists(String keystorePath) {
+        boolean result = false;
         File fKeyStore = new File(keystorePath);
         if (fKeyStore.exists()) {
-            return true;
+            result = true;
         }
-        return false;
+        return result;
     }
 
     private char[] getOldKeystorePassword(String keystorePath) {

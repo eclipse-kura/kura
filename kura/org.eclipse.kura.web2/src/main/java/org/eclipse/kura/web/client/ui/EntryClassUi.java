@@ -41,6 +41,8 @@ import org.eclipse.kura.web.shared.service.GwtComponentService;
 import org.eclipse.kura.web.shared.service.GwtComponentServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
+import org.eclipse.kura.web.shared.service.GwtSessionService;
+import org.eclipse.kura.web.shared.service.GwtSessionServiceAsync;
 import org.gwtbootstrap3.client.ui.Anchor;
 import org.gwtbootstrap3.client.ui.AnchorListItem;
 import org.gwtbootstrap3.client.ui.Button;
@@ -65,9 +67,11 @@ import org.gwtbootstrap3.client.ui.html.Span;
 import org.gwtbootstrap3.client.ui.html.Strong;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Label;
@@ -161,6 +165,10 @@ public class EntryClassUi extends Composite {
     Panel sidenavOverlay;
     @UiField
     Label serviceDescription;
+    @UiField
+    Button logoutButton;
+    @UiField
+    Button headerLogoutButton;
 
     private static final Messages MSGS = GWT.create(Messages.class);
     private static final EntryClassUIUiBinder uiBinder = GWT.create(EntryClassUIUiBinder.class);
@@ -189,6 +197,7 @@ public class EntryClassUi extends Composite {
 
     private final GwtComponentServiceAsync gwtComponentService = GWT.create(GwtComponentService.class);
     private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
+    private final GwtSessionServiceAsync gwtSessionService = GWT.create(GwtSessionService.class);
 
     private final KeyUpHandler searchBoxChangeHandler = event -> {
         TextBox searchBox = (TextBox) event.getSource();
@@ -231,6 +240,7 @@ public class EntryClassUi extends Composite {
             }
         });
 
+        initLogoutButtons();
         initServicesTree();
     }
 
@@ -575,6 +585,35 @@ public class EntryClassUi extends Composite {
                         });
             }
         });
+    }
+
+    private void initLogoutButtons() {
+        final ClickHandler logoutHandler = e -> gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+
+            @Override
+            public void onSuccess(GwtXSRFToken result) {
+                gwtSessionService.logout(result, new AsyncCallback<Void>() {
+
+                    @Override
+                    public void onSuccess(Void result) {
+                        Window.Location.reload();
+                    }
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        FailureHandler.handle(caught);
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+                FailureHandler.handle(caught);
+            }
+        });
+
+        this.logoutButton.addClickHandler(logoutHandler);
+        this.headerLogoutButton.addClickHandler(logoutHandler);
     }
 
     private void initServicesTree() {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -59,7 +59,7 @@ public class KuraRemoteServiceServlet extends RemoteServiceServlet {
      */
     private static void performXSRFTokenValidation(HttpServletRequest req, GwtXSRFToken userToken)
             throws GwtKuraException {
-        HttpSession session = req.getSession();
+        HttpSession session = req.getSession(false);
 
         if (!isValidXSRFToken(session, userToken)) {
             logger.info("XSRF token is NOT VALID");
@@ -94,7 +94,7 @@ public class KuraRemoteServiceServlet extends RemoteServiceServlet {
     public static boolean isValidXSRFToken(HttpSession session, GwtXSRFToken userToken) {
         logger.debug("Starting XSRF Token validation...'");
 
-        if (userToken == null) {
+        if (userToken == null || session == null) {
             logger.debug("XSRF Token is NOT VALID -> NULL TOKEN");
             return false;
         }

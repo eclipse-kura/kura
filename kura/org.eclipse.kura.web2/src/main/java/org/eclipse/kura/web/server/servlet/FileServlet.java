@@ -53,7 +53,6 @@ import org.eclipse.kura.deployment.agent.DeploymentAgentService;
 import org.eclipse.kura.marshalling.Unmarshaller;
 import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.util.service.ServiceUtil;
-import org.eclipse.kura.web.Console;
 import org.eclipse.kura.web.server.KuraRemoteServiceServlet;
 import org.eclipse.kura.web.server.util.AssetConfigValidator;
 import org.eclipse.kura.web.server.util.ServiceLocator;
@@ -96,6 +95,12 @@ public class FileServlet extends HttpServlet {
 
     private DiskFileItemFactory diskFileItemFactory;
     private FileCleaningTracker fileCleaningTracker;
+
+    private final BundleContext bundleContext;
+
+    public FileServlet() {
+        bundleContext = FrameworkUtil.getBundle(FileServlet.class).getBundleContext();
+    }
 
     @Override
     public void destroy() {
@@ -216,8 +221,7 @@ public class FileServlet extends HttpServlet {
         }
 
         if (pid != null && pid.length() > 0) {
-            BundleContext ctx = Console.getBundleContext();
-            Bundle[] bundles = ctx.getBundles();
+            Bundle[] bundles = bundleContext.getBundles();
             ServiceLocator locator = ServiceLocator.getInstance();
 
             final MetaTypeService mts;
@@ -435,11 +439,12 @@ public class FileServlet extends HttpServlet {
             ConfigurationService cs = locator.getService(ConfigurationService.class);
 
             if (doReplace) {
-                String fp = cs.getComponentConfiguration(assetPid).getConfigurationProperties().get("service.factoryPid").toString();
+                String fp = cs.getComponentConfiguration(assetPid).getConfigurationProperties()
+                        .get("service.factoryPid").toString();
                 cs.deleteFactoryConfiguration(assetPid, false);
                 newProps.put("driver.pid", driverPid);
                 cs.createFactoryConfiguration(fp, assetPid, newProps, true);
-            }else{
+            } else {
                 cs.updateConfiguration(assetPid, newProps);
             }
 
@@ -537,8 +542,7 @@ public class FileServlet extends HttpServlet {
         }
     }
 
-    private void doPostDeployUpload(HttpServletRequest req)
-            throws ServletException, IOException {
+    private void doPostDeployUpload(HttpServletRequest req) throws ServletException, IOException {
         ServiceLocator locator = ServiceLocator.getInstance();
         DeploymentAgentService deploymentAgentService;
         try {

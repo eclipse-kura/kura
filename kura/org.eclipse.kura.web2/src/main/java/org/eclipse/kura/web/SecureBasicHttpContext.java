@@ -106,7 +106,7 @@ public class SecureBasicHttpContext implements HttpContext {
             return failAuthorization(response);
         }
 
-        final String credentials = new String ( getDecoder().decode(tokens.nextToken()), StandardCharsets.UTF_8 );
+        final String credentials = new String(getDecoder().decode(tokens.nextToken()), StandardCharsets.UTF_8);
 
         int colon = credentials.indexOf(':');
         String userid = credentials.substring(0, colon);
@@ -151,9 +151,9 @@ public class SecureBasicHttpContext implements HttpContext {
         subject = authorize(userid, password);
         session.setAttribute("subject", subject);
         session.setAttribute("username", userid);
-        if (session.isNew()) {
-            session.getServletContext().getSessionCookieConfig().setHttpOnly(true);
-        }
+        // if (session.isNew()) {
+        // session.getServletContext().getSessionCookieConfig().setHttpOnly(true);
+        // }
         return subject;
 
     }

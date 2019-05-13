@@ -13,11 +13,18 @@
 
 -->
 <!DOCTYPE web-app
-    PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
-    "http://java.sun.com/dtd/web-app_2_3.dtd">
+    PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 3.0//EN"
+    "http://java.sun.com/dtd/web-app_3_0.dtd">
 
 <web-app>
-
+  <session-config>
+      <session-timeout>30</session-timeout>
+      <cookie-config>
+         <http-only>true</http-only>
+         <secure>true</secure>
+      </cookie-config>
+      <tracking-mode>COOKIE</tracking-mode>
+  </session-config>
   <listener>
     <listener-class>
        org.apache.commons.fileupload.servlet.FileCleanerCleanup

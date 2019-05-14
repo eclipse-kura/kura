@@ -112,10 +112,6 @@ body {
 	white-space: nowrap;
 }
 
-.header-bar * {
-	height: 1.5cm !important;
-}
-
 .main-container {
 	min-height: 100vh;
 	padding-bottom: 2.1cm;
@@ -341,6 +337,7 @@ Sidenav START
 
 .sidenav {
 	border-right: 1px solid #ddd;
+	position: relative;
 }
 
 .sidenav .panel-heading {
@@ -384,6 +381,7 @@ Sidenav START
 	}
 	
 	.main-content {
+		padding-top: 0;
 		position: relative !important;
 		left: 16.66666667% !important;
 	}
@@ -426,6 +424,9 @@ Sidenav START
 		transform: translateX(-6cm);
 	}
 	
+	.logout-ui:not(.header-logout-ui) {
+		display: none;
+	} 
 }
 
 .not-scrollable {
@@ -456,8 +457,41 @@ Sidenav START
 	background-color: white;
 }
 
+.logout-ui {
+	padding-top: 0.2cm;
+	text-align: right;
+	padding-left: 15px !important;
+    padding-right: 15px !important;
+}
+		
+.logout-button {
+	display: inline;
+}
+
+.header-bar .logout-ui {
+	position: absolute;
+	right: 0;
+	top: 0.2cm;
+}
+
 /**********************
 Sidenav END
+***********************/
+
+/**********************
+Login START
+***********************/
+
+.login-icon i {
+	width: 1cm;
+}
+
+.login-input:last-of-type {
+	padding-top: 0.4cm;
+}
+
+/**********************
+Login END
 ***********************/
 
 /**********************

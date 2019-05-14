@@ -53,7 +53,6 @@ import org.eclipse.kura.deployment.agent.DeploymentAgentService;
 import org.eclipse.kura.marshalling.Unmarshaller;
 import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.util.service.ServiceUtil;
-import org.eclipse.kura.web.Console;
 import org.eclipse.kura.web.server.KuraRemoteServiceServlet;
 import org.eclipse.kura.web.server.util.AssetConfigValidator;
 import org.eclipse.kura.web.server.util.ServiceLocator;
@@ -96,6 +95,12 @@ public class FileServlet extends HttpServlet {
 
     private DiskFileItemFactory diskFileItemFactory;
     private FileCleaningTracker fileCleaningTracker;
+
+    private final BundleContext bundleContext;
+
+    public FileServlet() {
+        bundleContext = FrameworkUtil.getBundle(FileServlet.class).getBundleContext();
+    }
 
     @Override
     public void destroy() {
@@ -216,8 +221,7 @@ public class FileServlet extends HttpServlet {
         }
 
         if (pid != null && pid.length() > 0) {
-            BundleContext ctx = Console.getBundleContext();
-            Bundle[] bundles = ctx.getBundles();
+            Bundle[] bundles = bundleContext.getBundles();
             ServiceLocator locator = ServiceLocator.getInstance();
 
             final MetaTypeService mts;
@@ -432,26 +436,27 @@ public class FileServlet extends HttpServlet {
 
             Map<String, Object> newProps = AssetConfigValidator.get().validateCsv(csvString, driverPid, errors);
 
-            ServiceLocator.applyToAllServices(ConfigurationService.class, cs -> {
-                if (doReplace) {
-                    String fp = cs.getComponentConfiguration(assetPid).getConfigurationProperties()
-                            .get("service.factoryPid").toString();
-                    cs.deleteFactoryConfiguration(assetPid, false);
-                    newProps.put("driver.pid", driverPid);
-                    cs.createFactoryConfiguration(fp, assetPid, newProps, true);
-                } else {
-                    cs.updateConfiguration(assetPid, newProps);
-                }
-            });
+            ServiceLocator locator = ServiceLocator.getInstance();
+
+            ConfigurationService cs = locator.getService(ConfigurationService.class);
+
+            if (doReplace) {
+                String fp = cs.getComponentConfiguration(assetPid).getConfigurationProperties()
+                        .get("service.factoryPid").toString();
+                cs.deleteFactoryConfiguration(assetPid, false);
+                newProps.put("driver.pid", driverPid);
+                cs.createFactoryConfiguration(fp, assetPid, newProps, true);
+            } else {
+                cs.updateConfiguration(assetPid, newProps);
+            }
 
             // Add an additional delay after the configuration update
             // to give the time to the device to apply the received configuration
-            ServiceLocator.applyToAllServices(SystemService.class, ss -> {
-                long delay = Long.parseLong(ss.getProperties().getProperty("console.updateConfigDelay", "5000"));
-                if (delay > 0) {
-                    Thread.sleep(delay);
-                }
-            });
+            SystemService ss = locator.getService(SystemService.class);
+            long delay = Long.parseLong(ss.getProperties().getProperty("console.updateConfigDelay", "5000"));
+            if (delay > 0) {
+                Thread.sleep(delay);
+            }
         } catch (KuraException | GwtKuraException | InterruptedException e) {
             logger.error("Error updating device configuration", e);
         } catch (ServletException ex) {

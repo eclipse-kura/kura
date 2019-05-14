@@ -295,9 +295,6 @@ public class Console implements ConfigurableComponent {
     public HttpSession createSession(final HttpServletRequest request, final HttpServletResponse response) {
         final HttpSession session = request.getSession();
 
-        final String sessionid = session.getId();
-        response.setHeader("SET-COOKIE", "JSESSIONID=" + sessionid + "; Path=/; HttpOnly");
-
         session.setMaxInactiveInterval(sessionMaxInactiveInterval * 60);
 
         session.setAttribute(Attributes.LAST_ACTIVITY.getValue(), System.currentTimeMillis());

@@ -29,6 +29,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.web.server.util.ServiceLocator;
+import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -101,7 +102,8 @@ public class SkinServlet extends HttpServlet {
         String styleDirectory = systemService.getKuraStyleDirectory();
 
         if (styleDirectory == null) {
-            throw new GwtKuraException(null, null, "Style resource directory is not configured");
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, null,
+                    "Style resource directory is not configured");
         }
 
         try (Stream<Path> kuraStyleDirStream = Files.list(Paths.get(styleDirectory));) {

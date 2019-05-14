@@ -58,7 +58,6 @@
             type="String"
             cardinality="0" 
             required="false"
-            default="/opt/eclipse/kura/user/security/httpskeystore.ks" 
             description="Specifies the path to the keystore used for https communication."/>
         
         <AD id="https.keystore.password"  

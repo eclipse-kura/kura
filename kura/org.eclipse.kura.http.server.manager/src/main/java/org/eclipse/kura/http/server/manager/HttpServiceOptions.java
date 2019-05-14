@@ -30,8 +30,6 @@ public class HttpServiceOptions {
     private static final Property<Integer> HTTP_PORT = new Property<>(PROP_HTTP_PORT, 80);
     private static final Property<Boolean> HTTPS_ENABLED = new Property<>(PROP_HTTPS_ENABLED, false);
     private static final Property<Integer> HTTPS_PORT = new Property<>(PROP_HTTPS_PORT, 443);
-    private static final Property<String> HTTPS_KEYSTORE_PATH = new Property<>(PROP_HTTPS_KEYSTORE_PATH,
-            "/opt/eclipse/kura/user/security/httpskeystore.ks");
     private static final Property<String> HTTPS_KEYSTORE_PASSWORD = new Property<>(PROP_HTTPS_KEYSTORE_PASSWORD,
             DEFAULT_HTTPS_KEYSTORE_PASSWORD);
 
@@ -42,12 +40,16 @@ public class HttpServiceOptions {
     private final String httpsKeystorePath;
     private final char[] httpsKeystorePasswordArray;
 
-    public HttpServiceOptions(final Map<String, Object> properties) {
+    public HttpServiceOptions(final Map<String, Object> properties, final String kuraHome) {
+        Property<String> httpsKeystorePathProp = new Property<>(PROP_HTTPS_KEYSTORE_PATH,
+                kuraHome + "/user/security/httpskeystore.ks");
+        
+        
         this.httpEnabled = HTTP_ENABLED.get(properties);
         this.httpPort = HTTP_PORT.get(properties);
         this.httpsEnabled = HTTPS_ENABLED.get(properties);
         this.httpsPort = HTTPS_PORT.get(properties);
-        this.httpsKeystorePath = HTTPS_KEYSTORE_PATH.get(properties);
+        this.httpsKeystorePath = httpsKeystorePathProp.get(properties);
         this.httpsKeystorePasswordArray = HTTPS_KEYSTORE_PASSWORD.get(properties).toCharArray();
     }
 

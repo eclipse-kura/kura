@@ -98,7 +98,7 @@ public class HttpService implements ConfigurableComponent {
 
         this.properties = properties;
 
-        this.options = new HttpServiceOptions(properties);
+        this.options = new HttpServiceOptions(properties, this.systemService.getKuraHome());
         this.selfUpdaterExecutor = Executors.newSingleThreadScheduledExecutor();
 
         if (keystoreExists(this.options.getHttpsKeystorePath())) {
@@ -119,7 +119,7 @@ public class HttpService implements ConfigurableComponent {
 
         this.properties = properties;
 
-        HttpServiceOptions updatedOptions = new HttpServiceOptions(properties);
+        HttpServiceOptions updatedOptions = new HttpServiceOptions(properties, this.systemService.getKuraHome());
 
         if (!this.options.equals(updatedOptions)) {
             logger.debug("Updating, new props");
@@ -278,7 +278,9 @@ public class HttpService implements ConfigurableComponent {
         // update our configuration with the newly generated password
         final String pid = (String) this.properties.get("service.pid");
 
-        Map<String, Object> props = new HashMap<>(this.properties);
+        Map<String, Object> props = new HashMap<>();
+        props.putAll(this.properties);
+        props.put(HttpServiceOptions.PROP_HTTPS_KEYSTORE_PATH, this.options.getHttpsKeystorePath());
         props.put(HttpServiceOptions.PROP_HTTPS_KEYSTORE_PASSWORD, new Password(newPassword));
 
         this.selfUpdaterFuture = this.selfUpdaterExecutor.scheduleAtFixedRate(() -> {

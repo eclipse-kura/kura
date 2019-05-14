@@ -17,15 +17,36 @@ import java.util.Dictionary;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.servlet.SessionCookieConfig;
+
 import org.eclipse.equinox.http.jetty.JettyCustomizer;
 import org.eclipse.jetty.server.ConnectionFactory;
 import org.eclipse.jetty.server.ForwardedRequestCustomizer;
 import org.eclipse.jetty.server.HttpConfiguration.Customizer;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.servlet.ServletContextHandler;
 
 public class KuraJettyCustomizer extends JettyCustomizer {
 
+    @Override
+    public Object customizeContext(Object context, Dictionary<String, ?> settings) {
+        if (!(context instanceof ServletContextHandler)) {
+            return context;
+        }
+
+        final ServletContextHandler serverContextHandler = (ServletContextHandler) context;
+        
+        serverContextHandler.setErrorHandler(new KuraErrorHandler());
+        
+        final SessionCookieConfig cookieConfig = serverContextHandler.getSessionHandler().getSessionCookieConfig();
+        
+        cookieConfig.setHttpOnly(true);
+        cookieConfig.setPath("/");
+        
+        return context;
+    }
+    
     @Override
     public Object customizeHttpConnector(final Object connector, final Dictionary<String, ?> settings) {
         customizeConnector(connector);

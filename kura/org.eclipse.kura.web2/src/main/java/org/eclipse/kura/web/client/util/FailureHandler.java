@@ -18,6 +18,7 @@ import org.gwtbootstrap3.client.ui.Modal;
 import org.gwtbootstrap3.client.ui.Panel;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.StatusCodeException;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -34,11 +35,17 @@ public class FailureHandler {
     }
 
     public static void handle(Throwable caught, String name) {
+        if (caught instanceof StatusCodeException) {
+            final StatusCodeException statusCodeException = (StatusCodeException) caught;
+            if (statusCodeException.getStatusCode() == 401) {
+                Window.Location.reload();
+            }
+        }
         printMessage(caught, name);
     }
 
     public static void handle(Throwable caught) {
-        printMessage(caught, "");
+        handle(caught, "");
     }
 
     public static void showErrorMessage(String message) {

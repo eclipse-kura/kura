@@ -28,7 +28,7 @@ public class BaseSecurityHandler implements SecurityHandler {
         response.setHeader("X-FRAME-OPTIONS", "SAMEORIGIN");
         response.setHeader("X-XSS-protection", "1; mode=block");
         response.setHeader("X-Content-Type-Options", "nosniff");
-        response.setHeader("Cache-Control", "no-cache,no-store");
+        response.setHeader("Cache-Control", "no-cache,no-store,must-revalidate");
         response.setHeader("Pragma", "no-cache");
 
         // If a trailing "/" is used when accesssing the app, redirect

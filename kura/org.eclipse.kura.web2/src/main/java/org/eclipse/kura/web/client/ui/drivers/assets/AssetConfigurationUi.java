@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2019 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -31,6 +31,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Level;
 
+import org.eclipse.kura.web.Console;
 import org.eclipse.kura.web.client.configuration.Configurations;
 import org.eclipse.kura.web.client.configuration.HasConfiguration;
 import org.eclipse.kura.web.client.ui.AbstractServicesUi;
@@ -155,7 +156,7 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
 
     private final SingleSelectionModel<ChannelModel> selectionModel = new SingleSelectionModel<>();
 
-    private static final String SERVLET_URL = "/" + GWT.getModuleName() + "/file/asset";
+    private static final String SERVLET_URL = Console.ADMIN_ROOT + '/' + GWT.getModuleName() + "/file/asset";
 
     private final Set<String> nonValidatedCells;
 

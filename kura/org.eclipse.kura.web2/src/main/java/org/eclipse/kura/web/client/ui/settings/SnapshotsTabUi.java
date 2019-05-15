@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.eclipse.kura.web.Console;
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.ui.Tab;
@@ -68,7 +69,8 @@ public class SnapshotsTabUi extends Composite implements Tab {
     private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
     private final GwtSnapshotServiceAsync gwtSnapshotService = GWT.create(GwtSnapshotService.class);
 
-    private static final String SERVLET_URL = "/" + GWT.getModuleName() + "/file/configuration/snapshot";
+    private static final String SERVLET_URL = Console.ADMIN_ROOT + '/' + GWT.getModuleName()
+            + "/file/configuration/snapshot";
 
     @UiField
     Modal uploadModal;

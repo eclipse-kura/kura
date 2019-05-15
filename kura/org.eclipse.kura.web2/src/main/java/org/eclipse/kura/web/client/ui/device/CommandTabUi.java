@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.device;
 
+import org.eclipse.kura.web.Console;
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.util.FailureHandler;
@@ -44,7 +45,7 @@ public class CommandTabUi extends Composite {
     private static CommandTabUiUiBinder uiBinder = GWT.create(CommandTabUiUiBinder.class);
 
     private static final Messages MSGS = GWT.create(Messages.class);
-    private static final String SERVLET_URL = "/" + GWT.getModuleName() + "/file/command";
+    private static final String SERVLET_URL = Console.ADMIN_ROOT + '/' + GWT.getModuleName() + "/file/command";
 
     @SuppressWarnings("unused")
     private GwtSession session;
@@ -112,20 +113,21 @@ public class CommandTabUi extends Composite {
         });
 
         this.execute.setText(MSGS.deviceCommandExecute());
-        this.execute.addClickHandler(event -> CommandTabUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+        this.execute.addClickHandler(
+                event -> CommandTabUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
-            @Override
-            public void onFailure(Throwable ex) {
-                FailureHandler.handle(ex);
-            }
+                    @Override
+                    public void onFailure(Throwable ex) {
+                        FailureHandler.handle(ex);
+                    }
 
-            @Override
-            public void onSuccess(GwtXSRFToken token) {
-                CommandTabUi.this.xsrfTokenField.setValue(token.getToken());
-                CommandTabUi.this.commandForm.submit();
-                CommandTabUi.this.formExecute.setFocus(true);
-            }
-        }));
+                    @Override
+                    public void onSuccess(GwtXSRFToken token) {
+                        CommandTabUi.this.xsrfTokenField.setValue(token.getToken());
+                        CommandTabUi.this.commandForm.submit();
+                        CommandTabUi.this.formExecute.setFocus(true);
+                    }
+                }));
 
         this.commandForm.setEncoding(FormPanel.ENCODING_MULTIPART);
         this.commandForm.setMethod(FormPanel.METHOD_POST);
@@ -153,27 +155,27 @@ public class CommandTabUi extends Composite {
                                 CommandTabUi.this.formExecute.getText(), CommandTabUi.this.formPassword.getText(),
                                 new AsyncCallback<String>() {
 
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                if (caught.getLocalizedMessage()
-                                        .equals(GwtKuraErrorCode.SERVICE_NOT_ENABLED.toString())) {
-                                    display(MSGS.error() + "\n" + MSGS.commandServiceNotEnabled());
-                                } else if (caught.getLocalizedMessage()
-                                        .equals(GwtKuraErrorCode.ILLEGAL_ARGUMENT.toString())) {
-                                    display(MSGS.error() + "\n" + MSGS.commandPasswordNotCorrect());
-                                } else {
-                                    display(MSGS.error() + "\n" + caught.getLocalizedMessage());
-                                }
-                                EntryClassUi.hideWaitModal();
-                            }
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        if (caught.getLocalizedMessage()
+                                                .equals(GwtKuraErrorCode.SERVICE_NOT_ENABLED.toString())) {
+                                            display(MSGS.error() + "\n" + MSGS.commandServiceNotEnabled());
+                                        } else if (caught.getLocalizedMessage()
+                                                .equals(GwtKuraErrorCode.ILLEGAL_ARGUMENT.toString())) {
+                                            display(MSGS.error() + "\n" + MSGS.commandPasswordNotCorrect());
+                                        } else {
+                                            display(MSGS.error() + "\n" + caught.getLocalizedMessage());
+                                        }
+                                        EntryClassUi.hideWaitModal();
+                                    }
 
-                            @Override
-                            public void onSuccess(String result) {
-                                display(result);
-                                EntryClassUi.hideWaitModal();
-                            }
+                                    @Override
+                                    public void onSuccess(String result) {
+                                        display(result);
+                                        EntryClassUi.hideWaitModal();
+                                    }
 
-                        });
+                                });
                     }
 
                 });

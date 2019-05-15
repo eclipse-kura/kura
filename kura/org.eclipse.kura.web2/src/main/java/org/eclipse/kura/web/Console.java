@@ -74,7 +74,7 @@ import org.slf4j.LoggerFactory;
 
 public class Console implements ConfigurableComponent {
 
-    private static final String ADMIN_ROOT = "/admin";
+    public static final String ADMIN_ROOT = "/admin";
 
     private static final String LOGIN_MODULE_PATH = ADMIN_ROOT + "/login";
     private static final String DENALI_MODULE_PATH = ADMIN_ROOT + "/denali";

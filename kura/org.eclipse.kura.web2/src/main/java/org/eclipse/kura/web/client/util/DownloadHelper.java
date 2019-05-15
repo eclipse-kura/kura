@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2018, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -9,6 +9,7 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.util;
 
+import org.eclipse.kura.web.Console;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 
 import com.google.gwt.core.client.GWT;
@@ -41,7 +42,7 @@ public final class DownloadHelper {
     public void startDownload(GwtXSRFToken token, String resource) {
         final StringBuilder sbUrl = new StringBuilder();
 
-        sbUrl.append("/").append(GWT.getModuleName()).append(resource).append(resource.indexOf('?') != -1 ? '&' : '?')
+        sbUrl.append(Console.ADMIN_ROOT).append("/").append(GWT.getModuleName()).append(resource).append(resource.indexOf('?') != -1 ? '&' : '?')
                 .append("xsrfToken=").append(URL.encodeQueryString(token.getToken()));
 
         startDownload(sbUrl.toString());

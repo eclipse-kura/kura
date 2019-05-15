@@ -48,6 +48,8 @@ import org.eclipse.kura.web.server.GwtWireGraphServiceImpl;
 import org.eclipse.kura.web.server.servlet.ChannelServlet;
 import org.eclipse.kura.web.server.servlet.DeviceSnapshotsServlet;
 import org.eclipse.kura.web.server.servlet.FileServlet;
+import org.eclipse.kura.web.server.servlet.RedirectServlet;
+import org.eclipse.kura.web.server.servlet.SendStatusServlet;
 import org.eclipse.kura.web.server.servlet.SkinServlet;
 import org.eclipse.kura.web.server.servlet.WiresBlinkServlet;
 import org.eclipse.kura.web.server.servlet.WiresSnapshotServlet;
@@ -72,22 +74,27 @@ import org.slf4j.LoggerFactory;
 
 public class Console implements ConfigurableComponent {
 
-    private static final String PASSWORD_AUTH_PATH = "/login/password";
+    private static final String ADMIN_ROOT = "/admin";
 
-    private static final String ADMIN_LOGIN_PATH = "/admin/login";
+    private static final String LOGIN_MODULE_PATH = ADMIN_ROOT + "/login";
+    private static final String DENALI_MODULE_PATH = ADMIN_ROOT + "/denali";
 
-    private static final String ADMIN_PATH = "/admin";
+    private static final String AUTH_RESOURCE_PATH = ADMIN_ROOT + "/auth.html";
+    private static final String CONSOLE_RESOURCE_PATH = ADMIN_ROOT + "/denali.html";
+
+    private static final String AUTH_PATH = ADMIN_ROOT + "/auth";
+    private static final String CONSOLE_PATH = ADMIN_ROOT + "/console";
+
+    private static final String PASSWORD_AUTH_PATH = LOGIN_MODULE_PATH + "/password";
 
     private static final Logger logger = LoggerFactory.getLogger(Console.class);
 
-    private static final String SERVLET_ALIAS_ROOT = "servlet.alias.root";
     private static final String APP_ROOT = "app.root";
     private static final String SESSION_MAX_INACTIVITY_INTERVAL = "session.max.inactivity.interval";
 
     private static final String CONSOLE_PASSWORD = "console.password.value";
     private static final String CONSOLE_USERNAME = "console.username.value";
 
-    private String servletRoot;
     private String appRoot;
     private int sessionMaxInactiveInterval;
     private ComponentContext componentContext;
@@ -192,10 +199,6 @@ public class Console implements ConfigurableComponent {
         this.sessionMaxInactiveInterval = sessionMaxInactiveInterval;
     }
 
-    private void setServletRoot(String propertiesAliasRoot) {
-        servletRoot = propertiesAliasRoot;
-    }
-
     private void setComponentContext(ComponentContext context) {
         componentContext = context;
     }
@@ -217,7 +220,6 @@ public class Console implements ConfigurableComponent {
             logger.warn("Error Updating Web properties", e);
         }
 
-        setServletRoot((String) properties.get(SERVLET_ALIAS_ROOT));
         setAppRoot((String) properties.get(APP_ROOT));
         setSessionMaxInactiveInterval((int) properties.getOrDefault(SESSION_MAX_INACTIVITY_INTERVAL, 15));
 
@@ -242,34 +244,35 @@ public class Console implements ConfigurableComponent {
 
     private void unregisterServlet() {
         this.httpService.unregister("/");
-        this.httpService.unregister(ADMIN_PATH);
-        this.httpService.unregister(servletRoot);
-        this.httpService.unregister(ADMIN_LOGIN_PATH);
-        this.httpService.unregister("/login");
+        this.httpService.unregister(ADMIN_ROOT);
+        this.httpService.unregister(CONSOLE_PATH);
+        this.httpService.unregister(AUTH_PATH);
 
+        this.httpService.unregister(AUTH_RESOURCE_PATH);
+        this.httpService.unregister(CONSOLE_RESOURCE_PATH);
         this.httpService.unregister(PASSWORD_AUTH_PATH);
-        this.httpService.unregister(servletRoot + "/session");
-        this.httpService.unregister(servletRoot + "/xsrf");
-        this.httpService.unregister(servletRoot + "/status");
-        this.httpService.unregister(servletRoot + "/device");
-        this.httpService.unregister(servletRoot + "/network");
-        this.httpService.unregister(servletRoot + "/component");
-        this.httpService.unregister(servletRoot + "/package");
-        this.httpService.unregister(servletRoot + "/snapshot");
-        this.httpService.unregister(servletRoot + "/certificate");
-        this.httpService.unregister(servletRoot + "/security");
-        this.httpService.unregister(servletRoot + "/file");
-        this.httpService.unregister(servletRoot + "/device_snapshots");
-        this.httpService.unregister(servletRoot + "/assetsUpDownload");
-        this.httpService.unregister(servletRoot + "/skin");
-        this.httpService.unregister(servletRoot + "/ssl");
-        this.httpService.unregister(servletRoot + "/cloudservices");
-        this.httpService.unregister(servletRoot + "/wires");
-        this.httpService.unregister(servletRoot + "/wiresSnapshot");
-        this.httpService.unregister(servletRoot + "/assetservices");
-        this.httpService.unregister("/sse");
+        this.httpService.unregister(DENALI_MODULE_PATH + "/session");
+        this.httpService.unregister(DENALI_MODULE_PATH + "/xsrf");
+        this.httpService.unregister(DENALI_MODULE_PATH + "/status");
+        this.httpService.unregister(DENALI_MODULE_PATH + "/device");
+        this.httpService.unregister(DENALI_MODULE_PATH + "/network");
+        this.httpService.unregister(DENALI_MODULE_PATH + "/component");
+        this.httpService.unregister(DENALI_MODULE_PATH + "/package");
+        this.httpService.unregister(DENALI_MODULE_PATH + "/snapshot");
+        this.httpService.unregister(DENALI_MODULE_PATH + "/certificate");
+        this.httpService.unregister(DENALI_MODULE_PATH + "/security");
+        this.httpService.unregister(DENALI_MODULE_PATH + "/file");
+        this.httpService.unregister(DENALI_MODULE_PATH + "/device_snapshots");
+        this.httpService.unregister(DENALI_MODULE_PATH + "/assetsUpDownload");
+        this.httpService.unregister(DENALI_MODULE_PATH + "/skin");
+        this.httpService.unregister(DENALI_MODULE_PATH + "/ssl");
+        this.httpService.unregister(DENALI_MODULE_PATH + "/cloudservices");
+        this.httpService.unregister(DENALI_MODULE_PATH + "/wires");
+        this.httpService.unregister(DENALI_MODULE_PATH + "/wiresSnapshot");
+        this.httpService.unregister(DENALI_MODULE_PATH + "/assetservices");
+        this.httpService.unregister(ADMIN_ROOT + "/sse");
         this.eventService.stop();
-        this.httpService.unregister(servletRoot + "/event");
+        this.httpService.unregister(DENALI_MODULE_PATH + "/event");
     }
 
     public static Console instance() {
@@ -288,15 +291,10 @@ public class Console implements ConfigurableComponent {
         return appRoot;
     }
 
-    public String getServletRoot() {
-        return servletRoot;
-    }
-
     public HttpSession createSession(final HttpServletRequest request, final HttpServletResponse response) {
         final HttpSession session = request.getSession();
 
         session.setMaxInactiveInterval(sessionMaxInactiveInterval * 60);
-
         session.setAttribute(Attributes.LAST_ACTIVITY.getValue(), System.currentTimeMillis());
 
         return session;
@@ -304,10 +302,10 @@ public class Console implements ConfigurableComponent {
 
     private HttpContext initSessionContext(final HttpContext defaultContext) {
 
-        final Set<String> authenticationPaths = new HashSet<>(Arrays.asList(ADMIN_LOGIN_PATH, PASSWORD_AUTH_PATH));
-        final Set<String> eventPaths = new HashSet<>(Arrays.asList(servletRoot + "/event", "/sse"));
+        final Set<String> authenticationPaths = new HashSet<>(Arrays.asList(AUTH_PATH, PASSWORD_AUTH_PATH));
+        final Set<String> eventPaths = new HashSet<>(Arrays.asList(DENALI_MODULE_PATH + "/event", "/sse"));
 
-        final SecurityHandler baseHandler = new BaseSecurityHandler(appRoot);
+        final SecurityHandler baseHandler = new BaseSecurityHandler();
         final SecurityHandler sessionAuthHandler = new SessionAutorizationSecurityHandler();
         final SecurityHandler sessionExpirationHandler = new SessionExpirationSecurityHandler();
 
@@ -326,13 +324,13 @@ public class Console implements ConfigurableComponent {
                 chain(baseHandler, sessionAuthHandler).sendErrorOnFailure(401));
 
         // exception on admin console path, redirect to login page on failure instead of sending 401 status
-        routingHandler.addRouteHandler(ADMIN_PATH::equals, defaultHandler.redirectOnFailure(ADMIN_LOGIN_PATH));
+        routingHandler.addRouteHandler(CONSOLE_PATH::equals, defaultHandler.redirectOnFailure(AUTH_PATH));
 
         return new HttpContextImpl(routingHandler, defaultContext);
     }
 
     private HttpContext initResourceContext(final HttpContext defaultContext) {
-        return new HttpContextImpl(new BaseSecurityHandler(appRoot), defaultContext);
+        return new HttpContextImpl(new BaseSecurityHandler(), defaultContext);
     }
 
     private void initHTTPService() throws NamespaceException, ServletException {
@@ -342,42 +340,53 @@ public class Console implements ConfigurableComponent {
         final HttpContext resourceContext = initResourceContext(defaultContext);
         final HttpContext sessionContext = initSessionContext(defaultContext);
 
-        this.httpService.registerResources("/", "www", resourceContext);
-        this.httpService.registerResources(ADMIN_PATH, "www/denali.html", sessionContext);
-        this.httpService.registerResources(servletRoot, "www" + servletRoot, resourceContext);
-        this.httpService.registerResources(ADMIN_LOGIN_PATH, "www/login.html", sessionContext);
-        this.httpService.registerResources("/login", "www/login", resourceContext);
+        this.httpService.registerResources(ADMIN_ROOT, "www", resourceContext);
+        this.httpService.registerResources(AUTH_PATH, "www/auth.html", sessionContext);
+        this.httpService.registerResources(CONSOLE_PATH, "www/denali.html", sessionContext);
+
+        this.httpService.registerServlet("/", new RedirectServlet("/"::equals, appRoot), null, resourceContext);
+        this.httpService.registerServlet(AUTH_RESOURCE_PATH, new SendStatusServlet(404), null, resourceContext);
+        this.httpService.registerServlet(CONSOLE_RESOURCE_PATH, new SendStatusServlet(404), null, resourceContext);
 
         this.httpService.registerServlet(PASSWORD_AUTH_PATH,
-                new GwtPasswordAuthenticationServiceImpl(this.authMgr, ADMIN_PATH), null, sessionContext);
-        this.httpService.registerServlet(servletRoot + "/session", new GwtSessionServiceImpl(), null, sessionContext);
-        this.httpService.registerServlet(servletRoot + "/xsrf", new GwtSecurityTokenServiceImpl(), null,
+                new GwtPasswordAuthenticationServiceImpl(this.authMgr, CONSOLE_PATH), null, sessionContext);
+        this.httpService.registerServlet(DENALI_MODULE_PATH + "/session", new GwtSessionServiceImpl(), null,
                 sessionContext);
-        this.httpService.registerServlet(servletRoot + "/status", new GwtStatusServiceImpl(), null, sessionContext);
-        this.httpService.registerServlet(servletRoot + "/device", new GwtDeviceServiceImpl(), null, sessionContext);
-        this.httpService.registerServlet(servletRoot + "/network", new GwtNetworkServiceImpl(), null, sessionContext);
-        this.httpService.registerServlet(servletRoot + "/component", new GwtComponentServiceImpl(), null,
+        this.httpService.registerServlet(DENALI_MODULE_PATH + "/xsrf", new GwtSecurityTokenServiceImpl(), null,
                 sessionContext);
-        this.httpService.registerServlet(servletRoot + "/package", new GwtPackageServiceImpl(), null, sessionContext);
-        this.httpService.registerServlet(servletRoot + "/snapshot", new GwtSnapshotServiceImpl(), null, sessionContext);
-        this.httpService.registerServlet(servletRoot + "/certificate", new GwtCertificatesServiceImpl(), null,
+        this.httpService.registerServlet(DENALI_MODULE_PATH + "/status", new GwtStatusServiceImpl(), null,
                 sessionContext);
-        this.httpService.registerServlet(servletRoot + "/security", new GwtSecurityServiceImpl(), null, sessionContext);
-        this.httpService.registerServlet(servletRoot + "/file", new FileServlet(), null, sessionContext);
-        this.httpService.registerServlet(servletRoot + "/device_snapshots", new DeviceSnapshotsServlet(), null,
+        this.httpService.registerServlet(DENALI_MODULE_PATH + "/device", new GwtDeviceServiceImpl(), null,
                 sessionContext);
-        this.httpService.registerServlet(servletRoot + "/assetsUpDownload", new ChannelServlet(), null, sessionContext);
-        this.httpService.registerServlet(servletRoot + "/skin", new SkinServlet(), null, resourceContext);
-        this.httpService.registerServlet(servletRoot + "/ssl", new GwtSslServiceImpl(), null, sessionContext);
-        this.httpService.registerServlet(servletRoot + "/cloudservices", new GwtCloudConnectionServiceImpl(), null,
+        this.httpService.registerServlet(DENALI_MODULE_PATH + "/network", new GwtNetworkServiceImpl(), null,
                 sessionContext);
-        this.httpService.registerServlet(servletRoot + "/wires", new GwtWireGraphServiceImpl(), null, sessionContext);
-        this.httpService.registerServlet(servletRoot + "/wiresSnapshot", new WiresSnapshotServlet(), null,
+        this.httpService.registerServlet(DENALI_MODULE_PATH + "/component", new GwtComponentServiceImpl(), null,
                 sessionContext);
-        this.httpService.registerServlet(servletRoot + "/assetservices", new GwtAssetServiceImpl(), null,
+        this.httpService.registerServlet(DENALI_MODULE_PATH + "/package", new GwtPackageServiceImpl(), null,
                 sessionContext);
-        this.httpService.registerServlet("/sse", new WiresBlinkServlet(), null, sessionContext);
-        this.httpService.registerServlet(servletRoot + "/event", this.eventService, null, sessionContext);
+        this.httpService.registerServlet(DENALI_MODULE_PATH + "/snapshot", new GwtSnapshotServiceImpl(), null,
+                sessionContext);
+        this.httpService.registerServlet(DENALI_MODULE_PATH + "/certificate", new GwtCertificatesServiceImpl(), null,
+                sessionContext);
+        this.httpService.registerServlet(DENALI_MODULE_PATH + "/security", new GwtSecurityServiceImpl(), null,
+                sessionContext);
+        this.httpService.registerServlet(DENALI_MODULE_PATH + "/file", new FileServlet(), null, sessionContext);
+        this.httpService.registerServlet(DENALI_MODULE_PATH + "/device_snapshots", new DeviceSnapshotsServlet(), null,
+                sessionContext);
+        this.httpService.registerServlet(DENALI_MODULE_PATH + "/assetsUpDownload", new ChannelServlet(), null,
+                sessionContext);
+        this.httpService.registerServlet(DENALI_MODULE_PATH + "/skin", new SkinServlet(), null, resourceContext);
+        this.httpService.registerServlet(DENALI_MODULE_PATH + "/ssl", new GwtSslServiceImpl(), null, sessionContext);
+        this.httpService.registerServlet(DENALI_MODULE_PATH + "/cloudservices", new GwtCloudConnectionServiceImpl(),
+                null, sessionContext);
+        this.httpService.registerServlet(DENALI_MODULE_PATH + "/wires", new GwtWireGraphServiceImpl(), null,
+                sessionContext);
+        this.httpService.registerServlet(DENALI_MODULE_PATH + "/wiresSnapshot", new WiresSnapshotServlet(), null,
+                sessionContext);
+        this.httpService.registerServlet(DENALI_MODULE_PATH + "/assetservices", new GwtAssetServiceImpl(), null,
+                sessionContext);
+        this.httpService.registerServlet(ADMIN_ROOT + "/sse", new WiresBlinkServlet(), null, sessionContext);
+        this.httpService.registerServlet(DENALI_MODULE_PATH + "/event", this.eventService, null, sessionContext);
         this.eventService.start();
     }
 

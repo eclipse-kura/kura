@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Red Hat Inc and others
+ * Copyright (c) 2018, 2019 Red Hat Inc and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -35,18 +35,17 @@ public class KuraJettyCustomizer extends JettyCustomizer {
             return context;
         }
 
-        final ServletContextHandler serverContextHandler = (ServletContextHandler) context;
-        
-        serverContextHandler.setErrorHandler(new KuraErrorHandler());
-        
-        final SessionCookieConfig cookieConfig = serverContextHandler.getSessionHandler().getSessionCookieConfig();
-        
+        final ServletContextHandler serletContextHandler = (ServletContextHandler) context;
+
+        serletContextHandler.setErrorHandler(new KuraErrorHandler());
+
+        final SessionCookieConfig cookieConfig = serletContextHandler.getSessionHandler().getSessionCookieConfig();
+
         cookieConfig.setHttpOnly(true);
-        cookieConfig.setPath("/");
-        
+
         return context;
     }
-    
+
     @Override
     public Object customizeHttpConnector(final Object connector, final Dictionary<String, ?> settings) {
         customizeConnector(connector);

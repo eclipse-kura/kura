@@ -42,7 +42,7 @@
             type="String"
             cardinality="0"
             required="true"
-            default="/admin"
+            default="/admin/console"
             description="Default Web Server Entry Point for Applications running of framework\'s Web Server">
         </AD>
 

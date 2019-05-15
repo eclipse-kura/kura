@@ -14,13 +14,12 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class BaseSecurityHandler implements SecurityHandler {
 
-    private final String appRoot;
-
-    public BaseSecurityHandler(final String appRoot) {
-        this.appRoot = appRoot;
-    }
+    private static final Logger logger = LoggerFactory.getLogger(BaseSecurityHandler.class);
 
     @Override
     public boolean handleSecurity(final HttpServletRequest request, final HttpServletResponse response)
@@ -31,19 +30,27 @@ public class BaseSecurityHandler implements SecurityHandler {
         response.setHeader("Cache-Control", "no-cache,no-store");
         response.setHeader("Pragma", "no-cache");
 
-        // If a trailing "/" is used when accesssing the app, redirect
-        if (request.getRequestURI().equals(this.appRoot + "/")) {
-            response.sendRedirect(this.appRoot);
-            return false;
-        }
-
-        // If using root context, redirect
-        if (request.getRequestURI().equals("/")) {
-            response.sendRedirect(this.appRoot);
-            return false;
-        }
+        fixTrailingSlashes(request, response);
 
         return true;
     }
 
+    private static void fixTrailingSlashes(final HttpServletRequest request, final HttpServletResponse response) {
+
+        final String path = request.getRequestURI();
+
+        if (!path.endsWith("/") || "/".contentEquals(path) || path.isEmpty()) {
+            return;
+        }
+
+        int end = path.length() - 1;
+        for (; end > 1 && path.charAt(end) == '/'; end--)
+            ;
+
+        try {
+            response.sendRedirect(path.substring(0, end + 1));
+        } catch (IOException e) {
+            logger.warn("unexpected exception", e);
+        }
+    }
 }

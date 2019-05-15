@@ -104,7 +104,7 @@ public class OsgiRemoteServiceServlet extends KuraRemoteServiceServlet {
             InputStream is = getServletContext().getResourceAsStream(serializationPolicyFilePath);
             if (is == null) {
                 // try: /www/denali/202D6ADA06C975A44587AEAB102E2B68.gwt.rpc
-                String file = "/www" + serializationPolicyFilePath;
+                String file = "/www" + serializationPolicyFilePath.replace("/admin", "");
                 log("Trying " + file);
                 is = Thread.currentThread().getContextClassLoader().getResourceAsStream(file);
             }

@@ -9,7 +9,7 @@ BlinkEffect.prototype.setEnabled = function (enabled) {
 	
 	if (enabled) {
 		this.eventSourceSessionId = new Date().getTime();
-		this.eventSource = new EventSource("/sse?session="
+		this.eventSource = new EventSource("/admin/sse?session="
 				+ this.eventSourceSessionId);
 		var self = this
 		this.eventSource.onmessage = function(event) {
@@ -28,7 +28,7 @@ BlinkEffect.prototype.setEnabled = function (enabled) {
 		this.eventSource.close();
 		this.eventSource = null;
 		var xmlHttp = new XMLHttpRequest();
-		xmlHttp.open("GET", "/sse?session=" + this.eventSourceSessionId
+		xmlHttp.open("GET", "/admin/sse?session=" + this.eventSourceSessionId
 				+ "&logout=" + this.eventSourceSessionId, true);
 		xmlHttp.send(null);
 	}

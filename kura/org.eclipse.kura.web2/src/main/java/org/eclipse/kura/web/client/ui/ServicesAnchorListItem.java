@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui;
 
+import org.eclipse.kura.web.Console;
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.gwtbootstrap3.client.ui.AnchorListItem;
@@ -29,7 +30,7 @@ import com.google.gwt.http.client.URL;
 
 public class ServicesAnchorListItem extends AnchorListItem {
 
-    private static final String SERVLET_URL = "/" + GWT.getModuleName() + "/file/icon?";
+    private static final String SERVLET_URL = Console.ADMIN_ROOT + '/' + GWT.getModuleName() + "/file/icon?";
 
     EntryClassUi ui;
     GwtConfigComponent item;

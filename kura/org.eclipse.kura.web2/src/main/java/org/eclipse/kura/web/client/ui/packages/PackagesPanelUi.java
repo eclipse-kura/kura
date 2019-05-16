@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.eclipse.kura.web.Console;
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.messages.ValidationMessages;
 import org.eclipse.kura.web.client.ui.AlertDialog;
@@ -75,7 +76,7 @@ public class PackagesPanelUi extends Composite {
     private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
     private final GwtPackageServiceAsync gwtPackageService = GWT.create(GwtPackageService.class);
 
-    private static final String SERVLET_URL = "/" + GWT.getModuleName() + "/file/deploy";
+    private static final String SERVLET_URL = Console.ADMIN_ROOT + '/' + GWT.getModuleName() + "/file/deploy";
 
     private static final Messages MSGS = GWT.create(Messages.class);
     private static final ValidationMessages VMSGS = GWT.create(ValidationMessages.class);
@@ -259,45 +260,47 @@ public class PackagesPanelUi extends Composite {
     }
 
     private void initModalHandlers() {
-        this.fileSubmit.addClickHandler(event -> PackagesPanelUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+        this.fileSubmit.addClickHandler(
+                event -> PackagesPanelUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
-            @Override
-            public void onFailure(Throwable ex) {
-                FailureHandler.handle(ex);
-            }
+                    @Override
+                    public void onFailure(Throwable ex) {
+                        FailureHandler.handle(ex);
+                    }
 
-            @Override
-            public void onSuccess(GwtXSRFToken token) {
-                PackagesPanelUi.this.xsrfTokenFieldFile.setValue(token.getToken());
-                if (!"".equals(PackagesPanelUi.this.filePath.getFilename())) {
-                    PackagesPanelUi.this.packagesFormFile.submit();
-                } else {
-                    PackagesPanelUi.this.uploadModal.hide();
-                    PackagesPanelUi.this.uploadErrorModal.show();
-                }
-            }
-        }));
+                    @Override
+                    public void onSuccess(GwtXSRFToken token) {
+                        PackagesPanelUi.this.xsrfTokenFieldFile.setValue(token.getToken());
+                        if (!"".equals(PackagesPanelUi.this.filePath.getFilename())) {
+                            PackagesPanelUi.this.packagesFormFile.submit();
+                        } else {
+                            PackagesPanelUi.this.uploadModal.hide();
+                            PackagesPanelUi.this.uploadErrorModal.show();
+                        }
+                    }
+                }));
 
         this.fileCancel.addClickHandler(event -> PackagesPanelUi.this.uploadModal.hide());
 
-        this.urlSubmit.addClickHandler(event -> PackagesPanelUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+        this.urlSubmit.addClickHandler(
+                event -> PackagesPanelUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
-            @Override
-            public void onFailure(Throwable ex) {
-                FailureHandler.handle(ex);
-            }
+                    @Override
+                    public void onFailure(Throwable ex) {
+                        FailureHandler.handle(ex);
+                    }
 
-            @Override
-            public void onSuccess(GwtXSRFToken token) {
-                if (!"".equals(PackagesPanelUi.this.formUrl.getValue())) {
-                    PackagesPanelUi.this.xsrfTokenFieldUrl.setValue(token.getToken());
-                    PackagesPanelUi.this.packagesFormUrl.submit();
-                } else {
-                    PackagesPanelUi.this.uploadModal.hide();
-                    PackagesPanelUi.this.uploadErrorModal.show();
-                }
-            }
-        }));
+                    @Override
+                    public void onSuccess(GwtXSRFToken token) {
+                        if (!"".equals(PackagesPanelUi.this.formUrl.getValue())) {
+                            PackagesPanelUi.this.xsrfTokenFieldUrl.setValue(token.getToken());
+                            PackagesPanelUi.this.packagesFormUrl.submit();
+                        } else {
+                            PackagesPanelUi.this.uploadModal.hide();
+                            PackagesPanelUi.this.uploadErrorModal.show();
+                        }
+                    }
+                }));
 
         this.urlCancel.addClickHandler(event -> PackagesPanelUi.this.uploadModal.hide());
 
@@ -589,7 +592,8 @@ public class PackagesPanelUi extends Composite {
                     final String url = event.getAsText();
                     packagesDropzone.removeStyleName(DROPZONE_ACTIVE_STYLE_NAME);
                     if (isEclipseMarketplaceUrl(url)) {
-                        confirmDialog.show(MSGS.packagesMarketplaceInstallConfirmMessage(), () -> eclipseMarketplaceInstall(url));
+                        confirmDialog.show(MSGS.packagesMarketplaceInstallConfirmMessage(),
+                                () -> eclipseMarketplaceInstall(url));
                     }
                     return true;
                 }

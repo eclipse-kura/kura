@@ -1153,10 +1153,10 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
     @Override
     public List<String> getDeviceManagementServiceIgnore() {
         String servicesToIgnore = this.kuraProperties.getProperty(CONFIG_CONSOLE_DEVICE_MANAGE_SERVICE_IGNORE);
+        List<String> services = new ArrayList<>();
         if (servicesToIgnore != null && !servicesToIgnore.trim().isEmpty()) {
             String[] servicesArray = servicesToIgnore.split(",");
             if (servicesArray != null && servicesArray.length > 0) {
-                List<String> services = new ArrayList<>();
                 for (String service : servicesArray) {
                     services.add(service);
                 }
@@ -1164,7 +1164,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             }
         }
 
-        return null;
+        return services;
     }
 
     // ----------------------------------------------------------------

@@ -486,7 +486,7 @@ Login START
 	width: 1cm;
 }
 
-.login-input:last-of-type {
+.login-input:not(:first-of-type) {
 	padding-top: 0.4cm;
 }
 

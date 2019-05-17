@@ -14,26 +14,34 @@
 
 	<b:Container fluid="true">
 
+<g:FormPanel ui:field="loginForm">
 		<b:Modal ui:field="loginDialog" title="Login" closable="false"
-			fade="true" dataBackdrop="STATIC" b:id="myModal">
+			fade="false" dataBackdrop="STATIC">
+			
 			<b:ModalBody>
-				<b:Container fluid="true">
-					<b:InputGroup addStyleNames="login-input">
-						<b:InputGroupAddon icon="USER" iconSize="LARGE" addStyleNames="login-icon"/>
-						<b:Input placeholder="Enter username" type="TEXT"
-							autoComplete="false" ui:field="usernameInput" b:id="login-user"/>
-					</b:InputGroup>
-					<b:InputGroup addStyleNames="login-input">
-						<b:InputGroupAddon icon="KEY" iconSize="LARGE" addStyleNames="login-icon"/>
-						<b:Input placeholder="Enter password" type="PASSWORD"
-							autoComplete="false" ui:field="passwordInput" b:id="login-password"/>
-					</b:InputGroup>
-				</b:Container>
+				
+						<b:InputGroup addStyleNames="login-input">
+							<b:InputGroupAddon icon="USER" iconSize="LARGE"
+								addStyleNames="login-icon" />
+							<b:Input placeholder="Enter username" type="TEXT"
+								autoComplete="false" ui:field="usernameInput" b:id="login-user" />
+						</b:InputGroup>
+						<b:InputGroup addStyleNames="login-input">
+							<b:InputGroupAddon icon="KEY" iconSize="LARGE"
+								addStyleNames="login-icon" />
+							<b:Input placeholder="Enter password" type="PASSWORD"
+								autoComplete="false" ui:field="passwordInput"
+								b:id="login-password" />
+						</b:InputGroup>
+					
 			</b:ModalBody>
 			<b:ModalFooter>
-				<b:Button text="Login" type="PRIMARY" ui:field="loginButton" b:id="login-button"/>
+				<b:SubmitButton text="Login" b:id="login-button" />
 			</b:ModalFooter>
+		
+				
 		</b:Modal>
+		</g:FormPanel>
 
 
 		<kura:AlertDialog ui:field="alertDialog" />

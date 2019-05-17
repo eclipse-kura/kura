@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2019 Eurotech and/or its affiliates, and others
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.cloudconnection.raw.mqtt.publisher.RawMqttPublisher" 
+         name="CloudPublisher" 
+         description="The CloudPublisher allows to define publishing parameters and provide a simple endpoint where the applications can attach to publish their messages.">
+        
+        <AD id="topic"
+        	name="Topic"
+        	type="String"
+        	cardinality="0"
+        	required="true"
+        	default=""
+        	description='The MQTT topic to publush messages on.'>
+        </AD>
+                    
+        <AD id="qos"
+            name="Qos"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="0"
+            description='The desired quality of service for the messages that have to be published. If Qos is 0, the message is delivered at most once, or it not delivered at all. If Qos is set to 1, the message is always delivered at least once. If set to 2, the message will be delivered exactly once.'>
+            <Option label="0" value="0" />
+            <Option label="1" value="1" />
+            <Option label="2" value="2" />
+        </AD>
+                    
+        <AD id="retain"
+            name="Retain"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Retaing flag for the published messages.">
+        </AD>
+            
+        <AD id="priority"
+            name="Priority"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="7"
+            description='The priority of the messages. 0 is highest priority. This parameter is related to the DataService component of the cloud stack.'>
+        </AD>
+    </OCD>
+    
+    <Designate pid="org.eclipse.kura.cloudconnection.raw.mqtt.publisher.RawMqttPublisher" factoryPid="org.eclipse.kura.cloudconnection.raw.mqtt.publisher.RawMqttPublisher">
+        <Object ocdref="org.eclipse.kura.cloudconnection.raw.mqtt.publisher.RawMqttPublisher"/>
+    </Designate>
+</MetaData>

@@ -14,23 +14,19 @@ import org.eclipse.kura.web.client.ui.AlertDialog.Severity;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.service.GwtPasswordAuthenticationService;
 import org.eclipse.kura.web.shared.service.GwtPasswordAuthenticationServiceAsync;
-import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.Input;
 import org.gwtbootstrap3.client.ui.Modal;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class LoginUi extends Composite {
-
-    private static final int ENTER_CHAR_CODE = 13;
 
     private final GwtPasswordAuthenticationServiceAsync pwdAutenticationService = GWT
             .create(GwtPasswordAuthenticationService.class);
@@ -45,31 +41,27 @@ public class LoginUi extends Composite {
     @UiField
     Input passwordInput;
     @UiField
-    Button loginButton;
-    @UiField
     AlertDialog alertDialog;
     @UiField
     Modal loginDialog;
+    @UiField
+    FormPanel loginForm;
 
     public LoginUi() {
         initWidget(uiBinder.createAndBindUi(this));
-
-        loginButton.addClickHandler(e -> login());
-
-        RootPanel.get().addDomHandler(e -> {
-
-            if (e.getCharCode() == ENTER_CHAR_CODE) {
-                login();
-            }
-        }, KeyPressEvent.getType());
-
-        loginDialog.show();
     }
 
     @Override
     protected void onAttach() {
         super.onAttach();
         usernameInput.setFocus(true);
+
+        loginForm.addSubmitHandler(e -> {
+            e.cancel();
+            login();
+        });
+
+        loginDialog.show();
     }
 
     private void login() {

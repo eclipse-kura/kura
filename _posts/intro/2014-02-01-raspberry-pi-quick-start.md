@@ -43,14 +43,14 @@ in order to enable it follow the instructions available at the following URL:
 To install Kura with its dependencies on the Raspberry Pi, perform the
 following steps:
 
-1.  Boot the Raspberry Pi with the latest Raspbian image (starting from release 2.1.0 Kura only supports Debian 8 or above).
+1. Boot the Raspberry Pi with the latest Raspbian image (starting from release 2.1.0 Kura only supports Debian 8 or above).
 
-2.  The dhcpcd5 package is not compatible with Kura and needs to be removed
+2. The dhcpcd5 package is not compatible with Kura and needs to be removed
     performing the following command:
 
     <pre>sudo apt-get purge dhcpcd5</pre>
 
-3.  NetworkManager conflicts with Kura network management, make sure that it is
+3. NetworkManager conflicts with Kura network management, make sure that it is
     not installed performing the following command:
 
     <pre>sudo apt-get remove network-manager</pre>
@@ -59,16 +59,16 @@ following steps:
 
     <pre>sudo systemctl disable networking</pre>
 
-4.  In the latest raspbian releases, the wireless interface is disabled by default. Type the following command to enabled it:
+4. In the latest raspbian releases, the wireless interface is disabled by default. Type the following command to enabled it:
 
     <pre>sudo rfkill unblock all</pre>
 
-5.  Install the gdebi command line tool:
+5. Install the gdebi command line tool:
 
     <pre>sudo apt-get update
     sudo apt-get install gdebi-core</pre>
 
-6.  Make sure that Java 8 is installed with
+6. Make sure that Java 8 is installed with
 
     <pre>java -version</pre>
 
@@ -76,31 +76,38 @@ following steps:
 
     <pre>sudo apt-get install openjdk-8-jre-headless</pre>
 
-7.  Download the Kura package with:
+7. Download the Kura package with:
 
     <pre>wget http://download.eclipse.org/kura/releases/&lt;version&gt;/kura_&lt;version&gt;_raspberry-pi-2-3_installer.deb</pre>
 
     Note: replace \<version\> in the URL above with the version number of the latest release (e.g. 2.1.0).
 
-8.  Install Kura with: 
+8. Install Kura with: 
 
     <pre>sudo gdebi kura_&lt;version&gt;_raspberry-pi-2-3_installer.deb</pre>
 
-9.  Reboot the Raspberry Pi with:
+9. Reboot the Raspberry Pi with:
 
     <pre>sudo reboot</pre>
 
     Kura starts on the target platform after reboot.
 
-10.  Kura setups a local web ui that is available using a browser via:
+10. Kura setups a local web ui that is available using a browser via:
 
-    <pre>http://&lt;device-ip&gt;</pre>
-
-    Default **username** is:
+    <pre>https://&lt;device-ip&gt;</pre>
+    
+    The browser will prompt the user to accept the connection to an endpoint with an untrusted certificate:
+    ![Untrusted certificate page]({{ site.baseurl }}/kura/assets/images/admin/untrusted_cert1.png)
+    
+    ![Untrusted certificate details]({{ site.baseurl }}/kura/assets/images/admin/untrusted_cert2.png)
+    
+    ![Proceed trusting the source]({{ site.baseurl }}/kura/assets/images/admin/untrusted_cert3.png)
+    
+    Once trusted the source, the user will be redirected to a login page where the default **username** is:
 
     <pre>admin</pre>
 
-    Default **password** is:
+    and the default **password** is:
 
     <pre>admin</pre>
 
@@ -119,6 +126,7 @@ downloaded from Java SE 8 Downloads. Use the latest version of Java SE Developme
 5.  Begin developing Kura-based applications for your target platform.
 
 ### Oomph Installer
+
 1. Start the Eclipse Installer
 1. Switch to advanced mode (in simple mode you cannot add the custom installer)
 1. Select "Eclipse for Committers" and select a JRE 1.8+ -> Next

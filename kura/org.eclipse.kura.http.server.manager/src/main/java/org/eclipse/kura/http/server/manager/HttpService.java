@@ -27,35 +27,36 @@ import java.security.SecureRandom;
 import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateException;
 import java.util.Arrays;
+import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.equinox.http.jetty.JettyConfigurator;
+import org.eclipse.equinox.http.jetty.JettyConstants;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.system.SystemService;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleException;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class HttpService implements ConfigurableComponent {
 
+    private static final String KURA_JETTY_PID = "kura.default";
     private static final String KURA_HTTPS_KEY_STORE_PASSWORD_KEY = "kura.https.keyStorePassword";
 
     private static final Logger logger = LoggerFactory.getLogger(HttpService.class);
 
     private ComponentContext componentContext;
-    private BundleContext bundleContext;
     private HttpServiceOptions options;
 
     private CryptoService cryptoService;
@@ -94,7 +95,6 @@ public class HttpService implements ConfigurableComponent {
     public void activate(ComponentContext context, Map<String, Object> properties) {
         logger.info("Activating {}", this.getClass().getSimpleName());
         this.componentContext = context;
-        this.bundleContext = context.getBundleContext();
 
         this.properties = properties;
 
@@ -105,8 +105,6 @@ public class HttpService implements ConfigurableComponent {
             if (isFirstBoot()) {
                 changeDefaultKeystorePassword();
             } else {
-                setSystemProperties();
-
                 activateHttpService();
             }
         }
@@ -131,7 +129,6 @@ public class HttpService implements ConfigurableComponent {
 
                 accessKeystore();
 
-                setSystemProperties();
                 activateHttpService();
             }
         }
@@ -152,12 +149,14 @@ public class HttpService implements ConfigurableComponent {
         }
     }
 
-    private void setSystemProperties() {
-        System.setProperty("org.eclipse.equinox.http.jetty.https.port", Integer.toString(this.options.getHttpsPort()));
-        System.setProperty("org.eclipse.equinox.http.jetty.https.enabled",
-                Boolean.toString(this.options.isHttpsEnabled()));
-        System.setProperty("org.eclipse.equinox.http.jetty.https.host", "0.0.0.0");
-        System.setProperty("org.eclipse.equinox.http.jetty.ssl.keystore", this.options.getHttpsKeystorePath());
+    private Dictionary<String, Object> getJettyConfig() {
+
+        final Hashtable<String, Object> config = new Hashtable<>();
+
+        config.put(JettyConstants.HTTP_PORT, this.options.getHttpsPort());
+        config.put(JettyConstants.HTTPS_ENABLED, this.options.isHttpsEnabled());
+        config.put(JettyConstants.HTTPS_HOST, "0.0.0.0");
+        config.put(JettyConstants.SSL_KEYSTORE, this.options.getHttpsKeystorePath());
 
         char[] decryptedPassword;
         try {
@@ -167,34 +166,37 @@ public class HttpService implements ConfigurableComponent {
             decryptedPassword = this.options.getHttpsKeystorePassword();
         }
 
-        System.setProperty("org.eclipse.equinox.http.jetty.ssl.password", new String(decryptedPassword));
+        config.put(JettyConstants.SSL_PASSWORD, new String(decryptedPassword));
+        config.put(JettyConstants.HTTP_PORT, this.options.getHttpPort());
+        config.put(JettyConstants.HTTP_ENABLED, this.options.isHttpEnabled());
 
-        System.setProperty("org.osgi.service.http.port", Integer.toString(this.options.getHttpPort()));
-        System.setProperty("org.eclipse.equinox.http.jetty.http.enabled",
-                Boolean.toString(this.options.isHttpEnabled()));
+        final String customizerClass = System
+                .getProperty(JettyConstants.PROPERTY_PREFIX + JettyConstants.CUSTOMIZER_CLASS);
+
+        if (customizerClass instanceof String) {
+            config.put(JettyConstants.CUSTOMIZER_CLASS, customizerClass);
+        }
+
+        return config;
     }
 
     private void activateHttpService() {
-        for (Bundle bundle : this.bundleContext.getBundles()) {
-            if (bundle.getSymbolicName().contains("org.eclipse.equinox.http.jetty")) {
-                try {
-                    bundle.start();
-                } catch (BundleException e) {
-                    logger.error("Could not start Jetty Web server", e);
-                }
-            }
+        try {
+            logger.info("starting Jetty instance...");
+            JettyConfigurator.startServer(KURA_JETTY_PID, getJettyConfig());
+            logger.info("starting Jetty instance...done");
+        } catch (final Exception e) {
+            logger.error("Could not start Jetty Web server", e);
         }
     }
 
     private void deactivateHttpService() {
-        for (Bundle bundle : this.bundleContext.getBundles()) {
-            if (bundle.getSymbolicName().contains("org.eclipse.equinox.http.jetty")) {
-                try {
-                    bundle.stop();
-                } catch (BundleException e) {
-                    logger.error("Could not stop Jetty Web server");
-                }
-            }
+        try {
+            logger.info("stopping Jetty instance...");
+            JettyConfigurator.stopServer(KURA_JETTY_PID);
+            logger.info("stopping Jetty instance...done");
+        } catch (final Exception e) {
+            logger.error("Could not stop Jetty Web server", e);
         }
     }
 

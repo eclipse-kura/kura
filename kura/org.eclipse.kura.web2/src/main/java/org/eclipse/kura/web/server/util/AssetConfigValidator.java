@@ -73,15 +73,15 @@ public class AssetConfigValidator {
         }
         if (!errorInChannel) {
             for (int i = 0; i < line.size(); i++) {
-                String token = line.get(i);
-                token = token.replace(" ", "_");
-                token = token.replace("#", "_");
-                token = token.replace("+", "_");
                 try {
-                    channelValues.add(validate(fullChannelMetatype.get(i), token, errors, this.lineNumber));
+                    String token = line.get(i);
                     if (fullChannelMetatype.get(i).getId().substring(1).equals("name")) {
+                        token = token.replace(" ", "_");
+                        token = token.replace("#", "_");
+                        token = token.replace("+", "_");
                         channelName = token;
                     }
+                    channelValues.add(validate(fullChannelMetatype.get(i), token, errors, this.lineNumber));
                 } catch (Exception ex) {
                     errorInChannel = true;
                 }

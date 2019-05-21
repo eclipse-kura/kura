@@ -20,7 +20,7 @@
         	cardinality="0"
         	required="true"
         	default=""
-        	description='The MQTT topic to publush messages on.'>
+        	description='The MQTT topic to publish messages on.'>
         </AD>
                     
         <AD id="qos"
@@ -29,7 +29,7 @@
             cardinality="0"
             required="true"
             default="0"
-            description='The desired quality of service for the messages that have to be published. If Qos is 0, the message is delivered at most once, or it not delivered at all. If Qos is set to 1, the message is always delivered at least once. If set to 2, the message will be delivered exactly once.'>
+            description='The desired quality of service for the messages that have to be published. If Qos is 0, the message is delivered at most once, or it is not delivered at all. If Qos is set to 1, the message is always delivered at least once. If set to 2, the message will be delivered exactly once.'>
             <Option label="0" value="0" />
             <Option label="1" value="1" />
             <Option label="2" value="2" />
@@ -41,7 +41,7 @@
             cardinality="0"
             required="true"
             default="false"
-            description="Retaing flag for the published messages.">
+            description="Retain flag for the published messages.">
         </AD>
             
         <AD id="priority"

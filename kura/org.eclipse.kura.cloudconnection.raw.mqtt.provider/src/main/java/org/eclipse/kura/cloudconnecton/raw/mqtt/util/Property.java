@@ -49,8 +49,8 @@ public class Property<T> {
         try {
             return (T) properties.get(key);
         } catch (final Exception e) {
-            throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID, "invalid property value for " + key,
-                    e);
+            throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID, null, null,
+                    "invalid property value for " + key, e);
         }
     }
 
@@ -97,7 +97,8 @@ public class Property<T> {
                 final T value = orig.get(properties);
 
                 if (!validator.test(value)) {
-                    throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
+                    throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID, null, null,
+                            "Validation failed for property " + key);
                 }
 
                 return value;

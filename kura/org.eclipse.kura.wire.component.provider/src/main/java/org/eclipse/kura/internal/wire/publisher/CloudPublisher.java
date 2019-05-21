@@ -236,7 +236,9 @@ public final class CloudPublisher implements WireReceiver, ConfigurableComponent
         try {
             final TypedValue<?> bodyPropertyValue = wireRecordProperties.get(bodyProperty);
 
-            if (bodyPropertyValue instanceof StringValue) {
+            if (bodyPropertyValue == null) {
+                logger.warn("The \"{}\" property is missing, message body will not be set", bodyProperty);
+            } else if (bodyPropertyValue instanceof StringValue) {
                 kuraPayload.setBody(((String) bodyPropertyValue.getValue()).getBytes(StandardCharsets.UTF_8));
             } else if (bodyPropertyValue instanceof ByteArrayValue) {
                 kuraPayload.setBody(((byte[]) bodyPropertyValue.getValue()));

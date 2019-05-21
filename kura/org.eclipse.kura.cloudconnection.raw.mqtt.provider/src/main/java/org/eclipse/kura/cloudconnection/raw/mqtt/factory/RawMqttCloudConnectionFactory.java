@@ -36,17 +36,17 @@ public class RawMqttCloudConnectionFactory implements CloudConnectionFactory {
     private static final String DATA_SERVICE_FACTORY_PID = "org.eclipse.kura.data.DataService";
     private static final String DATA_TRANSPORT_SERVICE_FACTORY_PID = "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport";
 
-    private static final String CLOUD_SERVICE_PID = "org.eclipse.kura.cloudconnection.raw.mqtt.cloud.RawMqttCloudEndpoint";
-    private static final String DATA_SERVICE_PID = "org.eclipse.kura.cloudconnection.eclipseiot.mqtt.DataService";
-    private static final String DATA_TRANSPORT_SERVICE_PID = "org.eclipse.kura.cloudconnection.eclipseiot.mqtt.MqttDataTransport";
+    private static final String CLOUD_SERVICE_PID = "org.eclipse.kura.cloudconnection.raw.mqtt.CloudEndpoint";
+    private static final String DATA_SERVICE_PID = "org.eclipse.kura.cloudconnection.raw.mqtt.DataService";
+    private static final String DATA_TRANSPORT_SERVICE_PID = "org.eclipse.kura.cloudconnection.raw.mqtt.MqttDataTransport";
 
     private static final String DATA_SERVICE_REFERENCE_NAME = "DataService";
     private static final String DATA_TRANSPORT_SERVICE_REFERENCE_NAME = "DataTransportService";
 
     private static final String REFERENCE_TARGET_VALUE_FORMAT = "(" + ConfigurationService.KURA_SERVICE_PID + "=%s)";
 
-    private static final Pattern MANAGED_CLOUD_SERVICE_PID_PATTERN = Pattern.compile(
-            "^org\\.eclipse\\.kura\\.cloudconnection\\.raw\\.mqtt\\.cloud\\.RawMqttCloudEndpoint(-[a-zA-Z0-9]+)?$");
+    private static final Pattern MANAGED_CLOUD_SERVICE_PID_PATTERN = Pattern
+            .compile("^org\\.eclipse\\.kura\\.cloudconnection\\.raw\\.mqtt\\.CloudEndpoint(-[a-zA-Z0-9]+)?$");
 
     private ConfigurationService configurationService;
 

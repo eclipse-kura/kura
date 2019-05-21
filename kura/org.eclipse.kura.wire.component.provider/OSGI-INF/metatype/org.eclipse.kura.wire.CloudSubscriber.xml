@@ -27,7 +27,7 @@
             cardinality="0"
             required="false"
             default=""
-            description="If set to a non empty value, the publisher will add a metric to the emitted envelope containing with the content of the body of received message. The name of the emitted property is the value of this parameter, its type depends on the Body property type parameter">
+            description="If set to a non empty value, the publisher will add a metric to the emitted envelope containing the received message body content. The name of the emitted property is the value of this parameter, its type depends on the Body property type parameter">
         </AD>
         
         <AD id="body.property.type"
@@ -36,7 +36,7 @@
             cardinality="0"
             required="true"
             default="BYTE_ARRAY"
-            description="Defines the type of the metric containing payload body.">
+            description="Defines the payload body type.">
             <Option label="STRING" value="STRING" />
             <Option label="BYTE_ARRAY" value="BYTE_ARRAY" />
         </AD>

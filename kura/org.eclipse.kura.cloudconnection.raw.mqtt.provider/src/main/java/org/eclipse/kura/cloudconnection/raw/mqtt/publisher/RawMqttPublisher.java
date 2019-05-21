@@ -52,13 +52,13 @@ public class RawMqttPublisher extends AbstractStackComponent<PublishOptions>
         final Optional<PublishOptions> publishOptions = currentOptions.getComponentOptions();
 
         if (!publishOptions.isPresent()) {
-            throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, "invalid publish configuration");
+            throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, null, null, "invalid publish configuration");
         }
 
         final Optional<RawMqttCloudEndpoint> currentEndpoint = getEndpoint();
 
         if (!currentEndpoint.isPresent()) {
-            throw new KuraException(KuraErrorCode.NOT_FOUND, "cloud endpoint not bound");
+            throw new KuraException(KuraErrorCode.NOT_FOUND, null, null, "cloud endpoint not bound");
         }
 
         return currentEndpoint.get().publish(publishOptions.get(), message.getPayload());

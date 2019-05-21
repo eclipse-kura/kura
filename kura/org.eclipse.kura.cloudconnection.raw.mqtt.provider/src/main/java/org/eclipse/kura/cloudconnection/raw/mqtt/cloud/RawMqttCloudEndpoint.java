@@ -141,7 +141,7 @@ public class RawMqttCloudEndpoint
         final byte[] body = kuraPayload.getBody();
 
         if (body == null) {
-            throw new KuraException(KuraErrorCode.INVALID_PARAMETER, "missing message body");
+            throw new KuraException(KuraErrorCode.INVALID_PARAMETER, null, null, "missing message body");
         }
 
         final int qos = options.getQos().getValue();

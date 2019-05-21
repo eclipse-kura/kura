@@ -611,7 +611,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
      * Returns ip of the first interface name of which begins with <code>prefix</code>.
      *
      * @param prefix
-     *                   network interface name prefix e.g. eth, wlan
+     *            network interface name prefix e.g. eth, wlan
      * @return ip of the first interface name of which begins with prefix; null if none found with ip
      * @throws SocketException
      */
@@ -987,8 +987,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             if (displayTmp.length() > 0) {
                 deviceName = displayTmp;
             }
-        } else if (OS_LINUX.equals(getOsName()) || OS_CLOUDBEES.equals(getOsName())
-                || getOsName().toLowerCase().startsWith(OS_WINDOWS)) {
+        } else if (OS_LINUX.equals(getOsName()) || OS_CLOUDBEES.equals(getOsName()) || getOsName().toLowerCase().startsWith(OS_WINDOWS)) {
             String displayTmp = runSystemCommand("hostname");
             if (displayTmp.length() > 0) {
                 deviceName = displayTmp;
@@ -1199,8 +1198,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
         if (OS_MAC_OSX.equals(getOsName())) {
             hostname = runSystemCommand("scutil --get ComputerName");
-        } else if (OS_LINUX.equals(getOsName()) || OS_CLOUDBEES.equals(getOsName())
-                || getOsName().toLowerCase().startsWith(OS_WINDOWS)) {
+        } else if (OS_LINUX.equals(getOsName()) || OS_CLOUDBEES.equals(getOsName()) || getOsName().toLowerCase().startsWith(OS_WINDOWS)) {
             hostname = runSystemCommand("hostname");
         }
 

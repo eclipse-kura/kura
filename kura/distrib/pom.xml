@@ -1814,7 +1814,7 @@
         </profile>
         
         <profile>
-            <id>firefly-rk3399-ubuntu-16</id>
+            <id>firefly-rk3399-ubuntu-18</id>
             <properties>
                 <project.raspbian.dependencies>hostapd, isc-dhcp-server, iw, dos2unix, bind9, unzip, ethtool, telnet, bluez-hcidump,
                     wireless-tools, java8-runtime-headless | java8-runtime</project.raspbian.dependencies>
@@ -1849,7 +1849,7 @@
                         <version>1.7</version>
                         <executions>
                             <execution>
-                                <id>firefly-rk3399-ubuntu-16-jars</id>
+                                <id>firefly-rk3399-ubuntu-18-jars</id>
                                 <phase>prepare-package</phase>
                                 <goals>
                                     <goal>run</goal>
@@ -1860,11 +1860,11 @@
                                         <property name="project.version" value="${project.version}" />
                                         <property name="project.build.profile" value="${project.build.profile}" />
                                         <property name="project.build.directory" value="${project.build.directory}" />
-                                        <property name="build.name" value="firefly-rk3399-ubuntu-16" />
-                                        <property name="target.device" value="firefly-rk3399-ubuntu-16" />
+                                        <property name="build.name" value="firefly-rk3399-ubuntu-18" />
+                                        <property name="target.device" value="firefly-rk3399-ubuntu-18" />
                                         <property name="native.tag" value="aarch64" />
                                         <property name="kura.os.version" value="ubuntu" />
-                                        <property name="kura.arch" value="firefly-rk3399-ubuntu-16" />
+                                        <property name="kura.arch" value="firefly-rk3399-ubuntu-18" />
                                         <property name="service.manager" value="sysv" />
                                         <property name="os.base" value="debian" />
                                         <property name="kura.mem.size" value="1024m" />
@@ -1881,18 +1881,18 @@
                         <version>1.0</version>
                         <executions>
                             <execution>
-                                <id>firefly-rk3399-ubuntu-16-deb</id>
+                                <id>firefly-rk3399-ubuntu-18-deb</id>
                                 <phase>package</phase>
                                 <goals>
                                     <goal>jdeb</goal>
                                 </goals>
                                 <configuration>
                                     <verbose>true</verbose>
-                                    <deb>${basedir}/target/kura_${project.version}_firefly-rk3399-ubuntu-16_installer.deb</deb>
+                                    <deb>${basedir}/target/kura_${project.version}_firefly-rk3399-ubuntu-18_installer.deb</deb>
                                     <controlDir>${basedir}/src/main/deb/control</controlDir>
                                     <dataSet>
                                         <data>
-                                            <src>${basedir}/target/kura_${project.version}_firefly-rk3399-ubuntu-16.zip</src>
+                                            <src>${basedir}/target/kura_${project.version}_firefly-rk3399-ubuntu-18.zip</src>
                                             <type>file</type>
                                             <mapper>
                                                 <type>perm</type>

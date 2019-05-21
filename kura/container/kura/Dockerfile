@@ -70,10 +70,9 @@ RUN \
     dp-install "https://repo1.maven.org/maven2/de/dentrassi/kura/addons/de.dentrassi.kura.addons.utils.fileinstall/0.6.0/de.dentrassi.kura.addons.utils.fileinstall-0.6.0.dp" && \
     add-config-ini "felix.fileinstall.disableNio2=true" && \
     add-config-ini "felix.fileinstall.dir=/load" && \
-    sed -ie "s/org.osgi.service.http.port=.*/org.osgi.service.http.port=8080/g" "${KURA_DIR}/framework/config.ini" && \
     pack-kura
 
-EXPOSE 8080
+EXPOSE 443
 
 VOLUME ["/load"]
 

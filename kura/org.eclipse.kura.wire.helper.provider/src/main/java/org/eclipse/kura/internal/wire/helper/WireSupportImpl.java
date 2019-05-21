@@ -54,6 +54,8 @@ final class WireSupportImpl implements WireSupport, MultiportWireSupport {
 
     private final String servicePid;
 
+    private final String kuraServicePid;
+
     private final Map<Wire, ReceiverPortImpl> receiverPortByWire;
 
     WireSupportImpl(final WireComponent wireComponent, final String servicePid, final String kuraServicePid,
@@ -63,6 +65,7 @@ final class WireSupportImpl implements WireSupport, MultiportWireSupport {
         requireNonNull(kuraServicePid, "kura service pid cannot be null");
 
         this.servicePid = servicePid;
+        this.kuraServicePid = kuraServicePid;
         this.wireComponent = wireComponent;
 
         if (inputPortCount < 0) {

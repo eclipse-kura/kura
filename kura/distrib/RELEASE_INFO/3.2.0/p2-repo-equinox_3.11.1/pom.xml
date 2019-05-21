@@ -116,8 +116,7 @@
                                     <artifactId>org.eclipse.equinox.http.servlet</artifactId>
                                     <version>${org.eclipse.equinox.http.servlet.version}</version>
                                 </artifactItem>
-                            </artifactItems>
-                            <stripVersion>true</stripVersion>
+                            </artifactItems><stripVersion>true</stripVersion>
                             <stripVersion>true</stripVersion>
                             <outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>
                         </configuration>

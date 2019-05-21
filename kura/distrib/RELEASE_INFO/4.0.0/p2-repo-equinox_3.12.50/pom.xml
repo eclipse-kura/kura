@@ -109,8 +109,7 @@
                                     <artifactId>org.eclipse.equinox.wireadmin</artifactId>
                                     <version>1.0.800</version>
                                 </artifactItem>
-                            </artifactItems>
-                            <stripVersion>true</stripVersion>
+                            </artifactItems><stripVersion>true</stripVersion>
                             <stripVersion>true</stripVersion>
                             <outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>
                         </configuration>

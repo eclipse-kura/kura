@@ -53,34 +53,6 @@
                 <esf:value>org.eclipse.kura.clock.ClockService</esf:value>
             </esf:property>
         </esf:properties>
-        </esf:configuration>
-        <esf:configuration pid="org.eclipse.kura.db.H2DbService">
-        <esf:properties>
-            <esf:property array="false" encrypted="false" name="db.user" type="String">
-                <esf:value>SA</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="db.connection.pool.max.size" type="Integer">
-                <esf:value>10</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="db.connector.url" type="String">
-                <esf:value>jdbc:h2:mem:kuradb</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="db.defrag.interval.minutes" type="Integer">
-                <esf:value>15</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="service.factoryPid" type="String">
-                <esf:value>org.eclipse.kura.core.db.H2DbService</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="db.checkpoint.interval.seconds" type="Integer">
-                <esf:value>900</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="kura.service.pid" type="String">
-                <esf:value>org.eclipse.kura.db.H2DbService</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="service.pid" type="String">
-                <esf:value>org.eclipse.kura.core.db.H2DbService-1552047873140-3</esf:value>
-            </esf:property>
-        </esf:properties>
     </esf:configuration>
     <esf:configuration pid="org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport">
         <esf:properties>

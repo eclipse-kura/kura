@@ -1482,6 +1482,9 @@ fi]]>
 			<zipfileset
 				file="../target-definition/common/repository/plugins/com.gwt.user_${com.gwt.user.version}.jar"
 				prefix="${build.output.name}/${plugins.folder}" />
+			<zipfileset
+				file="${project.build.directory}/plugins/org.eclipse.kura.http.server.manager_${org.eclipse.kura.http.server.manager.version}.jar"
+				prefix="${build.output.name}/${plugins.folder}" />
 		</zip>
 	</target>
 

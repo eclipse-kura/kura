@@ -803,7 +803,7 @@ fi]]>
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.equinox.wireadmin_${org.eclipse.equinox.wireadmin.version}.jar@3:start" />
 			<entry key="osgi.bundles" operation="+"
-				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.equinox.http.jetty_${org.eclipse.equinox.http.jetty.version}.jar@5:start" />
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.equinox.http.jetty_${org.eclipse.equinox.http.jetty.version}.jar@5" />
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.jetty.customizer_${org.eclipse.kura.jetty.customizer.version}.jar" />
 			<entry key="osgi.bundles" operation="+"
@@ -1046,6 +1046,8 @@ fi]]>
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/com.gwt.user_${com.gwt.user.version}.jar@3" />
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.web2_${org.eclipse.kura.web2.version}.jar@6:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.http.server.manager_${org.eclipse.kura.http.server.manager.version}.jar@5:start" />
 		</propertyfile>
 	</target>
 

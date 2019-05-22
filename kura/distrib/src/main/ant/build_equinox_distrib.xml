@@ -663,6 +663,16 @@ fi]]>
 			<zipfileset
 				file="${project.build.directory}/plugins/org.eclipse.kura.linux_${org.eclipse.kura.linux.version}.jar"
 				prefix="${build.output.name}/${plugins.folder}" />
+			  <!-- additional configs -->
+            <zipfileset
+                file="${project.build.directory}/plugins/org.eclipse.kura.driver.opcua.provider_${org.eclipse.kura.driver.opcua.provider.version}.jar"
+                prefix="${build.output.name}/${plugins.folder}" />
+			<zipfileset
+                file="${project.build.directory}/plugins/org.eclipse.kura.driver.s7plc.provider_${org.eclipse.kura.driver.s7plc.provider.version}.jar"
+                prefix="${build.output.name}/${plugins.folder}" />
+            <zipfileset
+                file="${project.build.directory}/plugins/org.eclipse.kura.protocol.modbus_${org.eclipse.kura.protocol.modbus.version}.jar"
+                prefix="${build.output.name}/${plugins.folder}" />
 		</zip>
 
 		<antcall target="camel-jar" />
@@ -882,6 +892,15 @@ fi]]>
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/com.google.gson_${com.google.gson.version}.jar@3" />
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.commons.csv_${org.apache.commons.csv.version}.jar@3" />
+			<!-- additional configs -->
+			<entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.felix.fileinstall_${org.apache.felix.fileinstall.version}.jar@3:start" />
+            <entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.driver.opcua.provider_${org.eclipse.kura.driver.opcua.provider.version}.jar@4:start" />
+			<entry key="osgi.bundles" operation="+"
+			    value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.driver.s7plc.provider_${org.eclipse.kura.driver.s7plc.provider.version}.jar@4:start" />
+            <entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.protocol.modbus_${org.eclipse.kura.protocol.modbus.version}.jar@4:start" />
 		</propertyfile>
 	</target>
 

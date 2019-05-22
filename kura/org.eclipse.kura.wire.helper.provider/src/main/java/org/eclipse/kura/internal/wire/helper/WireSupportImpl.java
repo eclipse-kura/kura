@@ -24,6 +24,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 import org.eclipse.kura.wire.WireComponent;
@@ -54,7 +60,7 @@ final class WireSupportImpl implements WireSupport, MultiportWireSupport {
 
     private final String servicePid;
 
-    private final String kuraServicePid;
+    private final ExecutorService receiverExecutor;
 
     private final Map<Wire, ReceiverPortImpl> receiverPortByWire;
 
@@ -63,9 +69,9 @@ final class WireSupportImpl implements WireSupport, MultiportWireSupport {
         requireNonNull(wireComponent, "Wire component cannot be null");
         requireNonNull(servicePid, "service pid cannot be null");
         requireNonNull(kuraServicePid, "kura service pid cannot be null");
-
+        receiverExecutor = new ThreadPoolExecutor(2, 10, 60L, TimeUnit.SECONDS, new SynchronousQueue<>(),
+                new WireDefaultThreadFactory(kuraServicePid), new ThreadPoolExecutor.DiscardOldestPolicy());
         this.servicePid = servicePid;
-        this.kuraServicePid = kuraServicePid;
         this.wireComponent = wireComponent;
 
         if (inputPortCount < 0) {
@@ -126,12 +132,16 @@ final class WireSupportImpl implements WireSupport, MultiportWireSupport {
         List<CompletableFuture<Void>> futures = new ArrayList<>();
         for (EmitterPort emitterPort : this.emitterPorts) {
             CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-                emitterPort.emit(envelope);
+                try {
+                    emitterPort.emit(envelope);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
             });
             futures.add(future);
         }
         try {
-            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).get();
+            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
         } catch (Exception e) {
             logger.error("emit error", e);
         }
@@ -172,10 +182,12 @@ final class WireSupportImpl implements WireSupport, MultiportWireSupport {
         }
         final WireEnvelope envelope = (WireEnvelope) value;
         if (wireComponent instanceof WireReceiver) {
-            ((WireReceiver) this.wireComponent).onWireReceive(envelope);
+            receiverExecutor.execute(() -> ((WireReceiver) WireSupportImpl.this.wireComponent).onWireReceive(envelope));
         } else {
-            final ReceiverPortImpl receiverPort = this.receiverPortByWire.get(wire);
-            receiverPort.consumer.accept(envelope);
+            receiverExecutor.execute(() -> {
+                final ReceiverPortImpl receiverPort = WireSupportImpl.this.receiverPortByWire.get(wire);
+                receiverPort.consumer.accept(envelope);
+            });
         }
     }
 
@@ -225,5 +237,28 @@ final class WireSupportImpl implements WireSupport, MultiportWireSupport {
     @Override
     public WireEnvelope createWireEnvelope(List<WireRecord> records) {
         return new WireEnvelope(servicePid, records);
+    }
+
+    static class WireDefaultThreadFactory implements ThreadFactory {
+
+        private static final AtomicInteger poolNumber = new AtomicInteger(1);
+        private final ThreadGroup group;
+        private final AtomicInteger threadNumber = new AtomicInteger(1);
+        private final String namePrefix;
+
+        WireDefaultThreadFactory(String name) {
+            SecurityManager s = System.getSecurityManager();
+            group = (s != null) ? s.getThreadGroup() : Thread.currentThread().getThreadGroup();
+            namePrefix = "WirePool-" + poolNumber.getAndIncrement() + "-" + name + "-";
+        }
+
+        public Thread newThread(Runnable r) {
+            Thread t = new Thread(group, r, namePrefix + threadNumber.getAndIncrement(), 0);
+            if (t.isDaemon())
+                t.setDaemon(false);
+            if (t.getPriority() != Thread.NORM_PRIORITY)
+                t.setPriority(Thread.NORM_PRIORITY);
+            return t;
+        }
     }
 }

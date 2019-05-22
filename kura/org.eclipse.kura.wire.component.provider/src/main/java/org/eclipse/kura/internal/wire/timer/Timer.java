@@ -40,6 +40,7 @@ import org.quartz.SchedulerException;
 import org.quartz.SimpleScheduleBuilder;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
+import org.quartz.UnableToInterruptJobException;
 import org.quartz.impl.StdSchedulerFactory;
 
 /**
@@ -70,7 +71,7 @@ public class Timer implements WireEmitter, ConfigurableComponent {
      * Binds the Wire Helper Service.
      *
      * @param wireHelperService
-     *            the new Wire Helper Service
+     *                              the new Wire Helper Service
      */
     public void bindWireHelperService(final WireHelperService wireHelperService) {
         if (isNull(this.wireHelperService)) {
@@ -82,7 +83,7 @@ public class Timer implements WireEmitter, ConfigurableComponent {
      * Unbinds the Wire Helper Service.
      *
      * @param wireHelperService
-     *            the new Wire Helper Service
+     *                              the new Wire Helper Service
      */
     public void unbindWireHelperService(final WireHelperService wireHelperService) {
         if (this.wireHelperService == wireHelperService) {
@@ -94,9 +95,9 @@ public class Timer implements WireEmitter, ConfigurableComponent {
      * OSGi service component activation callback
      *
      * @param ctx
-     *            the component context
+     *                       the component context
      * @param properties
-     *            the configured properties
+     *                       the configured properties
      */
     @SuppressWarnings("unchecked")
     protected void activate(final ComponentContext ctx, final Map<String, Object> properties) {
@@ -116,7 +117,7 @@ public class Timer implements WireEmitter, ConfigurableComponent {
      * OSGi service component modification callback
      *
      * @param properties
-     *            the updated properties
+     *                       the updated properties
      */
     protected void updated(final Map<String, Object> properties) {
         logger.debug("Updating Timer...");
@@ -133,7 +134,7 @@ public class Timer implements WireEmitter, ConfigurableComponent {
      * OSGi service component deactivation callback
      *
      * @param ctx
-     *            the component context
+     *                the component context
      */
     protected void deactivate(final ComponentContext ctx) {
         logger.debug("Dectivating Timer...");
@@ -146,18 +147,25 @@ public class Timer implements WireEmitter, ConfigurableComponent {
     private void shutdownScheduler() {
         try {
             if (nonNull(this.scheduler) && nonNull(this.jobKey)) {
-                this.scheduler.interrupt(this.jobKey);
-                this.scheduler.deleteJob(this.jobKey);
+                try {
+                    this.scheduler.interrupt(this.jobKey);
+                } catch (UnableToInterruptJobException e) {
+                    logger.warn("Scheduler UnableToInterrupt exception.", e);
+                }
+                try {
+                    this.scheduler.deleteJob(this.jobKey);
+                } catch (SchedulerException e) {
+                    logger.warn("Scheduler deleteJob exception.", e);
+                }
+
                 this.jobKey = null;
             }
-        } catch (final SchedulerException e) {
-            logger.error("Scheduler exception.", e);
         } finally {
             if (this.scheduler != null) {
                 try {
                     this.scheduler.shutdown();
                 } catch (SchedulerException e) {
-                    logger.warn("Scheduler exception.", e);
+                    logger.warn("Scheduler shutdown exception.", e);
                 }
                 this.scheduler = null;
             }
@@ -188,40 +196,34 @@ public class Timer implements WireEmitter, ConfigurableComponent {
      * interval
      *
      * @throws SchedulerException
-     *             if job scheduling fails
+     *                                if job scheduling fails
      */
     private void doUpdate() throws SchedulerException {
         shutdownScheduler();
         if (this.wireSupport.getEmitterPorts().get(0).listConnectedWires().isEmpty())
             return;
-        if ("SIMPLE".equalsIgnoreCase(this.timerOptions.getType())) {
-            scheduleSimpleInterval(
-                    this.timerOptions.getSimpleInterval() * this.timerOptions.getSimpleTimeUnitMultiplier());
-            return;
-        }
-        final String cronExpression = this.timerOptions.getCronExpression();
-        scheduleCronInterval(cronExpression);
+        forceUpdate();
     }
 
     private void forceUpdate() throws SchedulerException {
         if ("SIMPLE".equalsIgnoreCase(this.timerOptions.getType())) {
             scheduleSimpleInterval(
                     this.timerOptions.getSimpleInterval() * this.timerOptions.getSimpleTimeUnitMultiplier());
-            return;
+        } else {
+            final String cronExpression = this.timerOptions.getCronExpression();
+            scheduleCronInterval(cronExpression);
         }
-        final String cronExpression = this.timerOptions.getCronExpression();
-        scheduleCronInterval(cronExpression);
     }
 
     /**
      * Creates a trigger based on the provided interval
      *
      * @param interval
-     *            the interval in milliseconds
+     *                     the interval in milliseconds
      * @throws SchedulerException
-     *             if scheduling fails
+     *                                      if scheduling fails
      * @throws IllegalArgumentException
-     *             if the interval is less than or equal to zero
+     *                                      if the interval is less than or equal to zero
      */
     private void scheduleSimpleInterval(final long interval) throws SchedulerException {
         if (interval <= 0) {
@@ -249,11 +251,11 @@ public class Timer implements WireEmitter, ConfigurableComponent {
      * Creates a cron trigger based on the provided interval
      *
      * @param expression
-     *            the CRON expression
+     *                       the CRON expression
      * @throws SchedulerException
-     *             if scheduling fails
+     *                                  if scheduling fails
      * @throws NullPointerException
-     *             if the argument is null
+     *                                  if the argument is null
      */
     private void scheduleCronInterval(final String expression) throws SchedulerException {
         requireNonNull(expression, "Cron Expression cannot be null");

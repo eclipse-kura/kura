@@ -32,11 +32,11 @@
     </Appenders>
  
     <Loggers>
-        <Logger name="org.eclipse" level="info" additivity="false">
+        <Logger name="org.eclipse" level="warn" additivity="false">
             <AppenderRef ref="RollingFile"/>
         </Logger>
  
-        <Root level="info">
+        <Root level="warn">
             <AppenderRef ref="RollingFile"/>
         </Root>
   </Loggers>

@@ -30,7 +30,7 @@ import org.osgi.framework.ServiceReference;
 public class XmlConfigPropertiesAdapter {
 
     public XmlConfigPropertiesAdapted marshal(Map<String, Object> props) throws Exception {
-        List<XmlConfigPropertyAdapted> adaptedValues = new ArrayList<XmlConfigPropertyAdapted>();
+        List<XmlConfigPropertyAdapted> adaptedValues = new ArrayList<>();
         if (props != null) {
 
             for (Entry<String, Object> prop : props.entrySet()) {

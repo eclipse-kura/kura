@@ -23,7 +23,7 @@
 	
 	<properties>
 		<kura.basedir>${project.basedir}/..</kura.basedir>
-        <quartz.version>2.3.0_2</quartz.version>
+        <quartz.version>2.3.1_1</quartz.version>
 	</properties>
     <build>
         <plugins>

@@ -89,7 +89,7 @@ public class WireGraphServiceImpl implements ConfigurableComponent, WireGraphSer
      * Binds the {@link WireAdmin} dependency
      *
      * @param wireAdmin
-     *            the new {@link WireAdmin} service dependency
+     *                      the new {@link WireAdmin} service dependency
      */
     public void bindWireAdmin(final WireAdmin wireAdmin) {
         if (isNull(this.wireAdmin)) {
@@ -101,7 +101,7 @@ public class WireGraphServiceImpl implements ConfigurableComponent, WireGraphSer
      * Unbinds {@link WireAdmin} dependency
      *
      * @param wireAdmin
-     *            the new {@link WireAdmin} instance
+     *                      the new {@link WireAdmin} instance
      */
     public void unbindWireAdmin(final WireAdmin wireAdmin) {
         if (this.wireAdmin == wireAdmin) {
@@ -414,6 +414,7 @@ public class WireGraphServiceImpl implements ConfigurableComponent, WireGraphSer
 
         Set<String> oldPids = oldWireComponentConfigurations.stream().map(com -> com.getConfiguration().getPid())
                 .collect(Collectors.toSet());
+
         List<WireComponentConfiguration> toDels = newWireComponentConfigurations.stream()
                 .filter(newCom -> !oldPids.contains(newCom.getConfiguration().getPid())).collect(Collectors.toList());
         componentsToCreate.addAll(toDels);
@@ -423,8 +424,9 @@ public class WireGraphServiceImpl implements ConfigurableComponent, WireGraphSer
 
     private Set<WireComponentConfiguration> getComponentsToDelete(
             List<WireComponentConfiguration> oldWireComponentConfigurations,
-            List<WireComponentConfiguration> newWireComponentConfigurations) {
+            List<WireComponentConfiguration> newWireComponentConfigurations) throws KuraException {
         Set<WireComponentConfiguration> componentsToDelete = new HashSet<>();
+        Set<WireComponentConfiguration> componentsToDelete1 = new HashSet<>();
 
         Set<String> newPids = newWireComponentConfigurations.stream().map(com -> com.getConfiguration().getPid())
                 .collect(Collectors.toSet());
@@ -432,6 +434,17 @@ public class WireGraphServiceImpl implements ConfigurableComponent, WireGraphSer
                 .filter(pid -> !newPids.contains(pid.getConfiguration().getPid())).collect(Collectors.toSet());
         componentsToDelete.addAll(toDels);
 
+        List<ComponentConfiguration> configServiceComponentConfigurations = this.configurationService
+                .getComponentConfigurations(WIRE_COMPONENT_FILTER);
+        for (ComponentConfiguration configServiceComponentConfiguration : configServiceComponentConfigurations) {
+            String pid = configServiceComponentConfiguration.getPid();
+            if (!newPids.contains(pid)
+                    && componentsToDelete.stream().noneMatch(conf -> conf.getConfiguration().getPid().equals(pid))) {
+                componentsToDelete1.add(new WireComponentConfiguration(configServiceComponentConfiguration,
+                        configServiceComponentConfiguration.getConfigurationProperties()));
+            }
+        }
+        componentsToDelete.addAll(componentsToDelete1);
         return componentsToDelete;
 
     }
@@ -470,20 +483,20 @@ public class WireGraphServiceImpl implements ConfigurableComponent, WireGraphSer
 
         List<WireComponentConfiguration> completeWireComponentConfigurations = new ArrayList<>();
         for (WireComponentConfiguration wireComponentConfiguration : wireComponentConfigurations) {
-            ComponentConfiguration componentConfiguration = wireComponentConfiguration.getConfiguration();
-            Map<String, Object> componentProperties = wireComponentConfiguration.getProperties();
-            String componentPid = componentConfiguration.getPid();
+            ComponentConfiguration wComponentConfiguration = wireComponentConfiguration.getConfiguration();
+            Map<String, Object> wComponentProperties = wireComponentConfiguration.getProperties();
+            String wComponentPid = wComponentConfiguration.getPid();
 
             for (ComponentConfiguration configServiceComponentConfiguration : configServiceComponentConfigurations) {
-                if (componentPid.equals(configServiceComponentConfiguration.getPid())) {
-                    componentConfiguration = new ComponentConfigurationImpl(componentPid,
+                if (wComponentPid.equals(configServiceComponentConfiguration.getPid())) {
+                    wComponentConfiguration = new ComponentConfigurationImpl(wComponentPid,
                             (Tocd) configServiceComponentConfiguration.getDefinition(),
                             configServiceComponentConfiguration.getConfigurationProperties());
                     break;
                 }
             }
             completeWireComponentConfigurations
-                    .add(new WireComponentConfiguration(componentConfiguration, componentProperties));
+                    .add(new WireComponentConfiguration(wComponentConfiguration, wComponentProperties));
         }
 
         return new WireGraphConfiguration(completeWireComponentConfigurations,

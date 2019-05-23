@@ -1,16 +1,16 @@
 <!--
 
     Copyright (c) 2011, 2019 Eurotech and others
-    
+
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
      which accompanies this distribution, and is available at
      http://www.eclipse.org/legal/epl-v10.html
-     
+
     Contributors:
       Eurotech
       Red Hat Inc
-      
+
 -->
 <project name="build_equinox_distrib" default="dist-linux"
 	basedir="../../../">
@@ -29,7 +29,7 @@
 		<property name="security.folder" value="${user.config.folder}/security" />
 		<property name="console.folder" value="${user.config.folder}/console" />
 
-		<!-- Loads entries from a manifest file. @jar The jar from where to read 
+		<!-- Loads entries from a manifest file. @jar The jar from where to read
 			@prefix A prefix to prepend -->
 		<macrodef name="loadmf">
 			<attribute name="jar" />
@@ -135,6 +135,7 @@
 		<antcall target="core.certificates-config" />
 		<antcall target="core.cloud-config" />
 		<antcall target="cloud.mqtt.eclipseiot-config" />
+		<antcall target="cloud.mqtt.raw-config" />
 		<antcall target="core.comm-config" />
 		<antcall target="core.configuration-config" />
 		<antcall target="core.crypto-config" />
@@ -174,7 +175,7 @@
 		<!-- Miscellaneous bundles config -->
 		<antcall target="misc-config" />
 
-		<!-- Conditional entries. Check for jar presence, and invoke relevant ant 
+		<!-- Conditional entries. Check for jar presence, and invoke relevant ant
 			target -->
 		<available
 			file="${project.build.directory}/plugins/org.eclipse.kura.web2_${org.eclipse.kura.web2.version}.jar"
@@ -607,6 +608,9 @@ fi]]>
 				file="${project.build.directory}/plugins/org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider_${org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider.version}.jar"
 				prefix="${build.output.name}/${plugins.folder}" />
 			<zipfileset
+				file="${project.build.directory}/plugins/org.eclipse.kura.cloudconnection.raw.mqtt.provider_${org.eclipse.kura.cloudconnection.raw.mqtt.provider.version}.jar"
+				prefix="${build.output.name}/${plugins.folder}" />
+			<zipfileset
 				file="${project.build.directory}/plugins/org.eclipse.kura.core.comm_${org.eclipse.kura.core.comm.version}.jar"
 				prefix="${build.output.name}/${plugins.folder}" />
 			<zipfileset
@@ -921,6 +925,14 @@ fi]]>
 			file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider_${org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider.version}.jar@4:start" />
+		</propertyfile>
+	</target>
+
+	<target name="cloud.mqtt.raw-config">
+		<propertyfile
+			file="${project.build.directory}/${build.output.name}/config.ini">
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.cloudconnection.raw.mqtt.provider_${org.eclipse.kura.cloudconnection.raw.mqtt.provider.version}.jar@4:start" />
 		</propertyfile>
 	</target>
 

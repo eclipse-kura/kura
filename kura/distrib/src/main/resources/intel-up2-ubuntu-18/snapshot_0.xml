@@ -3,18 +3,14 @@
     <esf:configuration pid="org.eclipse.kura.net.admin.FirewallConfigurationService">
 	<esf:properties>
 	    <esf:property array="false" encrypted="false" name="firewall.open.ports" type="String">
-<<<<<<< HEAD
-                <esf:value>22,tcp,,,,,,#;443,tcp,,enp2s0,,,,#;443,tcp,,enp3s0,,,,#;443,tcp,,wlp4s0,,,,#;443,tcp,10.234.0.0/16,,,,,#;80,tcp,,enp2s0,,,,#;80,tcp,,enp3s0,,,,#;80,tcp,,wlp4s0,,,,#;80,tcp,10.234.0.0/16,,,,,#;8088,tcp,,enp2s0,,,,#;8088,tcp,,enp3s0,,,,#;8088,tcp,,wlp4s0,,,,#;8088,tcp,10.234.0.0/16,,,,,#;1450,tcp,,enp2s0,,,,#;1450,tcp,,enp3s0,,,,#;1450,tcp,,wlp4s0,,,,#;5002,tcp,127.0.0.1/32,,,,,#;53,udp,,enp2s0,,,,#;53,udp,,enp3s0,,,,#;53,udp,,wlp4s0,,,,#;67,udp,,enp2s0,,,,#;67,udp,,enp3s0,,,,#;67,udp,,wlp4s0,,,,#;8000,tcp,,enp2s0,,,,#;8000,tcp,,enp3s0,,,,#;8000,tcp,,wlp4s0,,,,#;5353,udp,,enp2s0,,,,#;5353,udp,,enp3s0,,,,#;5353,udp,,wlp4s0,,,,#</esf:value>
-=======
-                <esf:value>22,tcp,,,,,,#;443,tcp,,enp2s0,,,,#;443,tcp,,enp3s0,,,,#;443,tcp,,wlp4s0,,,,#;443,tcp,10.234.0.0/16,,,,,#;1450,tcp,,enp2s0,,,,#;1450,tcp,,enp3s0,,,,#;1450,tcp,,wlp4s0,,,,#;5002,tcp,127.0.0.1/32,,,,,#;53,udp,,enp2s0,,,,#;53,udp,,enp3s0,,,,#;53,udp,,wlp4s0,,,,#;67,udp,,enp2s0,,,,#;67,udp,,enp3s0,,,,#;67,udp,,wlp4s0,,,,#;8000,tcp,,enp2s0,,,,#;8000,tcp,,enp3s0,,,,#;8000,tcp,,wlp4s0,,,,#;5353,udp,,enp2s0,,,,#;5353,udp,,enp3s0,,,,#;5353,udp,,wlp4s0,,,,#</esf:value>
->>>>>>> refs/remotes/origin/develop
-            </esf:property>
+            <esf:value>22,tcp,,,,,,#;443,tcp,,enp2s0,,,,#;443,tcp,,enp3s0,,,,#;443,tcp,,wlp4s0,,,,#;443,tcp,10.234.0.0/16,,,,,#;80,tcp,,enp2s0,,,,#;80,tcp,,enp3s0,,,,#;80,tcp,,wlp4s0,,,,#;80,tcp,10.234.0.0/16,,,,,#;8088,tcp,,enp2s0,,,,#;8088,tcp,,enp3s0,,,,#;8088,tcp,,wlp4s0,,,,#;8088,tcp,10.234.0.0/16,,,,,#;1450,tcp,,enp2s0,,,,#;1450,tcp,,enp3s0,,,,#;1450,tcp,,wlp4s0,,,,#;5002,tcp,127.0.0.1/32,,,,,#;53,udp,,enp2s0,,,,#;53,udp,,enp3s0,,,,#;53,udp,,wlp4s0,,,,#;67,udp,,enp2s0,,,,#;67,udp,,enp3s0,,,,#;67,udp,,wlp4s0,,,,#;8000,tcp,,enp2s0,,,,#;8000,tcp,,enp3s0,,,,#;8000,tcp,,wlp4s0,,,,#;5353,udp,,enp2s0,,,,#;5353,udp,,enp3s0,,,,#;5353,udp,,wlp4s0,,,,#</esf:value>
+        </esf:property>
 	    <esf:property array="false" encrypted="false" name="firewall.port.forwarding" type="String">
-                <esf:value></esf:value>
-            </esf:property>
+            <esf:value></esf:value>
+        </esf:property>
 	    <esf:property array="false" encrypted="false" name="firewall.nat" type="String">
-                <esf:value></esf:value>
-            </esf:property>
+            <esf:value></esf:value>
+        </esf:property>
 	</esf:properties>
     </esf:configuration>
     <esf:configuration pid="org.eclipse.kura.net.admin.NetworkConfigurationService">

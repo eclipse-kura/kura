@@ -43,8 +43,4 @@ cp ${INSTALL_DIR}/kura/user/snapshots/snapshot_0.xml ${INSTALL_DIR}/kura/.data/s
 cp ${INSTALL_DIR}/kura/install/recover_default_config.init ${INSTALL_DIR}/kura/bin/.recoverDefaultConfig.sh
 chmod +x ${INSTALL_DIR}/kura/bin/.recoverDefaultConfig.sh
 
-<<<<<<< HEAD
 keytool -genkey -alias localhost -keyalg RSA -keysize 2048 -keystore /opt/eclipse/kura/user/security/httpskeystore.ks -deststoretype pkcs12 -dname "CN=YOFC, OU=YOFC, O=YOFC IOT, L=湖北, S=武汉, C=中国" -validity 1000 -storepass changeit -keypass changeit  
-=======
-keytool -genkey -alias localhost -keyalg RSA -keysize 2048 -keystore /opt/eclipse/kura/user/security/httpskeystore.ks -deststoretype pkcs12 -dname "CN=Kura, OU=Kura, O=Eclipse Foundation, L=Ottawa, S=Ontario, C=CA" -validity 1000 -storepass changeit -keypass changeit  
->>>>>>> refs/remotes/origin/develop

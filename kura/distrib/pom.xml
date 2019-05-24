@@ -505,6 +505,14 @@
                                     <artifactId>org.eclipse.kura.http.server.manager</artifactId>
                                     <version>${org.eclipse.kura.http.server.manager.version}</version>
                                 </artifactItem>
+<<<<<<< HEAD
+=======
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.cloudconnection.raw.mqtt.provider</artifactId>
+                                    <version>${org.eclipse.kura.cloudconnection.raw.mqtt.provider.version}</version>
+                                </artifactItem>
+>>>>>>> refs/remotes/origin/develop
                             </artifactItems>
                             <stripVersion>true</stripVersion>
                             <outputDirectory>${project.basedir}/target/plugins</outputDirectory>
@@ -715,6 +723,11 @@
                                     tofile="target/plugins/org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider_${org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.http.server.manager.jar"
                                     tofile="target/plugins/org.eclipse.kura.http.server.manager_${org.eclipse.kura.http.server.manager.version}.jar" />
+<<<<<<< HEAD
+=======
+                                <move file="target/plugins/org.eclipse.kura.cloudconnection.raw.mqtt.provider.jar"
+                                    tofile="target/plugins/org.eclipse.kura.cloudconnection.raw.mqtt.provider_${org.eclipse.kura.cloudconnection.raw.mqtt.provider.version}.jar" />
+>>>>>>> refs/remotes/origin/develop
                             </tasks>
                         </configuration>
                     </execution>
@@ -2141,6 +2154,10 @@
 
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider_${org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider.version}.jar"
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
+
+                                        <copy
+                                            file="${project.build.directory}/plugins/org.eclipse.kura.cloudconnection.raw.mqtt.provider_${org.eclipse.kura.cloudconnection.raw.mqtt.provider.version}.jar"
                                             todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
                                     </target>
                                 </configuration>

@@ -94,6 +94,7 @@
         <module>org.eclipse.kura.wire.component.join.provider</module>
 
         <module>org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider</module>
+        <module>org.eclipse.kura.cloudconnection.raw.mqtt.provider</module>
 
         <module>org.eclipse.kura.linux.sysv.provider</module>
         <module>org.eclipse.kura.linux.systemd.provider</module>

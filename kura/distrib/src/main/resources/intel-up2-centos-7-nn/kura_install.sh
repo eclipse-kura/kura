@@ -49,7 +49,11 @@ cp ${INSTALL_DIR}/kura/install/kura.logrotate /etc/logrotate.d/kura
 # Setup tmpfiles.d
 cp ${INSTALL_DIR}/kura/install/kura-tmpfiles.conf /usr/lib/tmpfiles.d/kura.conf
 
+<<<<<<< HEAD
 keytool -genkey -alias localhost -keyalg RSA -keysize 2048 -keystore /opt/eclipse/kura/user/security/httpskeystore.ks -deststoretype pkcs12 -dname "CN=YOFC, OU=YOFC, O=YOFC IOT, L=湖北, S=武汉, C=中国" -validity 1000 -storepass changeit -keypass changeit  
+=======
+keytool -genkey -alias localhost -keyalg RSA -keysize 2048 -keystore /opt/eclipse/kura/user/security/httpskeystore.ks -deststoretype pkcs12 -dname "CN=Kura, OU=Kura, O=Eclipse Foundation, L=Ottawa, S=Ontario, C=CA" -validity 1000 -storepass changeit -keypass changeit  
+>>>>>>> refs/remotes/origin/develop
 # execute patch_sysctl.sh from installer install folder
 chmod 700 ${INSTALL_DIR}/kura/install/patch_sysctl.sh 
 ${INSTALL_DIR}/kura/install/patch_sysctl.sh ${INSTALL_DIR}/kura/install/sysctl.kura.conf /etc/sysctl.conf

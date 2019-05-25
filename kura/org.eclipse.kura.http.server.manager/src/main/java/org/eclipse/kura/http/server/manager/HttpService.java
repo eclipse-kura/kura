@@ -45,6 +45,7 @@ import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.system.SystemService;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,6 +94,12 @@ public class HttpService implements ConfigurableComponent {
     }
 
     public void activate(ComponentContext context, Map<String, Object> properties) {
+        ServiceReference<?> osgiHttpService = context.getBundleContext()
+                .getServiceReference("org.osgi.service.http.HttpService");
+        if (osgiHttpService != null) {
+            logger.warn("Default http server is running. Use default http server");
+            return;
+        }
         logger.info("Activating {}", this.getClass().getSimpleName());
         this.componentContext = context;
 
@@ -107,7 +114,8 @@ public class HttpService implements ConfigurableComponent {
             } else {
                 activateHttpService();
             }
-        }
+        } else
+            activateOnlyHttpService();
 
         logger.info("Activating... Done.");
     }
@@ -130,6 +138,9 @@ public class HttpService implements ConfigurableComponent {
                 accessKeystore();
 
                 activateHttpService();
+            } else {
+                deactivateHttpService();
+                activateOnlyHttpService();
             }
         }
 
@@ -178,6 +189,36 @@ public class HttpService implements ConfigurableComponent {
         }
 
         return config;
+    }
+
+    private Dictionary<String, Object> getJettyHttpConfig() {
+
+        final Hashtable<String, Object> config = new Hashtable<>();
+
+        config.put(JettyConstants.HTTP_PORT, this.options.getHttpPort());
+        config.put(JettyConstants.HTTP_ENABLED, this.options.isHttpEnabled());
+
+        config.put(JettyConstants.HTTPS_ENABLED, false);
+
+        final String customizerClass = System
+                .getProperty(JettyConstants.PROPERTY_PREFIX + JettyConstants.CUSTOMIZER_CLASS);
+
+        if (customizerClass instanceof String) {
+            config.put(JettyConstants.CUSTOMIZER_CLASS, customizerClass);
+        }
+
+        return config;
+    }
+
+    private void activateOnlyHttpService() {
+        logger.warn("no keystore https disabled.");
+        try {
+            logger.info("starting Jetty http only instance...");
+            JettyConfigurator.startServer(KURA_JETTY_PID, getJettyHttpConfig());
+            logger.info("starting Jetty http onlny instance...done");
+        } catch (final Exception e) {
+            logger.error("Could not start Jetty http only Web server", e);
+        }
     }
 
     private void activateHttpService() {

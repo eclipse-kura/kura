@@ -57,7 +57,7 @@ public class Emulator {
             }
 
         } catch (Exception e) {
-            logger.error("Framework is not running in emulation mode or initialization failed!: " + e.getMessage());
+            logger.error("Framework is not running in emulation mode or initialization failed!: ", e);
         }
     }
 
@@ -66,23 +66,15 @@ public class Emulator {
     }
 
     private void copySnapshot(String snapshotFolderPath) throws IOException {
-        InputStream fileInput = null;
-        OutputStream fileOutput = null;
-        try {
-            URL internalSnapshotURL = this.m_componentContext.getBundleContext().getBundle()
-                    .getResource(SNAPSHOT_0_NAME);
-            fileInput = internalSnapshotURL.openStream();
-            fileOutput = new FileOutputStream(snapshotFolderPath + File.separator + SNAPSHOT_0_NAME);
+        URL internalSnapshotURL = this.m_componentContext.getBundleContext().getBundle().getResource(SNAPSHOT_0_NAME);
+        try (InputStream fileInput = internalSnapshotURL.openStream();
+                OutputStream fileOutput = new FileOutputStream(snapshotFolderPath + File.separator + SNAPSHOT_0_NAME)) {
+
             if (fileInput != null) {
                 IOUtils.copy(fileInput, fileOutput);
             }
-        } finally {
-            if (fileOutput != null) {
-                fileOutput.close();
-            }
-            if (fileInput != null) {
-                fileInput.close();
-            }
+        } catch (Exception e) {
+            logger.error("copy snapshot file error", e);
         }
     }
 }

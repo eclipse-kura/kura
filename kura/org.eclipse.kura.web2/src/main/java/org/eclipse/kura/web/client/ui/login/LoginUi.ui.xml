@@ -11,11 +11,11 @@
 	xmlns:g="urn:import:com.google.gwt.user.client.ui"
 	xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt"
 	xmlns:kura="urn:import:org.eclipse.kura.web.client.ui">
-
+    <ui:with field="msgs" type="org.eclipse.kura.web.client.messages.Messages"></ui:with>
 	<b:Container fluid="true">
 
 <g:FormPanel ui:field="loginForm">
-		<b:Modal ui:field="loginDialog" title="Login" closable="false"
+		<b:Modal ui:field="loginDialog" title="{msgs.login}" closable="false"
 			fade="false" dataBackdrop="STATIC">
 			
 			<b:ModalBody>
@@ -23,20 +23,20 @@
 						<b:InputGroup addStyleNames="login-input">
 							<b:InputGroupAddon icon="USER" iconSize="LARGE"
 								addStyleNames="login-icon" />
-							<b:Input placeholder="Enter username" type="TEXT"
+							<b:Input placeholder="{msgs.usernameInput}" type="TEXT"
 								autoComplete="false" ui:field="usernameInput" b:id="login-user" />
 						</b:InputGroup>
 						<b:InputGroup addStyleNames="login-input">
 							<b:InputGroupAddon icon="KEY" iconSize="LARGE"
 								addStyleNames="login-icon" />
-							<b:Input placeholder="Enter password" type="PASSWORD"
+							<b:Input placeholder="{msgs.passwordInput}" type="PASSWORD"
 								autoComplete="false" ui:field="passwordInput"
 								b:id="login-password" />
 						</b:InputGroup>
 					
 			</b:ModalBody>
 			<b:ModalFooter>
-				<b:SubmitButton text="Login" b:id="login-button" />
+				<b:SubmitButton text="{msgs.login}" b:id="login-button" />
 			</b:ModalFooter>
 		
 				

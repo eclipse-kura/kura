@@ -31,7 +31,7 @@
             type="Integer"
             cardinality="0" 
             required="true"
-            default="80" 
+            default="8080" 
             description="Allows to specify the port used by the http service for plain, unencrypted communication.">
         </AD>
         

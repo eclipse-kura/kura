@@ -25,6 +25,15 @@
             description="S7 PLC Host IP Address">
         </AD>
         
+        <AD id="host.port"
+            name="host.port"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="102"
+            description="S7 PLC Port">
+        </AD>
+        
         <AD id="rack"
             name="rack"
             type="Integer"

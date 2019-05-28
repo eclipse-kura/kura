@@ -18,6 +18,7 @@ import java.util.Map;
 final class S7PlcOptions {
 
     private static final Property<String> IP_PROP = new Property<>("host.ip", "");
+    private static final Property<Integer> PORT_PROP = new Property<>("host.port", 102);
     private static final Property<Boolean> AUTENTICATE_PROP = new Property<>("authenticate", false);
     private static final Property<String> PASSWORD_PROP = new Property<>("password", "");
     private static final Property<Integer> RACK_PROP = new Property<>("rack", 0);
@@ -25,6 +26,7 @@ final class S7PlcOptions {
     private static final Property<Integer> MINIMUM_GAP_SIZE_PROP = new Property<>("read.minimum.gap.size", 0);
 
     private final String ip;
+    private final int port;
     private final boolean authenticate;
     private final String password;
     private final int rack;
@@ -33,6 +35,7 @@ final class S7PlcOptions {
 
     S7PlcOptions(final Map<String, Object> properties) {
         this.ip = IP_PROP.get(properties);
+        this.port = PORT_PROP.get(properties);
         this.authenticate = AUTENTICATE_PROP.get(properties);
         this.password = PASSWORD_PROP.get(properties);
         this.rack = RACK_PROP.get(properties);
@@ -42,6 +45,10 @@ final class S7PlcOptions {
 
     String getIp() {
         return ip;
+    }
+
+    public int getPort() {
+        return port;
     }
 
     boolean shouldAuthenticate() {

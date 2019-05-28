@@ -74,6 +74,7 @@ public class S7Client {
     private DataOutputStream OutStream = null;
 
     private String IPAddress;
+    private int TCPPort;
 
     private byte LocalTSAP_HI;
     private byte LocalTSAP_LO;
@@ -279,7 +280,7 @@ public class S7Client {
     }
 
     private int TCPConnect() {
-        SocketAddress sockaddr = new InetSocketAddress(this.IPAddress, ISOTCP);
+        SocketAddress sockaddr = new InetSocketAddress(this.IPAddress, TCPPort);
         this.LastError = 0;
         try {
             this.TCPSocket = new Socket();
@@ -499,8 +500,13 @@ public class S7Client {
     }
 
     public int ConnectTo(String Address, int Rack, int Slot) {
+        // Use the default port
+        return ConnectTo(Address, Rack, Slot, ISOTCP);
+    }
+
+    public int ConnectTo(String Address, int Rack, int Slot, int Port) {
         int RemoteTSAP = (this.ConnType << 8) + Rack * 0x20 + Slot;
-        SetConnectionParams(Address, 0x0100, RemoteTSAP);
+        SetConnectionParams(Address, Port, 0x0100, RemoteTSAP);
         return Connect();
     }
 
@@ -509,8 +515,13 @@ public class S7Client {
     }
 
     public void SetConnectionParams(String Address, int LocalTSAP, int RemoteTSAP) {
+        SetConnectionParams(Address, ISOTCP, LocalTSAP, RemoteTSAP);
+    }
+
+    public void SetConnectionParams(String Address, int Port, int LocalTSAP, int RemoteTSAP) {
         int LocTSAP = LocalTSAP & 0x0000FFFF;
         int RemTSAP = RemoteTSAP & 0x0000FFFF;
+        this.TCPPort = Port;
         this.IPAddress = Address;
         this.LocalTSAP_HI = (byte) (LocTSAP >> 8);
         this.LocalTSAP_LO = (byte) (LocTSAP & 0x00FF);

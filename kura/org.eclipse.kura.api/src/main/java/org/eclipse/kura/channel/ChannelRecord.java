@@ -105,11 +105,11 @@ public class ChannelRecord {
      * Creates a channel record that represents a read request.
      * 
      * @param channelName
-     *            The name of the channel
+     *                        The name of the channel
      * @param valueType
-     *            The type of the value to be read
+     *                        The type of the value to be read
      * @throws NullPointerException
-     *             If any of the provided arguments is null
+     *                                  If any of the provided arguments is null
      * @return the channel record
      */
     public static ChannelRecord createReadRecord(final String channelName, final DataType valueType) {
@@ -127,11 +127,11 @@ public class ChannelRecord {
      * Creates a channel record that represents a write request.
      * 
      * @param channelName
-     *            The name of the channel
+     *                        The name of the channel
      * @param value
-     *            The value to be written
+     *                        The value to be written
      * @throws NullPointerException
-     *             If any of the provided arguments is null
+     *                                  If any of the provided arguments is null
      * @return the channel record
      */
     public static ChannelRecord createWriteRecord(final String channelName, final TypedValue<?> value) {
@@ -150,11 +150,11 @@ public class ChannelRecord {
      * Creates a channel record that describes the status of an operation.
      * 
      * @param channelName
-     *            The name of the channel
+     *                        The name of the channel
      * @param status
-     *            The status
+     *                        The status
      * @throws NullPointerException
-     *             If any of the provided arguments is null
+     *                                  If any of the provided arguments is null
      * @return the channel record
      */
     public static ChannelRecord createStatusRecord(final String channelName, final ChannelStatus status) {
@@ -199,9 +199,9 @@ public class ChannelRecord {
      * Sets the channel configuration as provided.
      *
      * @param channelConfig
-     *            the channel configuration
+     *                          the channel configuration
      * @throws NullPointerException
-     *             if the argument is null
+     *                                  if the argument is null
      */
     public void setChannelConfig(final Map<String, Object> channelConfig) {
         requireNonNull(channelConfig, "Channel configuration cannot be null");
@@ -212,9 +212,9 @@ public class ChannelRecord {
      * Sets the status.
      *
      * @param status
-     *            the new driver status
+     *                   the new driver status
      * @throws NullPointerException
-     *             if the argument is null
+     *                                  if the argument is null
      */
     public void setChannelStatus(final ChannelStatus status) {
         requireNonNull(status, "Channel Status cannot be null");
@@ -225,7 +225,7 @@ public class ChannelRecord {
      * Sets the timestamp as provided.
      *
      * @param timestamp
-     *            the new timestamp
+     *                      the new timestamp
      */
     public void setTimestamp(final long timestamp) {
         this.timestamp = timestamp;
@@ -262,9 +262,9 @@ public class ChannelRecord {
      * Sets the value associated to the operation represented by this channel record
      * 
      * @param value
-     *            the value to be set
+     *                  the value to be set
      * @throws NullPointerException
-     *             if the provided value is null
+     *                                  if the provided value is null
      */
     public void setValue(TypedValue<?> value) {
         requireNonNull(value, "Value cannot be null");

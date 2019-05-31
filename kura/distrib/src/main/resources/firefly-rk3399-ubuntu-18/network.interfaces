@@ -11,5 +11,3 @@ iface lo inet loopback
 auto eth0
 iface eth0 inet dhcp
 
-auto enx006f00001ee1
-iface enx006f00001ee1 inet dhcp

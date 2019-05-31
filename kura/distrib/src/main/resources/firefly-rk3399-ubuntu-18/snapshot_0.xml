@@ -3,7 +3,7 @@
     <esf:configuration pid="org.eclipse.kura.net.admin.FirewallConfigurationService">
     	<esf:properties>
     	    <esf:property array="false" encrypted="false" name="firewall.open.ports" type="String">
-                    <esf:value>8000,tcp,0.0.0.0/0,enx006f00001ee1,,,,#;8000,tcp,0.0.0.0/0,eth0,,,,#;67,udp,0.0.0.0/0,enx006f00001ee1,,,,#;67,udp,0.0.0.0/0,eth0,,,,#;53,udp,0.0.0.0/0,enx006f00001ee1,,,,#;53,udp,0.0.0.0/0,eth0,,,,#;5002,tcp,127.0.0.1/32,,,,,#;1450,tcp,0.0.0.0/0,enx006f00001ee1,,,,#;1450,tcp,0.0.0.0/0,eth0,,,,#;443,tcp,10.234.0.0/16,,,,,#;443,tcp,0.0.0.0/0,enx006f00001ee1,,,,#;443,tcp,0.0.0.0/0,eth0,,,,#;22,tcp,10.234.0.0/16,,,,,#;22,tcp,0.0.0.0/0,enx006f00001ee1,,,,#;22,tcp,0.0.0.0/0,eth0,,,,#;5353,udp,0.0.0.0/0,enx006f00001ee1,,,,#;5353,udp,0.0.0.0/0,eth0,,,,#;80,tcp,0.0.0.0/0,,,,,#</esf:value>
+                    <esf:value>8000,tcp,0.0.0.0/0,eth0,,,,#;67,udp,0.0.0.0/0,eth0,,,,#;53,udp,0.0.0.0/0,eth0,,,,#;5002,tcp,127.0.0.1/32,,,,,#;1450,tcp,0.0.0.0/0,eth0,,,,#;443,tcp,10.234.0.0/16,,,,,#;443,tcp,0.0.0.0/0,eth0,,,,#;22,tcp,10.234.0.0/16,,,,,#;22,tcp,0.0.0.0/0,eth0,,,,#;5353,udp,0.0.0.0/0,eth0,,,,#;80,tcp,0.0.0.0/0,,,,,#</esf:value>
                 </esf:property>
     	    <esf:property array="false" encrypted="false" name="firewall.port.forwarding" type="String">
                     <esf:value></esf:value>
@@ -14,102 +14,30 @@
     	</esf:properties>
     </esf:configuration>
     <esf:configuration pid="org.eclipse.kura.net.admin.NetworkConfigurationService">
-        <esf:properties>
-            <esf:property array="false" name="net.interface.lo.mac" type="String">
-                <esf:value>00:00:00:00:00:00</esf:value>
-            </esf:property>            
+        <esf:properties>           
             <esf:property array="false" name="net.interfaces" type="String">
-                <esf:value>lo,eth0,enx006f00001ee1</esf:value>
+                <esf:value>lo,eth0</esf:value>
             </esf:property>       
-            <esf:property array="false" name="net.interface.enx006f00001ee1.up" type="Boolean">
-                <esf:value>true</esf:value>
-            </esf:property>
-            <esf:property array="false" name="net.interface.lo.config.ip4.dnsServers" type="String">
-                <esf:value></esf:value>
-            </esf:property>
             <esf:property array="false" name="net.interface.eth0.config.state" type="String">
                 <esf:value>ACTIVATED</esf:value>
             </esf:property>    
-            <esf:property array="false" name="net.interface.lo.config.ip4.status" type="String">
-                <esf:value>netIPv4StatusEnabledLAN</esf:value>
-            </esf:property>
-            <esf:property array="false" name="net.interface.enx006f00001ee1.config.ip4.status" type="String">
-                <esf:value>netIPv4StatusEnabledLAN</esf:value>
-            </esf:property>
-            <esf:property array="false" name="net.interface.lo.ip4.netmask" type="String">
-                <esf:value>255.0.0.0</esf:value>
-            </esf:property>
-            <esf:property array="false" name="net.interface.lo.virtual" type="Boolean">
-                <esf:value>false</esf:value>
-            </esf:property>
-            <esf:property array="false" name="net.interface.enx006f00001ee1.virtual" type="Boolean">
-                <esf:value>false</esf:value>
-            </esf:property>
             <esf:property array="false" name="net.interface.eth0.ptp" type="Boolean">
                 <esf:value>false</esf:value>
             </esf:property>
             <esf:property array="false" name="net.interface.eth0.config.dhcpClient4.enabled" type="Boolean">
                 <esf:value>true</esf:value>
             </esf:property>
-            <esf:property array="false" name="net.interface.lo.config.name" type="String">
-                <esf:value>lo</esf:value>
-            </esf:property>
-            <esf:property array="false" name="net.interface.lo.ip4.prefix" type="Short">
-                <esf:value>8</esf:value>
-            </esf:property>
-            <esf:property array="false" name="net.interface.enx006f00001ee1.eth.link.up" type="Boolean">
-                <esf:value>false</esf:value>
-            </esf:property>
-            <esf:property array="false" name="net.interface.lo.loopback" type="Boolean">
-                <esf:value>true</esf:value>
-            </esf:property>
-            <esf:property array="false" name="net.interface.enx006f00001ee1.config.name" type="String">
-                <esf:value>enx006f00001ee1</esf:value>
-            </esf:property>
             <esf:property array="false" name="net.interface.eth0.loopback" type="Boolean">
                 <esf:value>false</esf:value>
-            </esf:property>
-            <esf:property array="false" name="net.interface.enx006f00001ee1.config.state" type="String">
-                <esf:value>ACTIVATED</esf:value>
-            </esf:property>
+            </esf:property>         
             <esf:property array="false" name="net.interface.eth0.config.dhcpServer4.enabled" type="Boolean">
                 <esf:value>false</esf:value>
-            </esf:property>
-            <esf:property array="false" name="net.interface.lo.config.state" type="String">
-                <esf:value>ACTIVATED</esf:value>
             </esf:property>
             <esf:property array="false" name="net.interface.eth0.config.ip4.dnsServers" type="String">
                 <esf:value></esf:value>
             </esf:property>
-            <esf:property array="false" name="net.interface.enx006f00001ee1.driver.version" type="String">
-                <esf:value> 22-Dec-2011</esf:value>
-            </esf:property>
-            <esf:property array="false" name="net.interface.enx006f00001ee1.usb.devicePath" type="String">
-                <esf:value>1</esf:value>
-            </esf:property>
-            <esf:property array="false" name="net.interface.lo.ip4.broadcast" type="String">
-                <esf:value>127.0.0.1</esf:value>
-            </esf:property>
-            <esf:property array="false" name="net.interface.enx006f00001ee1.config.dhcpClient4.enabled" type="Boolean">
-                <esf:value>true</esf:value>
-            </esf:property>
-            <esf:property array="false" name="net.interface.lo.type" type="String">
-                <esf:value>LOOPBACK</esf:value>
-            </esf:property>
-            <esf:property array="false" name="net.interface.lo.driver.version" type="String">
-                <esf:value>unknown</esf:value>
-            </esf:property>
             <esf:property array="false" name="net.interface.eth0.driver" type="String">
                 <esf:value> st_gmac</esf:value>
-            </esf:property>
-            <esf:property array="false" name="net.interface.lo.config.mtu" type="Integer">
-                <esf:value>65536</esf:value>
-            </esf:property>
-            <esf:property array="false" name="net.interface.lo.driver" type="String">
-                <esf:value>unknown</esf:value>
-            </esf:property>
-            <esf:property array="false" name="net.interface.lo.config.ip4.address" type="String">
-                <esf:value></esf:value>
             </esf:property>
             <esf:property array="false" name="net.interface.eth0.type" type="String">
                 <esf:value>ETHERNET</esf:value>
@@ -126,6 +54,36 @@
             <esf:property array="false" name="net.interface.eth0.config.name" type="String">
                 <esf:value>eth0</esf:value>
             </esf:property>
+            <esf:property array="false" name="net.interface.eth0.config.dhcpServer4.maxLeaseTime" type="Integer">
+                <esf:value>7200</esf:value>
+            </esf:property>
+            <esf:property array="false" name="net.interface.eth0.up" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
+            <esf:property array="false" name="net.interface.eth0.config.dhcpServer4.passDns" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property array="false" name="net.interface.eth0.virtual" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property array="false" name="net.interface.eth0.config.ip4.status" type="String">
+                <esf:value>netIPv4StatusEnabledWAN</esf:value>
+            </esf:property>
+            <esf:property array="false" name="net.interface.lo.config.autoconnect" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
+            <esf:property array="false" name="net.interface.lo.config.dhcpClient4.enabled" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>      
+            <esf:property array="false" name="net.interface.lo.ptp" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property array="false" name="net.interface.lo.config.domains" type="String">
+                <esf:value></esf:value>
+            </esf:property> 
+            <esf:property array="false" name="net.interface.lo.up" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
             <esf:property array="false" name="net.interface.lo.ip4.address" type="String">
                 <esf:value>127.0.0.1</esf:value>
             </esf:property>
@@ -135,50 +93,50 @@
             <esf:property array="false" name="net.interface.lo.config.winsServers" type="String">
                 <esf:value></esf:value>
             </esf:property>
-            <esf:property array="false" name="net.interface.enx006f00001ee1.loopback" type="Boolean">
-                <esf:value>false</esf:value>
+            <esf:property array="false" name="net.interface.lo.config.mtu" type="Integer">
+                <esf:value>65536</esf:value>
             </esf:property>
-            <esf:property array="false" name="net.interface.enx006f00001ee1.type" type="String">
-                <esf:value>ETHERNET</esf:value>
+            <esf:property array="false" name="net.interface.lo.driver" type="String">
+                <esf:value>unknown</esf:value>
             </esf:property>
-            <esf:property array="false" name="net.interface.eth0.config.dhcpServer4.maxLeaseTime" type="Integer">
-                <esf:value>7200</esf:value>
-            </esf:property>
-            <esf:property array="false" name="net.interface.enx006f00001ee1.usb.vendor.id" type="String">
-                <esf:value>0b95</esf:value>
-            </esf:property>
-            <esf:property array="false" name="net.interface.lo.up" type="Boolean">
-                <esf:value>true</esf:value>
-            </esf:property>
-            <esf:property array="false" name="net.interface.enx006f00001ee1.ptp" type="Boolean">
-                <esf:value>false</esf:value>
-            </esf:property>
-            <esf:property array="false" name="net.interface.eth0.up" type="Boolean">
-                <esf:value>true</esf:value>
-            </esf:property>
-            <esf:property array="false" name="net.interface.lo.ptp" type="Boolean">
-                <esf:value>false</esf:value>
-            </esf:property>
-            <esf:property array="false" name="net.interface.lo.config.domains" type="String">
+            <esf:property array="false" name="net.interface.lo.config.ip4.address" type="String">
                 <esf:value></esf:value>
             </esf:property>
-            <esf:property array="false" name="net.interface.eth0.config.dhcpServer4.passDns" type="Boolean">
-                <esf:value>false</esf:value>
+            <esf:property array="false" name="net.interface.lo.ip4.broadcast" type="String">
+                <esf:value>127.0.0.1</esf:value>
             </esf:property>
-            <esf:property array="false" name="net.interface.lo.config.dhcpClient4.enabled" type="Boolean">
-                <esf:value>false</esf:value>
-            </esf:property>         
-            <esf:property array="false" name="net.interface.eth0.virtual" type="Boolean">
-                <esf:value>false</esf:value>
+            <esf:property array="false" name="net.interface.lo.type" type="String">
+                <esf:value>LOOPBACK</esf:value>
             </esf:property>
-            <esf:property array="false" name="net.interface.lo.config.autoconnect" type="Boolean">
+            <esf:property array="false" name="net.interface.lo.driver.version" type="String">
+                <esf:value>unknown</esf:value>
+            </esf:property>
+            <esf:property array="false" name="net.interface.lo.config.state" type="String">
+                <esf:value>ACTIVATED</esf:value>
+            </esf:property>
+            <esf:property array="false" name="net.interface.lo.config.name" type="String">
+                <esf:value>lo</esf:value>
+            </esf:property>
+            <esf:property array="false" name="net.interface.lo.ip4.prefix" type="Short">
+                <esf:value>8</esf:value>
+            </esf:property>
+            <esf:property array="false" name="net.interface.lo.loopback" type="Boolean">
                 <esf:value>true</esf:value>
             </esf:property>
-            <esf:property array="false" name="net.interface.enx006f00001ee1.config.autoconnect" type="Boolean">
-                <esf:value>true</esf:value>
+            <esf:property array="false" name="net.interface.lo.mac" type="String">
+                <esf:value>00:00:00:00:00:00</esf:value>
+            </esf:property>  
+            <esf:property array="false" name="net.interface.lo.config.ip4.dnsServers" type="String">
+                <esf:value></esf:value>
             </esf:property>
-            <esf:property array="false" name="net.interface.eth0.config.ip4.status" type="String">
-                <esf:value>netIPv4StatusEnabledWAN</esf:value>
+            <esf:property array="false" name="net.interface.lo.config.ip4.status" type="String">
+                <esf:value>netIPv4StatusEnabledLAN</esf:value>
+            </esf:property>
+            <esf:property array="false" name="net.interface.lo.ip4.netmask" type="String">
+                <esf:value>255.0.0.0</esf:value>
+            </esf:property>
+            <esf:property array="false" name="net.interface.lo.virtual" type="Boolean">
+                <esf:value>false</esf:value>
             </esf:property>
         </esf:properties>
     </esf:configuration>

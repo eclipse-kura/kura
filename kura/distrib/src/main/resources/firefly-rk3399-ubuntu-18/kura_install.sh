@@ -59,16 +59,6 @@ chmod +x /etc/init.d/firewall
 cp ${INSTALL_DIR}/kura/install/iptables.init /etc/sysconfig/iptables
 cp /etc/sysconfig/iptables ${INSTALL_DIR}/kura/.data/iptables
 
-#set up networking configuration
-mac_addr=$(head -1 /sys/class/net/eth0/address | tr '[:lower:]' '[:upper:]')
-sed "s/^ssid=kura_gateway.*/ssid=kura_gateway_${mac_addr}/" < ${INSTALL_DIR}/kura/install/hostapd.conf > /etc/hostapd-enx006f00001ee1.conf
-
-cp ${INSTALL_DIR}/kura/install/dhcpd-eth0.conf /etc/dhcpd-eth0.conf
-cp ${INSTALL_DIR}/kura/install/dhcpd-eth0.conf ${INSTALL_DIR}/kura/.data/dhcpd-eth0.conf
-
-cp ${INSTALL_DIR}/kura/install/dhcpd-enx006f00001ee1.conf /etc/dhcpd-wlp4s0.conf
-cp ${INSTALL_DIR}/kura/install/dhcpd-enx006f00001ee1.conf ${INSTALL_DIR}/kura/.data/dhcpd-enx006f00001ee1.conf
-
 #set up kuranet.conf
 cp ${INSTALL_DIR}/kura/install/kuranet.conf ${INSTALL_DIR}/kura/user/kuranet.conf
 cp ${INSTALL_DIR}/kura/install/kuranet.conf ${INSTALL_DIR}/kura/.data/kuranet.conf

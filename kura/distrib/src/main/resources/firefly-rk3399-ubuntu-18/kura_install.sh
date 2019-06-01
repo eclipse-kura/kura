@@ -80,6 +80,7 @@ cp ${INSTALL_DIR}/kura/install/monitrc.raspbian /etc/monitrc
 chmod 700 /etc/monitrc
 
 #set up runlevels to start/stop Kura by default
+update-rc.d network-manager remove
 update-rc.d firewall defaults
 update-rc.d kura defaults
 

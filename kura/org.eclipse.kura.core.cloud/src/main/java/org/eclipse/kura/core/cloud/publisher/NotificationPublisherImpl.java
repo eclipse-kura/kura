@@ -11,10 +11,10 @@ package org.eclipse.kura.core.cloud.publisher;
 
 import static java.util.Objects.isNull;
 import static org.eclipse.kura.core.message.MessageConstants.CONTROL;
+import static org.eclipse.kura.core.message.MessageConstants.FULL_TOPIC;
 import static org.eclipse.kura.core.message.MessageConstants.PRIORITY;
 import static org.eclipse.kura.core.message.MessageConstants.QOS;
 import static org.eclipse.kura.core.message.MessageConstants.RETAIN;
-import static org.eclipse.kura.core.message.MessageConstants.FULL_TOPIC;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,7 +29,6 @@ import org.eclipse.kura.cloudconnection.message.KuraMessage;
 import org.eclipse.kura.cloudconnection.publisher.CloudNotificationPublisher;
 import org.eclipse.kura.core.cloud.CloudServiceImpl;
 import org.eclipse.kura.core.cloud.CloudServiceOptions;
-import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -118,14 +117,14 @@ public class NotificationPublisherImpl implements CloudNotificationPublisher {
     private String encodeTopic(String appId, String messageType, String requestorClientId) {
 
         CloudServiceOptions options = this.cloudServiceImpl.getCloudServiceOptions();
-        String deviceId = options.getTopicClientIdToken();
-        String topicSeparator = options.getTopicSeparator();
+        String deviceId = CloudServiceOptions.getTopicClientIdToken();
+        String topicSeparator = CloudServiceOptions.getTopicSeparator();
 
         StringBuilder sb = new StringBuilder();
 
         sb.append(options.getTopicControlPrefix()).append(topicSeparator);
 
-        sb.append(options.getTopicAccountToken()).append(topicSeparator).append(requestorClientId)
+        sb.append(CloudServiceOptions.getTopicAccountToken()).append(topicSeparator).append(requestorClientId)
                 .append(topicSeparator).append(appId);
 
         sb.append(topicSeparator).append("NOTIFY").append(topicSeparator).append(deviceId).append(topicSeparator)

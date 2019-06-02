@@ -19,7 +19,7 @@
         	type="String"
         	cardinality="0"
         	required="true"
-        	default=""
+        	default="A/#"
         	description='The MQTT subscription topic filter. For example foo/bar/baz, foo/+/bar, #, foo/#'>
         </AD>
                     

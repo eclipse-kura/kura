@@ -196,7 +196,7 @@ public class CloudPublisherImpl
 
         StringBuilder sb = new StringBuilder();
 
-        sb.append(topicPrefix).append(topicSeparator).append(topicSeparator);
+        sb.append(topicPrefix);
 
         if (semanticTopic != null && !semanticTopic.isEmpty()) {
             sb.append(topicSeparator).append(semanticTopic);

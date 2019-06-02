@@ -22,6 +22,7 @@ public class CloudPublisherOptions {
     private static final Property<String> PROPERTY_APP_TOPIC = new Property<>("app.topic", "A1/$assetName");
     private static final Property<Integer> PROPERTY_QOS = new Property<>("qos", 0);
     private static final Property<Boolean> PROPERTY_RETAIN = new Property<>("retain", false);
+    private static final Property<Boolean> PROPERTY_APP_TOPIC_ONLY = new Property<>("app.topic.only", false);
     private static final Property<String> PROPERTY_MESSAGE_TYPE = new Property<>("message.type", "data");
     private static final Property<Integer> PROPERTY_PRIORITY = new Property<>("priority", 7);
 
@@ -32,6 +33,7 @@ public class CloudPublisherOptions {
     private final boolean retain;
     private final String messageType;
     private final int priority;
+    private final boolean appTopicOnly;
 
     public CloudPublisherOptions(final Map<String, Object> properties) {
         this.cloudServicePid = PROPERTY_CLOUD_SERVICE_PID.get(properties);
@@ -41,6 +43,7 @@ public class CloudPublisherOptions {
         this.retain = PROPERTY_RETAIN.get(properties);
         this.messageType = PROPERTY_MESSAGE_TYPE.get(properties);
         this.priority = PROPERTY_PRIORITY.get(properties);
+        this.appTopicOnly = PROPERTY_APP_TOPIC_ONLY.get(properties);
     }
 
     public String getCloudServicePid() {
@@ -53,6 +56,10 @@ public class CloudPublisherOptions {
 
     public String getAppTopic() {
         return this.appTopic;
+    }
+
+    public boolean isAppTopicOnly() {
+        return appTopicOnly;
     }
 
     public int getQos() {

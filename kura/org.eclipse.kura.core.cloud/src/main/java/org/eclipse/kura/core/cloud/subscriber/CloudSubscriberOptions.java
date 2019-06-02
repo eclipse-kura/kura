@@ -17,9 +17,11 @@ import org.eclipse.kura.core.message.MessageType;
 public class CloudSubscriberOptions {
 
     private static final Property<String> PROPERTY_CLOUD_SERVICE_PID = new Property<>(
-            CloudConnectionConstants.CLOUD_ENDPOINT_SERVICE_PID_PROP_NAME.value(), "org.eclipse.kura.cloud.CloudService");
+            CloudConnectionConstants.CLOUD_ENDPOINT_SERVICE_PID_PROP_NAME.value(),
+            "org.eclipse.kura.cloud.CloudService");
     private static final Property<String> PROPERTY_APP_ID = new Property<>("appId", "appId");
     private static final Property<String> PROPERTY_APP_TOPIC = new Property<>("app.topic", "#");
+    private static final Property<Boolean> PROPERTY_APP_TOPIC_ONLY = new Property<>("app.topic.only", false);
     private static final Property<Integer> PROPERTY_QOS = new Property<>("qos", 0);
     private static final Property<String> PROPERTY_MESSAGE_TYPE = new Property<>("message.type", "data");
 
@@ -28,6 +30,7 @@ public class CloudSubscriberOptions {
     private final String appTopic;
     private final int qos;
     private final String messageType;
+    private final boolean appTopicOnly;
 
     public CloudSubscriberOptions(final Map<String, Object> properties) {
         this.cloudServicePid = PROPERTY_CLOUD_SERVICE_PID.get(properties);
@@ -35,6 +38,7 @@ public class CloudSubscriberOptions {
         this.appTopic = PROPERTY_APP_TOPIC.get(properties);
         this.qos = PROPERTY_QOS.get(properties);
         this.messageType = PROPERTY_MESSAGE_TYPE.get(properties);
+        this.appTopicOnly = PROPERTY_APP_TOPIC_ONLY.get(properties);
     }
 
     public String getCloudServicePid() {
@@ -47,6 +51,10 @@ public class CloudSubscriberOptions {
 
     public String getAppTopic() {
         return this.appTopic;
+    }
+
+    public boolean isAppTopicOnly() {
+        return appTopicOnly;
     }
 
     public int getQos() {

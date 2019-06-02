@@ -36,6 +36,7 @@ import org.eclipse.kura.cloudconnection.publisher.CloudPublisher;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.core.cloud.CloudPublisherDeliveryListener;
 import org.eclipse.kura.core.cloud.CloudServiceImpl;
+import org.eclipse.kura.core.message.MessageConstants;
 import org.eclipse.kura.core.message.MessageType;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -159,6 +160,8 @@ public class CloudPublisherImpl
         boolean isControl = MessageType.CONTROL.equals(this.cloudPublisherOptions.getMessageType());
 
         Map<String, Object> publishMessageProps = new HashMap<>();
+        if (this.cloudPublisherOptions.isAppTopicOnly())
+            publishMessageProps.put(MessageConstants.FULL_TOPIC.name(), appTopic);
         publishMessageProps.put(APP_TOPIC.name(), appTopic);
         publishMessageProps.put(APP_ID.name(), this.cloudPublisherOptions.getAppId());
         publishMessageProps.put(QOS.name(), qos);
@@ -243,7 +246,8 @@ public class CloudPublisherImpl
     @Override
     public void onMessageConfirmed(String messageId, String topic) {
         if (topic.contains(this.cloudPublisherOptions.getAppId())) {
-            this.cloudDeliveryListeners.forEach(listener -> this.worker.execute(() -> listener.onMessageConfirmed(messageId)));
+            this.cloudDeliveryListeners
+                    .forEach(listener -> this.worker.execute(() -> listener.onMessageConfirmed(messageId)));
         }
     }
 

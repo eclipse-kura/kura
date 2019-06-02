@@ -979,7 +979,7 @@ public class CloudServiceImpl
 
         String fullTopic = (String) messageProps.get(FULL_TOPIC.name());
 
-        if (isNull(fullTopic)) {
+        if (isNull(fullTopic) || fullTopic.equals("")) {
             String appId = (String) messageProps.get(APP_ID.name());
             String appTopic = (String) messageProps.get(APP_TOPIC.name());
             boolean isControl = (Boolean) messageProps.get(CONTROL.name());
@@ -1009,8 +1009,9 @@ public class CloudServiceImpl
         if (isNull(appId) || isNull(appTopic)) {
             return;
         }
-
-        String fullTopic = encodeTopic(appId, CloudServiceOptions.getTopicClientIdToken(), appTopic, isControl);
+        String fullTopic = (String) subscriptionProperties.get(FULL_TOPIC.name());
+        if (isNull(fullTopic))
+            fullTopic = encodeTopic(appId, CloudServiceOptions.getTopicClientIdToken(), appTopic, isControl);
 
         CloudSubscriptionRecord subscriptionRecord = new CloudSubscriptionRecord(fullTopic, qos);
 

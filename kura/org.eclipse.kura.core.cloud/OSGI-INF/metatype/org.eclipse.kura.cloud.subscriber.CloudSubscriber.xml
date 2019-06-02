@@ -34,6 +34,15 @@
         	default="A1/#"
         	description='Follows the application Id and specifies the rest of the subscription topic.'>
         </AD>
+        
+        <AD id="app.topic.only"
+            name="Only App Topic"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Default required account,id,app id.">
+        </AD>   
                     
         <AD id="qos"
             name="Qos"

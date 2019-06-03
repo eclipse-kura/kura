@@ -74,6 +74,8 @@ import org.slf4j.LoggerFactory;
 
 public class Console implements ConfigurableComponent {
 
+    private static final String EVENT_PATH = "/event";
+
     public static final String ADMIN_ROOT = "/admin";
 
     private static final String LOGIN_MODULE_PATH = ADMIN_ROOT + "/login";
@@ -272,7 +274,7 @@ public class Console implements ConfigurableComponent {
         this.httpService.unregister(DENALI_MODULE_PATH + "/assetservices");
         this.httpService.unregister(ADMIN_ROOT + "/sse");
         this.eventService.stop();
-        this.httpService.unregister(DENALI_MODULE_PATH + "/event");
+        this.httpService.unregister(DENALI_MODULE_PATH + EVENT_PATH);
     }
 
     public static Console instance() {
@@ -303,7 +305,7 @@ public class Console implements ConfigurableComponent {
     private HttpContext initSessionContext(final HttpContext defaultContext) {
 
         final Set<String> authenticationPaths = new HashSet<>(Arrays.asList(AUTH_PATH, PASSWORD_AUTH_PATH));
-        final Set<String> eventPaths = new HashSet<>(Arrays.asList(DENALI_MODULE_PATH + "/event", "/sse"));
+        final Set<String> eventPaths = new HashSet<>(Arrays.asList(DENALI_MODULE_PATH + EVENT_PATH, "/sse"));
 
         final SecurityHandler baseHandler = new BaseSecurityHandler();
         final SecurityHandler sessionAuthHandler = new SessionAutorizationSecurityHandler();
@@ -386,7 +388,7 @@ public class Console implements ConfigurableComponent {
         this.httpService.registerServlet(DENALI_MODULE_PATH + "/assetservices", new GwtAssetServiceImpl(), null,
                 sessionContext);
         this.httpService.registerServlet(ADMIN_ROOT + "/sse", new WiresBlinkServlet(), null, sessionContext);
-        this.httpService.registerServlet(DENALI_MODULE_PATH + "/event", this.eventService, null, sessionContext);
+        this.httpService.registerServlet(DENALI_MODULE_PATH + EVENT_PATH, this.eventService, null, sessionContext);
         this.eventService.start();
     }
 

@@ -72,7 +72,7 @@ public class denali implements EntryPoint {
 
                                 if (results != null) {
                                     List<GwtGroupedNVPair> pairs = results;
-                                    for (GwtGroupedNVPair pair : pairs) {
+                                    pairs.forEach(pair -> {
                                         String name = pair.getName();
                                         if ("kura.have.net.admin".equals(name)) {
                                             Boolean value = Boolean.valueOf(pair.getValue());
@@ -84,7 +84,7 @@ public class denali implements EntryPoint {
                                         if ("kura.os.version".equals(name)) {
                                             gwtSession.setOsVersion(pair.getValue());
                                         }
-                                    }
+                                    });
                                 }
 
                                 denali.this.gwtSecurityService.isDebugMode(new AsyncCallback<Boolean>() {

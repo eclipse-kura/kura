@@ -69,10 +69,14 @@ public class StringData implements BinaryData<String> {
                 break;
             size = raw[i + 1];
             length = Math.min(size, totalSize - 2);
-            if (length > 0)
-                builder.append("\n");
+            if (length > 0) {
+                int j = i + length + 2;
+                if ((rawLength - j) > 2)
+                    builder.append('\n');
+                else
+                    break;
+            }
         }
-
         return builder.toString();
     }
 

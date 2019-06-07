@@ -58,21 +58,26 @@ public class StringData implements BinaryData<String> {
         if (totalSize <= 2)
             return "";
         int i = 0;
+        int totalByteSize = raw[i];
         int size = raw[i + 1]; // Current length of the string
         int length = Math.min(size, totalSize - 2);
         StringBuilder builder = new StringBuilder();
-        while (length > 0) {
-            builder.append(new String(raw, i + 2, length, this.charset));
-            i = i + length + 2;
+        while (totalSize > 0) {
+            if (length > 0)
+                builder.append(new String(raw, i + 2, length, this.charset));
+            i = i + totalByteSize + 2;
             totalSize = rawLength - i;
             if (totalSize <= 2)
                 break;
+            totalByteSize = raw[i];
             size = raw[i + 1];
+            if (totalByteSize < size)
+                break;
             length = Math.min(size, totalSize - 2);
             if (length > 0) {
                 int j = i + length + 2;
                 if ((rawLength - j) > 2)
-                    builder.append('\n');
+                    builder.append('_');
                 else
                     break;
             }

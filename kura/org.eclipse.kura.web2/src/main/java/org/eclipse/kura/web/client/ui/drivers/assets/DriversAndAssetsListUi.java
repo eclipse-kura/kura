@@ -13,10 +13,13 @@ package org.eclipse.kura.web.client.ui.drivers.assets;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import org.eclipse.kura.web.client.configuration.Configurations;
 import org.eclipse.kura.web.client.configuration.HasConfiguration;
@@ -122,8 +125,7 @@ public class DriversAndAssetsListUi extends Composite {
     private void fillWithConfiguration(final DriverAssetInfo selectedInstanceEntry, final String pid,
             HasConfiguration hasConfiguration) {
         if (!selectedInstanceEntry.isAsset()) {
-            ConfigurableComponentUi driverUi = new ConfigurableComponentUi(
-                    hasConfiguration.getConfiguration());
+            ConfigurableComponentUi driverUi = new ConfigurableComponentUi(hasConfiguration.getConfiguration());
             ConfigurationUiButtons buttonBar = createDriverConfigButtonBar(driverUi);
             driverUi.renderForm();
             driverConfigUi = driverUi;
@@ -222,7 +224,7 @@ public class DriversAndAssetsListUi extends Composite {
 
     private List<DriverAssetInfo> buildTableList() {
         final List<DriverAssetInfo> result = new ArrayList<>();
-        final Map<String, List<DriverAssetInfo>> grouped = new HashMap<>();
+        Map<String, List<DriverAssetInfo>> grouped = new HashMap<>();
 
         final Collection<HasConfiguration> configs = configurations.getConfigurations();
 
@@ -235,12 +237,14 @@ public class DriversAndAssetsListUi extends Composite {
                 getAssetsForDriver(grouped, entry.getPid());
             }
         }
-
+        grouped = grouped.entrySet().stream().sorted(Map.Entry.comparingByKey()).collect(Collectors
+                .toMap(Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue, LinkedHashMap::new));
         for (Entry<String, List<DriverAssetInfo>> e : grouped.entrySet()) {
             result.add(getDriverEntry(e.getKey()));
-            result.addAll(e.getValue());
+            List<DriverAssetInfo> driverAssetInfos = e.getValue().stream()
+                    .sorted(Comparator.comparing(DriverAssetInfo::getPid)).collect(Collectors.toList());
+            result.addAll(driverAssetInfos);
         }
-
         return result;
     }
 

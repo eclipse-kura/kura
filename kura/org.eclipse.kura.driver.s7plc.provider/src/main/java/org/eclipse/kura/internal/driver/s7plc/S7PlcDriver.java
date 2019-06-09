@@ -113,31 +113,27 @@ public class S7PlcDriver extends AbstractBlockDriver<S7PlcDomain> implements Con
 
     @Override
     public synchronized void connect() throws ConnectionException {
-        try {
-            final S7PlcOptions currentOptions = this.options.get();
+        final S7PlcOptions currentOptions = this.options.get();
 
-            if (this.state.options != currentOptions) {
-                logger.info("configuration changed, disconnecting...");
-                disconnect();
-                this.state = createClientState(currentOptions);
-                logger.info("configuration changed, disconnecting...Done");
-            }
+        if (this.state.options != currentOptions) {
+            logger.info("configuration changed, disconnecting...");
+            disconnect();
+            this.state = createClientState(currentOptions);
+            logger.info("configuration changed, disconnecting...Done");
+        }
 
-            if (!this.state.client.Connected) {
-                logger.debug("Connecting to S7 PLC...");
-                this.state.client.SetConnectionType(S7.OP);
-                int code = this.state.client.ConnectTo(currentOptions.getIp(), currentOptions.getRack(),
-                        currentOptions.getSlot(), currentOptions.getPort());
-                if (code != 0) {
-                    throw new ConnectionException("Failed to connect to PLC, ConnectTo() failed with code: " + code);
-                }
-                if (currentOptions.shouldAuthenticate()) {
-                    authenticate(this.state);
-                }
-                logger.debug("Connecting to S7 PLC... Done");
+        if (!this.state.client.Connected) {
+            logger.debug("Connecting to S7 PLC...");
+            this.state.client.SetConnectionType(S7.OP);
+            int code = this.state.client.ConnectTo(currentOptions.getIp(), currentOptions.getRack(),
+                    currentOptions.getSlot(), currentOptions.getPort());
+            if (code != 0) {
+                throw new ConnectionException("Failed to connect to PLC, ConnectTo() failed with code: " + code);
             }
-        } catch (Exception e) {
-            throw new ConnectionException("Connection failed, unexpected exception", e);
+            if (currentOptions.shouldAuthenticate()) {
+                authenticate(this.state);
+            }
+            logger.debug("Connecting to S7 PLC... Done");
         }
     }
 
@@ -200,16 +196,85 @@ public class S7PlcDriver extends AbstractBlockDriver<S7PlcDomain> implements Con
     public synchronized void write(int db, int offset, byte[] data) throws IOException {
         int result = this.state.client.WriteArea(S7.S7AreaDB, db, offset, data.length, data);
         if (result != 0) {
-            throw new Moka7Exception("DB: " + db + " off: " + offset + " len: " + data.length + " status: " + result
-                    + " Error:" + S7Client.ErrorText(result), result);
+            final S7PlcOptions currentOptions = this.options.get();
+            int readTimeOutTyrNum = 0;
+            while (result > 0 && result <= 5) {
+                logger.warn(
+                        "Read connection error---IP: {} Rack:{} Slot:{} Port:{} DB: {} off: {} len: {} status: {} Error: {}, Retry!!!",
+                        currentOptions.getIp(), currentOptions.getRack(), currentOptions.getSlot(),
+                        currentOptions.getPort(), db, offset, data.length, result, S7Client.ErrorText(result));
+                if (result != 4 || readTimeOutTyrNum >= 1) {
+                    logger.warn(
+                            "Write connection error---IP: {} Rack:{} Slot:{} Port:{} DB: {} off: {} len: {} status: {} Error: {}, Retry!!!",
+                            currentOptions.getIp(), currentOptions.getRack(), currentOptions.getSlot(),
+                            currentOptions.getPort(), db, offset, data.length, result, S7Client.ErrorText(result));
+                    try {
+                        this.disconnect();
+                        this.connect();
+                    } catch (ConnectionException e) {
+                        try {
+                            this.disconnect();
+                            this.connect();
+                        } catch (ConnectionException e1) {
+                            throw new Moka7Exception(
+                                    "Write connection retry error IP:" + currentOptions.getIp() + " Rack:"
+                                            + currentOptions.getRack() + " Slot:" + currentOptions.getSlot() + " Port:"
+                                            + currentOptions.getPort() + " DB: " + db + " off: " + offset + " len: "
+                                            + data.length + " status: " + result + " Error:"
+                                            + S7Client.ErrorText(result) + " Connection Error:" + e1.getMessage(),
+                                    result);
+                        }
+                    }
+                } else
+                    readTimeOutTyrNum++;
+
+                result = this.state.client.WriteArea(S7.S7AreaDB, db, offset, data.length, data);
+            }
+            if (result != 0)
+                throw new Moka7Exception("DB: " + db + " off: " + offset + " len: " + data.length + " status: " + result
+                        + " Error:" + S7Client.ErrorText(result), result);
         }
     }
 
     public synchronized void read(int db, int offset, byte[] data) throws IOException {
         int result = this.state.client.ReadArea(S7.S7AreaDB, db, offset, data.length, data);
         if (result != 0) {
-            throw new Moka7Exception("DB: " + db + " off: " + offset + " len: " + data.length + " status: " + result
-                    + " Error:" + S7Client.ErrorText(result), result);
+            final S7PlcOptions currentOptions = this.options.get();
+            int readTimeOutTyrNum = 0;
+            while (result > 0 && result <= 5) {
+                logger.warn(
+                        "Read connection error---IP: {} Rack:{} Slot:{} Port:{} DB: {} off: {} len: {} status: {} Error: {}, Retry!!!",
+                        currentOptions.getIp(), currentOptions.getRack(), currentOptions.getSlot(),
+                        currentOptions.getPort(), db, offset, data.length, result, S7Client.ErrorText(result));
+                if (result != 4 || readTimeOutTyrNum >= 1) {
+                    logger.warn("Read reConnection ---IP: {} Rack:{} Slot:{} Port:{} DB: {} off: {}",
+                            currentOptions.getIp(), currentOptions.getRack(), currentOptions.getSlot(),
+                            currentOptions.getPort(), db, offset);
+                    try {
+                        this.disconnect();
+                        this.connect();
+                    } catch (ConnectionException e) {
+                        try {
+                            this.disconnect();
+                            this.connect();
+                        } catch (ConnectionException e1) {
+                            throw new Moka7Exception(
+                                    "Read connection retry error IP:" + currentOptions.getIp() + " Rack:"
+                                            + currentOptions.getRack() + " Slot:" + currentOptions.getSlot() + " Port:"
+                                            + currentOptions.getPort() + " DB: " + db + " off: " + offset + " len: "
+                                            + data.length + " status: " + result + " Error:"
+                                            + S7Client.ErrorText(result) + " Connection Error:" + e1.getMessage(),
+                                    result);
+                        }
+                    }
+                } else
+                    readTimeOutTyrNum++;
+
+                result = this.state.client.ReadArea(S7.S7AreaDB, db, offset, data.length, data);
+            }
+            if (result != 0)
+                throw new Moka7Exception("DB: " + db + " off: " + offset + " len: " + data.length + " status: " + result
+                        + " Error:" + S7Client.ErrorText(result), result);
         }
     }
 

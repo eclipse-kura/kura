@@ -28,6 +28,8 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.util.Date;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  *
@@ -58,7 +60,7 @@ public class S7Client {
     // Public fields
     public boolean Connected = false;
     public int LastError = 0;
-    public int RecvTimeout = 2000;
+    public int RecvTimeout = 5000;
 
     // Privates
     private static final int ISOTCP = 102; // ISOTCP Port
@@ -66,7 +68,7 @@ public class S7Client {
     private static final int DefaultPduSizeRequested = 480;
     private static final int IsoHSize = 7; // TPKT+COTP Header Size
     private static final int MaxPduSize = DefaultPduSizeRequested + IsoHSize;
-
+    private Lock lock = new ReentrantLock();
     private Socket TCPSocket;
     private final byte[] PDU = new byte[2048];
 
@@ -284,7 +286,7 @@ public class S7Client {
         this.LastError = 0;
         try {
             this.TCPSocket = new Socket();
-            this.TCPSocket.connect(sockaddr, 5000);
+            this.TCPSocket.connect(sockaddr, 10000);
             this.TCPSocket.setTcpNoDelay(true);
             this.InStream = new DataInputStream(this.TCPSocket.getInputStream());
             this.OutStream = new DataOutputStream(this.TCPSocket.getOutputStream());
@@ -347,7 +349,19 @@ public class S7Client {
             this.OutStream.write(Buffer, 0, Len);
             this.OutStream.flush();
         } catch (IOException ex) {
-            this.LastError = errTCPDataSend;
+            this.Connected = false;
+            try {
+                this.Connect();
+                try {
+                    this.OutStream.write(Buffer, 0, Len);
+                    this.OutStream.flush();
+                } catch (IOException ex1) {
+                    this.LastError = errTCPDataSend;
+                }
+            } catch (Exception e) {
+                this.LastError = errTCPDataSend;
+            }
+
         }
     }
 
@@ -501,7 +515,14 @@ public class S7Client {
 
     public int ConnectTo(String Address, int Rack, int Slot) {
         // Use the default port
-        return ConnectTo(Address, Rack, Slot, ISOTCP);
+        try {
+            lock.lockInterruptibly();
+            return ConnectTo(Address, Rack, Slot, ISOTCP);
+        } catch (InterruptedException e) {
+            return errTCPConnectionFailed;
+        } finally {
+            lock.unlock();
+        }
     }
 
     public int ConnectTo(String Address, int Rack, int Slot, int Port) {
@@ -587,24 +608,29 @@ public class S7Client {
             this.PDU[29] = (byte) (Address & 0x0FF);
             Address = Address >> 8;
             this.PDU[28] = (byte) (Address & 0x0FF);
-
-            SendPacket(this.PDU, Size_RD);
-            if (this.LastError == 0) {
-                Length = RecvIsoPacket();
+            try {
+                lock.lockInterruptibly();
+                SendPacket(this.PDU, Size_RD);
                 if (this.LastError == 0) {
-                    if (Length >= 25) {
-                        if (Length - 25 == SizeRequested && this.PDU[21] == (byte) 0xFF) {
-                            System.arraycopy(this.PDU, 25, Data, Offset, SizeRequested);
-                            Offset += SizeRequested;
+                    Length = RecvIsoPacket();
+                    if (this.LastError == 0) {
+                        if (Length >= 25) {
+                            if (Length - 25 == SizeRequested && this.PDU[21] == (byte) 0xFF) {
+                                System.arraycopy(this.PDU, 25, Data, Offset, SizeRequested);
+                                Offset += SizeRequested;
+                            } else {
+                                this.LastError = errS7DataRead;
+                            }
                         } else {
-                            this.LastError = errS7DataRead;
+                            this.LastError = errS7InvalidPDU;
                         }
-                    } else {
-                        this.LastError = errS7InvalidPDU;
                     }
                 }
+            } catch (InterruptedException e) {
+                this.LastError = errS7DataRead;
+            } finally {
+                lock.unlock();
             }
-
             TotElements -= NumElements;
             Start += NumElements * WordSize;
         }
@@ -682,19 +708,25 @@ public class S7Client {
 
             // Copies the Data
             System.arraycopy(Data, Offset, this.PDU, 35, DataSize);
-
-            SendPacket(this.PDU, IsoSize);
-            if (this.LastError == 0) {
-                Length = RecvIsoPacket();
+            try {
+                lock.lockInterruptibly();
+                SendPacket(this.PDU, IsoSize);
                 if (this.LastError == 0) {
-                    if (Length == 22) {
-                        if (S7.GetWordAt(this.PDU, 17) != 0 || this.PDU[21] != (byte) 0xFF) {
-                            this.LastError = errS7DataWrite;
+                    Length = RecvIsoPacket();
+                    if (this.LastError == 0) {
+                        if (Length == 22) {
+                            if (S7.GetWordAt(this.PDU, 17) != 0 || this.PDU[21] != (byte) 0xFF) {
+                                this.LastError = errS7DataWrite;
+                            }
+                        } else {
+                            this.LastError = errS7InvalidPDU;
                         }
-                    } else {
-                        this.LastError = errS7InvalidPDU;
                     }
                 }
+            } catch (InterruptedException e) {
+                this.LastError = errS7DataWrite;
+            } finally {
+                lock.unlock();
             }
 
             Offset += DataSize;
@@ -741,11 +773,11 @@ public class S7Client {
     /**
      *
      * @param DBNumber
-     *            DB Number
+     *                     DB Number
      * @param Buffer
-     *            Destination buffer
+     *                     Destination buffer
      * @param SizeRead
-     *            How many bytes were read
+     *                     How many bytes were read
      * @return
      */
     public int DBGet(int DBNumber, byte[] Buffer, IntByRef SizeRead) {

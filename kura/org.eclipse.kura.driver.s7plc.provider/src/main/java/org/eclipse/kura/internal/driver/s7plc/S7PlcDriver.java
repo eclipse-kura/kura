@@ -131,6 +131,7 @@ public class S7PlcDriver extends AbstractBlockDriver<S7PlcDomain> implements Con
             while (code > 0 && code <= 5 && connectNum < 3) {
                 code = this.state.client.ConnectTo(currentOptions.getIp(), currentOptions.getRack(),
                         currentOptions.getSlot(), currentOptions.getPort());
+                connectNum++;
             }
             if (code != 0)
                 throw new ConnectionException("Failed to connect to PLC, ConnectTo() failed with code: " + code);
@@ -210,10 +211,10 @@ public class S7PlcDriver extends AbstractBlockDriver<S7PlcDomain> implements Con
                     this.disconnect();
                     this.connect();
                 } catch (ConnectionException e) {
-                    throw new Moka7Exception("Write connection retry connection error IP:" + currentOptions.getIp()
-                            + " Rack:" + currentOptions.getRack() + " Slot:" + currentOptions.getSlot() + " Port:"
+                    throw new Moka7Exception("Write reConnection error IP:" + currentOptions.getIp() + " Rack:"
+                            + currentOptions.getRack() + " Slot:" + currentOptions.getSlot() + " Port:"
                             + currentOptions.getPort() + " DB: " + db + " off: " + offset + " len: " + data.length
-                            + " status: " + result + " Error:" + S7Client.ErrorText(result) + " Connection Error:"
+                            + " status: " + result + "\n Error:" + S7Client.ErrorText(result) + " Error:"
                             + e.getMessage(), result);
 
                 }
@@ -221,10 +222,10 @@ public class S7PlcDriver extends AbstractBlockDriver<S7PlcDomain> implements Con
 
             result = this.state.client.WriteArea(S7.S7AreaDB, db, offset, data.length, data);
             if (result != 0)
-                throw new Moka7Exception("write connection retry error IP:" + currentOptions.getIp() + " Rack:"
+                throw new Moka7Exception("Write reConnection result error IP:" + currentOptions.getIp() + " Rack:"
                         + currentOptions.getRack() + " Slot:" + currentOptions.getSlot() + " Port:"
                         + currentOptions.getPort() + " DB: " + db + " off: " + offset + " len: " + data.length
-                        + " status: " + result + " Error:" + S7Client.ErrorText(result), result);
+                        + " status: " + result + "\n Error:" + S7Client.ErrorText(result), result);
         }
 
     }
@@ -235,18 +236,19 @@ public class S7PlcDriver extends AbstractBlockDriver<S7PlcDomain> implements Con
             final S7PlcOptions currentOptions = this.options.get();
             while (result > 0 && result <= 5) {
 
-                logger.warn("Read reConnection ---IP: {} Rack:{} Slot:{} Port:{} DB: {} off: {}",
+                logger.warn("Read reConnection ---IP: {} Rack:{} Slot:{} Port:{} DB: {} off: {} len:{}",
                         currentOptions.getIp(), currentOptions.getRack(), currentOptions.getSlot(),
-                        currentOptions.getPort(), db, offset);
+                        currentOptions.getPort(), db, offset, data.length);
                 try {
                     this.disconnect();
                     this.connect();
                 } catch (ConnectionException e) {
-                    throw new Moka7Exception("Read connection retry connnection error IP:" + currentOptions.getIp()
-                            + " Rack:" + currentOptions.getRack() + " Slot:" + currentOptions.getSlot() + " Port:"
-                            + currentOptions.getPort() + " DB: " + db + " off: " + offset + " len: " + data.length
-                            + " status: " + result + " Error:" + S7Client.ErrorText(result) + " Connection Error:"
-                            + e.getMessage(), result);
+                    throw new Moka7Exception(
+                            "Read reConnection error IP:" + currentOptions.getIp() + " Rack:" + currentOptions.getRack()
+                                    + " Slot:" + currentOptions.getSlot() + " Port:" + currentOptions.getPort()
+                                    + " DB: " + db + " off: " + offset + " len: " + data.length + " status: " + result
+                                    + " Error:" + S7Client.ErrorText(result) + "\n Error:" + e.getMessage(),
+                            result);
 
                 }
 
@@ -254,10 +256,10 @@ public class S7PlcDriver extends AbstractBlockDriver<S7PlcDomain> implements Con
             }
 
             if (result != 0)
-                throw new Moka7Exception("Read connection retry error IP:" + currentOptions.getIp() + " Rack:"
+                throw new Moka7Exception("Read reConnection result error IP:" + currentOptions.getIp() + " Rack:"
                         + currentOptions.getRack() + " Slot:" + currentOptions.getSlot() + " Port:"
                         + currentOptions.getPort() + " DB: " + db + " off: " + offset + " len: " + data.length
-                        + " status: " + result + " Error:" + S7Client.ErrorText(result), result);
+                        + " status: " + result + "\n Error:" + S7Client.ErrorText(result), result);
 
         }
     }

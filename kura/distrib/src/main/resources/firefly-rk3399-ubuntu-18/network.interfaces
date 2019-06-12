@@ -5,7 +5,9 @@ source /etc/network/interfaces.d/*
 
 # The loopback network interface
 auto lo
-iface lo inet loopback
+iface lo inet static
+	address 127.0.0.1
+	netmask 255.0.0.0
 
 # The primary network interface
 auto eth0

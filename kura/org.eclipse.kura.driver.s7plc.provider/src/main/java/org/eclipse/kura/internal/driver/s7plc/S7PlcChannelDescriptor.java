@@ -20,6 +20,8 @@ import org.eclipse.kura.core.configuration.metatype.Tscalar;
 import org.eclipse.kura.driver.ChannelDescriptor;
 import org.eclipse.kura.util.collection.CollectionUtil;
 
+import Moka7.S7;
+
 /**
  * S7 PLC specific channel descriptor. The descriptor contains the following
  * attribute definition identifiers.
@@ -32,6 +34,7 @@ import org.eclipse.kura.util.collection.CollectionUtil;
  */
 public final class S7PlcChannelDescriptor implements ChannelDescriptor {
 
+    public static final String S7_DB_TYPE = "s7.db.type";
     public static final String S7_ELEMENT_TYPE_ID = "s7.data.type";
     public static final String DATA_BLOCK_NO_ID = "data.block.no";
     public static final String BYTE_COUNT_ID = "byte.count";
@@ -45,10 +48,54 @@ public final class S7PlcChannelDescriptor implements ChannelDescriptor {
         return option;
     }
 
+    private Toption generateDbTypeOption(int type) {
+        Toption option = new Toption();
+        option.setLabel(String.valueOf(type));
+        switch (type) {
+        case S7.S7AreaDB:
+            option.setValue("D,DB");
+            break;
+        case S7.S7AreaPE:
+            option.setValue("I");
+            break;
+        case S7.S7AreaPA:
+            option.setValue("Q");
+            break;
+        case S7.S7AreaMK:
+            option.setValue("M");
+            break;
+        case S7.S7AreaCT:
+            option.setValue("C");
+            break;
+        case S7.S7AreaTM:
+            option.setValue("T");
+            break;
+        default:
+            break;
+        }
+
+        return option;
+    }
+
     /** {@inheritDoc} */
     @Override
     public Object getDescriptor() {
         final List<Tad> elements = CollectionUtil.newArrayList();
+
+        final Tad dbType = new Tad();
+        dbType.setName(S7_DB_TYPE);
+        dbType.setId(S7_DB_TYPE);
+        dbType.setDescription("DB TYPE");
+        dbType.setType(Tscalar.INTEGER);
+        dbType.setRequired(true);
+        dbType.setDefault(String.valueOf(S7.S7AreaDB));
+        dbType.setOption(generateDbTypeOption(S7.S7AreaDB));
+        dbType.setOption(generateDbTypeOption(S7.S7AreaPE));
+        dbType.setOption(generateDbTypeOption(S7.S7AreaPA));
+        dbType.setOption(generateDbTypeOption(S7.S7AreaMK));
+        dbType.setOption(generateDbTypeOption(S7.S7AreaCT));
+        dbType.setOption(generateDbTypeOption(S7.S7AreaTM));
+        elements.add(dbType);
 
         final Tad s7ElementType = new Tad();
         s7ElementType.setName(S7_ELEMENT_TYPE_ID);

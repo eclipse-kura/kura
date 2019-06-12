@@ -158,7 +158,8 @@ public class S7PlcDriver extends AbstractBlockDriver<S7PlcDomain> implements Con
 
     @Override
     protected BlockFactory<ToplevelBlockTask> getTaskFactoryForDomain(final S7PlcDomain domain, final Mode mode) {
-        return (start, end) -> new S7PlcToplevelBlockTask(S7PlcDriver.this, mode, domain.getDB(), start, end);
+        return (start, end) -> new S7PlcToplevelBlockTask(S7PlcDriver.this, mode, domain.getDbType(), domain.getDB(),
+                start, end);
     }
 
     @Override

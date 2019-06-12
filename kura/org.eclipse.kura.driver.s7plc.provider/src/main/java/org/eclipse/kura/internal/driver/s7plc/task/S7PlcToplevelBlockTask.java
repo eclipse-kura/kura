@@ -25,15 +25,16 @@ import org.slf4j.LoggerFactory;
 public class S7PlcToplevelBlockTask extends ToplevelBlockTask {
 
     private static final Logger logger = LoggerFactory.getLogger(S7PlcDriver.class);
-
+    private int dbType;
     private int areaNo;
     private ByteArrayBuffer data;
     private S7PlcDriver driver;
 
-    public S7PlcToplevelBlockTask(S7PlcDriver driver, Mode mode, int dbNumber, int start, int end) {
+    public S7PlcToplevelBlockTask(S7PlcDriver driver, Mode mode, int dbType, int dbNumber, int start, int end) {
         super(start, end, mode);
         this.areaNo = dbNumber;
         this.driver = driver;
+        this.dbType = dbType;
     }
 
     public void processBuffer() throws IOException {

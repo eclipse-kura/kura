@@ -33,12 +33,12 @@ import java.util.Date;
 public class S7 {
 
     // S7 ID Area (Area that we want to read/write)
-    public static final int S7AreaPE = 0x81;
-    public static final int S7AreaPA = 0x82;
-    public static final int S7AreaMK = 0x83;
-    public static final int S7AreaDB = 0x84;
-    public static final int S7AreaCT = 0x1C;
-    public static final int S7AreaTM = 0x1D;
+    public static final int S7AreaPE = 0x81;  // I
+    public static final int S7AreaPA = 0x82;  // Q
+    public static final int S7AreaMK = 0x83;  // M
+    public static final int S7AreaDB = 0x84;  // D
+    public static final int S7AreaCT = 0x1C;  // C
+    public static final int S7AreaTM = 0x1D;  // T
     // Connection types
     public static final byte PG = 0x01;
     public static final byte OP = 0x02;

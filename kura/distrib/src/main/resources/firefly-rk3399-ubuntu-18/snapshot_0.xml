@@ -3,8 +3,8 @@
     <esf:configuration pid="org.eclipse.kura.net.admin.FirewallConfigurationService">
     	<esf:properties>
     	    <esf:property array="false" encrypted="false" name="firewall.open.ports" type="String">
-                    <esf:value>8000,tcp,0.0.0.0/0,eth0,,,,#;67,udp,0.0.0.0/0,eth0,,,,#;53,udp,0.0.0.0/0,eth0,,,,#;5002,tcp,127.0.0.1/32,,,,,#;1450,tcp,0.0.0.0/0,eth0,,,,#;443,tcp,10.234.0.0/16,,,,,#;443,tcp,0.0.0.0/0,eth0,,,,#;22,tcp,10.234.0.0/16,,,,,#;22,tcp,0.0.0.0/0,eth0,,,,#;5353,udp,0.0.0.0/0,eth0,,,,#;80,tcp,0.0.0.0/0,,,,,#</esf:value>
-                </esf:property>
+                    <esf:value>443,tcp,0.0.0.0/0,,,,,#;22,tcp,0.0.0.0/0,,,,,#;80,tcp,0.0.0.0/0,,,,,#</esf:value>
+            </esf:property>
     	    <esf:property array="false" encrypted="false" name="firewall.port.forwarding" type="String">
                     <esf:value></esf:value>
                 </esf:property>
@@ -67,7 +67,7 @@
                 <esf:value>false</esf:value>
             </esf:property>
             <esf:property array="false" name="net.interface.eth0.config.ip4.status" type="String">
-                <esf:value>netIPv4StatusEnabledWAN</esf:value>
+                <esf:value>netIPv4StatusEnabledLAN</esf:value>
             </esf:property>
             <esf:property array="false" name="net.interface.lo.config.autoconnect" type="Boolean">
                 <esf:value>true</esf:value>

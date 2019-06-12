@@ -14,14 +14,20 @@ package org.eclipse.kura.internal.driver.s7plc;
 
 public class S7PlcDomain {
 
+    private final int dbType;
     private final int db;
 
-    public S7PlcDomain(int db) {
+    public S7PlcDomain(int dbType, int db) {
         this.db = db;
+        this.dbType = dbType;
     }
 
     public int getDB() {
         return db;
+    }
+
+    public int getDbType() {
+        return dbType;
     }
 
     @Override

@@ -251,7 +251,8 @@ public abstract class FirewallOpenPortConfigIP<T extends IPAddress> implements F
             return false;
         }
 
-        if (this.protocol == null || !this.protocol.equals(NetProtocol.tcp) || !this.protocol.equals(NetProtocol.udp)) {
+        if (this.protocol == null || !this.protocol.equals(NetProtocol.tcp) || !this.protocol.equals(NetProtocol.udp)
+                || !this.protocol.equals(NetProtocol.icmp)) {
             return false;
         }
 

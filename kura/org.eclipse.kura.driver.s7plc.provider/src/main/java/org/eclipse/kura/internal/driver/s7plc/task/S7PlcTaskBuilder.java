@@ -40,6 +40,16 @@ public final class S7PlcTaskBuilder {
     private S7PlcTaskBuilder() {
     }
 
+    private static int getDbType(ChannelRecord record) throws KuraException {
+        try {
+            return getIntProperty(record, S7PlcChannelDescriptor.S7_DB_TYPE, "Error while retrieving Area No");
+        } catch (KuraException e) {
+            record.setChannelStatus(new ChannelStatus(ChannelFlag.FAILURE, e.getMessage(), e));
+            record.setTimestamp(System.currentTimeMillis());
+            throw e;
+        }
+    }
+
     private static int getAreaNo(ChannelRecord record) throws KuraException {
         try {
             return getIntProperty(record, S7PlcChannelDescriptor.DATA_BLOCK_NO_ID, "Error while retrieving Area No");
@@ -127,8 +137,9 @@ public final class S7PlcTaskBuilder {
     public static Stream<Pair<S7PlcDomain, BlockTask>> build(List<ChannelRecord> records, Mode mode) {
         return records.stream().map((record) -> {
             try {
+                final int dbType = S7PlcTaskBuilder.getDbType(record);
                 final int db = S7PlcTaskBuilder.getAreaNo(record);
-                return new Pair<>(new S7PlcDomain(db), build(record, mode));
+                return new Pair<>(new S7PlcDomain(dbType, db), build(record, mode));
             } catch (Exception e) {
                 record.setTimestamp(System.currentTimeMillis());
                 record.setChannelStatus(new ChannelStatus(ChannelFlag.FAILURE, e.getMessage(), e));

@@ -153,7 +153,7 @@ public class HttpService implements ConfigurableComponent {
 
         final Hashtable<String, Object> config = new Hashtable<>();
 
-        config.put(JettyConstants.HTTP_PORT, this.options.getHttpsPort());
+        config.put(JettyConstants.HTTPS_PORT, this.options.getHttpsPort());
         config.put(JettyConstants.HTTPS_ENABLED, this.options.isHttpsEnabled());
         config.put(JettyConstants.HTTPS_HOST, "0.0.0.0");
         config.put(JettyConstants.SSL_KEYSTORE, this.options.getHttpsKeystorePath());

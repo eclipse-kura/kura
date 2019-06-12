@@ -2,6 +2,11 @@ language: java
 
 sudo: false
 
+dist: trusty
+
+jdk:
+  - openjdk8
+
 cache:
   directories:
   - $HOME/.m2
@@ -20,7 +25,7 @@ before_script:
   - cd maven ; tar --strip-components 1 -xzf ../maven.tar.gz ; cd ..
   - chmod a+x maven/bin/mvn
   - export M2_HOME=$PWD/maven
-  - export PATH=${M2_HOME}/maven/bin:${PATH}
+  - export PATH=${M2_HOME}/bin:${PATH}
   - hash -r
 
 addons:
@@ -34,6 +39,7 @@ jobs:
       script:
         - rm -rf $HOME/.m2/repository/org/eclipse
         - rm -rf kura/target-definition/{common,equinox*,test-deps}
+        - $M2_HOME/bin/mvn -version
         - $M2_HOME/bin/mvn -B -f target-platform/pom.xml clean install
         - $M2_HOME/bin/mvn -B -f kura/pom.xml clean install -DskipTests
     - stage: distrib-examples-tests-karaf

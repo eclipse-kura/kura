@@ -11,6 +11,7 @@ package org.eclipse.kura.core.cloud;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -22,8 +23,14 @@ import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.test.annotation.TestTarget;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CloudServiceTest {
+
+    private static final String MQTT_DATA_TRANSPORT_SERVICE_PID = "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport";
+
+    private static final Logger logger = LoggerFactory.getLogger(CloudServiceTest.class);
 
     private static CountDownLatch dependencyLatch = new CountDownLatch(3);
 
@@ -39,6 +46,14 @@ public class CloudServiceTest {
             dependencyLatch.await(10, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+        }
+
+        Map<String, Object> updatedProp = new HashMap<>();
+        updatedProp.put("client-id", "test");
+        try {
+            cfgSvc.updateConfiguration(MQTT_DATA_TRANSPORT_SERVICE_PID, updatedProp);
+        } catch (KuraException e) {
+            logger.error("Unable to update configuration!");
         }
     }
 

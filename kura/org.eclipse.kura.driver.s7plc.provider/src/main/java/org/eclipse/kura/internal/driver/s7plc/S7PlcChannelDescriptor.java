@@ -50,25 +50,25 @@ public final class S7PlcChannelDescriptor implements ChannelDescriptor {
 
     private Toption generateDbTypeOption(int type) {
         Toption option = new Toption();
-        option.setLabel(String.valueOf(type));
+        option.setValue(String.valueOf(type));
         switch (type) {
         case S7.S7AreaDB:
-            option.setValue("D,DB");
+            option.setLabel("D,DB");
             break;
         case S7.S7AreaPE:
-            option.setValue("I");
+            option.setLabel("I");
             break;
         case S7.S7AreaPA:
-            option.setValue("Q");
+            option.setLabel("Q");
             break;
         case S7.S7AreaMK:
-            option.setValue("M");
+            option.setLabel("M");
             break;
         case S7.S7AreaCT:
-            option.setValue("C");
+            option.setLabel("C");
             break;
         case S7.S7AreaTM:
-            option.setValue("T");
+            option.setLabel("T");
             break;
         default:
             break;

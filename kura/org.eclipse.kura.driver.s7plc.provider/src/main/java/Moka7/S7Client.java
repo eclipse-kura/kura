@@ -615,7 +615,8 @@ public class S7Client {
                     Length = RecvIsoPacket();
                     if (this.LastError == 0) {
                         if (Length >= 25) {
-                            if (Length - 25 == SizeRequested && this.PDU[21] == (byte) 0xFF) {
+                            if (Length - 25 == SizeRequested && this.PDU[21] == (byte) 0xFF
+                                    && SizeRequested <= (Data.length - Offset)) {
                                 System.arraycopy(this.PDU, 25, Data, Offset, SizeRequested);
                                 Offset += SizeRequested;
                             } else {

@@ -40,10 +40,10 @@ public class S7PlcToplevelBlockTask extends ToplevelBlockTask {
     public void processBuffer() throws IOException {
         if (getMode() == Mode.READ) {
             logger.debug("Reading from PLC, DB{} offset: {} length: {}", areaNo, getStart(), getBuffer().getLength());
-            driver.read(areaNo, getStart(), ((ByteArrayBuffer) getBuffer()).getBackingArray());
+            driver.read(dbType, areaNo, getStart(), ((ByteArrayBuffer) getBuffer()).getBackingArray());
         } else {
             logger.debug("Writing to PLC, DB{} offset: {} length: {}", areaNo, getStart(), getBuffer().getLength());
-            driver.write(areaNo, getStart(), ((ByteArrayBuffer) getBuffer()).getBackingArray());
+            driver.write(dbType, areaNo, getStart(), ((ByteArrayBuffer) getBuffer()).getBackingArray());
         }
     }
 

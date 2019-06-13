@@ -32,11 +32,17 @@ public class S7PlcDomain {
 
     @Override
     public int hashCode() {
-        return db;
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + db;
+        result = prime * result + dbType;
+        return result;
     }
 
     @Override
     public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
         if (obj == null)
             return false;
         if (getClass() != obj.getClass())
@@ -44,6 +50,9 @@ public class S7PlcDomain {
         S7PlcDomain other = (S7PlcDomain) obj;
         if (db != other.db)
             return false;
+        if (dbType != other.dbType)
+            return false;
         return true;
     }
+
 }

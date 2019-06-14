@@ -20,6 +20,5 @@ public enum NetProtocol {
     tcp,
 
     /** User Datagram Protocol (UDP) **/
-    udp,
-    icmp
+    udp
 }

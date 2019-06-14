@@ -299,8 +299,7 @@ public abstract class FirewallPortForwardConfigIP<T extends IPAddress> implement
             return false;
         }
 
-        if (this.protocol == null || !this.protocol.equals(NetProtocol.tcp) || !this.protocol.equals(NetProtocol.udp)
-                || !this.protocol.equals(NetProtocol.icmp)) {
+        if (this.protocol == null || !this.protocol.equals(NetProtocol.tcp) || !this.protocol.equals(NetProtocol.udp)) {
             return false;
         }
 

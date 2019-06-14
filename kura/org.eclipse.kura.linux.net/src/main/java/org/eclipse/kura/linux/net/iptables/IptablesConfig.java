@@ -43,12 +43,12 @@ public class IptablesConfig {
     private static final String ALLOW_ONLY_INCOMING_TO_OUTGOING = "-A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT";
 
     private static final String[] ALLOW_ICMP = {
-            "-A INPUT -p icmp --icmp-type 8 -m state --state NEW,RELATED,ESTABLISHED -j ACCEPT",
-            "-A OUTPUT -p icmp --icmp-type 0 -m state --state RELATED,ESTABLISHED -j ACCEPT" };
+            "-A INPUT -p icmp -m icmp --icmp-type 8 -m state --state NEW,RELATED,ESTABLISHED -j ACCEPT",
+            "-A OUTPUT -p icmp -m icmp --icmp-type 0 -m state --state RELATED,ESTABLISHED -j ACCEPT" };
 
     private static final String[] DO_NOT_ALLOW_ICMP = {
-            "-A INPUT -p icmp --icmp-type 8 -m state --state NEW,RELATED,ESTABLISHED -j DROP",
-            "-A OUTPUT -p icmp --icmp-type 0 -m state --state RELATED,ESTABLISHED -j DROP" };
+            "-A INPUT -p icmp -m icmp --icmp-type 8 -m state --state NEW,RELATED,ESTABLISHED -j DROP",
+            "-A OUTPUT -p icmp -m icmp --icmp-type 0 -m state --state RELATED,ESTABLISHED -j DROP" };
 
     private final Set<LocalRule> localRules;
     private final Set<PortForwardRule> portForwardRules;
@@ -288,8 +288,6 @@ public class IptablesConfig {
                 }
             }
             writer.println("COMMIT");
-            writer.flush();
-            fos.flush();
         } catch (Exception e) {
             logger.error("save() :: failed to clear all chains ", e);
             throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);

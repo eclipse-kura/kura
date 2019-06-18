@@ -21,6 +21,6 @@ import org.eclipse.kura.driver.binary.adapter.StringData;
 public class StringTask extends BinaryDataTask<String> {
 
     public StringTask(ChannelRecord record, int start, int end, Mode mode) {
-        super(record, start, new StringData(new ByteArray(end - start), StandardCharsets.US_ASCII), mode);
+        super(record, start, new StringData(new ByteArray(end - start), StandardCharsets.UTF_8), mode);
     }
 }

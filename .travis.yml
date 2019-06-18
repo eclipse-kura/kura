@@ -25,7 +25,7 @@ before_script:
   - cd maven ; tar --strip-components 1 -xzf ../maven.tar.gz ; cd ..
   - chmod a+x maven/bin/mvn
   - export M2_HOME=$PWD/maven
-  - export PATH=${M2_HOME}/bin:${PATH}
+  - export PATH=${M2_HOME}/maven/bin:${PATH}
   - hash -r
 
 addons:

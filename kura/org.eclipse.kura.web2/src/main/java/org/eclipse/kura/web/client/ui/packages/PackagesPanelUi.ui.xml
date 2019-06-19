@@ -46,10 +46,10 @@
         <b:Row b:id="marketplaceInstall">
             <b:Well size="SMALL" ui:field="marketplaceInstallWell">
                 <g:HTMLPanel>
-                    <h5>Install from <a href="https://marketplace.eclipse.org/taxonomy/term/4397%2C4396/title" target="_blank">Eclipse Marketplace&trade;</a></h5>
+                    <h5><b.html:Text text="{msgs.installfrom}"/>   <a href="http://www.yofc.com" target="_blank">YOFC Marketplace&trade;</a></h5>
                 </g:HTMLPanel>
                 <b:HelpBlock
-                    text="In order to install a deployment package from Eclipse Marketplace drag and drop here the Install button available in the software description page." />
+                    text="{msgs.installdp}" />
             </b:Well>
         </b:Row>
 

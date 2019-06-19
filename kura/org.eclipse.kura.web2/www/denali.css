@@ -118,7 +118,7 @@ body {
 }
 
 .headerLogo {
-	height: 1cm !important;
+	height: 1.5cm !important;
 }
 
 table {
@@ -1061,16 +1061,16 @@ Packages panel dropzone END
 
 div.copyright:after {
 	content:
-		' 长飞光纤光缆股份有限公司 何幼林 ';
+		' 长飞光纤光缆股份有限公司 ';
 }
 
 div.headerLogo { 
-	height: 			38px;
+	height: 			5px;
 	margin: 			5px 0px 5px 15px;
 	vertical-align: 	baseline;
 	background: 		url(eclipse/kura/icons/yofc_logo_small.png);
+	background-size: 100% 100%;
 	background-repeat: 	no-repeat;
-	background-size: 	contain;
 	background-position: center !important;
 	margin-left: 0 !important;
 	margin-right: 0 !important;

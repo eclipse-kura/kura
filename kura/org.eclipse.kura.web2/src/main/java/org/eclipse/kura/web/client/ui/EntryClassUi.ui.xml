@@ -109,7 +109,7 @@
 									addStyleNames="glyphicon glyphicon-menu-hamburger sidebar-button"></b:Button>
 								<b:Panel addStyleNames="{style.image} headerLogo" />
 								<b:Container fluid="true" addStyleNames="logout-ui header-logout-ui">
-									<b:Button text="Logout" icon="SIGN_OUT" size="SMALL" addStyleNames="logout-button"
+									<b:Button text="{msgs.logout}" icon="SIGN_OUT" size="SMALL" addStyleNames="logout-button"
 										ui:field="headerLogoutButton" />
 								</b:Container>
 							</b:PanelHeader>
@@ -127,7 +127,7 @@
 							<b:Panel>
 								<b:Panel addStyleNames="{style.image} headerLogo" />
 								<b:PanelHeader>
-									<b:Heading size="H3" text="System" />
+									<b:Heading size="H3" text="{msgs.sysapp}" />
 								</b:PanelHeader>
 								<b:PanelBody ui:field='systemPanel'
 									b:id="systemPanel">
@@ -170,14 +170,14 @@
 							addStyleNames="{style.services-list}">
 							<b:Panel>
 								<b:PanelHeader>
-									<b:Heading size="H3" text="Services" />
+									<b:Heading size="H3" text="{msgs.services}" />
 								</b:PanelHeader>
 								<b:PanelBody>
 									<b:FieldSet>
 										<b:FormGroup addStyleNames="services-form-group">
 											<b:InputGroup
 												addStyleNames="services-input-group">
-												<b:TextBox placeholder="Search"
+												<b:TextBox placeholder="{msgs.search}"
 													ui:field="textSearch" addStyleNames="services-search"
 													b:id="servicesSearchField" />
 												<b:InputGroupButton
@@ -202,7 +202,7 @@
 					</b:Row>
 				</b:Column>
 				<b:Container fluid="true" addStyleNames="logout-ui">
-					<b:Button text="Logout" icon="SIGN_OUT" size="SMALL" addStyleNames="logout-button"
+					<b:Button text="{msgs.logout}" icon="SIGN_OUT" size="SMALL" addStyleNames="logout-button"
 										ui:field="logoutButton" />
 				</b:Container>
 				<b:Row addStyleNames='main-content'>

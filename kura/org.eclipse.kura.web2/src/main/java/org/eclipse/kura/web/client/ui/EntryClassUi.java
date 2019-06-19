@@ -479,7 +479,7 @@ public class EntryClassUi extends Composite {
                 }
                 EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.status);
                 EntryClassUi.this.contentPanel.setVisible(true);
-                setHeader("Status", null);
+                setHeader(MSGS.status(), null);
                 EntryClassUi.this.contentPanelBody.clear();
                 EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.statusBinder);
                 EntryClassUi.this.statusBinder.setSession(EntryClassUi.this.currentSession);
@@ -902,7 +902,7 @@ public class EntryClassUi extends Composite {
     private void showStatusPanel() {
         setSelectedAnchorListItem(this.status);
         this.contentPanel.setVisible(true);
-        this.contentPanelHeader.setText("Status");
+        this.contentPanelHeader.setText(MSGS.status());
         this.contentPanelBody.clear();
         this.contentPanelBody.add(EntryClassUi.this.statusBinder);
         this.statusBinder.setSession(EntryClassUi.this.currentSession);

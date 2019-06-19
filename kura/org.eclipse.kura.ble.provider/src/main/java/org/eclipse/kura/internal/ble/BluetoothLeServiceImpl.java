@@ -34,6 +34,7 @@ public class BluetoothLeServiceImpl implements BluetoothLeService {
         if (!startBluetoothUbuntuSnap() && !startBluetoothSystemd() && !startBluetoothInitd()) {
             startBluetoothDaemon();
         }
+        startBluetoothHCI();
         try {
             this.bluetoothManager = BluetoothManager.getBluetoothManager();
         } catch (RuntimeException | UnsatisfiedLinkError e) {
@@ -87,6 +88,22 @@ public class BluetoothLeServiceImpl implements BluetoothLeService {
         return started;
     }
 
+    private void startBluetoothHCI() {
+        Process process;
+        try {
+            process = Runtime.getRuntime().exec("ls /sys/class/bluetooth");
+            BufferedReader stdin = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String s = stdin.readLine();
+            if (s != null && !s.equals("")) {
+                String[] hcis = s.split("\\s+");
+                for (String hci : hcis)
+                    Runtime.getRuntime().exec("hciconfig " + hci + " up");
+            }
+        } catch (IOException e) {
+            logger.error("Failed to start linux hciconfig bluetooth", e);
+        }
+    }
+
     private boolean startBluetoothInitd() {
         String initdCommand = "/etc/init.d/bluetooth start";
         boolean started = false;
@@ -116,12 +133,12 @@ public class BluetoothLeServiceImpl implements BluetoothLeService {
 
     private boolean startBluetoothUbuntuSnap() {
         String snap_name = System.getProperty("kura.os.snap.name");
-        if (snap_name != null && snap_name.length() != 0 ) {
-          // when running as snap, we assume bluez is installed as snap and running
-          logger.info("We are running as snap, assume bluetooth is running");
-          return true;
+        if (snap_name != null && snap_name.length() != 0) {
+            // when running as snap, we assume bluez is installed as snap and running
+            logger.info("We are running as snap, assume bluetooth is running");
+            return true;
         } else {
-          return false;
+            return false;
         }
     }
 }

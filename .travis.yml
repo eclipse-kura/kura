@@ -1,6 +1,10 @@
 language: java
 
+jdk:
+- openjdk8
+
 sudo: false
+dist: trusty
 
 cache:
   directories:
@@ -27,6 +31,7 @@ addons:
   apt:
     packages:
       - dos2unix
+      - openjdk-8-jdk
 
 jobs:
   include:

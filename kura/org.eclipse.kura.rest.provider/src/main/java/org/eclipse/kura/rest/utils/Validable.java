@@ -8,7 +8,7 @@
  *
  *******************************************************************************/
 
-package org.eclipse.kura.internal.rest.asset;
+package org.eclipse.kura.rest.utils;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;

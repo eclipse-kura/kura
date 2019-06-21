@@ -28,8 +28,6 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.util.Date;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  *
@@ -68,7 +66,6 @@ public class S7Client {
     private static final int DefaultPduSizeRequested = 480;
     private static final int IsoHSize = 7; // TPKT+COTP Header Size
     private static final int MaxPduSize = DefaultPduSizeRequested + IsoHSize;
-    private Lock lock = new ReentrantLock();
     private Socket TCPSocket;
     private final byte[] PDU = new byte[2048];
 
@@ -515,14 +512,7 @@ public class S7Client {
 
     public int ConnectTo(String Address, int Rack, int Slot) {
         // Use the default port
-        try {
-            lock.lockInterruptibly();
-            return ConnectTo(Address, Rack, Slot, ISOTCP);
-        } catch (InterruptedException e) {
-            return errTCPConnectionFailed;
-        } finally {
-            lock.unlock();
-        }
+        return ConnectTo(Address, Rack, Slot, ISOTCP);
     }
 
     public int ConnectTo(String Address, int Rack, int Slot, int Port) {
@@ -608,30 +598,25 @@ public class S7Client {
             this.PDU[29] = (byte) (Address & 0x0FF);
             Address = Address >> 8;
             this.PDU[28] = (byte) (Address & 0x0FF);
-            try {
-                lock.lockInterruptibly();
-                SendPacket(this.PDU, Size_RD);
+
+            SendPacket(this.PDU, Size_RD);
+            if (this.LastError == 0) {
+                Length = RecvIsoPacket();
                 if (this.LastError == 0) {
-                    Length = RecvIsoPacket();
-                    if (this.LastError == 0) {
-                        if (Length >= 25) {
-                            if (Length - 25 == SizeRequested && this.PDU[21] == (byte) 0xFF
-                                    && SizeRequested <= (Data.length - Offset)) {
-                                System.arraycopy(this.PDU, 25, Data, Offset, SizeRequested);
-                                Offset += SizeRequested;
-                            } else {
-                                this.LastError = errS7DataRead;
-                            }
+                    if (Length >= 25) {
+                        if (Length - 25 == SizeRequested && this.PDU[21] == (byte) 0xFF
+                                && SizeRequested <= (Data.length - Offset)) {
+                            System.arraycopy(this.PDU, 25, Data, Offset, SizeRequested);
+                            Offset += SizeRequested;
                         } else {
-                            this.LastError = errS7InvalidPDU;
+                            this.LastError = errS7DataRead;
                         }
+                    } else {
+                        this.LastError = errS7InvalidPDU;
                     }
                 }
-            } catch (InterruptedException e) {
-                this.LastError = errS7DataRead;
-            } finally {
-                lock.unlock();
             }
+
             TotElements -= NumElements;
             Start += NumElements * WordSize;
         }
@@ -709,25 +694,19 @@ public class S7Client {
 
             // Copies the Data
             System.arraycopy(Data, Offset, this.PDU, 35, DataSize);
-            try {
-                lock.lockInterruptibly();
-                SendPacket(this.PDU, IsoSize);
+
+            SendPacket(this.PDU, IsoSize);
+            if (this.LastError == 0) {
+                Length = RecvIsoPacket();
                 if (this.LastError == 0) {
-                    Length = RecvIsoPacket();
-                    if (this.LastError == 0) {
-                        if (Length == 22) {
-                            if (S7.GetWordAt(this.PDU, 17) != 0 || this.PDU[21] != (byte) 0xFF) {
-                                this.LastError = errS7DataWrite;
-                            }
-                        } else {
-                            this.LastError = errS7InvalidPDU;
+                    if (Length == 22) {
+                        if (S7.GetWordAt(this.PDU, 17) != 0 || this.PDU[21] != (byte) 0xFF) {
+                            this.LastError = errS7DataWrite;
                         }
+                    } else {
+                        this.LastError = errS7InvalidPDU;
                     }
                 }
-            } catch (InterruptedException e) {
-                this.LastError = errS7DataWrite;
-            } finally {
-                lock.unlock();
             }
 
             Offset += DataSize;
@@ -774,11 +753,11 @@ public class S7Client {
     /**
      *
      * @param DBNumber
-     *                     DB Number
+     *            DB Number
      * @param Buffer
-     *                     Destination buffer
+     *            Destination buffer
      * @param SizeRead
-     *                     How many bytes were read
+     *            How many bytes were read
      * @return
      */
     public int DBGet(int DBNumber, byte[] Buffer, IntByRef SizeRead) {

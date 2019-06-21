@@ -156,7 +156,7 @@ Copyright (c) 2017 Eurotech and/or its affiliates and others
                             <autoStart>true</autoStart>
                         </bundle>
                         <bundle>
-                            <id>org.h2</id>
+                            <id>com.h2database</id>
                             <level>4</level>
                             <autoStart>true</autoStart>
                         </bundle>
@@ -271,7 +271,7 @@ Copyright (c) 2017 Eurotech and/or its affiliates and others
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>
-                            <artifactId>org.h2</artifactId>
+                            <artifactId>com.h2database</artifactId>
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>

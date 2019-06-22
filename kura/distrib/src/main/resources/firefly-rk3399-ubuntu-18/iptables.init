@@ -17,12 +17,13 @@ COMMIT
 -A INPUT -p tcp -m tcp --dport 1883 -j ACCEPT
 -A INPUT -p tcp -m tcp --dport 22 -j ACCEPT
 -A INPUT -p tcp -m tcp --dport 1450 -j ACCEPT
--A INPUT -p tcp -m udp --dport 53 -j ACCEPT
--A INPUT -p tcp -m udp --dport 53 -j ACCEPT
+-A INPUT -p tcp -m tcp --dport 53 -j ACCEPT
+-A INPUT -p udp -m udp --dport 53 -j ACCEPT
+-A INPUT -p tcp -m tcp --dport 67 -j ACCEPT
 -A INPUT -p udp -m udp --dport 67 -j ACCEPT
+-A INPUT -p tcp -m tcp --dport 5353 -j ACCEPT
 -A INPUT -p udp -m udp --dport 5353 -j ACCEPT
 -A INPUT -i lo -j ACCEPT
--A OUTPUT -o lo -j ACCEPT
 -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
 -A INPUT -p icmp -m icmp --icmp-type 8 -m state --state NEW,RELATED,ESTABLISHED -j ACCEPT
 -A OUTPUT -p icmp -m icmp --icmp-type 0 -m state --state RELATED,ESTABLISHED -j ACCEPT

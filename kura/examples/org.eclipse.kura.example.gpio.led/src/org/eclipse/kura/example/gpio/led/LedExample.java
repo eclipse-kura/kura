@@ -28,12 +28,12 @@ import org.slf4j.LoggerFactory;
 
 public class LedExample implements ConfigurableComponent {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(LedExample.class);
+    private static final Logger logger = LoggerFactory.getLogger(LedExample.class);
     private static final String APP_ID = "org.eclipse.kura.example.gpio.led.LedExample";
-   
-
+    
     private GPIOService myservice;
     private LedOptions options;
+    private KuraGPIOPin pin;
 
     protected synchronized void bindGPIOService(final GPIOService gpioService) {
         this.myservice = gpioService;
@@ -44,50 +44,64 @@ public class LedExample implements ConfigurableComponent {
     }
 
     protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
-        s_logger.info("Bundle " + APP_ID + " has started with config!");
+        logger.info("Bundle {} has started with config!", APP_ID);
         updated(properties);
     }
 
     protected void deactivate(ComponentContext componentContext) {
-        s_logger.info("Bundle " + APP_ID + " has stopped!");
+        logger.info("Bundle {} has stopped!", APP_ID);
+        close();
     }
 
     public void updated(Map<String, Object> properties) {
+        
+    	this.options = new LedOptions(properties);
+        
+    	close();
+    	
+    	pin = this.myservice.getPinByTerminal(this.options.isConfigPin());
+    	    
+    	if (pin == null) {
+    		return;
+    	}
 
-       
-        KuraGPIOPin pin = this.myservice.getPinByTerminal(6);
+        open();
 
-        this.options = new LedOptions(properties);
+        if (this.options.isEnableLed()) {
+        	setValue(true);
+        } else {
+        	setValue(false);
+        }
 
-        try {
+    }
+    
+    private void open() {
+    	try {
             pin.open();
         } catch (KuraGPIODeviceException | KuraUnavailableDeviceException | IOException e) {
             e.printStackTrace();
         }
-
-        if (this.options.isEnableLed()) {
-
-            try {
-                pin.setValue(true);
-                TimeUnit.SECONDS.sleep(1);
-            } catch (KuraUnavailableDeviceException | IOException | KuraClosedDeviceException e) {
-                s_logger.error("Exception GPIOService ", e);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        } else {
-
-            try {
-                pin.setValue(false);
-                TimeUnit.SECONDS.sleep(1);
-                pin.close();
-            } catch (KuraUnavailableDeviceException | KuraClosedDeviceException | IOException e) {
-                s_logger.error("Exception GPIOService ", e);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
+    }
+    
+    private void close() {
+    	
+    	if (pin != null) {
+    		try {
+    			pin.close();
+    		} catch (IOException e) {
+    			e.printStackTrace();
+    		}
+    	}
+    }
+    
+    private void setValue(boolean bool) {
+    	try {
+            pin.setValue(bool);
+            TimeUnit.SECONDS.sleep(1);
+        } catch (KuraUnavailableDeviceException | IOException | KuraClosedDeviceException e) {
+            logger.error("Exception GPIOService ", e);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
-
     }
 }

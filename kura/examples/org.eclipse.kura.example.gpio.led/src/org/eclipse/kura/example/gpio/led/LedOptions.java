@@ -17,23 +17,32 @@ import static java.util.Objects.requireNonNull;
 import java.util.Map;
 
 public class LedOptions {
+	
+	private static final String PROPRTY_PIN_NOME = "configurePin";
+	private static final int PROPRTY_PIN_DEFAULT = 6;
 
     private static final String PROPRTY_LED_NOME = "switchLed";
-
     private static final boolean PROPRTY_LED_DEFAULT = false;
-
+    
+    private final int configPin;  
     private final boolean enableLed;
 
     public LedOptions(Map<String, Object> properties) {
 
         requireNonNull(properties, "Required not null");
+        this.configPin = getProperty(properties, PROPRTY_PIN_NOME, PROPRTY_PIN_DEFAULT);
         this.enableLed = getProperty(properties, PROPRTY_LED_NOME, PROPRTY_LED_DEFAULT);
 
+    }
+    
+    public int isConfigPin() {
+    	return this.configPin;
     }
 
     public boolean isEnableLed() {
         return this.enableLed;
     }
+    
 
     @SuppressWarnings("unchecked")
     private <T> T getProperty(Map<String, Object> properties, String propertyName, T defaultValue) {

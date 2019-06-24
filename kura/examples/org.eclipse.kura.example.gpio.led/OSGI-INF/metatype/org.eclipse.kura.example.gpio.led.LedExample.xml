@@ -14,9 +14,18 @@
 -->
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
     <OCD id="org.eclipse.kura.example.gpio.led.LedExample"
-        name="LedExample"
-        description="Example of switching on and off the led">
+        name="Gpio Led Example"
+        description="This example allows to configure and manage the state of a LED connected to a configurable GPIO pin">
 
+        <AD id="configurePin"
+            name="configurePin"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="6"
+            min = "0"
+            description="Configure the Pin to use."/>
+            
             
         <AD id="switchLed"
             name="switchLed"
@@ -24,7 +33,7 @@
             cardinality="0"
             required="true"
             default="false"
-            description="Switch on and of the led."/>
+            description="Switches the selected GPIO port state."/>
             
     </OCD>
 

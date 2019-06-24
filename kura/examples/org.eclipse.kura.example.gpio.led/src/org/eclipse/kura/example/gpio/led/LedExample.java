@@ -59,19 +59,15 @@ public class LedExample implements ConfigurableComponent {
         
     	close();
     	
-    	pin = this.myservice.getPinByTerminal(this.options.isConfigPin());
+    	    pin = this.myservice.getPinByTerminal(this.options.isConfigPin());
     	    
     	if (pin == null) {
     		return;
     	}
 
         open();
-
-        if (this.options.isEnableLed()) {
-        	setValue(true);
-        } else {
-        	setValue(false);
-        }
+        
+        setValue(this.options.isEnableLed());
 
     }
     
@@ -79,7 +75,7 @@ public class LedExample implements ConfigurableComponent {
     	try {
             pin.open();
         } catch (KuraGPIODeviceException | KuraUnavailableDeviceException | IOException e) {
-            e.printStackTrace();
+        	logger.error("Exception GPIOService ", e);
         }
     }
     
@@ -89,7 +85,7 @@ public class LedExample implements ConfigurableComponent {
     		try {
     			pin.close();
     		} catch (IOException e) {
-    			e.printStackTrace();
+    			logger.error("Exception GPIOService ", e);
     		}
     	}
     }
@@ -98,10 +94,8 @@ public class LedExample implements ConfigurableComponent {
     	try {
             pin.setValue(bool);
             TimeUnit.SECONDS.sleep(1);
-        } catch (KuraUnavailableDeviceException | IOException | KuraClosedDeviceException e) {
+        } catch (InterruptedException | KuraUnavailableDeviceException | IOException | KuraClosedDeviceException e) {
             logger.error("Exception GPIOService ", e);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
         }
     }
 }

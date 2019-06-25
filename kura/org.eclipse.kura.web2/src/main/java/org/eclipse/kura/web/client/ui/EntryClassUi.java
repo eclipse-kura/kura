@@ -169,6 +169,12 @@ public class EntryClassUi extends Composite {
     Button logoutButton;
     @UiField
     Button headerLogoutButton;
+    @UiField
+    Modal accessBannerModal;
+    @UiField
+    Button buttonAccessBannerModalOk;
+    @UiField
+    Strong accessBannerModalPannelBody;
 
     private static final Messages MSGS = GWT.create(Messages.class);
     private static final EntryClassUIUiBinder uiBinder = GWT.create(EntryClassUIUiBinder.class);
@@ -241,7 +247,23 @@ public class EntryClassUi extends Composite {
         });
 
         initLogoutButtons();
+        initLoginBannerModal();
         initServicesTree();
+    }
+
+    private void initLoginBannerModal() {
+        this.accessBannerModal.setTitle(MSGS.warning());
+        this.buttonAccessBannerModalOk.setText(MSGS.okButton());
+
+        RequestQueue.submit(context -> this.gwtSessionService.isBannerEnabled(context.callback(bannerStatus -> {
+            if (bannerStatus) {
+                this.gwtSessionService.getBannerContent(context.callback(bannerContent -> {
+                    EntryClassUi.this.accessBannerModalPannelBody.setText(bannerContent);
+                    EntryClassUi.this.accessBannerModal.show();
+                }));
+            }
+
+        })));
     }
 
     private void initExceptionReportModal() {
@@ -588,15 +610,23 @@ public class EntryClassUi extends Composite {
     }
 
     private void initLogoutButtons() {
-        final ClickHandler logoutHandler = e -> gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-
-            @Override
-            public void onSuccess(GwtXSRFToken result) {
-                gwtSessionService.logout(result, new AsyncCallback<Void>() {
+        final ClickHandler logoutHandler = e -> this.gwtXSRFService
+                .generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
                     @Override
-                    public void onSuccess(Void result) {
-                        Window.Location.reload();
+                    public void onSuccess(GwtXSRFToken result) {
+                        EntryClassUi.this.gwtSessionService.logout(result, new AsyncCallback<Void>() {
+
+                            @Override
+                            public void onSuccess(Void result) {
+                                Window.Location.reload();
+                            }
+
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                FailureHandler.handle(caught);
+                            }
+                        });
                     }
 
                     @Override
@@ -604,13 +634,6 @@ public class EntryClassUi extends Composite {
                         FailureHandler.handle(caught);
                     }
                 });
-            }
-
-            @Override
-            public void onFailure(Throwable caught) {
-                FailureHandler.handle(caught);
-            }
-        });
 
         this.logoutButton.addClickHandler(logoutHandler);
         this.headerLogoutButton.addClickHandler(logoutHandler);

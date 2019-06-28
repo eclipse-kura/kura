@@ -15,18 +15,19 @@ package org.eclipse.kura.linux.net.util;
 import java.util.Collection;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.linux.net.wifi.WifiOptions;
 
 public abstract class ScanTool {
 
-    public static IScanTool get(String ifaceName) throws KuraException {
-        Collection<String> supportedWifiOptions = WifiOptions.getSupportedOptions(ifaceName);
+    public static IScanTool get(String ifaceName, CommandExecutorService executorService) throws KuraException {
+        Collection<String> supportedWifiOptions = new WifiOptions(executorService).getSupportedOptions(ifaceName);
         IScanTool scanTool = null;
         if (!supportedWifiOptions.isEmpty()) {
             if (supportedWifiOptions.contains(WifiOptions.WIFI_MANAGED_DRIVER_NL80211)) {
-                scanTool = new iwScanTool(ifaceName);
+                scanTool = new IwScanTool(ifaceName, executorService);
             } else if (supportedWifiOptions.contains(WifiOptions.WIFI_MANAGED_DRIVER_WEXT)) {
-                scanTool = new iwlistScanTool(ifaceName);
+                scanTool = new IwlistScanTool(ifaceName, executorService);
             }
         }
         return scanTool;

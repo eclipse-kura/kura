@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.linux.bluetooth.le;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,6 +25,8 @@ import org.eclipse.kura.bluetooth.BluetoothDevice;
 import org.eclipse.kura.bluetooth.BluetoothLeScanListener;
 import org.eclipse.kura.bluetooth.listener.BluetoothAdvertisementData;
 import org.eclipse.kura.bluetooth.listener.BluetoothAdvertisementScanListener;
+import org.eclipse.kura.core.linux.executor.LinuxSignal;
+import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.linux.bluetooth.BluetoothDeviceImpl;
 import org.eclipse.kura.linux.bluetooth.util.BTSnoopListener;
 import org.eclipse.kura.linux.bluetooth.util.BluetoothProcess;
@@ -38,7 +41,6 @@ public class BluetoothLeScanner implements BluetoothProcessListener, BTSnoopList
     private static final String MAC_REGEX = "^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$";
 
     public static final int SCAN_FAILED_INTERNAL_ERROR = 0x0003;
-    private static final String SIGINT = "2";
 
     private final Map<String, String> devices;
     private List<BluetoothDevice> scanResult;
@@ -49,9 +51,11 @@ public class BluetoothLeScanner implements BluetoothProcessListener, BTSnoopList
     private BluetoothAdvertisementScanListener advertisementListener = null;
     private boolean scanRunning = false;
     private String companyName;
+    private final CommandExecutorService executorService;
 
-    public BluetoothLeScanner() {
+    public BluetoothLeScanner(CommandExecutorService executorService) {
         this.devices = new HashMap<>();
+        this.executorService = executorService;
     }
 
     public void startScan(String name, BluetoothLeScanListener listener) {
@@ -60,9 +64,12 @@ public class BluetoothLeScanner implements BluetoothProcessListener, BTSnoopList
         logger.info("Starting bluetooth le scan...");
 
         // Start scan process
-        this.proc = BluetoothUtil.hcitoolCmd(name, "lescan", this);
-
-        setScanRunning(true);
+        try {
+            this.proc = BluetoothUtil.hcitoolCmd(name, "lescan", this, this.executorService);
+            setScanRunning(true);
+        } catch (IOException e) {
+            logger.error("Failed to start device scan", e);
+        }
     }
 
     public void startAdvertisementScan(String name, String companyName, BluetoothAdvertisementScanListener listener) {
@@ -71,13 +78,16 @@ public class BluetoothLeScanner implements BluetoothProcessListener, BTSnoopList
 
         logger.info("Starting bluetooth le advertisement scan...");
 
-        // Start scan process
-        this.proc = BluetoothUtil.hcitoolCmd(name, new String[] { "lescan-passive", "--duplicates" }, this);
-
-        // Start dump process
-        this.dumpProc = BluetoothUtil.btdumpCmd(name, this);
-
-        setScanRunning(true);
+        try {
+            // Start scan process
+            this.proc = BluetoothUtil.hcitoolCmd(name, new String[] { "lescan-passive", "--duplicates" }, this,
+                    this.executorService);
+            // Start dump process
+            this.dumpProc = BluetoothUtil.btdumpCmd(name, this, this.executorService);
+            setScanRunning(true);
+        } catch (IOException e) {
+            logger.error("Failed to start advertisement scan", e);
+        }
     }
 
     public void startBeaconScan(String name, String companyName, BluetoothBeaconScanListener listener) {
@@ -87,31 +97,37 @@ public class BluetoothLeScanner implements BluetoothProcessListener, BTSnoopList
         logger.info("Starting bluetooth le beacon scan...");
 
         // Start scan process
-        this.proc = BluetoothUtil.hcitoolCmd(name, new String[] { "lescan-passive", "--duplicates" }, this);
-
-        // Start dump process
-        this.dumpProc = BluetoothUtil.btdumpCmd(name, this);
-
-        setScanRunning(true);
+        try {
+            this.proc = BluetoothUtil.hcitoolCmd(name, new String[] { "lescan-passive", "--duplicates" }, this,
+                    this.executorService);
+            // Start dump process
+            this.dumpProc = BluetoothUtil.btdumpCmd(name, this, this.executorService);
+            setScanRunning(true);
+        } catch (IOException e) {
+            logger.error("Failed to start beacon scan", e);
+        }
     }
 
-    public void killScan() {
-        // SIGINT must be sent to the hcitool process. Otherwise the adapter must be toggled (down/up).
+    public void killScan(String name) {
+        // Shut down hcitool process
         if (this.proc != null) {
             logger.info("Killing hcitool...");
-            BluetoothUtil.killCmd(BluetoothUtil.HCITOOL, SIGINT);
-            this.proc = null;
+            if (!BluetoothUtil.stopHcitool(name, executorService, "")) {
+                logger.info("Cannot kill hcitool process...");
+            }
+            this.proc.destroy();
         } else {
-            logger.info("Cannot Kill hcitool, m_proc = null ...");
+            logger.info("Cannot destroy hcitool process...");
         }
 
         // Shut down btdump process
         if (this.dumpProc != null) {
             logger.info("Killing btdump...");
+            BluetoothUtil.stopBtdump(name, this.executorService);
+            BluetoothUtil.killCmd("hcidump -i " + name, LinuxSignal.SIGINT, executorService);
             this.dumpProc.destroyBTSnoop();
-            this.dumpProc = null;
         } else {
-            logger.info("Cannot Kill btdump, m_dump_proc = null ...");
+            logger.info("Cannot destroy btdump process...");
         }
 
         setScanRunning(false);
@@ -133,7 +149,7 @@ public class BluetoothLeScanner implements BluetoothProcessListener, BTSnoopList
 
             this.scanResult = new ArrayList<>();
             for (Entry<String, String> device : this.devices.entrySet()) {
-                this.scanResult.add(new BluetoothDeviceImpl(device.getKey(), device.getValue()));
+                this.scanResult.add(new BluetoothDeviceImpl(device.getKey(), device.getValue(), this.executorService));
                 logger.info("m_scanResult.add {} - {}", device.getKey(), device.getValue());
             }
 
@@ -186,7 +202,7 @@ public class BluetoothLeScanner implements BluetoothProcessListener, BTSnoopList
         }
 
     }
-    
+
     @Override
     public void processErrorStream(String string) {
     }

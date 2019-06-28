@@ -58,10 +58,10 @@ public class PppConfigTest {
                 return null;
             }
 
-            @Override
-            protected boolean hasAddress(int pppNumber) throws KuraException {
-                return true;
-            }
+            // @Override
+            // protected boolean hasAddress(int pppNumber) throws KuraException {
+            // return true;
+            // }
 
             @Override
             protected List<IPAddress> getPppDnServers() throws KuraException {
@@ -130,8 +130,8 @@ public class PppConfigTest {
             fw.write("user='a user'\n");
             fw.write("connect=connect -f " + dir + "chat\n");
         }
-        
-        try (FileWriter fw = new FileWriter(dir + "chat")) {    
+
+        try (FileWriter fw = new FileWriter(dir + "chat")) {
             fw.write("expectedresult send\n");
             fw.write("dial a number\n");
             fw.write("CONNECT connect\n");
@@ -158,10 +158,10 @@ public class PppConfigTest {
                 return null;
             }
 
-            @Override
-            protected boolean hasAddress(int pppNumber) throws KuraException {
-                return true;
-            }
+            // @Override
+            // protected boolean hasAddress(int pppNumber) throws KuraException {
+            // return true;
+            // }
 
             @Override
             protected List<IPAddress> getPppDnServers() throws KuraException {

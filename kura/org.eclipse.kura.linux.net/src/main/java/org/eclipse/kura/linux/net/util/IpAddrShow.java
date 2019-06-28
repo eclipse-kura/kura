@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -12,16 +12,17 @@
 
 package org.eclipse.kura.linux.net.util;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.io.ByteArrayOutputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 
+import org.apache.commons.io.Charsets;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.core.util.ProcessUtil;
-import org.eclipse.kura.core.util.SafeProcess;
+import org.eclipse.kura.executor.Command;
+import org.eclipse.kura.executor.CommandStatus;
+import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,15 +32,16 @@ public class IpAddrShow {
     private static final Logger logger = LoggerFactory.getLogger(IpAddrShow.class);
 
     private String ifaceName;
+    private CommandExecutorService executorService;
     private final ArrayList<LinuxIfconfig> configs = new ArrayList<>();
 
-    public IpAddrShow() {
-        super();
+    public IpAddrShow(CommandExecutorService executoService) {
+        this.executorService = executoService;
     }
 
-    public IpAddrShow(String interfaceName) {
-        super();
+    public IpAddrShow(String interfaceName, CommandExecutorService executoService) {
         this.ifaceName = interfaceName;
+        this.executorService = executoService;
     }
 
     // ifconfig sucks. ip sucks too but at least the output is consistent.
@@ -59,89 +61,74 @@ public class IpAddrShow {
         if (this.ifaceName != null) {
             sb.append(" dev ").append(this.ifaceName);
         }
-        SafeProcess proc = null;
         String cmd = sb.toString();
-        try {
-            proc = ProcessUtil.exec(cmd);
-            if (proc.waitFor() != 0) {
-                throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, cmd, proc.exitValue());
-            }
-            parseExecLink(proc);
-        } catch (Exception e) {
-            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e);
-        } finally {
-            if (proc != null) {
-                ProcessUtil.destroy(proc);
-            }
+        Command command = new Command(cmd);
+        command.setTimeout(60);
+        command.setOutputStream(new ByteArrayOutputStream());
+        CommandStatus status = this.executorService.execute(command);
+        int exitValue = (Integer) status.getExitStatus().getExitValue();
+        if (exitValue != 0) {
+            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, cmd, exitValue);
         }
+        parseExecLink(new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray(), Charsets.UTF_8));
     }
 
-    private void parseExecLink(SafeProcess proc) throws KuraException {
-        try (InputStreamReader isr = new InputStreamReader(proc.getInputStream());
-                BufferedReader br = new BufferedReader(isr)) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                line = line.trim();
-                if (line.isEmpty()) {
-                    continue;
-                }
-
-                logger.debug(line);
-
-                String ifname = findIfname(line);
-                logger.debug("ifname: '{}'", ifname);
-                if (ifname == null) {
-                    continue;
-                }
-                LinuxIfconfig config = new LinuxIfconfig(ifname);
-
-                String[] flags = findFlags(line);
-                boolean multicast = isMulticast(flags);
-                logger.debug("multicast: '{}'", multicast);
-                config.setMulticast(multicast);
-
-                boolean up = isUp(flags);
-                logger.debug("up: '{}'", up);
-                config.setUp(up);
-
-                String smtu = findValue(line, "mtu", " ");
-                logger.debug("mtu: '{}'", smtu);
-                if (smtu != null) {
-                    int mtu = Integer.parseInt(smtu);
-                    config.setMtu(mtu);
-                }
-
-                String linkState = findValue(line, "state", " ");
-                logger.debug("link state: '{}'", linkState);
-
-                // Some interfaces, like ppp0 report the link state as UNKNOWN.
-                // In this case we consider the link up.
-                if ("DOWN".equals(linkState)) {
-                    config.setLinkUp(false);
-                } else {
-                    config.setLinkUp(true);
-                }
-
-                String link = findValue(line, "link", "/| ");
-                logger.debug("link: '{}'", link);
-                if ("loopback".equals(link)) {
-                    config.setType(NetInterfaceType.LOOPBACK);
-                } else if ("ether".equals(link)) {
-                    config.setType(NetInterfaceType.ETHERNET);
-                } else if ("ppp".equals(link)) {
-                    config.setType(NetInterfaceType.MODEM);
-                } else {
-                    config.setType(NetInterfaceType.UNKNOWN);
-                }
-
-                String hwaddr = findValue(line, "link/" + link, " ");
-                logger.debug("hwaddr: '{}'", hwaddr);
-                config.setMacAddress(hwaddr); // can be null
-
-                this.configs.add(config);
+    private void parseExecLink(String commandOutput) {
+        for (String line : commandOutput.split("\n")) {
+            line = line.trim();
+            if (line.isEmpty()) {
+                continue;
             }
-        } catch (Exception e) {
-            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e);
+
+            logger.debug(line);
+
+            String ifname = findIfname(line);
+            logger.debug("ifname: '{}'", ifname);
+            if (ifname == null) {
+                continue;
+            }
+            LinuxIfconfig config = new LinuxIfconfig(ifname);
+
+            String[] flags = findFlags(line);
+            boolean multicast = isMulticast(flags);
+            logger.debug("multicast: '{}'", multicast);
+            config.setMulticast(multicast);
+
+            boolean up = isUp(flags);
+            logger.debug("up: '{}'", up);
+            config.setUp(up);
+
+            String smtu = findValue(line, "mtu", " ");
+            logger.debug("mtu: '{}'", smtu);
+            if (smtu != null) {
+                int mtu = Integer.parseInt(smtu);
+                config.setMtu(mtu);
+            }
+
+            String linkState = findValue(line, "state", " ");
+            logger.debug("link state: '{}'", linkState);
+
+            // Some interfaces, like ppp0 report the link state as UNKNOWN.
+            // In this case we consider the link up.
+            config.setLinkUp(!"DOWN".equals(linkState));
+
+            String link = findValue(line, "link", "/| ");
+            logger.debug("link: '{}'", link);
+            if ("loopback".equals(link)) {
+                config.setType(NetInterfaceType.LOOPBACK);
+            } else if ("ether".equals(link)) {
+                config.setType(NetInterfaceType.ETHERNET);
+            } else if ("ppp".equals(link)) {
+                config.setType(NetInterfaceType.MODEM);
+            } else {
+                config.setType(NetInterfaceType.UNKNOWN);
+            }
+
+            String hwaddr = findValue(line, "link/" + link, " ");
+            logger.debug("hwaddr: '{}'", hwaddr);
+            config.setMacAddress(hwaddr); // can be null
+
+            this.configs.add(config);
         }
     }
 
@@ -150,31 +137,23 @@ public class IpAddrShow {
         if (this.ifaceName != null) {
             sb.append(" dev ").append(this.ifaceName);
         }
-        SafeProcess proc = null;
         String cmd = sb.toString();
-
-        try {
-            proc = ProcessUtil.exec(cmd);
-            if (proc.waitFor() != 0) {
-                throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, cmd, proc.exitValue());
-            }
-            parseExecInet(proc);
-        } catch (Exception e) {
-            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e);
-        } finally {
-            if (proc != null) {
-                ProcessUtil.destroy(proc);
-            }
+        Command command = new Command(cmd);
+        command.setTimeout(60);
+        command.setOutputStream(new ByteArrayOutputStream());
+        CommandStatus status = this.executorService.execute(command);
+        int exitValue = (Integer) status.getExitStatus().getExitValue();
+        if (exitValue != 0) {
+            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, cmd, exitValue);
         }
+        parseExecInet(new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray(), Charsets.UTF_8));
     }
 
-    private void parseExecInet(SafeProcess proc) throws KuraException {
-        try (InputStreamReader isr = new InputStreamReader(proc.getInputStream());
-                BufferedReader br = new BufferedReader(isr)) {
-            String line;
-            // FIXME: Note that one interface might have multiple inet addresses
-            // while this implementation assumes a single inet address.
-            while ((line = br.readLine()) != null) {
+    private void parseExecInet(String commandOutput) throws KuraException {
+        // FIXME: Note that one interface might have multiple inet addresses
+        // while this implementation assumes a single inet address.
+        try {
+            for (String line : commandOutput.split("\n")) {
                 line = line.trim();
                 if (line.isEmpty()) {
                     continue;

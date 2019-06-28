@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -15,6 +15,7 @@ import java.util.Hashtable;
 import java.util.Map;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.executor.CommandExecutorService;
 
 public class DhcpServerFactory {
 
@@ -23,15 +24,15 @@ public class DhcpServerFactory {
     private DhcpServerFactory() {
     }
 
-    public static DhcpServerImpl getInstance(String interfaceName, boolean enabled, boolean passDns)
-            throws KuraException {
+    public static DhcpServerImpl getInstance(String interfaceName, boolean enabled, boolean passDns,
+            CommandExecutorService executorService) throws KuraException {
         if (dhcpServers == null) {
             dhcpServers = new Hashtable<>();
         }
 
         DhcpServerImpl dhcpServer = dhcpServers.get(interfaceName);
         if (dhcpServer == null) {
-            dhcpServer = new DhcpServerImpl(interfaceName, enabled, passDns);
+            dhcpServer = new DhcpServerImpl(interfaceName, enabled, passDns, executorService);
             dhcpServers.put(interfaceName, dhcpServer);
         }
 

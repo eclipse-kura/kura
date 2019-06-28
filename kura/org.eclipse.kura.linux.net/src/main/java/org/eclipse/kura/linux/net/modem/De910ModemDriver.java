@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.eclipse.kura.linux.net.modem;
 
+import org.eclipse.kura.executor.CommandExecutorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,8 +26,8 @@ public class De910ModemDriver extends OptionModemDriver {
     }
 
     @Override
-    public int install() throws Exception {
+    public int install(CommandExecutorService executorService) {
         logger.info("Installing {} driver for Telit DE910 modem", getName());
-        return super.install();
+        return super.install(executorService);
     }
 }

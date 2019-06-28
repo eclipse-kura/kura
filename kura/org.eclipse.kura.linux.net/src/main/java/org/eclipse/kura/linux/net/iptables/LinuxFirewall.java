@@ -478,6 +478,17 @@ public class LinuxFirewall {
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
         }
+        // String command;
+        // if (allow) {
+        // command = "sudo echo 1 > " + IP_FORWARD_FILE_NAME;
+        // } else {
+        // command = "sudo echo 0 > " + IP_FORWARD_FILE_NAME;
+        // }
+        // try {
+        // Runtime.getRuntime().exec(command);
+        // } catch (IOException e) {
+        // throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, e);
+        // }
     }
 
     /*

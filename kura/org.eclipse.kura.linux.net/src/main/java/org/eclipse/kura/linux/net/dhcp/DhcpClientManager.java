@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -12,10 +12,15 @@
 package org.eclipse.kura.linux.net.dhcp;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.eclipse.kura.KuraErrorCode;
-import org.eclipse.kura.KuraException;
-import org.eclipse.kura.core.linux.util.LinuxProcessUtil;
+import org.eclipse.kura.KuraProcessExecutionErrorException;
+import org.eclipse.kura.core.linux.executor.LinuxSignal;
+import org.eclipse.kura.executor.Command;
+import org.eclipse.kura.executor.CommandStatus;
+import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.Pid;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,9 +31,14 @@ public class DhcpClientManager {
 
     private static DhcpClientTool dhcpClientTool = DhcpClientTool.NONE;
     private static final String PID_FILE_DIR = "/var/run";
+    private CommandExecutorService executorService;
 
     static {
         dhcpClientTool = getTool();
+    }
+
+    public DhcpClientManager(CommandExecutorService service) {
+        this.executorService = service;
     }
 
     public static DhcpClientTool getTool() {
@@ -42,67 +52,39 @@ public class DhcpClientManager {
         return dhcpClientTool;
     }
 
-    public static boolean isRunning(String interfaceName) throws KuraException {
-
-        int pid = -1;
-        try {
-            if (dhcpClientTool == DhcpClientTool.DHCLIENT) {
-                pid = LinuxProcessUtil.getPid(DhcpClientTool.DHCLIENT.getValue(), new String[] { interfaceName });
-            } else if (dhcpClientTool == DhcpClientTool.UDHCPC) {
-                pid = LinuxProcessUtil.getPid(DhcpClientTool.UDHCPC.getValue(), new String[] { interfaceName });
-            }
-            return pid > -1;
-        } catch (Exception e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+    public void enable(String interfaceName) throws KuraProcessExecutionErrorException {
+        if (isRunning(interfaceName)) {
+            logger.info("enable() :: disabling DHCP client for {}", interfaceName);
+            disable(interfaceName);
+        }
+        logger.info("enable() :: Starting DHCP client for {}", interfaceName);
+        CommandStatus status = this.executorService.execute(new Command(formCommand(interfaceName, true, true, true)));
+        if ((Integer) status.getExitStatus().getExitValue() != 0) {
+            throw new KuraProcessExecutionErrorException("Failed to start dhcp client on interface " + interfaceName);
         }
     }
 
-    public static void enable(String interfaceName) throws KuraException {
-        try {
-            int pid = -1;
-            if (dhcpClientTool == DhcpClientTool.DHCLIENT) {
-                pid = LinuxProcessUtil.getPid(DhcpClientTool.DHCLIENT.getValue(), new String[] { interfaceName });
-            } else if (dhcpClientTool == DhcpClientTool.UDHCPC) {
-                pid = LinuxProcessUtil.getPid(DhcpClientTool.UDHCPC.getValue(), new String[] { interfaceName });
-            }
-
-            if (pid >= 0) {
-                logger.info("enable() :: disabling DHCP client for {}", interfaceName);
-                disable(interfaceName);
-            }
-            logger.info("enable() :: Starting DHCP client for {}", interfaceName);
-            LinuxProcessUtil.start(formCommand(interfaceName, true, true, true), true);
-        } catch (Exception e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-        }
-    }
-
-    public static void disable(String interfaceName) throws KuraException {
-        int pid = -1;
-        try {
-            if (dhcpClientTool == DhcpClientTool.DHCLIENT) {
-                pid = LinuxProcessUtil.getPid(DhcpClientTool.DHCLIENT.getValue(), new String[] { interfaceName });
-            } else if (dhcpClientTool == DhcpClientTool.UDHCPC) {
-                pid = LinuxProcessUtil.getPid(DhcpClientTool.UDHCPC.getValue(), new String[] { interfaceName });
-            }
-            if (pid > -1) {
+    public void disable(String interfaceName) throws KuraProcessExecutionErrorException {
+        List<Pid> pids = getPid(interfaceName);
+        if (!pids.isEmpty()) {
+            for (Pid pid : pids) {
                 logger.info("disable() :: killing DHCP client for {}", interfaceName);
-                if (LinuxProcessUtil.kill(pid)) {
+                if (this.executorService.stop(pid, LinuxSignal.SIGKILL)) {
                     removePidFile(interfaceName);
                 } else {
-                    throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "error killing process, pid={}", pid);
+                    throw new KuraProcessExecutionErrorException(
+                            "Failed to stop process with pid " + (Integer) pid.getPid());
                 }
             }
-        } catch (Exception e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
         }
     }
 
-    public static void releaseCurrentLease(String interfaceName) throws KuraException {
-        try {
-            LinuxProcessUtil.start(formReleaseCurrentLeaseCommand(interfaceName), true);
-        } catch (Exception e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+    public void releaseCurrentLease(String interfaceName) throws KuraProcessExecutionErrorException {
+        Command command = new Command(formReleaseCurrentLeaseCommand(interfaceName));
+        command.setTimeout(60);
+        CommandStatus status = this.executorService.execute(command);
+        if ((Integer) status.getExitStatus().getExitValue() != 0) {
+            throw new KuraProcessExecutionErrorException("Failed to release current lease");
         }
     }
 
@@ -191,5 +173,19 @@ public class DhcpClientManager {
         sb.append("-lf ");
         sb.append(DhcpClientLeases.getInstance().getDhclientLeasesFilePath(interfaceName));
         return sb.toString();
+    }
+
+    private List<Pid> getPid(String interfaceName) {
+        List<Pid> pids = new ArrayList<>();
+        if (dhcpClientTool == DhcpClientTool.DHCLIENT) {
+            pids = this.executorService.getPids(DhcpClientTool.DHCLIENT.getValue() + " " + interfaceName, false);
+        } else if (dhcpClientTool == DhcpClientTool.UDHCPC) {
+            pids = this.executorService.getPids(DhcpClientTool.UDHCPC.getValue() + " " + interfaceName, false);
+        }
+        return pids;
+    }
+
+    private boolean isRunning(String interfaceName) {
+        return !getPid(interfaceName).isEmpty();
     }
 }

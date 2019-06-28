@@ -18,29 +18,29 @@ import org.eclipse.kura.core.util.SafeProcess;
 
 public class ProcessStats {
 
-    private final SafeProcess m_process;
+    private final SafeProcess process;
 
     public ProcessStats(SafeProcess proc) {
-        this.m_process = proc;
+        this.process = proc;
     }
 
     public SafeProcess getProcess() {
-        return this.m_process;
+        return this.process;
     }
 
     public OutputStream getOutputStream() {
-        return this.m_process.getOutputStream();
+        return this.process.getOutputStream();
     }
 
     public InputStream getInputStream() {
-        return this.m_process.getInputStream();
+        return this.process.getInputStream();
     }
 
     public InputStream getErrorStream() {
-        return this.m_process.getErrorStream();
+        return this.process.getErrorStream();
     }
 
     public int getReturnValue() {
-        return this.m_process.exitValue();
+        return this.process.exitValue();
     }
 }

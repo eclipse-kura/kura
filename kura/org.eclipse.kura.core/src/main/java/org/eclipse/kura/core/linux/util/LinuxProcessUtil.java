@@ -18,7 +18,10 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Arrays;
 import java.util.StringTokenizer;
+
+import javax.naming.OperationNotSupportedException;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.util.ProcessUtil;
@@ -34,24 +37,31 @@ public class LinuxProcessUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(LinuxProcessUtil.class);
 
-    private static final String PLATFORM_INTEL_EDISON = "intel-edison";
-    private static volatile Boolean usingBusybox;
+    public static final String RETURNED_WITH_EXIT_VALUE = "{} returned with exit value: {}";
+    public static final String EXECUTING = "executing: {}";
+    public static final String PRIVILEGED_OPERATIONS_NOT_ALLOWED = "Privileged operations not allowed";
+    private static final String PS_COMMAND = "ps -ax";
 
-    public static int start(String command, boolean wait, boolean background) throws Exception {
+    private static final String PLATFORM_INTEL_EDISON = "intel-edison";
+    private static Boolean usingBusybox;
+
+    protected LinuxProcessUtil() {
+        // Empty private constructor
+    }
+
+    public static int start(String command, boolean wait, boolean background)
+            throws OperationNotSupportedException, IOException {
+        if (command.contains("sudo")) {
+            throw new OperationNotSupportedException(PRIVILEGED_OPERATIONS_NOT_ALLOWED);
+        }
         SafeProcess proc = null;
         try {
-            logger.info("executing: " + command);
+            logger.info(EXECUTING, command);
             proc = ProcessUtil.exec(command);
-            // FIXME:MC this leads to a process leak when called with false
             if (wait) {
-                try {
-                    proc.waitFor();
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    logger.warn("Interrupted exception - ", e);
-                }
+                waitFor(proc);
 
-                logger.info(command + " returned with exit value:" + proc.exitValue());
+                logger.info(RETURNED_WITH_EXIT_VALUE, command, proc.exitValue());
                 if (proc.exitValue() > 0) {
                     String stdout = getInputStreamAsString(proc.getInputStream());
                     String stderr = getInputStreamAsString(proc.getErrorStream());
@@ -62,25 +72,22 @@ public class LinuxProcessUtil {
             } else {
                 return 0;
             }
-        } catch (Exception e) {
-            throw e;
         } finally {
-            // FIXME:MC this may lead to a process leak when called with false
             if (!background && proc != null) {
                 ProcessUtil.destroy(proc);
             }
         }
     }
 
-    public static int start(String command) throws Exception {
-        return LinuxProcessUtil.start(command, true, false);
+    public static int start(String command) throws OperationNotSupportedException, IOException {
+        return start(command, true, false);
     }
 
-    public static int start(String command, boolean wait) throws Exception {
+    public static int start(String command, boolean wait) throws OperationNotSupportedException, IOException {
         return start(command, wait, false);
     }
 
-    public static int start(String[] command, boolean wait) throws Exception {
+    public static int start(String[] command, boolean wait) throws OperationNotSupportedException, IOException {
         StringBuilder cmdBuilder = new StringBuilder();
         for (String cmd : command) {
             cmdBuilder.append(cmd).append(' ');
@@ -88,61 +95,47 @@ public class LinuxProcessUtil {
         return start(cmdBuilder.toString(), wait);
     }
 
-    public static int startBackground(String command, boolean wait) throws Exception {
+    public static int startBackground(String command, boolean wait) throws OperationNotSupportedException, IOException {
         return start(command, wait, true);
     }
 
-    public static ProcessStats startWithStats(String command) throws Exception {
-        SafeProcess proc = null;
-        try {
-            logger.info("executing: " + command);
-            proc = ProcessUtil.exec(command);
-
-            try {
-                int exitVal = proc.waitFor();
-                logger.info(command + " returned with exit value:" + exitVal);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                logger.error("error executing " + command + " command" + e);
-            }
-
-            ProcessStats stats = new ProcessStats(proc);
-            // s_logger.info(command + " returned with exit value:" +
-            // proc.exitValue());
-            return stats;
-        } catch (Exception e) {
-            throw e;
+    public static ProcessStats startWithStats(String command) throws OperationNotSupportedException, IOException {
+        if (command.contains("sudo")) {
+            throw new OperationNotSupportedException(PRIVILEGED_OPERATIONS_NOT_ALLOWED);
         }
+        SafeProcess proc = null;
+        logger.info(EXECUTING, command);
+        proc = ProcessUtil.exec(command);
+
+        try {
+            int exitVal = proc.waitFor();
+            logger.debug(RETURNED_WITH_EXIT_VALUE, command, exitVal);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            logger.error("error executing {} command", command, e);
+        }
+
+        return new ProcessStats(proc);
     }
 
-    public static ProcessStats startWithStats(String[] command) throws Exception {
-        SafeProcess proc = null;
-        try {
-            StringBuilder cmdBuilder = new StringBuilder();
-            for (String cmd : command) {
-                cmdBuilder.append(cmd).append(' ');
-            }
-            logger.debug("executing: {}", cmdBuilder);
-            proc = ProcessUtil.exec(command);
-
-            try {
-                int exitVal = proc.waitFor();
-                logger.debug("{} returned with exit value:{}", cmdBuilder, +exitVal);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                logger.error("error executing " + command + " command" + e);
-            }
-
-            ProcessStats stats = new ProcessStats(proc);
-            // s_logger.debug(cmdBuilder + " returned with exit value:" +
-            // proc.exitValue());
-            return stats;
-        } catch (Exception e) {
-            throw e;
+    public static ProcessStats startWithStats(String[] command) throws OperationNotSupportedException, IOException {
+        if (Arrays.asList(command).stream().anyMatch(s -> s.contains("sudo"))) {
+            throw new OperationNotSupportedException(PRIVILEGED_OPERATIONS_NOT_ALLOWED);
         }
+        SafeProcess proc = null;
+        StringBuilder cmdBuilder = new StringBuilder();
+        for (String cmd : command) {
+            cmdBuilder.append(cmd).append(' ');
+        }
+        logger.debug(EXECUTING, cmdBuilder);
+        proc = ProcessUtil.exec(command);
+
+        wairFor(proc, cmdBuilder);
+
+        return new ProcessStats(proc);
     }
 
-    public static int getPid(String command) throws Exception {
+    public static int getPid(String command) throws IOException, InterruptedException {
         StringTokenizer st = null;
         String line = null;
         String pid = null;
@@ -156,7 +149,7 @@ public class LinuxProcessUtil {
                 if (isUsingBusyBox()) {
                     proc = ProcessUtil.exec("ps");
                 } else {
-                    proc = ProcessUtil.exec("ps -ax");
+                    proc = ProcessUtil.exec(PS_COMMAND);
                 }
                 proc.waitFor();
 
@@ -183,8 +176,6 @@ public class LinuxProcessUtil {
 
             // return failure
             return -1;
-        } catch (Exception e) {
-            throw e;
         } finally {
             if (br != null) {
                 br.close();
@@ -195,7 +186,7 @@ public class LinuxProcessUtil {
         }
     }
 
-    public static int getPid(String command, String[] tokens) throws Exception {
+    public static int getPid(String command, String[] tokens) throws IOException, InterruptedException {
         StringTokenizer st = null;
         String line = null;
         String pid = null;
@@ -207,7 +198,7 @@ public class LinuxProcessUtil {
                 if (isUsingBusyBox()) {
                     proc = ProcessUtil.exec("ps");
                 } else {
-                    proc = ProcessUtil.exec("ps -ax");
+                    proc = ProcessUtil.exec(PS_COMMAND);
                 }
                 proc.waitFor();
 
@@ -224,25 +215,14 @@ public class LinuxProcessUtil {
                     line = line.substring(line.indexOf(st.nextToken()));
 
                     // see if the line has our command
-                    if (line.indexOf(command) >= 0) {
-                        boolean allTokensPresent = true;
-                        for (String token : tokens) {
-                            if (!line.contains(token)) {
-                                allTokensPresent = false;
-                                break;
-                            }
-                        }
-                        if (allTokensPresent) {
-                            logger.trace("found pid {} for command: {}", pid, command);
-                            return Integer.parseInt(pid);
-                        }
+                    if (line.indexOf(command) >= 0 && checkLine(line, tokens)) {
+                        logger.trace("found pid {} for command: {}", pid, command);
+                        return Integer.parseInt(pid);
                     }
                 }
             }
 
             return -1;
-        } catch (Exception e) {
-            throw e;
         } finally {
             if (br != null) {
                 br.close();
@@ -253,7 +233,7 @@ public class LinuxProcessUtil {
         }
     }
 
-    public static int getKuraPid() throws Exception {
+    public static int getKuraPid() throws IOException {
 
         int pid = -1;
         File kuraPidFile = new File("/var/run/kura.pid");
@@ -275,33 +255,27 @@ public class LinuxProcessUtil {
 
     public static boolean killAll(String command) {
         try {
-            logger.info("attempting to kill process " + command);
+            logger.info("attempting to kill process {}", command);
             if (start("killall " + command) == 0) {
-                logger.info("successfully killed process " + command);
+                logger.info("successfully killed process {}", command);
                 return true;
             } else {
-                logger.warn("failed to kill process " + command);
+                logger.warn("failed to kill process {}", command);
                 return false;
             }
         } catch (Exception e) {
-            logger.warn("failed to kill process " + command);
+            logger.warn("failed to kill process {}", command);
             return false;
         }
     }
 
     public static String getInputStreamAsString(InputStream stream) throws IOException {
-        StringBuffer sb = new StringBuffer();
-        BufferedReader br = null;
-        try {
-            br = new BufferedReader(new InputStreamReader(stream));
+        StringBuilder sb = new StringBuilder();
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(stream))) {
             char[] cbuf = new char[1024];
             int len;
             while ((len = br.read(cbuf)) > 0) {
                 sb.append(cbuf, 0, len);
-            }
-        } finally {
-            if (br != null) {
-                br.close();
             }
         }
         return sb.toString();
@@ -327,7 +301,7 @@ public class LinuxProcessUtil {
             if (isUsingBusyBox()) {
                 proc = ProcessUtil.exec("ps");
             } else {
-                proc = ProcessUtil.exec("ps -ax");
+                proc = ProcessUtil.exec(PS_COMMAND);
             }
             proc.waitFor();
 
@@ -430,7 +404,7 @@ public class LinuxProcessUtil {
         boolean result = false;
         try {
             if (isProcessRunning(pid)) {
-                StringBuffer cmd = new StringBuffer();
+                StringBuilder cmd = new StringBuilder();
                 cmd.append("kill ");
                 if (kill) {
                     cmd.append("-9 ");
@@ -483,5 +457,35 @@ public class LinuxProcessUtil {
             logger.warn("getPid() :: NumberFormatException reading PID - {}", e);
         }
         return processID;
+    }
+
+    private static void waitFor(SafeProcess proc) {
+        try {
+            proc.waitFor();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            logger.warn("Interrupted exception - ", e);
+        }
+    }
+
+    private static void wairFor(SafeProcess proc, StringBuilder cmdBuilder) {
+        try {
+            int exitVal = proc.waitFor();
+            logger.debug(RETURNED_WITH_EXIT_VALUE, cmdBuilder, exitVal);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            logger.error("error executing {} command", cmdBuilder, e);
+        }
+    }
+
+    private static boolean checkLine(String line, String[] tokens) {
+        boolean allTokensPresent = true;
+        for (String token : tokens) {
+            if (!line.contains(token)) {
+                allTokensPresent = false;
+                break;
+            }
+        }
+        return allTokensPresent;
     }
 }

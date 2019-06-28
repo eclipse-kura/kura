@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -12,7 +12,8 @@
 package org.eclipse.kura.linux.net.modem;
 
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.core.linux.util.LinuxProcessUtil;
+import org.eclipse.kura.executor.Command;
+import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.internal.linux.net.modem.GatewayModemDriver;
 import org.eclipse.kura.util.service.ServiceUtil;
 import org.osgi.framework.BundleContext;
@@ -35,14 +36,14 @@ public class UsbModemDriver {
         this.product = product;
     }
 
-    public int install() throws Exception {
+    public int install(CommandExecutorService executorService) {
         logger.info("installing driver: {}", this.name);
-        return LinuxProcessUtil.start("modprobe " + this.name, true);
+        return (Integer) executorService.execute(new Command("modprobe " + this.name)).getExitStatus().getExitValue();
     }
 
-    public int remove() throws Exception {
+    public int remove(CommandExecutorService executorService) {
         logger.info("removing driver: {}", this.name);
-        return LinuxProcessUtil.start("rmmod " + this.name, true);
+        return (Integer) executorService.execute(new Command("rmmod " + this.name)).getExitStatus().getExitValue();
     }
 
     public String getName() {

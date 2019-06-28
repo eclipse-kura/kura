@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -27,6 +27,7 @@ import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
 import org.eclipse.kura.core.util.IOUtil;
 import org.eclipse.kura.linux.net.wifi.HostapdManager;
+import org.eclipse.kura.linux.net.wifi.WifiOptions;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetConfigIP4;
 import org.eclipse.kura.net.NetInterfaceAddressConfig;
@@ -288,7 +289,10 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
         if (interfaceDriver != null && interfaceDriver.length() > 0) {
             fileAsString = fileAsString.replaceFirst("KURA_DRIVER", interfaceDriver);
         } else {
-            String drv = HostapdManager.getDriver(interfaceName);
+            // Meh...
+            // String drv = HostapdManager.getDriver(interfaceName);
+            // make a guess
+            String drv = WifiOptions.WIFI_MANAGED_DRIVER_NL80211;
             logger.warn("The 'driver' parameter must be set: setting to: {}", drv);
             fileAsString = fileAsString.replaceFirst("KURA_DRIVER", drv);
         }

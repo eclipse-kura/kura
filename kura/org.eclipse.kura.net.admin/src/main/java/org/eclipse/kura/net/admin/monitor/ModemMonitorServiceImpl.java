@@ -35,6 +35,7 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.comm.CommURI;
 import org.eclipse.kura.core.net.AbstractNetInterface;
 import org.eclipse.kura.core.net.NetworkConfiguration;
+import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.linux.net.ConnectionInfoImpl;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemInfo;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemsInfo;
@@ -96,6 +97,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
     private NetworkService networkService;
     private NetworkConfigurationService netConfigService;
     private EventAdmin eventAdmin;
+    private CommandExecutorService executorService;
 
     private final Set<ModemMonitorListener> listeners = Collections.synchronizedSet(new HashSet<>());
 
@@ -108,6 +110,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 
     private final AtomicBoolean monitorRequestPending = new AtomicBoolean();
     private volatile boolean serviceActivated;
+    private LinuxNetworkUtil linuxNetworkUtil;
 
     public void setNetworkService(NetworkService networkService) {
         this.networkService = networkService;
@@ -141,8 +144,17 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
         this.systemService = null;
     }
 
+    public void setExecutorService(CommandExecutorService executorService) {
+        this.executorService = executorService;
+    }
+
+    public void unsetExecutorService(CommandExecutorService executorService) {
+        this.executorService = null;
+    }
+
     protected void activate() {
 
+        this.linuxNetworkUtil = new LinuxNetworkUtil(this.executorService);
         executor.execute(() -> {
             // track currently installed modems
             try {
@@ -584,9 +596,10 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
             }
 
             if (modemDevice instanceof UsbModemDevice) {
-                this.modems.put(((UsbModemDevice) modemDevice).getUsbPort(), new MonitoredModem(modem));
+                this.modems.put(((UsbModemDevice) modemDevice).getUsbPort(),
+                        new MonitoredModem(modem, this.linuxNetworkUtil));
             } else if (modemDevice instanceof SerialModemDevice) {
-                this.modems.put(modemDevice.getProductName(), new MonitoredModem(modem));
+                this.modems.put(modemDevice.getProductName(), new MonitoredModem(modem, this.linuxNetworkUtil));
             }
         } catch (Exception e) {
             logger.error("trackModem() :: {}", e.getMessage(), e);
@@ -633,7 +646,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
     }
 
     void addModem(final String intf, final CellularModem modem) {
-        this.modems.put(intf, new MonitoredModem(modem));
+        this.modems.put(intf, new MonitoredModem(modem, this.linuxNetworkUtil));
     }
 
     void sync() throws InterruptedException, ExecutionException {
@@ -642,7 +655,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
     }
 
     IModemLinkService getPppService(final String interfaceName, final String port) {
-        return PppFactory.getPppService(interfaceName, port);
+        return PppFactory.getPppService(interfaceName, port, this.executorService);
     }
 
     private boolean disableModemGps(CellularModem modem) {
@@ -738,10 +751,12 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
         private AtomicBoolean isValid = new AtomicBoolean(true);
         private boolean isInitialized;
         private PppState pppState = PppState.NOT_CONNECTED;
+        private LinuxNetworkUtil linuxNetworkUtil;
 
-        public MonitoredModem(final CellularModem modem) {
+        public MonitoredModem(final CellularModem modem, LinuxNetworkUtil linuxNetworkUtil) {
             this.modem = modem;
             this.resetTimer = new ModemResetTimer();
+            this.linuxNetworkUtil = linuxNetworkUtil;
         }
 
         CellularModem getModem() {
@@ -947,7 +962,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
                     this.pppState = pppSt;
                     ConnectionInfo connInfo = new ConnectionInfoImpl(ifaceName);
                     InterfaceState interfaceState = new InterfaceState(ifaceName,
-                            LinuxNetworkUtil.hasAddress(ifaceName), pppSt == PppState.CONNECTED,
+                            this.linuxNetworkUtil.hasAddress(ifaceName), pppSt == PppState.CONNECTED,
                             connInfo.getIpAddress());
                     newInterfaceStatuses.put(ifaceName, interfaceState);
 

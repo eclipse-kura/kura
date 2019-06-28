@@ -34,5 +34,5 @@
    <property name="service.pid" type="String" value="org.eclipse.kura.web.Console"/>
    <service>
       <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
-   </service>   
+   </service>
 </scr:component>

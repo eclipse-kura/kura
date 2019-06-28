@@ -41,16 +41,16 @@ import org.slf4j.LoggerFactory;
 public class BluetoothLe implements ConfigurableComponent, BluetoothLeScanListener, TiSensorTagNotificationListener {
 
     private static final String ADDRESS_MESSAGE_PROP_KEY = "address";
+    private static final String INTERRUPTED_EX = "Interrupted Exception";
 
     private static final Logger logger = LoggerFactory.getLogger(BluetoothLe.class);
-
-    private static final String INTERRUPTED_EX = "Interrupted Exception";
 
     private List<TiSensorTag> tiSensorTagList;
     private BluetoothService bluetoothService;
     private BluetoothAdapter bluetoothAdapter;
     private ScheduledExecutorService worker;
-    private ScheduledFuture<?> handle;
+    private ScheduledFuture<?> scanHandle;
+    private ScheduledFuture<?> readHandle;
     private long startTime;
 
     private BluetoothLeOptions options;
@@ -117,8 +117,11 @@ public class BluetoothLe implements ConfigurableComponent, BluetoothLeScanListen
         this.tiSensorTagList.clear();
 
         // cancel a current worker handle if one is active
-        if (this.handle != null) {
-            this.handle.cancel(true);
+        if (this.scanHandle != null) {
+            this.scanHandle.cancel(true);
+        }
+        if (this.readHandle != null) {
+            this.readHandle.cancel(true);
         }
 
         // shutting down the worker and cleaning up the properties
@@ -136,7 +139,7 @@ public class BluetoothLe implements ConfigurableComponent, BluetoothLeScanListen
         this.startTime = 0;
         if (this.options.isEnableScan()) {
             // re-create the worker
-            this.worker = Executors.newSingleThreadScheduledExecutor();
+            this.worker = Executors.newScheduledThreadPool(2);
 
             // Get Bluetooth adapter and ensure it is enabled
             this.bluetoothAdapter = this.bluetoothService.getBluetoothAdapter(this.options.getIname());
@@ -148,7 +151,9 @@ public class BluetoothLe implements ConfigurableComponent, BluetoothLeScanListen
                 }
                 logger.info("Bluetooth adapter address => {}", this.bluetoothAdapter.getAddress());
 
-                this.handle = this.worker.scheduleAtFixedRate(this::performScan, 0, 1, TimeUnit.SECONDS);
+                this.scanHandle = this.worker.scheduleAtFixedRate(this::performScan, 0, 1, TimeUnit.SECONDS);
+                this.readHandle = this.worker.scheduleAtFixedRate(this::readTiSensorTags, 0, this.options.getPeriod(),
+                        TimeUnit.SECONDS);
             } else {
                 logger.info("Bluetooth adapter {} not found.", this.options.getIname());
             }
@@ -236,17 +241,6 @@ public class BluetoothLe implements ConfigurableComponent, BluetoothLeScanListen
         return found;
     }
 
-    private void filterDevices(List<BluetoothDevice> devices) {
-        // Scan for TI SensorTag
-        for (BluetoothDevice bluetoothDevice : devices) {
-            logger.info("Address {} Name {}", bluetoothDevice.getAdress(), bluetoothDevice.getName());
-
-            if (bluetoothDevice.getName().contains("SensorTag") && !isSensorTagInList(bluetoothDevice.getAdress())) {
-                this.tiSensorTagList.add(new TiSensorTag(bluetoothDevice));
-            }
-        }
-    }
-
     // --------------------------------------------------------------------
     //
     // BluetoothLeScanListener APIs
@@ -261,8 +255,18 @@ public class BluetoothLe implements ConfigurableComponent, BluetoothLeScanListen
     @Override
     public void onScanResults(List<BluetoothDevice> scanResults) {
 
-        filterDevices(scanResults);
+        // Scan for TI SensorTag
+        for (BluetoothDevice bluetoothDevice : scanResults) {
+            logger.info("Address {} Name {}", bluetoothDevice.getAdress(), bluetoothDevice.getName());
 
+            if (bluetoothDevice.getName().contains("SensorTag") && !isSensorTagInList(bluetoothDevice.getAdress())) {
+                this.tiSensorTagList.add(new TiSensorTag(bluetoothDevice));
+            }
+        }
+
+    }
+
+    private void readTiSensorTags() {
         // connect to TiSensorTags
         for (TiSensorTag myTiSensorTag : this.tiSensorTagList) {
             if (!myTiSensorTag.isConnected()) {
@@ -360,6 +364,7 @@ public class BluetoothLe implements ConfigurableComponent, BluetoothLeScanListen
             }
 
         }
+
     }
 
     private void readLight(TiSensorTag myTiSensorTag, KuraPayload payload) {

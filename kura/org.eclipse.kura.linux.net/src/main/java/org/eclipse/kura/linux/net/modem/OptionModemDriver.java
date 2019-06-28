@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -16,6 +16,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import org.eclipse.kura.executor.CommandExecutorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,13 +31,17 @@ public class OptionModemDriver extends UsbModemDriver {
     }
 
     @Override
-    public int install() throws Exception {
-        int status = super.install();
+    public int install(CommandExecutorService executorService) {
+        int status = super.install(executorService);
         if (status == 0) {
             logger.info("submiting {}:{} information to option driver ...", getVendor(), getProduct());
             File newIdFile = new File(USB_BUS_DRIVERS_PATH);
             if (newIdFile.exists()) {
-                writeToFile(newIdFile);
+                try {
+                    writeToFile(newIdFile);
+                } catch (IOException e) {
+                    logger.error("Failed to write options on file " + USB_BUS_DRIVERS_PATH, e);
+                }
             }
         }
         return status;

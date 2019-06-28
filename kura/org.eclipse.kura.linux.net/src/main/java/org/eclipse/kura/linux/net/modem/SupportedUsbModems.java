@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and others
+ * Copyright (c) 2011, 2019 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -23,6 +23,7 @@ import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.NullOutputStream;
+import org.eclipse.kura.executor.CommandExecutorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,7 +66,7 @@ public class SupportedUsbModems {
     private SupportedUsbModems() {
     }
 
-    public static void installModemDrivers() {
+    public static void installModemDrivers(CommandExecutorService executorService) {
         List<LsusbEntry> lsusbEntries = null;
         try {
             lsusbEntries = getLsusbInfo();
@@ -79,7 +80,7 @@ public class SupportedUsbModems {
                     logger.info("The {}:{} USB modem device is attached", modem.getVendorId(), modem.getProductId());
                     List<? extends UsbModemDriver> drivers = modem.getDeviceDrivers();
                     for (UsbModemDriver driver : drivers) {
-                        driver.install();
+                        driver.install(executorService);
                     }
                 }
             } catch (Exception e) {

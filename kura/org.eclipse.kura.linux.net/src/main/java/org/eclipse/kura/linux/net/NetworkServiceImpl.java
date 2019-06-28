@@ -43,6 +43,7 @@ import org.eclipse.kura.core.net.WifiInterfaceImpl;
 import org.eclipse.kura.core.net.modem.ModemInterfaceAddressImpl;
 import org.eclipse.kura.core.net.modem.ModemInterfaceImpl;
 import org.eclipse.kura.core.net.util.NetworkUtil;
+import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.linux.net.dns.LinuxDns;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemInfo;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModems;
@@ -116,8 +117,10 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 
     private EventAdmin eventAdmin;
     private UsbService usbService;
+    private CommandExecutorService executorService;
 
     private SerialModemDevice serialModem;
+    private LinuxNetworkUtil linuxNetworkUtil;
 
     // ----------------------------------------------------------------
     //
@@ -140,6 +143,14 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
         this.usbService = null;
     }
 
+    public void setExecutorService(CommandExecutorService executorService) {
+        this.executorService = executorService;
+    }
+
+    public void unsetExecutorService(CommandExecutorService executorService) {
+        this.executorService = null;
+    }
+
     // ----------------------------------------------------------------
     //
     // Activation APIs
@@ -149,14 +160,15 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
     protected void activate(ComponentContext componentContext) {
         // save the bundle context
         this.ctx = componentContext;
+        this.linuxNetworkUtil = new LinuxNetworkUtil(this.executorService);
 
         Dictionary<String, String[]> d = new Hashtable<>();
         d.put(EventConstants.EVENT_TOPIC, EVENT_TOPICS);
         this.ctx.getBundleContext().registerService(EventHandler.class.getName(), this, d);
 
-        executor.execute(() -> {
+        this.executor.execute(() -> {
             try {
-                SupportedUsbModems.installModemDrivers();
+                SupportedUsbModems.installModemDrivers(this.executorService);
 
                 // Add tty devices
                 List<? extends AbstractUsbDevice> ttyDevices = this.usbService.getUsbTtyDevices();
@@ -210,7 +222,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
                     }
                 }
             } finally {
-                activated.set(true);
+                this.activated.set(true);
             }
         });
     }
@@ -263,10 +275,10 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
         // FIXME - this method needs some work
 
         // see if we have global access by trying to ping - maybe there is a better way?
-        if (LinuxNetworkUtil.canPing("8.8.8.8", 1)) {
+        if (this.linuxNetworkUtil.canPing("8.8.8.8", 1)) {
             return NetworkState.CONNECTED_GLOBAL;
         }
-        if (LinuxNetworkUtil.canPing("8.8.4.4", 1)) {
+        if (this.linuxNetworkUtil.canPing("8.8.4.4", 1)) {
             return NetworkState.CONNECTED_GLOBAL;
         }
 
@@ -308,7 +320,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
         waitActivated();
 
         ArrayList<String> interfaceNames = new ArrayList<>();
-        List<String> allInterfaceNames = LinuxNetworkUtil.getAllInterfaceNames();
+        List<String> allInterfaceNames = this.linuxNetworkUtil.getAllInterfaceNames();
         if (allInterfaceNames != null) {
             interfaceNames.addAll(allInterfaceNames);
         }
@@ -440,7 +452,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
         List<String> interfaceNames = getAllNetworkInterfaceNames();
         if (!interfaceNames.isEmpty()) {
             for (String interfaceName : interfaceNames) {
-                if (LinuxNetworkUtil.getType(interfaceName) == NetInterfaceType.WIFI) {
+                if (this.linuxNetworkUtil.getType(interfaceName) == NetInterfaceType.WIFI) {
                     accessPoints.addAll(getWifiAccessPoints(interfaceName));
                 }
             }
@@ -451,7 +463,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
     @Override
     public List<WifiAccessPoint> getWifiAccessPoints(String wifiInterfaceName) throws KuraException {
         List<WifiAccessPoint> wifAccessPoints = null;
-        IScanTool scanTool = ScanTool.get(wifiInterfaceName);
+        IScanTool scanTool = ScanTool.get(wifiInterfaceName, this.executorService);
         if (scanTool != null) {
             wifAccessPoints = scanTool.scan();
         }
@@ -463,7 +475,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
         List<NetInterface<? extends NetInterfaceAddress>> activeInterfaces = new ArrayList<>();
         List<NetInterface<? extends NetInterfaceAddress>> interfaces = getNetworkInterfaces();
         for (NetInterface<? extends NetInterfaceAddress> iface : interfaces) {
-            if (LinuxNetworkUtil.hasAddress(iface.getName())) {
+            if (this.linuxNetworkUtil.hasAddress(iface.getName())) {
                 activeInterfaces.add(iface);
             }
         }
@@ -490,7 +502,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
             return null;
         }
 
-        LinuxIfconfig ifconfig = LinuxNetworkUtil.getInterfaceConfiguration(interfaceName);
+        LinuxIfconfig ifconfig = this.linuxNetworkUtil.getInterfaceConfiguration(interfaceName);
         if (ifconfig == null) {
             logger.debug("Ignoring {} interface.", interfaceName);
             return null;
@@ -507,7 +519,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
         if (type == NetInterfaceType.ETHERNET) {
             EthernetInterfaceImpl<NetInterfaceAddress> netInterface = new EthernetInterfaceImpl<>(interfaceName);
 
-            Map<String, String> driver = LinuxNetworkUtil.getEthernetDriver(interfaceName);
+            Map<String, String> driver = this.linuxNetworkUtil.getEthernetDriver(interfaceName);
             netInterface.setDriver(driver.get("name"));
             netInterface.setDriverVersion(driver.get("version"));
             netInterface.setFirmwareVersion(driver.get("firmware"));
@@ -515,7 +527,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
             netInterface.setHardwareAddress(ifconfig.getMacAddressBytes());
             netInterface.setMTU(ifconfig.getMtu());
             netInterface.setSupportsMulticast(ifconfig.isMulticast());
-            netInterface.setLinkUp(LinuxNetworkUtil.isLinkUp(type, interfaceName));
+            netInterface.setLinkUp(this.linuxNetworkUtil.isLinkUp(type, interfaceName));
             netInterface.setLoopback(false);
             netInterface.setPointToPoint(false);
             netInterface.setUp(isUp);
@@ -547,7 +559,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
         } else if (type == NetInterfaceType.WIFI) {
             WifiInterfaceImpl<WifiInterfaceAddress> wifiInterface = new WifiInterfaceImpl<>(interfaceName);
 
-            Map<String, String> driver = LinuxNetworkUtil.getEthernetDriver(interfaceName);
+            Map<String, String> driver = this.linuxNetworkUtil.getEthernetDriver(interfaceName);
             wifiInterface.setDriver(driver.get("name"));
             wifiInterface.setDriverVersion(driver.get("version"));
             wifiInterface.setFirmwareVersion(driver.get("firmware"));
@@ -566,7 +578,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
             wifiInterface.setNetInterfaceAddresses(getWifiInterfaceAddresses(interfaceName, isUp));
 
             try {
-                wifiInterface.setCapabilities(LinuxNetworkUtil.getWifiCapabilities(interfaceName));
+                wifiInterface.setCapabilities(this.linuxNetworkUtil.getWifiCapabilities(interfaceName));
             } catch (final Exception e) {
                 logger.warn("failed to get capabilities for {}", interfaceName);
                 logger.debug("excepton", e);
@@ -598,7 +610,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
             } else if (interfaceName.startsWith("ppp")) {
                 logger.debug("Ignoring unconfigured ppp interface: {}", interfaceName);
             } else {
-                logger.debug("Unsupported network type - not adding to network devices: {} of type: ", interfaceName,
+                logger.debug("Unsupported network type - not adding to network devices: {} of type: {}", interfaceName,
                         type.toString());
             }
             return null;
@@ -644,7 +656,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
                 List<? extends UsbModemDriver> drivers = modemInfo.getDeviceDrivers();
                 for (UsbModemDriver driver : drivers) {
                     try {
-                        driver.install();
+                        driver.install(this.executorService);
                     } catch (Exception e) {
                         logger.error("handleEvent() :: Failed to install modem device driver {} ", driver.getName(), e);
                     }
@@ -804,7 +816,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
         modemInterface.setState(getState(interfaceName, isUp));
         modemInterface.setHardwareAddress(new byte[] { 0, 0, 0, 0, 0, 0 });
         if (!interfaceName.matches(UNCONFIGURED_MODEM_REGEX)) {
-            LinuxIfconfig ifconfig = LinuxNetworkUtil.getInterfaceConfiguration(interfaceName);
+            LinuxIfconfig ifconfig = this.linuxNetworkUtil.getInterfaceConfiguration(interfaceName);
             if (ifconfig != null) {
                 modemInterface.setMTU(ifconfig.getMtu());
                 modemInterface.setSupportsMulticast(ifconfig.isMulticast());
@@ -826,7 +838,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
             ConnectionInfo conInfo = new ConnectionInfoImpl(interfaceName);
             NetInterfaceAddressImpl netInterfaceAddress = new NetInterfaceAddressImpl();
             try {
-                LinuxIfconfig ifconfig = LinuxNetworkUtil.getInterfaceConfiguration(interfaceName);
+                LinuxIfconfig ifconfig = this.linuxNetworkUtil.getInterfaceConfiguration(interfaceName);
                 if (ifconfig != null) {
                     String currentNetmask = ifconfig.getInetMask();
                     if (currentNetmask != null) {
@@ -859,7 +871,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
             WifiInterfaceAddressImpl wifiInterfaceAddress = new WifiInterfaceAddressImpl();
             wifiInterfaceAddresses.add(wifiInterfaceAddress);
             try {
-                LinuxIfconfig ifconfig = LinuxNetworkUtil.getInterfaceConfiguration(interfaceName);
+                LinuxIfconfig ifconfig = this.linuxNetworkUtil.getInterfaceConfiguration(interfaceName);
                 if (ifconfig != null) {
                     String currentNetmask = ifconfig.getInetMask();
                     if (currentNetmask != null) {
@@ -870,13 +882,13 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
                         wifiInterfaceAddress.setGateway(conInfo.getGateway());
                         wifiInterfaceAddress.setDnsServers(conInfo.getDnsServers());
 
-                        WifiMode wifiMode = LinuxNetworkUtil.getWifiMode(interfaceName);
-                        wifiInterfaceAddress.setBitrate(LinuxNetworkUtil.getWifiBitrate(interfaceName));
+                        WifiMode wifiMode = this.linuxNetworkUtil.getWifiMode(interfaceName);
+                        wifiInterfaceAddress.setBitrate(this.linuxNetworkUtil.getWifiBitrate(interfaceName));
                         wifiInterfaceAddress.setMode(wifiMode);
 
                         // TODO - should this only be the AP we are connected to in client mode?
                         if (wifiMode == WifiMode.INFRA) {
-                            String currentSSID = LinuxNetworkUtil.getSSID(interfaceName);
+                            String currentSSID = this.linuxNetworkUtil.getSSID(interfaceName);
 
                             if (currentSSID != null) {
                                 logger.debug("Adding access point SSID: {}", currentSSID);
@@ -915,7 +927,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
             ModemInterfaceAddressImpl modemInterfaceAddress = new ModemInterfaceAddressImpl();
             modemInterfaceAddresses.add(modemInterfaceAddress);
             try {
-                LinuxIfconfig ifconfig = LinuxNetworkUtil.getInterfaceConfiguration(interfaceName);
+                LinuxIfconfig ifconfig = this.linuxNetworkUtil.getInterfaceConfiguration(interfaceName);
                 if (ifconfig != null) {
                     String currentNetmask = ifconfig.getInetMask();
                     if (currentNetmask != null) {
@@ -1082,9 +1094,9 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
     }
 
     private void waitActivated() {
-        if (!activated.get()) {
+        if (!this.activated.get()) {
             try {
-                executor.submit(() -> {
+                this.executor.submit(() -> {
                 }).get();
             } catch (final Exception e) {
                 logger.warn("Exception while waiting for activation", e);
@@ -1102,26 +1114,27 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
             this.usbPort = usbPort;
         }
 
+        @Override
         public void run() {
 
             final String threadName = Thread.currentThread().getName();
             Thread.currentThread().setName(TOGGLE_MODEM_TASK_NAME);
 
             try {
-                final UsbModemDevice modemDevice = usbModems.get(usbPort);
+                final UsbModemDevice modemDevice = NetworkServiceImpl.this.usbModems.get(this.usbPort);
 
                 if (modemDevice == null) {
                     logger.info("ToggleModemTask :: modem is no longer attached, exiting");
                     return;
                 }
 
-                if (hasCorrectNumberOfResources(modemInfo, modemDevice)) {
+                if (hasCorrectNumberOfResources(this.modemInfo, modemDevice)) {
                     logger.info("ToggleModemTask :: modem is ready, exiting");
                     return;
                 }
 
                 UsbModemDriver modemDriver = null;
-                List<? extends UsbModemDriver> usbDeviceDrivers = modemInfo.getDeviceDrivers();
+                List<? extends UsbModemDriver> usbDeviceDrivers = this.modemInfo.getDeviceDrivers();
                 if (usbDeviceDrivers != null && !usbDeviceDrivers.isEmpty()) {
                     modemDriver = usbDeviceDrivers.get(0);
                 }
@@ -1139,11 +1152,11 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
                 logger.info("ToggleModemTask :: modem has been toggled ...");
 
                 // will check if the modem is ready at next iteration and toggles again if needed
-                executor.schedule(this, TOGGLE_MODEM_TASK_INTERVAL, TimeUnit.SECONDS);
+                NetworkServiceImpl.this.executor.schedule(this, TOGGLE_MODEM_TASK_INTERVAL, TimeUnit.SECONDS);
 
             } catch (Exception e) {
                 logger.error("toggleModem() :: failed to toggle modem ", e);
-                executor.schedule(this, TOGGLE_MODEM_TASK_INTERVAL, TimeUnit.SECONDS);
+                NetworkServiceImpl.this.executor.schedule(this, TOGGLE_MODEM_TASK_INTERVAL, TimeUnit.SECONDS);
             } finally {
                 Thread.currentThread().setName(threadName);
             }

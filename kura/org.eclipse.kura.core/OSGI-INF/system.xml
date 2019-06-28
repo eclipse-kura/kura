@@ -24,4 +24,5 @@
               unbind="unsetNetworkService"
               cardinality="1..1" 
               policy="static"/>
+   <reference bind="setExecutorService" cardinality="1..1" interface="org.eclipse.kura.executor.PrivilegedExecutorService" name="PrivilegedExecutorService" policy="static" unbind="unsetExecutorService"/>
 </scr:component>

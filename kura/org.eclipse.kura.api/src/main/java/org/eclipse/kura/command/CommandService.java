@@ -20,6 +20,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * @noimplement This interface is not intended to be implemented by clients.
  */
 @ProviderType
+@Deprecated
 public interface CommandService {
 
     public String execute(String cmd) throws KuraException;

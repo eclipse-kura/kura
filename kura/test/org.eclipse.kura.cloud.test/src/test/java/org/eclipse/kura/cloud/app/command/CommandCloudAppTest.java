@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2019 Eurotech and/or its affiliates and others
  *
  *   All rights reserved. This program and the accompanying materials
  *   are made available under the terms of the Eclipse Public License v1.0
@@ -8,6 +8,7 @@
  ******************************************************************************/
 package org.eclipse.kura.cloud.app.command;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.eclipse.kura.cloudconnection.request.RequestHandlerMessageConstants.ARGS_KEY;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -16,10 +17,12 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -35,8 +38,11 @@ import org.eclipse.kura.cloud.CloudClient;
 import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
 import org.eclipse.kura.configuration.Password;
+import org.eclipse.kura.core.linux.executor.LinuxExitValue;
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.crypto.CryptoService;
+import org.eclipse.kura.executor.CommandStatus;
+import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
@@ -61,6 +67,7 @@ public class CommandCloudAppTest {
 
         cca.updated(properties);
 
+        @SuppressWarnings("unchecked")
         Map<String, Object> props = (Map<String, Object>) TestUtil.getFieldValue(cca, "properties");
 
         assertEquals(3, props.size());
@@ -71,7 +78,7 @@ public class CommandCloudAppTest {
     }
 
     @Test
-    public void testUpdatedSuperActivateExc() throws KuraException, NoSuchFieldException {
+    public void testUpdatedSuperActivateExec() throws KuraException, NoSuchFieldException {
         String passKey = "command.password.value";
         char[] password = "encpass".toCharArray();
         char[] decpass = "decpass".toCharArray();
@@ -97,6 +104,7 @@ public class CommandCloudAppTest {
 
         TestUtil.setFieldValue(cca, "currentStatus", true);
 
+        @SuppressWarnings("unchecked")
         Map<String, Object> props = (Map<String, Object>) TestUtil.getFieldValue(cca, "properties");
 
         assertEquals(3, props.size());
@@ -135,6 +143,7 @@ public class CommandCloudAppTest {
         } catch (ComponentException e) {
         }
 
+        @SuppressWarnings("unchecked")
         Map<String, Object> props = (Map<String, Object>) TestUtil.getFieldValue(cca, "properties");
 
         assertEquals(3, props.size());
@@ -165,6 +174,7 @@ public class CommandCloudAppTest {
 
         cca.updated(properties);
 
+        @SuppressWarnings("unchecked")
         Map<String, Object> props = (Map<String, Object>) TestUtil.getFieldValue(cca, "properties");
 
         assertEquals(3, props.size());
@@ -349,22 +359,24 @@ public class CommandCloudAppTest {
     }
 
     @Test
-    public void testPrepareesponseNoTimeoutNoException() throws Throwable {
+    public void testPrepareResponseNoTimeoutNoException() throws Throwable {
         String err = "err";
         String out = "out";
-        int exitVal = 10;
+        ByteArrayOutputStream baos = new ByteArrayOutputStream(3);
+        baos.write(out.getBytes(UTF_8));
+        ByteArrayOutputStream baes = new ByteArrayOutputStream(3);
+        baes.write(err.getBytes(UTF_8));
+        int exitVal = 0;
 
         KuraCommandResponsePayload resp = new KuraCommandResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
-        ProcessMonitorThread pmtMock = mock(ProcessMonitorThread.class);
-        when(pmtMock.getException()).thenReturn(null);
-        when(pmtMock.isTimedOut()).thenReturn(false);
-        when(pmtMock.getExitValue()).thenReturn(exitVal);
-        when(pmtMock.getStderr()).thenReturn(err);
-        when(pmtMock.getStdout()).thenReturn(out);
+        CommandStatus status = new CommandStatus(new LinuxExitValue(0));
+        status.setErrorStream(baes);
+        status.setOutputStream(baos);
+        status.setTimedout(false);
 
         CommandCloudApp cca = new CommandCloudApp();
 
-        TestUtil.invokePrivate(cca, "prepareResponseNoTimeout", resp, pmtMock);
+        TestUtil.invokePrivate(cca, "prepareResponse", resp, status, baos, baes);
 
         assertEquals("Response expected not to be changed", KuraResponsePayload.RESPONSE_CODE_OK,
                 resp.getResponseCode());
@@ -375,44 +387,50 @@ public class CommandCloudAppTest {
     }
 
     @Test
-    public void testPrepareesponseNoTimeoutExecption() throws Throwable {
+    public void testPrepareResponseNoTimeoutException() throws Throwable {
         String err = "err";
         String out = "out";
-        int exitVal = 10;
-        Exception exc = new Exception("test");
+        ByteArrayOutputStream baos = new ByteArrayOutputStream(3);
+        baos.write(out.getBytes(UTF_8));
+        ByteArrayOutputStream baes = new ByteArrayOutputStream(3);
+        baes.write(err.getBytes(UTF_8));
 
         KuraCommandResponsePayload resp = new KuraCommandResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
-        ProcessMonitorThread pmtMock = mock(ProcessMonitorThread.class);
-        when(pmtMock.getException()).thenReturn(exc);
-        when(pmtMock.isTimedOut()).thenReturn(false);
-        when(pmtMock.getExitValue()).thenReturn(exitVal);
-        when(pmtMock.getStderr()).thenReturn(err);
-        when(pmtMock.getStdout()).thenReturn(out);
+        CommandStatus status = new CommandStatus(new LinuxExitValue(1));
+        status.setErrorStream(baes);
+        status.setOutputStream(baos);
+        status.setTimedout(false);
 
         CommandCloudApp cca = new CommandCloudApp();
 
-        TestUtil.invokePrivate(cca, "prepareResponseNoTimeout", resp, pmtMock);
+        TestUtil.invokePrivate(cca, "prepareResponse", resp, status, baos, baes);
 
         assertEquals("Response expected to be changed", KuraResponsePayload.RESPONSE_CODE_ERROR,
                 resp.getResponseCode());
         assertEquals(err, resp.getStderr());
         assertEquals(out, resp.getStdout());
-        assertEquals("test", resp.getExceptionMessage());
+        assertFalse(resp.isTimedout());
+        assertEquals(err, resp.getExceptionMessage());
     }
 
     @Test
     public void testPrepareTimeoutResponse() throws Throwable {
         String err = "err";
         String out = "out";
+        ByteArrayOutputStream baos = new ByteArrayOutputStream(3);
+        baos.write(out.getBytes(UTF_8));
+        ByteArrayOutputStream baes = new ByteArrayOutputStream(3);
+        baes.write(err.getBytes(UTF_8));
 
         KuraCommandResponsePayload resp = new KuraCommandResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
-        ProcessMonitorThread pmtMock = mock(ProcessMonitorThread.class);
-        when(pmtMock.getStderr()).thenReturn(err);
-        when(pmtMock.getStdout()).thenReturn(out);
+        CommandStatus status = new CommandStatus(new LinuxExitValue(0));
+        status.setErrorStream(baes);
+        status.setOutputStream(baos);
+        status.setTimedout(true);
 
         CommandCloudApp cca = new CommandCloudApp();
 
-        TestUtil.invokePrivate(cca, "prepareTimeoutResponse", resp, pmtMock);
+        TestUtil.invokePrivate(cca, "prepareResponse", resp, status, baos, baes);
 
         assertEquals("Response expected not to be changed", KuraResponsePayload.RESPONSE_CODE_OK,
                 resp.getResponseCode());
@@ -543,7 +561,20 @@ public class CommandCloudAppTest {
             cmd += ".sh";
         }
 
+        ByteArrayOutputStream baos = new ByteArrayOutputStream(3);
+        baos.write("OK".getBytes(UTF_8));
+        ByteArrayOutputStream baes = new ByteArrayOutputStream(3);
+        baes.write("err".getBytes(UTF_8));
+        CommandStatus status = new CommandStatus(new LinuxExitValue(0));
+        status.setErrorStream(baes);
+        status.setOutputStream(baos);
+        status.setTimedout(false);
+
+        CommandExecutorService esMock = mock(CommandExecutorService.class);
+        when(esMock.execute(anyObject())).thenReturn(status);
+
         CommandCloudApp cca = new CommandCloudApp();
+        cca.setExecutorService(esMock);
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("command.password.value", "pass");
@@ -583,7 +614,20 @@ public class CommandCloudAppTest {
             cmd += ".sh";
         }
 
+        ByteArrayOutputStream baos = new ByteArrayOutputStream(3);
+        baos.write("NOK".getBytes(UTF_8));
+        ByteArrayOutputStream baes = new ByteArrayOutputStream(3);
+        baes.write("err".getBytes(UTF_8));
+        CommandStatus status = new CommandStatus(new LinuxExitValue(0));
+        status.setErrorStream(baes);
+        status.setOutputStream(baos);
+        status.setTimedout(false);
+
+        CommandExecutorService esMock = mock(CommandExecutorService.class);
+        when(esMock.execute(anyObject())).thenReturn(status);
+
         CommandCloudApp cca = new CommandCloudApp();
+        cca.setExecutorService(esMock);
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("command.password.value", "pass");
@@ -615,7 +659,20 @@ public class CommandCloudAppTest {
     public void testExecutePayloadNoCommand() throws KuraException, IOException {
         String wd = "/tmp";
 
+        ByteArrayOutputStream baos = new ByteArrayOutputStream(3);
+        baos.write("OK".getBytes(UTF_8));
+        ByteArrayOutputStream baes = new ByteArrayOutputStream(3);
+        baes.write("err".getBytes(UTF_8));
+        CommandStatus status = new CommandStatus(new LinuxExitValue(0));
+        status.setErrorStream(baes);
+        status.setOutputStream(baos);
+        status.setTimedout(false);
+
+        CommandExecutorService esMock = mock(CommandExecutorService.class);
+        when(esMock.execute(anyObject())).thenReturn(status);
+
         CommandCloudApp cca = new CommandCloudApp();
+        cca.setExecutorService(esMock);
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("command.password.value", "pass");
@@ -671,7 +728,20 @@ public class CommandCloudAppTest {
             cmd += ".sh";
         }
 
+        ByteArrayOutputStream baos = new ByteArrayOutputStream(3);
+        baos.write("OK".getBytes(UTF_8));
+        ByteArrayOutputStream baes = new ByteArrayOutputStream(3);
+        baes.write("err".getBytes(UTF_8));
+        CommandStatus status = new CommandStatus(new LinuxExitValue(0));
+        status.setErrorStream(baes);
+        status.setOutputStream(baos);
+        status.setTimedout(false);
+
+        CommandExecutorService esMock = mock(CommandExecutorService.class);
+        when(esMock.execute(anyObject())).thenReturn(status);
+
         CommandCloudApp cca = new CommandCloudApp();
+        cca.setExecutorService(esMock);
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("command.password.value", "pass");

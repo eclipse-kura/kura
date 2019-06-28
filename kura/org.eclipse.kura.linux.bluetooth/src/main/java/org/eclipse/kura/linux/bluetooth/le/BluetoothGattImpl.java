@@ -19,12 +19,14 @@ import java.util.List;
 import java.util.UUID;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.KuraProcessExecutionErrorException;
 import org.eclipse.kura.KuraTimeoutException;
 import org.eclipse.kura.bluetooth.BluetoothGatt;
 import org.eclipse.kura.bluetooth.BluetoothGattCharacteristic;
 import org.eclipse.kura.bluetooth.BluetoothGattSecurityLevel;
 import org.eclipse.kura.bluetooth.BluetoothGattService;
 import org.eclipse.kura.bluetooth.BluetoothLeNotificationListener;
+import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.linux.bluetooth.util.BluetoothProcess;
 import org.eclipse.kura.linux.bluetooth.util.BluetoothProcessListener;
 import org.eclipse.kura.linux.bluetooth.util.BluetoothUtil;
@@ -68,9 +70,11 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
     private boolean ready = false;
     private StringBuilder stringBuilder = null;
     private final String address;
+    private final CommandExecutorService executorService;
 
-    public BluetoothGattImpl(String address) {
+    public BluetoothGattImpl(String address, CommandExecutorService executorService) {
         this.address = address;
+        this.executorService = executorService;
     }
 
     // --------------------------------------------------------------------
@@ -85,7 +89,11 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
 
     @Override
     public boolean connect(String adapterName) throws KuraException {
-        this.proc = BluetoothUtil.startSession(adapterName, this.address, this);
+        try {
+            this.proc = BluetoothUtil.startSession(adapterName, this.address, this, this.executorService);
+        } catch (IOException e) {
+            throw new KuraProcessExecutionErrorException(e, "Failed to start gatttool session");
+        }
         if (this.proc != null) {
             this.bufferedWriter = this.proc.getWriter();
             logger.info("Sending connect message...");

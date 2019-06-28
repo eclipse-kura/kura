@@ -18,4 +18,5 @@
       <provide interface="org.eclipse.kura.bluetooth.BluetoothService"/>
    </service>
    <property name="service.pid" value="org.eclipse.kura.bluetooth.BluetoothService"/>
+   <reference bind="setExecutorService" cardinality="1..1" interface="org.eclipse.kura.executor.PrivilegedExecutorService" name="PrivilegedExecutorService" policy="static" unbind="unsetExecutorService"/>
 </scr:component>

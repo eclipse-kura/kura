@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -17,11 +17,17 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.StringTokenizer;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.core.linux.util.LinuxProcessUtil;
+import org.eclipse.kura.KuraProcessExecutionErrorException;
+import org.eclipse.kura.core.linux.executor.LinuxSignal;
+import org.eclipse.kura.executor.Command;
+import org.eclipse.kura.executor.CommandStatus;
+import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.Pid;
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.dhcp.DhcpServer;
@@ -46,8 +52,10 @@ public class DhcpServerImpl implements DhcpServer {
     private final String pidFileName;
     private final String persistentConfigFileName;
     private final String persistentPidFilename;
+    private final CommandExecutorService executorService;
 
-    DhcpServerImpl(String interfaceName, boolean enabled, boolean passDns) throws KuraException {
+    DhcpServerImpl(String interfaceName, boolean enabled, boolean passDns, CommandExecutorService executorService)
+            throws KuraException {
         this.interfaceName = interfaceName;
 
         StringBuilder sb = new StringBuilder();
@@ -60,6 +68,8 @@ public class DhcpServerImpl implements DhcpServer {
 
         this.persistentConfigFileName = FILE_DIR + this.configFileName;
         this.persistentPidFilename = PID_FILE_DIR + this.pidFileName;
+
+        this.executorService = executorService;
 
         readConfig(enabled, passDns);
     }
@@ -150,13 +160,7 @@ public class DhcpServerImpl implements DhcpServer {
 
     @Override
     public boolean isRunning() throws KuraException {
-        try {
-            // Check if dhcpd is running
-            int pid = LinuxProcessUtil.getPid(formDhcpdCommand());
-            return pid > -1;
-        } catch (Exception e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-        }
+        return this.executorService.isRunning(formDhcpdCommand());
     }
 
     public boolean enable() throws KuraException {
@@ -168,22 +172,18 @@ public class DhcpServerImpl implements DhcpServer {
             return false;
         }
 
-        try {
-            // Check if dhcpd is running
-            if (isRunning()) {
-                // If so, disable it
-                logger.error("DHCP server is already running, bringing it down...");
-                disable();
-            }
-            // Start dhcpd
-            // FIXME:MC This leads to a process leak
-            if (LinuxProcessUtil.startBackground(formDhcpdCommand(), false) == 0) {
-                logger.debug("DHCP server started.");
-                logger.trace(this.dhcpServerConfig4.toString());
-                return true;
-            }
-        } catch (Exception e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+        // Check if dhcpd is running
+        if (isRunning()) {
+            // If so, disable it
+            logger.error("DHCP server is already running, bringing it down...");
+            disable();
+        }
+        // Start dhcpd
+        CommandStatus status = this.executorService.execute(new Command(formDhcpdCommand()));
+        if ((Integer) status.getExitStatus().getExitValue() == 0) {
+            logger.debug("DHCP server started.");
+            logger.trace(this.dhcpServerConfig4.toString());
+            return true;
         }
 
         return false;
@@ -200,26 +200,23 @@ public class DhcpServerImpl implements DhcpServer {
             return false;
         }
 
-        try {
-            // Check if dhcpd is running
-            int pid = LinuxProcessUtil.getPid(formDhcpdCommand());
-            if (pid > -1) {
-                // If so, kill it.
-                if (LinuxProcessUtil.stop(pid)) {
+        // Check if dhcpd is running
+        List<Pid> pids = this.executorService.getPids(formDhcpdCommand(), true);
+        // If so, kill it.
+        for (Pid pid : pids) {
+            if (this.executorService.stop(pid, LinuxSignal.SIGTERM)) {
+                removePidFile();
+            } else {
+                logger.debug("Failed to stop process...try to kill");
+                if (this.executorService.stop(pid, LinuxSignal.SIGKILL)) {
                     removePidFile();
                 } else {
-                    logger.debug("Failed to stop process...try to kill");
-                    if (LinuxProcessUtil.kill(pid)) {
-                        removePidFile();
-                    } else {
-                        throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "error killing process, pid=" + pid);
-                    }
+                    throw new KuraProcessExecutionErrorException("Failed to disable DHCP server");
                 }
-            } else {
-                logger.debug("tried to kill DHCP server for interface but it is not running");
             }
-        } catch (Exception e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+        }
+        if (pids.isEmpty()) {
+            logger.debug("tried to kill DHCP server for interface but it is not running");
         }
 
         return true;

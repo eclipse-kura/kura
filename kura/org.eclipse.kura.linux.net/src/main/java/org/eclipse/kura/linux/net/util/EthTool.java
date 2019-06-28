@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -11,13 +11,13 @@
  *******************************************************************************/
 package org.eclipse.kura.linux.net.util;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.io.ByteArrayOutputStream;
 
-import org.eclipse.kura.KuraErrorCode;
+import org.apache.commons.io.Charsets;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.core.util.ProcessUtil;
-import org.eclipse.kura.core.util.SafeProcess;
+import org.eclipse.kura.executor.Command;
+import org.eclipse.kura.executor.CommandStatus;
+import org.eclipse.kura.executor.CommandExecutorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  */
 public class EthTool implements LinkTool {
 
-    private static final Logger logger = LoggerFactory.getLogger(LinuxNetworkUtil.class);
+    private static final Logger logger = LoggerFactory.getLogger(EthTool.class);
 
     private static final String LINK_DETECTED = "Link detected:";
     private static final String LINK_DUPLEX = "Duplex:";
@@ -40,14 +40,19 @@ public class EthTool implements LinkTool {
     private int speed = 0; // in b/s
     private String duplex = null;
 
+    private CommandExecutorService executorService;
+
     /**
      * ethtool constructor
      *
      * @param ifaceName
      *            - interface name as {@link String}
+     * @param executorService
+     *            - the {@link org.eclipse.kura.executor.CommandExecutorService} used to run the command
      */
-    public EthTool(String ifaceName) {
+    public EthTool(String ifaceName, CommandExecutorService executorService) {
         this.ifaceName = ifaceName;
+        this.executorService = executorService;
     }
 
     /*
@@ -57,42 +62,30 @@ public class EthTool implements LinkTool {
      */
     @Override
     public boolean get() throws KuraException {
-        SafeProcess proc = null;
-        boolean result = false;
-        try {
-            proc = ProcessUtil.exec("ethtool " + this.ifaceName);
-            result = proc.waitFor() == 0 ? true : false;
-            parse(proc);
-        } catch (Exception e) {
-            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e);
-        } finally {
-            if (proc != null) {
-                ProcessUtil.destroy(proc);
-            }
-        }
+        Command command = new Command("ethtool " + this.ifaceName);
+        command.setTimeout(60);
+        command.setOutputStream(new ByteArrayOutputStream());
+        CommandStatus status = this.executorService.execute(command);
+        boolean result = (Integer) status.getExitStatus().getExitValue() == 0;
+        parse(new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray(), Charsets.UTF_8));
 
         return result;
     }
 
-    private void parse(SafeProcess proc) throws KuraException {
-        try (InputStreamReader isr = new InputStreamReader(proc.getInputStream());
-                BufferedReader br = new BufferedReader(isr)) {
-            String line = null;
+    private void parse(String commandOutput) {
+        String[] lines = commandOutput.split("\n");
+        for (String line : lines) {
             int ind = -1;
-            while ((line = br.readLine()) != null) {
-                if ((ind = line.indexOf(LINK_DETECTED)) >= 0) {
-                    logger.trace("Link detected from: {}", line);
-                    line = line.substring(ind + LINK_DETECTED.length()).trim();
-                    this.linkDetected = line.compareTo("yes") == 0 ? true : false;
-                } else if ((ind = line.indexOf(LINK_DUPLEX)) >= 0) {
-                    this.duplex = line.substring(ind + LINK_DUPLEX.length()).trim();
-                } else if ((ind = line.indexOf(LINK_SPEED)) >= 0) {
-                    line = line.substring(ind + LINK_SPEED.length()).trim();
-                    setSpeed(line);
-                }
+            if ((ind = line.indexOf(LINK_DETECTED)) >= 0) {
+                logger.trace("Link detected from: {}", line);
+                line = line.substring(ind + LINK_DETECTED.length()).trim();
+                this.linkDetected = line.compareTo("yes") == 0;
+            } else if ((ind = line.indexOf(LINK_DUPLEX)) >= 0) {
+                this.duplex = line.substring(ind + LINK_DUPLEX.length()).trim();
+            } else if ((ind = line.indexOf(LINK_SPEED)) >= 0) {
+                line = line.substring(ind + LINK_SPEED.length()).trim();
+                setSpeed(line);
             }
-        } catch (Exception e) {
-            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e);
         }
     }
 

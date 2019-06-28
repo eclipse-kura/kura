@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -41,6 +41,7 @@ import org.eclipse.kura.core.net.WifiInterfaceConfigImpl;
 import org.eclipse.kura.core.net.WifiInterfaceImpl;
 import org.eclipse.kura.core.net.modem.ModemInterfaceConfigImpl;
 import org.eclipse.kura.core.net.modem.ModemInterfaceImpl;
+import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.linux.net.modem.UsbModemDriver;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.eclipse.kura.net.EthernetInterface;
@@ -80,12 +81,14 @@ public class NetworkConfigurationServiceImpl
     private EventAdmin eventAdmin;
     private UsbService usbService;
     private ModemManagerService modemManagerService;
+    private CommandExecutorService executorService;
 
     private List<NetworkConfigurationVisitor> readVisitors;
     private List<NetworkConfigurationVisitor> writeVisitors;
 
     private ScheduledExecutorService executorUtil;
     private boolean firstConfig = true;
+    private LinuxNetworkUtil linuxNetworkUtil;
 
     // ----------------------------------------------------------------
     //
@@ -126,6 +129,14 @@ public class NetworkConfigurationServiceImpl
         this.modemManagerService = null;
     }
 
+    public void setExecutorService(CommandExecutorService executorService) {
+        this.executorService = executorService;
+    }
+
+    public void unsetExecutorService(CommandExecutorService executorService) {
+        this.executorService = null;
+    }
+
     // ----------------------------------------------------------------
     //
     // Activation APIs
@@ -152,6 +163,7 @@ public class NetworkConfigurationServiceImpl
 
         initVisitors();
 
+        this.linuxNetworkUtil = new LinuxNetworkUtil(this.executorService);
         // we are intentionally ignoring the properties from ConfigAdmin at startup
         if (properties == null) {
             logger.debug("Got null properties...");
@@ -176,11 +188,11 @@ public class NetworkConfigurationServiceImpl
     }
 
     protected List<String> getAllInterfaceNames() throws KuraException {
-        return LinuxNetworkUtil.getAllInterfaceNames();
+        return this.linuxNetworkUtil.getAllInterfaceNames();
     }
 
     protected NetInterfaceType getNetworkType(String interfaceName) throws KuraException {
-        return LinuxNetworkUtil.getType(interfaceName);
+        return this.linuxNetworkUtil.getType(interfaceName);
     }
 
     @Override

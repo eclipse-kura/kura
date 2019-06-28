@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2019 Eurotech and/or its affiliates and others
  *
  *   All rights reserved. This program and the accompanying materials
  *   are made available under the terms of the Eclipse Public License v1.0
@@ -8,15 +8,22 @@
  ******************************************************************************/
 package org.eclipse.kura.internal.ble.util;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.core.linux.executor.LinuxExitValue;
+import org.eclipse.kura.executor.CommandStatus;
+import org.eclipse.kura.executor.CommandExecutorService;
 import org.junit.Test;
-
 
 public class BluetoothProcessTest {
 
@@ -55,7 +62,18 @@ public class BluetoothProcessTest {
             }
         };
 
-        BluetoothProcess proc = new BluetoothProcess();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream(3);
+        baos.write("test\\r?\\n".getBytes(UTF_8));
+        ByteArrayOutputStream baes = new ByteArrayOutputStream(3);
+        baes.write("testerror\\r?\\n".getBytes(UTF_8));
+        CommandStatus status = new CommandStatus(new LinuxExitValue(0));
+        status.setErrorStream(baes);
+        status.setOutputStream(baos);
+        status.setTimedout(false);
+
+        CommandExecutorService esMock = mock(CommandExecutorService.class);
+        when(esMock.execute(anyObject())).thenReturn(status);
+        BluetoothProcess proc = new BluetoothProcess(esMock);
         proc.exec(cmdArray, listener);
 
         Thread.sleep(100);

@@ -11,11 +11,17 @@
  *******************************************************************************/
 package org.eclipse.kura.linux.test.net;
 
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.kura.core.linux.executor.LinuxExitValue;
+import org.eclipse.kura.executor.CommandStatus;
+import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.linux.net.wifi.WpaSupplicantManager;
-import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.test.annotation.TestTarget;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -30,6 +36,7 @@ public class WpaSupplicantTest extends TestCase {
 
     private static CountDownLatch dependencyLatch = new CountDownLatch(0);	// initialize with number of dependencies
     private static final String IFACE_NAME = "wlan0";
+    private WpaSupplicantManager wpaSupplicantManager;
 
     @Override
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
@@ -42,6 +49,10 @@ public class WpaSupplicantTest extends TestCase {
             fail("OSGi dependencies unfulfilled");
             System.exit(1);
         }
+        CommandExecutorService executorServiceMock = mock(CommandExecutorService.class);
+        CommandStatus status = new CommandStatus(new LinuxExitValue(0));
+        when(executorServiceMock.execute(anyObject())).thenReturn(status);
+        this.wpaSupplicantManager = new WpaSupplicantManager(executorServiceMock);
     }
 
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
@@ -50,10 +61,10 @@ public class WpaSupplicantTest extends TestCase {
         s_logger.info("Test start wpa_supplicant");
 
         try {
-            WpaSupplicantManager.start(IFACE_NAME, WifiMode.INFRA, null);
-            assertTrue("wpa_supplicant is started", WpaSupplicantManager.isRunning(IFACE_NAME));
+            this.wpaSupplicantManager.start(IFACE_NAME, null);
+            assertTrue("wpa_supplicant is started", this.wpaSupplicantManager.isRunning(IFACE_NAME));
 
-            boolean validPid = (WpaSupplicantManager.getPid(IFACE_NAME) > 0) ? true : false;
+            boolean validPid = (this.wpaSupplicantManager.getPid(IFACE_NAME) > 0) ? true : false;
             assertTrue("Valid wpa_supplicant PID", validPid);
         } catch (Exception e) {
             fail("testEnable failed: " + e);
@@ -65,8 +76,8 @@ public class WpaSupplicantTest extends TestCase {
     public void testStop() {
         s_logger.info("Test stop wpa_supplicant");
         try {
-            WpaSupplicantManager.stop(IFACE_NAME);
-            assertFalse("wpa_supplicant is disabled", WpaSupplicantManager.isRunning(IFACE_NAME));
+            this.wpaSupplicantManager.stop(IFACE_NAME);
+            assertFalse("wpa_supplicant is disabled", this.wpaSupplicantManager.isRunning(IFACE_NAME));
         } catch (Exception e) {
             fail("testStop failed: " + e);
         }

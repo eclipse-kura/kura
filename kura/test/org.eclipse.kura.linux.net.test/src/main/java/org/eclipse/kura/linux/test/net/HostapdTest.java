@@ -11,9 +11,16 @@
  *******************************************************************************/
 package org.eclipse.kura.linux.test.net;
 
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.kura.core.linux.executor.LinuxExitValue;
+import org.eclipse.kura.executor.CommandStatus;
+import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.linux.net.wifi.HostapdManager;
 import org.eclipse.kura.test.annotation.TestTarget;
 import org.junit.BeforeClass;
@@ -29,6 +36,7 @@ public class HostapdTest extends TestCase {
     private static CountDownLatch dependencyLatch = new CountDownLatch(0);  // initialize with number of dependencies
 
     private static final String IFACE_NAME = "wlan0";
+    private HostapdManager hostapdManager;
 
     @Override
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
@@ -42,6 +50,10 @@ public class HostapdTest extends TestCase {
             fail("OSGi dependencies unfulfilled");
             System.exit(1);
         }
+        CommandExecutorService executorServiceMock = mock(CommandExecutorService.class);
+        CommandStatus status = new CommandStatus(new LinuxExitValue(0));
+        when(executorServiceMock.execute(anyObject())).thenReturn(status);
+        this.hostapdManager = new HostapdManager(executorServiceMock);
     }
 
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
@@ -50,10 +62,10 @@ public class HostapdTest extends TestCase {
         s_logger.info("Test start hostapd");
 
         try {
-            HostapdManager.start(IFACE_NAME);
-            assertTrue("hostapd is started", HostapdManager.isRunning(IFACE_NAME));
+            this.hostapdManager.start(IFACE_NAME);
+            assertTrue("hostapd is started", this.hostapdManager.isRunning(IFACE_NAME));
 
-            boolean validPid = (HostapdManager.getPid(IFACE_NAME) > 0) ? true : false;
+            boolean validPid = (this.hostapdManager.getPid(IFACE_NAME) > 0) ? true : false;
             assertTrue("Valid hostapd PID", validPid);
         } catch (Exception e) {
             fail("testEnable failed: " + e);
@@ -66,8 +78,8 @@ public class HostapdTest extends TestCase {
         s_logger.info("Test stop hostapd");
 
         try {
-            HostapdManager.stop(IFACE_NAME);
-            assertFalse("hostapd is disabled", HostapdManager.isRunning(IFACE_NAME));
+            this.hostapdManager.stop(IFACE_NAME);
+            assertFalse("hostapd is disabled", this.hostapdManager.isRunning(IFACE_NAME));
         } catch (Exception e) {
             fail("testDisable failed: " + e);
         }

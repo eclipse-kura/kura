@@ -39,7 +39,6 @@ import org.eclipse.kura.net.wifi.WifiInterfaceAddressConfig;
 import org.junit.Before;
 import org.junit.Test;
 
-
 public class DhcpConfigTest {
 
     private DhcpConfigWriter writer;
@@ -74,7 +73,7 @@ public class DhcpConfigTest {
     public void testCompleteNoDhcpd() throws KuraException, UnknownHostException, NoSuchFieldException {
         // file remains empty if no DHCP server software is found
 
-        TestUtil.setFieldValue(new DhcpServerManager(), "dhcpServerTool", DhcpServerTool.NONE);
+        TestUtil.setFieldValue(new DhcpServerManager(null), "dhcpServerTool", DhcpServerTool.NONE);
 
         String interfaceName = "testinterface";
 
@@ -134,7 +133,7 @@ public class DhcpConfigTest {
         // write out dhcpd's configuration
 
         DhcpServerTool dhcpTool = DhcpServerTool.DHCPD;
-        TestUtil.setFieldValue(new DhcpServerManager(), "dhcpServerTool", dhcpTool);
+        TestUtil.setFieldValue(new DhcpServerManager(null), "dhcpServerTool", dhcpTool);
 
         String interfaceName = "testinterface";
 
@@ -271,7 +270,7 @@ public class DhcpConfigTest {
         // write out dhcpd's configuration
 
         DhcpServerTool dhcpTool = DhcpServerTool.UDHCPD;
-        TestUtil.setFieldValue(new DhcpServerManager(), "dhcpServerTool", dhcpTool);
+        TestUtil.setFieldValue(new DhcpServerManager(null), "dhcpServerTool", dhcpTool);
 
         String interfaceName = "testinterface";
 

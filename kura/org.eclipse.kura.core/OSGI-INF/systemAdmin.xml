@@ -17,5 +17,6 @@
    <service>
       <provide interface="org.eclipse.kura.system.SystemAdminService"/>
    </service>
-   <property name="service.pid" value="org.eclipse.kura.system.SystemAdminService"/>        
+   <property name="service.pid" value="org.eclipse.kura.system.SystemAdminService"/>
+   <reference bind="setExecutorService" cardinality="1..1" interface="org.eclipse.kura.executor.PrivilegedExecutorService" name="PrivilegedExecutorService" policy="static" unbind="unsetExecutorService"/>        
  </scr:component>

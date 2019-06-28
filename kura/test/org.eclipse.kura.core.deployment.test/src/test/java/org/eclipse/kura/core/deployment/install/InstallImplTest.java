@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2019 Eurotech and/or its affiliates and others
  *
  *   All rights reserved. This program and the accompanying materials
  *   are made available under the terms of the Eclipse Public License v1.0
@@ -33,7 +33,10 @@ import org.eclipse.kura.core.deployment.CloudDeploymentHandlerV2;
 import org.eclipse.kura.core.deployment.DeploymentPackageOptions;
 import org.eclipse.kura.core.deployment.InstallStatus;
 import org.eclipse.kura.core.deployment.download.DeploymentPackageDownloadOptions;
+import org.eclipse.kura.core.linux.executor.LinuxExitValue;
 import org.eclipse.kura.core.testutil.TestUtil;
+import org.eclipse.kura.executor.CommandStatus;
+import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -50,7 +53,7 @@ public class InstallImplTest {
         CloudDeploymentHandlerV2 callbackMock = mock(CloudDeploymentHandlerV2.class);
         String kuraDataDir = "/tmp";
 
-        InstallImpl ii = new InstallImpl(callbackMock, kuraDataDir);
+        InstallImpl ii = new InstallImpl(callbackMock, kuraDataDir, null);
         ii.setDpaConfPath("/tmp/dpagdpe.properties");
 
         Properties packages = ii.getDeployedPackages();
@@ -69,7 +72,7 @@ public class InstallImplTest {
         CloudDeploymentHandlerV2 callbackMock = mock(CloudDeploymentHandlerV2.class);
         String kuraDataDir = "/tmp";
 
-        InstallImpl ii = new InstallImpl(callbackMock, kuraDataDir);
+        InstallImpl ii = new InstallImpl(callbackMock, kuraDataDir, null);
         ii.setDpaConfPath(dpaConfPath);
 
         Properties packages = ii.getDeployedPackages();
@@ -83,7 +86,7 @@ public class InstallImplTest {
     public void testInstallDpSuccessMessage() throws KuraException {
         CloudDeploymentHandlerV2 callbackMock = mock(CloudDeploymentHandlerV2.class);
         String kuraDataDir = "/tmp";
-        InstallImpl ii = new InstallImpl(callbackMock, kuraDataDir);
+        InstallImpl ii = new InstallImpl(callbackMock, kuraDataDir, null);
 
         final String clientId = "clientid";
         final long jobid = 1234;
@@ -121,7 +124,7 @@ public class InstallImplTest {
     public void testInstallDPFailMessage() throws Throwable {
         CloudDeploymentHandlerV2 callbackMock = mock(CloudDeploymentHandlerV2.class);
         String kuraDataDir = "/tmp";
-        InstallImpl ii = new InstallImpl(callbackMock, kuraDataDir);
+        InstallImpl ii = new InstallImpl(callbackMock, kuraDataDir, null);
 
         DeploymentAdmin deploymentAdminMock = mock(DeploymentAdmin.class);
         ii.setDeploymentAdmin(deploymentAdminMock);
@@ -178,7 +181,7 @@ public class InstallImplTest {
     public void testInstallDeploymentPackageInternal() throws Throwable {
         CloudDeploymentHandlerV2 callbackMock = mock(CloudDeploymentHandlerV2.class);
         String kuraDataDir = "/tmp";
-        InstallImpl ii = new InstallImpl(callbackMock, kuraDataDir);
+        InstallImpl ii = new InstallImpl(callbackMock, kuraDataDir, null);
 
         DeploymentAdmin deploymentAdminMock = mock(DeploymentAdmin.class);
         ii.setDeploymentAdmin(deploymentAdminMock);
@@ -212,7 +215,7 @@ public class InstallImplTest {
     public void testInstallDeploymentPackageInternalAddToConfig() throws Throwable {
         CloudDeploymentHandlerV2 callbackMock = mock(CloudDeploymentHandlerV2.class);
         String kuraDataDir = "/tmp";
-        InstallImpl ii = new InstallImpl(callbackMock, kuraDataDir) {
+        InstallImpl ii = new InstallImpl(callbackMock, kuraDataDir, null) {
 
             @Override
             public Properties getDeployedPackages() {
@@ -262,7 +265,7 @@ public class InstallImplTest {
         CloudDeploymentHandlerV2 callbackMock = mock(CloudDeploymentHandlerV2.class);
         String kuraDataDir = "/tmp";
 
-        InstallImpl ii = new InstallImpl(callbackMock, kuraDataDir);
+        InstallImpl ii = new InstallImpl(callbackMock, kuraDataDir, null);
 
         String dpName = "dpname";
         String dpVersion = "7.3.57";
@@ -285,7 +288,7 @@ public class InstallImplTest {
         CloudDeploymentHandlerV2 callbackMock = mock(CloudDeploymentHandlerV2.class);
         String kuraDataDir = "/tmp";
 
-        InstallImpl ii = new InstallImpl(callbackMock, kuraDataDir);
+        InstallImpl ii = new InstallImpl(callbackMock, kuraDataDir, null);
 
         String dpName = "dpname";
         String dpVersion = "7.3.57";
@@ -304,9 +307,12 @@ public class InstallImplTest {
     @Test
     public void testSendInstallConfirmations() throws IOException, KuraException {
         CloudDeploymentHandlerV2 callbackMock = mock(CloudDeploymentHandlerV2.class);
+        CommandStatus status = new CommandStatus(new LinuxExitValue(0));
+        CommandExecutorService serviceMock = mock(CommandExecutorService.class);
+        when(serviceMock.execute(anyObject())).thenReturn(status);
         String kuraDataDir = "/tmp";
 
-        InstallImpl ii = new InstallImpl(callbackMock, kuraDataDir);
+        InstallImpl ii = new InstallImpl(callbackMock, kuraDataDir, serviceMock);
 
         File persDir = new File(kuraDataDir, "persistance");
         persDir.mkdirs();
@@ -337,7 +343,8 @@ public class InstallImplTest {
         sb.append(DeploymentPackageOptions.METRIC_JOB_ID).append("=1234\n");
         sb.append(InstallImpl.PERSISTANCE_FILE_NAME).append("=test_script.sh\n");
         sb.append(CloudDeploymentHandlerV2.METRIC_REQUESTER_CLIENT_ID).append("=REQUESTER_CLIENT_ID\n");
-        sb.append(DeploymentPackageOptions.NOTIFICATION_PUBLISHER_PID_KEY).append("=org.eclipse.kura.cloud.publisher.CloudNotificationPublisher\n");
+        sb.append(DeploymentPackageOptions.NOTIFICATION_PUBLISHER_PID_KEY)
+                .append("=org.eclipse.kura.cloud.publisher.CloudNotificationPublisher\n");
         fw = new FileWriter(fperf);
         fw.write(sb.toString());
         fw.close();
@@ -359,11 +366,12 @@ public class InstallImplTest {
             }
         }).when(callbackMock).publishMessage(Mockito.anyObject(), Mockito.anyObject(),
                 eq(InstallImpl.RESOURCE_INSTALL));
-        
+
         CloudNotificationPublisher notificationPublisher = mock(CloudNotificationPublisher.class);
         when(notificationPublisher.publish(anyObject())).thenReturn("12345");
 
-        ii.sendInstallConfirmations("org.eclipse.kura.cloud.publisher.CloudNotificationPublisher", notificationPublisher);
+        ii.sendInstallConfirmations("org.eclipse.kura.cloud.publisher.CloudNotificationPublisher",
+                notificationPublisher);
 
         assertFalse("File should have been deleted.", f.exists());
         assertTrue("File should not have been deleted.", f1.exists());
@@ -379,9 +387,12 @@ public class InstallImplTest {
     @Test
     public void testSendInstallConfirmationsError() throws IOException, KuraException {
         CloudDeploymentHandlerV2 callbackMock = mock(CloudDeploymentHandlerV2.class);
+        CommandStatus status = new CommandStatus(new LinuxExitValue(1));
+        CommandExecutorService serviceMock = mock(CommandExecutorService.class);
+        when(serviceMock.execute(anyObject())).thenReturn(status);
         String kuraDataDir = "/tmp";
 
-        InstallImpl ii = new InstallImpl(callbackMock, kuraDataDir);
+        InstallImpl ii = new InstallImpl(callbackMock, kuraDataDir, serviceMock);
 
         File persDir = new File(kuraDataDir, "persistance");
         persDir.mkdirs();
@@ -408,7 +419,8 @@ public class InstallImplTest {
         sb.append(DeploymentPackageOptions.METRIC_JOB_ID).append("=1234\n");
         sb.append(InstallImpl.PERSISTANCE_FILE_NAME).append("=test_scriptError.sh\n");
         sb.append(CloudDeploymentHandlerV2.METRIC_REQUESTER_CLIENT_ID).append("=REQUESTER_CLIENT_ID\n");
-        sb.append(DeploymentPackageOptions.NOTIFICATION_PUBLISHER_PID_KEY).append("=org.eclipse.kura.cloud.publisher.CloudNotificationPublisher\n");
+        sb.append(DeploymentPackageOptions.NOTIFICATION_PUBLISHER_PID_KEY)
+                .append("=org.eclipse.kura.cloud.publisher.CloudNotificationPublisher\n");
         fw = new FileWriter(fperf);
         fw.write(sb.toString());
         fw.close();
@@ -433,8 +445,9 @@ public class InstallImplTest {
 
         CloudNotificationPublisher notificationPublisher = mock(CloudNotificationPublisher.class);
         when(notificationPublisher.publish(anyObject())).thenReturn("12345");
-        
-        ii.sendInstallConfirmations("org.eclipse.kura.cloud.publisher.CloudNotificationPublisher", notificationPublisher);
+
+        ii.sendInstallConfirmations("org.eclipse.kura.cloud.publisher.CloudNotificationPublisher",
+                notificationPublisher);
 
         assertFalse("File should have been deleted.", f.exists());
 
@@ -447,7 +460,7 @@ public class InstallImplTest {
         CloudDeploymentHandlerV2 callbackMock = mock(CloudDeploymentHandlerV2.class);
         String kuraDataDir = "/tmp";
 
-        InstallImpl ii = new InstallImpl(callbackMock, kuraDataDir) {
+        InstallImpl ii = new InstallImpl(callbackMock, kuraDataDir, null) {
 
             @Override
             public Properties getDeployedPackages() {
@@ -469,7 +482,7 @@ public class InstallImplTest {
         properties.put("test", "testval");
         properties.put("test2", "testval2");
 
-        InstallImpl ii = new InstallImpl(callbackMock, kuraDataDir) {
+        InstallImpl ii = new InstallImpl(callbackMock, kuraDataDir, null) {
 
             @Override
             public Properties getDeployedPackages() {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -11,13 +11,13 @@
  *******************************************************************************/
 package org.eclipse.kura.linux.net.util;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.io.ByteArrayOutputStream;
 
-import org.eclipse.kura.KuraErrorCode;
+import org.apache.commons.io.Charsets;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.core.util.ProcessUtil;
-import org.eclipse.kura.core.util.SafeProcess;
+import org.eclipse.kura.executor.Command;
+import org.eclipse.kura.executor.CommandStatus;
+import org.eclipse.kura.executor.CommandExecutorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,58 +31,52 @@ public class IwLinkTool implements LinkTool {
     private String duplex = null;
     private int signal = 0;
 
+    private CommandExecutorService executorService;
+
     /**
      * constructor
      *
      * @param ifaceName
      *            - interface name as {@link String}
+     * @param executorService
+     *            - the {@link org.eclipse.kura.executor.CommandExecutorService} used to run the command
      */
-    public IwLinkTool(String ifaceName) {
+    public IwLinkTool(String ifaceName, CommandExecutorService executorService) {
         this.interfaceName = ifaceName;
         this.duplex = "half";
+        this.executorService = executorService;
     }
 
     @Override
     public boolean get() throws KuraException {
-        SafeProcess proc = null;
-        try {
-            proc = ProcessUtil.exec(formIwLinkCommand(this.interfaceName));
-            if (proc.waitFor() != 0) {
-                logger.warn("The iw returned with exit value {}", proc.exitValue());
-                return false;
-            }
-            return parse(proc);
-        } catch (Exception e) {
-            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e);
-        } finally {
-            if (proc != null) {
-                ProcessUtil.destroy(proc);
-            }
+        Command command = new Command(formIwLinkCommand(this.interfaceName));
+        command.setTimeout(60);
+        command.setOutputStream(new ByteArrayOutputStream());
+        CommandStatus status = this.executorService.execute(command);
+        int exitValue = (Integer) status.getExitStatus().getExitValue();
+        if (exitValue != 0) {
+            logger.warn("The iwconfig returned with exit value {}", exitValue);
+            return false;
         }
+        parse(new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray(), Charsets.UTF_8));
+        return true;
     }
 
-    private boolean parse(SafeProcess proc) throws KuraException {
+    private boolean parse(String commandOutput) {
         boolean ret = true;
-        try (InputStreamReader isr = new InputStreamReader(proc.getInputStream());
-                BufferedReader br = new BufferedReader(isr)) {
-            String line = null;
-            boolean proceed = true;
-            while ((line = br.readLine()) != null) {
-                line = line.trim();
-                if (line.startsWith("Not connected")) {
-                    proceed = false;
-                }
-                if (!parseLine(line)) {
-                    ret = false;
-                    proceed = false;
-                }
-                if (!proceed) {
-                    break;
-                }
+        boolean proceed = true;
+        for (String line : commandOutput.split("\n")) {
+            line = line.trim();
+            if (line.startsWith("Not connected")) {
+                proceed = false;
             }
-
-        } catch (Exception e) {
-            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e);
+            if (!parseLine(line)) {
+                ret = false;
+                proceed = false;
+            }
+            if (!proceed) {
+                break;
+            }
         }
         return ret;
     }

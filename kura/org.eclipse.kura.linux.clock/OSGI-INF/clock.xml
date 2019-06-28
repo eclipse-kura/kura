@@ -25,4 +25,5 @@
               bind="setEventAdmin"
               unbind="unsetEventAdmin"
               interface="org.osgi.service.event.EventAdmin"/>
+   <reference bind="setExecutorService" cardinality="1..1" interface="org.eclipse.kura.executor.PrivilegedExecutorService" name="PrivilegedExecutorService" policy="static" unbind="unsetExecutorService"/>
 </scr:component>

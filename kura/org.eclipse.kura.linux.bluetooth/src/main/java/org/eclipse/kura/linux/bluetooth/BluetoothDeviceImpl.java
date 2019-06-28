@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -14,6 +14,7 @@ package org.eclipse.kura.linux.bluetooth;
 import org.eclipse.kura.bluetooth.BluetoothConnector;
 import org.eclipse.kura.bluetooth.BluetoothDevice;
 import org.eclipse.kura.bluetooth.BluetoothGatt;
+import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.linux.bluetooth.le.BluetoothGattImpl;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -24,12 +25,14 @@ public class BluetoothDeviceImpl implements BluetoothDevice {
     public static final int DEVICE_TYPE_LE = 0x002;
     public static final int DEVICE_TYPE_UNKNOWN = 0x000;
 
-    private final String m_name;
-    private final String m_address;
+    private final String name;
+    private final String address;
+    private final CommandExecutorService executorService;
 
-    public BluetoothDeviceImpl(String address, String name) {
-        this.m_address = address;
-        this.m_name = name;
+    public BluetoothDeviceImpl(String address, String name, CommandExecutorService executorService) {
+        this.address = address;
+        this.name = name;
+        this.executorService = executorService;
     }
 
     // --------------------------------------------------------------------
@@ -39,12 +42,12 @@ public class BluetoothDeviceImpl implements BluetoothDevice {
     // --------------------------------------------------------------------
     @Override
     public String getName() {
-        return this.m_name;
+        return this.name;
     }
 
     @Override
     public String getAdress() {
-        return this.m_address;
+        return this.address;
     }
 
     @Override
@@ -67,7 +70,7 @@ public class BluetoothDeviceImpl implements BluetoothDevice {
 
     @Override
     public BluetoothGatt getBluetoothGatt() {
-        return new BluetoothGattImpl(this.m_address);
+        return new BluetoothGattImpl(this.address, this.executorService);
     }
 
 }

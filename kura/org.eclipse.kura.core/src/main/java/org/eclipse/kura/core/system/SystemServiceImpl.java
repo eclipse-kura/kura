@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 Eurotech and others
+ * Copyright (c) 2011, 2019 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -38,6 +38,7 @@ import org.eclipse.kura.core.util.IOUtil;
 import org.eclipse.kura.core.util.NetUtil;
 import org.eclipse.kura.core.util.ProcessUtil;
 import org.eclipse.kura.core.util.SafeProcess;
+import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.net.NetInterface;
 import org.eclipse.kura.net.NetInterfaceAddress;
 import org.eclipse.kura.net.NetworkService;
@@ -62,6 +63,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
     private ComponentContext componentContext;
 
     private NetworkService networkService;
+    private CommandExecutorService executorService;
 
     // ----------------------------------------------------------------
     //
@@ -74,6 +76,14 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
     public void unsetNetworkService(NetworkService networkService) {
         this.networkService = null;
+    }
+
+    public void setExecutorService(CommandExecutorService executorService) {
+        this.executorService = executorService;
+    }
+
+    public void unsetExecutorService(CommandExecutorService executorService) {
+        this.executorService = null;
     }
 
     // ----------------------------------------------------------------
@@ -943,22 +953,22 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
         if (OS_LINUX.equals(getOsName())) {
             if ("2.6.34.9-WR4.2.0.0_standard".equals(getOsVersion())
                     || "2.6.34.12-WR4.3.0.0_standard".equals(getOsVersion())) {
-                biosVersion = runSystemCommand("eth_vers_bios");
+                biosVersion = runSystemCommand("eth_vers_bios", this.executorService);
             } else {
-                String biosTmp = runSystemCommand("dmidecode -s bios-version");
+                String biosTmp = runSystemCommand("dmidecode -s bios-version", this.executorService);
                 if (biosTmp.length() > 0 && !biosTmp.contains("Permission denied")) {
                     biosVersion = biosTmp;
                 }
             }
         } else if (OS_MAC_OSX.equals(getOsName())) {
             String[] cmds = { "/bin/sh", "-c", "system_profiler SPHardwareDataType | grep 'Boot ROM'" };
-            String biosTmp = runSystemCommand(cmds);
+            String biosTmp = runSystemCommand(cmds, this.executorService);
             if (biosTmp.contains(": ")) {
                 biosVersion = biosTmp.split(":\\s+")[1];
             }
         } else if (getOsName().toLowerCase().startsWith(OS_WINDOWS)) {
             String[] cmds = { "wmic", "bios", "get", "smbiosbiosversion" };
-            String biosTmp = runSystemCommand(cmds);
+            String biosTmp = runSystemCommand(cmds, this.executorService);
             if (biosTmp.contains("SMBIOSBIOSVersion")) {
                 biosVersion = biosTmp.split("SMBIOSBIOSVersion\\s+")[1];
                 biosVersion = biosVersion.trim();
@@ -977,12 +987,13 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
         String deviceName = UNKNOWN;
         if (OS_MAC_OSX.equals(getOsName())) {
-            String displayTmp = runSystemCommand("scutil --get ComputerName");
+            String displayTmp = runSystemCommand("scutil --get ComputerName", this.executorService);
             if (displayTmp.length() > 0) {
                 deviceName = displayTmp;
             }
-        } else if (OS_LINUX.equals(getOsName()) || OS_CLOUDBEES.equals(getOsName()) || getOsName().toLowerCase().startsWith(OS_WINDOWS)) {
-            String displayTmp = runSystemCommand("hostname");
+        } else if (OS_LINUX.equals(getOsName()) || OS_CLOUDBEES.equals(getOsName())
+                || getOsName().toLowerCase().startsWith(OS_WINDOWS)) {
+            String displayTmp = runSystemCommand("hostname", this.executorService);
             if (displayTmp.length() > 0) {
                 deviceName = displayTmp;
             }
@@ -1002,9 +1013,10 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
         if (OS_LINUX.equals(getOsName()) && getOsVersion() != null) {
             if (getOsVersion().startsWith("2.6.34.9-WR4.2.0.0_standard")
                     || getOsVersion().startsWith("2.6.34.12-WR4.3.0.0_standard")) {
-                fwVersion = runSystemCommand("eth_vers_cpld") + " " + runSystemCommand("eth_vers_uctl");
+                fwVersion = runSystemCommand("eth_vers_cpld", this.executorService) + " "
+                        + runSystemCommand("eth_vers_uctl", this.executorService);
             } else if (getOsVersion().startsWith("3.0.35-12.09.01+yocto")) {
-                fwVersion = runSystemCommand("eth_vers_avr");
+                fwVersion = runSystemCommand("eth_vers_avr", this.executorService);
             }
         }
         return fwVersion;
@@ -1020,18 +1032,18 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
         String modelId = UNKNOWN;
 
         if (OS_MAC_OSX.equals(getOsName())) {
-            String modelTmp = runSystemCommand("sysctl -b hw.model");
+            String modelTmp = runSystemCommand("sysctl -b hw.model", this.executorService);
             if (modelTmp.length() > 0) {
                 modelId = modelTmp;
             }
         } else if (OS_LINUX.equals(getOsName())) {
-            String modelTmp = runSystemCommand("dmidecode -t system");
+            String modelTmp = runSystemCommand("dmidecode -t system", this.executorService);
             if (modelTmp.contains("Version: ")) {
                 modelId = modelTmp.split("Version:\\s+")[1].split("\n")[0];
             }
         } else if (getOsName().toLowerCase().startsWith(OS_WINDOWS)) {
             String[] cmds = { "wmic", "baseboard", "get", "Version" };
-            String biosTmp = runSystemCommand(cmds);
+            String biosTmp = runSystemCommand(cmds, this.executorService);
             if (biosTmp.contains("Version")) {
                 modelId = biosTmp.split("Version\\s+")[1];
                 modelId = modelId.trim();
@@ -1052,18 +1064,18 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
         if (OS_MAC_OSX.equals(getOsName())) {
             String[] cmds = { "/bin/sh", "-c", "system_profiler SPHardwareDataType | grep 'Model Name'" };
-            String modelTmp = runSystemCommand(cmds);
+            String modelTmp = runSystemCommand(cmds, this.executorService);
             if (modelTmp.contains(": ")) {
                 modelName = modelTmp.split(":\\s+")[1];
             }
         } else if (OS_LINUX.equals(getOsName())) {
-            String modelTmp = runSystemCommand("dmidecode -t system");
+            String modelTmp = runSystemCommand("dmidecode -t system", this.executorService);
             if (modelTmp.contains("Product Name: ")) {
                 modelName = modelTmp.split("Product Name:\\s+")[1].split("\n")[0];
             }
         } else if (getOsName().toLowerCase().startsWith(OS_WINDOWS)) {
             String[] cmds = { "wmic", "baseboard", "get", "Product" };
-            String biosTmp = runSystemCommand(cmds);
+            String biosTmp = runSystemCommand(cmds, this.executorService);
             if (biosTmp.contains("Product")) {
                 modelName = biosTmp.split("Product\\s+")[1];
                 modelName = modelName.trim();
@@ -1085,7 +1097,8 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
         if (OS_LINUX.equals(getOsName())) {
             if ("2.6.34.9-WR4.2.0.0_standard".equals(getOsVersion())
                     || "2.6.34.12-WR4.3.0.0_standard".equals(getOsVersion())) {
-                partNumber = runSystemCommand("eth_partno_bsp") + " " + runSystemCommand("eth_partno_epr");
+                partNumber = runSystemCommand("eth_partno_bsp", this.executorService) + " "
+                        + runSystemCommand("eth_partno_epr", this.executorService);
             }
         }
 
@@ -1103,18 +1116,18 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
         if (OS_MAC_OSX.equals(getOsName())) {
             String[] cmds = { "/bin/sh", "-c", "system_profiler SPHardwareDataType | grep 'Serial Number'" };
-            String serialTmp = runSystemCommand(cmds);
+            String serialTmp = runSystemCommand(cmds, this.executorService);
             if (serialTmp.contains(": ")) {
                 serialNum = serialTmp.split(":\\s+")[1];
             }
         } else if (OS_LINUX.equals(getOsName())) {
-            String serialTmp = runSystemCommand("dmidecode -t system");
+            String serialTmp = runSystemCommand("dmidecode -t system", this.executorService);
             if (serialTmp.contains("Serial Number: ")) {
                 serialNum = serialTmp.split("Serial Number:\\s+")[1].split("\n")[0];
             }
         } else if (getOsName().toLowerCase().startsWith(OS_WINDOWS)) {
             String[] cmds = { "wmic", "bios", "get", "SerialNumber" };
-            String biosTmp = runSystemCommand(cmds);
+            String biosTmp = runSystemCommand(cmds, this.executorService);
             if (biosTmp.contains("SerialNumber")) {
                 serialNum = biosTmp.split("SerialNumber\\s+")[1];
                 serialNum = serialNum.trim();
@@ -1191,9 +1204,10 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
         String hostname = UNKNOWN;
 
         if (OS_MAC_OSX.equals(getOsName())) {
-            hostname = runSystemCommand("scutil --get ComputerName");
-        } else if (OS_LINUX.equals(getOsName()) || OS_CLOUDBEES.equals(getOsName()) || getOsName().toLowerCase().startsWith(OS_WINDOWS)) {
-            hostname = runSystemCommand("hostname");
+            hostname = runSystemCommand("scutil --get ComputerName", this.executorService);
+        } else if (OS_LINUX.equals(getOsName()) || OS_CLOUDBEES.equals(getOsName())
+                || getOsName().toLowerCase().startsWith(OS_WINDOWS)) {
+            hostname = runSystemCommand("hostname", this.executorService);
         }
 
         return hostname;

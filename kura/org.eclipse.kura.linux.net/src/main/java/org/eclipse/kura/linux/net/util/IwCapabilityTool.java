@@ -10,6 +10,8 @@
 package org.eclipse.kura.linux.net.util;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -21,8 +23,9 @@ import java.util.regex.Pattern;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.core.util.ProcessUtil;
-import org.eclipse.kura.core.util.SafeProcess;
+import org.eclipse.kura.executor.Command;
+import org.eclipse.kura.executor.CommandStatus;
+import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.net.wifi.WifiInterface.Capability;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -123,35 +126,29 @@ public class IwCapabilityTool {
         return capabilities;
     }
 
-    public static InputStream exec(final String command) throws KuraException {
-        SafeProcess proc = null;
-        try {
-            proc = ProcessUtil.exec(command);
-            final int exitValue = proc.exitValue();
+    public static InputStream exec(final String commandLine, CommandExecutorService executorService) throws KuraException {
+        Command command = new Command(commandLine);
+        command.setOutputStream(new ByteArrayOutputStream());
+        CommandStatus status = executorService.execute(command);
+        final int exitValue = (Integer) status.getExitStatus().getExitValue();
 
-            if (exitValue != 0) {
-                logger.warn("error executing command --- {} --- exit value = {}", command, exitValue);
-                throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, command, exitValue);
-            }
-
-            return proc.getInputStream();
-
-        } catch (final Exception e) {
-            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e);
-        } finally {
-            if (proc != null) {
-                ProcessUtil.destroy(proc);
-            }
+        if (exitValue != 0) {
+            logger.warn("error executing command --- {} --- exit value = {}", commandLine, exitValue);
+            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, commandLine, exitValue);
         }
+
+        return new ByteArrayInputStream(((ByteArrayOutputStream) status.getOutputStream()).toByteArray());
+
     }
 
-    public static Set<Capability> probeCapabilities(final String interfaceName) throws KuraException {
+    public static Set<Capability> probeCapabilities(final String interfaceName, CommandExecutorService executorService)
+            throws KuraException {
         try {
 
-            final int phy = parseWiphyIndex(exec("iw " + interfaceName + " info"))
+            final int phy = parseWiphyIndex(exec("iw " + interfaceName + " info", executorService))
                     .orElseThrow(() -> new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR,
                             "failed to get phy index for " + interfaceName));
-            return parseCapabilities(exec("iw phy" + phy + " info"));
+            return parseCapabilities(exec("iw phy" + phy + " info", executorService));
 
         } catch (final KuraException e) {
             throw e;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Eurotech and others
+ * Copyright (c) 2018, 2019 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -189,7 +189,7 @@ public class DnsServerServiceImpl implements DnsServerService {
     @Override
     public void restart() throws KuraException {
         try {
-            if (LinuxProcessUtil.start("/etc/init.d/named restart") == 0) {
+            if (LinuxProcessUtil.start("/bin/systemctl restart named") == 0) {
                 logger.debug("DNS server restarted.");
             } else {
                 throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, "error restarting");

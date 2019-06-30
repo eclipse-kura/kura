@@ -51,7 +51,7 @@ class WireAssetOptions {
         try {
             return TimestampMode.valueOf(properties.get(TIMESTAMP_MODE_PROP_NAME).toString());
         } catch (Exception e) {
-            return TimestampMode.PER_CHANNEL;
+            return TimestampMode.NO_TIMESTAMPS;
         }
     }
 

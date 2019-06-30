@@ -10,13 +10,22 @@
 
 package org.eclipse.kura.internal.wire.asset;
 
+import static org.eclipse.kura.asset.provider.AssetConstants.ASSET_DESC_PROP;
+import static org.eclipse.kura.asset.provider.AssetConstants.ASSET_DRIVER_PROP;
+
 import java.util.List;
 
+import org.eclipse.kura.asset.provider.BaseAsset;
 import org.eclipse.kura.asset.provider.BaseAssetOCD;
+import org.eclipse.kura.configuration.metatype.AD;
+import org.eclipse.kura.configuration.metatype.OCD;
 import org.eclipse.kura.configuration.metatype.Option;
 import org.eclipse.kura.core.configuration.metatype.Tad;
+import org.eclipse.kura.core.configuration.metatype.Tmetadata;
 import org.eclipse.kura.core.configuration.metatype.Toption;
 import org.eclipse.kura.core.configuration.metatype.Tscalar;
+import org.eclipse.kura.core.configuration.util.ComponentUtil;
+import org.osgi.framework.FrameworkUtil;
 
 public class WireAssetOCD extends BaseAssetOCD {
 
@@ -43,42 +52,81 @@ public class WireAssetOCD extends BaseAssetOCD {
     }
 
     public WireAssetOCD() {
-        super();
+        Tmetadata meta = null;
+        try {
+            meta = ComponentUtil.readMetadata(FrameworkUtil.getBundle(this.getClass()),
+                    WireAssetConstants.CONF_PID.value());
+        } catch (Exception e) {
 
-        final Tad emitAllChannelsAd = new Tad();
-        emitAllChannelsAd.setId(WireAssetOptions.EMIT_ALL_CHANNELS_PROP_NAME);
-        emitAllChannelsAd.setName(WireAssetOptions.EMIT_ALL_CHANNELS_PROP_NAME);
-        emitAllChannelsAd.setCardinality(0);
-        emitAllChannelsAd.setType(Tscalar.BOOLEAN);
-        emitAllChannelsAd.setDescription(EMIT_ALL_CHANNELS_DESCRIPTION);
-        emitAllChannelsAd.setRequired(true);
-        emitAllChannelsAd.setDefault("false");
+        }
+        if (meta != null) {
+            this.ad.clear();
+            for (OCD ocd : meta.getOCD()) {
+                setId(ocd.getId());
+                setName(ocd.getName());
+                setDescription(ocd.getDescription());
+                for (AD ad : ocd.getAD())
+                    this.ad.add((Tad) ad);
+            }
+        } else {
+            setId(BaseAsset.CONF_PID);
+            setName("Wire Asset");
+            setDescription("Configure Wire Asset Instance");
 
-        addAD(emitAllChannelsAd);
+            final Tad assetDescriptionAd = new Tad();
+            assetDescriptionAd.setId(ASSET_DESC_PROP.value());
+            assetDescriptionAd.setName(ASSET_DESC_PROP.value());
+            assetDescriptionAd.setCardinality(0);
+            assetDescriptionAd.setType(Tscalar.STRING);
+            assetDescriptionAd.setDescription("Asset Description");
+            assetDescriptionAd.setRequired(false);
 
-        final Tad timestampModeAd = new Tad();
-        timestampModeAd.setId(WireAssetOptions.TIMESTAMP_MODE_PROP_NAME);
-        timestampModeAd.setName(WireAssetOptions.TIMESTAMP_MODE_PROP_NAME);
-        timestampModeAd.setCardinality(0);
-        timestampModeAd.setType(Tscalar.STRING);
-        timestampModeAd.setDescription(TIMESTAMP_MODE_DESCRIPTION);
-        timestampModeAd.setRequired(true);
-        timestampModeAd.setDefault(TimestampMode.NO_TIMESTAMPS.name());
+            final Tad driverNameAd = new Tad();
+            driverNameAd.setId(ASSET_DRIVER_PROP.value());
+            driverNameAd.setName(ASSET_DRIVER_PROP.value());
+            driverNameAd.setCardinality(0);
+            driverNameAd.setType(Tscalar.STRING);
+            driverNameAd.setDescription("Driver Name");
+            driverNameAd.setRequired(true);
 
-        addOptions(timestampModeAd, TimestampMode.values());
+            addAD(assetDescriptionAd);
+            addAD(driverNameAd);
 
-        addAD(timestampModeAd);
+            final Tad emitAllChannelsAd = new Tad();
+            emitAllChannelsAd.setId(WireAssetOptions.EMIT_ALL_CHANNELS_PROP_NAME);
+            emitAllChannelsAd.setName(WireAssetOptions.EMIT_ALL_CHANNELS_PROP_NAME);
+            emitAllChannelsAd.setCardinality(0);
+            emitAllChannelsAd.setType(Tscalar.BOOLEAN);
+            emitAllChannelsAd.setDescription(EMIT_ALL_CHANNELS_DESCRIPTION);
+            emitAllChannelsAd.setRequired(true);
+            emitAllChannelsAd.setDefault("false");
 
-        final Tad emitErrorsAd = new Tad();
-        emitErrorsAd.setId(WireAssetOptions.EMIT_ERRORS_PROP_NAME);
-        emitErrorsAd.setName(WireAssetOptions.EMIT_ERRORS_PROP_NAME);
-        emitErrorsAd.setCardinality(0);
-        emitErrorsAd.setType(Tscalar.BOOLEAN);
-        emitErrorsAd.setDescription(EMIT_ERRORS_DESCRIPTION);
-        emitErrorsAd.setRequired(true);
-        emitErrorsAd.setDefault("false");
+            addAD(emitAllChannelsAd);
 
-        addAD(emitErrorsAd);
+            final Tad timestampModeAd = new Tad();
+            timestampModeAd.setId(WireAssetOptions.TIMESTAMP_MODE_PROP_NAME);
+            timestampModeAd.setName(WireAssetOptions.TIMESTAMP_MODE_PROP_NAME);
+            timestampModeAd.setCardinality(0);
+            timestampModeAd.setType(Tscalar.STRING);
+            timestampModeAd.setDescription(TIMESTAMP_MODE_DESCRIPTION);
+            timestampModeAd.setRequired(true);
+            timestampModeAd.setDefault(TimestampMode.NO_TIMESTAMPS.name());
+
+            addOptions(timestampModeAd, TimestampMode.values());
+
+            addAD(timestampModeAd);
+
+            final Tad emitErrorsAd = new Tad();
+            emitErrorsAd.setId(WireAssetOptions.EMIT_ERRORS_PROP_NAME);
+            emitErrorsAd.setName(WireAssetOptions.EMIT_ERRORS_PROP_NAME);
+            emitErrorsAd.setCardinality(0);
+            emitErrorsAd.setType(Tscalar.BOOLEAN);
+            emitErrorsAd.setDescription(EMIT_ERRORS_DESCRIPTION);
+            emitErrorsAd.setRequired(true);
+            emitErrorsAd.setDefault("false");
+
+            addAD(emitErrorsAd);
+        }
 
     }
 

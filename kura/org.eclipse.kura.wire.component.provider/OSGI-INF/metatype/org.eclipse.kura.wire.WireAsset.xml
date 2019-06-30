@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="OSGI-INF/l10n/WireAsset">
+    <OCD id="org.eclipse.kura.asset" 
+         name="%name" 
+         description="%description">
+
+        <AD id="asset.desc"
+            name="%assetdescname"
+            type="String"
+            cardinality="0"
+            required="false"
+            description="%assetdescdesc"/>
+        <AD id="driver.pid"
+            name="%driverpidname"
+            type="String"
+            cardinality="0"
+            required="true"
+            description="%driverpiddesc"/>
+        <AD id="emit.all.channels"
+            name="%emitallchannelsname"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="%emitallchannelsdesc">
+        </AD>
+        
+        <AD id="timestamp.mode"
+            name="%timestampmodename"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="NO_TIMESTAMPS"
+            description="%timestampmodedesc">
+            <Option label="NO_TIMESTAMPS" value="NO_TIMESTAMPS" />
+            <Option label="PER_CHANNEL" value="PER_CHANNEL" />
+            <Option label="SINGLE_ASSET_GENERATED" value="SINGLE_ASSET_GENERATED" />
+            <Option label="SINGLE_DRIVER_GENERATED_MAX" value="SINGLE_DRIVER_GENERATED_MAX" />
+            <Option label="SINGLE_DRIVER_GENERATED_MIN" value="SINGLE_DRIVER_GENERATED_MIN" />
+        </AD>
+        
+        <AD id="emit.errors"
+            name="%emiterrorsname"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Specifies wheter errors should be included or not in the emitted envelope">
+        </AD>
+           
+    </OCD>
+    
+    <Designate pid="org.eclipse.kura.asset" factoryPid="org.eclipse.kura.asset">
+        <Object ocdref="org.eclipse.kura.asset"/>
+    </Designate>
+</MetaData>

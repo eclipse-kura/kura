@@ -39,7 +39,10 @@ public class StringData implements BinaryData<String> {
 
     @Override
     public void write(Buffer buf, int offset, String value) {
-        final byte[] raw = value.getBytes(this.charset);
+        Charset charset = AutoCharsetReader.getEncoding(value);
+        if (charset == null)
+            charset = this.charset;
+        final byte[] raw = value.getBytes(charset);
         int amount = this.wrapped.getSize();
         int size = value.length();
         byte[] sendByte = new byte[amount + 2];
@@ -63,8 +66,12 @@ public class StringData implements BinaryData<String> {
         int length = Math.min(size, totalSize - 2);
         StringBuilder builder = new StringBuilder();
         while (totalSize > 0) {
-            if (length > 0)
-                builder.append(new String(raw, i + 2, length, this.charset));
+            if (length > 0) {
+                Charset charset = AutoCharsetReader.detectCharset(raw, i + 2, length);
+                if (charset == null)
+                    charset = this.charset;
+                builder.append(new String(raw, i + 2, length, charset));
+            }
             i = i + totalByteSize + 2;
             totalSize = rawLength - i;
             if (totalSize <= 2)

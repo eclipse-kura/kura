@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.core.configuration.XmlConfigPropertyAdapted.ConfigPropertyType;
 import org.eclipse.kura.crypto.CryptoService;
@@ -272,7 +273,12 @@ public class XmlConfigPropertiesAdapter {
 
                             propvalue = values[0];
                             if (adaptedProp.isEncrypted()) {
-                                propvalue = new Password(cryptoService.decodeBase64((String) propvalue));
+                                try {
+                                    propvalue = new Password(
+                                            cryptoService.decryptAes(((String) propvalue).toCharArray()));
+                                } catch (KuraException e) {
+                                    propvalue = new Password(cryptoService.decodeBase64((String) propvalue));
+                                }
                             } else {
                                 propvalue = new Password((String) propvalue);
                             }
@@ -371,7 +377,12 @@ public class XmlConfigPropertiesAdapter {
                             for (int i = 0; i < values.length; i++) {
                                 if (values[i] != null) {
                                     if (adaptedProp.isEncrypted()) {
-                                        pwdValues[i] = new Password(cryptoService.decodeBase64(values[i]));
+                                        try {
+                                            pwdValues[i] = new Password(
+                                                    cryptoService.decryptAes(values[i].toCharArray()));
+                                        } catch (KuraException e) {
+                                            pwdValues[i] = new Password(cryptoService.decodeBase64(values[i]));
+                                        }
                                     } else {
                                         pwdValues[i] = new Password(values[i]);
                                     }

@@ -70,7 +70,8 @@ public class StringData implements BinaryData<String> {
                 Charset charset = AutoCharsetReader.detectCharset(raw, i + 2, length);
                 if (charset == null)
                     charset = this.charset;
-                builder.append(new String(raw, i + 2, length, charset));
+                String substr = new String(raw, i + 2, length, charset);
+                builder.append(substr);
             }
             i = i + totalByteSize + 2;
             totalSize = rawLength - i;
@@ -89,7 +90,20 @@ public class StringData implements BinaryData<String> {
                     break;
             }
         }
-        return builder.toString();
+        return rTrimNonString(builder);
+    }
+
+    private static String rTrimNonString(StringBuilder str) {
+        int len = str.length();
+        char[] value = new char[len];
+        str.getChars(0, len, value, 0);
+
+        while (len > 0 && value[len - 1] < ' ') {
+            len--;
+        }
+        if (len <= 0)
+            return "";
+        return (len < value.length) ? str.substring(0, len) : str.toString();
     }
 
     @Override

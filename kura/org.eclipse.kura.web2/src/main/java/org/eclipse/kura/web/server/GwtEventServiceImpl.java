@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2016, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -33,8 +33,8 @@ public class GwtEventServiceImpl extends OsgiRemoteServiceServlet implements Gwt
 
     private static final int MAX_EVENT_COUNT = 50;
 
-    private LinkedList<String> topics = new LinkedList<String>();
-    private LinkedList<GwtEventInfo> events = new LinkedList<GwtEventInfo>();
+    private LinkedList<String> topics = new LinkedList<>();
+    private LinkedList<GwtEventInfo> events = new LinkedList<>();
     private ServiceRegistration<EventHandler> registration;
 
     public GwtEventServiceImpl() {
@@ -58,7 +58,7 @@ public class GwtEventServiceImpl extends OsgiRemoteServiceServlet implements Gwt
     }
 
     private List<GwtEventInfo> getEvents(long fromTimestamp) {
-        LinkedList<GwtEventInfo> result = new LinkedList<GwtEventInfo>();
+        LinkedList<GwtEventInfo> result = new LinkedList<>();
 
         Iterator<GwtEventInfo> i = events.iterator();
 
@@ -76,7 +76,7 @@ public class GwtEventServiceImpl extends OsgiRemoteServiceServlet implements Gwt
     public void start() {
         stop();
 
-        Dictionary<String, Object> map = new Hashtable<String, Object>();
+        Dictionary<String, Object> map = new Hashtable<>();
 
         map.put(EventConstants.EVENT_TOPIC, topics.toArray(new String[topics.size()]));
 
@@ -102,9 +102,9 @@ public class GwtEventServiceImpl extends OsgiRemoteServiceServlet implements Gwt
         }
 
         try {
-            this.wait(POLL_TIMEOUT_SECONDS * 1000);
+            this.wait(POLL_TIMEOUT_SECONDS * 1000L);
         } catch (InterruptedException e) {
-            return new LinkedList<GwtEventInfo>();
+            return new LinkedList<>();
         }
 
         return getEvents(timestamp);

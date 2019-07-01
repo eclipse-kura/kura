@@ -9,6 +9,7 @@
  *******************************************************************************/
 package org.eclipse.kura.web.server;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.eclipse.kura.KuraErrorCode;
@@ -43,16 +44,20 @@ public class GwtPasswordAuthenticationServiceImpl extends OsgiRemoteServiceServl
     @Override
     public String authenticate(final String username, final String password) throws GwtKuraException {
 
-        final HttpSession session = Console.instance().createSession(getThreadLocalRequest(), getThreadLocalResponse());
+        final HttpSession session = Console.instance().createSession(getThreadLocalRequest());
+        final HttpServletRequest request = getThreadLocalRequest();
+
+        final String requestIp = request.getRemoteAddr();
 
         try {
             if (!this.authenticationManager.authenticate(username, password)) {
-                logger.warn("UI Login - Failure - Login failed for user: {}", username);
+                logger.warn("UI Login - Failure - Login failed for user: {}, request IP: {}", username, requestIp);
                 throw new KuraException(KuraErrorCode.SECURITY_EXCEPTION);
             }
 
             session.setAttribute(Attributes.AUTORIZED_USER.getValue(), username);
-            logger.warn("UI Login - Success - Login for user: {}, session id: {}", username, session.getId());
+            logger.warn("UI Login - Success - Login for user: {}, session id: {}, request IP: {}", username,
+                    session.getId(), requestIp);
 
             return this.redirectPath;
 

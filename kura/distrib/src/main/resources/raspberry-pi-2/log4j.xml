@@ -13,12 +13,11 @@
 #
 -->
 <Configuration status="warn" strict="true" name="KuraConfig" monitorInterval="30">
-
     <Properties>
         <Property name="filename">/var/log/kura</Property>
+        <Property name="AUDIT_DIR">/var/log/audit</Property>
     </Properties>
     <Filter type="ThresholdFilter" level="trace"/>
- 
     <Appenders>
         <RollingFile name="RollingFile" fileName="${filename}.log" filePattern="${filename}-%d{MM-dd-yy-HH-mm-ss}-%i.log.gz">
             <PatternLayout>
@@ -29,17 +28,30 @@
             </Policies>
             <DefaultRolloverStrategy max="10"/>
         </RollingFile>
+        <RollingFile name="audit" fileName="${AUDIT_DIR}/audit.log" filePattern="${AUDIT_DIR}/audit-%d{MM-dd-yy-HH-mm-ss}-%i.log.gz">
+            <RFC5424Layout enterpriseNumber="28392" includeMDC="true" mdcId="RequestContext" appName="EclipseKura" mdcPrefix="" newLine="true">
+                <LoggerFields>
+                    <KeyValuePair key="thread" value="%t"/>
+                    <KeyValuePair key="priority" value="%p"/>
+                    <KeyValuePair key="category" value="%c"/>
+                    <KeyValuePair key="exception" value="%ex"/>
+                </LoggerFields>
+            </RFC5424Layout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="20 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="10"/>
+        </RollingFile>
     </Appenders>
- 
     <Loggers>
         <Logger name="org.eclipse" level="info" additivity="false">
             <AppenderRef ref="RollingFile"/>
         </Logger>
- 
+        <Logger name="AuditLogger" level="trace" additivity="false">
+            <AppenderRef ref="audit"/>
+        </Logger>
         <Root level="info">
             <AppenderRef ref="RollingFile"/>
         </Root>
-  </Loggers>
- 
+    </Loggers>
 </Configuration>
-

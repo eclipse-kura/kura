@@ -27,6 +27,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.metatype.AD;
@@ -39,6 +42,7 @@ import org.eclipse.kura.internal.wire.asset.WireAssetChannelDescriptor;
 import org.eclipse.kura.internal.wire.asset.WireAssetOCD;
 import org.eclipse.kura.web.server.util.GwtServerUtil;
 import org.eclipse.kura.web.server.util.ServiceLocator;
+import org.eclipse.kura.web.session.Attributes;
 import org.eclipse.kura.web.shared.FilterUtil;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
@@ -65,11 +69,15 @@ import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.ConfigurationAdmin;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The class GwtWireGraphServiceImpl implements {@link GwtWireGraphService}
  */
 public final class GwtWireGraphServiceImpl extends OsgiRemoteServiceServlet implements GwtWireGraphService {
+
+    private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
 
     private static final GwtConfigComponent WIRE_ASSET_OCD = GwtServerUtil.toGwtConfigComponent(
             new ComponentConfigurationImpl("org.eclipse.kura.wire.WireAsset", new WireAssetOCD(), new HashMap<>()));
@@ -248,20 +256,21 @@ public final class GwtWireGraphServiceImpl extends OsgiRemoteServiceServlet impl
             List<GwtConfigComponent> additionalGwtConfigs) throws GwtKuraException {
         this.checkXSRFToken(xsrfToken);
 
-        final Iterator<String> receivedConfigurationPids = Stream.concat(
-                gwtConfigurations.getWireComponentConfigurations() //
-                        .stream()//
-                        .map(config -> config.getConfiguration().getComponentId()),
+        final List<String> receivedConfigurationPids = Stream.concat(gwtConfigurations.getWireComponentConfigurations() //
+                .stream()//
+                .map(config -> config.getConfiguration().getComponentId()),
                 additionalGwtConfigs //
                         .stream() //
                         .map(GwtConfigComponent::getComponentId))
-                .iterator();
+                .collect(Collectors.toList());
+
+        final Iterator<String> receivedConfigurationPidsIterator = receivedConfigurationPids.iterator();
 
         final Map<String, ComponentConfiguration> originalConfigs;
 
-        if (receivedConfigurationPids.hasNext()) {
+        if (receivedConfigurationPidsIterator.hasNext()) {
             final Filter receivedConfigurationPidsFilter = getFilter(
-                    FilterUtil.getPidFilter(receivedConfigurationPids));
+                    FilterUtil.getPidFilter(receivedConfigurationPidsIterator));
 
             originalConfigs = ServiceLocator.applyToServiceOptionally(ConfigurationService.class, cs -> cs //
                     .getComponentConfigurations(receivedConfigurationPidsFilter) //
@@ -312,6 +321,13 @@ public final class GwtWireGraphServiceImpl extends OsgiRemoteServiceServlet impl
             wireGraphService.update(new WireGraphConfiguration(wireComponentConfigurations, wireConfigurations));
             return (Void) null;
         });
+
+        final HttpServletRequest request = getThreadLocalRequest();
+        final HttpSession session = request.getSession(false);
+        String updatedPids = receivedConfigurationPids.stream().collect(Collectors.joining(","));
+        auditLogger.info(
+                "UI Wires - Success - Successfully updated wires configuration for user: {}, session: {}, received configuration pids: {}",
+                session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId(), updatedPids);
     }
 
     @Deprecated

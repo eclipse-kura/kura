@@ -118,7 +118,7 @@ body {
 }
 
 .headerLogo {
-	height: 1.5cm !important;
+	height: 1cm !important;
 }
 
 table {
@@ -488,6 +488,22 @@ Login START
 
 .login-input:not(:first-of-type) {
 	padding-top: 0.4cm;
+}
+
+.login-background {
+    background-image: url(eclipse/kura/icons/yofc_login_background.png);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: auto;
+    min-height: 100%;
+    position: fixed;
+    width: 100%;
+}
+
+.login-form {
+    padding-top: 5%;
 }
 
 /**********************

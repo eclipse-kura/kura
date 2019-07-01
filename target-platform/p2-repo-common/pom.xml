@@ -253,6 +253,11 @@
                                     <version>${org.eclipse.soda.dk.comm.version}</version>
                                 </artifactItem>
                                 <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.soda.dk.comm.macosx</artifactId>
+                                    <version>${org.eclipse.soda.dk.comm.version}</version>
+                                </artifactItem>
+                                <artifactItem>
                                     <groupId>org.apache.camel</groupId>
                                     <artifactId>camel-amqp</artifactId>
                                     <version>${org.apache.camel.camel-amqp.version}</version>

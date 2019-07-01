@@ -11,12 +11,13 @@
 	xmlns:g="urn:import:com.google.gwt.user.client.ui"
 	xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt"
 	xmlns:kura="urn:import:org.eclipse.kura.web.client.ui">
-    <ui:with field="msgs" type="org.eclipse.kura.web.client.messages.Messages"></ui:with>
-	<b:Container fluid="true">
+    <ui:with field="msgs" type="org.eclipse.kura.web.client.messages.Messages"/>
+
+	<b:Container fluid="true" addStyleNames="login-background">
 
 <g:FormPanel ui:field="loginForm">
 		<b:Modal ui:field="loginDialog" title="{msgs.login}" closable="false"
-			fade="false" dataBackdrop="STATIC">
+			fade="false" dataBackdrop="FALSE" addStyleNames="login-form">
 			
 			<b:ModalBody>
 				

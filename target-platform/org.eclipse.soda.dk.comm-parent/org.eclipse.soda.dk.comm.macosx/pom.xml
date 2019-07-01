@@ -24,10 +24,10 @@
         <version>1.2.600-SNAPSHOT</version>
     </parent>
 
-    <artifactId>org.eclipse.soda.dk.comm.x86_64</artifactId>
+    <artifactId>org.eclipse.soda.dk.comm.macosx</artifactId>
     <packaging>bundle</packaging>
 
-    <name>Native libraries for 'org.eclipse.soda.dk.comm' on x86_64</name>
+    <name>Native libraries for 'org.eclipse.soda.dk.comm' on macosx</name>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -42,7 +42,7 @@
                 <version>2.22.1</version>
                 <configuration>
                     <systemPropertyVariables>
-                        <java.library.path>${project.basedir}/src/main/lib/linux</java.library.path>
+                        <java.library.path>${project.basedir}/src/main/lib/macosx</java.library.path>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
@@ -60,12 +60,12 @@
                         <Bundle-Vendor>%bundle.vendor</Bundle-Vendor>
                         <Bundle-Copyright>%bundle.copyright</Bundle-Copyright>
                         <Include-Resource>
-                            lib=${project.basedir}/src/main/lib/linux,
+                            lib=${project.basedir}/src/main/lib/macosx,
                             ${project.basedir}/about.html,
                             about_files=${project.basedir}/about_files/
                         </Include-Resource>
                         <Bundle-NativeCode>
-                            lib/libdkcomm.so; osname=Linux; processor=x86-64
+                            lib/libdkcomm.jnilib; osname=macos; osname=macosx; processor=x86_64
                         </Bundle-NativeCode>
                         <Fragment-Host>org.eclipse.soda.dk.comm;bundle-version="[1.2.4,2.0.0)"</Fragment-Host>
                     </instructions>

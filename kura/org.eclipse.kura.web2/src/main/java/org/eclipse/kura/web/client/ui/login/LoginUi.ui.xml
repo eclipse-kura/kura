@@ -12,11 +12,11 @@
 	xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt"
 	xmlns:kura="urn:import:org.eclipse.kura.web.client.ui">
 
-	<b:Container fluid="true">
+	<b:Container fluid="true" addStyleNames="login-background">
 
 <g:FormPanel ui:field="loginForm">
 		<b:Modal ui:field="loginDialog" title="Login" closable="false"
-			fade="false" dataBackdrop="STATIC">
+			fade="false" dataBackdrop="FALSE" addStyleNames="login-form">
 			
 			<b:ModalBody>
 				

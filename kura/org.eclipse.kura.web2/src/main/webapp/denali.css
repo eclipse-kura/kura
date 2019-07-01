@@ -490,6 +490,22 @@ Login START
 	padding-top: 0.4cm;
 }
 
+.login-background {
+    background-image: url(eclipse/kura/icons/kura_login_background.png);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: auto;
+    min-height: 100%;
+    position: fixed;
+    width: 100%;
+}
+
+.login-form {
+    padding-top: 15%;
+}
+
 /**********************
 Login END
 ***********************/

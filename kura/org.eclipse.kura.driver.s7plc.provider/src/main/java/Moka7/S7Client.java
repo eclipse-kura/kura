@@ -283,7 +283,7 @@ public class S7Client {
         this.LastError = 0;
         try {
             this.TCPSocket = new Socket();
-            this.TCPSocket.connect(sockaddr, 10000);
+            this.TCPSocket.connect(sockaddr, 5000);
             this.TCPSocket.setTcpNoDelay(true);
             this.InStream = new DataInputStream(this.TCPSocket.getInputStream());
             this.OutStream = new DataOutputStream(this.TCPSocket.getOutputStream());

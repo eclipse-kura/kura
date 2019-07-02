@@ -21,5 +21,14 @@ public enum S7PlcDataType {
     INT,
     DINT,
     REAL,
-    CHAR
+    CHAR,
+    CHAR_UTF_8,
+    CHAR_GBK,
+    CHAR_GB2312,
+    CHAR_BIG5,
+    CHAR_UTF_16BE,
+    CHAR_UTF_16LE,
+    CHAR_UTF_16,
+    CHAR_UNICODE
+
 }

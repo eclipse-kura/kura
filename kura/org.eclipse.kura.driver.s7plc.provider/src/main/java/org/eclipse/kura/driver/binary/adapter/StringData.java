@@ -67,10 +67,15 @@ public class StringData implements BinaryData<String> {
         StringBuilder builder = new StringBuilder();
         while (totalSize > 0) {
             if (length > 0) {
-                Charset charset = AutoCharsetReader.detectCharset(raw, i + 2, length);
+                Charset charset = this.charset;
                 if (charset == null)
-                    charset = this.charset;
+                    charset = AutoCharsetReader.detectCharset(raw, i + 2, length);
+                if (charset == null)
+                    charset = AutoCharsetReader.detectCharset(raw, i + 2, length - 1);
+                if (charset == null)
+                    charset = Charset.forName("US-ASCII");
                 String substr = new String(raw, i + 2, length, charset);
+                substr = substr.replaceAll("[^\u0020-\u9FA5]", "");
                 builder.append(substr);
             }
             i = i + totalByteSize + 2;
@@ -90,20 +95,7 @@ public class StringData implements BinaryData<String> {
                     break;
             }
         }
-        return rTrimNonString(builder);
-    }
-
-    private static String rTrimNonString(StringBuilder str) {
-        int len = str.length();
-        char[] value = new char[len];
-        str.getChars(0, len, value, 0);
-
-        while (len > 0 && value[len - 1] < ' ') {
-            len--;
-        }
-        if (len <= 0)
-            return "";
-        return (len < value.length) ? str.substring(0, len) : str.toString();
+        return builder.toString();
     }
 
     @Override

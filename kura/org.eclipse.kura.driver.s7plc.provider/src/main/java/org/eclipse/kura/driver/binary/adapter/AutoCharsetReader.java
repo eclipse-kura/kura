@@ -9,8 +9,7 @@ import java.nio.charset.CharsetDecoder;
 
 public class AutoCharsetReader {
 
-    private static final String[] _defaultCharsets = { "US-ASCII", "UTF-8", "GBK", "GB2312", "BIG5", "GB18030",
-            "UTF-16BE", "UTF-16LE", "UTF-16", "UNICODE" };
+    private static final String[] _defaultCharsets = { "US-ASCII", "UTF-8", "GBK", "GB2312", "BIG5", "GB18030" };
 
     private AutoCharsetReader() {
         throw new IllegalStateException("Utility class");

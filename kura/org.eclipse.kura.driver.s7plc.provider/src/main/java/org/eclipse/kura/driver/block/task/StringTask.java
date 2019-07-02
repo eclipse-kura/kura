@@ -12,7 +12,7 @@
 
 package org.eclipse.kura.driver.block.task;
 
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 
 import org.eclipse.kura.channel.ChannelRecord;
 import org.eclipse.kura.driver.binary.ByteArray;
@@ -20,7 +20,7 @@ import org.eclipse.kura.driver.binary.adapter.StringData;
 
 public class StringTask extends BinaryDataTask<String> {
 
-    public StringTask(ChannelRecord record, int start, int end, Mode mode) {
-        super(record, start, new StringData(new ByteArray(end - start), StandardCharsets.US_ASCII), mode);
+    public StringTask(ChannelRecord record, int start, int end, Mode mode, Charset charset) {
+        super(record, start, new StringData(new ByteArray(end - start), charset), mode);
     }
 }

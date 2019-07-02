@@ -12,6 +12,7 @@
 
 package org.eclipse.kura.internal.driver.s7plc.task;
 
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -117,12 +118,45 @@ public final class S7PlcTaskBuilder {
 
             return new BinaryDataTask<>(record, offset, BinaryDataTypes.UINT8, type, mode);
 
-        } else if (S7PlcDataType.CHAR.name().equals(s7DataTypeId)) {
+        } else if (s7DataTypeId.startsWith(S7PlcDataType.CHAR.name())) {
 
             assertChannelType(record, DataType.STRING);
             int byteCount = getIntProperty(record, S7PlcChannelDescriptor.BYTE_COUNT_ID,
                     "Error while retrieving Byte Count");
-            return new StringTask(record, offset, offset + byteCount, mode);
+            String charsetName = "US-ASCII";
+            switch (s7DataTypeId) {
+            case "CHAR_UTF_8":
+                charsetName = "UTF-8";
+                break;
+            case "CHAR_GBK":
+                charsetName = "GBK";
+                break;
+            case "CHAR_GB2312":
+                charsetName = "GB2312";
+                break;
+            case "CHAR_BIG5":
+                charsetName = "BIG5";
+                break;
+            case "CHAR_UTF_16BE":
+                charsetName = "UTF-16BE";
+                break;
+            case "CHAR_UTF_16LE":
+                charsetName = "UTF-16LE";
+                break;
+            case "CHAR_UTF_16":
+                charsetName = "UTF-16";
+                break;
+            case "CHAR_UNICODE":
+                charsetName = "UNICODE";
+                break;
+            default:
+                charsetName = "US-ASCII";
+
+            }
+            Charset charset = null;
+            if (!s7DataTypeId.equals(S7PlcDataType.CHAR.name()))
+                charset = Charset.forName(charsetName);
+            return new StringTask(record, offset, offset + byteCount, mode, charset);
 
         } else if (S7PlcDataType.REAL.name().equals(s7DataTypeId)) {
 

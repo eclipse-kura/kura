@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -11,7 +11,6 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.status;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -20,12 +19,10 @@ import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.messages.ValidationMessages;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.util.EventService;
-import org.eclipse.kura.web.client.util.FailureHandler;
+import org.eclipse.kura.web.client.util.request.RequestQueue;
 import org.eclipse.kura.web.shared.ForwardedEventTopic;
-import org.eclipse.kura.web.shared.model.GwtEventInfo;
 import org.eclipse.kura.web.shared.model.GwtGroupedNVPair;
 import org.eclipse.kura.web.shared.model.GwtSession;
-import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtStatusService;
@@ -36,8 +33,6 @@ import org.gwtbootstrap3.client.ui.gwt.CellTable;
 
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -45,7 +40,6 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.RowStyles;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
@@ -97,21 +91,11 @@ public class StatusPanelUi extends Composite {
 
         loadStatusTable(this.statusGrid, this.statusGridProvider);
 
-        this.statusRefresh.addClickHandler(new ClickHandler() {
+        this.statusRefresh.addClickHandler(e -> loadStatusData());
 
-            @Override
-            public void onClick(ClickEvent event) {
+        EventService.Handler connectionStateChangeHandler = eventInfo -> {
+            if (StatusPanelUi.this.isVisible() && StatusPanelUi.this.isAttached()) {
                 loadStatusData();
-            }
-        });
-
-        EventService.Handler connectionStateChangeHandler = new EventService.Handler() {
-
-            @Override
-            public void handleEvent(GwtEventInfo eventInfo) {
-                if (StatusPanelUi.this.isVisible() && StatusPanelUi.this.isAttached()) {
-                    loadStatusData();
-                }
             }
         };
 
@@ -153,52 +137,27 @@ public class StatusPanelUi extends Composite {
     // fetch table data
     public void loadStatusData() {
         this.statusGridProvider.getList().clear();
-        EntryClassUi.showWaitModal();
-        this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+        RequestQueue.submit(c -> this.gwtXSRFService
+                .generateSecurityToken(c.callback(token -> StatusPanelUi.this.gwtStatusService.getDeviceConfig(token,
+                        StatusPanelUi.this.currentSession.isNetAdminAvailable(), c.callback(result -> {
+                            String title = "cloudStatus";
+                            StatusPanelUi.this.statusGridProvider.getList()
+                                    .add(new GwtGroupedNVPair(" ", msgs.getString(title), " "));
 
-            @Override
-            public void onFailure(Throwable ex) {
-                EntryClassUi.hideWaitModal();
-                FailureHandler.handle(ex);
-            }
-
-            @Override
-            public void onSuccess(GwtXSRFToken token) {
-                StatusPanelUi.this.gwtStatusService.getDeviceConfig(token,
-                        StatusPanelUi.this.currentSession.isNetAdminAvailable(),
-                        new AsyncCallback<ArrayList<GwtGroupedNVPair>>() {
-
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        FailureHandler.handle(caught);
-                        StatusPanelUi.this.statusGridProvider.flush();
-                        EntryClassUi.hideWaitModal();
-                    }
-
-                    @Override
-                    public void onSuccess(ArrayList<GwtGroupedNVPair> result) {
-                        String title = "cloudStatus";
-                        StatusPanelUi.this.statusGridProvider.getList()
-                                .add(new GwtGroupedNVPair(" ", msgs.getString(title), " "));
-
-                        Iterator<GwtGroupedNVPair> it = result.iterator();
-                        while (it.hasNext()) {
-                            GwtGroupedNVPair connectionName = it.next();
-                            if (!title.equals(connectionName.getGroup())) {
-                                title = connectionName.getGroup();
-                                StatusPanelUi.this.statusGridProvider.getList()
-                                        .add(new GwtGroupedNVPair(" ", msgs.getString(title), " "));
+                            Iterator<GwtGroupedNVPair> it = result.iterator();
+                            while (it.hasNext()) {
+                                GwtGroupedNVPair connectionName = it.next();
+                                if (!title.equals(connectionName.getGroup())) {
+                                    title = connectionName.getGroup();
+                                    StatusPanelUi.this.statusGridProvider.getList()
+                                            .add(new GwtGroupedNVPair(" ", msgs.getString(title), " "));
+                                }
+                                StatusPanelUi.this.statusGridProvider.getList().add(connectionName);
                             }
-                            StatusPanelUi.this.statusGridProvider.getList().add(connectionName);
-                        }
-                        int size = StatusPanelUi.this.statusGridProvider.getList().size();
-                        StatusPanelUi.this.statusGrid.setVisibleRange(0, size);
-                        StatusPanelUi.this.statusGridProvider.flush();
-                        EntryClassUi.hideWaitModal();
-                    }
-                });
-            }
-        });
+                            int size = StatusPanelUi.this.statusGridProvider.getList().size();
+                            StatusPanelUi.this.statusGrid.setVisibleRange(0, size);
+                            StatusPanelUi.this.statusGridProvider.flush();
+                        })))));
     }
 
     public void setParent(EntryClassUi parent) {

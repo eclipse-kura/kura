@@ -20,7 +20,6 @@ public interface GwtSessionService extends RemoteService {
 
     public void logout(GwtXSRFToken xsrfToken) throws GwtKuraException;
 
-    public boolean isBannerEnabled();
+    public String getLoginBanner();
 
-    public String getBannerContent();
 }

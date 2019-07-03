@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.eclipse.kura.web.Console;
+import org.eclipse.kura.web.ConsoleOptions;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtSessionService;
@@ -38,13 +39,14 @@ public class GwtSessionServiceImpl extends OsgiRemoteServiceServlet implements G
     }
 
     @Override
-    public boolean isBannerEnabled() {
-        return Console.getConsoleOptions().isBannerEnabled();
-    }
+    public String getLoginBanner() {
+        final ConsoleOptions options = Console.getConsoleOptions();
 
-    @Override
-    public String getBannerContent() {
-        return Console.getConsoleOptions().getBannerContent();
+        if (options.isBannerEnabled()) {
+            return options.getBannerContent();
+        } else {
+            return null;
+        }
     }
 
 }

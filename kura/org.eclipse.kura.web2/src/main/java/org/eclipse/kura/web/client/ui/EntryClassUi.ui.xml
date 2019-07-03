@@ -345,5 +345,20 @@
 					ui:field="errorModalDismiss" />
 			</b:ModalFooter>
 		</b:Modal>
+        <b:Modal closable="true" fade="true" dataBackdrop="STATIC"
+            dataKeyboard="true" ui:field="accessBannerModal"
+            b:id="accessBannerModal">
+            <b:ModalBody>
+                <b:Panel>
+                    <b:PanelBody>
+                        <b.html:Strong ui:field="accessBannerModalPannelBody"/>
+                    </b:PanelBody>
+                </b:Panel>
+            </b:ModalBody>
+            <b:ModalFooter>
+                <b:Button type="PRIMARY" dataDismiss="MODAL"
+                    ui:field="buttonAccessBannerModalOk" />
+            </b:ModalFooter>
+        </b:Modal>
 	</b:Container>
 </ui:UiBinder> 

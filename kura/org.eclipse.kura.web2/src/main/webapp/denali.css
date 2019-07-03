@@ -244,6 +244,19 @@ Upload panel END
 ***********************/
 
 /**********************
+Wait modal START
+***********************/
+
+.gwt-PopupPanelGlass {
+	position: fixed !important;
+	z-index: 50 !important;
+}
+
+/**********************
+Wait modal END
+***********************/
+
+/**********************
 Channel Table Validation START
 ***********************/
 

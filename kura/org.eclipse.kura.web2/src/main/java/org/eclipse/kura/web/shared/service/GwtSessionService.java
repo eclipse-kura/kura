@@ -19,4 +19,7 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 public interface GwtSessionService extends RemoteService {
 
     public void logout(GwtXSRFToken xsrfToken) throws GwtKuraException;
+
+    public String getLoginBanner();
+
 }

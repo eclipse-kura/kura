@@ -91,12 +91,6 @@ public class Console implements ConfigurableComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(Console.class);
 
-    private static final String APP_ROOT = "app.root";
-    private static final String SESSION_MAX_INACTIVITY_INTERVAL = "session.max.inactivity.interval";
-
-    private static final String CONSOLE_PASSWORD = "console.password.value";
-    private static final String CONSOLE_USERNAME = "console.username.value";
-
     private String appRoot;
     private int sessionMaxInactiveInterval;
     private ComponentContext componentContext;
@@ -111,6 +105,8 @@ public class Console implements ConfigurableComponent {
     private GwtEventServiceImpl eventService;
 
     private static Console instance;
+
+    private static ConsoleOptions consoleOptions;
 
     // ----------------------------------------------------------------
     //
@@ -181,20 +177,18 @@ public class Console implements ConfigurableComponent {
         this.eventAdmin.postEvent(new Event(KuraConfigReadyEvent.KURA_CONFIG_EVENT_READY_TOPIC, eventProps));
     }
 
-    private void updateAuthenticationManager(Map<String, Object> properties)
+    private void updateAuthenticationManager(String username, String password)
             throws KuraException, NoSuchAlgorithmException, UnsupportedEncodingException {
-        String registeredUsername = (String) properties.get(CONSOLE_USERNAME);
 
-        Object value = properties.get(CONSOLE_PASSWORD);
-        char[] decryptedPassword = this.cryptoService.decryptAes(((String) value).toCharArray());
+        char[] decryptedPassword = this.cryptoService.decryptAes(password.toCharArray());
         char[] propertyPassword = this.cryptoService.sha1Hash(new String(decryptedPassword)).toCharArray();
 
-        this.authMgr.setUsername(registeredUsername);
+        this.authMgr.setUsername(username);
         this.authMgr.setPassword(propertyPassword);
     }
 
     private void setAppRoot(String propertiesAppRoot) {
-        appRoot = propertiesAppRoot;
+        this.appRoot = propertiesAppRoot;
     }
 
     private void setSessionMaxInactiveInterval(int sessionMaxInactiveInterval) {
@@ -202,7 +196,7 @@ public class Console implements ConfigurableComponent {
     }
 
     private void setComponentContext(ComponentContext context) {
-        componentContext = context;
+        this.componentContext = context;
     }
 
     protected void updated(Map<String, Object> properties) {
@@ -216,14 +210,18 @@ public class Console implements ConfigurableComponent {
     }
 
     private void doUpdate(Map<String, Object> properties) {
+        ConsoleOptions options = new ConsoleOptions(properties);
+
+        Console.setConsoleOptions(options);
+
         try {
-            updateAuthenticationManager(properties);
+            updateAuthenticationManager(options.getUsername(), options.getUserPassword());
         } catch (Exception e) {
             logger.warn("Error Updating Web properties", e);
         }
 
-        setAppRoot((String) properties.get(APP_ROOT));
-        setSessionMaxInactiveInterval((int) properties.getOrDefault(SESSION_MAX_INACTIVITY_INTERVAL, 15));
+        setAppRoot(options.getAppRoot());
+        setSessionMaxInactiveInterval(options.getSessionMaxInactivityInterval());
 
         try {
             initHTTPService();
@@ -285,18 +283,26 @@ public class Console implements ConfigurableComponent {
         Console.instance = instance;
     }
 
+    public static ConsoleOptions getConsoleOptions() {
+        return consoleOptions;
+    }
+
+    private static void setConsoleOptions(final ConsoleOptions options) {
+        Console.consoleOptions = options;
+    }
+
     public BundleContext getBundleContext() {
-        return componentContext.getBundleContext();
+        return this.componentContext.getBundleContext();
     }
 
     public String getApplicationRoot() {
-        return appRoot;
+        return this.appRoot;
     }
 
     public HttpSession createSession(final HttpServletRequest request, final HttpServletResponse response) {
         final HttpSession session = request.getSession();
 
-        session.setMaxInactiveInterval(sessionMaxInactiveInterval * 60);
+        session.setMaxInactiveInterval(this.sessionMaxInactiveInterval * 60);
         session.setAttribute(Attributes.LAST_ACTIVITY.getValue(), System.currentTimeMillis());
 
         return session;
@@ -346,7 +352,7 @@ public class Console implements ConfigurableComponent {
         this.httpService.registerResources(AUTH_PATH, "www/auth.html", sessionContext);
         this.httpService.registerResources(CONSOLE_PATH, "www/denali.html", sessionContext);
 
-        this.httpService.registerServlet("/", new RedirectServlet("/"::equals, appRoot), null, resourceContext);
+        this.httpService.registerServlet("/", new RedirectServlet("/"::equals, this.appRoot), null, resourceContext);
         this.httpService.registerServlet(AUTH_RESOURCE_PATH, new SendStatusServlet(404), null, resourceContext);
         this.httpService.registerServlet(CONSOLE_RESOURCE_PATH, new SendStatusServlet(404), null, resourceContext);
 

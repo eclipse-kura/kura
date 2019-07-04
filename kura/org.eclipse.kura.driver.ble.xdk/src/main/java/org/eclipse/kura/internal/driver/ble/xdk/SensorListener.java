@@ -124,6 +124,8 @@ public class SensorListener {
         Optional<TypedValue<?>> typedValue = Optional.empty();
         switch (listener.getSensorType()) {
         case "ACCELERATION_X":
+        	 typedValue = XdkDriver.getTypedValue(listener.getDataTypes().get(index), Array.get(value, 0));
+        	 break;
         case "ACCELERATION_Y":
         case "ACCELERATION_Z":
         case "GYROSCOPE_X":
@@ -135,7 +137,7 @@ public class SensorListener {
         case "PRESURE":
         case "HUMIDITY":
         case "SD_CARD_DETECT_STATUS":
-        case "BUTTONS": 
+        case "BUTTONS_STATUS": 
         case "MAGNETIC_X":
         case "MAGNETIC_Y":
         case "MAGNETIC_Z":

@@ -232,6 +232,19 @@ public class Xdk {
     /*
      * Enable High Notifications
      */
+    public void enableHighTWONotifications(Consumer<int[]> callback) {
+    	Consumer<byte[]> callbackHigh = new Consumer<byte[]>() {
+			@Override
+			public void accept(byte[] t) {
+				callback.accept(calculateHighTWOData(t));
+			}
+    	};
+    	try {
+        	this.gattResources.get(HIGH_PRIORITY_ARRAY).getGattService().findCharacteristic(XdkGatt.UUID_XDK_HIGH_DATA_RATE_HIGH_PRIORITY_ARREY).enableValueNotifications(callbackHigh);
+    	} catch (KuraException e) {
+            logger.error("Notification enable failed", e);
+        }		
+    }
     public void enableHighNotifications(Consumer<double[]> callback, int index) {
         try {
         	this.gattResources.get(HIGH_PRIORITY_ARRAY).getGattService().findCharacteristic(XdkGatt.UUID_XDK_HIGH_DATA_RATE_HIGH_PRIORITY_ARREY).enableValueNotifications(new Consumer<byte[]>() {
@@ -266,7 +279,6 @@ public class Xdk {
 						break;
 				     default:
 					}
-				
 					//logger.info("received notification: {}", calculateHighData(t));
 				}
 			});
@@ -387,6 +399,10 @@ public class Xdk {
             logger.error("Notification disable failed", e);
         }
     }
+    
+    /*
+     * convert in byte
+     */
 
     /*
      * Set sampling period
@@ -423,6 +439,33 @@ public class Xdk {
 		logger.info("Received High Data value: {}", byteArrayToHexString(valueByte));
 		
 		Object[] highData = new Object[6];
+		
+		int Ax = shortSignedAtOffset(valueByte, 0);
+		int Ay = shortSignedAtOffset(valueByte, 2); 
+		int Az = shortSignedAtOffset(valueByte, 4);
+		
+		int Gx = shortSignedAtOffset(valueByte, 6);
+		int Gy = shortSignedAtOffset(valueByte, 8);
+		int Gz = shortSignedAtOffset(valueByte, 10);
+	    
+		highData[0] = Ax;
+		highData[1] = Ay;
+		highData[2] = Az;
+		highData[3] = Gx;
+		highData[4] = Gy;
+		highData[5] = Gz;
+		
+		return highData;
+	}
+	
+	/*
+     * Calculate High Data
+     */
+	private int[] calculateHighTWOData(byte[] valueByte) {
+		
+		logger.info("Received High Data value: {}", byteArrayToHexString(valueByte));
+		
+		int[] highData = new int[6];
 		
 		int Ax = shortSignedAtOffset(valueByte, 0);
 		int Ay = shortSignedAtOffset(valueByte, 2); 

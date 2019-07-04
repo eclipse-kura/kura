@@ -439,7 +439,7 @@ Sidenav START
 	
 	.logout-ui:not(.header-logout-ui) {
 		display: none;
-	} 
+	}
 }
 
 .not-scrollable {
@@ -504,11 +504,10 @@ Login START
 }
 
 .login-background {
-    background-image: url(eclipse/kura/icons/kura_login_background.png);
-    background-repeat: no-repeat;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
+    background-image: url(eclipse/kura/icons/eclipse_foundation_logo.png), url(eclipse/kura/icons/kura_login_logo.png),url(eclipse/kura/icons/kura_login_background.png);
+    background-repeat: no-repeat, no-repeat, no-repeat;
+    background-position: 5% 5%, 95% 5%, center;
+    background-size: 250px,250px,cover;
     height: auto;
     min-height: 100%;
     position: fixed;
@@ -517,6 +516,16 @@ Login START
 
 .login-form {
     padding-top: 15%;
+}
+
+@media screen and (max-width: 992px) {
+	.login-background {
+    	background-size: 30%,30%,cover;
+	}
+
+	.login-form {
+    	padding-top: 20%;
+	}
 }
 
 /**********************

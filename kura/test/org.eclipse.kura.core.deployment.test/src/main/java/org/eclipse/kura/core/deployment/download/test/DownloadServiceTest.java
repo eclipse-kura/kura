@@ -9,6 +9,7 @@
 package org.eclipse.kura.core.deployment.download.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -25,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
@@ -332,7 +334,6 @@ public class DownloadServiceTest {
         download.future().get(30, TimeUnit.SECONDS);
 
         assertContentEquals(dest, TEST_MESSAGE);
-        assertEquals(3, states.size());
 
         final Iterator<DownloadState> iter = states.iterator();
 
@@ -359,9 +360,11 @@ public class DownloadServiceTest {
         assertEquals(100, third.getDownloadPercent());
         assertEquals(DownloadStatus.COMPLETED, third.getStatus());
         assertEquals(Optional.empty(), third.getException());
+
+        assertEquals(3, states.size());
     }
 
-    @Test(expected = ExecutionException.class)
+    @Test
     public void shouldSuportCancellation()
             throws URISyntaxException, KuraException, InterruptedException, ExecutionException, TimeoutException {
 
@@ -379,7 +382,15 @@ public class DownloadServiceTest {
 
         future.cancel(true);
 
-        download.future().get(30, TimeUnit.SECONDS);
+        try {
+            download.future().get(30, TimeUnit.SECONDS);
+        } catch (final ExecutionException e) {
+            return;
+        } catch (final CancellationException e) {
+            return;
+        }
+
+        fail("expected exception");
     }
 
     private static File createTempFile() {

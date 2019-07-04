@@ -232,15 +232,15 @@ public abstract class GenericDownloadImpl implements Download {
 
     protected void complete(final DownloadStatus status) {
         state.setStatus(status);
-        future.complete(null);
         postStateChange();
+        future.complete(null);
     }
 
     protected void completeExceptionally(final Throwable e, final DownloadStatus status) {
         state.setStatus(status);
         state.setException(Optional.of(e));
-        future.completeExceptionally(e);
         postStateChange();
+        future.completeExceptionally(e);
     }
 
     protected void postStateChange() {

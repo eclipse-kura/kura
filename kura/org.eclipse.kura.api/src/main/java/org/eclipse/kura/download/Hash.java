@@ -18,7 +18,7 @@ import org.osgi.annotation.versioning.ProviderType;
 /**
  * Represents an hash value returned by a specific algorithm, as specified by the {@link MessageDigest} class.
  *
- * @since 2.2.0
+ * @since 2.2
  * @noimplement This interface is not intended to be implemented by clients.
  */
 @ProviderType

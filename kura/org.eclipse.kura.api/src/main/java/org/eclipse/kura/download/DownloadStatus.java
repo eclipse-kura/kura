@@ -18,7 +18,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * completed {@link DownloadStatus.DOWNLOAD_STATUS.FAILED} Download
  * failed
  * 
- * @since 2.2.0
+ * @since 2.2
  * @noimplement This interface is not intended to be implemented by clients.
  */
 @ProviderType

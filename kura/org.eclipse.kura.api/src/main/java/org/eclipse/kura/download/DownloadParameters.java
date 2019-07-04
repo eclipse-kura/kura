@@ -22,7 +22,7 @@ import org.osgi.annotation.versioning.ProviderType;
 /**
  * Represents the parameters describing a download request.
  * 
- * @since 2.2.0
+ * @since 2.2
  * @noimplement This interface is not intended to be implemented by clients.
  */
 @ProviderType

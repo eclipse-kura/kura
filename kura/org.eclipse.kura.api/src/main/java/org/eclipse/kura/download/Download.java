@@ -18,7 +18,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * Represents a download operation.
  * The operation must be explicitly started calling the {@link Download#start()} method.
  * 
- * @since 2.2.0
+ * @since 2.2
  * @noimplement This interface is not intended to be implemented by clients.
  */
 @ProviderType

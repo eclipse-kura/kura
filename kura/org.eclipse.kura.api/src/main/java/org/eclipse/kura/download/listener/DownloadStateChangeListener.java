@@ -16,7 +16,7 @@ import org.osgi.annotation.versioning.ConsumerType;
 /**
  * Listener interface that can be used for receiving download state change events.
  * 
- * @since 2.2.0
+ * @since 2.2
  */
 @ConsumerType
 public interface DownloadStateChangeListener {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -45,7 +45,7 @@ public interface SslManagerService {
      * If not, no Key store will be specified..<br>
      *
      * @return the SSLContext
-     * @since 2.2.0
+     * @since 2.2
      */
     public SSLContext getSSLContext() throws GeneralSecurityException, IOException;
 
@@ -62,7 +62,7 @@ public interface SslManagerService {
      * @param keyAlias
      *            alias of the entry in the KeyStore to be used for the returned SSLSocketFactory
      * @return the SSLContext
-     * @since 2.2.0
+     * @since 2.2
      */
     public SSLContext getSSLContext(String keyAlias) throws GeneralSecurityException, IOException;
 
@@ -85,7 +85,7 @@ public interface SslManagerService {
      * @param keyAlias
      *            alias of the entry in the KeyStore to be used for the returned SSLSocketFactory
      * @return the SSLContext
-     * @since 2.2.0
+     * @since 2.2
      */
     public SSLContext getSSLContext(String protocol, String cipherSuites, String trustStorePath, String keyStorePath,
             char[] keyStorePassword, String keyAlias) throws GeneralSecurityException, IOException;
@@ -111,7 +111,7 @@ public interface SslManagerService {
      * @param hostnameVerification
      *            enable server Hostname Verification
      * @return the SSLContext
-     * @since 2.2.0
+     * @since 2.2
      */
     public SSLContext getSSLContext(String protocol, String cipherSuites, String trustStorePath, String keyStorePath,
             char[] keyStorePassword, String keyAlias, boolean hostnameVerification)

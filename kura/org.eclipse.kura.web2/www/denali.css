@@ -504,7 +504,7 @@ Login START
 }
 
 .login-background {
-    background-image: url(eclipse/kura/icons/yofc_login_background.png), url(eclipse/kura/icons/kura_login_logo.png),url(eclipse/kura/icons/kura_login_background.png);
+    background-image: url(eclipse/kura/icons/yofc_login_background.png), url(eclipse/kura/icons/yofc_login_logo.png),url(eclipse/kura/icons/yofc_login_background.png);
     background-repeat: no-repeat;
     background-position: center;
     background-size: cover;

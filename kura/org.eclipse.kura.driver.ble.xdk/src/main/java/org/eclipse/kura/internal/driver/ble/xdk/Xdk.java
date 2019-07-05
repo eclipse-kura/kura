@@ -156,12 +156,16 @@ public class Xdk {
      */
 	public void startSensor() { 
 		// Write "00" to enable sensor
-        byte[] value = { 0x00 };
+        byte[] value = { 0x01 };
+        byte[] rate = {0x64, 0x00, 0x00, 0x00};
         try {
-            BluetoothLeGattService x = this.gattResources.get(SENSOR).getGattService();
+        	
+        	this.gattResources.get(SENSOR).getGattService().findCharacteristic(XdkGatt.UUID_XDK_CONTROL_SERVICE_CHANGE_SENSOR_SAMPLING_RATA ).writeValue(rate);
+        	
+            this.gattResources.get(SENSOR).getGattService().findCharacteristic(XdkGatt.UUID_XDK_CONTROL_SERVICE_START_SENSOR_SAMPLING_AND_NOTIFICATION).writeValue(value);
                  
-            BluetoothLeGattCharacteristic y = x.findCharacteristic(XdkGatt.UUID_XDK_CONTROL_SERVICE_START_SENSOR_SAMPLING_AND_NOTIFICATION);
-            y.writeValue(value);
+            
+            
         } catch (KuraException e) {
             logger.error("Sensor start failed", e);
         }
@@ -175,10 +179,10 @@ public class Xdk {
 	/*
      * Read High Data sensor
      */
-	public Object[] readHighData() {
-		Object[] hightData = new Object[6];
+	public int[] readHighData() {
+		int[] hightData = new int[6];
 		try {
-            hightData = calculateHighDataObj(
+            hightData = calculateHighData(
                     this.gattResources.get(HIGH_PRIORITY_ARRAY).getGattValueCharacteristic().readValue());
         } catch (KuraException e) {
             logger.error("High Data read failed", e);
@@ -462,13 +466,13 @@ public class Xdk {
 		
 		Object[] highData = new Object[6];
 		
-		int Ax = shortSignedAtOffset(valueByte, 0);
-		int Ay = shortSignedAtOffset(valueByte, 2); 
-		int Az = shortSignedAtOffset(valueByte, 4);
+		Integer Ax = shortSignedAtOffset(valueByte, 0);
+		Integer Ay = shortSignedAtOffset(valueByte, 2); 
+		Integer Az = shortSignedAtOffset(valueByte, 4);
 		
-		int Gx = shortSignedAtOffset(valueByte, 6);
-		int Gy = shortSignedAtOffset(valueByte, 8);
-		int Gz = shortSignedAtOffset(valueByte, 10);
+		Integer Gx = shortSignedAtOffset(valueByte, 6);
+		Integer Gy = shortSignedAtOffset(valueByte, 8);
+		Integer Gz = shortSignedAtOffset(valueByte, 10);
 	    
 		highData[0] = Ax;
 		highData[1] = Ay;
@@ -550,7 +554,7 @@ public class Xdk {
         return new String(hexValue);
     }
 
-	private int shortSignedAtOffset(byte[] c, int offset) {
+	private Integer shortSignedAtOffset(byte[] c, int offset) {
 		Integer lowerByte = c[offset] & 0xFF;
         Integer upperByte = (int) c[offset + 1];
         return (upperByte << 8) + lowerByte;

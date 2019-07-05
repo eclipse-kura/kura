@@ -39,9 +39,10 @@ public class GwtSessionServiceImpl extends OsgiRemoteServiceServlet implements G
         final HttpSession session = request.getSession(false);
 
         if (session != null) {
+            final Object username = session.getAttribute(Attributes.AUTORIZED_USER.getValue());
+            final String id = session.getId();
             session.invalidate();
-            logger.warn("UI Logout - Success - Logout succeeded for user: {}, session {}",
-                    session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
+            logger.warn("UI Logout - Success - Logout succeeded for user: {}, session {}", username, id);
         }
     }
 

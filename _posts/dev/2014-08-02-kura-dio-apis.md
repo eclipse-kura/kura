@@ -131,7 +131,9 @@ button.setInputListener(new PinListener(){
 });
 
 ```
-### Accessing a GPIO Pin with GPIOService for a switch a Led. 
+### Use GPIO Pin with GPIOService for a switch a Led. 
+
+This example was developed for a **Raspberry Pi 3**.
 
 Inside the **jdk.dio.properties** file:
 
@@ -191,23 +193,10 @@ return;
 
 open(); //Open the pin
 
-if (this.options.isEnableLed()) {
-	setValue(true); //Turns the LED on
-} else {
-	setValue(false); //Turns the LED off
-	}
-}
-
-```
-
-to simplify the code:
-
-
-```java
-
 setValue(this.options.isEnableLed()); //Turns the LED on and of
 
 ```
+
 
 The metods for using the Pin:
 
@@ -242,7 +231,7 @@ private void open() {
 ```
 
 
-### Create a Class for accessing on Kura service for switch a Led.
+### Create Options Led Class.
 
 ```java
 
@@ -294,7 +283,7 @@ public class LedOptions {
 
 ```
 
-### Defines the Paramters
+### Metatype Definition
 
 At this point, you have to write the ‘metatype’ file that defines the parameters. 
 

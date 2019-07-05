@@ -758,8 +758,6 @@
                                     tofile="target/source/plugins/org.hamcrest.core_${org.hamcrest.core.version}.jar" />
                                 <move file="target/source/plugins/org.usb4java.jar"
                                     tofile="target/source/plugins/org.usb4java_${org.usb4java.version}.jar" />
-                                <move file="target/source/plugins/h2.jar"
-                                    tofile="target/source/plugins/h2_${com.h2database.h2.version}.jar" />
                                 <move file="target/source/plugins/jdk.dio.jar"
                                     tofile="target/source/plugins/jdk.dio_${jdk.dio.version}.jar" />
                                 <move file="target/source/plugins/jdk.dio.armv6hf.jar"

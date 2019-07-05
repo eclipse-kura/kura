@@ -169,6 +169,12 @@ public class EntryClassUi extends Composite {
     Button logoutButton;
     @UiField
     Button headerLogoutButton;
+    @UiField
+    Modal accessBannerModal;
+    @UiField
+    Button buttonAccessBannerModalOk;
+    @UiField
+    Strong accessBannerModalPannelBody;
 
     private static final Messages MSGS = GWT.create(Messages.class);
     private static final EntryClassUIUiBinder uiBinder = GWT.create(EntryClassUIUiBinder.class);
@@ -242,6 +248,19 @@ public class EntryClassUi extends Composite {
 
         initLogoutButtons();
         initServicesTree();
+    }
+
+    private void initLoginBannerModal() {
+        this.accessBannerModal.setTitle(MSGS.warning());
+        this.buttonAccessBannerModalOk.setText(MSGS.okButton());
+
+        RequestQueue.submit(c -> this.gwtSessionService.getLoginBanner(c.callback(banner -> {
+            if (banner != null) {
+                EntryClassUi.this.accessBannerModalPannelBody.setText(banner);
+                EntryClassUi.this.accessBannerModal.show();
+            }
+        })));
+
     }
 
     private void initExceptionReportModal() {
@@ -547,17 +566,9 @@ public class EntryClassUi extends Composite {
 
     public void fetchAvailableServices(final AsyncCallback<Void> callback) {
         // (Re)Fetch Available Services
-        this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-
-            @Override
-            public void onFailure(Throwable ex) {
-                FailureHandler.handle(ex, EntryClassUi.class.getName());
-            }
-
-            @Override
-            public void onSuccess(GwtXSRFToken token) {
-                EntryClassUi.this.gwtComponentService.findComponentConfigurations(token, SERVICES_FILTER,
-                        new AsyncCallback<List<GwtConfigComponent>>() {
+        RequestQueue.submit(c -> this.gwtXSRFService.generateSecurityToken(
+                c.callback(token -> EntryClassUi.this.gwtComponentService.findComponentConfigurations(token,
+                        SERVICES_FILTER, c.callback(new AsyncCallback<List<GwtConfigComponent>>() {
 
                             @Override
                             public void onFailure(Throwable ex) {
@@ -582,21 +593,28 @@ public class EntryClassUi extends Composite {
                                     callback.onSuccess(null);
                                 }
                             }
-                        });
-            }
-        });
+                        })))));
+
     }
 
     private void initLogoutButtons() {
-        final ClickHandler logoutHandler = e -> gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-
-            @Override
-            public void onSuccess(GwtXSRFToken result) {
-                gwtSessionService.logout(result, new AsyncCallback<Void>() {
+        final ClickHandler logoutHandler = e -> this.gwtXSRFService
+                .generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
                     @Override
-                    public void onSuccess(Void result) {
-                        Window.Location.reload();
+                    public void onSuccess(GwtXSRFToken result) {
+                        EntryClassUi.this.gwtSessionService.logout(result, new AsyncCallback<Void>() {
+
+                            @Override
+                            public void onSuccess(Void result) {
+                                Window.Location.reload();
+                            }
+
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                FailureHandler.handle(caught);
+                            }
+                        });
                     }
 
                     @Override
@@ -604,13 +622,6 @@ public class EntryClassUi extends Composite {
                         FailureHandler.handle(caught);
                     }
                 });
-            }
-
-            @Override
-            public void onFailure(Throwable caught) {
-                FailureHandler.handle(caught);
-            }
-        });
 
         this.logoutButton.addClickHandler(logoutHandler);
         this.headerLogoutButton.addClickHandler(logoutHandler);
@@ -897,6 +908,8 @@ public class EntryClassUi extends Composite {
                 EntryClassUi.this.showStatusPanel();
             }
         });
+
+        initLoginBannerModal();
     }
 
     private void showStatusPanel() {

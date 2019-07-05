@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2019 Eurotech and/or its affiliates and others
  *
  *   All rights reserved. This program and the accompanying materials
  *   are made available under the terms of the Eclipse Public License v1.0
@@ -55,6 +55,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.security.auth.x500.X500Principal;
 
@@ -850,19 +851,19 @@ public class SslManagerServiceImplTest {
 
         SSLSocketFactory factory = svc.getSSLSocketFactory();
 
-        Map<ConnectionSslOptions, SSLSocketFactory> sslSocketFactories = (Map<ConnectionSslOptions, SSLSocketFactory>) TestUtil
-                .getFieldValue(svc, "sslSocketFactories");
+        Map<ConnectionSslOptions, SSLContext> sslContexts = (Map<ConnectionSslOptions, SSLContext>) TestUtil
+                .getFieldValue(svc, "sslContexts");
 
         assertNotNull(factory);
-        assertEquals(1, sslSocketFactories.size());
-        assertEquals(factory, sslSocketFactories.values().iterator().next());
+        assertEquals(1, sslContexts.size());
+        assertEquals(factory, sslContexts.values().iterator().next().getSocketFactory());
 
         svc.updated(properties);
 
-        Map<ConnectionSslOptions, SSLSocketFactory> updatedSslSocketFactories = (Map<ConnectionSslOptions, SSLSocketFactory>) TestUtil
-                .getFieldValue(svc, "sslSocketFactories");
-        assertNotNull(updatedSslSocketFactories);
-        assertEquals(0, updatedSslSocketFactories.size());
+        Map<ConnectionSslOptions, SSLContext> updatedSslContexts = (Map<ConnectionSslOptions, SSLContext>) TestUtil
+                .getFieldValue(svc, "sslContexts");
+        assertNotNull(updatedSslContexts);
+        assertEquals(0, updatedSslContexts.size());
     }
 
     @Test
@@ -897,8 +898,8 @@ public class SslManagerServiceImplTest {
 
         TestUtil.setFieldValue(svc, "sslServiceListeners", listener);
 
-        Map<ConnectionSslOptions, SSLSocketFactory> sslFactories = new ConcurrentHashMap<>();
-        TestUtil.setFieldValue(svc, "sslSocketFactories", sslFactories);
+        Map<ConnectionSslOptions, SSLContext> sslContexts = new ConcurrentHashMap<>();
+        TestUtil.setFieldValue(svc, "sslContexts", sslContexts);
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("ssl.default.protocol", "TLSv1");
@@ -986,8 +987,8 @@ public class SslManagerServiceImplTest {
 
         TestUtil.setFieldValue(svc, "sslServiceListeners", listener);
 
-        Map<ConnectionSslOptions, SSLSocketFactory> sslFactories = new ConcurrentHashMap<>();
-        TestUtil.setFieldValue(svc, "sslSocketFactories", sslFactories);
+        Map<ConnectionSslOptions, SSLContext> sslContexts = new ConcurrentHashMap<>();
+        TestUtil.setFieldValue(svc, "sslContexts", sslContexts);
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("ssl.default.protocol", "TLSv1");

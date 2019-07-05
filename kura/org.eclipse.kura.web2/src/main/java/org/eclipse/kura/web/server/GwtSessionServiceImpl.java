@@ -12,6 +12,8 @@ package org.eclipse.kura.web.server;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.eclipse.kura.web.Console;
+import org.eclipse.kura.web.ConsoleOptions;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtSessionService;
@@ -19,7 +21,7 @@ import org.eclipse.kura.web.shared.service.GwtSessionService;
 public class GwtSessionServiceImpl extends OsgiRemoteServiceServlet implements GwtSessionService {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 1L;
 
@@ -27,12 +29,23 @@ public class GwtSessionServiceImpl extends OsgiRemoteServiceServlet implements G
     public void logout(GwtXSRFToken xsrfToken) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
 
-        final HttpServletRequest request = this.getThreadLocalRequest();
+        final HttpServletRequest request = getThreadLocalRequest();
 
         final HttpSession session = request.getSession(false);
 
         if (session != null) {
             session.invalidate();
+        }
+    }
+
+    @Override
+    public String getLoginBanner() {
+        final ConsoleOptions options = Console.getConsoleOptions();
+
+        if (options.isBannerEnabled()) {
+            return options.getBannerContent();
+        } else {
+            return null;
         }
     }
 

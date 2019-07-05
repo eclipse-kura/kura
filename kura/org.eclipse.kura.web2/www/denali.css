@@ -244,6 +244,19 @@ Upload panel END
 ***********************/
 
 /**********************
+Wait modal START
+***********************/
+
+.gwt-PopupPanelGlass {
+	position: fixed !important;
+	z-index: 50 !important;
+}
+
+/**********************
+Wait modal END
+***********************/
+
+/**********************
 Channel Table Validation START
 ***********************/
 
@@ -426,7 +439,7 @@ Sidenav START
 	
 	.logout-ui:not(.header-logout-ui) {
 		display: none;
-	} 
+	}
 }
 
 .not-scrollable {
@@ -491,10 +504,9 @@ Login START
 }
 
 .login-background {
-    background-image: url(eclipse/kura/icons/yofc_login_background.png);
+    background-image: url(eclipse/kura/icons/yofc_login_background.png), url(eclipse/kura/icons/kura_login_logo.png),url(eclipse/kura/icons/kura_login_background.png);
     background-repeat: no-repeat;
     background-position: center;
-    background-repeat: no-repeat;
     background-size: cover;
     height: auto;
     min-height: 100%;
@@ -504,6 +516,16 @@ Login START
 
 .login-form {
     padding-top: 5%;
+}
+
+@media screen and (max-width: 992px) {
+	.login-background {
+    	background-size: 30%,30%,cover;
+	}
+
+	.login-form {
+    	padding-top: 20%;
+	}
 }
 
 /**********************
@@ -1085,8 +1107,8 @@ div.headerLogo {
 	margin: 			5px 0px 5px 15px;
 	vertical-align: 	baseline;
 	background: 		url(eclipse/kura/icons/yofc_logo_small.png);
-	background-size: 100% 100%;
 	background-repeat: 	no-repeat;
+	background-size: 	100% 100%;
 	background-position: center !important;
 	margin-left: 0 !important;
 	margin-right: 0 !important;

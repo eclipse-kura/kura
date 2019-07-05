@@ -127,25 +127,59 @@ public class SensorListener {
         	 typedValue = XdkDriver.getTypedValue(listener.getDataTypes().get(index), Array.get(value, 0));
         	 break;
         case "ACCELERATION_Y":
+        	typedValue = XdkDriver.getTypedValue(listener.getDataTypes().get(index), Array.get(value, 1));
+       	    break;
         case "ACCELERATION_Z":
+        	typedValue = XdkDriver.getTypedValue(listener.getDataTypes().get(index), Array.get(value, 2));
+       	    break;
         case "GYROSCOPE_X":
+        	typedValue = XdkDriver.getTypedValue(listener.getDataTypes().get(index), Array.get(value, 3));
+       	    break;
         case "GYROSCOPE_Y":
+        	typedValue = XdkDriver.getTypedValue(listener.getDataTypes().get(index), Array.get(value, 4));
+       	    break;
         case "GYROSCOPE_Z":
+        	typedValue = XdkDriver.getTypedValue(listener.getDataTypes().get(index), Array.get(value, 5));
+       	    break;
         case "LIGHT":
+        	typedValue = XdkDriver.getTypedValue(listener.getDataTypes().get(index), Array.get(value, 0));
+       	    break;
         case "NOISE":
+        	typedValue = XdkDriver.getTypedValue(listener.getDataTypes().get(index), Array.get(value, 1));
+       	    break;
         case "TEMPERATURE":
+        	typedValue = XdkDriver.getTypedValue(listener.getDataTypes().get(index), Array.get(value, 2));
+       	    break;
         case "PRESURE":
+        	typedValue = XdkDriver.getTypedValue(listener.getDataTypes().get(index), Array.get(value, 3));
+       	    break;
         case "HUMIDITY":
+        	typedValue = XdkDriver.getTypedValue(listener.getDataTypes().get(index), Array.get(value, 4));
+       	    break;
         case "SD_CARD_DETECT_STATUS":
+        	typedValue = XdkDriver.getTypedValue(listener.getDataTypes().get(index), Array.get(value, 5));
+       	    break;
         case "BUTTONS_STATUS": 
+        	typedValue = XdkDriver.getTypedValue(listener.getDataTypes().get(index), Array.get(value, 6));
+       	   break;
         case "MAGNETIC_X":
+        	typedValue = XdkDriver.getTypedValue(listener.getDataTypes().get(index), Array.get(value, 0));
+       	    break;
         case "MAGNETIC_Y":
+        	typedValue = XdkDriver.getTypedValue(listener.getDataTypes().get(index), Array.get(value, 1));
+       	    break;
         case "MAGNETIC_Z":
-        case "MAGNETOMETER_RESISTANCE":	
+        	typedValue = XdkDriver.getTypedValue(listener.getDataTypes().get(index), Array.get(value, 2));
+       	    break;
+        case "MAGNETOMETER_RESISTANCE":
+        	typedValue = XdkDriver.getTypedValue(listener.getDataTypes().get(index), Array.get(value, 3));
+       	    break;
         case "LED_STATUS":
+        	typedValue = XdkDriver.getTypedValue(listener.getDataTypes().get(index), Array.get(value, 4));
+       	    break;
         case "VOLTAGE_LEM":
-        	typedValue = XdkDriver.getTypedValue(listener.getDataTypes().get(index), value);
-            break;
+        	typedValue = XdkDriver.getTypedValue(listener.getDataTypes().get(index), Array.get(value, 5));
+       	    break;
         default:
         }
         return typedValue;

@@ -437,7 +437,7 @@ public class XdkDriver implements Driver, ConfigurableComponent {
 	        case "ACCELERATION_X":
 	        	sensorListener.getXdk().setSamplingRate((int) (sensorListener.getPeriod() / 100));
 	        	sensorListener.getXdk().disableHighNotifications();
-	        	sensorListener.getXdk().enableHighTWONotifications(SensorListener.getSensorConsumer(sensorListener));
+	        	sensorListener.getXdk().enableHighNotifications(SensorListener.getSensorConsumer(sensorListener));
             
 	            //sensorListener.getXdk()
 	              //      .enableHighNotifications(SensorListener.getSensorConsumer(sensorListener), 0);
@@ -446,109 +446,109 @@ public class XdkDriver implements Driver, ConfigurableComponent {
 	        	sensorListener.getXdk().setSamplingRate((int) (sensorListener.getPeriod() / 100));
 	        	sensorListener.getXdk().disableHighNotifications();
 	            sensorListener.getXdk()
-	                    .enableHighNotifications(SensorListener.getSensorConsumer(sensorListener), 1);
+	                    .enableHighNotifications(SensorListener.getSensorConsumer(sensorListener));
 	            break;
 	        case "ACCELERATION_Z":
 	        	sensorListener.getXdk().setSamplingRate((int) (sensorListener.getPeriod() / 100));
 	        	sensorListener.getXdk().disableHighNotifications();
 	            sensorListener.getXdk()
-	                    .enableHighNotifications(SensorListener.getSensorConsumer(sensorListener), 2);
+	                    .enableHighNotifications(SensorListener.getSensorConsumer(sensorListener));
 	            break;
 	        case "GYROSCOPE_X":
 	        	sensorListener.getXdk().setSamplingRate((int) (sensorListener.getPeriod() / 100));
 	        	sensorListener.getXdk().disableHighNotifications();
 	            sensorListener.getXdk()
-	                    .enableHighNotifications(SensorListener.getSensorConsumer(sensorListener), 3);
+	                    .enableHighNotifications(SensorListener.getSensorConsumer(sensorListener));
 	            break;
 	        case "GYROSCOPE_Y":
 	        	sensorListener.getXdk().setSamplingRate((int) (sensorListener.getPeriod() / 100));
 	        	sensorListener.getXdk().disableHighNotifications();
 	            sensorListener.getXdk()
-	                    .enableHighNotifications(SensorListener.getSensorConsumer(sensorListener), 4);
+	                    .enableHighNotifications(SensorListener.getSensorConsumer(sensorListener));
 	            break;
 	        case "GYROSCOPE_Z":
 	        	sensorListener.getXdk().setSamplingRate((int) (sensorListener.getPeriod() / 100));
 	        	sensorListener.getXdk().disableHighNotifications();
 	            sensorListener.getXdk()
-	                    .enableHighNotifications(SensorListener.getSensorConsumer(sensorListener), 5);
+	                    .enableHighNotifications(SensorListener.getSensorConsumer(sensorListener));
 	            break;
 	        case "LIGHT":
 	        	sensorListener.getXdk().setSamplingRate((int) (sensorListener.getPeriod() / 100));
 	        	sensorListener.getXdk().disableLowNotifications();
 	            sensorListener.getXdk()
-	                    .enableOneLowNotifications(SensorListener.getSensorConsumer(sensorListener), 0);
+	                    .enableLowNotifications(SensorListener.getSensorConsumer(sensorListener), m1);
 	            break;
 	        case "NOISE":
 	        	sensorListener.getXdk().setSamplingRate((int) (sensorListener.getPeriod() / 100));
 	        	sensorListener.getXdk().disableLowNotifications();
 	            sensorListener.getXdk()
-	                    .enableOneLowNotifications(SensorListener.getSensorConsumer(sensorListener), 1);
+	                    .enableLowNotifications(SensorListener.getSensorConsumer(sensorListener), m1);
 	            break;
 	        case "PRESURE":
 	        	sensorListener.getXdk().setSamplingRate((int) (sensorListener.getPeriod() / 100));
 	        	sensorListener.getXdk().disableLowNotifications();
 	            sensorListener.getXdk()
-	                    .enableOneLowNotifications(SensorListener.getSensorConsumer(sensorListener), 2);
+	                    .enableLowNotifications(SensorListener.getSensorConsumer(sensorListener), m1);
 	            break;
 	        case "TEMPERATURE":
 	        	sensorListener.getXdk().setSamplingRate((int) (sensorListener.getPeriod() / 100));
 	        	sensorListener.getXdk().disableLowNotifications();
 	            sensorListener.getXdk()
-	                    .enableOneLowNotifications(SensorListener.getSensorConsumer(sensorListener), 3);
+	                    .enableLowNotifications(SensorListener.getSensorConsumer(sensorListener), m1);
 	            break;
             case "HUMIDITY":
             	sensorListener.getXdk().setSamplingRate((int) (sensorListener.getPeriod() / 100));
             	sensorListener.getXdk().disableLowNotifications();
 	            sensorListener.getXdk()
-	                    .enableOneLowNotifications(SensorListener.getSensorConsumer(sensorListener), 4);
+	                    .enableLowNotifications(SensorListener.getSensorConsumer(sensorListener), m1);
 	            break;
 	        case "SD_CARD_DETECT_STATUS":
 	        	sensorListener.getXdk().setSamplingRate((int) (sensorListener.getPeriod() / 100));
 	        	sensorListener.getXdk().disableLowNotifications();
 	            sensorListener.getXdk()
-	                    .enableOneLowNotifications(SensorListener.getSensorConsumer(sensorListener), 5);
+	                    .enableLowNotifications(SensorListener.getSensorConsumer(sensorListener), m1);
 	            break;
 	        case "BUTTON_STATUS":
 	        	sensorListener.getXdk().setSamplingRate((int) (sensorListener.getPeriod() / 100));
 	        	sensorListener.getXdk().disableLowNotifications();
 	            sensorListener.getXdk()
-	                    .enableOneLowNotifications(SensorListener.getSensorConsumer(sensorListener), 6);
+	                    .enableLowNotifications(SensorListener.getSensorConsumer(sensorListener), m1);
 	            break;
 	        case "MAGNETIC_X":
 	        	sensorListener.getXdk().setSamplingRate((int) (sensorListener.getPeriod() / 100));
 	        	sensorListener.getXdk().disableLowNotifications();
 	            sensorListener.getXdk()
-	                    .enableTwoLowNotifications(SensorListener.getSensorConsumer(sensorListener), 0);
+	                    .enableLowNotifications(SensorListener.getSensorConsumer(sensorListener), m2);
 	            break;
 	        case "MAGNETIC_Y":
 	        	sensorListener.getXdk().setSamplingRate((int) (sensorListener.getPeriod() / 100));
 	        	sensorListener.getXdk().disableLowNotifications();
 	            sensorListener.getXdk()
-	                    .enableTwoLowNotifications(SensorListener.getSensorConsumer(sensorListener), 1);
+	                    .enableLowNotifications(SensorListener.getSensorConsumer(sensorListener), m2);
 	            break;
 	        case "MAGNETIC_Z":
 	        	sensorListener.getXdk().setSamplingRate((int) (sensorListener.getPeriod() / 100));
 	        	sensorListener.getXdk().disableLowNotifications();
 	            sensorListener.getXdk()
-	                    .enableTwoLowNotifications(SensorListener.getSensorConsumer(sensorListener), 2);
+	                    .enableLowNotifications(SensorListener.getSensorConsumer(sensorListener), m2);
 	            break;
 	        case "MAGNETOMETER_RESISTENCE":
 	        	sensorListener.getXdk().setSamplingRate((int) (sensorListener.getPeriod() / 100));
 	        	sensorListener.getXdk().disableLowNotifications();
 	            sensorListener.getXdk()
-	                    .enableTwoLowNotifications(SensorListener.getSensorConsumer(sensorListener), 3);
+	                    .enableLowNotifications(SensorListener.getSensorConsumer(sensorListener), m2);
 	            break;
 	        case "LED_STATUS":
 	        	sensorListener.getXdk().setSamplingRate((int) (sensorListener.getPeriod() / 100));
 	        	sensorListener.getXdk().disableLowNotifications();
 	            sensorListener.getXdk()
-	                    .enableTwoLowNotifications(SensorListener.getSensorConsumer(sensorListener), 4);
+	                    .enableLowNotifications(SensorListener.getSensorConsumer(sensorListener), m2);
 	            break;
 	        case "VOLTAGE_LEM":
 	        	sensorListener.getXdk().setSamplingRate((int) (sensorListener.getPeriod() / 100));
 	        	sensorListener.getXdk().disableLowNotifications();
 	            sensorListener.getXdk()
-	                    .enableTwoLowNotifications(SensorListener.getSensorConsumer(sensorListener), 5);
+	                    .enableLowNotifications(SensorListener.getSensorConsumer(sensorListener), m2);
 	            break;
 	        default:
 

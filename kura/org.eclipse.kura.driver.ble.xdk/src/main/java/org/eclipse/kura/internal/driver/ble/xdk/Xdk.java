@@ -21,7 +21,6 @@ import java.util.Map.Entry;
 import java.util.function.Consumer;
 
 import org.eclipse.kura.KuraBluetoothConnectionException;
-import org.eclipse.kura.KuraBluetoothIOException;
 import org.eclipse.kura.KuraBluetoothResourceNotFoundException;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.bluetooth.le.BluetoothLeDevice;
@@ -41,28 +40,6 @@ public class Xdk {
 	private static final String LOW_PRIORITY_ARRAY = "low priority array";
 	
 	
-	private static final String ACCELERATION_X = "acceletetion x";
-	private static final String ACCELERATION_Y = "acceletetion y";
-	private static final String ACCELERATION_Z = "acceletetion z";
-	private static final String GYROSCOPE_X = "gyroscope x";
-	private static final String GYROSCOPE_Y = "gyroscope y";
-	private static final String GYROSCOPE_Z = "gyroscope z";
-	private static final String LIGHT = "light";
-	private static final String NOISE = "noise";
-	private static final String PRESSURE = "pressure";
-	private static final String TEMPERATURE = "temperature";
-    private static final String HUMIDITY = "humidity";
-    private static final String SD_CARD_DETECT_STATUS= "sd card detect status";
-    private static final String BUTTON_STATUS = "button statud";
-    private static final String MAGNETIC_X = "magnetic x";
-    private static final String MAGNETIC_Y = "magnetic x";
-    private static final String MAGNETIC_Z = "magnetic x";
-    private static final String MAGNETOMETER_RESISTANCE = "magnetometer resistence";
-    private static final String LED_STATUS = "led statud";
-    private static final String VOLTAGE_LEM = "voltage lem";
-    private static final String OPTO = "opto";
-    private static final String KEYS = "keys";
-    private static final String IO = "io";
 	
 	private static final int SERVICE_TIMEOUT = 1000000;
 	private static final byte m1 = 0x01;
@@ -201,7 +178,7 @@ public class Xdk {
 	public Object[] readHighData() {
 		Object[] hightData = new Object[6];
 		try {
-            hightData = calculateHighData(
+            hightData = calculateHighDataObj(
                     this.gattResources.get(HIGH_PRIORITY_ARRAY).getGattValueCharacteristic().readValue());
         } catch (KuraException e) {
             logger.error("High Data read failed", e);
@@ -211,9 +188,9 @@ public class Xdk {
 	/*
      * Read Low Data sensor
      */
-    public Object[] readLowData(byte ID) {
+    public Integer[] readLowData(byte ID) {
 		
-		Object[] lowData = new Object[7];
+		Integer[] lowData = new Integer[7];
 		byte[] data;
 		
 		try {
@@ -232,11 +209,11 @@ public class Xdk {
     /*
      * Enable High Notifications
      */
-    public void enableHighTWONotifications(Consumer<int[]> callback) {
+    public void enableHighNotifications(Consumer<int[]> callback) {
     	Consumer<byte[]> callbackHigh = new Consumer<byte[]>() {
 			@Override
 			public void accept(byte[] t) {
-				callback.accept(calculateHighTWOData(t));
+				callback.accept(calculateHighData(t));
 			}
     	};
     	try {
@@ -245,7 +222,28 @@ public class Xdk {
             logger.error("Notification enable failed", e);
         }		
     }
-    public void enableHighNotifications(Consumer<double[]> callback, int index) {
+    
+    /*
+     * Enable Low Notifications
+     */
+    
+     public void enableLowNotifications(Consumer<Integer[]> callback, byte ID) {
+    	Consumer<byte[]> callbackHigh = valueBytes -> callback.accept(calculateLowData(valueBytes, ID));
+    			
+    			/*new Consumer<byte[]>() {
+			@Override
+			public void accept(byte[] t) {
+				callback.accept(calculateLowData(t, ID));
+			}
+    	};*/
+    	try {
+        	this.gattResources.get(LOW_PRIORITY_ARRAY).getGattService().findCharacteristic(XdkGatt.UUID_XDK_HIGH_DATA_RATE_LOW_PRIORITY_ARREY).enableValueNotifications(callbackHigh);
+    	} catch (KuraException e) {
+            logger.error("Notification enable failed", e);
+        }		
+    }
+    
+    public void enableHighNotificationsLogger(Consumer<double[]> callback, int index) {
         try {
         	this.gattResources.get(HIGH_PRIORITY_ARRAY).getGattService().findCharacteristic(XdkGatt.UUID_XDK_HIGH_DATA_RATE_HIGH_PRIORITY_ARREY).enableValueNotifications(new Consumer<byte[]>() {
         		
@@ -287,7 +285,7 @@ public class Xdk {
         }
     }
     
-    public void enableOneLowNotifications(Consumer<double[]> callback, int index) {
+    public void enableOneLowNotificationsLogger(Consumer<double[]> callback, int index) {
         try {
         	this.gattResources.get(LOW_PRIORITY_ARRAY).getGattService().findCharacteristic(XdkGatt.UUID_XDK_HIGH_DATA_RATE_LOW_PRIORITY_ARREY).enableValueNotifications(new Consumer<byte[]>() {
 				
@@ -309,19 +307,19 @@ public class Xdk {
 							logger.info("Pressure received notification: {}", pres);
 							break;
 						case 3:
-							double temp = (double) calculateLowData(t, m1)[index]; 
+							double temp = (Integer) calculateLowData(t, m1)[index]; 
 							logger.info("Temperature received notification: {}", temp);
 							break;
 						case 4:
-							Integer hum = (Integer) calculateLowData(t, m1)[index]; 
+							Integer hum =  calculateLowData(t, m1)[index]; 
 							logger.info("Humidity received notification: {}", hum);
 							break;
 						case 5:
-							byte sd = (byte) calculateLowData(t, m1)[index]; 
+							Integer sd = (Integer) calculateLowData(t, m1)[index]; 
 							logger.info("SD-Card Detection Status received notification: {}", sd);
 							break;
 						case 6:	
-							byte button = (byte) calculateLowData(t, m1)[index]; 
+							Integer button = (Integer) calculateLowData(t, m1)[index]; 
 							logger.info("Button Status received notification: {}", button);
 							break;
 							default:
@@ -334,7 +332,7 @@ public class Xdk {
         }
     }
     
-    public void enableTwoLowNotifications(Consumer<double[]> callback, int index) {
+    public void enableTwoLowNotificationsLogger(Consumer<double[]> callback, int index) {
         try {
         	this.gattResources.get(LOW_PRIORITY_ARRAY).getGattService().findCharacteristic(XdkGatt.UUID_XDK_HIGH_DATA_RATE_LOW_PRIORITY_ARREY).enableValueNotifications(new Consumer<byte[]>() {
 				
@@ -344,27 +342,27 @@ public class Xdk {
 					if(t[0] == m2) {
 							switch(index) {
 							case 0: 
-								int mx = (int) calculateLowData(t, m2)[index]; 
+								Integer mx = (Integer) calculateLowData(t, m2)[index]; 
 								logger.info("Maghetometer X-Axis received notification: {}", mx);
 								break;
 							case 1:
-								int my = (int) calculateLowData(t, m2)[index]; 
+								Integer my = (Integer) calculateLowData(t, m2)[index]; 
 								logger.info("Maghetometer Y-Axis received notification: {}", my);
 								break;
 							case 2:
-								int mz = (int) calculateLowData(t, m2)[index]; 
+								Integer mz = (Integer) calculateLowData(t, m2)[index]; 
 								logger.info("Maghetometer Z-Axis received notification: {}", mz);
 								break;
 							case 3:
-								int mr = (int) calculateLowData(t, m2)[index]; 
+								Integer mr = (Integer) calculateLowData(t, m2)[index]; 
 								logger.info("Maghetometer Resistence received notification: {}", mr);
 								break;
 							case 4:
-								byte led = (byte) calculateLowData(t, m2)[index]; 
+								Integer led = (Integer) calculateLowData(t, m2)[index]; 
 								logger.info("Led Status received notification: {}", led);
 								break;
 							case 5:
-								double volt = (double) calculateLowData(t, m2)[index]; 
+								Integer volt = (Integer) calculateLowData(t, m2)[index]; 
 								logger.info("RMS voltage of LEM sensor received notification: {}", volt);
 								break;
 							case 6:	
@@ -430,11 +428,35 @@ public class Xdk {
     public boolean isLowNotifying() {
         return isNotifying(LOW_PRIORITY_ARRAY); 
     }
-    
-    /*
+	
+	/*
      * Calculate High Data
      */
-	private Object[] calculateHighData(byte[] valueByte) {
+	private int[] calculateHighData(byte[] valueByte) {
+		
+		logger.info("Received High Data value: {}", byteArrayToHexString(valueByte));
+		
+		int[] highData = new int[6];
+		
+		int Ax = shortSignedAtOffset(valueByte, 0);
+		int Ay = shortSignedAtOffset(valueByte, 2); 
+		int Az = shortSignedAtOffset(valueByte, 4);
+		
+		int Gx = shortSignedAtOffset(valueByte, 6);
+		int Gy = shortSignedAtOffset(valueByte, 8);
+		int Gz = shortSignedAtOffset(valueByte, 10);
+	    
+		highData[0] = Ax;
+		highData[1] = Ay;
+		highData[2] = Az;
+		highData[3] = Gx;
+		highData[4] = Gy;
+		highData[5] = Gz;
+		
+		return highData;
+	}
+	
+	private Object[] calculateHighDataObj(byte[] valueByte) {
 		
 		logger.info("Received High Data value: {}", byteArrayToHexString(valueByte));
 		
@@ -459,51 +481,24 @@ public class Xdk {
 	}
 	
 	/*
-     * Calculate High Data
-     */
-	private int[] calculateHighTWOData(byte[] valueByte) {
-		
-		logger.info("Received High Data value: {}", byteArrayToHexString(valueByte));
-		
-		int[] highData = new int[6];
-		
-		int Ax = shortSignedAtOffset(valueByte, 0);
-		int Ay = shortSignedAtOffset(valueByte, 2); 
-		int Az = shortSignedAtOffset(valueByte, 4);
-		
-		int Gx = shortSignedAtOffset(valueByte, 6);
-		int Gy = shortSignedAtOffset(valueByte, 8);
-		int Gz = shortSignedAtOffset(valueByte, 10);
-	    
-		highData[0] = Ax;
-		highData[1] = Ay;
-		highData[2] = Az;
-		highData[3] = Gx;
-		highData[4] = Gy;
-		highData[5] = Gz;
-		
-		return highData;
-	}
-	
-	/*
      * Calculate Low Data
      */
 	
-	 private Object[] calculateLowData(byte[] valueByte, byte ID) {
+	 private Integer[] calculateLowData(byte[] valueByte, byte ID) {
 		
 		 logger.info("Received Low Data value: {}", byteArrayToHexString(valueByte));
 			
-		 Object[] LowData = new Object[7];
+		 Integer[] LowData = new Integer[7];
 		 
 		 if(ID == 0x01) {
 			 
 			 Integer lux = thirtyTwoBitUnsignedAtOffset(valueByte, 1)/1000;
 			 Integer noise = eightBitUnsignedAtOffset(valueByte, 5);
 			 Integer pressure = thirtyTwoBitUnsignedAtOffset(valueByte, 6);
-			 double temperature = thirtyTwoBitShortSignedAtOffset(valueByte, 10)/1000;
+			 Integer temperature = (Integer)(thirtyTwoBitShortSignedAtOffset(valueByte, 10)/1000);
 			 Integer humidity = thirtyTwoBitUnsignedAtOffset(valueByte, 14);
-			 byte sd_card = valueByte[18];
-			 byte button = valueByte[19];
+			 Integer sd_card = valueByte[18] & 0xFF;
+			 Integer button = valueByte[19] & 0xFF;
 			 
 			 LowData[0] = lux;
 			 LowData[1] = noise;
@@ -516,13 +511,13 @@ public class Xdk {
 			 
 		 } else {
 			 
-			 int Mx = shortSignedAtOffset(valueByte, 1);
-			 int My = shortSignedAtOffset(valueByte, 3);
-			 int Mz = shortSignedAtOffset(valueByte, 5);
-			 int M_res = shortSignedAtOffset(valueByte, 7);
-			 byte led = valueByte[9];
-			 double voltage = shortSignedAtOffset(valueByte, 10)/1000;
-			 byte none = 0x00;
+			 Integer Mx = shortSignedAtOffset(valueByte, 1);
+			 Integer My = shortSignedAtOffset(valueByte, 3);
+			 Integer Mz = shortSignedAtOffset(valueByte, 5);
+			 Integer M_res = shortSignedAtOffset(valueByte, 7);
+			 Integer led =  valueByte[9] & 0xFF;
+			 Integer voltage = (Integer)shortSignedAtOffset(valueByte, 10)/1000;
+			 Integer none = 0x00;
 			 
 			 LowData[0] = Mx;
 			 LowData[1] = My;

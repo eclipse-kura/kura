@@ -147,10 +147,10 @@ public class SensorListener {
         case "NOISE":
         	typedValue = XdkDriver.getTypedValue(listener.getDataTypes().get(index), Array.get(value, 1));
        	    break;
-        case "TEMPERATURE":
+        case "PRESURE":
         	typedValue = XdkDriver.getTypedValue(listener.getDataTypes().get(index), Array.get(value, 2));
        	    break;
-        case "PRESURE":
+        case "TEMPERATURE":
         	typedValue = XdkDriver.getTypedValue(listener.getDataTypes().get(index), Array.get(value, 3));
        	    break;
         case "HUMIDITY":

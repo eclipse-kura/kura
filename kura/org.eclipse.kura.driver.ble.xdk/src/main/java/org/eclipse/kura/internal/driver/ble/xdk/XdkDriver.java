@@ -495,6 +495,7 @@ public class XdkDriver implements Driver, ConfigurableComponent {
 	        	sensorListener.getXdk().disableLowNotifications();
 	            sensorListener.getXdk()
 	                    .enableLowNotifications(SensorListener.getSensorConsumer(sensorListener), m1);
+	        	//sensorListener.getXdk().enableOneLowNotificationsLogger(SensorListener.getSensorConsumer(sensorListener), 3);
 	            break;
             case "HUMIDITY":
             	sensorListener.getXdk().setSamplingRate((int) (sensorListener.getPeriod() / 100));

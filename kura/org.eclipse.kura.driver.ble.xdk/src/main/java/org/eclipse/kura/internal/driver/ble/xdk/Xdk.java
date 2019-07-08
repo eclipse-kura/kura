@@ -232,7 +232,11 @@ public class Xdk {
      */
     
      public void enableLowNotifications(Consumer<Integer[]> callback, byte ID) {
-    	Consumer<byte[]> callbackHigh = valueBytes -> callback.accept(calculateLowData(valueBytes, ID));
+    	Consumer<byte[]> callbackHigh = valueBytes -> {
+    		if(valueBytes[0] == ID) {
+    		callback.accept(calculateLowData(valueBytes, ID));
+    		} 
+    	};
     			
     			/*new Consumer<byte[]>() {
 			@Override

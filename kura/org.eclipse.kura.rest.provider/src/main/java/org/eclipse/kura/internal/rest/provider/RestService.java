@@ -16,17 +16,14 @@ import java.security.Principal;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Base64.Decoder;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.StringTokenizer;
 
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
-import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.PathSegment;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
@@ -111,22 +108,10 @@ public class RestService
 
         final User user = this.users.get(userName);
 
-        MultivaluedMap<String, String> headers = request.getHeaders();
-        for (Entry<String, List<String>> header : headers.entrySet()) {
-            logger.info("Header key: {}, value: {}", header.getKey(), header.getValue());
-        }
-
-        Collection<String> propNames = request.getPropertyNames();
-        for (String propName : propNames) {
-            logger.info("Property key: {}, value: {}", propName, request.getProperty(propName));
-        }
-
         try {
             final char[] userPassword = user.getPassword().getPassword();
             if (userPassword.length == 0 && requestPassword.isEmpty()
                     || Arrays.equals(userPassword, this.cryptoService.encryptAes(requestPassword.toCharArray()))) {
-                auditLogger.info("UI Rest - Success - Received REST request for user: {}, method: {}, path: {}",
-                        userName, request.getMethod(), path);
                 return user;
             }
         } catch (Exception e) {
@@ -158,15 +143,16 @@ public class RestService
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext)
             throws IOException {
         String path = getRequestPath(requestContext);
+        String user = requestContext.getSecurityContext().getUserPrincipal().getName();
 
         int responseStatus = responseContext.getStatus();
         if (responseStatus == Response.Status.OK.getStatusCode()) {
-            auditLogger.info("UI Rest - Success - Request succeeded for method: {}, path: {}",
+            auditLogger.info("UI Rest - Success - Request succeeded for user: {}, method: {}, path: {}", user,
                     requestContext.getMethod(), path);
         } else {
             auditLogger.warn(
-                    "UI Rest - Failure - Request failed for method: {}, path: {}, response code: {}, message: {}",
-                    requestContext.getMethod(), path, responseStatus, responseContext.getEntity());
+                    "UI Rest - Failure - Request failed for user: {}, method: {}, path: {}, response code: {}, message: {}",
+                    user, requestContext.getMethod(), path, responseStatus, responseContext.getEntity());
         }
 
     }

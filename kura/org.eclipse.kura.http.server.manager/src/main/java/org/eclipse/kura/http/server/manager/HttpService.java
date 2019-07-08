@@ -180,6 +180,7 @@ public class HttpService implements ConfigurableComponent {
         config.put(JettyConstants.SSL_PASSWORD, new String(decryptedPassword));
         config.put(JettyConstants.HTTP_PORT, this.options.getHttpPort());
         config.put(JettyConstants.HTTP_ENABLED, this.options.isHttpEnabled());
+        config.put(JettyConstants.HTTP_HOST, "0.0.0.0");
 
         final String customizerClass = System
                 .getProperty(JettyConstants.PROPERTY_PREFIX + JettyConstants.CUSTOMIZER_CLASS);

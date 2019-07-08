@@ -840,7 +840,7 @@ fi]]>
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/minimal-json_${com.eclipsesource.minimal-json.version}.jar" />
 			<entry key="osgi.bundles" operation="+"
-				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.h2_${com.h2database.h2.version}.jar@3:start" />
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/com.h2database_${com.h2database.h2.version}.jar@3:start" />
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/com.codeminders.hidapi.${native.tag}_${com.codeminders.hidapi.version}.jar@3" />
 			<entry key="osgi.bundles" operation="+"

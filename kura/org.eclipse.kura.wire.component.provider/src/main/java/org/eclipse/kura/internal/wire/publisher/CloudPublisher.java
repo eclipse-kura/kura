@@ -18,6 +18,7 @@ import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -295,8 +296,10 @@ public final class CloudPublisher implements WireReceiver, ConfigurableComponent
         Map<String, TypedValue<?>> wireRecordProps = wireRecord.getProperties();
 
         final Map<String, Object> properties = new HashMap<>();
-        if (wireRecordProps.containsKey(ASSET_NAME_PROPERTY_KEY)) {
-            properties.put(ASSET_NAME_PROPERTY_KEY, wireRecordProps.get(ASSET_NAME_PROPERTY_KEY).getValue());
+        List<String> l = new ArrayList<>(wireRecordProps.keySet());
+        for(String s:l) {
+            logger.info("IN buildKuraMessageProperties avec props = {}", s);
+            properties.put(s, wireRecordProps.get(s).getValue());
         }
         return properties;
     }

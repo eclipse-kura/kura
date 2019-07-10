@@ -138,7 +138,7 @@ public class XdkDriver implements Driver, ConfigurableComponent {
     
     @Override
 	public void connect() throws ConnectionException {
-		// connect to all TiSensorTags in the map
+		// connect to all Xdk in the map
         for (Entry<String, Xdk> entry : this.xdkMap.entrySet()) {
             if (!entry.getValue().isConnected()) {
                 connect(entry.getValue());
@@ -209,8 +209,8 @@ public class XdkDriver implements Driver, ConfigurableComponent {
         ChannelRecord record = requestInfo.channelRecord;
         try {
             Xdk xdk = getXdk(requestInfo.xdkAddress);
-            if (xdk.isConnected()) {//QUI STO LEGGENDO
-                Object readResult = getReadResult(requestInfo.sensorName, xdk); //ottengo la temp
+            if (xdk.isConnected()) {    /*Read the data*/
+                Object readResult = getReadResult(requestInfo.sensorName, xdk); 
                 final Optional<TypedValue<?>> typedValue = getTypedValue(requestInfo.dataType, readResult);
                 if (!typedValue.isPresent()) {
                     record.setChannelStatus(new ChannelStatus(FAILURE,
@@ -218,7 +218,7 @@ public class XdkDriver implements Driver, ConfigurableComponent {
                     record.setTimestamp(System.currentTimeMillis());
                     return;
                 }
-                record.setValue(typedValue.get()); // convertito e voglio qualcosa che vada bene a valle
+                record.setValue(typedValue.get()); 
                 record.setChannelStatus(new ChannelStatus(SUCCESS));
                 record.setTimestamp(System.currentTimeMillis());
             } else {
@@ -361,8 +361,7 @@ public class XdkDriver implements Driver, ConfigurableComponent {
 
 	@Override
 	public void write(List<ChannelRecord> records) throws ConnectionException {
-		// 
-		
+		// Method not supported
 	}
 	
 
@@ -438,9 +437,7 @@ public class XdkDriver implements Driver, ConfigurableComponent {
 	        	sensorListener.getXdk().setSamplingRate((int) (sensorListener.getPeriod() / 100));
 	        	sensorListener.getXdk().disableHighNotifications();
 	        	sensorListener.getXdk().enableHighNotifications(SensorListener.getSensorConsumer(sensorListener));
-            
-	            //sensorListener.getXdk()
-	              //      .enableHighNotifications(SensorListener.getSensorConsumer(sensorListener), 0);
+
 	            break;
 	        case "ACCELERATION_Y":
 	        	sensorListener.getXdk().setSamplingRate((int) (sensorListener.getPeriod() / 100));
@@ -495,7 +492,6 @@ public class XdkDriver implements Driver, ConfigurableComponent {
 	        	sensorListener.getXdk().disableLowNotifications();
 	            sensorListener.getXdk()
 	                    .enableLowNotifications(SensorListener.getSensorConsumer(sensorListener), m1);
-	        	//sensorListener.getXdk().enableOneLowNotificationsLogger(SensorListener.getSensorConsumer(sensorListener), 3);
 	            break;
             case "HUMIDITY":
             	sensorListener.getXdk().setSamplingRate((int) (sensorListener.getPeriod() / 100));
@@ -632,85 +628,9 @@ public class XdkDriver implements Driver, ConfigurableComponent {
 	        }
 	    }
 	 
+	
 	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 /*private void unregisterSensorNotification(SensorListener sensorListener) {
-	        if (sensorListener.getXdk().isSensorNotifying()) {
-	            sensorListener.getXdk().disableSensorNotifications();
-	        }
-	    }*/
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	    private class XdkPreparedRead implements PreparedRead {
+	     private class XdkPreparedRead implements PreparedRead {
 
 	        private final List<XdkRequestInfo> requestInfos = new ArrayList<>();
 	        private volatile List<ChannelRecord> channelRecords;

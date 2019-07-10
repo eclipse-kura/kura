@@ -64,7 +64,7 @@ public final class XdkChannelDescriptor implements ChannelDescriptor {
         notificationPeriod.setDescription(NOTIFICATION_PERIOD);
         notificationPeriod.setType(Tscalar.INTEGER);
         notificationPeriod.setRequired(true);
-        notificationPeriod.setDefault("100");
+        notificationPeriod.setDefault("1000");
 
         elements.add(XdkAddress);
         elements.add(sensorName);

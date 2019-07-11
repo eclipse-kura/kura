@@ -22,7 +22,7 @@ public class XdkOptions {
     private final Map<String, Object> properties;
     
     /**
-     * Instantiates a new BLE SensorTag options.
+     * Instantiates a new BLE Xdk options.
      *
      * @param properties
      *            the properties

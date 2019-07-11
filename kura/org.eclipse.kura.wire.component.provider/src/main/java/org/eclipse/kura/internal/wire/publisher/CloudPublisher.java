@@ -298,7 +298,6 @@ public final class CloudPublisher implements WireReceiver, ConfigurableComponent
         final Map<String, Object> properties = new HashMap<>();
         List<String> l = new ArrayList<>(wireRecordProps.keySet());
         for (String s : l) {
-            logger.info("IN buildKuraMessageProperties avec props = {}", s);
             properties.put(s, wireRecordProps.get(s).getValue());
         }
         return properties;

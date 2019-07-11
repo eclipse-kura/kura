@@ -25,7 +25,6 @@ public final class XdkChannelDescriptor implements ChannelDescriptor {
 	
 	private static final String SENSOR_NAME = "sensor.name";
     private static final String XDK_ADDRESS = "xdk.address";
-    private static final String NOTIFICATION_PERIOD = "notification.period";
     
     private static void addOptions(Tad target, Enum<?>[] values) {
         final List<Option> options = target.getOption();
@@ -58,17 +57,9 @@ public final class XdkChannelDescriptor implements ChannelDescriptor {
         XdkAddress.setRequired(true);
         XdkAddress.setDefault("AA:BB:CC:DD:EE:FF");
 
-        final Tad notificationPeriod = new Tad();
-        notificationPeriod.setName(NOTIFICATION_PERIOD);
-        notificationPeriod.setId(NOTIFICATION_PERIOD);
-        notificationPeriod.setDescription(NOTIFICATION_PERIOD);
-        notificationPeriod.setType(Tscalar.INTEGER);
-        notificationPeriod.setRequired(true);
-        notificationPeriod.setDefault("1000");
 
         elements.add(XdkAddress);
         elements.add(sensorName);
-        elements.add(notificationPeriod);
         return elements;
     }
 
@@ -80,9 +71,6 @@ public final class XdkChannelDescriptor implements ChannelDescriptor {
         return SensorName.valueOf((String) properties.get(SENSOR_NAME));
     }
 
-    static int getNotificationPeriod(Map<String, Object> properties) {
-        return Integer.parseInt((String) properties.get(NOTIFICATION_PERIOD));
-    }
 
 
 }

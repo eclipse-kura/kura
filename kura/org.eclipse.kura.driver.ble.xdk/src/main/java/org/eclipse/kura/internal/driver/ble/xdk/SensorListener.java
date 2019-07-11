@@ -31,16 +31,14 @@ public class SensorListener {
 
     private final Xdk xdk;
     private final String sensorType;
-    private final int period;
     private final List<ChannelListener> listeners;
     private final List<String> channelNames;
     private final List<SensorName> sensorNames;
     private final List<DataType> dataTypes;
 
-    public SensorListener(Xdk xdk, String sensorType, int period) {
+    public SensorListener(Xdk xdk, String sensorType) {
         this.xdk = xdk;
         this.sensorType = sensorType;
-        this.period = period;
         this.channelNames = new ArrayList<>();
         this.sensorNames = new ArrayList<>();
         this.dataTypes = new ArrayList<>();
@@ -87,9 +85,6 @@ public class SensorListener {
         return this.sensorType;
     }
 
-    public int getPeriod() {
-        return period;
-    }
 
     public void removeAll(int index) {
         this.channelNames.remove(index);
@@ -180,6 +175,18 @@ public class SensorListener {
         case "VOLTAGE_LEM":
         	typedValue = XdkDriver.getTypedValue(listener.getDataTypes().get(index), Array.get(value, 5));
        	    break;
+        case "QUATERNION_M":
+       	 typedValue = XdkDriver.getTypedValue(listener.getDataTypes().get(index), Array.get(value, 6));
+       	 break;
+       case "QUATERNION_X":
+       	typedValue = XdkDriver.getTypedValue(listener.getDataTypes().get(index), Array.get(value, 7));
+      	    break;
+       case "QUATERNION_Y":
+       	typedValue = XdkDriver.getTypedValue(listener.getDataTypes().get(index), Array.get(value, 8));
+      	    break;
+       case "QUATERNION_Z":
+       	typedValue = XdkDriver.getTypedValue(listener.getDataTypes().get(index), Array.get(value, 9));
+      	    break;
         default:
         }
         return typedValue;

@@ -22,6 +22,24 @@
             required="true"
             default="hci0"
             description="Name of bluetooth adapter."/>
+            
+        <AD id="enableRotationQuaternion"
+            name="enableRotationQuaternion"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="flase"
+            description="Enable Rotation-Quaternion, this chosen disability the Accelerometer and Gyroscope"/>
+        
+        <AD id="configureSampleRateHz"
+            name="configureSampleRateHz"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="10"
+            min = "1"
+            max = "50"
+            description="Configure Sample Rate."/>     
         
     </OCD>
     

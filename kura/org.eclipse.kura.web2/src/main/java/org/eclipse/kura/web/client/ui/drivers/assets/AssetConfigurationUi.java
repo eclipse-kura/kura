@@ -41,6 +41,7 @@ import org.eclipse.kura.web.client.ui.wires.ValidationData;
 import org.eclipse.kura.web.client.ui.wires.ValidationInputCell;
 import org.eclipse.kura.web.client.util.DownloadHelper;
 import org.eclipse.kura.web.client.util.FailureHandler;
+import org.eclipse.kura.web.client.util.ResizableTableHeader;
 import org.eclipse.kura.web.client.util.request.RequestContext;
 import org.eclipse.kura.web.client.util.request.RequestQueue;
 import org.eclipse.kura.web.shared.AssetConstants;
@@ -71,7 +72,6 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.SimplePager;
-import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.HasAlignment;
@@ -291,7 +291,7 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
         for (final GwtConfigParameter param : this.model.getChannelDescriptor().getParameters()) {
             AssetConfigurationUi.this.channelTable.addColumn(
                     getColumnFromParam(param, param.getId().equals(AssetConstants.NAME.value())),
-                    new TextHeader(param.getName()));
+                    new ResizableTableHeader(param.getName()));
         }
 
         this.channelsDataProvider.setList(this.model.getChannels());

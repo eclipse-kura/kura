@@ -15,7 +15,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class SessionExpirationSecurityHandler implements SecurityHandler {
+
+    private static final Logger logger = LoggerFactory.getLogger(SessionExpirationSecurityHandler.class);
 
     @Override
     public boolean handleSecurity(final HttpServletRequest request, final HttpServletResponse response)
@@ -34,7 +39,10 @@ public class SessionExpirationSecurityHandler implements SecurityHandler {
 
             final int maxInactiveInterval = session.getMaxInactiveInterval();
 
-            if (maxInactiveInterval > 0 && now - lastActivity > maxInactiveInterval * 1000) {
+            final long delta = now - lastActivity;
+            if (maxInactiveInterval > 0 && delta > maxInactiveInterval * 1000) {
+                logger.warn("UI Session Expired - user: {}, session {}, last activity: {} ms ago",
+                        session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId(), delta);
                 session.invalidate();
                 return false;
             }

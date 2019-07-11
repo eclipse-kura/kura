@@ -14,11 +14,16 @@ import javax.servlet.http.HttpSession;
 
 import org.eclipse.kura.web.Console;
 import org.eclipse.kura.web.ConsoleOptions;
+import org.eclipse.kura.web.session.Attributes;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtSessionService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GwtSessionServiceImpl extends OsgiRemoteServiceServlet implements GwtSessionService {
+
+    private static final Logger logger = LoggerFactory.getLogger(GwtSessionServiceImpl.class);
 
     /**
      *
@@ -34,7 +39,10 @@ public class GwtSessionServiceImpl extends OsgiRemoteServiceServlet implements G
         final HttpSession session = request.getSession(false);
 
         if (session != null) {
+            final Object username = session.getAttribute(Attributes.AUTORIZED_USER.getValue());
+            final String id = session.getId();
             session.invalidate();
+            logger.warn("UI Logout - Success - Logout succeeded for user: {}, session {}", username, id);
         }
     }
 

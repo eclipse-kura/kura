@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2019 Eurotech and/or its affiliates, and others
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.cloudconnection.raw.mqtt.cloud.RawMqttCloudEndpoint" 
+         name="RawMqttCloudEndpoint" 
+         description="A CloudEndpoint that allows to publish MQTT messages without restrictions or assumptions on payload format.">
+
+        <Icon resource="CloudService" size="32"/>
+    </OCD>
+    
+    <Designate pid="org.eclipse.kura.cloudconnection.raw.mqtt.cloud.RawMqttCloudEndpoint" factoryPid="org.eclipse.kura.cloudconnection.raw.mqtt.cloud.RawMqttCloudEndpoint">
+        <Object ocdref="org.eclipse.kura.cloudconnection.raw.mqtt.cloud.RawMqttCloudEndpoint"/>
+    </Designate>
+</MetaData>

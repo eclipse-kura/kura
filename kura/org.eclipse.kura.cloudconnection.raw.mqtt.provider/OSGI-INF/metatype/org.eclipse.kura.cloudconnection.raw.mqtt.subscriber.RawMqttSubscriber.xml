@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2019 Eurotech and/or its affiliates, and others
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.cloudconnection.raw.mqtt.subscriber.RawMqttSubscriber" 
+         name="RawMqttSubscriber" 
+         description="The RawMqttSubscriber allows to define the subscribtion topic and notify the associated applications when a subscription event happens.">
+        
+        <AD id="topic.filter"
+        	name="Topic Filter"
+        	type="String"
+        	cardinality="0"
+        	required="true"
+        	default=""
+        	description='The MQTT subscription topic filter. For example foo/bar/baz, foo/+/bar, #, foo/#'>
+        </AD>
+                    
+        <AD id="qos"
+            name="Qos"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="0"
+            description='The desired quality of service for the subscription messages.'>
+            <Option label="0" value="0" />
+            <Option label="1" value="1" />
+            <Option label="2" value="2" />
+        </AD>
+        
+    </OCD>
+    
+    <Designate pid="org.eclipse.kura.cloudconnection.raw.mqtt.subscriber.RawMqttSubscriber" factoryPid="org.eclipse.kura.cloudconnection.raw.mqtt.subscriber.RawMqttSubscriber">
+        <Object ocdref="org.eclipse.kura.cloudconnection.raw.mqtt.subscriber.RawMqttSubscriber"/>
+    </Designate>
+</MetaData>

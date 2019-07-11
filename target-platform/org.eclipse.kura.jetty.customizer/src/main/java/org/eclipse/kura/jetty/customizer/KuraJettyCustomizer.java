@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Red Hat Inc and others
+ * Copyright (c) 2018, 2019 Red Hat Inc and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -17,14 +17,34 @@ import java.util.Dictionary;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.servlet.SessionCookieConfig;
+
 import org.eclipse.equinox.http.jetty.JettyCustomizer;
 import org.eclipse.jetty.server.ConnectionFactory;
 import org.eclipse.jetty.server.ForwardedRequestCustomizer;
 import org.eclipse.jetty.server.HttpConfiguration.Customizer;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.servlet.ServletContextHandler;
 
 public class KuraJettyCustomizer extends JettyCustomizer {
+
+    @Override
+    public Object customizeContext(Object context, Dictionary<String, ?> settings) {
+        if (!(context instanceof ServletContextHandler)) {
+            return context;
+        }
+
+        final ServletContextHandler serletContextHandler = (ServletContextHandler) context;
+
+        serletContextHandler.setErrorHandler(new KuraErrorHandler());
+
+        final SessionCookieConfig cookieConfig = serletContextHandler.getSessionHandler().getSessionCookieConfig();
+
+        cookieConfig.setHttpOnly(true);
+
+        return context;
+    }
 
     @Override
     public Object customizeHttpConnector(final Object connector, final Dictionary<String, ?> settings) {

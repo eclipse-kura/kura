@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and others
+ * Copyright (c) 2011, 2019 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -18,6 +18,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.MessageDigest;
@@ -76,15 +77,9 @@ public class CryptoServiceImpl implements CryptoService {
             c.init(Cipher.ENCRYPT_MODE, key);
             byte[] encryptedBytes = c.doFinal(new String(value).getBytes());
             encryptedValue = base64Encode(encryptedBytes);
-        } catch (NoSuchAlgorithmException e) {
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
             throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
-        } catch (NoSuchPaddingException e) {
-            throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
-        } catch (InvalidKeyException e) {
-            throw new KuraException(KuraErrorCode.ENCODE_ERROR);
-        } catch (IllegalBlockSizeException e) {
-            throw new KuraException(KuraErrorCode.ENCODE_ERROR);
-        } catch (BadPaddingException e) {
+        } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
             throw new KuraException(KuraErrorCode.ENCODE_ERROR);
         }
 
@@ -114,15 +109,9 @@ public class CryptoServiceImpl implements CryptoService {
             byte[] decryptedBytes = c.doFinal(decodedValue);
             String decryptedValue = new String(decryptedBytes);
             return decryptedValue.toCharArray();
-        } catch (NoSuchAlgorithmException e) {
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
             throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
-        } catch (NoSuchPaddingException e) {
-            throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
-        } catch (InvalidKeyException e) {
-            throw new KuraException(KuraErrorCode.DECODER_ERROR);
-        } catch (BadPaddingException e) {
-            throw new KuraException(KuraErrorCode.DECODER_ERROR);
-        } catch (IllegalBlockSizeException e) {
+        } catch (InvalidKeyException | BadPaddingException | IllegalBlockSizeException e) {
             throw new KuraException(KuraErrorCode.DECODER_ERROR);
         }
     }
@@ -167,7 +156,7 @@ public class CryptoServiceImpl implements CryptoService {
     public String sha1Hash(String s) throws NoSuchAlgorithmException, UnsupportedEncodingException {
         MessageDigest cript = MessageDigest.getInstance("SHA-1");
         cript.reset();
-        cript.update(s.getBytes("UTF8"));
+        cript.update(s.getBytes(StandardCharsets.UTF_8));
 
         byte[] encodedBytes = cript.digest();
         return base64Encode(encodedBytes);
@@ -175,33 +164,33 @@ public class CryptoServiceImpl implements CryptoService {
 
     @Override
     public String encodeBase64(String stringValue) throws UnsupportedEncodingException {
-        if (stringValue == null)
+        if (stringValue == null) {
             return null;
+        }
 
-        return base64Encode(stringValue.getBytes("UTF-8"));
+        return base64Encode(stringValue.getBytes(StandardCharsets.UTF_8));
     }
 
     @Override
     public String decodeBase64(String encodedValue) throws NoSuchAlgorithmException, UnsupportedEncodingException {
-        if (encodedValue == null)
+        if (encodedValue == null) {
             return null;
+        }
 
-        return new String(base64Decode(encodedValue), "UTF-8");
+        return new String(base64Decode(encodedValue), StandardCharsets.UTF_8);
     }
 
     @Override
     public char[] getKeyStorePassword(String keyStorePath) {
         Properties props = new Properties();
         char[] password = null;
-        FileInputStream fis = null;
 
         File f = new File(this.keystorePasswordPath);
         if (!f.exists()) {
             return "changeit".toCharArray();
         }
 
-        try {
-            fis = new FileInputStream(this.keystorePasswordPath);
+        try (FileInputStream fis = new FileInputStream(this.keystorePasswordPath);) {
             props.load(fis);
             Object value = props.get(keyStorePath);
             if (value != null) {
@@ -214,14 +203,6 @@ public class CryptoServiceImpl implements CryptoService {
             logger.warn("IOException while getting keystore password - ", e);
         } catch (KuraException e) {
             logger.warn("KuraException while getting keystore password - ", e);
-        } finally {
-            if (fis != null) {
-                try {
-                    fis.close();
-                } catch (IOException e) {
-                    logger.warn("IOException while closing source - ", e);
-                }
-            }
         }
 
         return password;
@@ -230,10 +211,17 @@ public class CryptoServiceImpl implements CryptoService {
     @Override
     public void setKeyStorePassword(String keyStorePath, char[] password) throws KuraException {
         Properties props = new Properties();
+        FileInputStream fis;
+        try {
+            fis = new FileInputStream(this.keystorePasswordPath);
+            props.load(fis);
+        } catch (IOException e) {
+            // Not loading from an existing file
+        }
         char[] encryptedPassword = encryptAes(password);
         props.put(keyStorePath, new String(encryptedPassword));
 
-        try (FileOutputStream fos = new FileOutputStream(this.keystorePasswordPath);){
+        try (FileOutputStream fos = new FileOutputStream(this.keystorePasswordPath);) {
             props.store(fos, "Do not edit this file. It's automatically generated by Kura");
             fos.flush();
         } catch (IOException e) {

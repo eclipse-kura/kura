@@ -81,7 +81,8 @@ public class HostapdManager {
 
     public static int getPid(String ifaceName) throws KuraException {
         try {
-            String[] tokens = { getHostapdConfigFileName(ifaceName) };
+            File configFile = new File(getHostapdConfigFileName(ifaceName));
+            String[] tokens = { configFile.getAbsolutePath() };
             int pid = LinuxProcessUtil.getPid("hostapd", tokens);
             logger.trace("getPid() :: pid={}", pid);
             return pid;

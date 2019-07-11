@@ -43,14 +43,20 @@ public class SkinServlet extends HttpServlet {
     public void doGet(HttpServletRequest request, HttpServletResponse response) {
         String resourceName = request.getPathInfo();
 
-        File fResourceFile;
+        File fResourceFile = null;
         try {
             fResourceFile = checkFile(resourceName);
         } catch (GwtKuraException | IOException e) {
-            return;
+            logger.warn("Failed to load skin resource, {}", e.getMessage());
         }
 
-        if (resourceName.endsWith(".css")) {
+        if (fResourceFile == null) {
+            try {
+                response.sendError(404);
+            } catch (final IOException e) {
+                logger.warn("Failed to send response", e);
+            }
+        } else if (resourceName.endsWith(".css")) {
             response.setContentType("text/css");
             streamText(fResourceFile, response);
         } else if (resourceName.endsWith(".js")) {
@@ -92,12 +98,17 @@ public class SkinServlet extends HttpServlet {
     private File checkFile(String resourceName) throws GwtKuraException, IOException {
         SystemService systemService = ServiceLocator.getInstance().getService(SystemService.class);
 
-        try (Stream<Path> kuraStyleDirStream = Files.list(Paths.get(systemService.getKuraStyleDirectory()));) {
+        String styleDirectory = systemService.getKuraStyleDirectory();
+
+        if (styleDirectory == null) {
+            throw new GwtKuraException(null, null, "Style resource directory is not configured");
+        }
+
+        try (Stream<Path> kuraStyleDirStream = Files.list(Paths.get(styleDirectory));) {
             Optional<Path> fResourcePath = kuraStyleDirStream.filter(filePath -> filePath.toFile().isFile())
                     .filter(filePath -> filePath.toFile().getAbsolutePath().endsWith(resourceName)).findFirst();
 
             if (!fResourcePath.isPresent()) {
-                logger.warn("Resource File {} does not exist", resourceName);
                 throw new IOException("Resource File " + resourceName + " does not exist");
             }
 

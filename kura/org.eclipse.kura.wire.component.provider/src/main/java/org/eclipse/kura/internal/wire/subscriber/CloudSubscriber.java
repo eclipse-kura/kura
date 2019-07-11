@@ -16,11 +16,13 @@ package org.eclipse.kura.internal.wire.subscriber;
 import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -28,6 +30,9 @@ import org.eclipse.kura.cloudconnection.message.KuraMessage;
 import org.eclipse.kura.cloudconnection.subscriber.listener.CloudSubscriberListener;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.message.KuraPayload;
+import org.eclipse.kura.type.ByteArrayValue;
+import org.eclipse.kura.type.DataType;
+import org.eclipse.kura.type.StringValue;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
 import org.eclipse.kura.wire.WireComponent;
@@ -60,6 +65,7 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
     private WireSupport wireSupport;
 
     private org.eclipse.kura.cloudconnection.subscriber.CloudSubscriber cloudSubscriber;
+    private CloudSubscriberOptions options;
 
     // ----------------------------------------------------------------
     //
@@ -120,6 +126,7 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
         this.wireSupport = this.wireHelperService.newWireSupport(this,
                 (ServiceReference<WireComponent>) componentContext.getServiceReference());
 
+        options = new CloudSubscriberOptions(properties);
         logger.debug("Activating Cloud Subscriber Wire Component... Done");
     }
 
@@ -131,6 +138,8 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
      */
     public void updated(final Map<String, Object> properties) {
         logger.debug("Updating Cloud Subscriber Wire Component...");
+
+        options = new CloudSubscriberOptions(properties);
 
         logger.debug("Updating Cloud Subscriber Wire Component... Done");
     }
@@ -188,8 +197,33 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
             wireProperties.put(entryKey, convertedValue);
         }
 
+        final Optional<String> bodyProperty = this.options.getBodyProperty();
+
+        if (bodyProperty.isPresent()) {
+            emitBody(wireProperties, payload, bodyProperty.get(), options.getBodyPropertyType());
+        }
+
         final WireRecord wireRecord = new WireRecord(wireProperties);
         return Arrays.asList(wireRecord);
+    }
+
+    private void emitBody(final Map<String, TypedValue<?>> wireRecordProperties, final KuraPayload payload,
+            final String property, final DataType dataType) {
+        try {
+            final byte[] body = payload.getBody();
+
+            if (body == null) {
+                return;
+            }
+
+            if (dataType == DataType.BYTE_ARRAY) {
+                wireRecordProperties.put(property, new ByteArrayValue(body));
+            } else {
+                wireRecordProperties.put(property, new StringValue(new String(body, StandardCharsets.UTF_8)));
+            }
+        } catch (final Exception e) {
+            logger.warn("failed to emit body", e);
+        }
     }
 
     @Override

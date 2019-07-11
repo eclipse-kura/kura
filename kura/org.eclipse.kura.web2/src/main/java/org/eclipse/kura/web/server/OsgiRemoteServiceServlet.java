@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -20,8 +20,6 @@ import java.text.ParseException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.eclipse.kura.web.Console;
 
 import com.google.gwt.user.server.rpc.SerializationPolicy;
 import com.google.gwt.user.server.rpc.SerializationPolicyLoader;
@@ -68,7 +66,6 @@ public class OsgiRemoteServiceServlet extends KuraRemoteServiceServlet {
         // container root.
         String contextPath = request.getContextPath();
         String modulePath = null;
-        String servletRoot = Console.getServletRoot();
 
         if (moduleBaseURL != null) {
             try {
@@ -107,26 +104,8 @@ public class OsgiRemoteServiceServlet extends KuraRemoteServiceServlet {
             InputStream is = getServletContext().getResourceAsStream(serializationPolicyFilePath);
             if (is == null) {
                 // try: /www/denali/202D6ADA06C975A44587AEAB102E2B68.gwt.rpc
-                String file = "/www" + servletRoot
-                        + serializationPolicyFilePath.substring(serializationPolicyFilePath.indexOf("/", 1));
-                log("Trying www resource2: " + file);
-                is = Thread.currentThread().getContextClassLoader().getResourceAsStream(file);
-            }
-            if (is == null) {
-                // try: /denali/denali/202D6ADA06C975A44587AEAB102E2B68.gwt.rpc
-                log("Trying " + servletRoot + servletRoot + " resource1: " + serializationPolicyFilePath);
-                is = Thread.currentThread().getContextClassLoader().getResourceAsStream(serializationPolicyFilePath);
-            }
-            if (is == null) {
-                // try: /denali/202D6ADA06C975A44587AEAB102E2B68.gwt.rpc
-                String file = serializationPolicyFilePath.substring(serializationPolicyFilePath.indexOf("/", 1));
-                log("Trying " + servletRoot + " resource3: " + file);
-                is = Thread.currentThread().getContextClassLoader().getResourceAsStream(file);
-            }
-            if (is == null) {
-                // try: /202D6ADA06C975A44587AEAB102E2B68.gwt.rpc
-                String file = serializationPolicyFilePath.substring(serializationPolicyFilePath.lastIndexOf("/"));
-                log("Trying / resource4: " + file);
+                String file = "/www" + serializationPolicyFilePath.replace("/admin", "");
+                log("Trying " + file);
                 is = Thread.currentThread().getContextClassLoader().getResourceAsStream(file);
             }
 

@@ -57,9 +57,6 @@
 						</fileset>
 						<fileset>
 							<directory>src/main/webapp/WEB-INF</directory>
-							<excludes>
-								<exclude>web.xml</exclude>
-							</excludes>
 						</fileset>
 					</filesets>
 				</configuration>

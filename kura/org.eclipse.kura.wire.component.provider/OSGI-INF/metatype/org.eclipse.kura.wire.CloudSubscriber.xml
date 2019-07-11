@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
+    Copyright (c) 2016, 2019 Eurotech and/or its affiliates and others
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -19,6 +19,26 @@
             required="true"
             default="(kura.service.pid=changeme)"
             description="Specifies, as an OSGi target filter, the pid of the Cloud Subscriber used to receive messages from the cloud platform.">
+        </AD>
+        
+        <AD id="set.property.from.body"
+            name="Set property from message body"
+            type="String"
+            cardinality="0"
+            required="false"
+            default=""
+            description="If set to a non empty value, the publisher will add a metric to the emitted envelope containing the received message body content. The name of the emitted property is the value of this parameter, its type depends on the Body property type parameter">
+        </AD>
+        
+        <AD id="body.property.type"
+            name="Body property type"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="BYTE_ARRAY"
+            description="Defines the payload body type.">
+            <Option label="STRING" value="STRING" />
+            <Option label="BYTE_ARRAY" value="BYTE_ARRAY" />
         </AD>
 
     </OCD>

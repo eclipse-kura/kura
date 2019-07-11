@@ -15,7 +15,6 @@
 -->
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" configuration-policy="require" deactivate="deactivate" immediate="true" modified="updated" name="org.eclipse.kura.web.Console">
    <implementation class="org.eclipse.kura.web.Console"/>
-   <property name="servlet.alias.root" value="/denali"/>
    <reference name="HttpService" 
               bind="setHttpService"
               unbind="unsetHttpService"
@@ -32,7 +31,6 @@
               bind="setEventAdminService" 
               unbind="unsetEventAdminService"
               interface="org.osgi.service.event.EventAdmin"/>
-   <property name="app.root" type="String" value="/kura"/>
    <property name="service.pid" type="String" value="org.eclipse.kura.web.Console"/>
    <service>
       <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>

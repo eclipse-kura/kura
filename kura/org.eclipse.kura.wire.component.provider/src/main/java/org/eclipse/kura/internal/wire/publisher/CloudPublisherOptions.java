@@ -17,6 +17,7 @@ import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -30,6 +31,7 @@ final class CloudPublisherOptions {
     private static final Logger logger = LogManager.getLogger(CloudPublisherOptions.class);
 
     private static final String CONF_POSITION = "publish.position";
+    private static final String CONF_BODY_PROPERTY = "set.body.from.property";
 
     private final Map<String, Object> properties;
 
@@ -63,5 +65,21 @@ final class CloudPublisherOptions {
             logger.warn("Cannot parse the provided position type.", e);
         }
         return result;
+    }
+
+    Optional<String> getBodyProperty() {
+        final Object propertyRaw = properties.get(CONF_BODY_PROPERTY);
+
+        if (!(propertyRaw instanceof String)) {
+            return Optional.empty();
+        }
+
+        final String property = (String) propertyRaw;
+
+        if (property.trim().isEmpty()) {
+            return Optional.empty();
+        }
+
+        return Optional.of(property);
     }
 }

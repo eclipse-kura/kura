@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -17,6 +17,7 @@ import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 
+import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 
 import org.osgi.annotation.versioning.ProviderType;
@@ -36,19 +37,20 @@ import org.osgi.annotation.versioning.ProviderType;
 public interface SslManagerService {
 
     /**
-     * Returns an SSLSocketFactory based on the current configuration of the SslManagerService and applying
+     * Returns an SSLContext based on the current configuration of the SslManagerService and applying
      * best practices like Hostname Verification and disables the legacy SSL-2.0-compatible Client Hello.<br>
      * If the SslManagerService configuration contains a path to a custom Trust store, then it will be used.
      * If not, the Java VM default Trust Store will be used.<br>
      * If the SslManagerService configuration contains a path to a custom Key store, then it will be used.
      * If not, no Key store will be specified..<br>
      *
-     * @return the SSLSocketFactory
+     * @return the SSLContext
+     * @since 2.2
      */
-    public SSLSocketFactory getSSLSocketFactory() throws GeneralSecurityException, IOException;
+    public SSLContext getSSLContext() throws GeneralSecurityException, IOException;
 
     /**
-     * Returns an SSLSocketFactory based on the current configuration of the SslManagerService and applying
+     * Returns an SSLContext based on the current configuration of the SslManagerService and applying
      * best practices like Hostname Verification and disables the legacy SSL-2.0-compatible Client Hello.<br>
      * If the SslManagerService configuration contains a path to a custom Trust store, then it will be used.
      * If not, the Java VM default Trust Store will be used.<br>
@@ -59,13 +61,80 @@ public interface SslManagerService {
      *
      * @param keyAlias
      *            alias of the entry in the KeyStore to be used for the returned SSLSocketFactory
+     * @return the SSLContext
+     * @since 2.2
+     */
+    public SSLContext getSSLContext(String keyAlias) throws GeneralSecurityException, IOException;
+
+    /**
+     * Returns an SSLContext based on the specified parameters and applying best practices
+     * like Hostname Verification (enabled by default) and disables the legacy SSL-2.0-compatible Client Hello.<br>
+     *
+     * @param protocol
+     *            the protocol to use to initialize the SSLContext - e.g. TLSv1.2
+     * @param cipherSuites
+     *            allowed cipher suites for the returned SSLSocketFactory
+     * @param trustStorePath
+     *            Location of the Java keystore file containing the collection of CA certificates trusted by this
+     *            application process (trust store). Key store type is expected to be JKS.
+     * @param keyStorePath
+     *            Location of the Java keystore file containing an application process's own certificate and private
+     *            key. Key store type is expected to be JKS.
+     * @param keyStorePassword
+     *            Password to access the private key from the keystore file.
+     * @param keyAlias
+     *            alias of the entry in the KeyStore to be used for the returned SSLSocketFactory
+     * @return the SSLContext
+     * @since 2.2
+     */
+    public SSLContext getSSLContext(String protocol, String cipherSuites, String trustStorePath, String keyStorePath,
+            char[] keyStorePassword, String keyAlias) throws GeneralSecurityException, IOException;
+
+    /**
+     * Returns an SSLContext based on the specified parameters and applying best practices
+     * like Hostname Verification and disables the legacy SSL-2.0-compatible Client Hello.<br>
+     *
+     * @param protocol
+     *            the protocol to use to initialize the SSLContext - e.g. TLSv1.2
+     * @param cipherSuites
+     *            allowed cipher suites for the returned SSLSocketFactory
+     * @param trustStorePath
+     *            Location of the Java keystore file containing the collection of CA certificates trusted by this
+     *            application process (trust store). Key store type is expected to be JKS.
+     * @param keyStorePath
+     *            Location of the Java keystore file containing an application process's own certificate and private
+     *            key. Key store type is expected to be JKS.
+     * @param keyStorePassword
+     *            Password to access the private key from the keystore file.
+     * @param keyAlias
+     *            alias of the entry in the KeyStore to be used for the returned SSLSocketFactory
+     * @param hostnameVerification
+     *            enable server Hostname Verification
+     * @return the SSLContext
+     * @since 2.2
+     */
+    public SSLContext getSSLContext(String protocol, String cipherSuites, String trustStorePath, String keyStorePath,
+            char[] keyStorePassword, String keyAlias, boolean hostnameVerification)
+            throws GeneralSecurityException, IOException;
+
+    /**
+     * Shorthand for getSSLContext().getSocketFactory().
+     *
+     * @return the SSLSocketFactory
+     */
+    public SSLSocketFactory getSSLSocketFactory() throws GeneralSecurityException, IOException;
+
+    /**
+     * Shorthand for getSSLContext(String).getSocketFactory().
+     *
+     * @param keyAlias
+     *            alias of the entry in the KeyStore to be used for the returned SSLSocketFactory
      * @return the SSLSocketFactory
      */
     public SSLSocketFactory getSSLSocketFactory(String keyAlias) throws GeneralSecurityException, IOException;
 
     /**
-     * Returns an SSLSocketFactory based on the specified parameters and applying best practices
-     * like Hostname Verification (enabled by default) and disables the legacy SSL-2.0-compatible Client Hello.<br>
+     * Shorthand for getSSLContext(String, String, String, String, char[], String).getSocketFactory().
      *
      * @param protocol
      *            the protocol to use to initialize the SSLContext - e.g. TLSv1.2
@@ -87,8 +156,7 @@ public interface SslManagerService {
             String keyStorePath, char[] keyStorePassword, String keyAlias) throws GeneralSecurityException, IOException;
 
     /**
-     * Returns an SSLSocketFactory based on the specified parameters and applying best practices
-     * like Hostname Verification and disables the legacy SSL-2.0-compatible Client Hello.<br>
+     * Shorthand for getSSLContext(String, String, String, String, char[], String, boolean).getSocketFactory().
      *
      * @param protocol
      *            the protocol to use to initialize the SSLContext - e.g. TLSv1.2
@@ -110,7 +178,7 @@ public interface SslManagerService {
      */
     public SSLSocketFactory getSSLSocketFactory(String protocol, String cipherSuites, String trustStorePath,
             String keyStorePath, char[] keyStorePassword, String keyAlias, boolean hostnameVerification)
-                    throws GeneralSecurityException, IOException;
+            throws GeneralSecurityException, IOException;
 
     /**
      * Returns the X509 Certificates installed in the currently configured trust store.

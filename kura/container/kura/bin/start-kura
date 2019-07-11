@@ -42,4 +42,10 @@ JAVA_INT_OPTS="$JAVA_INT_OPTS -Dlog4j.configurationFile=file:\"${KURA_LOG4J_FILE
 
 set -x
 
+if [ -f "${KURA_DIR}/user/security/httpskeystore.ks" ]; then
+    echo "Keystore already exists"
+else
+    keytool -genkey -alias localhost -keyalg RSA -keysize 2048 -keystore ${KURA_DIR}/user/security/httpskeystore.ks -deststoretype pkcs12 -dname "CN=Kura, OU=Kura, O=Eclipse Foundation, L=Ottawa, S=Ontario, C=CA" -validity 1000 -storepass changeit -keypass changeit  
+fi
+
 eval exec /usr/bin/java ${JAVA_OPTS} ${JAVA_INT_OPTS} -jar ${KURA_DIR}/plugins/org.eclipse.equinox.launcher_${LAUNCHER_VERSION}.jar -configuration  /tmp/.kura/configuration "$@"

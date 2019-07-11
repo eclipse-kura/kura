@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 Eurotech and others
+ * Copyright (c) 2011, 2019 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.eclipse.kura.web.Console;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.osgi.framework.BundleContext;
@@ -28,7 +27,10 @@ public class ServiceLocator {
 
     private static final ServiceLocator s_instance = new ServiceLocator();
 
+    private final BundleContext bundleContext;
+
     private ServiceLocator() {
+        bundleContext = FrameworkUtil.getBundle(ServiceLocator.class).getBundleContext();
     }
 
     public static ServiceLocator getInstance() {
@@ -36,11 +38,9 @@ public class ServiceLocator {
     }
 
     public <T> ServiceReference<T> getServiceReference(Class<T> serviceClass) throws GwtKuraException {
-        BundleContext bundleContext = Console.getBundleContext();
-        ServiceReference<T> sr = null;
-        if (bundleContext != null) {
-            sr = bundleContext.getServiceReference(serviceClass);
-        }
+
+        ServiceReference<T> sr = bundleContext.getServiceReference(serviceClass);
+
         if (sr == null) {
             throw GwtKuraException.internalError(serviceClass.toString() + " not found.");
         }
@@ -49,19 +49,19 @@ public class ServiceLocator {
 
     public <T> Collection<ServiceReference<T>> getServiceReferences(Class<T> serviceClass, String filter)
             throws GwtKuraException {
-        final BundleContext bundleContext = Console.getBundleContext();
-        Collection<ServiceReference<T>> sr = null;
-        if (bundleContext != null) {
-            try {
-                sr = bundleContext.getServiceReferences(serviceClass, filter);
-            } catch (InvalidSyntaxException e) {
-                throw GwtKuraException.internalError("Getting service references failed.");
+
+        try {
+            final Collection<ServiceReference<T>> sr = bundleContext.getServiceReferences(serviceClass, filter);
+
+            if (sr == null) {
+                throw GwtKuraException.internalError(serviceClass.toString() + " not found.");
             }
+
+            return sr;
+        } catch (InvalidSyntaxException e) {
+            throw GwtKuraException.internalError("Getting service references failed.");
         }
-        if (sr == null) {
-            throw GwtKuraException.internalError(serviceClass.toString() + " not found.");
-        }
-        return sr;
+
     }
 
     public <T> T getService(Class<T> serviceClass) throws GwtKuraException {
@@ -235,8 +235,8 @@ public class ServiceLocator {
 
     public <T> T getService(ServiceReference<T> serviceReference) throws GwtKuraException {
         T service = null;
-        BundleContext bundleContext = Console.getBundleContext();
-        if (bundleContext != null && serviceReference != null) {
+
+        if (serviceReference != null) {
             service = bundleContext.getService(serviceReference);
         }
         if (service == null) {
@@ -252,15 +252,12 @@ public class ServiceLocator {
     public <T> List<T> getServices(Class<T> serviceClass, String filter) throws GwtKuraException {
         List<T> services = null;
 
-        BundleContext bundleContext = Console.getBundleContext();
-        if (bundleContext != null) {
-            Collection<ServiceReference<T>> serviceReferences = getServiceReferences(serviceClass, filter);
+        Collection<ServiceReference<T>> serviceReferences = getServiceReferences(serviceClass, filter);
 
-            if (serviceReferences != null) {
-                services = new ArrayList<T>(serviceReferences.size());
-                for (ServiceReference<T> sr : serviceReferences) {
-                    services.add(getService(sr));
-                }
+        if (serviceReferences != null) {
+            services = new ArrayList<T>(serviceReferences.size());
+            for (ServiceReference<T> sr : serviceReferences) {
+                services.add(getService(sr));
             }
         }
 
@@ -268,10 +265,11 @@ public class ServiceLocator {
     }
 
     public boolean ungetService(ServiceReference<?> serviceReference) {
-        BundleContext bundleContext = Console.getBundleContext();
-        if (bundleContext != null && serviceReference != null) {
+
+        if (serviceReference != null) {
             return bundleContext.ungetService(serviceReference);
         }
+
         return false;
     }
 }

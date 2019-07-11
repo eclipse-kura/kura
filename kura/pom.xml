@@ -94,12 +94,15 @@
         <module>org.eclipse.kura.wire.component.join.provider</module>
 
         <module>org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider</module>
+        <module>org.eclipse.kura.cloudconnection.raw.mqtt.provider</module>
 
         <module>org.eclipse.kura.linux.sysv.provider</module>
         <module>org.eclipse.kura.linux.systemd.provider</module>
 
         <module>org.eclipse.kura.linux.debian.provider</module>
         <module>org.eclipse.kura.linux.redhat.provider</module>
+        
+        <module>org.eclipse.kura.http.server.manager</module>
 
         <module>features</module>
         <module>emulator</module>

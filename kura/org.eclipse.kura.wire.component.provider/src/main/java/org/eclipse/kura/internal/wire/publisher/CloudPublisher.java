@@ -242,7 +242,7 @@ public final class CloudPublisher implements WireReceiver, ConfigurableComponent
             } else if (bodyPropertyValue instanceof StringValue) {
                 kuraPayload.setBody(((String) bodyPropertyValue.getValue()).getBytes(StandardCharsets.UTF_8));
             } else if (bodyPropertyValue instanceof ByteArrayValue) {
-                kuraPayload.setBody(((byte[]) bodyPropertyValue.getValue()));
+                kuraPayload.setBody((byte[]) bodyPropertyValue.getValue());
             } else {
                 logger.warn("The type of the body property must be STRING or BYTE_ARRAY");
             }
@@ -297,7 +297,7 @@ public final class CloudPublisher implements WireReceiver, ConfigurableComponent
 
         final Map<String, Object> properties = new HashMap<>();
         List<String> l = new ArrayList<>(wireRecordProps.keySet());
-        for(String s:l) {
+        for (String s : l) {
             logger.info("IN buildKuraMessageProperties avec props = {}", s);
             properties.put(s, wireRecordProps.get(s).getValue());
         }

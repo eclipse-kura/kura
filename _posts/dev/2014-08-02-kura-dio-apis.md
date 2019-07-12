@@ -158,6 +158,9 @@ KuraGPIOPin pin = this.myservice.getPinByTerminal(6);
 In a **component.xml** enter a new service. Select a **Service** and in a **Referenced Service** open **Add** for add  the GPIOService. Select the **GPIOService** and use edit button for set in the bind field to **bindGPIOService** and set the unbind filed to **unbindGPIOService**.
 Created methods bind and unbind in a principale software.
 
+
+<img src="{{ site.baseurl }}/assets/images/drivers_and_assets/component_gpio_led.png"/>
+
 Then in the code:
 
 ```java
@@ -319,6 +322,8 @@ At this point, you have to write the ‘metatype’ file that defines the parame
     </Designate>
 </MetaData>
 ```
+
+<img src="{{ site.baseurl }}/assets/images/drivers_and_assets/metatype_gpio_led.png"/>
 
 ### Accessing a I2C device with OpenJDK Device I/O
 

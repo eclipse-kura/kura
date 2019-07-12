@@ -1,0 +1,71 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<?artifactRepository version='1.1.0'?>
+<repository name='file:/home/eurotech/Documents/kura/target-platform/p2-repo-test-deps/target/repository - artifacts' type='org.eclipse.equinox.p2.artifact.repository.simpleRepository' version='1'>
+  <properties size='2'>
+    <property name='p2.timestamp' value='1561971134826'/>
+    <property name='p2.compressed' value='false'/>
+  </properties>
+  <mappings size='3'>
+    <rule filter='(&amp; (classifier=osgi.bundle))' output='${repoUrl}/plugins/${id}_${version}.jar'/>
+    <rule filter='(&amp; (classifier=binary))' output='${repoUrl}/binary/${id}_${version}'/>
+    <rule filter='(&amp; (classifier=org.eclipse.update.feature))' output='${repoUrl}/features/${id}_${version}.jar'/>
+  </mappings>
+  <artifacts size='8'>
+    <artifact classifier='osgi.bundle' id='org.hamcrest' version='1.1.0.v20090501071000'>
+      <properties size='3'>
+        <property name='artifact.size' value='8381'/>
+        <property name='download.size' value='8381'/>
+        <property name='download.md5' value='c522d9ba8eae729cc5c1610c9be37a8f'/>
+      </properties>
+    </artifact>
+    <artifact classifier='osgi.bundle' id='org.hamcrest.integration' version='1.1.0.v201303031500'>
+      <properties size='3'>
+        <property name='artifact.size' value='12564'/>
+        <property name='download.size' value='12564'/>
+        <property name='download.md5' value='316d38cf3dfb1de638e477b14bdfba79'/>
+      </properties>
+    </artifact>
+    <artifact classifier='osgi.bundle' id='org.objenesis' version='2.4.0'>
+      <properties size='3'>
+        <property name='artifact.size' value='51287'/>
+        <property name='download.size' value='51287'/>
+        <property name='download.md5' value='2f77ee71efc05b83104d3a7a8aaa51c7'/>
+      </properties>
+    </artifact>
+    <artifact classifier='osgi.bundle' id='org.mockito.mockito-core' version='1.10.19'>
+      <properties size='3'>
+        <property name='artifact.size' value='1172979'/>
+        <property name='download.size' value='1172979'/>
+        <property name='download.md5' value='c1967f0a515c4b8155f62478ec823464'/>
+      </properties>
+    </artifact>
+    <artifact classifier='osgi.bundle' id='moquette-broker' version='1.0.0.SNAPSHOT'>
+      <properties size='3'>
+        <property name='artifact.size' value='3340905'/>
+        <property name='download.size' value='3340905'/>
+        <property name='download.md5' value='50a624b15b0c67e21294b2cec8f9bf9a'/>
+      </properties>
+    </artifact>
+    <artifact classifier='osgi.bundle' id='org.hamcrest.text' version='1.1.0.v20090501071000'>
+      <properties size='3'>
+        <property name='artifact.size' value='32639'/>
+        <property name='download.size' value='32639'/>
+        <property name='download.md5' value='189a879a6cdcd1c1cb95edcdc53a380f'/>
+      </properties>
+    </artifact>
+    <artifact classifier='osgi.bundle' id='org.hamcrest.library' version='1.1.0.v20090501071000'>
+      <properties size='3'>
+        <property name='artifact.size' value='37455'/>
+        <property name='download.size' value='37455'/>
+        <property name='download.md5' value='1bbe0b7a6c60ecbafa33b749ea533c2e'/>
+      </properties>
+    </artifact>
+    <artifact classifier='osgi.bundle' id='io.dropwizard.metrics.core' version='3.2.2'>
+      <properties size='3'>
+        <property name='artifact.size' value='129402'/>
+        <property name='download.size' value='129402'/>
+        <property name='download.md5' value='da529999d5083e800829eaab432a8a54'/>
+      </properties>
+    </artifact>
+  </artifacts>
+</repository>

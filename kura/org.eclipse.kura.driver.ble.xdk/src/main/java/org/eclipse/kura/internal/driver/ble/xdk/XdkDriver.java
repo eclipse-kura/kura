@@ -56,8 +56,8 @@ public class XdkDriver implements Driver, ConfigurableComponent {
     private static final int TIMEOUT = 5;
     private static final String INTERRUPTED_EX = "Interrupted Exception";
 
-    private static final byte m1 = 0x01;
-    private static final byte m2 = 0x02;
+    private static final byte message1 = 0x01;
+    private static final byte message2 = 0x02;
     private int configSampleRate;
     private boolean enableQuaternion;
 
@@ -115,7 +115,6 @@ public class XdkDriver implements Driver, ConfigurableComponent {
             logger.error("Disconnection failed", e);
         }
 
-        // cancel bluetoothAdapter
         this.bluetoothLeAdapter = null;
     }
 
@@ -125,7 +124,7 @@ public class XdkDriver implements Driver, ConfigurableComponent {
 
         enableQuaternion = this.options.isEnableRotationQuaternion();
 
-        configSampleRate = (int) (1000 / this.options.isConfigSampleRate());
+        configSampleRate = 1000 / this.options.isConfigSampleRate();
 
         // Get Bluetooth adapter and ensure it is enabled
         this.bluetoothLeAdapter = this.bluetoothLeService.getAdapter(this.options.getBluetoothInterfaceName());
@@ -230,13 +229,11 @@ public class XdkDriver implements Driver, ConfigurableComponent {
             } else {
                 record.setChannelStatus(new ChannelStatus(FAILURE, "Unable to Connect...", null));
                 record.setTimestamp(System.currentTimeMillis());
-                return;
             }
         } catch (KuraBluetoothIOException | ConnectionException e) {
             record.setChannelStatus(new ChannelStatus(ChannelFlag.FAILURE, "Xdk Read Operation Failed", null));
             record.setTimestamp(System.currentTimeMillis());
             logger.warn(e.getMessage());
-            return;
         }
     }
 
@@ -258,32 +255,32 @@ public class XdkDriver implements Driver, ConfigurableComponent {
             return xdk.readHighData()[5];
         // Low Priority Data - Message 1
         case LIGHT:
-            return xdk.readLowData(m1)[0];
+            return xdk.readLowData(message1)[0];
         case NOISE:
-            return xdk.readLowData(m1)[1];
+            return xdk.readLowData(message1)[1];
         case PRESSURE:
-            return xdk.readLowData(m1)[2];
+            return xdk.readLowData(message1)[2];
         case TEMPERATURE:
-            return xdk.readLowData(m1)[3];
+            return xdk.readLowData(message1)[3];
         case HUMIDITY:
-            return xdk.readLowData(m1)[4];
+            return xdk.readLowData(message1)[4];
         case SD_CARD_DETECT_STATUS:
-            return xdk.readLowData(m1)[5];
+            return xdk.readLowData(message1)[5];
         case BUTTON_STATUS:
-            return xdk.readLowData(m1)[6];
+            return xdk.readLowData(message1)[6];
         // Low Priority Data - Message 2
         case MAGNETIC_X:
-            return xdk.readLowData(m2)[0];
+            return xdk.readLowData(message2)[0];
         case MAGNETIC_Y:
-            return xdk.readLowData(m2)[1];
+            return xdk.readLowData(message2)[1];
         case MAGNETIC_Z:
-            return xdk.readLowData(m2)[2];
+            return xdk.readLowData(message2)[2];
         case MAGNETOMETER_RESISTANCE:
-            return xdk.readLowData(m2)[3];
+            return xdk.readLowData(message2)[3];
         case LED_STATUS:
-            return xdk.readLowData(m2)[4];
+            return xdk.readLowData(message2)[4];
         case VOLTAGE_LEM:
-            return xdk.readLowData(m2)[5];
+            return xdk.readLowData(message2)[5];
         case QUATERNION_M:
             return xdk.readHighData()[6];
         case QUATERNION_X:
@@ -373,7 +370,7 @@ public class XdkDriver implements Driver, ConfigurableComponent {
 
     @Override
     public void write(List<ChannelRecord> records) throws ConnectionException {
-
+        // Method not supported
     }
 
     private static class XdkRequestInfo {
@@ -466,13 +463,9 @@ public class XdkDriver implements Driver, ConfigurableComponent {
         case "TEMPERATURE":
         case "HUMIDITY":
         case "SD_CARD_DETECT_STATUS":
-            sensorListener.getXdk().disableLowNotifications();
-            sensorListener.getXdk().enableLowNotifications(SensorListener.getSensorConsumer(sensorListener), m1);
-            break;
         case "BUTTON_STATUS":
             sensorListener.getXdk().disableLowNotifications();
-            waitFor(1000);
-            sensorListener.getXdk().enableLowNotifications(SensorListener.getSensorConsumer(sensorListener), m1);
+            sensorListener.getXdk().enableLowNotifications(SensorListener.getSensorConsumer(sensorListener), message1);
             break;
         case "MAGNETIC_X":
         case "MAGNETIC_Y":
@@ -481,7 +474,7 @@ public class XdkDriver implements Driver, ConfigurableComponent {
         case "LED_STATUS":
         case "VOLTAGE_LEM":
             sensorListener.getXdk().disableLowNotifications();
-            sensorListener.getXdk().enableLowNotifications(SensorListener.getSensorConsumer(sensorListener), m2);
+            sensorListener.getXdk().enableLowNotifications(SensorListener.getSensorConsumer(sensorListener), message2);
             break;
         default:
 

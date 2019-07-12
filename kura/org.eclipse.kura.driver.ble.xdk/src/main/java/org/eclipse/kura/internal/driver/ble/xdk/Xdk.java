@@ -150,7 +150,7 @@ public class Xdk {
      */
     public void startSensor(boolean enableQuaternion, int configSimpleRate) {
 
-        if (enableQuaternion == true) {
+        if (enableQuaternion) {
             sensorFusion[0] = 0x01;
         } else {
             sensorFusion[0] = 0x00;

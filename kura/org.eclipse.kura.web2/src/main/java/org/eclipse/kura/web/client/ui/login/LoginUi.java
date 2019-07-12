@@ -54,18 +54,18 @@ public class LoginUi extends Composite {
     @Override
     protected void onAttach() {
         super.onAttach();
-        usernameInput.setFocus(true);
+        this.usernameInput.setFocus(true);
 
-        loginForm.addSubmitHandler(e -> {
+        this.loginForm.addSubmitHandler(e -> {
             e.cancel();
             login();
         });
 
-        loginDialog.show();
+        this.loginDialog.show();
     }
 
     private void login() {
-        pwdAutenticationService.authenticate(usernameInput.getValue(), passwordInput.getValue(),
+        this.pwdAutenticationService.authenticate(this.usernameInput.getValue(), this.passwordInput.getValue(),
                 new AsyncCallback<String>() {
 
                     @Override
@@ -76,10 +76,11 @@ public class LoginUi extends Composite {
                     @Override
                     public void onFailure(final Throwable caught) {
                         if (caught instanceof GwtKuraException) {
-                            alertDialog.show("Login failed: The provided credentials are not valid.", Severity.ALERT,
-                                    null);
+                            LoginUi.this.alertDialog.show("Login failed: The provided credentials are not valid.",
+                                    Severity.ALERT, null);
                         } else {
-                            alertDialog.show("Login failed: The device is unreachable.", Severity.ALERT, null);
+                            LoginUi.this.alertDialog.show("Login failed: The device is unreachable.", Severity.ALERT,
+                                    null);
                         }
                     }
                 });

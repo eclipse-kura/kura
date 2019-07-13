@@ -107,7 +107,8 @@ public class S7PlcDriver extends AbstractBlockDriver<S7PlcDomain> implements Con
             throw new ConnectionException(e);
         }
         if (code != 0) {
-            throw new ConnectionException("Authentication failed, SetSessionPassword() failed with code: " + code);
+            throw new ConnectionException(
+                    "Authentication failed, SetSessionPassword() failed with Error: " + S7Client.ErrorText(code));
         }
     }
 
@@ -134,7 +135,8 @@ public class S7PlcDriver extends AbstractBlockDriver<S7PlcDomain> implements Con
                 connectNum++;
             }
             if (code != 0)
-                throw new ConnectionException("Failed to connect to PLC, ConnectTo() failed with code: " + code);
+                throw new ConnectionException(
+                        "Failed to connect to PLC, ConnectTo() failed with Error: " + S7Client.ErrorText(code));
             if (currentOptions.shouldAuthenticate()) {
                 authenticate(this.state);
             }

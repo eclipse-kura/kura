@@ -9,13 +9,18 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.login;
 
+import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.AlertDialog;
 import org.eclipse.kura.web.client.ui.AlertDialog.Severity;
 import org.eclipse.kura.web.shared.GwtKuraException;
+import org.eclipse.kura.web.shared.service.GwtBannerService;
+import org.eclipse.kura.web.shared.service.GwtBannerServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtPasswordAuthenticationService;
 import org.eclipse.kura.web.shared.service.GwtPasswordAuthenticationServiceAsync;
+import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.Input;
 import org.gwtbootstrap3.client.ui.Modal;
+import org.gwtbootstrap3.client.ui.html.Strong;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -33,6 +38,10 @@ public class LoginUi extends Composite {
 
     private static final LoginUiBinder uiBinder = GWT.create(LoginUiBinder.class);
 
+    private static final Messages MSGS = GWT.create(Messages.class);
+
+    private final GwtBannerServiceAsync gwtBannerService = GWT.create(GwtBannerService.class);
+
     interface LoginUiBinder extends UiBinder<Widget, LoginUi> {
     }
 
@@ -46,9 +55,36 @@ public class LoginUi extends Composite {
     Modal loginDialog;
     @UiField
     FormPanel loginForm;
+    @UiField
+    Modal accessBannerModal;
+    @UiField
+    Button buttonAccessBannerModalOk;
+    @UiField
+    Strong accessBannerModalPannelBody;
 
     public LoginUi() {
         initWidget(uiBinder.createAndBindUi(this));
+    }
+
+    private void initLoginBannerModal() {
+        this.accessBannerModal.setTitle(MSGS.warning());
+        this.buttonAccessBannerModalOk.setText(MSGS.okButton());
+
+        this.gwtBannerService.getLoginBanner(new AsyncCallback<String>() {
+
+            @Override
+            public void onFailure(Throwable caught) {
+                // Nothing to do
+            }
+
+            @Override
+            public void onSuccess(String banner) {
+                if (banner != null) {
+                    LoginUi.this.accessBannerModalPannelBody.setText(banner);
+                    LoginUi.this.accessBannerModal.show();
+                }
+            }
+        });
     }
 
     @Override
@@ -62,6 +98,7 @@ public class LoginUi extends Composite {
         });
 
         this.loginDialog.show();
+        initLoginBannerModal();
     }
 
     private void login() {

@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 public class GwtSessionServiceImpl extends OsgiRemoteServiceServlet implements GwtSessionService {
 
     private static final Logger logger = LoggerFactory.getLogger(GwtSessionServiceImpl.class);
+    private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
 
     /**
      *
@@ -46,7 +47,8 @@ public class GwtSessionServiceImpl extends OsgiRemoteServiceServlet implements G
             final String id = session.getId();
             session.invalidate();
 
-            logger.warn("UI Logout - Success - Logout succeeded for user: {}, session {}", username, id);
+            logger.info("UI Logout - Success - Logout succeeded for user: {}, session {}", username, id);
+            auditLogger.info("UI Logout - Success - Logout succeeded for user: {}, session {}", username, id);
 
             Cookie[] cookies = request.getCookies();
             for (Cookie cookie : cookies) {

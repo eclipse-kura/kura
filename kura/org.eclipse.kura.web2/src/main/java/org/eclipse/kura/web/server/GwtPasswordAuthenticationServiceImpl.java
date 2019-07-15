@@ -9,6 +9,8 @@
  *******************************************************************************/
 package org.eclipse.kura.web.server;
 
+import static java.util.Objects.isNull;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
@@ -26,6 +28,7 @@ public class GwtPasswordAuthenticationServiceImpl extends OsgiRemoteServiceServl
         implements GwtPasswordAuthenticationService {
 
     private static final Logger logger = LoggerFactory.getLogger(GwtPasswordAuthenticationServiceImpl.class);
+    private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
 
     /**
      *
@@ -47,16 +50,22 @@ public class GwtPasswordAuthenticationServiceImpl extends OsgiRemoteServiceServl
         final HttpSession session = Console.instance().createSession(getThreadLocalRequest());
         final HttpServletRequest request = getThreadLocalRequest();
 
-        final String requestIp = request.getRemoteAddr();
+        String requestIp = request.getHeader("X-FORWARDED-FOR");
+        if (isNull(requestIp)) {
+            requestIp = request.getRemoteAddr();
+        }
 
         try {
             if (!this.authenticationManager.authenticate(username, password)) {
                 logger.warn("UI Login - Failure - Login failed for user: {}, request IP: {}", username, requestIp);
+                auditLogger.warn("UI Login - Failure - Login failed for user: {}, request IP: {}", username, requestIp);
                 throw new KuraException(KuraErrorCode.SECURITY_EXCEPTION);
             }
 
             session.setAttribute(Attributes.AUTORIZED_USER.getValue(), username);
-            logger.warn("UI Login - Success - Login for user: {}, session id: {}, request IP: {}", username,
+            logger.info("UI Login - Success - Login for user: {}, session id: {}, request IP: {}", username,
+                    session.getId(), requestIp);
+            auditLogger.info("UI Login - Success - Login for user: {}, session id: {}, request IP: {}", username,
                     session.getId(), requestIp);
 
             return this.redirectPath;

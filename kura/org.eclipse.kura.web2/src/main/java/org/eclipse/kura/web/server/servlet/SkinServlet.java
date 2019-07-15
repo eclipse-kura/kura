@@ -48,7 +48,7 @@ public class SkinServlet extends HttpServlet {
         try {
             fResourceFile = checkFile(resourceName);
         } catch (GwtKuraException | IOException e) {
-            logger.warn("Failed to load skin resource, {}", e.getMessage());
+            logger.warn("Failed to load skin resource, {}, resourceName {}", e.getMessage(), resourceName);
         }
 
         if (fResourceFile == null) {

@@ -12,8 +12,6 @@ package org.eclipse.kura.web.server;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.eclipse.kura.web.Console;
-import org.eclipse.kura.web.ConsoleOptions;
 import org.eclipse.kura.web.session.Attributes;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
@@ -43,17 +41,6 @@ public class GwtSessionServiceImpl extends OsgiRemoteServiceServlet implements G
             final String id = session.getId();
             session.invalidate();
             logger.warn("UI Logout - Success - Logout succeeded for user: {}, session {}", username, id);
-        }
-    }
-
-    @Override
-    public String getLoginBanner() {
-        final ConsoleOptions options = Console.getConsoleOptions();
-
-        if (options.isBannerEnabled()) {
-            return options.getBannerContent();
-        } else {
-            return null;
         }
     }
 

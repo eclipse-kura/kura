@@ -30,6 +30,7 @@ import org.eclipse.kura.configuration.KuraConfigReadyEvent;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.web.server.GwtAssetServiceImpl;
+import org.eclipse.kura.web.server.GwtBannerServiceImpl;
 import org.eclipse.kura.web.server.GwtCertificatesServiceImpl;
 import org.eclipse.kura.web.server.GwtCloudConnectionServiceImpl;
 import org.eclipse.kura.web.server.GwtComponentServiceImpl;
@@ -251,6 +252,7 @@ public class Console implements ConfigurableComponent {
         this.httpService.unregister(AUTH_RESOURCE_PATH);
         this.httpService.unregister(CONSOLE_RESOURCE_PATH);
         this.httpService.unregister(PASSWORD_AUTH_PATH);
+        this.httpService.unregister(LOGIN_MODULE_PATH + "/banner");
         this.httpService.unregister(DENALI_MODULE_PATH + "/session");
         this.httpService.unregister(DENALI_MODULE_PATH + "/xsrf");
         this.httpService.unregister(DENALI_MODULE_PATH + "/status");
@@ -327,7 +329,7 @@ public class Console implements ConfigurableComponent {
         routingHandler.addRouteHandler(authenticationPaths::contains,
                 chain(baseHandler, new CreateSessionSecurityHandler()));
 
-        // exception on event paths, activity on these paths does not count towards session expriration
+        // exception on event paths, activity on these paths does not count towards session expiration
         routingHandler.addRouteHandler(eventPaths::contains,
                 chain(baseHandler, sessionAuthHandler).sendErrorOnFailure(401));
 
@@ -351,6 +353,8 @@ public class Console implements ConfigurableComponent {
         this.httpService.registerResources(ADMIN_ROOT, "www", resourceContext);
         this.httpService.registerResources(AUTH_PATH, "www/auth.html", sessionContext);
         this.httpService.registerResources(CONSOLE_PATH, "www/denali.html", sessionContext);
+        this.httpService.registerServlet(LOGIN_MODULE_PATH + "/banner", new GwtBannerServiceImpl(), null,
+                resourceContext);
 
         this.httpService.registerServlet("/", new RedirectServlet("/"::equals, this.appRoot), null, resourceContext);
         this.httpService.registerServlet(AUTH_RESOURCE_PATH, new SendStatusServlet(404), null, resourceContext);

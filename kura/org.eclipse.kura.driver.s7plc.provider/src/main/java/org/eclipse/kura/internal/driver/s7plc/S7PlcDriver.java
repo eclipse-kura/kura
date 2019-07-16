@@ -135,8 +135,9 @@ public class S7PlcDriver extends AbstractBlockDriver<S7PlcDomain> implements Con
                 connectNum++;
             }
             if (code != 0)
-                throw new ConnectionException(
-                        "Failed to connect to PLC, ConnectTo() failed with Error: " + S7Client.ErrorText(code));
+                throw new ConnectionException("Failed to connect to PLC, ConnectTo() failed with Error: "
+                        + S7Client.ErrorText(code) + ". IP:" + currentOptions.getIp() + ", Rack:"
+                        + currentOptions.getRack() + ", slot:" + currentOptions.getSlot());
             if (currentOptions.shouldAuthenticate()) {
                 authenticate(this.state);
             }

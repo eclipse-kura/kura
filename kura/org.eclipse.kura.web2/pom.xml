@@ -53,10 +53,10 @@
 				<configuration>
 					<filesets>
 						<fileset>
-							<directory>src/main/webapp/denali</directory>
+							<directory>www/denali</directory>
 						</fileset>
 						<fileset>
-							<directory>src/main/webapp/WEB-INF</directory>
+							<directory>www/WEB-INF</directory>
 						</fileset>
 					</filesets>
 				</configuration>

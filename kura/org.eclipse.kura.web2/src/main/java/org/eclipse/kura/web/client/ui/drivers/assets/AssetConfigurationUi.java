@@ -62,6 +62,7 @@ import org.gwtbootstrap3.client.ui.Modal;
 import org.gwtbootstrap3.client.ui.Panel;
 import org.gwtbootstrap3.client.ui.TextBox;
 import org.gwtbootstrap3.client.ui.gwt.CellTable;
+import org.gwtbootstrap3.client.ui.html.Paragraph;
 import org.gwtbootstrap3.client.ui.html.Strong;
 
 import com.google.gwt.cell.client.AbstractCell;
@@ -71,6 +72,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FormPanel;
@@ -145,6 +147,8 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
     Hidden driverPidField;
     @UiField
     Hidden appendCheckField;
+    @UiField
+    Paragraph emptyTableLabel;
 
     private static final String INVALID_CLASS_NAME = "error-text-box";
 
@@ -184,6 +188,9 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
         this.associatedView = associatedView;
 
         this.nonValidatedCells = new HashSet<>();
+
+        this.channelTable.setAutoFooterRefreshDisabled(true);
+        this.channelTable.setAutoHeaderRefreshDisabled(true);
 
         this.btnDownload.setEnabled(true);
         this.btnDownload.addClickHandler(event -> RequestQueue.submit(
@@ -290,13 +297,13 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
 
         for (final GwtConfigParameter param : this.model.getChannelDescriptor().getParameters()) {
             AssetConfigurationUi.this.channelTable.addColumn(
-                    getColumnFromParam(param, param.getId().equals(AssetConstants.NAME.value())),
-                    new ResizableTableHeader(param.getName()));
+                    getColumnFromParam(param, param.getId().equals(AssetConstants.NAME.value())), buildHeader(param));
         }
 
         this.channelsDataProvider.setList(this.model.getChannels());
         this.channelsDataProvider.refresh();
         this.channelPanel.setVisible(true);
+        handleChannelTableVisibility();
     }
 
     @Override
@@ -314,6 +321,14 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
                 this.listener.onConfigurationChanged(this);
             }
         }
+    }
+
+    public Header<?> buildHeader(final GwtConfigParameter param) {
+        final String name = param.getName();
+        final String description = param.getDescription();
+        final String tooltip = name + (description != null ? " - " + description : "");
+
+        return new ResizableTableHeader(name, tooltip);
     }
 
     @Override
@@ -384,13 +399,10 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
                     viewData = ((ValidationInputCell) cell).getViewData(object);
                     viewData.setInvalid(true);
                     AssetConfigurationUi.this.nonValidatedCells.add(object.getChannelName());
-                    // We only modified the cell, so do a local redraw.
-                    AssetConfigurationUi.this.channelTable.redraw();
                     return;
                 }
                 AssetConfigurationUi.this.nonValidatedCells.remove(object.getChannelName());
                 AssetConfigurationUi.this.setDirty(true);
-                AssetConfigurationUi.this.channelTable.redraw();
                 object.setValue(param.getId(), value);
             });
         }
@@ -432,7 +444,6 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
             result.setFieldUpdater((index, object, label) -> {
                 AssetConfigurationUi.this.setDirty(true);
                 object.setValue(param.getId(), labelsToValues.get(label));
-                AssetConfigurationUi.this.channelTable.redraw();
             });
         }
 
@@ -472,6 +483,7 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
             AssetConfigurationUi.this.channelPager.lastPage();
             AssetConfigurationUi.this.setDirty(true);
             AssetConfigurationUi.this.newChannelModal.hide();
+            handleChannelTableVisibility();
         });
 
         this.btnRemove.addClickHandler(event -> {
@@ -482,7 +494,14 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
             AssetConfigurationUi.this.channelsDataProvider.refresh();
             AssetConfigurationUi.this.btnRemove.setEnabled(false);
             AssetConfigurationUi.this.setDirty(true);
+            handleChannelTableVisibility();
         });
+    }
+
+    private void handleChannelTableVisibility() {
+        final boolean isVisible = !model.getChannels().isEmpty();
+        channelTable.setVisible(isVisible);
+        emptyTableLabel.setVisible(!isVisible);
     }
 
     private ValidationData validateChannelName(final String channelName) {

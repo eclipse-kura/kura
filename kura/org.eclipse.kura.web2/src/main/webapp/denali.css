@@ -260,23 +260,33 @@ Wait modal END
 Channel Table Validation START
 ***********************/
 
-.channel-configuration-table input[type="text"],
-.channel-data-table input[type="text"],
-.channel-configuration-table select,
-.channel-data-table select {
-	width: 100%;
+.empty-table-label {
+	font-weight: bold;
+	text-align: center;
+	padding: 0.5cm;
+}
+
+.channel-configuration-table {
+	overflow-x: auto;
+}
+
+.channel-configuration-table table {
+	width: auto;
+	width: min-content;
+	max-width: initial;
 }
 
 .channel-configuration-table select,
-.channel-data-table select {
-	min-width: 80px;
+.channel-configuration-table input[type="text"] {
+	width: 100%
 }
 
 .table-header-wrapper {
-	min-width: 50px;
-	width: 100%;
-	overflow: auto;
+	overflow: hidden;
 	resize: horizontal;
+	width: 100px;
+	min-width: unset;
+	text-overflow: ellipsis;
 }
 
 .cell-not-valid:not(.active), .cell-not-valid:not(.active) *{

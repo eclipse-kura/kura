@@ -16,11 +16,18 @@ import com.google.gwt.user.cellview.client.SafeHtmlHeader;
 public class ResizableTableHeader extends SafeHtmlHeader {
 
     public ResizableTableHeader(final String value) {
-        super(getSafeHtml(value));
+        this(value, value);
     }
 
-    private static final SafeHtml getSafeHtml(final String value) {
-        return new SafeHtmlBuilder().appendHtmlConstant("<div class=\"table-header-wrapper\">") //
+    public ResizableTableHeader(final String value, final String title) {
+        super(getSafeHtml(value, title));
+    }
+
+    private static final SafeHtml getSafeHtml(final String value, final String title) {
+        return new SafeHtmlBuilder() //
+                .appendHtmlConstant("<div class=\"table-header-wrapper\" title=\"") //
+                .appendEscaped(title) //
+                .appendHtmlConstant("\">") //
                 .appendEscaped(value) //
                 .appendHtmlConstant("</div>") //
                 .toSafeHtml();

@@ -43,9 +43,10 @@ The Xdk Driver can be used to get the values from all the sensor installed on th
 | **VOLTAGE_LEM** | mV | RMS voltage of LEM sensor |
 
 *If enable Quaternion then:
+
 | Resource | Unit | Description |
 |----------|------|-------------|
-|**QUATERNION_M**, **QUATERNION_X**, **QUATERNION_Y**, **QUATERNION_Z** |  | The rotation-quaternion for each axis* |
+|**QUATERNION_M**, **QUATERNION_X**, **QUATERNION_Y**, **QUATERNION_Z** | number | The rotation-quaternion for each axis |
 
 
 When a notification is enabled for a specific channel (sensor), the notification period can't be set. Use the Timer in Wire Graph to set notification period.

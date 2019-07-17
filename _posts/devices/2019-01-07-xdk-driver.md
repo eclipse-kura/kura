@@ -26,6 +26,26 @@ The Xdk Driver can be used to get the values from all the sensor installed on th
 - led status
 - rms voltage of LEM sensor
 
+| Resource | Unit | Description |
+|----------|------|-------------|
+| **ACCELERATION_X**, **ACCELERATION_Y**, **ACCELERATION_Z** | G | The proper acceleration for each axis* |
+| **GYROSCOPE_X**, **GYROSCOPE_Y**, **GYROSCOPE_Z** | rad/S | The angular acceleration for each axis* |
+| **LIGHT** | lux | The light value |
+| **NOISE** | DpSpl | The acustic pressure value |
+| **PRESSURE** | Pa | The pressure value |
+| **TEMPERATURE** | °C | The temperature value |
+| **HUMIDITY** | %rH | The relative humidity |
+| **SD_CARD_DETECTION_STATUS** | boolean | SD-Card detect status |
+| **PUSH_BUTTONS** | bit | Button status, encoded as bit field: Bit 0, Button 1; Bit 1, Button 2 |
+| **MAGNETOMETER_X**, **MAGNETOMETER_Y**, **MAGNETOMETERE_Z** | uT | The magnetometer value for each axis |
+| **MAGNETOMETER_RESISTENCE** | ohm | The magnetometer resistence value |
+| **LED_STATUS** | bit | Led status, encoded as a bit field: Bit 0: yellow Led; Bit 1: orange Led; Bit 2: red Led|
+| **VOLTAGE_LEM** | mV | RMS voltage of LEM sensor |
+
+*If enable Quaternion then:
+|----------|------|-------------|
+|**QUATERNION_M**, **QUATERNION_X**, **QUATERNION_Y**, **QUATERNION_Z** |  | The rotation-quaternion for each axis* |
+
 
 When a notification is enabled for a specific channel (sensor), the notification period can't be set. Use the Timer in Wire Graph to set notification period.
 

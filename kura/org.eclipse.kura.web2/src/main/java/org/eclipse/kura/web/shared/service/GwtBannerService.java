@@ -9,15 +9,12 @@
  *******************************************************************************/
 package org.eclipse.kura.web.shared.service;
 
-import org.eclipse.kura.web.shared.GwtKuraException;
-import org.eclipse.kura.web.shared.model.GwtXSRFToken;
-
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
-@RemoteServiceRelativePath("session")
-public interface GwtSessionService extends RemoteService {
-
-    public void logout(GwtXSRFToken xsrfToken) throws GwtKuraException;
+@RemoteServiceRelativePath("banner")
+public interface GwtBannerService extends RemoteService {
+    
+    public String getLoginBanner();
 
 }

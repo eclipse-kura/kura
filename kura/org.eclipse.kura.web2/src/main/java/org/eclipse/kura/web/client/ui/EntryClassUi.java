@@ -169,12 +169,6 @@ public class EntryClassUi extends Composite {
     Button logoutButton;
     @UiField
     Button headerLogoutButton;
-    @UiField
-    Modal accessBannerModal;
-    @UiField
-    Button buttonAccessBannerModalOk;
-    @UiField
-    Strong accessBannerModalPannelBody;
 
     private static final Messages MSGS = GWT.create(Messages.class);
     private static final EntryClassUIUiBinder uiBinder = GWT.create(EntryClassUIUiBinder.class);
@@ -248,19 +242,6 @@ public class EntryClassUi extends Composite {
 
         initLogoutButtons();
         initServicesTree();
-    }
-
-    private void initLoginBannerModal() {
-        this.accessBannerModal.setTitle(MSGS.warning());
-        this.buttonAccessBannerModalOk.setText(MSGS.okButton());
-
-        RequestQueue.submit(c -> this.gwtSessionService.getLoginBanner(c.callback(banner -> {
-            if (banner != null) {
-                EntryClassUi.this.accessBannerModalPannelBody.setText(banner);
-                EntryClassUi.this.accessBannerModal.show();
-            }
-        })));
-
     }
 
     private void initExceptionReportModal() {
@@ -908,8 +889,6 @@ public class EntryClassUi extends Composite {
                 EntryClassUi.this.showStatusPanel();
             }
         });
-
-        initLoginBannerModal();
     }
 
     private void showStatusPanel() {

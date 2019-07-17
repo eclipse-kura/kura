@@ -58,6 +58,9 @@
 						<fileset>
 							<directory>www/WEB-INF</directory>
 						</fileset>
+                        <fileset>
+                            <directory>www/login</directory>
+                        </fileset>
 					</filesets>
 				</configuration>
 			</plugin>

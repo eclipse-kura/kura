@@ -36,6 +36,8 @@ public class Xdk {
 
     private static final String DEVINFO = "devinfo";
     private static final String SENSOR = "sensor";
+    private static final String RATE = "rate";
+    private static final String SENSOR_FUSION = "sensor fusion";
     private static final String HIGH_PRIORITY_ARRAY = "high priority array";
     private static final String LOW_PRIORITY_ARRAY = "low priority array";
 
@@ -160,14 +162,14 @@ public class Xdk {
 
         try {
 
-            this.gattResources.get(SENSOR).getGattService()
+            this.gattResources.get(RATE).getGattService()
                     .findCharacteristic(XdkGatt.UUID_XDK_CONTROL_SERVICE_CHANGE_SENSOR_SAMPLING_RATA).writeValue(rate);
 
             this.gattResources.get(SENSOR).getGattService()
                     .findCharacteristic(XdkGatt.UUID_XDK_CONTROL_SERVICE_START_SENSOR_SAMPLING_AND_NOTIFICATION)
                     .writeValue(value);
 
-            this.gattResources.get(SENSOR).getGattService()
+            this.gattResources.get(SENSOR_FUSION).getGattService()
                     .findCharacteristic(XdkGatt.UUID_XDK_CONTROL_SERVICE_CONTROL_NODE_USE_SENSOR_FUSION)
                     .writeValue(sensorFusion);
 
@@ -189,7 +191,7 @@ public class Xdk {
      * Read High Data sensor
      */
     public float[] readHighData() {
-        float[] hightData = new float[6];
+        float[] hightData = new float[10];
         try {
             hightData = calculateHighData(
                     this.gattResources.get(HIGH_PRIORITY_ARRAY).getGattValueCharacteristic().readValue());
@@ -469,7 +471,11 @@ public class Xdk {
             BluetoothLeGattService DataService = this.device.findService(XdkGatt.UUID_XDK_HIGH_DATA_RATE);
 
             BluetoothLeGattCharacteristic SensorCharacteristic = ControlService
+                    .findCharacteristic(XdkGatt.UUID_XDK_CONTROL_SERVICE_START_SENSOR_SAMPLING_AND_NOTIFICATION);
+            BluetoothLeGattCharacteristic RateCharacteristic = ControlService
                     .findCharacteristic(XdkGatt.UUID_XDK_CONTROL_SERVICE_CHANGE_SENSOR_SAMPLING_RATA);
+            BluetoothLeGattCharacteristic FusionCharacteristic = ControlService
+                    .findCharacteristic(XdkGatt.UUID_XDK_CONTROL_SERVICE_CONTROL_NODE_USE_SENSOR_FUSION);
 
             BluetoothLeGattCharacteristic HighDataCharacteristic = DataService
                     .findCharacteristic(XdkGatt.UUID_XDK_HIGH_DATA_RATE_HIGH_PRIORITY_ARREY);
@@ -477,6 +483,8 @@ public class Xdk {
                     .findCharacteristic(XdkGatt.UUID_XDK_HIGH_DATA_RATE_LOW_PRIORITY_ARREY);
 
             XdkGattResources SensorGattResources = new XdkGattResources(SENSOR, ControlService, SensorCharacteristic);
+            XdkGattResources RateGattResources = new XdkGattResources(RATE, ControlService, RateCharacteristic);
+            XdkGattResources FusionGattResources = new XdkGattResources(RATE, ControlService, FusionCharacteristic);
             //
             XdkGattResources HighDataGattResources = new XdkGattResources(HIGH_PRIORITY_ARRAY, DataService,
                     HighDataCharacteristic);
@@ -484,6 +492,10 @@ public class Xdk {
                     LowDataCharacteristic);
 
             gattResources.put(SENSOR, SensorGattResources);
+
+            gattResources.put(RATE, RateGattResources);
+
+            gattResources.put(SENSOR_FUSION, FusionGattResources);
 
             gattResources.put(HIGH_PRIORITY_ARRAY, HighDataGattResources);
 

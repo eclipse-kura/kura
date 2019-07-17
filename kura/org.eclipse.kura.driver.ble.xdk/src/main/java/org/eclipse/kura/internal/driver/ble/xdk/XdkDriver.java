@@ -56,8 +56,8 @@ public class XdkDriver implements Driver, ConfigurableComponent {
     private static final int TIMEOUT = 5;
     private static final String INTERRUPTED_EX = "Interrupted Exception";
 
-    private static final byte message1 = 0x01;
-    private static final byte message2 = 0x02;
+    private static final byte MESSAGE1 = 0x01;
+    private static final byte MESSAGE2 = 0x02;
     private int configSampleRate;
     private boolean enableQuaternion;
 
@@ -255,32 +255,32 @@ public class XdkDriver implements Driver, ConfigurableComponent {
             return xdk.readHighData()[5];
         // Low Priority Data - Message 1
         case LIGHT:
-            return xdk.readLowData(message1)[0];
+            return xdk.readLowData(MESSAGE1)[0];
         case NOISE:
-            return xdk.readLowData(message1)[1];
+            return xdk.readLowData(MESSAGE1)[1];
         case PRESSURE:
-            return xdk.readLowData(message1)[2];
+            return xdk.readLowData(MESSAGE1)[2];
         case TEMPERATURE:
-            return xdk.readLowData(message1)[3];
+            return xdk.readLowData(MESSAGE1)[3];
         case HUMIDITY:
-            return xdk.readLowData(message1)[4];
+            return xdk.readLowData(MESSAGE1)[4];
         case SD_CARD_DETECT_STATUS:
-            return xdk.readLowData(message1)[5];
+            return xdk.readLowData(MESSAGE1)[5];
         case BUTTON_STATUS:
-            return xdk.readLowData(message1)[6];
+            return xdk.readLowData(MESSAGE1)[6];
         // Low Priority Data - Message 2
         case MAGNETIC_X:
-            return xdk.readLowData(message2)[0];
+            return xdk.readLowData(MESSAGE2)[0];
         case MAGNETIC_Y:
-            return xdk.readLowData(message2)[1];
+            return xdk.readLowData(MESSAGE2)[1];
         case MAGNETIC_Z:
-            return xdk.readLowData(message2)[2];
+            return xdk.readLowData(MESSAGE2)[2];
         case MAGNETOMETER_RESISTANCE:
-            return xdk.readLowData(message2)[3];
+            return xdk.readLowData(MESSAGE2)[3];
         case LED_STATUS:
-            return xdk.readLowData(message2)[4];
+            return xdk.readLowData(MESSAGE2)[4];
         case VOLTAGE_LEM:
-            return xdk.readLowData(message2)[5];
+            return xdk.readLowData(MESSAGE2)[5];
         case QUATERNION_M:
             return xdk.readHighData()[6];
         case QUATERNION_X:
@@ -343,7 +343,7 @@ public class XdkDriver implements Driver, ConfigurableComponent {
                 sensorListener.addSensorName(XdkChannelDescriptor.getSensorName(channelConfig));
                 registerNotification(sensorListener);
             } else {
-                logger.warn("Listener registration failed: TiSensorTag not connected");
+                logger.warn("Listener registration failed: Xdk not connected");
             }
         } catch (KuraBluetoothIOException | ConnectionException e) {
             logger.error("Listener registration failed", e);
@@ -465,7 +465,7 @@ public class XdkDriver implements Driver, ConfigurableComponent {
         case "SD_CARD_DETECT_STATUS":
         case "BUTTON_STATUS":
             sensorListener.getXdk().disableLowNotifications();
-            sensorListener.getXdk().enableLowNotifications(SensorListener.getSensorConsumer(sensorListener), message1);
+            sensorListener.getXdk().enableLowNotifications(SensorListener.getSensorConsumer(sensorListener), MESSAGE1);
             break;
         case "MAGNETIC_X":
         case "MAGNETIC_Y":
@@ -474,7 +474,7 @@ public class XdkDriver implements Driver, ConfigurableComponent {
         case "LED_STATUS":
         case "VOLTAGE_LEM":
             sensorListener.getXdk().disableLowNotifications();
-            sensorListener.getXdk().enableLowNotifications(SensorListener.getSensorConsumer(sensorListener), message2);
+            sensorListener.getXdk().enableLowNotifications(SensorListener.getSensorConsumer(sensorListener), MESSAGE2);
             break;
         default:
 

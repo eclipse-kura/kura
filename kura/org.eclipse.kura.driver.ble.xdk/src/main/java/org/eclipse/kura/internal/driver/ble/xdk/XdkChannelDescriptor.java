@@ -49,16 +49,16 @@ public final class XdkChannelDescriptor implements ChannelDescriptor {
         sensorName.setDefault("TEMPERATURE");
         addOptions(sensorName, SensorName.values());
 
-        final Tad XdkAddress = new Tad();
-        XdkAddress.setName(XDK_ADDRESS);
-        XdkAddress.setId(XDK_ADDRESS);
-        XdkAddress.setDescription(XDK_ADDRESS);
-        XdkAddress.setType(Tscalar.STRING);
-        XdkAddress.setRequired(true);
-        XdkAddress.setDefault("AA:BB:CC:DD:EE:FF");
+        final Tad xdkAddress = new Tad();
+        xdkAddress.setName(XDK_ADDRESS);
+        xdkAddress.setId(XDK_ADDRESS);
+        xdkAddress.setDescription(XDK_ADDRESS);
+        xdkAddress.setType(Tscalar.STRING);
+        xdkAddress.setRequired(true);
+        xdkAddress.setDefault("AA:BB:CC:DD:EE:FF");
 
 
-        elements.add(XdkAddress);
+        elements.add(xdkAddress);
         elements.add(sensorName);
         return elements;
     }

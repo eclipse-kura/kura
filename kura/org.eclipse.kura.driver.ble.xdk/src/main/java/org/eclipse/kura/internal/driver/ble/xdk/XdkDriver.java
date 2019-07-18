@@ -56,8 +56,8 @@ public class XdkDriver implements Driver, ConfigurableComponent {
     private static final int TIMEOUT = 5;
     private static final String INTERRUPTED_EX = "Interrupted Exception";
 
-    private static final byte MESSAGE1 = 0x01;
-    private static final byte MESSAGE2 = 0x02;
+    private static final byte MESSAGE_ONE = 0x01;
+    private static final byte MESSAGE_TWO = 0x02;
     private int configSampleRate;
     private boolean enableQuaternion;
 
@@ -126,7 +126,6 @@ public class XdkDriver implements Driver, ConfigurableComponent {
 
         configSampleRate = 1000 / this.options.isConfigSampleRate();
 
-        // Get Bluetooth adapter and ensure it is enabled
         this.bluetoothLeAdapter = this.bluetoothLeService.getAdapter(this.options.getBluetoothInterfaceName());
         if (this.bluetoothLeAdapter != null) {
             logger.info("Bluetooth adapter interface => {}", this.options.getBluetoothInterfaceName());
@@ -255,32 +254,32 @@ public class XdkDriver implements Driver, ConfigurableComponent {
             return xdk.readHighData()[5];
         // Low Priority Data - Message 1
         case LIGHT:
-            return xdk.readLowData(MESSAGE1)[0];
+            return xdk.readLowData(MESSAGE_ONE)[0];
         case NOISE:
-            return xdk.readLowData(MESSAGE1)[1];
+            return xdk.readLowData(MESSAGE_ONE)[1];
         case PRESSURE:
-            return xdk.readLowData(MESSAGE1)[2];
+            return xdk.readLowData(MESSAGE_ONE)[2];
         case TEMPERATURE:
-            return xdk.readLowData(MESSAGE1)[3];
+            return xdk.readLowData(MESSAGE_ONE)[3];
         case HUMIDITY:
-            return xdk.readLowData(MESSAGE1)[4];
+            return xdk.readLowData(MESSAGE_ONE)[4];
         case SD_CARD_DETECT_STATUS:
-            return xdk.readLowData(MESSAGE1)[5];
+            return xdk.readLowData(MESSAGE_ONE)[5];
         case BUTTON_STATUS:
-            return xdk.readLowData(MESSAGE1)[6];
+            return xdk.readLowData(MESSAGE_ONE)[6];
         // Low Priority Data - Message 2
         case MAGNETIC_X:
-            return xdk.readLowData(MESSAGE2)[0];
+            return xdk.readLowData(MESSAGE_TWO)[0];
         case MAGNETIC_Y:
-            return xdk.readLowData(MESSAGE2)[1];
+            return xdk.readLowData(MESSAGE_TWO)[1];
         case MAGNETIC_Z:
-            return xdk.readLowData(MESSAGE2)[2];
+            return xdk.readLowData(MESSAGE_TWO)[2];
         case MAGNETOMETER_RESISTANCE:
-            return xdk.readLowData(MESSAGE2)[3];
+            return xdk.readLowData(MESSAGE_TWO)[3];
         case LED_STATUS:
-            return xdk.readLowData(MESSAGE2)[4];
+            return xdk.readLowData(MESSAGE_TWO)[4];
         case VOLTAGE_LEM:
-            return xdk.readLowData(MESSAGE2)[5];
+            return xdk.readLowData(MESSAGE_TWO)[5];
         case QUATERNION_M:
             return xdk.readHighData()[6];
         case QUATERNION_X:
@@ -370,7 +369,7 @@ public class XdkDriver implements Driver, ConfigurableComponent {
 
     @Override
     public void write(List<ChannelRecord> records) throws ConnectionException {
-        // Method not supported
+        throw new UnsupportedOperationException("Un supported operation.");
     }
 
     private static class XdkRequestInfo {
@@ -459,13 +458,14 @@ public class XdkDriver implements Driver, ConfigurableComponent {
             break;
         case "LIGHT":
         case "NOISE":
-        case "PRESURE":
+        case "PRESSURE":
         case "TEMPERATURE":
         case "HUMIDITY":
         case "SD_CARD_DETECT_STATUS":
         case "BUTTON_STATUS":
             sensorListener.getXdk().disableLowNotifications();
-            sensorListener.getXdk().enableLowNotifications(SensorListener.getSensorConsumer(sensorListener), MESSAGE1);
+            sensorListener.getXdk().enableLowNotifications(SensorListener.getSensorConsumer(sensorListener),
+                    MESSAGE_ONE);
             break;
         case "MAGNETIC_X":
         case "MAGNETIC_Y":
@@ -474,7 +474,8 @@ public class XdkDriver implements Driver, ConfigurableComponent {
         case "LED_STATUS":
         case "VOLTAGE_LEM":
             sensorListener.getXdk().disableLowNotifications();
-            sensorListener.getXdk().enableLowNotifications(SensorListener.getSensorConsumer(sensorListener), MESSAGE2);
+            sensorListener.getXdk().enableLowNotifications(SensorListener.getSensorConsumer(sensorListener),
+                    MESSAGE_TWO);
             break;
         default:
 
@@ -518,7 +519,8 @@ public class XdkDriver implements Driver, ConfigurableComponent {
 
         @Override
         public void close() {
-            // Method not supported
+
+            throw new UnsupportedOperationException("Un supported operation.");
         }
     }
 

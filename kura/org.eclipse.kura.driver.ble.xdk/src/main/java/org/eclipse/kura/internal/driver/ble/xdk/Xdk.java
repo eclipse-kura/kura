@@ -11,7 +11,6 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.driver.ble.xdk;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,7 +33,6 @@ public class Xdk {
 
     private static final Logger logger = LoggerFactory.getLogger(Xdk.class);
 
-    private static final String DEVINFO = "devinfo";
     private static final String SENSOR = "sensor";
     private static final String RATE = "rate";
     private static final String SENSOR_FUSION = "sensor fusion";
@@ -44,7 +42,7 @@ public class Xdk {
     private static final int SERVICE_TIMEOUT = 10000;
 
     private byte[] value = { 0x01 };
-    private byte[] rate = { 0x64, 0x00, 0x00, 0x00 };
+    private byte[] rateSamples = { 0x64, 0x00, 0x00, 0x00 };
     private byte[] sensorFusion = { 0x00 };
 
     private BluetoothLeDevice device;
@@ -70,7 +68,6 @@ public class Xdk {
     public void connect() throws ConnectionException {
         try {
             this.device.connect();
-            // Wait a bit to ensure that the device is really connected and services discovered
             Long startTime = System.currentTimeMillis();
             while (System.currentTimeMillis() - startTime < SERVICE_TIMEOUT) {
                 if (this.device.isServicesResolved()) {
@@ -108,31 +105,7 @@ public class Xdk {
         } catch (KuraBluetoothConnectionException e) {
             throw new ConnectionException(e);
         }
-        // Wait a while after disconnection
         XdkDriver.waitFor(1000);
-    }
-
-    public String getFirmareRevision() {
-        String firmware = "";
-        try {
-            BluetoothLeGattCharacteristic devinfo = this.gattResources.get(DEVINFO).getGattService()
-                    .findCharacteristic(XdkGatt.UUID_XDK_CONTROL_SERVICE_GET_FIRMWARE_VERSION);
-            firmware = new String(devinfo.readValue(), "UTF-8");
-        } catch (KuraException | UnsupportedEncodingException e) {
-            logger.error("Firmware revision read failed", e);
-        }
-        return firmware;
-    }
-
-    /*
-     * Discover services
-     */
-    public Map<String, BluetoothLeGattService> discoverServices() {
-        Map<String, BluetoothLeGattService> services = new HashMap<>();
-        for (XdkGattResources resources : this.gattResources.values()) {
-            services.put(resources.getName(), resources.getGattService());
-        }
-        return services;
     }
 
     public List<BluetoothLeGattCharacteristic> getCharacteristics() {
@@ -147,9 +120,6 @@ public class Xdk {
         return characteristics;
     }
 
-    /*
-     * Enable Sensor
-     */
     public void startSensor(boolean enableQuaternion, int configSimpleRate) {
 
         if (enableQuaternion) {
@@ -158,12 +128,13 @@ public class Xdk {
             sensorFusion[0] = 0x00;
         }
 
-        rate = intToBytesArray(configSimpleRate);
+        rateSamples = intToBytesArray(configSimpleRate);
 
         try {
 
             this.gattResources.get(RATE).getGattService()
-                    .findCharacteristic(XdkGatt.UUID_XDK_CONTROL_SERVICE_CHANGE_SENSOR_SAMPLING_RATA).writeValue(rate);
+                    .findCharacteristic(XdkGatt.UUID_XDK_CONTROL_SERVICE_CHANGE_SENSOR_SAMPLING_RATA)
+                    .writeValue(rateSamples);
 
             this.gattResources.get(SENSOR).getGattService()
                     .findCharacteristic(XdkGatt.UUID_XDK_CONTROL_SERVICE_START_SENSOR_SAMPLING_AND_NOTIFICATION)
@@ -178,18 +149,6 @@ public class Xdk {
         }
     }
 
-    public void reboot() {
-        try {
-            this.gattResources.get(SENSOR).getGattService().findCharacteristic(XdkGatt.UUID_XDK_CONTROL_SERVICE_REBOOT)
-                    .writeValue(rate);
-        } catch (KuraException e) {
-            logger.error("Sensor reboot failed", e);
-        }
-    }
-
-    /*
-     * Read High Data sensor
-     */
     public float[] readHighData() {
         float[] hightData = new float[10];
         try {
@@ -201,38 +160,27 @@ public class Xdk {
         return hightData;
     }
 
-    /*
-     * Read Low Data sensor
-     */
-    public Integer[] readLowData(byte ID) {
+    public Integer[] readLowData(byte id) {
 
         Integer[] lowData = new Integer[7];
         byte[] data;
 
         try {
             data = this.gattResources.get(LOW_PRIORITY_ARRAY).getGattValueCharacteristic().readValue();
-            while (data[0] != ID) {
+            while (data[0] != id) {
                 data = this.gattResources.get(LOW_PRIORITY_ARRAY).getGattValueCharacteristic().readValue();
             }
 
-            lowData = calculateLowData(data, ID);
+            lowData = calculateLowData(data, id);
         } catch (KuraException e) {
             logger.error("Low Data read failed", e);
         }
         return lowData;
     }
 
-    /*
-     * Enable High Notifications
-     */
     public void enableHighNotifications(Consumer<float[]> callback) {
-        Consumer<byte[]> callbackHigh = new Consumer<byte[]>() {
+        Consumer<byte[]> callbackHigh = valueBytes -> callback.accept(calculateHighData(valueBytes));
 
-            @Override
-            public void accept(byte[] t) {
-                callback.accept(calculateHighData(t));
-            }
-        };
         try {
             this.gattResources.get(HIGH_PRIORITY_ARRAY).getGattService()
                     .findCharacteristic(XdkGatt.UUID_XDK_HIGH_DATA_RATE_HIGH_PRIORITY_ARREY)
@@ -242,14 +190,10 @@ public class Xdk {
         }
     }
 
-    /*
-     * Enable Low Notifications
-     */
-
-    public void enableLowNotifications(Consumer<Integer[]> callback, byte ID) {
+    public void enableLowNotifications(Consumer<Integer[]> callback, byte id) {
         Consumer<byte[]> callbackHigh = valueBytes -> {
-            if (valueBytes[0] == ID) {
-                callback.accept(calculateLowData(valueBytes, ID));
+            if (valueBytes[0] == id) {
+                callback.accept(calculateLowData(valueBytes, id));
             }
         };
         try {
@@ -260,10 +204,6 @@ public class Xdk {
             logger.error("Notification enable failed", e);
         }
     }
-
-    /*
-     * Disable temperature notifications
-     */
 
     public void disableHighNotifications() {
         try {
@@ -292,9 +232,6 @@ public class Xdk {
         return isNotifying(LOW_PRIORITY_ARRAY);
     }
 
-    /*
-     * Calculate High Data
-     */
     private float[] calculateHighData(byte[] valueByte) {
 
         logger.debug("Received High Data value: {}", byteArrayToHexString(valueByte));
@@ -302,20 +239,20 @@ public class Xdk {
         float[] highData = new float[10];
 
         if (sensorFusion[0] == 0x00) {
-            int Ax = shortSignedAtOffset(valueByte, 0);
-            int Ay = shortSignedAtOffset(valueByte, 2);
-            int Az = shortSignedAtOffset(valueByte, 4);
+            int ax = shortSignedAtOffset(valueByte, 0);
+            int ay = shortSignedAtOffset(valueByte, 2);
+            int az = shortSignedAtOffset(valueByte, 4);
 
-            int Gx = shortSignedAtOffset(valueByte, 6);
-            int Gy = shortSignedAtOffset(valueByte, 8);
-            int Gz = shortSignedAtOffset(valueByte, 10);
+            int gx = shortSignedAtOffset(valueByte, 6);
+            int gy = shortSignedAtOffset(valueByte, 8);
+            int gz = shortSignedAtOffset(valueByte, 10);
 
-            highData[0] = Ax;
-            highData[1] = Ay;
-            highData[2] = Az;
-            highData[3] = Gx;
-            highData[4] = Gy;
-            highData[5] = Gz;
+            highData[0] = ax;
+            highData[1] = ay;
+            highData[2] = az;
+            highData[3] = gx;
+            highData[4] = gy;
+            highData[5] = gz;
             highData[6] = 0;
             highData[7] = 0;
             highData[8] = 0;
@@ -343,63 +280,53 @@ public class Xdk {
         return highData;
     }
 
-    /*
-     * Calculate Low Data
-     */
-
-    private Integer[] calculateLowData(byte[] valueByte, byte ID) {
+    private Integer[] calculateLowData(byte[] valueByte, byte id) {
 
         logger.debug("Received Low Data value: {}", byteArrayToHexString(valueByte));
 
-        Integer[] LowData = new Integer[7];
+        Integer[] lowData = new Integer[7];
 
-        if (ID == 0x01) {
+        if (id == 0x01) {
 
             Integer lux = thirtyTwoBitUnsignedAtOffset(valueByte, 1) / 1000;
             Integer noise = eightBitUnsignedAtOffset(valueByte, 5);
             Integer pressure = thirtyTwoBitUnsignedAtOffset(valueByte, 6);
             Integer temperature = (Integer) (thirtyTwoBitShortSignedAtOffset(valueByte, 10) / 1000);
             Integer humidity = thirtyTwoBitUnsignedAtOffset(valueByte, 14);
-            Integer sd_card = valueByte[18] & 0xFF;
+            Integer sdCard = valueByte[18] & 0xFF;
             Integer button = valueByte[19] & 0xFF;
 
-            LowData[0] = lux;
-            LowData[1] = noise;
-            LowData[2] = pressure;
-            LowData[3] = temperature;
-            LowData[4] = humidity;
-            LowData[5] = sd_card;
-            LowData[6] = button;
+            lowData[0] = lux;
+            lowData[1] = noise;
+            lowData[2] = pressure;
+            lowData[3] = temperature;
+            lowData[4] = humidity;
+            lowData[5] = sdCard;
+            lowData[6] = button;
 
         } else {
 
-            Integer Mx = shortSignedAtOffset(valueByte, 1);
-            Integer My = shortSignedAtOffset(valueByte, 3);
-            Integer Mz = shortSignedAtOffset(valueByte, 5);
-            Integer M_res = shortSignedAtOffset(valueByte, 7);
+            Integer mx = shortSignedAtOffset(valueByte, 1);
+            Integer my = shortSignedAtOffset(valueByte, 3);
+            Integer mz = shortSignedAtOffset(valueByte, 5);
+            Integer mRes = shortSignedAtOffset(valueByte, 7);
             Integer led = valueByte[9] & 0xFF;
             Integer voltage = (Integer) shortSignedAtOffset(valueByte, 10) / 1000;
             Integer none = 0x00;
 
-            LowData[0] = Mx;
-            LowData[1] = My;
-            LowData[2] = Mz;
-            LowData[3] = M_res;
-            LowData[4] = led;
-            LowData[5] = voltage;
-            LowData[6] = none;
+            lowData[0] = mx;
+            lowData[1] = my;
+            lowData[2] = mz;
+            lowData[3] = mRes;
+            lowData[4] = led;
+            lowData[5] = voltage;
+            lowData[6] = none;
 
         }
 
-        return LowData;
+        return lowData;
 
     }
-
-    // ---------------------------------------------------------------------------------------------
-    //
-    // Auxiliary methods
-    //
-    // ---------------------------------------------------------------------------------------------
 
     private String byteArrayToHexString(byte[] value) {
         final char[] hexadecimals = "0123456789ABCDEF".toCharArray();
@@ -427,8 +354,8 @@ public class Xdk {
     }
 
     private Integer eightBitUnsignedAtOffset(byte[] c, int offset) {
-        Integer lowerByte = c[offset] & 0xFF;
-        return lowerByte;
+
+        return c[offset] & 0xFF;
     }
 
     private Integer thirtyTwoBitUnsignedAtOffset(byte[] c, int offset) {
@@ -467,39 +394,39 @@ public class Xdk {
 
     private void getGattResources() throws ConnectionException {
         try {
-            BluetoothLeGattService ControlService = this.device.findService(XdkGatt.UUID_XDK_CONTROL_SERVICE);
-            BluetoothLeGattService DataService = this.device.findService(XdkGatt.UUID_XDK_HIGH_DATA_RATE);
+            BluetoothLeGattService controlService = this.device.findService(XdkGatt.UUID_XDK_CONTROL_SERVICE);
+            BluetoothLeGattService dataService = this.device.findService(XdkGatt.UUID_XDK_HIGH_DATA_RATE);
 
-            BluetoothLeGattCharacteristic SensorCharacteristic = ControlService
+            BluetoothLeGattCharacteristic sensorCharacteristic = controlService
                     .findCharacteristic(XdkGatt.UUID_XDK_CONTROL_SERVICE_START_SENSOR_SAMPLING_AND_NOTIFICATION);
-            BluetoothLeGattCharacteristic RateCharacteristic = ControlService
+            BluetoothLeGattCharacteristic rateCharacteristic = controlService
                     .findCharacteristic(XdkGatt.UUID_XDK_CONTROL_SERVICE_CHANGE_SENSOR_SAMPLING_RATA);
-            BluetoothLeGattCharacteristic FusionCharacteristic = ControlService
+            BluetoothLeGattCharacteristic fusionCharacteristic = controlService
                     .findCharacteristic(XdkGatt.UUID_XDK_CONTROL_SERVICE_CONTROL_NODE_USE_SENSOR_FUSION);
 
-            BluetoothLeGattCharacteristic HighDataCharacteristic = DataService
+            BluetoothLeGattCharacteristic highDataCharacteristic = dataService
                     .findCharacteristic(XdkGatt.UUID_XDK_HIGH_DATA_RATE_HIGH_PRIORITY_ARREY);
-            BluetoothLeGattCharacteristic LowDataCharacteristic = DataService
+            BluetoothLeGattCharacteristic lowDataCharacteristic = dataService
                     .findCharacteristic(XdkGatt.UUID_XDK_HIGH_DATA_RATE_LOW_PRIORITY_ARREY);
 
-            XdkGattResources SensorGattResources = new XdkGattResources(SENSOR, ControlService, SensorCharacteristic);
-            XdkGattResources RateGattResources = new XdkGattResources(RATE, ControlService, RateCharacteristic);
-            XdkGattResources FusionGattResources = new XdkGattResources(RATE, ControlService, FusionCharacteristic);
+            XdkGattResources sensorGattResources = new XdkGattResources(SENSOR, controlService, sensorCharacteristic);
+            XdkGattResources rateGattResources = new XdkGattResources(RATE, controlService, rateCharacteristic);
+            XdkGattResources fusionGattResources = new XdkGattResources(RATE, controlService, fusionCharacteristic);
             //
-            XdkGattResources HighDataGattResources = new XdkGattResources(HIGH_PRIORITY_ARRAY, DataService,
-                    HighDataCharacteristic);
-            XdkGattResources LowDataGattResources = new XdkGattResources(LOW_PRIORITY_ARRAY, DataService,
-                    LowDataCharacteristic);
+            XdkGattResources highDataGattResources = new XdkGattResources(HIGH_PRIORITY_ARRAY, dataService,
+                    highDataCharacteristic);
+            XdkGattResources lowDataGattResources = new XdkGattResources(LOW_PRIORITY_ARRAY, dataService,
+                    lowDataCharacteristic);
 
-            gattResources.put(SENSOR, SensorGattResources);
+            gattResources.put(SENSOR, sensorGattResources);
 
-            gattResources.put(RATE, RateGattResources);
+            gattResources.put(RATE, rateGattResources);
 
-            gattResources.put(SENSOR_FUSION, FusionGattResources);
+            gattResources.put(SENSOR_FUSION, fusionGattResources);
 
-            gattResources.put(HIGH_PRIORITY_ARRAY, HighDataGattResources);
+            gattResources.put(HIGH_PRIORITY_ARRAY, highDataGattResources);
 
-            gattResources.put(LOW_PRIORITY_ARRAY, LowDataGattResources);
+            gattResources.put(LOW_PRIORITY_ARRAY, lowDataGattResources);
 
         } catch (KuraBluetoothResourceNotFoundException e) {
             logger.error("Failed to get GATT service", e);

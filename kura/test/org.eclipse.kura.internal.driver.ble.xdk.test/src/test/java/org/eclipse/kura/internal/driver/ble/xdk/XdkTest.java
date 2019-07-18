@@ -127,6 +127,14 @@ public class XdkTest {
     }
 
     @Test
+    public void testEnableQuaternion() throws Throwable {
+
+        ImplementationXdk impXdk = new ImplementationXdk();
+
+        testEnableFusion(impXdk.getFusionChrMock(), impXdk.getXdk(), "startSensor");
+    }
+
+    @Test
     public void testDisableQuaternion() throws Throwable {
 
         ImplementationXdk impXdk = new ImplementationXdk();
@@ -166,11 +174,25 @@ public class XdkTest {
     }
 
     @Test
+    public void testReadHighDataQuaternion() throws Throwable {
+
+        boolean enableQuaternion = true;
+
+        ImplementationXdk impXdk = new ImplementationXdk((byte) 0x01, enableQuaternion);
+
+        float[] expected = new float[] { 0, 0, 0, 0, 0, 0, (float) 0.93681324, (float) 0.013107585, (float) 0.01862044,
+                (float) -0.34908798 };
+
+        testRead(ImplementationXdk.HIGHDATABYTE, expected, impXdk.getXdk(), impXdk.getHighChrMock(),
+                impXdk.getDataSvcMock(), "readHighData");
+    }
+
+    @Test
     public void testReadLowDataMessageOne() throws Throwable {
 
         byte message = 0x01;
 
-        ImplementationXdk impXdk = new ImplementationXdk(message);
+        ImplementationXdk impXdk = new ImplementationXdk(message, false);
 
         Integer[] expected = new Integer[] { 336, 0, 98216, 23, 46, 0, 0 };
 
@@ -183,7 +205,7 @@ public class XdkTest {
 
         byte message = 0x02;
 
-        ImplementationXdk impXdk = new ImplementationXdk(message);
+        ImplementationXdk impXdk = new ImplementationXdk(message, false);
 
         Integer[] expected = new Integer[] { -22, -13, -62, 6305, 2, 0, 0 };
 
@@ -205,12 +227,12 @@ public class XdkTest {
     public void testEnableLowNotificationsMessageOne() throws Throwable {
         ImplementationXdk impXdk = new ImplementationXdk();
 
-        Integer[] expected = new Integer[] { 337, 0, 98216, 24, 46, 0, 0 };
+        Integer[] expected = new Integer[] { 336, 0, 98216, 23, 46, 0, 0 };
 
         byte message = 0x01;
 
         testEnableNotifications(ImplementationXdk.LOWDATABYTE_MESSAGE_ONE, expected, impXdk.getXdk(),
-                impXdk.getLowChrMock(), impXdk.getDataSvcMock(), "enableHighNotifications", message);
+                impXdk.getLowChrMock(), impXdk.getDataSvcMock(), "enableLowNotifications", message);
 
     }
 
@@ -223,7 +245,7 @@ public class XdkTest {
         byte message = 0x02;
 
         testEnableNotifications(ImplementationXdk.LOWDATABYTE_MESSAGE_TWO, expected, impXdk.getXdk(),
-                impXdk.getLowChrMock(), impXdk.getDataSvcMock(), "enableHighNotifications", message);
+                impXdk.getLowChrMock(), impXdk.getDataSvcMock(), "enableLowNotifications", message);
 
     }
 
@@ -255,6 +277,15 @@ public class XdkTest {
         TestUtil.invokePrivate(xdk, method, new Class<?>[] { boolean.class, int.class }, false, 10);
 
         byte[] config = new byte[] { (byte) 0x0A, 0x00, 0x00, 0x00 };
+
+        verify(bch, times(1)).writeValue(config);
+    }
+
+    private void testEnableFusion(BluetoothLeGattCharacteristic bch, Xdk xdk, String method) throws Throwable {
+
+        TestUtil.invokePrivate(xdk, method, new Class<?>[] { boolean.class, int.class }, true, 10);
+
+        byte[] config = new byte[] { 0x01 };
 
         verify(bch, times(1)).writeValue(config);
     }
@@ -355,6 +386,10 @@ class ImplementationXdk {
             (byte) 0x04, (byte) 0x2C, (byte) 0x00, (byte) 0x37, (byte) 0x00, (byte) 0x42, (byte) 0x00, (byte) 0x00,
             (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00 };
 
+    public static final byte[] HIGHDATABYTE_QUATERNION = { (byte) 0xfe, (byte) 0xd2, (byte) 0x6f, (byte) 0x3f,
+            (byte) 0x32, (byte) 0xc1, (byte) 0x56, (byte) 0x3c, (byte) 0xe5, (byte) 0x89, (byte) 0x98, (byte) 0x3c,
+            (byte) 0xa9, (byte) 0xbb, (byte) 0xb2, (byte) 0xbe, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00 };
+
     public static final byte[] LOWDATABYTE_MESSAGE_ONE = { (byte) 0x01, (byte) 0x40, (byte) 0x24, (byte) 0x05,
             (byte) 0x00, (byte) 0x00, (byte) 0xa8, (byte) 0x7f, (byte) 0x01, (byte) 0x00, (byte) 0xbd, (byte) 0x5c,
             (byte) 0x00, (byte) 0x00, (byte) 0x2e, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00 };
@@ -409,7 +444,7 @@ class ImplementationXdk {
         xdk = builder.build(true);
     }
 
-    public ImplementationXdk(byte message) throws KuraBluetoothResourceNotFoundException {
+    public ImplementationXdk(byte message, boolean enableQuaternion) throws Throwable {
         controlSvcMock = mock(BluetoothLeGattService.class);
 
         dataSvcMock = mock(BluetoothLeGattService.class);
@@ -435,7 +470,11 @@ class ImplementationXdk {
                         UUID_XDK_CONTROL_SERVICE_CONTROL_NODE_USE_SENSOR_FUSION, fusionChrMock);
 
         try {
-            when(highChrMock.readValue()).thenReturn(HIGHDATABYTE);
+            if (enableQuaternion) {
+                when(highChrMock.readValue()).thenReturn(HIGHDATABYTE_QUATERNION);
+            } else {
+                when(highChrMock.readValue()).thenReturn(HIGHDATABYTE);
+            }
 
             if (message == MESSAGE_ONE) {
                 when(lowChrMock.readValue()).thenReturn(LOWDATABYTE_MESSAGE_ONE);
@@ -447,7 +486,7 @@ class ImplementationXdk {
             e.printStackTrace();
         }
 
-        xdk = builder.build(true);
+        xdk = builder.build(true, enableQuaternion);
     }
 
     public BluetoothLeGattService getControlSvcMock() {
@@ -536,6 +575,22 @@ class XdkBuilder {
         } catch (ConnectionException e) {
             // Do nothing
         }
+
+        return xdk;
+    }
+
+    public Xdk build(boolean connect, boolean quaternion) throws Throwable {
+        Xdk xdk = new Xdk(deviceMock);
+
+        try {
+            if (connect) {
+                xdk.connect();
+            }
+            xdk.init();
+        } catch (ConnectionException e) {
+            // Do nothing
+        }
+        TestUtil.invokePrivate(xdk, "startSensor", new Class<?>[] { boolean.class, int.class }, quaternion, 10);
 
         return xdk;
     }

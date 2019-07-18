@@ -15,6 +15,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.security.FloodingProtectionService;
+import org.eclipse.kura.security.LoginProtectionService;
 import org.eclipse.kura.security.SecurityService;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.session.Attributes;
@@ -103,5 +105,30 @@ public class GwtSecurityServiceImpl extends OsgiRemoteServiceServlet implements 
         auditLogger.info(
                 "UI Security - Success - Successfully reloaded command line fingerprint for user: {}, session: {}",
                 session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
+    }
+
+    @Override
+    public boolean isIdsAvailable() {
+        boolean result = false;
+
+        try {
+            LoginProtectionService loginProtectionService = ServiceLocator.getInstance()
+                    .getService(LoginProtectionService.class);
+            if (loginProtectionService != null) {
+                result = true;
+            }
+        } catch (GwtKuraException e) {
+        }
+
+        try {
+            FloodingProtectionService floodingProtectionService = ServiceLocator.getInstance()
+                    .getService(FloodingProtectionService.class);
+            if (floodingProtectionService != null) {
+                result = true;
+            }
+        } catch (GwtKuraException e) {
+        }
+        
+        return result;
     }
 }

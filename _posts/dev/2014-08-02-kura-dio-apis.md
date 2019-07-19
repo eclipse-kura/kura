@@ -149,10 +149,7 @@ Then in the code:
 
 private GPIOService myservice;
 
-KuraGPIOPin pin = this.myservice.getPinByTerminal(6);
-
-// to allow pin configuration use
-//pin = this.myservice.getPinByTerminal(this.options.isConfigPin());
+KuraGPIOPin pin = this.myservice.getPinByTerminal(this.options.isConfigPin());
 
 ``` 
 In a **component.xml** enter a new service. Select a **Service** and in a **Referenced Service** open **Add** for add  the GPIOService. Select the **GPIOService** and use edit button for set in the bind field to **bindGPIOService** and set the unbind filed to **unbindGPIOService**.

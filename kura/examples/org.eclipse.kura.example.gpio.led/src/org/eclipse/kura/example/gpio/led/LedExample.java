@@ -30,7 +30,7 @@ public class LedExample implements ConfigurableComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(LedExample.class);
     private static final String APP_ID = "org.eclipse.kura.example.gpio.led.LedExample";
-    
+
     private GPIOService myservice;
     private LedOptions options;
     private KuraGPIOPin pin;
@@ -54,48 +54,48 @@ public class LedExample implements ConfigurableComponent {
     }
 
     public void updated(Map<String, Object> properties) {
-        
-    	this.options = new LedOptions(properties);
-        
-    	close();
-    	
-    	    pin = this.myservice.getPinByTerminal(this.options.isConfigPin());
-    	    
-    	if (pin == null) {
-    		return;
-    	}
+
+        this.options = new LedOptions(properties);
+
+        close();
+
+        pin = this.myservice.getPinByTerminal(this.options.isConfigPin());
+
+        if (pin == null) {
+            return;
+        }
 
         open();
-        
+
         setValue(this.options.isEnableLed());
 
     }
-    
+
     private void open() {
-    	try {
+        try {
             pin.open();
         } catch (KuraGPIODeviceException | KuraUnavailableDeviceException | IOException e) {
-        	logger.error("Exception GPIOService ", e);
+            logger.error("Open Exception ", e);
         }
     }
-    
+
     private void close() {
-    	
-    	if (pin != null) {
-    		try {
-    			pin.close();
-    		} catch (IOException e) {
-    			logger.error("Exception GPIOService ", e);
-    		}
-    	}
+
+        if (pin != null) {
+            try {
+                pin.close();
+            } catch (IOException e) {
+                logger.error("Close Exception ", e);
+            }
+        }
     }
-    
+
     private void setValue(boolean bool) {
-    	try {
+        try {
             pin.setValue(bool);
             TimeUnit.SECONDS.sleep(1);
         } catch (InterruptedException | KuraUnavailableDeviceException | IOException | KuraClosedDeviceException e) {
-            logger.error("Exception GPIOService ", e);
+            logger.error("Set Value Exception ", e);
         }
     }
 }

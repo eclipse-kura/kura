@@ -59,15 +59,14 @@ public class StatusPanelUi extends Composite {
     private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
 
     private GwtSession currentSession;
-    private final ListDataProvider<GwtGroupedNVPair> statusGridProvider = new ListDataProvider<GwtGroupedNVPair>();
+    private final ListDataProvider<GwtGroupedNVPair> statusGridProvider = new ListDataProvider<>();
     private EntryClassUi parent;
-
     @UiField
     Well statusWell;
     @UiField
     Button statusRefresh;
     @UiField
-    CellTable<GwtGroupedNVPair> statusGrid = new CellTable<GwtGroupedNVPair>();
+    CellTable<GwtGroupedNVPair> statusGrid = new CellTable<>();
 
     public StatusPanelUi() {
         logger.log(Level.FINER, "Initializing StatusPanelUi...");
@@ -110,7 +109,7 @@ public class StatusPanelUi extends Composite {
     }
 
     // create table layout
-    public void loadStatusTable(CellTable<GwtGroupedNVPair> grid, ListDataProvider<GwtGroupedNVPair> dataProvider) {
+    private void loadStatusTable(CellTable<GwtGroupedNVPair> grid, ListDataProvider<GwtGroupedNVPair> dataProvider) {
         TextColumn<GwtGroupedNVPair> col1 = new TextColumn<GwtGroupedNVPair>() {
 
             @Override

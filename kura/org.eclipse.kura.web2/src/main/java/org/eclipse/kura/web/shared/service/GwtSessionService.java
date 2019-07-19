@@ -10,6 +10,7 @@
 package org.eclipse.kura.web.shared.service;
 
 import org.eclipse.kura.web.shared.GwtKuraException;
+import org.eclipse.kura.web.shared.model.GwtConsoleUserOptions;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 
 import com.google.gwt.user.client.rpc.RemoteService;
@@ -19,5 +20,7 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 public interface GwtSessionService extends RemoteService {
 
     public void logout(GwtXSRFToken xsrfToken) throws GwtKuraException;
+
+    public GwtConsoleUserOptions getUserOptions(GwtXSRFToken token) throws GwtKuraException;
 
 }

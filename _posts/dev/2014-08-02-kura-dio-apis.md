@@ -153,7 +153,8 @@ KuraGPIOPin pin = this.myservice.getPinByTerminal(this.options.isConfigPin());
 
 ``` 
 In a **component.xml** enter a new service. Select a **Service** and in a **Referenced Service** open **Add** for add  the GPIOService. Select the **GPIOService** and use edit button for set in the bind field to **bindGPIOService** and set the unbind filed to **unbindGPIOService**.
-Created methods bind and unbind in a principale software.
+
+The bind/unbind methods used to bind and unbind Kura's gpioService.
 
 
 <img src="{{ site.baseurl }}/assets/images/drivers_and_assets/component_gpio_led.png"/>

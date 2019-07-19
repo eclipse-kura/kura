@@ -29,7 +29,7 @@
             cardinality="0"
             required="true"
             default="flase"
-            description="Enable Rotation-Quaternion or Disable the Accelerometer and Gyroscope"/>
+            description="Set true enable Rotation-Quaternion otherwise set flase enalbe the Accelerometer and Gyroscope"/>
         
         <AD id="configureSampleRateHz"
             name="configureSampleRateHz"

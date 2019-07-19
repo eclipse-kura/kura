@@ -78,9 +78,9 @@
             name="Minimum password length"
             type="Integer"
             cardinality="0"
-            required="false"
-            default="0"
-            min="0"
+            required="true"
+            default="8"
+            min="1"
             description="The minimum length to be enforced for new passwords. Set to 0 to disable.">
         </AD>
         
@@ -88,7 +88,7 @@
             name="Require digits in new password"
             type="Boolean"
             cardinality="0"
-            required="false"
+            required="true"
             default="false"
             description="If set to true, new passwords will be accepted only if containing at least one digit.">
         </AD>
@@ -97,7 +97,7 @@
             name="Require special characters in new password"
             type="Boolean"
             cardinality="0"
-            required="false"
+            required="true"
             default="false"
             description="If set to true, new passwords will be accepted only if containing at least one non alphanumeric character.">
         </AD>
@@ -106,7 +106,7 @@
             name="Require uppercase and lowercase characters in new passwords"
             type="Boolean"
             cardinality="0"
-            required="false"
+            required="true"
             default="false"
             description="If set to true, new passwords will be accepted only if containing both uppercase and lowercase alphanumeric characters.">
         </AD>

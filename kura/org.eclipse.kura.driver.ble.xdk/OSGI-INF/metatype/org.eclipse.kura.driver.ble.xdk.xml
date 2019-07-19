@@ -29,7 +29,7 @@
             cardinality="0"
             required="true"
             default="flase"
-            description="Set true enable Rotation-Quaternion otherwise set flase enalbe the Accelerometer and Gyroscope"/>
+            description="Set this field as true to enable quaternion representation. When this field is false, the output of accelerometer and gyroscope is returned."/>
         
         <AD id="configureSampleRateHz"
             name="configureSampleRateHz"

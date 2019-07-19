@@ -78,9 +78,9 @@ public class StatusPanelUi extends Composite {
 
             @Override
             public String getStyleNames(GwtGroupedNVPair row, int rowIndex) {
-                if ("Cloud Services".equals(row.getName()) || "Connection Name".equals(row.getName())
-                        || "Ethernet Settings".equals(row.getName()) || "Wireless Settings".equals(row.getName())
-                        || "Cellular Settings".equals(row.getName()) || "Position Status".equals(row.getName())) {
+                if ("cloudStatus".equals(row.getName()) || "connectionName".equals(row.getName())
+                        || "networkStatusEthernet".equals(row.getName()) || "networkStatusWifi".equals(row.getName())
+                        || "networkStatusModem".equals(row.getName()) || "positionStatus".equals(row.getName())) {
                     return "rowHeader";
                 } else {
                     return " ";
@@ -114,7 +114,17 @@ public class StatusPanelUi extends Composite {
 
             @Override
             public String getValue(GwtGroupedNVPair object) {
-                return String.valueOf(object.getName());
+                String title = object.getName();
+                if ("Connection Name".equals(title))
+                    title = "connectionName";
+                if ("Account".equals(title))
+                    title = "account";
+                try {
+                    title = msgs.getString(title);
+                } catch (Exception e) {
+                    // nothing
+                }
+                return String.valueOf(title);
             }
         };
         col1.setCellStyleNames("status-table-row");
@@ -140,16 +150,17 @@ public class StatusPanelUi extends Composite {
                 .generateSecurityToken(c.callback(token -> StatusPanelUi.this.gwtStatusService.getDeviceConfig(token,
                         StatusPanelUi.this.currentSession.isNetAdminAvailable(), c.callback(result -> {
                             String title = "cloudStatus";
-                            StatusPanelUi.this.statusGridProvider.getList()
-                                    .add(new GwtGroupedNVPair(" ", msgs.getString(title), " "));
+                            StatusPanelUi.this.statusGridProvider.getList().add(new GwtGroupedNVPair(" ", title, " "));
 
                             Iterator<GwtGroupedNVPair> it = result.iterator();
                             while (it.hasNext()) {
                                 GwtGroupedNVPair connectionName = it.next();
                                 if (!title.equals(connectionName.getGroup())) {
                                     title = connectionName.getGroup();
+                                    if ("Connection Name".equals(title))
+                                        title = "connectionName";
                                     StatusPanelUi.this.statusGridProvider.getList()
-                                            .add(new GwtGroupedNVPair(" ", msgs.getString(title), " "));
+                                            .add(new GwtGroupedNVPair(" ", title, " "));
                                 }
                                 StatusPanelUi.this.statusGridProvider.getList().add(connectionName);
                             }

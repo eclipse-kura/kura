@@ -48,12 +48,18 @@ public class SkinServlet extends HttpServlet {
         try {
             fResourceFile = checkFile(resourceName);
         } catch (GwtKuraException | IOException e) {
-            logger.warn("Failed to load skin resource, {}, resourceName {}", e.getMessage(), resourceName);
+            logger.debug("Failed to load skin resource, {}, resourceName {}", e.getMessage(), resourceName);
         }
 
         if (fResourceFile == null) {
             try {
-                response.sendError(404);
+                if (resourceName.endsWith(".css")) {
+                    response.setContentType("text/css");
+                } else if (resourceName.endsWith(".js")) {
+                    response.setContentType("text/javascript");
+                } else if (resourceName.endsWith(".jpg") || resourceName.endsWith(".png")) {
+                    response.sendError(404);
+                }
             } catch (final IOException e) {
                 logger.warn("Failed to send response", e);
             }

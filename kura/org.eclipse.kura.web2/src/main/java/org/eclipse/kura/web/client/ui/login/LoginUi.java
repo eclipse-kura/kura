@@ -79,7 +79,7 @@ public class LoginUi extends Composite {
 
             @Override
             public void onSuccess(String banner) {
-                if (banner != null) {
+                if (banner != null && !banner.equals("")) {
                     LoginUi.this.accessBannerModalPannelBody.setText(banner);
                     LoginUi.this.accessBannerModal.show();
                 }
@@ -90,7 +90,6 @@ public class LoginUi extends Composite {
     @Override
     protected void onAttach() {
         super.onAttach();
-        this.usernameInput.setFocus(true);
 
         this.loginForm.addSubmitHandler(e -> {
             e.cancel();
@@ -98,6 +97,7 @@ public class LoginUi extends Composite {
         });
 
         this.loginDialog.show();
+        this.usernameInput.setFocus(true);
         initLoginBannerModal();
     }
 

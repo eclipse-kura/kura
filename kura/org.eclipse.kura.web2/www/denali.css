@@ -530,13 +530,14 @@ Login START
 
 .login-background {
     background-image: url(eclipse/kura/icons/yofc_login_background.png), url(eclipse/kura/icons/yofc_login_logo.png),url(eclipse/kura/icons/yofc_login_background.png);
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: cover;
+    background-repeat: no-repeat, no-repeat, no-repeat;
+    background-position: 5% 5%, 95% 5%, center;
+    background-size: 250px,250px,cover;
     height: auto;
     min-height: 100%;
     position: fixed;
     width: 100%;
+    z-index: 1050;
 }
 
 .login-form {

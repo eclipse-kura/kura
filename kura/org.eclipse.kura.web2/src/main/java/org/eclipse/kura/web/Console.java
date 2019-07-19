@@ -92,6 +92,8 @@ public class Console implements ConfigurableComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(Console.class);
 
+    private HttpContext resourceContext;
+
     private String appRoot;
     private int sessionMaxInactiveInterval;
     private ComponentContext componentContext;
@@ -200,14 +202,28 @@ public class Console implements ConfigurableComponent {
         this.componentContext = context;
     }
 
-    protected void updated(Map<String, Object> properties) {
+    protected void updated(Map<String, Object> properties) throws ServletException, NamespaceException {
         boolean webEnabled = Boolean.parseBoolean(this.systemService.getKuraWebEnabled());
         if (!webEnabled) {
             return;
         }
 
-        unregisterServlet();
-        doUpdate(properties);
+        ConsoleOptions options = new ConsoleOptions(properties);
+
+        Console.setConsoleOptions(options);
+
+        try {
+            updateAuthenticationManager(options.getUsername(), options.getUserPassword());
+        } catch (Exception e) {
+            logger.warn("Error Updating Web properties", e);
+        }
+
+        setAppRoot(options.getAppRoot());
+        setSessionMaxInactiveInterval(options.getSessionMaxInactivityInterval());
+        this.httpService.unregister("/");
+        this.httpService.registerServlet("/", new RedirectServlet("/"::equals, this.appRoot), null,
+                this.resourceContext);
+
     }
 
     private void doUpdate(Map<String, Object> properties) {
@@ -347,7 +363,7 @@ public class Console implements ConfigurableComponent {
 
         final HttpContext defaultContext = this.httpService.createDefaultHttpContext();
 
-        final HttpContext resourceContext = initResourceContext(defaultContext);
+        this.resourceContext = initResourceContext(defaultContext);
         final HttpContext sessionContext = initSessionContext(defaultContext);
 
         this.httpService.registerResources(ADMIN_ROOT, "www", resourceContext);

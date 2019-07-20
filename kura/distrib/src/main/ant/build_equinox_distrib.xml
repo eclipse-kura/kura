@@ -1283,8 +1283,10 @@ fi]]>
 	<target name="camel-config">
 		<propertyfile
 			file="${project.build.directory}/${build.output.name}/config.ini">
+			<!--
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.camel.sun.misc_${org.eclipse.kura.camel.sun.misc.version}.jar@3" />
+			-->
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.camel.camel-amqp_${org.apache.camel.camel-amqp.version}.jar@4:start" />
 			<entry key="osgi.bundles" operation="+"

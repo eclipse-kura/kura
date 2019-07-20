@@ -11,7 +11,6 @@
 
     <modules>
         <module>org.apache.activemq.artemis</module>
-        <module>org.eclipse.kura.camel.sun.misc</module>
         <module>org.eclipse.kura.sun.misc</module>
         <module>com.codeminders.hidapi-parent</module>
         <module>org.usb4java</module>

@@ -128,10 +128,14 @@
 		<!-- Populate config.ini with correct versions -->
 		<replace file="${project.build.directory}/${build.output.name}/config.ini"
 			token="{kura.build.version}" value="${kura.build.version}" />
+		<!--
 		<condition property="is.docker">
 			<contains string="${build.name}" substring="-docker"/>
 		</condition>
-
+		-->
+		<condition property="isnot.ble">
+			<contains string="${driver.ble}" substring="no" />
+		</condition>
 		<!-- Populate config.ini with correct Kura bundles -->
 		<antcall target="api-config" />
 		<antcall target="core-config" />
@@ -228,6 +232,7 @@
 				</not>
 			</and>
 		</condition>
+		
 		<antcall target="emulator-config" />
 		<antcall target="linux-sysv-config" />
 		<antcall target="linux-debian-config" />
@@ -1046,7 +1051,7 @@ fi]]>
 		</propertyfile>
 	</target>
 
-	<target name="linux.bluetooth-config" unless="is.docker">
+	<target name="linux.bluetooth-config" unless="isnot.ble">
 		<propertyfile
 			file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"

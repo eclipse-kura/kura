@@ -103,11 +103,6 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>org.eclipse.kura.camel.sun.misc</artifactId>
-                                    <version>${org.eclipse.kura.camel.sun.misc.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.sun.misc</artifactId>
                                     <version>${org.eclipse.kura.sun.misc.version}</version>
                                 </artifactItem>
@@ -746,8 +741,6 @@
                                     tofile="target/source/plugins/com.google.protobuf_${com.google.protobuf.version}.jar" />
                                 <move file="target/source/plugins/org.eclipse.paho.client.mqttv3.jar"
                                     tofile="target/source/plugins/org.eclipse.paho.client.mqttv3_${org.eclipse.paho.client.mqttv3.version}.jar" />
-                                <move file="target/source/plugins/org.eclipse.kura.camel.sun.misc.jar"
-                                    tofile="target/source/plugins/org.eclipse.kura.camel.sun.misc_${org.eclipse.kura.camel.sun.misc.version}.jar" />
                                 <move file="target/source/plugins/org.eclipse.kura.sun.misc.jar"
                                     tofile="target/source/plugins/org.eclipse.kura.sun.misc_${org.eclipse.kura.sun.misc.version}.jar" />
                                 <move file="target/source/plugins/org.tigris.mtoolkit.iagent.rpc.jar"

@@ -46,7 +46,10 @@ public class Emulator {
             }
             final String snapshotFolderPath = System.getProperty(KURA_SNAPSHOTS_PATH);
             if (snapshotFolderPath == null || snapshotFolderPath.isEmpty()) {
-                throw new IllegalStateException("System property 'kura.snapshots' is not set");
+                if (!EMULATOR.equals(mode))
+                    return;
+                else
+                    throw new IllegalStateException("System property 'kura.snapshots' is not set");
             }
             final File snapshotFolder = new File(snapshotFolderPath);
             if (!snapshotFolder.exists()

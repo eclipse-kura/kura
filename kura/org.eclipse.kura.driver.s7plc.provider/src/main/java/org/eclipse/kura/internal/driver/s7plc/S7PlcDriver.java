@@ -222,9 +222,9 @@ public class S7PlcDriver extends AbstractBlockDriver<S7PlcDomain> implements Con
                             + e.getMessage(), result);
 
                 }
+                result = this.state.client.WriteArea(S7.S7AreaDB, db, offset, data.length, data);
             }
 
-            result = this.state.client.WriteArea(S7.S7AreaDB, db, offset, data.length, data);
             if (result != 0)
                 throw new Moka7Exception("Write reConnection result error IP:" + currentOptions.getIp() + " Rack:"
                         + currentOptions.getRack() + " Slot:" + currentOptions.getSlot() + " Port:"

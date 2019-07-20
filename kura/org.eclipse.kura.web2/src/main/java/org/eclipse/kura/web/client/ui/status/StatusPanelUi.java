@@ -66,7 +66,7 @@ public class StatusPanelUi extends Composite {
     @UiField
     Button statusRefresh;
     @UiField
-    CellTable<GwtGroupedNVPair> statusGrid = new CellTable<>();
+    CellTable<GwtGroupedNVPair> statusGrid;
 
     public StatusPanelUi() {
         logger.log(Level.FINER, "Initializing StatusPanelUi...");
@@ -122,7 +122,7 @@ public class StatusPanelUi extends Composite {
                 try {
                     title = msgs.getString(title);
                 } catch (Exception e) {
-                    // nothing
+                    // northing
                 }
                 return String.valueOf(title);
             }

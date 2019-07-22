@@ -35,6 +35,7 @@ import org.eclipse.kura.web.client.util.FilterBuilder;
 import org.eclipse.kura.web.client.util.PidTextBox;
 import org.eclipse.kura.web.client.util.request.RequestQueue;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
+import org.eclipse.kura.web.shared.model.GwtConsoleUserOptions;
 import org.eclipse.kura.web.shared.model.GwtSession;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtComponentService;
@@ -169,12 +170,6 @@ public class EntryClassUi extends Composite {
     Button logoutButton;
     @UiField
     Button headerLogoutButton;
-    @UiField
-    Modal accessBannerModal;
-    @UiField
-    Button buttonAccessBannerModalOk;
-    @UiField
-    Strong accessBannerModalPannelBody;
 
     private static final Messages MSGS = GWT.create(Messages.class);
     private static final EntryClassUIUiBinder uiBinder = GWT.create(EntryClassUIUiBinder.class);
@@ -222,6 +217,8 @@ public class EntryClassUi extends Composite {
     private ServicesUi servicesUi;
     private AnchorListItem selectedAnchorListItem;
 
+    private static GwtConsoleUserOptions userOptions;
+
     public EntryClassUi() {
         this.ui = this;
         initWidget(uiBinder.createAndBindUi(this));
@@ -248,19 +245,6 @@ public class EntryClassUi extends Composite {
 
         initLogoutButtons();
         initServicesTree();
-    }
-
-    private void initLoginBannerModal() {
-        this.accessBannerModal.setTitle(MSGS.warning());
-        this.buttonAccessBannerModalOk.setText(MSGS.okButton());
-
-        RequestQueue.submit(c -> this.gwtSessionService.getLoginBanner(c.callback(banner -> {
-            if (banner != null) {
-                EntryClassUi.this.accessBannerModalPannelBody.setText(banner);
-                EntryClassUi.this.accessBannerModal.show();
-            }
-        })));
-
     }
 
     private void initExceptionReportModal() {
@@ -564,6 +548,12 @@ public class EntryClassUi extends Composite {
         });
     }
 
+    public void fetchUserOptions() {
+        RequestQueue.submit(c -> this.gwtXSRFService.generateSecurityToken(c.callback(token -> {
+            this.gwtSessionService.getUserOptions(token, c.callback(options -> userOptions = options));
+        })));
+    }
+
     public void fetchAvailableServices(final AsyncCallback<Void> callback) {
         // (Re)Fetch Available Services
         RequestQueue.submit(c -> this.gwtXSRFService.generateSecurityToken(
@@ -865,6 +855,10 @@ public class EntryClassUi extends Composite {
         waitModal.hide();
     }
 
+    public static GwtConsoleUserOptions getUserOptions() {
+        return new GwtConsoleUserOptions(userOptions);
+    }
+
     private void forceTabsCleaning() {
         if (this.servicesUi != null) {
             this.servicesUi.setDirty(false);
@@ -908,8 +902,7 @@ public class EntryClassUi extends Composite {
                 EntryClassUi.this.showStatusPanel();
             }
         });
-
-        initLoginBannerModal();
+        fetchUserOptions();
     }
 
     private void showStatusPanel() {

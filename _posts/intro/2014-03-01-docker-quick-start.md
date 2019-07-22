@@ -20,6 +20,8 @@ docker run -d -p 8080:8080 -t eclipse/kura
 
 This command will start Kura in background and the Kura Web Ui will be available through port 8080.
 
+Once the image is started you can navigate your browser to [http://localhost:8080](http://localhost:8080) and log in using the credentials admin : admin.
+
 
 ## Command Toolbox
 

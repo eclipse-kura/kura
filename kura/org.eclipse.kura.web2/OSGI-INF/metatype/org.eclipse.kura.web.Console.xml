@@ -73,6 +73,43 @@
             default=""
             description="Access banner content. To be displayed at every user access, if the feature is enabled.">
         </AD>
+        
+        <AD id="new.password.min.length"
+            name="Minimum password length"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="8"
+            min="1"
+            description="The minimum length to be enforced for new passwords. Set to 0 to disable.">
+        </AD>
+        
+        <AD id="new.password.require.digits"
+            name="Require digits in new password"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="If set to true, new passwords will be accepted only if containing at least one digit.">
+        </AD>
+        
+        <AD id="new.password.require.special.characters"
+            name="Require special characters in new password"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="If set to true, new passwords will be accepted only if containing at least one non alphanumeric character.">
+        </AD>
+        
+        <AD id="new.password.require.both.cases"
+            name="Require uppercase and lowercase characters in new passwords"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="If set to true, new passwords will be accepted only if containing both uppercase and lowercase alphanumeric characters.">
+        </AD>
 
     </OCD>
 

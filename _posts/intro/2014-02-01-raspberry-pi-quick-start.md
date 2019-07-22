@@ -21,7 +21,7 @@ Raspberry Pi and the Kura development environment.
 
 This quickstart has been tested using the following image:
 
-<pre>2016-11-25-raspbian-jessie-lite.img</pre>
+<pre>2019-07-10-raspbian-buster-lite.img</pre>
 
 downloaded from
 
@@ -43,32 +43,21 @@ in order to enable it follow the instructions available at the following URL:
 To install Kura with its dependencies on the Raspberry Pi, perform the
 following steps:
 
-1. Boot the Raspberry Pi with the latest Raspbian image (starting from release 2.1.0 Kura only supports Debian 8 or above).
+1. Boot the Raspberry Pi with the latest Raspbian image (starting from release 2.1.0 Kura only supports Debian 8 or above).
 
 2. The dhcpcd5 package is not compatible with Kura and needs to be removed
     performing the following command:
 
     <pre>sudo apt-get purge dhcpcd5</pre>
 
-3. NetworkManager conflicts with Kura network management, make sure that it is
-    not installed performing the following command:
+3. After removing dhcpcd5 package you need to enable network interface(s) and ensure internet access. Follow the instructions <a href="https://raspberrypi.stackexchange.com/questions/37920/how-do-i-set-up-networking-wifi-static-ip-address/74428#74428" target="_blank">here</a>.
 
-    <pre>sudo apt-get remove network-manager</pre>
+4. Install the gdebi command line tool:
 
-    In the latest Raspbian releases, type the following command to disable the network manager:
+   <pre>sudo apt-get update
+   sudo apt-get install gdebi-core</pre>
 
-    <pre>sudo systemctl disable networking</pre>
-
-4. In the latest raspbian releases, the wireless interface is disabled by default. Type the following command to enabled it:
-
-    <pre>sudo rfkill unblock all</pre>
-
-5. Install the gdebi command line tool:
-
-    <pre>sudo apt-get update
-    sudo apt-get install gdebi-core</pre>
-
-6. Make sure that Java 8 is installed with
+5. Make sure that Java 8 is installed with
 
     <pre>java -version</pre>
 
@@ -76,23 +65,23 @@ following steps:
 
     <pre>sudo apt-get install openjdk-8-jre-headless</pre>
 
-7. Download the Kura package with:
+6. Download the Kura package with:
 
     <pre>wget http://download.eclipse.org/kura/releases/&lt;version&gt;/kura_&lt;version&gt;_raspberry-pi-2-3_installer.deb</pre>
 
-    Note: replace \<version\> in the URL above with the version number of the latest release (e.g. 2.1.0).
+    Note: replace \<version\> in the URL above with the version number of the latest release (e.g. 4.1.0).
 
-8. Install Kura with: 
+7. Install Kura with: 
 
     <pre>sudo gdebi kura_&lt;version&gt;_raspberry-pi-2-3_installer.deb</pre>
 
-9. Reboot the Raspberry Pi with:
+8. Reboot the Raspberry Pi with:
 
     <pre>sudo reboot</pre>
 
     Kura starts on the target platform after reboot.
 
-10. Kura setups a local web ui that is available using a browser via:
+9. Kura setups a local web ui that is available using a browser via:
 
     <pre>https://&lt;device-ip&gt;</pre>
     

@@ -27,6 +27,8 @@ import org.slf4j.LoggerFactory;
 public class GwtPasswordAuthenticationServiceImpl extends OsgiRemoteServiceServlet
         implements GwtPasswordAuthenticationService {
 
+    private static final String UI_LOGIN_FAILURE_MESSAGE = "UI Login - Failure - Login failed for user: {}, request IP: {}";
+    
     private static final Logger logger = LoggerFactory.getLogger(GwtPasswordAuthenticationServiceImpl.class);
     private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
 
@@ -57,8 +59,6 @@ public class GwtPasswordAuthenticationServiceImpl extends OsgiRemoteServiceServl
 
         try {
             if (!this.authenticationManager.authenticate(username, password)) {
-                logger.warn("UI Login - Failure - Login failed for user: {}, request IP: {}", username, requestIp);
-                auditLogger.warn("UI Login - Failure - Login failed for user: {}, request IP: {}", username, requestIp);
                 throw new KuraException(KuraErrorCode.SECURITY_EXCEPTION);
             }
 
@@ -72,6 +72,8 @@ public class GwtPasswordAuthenticationServiceImpl extends OsgiRemoteServiceServl
 
         } catch (final Exception e) {
             session.invalidate();
+            logger.warn(UI_LOGIN_FAILURE_MESSAGE, username, requestIp);
+            auditLogger.warn(UI_LOGIN_FAILURE_MESSAGE, username, requestIp);
 
             throw new GwtKuraException("unauthorized");
         }

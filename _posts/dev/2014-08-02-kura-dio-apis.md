@@ -12,6 +12,8 @@ categories: [dev]
 
 [APIs](#apis)
 
+[GPIO](#gpio)
+
 [Code Examples](#code-examples)
 
 ## Overview
@@ -129,6 +131,197 @@ button.setInputListener(new PinListener(){
 });
 
 ```
+### Use GPIO Pin with GPIOService for a switch a Led. 
+
+This example was developed for a **Raspberry Pi 3**.
+
+Inside the **jdk.dio.properties** file:
+
+```
+...
+6 = deviceType: gpio.GPIOPin, pinNumber:6, name:GPIO06
+...
+```
+
+Then in the code:
+
+```java
+
+private GPIOService myservice;
+
+KuraGPIOPin pin = this.myservice.getPinByTerminal(this.options.isConfigPin());
+
+``` 
+In a **component.xml** enter a new service. Select a **Service** and in a **Referenced Service** open **Add** for add  the GPIOService. Select the **GPIOService** and use edit button for set in the bind field to **bindGPIOService** and set the unbind filed to **unbindGPIOService**.
+
+The bind/unbind methods used to bind and unbind Kura's gpioService.
+
+
+<img src="{{ site.baseurl }}/assets/images/drivers_and_assets/component_gpio_led.png"/>
+
+Then in the code:
+
+```java
+protected synchronized void bindGPIOService(final GPIOService gpioService) {
+        this.myservice = gpioService;
+    }
+
+protected synchronized void unbindGPIOService(final GPIOService gpioService) {
+        this.myservice = null;
+    }
+``` 
+
+
+#### Accessing a GPIO Pin by its index
+
+
+```java
+// Accessing the GPIO Pin number 6. The default behaviour is defined in the
+// jdk.dio.properties file
+//
+// i.e.:
+// gpio.GPIOPin = initValue:0, deviceNumber:0, direction:3, mode:-1, trigger:3
+// 6 = deviceType: gpio.GPIOPin, pinNumber:6, name:GPIO06
+
+close(); //Close the pin
+
+    	
+pin = this.myservice.getPinByTerminal(this.options.isConfigPin());
+    	    
+if (pin == null) {
+return;
+}
+
+open(); //Open the pin
+
+setValue(this.options.isEnableLed()); //Turns the LED on and of
+
+```
+
+
+The metods for using the Pin:
+
+```java
+private void open() {
+    	try {
+            pin.open();
+        } catch (KuraGPIODeviceException | KuraUnavailableDeviceException | IOException e) {
+        	logger.error("Exception GPIOService ", e);
+        }
+    }
+    
+    private void close() {
+    	
+    	if (pin != null) {
+    		try {
+    			pin.close();
+    		} catch (IOException e) {
+    			logger.error("Exception GPIOService ", e);
+    		}
+    	}
+    }
+    
+    private void setValue(boolean bool) {
+    	try {
+            pin.setValue(bool);
+            TimeUnit.SECONDS.sleep(1);
+        } catch (InterruptedException | KuraUnavailableDeviceException | IOException | KuraClosedDeviceException e) {
+            logger.error("Exception GPIOService ", e);
+        }
+    }
+```
+
+
+### Create Options Led Class.
+
+```java
+
+package org.eclipse.kura.example.gpio.led;
+
+import static java.util.Objects.requireNonNull;
+
+import java.util.Map;
+
+public class LedOptions {
+	
+	private static final String PROPRTY_PIN_NOME = "configurePin";
+	private static final int PROPRTY_PIN_DEFAULT = 6;
+
+    private static final String PROPRTY_LED_NOME = "switchLed";
+    private static final boolean PROPRTY_LED_DEFAULT = false;
+    
+    private final int configPin;  
+    private final boolean enableLed;
+
+    public LedOptions(Map<String, Object> properties) {
+
+        requireNonNull(properties, "Required not null");
+        this.configPin = getProperty(properties, PROPRTY_PIN_NOME, PROPRTY_PIN_DEFAULT);
+        this.enableLed = getProperty(properties, PROPRTY_LED_NOME, PROPRTY_LED_DEFAULT);
+
+    }
+    
+    public int isConfigPin() {
+    	return this.configPin;
+    }
+
+    public boolean isEnableLed() {
+        return this.enableLed;
+    }
+    
+
+    @SuppressWarnings("unchecked")
+    private <T> T getProperty(Map<String, Object> properties, String propertyName, T defaultValue) {
+        Object prop = properties.getOrDefault(propertyName, defaultValue);
+        if (prop != null && prop.getClass().isAssignableFrom(defaultValue.getClass())) {
+            return (T) prop;
+        } else {
+            return defaultValue;
+        }
+    }
+
+}
+
+```
+
+### Metatype Definition
+
+At this point, you have to write the ‘metatype’ file that defines the parameters. 
+
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.example.gpio.led.LedExample"
+        name="Gpio Led Example"
+        description="This example allows to configure and manage the state of a LED connected to a configurable GPIO pin">
+
+        <AD id="configurePin"
+            name="configurePin"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="6"
+            min = "0"
+            description="Configure the Pin to use."/>
+            
+            
+        <AD id="switchLed"
+            name="switchLed"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Switches the selected GPIO port state."/>
+            
+    </OCD>
+
+    <Designate pid="org.eclipse.kura.example.gpio.led.LedExample">
+        <Object ocdref="org.eclipse.kura.example.gpio.led.LedExample"/>
+    </Designate>
+</MetaData>
+```
+
+<img src="{{ site.baseurl }}/assets/images/drivers_and_assets/metatype_gpio_led.png"/>
 
 ### Accessing a I2C device with OpenJDK Device I/O
 

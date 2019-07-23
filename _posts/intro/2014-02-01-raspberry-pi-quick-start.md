@@ -23,7 +23,7 @@ This quickstart has been tested using the following image:
 
 <pre>2019-07-10-raspbian-buster-lite.img</pre>
 
-downloaded from test
+downloaded from
 
 <pre>https://www.raspberrypi.org/downloads/raspbian/</pre>
 

@@ -71,7 +71,7 @@ following steps:
 
     Note: replace \<version\> in the URL above with the version number of the latest release (e.g. 2.1.0).
 
-7. Install Kura with: 
+7. Install Kura with:
 
     <pre>sudo gdebi kura_&lt;version&gt;_raspberry-pi-2-3_installer.deb</pre>
 

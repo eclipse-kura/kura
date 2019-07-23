@@ -1316,7 +1316,8 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                 }
 
                 FirewallOpenPortConfigIP<IP4Address> firewallOpenPortConfigIP = new FirewallOpenPortConfigIP4();
-                if (entry.getPortRange() != null) {
+                String[] parts = entry.getPortRange().split(":");
+                if (entry.getPortRange() != null && Integer.valueOf(parts[0]) < Integer.valueOf(parts[1])) {
                     if (entry.getPortRange().indexOf(':') > 0) {
                         firewallOpenPortConfigIP.setPortRange(entry.getPortRange());
                     } else {

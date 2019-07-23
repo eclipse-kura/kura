@@ -20,6 +20,7 @@ import org.eclipse.kura.security.LoginProtectionService;
 import org.eclipse.kura.security.SecurityService;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.session.Attributes;
+import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtSecurityService;
@@ -109,26 +110,71 @@ public class GwtSecurityServiceImpl extends OsgiRemoteServiceServlet implements 
 
     @Override
     public boolean isIdsAvailable() {
-        boolean result = false;
 
+        return isLoginProtectionAvailable() || isFloodingProtectionAvailable();
+    }
+
+    @Override
+    public boolean isLoginProtectionAvailable() {
         try {
             LoginProtectionService loginProtectionService = ServiceLocator.getInstance()
                     .getService(LoginProtectionService.class);
             if (loginProtectionService != null) {
-                result = true;
+                return true;
             }
         } catch (GwtKuraException e) {
         }
+        return false;
+    }
 
+    @Override
+    public boolean isFloodingProtectionAvailable() {
         try {
             FloodingProtectionService floodingProtectionService = ServiceLocator.getInstance()
                     .getService(FloodingProtectionService.class);
             if (floodingProtectionService != null) {
-                result = true;
+                return true;
             }
         } catch (GwtKuraException e) {
         }
-        
-        return result;
+        return false;
+    }
+
+    @Override
+    public void setLoginProtectionStatus(GwtXSRFToken xsrfToken, boolean status) throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+
+        LoginProtectionService loginProtectionService = ServiceLocator.getInstance()
+                .getService(LoginProtectionService.class);
+        try {
+            loginProtectionService.setStatus(status);
+        } catch (KuraException e) {
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+        }
+    }
+
+    @Override
+    public boolean getLoginProtectionStatus(GwtXSRFToken xsrfToken) throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+
+        LoginProtectionService loginProtectionService = ServiceLocator.getInstance()
+                .getService(LoginProtectionService.class);
+        try {
+            return loginProtectionService.isEnabled();
+        } catch (KuraException e) {
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+        }
+    }
+
+    @Override
+    public void setFloodingProtectionStatus(GwtXSRFToken xsrfToken, boolean status) throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+
+    }
+
+    @Override
+    public boolean getFloodingProtectionStatus(GwtXSRFToken xsrfToken) throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+        return false;
     }
 }

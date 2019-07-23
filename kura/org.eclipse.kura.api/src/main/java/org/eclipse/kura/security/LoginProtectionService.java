@@ -7,9 +7,7 @@ import org.eclipse.kura.KuraException;
  */
 public interface LoginProtectionService {
     
-    public void enable() throws KuraException;
-    
-    public void disable() throws KuraException;
+    public void setStatus(boolean status) throws KuraException;
     
     public boolean isEnabled() throws KuraException;
 

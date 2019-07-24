@@ -99,8 +99,7 @@ following steps:
 5. Install the gdebi command line tool:
 
     <pre>sudo apt-get update
-    sudo apt-get install gdebi-core
-    </pre>
+    sudo apt-get install gdebi-core</pre>
 
 6. Make sure that Java 8 is installed with
 

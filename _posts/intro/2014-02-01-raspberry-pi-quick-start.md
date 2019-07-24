@@ -12,6 +12,7 @@ categories: [intro]
 
 [Development Environment Installation](#development-environment-installation)
 
+
 ## Overview
 
 This section provides Eclipse Kura&trade; quick installation procedures for the
@@ -35,6 +36,38 @@ The ssh server is disabled by default on Raspbian images released after November
 in order to enable it follow the instructions available at the following URL:
 
 <pre>https://www.raspberrypi.org/documentation/remote-access/ssh/</pre>
+
+## Direct Connection of the Raspberry Pi to the Computer
+
+If you don't use Raspberry Pi with a monitor and keyvbord, you can direct connection of the Raspberry Pi to the Computer.
+
+{% include alerts.html message="This solution is for Raspian Jessie and later version (8+)" %}
+
+1. Insert the SD card on a reader of your Computer.
+2. Access the **boot** partition of the card and create a file called **ssh**.
+3. Access the **rootfs** partition of the card and edit the file **/etc/dhcpcd.conf**
+
+   <pre>
+   interface 'interface'
+   static ip_address='ip to assign'/'subnet'
+   static routers='ip router'
+   static domain_name_server='server DNS'
+   </pre>
+
+   for example
+   <pre>
+   interface eth0
+   static ip_address=10.42.0.27/24
+   static routers=10.42.0.1
+   static domain_name_server=8.8.8.8
+   </pre>
+
+{% include alerts.html message="You can access the ```/etc/dhcpcd.conf``` file also with ssh. In the Terminal type ```ssh pi@raspberrypi.local```, the defalut password is : ```raspberry```" %}
+
+4. Assign a static IP to the computer, the values must be compatible with those of the Raspberry Pi.
+
+5. Reboot the Raspberry Pi
+   <pre> sudo reboot </pre>
 
 ## Eclipse Kura&trade; Installation
 
@@ -137,3 +170,6 @@ downloaded from Java SE 8 Downloads. Use the latest version of Java SE Developme
 1. Wait for the installation to finish, a few additional plugins will be installed
 1. At first startup Eclipse IDE will checkout the code and perform a full build
 1. A few Working Sets will be prepared
+
+
+

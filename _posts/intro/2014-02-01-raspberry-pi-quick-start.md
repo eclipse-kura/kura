@@ -39,7 +39,7 @@ in order to enable it follow the instructions available at the following URL:
 
 ## Direct Connection of the Raspberry Pi to the Computer
 
-If you don't use Raspberry Pi with a monitor and keyvbord, you can direct connection of the Raspberry Pi to the Computer.
+If you don't use Raspberry Pi with a monitor and keyvboard, you can direct connection of the Raspberry Pi to the Computer.
 
 {% include alerts.html message="This solution is for Raspian Jessie and later version (8+)" %}
 
@@ -99,7 +99,8 @@ following steps:
 5. Install the gdebi command line tool:
 
     <pre>sudo apt-get update
-    sudo apt-get install gdebi-core</pre>
+    sudo apt-get install gdebi-core
+    </pre>
 
 6. Make sure that Java 8 is installed with
 

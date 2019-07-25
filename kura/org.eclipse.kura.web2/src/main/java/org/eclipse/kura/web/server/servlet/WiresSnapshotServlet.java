@@ -1,11 +1,11 @@
 /*******************************************************************************
- * Copyright (c) 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2019 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *******************************************************************************/
 package org.eclipse.kura.web.server.servlet;
 
@@ -22,6 +22,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.eclipse.kura.asset.provider.AssetConstants;
 import org.eclipse.kura.configuration.ComponentConfiguration;
@@ -32,6 +33,7 @@ import org.eclipse.kura.marshalling.Marshaller;
 import org.eclipse.kura.web.server.GwtWireGraphServiceImpl;
 import org.eclipse.kura.web.server.KuraRemoteServiceServlet;
 import org.eclipse.kura.web.server.util.ServiceLocator;
+import org.eclipse.kura.web.session.Attributes;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.wire.graph.WireComponentConfiguration;
@@ -50,6 +52,7 @@ public class WiresSnapshotServlet extends HttpServlet {
 
     private static final long serialVersionUID = -7483037360719617846L;
     private static final Logger logger = LoggerFactory.getLogger(WiresSnapshotServlet.class);
+    private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
 
     private String toSnapshot(XmlComponentConfigurations configs) throws GwtKuraException {
         final BundleContext context = FrameworkUtil.getBundle(GwtWireGraphServiceImpl.class).getBundleContext();
@@ -100,6 +103,8 @@ public class WiresSnapshotServlet extends HttpServlet {
             throw new ServletException("Security error: please retry this operation correctly.", e);
         }
 
+        HttpSession session = request.getSession(false);
+
         try {
             final List<ComponentConfiguration> result = new ArrayList<>();
 
@@ -125,17 +130,24 @@ public class WiresSnapshotServlet extends HttpServlet {
 
             final String marshalled = toSnapshot(xmlConfigs);
 
+            final String snapshotName = "graph_snapshot_" + System.currentTimeMillis() + ".xml";
+
             response.setCharacterEncoding("UTF-8");
             response.setContentType("application/xml");
-            response.setHeader("Content-Disposition",
-                    "attachment; filename=graph_snapshot_" + System.currentTimeMillis() + ".xml");
+            response.setHeader("Content-Disposition", "attachment; filename=" + snapshotName);
             response.setHeader("Cache-Control", "no-transform, max-age=0");
 
             try (PrintWriter writer = response.getWriter()) {
                 writer.write(marshalled);
             }
+
+            auditLogger.info(
+                    "UI Wires Snapshots - Success - Successfully generated wire graph snapshot for user: {}, session: {}, generated file name: {}",
+                    session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId(), snapshotName);
         } catch (Exception e) {
             logger.warn("Failed to download snapshot", e);
+            auditLogger.warn("UI Wires Snapshots - Failure - Failed to get wires snapshot for user: {}, session: {}",
+                    session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
             throw new ServletException("Failed to download snapshot");
         }
     }

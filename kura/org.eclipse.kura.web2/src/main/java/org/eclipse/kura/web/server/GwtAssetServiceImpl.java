@@ -23,6 +23,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
 import org.eclipse.kura.asset.Asset;
 import org.eclipse.kura.channel.ChannelFlag;
 import org.eclipse.kura.channel.ChannelRecord;
@@ -32,6 +35,7 @@ import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.server.util.ServiceLocator.ServiceConsumer;
+import org.eclipse.kura.web.session.Attributes;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtChannelOperationResult;
 import org.eclipse.kura.web.shared.model.GwtChannelRecord;
@@ -40,8 +44,12 @@ import org.eclipse.kura.web.shared.service.GwtAssetService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GwtAssetServiceImpl extends OsgiRemoteServiceServlet implements GwtAssetService {
+    
+    private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
 
     private static final long serialVersionUID = 8627173534436639487L;
 
@@ -52,6 +60,9 @@ public class GwtAssetServiceImpl extends OsgiRemoteServiceServlet implements Gwt
     public GwtChannelOperationResult readAllChannels(GwtXSRFToken xsrfToken, String assetPid) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
 
+        final HttpServletRequest request = getThreadLocalRequest();
+        final HttpSession session = request.getSession(false);
+        
         try {
             List<GwtChannelRecord> result = new ArrayList<>();
 
@@ -61,9 +72,13 @@ public class GwtAssetServiceImpl extends OsgiRemoteServiceServlet implements Gwt
                     result.add(toGwt(channelRecord));
                 }
             });
+            auditLogger.info("UI Asset - Success - Successfully read all channels for user: {}, session: {}",
+                    session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
 
             return new GwtChannelOperationResult(result);
         } catch (Exception e) {
+            auditLogger.warn("UI Asset - Failure - Failed to read all channels for user: {}, session: {}",
+                    session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
             return getFailureResult(e);
         }
     }
@@ -73,6 +88,9 @@ public class GwtAssetServiceImpl extends OsgiRemoteServiceServlet implements Gwt
             List<GwtChannelRecord> gwtChannelRecords) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
 
+        final HttpServletRequest request = getThreadLocalRequest();
+        final HttpSession session = request.getSession(false);
+        
         try {
             final Map<String, GwtChannelRecord> groupedRecords = new HashMap<>(gwtChannelRecords.size());
 
@@ -107,9 +125,14 @@ public class GwtAssetServiceImpl extends OsgiRemoteServiceServlet implements Gwt
                     fillErrorData(status, gwtChannelRecord);
                 }
             }
+            
+            auditLogger.info("UI Asset - Success - Successful write for user: {}, session {}",
+                    session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
 
             return new GwtChannelOperationResult(gwtChannelRecords);
         } catch (Exception e) {
+            auditLogger.warn("UI Asset - Failure - Write failure for user: {}, session {}",
+                    session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
             return getFailureResult(e);
         }
     }

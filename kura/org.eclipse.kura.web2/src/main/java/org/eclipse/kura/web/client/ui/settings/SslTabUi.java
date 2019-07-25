@@ -86,22 +86,10 @@ public class SslTabUi extends AbstractServicesUi {
         this.initialized = false;
         
         apply.setText(MSGS.apply());
-        apply.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                apply();
-            }
-        });
+        apply.addClickHandler(event -> apply());
 
         reset.setText(MSGS.reset());
-        reset.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                reset();
-            }
-        });
+        reset.addClickHandler(event -> reset());
     }
     
     public void load() {
@@ -178,69 +166,59 @@ public class SslTabUi extends AbstractServicesUi {
                 Button no = new Button();
                 no.setText(MSGS.noButton());
                 no.addStyleName("fa fa-times");
-                no.addClickHandler(new ClickHandler() {
-
-                    @Override
-                    public void onClick(ClickEvent event) {
-                        SslTabUi.this.modal.hide();
-                    }
-                });
+                no.addClickHandler(event -> SslTabUi.this.modal.hide());
 
                 group.add(no);
                 Button yes = new Button();
                 yes.setText(MSGS.yesButton());
                 yes.addStyleName("fa fa-check");
-                yes.addClickHandler(new ClickHandler() {
+                yes.addClickHandler(event -> {
+                    EntryClassUi.showWaitModal();
+                    try {
+                        getUpdatedConfiguration();
+                    } catch (Exception ex) {
+                        EntryClassUi.hideWaitModal();
+                        FailureHandler.handle(ex);
+                        return;
+                    }
+                    SslTabUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
-                    @Override
-                    public void onClick(ClickEvent event) {
-                        EntryClassUi.showWaitModal();
-                        try {
-                            getUpdatedConfiguration();
-                        } catch (Exception ex) {
+                        @Override
+                        public void onFailure(Throwable ex) {
                             EntryClassUi.hideWaitModal();
                             FailureHandler.handle(ex);
-                            return;
                         }
-                        SslTabUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
-                            @Override
-                            public void onFailure(Throwable ex) {
-                                EntryClassUi.hideWaitModal();
-                                FailureHandler.handle(ex);
-                            }
+                        @Override
+                        public void onSuccess(GwtXSRFToken token) {
+                            SslTabUi.this.gwtComponentService.updateComponentConfiguration(token,
+                                    SslTabUi.this.configurableComponent, new AsyncCallback<Void>() {
 
-                            @Override
-                            public void onSuccess(GwtXSRFToken token) {
-                                SslTabUi.this.gwtComponentService.updateComponentConfiguration(token,
-                                        SslTabUi.this.configurableComponent, new AsyncCallback<Void>() {
+                                        @Override
+                                        public void onFailure(Throwable caught) {
+                                            EntryClassUi.hideWaitModal();
+                                            FailureHandler.handle(caught);
+                                            errorLogger.log(Level.SEVERE,
+                                                    caught.getLocalizedMessage() != null
+                                                            ? caught.getLocalizedMessage()
+                                                            : caught.getClass().getName(),
+                                                    caught);
+                                        }
 
-                                            @Override
-                                            public void onFailure(Throwable caught) {
-                                                EntryClassUi.hideWaitModal();
-                                                FailureHandler.handle(caught);
-                                                errorLogger.log(Level.SEVERE,
-                                                        caught.getLocalizedMessage() != null
-                                                                ? caught.getLocalizedMessage()
-                                                                : caught.getClass().getName(),
-                                                        caught);
-                                            }
+                                        @Override
+                                        public void onSuccess(Void result) {
+                                            SslTabUi.this.modal.hide();
+                                            logger.info(MSGS.info() + ": " + MSGS.deviceConfigApplied());
+                                            SslTabUi.this.apply.setEnabled(false);
+                                            SslTabUi.this.reset.setEnabled(false);
+                                            setDirty(false);
+                                            SslTabUi.this.originalConfig = SslTabUi.this.configurableComponent;
+                                            EntryClassUi.hideWaitModal();
+                                        }
+                                    });
 
-                                            @Override
-                                            public void onSuccess(Void result) {
-                                                SslTabUi.this.modal.hide();
-                                                logger.info(MSGS.info() + ": " + MSGS.deviceConfigApplied());
-                                                SslTabUi.this.apply.setEnabled(false);
-                                                SslTabUi.this.reset.setEnabled(false);
-                                                setDirty(false);
-                                                SslTabUi.this.originalConfig = SslTabUi.this.configurableComponent;
-                                                EntryClassUi.hideWaitModal();
-                                            }
-                                        });
-
-                            }
-                        });
-                    }
+                        }
+                    });
                 });
                 group.add(yes);
                 footer.add(group);

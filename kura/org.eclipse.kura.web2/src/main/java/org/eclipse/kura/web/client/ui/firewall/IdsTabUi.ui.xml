@@ -42,45 +42,16 @@
                     </g:ScrollPanel>
                 </b:Well>
             </b:Row>
-            
-            <!-- <b:Row>
-                <b:Well>
-                    <g:ScrollPanel>
-                        <b:Form ui:field="form">
-                            <b:FormGroup ui:field="loginProtectionFormGroup">
-                                <b:FormLabel ui:field="loginProtectionLabel"/>
-                                <b:HelpBlock ui:field="loginProtectionHelpBlock"/>
-                                <g:FlowPanel ui:field="loginProtectionFlowPanel">
-                                    <b:InlineRadio ui:field="loginProtectionTrue" name="radio1" formValue="value1"/>
-                                    <b:InlineRadio ui:field="loginProtectionFalse" name="radio1" formValue="value2"/>
-                                </g:FlowPanel>
-                            </b:FormGroup>
-                            
-                            <b:FormGroup ui:field="floodingProtectionFormGroup">
-                                <b:FormLabel ui:field="floodingProtectionLabel"/>
-                                <b:HelpBlock ui:field="floodingProtectionHelpBlock"/>
-                                <g:FlowPanel ui:field="floodingProtectionFlowPanel">
-                                    <b:InlineRadio ui:field="floodingProtectionTrue" name="radio2" formValue="value1"/>
-                                    <b:InlineRadio ui:field="floodingProtectionFalse" name="radio2" formValue="value2"/>
-                                </g:FlowPanel>
-                            </b:FormGroup>
-                        </b:Form>
-                    </g:ScrollPanel>
-                </b:Well>
-            </b:Row>-->
-            
         </b:Column>
 
-<b:Modal closable="true" dataKeyboard="true" ui:field="incompleteFieldsModal" b:id="incompleteFieldsModal">
-            <b:ModalBody>
-                <b:Panel>
-                    <b:PanelBody>
-                        <b:Alert type="WARNING" ui:field="incompleteFields">
-                            <b.html:Text ui:field="incompleteFieldsText" />
-                        </b:Alert>
-                    </b:PanelBody>
-                </b:Panel>
-            </b:ModalBody>
+        <b:Modal closable="true" dataKeyboard="true" ui:field="notificationModal" b:id="notificationModal">
+            <b:ModalHeader ui:field="notificationModalHeader"/>
+            <b:ModalBody ui:field="notificationModalBody" />
+            <b:ModalFooter ui:field="notificationModalFooter">
+                <b:Button addStyleNames="fa fa-times" type="PRIMARY" dataDismiss="MODAL"
+                    ui:field="cancelButton" />
+                <b:Button addStyleNames="fa fa-check" dataDismiss="MODAL" ui:field="applyButton" />
+            </b:ModalFooter>
         </b:Modal>
     </b:Container>
 </ui:UiBinder>

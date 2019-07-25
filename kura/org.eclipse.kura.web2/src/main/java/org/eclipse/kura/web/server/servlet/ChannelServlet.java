@@ -29,6 +29,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -40,6 +41,7 @@ import org.eclipse.kura.web.server.KuraRemoteServiceServlet;
 import org.eclipse.kura.web.server.util.GwtServerUtil;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.server.util.ServiceLocator.ServiceConsumer;
+import org.eclipse.kura.web.session.Attributes;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.osgi.framework.BundleContext;
@@ -53,6 +55,7 @@ public class ChannelServlet extends HttpServlet {
     private static final long serialVersionUID = -1445700937173920652L;
 
     private static Logger logger = LoggerFactory.getLogger(ChannelServlet.class);
+    private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
 
     /**
      * Instance of Base Asset Channel Descriptor
@@ -62,6 +65,7 @@ public class ChannelServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        HttpSession session = req.getSession(false);
         // BEGIN XSRF - Servlet dependent code
         try {
             GwtXSRFToken token = new GwtXSRFToken(req.getParameter("xsrfToken"));
@@ -89,8 +93,15 @@ public class ChannelServlet extends HttpServlet {
                     writer.write(out.toString());
                 }
             }
+            
+            auditLogger.info(
+                    "UI Channel Servlet - Success - Successfully wrote Channel CSV description for user: {}, session: {}, asset pid: {}, driver pid: {}",
+                    session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId(), assetPid, driverPid);
         } catch (Exception ex) {
             logger.error("Error while exporting CSV output!", ex);
+            auditLogger.warn(
+                    "UI Channel Servlet - Failure - Failed to write Channel CSV description for user: {}, session: {}",
+                    session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
         }
     }
 

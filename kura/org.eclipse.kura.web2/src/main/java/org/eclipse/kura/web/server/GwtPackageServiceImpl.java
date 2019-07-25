@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -27,6 +29,7 @@ import org.eclipse.kura.deployment.agent.DeploymentAgentService;
 import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.web.client.util.GwtSafeHtmlUtils;
 import org.eclipse.kura.web.server.util.ServiceLocator;
+import org.eclipse.kura.web.session.Attributes;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtBundleInfo;
@@ -53,7 +56,10 @@ import org.w3c.dom.NodeList;
 public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements GwtPackageService {
 
     private static final long serialVersionUID = -3422518194598042896L;
+    
     private static final Logger logger = LoggerFactory.getLogger(GwtPackageServiceImpl.class);
+    private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
+    
     private static final int MARKETPLACE_FEEDBACK_REQUEST_TIMEOUT = 20 * 1000;
 
     @Override
@@ -87,6 +93,11 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
                 gwtDeploymentPackages.add(gwtDeploymentPackage);
             }
         }
+        
+        final HttpServletRequest request = getThreadLocalRequest();
+        final HttpSession session = request.getSession(false);
+        auditLogger.info("UI Packages - Success - Successfully listed deployment packages for user: {}, session: {}",
+                session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
 
         return gwtDeploymentPackages;
     }
@@ -94,11 +105,17 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
     @Override
     public void uninstallDeploymentPackage(GwtXSRFToken xsrfToken, String packageName) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
+        
+        final HttpServletRequest request = getThreadLocalRequest();
+        final HttpSession session = request.getSession(false);
+        
         DeploymentAgentService deploymentAgentService = ServiceLocator.getInstance()
                 .getService(DeploymentAgentService.class);
         try {
             deploymentAgentService.uninstallDeploymentPackageAsync(GwtSafeHtmlUtils.htmlEscape(packageName));
         } catch (Exception e) {
+            auditLogger.warn("UI Packages - Failure - Failed to uninstall dp for user: {}, session: {}, package name: {}",
+                    session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId(), packageName);
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
         }
     }
@@ -208,7 +225,7 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
 
     private String getMarketplaceCompatibilityVersionString() throws GwtKuraException {
         return ServiceLocator.applyToServiceOptionally(SystemService.class,
-                systemService -> systemService.getKuraMarketplaceCompatibilityVersion());
+                SystemService::getKuraMarketplaceCompatibilityVersion);
     }
 
     private void checkCompatibility(GwtMarketplacePackageDescriptor descriptor, Version currentProductVersion) {
@@ -237,6 +254,10 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
     public void installPackageFromMarketplace(GwtXSRFToken xsrfToken, GwtMarketplacePackageDescriptor descriptor)
             throws GwtKuraException {
         checkXSRFToken(xsrfToken);
+        
+        final HttpServletRequest request = getThreadLocalRequest();
+        final HttpSession session = request.getSession(false);
+        
         try {
             ServiceLocator.applyToServiceOptionally(DeploymentAgentService.class, deploymentAgentService -> {
                 if (deploymentAgentService == null) {
@@ -256,6 +277,8 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
 
         } catch (Exception e) {
             logger.warn("failed to start package install from Eclipse Marketplace", e);
+            auditLogger.warn("UI Packages - Failure - Failed to install package from Eclipse Marketplace for user: {}, session: {}",
+                    session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId(), e);
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
         }
     }

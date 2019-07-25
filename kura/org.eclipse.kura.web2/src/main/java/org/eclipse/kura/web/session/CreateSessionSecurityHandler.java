@@ -21,7 +21,7 @@ public class CreateSessionSecurityHandler implements SecurityHandler {
     @Override
     public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
-        Console.instance().createSession(request, response);
+        Console.instance().createSession(request);
 
         return true;
     }

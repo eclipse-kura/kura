@@ -21,7 +21,6 @@ import java.util.Set;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.eclipse.kura.KuraException;
@@ -43,7 +42,6 @@ import org.eclipse.kura.web.server.GwtSecurityServiceImpl;
 import org.eclipse.kura.web.server.GwtSecurityTokenServiceImpl;
 import org.eclipse.kura.web.server.GwtSessionServiceImpl;
 import org.eclipse.kura.web.server.GwtSnapshotServiceImpl;
-import org.eclipse.kura.web.server.GwtSslServiceImpl;
 import org.eclipse.kura.web.server.GwtStatusServiceImpl;
 import org.eclipse.kura.web.server.GwtWireGraphServiceImpl;
 import org.eclipse.kura.web.server.servlet.ChannelServlet;
@@ -283,7 +281,6 @@ public class Console implements ConfigurableComponent {
         this.httpService.unregister(DENALI_MODULE_PATH + "/device_snapshots");
         this.httpService.unregister(DENALI_MODULE_PATH + "/assetsUpDownload");
         this.httpService.unregister(DENALI_MODULE_PATH + "/skin");
-        this.httpService.unregister(DENALI_MODULE_PATH + "/ssl");
         this.httpService.unregister(DENALI_MODULE_PATH + "/cloudservices");
         this.httpService.unregister(DENALI_MODULE_PATH + "/wires");
         this.httpService.unregister(DENALI_MODULE_PATH + "/wiresSnapshot");
@@ -317,7 +314,7 @@ public class Console implements ConfigurableComponent {
         return this.appRoot;
     }
 
-    public HttpSession createSession(final HttpServletRequest request, final HttpServletResponse response) {
+    public HttpSession createSession(final HttpServletRequest request) {
         final HttpSession session = request.getSession();
 
         session.setMaxInactiveInterval(this.sessionMaxInactiveInterval * 60);
@@ -404,7 +401,6 @@ public class Console implements ConfigurableComponent {
         this.httpService.registerServlet(DENALI_MODULE_PATH + "/assetsUpDownload", new ChannelServlet(), null,
                 sessionContext);
         this.httpService.registerServlet(DENALI_MODULE_PATH + "/skin", new SkinServlet(), null, resourceContext);
-        this.httpService.registerServlet(DENALI_MODULE_PATH + "/ssl", new GwtSslServiceImpl(), null, sessionContext);
         this.httpService.registerServlet(DENALI_MODULE_PATH + "/cloudservices", new GwtCloudConnectionServiceImpl(),
                 null, sessionContext);
         this.httpService.registerServlet(DENALI_MODULE_PATH + "/wires", new GwtWireGraphServiceImpl(), null,

@@ -15,20 +15,30 @@
 <Configuration status="warn" strict="true" name="KuraConfig" monitorInterval="30">
 
     <Properties>
-        <Property name="filename">/var/log/kura</Property>
+        <Property name="log_dir">/var/log</Property>
+        <Property name="log_name">kura</Property>
     </Properties>
     <Filter type="ThresholdFilter" level="trace"/>
  
     <Appenders>
-        <Console name="Console" target="SYSTEM_OUT">
+        <RollingFile name="RollingFile" fileName="${log_dir}/${log_name}.log" filePattern="${log_dir}/${log_name}-%d{MM-dd-yy-HH-mm-ss}-%i.log.gz">
             <PatternLayout>
                 <Pattern>%d{ISO8601} [%t] %-5p %c{1.} - %m%n%throwable{full}</Pattern>
             </PatternLayout>
-        </Console>
-        <RollingFile name="RollingFile" fileName="${filename}.log" filePattern="${filename}-%d{MM-dd-yy-HH-mm-ss}-%i.log.gz">
-            <PatternLayout>
-                <Pattern>%d{ISO8601} [%t] %-5p %c{1.} - %m%n%throwable{full}</Pattern>
-            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="20 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="10"/>
+        </RollingFile>
+        <RollingFile name="audit" fileName="${log_dir}/${log_name}-audit.log" filePattern="${log_dir}/${log_name}-audit-%d{MM-dd-yy-HH-mm-ss}-%i.log.gz">
+            <RFC5424Layout enterpriseNumber="28392" includeMDC="true" mdcId="RequestContext" appName="EclipseKura" mdcPrefix="" newLine="true">
+                <LoggerFields>
+                    <KeyValuePair key="thread" value="%t"/>
+                    <KeyValuePair key="priority" value="%p"/>
+                    <KeyValuePair key="category" value="%c"/>
+                    <KeyValuePair key="exception" value="%ex"/>
+                </LoggerFields>
+            </RFC5424Layout>
             <Policies>
                 <SizeBasedTriggeringPolicy size="20 MB"/>
             </Policies>
@@ -39,14 +49,13 @@
     <Loggers>
         <Logger name="org.eclipse" level="warn" additivity="false">
             <AppenderRef ref="RollingFile"/>
-            <AppenderRef ref="Console"/>
         </Logger>
- 
+        <Logger name="AuditLogger" level="trace" additivity="false">
+            <AppenderRef ref="audit"/>
+        </Logger>
         <Root level="warn">
             <AppenderRef ref="RollingFile"/>
-            <AppenderRef ref="Console"/>
         </Root>
   </Loggers>
  
 </Configuration>
-

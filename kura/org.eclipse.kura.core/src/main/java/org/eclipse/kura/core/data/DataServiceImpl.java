@@ -105,6 +105,8 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 
     private AtomicInteger connectionAttempts;
 
+    private Runnable runnable;
+
     // ----------------------------------------------------------------
     //
     // Activation APIs
@@ -568,9 +570,12 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
         //
         // Establish a reconnect Thread based on the reconnect interval
         boolean autoConnect = this.dataServiceOptions.isAutoConnect();
-        int reconnectInterval = this.dataServiceOptions.getConnectDelay();
-        if (autoConnect) {
+        boolean connect = DataServiceImpl.this.dataTransportService.isConnected();
 
+        int delay = 1;
+        int reconnectDelay;
+
+        if (autoConnect) {
             if (this.dataServiceOptions.isConnectionRecoveryEnabled()) {
                 this.watchdogService.registerCriticalComponent(this);
                 this.watchdogService.checkin(this);
@@ -579,80 +584,78 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 
             // Change notification status to slow blinking when connection is expected to happen in the future
             this.cloudConnectionStatusService.updateStatus(this, CloudConnectionStatusEnum.SLOW_BLINKING);
-            // add a delay on the reconnect
-            int maxDelay = reconnectInterval / 5;
-            maxDelay = maxDelay > 0 ? maxDelay : 1;
-            int initialDelay = new Random().nextInt(maxDelay);
+            while (!connect) {
 
-            logger.info("Starting reconnect task with initial delay {}", initialDelay);
-            this.connectionMonitorFuture = this.connectionMonitorExecutor.scheduleAtFixedRate(new Runnable() {
+                Random random = new Random();
+                int n = (int) Math.pow(2, delay);
 
-                @Override
-                public void run() {
-                    String originalName = Thread.currentThread().getName();
-                    Thread.currentThread().setName("DataServiceImpl:ReconnectTask");
-                    boolean connected = false;
-                    try {
-                        if (DataServiceImpl.this.dbService == null) {
-                            logger.warn("H2DbService instance not attached, not connecting");
-                            return;
-                        }
-                        logger.info("Connecting...");
-                        if (DataServiceImpl.this.dataTransportService.isConnected()) {
-                            logger.info("Already connected. Reconnect task will be terminated.");
+                reconnectDelay = new Random().nextInt(n) + 1;
 
+                logger.info("Starting reconnect task with delay {}", reconnectDelay);
+
+                try {
+                    if (DataServiceImpl.this.dbService == null) {
+                        logger.warn("H2DbService instance not attached, not connecting");
+                    }
+                    logger.info("Connecting...");
+                    if (DataServiceImpl.this.dataTransportService.isConnected()) {
+                        logger.info("Already connected. Reconnect task will be terminated.");
+                        connect = true;
+                    } else {
+                        DataServiceImpl.this.dataTransportService.connect();
+                        logger.info("Connected. Reconnect task will be terminated.");
+                        connect = true;
+                    }
+                } catch (KuraConnectException e) {
+                    logger.warn("Connect failed", e);
+
+                    if (DataServiceImpl.this.dataServiceOptions.isConnectionRecoveryEnabled()) {
+                        if (isAuthenticationException(e) || DataServiceImpl.this.connectionAttempts
+                                .getAndIncrement() < DataServiceImpl.this.dataServiceOptions
+                                        .getRecoveryMaximumAllowedFailures()) {
+                            logger.info("Checkin done.");
+                            DataServiceImpl.this.watchdogService.checkin(DataServiceImpl.this);
                         } else {
-                            DataServiceImpl.this.dataTransportService.connect();
-                            logger.info("Connected. Reconnect task will be terminated.");
-                        }
-                        connected = true;
-                    } catch (KuraConnectException e) {
-                        logger.warn("Connect failed", e);
-
-                        if (DataServiceImpl.this.dataServiceOptions.isConnectionRecoveryEnabled()) {
-                            if (isAuthenticationException(e) || DataServiceImpl.this.connectionAttempts
-                                    .getAndIncrement() < DataServiceImpl.this.dataServiceOptions
-                                            .getRecoveryMaximumAllowedFailures()) {
-                                logger.info("Checkin done.");
-                                DataServiceImpl.this.watchdogService.checkin(DataServiceImpl.this);
-                            } else {
-                                logger.info("Maximum number of connection attempts reached. Requested reboot...");
-                            }
-                        }
-                    } catch (Error e) {
-                        // There's nothing we can do here but log an exception.
-                        logger.error("Unexpected Error. Task will be terminated", e);
-                        throw e;
-                    } finally {
-                        Thread.currentThread().setName(originalName);
-                        if (connected) {
-                            unregisterAsCriticalComponent();
-                            // Throwing an exception will suppress subsequent executions of this periodic task.
-                            throw new RuntimeException("Connected. Reconnect task will be terminated.");
+                            logger.info("Maximum number of connection attempts reached. Requested reboot...");
                         }
                     }
+                } catch (Error e) {
+                    // There's nothing we can do here but log an exception.
+                    logger.error("Unexpected Error. Task will be terminated", e);
+                    throw e;
                 }
 
-                private boolean isAuthenticationException(KuraConnectException e) {
-                    boolean authenticationException = false;
-                    if (e.getCause() instanceof MqttException) {
-                        MqttException mqttException = (MqttException) e.getCause();
-                        if (mqttException.getReasonCode() == MqttException.REASON_CODE_FAILED_AUTHENTICATION
-                                || mqttException.getReasonCode() == MqttException.REASON_CODE_INVALID_CLIENT_ID
-                                || mqttException.getReasonCode() == MqttException.REASON_CODE_NOT_AUTHORIZED) {
-                            logger.info("Authentication exception encountered.");
-                            authenticationException = true;
-                        }
-                    }
-                    return authenticationException;
+                try {
+                    TimeUnit.SECONDS.sleep(reconnectDelay);
+                } catch (InterruptedException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
                 }
-            }, initialDelay, reconnectInterval, TimeUnit.SECONDS);
+
+                delay = delay + 1;
+            }
+
         } else {
             // Change notification status to off. Connection is not expected to happen in the future
             this.cloudConnectionStatusService.updateStatus(this, CloudConnectionStatusEnum.OFF);
             unregisterAsCriticalComponent();
         }
+
         return autoConnect;
+    }
+
+    private boolean isAuthenticationException(KuraConnectException e) {
+        boolean authenticationException = false;
+        if (e.getCause() instanceof MqttException) {
+            MqttException mqttException = (MqttException) e.getCause();
+            if (mqttException.getReasonCode() == MqttException.REASON_CODE_FAILED_AUTHENTICATION
+                    || mqttException.getReasonCode() == MqttException.REASON_CODE_INVALID_CLIENT_ID
+                    || mqttException.getReasonCode() == MqttException.REASON_CODE_NOT_AUTHORIZED) {
+                logger.info("Authentication exception encountered.");
+                authenticationException = true;
+            }
+        }
+        return authenticationException;
     }
 
     private void createThrottle() {

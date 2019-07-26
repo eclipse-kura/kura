@@ -694,11 +694,7 @@
                 <esf:value>true</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="http.enabled" type="Boolean">
-<<<<<<< HEAD
                 <esf:value>true</esf:value>
-=======
-                <esf:value>false</esf:value>
->>>>>>> refs/remotes/origin/develop
             </esf:property>
             <esf:property array="false" encrypted="false" name="http.port" type="Integer">
                 <esf:value>80</esf:value>

@@ -663,7 +663,27 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
     }
 
     private void checkFieldsValues() {
-        String[] parts = this.port.getText().trim().split(":");
+        String[] parts = new String[2];
+        String[] partsProv = new String[2];
+        String portString = this.port.getText().trim();
+
+        if (portString.indexOf(":") != -1) {
+            partsProv = portString.split(":");
+        } else {
+            partsProv[0] = "-1";
+            partsProv[1] = portString;
+        }
+
+        if (partsProv[1].contentEquals("")) {
+            parts[0] = "-1";
+            parts[1] = partsProv[0];
+        } else if (partsProv[0].contentEquals("")) {
+            parts[0] = "-1";
+            parts[1] = partsProv[1];
+        } else {
+            parts[0] = partsProv[0];
+            parts[1] = partsProv[1];
+        }
         if (this.port.getText().trim().isEmpty() || Integer.valueOf(parts[0]) >= Integer.valueOf(parts[1])) {
             this.groupPort.setValidationState(ValidationState.ERROR);
         }

@@ -15,15 +15,17 @@ import org.eclipse.kura.KuraException;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
- * @noimplement This interface is not intended to be implemented by clients.
+ * This interface allows to manage services that protect the framework from DoS attacks to the exposed services.
+ *
  * @since 2.2
+ * @noimplement This interface is not intended to be implemented by clients.
  */
 @ProviderType
-public interface FloodingProtectionService {
+public interface LoginDosProtectionService {
 
     /**
      * Enables the protection
-     *
+     * 
      * @throws KuraException
      *             if the operation fails
      */
@@ -31,7 +33,7 @@ public interface FloodingProtectionService {
 
     /**
      * Disables the protection
-     *
+     * 
      * @throws KuraException
      *             if the operation fails
      */
@@ -39,7 +41,7 @@ public interface FloodingProtectionService {
 
     /**
      * Returns the service status
-     *
+     * 
      * @return true if the protection is enabled
      * @throws KuraException
      *             if the operation fails

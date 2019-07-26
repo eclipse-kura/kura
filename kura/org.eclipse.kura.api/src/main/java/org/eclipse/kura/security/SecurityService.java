@@ -9,7 +9,6 @@
  * Contributors:
  *     Eurotech
  *******************************************************************************/
-
 package org.eclipse.kura.security;
 
 import org.eclipse.kura.KuraException;

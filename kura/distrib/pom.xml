@@ -62,6 +62,7 @@
                 <updatePolicy>always</updatePolicy>
             </snapshots>
         </repository>
+        <!-- 
         <repository>
             <id>kura_addons</id>
             <name>Eclipse Kura Addons Maven Repository</name>
@@ -72,6 +73,7 @@
                 <updatePolicy>always</updatePolicy>
             </snapshots>
         </repository>
+         -->
     </repositories>
 
     <build>
@@ -1252,6 +1254,7 @@
                                         <property name="os.base" value="debian" />
                                         <property name="kura.mem.size" value="1024m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
+                                        <property name="driver.ble" value="no" />
                                         <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
                                     </target>
                                 </configuration>
@@ -1343,6 +1346,7 @@
                                         <property name="os.base" value="redhat" />
                                         <property name="kura.mem.size" value="1024m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
+                                        <property name="driver.ble" value="no" />
                                         <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
                                     </target>
                                 </configuration>
@@ -1878,6 +1882,7 @@
                                         <property name="os.base" value="debian" />
                                         <property name="kura.mem.size" value="1024m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
+                                        <property name="driver.ble" value="no" />
                                         <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
                                     </target>
                                 </configuration>

@@ -67,7 +67,7 @@ public class S7PlcDriver extends AbstractBlockDriver<S7PlcDomain> implements Con
         this.cryptoService = cryptoService;
     }
 
-    public void unsetCryptoService() {
+    public void unsetCryptoService(CryptoService cryptoService) {
         this.cryptoService = null;
     }
 

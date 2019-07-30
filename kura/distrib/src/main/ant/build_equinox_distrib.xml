@@ -1333,16 +1333,6 @@ fi]]>
 			<!-- additional configs -->
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/io.glutamate_${io.glutamate.version}.jar@3" />
-			<entry key="osgi.bundles" operation="+"
-				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/io.netty.codec-http2_${io.netty.version}.jar@3" />
-			<entry key="osgi.bundles" operation="+"
-				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/io.netty.resolver-dns_${io.netty.version}.jar@3" />
-			<entry key="osgi.bundles" operation="+"
-				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/io.netty.handler-proxy_${io.netty.version}.jar@3" />
-			<entry key="osgi.bundles" operation="+"
-				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/io.netty.codec-socks_${io.netty.version}.jar@3" />
-			<entry key="osgi.bundles" operation="+"
-				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/io.netty.codec-dns_${io.netty.version}.jar@3" />
             <entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.camel.camel-spring_${org.apache.camel.camel-spring.version}.jar@3:start" />
             <entry key="osgi.bundles" operation="+"
@@ -1431,15 +1421,25 @@ fi]]>
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/io.netty.codec_${io.netty.version}.jar@3" />
 			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/io.netty.codec-dns_${io.netty.version}.jar@3" />
+			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/io.netty.codec-http_${io.netty.version}.jar@3" />
 			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/io.netty.codec-http2_${io.netty.version}.jar@3" />
+			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/io.netty.codec-mqtt_${io.netty.version}.jar@3" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/io.netty.codec-socks_${io.netty.version}.jar@3" />
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/io.netty.common_${io.netty.version}.jar@3" />
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/io.netty.handler_${io.netty.version}.jar@3" />
 			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/io.netty.handler-proxy_${io.netty.version}.jar@3" />
+			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/io.netty.resolver_${io.netty.version}.jar@3" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/io.netty.resolver-dns_${io.netty.version}.jar@3" />
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/io.netty.transport_${io.netty.version}.jar@3" />
 			<entry key="osgi.bundles" operation="+"
@@ -1452,7 +1452,15 @@ fi]]>
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.activemq.artemis-mqtt-protocol_${org.apache.activemq.artemis.upstream.version}.jar@3:start" />
 			<entry key="osgi.bundles" operation="+"
-				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.activemq.artemis-native_${org.apache.activemq.artemis.upstream.version}.jar@3" />
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.activemq.artemis-amqp-protocol_${org.apache.activemq.artemis.upstream.version}.jar@3:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.activemq.artemis-hornetq-protocol_${org.apache.activemq.artemis.upstream.version}.jar@3:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.activemq.artemis-hqclient-protocol_${org.apache.activemq.artemis.upstream.version}.jar@3:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.activemq.artemis-stomp-protocol_${org.apache.activemq.artemis.upstream.version}.jar@3:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.activemq.artemis-native_${org.apache.activemq.artemis-native.version}.jar@3" />
 
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.commons.beanutils_${commons-beanutils.version}.jar@3" />

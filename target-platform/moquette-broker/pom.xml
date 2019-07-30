@@ -28,7 +28,7 @@
 
     <properties>
         <maven-bundle-plugin.version>4.1.0</maven-bundle-plugin.version>
-        <moquette-broker.version>0.12</moquette-broker.version>
+        <moquette-broker.version>0.12.1</moquette-broker.version>
     </properties>
 
     <repositories>

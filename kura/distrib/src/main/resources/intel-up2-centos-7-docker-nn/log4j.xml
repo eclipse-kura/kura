@@ -21,6 +21,11 @@
     <Filter type="ThresholdFilter" level="trace"/>
  
     <Appenders>
+    	<Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout>
+                <Pattern>%d{ISO8601} [%t] %-5p %c{1.} - %m%n%throwable{full}</Pattern>
+            </PatternLayout>
+        </Console>
         <RollingFile name="RollingFile" fileName="${log_dir}/${log_name}.log" filePattern="${log_dir}/${log_name}-%d{MM-dd-yy-HH-mm-ss}-%i.log.gz">
             <PatternLayout>
                 <Pattern>%d{ISO8601} [%t] %-5p %c{1.} - %m%n%throwable{full}</Pattern>
@@ -49,12 +54,15 @@
     <Loggers>
         <Logger name="org.eclipse" level="warn" additivity="false">
             <AppenderRef ref="RollingFile"/>
+            <AppenderRef ref="Console"/>
         </Logger>
         <Logger name="AuditLogger" level="trace" additivity="false">
             <AppenderRef ref="audit"/>
+            <AppenderRef ref="Console"/>
         </Logger>
         <Root level="warn">
             <AppenderRef ref="RollingFile"/>
+            <AppenderRef ref="Console"/>
         </Root>
   </Loggers>
  

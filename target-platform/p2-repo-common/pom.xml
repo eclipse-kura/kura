@@ -218,9 +218,9 @@
                                     <version>${org.apache.commons.io-mvn.version}</version>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.apache</groupId>
-                                    <artifactId>org.apache.commons.lang3</artifactId>
-                                    <version>${org.apache.commons.lang3.version}</version>
+                                    <groupId>org.apache.commons</groupId>
+                                    <artifactId>commons-lang3</artifactId>
+                                    <version>${org.apache.commons.lang3.maven.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.apache.commons</groupId>
@@ -489,11 +489,32 @@
                                     <artifactId>artemis-mqtt-protocol</artifactId>
                                     <version>${org.apache.activemq.artemis.upstream.version}</version>
                                 </artifactItem>
-                                <dependency>
+                                <artifactItem>
                                     <groupId>org.apache.activemq</groupId>
-                                    <artifactId>artemis-native</artifactId>
+                                    <artifactId>artemis-amqp-protocol</artifactId>
                                     <version>${org.apache.activemq.artemis.upstream.version}</version>
-                                </dependency>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.apache.activemq</groupId>
+                                    <artifactId>artemis-hornetq-protocol</artifactId>
+                                    <version>${org.apache.activemq.artemis.upstream.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.apache.activemq</groupId>
+                                    <artifactId>artemis-stomp-protocol</artifactId>
+                                    <version>${org.apache.activemq.artemis.upstream.version}</version>
+                                </artifactItem>
+
+                                <artifactItem>
+                                    <groupId>org.apache.activemq</groupId>
+                                    <artifactId>activemq-artemis-native</artifactId>
+                                    <version>${org.apache.activemq.artemis-native.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.apache.activemq</groupId>
+                                    <artifactId>artemis-hqclient-protocol</artifactId>
+                                    <version>${org.apache.activemq.artemis.upstream.version}</version>
+                                </artifactItem>
                                 <artifactItem>
                                     <groupId>io.netty</groupId>
                                     <artifactId>netty-buffer</artifactId>
@@ -559,11 +580,13 @@
                                     <artifactId>netty-codec-socks</artifactId>
                                     <version>${io.netty.version}</version>
                                 </artifactItem>
+                                <!-- 
                                 <artifactItem>
                                     <groupId>io.netty</groupId>
                                     <artifactId>netty-transport-native-epoll</artifactId>
                                     <version>${io.netty.version}</version>
                                 </artifactItem>
+                                -->
                                 <artifactItem>
                                     <groupId>io.netty</groupId>
                                     <artifactId>netty-transport-native-kqueue</artifactId>
@@ -572,6 +595,12 @@
                                 <artifactItem>
                                     <groupId>io.netty</groupId>
                                     <artifactId>netty-transport-native-unix-common</artifactId>
+                                    <version>${io.netty.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>io.netty</groupId>
+                                    <artifactId>netty-transport-native-epoll</artifactId>
+                                    <classifier>linux-x86_64</classifier>
                                     <version>${io.netty.version}</version>
                                 </artifactItem>
                                 <artifactItem>
@@ -780,8 +809,7 @@
                                     tofile="target/source/plugins/usb4java-javax_${usb4java-javax.version}.jar" />
                                 <move file="target/source/plugins/commons-io.jar"
                                     tofile="target/source/plugins/org.apache.commons.io_${org.apache.commons.io.version}.jar" />
-                                <move file="target/source/plugins/org.apache.commons.lang3.jar"
-                                    tofile="target/source/plugins/org.apache.commons.lang3_${org.apache.commons.lang3.version}.jar" />
+                                
                                 <move file="target/source/plugins/org.eclipse.soda.dk.comm.jar"
                                     tofile="target/source/plugins/org.eclipse.soda.dk.comm_${org.eclipse.soda.dk.comm.version}.jar" />
                                 <move file="target/source/plugins/org.eclipse.soda.dk.comm.armv6hf.jar"
@@ -898,8 +926,6 @@
                                     tofile="target/source/plugins/guava_${guava.version}.jar" />
                                 <move file="target/source/plugins/artemis-mqtt-protocol.jar"
                                     tofile="target/source/plugins/artemis-mqtt-protocol_${org.apache.activemq.artemis.upstream.version}.jar" />
-                                <move file="target/source/plugins/artemis-native.jar"
-                                    tofile="target/source/plugins/artemis-native_${org.apache.activemq.artemis.upstream.version}.jar" />
                                 <move file="target/source/plugins/netty-buffer.jar"
                                     tofile="target/source/plugins/netty-buffer_${io.netty.version}.jar" />
                                 <move file="target/source/plugins/netty-codec.jar"
@@ -916,8 +942,12 @@
                                     tofile="target/source/plugins/netty-resolver_${io.netty.version}.jar" />
                                 <move file="target/source/plugins/netty-transport.jar"
                                     tofile="target/source/plugins/netty-transport_${io.netty.version}.jar" />
+                                <!--
                                 <move file="target/source/plugins/netty-transport-native-epoll.jar"
                                     tofile="target/source/plugins/netty-transport-native-epoll_${io.netty.version}.jar" />
+                                -->
+                                <move file="target/source/plugins/netty-transport-native-epoll-linux-x86_64.jar"
+                                    tofile="target/source/plugins/netty-transport-native-epoll-linux-x86_64_${io.netty.version}.jar" />
                                 <move file="target/source/plugins/netty-codec-http2.jar"
                                     tofile="target/source/plugins/netty-codec-http2_${io.netty.version}.jar" />
                                 <move file="target/source/plugins/netty-handler-proxy.jar"

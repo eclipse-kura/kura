@@ -27,14 +27,14 @@
             default="false"
             description="Enable automatic connect of the Data Publishers on startup and after a disconnection."/>
                         
-        <AD id="connect.retry-interval"
-            name="Connect Retry-interval"
+        <AD id="backoff.max.tentatives"
+            name="Backoff max tentatives"
             type="Integer"
             cardinality="0" 
             required="true"
-            default="60"
+            default="10"
             min="1"
-            description="Frequency in seconds to retry a connection of the Data Publishers after a disconnect (Minimum value 1)."/>
+            description="Maximum number of tentatives used to calculate backoff jitter. (Minimum 1)"/>
             
         <AD id="enable.recovery.on.connection.failure"
             name="Enable Recovery On Connection Failure"

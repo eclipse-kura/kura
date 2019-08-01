@@ -11,8 +11,6 @@ package org.eclipse.kura.core.data;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
@@ -42,6 +40,7 @@ import org.eclipse.kura.status.CloudConnectionStatusService;
 import org.eclipse.kura.watchdog.WatchdogService;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.junit.Test;
+import org.mockito.Matchers;
 import org.osgi.service.component.ComponentContext;
 
 public class DataServiceImplTest {
@@ -292,7 +291,6 @@ public class DataServiceImplTest {
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("connect.auto-on-startup", false);
-        properties.put("connect.retry-interval", 10);
         DataServiceOptions dataServiceOptions = new DataServiceOptions(properties);
 
         TestUtil.setFieldValue(svc, "dataServiceOptions", dataServiceOptions);
@@ -330,7 +328,6 @@ public class DataServiceImplTest {
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("connect.auto-on-startup", true);
-        properties.put("connect.retry-interval", 10);
         DataServiceOptions dataServiceOptions = new DataServiceOptions(properties);
 
         TestUtil.setFieldValue(svc, "dataServiceOptions", dataServiceOptions);
@@ -346,7 +343,7 @@ public class DataServiceImplTest {
         verify(wsMock, times(1)).unregisterCriticalComponent(svc);
         verify(wsMock, times(1)).registerCriticalComponent(svc);
         verify(ccssMock, times(1)).updateStatus(svc, CloudConnectionStatusEnum.SLOW_BLINKING);
-        verify(cmeMock, times(1)).scheduleAtFixedRate(anyObject(), anyInt(), eq(10L), eq(TimeUnit.SECONDS));
+        verify(cmeMock, times(1)).schedule(Matchers.any(Runnable.class), eq(0L), eq(TimeUnit.SECONDS));
 
         // future is reset to scheduler result (null)
         assertNull(TestUtil.getFieldValue(svc, "connectionMonitorFuture"));
@@ -382,7 +379,6 @@ public class DataServiceImplTest {
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("connect.auto-on-startup", true);
-        properties.put("connect.retry-interval", 2);
         DataServiceOptions dataServiceOptions = new DataServiceOptions(properties);
         TestUtil.setFieldValue(svc, "dataServiceOptions", dataServiceOptions);
 
@@ -406,7 +402,7 @@ public class DataServiceImplTest {
             lock.wait(20000);
         }
 
-        verify(wsMock, times(2)).unregisterCriticalComponent(svc);
+        verify(wsMock, times(1)).unregisterCriticalComponent(svc);
     }
 
     @Test
@@ -444,7 +440,6 @@ public class DataServiceImplTest {
         // executor service parameters
         Map<String, Object> properties = new HashMap<>();
         properties.put("connect.auto-on-startup", true);
-        properties.put("connect.retry-interval", 1);
         properties.put("connection.recovery.max.failures", 4);
         DataServiceOptions dataServiceOptions = new DataServiceOptions(properties);
         TestUtil.setFieldValue(svc, "dataServiceOptions", dataServiceOptions);
@@ -472,14 +467,13 @@ public class DataServiceImplTest {
         cause = new MqttException(MqttException.REASON_CODE_BROKER_UNAVAILABLE);
         Throwable exc4 = new KuraConnectException(cause, "test");
         doThrow(exc1).doThrow(exc2).doThrow(exc3).doThrow(exc4)
-                .doThrow(new KuraConnectException("test ordinary exception"))
-                .when(dtsMock).connect();
+                .doThrow(new KuraConnectException("test ordinary exception")).when(dtsMock).connect();
 
         svc.onConnectionLost(new Exception("test"));
 
         // wait long enough for the task can run 7-8 times
         synchronized (lock) {
-            lock.wait(8000);
+            lock.wait(240000);
         }
 
         // initial checkin + 3 * authentication + (other mqtt + 3)

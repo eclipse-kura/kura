@@ -23,7 +23,7 @@ import org.eclipse.kura.db.H2DbService;
 public class DataServiceOptions {
 
     private static final String AUTOCONNECT_PROP_NAME = "connect.auto-on-startup";
-    private static final String CONNECT_DELAY_PROP_NAME = "connect.retry-interval";
+    private static final String BACKOFF_MAX_TENTATIVES = "backoff.max.tentatives";
     private static final String DISCONNECT_DELAY_PROP_NAME = "disconnect.quiesce-timeout";
     private static final String STORE_DB_SERVICE_INSTANCE_PROP_NAME = "store.db.service.pid";
     private static final String STORE_HOUSEKEEPER_INTERVAL_PROP_NAME = "store.housekeeper-interval";
@@ -40,7 +40,7 @@ public class DataServiceOptions {
     private static final String RECOVERY_MAX_FAILURES_PROP_NAME = "connection.recovery.max.failures";
 
     private static final boolean AUTOCONNECT_PROP_DEFAULT = false;
-    private static final int CONNECT_DELAY_DEFAULT = 60;
+    private static final int BACKOFF_MAX_TENTATIVES_DEFAULT = 60;
     private static final int DISCONNECT_DELAY_DEFAULT = 10;
     private static final String DB_SERVICE_INSTANCE_DEFAULT = H2DbService.DEFAULT_INSTANCE_PID;
     private static final int STORE_HOUSEKEEPER_INTERVAL_DEFAULT = 900;
@@ -96,8 +96,8 @@ public class DataServiceOptions {
         return (boolean) this.properties.getOrDefault(AUTOCONNECT_PROP_NAME, AUTOCONNECT_PROP_DEFAULT);
     }
 
-    int getConnectDelay() {
-        return (int) this.properties.getOrDefault(CONNECT_DELAY_PROP_NAME, CONNECT_DELAY_DEFAULT);
+    int getBackoffMaxTentatives() {
+        return (int) this.properties.getOrDefault(BACKOFF_MAX_TENTATIVES, BACKOFF_MAX_TENTATIVES_DEFAULT);
     }
 
     int getDisconnectDelay() {
@@ -155,6 +155,6 @@ public class DataServiceOptions {
     }
 
     int getCriticalComponentTimeout() {
-        return getConnectDelay() * CONNECT_CRITICAL_COMPONENT_TIMEOUT_MULTIPLIER;
+        return getBackoffMaxTentatives() * CONNECT_CRITICAL_COMPONENT_TIMEOUT_MULTIPLIER;
     }
 }

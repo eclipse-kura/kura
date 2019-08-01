@@ -504,7 +504,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 
     @Override
     public int getRetryInterval() {
-        return this.dataServiceOptions.getConnectDelay();
+        return this.dataServiceOptions.getBackoffMaxTentatives();
     }
 
     @Override
@@ -572,8 +572,6 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
         // Establish a reconnect Thread based on the reconnect interval
         boolean autoConnect = this.dataServiceOptions.isAutoConnect();
 
-        int inizialDelay = 1;
-
         if (autoConnect) {
             if (this.dataServiceOptions.isConnectionRecoveryEnabled()) {
                 this.watchdogService.registerCriticalComponent(this);
@@ -589,19 +587,20 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
                 @Override
                 public void run() {
 
-                    int delay = 1;
-                    int reconnectDelay;
+                    int attempts = 1;
+                    int backoffMaxTentatives = DataServiceImpl.this.dataServiceOptions.getBackoffMaxTentatives();
 
                     while (!DataServiceImpl.this.dataTransportService.isConnected() || autoConnect) {
 
-                        reconnectDelay = new Random().nextInt((int) Math.pow(2, delay)) + 1;
-
-                        logger.info("Starting reconnect task with delay {}", reconnectDelay);
+                        int reconnectDelay = (new Random().nextInt((int) Math.pow(2, attempts)) + 1) * 1000;
+                        logger.info("Starting reconnect task for attempt {} with delay {}", attempts, reconnectDelay);
 
                         String originalName = Thread.currentThread().getName();
                         Thread.currentThread().setName("DataServiceImpl:ReconnectTask");
                         boolean connected = false;
                         try {
+                            Thread.sleep(reconnectDelay);
+
                             if (DataServiceImpl.this.dbService == null) {
                                 logger.warn("H2DbService instance not attached, not connecting");
                                 return;
@@ -632,6 +631,10 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
                             // There's nothing we can do here but log an exception.
                             logger.error("Unexpected Error. Task will be terminated", e);
                             throw e;
+                        } catch (InterruptedException e) {
+                            logger.error("Reconnect task interrupted!", e);
+                            // Restore interrupted state...
+                            Thread.currentThread().interrupt();
                         } finally {
                             Thread.currentThread().setName(originalName);
                             if (connected) {
@@ -641,14 +644,8 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
                             }
                         }
 
-                        try {
-                            TimeUnit.SECONDS.sleep(reconnectDelay);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-
-                        delay = delay + 1;
-
+                        attempts++;
+                        attempts = attempts % backoffMaxTentatives;
                     }
                 }
 
@@ -666,7 +663,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
                     return authenticationException;
                 }
 
-            }, inizialDelay, TimeUnit.SECONDS);
+            }, 0, TimeUnit.SECONDS);
 
         } else {
             // Change notification status to off. Connection is not expected to happen in the future

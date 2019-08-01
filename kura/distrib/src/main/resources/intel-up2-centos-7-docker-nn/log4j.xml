@@ -58,7 +58,6 @@
         </Logger>
         <Logger name="AuditLogger" level="trace" additivity="false">
             <AppenderRef ref="audit"/>
-            <AppenderRef ref="Console"/>
         </Logger>
         <Root level="warn">
             <AppenderRef ref="RollingFile"/>

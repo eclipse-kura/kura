@@ -56,7 +56,7 @@ public class IdsTabUi extends AbstractServicesUi implements Tab {
     private final GwtComponentServiceAsync gwtComponentService = GWT.create(GwtComponentService.class);
 
     private static final String SERVICES_FILTER = FilterBuilder
-            .of("objectClass=org.eclipse.kura.security.LoginProtectionService");
+            .of("objectClass=org.eclipse.kura.security.LoginDosProtectionService");
 
     private boolean dirty;
     private boolean initialized;

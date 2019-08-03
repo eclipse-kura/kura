@@ -28,6 +28,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.util.Date;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  *
@@ -278,6 +279,8 @@ public class S7Client {
         }
     }
 
+    private static AtomicLong PDUReference = new AtomicLong(5);
+
     private int TCPConnect() {
         SocketAddress sockaddr = new InetSocketAddress(this.IPAddress, TCPPort);
         this.LastError = 0;
@@ -393,6 +396,10 @@ public class S7Client {
             RecvPacket(this.PDU, 7, Size - IsoHSize);
         }
         if (this.LastError == 0) {
+            int messageType = this.PDU[8];
+            System.out.println("messageType:" + messageType);
+            int reference = S7.GetShortAt(this.PDU, 11);
+            System.out.println("reference:" + reference);
             return Size;
         } else {
             return 0;
@@ -428,6 +435,7 @@ public class S7Client {
         int Length;
         // Set PDU Size Requested
         S7.SetWordAt(S7_PN, 23, DefaultPduSizeRequested);
+        S7.SetShortAt(S7_PN, 11, (int) PDUReference.getAndIncrement());
         // Sends the connection request telegram
         SendPacket(S7_PN);
         if (this.LastError == 0) {
@@ -588,7 +596,7 @@ public class S7Client {
             } else {
                 Address = Start << 3;
             }
-
+            S7.SetShortAt(this.PDU, 11, (int) PDUReference.getAndIncrement());
             // Num elements
             S7.SetWordAt(this.PDU, 23, NumElements);
 
@@ -659,6 +667,7 @@ public class S7Client {
             S7.SetWordAt(this.PDU, 2, IsoSize);
             // Data Length
             Length = DataSize + 4;
+            S7.SetShortAt(this.PDU, 11, (int) PDUReference.getAndIncrement());
             S7.SetWordAt(this.PDU, 15, Length);
             // Function
             this.PDU[17] = (byte) 0x05;
@@ -719,6 +728,7 @@ public class S7Client {
     public int GetAgBlockInfo(int BlockType, int BlockNumber, S7BlockInfo Block) {
         int Length;
         this.LastError = 0;
+        S7.SetShortAt(S7_BI, 11, (int) PDUReference.getAndIncrement());
         // Block Type
         S7_BI[30] = (byte) BlockType;
         // Block Number
@@ -753,11 +763,11 @@ public class S7Client {
     /**
      *
      * @param DBNumber
-     *            DB Number
+     *                     DB Number
      * @param Buffer
-     *            Destination buffer
+     *                     Destination buffer
      * @param SizeRead
-     *            How many bytes were read
+     *                     How many bytes were read
      * @return
      */
     public int DBGet(int DBNumber, byte[] Buffer, IntByRef SizeRead) {

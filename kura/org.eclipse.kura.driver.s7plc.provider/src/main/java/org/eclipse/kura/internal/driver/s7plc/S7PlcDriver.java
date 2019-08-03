@@ -125,7 +125,7 @@ public class S7PlcDriver extends AbstractBlockDriver<S7PlcDomain> implements Con
 
         if (!this.state.client.Connected) {
             logger.debug("Connecting to S7 PLC...");
-            this.state.client.SetConnectionType(S7.OP);
+            this.state.client.SetConnectionType(S7.PG);
             int code = this.state.client.ConnectTo(currentOptions.getIp(), currentOptions.getRack(),
                     currentOptions.getSlot(), currentOptions.getPort());
             int connectNum = 0;

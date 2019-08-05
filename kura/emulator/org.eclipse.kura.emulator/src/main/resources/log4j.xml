@@ -31,6 +31,9 @@
         <Logger name="org.apache.activemq" level="warn" additivity="false">
             <AppenderRef ref="Console"/>
         </Logger>
+        <Logger name="AuditLogger" level="warn" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
         <Root level="info">
             <AppenderRef ref="Console"/>
         </Root>

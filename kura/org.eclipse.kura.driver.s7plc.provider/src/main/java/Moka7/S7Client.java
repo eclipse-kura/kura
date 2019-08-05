@@ -28,7 +28,10 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.util.Date;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -36,6 +39,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class S7Client {
 
+    private static Logger logger = LoggerFactory.getLogger(S7Client.class);
     // WordLength
     private static final byte S7WLByte = 0x02;
     private static final byte S7WLCounter = 0x1C;
@@ -279,7 +283,7 @@ public class S7Client {
         }
     }
 
-    private static AtomicLong PDUReference = new AtomicLong(5);
+    private static AtomicInteger PDUReference = new AtomicInteger(5);
 
     private int TCPConnect() {
         SocketAddress sockaddr = new InetSocketAddress(this.IPAddress, TCPPort);
@@ -392,14 +396,18 @@ public class S7Client {
         if (this.LastError == 0) {
             RecvPacket(this.PDU, 4, 3); // Skip remaining 3 COTP bytes
             this.LastPDUType = this.PDU[5];   // Stores PDU Type, we need it
+            logger.info("PDUType:{}", this.LastPDUType & 0x0FF);
             // Receives the S7 Payload
             RecvPacket(this.PDU, 7, Size - IsoHSize);
         }
         if (this.LastError == 0) {
-            int messageType = this.PDU[8];
-            System.out.println("messageType:" + messageType);
-            int reference = S7.GetShortAt(this.PDU, 11);
-            System.out.println("reference:" + reference);
+            if (this.LastPDUType == (byte) 0xD0) {
+                int reference = S7.GetShortAt(this.PDU, 6);
+                logger.info("reference:{}", reference);
+            } else {
+                int reference = S7.GetShortAt(this.PDU, 11);
+                logger.info("reference:{}", reference);
+            }
             return Size;
         } else {
             return 0;
@@ -412,7 +420,7 @@ public class S7Client {
         ISO_CR[17] = this.LocalTSAP_LO;
         ISO_CR[20] = this.RemoteTSAP_HI;
         ISO_CR[21] = this.RemoteTSAP_LO;
-
+        S7.SetShortAt(ISO_CR, 8, PDUReference.getAndIncrement());
         // Sends the connection request telegram
         SendPacket(ISO_CR);
         if (this.LastError == 0) {
@@ -435,7 +443,7 @@ public class S7Client {
         int Length;
         // Set PDU Size Requested
         S7.SetWordAt(S7_PN, 23, DefaultPduSizeRequested);
-        S7.SetShortAt(S7_PN, 11, (int) PDUReference.getAndIncrement());
+        S7.SetShortAt(S7_PN, 11, PDUReference.getAndIncrement());
         // Sends the connection request telegram
         SendPacket(S7_PN);
         if (this.LastError == 0) {
@@ -596,7 +604,7 @@ public class S7Client {
             } else {
                 Address = Start << 3;
             }
-            S7.SetShortAt(this.PDU, 11, (int) PDUReference.getAndIncrement());
+            S7.SetShortAt(this.PDU, 11, PDUReference.getAndIncrement());
             // Num elements
             S7.SetWordAt(this.PDU, 23, NumElements);
 
@@ -667,7 +675,7 @@ public class S7Client {
             S7.SetWordAt(this.PDU, 2, IsoSize);
             // Data Length
             Length = DataSize + 4;
-            S7.SetShortAt(this.PDU, 11, (int) PDUReference.getAndIncrement());
+            S7.SetShortAt(this.PDU, 11, PDUReference.getAndIncrement());
             S7.SetWordAt(this.PDU, 15, Length);
             // Function
             this.PDU[17] = (byte) 0x05;
@@ -728,7 +736,7 @@ public class S7Client {
     public int GetAgBlockInfo(int BlockType, int BlockNumber, S7BlockInfo Block) {
         int Length;
         this.LastError = 0;
-        S7.SetShortAt(S7_BI, 11, (int) PDUReference.getAndIncrement());
+        S7.SetShortAt(S7_BI, 11, PDUReference.getAndIncrement());
         // Block Type
         S7_BI[30] = (byte) BlockType;
         // Block Number

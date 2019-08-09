@@ -160,7 +160,10 @@ public class NetInterfaceConfigSerializationServiceImpl implements NetInterfaceC
                 if (((NetConfigIP4) netConfig).getStatus() == NetInterfaceStatus.netIPv4StatusEnabledWAN) {
                     sb.append(DEFROUTE_PROP_NAME).append("=yes\n");
                 } else {
-                    sb.append(DEFROUTE_PROP_NAME).append("=no\n");
+                    if (this.isDelDefaultRoute)
+                        sb.append(DEFROUTE_PROP_NAME).append("=no\n");
+                    else
+                        sb.append(DEFROUTE_PROP_NAME).append("=yes\n");
                 }
 
                 // DNS
@@ -217,7 +220,7 @@ public class NetInterfaceConfigSerializationServiceImpl implements NetInterfaceC
     private void writeConfigFile(String tmpFileName, String dstFileName, StringBuilder sb) throws KuraException {
         File srcFile = new File(tmpFileName);
         File dstFile = new File(dstFileName);
-        
+
         // write tmp configuration file
         try (FileOutputStream fos = new FileOutputStream(srcFile); PrintWriter pw = new PrintWriter(fos)) {
             pw.write(sb.toString());
@@ -245,5 +248,12 @@ public class NetInterfaceConfigSerializationServiceImpl implements NetInterfaceC
             logger.error("Failed to rename tmp config file {} to {}", srcFile.getName(), dstFile.getName(), e);
             throw KuraException.internalError(e.getMessage());
         }
+    }
+
+    private boolean isDelDefaultRoute = false;
+
+    @Override
+    public void setDelDefaultRoute(boolean isDelDefaultRoute) {
+        this.isDelDefaultRoute = isDelDefaultRoute;
     }
 }

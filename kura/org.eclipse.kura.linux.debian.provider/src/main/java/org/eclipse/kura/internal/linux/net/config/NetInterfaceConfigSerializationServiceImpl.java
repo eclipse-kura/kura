@@ -448,9 +448,11 @@ public class NetInterfaceConfigSerializationServiceImpl implements NetInterfaceC
                 sb.append("dhcp\n");
                 if (((NetConfigIP4) netConfig).getStatus() == NetInterfaceStatus.netIPv4StatusEnabledLAN) {
                     // delete default route if configured as LAN
-                    sb.append("\tpost-up route del default dev ");
-                    sb.append(interfaceName);
-                    sb.append("\n");
+                    if (this.isDelDefaultRoute) {
+                        sb.append("\tpost-up route del default dev ");
+                        sb.append(interfaceName);
+                        sb.append("\n");
+                    }
                 }
             } else {
                 logger.debug("new config is STATIC for {}", interfaceName);
@@ -523,5 +525,12 @@ public class NetInterfaceConfigSerializationServiceImpl implements NetInterfaceC
             }
         }
         return ret;
+    }
+
+    private boolean isDelDefaultRoute = false;
+
+    @Override
+    public void setDelDefaultRoute(boolean isDelDefaultRoute) {
+        this.isDelDefaultRoute = isDelDefaultRoute;
     }
 }

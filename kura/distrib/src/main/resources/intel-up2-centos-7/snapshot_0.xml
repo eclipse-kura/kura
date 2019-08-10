@@ -719,7 +719,7 @@
                 <esf:value>true</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="http.enabled" type="Boolean">
-                <esf:value>false</esf:value>
+                <esf:value>true</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="http.port" type="Integer">
                 <esf:value>80</esf:value>

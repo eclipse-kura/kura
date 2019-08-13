@@ -36,6 +36,7 @@ import org.eclipse.kura.net.NetInterfaceConfig;
 import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.admin.visitor.linux.util.KuranetConfig;
+import org.eclipse.kura.system.SystemService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
@@ -65,6 +66,16 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
             ServiceReference<NetInterfaceConfigSerializationService> netConfigManagerSR = context
                     .getServiceReference(NetInterfaceConfigSerializationService.class);
             netConfigManager = context.getService(netConfigManagerSR);
+
+            ServiceReference<SystemService> systemServiceSR = context.getServiceReference(SystemService.class);
+            SystemService systemService = context.getService(systemServiceSR);
+            if (systemService != null) {
+                Boolean isDelDefaultRoute = Boolean
+                        .valueOf(systemService.getProperties().getProperty("kura.net.deldefaultroute", "true"));
+                netConfigManager.setDelDefaultRoute(isDelDefaultRoute);
+                context.ungetService(systemServiceSR);
+            }
+
         }
         return instance;
     }

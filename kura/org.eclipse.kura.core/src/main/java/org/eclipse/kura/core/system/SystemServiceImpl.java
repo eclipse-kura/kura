@@ -441,6 +441,12 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             if (System.getProperty("kura.snapshots.encrypt") != null) {
                 this.kuraProperties.put("kura.snapshots.encrypt", System.getProperty("kura.snapshots.encrypt"));
             }
+            if (System.getProperty("kura.net.deldefaultroute") != null) {
+                this.kuraProperties.put("kura.net.deldefaultroute", System.getProperty("kura.snapshots.encrypt"));
+            }
+            if (System.getProperty("kura.net.removestaticroute") != null) {
+                this.kuraProperties.put("kura.net.removestaticroute", System.getProperty("kura.snapshots.encrypt"));
+            }
 
             if (getKuraHome() == null) {
                 logger.error("Did not initialize kura.home");
@@ -987,7 +993,8 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             if (displayTmp.length() > 0) {
                 deviceName = displayTmp;
             }
-        } else if (OS_LINUX.equals(getOsName()) || OS_CLOUDBEES.equals(getOsName()) || getOsName().toLowerCase().startsWith(OS_WINDOWS)) {
+        } else if (OS_LINUX.equals(getOsName()) || OS_CLOUDBEES.equals(getOsName())
+                || getOsName().toLowerCase().startsWith(OS_WINDOWS)) {
             String displayTmp = runSystemCommand("hostname");
             if (displayTmp.length() > 0) {
                 deviceName = displayTmp;
@@ -1198,7 +1205,8 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
         if (OS_MAC_OSX.equals(getOsName())) {
             hostname = runSystemCommand("scutil --get ComputerName");
-        } else if (OS_LINUX.equals(getOsName()) || OS_CLOUDBEES.equals(getOsName()) || getOsName().toLowerCase().startsWith(OS_WINDOWS)) {
+        } else if (OS_LINUX.equals(getOsName()) || OS_CLOUDBEES.equals(getOsName())
+                || getOsName().toLowerCase().startsWith(OS_WINDOWS)) {
             hostname = runSystemCommand("hostname");
         }
 

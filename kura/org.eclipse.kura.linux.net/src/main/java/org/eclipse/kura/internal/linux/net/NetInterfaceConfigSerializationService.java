@@ -41,4 +41,6 @@ public interface NetInterfaceConfigSerializationService {
      */
     public void write(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netConfig) throws KuraException;
 
+    public void setDelDefaultRoute(boolean isDelDefaultRoute);
+
 }

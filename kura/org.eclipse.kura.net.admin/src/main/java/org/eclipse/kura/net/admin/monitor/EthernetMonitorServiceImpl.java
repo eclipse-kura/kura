@@ -48,6 +48,7 @@ import org.eclipse.kura.net.dhcp.DhcpServerConfig4;
 import org.eclipse.kura.net.dhcp.DhcpServerConfigIP4;
 import org.eclipse.kura.net.firewall.FirewallAutoNatConfig;
 import org.eclipse.kura.net.route.RouteConfig;
+import org.eclipse.kura.system.SystemService;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
@@ -62,7 +63,7 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 
     private static final String[] EVENT_TOPICS = new String[] {
             NetworkConfigurationChangeEvent.NETWORK_EVENT_CONFIG_CHANGE_TOPIC, };
-    
+
     private static final long THREAD_INTERVAL = 30000;
     private static final long THREAD_TERMINATION_TOUT = 1; // in seconds
 
@@ -75,6 +76,7 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
     private NetworkAdminService netAdminService;
     private NetworkConfigurationService netConfigService;
     private RouteService routeService;
+    private SystemService systemService;
 
     private final Map<String, InterfaceState> interfaceState = new HashMap<>();
     private final Map<String, NetInterfaceConfig<NetInterfaceAddressConfig>> networkConfiguration = new HashMap<>();
@@ -111,6 +113,13 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
         this.netConfigService = null;
     }
 
+    public void setSystemService(SystemService systemService) {
+        this.systemService = systemService;
+    }
+
+    public void unsetSystemService(SystemService systemService) {
+        this.systemService = null;
+    }
     // ----------------------------------------------------------------
     //
     // Activation APIs
@@ -354,8 +363,11 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
                             if (rconf != null) {
                                 logger.debug("{} is configured for LAN/DHCP - removing GATEWAY route ...",
                                         rconf.getInterfaceName());
-                                this.routeService.removeStaticRoute(rconf.getDestination(), rconf.getGateway(),
-                                        rconf.getNetmask(), rconf.getInterfaceName());
+                                Boolean isRemoveStaticRoute = Boolean.valueOf(this.systemService.getProperties()
+                                        .getProperty("kura.net.removestaticroute", "true"));
+                                if (isRemoveStaticRoute)
+                                    this.routeService.removeStaticRoute(rconf.getDestination(), rconf.getGateway(),
+                                            rconf.getNetmask(), rconf.getInterfaceName());
                             }
                         }
                     }

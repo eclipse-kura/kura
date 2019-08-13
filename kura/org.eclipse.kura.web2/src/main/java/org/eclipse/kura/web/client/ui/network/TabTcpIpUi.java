@@ -806,7 +806,8 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
                     this.ip.setEnabled(true);
                     this.subnet.setEnabled(true);
 
-                    if (this.status.getSelectedValue().equals(IPV4_STATUS_WAN_MESSAGE)) {
+                    if (this.status.getSelectedValue().equals(IPV4_STATUS_WAN_MESSAGE)
+                            || this.status.getSelectedValue().equals(IPV4_STATUS_LAN_MESSAGE)) {
                         this.gateway.setEnabled(true);
                         this.dns.setEnabled(true);
                     } else {

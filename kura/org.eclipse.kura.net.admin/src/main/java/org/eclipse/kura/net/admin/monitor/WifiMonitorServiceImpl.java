@@ -67,6 +67,7 @@ import org.eclipse.kura.net.wifi.WifiClientMonitorService;
 import org.eclipse.kura.net.wifi.WifiConfig;
 import org.eclipse.kura.net.wifi.WifiInterfaceAddressConfig;
 import org.eclipse.kura.net.wifi.WifiMode;
+import org.eclipse.kura.system.SystemService;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
@@ -100,7 +101,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
     private ExecutorService executor;
     private NetworkConfiguration currentNetworkConfiguration;
     private NetworkConfiguration newNetConfiguration;
-
+    private SystemService systemService;
     private WifiDriverService wifiDriverService;
 
     public void setNetworkService(NetworkService networkService) {
@@ -147,6 +148,14 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
 
     public void unsetWifiDriverService(WifiDriverService wifiUtils) {
         this.wifiDriverService = null;
+    }
+
+    public void setSystemService(SystemService systemService) {
+        this.systemService = systemService;
+    }
+
+    public void unsetSystemService(SystemService systemService) {
+        this.systemService = null;
     }
 
     protected void activate(ComponentContext componentContext) {
@@ -430,8 +439,11 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                                     logger.debug(
                                             "monitor() :: {} is configured for LAN/DHCP - removing GATEWAY route ...",
                                             rconf.getInterfaceName());
-                                    rs.removeStaticRoute(rconf.getDestination(), rconf.getGateway(), rconf.getNetmask(),
-                                            rconf.getInterfaceName());
+                                    Boolean isRemoveStaticRoute = Boolean.valueOf(this.systemService.getProperties()
+                                            .getProperty("kura.net.removestaticroute", "true"));
+                                    if (isRemoveStaticRoute)
+                                        rs.removeStaticRoute(rconf.getDestination(), rconf.getGateway(),
+                                                rconf.getNetmask(), rconf.getInterfaceName());
                                 }
                             }
                         } else if (WifiMode.MASTER.equals(wifiConfig.getMode()) && !wifiState.isLinkUp()) {

@@ -7,7 +7,7 @@ Bundle-Vendor: Eclipse Kura
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Service-Component: OSGI-INF/*.xml
 Bundle-ClassPath: .,
- lib/com.google.protobuf_2.6.0.jar
+ lib/com.google.protobuf_3.8.0.jar
 Bundle-ActivationPolicy: lazy
 Import-Package: com.eclipsesource.json;version="0.9.4",
  org.eclipse.kura;version="[1.0,2.0)",

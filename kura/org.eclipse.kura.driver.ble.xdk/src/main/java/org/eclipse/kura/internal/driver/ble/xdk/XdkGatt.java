@@ -59,7 +59,7 @@ public class XdkGatt {
 	public static final UUID UUID_XDK_CONTROL_SERVICE_CHANGE_SENSOR_SAMPLING_RATA = UUID.fromString("55b741d2-7ada-11e4-82f8-0800200c9a66");
 	public static final UUID UUID_XDK_CONTROL_SERVICE_REBOOT = UUID.fromString("55b741d3-7ada-11e4-82f8-0800200c9a66");
 	public static final UUID UUID_XDK_CONTROL_SERVICE_GET_FIRMWARE_VERSION = UUID.fromString("55b741d4-7ada-11e4-82f8-0800200c9a66");
-	
+	public static final UUID UUID_XDK_CONTROL_SERVICE_CONTROL_NODE_USE_SENSOR_FUSION = UUID.fromString("55b741d5-7ada-11e4-82f8-0800200c9a66");
 	
 	
 	private XdkGatt() {

@@ -457,27 +457,27 @@ fi]]>
 
 			<zipfileset
 				file="${project.build.directory}/${build.output.name}/kura_install.sh"
-				prefix="${build.output.name}/${install.folder}/" />
+				prefix="${build.output.name}/${install.folder}/" filemode="700" />
 
 			<zipfileset file="src/main/resources/${build.name}/kuranet.conf"
 				prefix="${build.output.name}/${install.folder}/" />
 
 			<zipfileset
 				file="${project.build.directory}/${build.output.name}/kura.init.yocto"
-				prefix="${build.output.name}/${install.folder}" />
+				prefix="${build.output.name}/${install.folder}" filemode="700" />
 			<zipfileset
 				file="${project.build.directory}/${build.output.name}/kura.init.raspbian"
-				prefix="${build.output.name}/${install.folder}" />
+				prefix="${build.output.name}/${install.folder}" filemode="700" />
 			<zipfileset
 				file="${project.build.directory}/${build.output.name}/kura.service"
 				prefix="${build.output.name}/${install.folder}" />
 			<zipfileset
 				file="src/main/resources/${build.name}/recover_default_config.init"
-				prefix="${build.output.name}/${install.folder}" />
+				prefix="${build.output.name}/${install.folder}" filemode="700" />
 			<zipfileset file="src/main/resources/${build.name}/firewall.init"
-				prefix="${build.output.name}/${install.folder}" />
+				prefix="${build.output.name}/${install.folder}" filemode="700" />
 			<zipfileset file="src/main/resources/${build.name}/iptables.init"
-				prefix="${build.output.name}/${install.folder}" />
+				prefix="${build.output.name}/${install.folder}" filemode="700" />
 			<zipfileset file="src/main/resources/${build.name}/hostapd.conf"
 				prefix="${build.output.name}/${install.folder}" />
 			<zipfileset file="src/main/resources/${build.name}/dhcpd-eth0.conf"
@@ -495,7 +495,8 @@ fi]]>
 			<zipfileset file="src/main/resources/${build.name}/ifcfg-wlp4s0"
 				prefix="${build.output.name}/${install.folder}" />
 			<zipfileset file="src/main/resources/common/monit.init.raspbian"
-				prefix="${build.output.name}/${install.folder}" />
+				prefix="${build.output.name}/${install.folder}" filemode="700" />
+
 			<zipfileset file="src/main/resources/common/monitrc.raspbian"
 				prefix="${build.output.name}/${install.folder}" />
 			<zipfileset file="src/main/resources/${build.name}/kura-tmpfiles.conf"

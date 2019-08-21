@@ -19,18 +19,20 @@ import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.model.GwtGroupedNVPair;
 import org.eclipse.kura.web.shared.model.GwtSession;
-import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtDeviceService;
 import org.eclipse.kura.web.shared.service.GwtDeviceServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityService;
 import org.eclipse.kura.web.shared.service.GwtSecurityServiceAsync;
-import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
-import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.rpc.HasRpcToken;
+import com.google.gwt.user.client.rpc.XsrfToken;
+import com.google.gwt.user.client.rpc.XsrfTokenService;
+import com.google.gwt.user.client.rpc.XsrfTokenServiceAsync;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.rpc.ServiceDefTarget;
 
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
@@ -38,7 +40,7 @@ import com.google.gwt.user.client.ui.RootPanel;
 public class denali implements EntryPoint {
 
     Logger logger = Logger.getLogger(denali.class.getSimpleName());
-    private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
+    private final XsrfTokenServiceAsync xsrf = GWT.create(XsrfTokenService.class);
     private final GwtDeviceServiceAsync gwtDeviceService = GWT.create(GwtDeviceService.class);
     private final GwtSecurityServiceAsync gwtSecurityService = GWT.create(GwtSecurityService.class);
 
@@ -52,17 +54,14 @@ public class denali implements EntryPoint {
     @Override
     public void onModuleLoad() {
         RootPanel.get().add(this.binder);
+        ((ServiceDefTarget)xsrf).setServiceEntryPoint("/gwt/xsrf");
 
-        this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-
-            @Override
-            public void onFailure(Throwable ex) {
-                FailureHandler.handle(ex, denali.class.getSimpleName());
-            }
+        this.xsrf.getNewXsrfToken(new AsyncCallback<XsrfToken>() {
 
             @Override
-            public void onSuccess(GwtXSRFToken token) {
-                denali.this.gwtDeviceService.findSystemProperties(token,
+            public void onSuccess(XsrfToken token) {
+                ((HasRpcToken) denali.this.gwtDeviceService).setRpcToken(token);
+                denali.this.gwtDeviceService.findSystemProperties(null,
                         new AsyncCallback<ArrayList<GwtGroupedNVPair>>() {
 
                             @Override
@@ -119,6 +118,12 @@ public class denali implements EntryPoint {
                                 denali.this.binder.setSession(new GwtSession());
                             }
                         });
+
+            }
+
+            @Override
+            public void onFailure(Throwable ex) {
+                FailureHandler.handle(ex, denali.class.getSimpleName());
             }
         });
     }

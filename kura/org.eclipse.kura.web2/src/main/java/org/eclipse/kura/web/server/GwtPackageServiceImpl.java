@@ -64,7 +64,6 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
 
     @Override
     public List<GwtDeploymentPackage> findDeviceDeploymentPackages(GwtXSRFToken xsrfToken) throws GwtKuraException {
-        checkXSRFToken(xsrfToken);
         DeploymentAdmin deploymentAdmin = ServiceLocator.getInstance().getService(DeploymentAdmin.class);
 
         List<GwtDeploymentPackage> gwtDeploymentPackages = new ArrayList<>();
@@ -104,7 +103,6 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
 
     @Override
     public void uninstallDeploymentPackage(GwtXSRFToken xsrfToken, String packageName) throws GwtKuraException {
-        checkXSRFToken(xsrfToken);
         
         final HttpServletRequest request = getThreadLocalRequest();
         final HttpSession session = request.getSession(false);
@@ -139,7 +137,6 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
     @Override
     public GwtMarketplacePackageDescriptor getMarketplacePackageDescriptor(GwtXSRFToken xsrfToken, String nodeId)
             throws GwtKuraException {
-        checkXSRFToken(xsrfToken);
 
         GwtMarketplacePackageDescriptor descriptor = null;
         URL mpUrl = null;
@@ -253,7 +250,6 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
     @Override
     public void installPackageFromMarketplace(GwtXSRFToken xsrfToken, GwtMarketplacePackageDescriptor descriptor)
             throws GwtKuraException {
-        checkXSRFToken(xsrfToken);
         
         final HttpServletRequest request = getThreadLocalRequest();
         final HttpSession session = request.getSession(false);

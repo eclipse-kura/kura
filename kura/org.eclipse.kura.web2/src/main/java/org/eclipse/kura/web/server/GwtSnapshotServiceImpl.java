@@ -40,7 +40,6 @@ public class GwtSnapshotServiceImpl extends OsgiRemoteServiceServlet implements 
 
     @Override
     public ArrayList<GwtSnapshot> findDeviceSnapshots(GwtXSRFToken xsrfToken) throws GwtKuraException {
-        checkXSRFToken(xsrfToken);
 
         final HttpServletRequest request = getThreadLocalRequest();
         final HttpSession session = request.getSession(false);
@@ -70,7 +69,6 @@ public class GwtSnapshotServiceImpl extends OsgiRemoteServiceServlet implements 
 
     @Override
     public void rollbackDeviceSnapshot(GwtXSRFToken xsrfToken, GwtSnapshot snapshot) throws GwtKuraException {
-        checkXSRFToken(xsrfToken);
 
         final HttpServletRequest request = getThreadLocalRequest();
         final HttpSession session = request.getSession(false);

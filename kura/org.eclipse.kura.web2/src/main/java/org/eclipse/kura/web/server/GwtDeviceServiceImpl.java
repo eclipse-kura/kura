@@ -63,7 +63,6 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
 
     @Override
     public ArrayList<GwtGroupedNVPair> findDeviceConfiguration(GwtXSRFToken xsrfToken) throws GwtKuraException {
-        checkXSRFToken(xsrfToken);
         List<GwtGroupedNVPair> pairs = new ArrayList<>();
 
         SystemService systemService = ServiceLocator.getInstance().getService(SystemService.class);
@@ -125,7 +124,6 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
     @SuppressWarnings("unchecked")
     @Override
     public ArrayList<GwtGroupedNVPair> findThreads(GwtXSRFToken xsrfToken) throws GwtKuraException {
-        checkXSRFToken(xsrfToken);
         List<GwtGroupedNVPair> pairs = new ArrayList<>();
 
         // get root thread group
@@ -192,7 +190,6 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public ArrayList<GwtGroupedNVPair> findSystemProperties(GwtXSRFToken xsrfToken) throws GwtKuraException {
-        checkXSRFToken(xsrfToken);
         List<GwtGroupedNVPair> pairs = new ArrayList<>();
         // kura properties
         SystemService systemService = ServiceLocator.getInstance().getService(SystemService.class);
@@ -207,7 +204,6 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
 
     @Override
     public ArrayList<GwtGroupedNVPair> findBundles(GwtXSRFToken xsrfToken) throws GwtKuraException {
-        checkXSRFToken(xsrfToken);
         List<GwtGroupedNVPair> pairs = new ArrayList<>();
 
         SystemService systemService = ServiceLocator.getInstance().getService(SystemService.class);
@@ -233,7 +229,6 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
 
     @Override
     public void startBundle(GwtXSRFToken xsrfToken, String bundleId) throws GwtKuraException {
-        checkXSRFToken(xsrfToken);
         final HttpServletRequest request = getThreadLocalRequest();
         final HttpSession session = request.getSession(false);
 
@@ -267,7 +262,6 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
 
     @Override
     public void stopBundle(GwtXSRFToken xsrfToken, String bundleId) throws GwtKuraException {
-        checkXSRFToken(xsrfToken);
 
         final HttpServletRequest request = getThreadLocalRequest();
         final HttpSession session = request.getSession(false);
@@ -304,7 +298,6 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
 
     @Override
     public String executeCommand(GwtXSRFToken xsrfToken, String cmd, String pwd) throws GwtKuraException {
-        checkXSRFToken(xsrfToken);
 
         final HttpServletRequest request = getThreadLocalRequest();
         final HttpSession session = request.getSession(false);

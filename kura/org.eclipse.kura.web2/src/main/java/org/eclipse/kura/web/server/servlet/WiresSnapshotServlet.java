@@ -45,7 +45,9 @@ import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class WiresSnapshotServlet extends HttpServlet {
+import com.google.gwt.user.server.rpc.XsrfProtectedServiceServlet;
+
+public class WiresSnapshotServlet extends XsrfProtectedServiceServlet {
 
     private static final String WIRE_GRAPH_SERVICE_PID = "org.eclipse.kura.wire.graph.WireGraphService";
     private static final String WIRE_ASSET_FACTORY_PID = "org.eclipse.kura.wire.WireAsset";
@@ -53,6 +55,10 @@ public class WiresSnapshotServlet extends HttpServlet {
     private static final long serialVersionUID = -7483037360719617846L;
     private static final Logger logger = LoggerFactory.getLogger(WiresSnapshotServlet.class);
     private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
+    
+    public WiresSnapshotServlet() {
+        super("JSESSIONID");
+    }
 
     private String toSnapshot(XmlComponentConfigurations configs) throws GwtKuraException {
         final BundleContext context = FrameworkUtil.getBundle(GwtWireGraphServiceImpl.class).getBundleContext();
@@ -95,13 +101,6 @@ public class WiresSnapshotServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
-        try {
-            GwtXSRFToken token = new GwtXSRFToken(request.getParameter("xsrfToken"));
-            KuraRemoteServiceServlet.checkXSRFToken(request, token);
-        } catch (Exception e) {
-            throw new ServletException("Security error: please retry this operation correctly.", e);
-        }
 
         HttpSession session = request.getSession(false);
 

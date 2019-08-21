@@ -22,15 +22,15 @@ import org.eclipse.kura.web.shared.model.GwtWireGraph;
 import org.eclipse.kura.web.shared.model.GwtWireGraphConfiguration;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 
-import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import com.google.gwt.user.client.rpc.XsrfProtectedService;
 
 /**
  * This is essentially used by GWT to interact with the OSGi WireGraphService for
  * retrieving and managing the Wire Graphs.
  */
 @RemoteServiceRelativePath("wires")
-public interface GwtWireGraphService extends RemoteService {
+public interface GwtWireGraphService extends XsrfProtectedService {
 
     /**
      * Gets the channel descriptor.

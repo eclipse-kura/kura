@@ -14,14 +14,17 @@ package org.eclipse.kura.web.shared.service;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 
-import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import com.google.gwt.user.client.rpc.XsrfProtectedService;
+import com.google.gwt.user.server.rpc.NoXsrfProtect;
 
 @RemoteServiceRelativePath("security")
-public interface GwtSecurityService extends RemoteService {
+public interface GwtSecurityService extends XsrfProtectedService {
 
+    @NoXsrfProtect
     public Boolean isSecurityServiceAvailable();
 
+    @NoXsrfProtect
     public Boolean isDebugMode();
 
     public void reloadSecurityPolicyFingerprint(GwtXSRFToken xsrfToken) throws GwtKuraException;

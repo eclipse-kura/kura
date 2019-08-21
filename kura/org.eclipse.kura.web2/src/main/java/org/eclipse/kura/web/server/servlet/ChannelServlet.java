@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -36,25 +35,29 @@ import org.eclipse.kura.asset.Asset;
 import org.eclipse.kura.configuration.metatype.AD;
 import org.eclipse.kura.driver.Driver;
 import org.eclipse.kura.internal.wire.asset.WireAssetChannelDescriptor;
-import org.eclipse.kura.web.server.KuraRemoteServiceServlet;
 import org.eclipse.kura.web.server.util.GwtServerUtil;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.server.util.ServiceLocator.ServiceConsumer;
 import org.eclipse.kura.web.session.Attributes;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
-import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ChannelServlet extends HttpServlet {
+import com.google.gwt.user.server.rpc.XsrfProtectedServiceServlet;
+
+public class ChannelServlet extends XsrfProtectedServiceServlet {
 
     private static final long serialVersionUID = -1445700937173920652L;
 
     private static Logger logger = LoggerFactory.getLogger(ChannelServlet.class);
     private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
+    
+    public ChannelServlet() {
+        super("JSESSIONID");
+    }
 
     /**
      * Instance of Base Asset Channel Descriptor
@@ -65,11 +68,7 @@ public class ChannelServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         HttpSession session = req.getSession(false);
-        // BEGIN XSRF - Servlet dependent code
         try {
-            GwtXSRFToken token = new GwtXSRFToken(req.getParameter("xsrfToken"));
-            KuraRemoteServiceServlet.checkXSRFToken(req, token);
-            // END XSRF security check
             String assetPid = req.getParameter("assetPid");
             String driverPid = req.getParameter("driverPid");
 

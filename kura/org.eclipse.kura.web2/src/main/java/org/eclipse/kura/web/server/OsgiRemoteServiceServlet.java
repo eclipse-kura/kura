@@ -23,10 +23,15 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.google.gwt.user.server.rpc.SerializationPolicy;
 import com.google.gwt.user.server.rpc.SerializationPolicyLoader;
+import com.google.gwt.user.server.rpc.XsrfProtectedServiceServlet;
 
-public class OsgiRemoteServiceServlet extends KuraRemoteServiceServlet {
+public class OsgiRemoteServiceServlet extends XsrfProtectedServiceServlet {
 
     private static final long serialVersionUID = -8826193840033103296L;
+    
+    public OsgiRemoteServiceServlet() {
+        super("JSESSIONID");
+    }
 
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

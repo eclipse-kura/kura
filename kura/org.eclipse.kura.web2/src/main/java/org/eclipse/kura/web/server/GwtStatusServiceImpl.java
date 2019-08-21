@@ -80,7 +80,6 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
     @Override
     public ArrayList<GwtGroupedNVPair> getDeviceConfig(GwtXSRFToken xsrfToken, boolean hasNetAdmin)
             throws GwtKuraException {
-        checkXSRFToken(xsrfToken);
         List<GwtGroupedNVPair> pairs = new ArrayList<>();
 
         pairs.addAll(getCloudStatus());
@@ -94,7 +93,6 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
 
     @Override
     public void connectDataService(GwtXSRFToken xsrfToken, String connectionId) throws GwtKuraException {
-        checkXSRFToken(xsrfToken);
 
         final HttpServletRequest request = getThreadLocalRequest();
         final HttpSession session = request.getSession(false);
@@ -178,7 +176,6 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
 
     @Override
     public void disconnectDataService(GwtXSRFToken xsrfToken, String connectionId) throws GwtKuraException {
-        checkXSRFToken(xsrfToken);
 
         final HttpServletRequest request = getThreadLocalRequest();
         final HttpSession session = request.getSession(false);
@@ -234,7 +231,6 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
 
     @Override
     public boolean isConnected(GwtXSRFToken xsrfToken, String connectionId) throws GwtKuraException {
-        checkXSRFToken(xsrfToken);
         boolean isConnected = false;
 
         Collection<ServiceReference<CloudService>> cloudServiceReferences = ServiceLocator.getInstance()

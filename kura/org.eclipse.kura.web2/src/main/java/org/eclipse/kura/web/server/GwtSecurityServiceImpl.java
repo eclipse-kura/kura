@@ -65,7 +65,6 @@ public class GwtSecurityServiceImpl extends OsgiRemoteServiceServlet implements 
 
     @Override
     public void reloadSecurityPolicyFingerprint(GwtXSRFToken xsrfToken) throws GwtKuraException {
-        checkXSRFToken(xsrfToken);
 
         final HttpServletRequest request = getThreadLocalRequest();
         final HttpSession session = request.getSession(false);
@@ -86,7 +85,6 @@ public class GwtSecurityServiceImpl extends OsgiRemoteServiceServlet implements 
 
     @Override
     public void reloadCommandLineFingerprint(GwtXSRFToken xsrfToken) throws GwtKuraException {
-        checkXSRFToken(xsrfToken);
 
         final HttpServletRequest request = getThreadLocalRequest();
         final HttpSession session = request.getSession(false);

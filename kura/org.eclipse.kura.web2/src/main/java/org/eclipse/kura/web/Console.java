@@ -39,7 +39,6 @@ import org.eclipse.kura.web.server.GwtNetworkServiceImpl;
 import org.eclipse.kura.web.server.GwtPackageServiceImpl;
 import org.eclipse.kura.web.server.GwtPasswordAuthenticationServiceImpl;
 import org.eclipse.kura.web.server.GwtSecurityServiceImpl;
-import org.eclipse.kura.web.server.GwtSecurityTokenServiceImpl;
 import org.eclipse.kura.web.server.GwtSessionServiceImpl;
 import org.eclipse.kura.web.server.GwtSnapshotServiceImpl;
 import org.eclipse.kura.web.server.GwtStatusServiceImpl;
@@ -70,6 +69,8 @@ import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.gwt.user.server.rpc.XsrfProtectedServiceServlet;
 
 public class Console implements ConfigurableComponent {
 
@@ -251,8 +252,8 @@ public class Console implements ConfigurableComponent {
         this.httpService.unregister(CONSOLE_RESOURCE_PATH);
         this.httpService.unregister(PASSWORD_AUTH_PATH);
         this.httpService.unregister(LOGIN_MODULE_PATH + "/banner");
+        this.httpService.unregister("/gwt/xsrf");
         this.httpService.unregister(DENALI_MODULE_PATH + "/session");
-        this.httpService.unregister(DENALI_MODULE_PATH + "/xsrf");
         this.httpService.unregister(DENALI_MODULE_PATH + "/status");
         this.httpService.unregister(DENALI_MODULE_PATH + "/device");
         this.httpService.unregister(DENALI_MODULE_PATH + "/network");
@@ -350,6 +351,10 @@ public class Console implements ConfigurableComponent {
         this.httpService.registerResources(ADMIN_ROOT, "www", resourceContext);
         this.httpService.registerResources(AUTH_PATH, "www/auth.html", sessionContext);
         this.httpService.registerResources(CONSOLE_PATH, "www/denali.html", sessionContext);
+
+        this.httpService.registerServlet("/gwt/xsrf", new XsrfProtectedServiceServlet("JSESSIONID"), null,
+                sessionContext);
+
         this.httpService.registerServlet(LOGIN_MODULE_PATH + "/banner", new GwtBannerServiceImpl(), null,
                 resourceContext);
 
@@ -360,8 +365,6 @@ public class Console implements ConfigurableComponent {
         this.httpService.registerServlet(PASSWORD_AUTH_PATH,
                 new GwtPasswordAuthenticationServiceImpl(this.authMgr, CONSOLE_PATH), null, sessionContext);
         this.httpService.registerServlet(DENALI_MODULE_PATH + "/session", new GwtSessionServiceImpl(), null,
-                sessionContext);
-        this.httpService.registerServlet(DENALI_MODULE_PATH + "/xsrf", new GwtSecurityTokenServiceImpl(), null,
                 sessionContext);
         this.httpService.registerServlet(DENALI_MODULE_PATH + "/status", new GwtStatusServiceImpl(), null,
                 sessionContext);

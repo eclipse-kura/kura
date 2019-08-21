@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -27,34 +26,29 @@ import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.core.configuration.XmlComponentConfigurations;
 import org.eclipse.kura.marshalling.Marshaller;
 import org.eclipse.kura.util.service.ServiceUtil;
-import org.eclipse.kura.web.server.KuraRemoteServiceServlet;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.session.Attributes;
-import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DeviceSnapshotsServlet extends HttpServlet {
+import com.google.gwt.user.server.rpc.XsrfProtectedServiceServlet;
+
+public class DeviceSnapshotsServlet extends XsrfProtectedServiceServlet {
 
     private static final long serialVersionUID = -2533869595709953567L;
 
     private static Logger logger = LoggerFactory.getLogger(DeviceSnapshotsServlet.class);
     private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
     
+    public DeviceSnapshotsServlet() {
+        super("JSESSIONID");
+    }
+
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // BEGIN XSRF - Servlet dependent code
 
-        try {
-            GwtXSRFToken token = new GwtXSRFToken(request.getParameter("xsrfToken"));
-            KuraRemoteServiceServlet.checkXSRFToken(request, token);
-        } catch (Exception e) {
-            throw new ServletException("Security error: please retry this operation correctly.", e);
-        }
-        // END XSRF security check
-        
         HttpSession session = request.getSession(false);
 
         String snapshotId = request.getParameter("snapshotId");
@@ -63,8 +57,8 @@ public class DeviceSnapshotsServlet extends HttpServlet {
         response.setContentType("application/xml");
         response.setHeader("Content-Disposition", "attachment; filename=snapshot_" + snapshotId + ".xml");
         response.setHeader("Cache-Control", "no-transform, max-age=0");
-        
-        try (PrintWriter writer = response.getWriter();){
+
+        try (PrintWriter writer = response.getWriter();) {
 
             ServiceLocator locator = ServiceLocator.getInstance();
             ConfigurationService cs = locator.getService(ConfigurationService.class);
@@ -85,7 +79,7 @@ public class DeviceSnapshotsServlet extends HttpServlet {
                 // marshall the response and write it
                 String result = marshal(xmlConfigs);
                 writer.write(result);
-                
+
                 auditLogger.info(
                         "UI Snapshots - Success - Successfully returned device snapshot for user: {}, session: {}, snapshot id: {}",
                         session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId(), snapshotId);

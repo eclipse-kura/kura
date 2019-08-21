@@ -19,9 +19,10 @@ import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import com.google.gwt.user.client.rpc.XsrfProtectedService;
 
 @RemoteServiceRelativePath("status")
-public interface GwtStatusService extends RemoteService {
+public interface GwtStatusService extends XsrfProtectedService {
 
     /**
      * Returns a list of name/value pairs describing status aspects of the device.

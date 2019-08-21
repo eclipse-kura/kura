@@ -176,7 +176,8 @@ public class GwtCloudConnectionServiceImpl extends OsgiRemoteServiceServlet impl
             }
         });
 
-        auditLogger.info("UI CloudConnection - Success - Successfully listed stack pids by factory for user: {}, session {}",
+        auditLogger.info(
+                "UI CloudConnection - Success - Successfully listed stack pids by factory for user: {}, session {}",
                 session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
 
         return result;
@@ -185,7 +186,6 @@ public class GwtCloudConnectionServiceImpl extends OsgiRemoteServiceServlet impl
     @Override
     public void createCloudServiceFromFactory(GwtXSRFToken xsrfToken, String factoryPid, String cloudServicePid)
             throws GwtKuraException {
-        checkXSRFToken(xsrfToken);
         if (factoryPid == null || factoryPid.trim().isEmpty() || cloudServicePid == null
                 || cloudServicePid.trim().isEmpty()) {
             throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_NULL_ARGUMENT);
@@ -250,7 +250,8 @@ public class GwtCloudConnectionServiceImpl extends OsgiRemoteServiceServlet impl
         final HttpServletRequest request = getThreadLocalRequest();
         final HttpSession session = request.getSession(false);
 
-        auditLogger.info("UI CloudConnection - Success - Successfully listed cloud service pid for user: {}, session {}",
+        auditLogger.info(
+                "UI CloudConnection - Success - Successfully listed cloud service pid for user: {}, session {}",
                 session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
 
         return result.get();
@@ -280,7 +281,8 @@ public class GwtCloudConnectionServiceImpl extends OsgiRemoteServiceServlet impl
         final HttpServletRequest request = getThreadLocalRequest();
         final HttpSession session = request.getSession(false);
 
-        auditLogger.info("UI CloudConnection - Success - Successfully listed cloud service pid for user: {}, session {}",
+        auditLogger.info(
+                "UI CloudConnection - Success - Successfully listed cloud service pid for user: {}, session {}",
                 session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
 
         return result.get();
@@ -289,7 +291,6 @@ public class GwtCloudConnectionServiceImpl extends OsgiRemoteServiceServlet impl
     @Override
     public void createPubSubInstance(final GwtXSRFToken token, final String pid, final String factoryPid,
             final String cloudConnectionPid) throws GwtKuraException {
-        checkXSRFToken(token);
 
         final HttpServletRequest request = getThreadLocalRequest();
         final HttpSession session = request.getSession(false);
@@ -298,7 +299,8 @@ public class GwtCloudConnectionServiceImpl extends OsgiRemoteServiceServlet impl
             cs.createFactoryConfiguration(factoryPid, pid, Collections.singletonMap(
                     CloudConnectionConstants.CLOUD_ENDPOINT_SERVICE_PID_PROP_NAME.value(), cloudConnectionPid), true);
 
-            auditLogger.info("UI CloudConnection - Success - Successfully created pub/sub instance for user: {}, session {}",
+            auditLogger.info(
+                    "UI CloudConnection - Success - Successfully created pub/sub instance for user: {}, session {}",
                     session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
 
             return (Void) null;
@@ -307,7 +309,6 @@ public class GwtCloudConnectionServiceImpl extends OsgiRemoteServiceServlet impl
 
     @Override
     public void deletePubSubInstance(final GwtXSRFToken token, final String pid) throws GwtKuraException {
-        checkXSRFToken(token);
 
         final HttpServletRequest request = getThreadLocalRequest();
         final HttpSession session = request.getSession(false);
@@ -315,7 +316,8 @@ public class GwtCloudConnectionServiceImpl extends OsgiRemoteServiceServlet impl
         ServiceLocator.applyToServiceOptionally(ConfigurationService.class, cs -> {
             cs.deleteFactoryConfiguration(pid, true);
 
-            auditLogger.info("UI CloudConnection - Success - Successfully deleted pub/sub instance for user: {}, session {}",
+            auditLogger.info(
+                    "UI CloudConnection - Success - Successfully deleted pub/sub instance for user: {}, session {}",
                     session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
 
             return (Void) null;

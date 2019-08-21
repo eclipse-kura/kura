@@ -15,9 +15,10 @@ import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import com.google.gwt.user.client.rpc.XsrfProtectedService;
 
 @RemoteServiceRelativePath("session")
-public interface GwtSessionService extends RemoteService {
+public interface GwtSessionService extends XsrfProtectedService {
 
     public void logout(GwtXSRFToken xsrfToken) throws GwtKuraException;
 

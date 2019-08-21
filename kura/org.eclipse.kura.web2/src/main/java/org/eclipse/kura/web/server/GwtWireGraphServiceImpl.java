@@ -173,7 +173,6 @@ public final class GwtWireGraphServiceImpl extends OsgiRemoteServiceServlet impl
 
     @Override
     public GwtWireGraphConfiguration getWiresConfiguration(final GwtXSRFToken xsrfToken) throws GwtKuraException {
-        this.checkXSRFToken(xsrfToken);
 
         return getWiresConfigurationInternal();
     }
@@ -254,7 +253,6 @@ public final class GwtWireGraphServiceImpl extends OsgiRemoteServiceServlet impl
     @Override
     public void updateWireConfiguration(final GwtXSRFToken xsrfToken, GwtWireGraphConfiguration gwtConfigurations,
             List<GwtConfigComponent> additionalGwtConfigs) throws GwtKuraException {
-        this.checkXSRFToken(xsrfToken);
 
         final List<String> receivedConfigurationPids = Stream.concat(gwtConfigurations.getWireComponentConfigurations() //
                 .stream()//
@@ -408,7 +406,6 @@ public final class GwtWireGraphServiceImpl extends OsgiRemoteServiceServlet impl
 
     @Override
     public GwtWireComposerStaticInfo getWireComposerStaticInfo(GwtXSRFToken xsrfToken) throws GwtKuraException {
-        this.checkXSRFToken(xsrfToken);
 
         return getWireComposerStaticInfoInternal();
     }
@@ -459,7 +456,6 @@ public final class GwtWireGraphServiceImpl extends OsgiRemoteServiceServlet impl
 
     @Override
     public GwtWireGraph getWireGraph(final GwtXSRFToken xsrfToken) throws GwtKuraException {
-        checkXSRFToken(xsrfToken);
 
         final GwtWireComposerStaticInfo staticInfo = getWireComposerStaticInfoInternal();
         final GwtWireGraphConfiguration wireGraphConfiguration = getWiresConfigurationInternal();

@@ -22,6 +22,7 @@ import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import com.google.gwt.user.client.rpc.XsrfProtectedService;
 
 /**
  * Set of methods that can be used to get or update component configurations. Those methods will work in relation with a
@@ -29,7 +30,7 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
  *
  */
 @RemoteServiceRelativePath("component")
-public interface GwtComponentService extends RemoteService {
+public interface GwtComponentService extends XsrfProtectedService {
 
     /**
      * Return the list of PIDs of all the components that

@@ -25,9 +25,10 @@ import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import com.google.gwt.user.client.rpc.XsrfProtectedService;
 
 @RemoteServiceRelativePath("network")
-public interface GwtNetworkService extends RemoteService {
+public interface GwtNetworkService extends XsrfProtectedService {
 
     public List<GwtNetInterfaceConfig> findNetInterfaceConfigurations() throws GwtKuraException;
 

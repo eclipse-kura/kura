@@ -717,8 +717,6 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
     @Override
     public void updateNetInterfaceConfigurations(GwtXSRFToken xsrfToken, GwtNetInterfaceConfig config)
             throws GwtKuraException {
-
-        checkXSRFToken(xsrfToken);
         NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
 
         logger.debug("config.getStatus(): {}", GwtSafeHtmlUtils.htmlEscape(config.getStatus()));
@@ -940,7 +938,6 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
     @Override
     public ArrayList<GwtFirewallOpenPortEntry> findDeviceFirewallOpenPorts(GwtXSRFToken xsrfToken)
             throws GwtKuraException {
-        checkXSRFToken(xsrfToken);
         NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
         List<GwtFirewallOpenPortEntry> gwtOpenPortEntries = new ArrayList<>();
 
@@ -984,7 +981,6 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
     public ArrayList<GwtWifiHotspotEntry> findWifiHotspots(GwtXSRFToken xsrfToken, String interfaceName,
             String wirelessSsid) throws GwtKuraException {
 
-        checkXSRFToken(xsrfToken);
         NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
         SystemService systemService = ServiceLocator.getInstance().getService(SystemService.class);
         List<GwtWifiHotspotEntry> gwtWifiHotspotsEntries = new ArrayList<>();
@@ -1085,7 +1081,6 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
     @Override
     public List<GwtModemPdpEntry> findPdpContextInfo(GwtXSRFToken xsrfToken, String interfaceName)
             throws GwtKuraException {
-        checkXSRFToken(xsrfToken);
 
         List<GwtModemPdpEntry> gwtModemPdpEntries = new ArrayList<>();
         ModemManagerService mms = ServiceLocator.getInstance().getService(ModemManagerService.class);
@@ -1127,8 +1122,6 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
     @Override
     public boolean verifyWifiCredentials(GwtXSRFToken xsrfToken, String interfaceName, GwtWifiConfig gwtWifiConfig)
             throws GwtKuraException {
-
-        checkXSRFToken(xsrfToken);
         if (interfaceName == null || gwtWifiConfig == null) {
             throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_NULL_ARGUMENT);
         }
@@ -1140,7 +1133,6 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
     @Override
     public ArrayList<GwtFirewallPortForwardEntry> findDeviceFirewallPortForwards(GwtXSRFToken xsrfToken)
             throws GwtKuraException {
-        checkXSRFToken(xsrfToken);
         NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
         List<GwtFirewallPortForwardEntry> gwtPortForwardEntries = new ArrayList<>();
 
@@ -1180,7 +1172,6 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
     @Override
     public ArrayList<GwtFirewallNatEntry> findDeviceFirewallNATs(GwtXSRFToken xsrfToken) throws GwtKuraException {
 
-        checkXSRFToken(xsrfToken);
         NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
         List<GwtFirewallNatEntry> gwtNatEntries = new ArrayList<>();
 
@@ -1299,7 +1290,6 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
     @Override
     public void updateDeviceFirewallOpenPorts(GwtXSRFToken xsrfToken, List<GwtFirewallOpenPortEntry> entries)
             throws GwtKuraException {
-        checkXSRFToken(xsrfToken);
         NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
         List<FirewallOpenPortConfigIP<? extends IPAddress>> firewallOpenPortConfigIPs = new ArrayList<>();
         logger.debug("updating open ports");
@@ -1356,7 +1346,6 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
             throws GwtKuraException {
 
         logger.debug("updateDeviceFirewallPortForwards() :: updating port forward entries");
-        checkXSRFToken(xsrfToken);
         NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
         List<FirewallPortForwardConfigIP<? extends IPAddress>> firewallPortForwardConfigIPs = new ArrayList<>();
 
@@ -1408,7 +1397,6 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
             throws GwtKuraException {
 
         logger.debug("updateDeviceFirewallNATs() :: updating NAT entries");
-        checkXSRFToken(xsrfToken);
         NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
         List<FirewallNatConfig> firewallNatConfigs = new ArrayList<>();
 
@@ -1442,7 +1430,6 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 
     @Override
     public void renewDhcpLease(GwtXSRFToken xsrfToken, String interfaceName) throws GwtKuraException {
-        checkXSRFToken(xsrfToken);
         NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
         try {
             nas.renewDhcpLease(GwtSafeHtmlUtils.htmlEscape(interfaceName));

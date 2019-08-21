@@ -58,7 +58,6 @@ public class GwtAssetServiceImpl extends OsgiRemoteServiceServlet implements Gwt
 
     @Override
     public GwtChannelOperationResult readAllChannels(GwtXSRFToken xsrfToken, String assetPid) throws GwtKuraException {
-        checkXSRFToken(xsrfToken);
 
         final HttpServletRequest request = getThreadLocalRequest();
         final HttpSession session = request.getSession(false);
@@ -86,7 +85,6 @@ public class GwtAssetServiceImpl extends OsgiRemoteServiceServlet implements Gwt
     @Override
     public GwtChannelOperationResult write(GwtXSRFToken xsrfToken, String assetPid,
             List<GwtChannelRecord> gwtChannelRecords) throws GwtKuraException {
-        checkXSRFToken(xsrfToken);
 
         final HttpServletRequest request = getThreadLocalRequest();
         final HttpSession session = request.getSession(false);

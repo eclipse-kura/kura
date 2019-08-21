@@ -22,8 +22,8 @@ import org.eclipse.kura.web.shared.model.GwtCloudConnectionEntry;
 import org.eclipse.kura.web.shared.model.GwtCloudEntry;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 
-import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import com.google.gwt.user.client.rpc.XsrfProtectedService;
 
 /**
  * This interface provide a set of methods to manage cloud services from the web UI.
@@ -42,7 +42,7 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
  *
  */
 @RemoteServiceRelativePath("cloudservices")
-public interface GwtCloudConnectionService extends RemoteService {
+public interface GwtCloudConnectionService extends XsrfProtectedService {
 
     /**
      * Returns the list of all the {@link org.eclipse.kura.cloud.CloudService} instances registered in the framework. An

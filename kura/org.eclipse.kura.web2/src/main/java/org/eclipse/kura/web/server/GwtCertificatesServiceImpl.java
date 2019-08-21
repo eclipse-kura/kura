@@ -54,7 +54,6 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
     @Override
     public Integer storePublicPrivateKeys(GwtXSRFToken xsrfToken, String privateKey, String publicKey, String password,
             String alias) throws GwtKuraException {
-        checkXSRFToken(xsrfToken);
 
         final HttpServletRequest request = getThreadLocalRequest();
         final HttpSession session = request.getSession(false);
@@ -100,7 +99,6 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
     @Override
     public Integer storeSSLPublicChain(GwtXSRFToken xsrfToken, String publicKeys, String alias)
             throws GwtKuraException {
-        checkXSRFToken(xsrfToken);
 
         final HttpServletRequest request = getThreadLocalRequest();
         final HttpSession session = request.getSession(false);
@@ -139,7 +137,6 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
     @Override
     public Integer storeApplicationPublicChain(GwtXSRFToken xsrfToken, String publicKeys, String alias)
             throws GwtKuraException {
-        checkXSRFToken(xsrfToken);
 
         final HttpServletRequest request = getThreadLocalRequest();
         final HttpSession session = request.getSession(false);

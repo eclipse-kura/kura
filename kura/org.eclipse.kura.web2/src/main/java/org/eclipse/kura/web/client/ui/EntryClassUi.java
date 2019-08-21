@@ -33,15 +33,11 @@ import org.eclipse.kura.web.client.ui.wires.WiresPanelUi;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.util.FilterBuilder;
 import org.eclipse.kura.web.client.util.PidTextBox;
-import org.eclipse.kura.web.client.util.request.RequestQueue;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConsoleUserOptions;
 import org.eclipse.kura.web.shared.model.GwtSession;
-import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtComponentService;
 import org.eclipse.kura.web.shared.service.GwtComponentServiceAsync;
-import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
-import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSessionService;
 import org.eclipse.kura.web.shared.service.GwtSessionServiceAsync;
 import org.gwtbootstrap3.client.ui.Anchor;
@@ -72,8 +68,12 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.rpc.HasRpcToken;
+import com.google.gwt.user.client.rpc.ServiceDefTarget;
+import com.google.gwt.user.client.rpc.XsrfToken;
+import com.google.gwt.user.client.rpc.XsrfTokenService;
+import com.google.gwt.user.client.rpc.XsrfTokenServiceAsync;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
@@ -196,8 +196,8 @@ public class EntryClassUi extends Composite {
     private final WiresPanelUi wiresBinder = GWT.create(WiresPanelUi.class);
     private final DriversAndAssetsUi driversAndTwinsBinder = GWT.create(DriversAndAssetsUi.class);
 
+    private final XsrfTokenServiceAsync xsrf = GWT.create(XsrfTokenService.class);
     private final GwtComponentServiceAsync gwtComponentService = GWT.create(GwtComponentService.class);
-    private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
     private final GwtSessionServiceAsync gwtSessionService = GWT.create(GwtSessionService.class);
 
     private final KeyUpHandler searchBoxChangeHandler = event -> {
@@ -221,6 +221,7 @@ public class EntryClassUi extends Composite {
 
     public EntryClassUi() {
         this.ui = this;
+        ((ServiceDefTarget) this.xsrf).setServiceEntryPoint("/gwt/xsrf");
         initWidget(uiBinder.createAndBindUi(this));
         initWaitModal();
         initNewComponentErrorModal();
@@ -549,16 +550,44 @@ public class EntryClassUi extends Composite {
     }
 
     public void fetchUserOptions() {
-        RequestQueue.submit(c -> this.gwtXSRFService.generateSecurityToken(c.callback(token -> {
-            this.gwtSessionService.getUserOptions(token, c.callback(options -> userOptions = options));
-        })));
+
+//        this.xsrf.getNewXsrfToken(new AsyncCallback<XsrfToken>() {
+//
+//            @Override
+//            public void onSuccess(XsrfToken token) {
+//                ((HasRpcToken) EntryClassUi.this.gwtSessionService).setRpcToken(token);
+//                EntryClassUi.this.gwtSessionService.getUserOptions(null, new AsyncCallback<GwtConsoleUserOptions>() {
+//
+//                    @Override
+//                    public void onSuccess(GwtConsoleUserOptions options) {
+//                        userOptions = options;
+//                    }
+//
+//                    @Override
+//                    public void onFailure(Throwable caught) {
+//                        // TODO Auto-generated method stub
+//
+//                    }
+//                });
+//            }
+//
+//            @Override
+//            public void onFailure(Throwable caught) {
+//                // TODO Auto-generated method stub
+//
+//            }
+//        });
     }
 
     public void fetchAvailableServices(final AsyncCallback<Void> callback) {
         // (Re)Fetch Available Services
-        RequestQueue.submit(c -> this.gwtXSRFService.generateSecurityToken(
-                c.callback(token -> EntryClassUi.this.gwtComponentService.findComponentConfigurations(token,
-                        SERVICES_FILTER, c.callback(new AsyncCallback<List<GwtConfigComponent>>() {
+        this.xsrf.getNewXsrfToken(new AsyncCallback<XsrfToken>() {
+
+            @Override
+            public void onSuccess(XsrfToken token) {
+                ((HasRpcToken) EntryClassUi.this.gwtComponentService).setRpcToken(token);
+                EntryClassUi.this.gwtComponentService.findComponentConfigurations(null, SERVICES_FILTER,
+                        new AsyncCallback<List<GwtConfigComponent>>() {
 
                             @Override
                             public void onFailure(Throwable ex) {
@@ -583,38 +612,46 @@ public class EntryClassUi extends Composite {
                                     callback.onSuccess(null);
                                 }
                             }
-                        })))));
+                        });
+            }
 
+            @Override
+            public void onFailure(Throwable caught) {
+                // TODO Auto-generated method stub
+
+            }
+        });
     }
 
     private void initLogoutButtons() {
-        final ClickHandler logoutHandler = e -> this.gwtXSRFService
-                .generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+        final ClickHandler logoutHandler = null;
+        // e -> this.gwtXSRFService
+        // .generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+        //
+        // @Override
+        // public void onSuccess(GwtXSRFToken result) {
+        // EntryClassUi.this.gwtSessionService.logout(result, new AsyncCallback<Void>() {
+        //
+        // @Override
+        // public void onSuccess(Void result) {
+        // Window.Location.reload();
+        // }
+        //
+        // @Override
+        // public void onFailure(Throwable caught) {
+        // FailureHandler.handle(caught);
+        // }
+        // });
+        // }
+        //
+        // @Override
+        // public void onFailure(Throwable caught) {
+        // FailureHandler.handle(caught);
+        // }
+        // });
 
-                    @Override
-                    public void onSuccess(GwtXSRFToken result) {
-                        EntryClassUi.this.gwtSessionService.logout(result, new AsyncCallback<Void>() {
-
-                            @Override
-                            public void onSuccess(Void result) {
-                                Window.Location.reload();
-                            }
-
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                FailureHandler.handle(caught);
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        FailureHandler.handle(caught);
-                    }
-                });
-
-        this.logoutButton.addClickHandler(logoutHandler);
-        this.headerLogoutButton.addClickHandler(logoutHandler);
+//        this.logoutButton.addClickHandler(logoutHandler);
+//        this.headerLogoutButton.addClickHandler(logoutHandler);
     }
 
     private void initServicesTree() {
@@ -626,16 +663,12 @@ public class EntryClassUi extends Composite {
         this.factoriesButton.addClickHandler(event -> {
             // always empty the PID input field
             EntryClassUi.this.componentName.setValue("");
-            EntryClassUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+            this.xsrf.getNewXsrfToken(new AsyncCallback<XsrfToken>() {
 
                 @Override
-                public void onFailure(Throwable ex) {
-                    FailureHandler.handle(ex, EntryClassUi.class.getName());
-                }
-
-                @Override
-                public void onSuccess(GwtXSRFToken token) {
-                    EntryClassUi.this.gwtComponentService.findFactoryComponents(token,
+                public void onSuccess(XsrfToken token) {
+                    ((HasRpcToken) EntryClassUi.this.gwtComponentService).setRpcToken(token);
+                    EntryClassUi.this.gwtComponentService.findFactoryComponents(null,
                             new AsyncCallback<List<String>>() {
 
                                 @Override
@@ -654,7 +687,13 @@ public class EntryClassUi extends Composite {
                                 }
                             });
                 }
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    FailureHandler.handle(caught, EntryClassUi.class.getName());
+                }
             });
+
         });
     }
 
@@ -680,24 +719,33 @@ public class EntryClassUi extends Composite {
                 return;
             }
 
-            RequestQueue.submit(
-                    context -> EntryClassUi.this.gwtXSRFService.generateSecurityToken(context.callback(token -> {
+            this.xsrf.getNewXsrfToken(new AsyncCallback<XsrfToken>() {
 
-                        EntryClassUi.this.newFactoryComponentModal.hide();
-                        EntryClassUi.this.gwtComponentService.createFactoryComponent(token, factoryPid, pid,
-                                context.callback(new AsyncCallback<Void>() {
+                @Override
+                public void onSuccess(XsrfToken token) {
+                    ((HasRpcToken) EntryClassUi.this.gwtComponentService).setRpcToken(token);
+                    EntryClassUi.this.newFactoryComponentModal.hide();
+                    EntryClassUi.this.gwtComponentService.createFactoryComponent(null, factoryPid, pid,
+                            new AsyncCallback<Void>() {
 
-                                    @Override
-                                    public void onFailure(Throwable ex) {
-                                        FailureHandler.showErrorMessage(MSGS.errorCreatingFactoryComponent());
-                                    }
+                                @Override
+                                public void onFailure(Throwable ex) {
+                                    FailureHandler.showErrorMessage(MSGS.errorCreatingFactoryComponent());
+                                }
 
-                                    @Override
-                                    public void onSuccess(Void result) {
-                                        context.defer(2000, () -> fetchAvailableServices(null));
-                                    }
-                                }));
-                    })));
+                                @Override
+                                public void onSuccess(Void result) {
+                                    // context.defer(2000, () -> fetchAvailableServices(null));
+                                }
+                            });
+                }
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    // TODO Auto-generated method stub
+
+                }
+            });
         });
     }
 

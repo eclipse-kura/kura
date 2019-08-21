@@ -35,7 +35,6 @@ public class GwtSessionServiceImpl extends OsgiRemoteServiceServlet implements G
 
     @Override
     public void logout(GwtXSRFToken xsrfToken) throws GwtKuraException {
-        checkXSRFToken(xsrfToken);
 
         final HttpServletRequest request = getThreadLocalRequest();
         final HttpServletResponse response = getThreadLocalResponse();
@@ -62,7 +61,6 @@ public class GwtSessionServiceImpl extends OsgiRemoteServiceServlet implements G
 
     @Override
     public GwtConsoleUserOptions getUserOptions(final GwtXSRFToken xsrfToken) throws GwtKuraException {
-        checkXSRFToken(xsrfToken);
 
         return Console.getConsoleOptions().getUserOptions();
     }

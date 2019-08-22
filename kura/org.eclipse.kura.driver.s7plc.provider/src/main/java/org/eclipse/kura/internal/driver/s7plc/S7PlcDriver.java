@@ -206,7 +206,10 @@ public class S7PlcDriver extends AbstractBlockDriver<S7PlcDomain> implements Con
         int result = this.state.client.WriteArea(dbType, db, offset, data.length, data);
         if (result != 0) {
             final S7PlcOptions currentOptions = this.options.get();
+            int reConnectTimes = 0;
             while (result > 0 && result <= 5) {
+                if (reConnectTimes >= 3)
+                    break;
                 logger.warn(
                         "Write connection error---IP: {} Rack:{} Slot:{} Port:{} DB: {} off: {} len: {} status: {} Error: {}, Retry!!!",
                         currentOptions.getIp(), currentOptions.getRack(), currentOptions.getSlot(),
@@ -222,11 +225,12 @@ public class S7PlcDriver extends AbstractBlockDriver<S7PlcDomain> implements Con
                             + e.getMessage(), result);
 
                 }
+                reConnectTimes++;
                 result = this.state.client.WriteArea(S7.S7AreaDB, db, offset, data.length, data);
             }
 
             if (result != 0)
-                throw new Moka7Exception("Write reConnection result error IP:" + currentOptions.getIp() + " Rack:"
+                throw new Moka7Exception("Write result error IP:" + currentOptions.getIp() + " Rack:"
                         + currentOptions.getRack() + " Slot:" + currentOptions.getSlot() + " Port:"
                         + currentOptions.getPort() + " DB: " + db + " off: " + offset + " len: " + data.length
                         + " status: " + result + "\n Error:" + S7Client.ErrorText(result), result);
@@ -238,8 +242,10 @@ public class S7PlcDriver extends AbstractBlockDriver<S7PlcDomain> implements Con
         int result = this.state.client.ReadArea(dbType, db, offset, data.length, data);
         if (result != 0) {
             final S7PlcOptions currentOptions = this.options.get();
+            int reConnectTimes = 0;
             while (result > 0 && result <= 5) {
-
+                if (reConnectTimes >= 3)
+                    break;
                 logger.warn("Read reConnection ---IP: {} Rack:{} Slot:{} Port:{} DB: {} off: {} len:{}",
                         currentOptions.getIp(), currentOptions.getRack(), currentOptions.getSlot(),
                         currentOptions.getPort(), db, offset, data.length);
@@ -255,12 +261,12 @@ public class S7PlcDriver extends AbstractBlockDriver<S7PlcDomain> implements Con
                             result);
 
                 }
-
+                reConnectTimes++;
                 result = this.state.client.ReadArea(S7.S7AreaDB, db, offset, data.length, data);
             }
 
             if (result != 0)
-                throw new Moka7Exception("Read reConnection result error IP:" + currentOptions.getIp() + " Rack:"
+                throw new Moka7Exception("Read result error IP:" + currentOptions.getIp() + " Rack:"
                         + currentOptions.getRack() + " Slot:" + currentOptions.getSlot() + " Port:"
                         + currentOptions.getPort() + " DB: " + db + " off: " + offset + " len: " + data.length
                         + " status: " + result + "\n Error:" + S7Client.ErrorText(result), result);

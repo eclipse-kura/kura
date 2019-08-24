@@ -140,6 +140,7 @@
         <osgi-dp-plugin-version>0.3.0</osgi-dp-plugin-version>
 
         <check.plugins.exist.remote>false</check.plugins.exist.remote>
+        <skip.check.style>true</skip.check.style>
     </properties>
 
     <distributionManagement>
@@ -265,6 +266,12 @@
                 <check.plugins.exist.remote>true</check.plugins.exist.remote>
             </properties>
         </profile>
+        <profile>
+            <id>check-style</id>
+            <properties>
+                <skip.check.style>false</skip.check.style>
+            </properties>
+        </profile>
     </profiles>
 
     <repositories>
@@ -340,6 +347,7 @@
                             <linkXRef>false</linkXRef>
                             <configLocation>../checkstyle_checks.xml</configLocation>
                             <suppressionsLocation>../suppressions.xml</suppressionsLocation>
+                            <skip>${skip.check.style}</skip>
                         </configuration>
                         <goals>
                             <goal>check</goal>

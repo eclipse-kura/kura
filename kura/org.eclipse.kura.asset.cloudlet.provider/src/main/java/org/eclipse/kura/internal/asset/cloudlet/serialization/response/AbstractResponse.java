@@ -20,12 +20,16 @@ import com.eclipsesource.json.JsonObject;
 
 public abstract class AbstractResponse {
 
-    protected JsonArray serialized = new JsonArray();
+    private JsonArray serialized = new JsonArray();
 
     public void reportAssetNotFound(String name) {
         JsonObject assetObject = Json.object();
         assetObject.add(SerializationConstants.ASSET_NAME_PROPERTY, name);
         assetObject.add(SerializationConstants.ERROR_PROPERTY, "Asset not found");
+        serialized.add(assetObject);
+    }
+    
+    public void addAssetObject(JsonObject assetObject) {
         serialized.add(assetObject);
     }
 

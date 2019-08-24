@@ -57,7 +57,7 @@ public class ChannelOperationResponse extends AbstractResponse {
 
         assetObject.add(SerializationConstants.CHANNELS_PROPERTY, channels);
 
-        serialized.add(assetObject);
+        addAssetObject(assetObject);
     }
 
     public void reportResult(String assetName, List<ChannelRecord> list) {
@@ -97,7 +97,7 @@ public class ChannelOperationResponse extends AbstractResponse {
 
         assetObject.add(SerializationConstants.CHANNELS_PROPERTY, channels);
 
-        serialized.add(assetObject);
+        addAssetObject(assetObject);
     }
 
 }

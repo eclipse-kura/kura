@@ -13,7 +13,7 @@ import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Defines the type of transport for Bluetooth devices.
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  * @since 2.0
  */

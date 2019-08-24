@@ -29,7 +29,7 @@ import org.osgi.annotation.versioning.ConsumerType;
  * <li>{@link RequestHandler#doExec} is used to perform application operation not necessary tied to a given
  * resource.</li>
  * </ul>
- * 
+ *
  * Every request is also associated to a {@link RequestHandlerContext} that specifies the request context and can be
  * used to send notification messages, keeping the link with the original cloud stack that started the interaction.
  *

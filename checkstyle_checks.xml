@@ -23,7 +23,7 @@
     
     <!-- Checks whether files end with a new line.                        -->
     <!-- See https://checkstyle.org/config_misc.html#NewlineAtEndOfFile -->
-    <module name="NewlineAtEndOfFile"/>
+    <!--<module name="NewlineAtEndOfFile"/>-->
     
     <!-- Checks that property files contain the same keys.         -->
     <!-- See https://checkstyle.org/config_misc.html#Translation -->
@@ -52,8 +52,11 @@
     <!--   <property name="headerFile" value="${checkstyle.header.file}"/> -->
         <property name="fileExtensions" value="java"/>
     </module>
+
+    <module name="SuppressWarningsFilter"/>
     
     <module name="TreeWalker">
+        <module name="SuppressWarningsHolder" />
         
         <!-- Checks for Javadoc comments.                     -->
         <!-- See https://checkstyle.org/config_javadoc.html -->

@@ -18,7 +18,7 @@ import org.osgi.annotation.versioning.ConsumerType;
  * wishing to receive BLE advertisement data
  *
  * @deprecated
- * 
+ *
  */
 @ConsumerType
 @Deprecated

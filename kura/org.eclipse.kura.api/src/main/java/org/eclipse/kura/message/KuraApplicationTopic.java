@@ -21,7 +21,7 @@ import org.osgi.annotation.versioning.ProviderType;
  */
 @ProviderType
 public abstract class KuraApplicationTopic {
-   
+
     protected String applicationId;
     protected String applicationTopic;
 

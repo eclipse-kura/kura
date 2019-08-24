@@ -23,7 +23,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * In this case, the configuration would not include an IP address. However, the 'status' in
  * the NetInterfaceAddress would because the interface does have an IP - just not one that is
  * configured because it is dynamically assigned by the DHCP server.
- * 
+ *
  * @noimplement This interface is not intended to be implemented by clients.
  */
 @ProviderType

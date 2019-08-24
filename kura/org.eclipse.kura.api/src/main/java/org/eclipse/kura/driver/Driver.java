@@ -230,7 +230,7 @@ public interface Driver {
      * If the validation of the channel configuration fails for some channels, the driver must not throw an exception
      * but it is required to return channel records with proper error flags set as a result of the
      * {@link PreparedRead#execute()} call.
-     * 
+     *
      * @see PreparedRead
      * @param records
      *            The list of channel records that represent the request to be optimized.

@@ -13,7 +13,7 @@ import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * KuraBluetoothRemoveException is raised when an error is detected during removing a device from the system.
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  * @since 2.0
  */

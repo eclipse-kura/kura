@@ -36,7 +36,7 @@ import org.osgi.annotation.versioning.ProviderType;
 public class Channel {
 
     /** The communication channel configuration. */
-    private transient final Map<String, Object> configuration;
+    private final transient Map<String, Object> configuration;
 
     /** The name of the communication channel. */
     private String name;
@@ -119,13 +119,13 @@ public class Channel {
 
     /**
      * Returns a boolean indicating if this channel is enabled or not
-     * 
+     *
      * @since 1.4
      * @return a boolean indicating if this channel is enabled or not
      */
 
     public boolean isEnabled() {
-        return isEnabled;
+        return this.isEnabled;
     }
 
     /**
@@ -169,7 +169,7 @@ public class Channel {
 
     /**
      * Specifies if this channel is enabled or not
-     * 
+     *
      * @since 1.4
      * @param isEnabled
      *            a boolean indicating if this channel is enabled or not
@@ -188,7 +188,7 @@ public class Channel {
     /**
      * Creates a new {@link ChannelRecord} that represents a read request
      * for the value of this {@code Channel}.
-     * 
+     *
      * @return
      *         the {@link ChannelRecord}
      */
@@ -202,7 +202,7 @@ public class Channel {
     /**
      * Creates a new {@link ChannelRecord} that represents a write request for this
      * {@code Channel}.
-     * 
+     *
      * @param vlaue
      *            The value to be written.
      * @throws IllegalArgumentException
@@ -215,7 +215,7 @@ public class Channel {
      */
     public ChannelRecord createWriteRecord(TypedValue<?> value) {
         requireNonNull(value, "Value cannot be null");
-        if (value.getType() != valueType) {
+        if (value.getType() != this.valueType) {
             throw new IllegalArgumentException("The value type of the argument must match the channel value type");
         }
         ChannelRecord result = ChannelRecord.createWriteRecord(this.name, value);
@@ -228,36 +228,45 @@ public class Channel {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((configuration == null) ? 0 : configuration.hashCode());
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
-        result = prime * result + ((type == null) ? 0 : type.hashCode());
-        result = prime * result + ((valueType == null) ? 0 : valueType.hashCode());
+        result = prime * result + (this.configuration == null ? 0 : this.configuration.hashCode());
+        result = prime * result + (this.name == null ? 0 : this.name.hashCode());
+        result = prime * result + (this.type == null ? 0 : this.type.hashCode());
+        result = prime * result + (this.valueType == null ? 0 : this.valueType.hashCode());
         return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         Channel other = (Channel) obj;
-        if (configuration == null) {
-            if (other.configuration != null)
+        if (this.configuration == null) {
+            if (other.configuration != null) {
                 return false;
-        } else if (!configuration.equals(other.configuration))
+            }
+        } else if (!this.configuration.equals(other.configuration)) {
             return false;
-        if (name == null) {
-            if (other.name != null)
+        }
+        if (this.name == null) {
+            if (other.name != null) {
                 return false;
-        } else if (!name.equals(other.name))
+            }
+        } else if (!this.name.equals(other.name)) {
             return false;
-        if (type != other.type)
+        }
+        if (this.type != other.type) {
             return false;
-        if (valueType != other.valueType)
+        }
+        if (this.valueType != other.valueType) {
             return false;
+        }
         return true;
     }
 }

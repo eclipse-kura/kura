@@ -15,7 +15,7 @@ import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Background Scan container class
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 @ProviderType
@@ -74,6 +74,17 @@ public class WifiBgscan {
 
     public int getRssiThreshold() {
         return this.m_rssiThreshold;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + m_longInterval;
+        result = prime * result + ((m_module == null) ? 0 : m_module.hashCode());
+        result = prime * result + m_rssiThreshold;
+        result = prime * result + m_shortInterval;
+        return result;
     }
 
     /*

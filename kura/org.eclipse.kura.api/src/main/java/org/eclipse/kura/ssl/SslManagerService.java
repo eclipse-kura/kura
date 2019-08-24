@@ -30,7 +30,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * and disable the Nagle algorithm.
  * Its implementation is configurable exposing the possibility to express the allowed SSL protocols,
  * the allowed cipher suites, and the location of the Trust Store and the Key Store files.
- * 
+ *
  * @noimplement This interface is not intended to be implemented by clients.
  */
 @ProviderType

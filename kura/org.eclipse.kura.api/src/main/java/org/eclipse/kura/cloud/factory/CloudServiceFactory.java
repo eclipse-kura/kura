@@ -17,8 +17,7 @@ import java.util.Set;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.CloudService;
-import org.eclipse.kura.cloudconnection.publisher.CloudPublisher;
-import org.eclipse.kura.cloudconnection.subscriber.CloudSubscriber;
+import org.eclipse.kura.cloudconnection.factory.CloudConnectionFactory;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.data.DataTransportService;
 import org.osgi.annotation.versioning.ProviderType;
@@ -60,7 +59,7 @@ import org.osgi.service.component.ComponentContext;
  * @since 1.0.8
  *
  * @noimplement This interface is not intended to be implemented by clients.
- * 
+ *
  * @deprecated Please consider using {@link CloudConnectionFactory}
  */
 @ProviderType

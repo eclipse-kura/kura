@@ -27,24 +27,24 @@ import org.osgi.annotation.versioning.ProviderType;
  * The Class ChannelRecord contains the information needed for performing a read or write
  * operation on a specific channel.<br/>
  * <br/>
- * 
+ *
  * The possible cases for a channel record are the following:
  * <ul>
- * 
+ *
  * <li>
  * Describing a read request: in this case the channel record must contain the channel
  * name and the data type to be read.
  * A channel record suitable for this use case can be created using the
  * {@link ChannelRecord#createReadRecord(String, DataType)} or {@link Channel#createReadRecord()} methods.
  * </li>
- * 
+ *
  * <li>
  * Describing a write request: in this case the channel record must contain the channel
  * name, the value to be written and its data type
  * A channel record suitable for this use case can be created using the
  * {@link ChannelRecord#createWriteRecord(String, TypedValue)} or {@link Channel#createWriteRecord(TypedValue)} methods.
  * </li>
- * 
+ *
  * <li>
  * Reporting a status: in this case the channel record must contain the channel
  * name and a {@link ChannelStatus} instance.
@@ -53,9 +53,9 @@ import org.osgi.annotation.versioning.ProviderType;
  * A channel record suitable for this use case can be created using the
  * {@link ChannelRecord#createStatusRecord(String, ChannelStatus)} method.
  * </li>
- * 
+ *
  * </ul>
- * 
+ *
  * A channel record might also contain an user defined configuration, specified
  * as a {@code Map<String, Object>} instance.
  * This configuration can be used to provide additional information concerning the
@@ -103,7 +103,7 @@ public class ChannelRecord {
 
     /**
      * Creates a channel record that represents a read request.
-     * 
+     *
      * @param channelName
      *            The name of the channel
      * @param valueType
@@ -125,7 +125,7 @@ public class ChannelRecord {
 
     /**
      * Creates a channel record that represents a write request.
-     * 
+     *
      * @param channelName
      *            The name of the channel
      * @param value
@@ -148,7 +148,7 @@ public class ChannelRecord {
 
     /**
      * Creates a channel record that describes the status of an operation.
-     * 
+     *
      * @param channelName
      *            The name of the channel
      * @param status
@@ -233,34 +233,34 @@ public class ChannelRecord {
 
     /**
      * Returns the name of the channel associated to the operation represented by this channel record
-     * 
+     *
      * @return the channel name
      */
     public String getChannelName() {
-        return name;
+        return this.name;
     }
 
     /**
      * Returns the type of the value associated to the operation represented by this channel record
-     * 
+     *
      * @return the value type
      */
     public DataType getValueType() {
-        return valueType;
+        return this.valueType;
     }
 
     /**
      * Returns the value associated to the operation represented by this channel record
-     * 
+     *
      * @return the value
      */
     public TypedValue<?> getValue() {
-        return value;
+        return this.value;
     }
 
     /**
      * Sets the value associated to the operation represented by this channel record
-     * 
+     *
      * @param value
      *            the value to be set
      * @throws NullPointerException
@@ -273,56 +273,70 @@ public class ChannelRecord {
 
     @Override
     public String toString() {
-        return "ChannelRecord [channelConfiguration=" + channelConfiguration + ", channelStatus=" + channelStatus
-                + ", name=" + name + ", valueType=" + valueType + ", value=" + value + ", timestamp=" + timestamp + "]";
+        return "ChannelRecord [channelConfiguration=" + this.channelConfiguration + ", channelStatus="
+                + this.channelStatus + ", name=" + this.name + ", valueType=" + this.valueType + ", value=" + this.value
+                + ", timestamp=" + this.timestamp + "]";
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((channelConfiguration == null) ? 0 : channelConfiguration.hashCode());
-        result = prime * result + ((channelStatus == null) ? 0 : channelStatus.hashCode());
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
-        result = prime * result + (int) (timestamp ^ (timestamp >>> 32));
-        result = prime * result + ((value == null) ? 0 : value.hashCode());
-        result = prime * result + ((valueType == null) ? 0 : valueType.hashCode());
+        result = prime * result + (this.channelConfiguration == null ? 0 : this.channelConfiguration.hashCode());
+        result = prime * result + (this.channelStatus == null ? 0 : this.channelStatus.hashCode());
+        result = prime * result + (this.name == null ? 0 : this.name.hashCode());
+        result = prime * result + (int) (this.timestamp ^ this.timestamp >>> 32);
+        result = prime * result + (this.value == null ? 0 : this.value.hashCode());
+        result = prime * result + (this.valueType == null ? 0 : this.valueType.hashCode());
         return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         ChannelRecord other = (ChannelRecord) obj;
-        if (channelConfiguration == null) {
-            if (other.channelConfiguration != null)
+        if (this.channelConfiguration == null) {
+            if (other.channelConfiguration != null) {
                 return false;
-        } else if (!channelConfiguration.equals(other.channelConfiguration))
+            }
+        } else if (!this.channelConfiguration.equals(other.channelConfiguration)) {
             return false;
-        if (channelStatus == null) {
-            if (other.channelStatus != null)
+        }
+        if (this.channelStatus == null) {
+            if (other.channelStatus != null) {
                 return false;
-        } else if (!channelStatus.equals(other.channelStatus))
+            }
+        } else if (!this.channelStatus.equals(other.channelStatus)) {
             return false;
-        if (name == null) {
-            if (other.name != null)
+        }
+        if (this.name == null) {
+            if (other.name != null) {
                 return false;
-        } else if (!name.equals(other.name))
+            }
+        } else if (!this.name.equals(other.name)) {
             return false;
-        if (timestamp != other.timestamp)
+        }
+        if (this.timestamp != other.timestamp) {
             return false;
-        if (value == null) {
-            if (other.value != null)
+        }
+        if (this.value == null) {
+            if (other.value != null) {
                 return false;
-        } else if (!value.equals(other.value))
+            }
+        } else if (!this.value.equals(other.value)) {
             return false;
-        if (valueType != other.valueType)
+        }
+        if (this.valueType != other.valueType) {
             return false;
+        }
         return true;
     }
 }

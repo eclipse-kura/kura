@@ -13,7 +13,7 @@ import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * KuraBluetoothConnectionException is raised when an error is detected during the device connection/disconnection.
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  * @since 1.3
  */

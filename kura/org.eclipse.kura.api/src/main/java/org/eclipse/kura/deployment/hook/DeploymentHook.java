@@ -20,33 +20,33 @@ import org.osgi.annotation.versioning.ConsumerType;
  * {@link DeploymentHook} instances can be used to customize the behavior of the DEPLOY-V2
  * Cloudlet by executing user-defined code at specific stages of deployment requests.
  * </p>
- * 
+ *
  * <p>
  * A {@link DeploymentHook} implementation must be registered as an OSGi service and it is identified by the
  * value of the {@code kura.service.pid} service property.
  * </p>
- * 
+ *
  * <p>
  * In order for a registered hook to be used for a particular request the following conditions must
  * be verified:
  * </p>
- * 
+ *
  * <ul>
  * <li>The request must provide a metric named {@code request.type} of string type.</li>
  * <li>The configuration of the DEPLOY-V2 cloudlet must contain a mapping beetween the received {@code request.type}
  * and the {@code kura.service.pid} of a registered {@link DeploymentHook} implementation.</li>
  * </ul>
- * 
+ *
  * <p>
  * The associations between {@code request.type} and hook {@code kura.service.pid} are maintained in the configuration
  * of the DEPLOY-V2 Cloudlet and are modifiable using the Kura WEB Ui.
  * </p>
- * 
+ *
  * <p>
  * The {@link DeploymentHook} methods can be executed at different stages of the {@code /EXEC/download} and
  * {@code /EXEC/install} as specified below.
  * </p>
- * 
+ *
  * <table border=1>
  * <tr>
  * <th>Method</th>
@@ -74,11 +74,11 @@ import org.osgi.annotation.versioning.ConsumerType;
  * installed/executed.</td>
  * </tr>
  * </table>
- * 
+ *
  * <p>
  * If any of the methods specified by this interface throws an exception, the current request will be aborted.
  * </p>
- * 
+ *
  * @since 1.3
  */
 @ConsumerType
@@ -86,7 +86,7 @@ public interface DeploymentHook {
 
     /**
      * This method is called at the {@code preDownload} phase, see class description for more details.
-     * 
+     *
      * @param context
      *            a {@link RequestContext} instance representing the current DEPLOY-V2 request
      * @param properties
@@ -98,7 +98,7 @@ public interface DeploymentHook {
 
     /**
      * This method is called at the {@code preDownload} phase, see class description for more details.
-     * 
+     *
      * @param context
      *            a {@link RequestContext} instance representing the current DEPLOY-V2 request
      * @param properties
@@ -110,7 +110,7 @@ public interface DeploymentHook {
 
     /**
      * This method is called at the {@code preDownload} phase, see class description for more details.
-     * 
+     *
      * @param context
      *            a {@link RequestContext} instance representing the current DEPLOY-V2 request
      * @param properties

@@ -25,9 +25,9 @@ import org.osgi.service.io.ConnectorService;
 
 /**
  * @noimplement This interface is not intended to be implemented by clients.
- * 
+ *
  * @deprecated
- * 
+ *
  */
 @ProviderType
 @Deprecated

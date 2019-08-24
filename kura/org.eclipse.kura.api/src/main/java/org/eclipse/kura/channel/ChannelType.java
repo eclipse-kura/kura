@@ -16,6 +16,7 @@ package org.eclipse.kura.channel;
 /**
  * This provides the necessary constants to denote the type of the channel
  * (whether the channel is for reading or writing or both)
+ *
  * @since 1.2
  */
 public enum ChannelType {
@@ -38,7 +39,7 @@ public enum ChannelType {
 
     /**
      * Converts {@code channelTypeString}, if possible, to the related {@link ChannelType}.
-     * 
+     *
      * @param channelTypeString
      *            String that we want to use to get the respective {@link ChannelType}.
      * @return a ChannelType that corresponds to the String passed as argument.

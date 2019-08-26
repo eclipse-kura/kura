@@ -176,7 +176,8 @@ public class GwtCloudConnectionServiceImpl extends OsgiRemoteServiceServlet impl
             }
         });
 
-        auditLogger.info("UI CloudConnection - Success - Successfully listed stack pids by factory for user: {}, session {}",
+        auditLogger.info(
+                "UI CloudConnection - Success - Successfully listed stack pids by factory for user: {}, session {}",
                 session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
 
         return result;
@@ -250,7 +251,8 @@ public class GwtCloudConnectionServiceImpl extends OsgiRemoteServiceServlet impl
         final HttpServletRequest request = getThreadLocalRequest();
         final HttpSession session = request.getSession(false);
 
-        auditLogger.info("UI CloudConnection - Success - Successfully listed cloud service pid for user: {}, session {}",
+        auditLogger.info(
+                "UI CloudConnection - Success - Successfully listed cloud service pid for user: {}, session {}",
                 session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
 
         return result.get();
@@ -280,7 +282,8 @@ public class GwtCloudConnectionServiceImpl extends OsgiRemoteServiceServlet impl
         final HttpServletRequest request = getThreadLocalRequest();
         final HttpSession session = request.getSession(false);
 
-        auditLogger.info("UI CloudConnection - Success - Successfully listed cloud service pid for user: {}, session {}",
+        auditLogger.info(
+                "UI CloudConnection - Success - Successfully listed cloud service pid for user: {}, session {}",
                 session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
 
         return result.get();
@@ -298,7 +301,8 @@ public class GwtCloudConnectionServiceImpl extends OsgiRemoteServiceServlet impl
             cs.createFactoryConfiguration(factoryPid, pid, Collections.singletonMap(
                     CloudConnectionConstants.CLOUD_ENDPOINT_SERVICE_PID_PROP_NAME.value(), cloudConnectionPid), true);
 
-            auditLogger.info("UI CloudConnection - Success - Successfully created pub/sub instance for user: {}, session {}",
+            auditLogger.info(
+                    "UI CloudConnection - Success - Successfully created pub/sub instance for user: {}, session {}",
                     session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
 
             return (Void) null;
@@ -315,7 +319,8 @@ public class GwtCloudConnectionServiceImpl extends OsgiRemoteServiceServlet impl
         ServiceLocator.applyToServiceOptionally(ConfigurationService.class, cs -> {
             cs.deleteFactoryConfiguration(pid, true);
 
-            auditLogger.info("UI CloudConnection - Success - Successfully deleted pub/sub instance for user: {}, session {}",
+            auditLogger.info(
+                    "UI CloudConnection - Success - Successfully deleted pub/sub instance for user: {}, session {}",
                     session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
 
             return (Void) null;

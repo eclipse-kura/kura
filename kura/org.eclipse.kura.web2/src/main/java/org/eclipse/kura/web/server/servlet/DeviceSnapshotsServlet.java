@@ -42,7 +42,7 @@ public class DeviceSnapshotsServlet extends HttpServlet {
 
     private static Logger logger = LoggerFactory.getLogger(DeviceSnapshotsServlet.class);
     private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
-    
+
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         // BEGIN XSRF - Servlet dependent code
@@ -54,7 +54,7 @@ public class DeviceSnapshotsServlet extends HttpServlet {
             throw new ServletException("Security error: please retry this operation correctly.", e);
         }
         // END XSRF security check
-        
+
         HttpSession session = request.getSession(false);
 
         String snapshotId = request.getParameter("snapshotId");
@@ -63,8 +63,8 @@ public class DeviceSnapshotsServlet extends HttpServlet {
         response.setContentType("application/xml");
         response.setHeader("Content-Disposition", "attachment; filename=snapshot_" + snapshotId + ".xml");
         response.setHeader("Cache-Control", "no-transform, max-age=0");
-        
-        try (PrintWriter writer = response.getWriter();){
+
+        try (PrintWriter writer = response.getWriter();) {
 
             ServiceLocator locator = ServiceLocator.getInstance();
             ConfigurationService cs = locator.getService(ConfigurationService.class);
@@ -85,7 +85,7 @@ public class DeviceSnapshotsServlet extends HttpServlet {
                 // marshall the response and write it
                 String result = marshal(xmlConfigs);
                 writer.write(result);
-                
+
                 auditLogger.info(
                         "UI Snapshots - Success - Successfully returned device snapshot for user: {}, session: {}, snapshot id: {}",
                         session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId(), snapshotId);

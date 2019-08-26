@@ -38,6 +38,7 @@ import org.osgi.service.wireadmin.Wire;
 
 public class Fifo implements WireEmitter, WireReceiver, ConfigurableComponent {
 
+    private static final int DEFAULT_QUEUE_CAPACITY = 50;
     private static final String DISCARD_ENVELOPES_PROP_NAME = "discard.envelopes";
     private static final String QUEUE_CAPACITY_PROP_NAME = "queue.capacity";
 
@@ -62,7 +63,7 @@ public class Fifo implements WireEmitter, WireReceiver, ConfigurableComponent {
 
     public void activate(final Map<String, Object> properties, ComponentContext componentContext) {
         logger.info("Activating Fifo...");
-        wireSupport = this.wireHelperService.newWireSupport(this,
+        this.wireSupport = this.wireHelperService.newWireSupport(this,
                 (ServiceReference<WireComponent>) componentContext.getServiceReference());
         updated(properties);
         logger.info("Activating Fifo... Done");
@@ -79,7 +80,7 @@ public class Fifo implements WireEmitter, WireReceiver, ConfigurableComponent {
 
         String threadName = (String) properties.getOrDefault(ConfigurationService.KURA_SERVICE_PID, "Fifo")
                 + "-EmitterThread";
-        int queueCapacity = (Integer) properties.getOrDefault(QUEUE_CAPACITY_PROP_NAME, 50);
+        int queueCapacity = (Integer) properties.getOrDefault(QUEUE_CAPACITY_PROP_NAME, DEFAULT_QUEUE_CAPACITY);
         boolean discardEnvelopes = (Boolean) properties.getOrDefault(DISCARD_ENVELOPES_PROP_NAME, false);
 
         restartEmitterThread(threadName, queueCapacity, discardEnvelopes);
@@ -88,9 +89,9 @@ public class Fifo implements WireEmitter, WireReceiver, ConfigurableComponent {
     }
 
     private synchronized void stopEmitterThread() {
-        if (emitterThread != null) {
-            emitterThread.shutdown();
-            emitterThread = null;
+        if (this.emitterThread != null) {
+            this.emitterThread.shutdown();
+            this.emitterThread = null;
         }
     }
 
@@ -99,15 +100,15 @@ public class Fifo implements WireEmitter, WireReceiver, ConfigurableComponent {
 
         logger.debug("Creating new emitter thread: {}, queue capacity: {}, discard envelopes: {}", threadName,
                 queueCapacity, discardEnvelopes);
-        emitterThread = new FifoEmitterThread(threadName, queueCapacity, discardEnvelopes);
-        emitterThread.start();
+        this.emitterThread = new FifoEmitterThread(threadName, queueCapacity, discardEnvelopes);
+        this.emitterThread.start();
     }
 
     @Override
     public void onWireReceive(WireEnvelope wireEnvelope) {
         requireNonNull(wireEnvelope, "Wire Envelope cannot be null");
-        if (emitterThread != null) {
-            emitterThread.submit(wireEnvelope);
+        if (this.emitterThread != null) {
+            this.emitterThread.submit(wireEnvelope);
         }
     }
 
@@ -133,14 +134,14 @@ public class Fifo implements WireEmitter, WireReceiver, ConfigurableComponent {
 
     private class FifoEmitterThread extends Thread {
 
-        private Lock lock = new ReentrantLock();
+        private final Lock lock = new ReentrantLock();
 
-        private Condition producer = lock.newCondition();
-        private Condition consumer = lock.newCondition();
+        private final Condition producer = this.lock.newCondition();
+        private final Condition consumer = this.lock.newCondition();
 
         private boolean run = true;
-        private ArrayList<WireEnvelope> queue;
-        private int queueCapacity;
+        private final ArrayList<WireEnvelope> queue;
+        private final int queueCapacity;
 
         private Consumer<WireEnvelope> submitter;
 
@@ -149,26 +150,26 @@ public class Fifo implements WireEmitter, WireReceiver, ConfigurableComponent {
             this.queueCapacity = queueCapacity;
             setName(threadName);
             if (discardEnvelopes) {
-                submitter = getEnvelopeDiscardingSubmitter();
+                this.submitter = getEnvelopeDiscardingSubmitter();
             } else {
-                submitter = getEmitterBlockingSubmitter();
+                this.submitter = getEmitterBlockingSubmitter();
             }
         }
 
         private Consumer<WireEnvelope> getEnvelopeDiscardingSubmitter() {
             return (envelope) -> {
                 try {
-                    lock.lock();
-                    if (!run || queue.size() >= queueCapacity) {
+                    this.lock.lock();
+                    if (!this.run || this.queue.size() >= this.queueCapacity) {
                         logger.debug("envelope discarded");
                         return;
                     } else {
-                        queue.add(envelope);
-                        producer.signal();
+                        this.queue.add(envelope);
+                        this.producer.signal();
                         logger.debug("envelope submitted");
                     }
                 } finally {
-                    lock.unlock();
+                    this.lock.unlock();
                 }
             };
         }
@@ -176,59 +177,59 @@ public class Fifo implements WireEmitter, WireReceiver, ConfigurableComponent {
         private Consumer<WireEnvelope> getEmitterBlockingSubmitter() {
             return (envelope) -> {
                 try {
-                    lock.lock();
-                    while (run && queue.size() >= queueCapacity) {
-                        consumer.await();
+                    this.lock.lock();
+                    while (this.run && this.queue.size() >= this.queueCapacity) {
+                        this.consumer.await();
                     }
-                    if (!run) {
+                    if (!this.run) {
                         return;
                     }
-                    queue.add(envelope);
-                    producer.signal();
+                    this.queue.add(envelope);
+                    this.producer.signal();
                     logger.debug("envelope submitted");
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     logger.warn("Interrupted while adding new envelope to queue", e);
                 } finally {
-                    lock.unlock();
+                    this.lock.unlock();
                 }
             };
         }
 
         public void shutdown() {
             try {
-                lock.lock();
-                run = false;
-                producer.signalAll();
-                consumer.signalAll();
+                this.lock.lock();
+                this.run = false;
+                this.producer.signalAll();
+                this.consumer.signalAll();
             } finally {
-                lock.unlock();
+                this.lock.unlock();
             }
         }
 
         public void submit(WireEnvelope envelope) {
-            submitter.accept(envelope);
+            this.submitter.accept(envelope);
         }
 
         @Override
         public void run() {
-            while (run) {
+            while (this.run) {
                 try {
                     WireEnvelope next = null;
                     try {
-                        lock.lock();
-                        while (run && queue.isEmpty()) {
-                            producer.await();
+                        this.lock.lock();
+                        while (this.run && this.queue.isEmpty()) {
+                            this.producer.await();
                         }
-                        if (!run) {
+                        if (!this.run) {
                             break;
                         }
-                        next = queue.remove(0);
-                        consumer.signal();
+                        next = this.queue.remove(0);
+                        this.consumer.signal();
                     } finally {
-                        lock.unlock();
+                        this.lock.unlock();
                     }
-                    wireSupport.emit(next.getRecords());
+                    Fifo.this.wireSupport.emit(next.getRecords());
                 } catch (Exception e) {
                     logger.warn("Unexpected exception while dispatching envelope", e);
                 }

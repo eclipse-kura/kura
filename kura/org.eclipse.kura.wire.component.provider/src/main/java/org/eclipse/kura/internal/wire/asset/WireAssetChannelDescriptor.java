@@ -18,7 +18,7 @@ import org.eclipse.kura.core.configuration.metatype.Tscalar;
 
 public class WireAssetChannelDescriptor extends BaseChannelDescriptor {
 
-    private static final WireAssetChannelDescriptor instance = new WireAssetChannelDescriptor();
+    private static WireAssetChannelDescriptor instance = new WireAssetChannelDescriptor();
 
     protected WireAssetChannelDescriptor() {
         super();

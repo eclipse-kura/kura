@@ -20,7 +20,7 @@ import org.eclipse.kura.type.TypedValue;
 
 class WireRecordWrapper extends ImmutableJSObject {
 
-    Map<String, TypedValue<?>> properties;
+    private Map<String, TypedValue<?>> properties;
 
     public WireRecordWrapper() {
         this.properties = new HashMap<>();

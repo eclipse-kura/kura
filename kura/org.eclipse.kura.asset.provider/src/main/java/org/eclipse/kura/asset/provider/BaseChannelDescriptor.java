@@ -19,7 +19,6 @@ import static org.eclipse.kura.asset.provider.AssetConstants.VALUE_TYPE;
 
 import java.util.List;
 
-import org.eclipse.kura.asset.AssetConfiguration;
 import org.eclipse.kura.channel.ChannelType;
 import org.eclipse.kura.configuration.metatype.Option;
 import org.eclipse.kura.core.configuration.metatype.Tad;
@@ -59,7 +58,7 @@ import org.eclipse.kura.util.collection.CollectionUtil;
  * <li>BYTE_ARRAY</li>
  * </ul>
  *
- * @see AssetConfiguration
+ * @see org.eclipse.kura.asset.AssetConfiguration
  */
 public class BaseChannelDescriptor implements ChannelDescriptor {
 

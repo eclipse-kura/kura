@@ -1365,7 +1365,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
         final GwtConsoleUserOptions configUserOptions = EntryClassUi.getUserOptions();
 
-        if (this.getWirelessMode() != GwtWifiWirelessMode.netWifiWirelessModeAccessPoint) {
+        if (getWirelessMode() != GwtWifiWirelessMode.netWifiWirelessModeAccessPoint) {
             configUserOptions.allowAnyPassword();
         }
 

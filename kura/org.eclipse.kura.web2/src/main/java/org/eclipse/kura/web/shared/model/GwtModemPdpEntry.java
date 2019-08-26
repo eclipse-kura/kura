@@ -26,23 +26,23 @@ public class GwtModemPdpEntry extends KuraBaseModel implements Serializable {
             return 0;
         }
     }
-    
+
     public String getPdpType() {
         return get("pdptype");
     }
-    
+
     public String getApn() {
         return get("apn");
     }
-    
+
     public void setContextNumber(int contextnum) {
         set("contextnum", contextnum);
     }
-    
+
     public void setPdpType(String pdptype) {
         set("pdptype", pdptype);
     }
-    
+
     public void setApn(String apn) {
         set("apn", apn);
     }

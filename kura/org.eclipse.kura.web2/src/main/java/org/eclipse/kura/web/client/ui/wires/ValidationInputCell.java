@@ -5,11 +5,11 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *  Eurotech
  *  Amit Kumar Mondal
- *  
+ *
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.wires;
 
@@ -63,18 +63,18 @@ public final class ValidationInputCell extends AbstractInputCell<String, Validat
             return;
         }
         final Object key = context.getKey();
-        ValidationData viewData = this.getViewData(key);
+        ValidationData viewData = getViewData(key);
         final String eventType = event.getType();
         if (CHANGE_EVENT.equals(eventType)) {
             final InputElement input = parent.getFirstChild().cast();
             input.getStyle().setColor(VALIDATED_COLOR);
             if (viewData == null) {
                 viewData = new ValidationData();
-                this.setViewData(key, viewData);
+                setViewData(key, viewData);
             }
             final String newValue = input.getValue();
             viewData.setValue(newValue);
-            this.finishEditing(parent, newValue, key, valueUpdater);
+            finishEditing(parent, newValue, key, valueUpdater);
             if (valueUpdater != null) {
                 valueUpdater.update(newValue);
             }
@@ -86,8 +86,8 @@ public final class ValidationInputCell extends AbstractInputCell<String, Validat
     protected void onEnterKeyDown(final Context context, final Element parent, final String value,
             final NativeEvent event, final ValueUpdater<String> valueUpdater) {
         final Element target = event.getEventTarget().cast();
-        if (this.getInputElement(parent).isOrHasChild(target)) {
-            this.finishEditing(parent, value, context.getKey(), valueUpdater);
+        if (getInputElement(parent).isOrHasChild(target)) {
+            finishEditing(parent, value, context.getKey(), valueUpdater);
         } else {
             super.onEnterKeyDown(context, parent, value, event, valueUpdater);
         }
@@ -97,17 +97,17 @@ public final class ValidationInputCell extends AbstractInputCell<String, Validat
     @Override
     public void render(final Context context, String value, final SafeHtmlBuilder shb) {
         final Object key = context.getKey();
-        ValidationData validationViewData = this.getViewData(key);
-        if ((validationViewData != null) && validationViewData.getValue().equals(value)) {
-            this.clearViewData(key);
+        ValidationData validationViewData = getViewData(key);
+        if (validationViewData != null && validationViewData.getValue().equals(value)) {
+            clearViewData(key);
             validationViewData = null;
         }
         if (value == null) {
             value = "";
         }
-        final String processingValue = (validationViewData == null) ? null : validationViewData.getValue();
-        final boolean invalid = (validationViewData == null) ? false : validationViewData.isInvalid();
-        final String color = processingValue != null ? (invalid ? NONVALIDATED_COLOR : VALIDATED_COLOR)
+        final String processingValue = validationViewData == null ? null : validationViewData.getValue();
+        final boolean invalid = validationViewData == null ? false : validationViewData.isInvalid();
+        final String color = processingValue != null ? invalid ? NONVALIDATED_COLOR : VALIDATED_COLOR
                 : NONPENDING_COLOR;
         final SafeStyles safeColor = SafeStylesUtils.fromTrustedString("color: " + color + ";");
         shb.append(this.validationTemplate.input(processingValue != null ? processingValue : value, safeColor,

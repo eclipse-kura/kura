@@ -173,7 +173,8 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
 
             return certs.length;
         } catch (CertificateException | UnsupportedEncodingException | KuraException e) {
-            auditLogger.warn("UI Certificate - Failure - Failed to store application public chain for user: {}, session {}",
+            auditLogger.warn(
+                    "UI Certificate - Failure - Failed to store application public chain for user: {}, session {}",
                     session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
             throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
         }

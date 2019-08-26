@@ -32,7 +32,7 @@ public abstract class AbstractCamelWireComponent extends AbstractWireComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractCamelWireComponent.class);
 
-    protected final BundleContext context = FrameworkUtil.getBundle(AbstractCamelWireComponent.class)
+    protected final BundleContext bundleContext = FrameworkUtil.getBundle(AbstractCamelWireComponent.class)
             .getBundleContext();
 
     private SingleServiceTracker<CamelContext> tracker;
@@ -56,10 +56,10 @@ public abstract class AbstractCamelWireComponent extends AbstractWireComponent {
             return;
         }
 
-        final Filter filter = this.context
+        final Filter filter = this.bundleContext
                 .createFilter(FilterUtil.simpleFilter(CamelContext.class, "camel.context.id", contextId));
 
-        this.tracker = new SingleServiceTracker<>(this.context, filter, this::bindContext);
+        this.tracker = new SingleServiceTracker<>(this.bundleContext, filter, this::bindContext);
         this.tracker.open();
     }
 

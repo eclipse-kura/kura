@@ -12,8 +12,16 @@ package org.eclipse.kura.internal.wire.conditional;
 
 public class WireEnvelopeWrapper {
 
-    public final String emitterPid;
-    public final WireRecordListWrapper records;
+    private final String emitterPid;
+    private final WireRecordListWrapper records;
+
+    public String getEmitterPid() {
+        return this.emitterPid;
+    }
+
+    public WireRecordListWrapper getRecords() {
+        return this.records;
+    }
 
     WireEnvelopeWrapper(WireRecordListWrapper records, String emitterPid) {
         this.records = records;

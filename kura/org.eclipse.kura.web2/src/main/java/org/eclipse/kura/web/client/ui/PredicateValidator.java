@@ -37,8 +37,8 @@ public class PredicateValidator implements Validator<String> {
     @Override
     public List<EditorError> validate(final Editor<String> editor, final String value) {
 
-        return predicate.test(value) ? Collections.emptyList()
-                : Collections.singletonList(new BasicEditorError(editor, value, message));
+        return this.predicate.test(value) ? Collections.emptyList()
+                : Collections.singletonList(new BasicEditorError(editor, value, this.message));
     }
 
 }

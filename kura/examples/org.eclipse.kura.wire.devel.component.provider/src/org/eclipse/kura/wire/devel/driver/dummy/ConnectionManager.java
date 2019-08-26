@@ -13,6 +13,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.kura.driver.Driver.ConnectionException;
@@ -20,6 +21,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ConnectionManager {
+
+    private static final int MILLISECONDS = 1000;
 
     private static final Logger logger = LoggerFactory.getLogger(ConnectionManager.class);
 
@@ -33,15 +36,15 @@ public class ConnectionManager {
     public Future<?> connectAsync() {
         synchronized (this) {
             if (isConnecting()) {
-                return connectionAttempt;
+                return this.connectionAttempt;
             }
 
             this.connectionAttempt = this.executor.submit(() -> {
-                if (isShuttingDown.get()) {
-                    return (Void) null;
+                if (this.isShuttingDown.get()) {
+                    return null;
                 }
-                this.connectInternal();
-                return (Void) null;
+                connectInternal();
+                return null;
             });
             return this.connectionAttempt;
         }
@@ -49,10 +52,10 @@ public class ConnectionManager {
 
     public Future<?> disconnectAsync() {
         return this.executor.submit(() -> {
-            if (isShuttingDown.get()) {
+            if (this.isShuttingDown.get()) {
                 return;
             }
-            this.disconnectInternal();
+            disconnectInternal();
         });
     }
 
@@ -75,14 +78,14 @@ public class ConnectionManager {
 
     public void disconnectSync() throws ConnectionException {
         try {
-            this.disconnectAsync().get();
+            disconnectAsync().get();
         } catch (final Exception e) {
             throw new ConnectionException(e);
         }
     }
 
     private void connectInternal() throws ConnectionException {
-        if (isConnected.get()) {
+        if (this.isConnected.get()) {
             logger.debug("already connected");
             return;
         }
@@ -99,24 +102,24 @@ public class ConnectionManager {
 
         if (connectionDelay > 0) {
             try {
-                Thread.sleep(connectionDelay * 1000);
+                Thread.sleep(TimeUnit.MILLISECONDS.convert(connectionDelay, TimeUnit.SECONDS));
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
         }
 
-        isConnected.set(true);
+        this.isConnected.set(true);
         logger.info("connecting...done");
     }
 
     private void disconnectInternal() {
-        if (!isConnected.get()) {
+        if (!this.isConnected.get()) {
             logger.debug("already disconnected");
             return;
         }
 
         logger.info("disconnecting...");
-        isConnected.set(false);
+        this.isConnected.set(false);
 
         final int connectionDelay = this.options.getConnectionDelay();
 
@@ -132,7 +135,7 @@ public class ConnectionManager {
     }
 
     public boolean isConnected() {
-        return isConnected.get();
+        return this.isConnected.get();
     }
 
     public boolean isConnecting() {
@@ -144,7 +147,7 @@ public class ConnectionManager {
     }
 
     public void shutdown() {
-        isShuttingDown.set(true);
+        this.isShuttingDown.set(true);
         try {
             this.executor.submit(this::disconnectInternal).get();
         } catch (Exception e) {

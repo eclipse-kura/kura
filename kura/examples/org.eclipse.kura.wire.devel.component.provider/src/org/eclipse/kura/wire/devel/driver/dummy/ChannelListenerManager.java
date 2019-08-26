@@ -70,7 +70,8 @@ public class ChannelListenerManager {
             try {
                 final TypedValue<?> value = this.driver.readInternal(reg.request);
 
-                final ChannelRecord record = ChannelRecord.createReadRecord(reg.request.channelName, value.getType());
+                String channelName = reg.request.getChannelName();
+                final ChannelRecord record = ChannelRecord.createReadRecord(channelName, value.getType());
                 record.setValue(value);
                 record.setChannelStatus(DummyDriver.SUCCESS);
                 record.setTimestamp(System.currentTimeMillis());
@@ -96,30 +97,38 @@ public class ChannelListenerManager {
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + ((request.channelName == null) ? 0 : request.channelName.hashCode());
-            result = prime * result + ((listener == null) ? 0 : listener.hashCode());
+            String channelName = this.request.getChannelName();
+            result = prime * result + (channelName == null ? 0 : channelName.hashCode());
+            result = prime * result + (this.listener == null ? 0 : this.listener.hashCode());
             return result;
         }
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj)
+            if (this == obj) {
                 return true;
-            if (obj == null)
+            }
+            if (obj == null) {
                 return false;
-            if (getClass() != obj.getClass())
+            }
+            if (getClass() != obj.getClass()) {
                 return false;
+            }
             ChannelListenerRegistration other = (ChannelListenerRegistration) obj;
-            if (request.channelName == null) {
-                if (other.request.channelName != null)
+            if (this.request.getChannelName() == null) {
+                if (other.request.getChannelName() != null) {
                     return false;
-            } else if (!request.channelName.equals(other.request.channelName))
+                }
+            } else if (!this.request.getChannelName().equals(other.request.getChannelName())) {
                 return false;
-            if (listener == null) {
-                if (other.listener != null)
+            }
+            if (this.listener == null) {
+                if (other.listener != null) {
                     return false;
-            } else if (!listener.equals(other.listener))
+                }
+            } else if (!this.listener.equals(other.listener)) {
                 return false;
+            }
             return true;
         }
     }

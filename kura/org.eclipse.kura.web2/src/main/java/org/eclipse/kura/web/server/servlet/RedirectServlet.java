@@ -25,7 +25,7 @@ public class RedirectServlet extends HttpServlet {
     private static final Logger logger = LoggerFactory.getLogger(RedirectServlet.class);
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 1L;
 
@@ -76,8 +76,8 @@ public class RedirectServlet extends HttpServlet {
         try {
             final String path = req.getRequestURI();
 
-            if (shouldRedirect.test(path)) {
-                resp.sendRedirect(location);
+            if (this.shouldRedirect.test(path)) {
+                resp.sendRedirect(this.location);
             } else {
                 resp.sendError(404);
             }

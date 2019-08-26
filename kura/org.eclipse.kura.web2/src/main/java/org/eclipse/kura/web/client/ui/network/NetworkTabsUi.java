@@ -77,7 +77,7 @@ public class NetworkTabsUi extends Composite {
     PanelBody content;
 
     public NetworkTabsUi(GwtSession session) {
-        this.visibleTabs = new ArrayList<AnchorListItem>();
+        this.visibleTabs = new ArrayList<>();
         initWidget(uiBinder.createAndBindUi(this));
         this.session = session;
         initTabs();

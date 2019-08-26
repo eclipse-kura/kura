@@ -5,7 +5,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *******************************************************************************/
 
 package org.eclipse.kura.web.shared.model;
@@ -28,15 +28,15 @@ public class GwtDriverDescriptor extends GwtBaseModel implements Serializable {
     }
 
     public String getPid() {
-        return pid;
+        return this.pid;
     }
 
     public String getFactoryPid() {
-        return factoryPid;
+        return this.factoryPid;
     }
 
     public GwtConfigComponent getChannelDescriptor() {
-        return channelDescriptor;
+        return this.channelDescriptor;
     }
 
 }

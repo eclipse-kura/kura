@@ -26,25 +26,25 @@ class WireAssetOptions {
     }
 
     public WireAssetOptions(Map<String, Object> properties) {
-        final Object emitAllChannels = properties.get(EMIT_ALL_CHANNELS_PROP_NAME);
-        final Object emitErrors = properties.get(EMIT_ERRORS_PROP_NAME);
+        final Object emitAllChannelsObject = properties.get(EMIT_ALL_CHANNELS_PROP_NAME);
+        final Object emitErrorsObject = properties.get(EMIT_ERRORS_PROP_NAME);
 
-        this.emitAllChannels = emitAllChannels instanceof Boolean && (Boolean) emitAllChannels;
-        this.emitErrors = emitErrors instanceof Boolean && (Boolean) emitErrors;
+        this.emitAllChannels = emitAllChannelsObject instanceof Boolean && (Boolean) emitAllChannelsObject;
+        this.emitErrors = emitErrorsObject instanceof Boolean && (Boolean) emitErrorsObject;
 
         this.timestampMode = extractTimestampMode(properties);
     }
 
     public boolean emitAllChannels() {
-        return emitAllChannels;
+        return this.emitAllChannels;
     }
 
     public TimestampMode getTimestampMode() {
-        return timestampMode;
+        return this.timestampMode;
     }
 
     public boolean emitErrors() {
-        return emitErrors;
+        return this.emitErrors;
     }
 
     private static TimestampMode extractTimestampMode(final Map<String, Object> properties) {

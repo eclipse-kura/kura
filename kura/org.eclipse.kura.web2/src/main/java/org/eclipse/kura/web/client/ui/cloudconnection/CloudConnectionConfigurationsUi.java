@@ -131,24 +131,25 @@ public class CloudConnectionConfigurationsUi extends Composite {
     }
 
     private void getPubSubConfiguration(final String pid) {
-        RequestQueue.submit(context -> gwtXSRFService.generateSecurityToken(context.callback(
-                token -> gwtComponentService.findFilteredComponentConfiguration(token, pid, context.callback(confs -> {
-                    connectionNavtabs.clear();
-                    renderTabs(confs.get(0), true);
-                })))));
+        RequestQueue.submit(
+                context -> this.gwtXSRFService.generateSecurityToken(context.callback(token -> this.gwtComponentService
+                        .findFilteredComponentConfiguration(token, pid, context.callback(confs -> {
+                            this.connectionNavtabs.clear();
+                            renderTabs(confs.get(0), true);
+                        })))));
     }
 
     private void getCloudStackConfigurations(final String factoryPid, final String cloudServicePid) {
 
-        connectionNavtabs.clear();
-        RequestQueue.submit(context -> gwtCloudService.findStackPidsByFactory(factoryPid, cloudServicePid,
+        this.connectionNavtabs.clear();
+        RequestQueue.submit(context -> this.gwtCloudService.findStackPidsByFactory(factoryPid, cloudServicePid,
                 context.callback(pidsResult -> {
                     if (pidsResult.isEmpty()) {
                         return;
                     }
 
-                    gwtXSRFService.generateSecurityToken(
-                            context.callback(token -> gwtComponentService.findComponentConfigurations(token,
+                    this.gwtXSRFService.generateSecurityToken(
+                            context.callback(token -> this.gwtComponentService.findComponentConfigurations(token,
                                     FilterUtil.getPidFilter(pidsResult.iterator()), context.callback(result -> {
                                         final ArrayList<GwtConfigComponent> sorted = new ArrayList<>(result);
                                         sorted.sort(Comparator.comparing(this::getSimplifiedComponentName));

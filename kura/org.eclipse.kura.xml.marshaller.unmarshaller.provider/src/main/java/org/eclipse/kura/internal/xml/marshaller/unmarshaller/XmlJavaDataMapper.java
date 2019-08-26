@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -18,7 +18,7 @@ import org.w3c.dom.Element;
 
 public interface XmlJavaDataMapper {
 
-    static final Logger s_logger = LoggerFactory.getLogger(XmlJavaDataMapper.class);
+    static final Logger logger = LoggerFactory.getLogger(XmlJavaDataMapper.class);
     static final String ESF_NAMESPACE = "esf";
     static final String OCD_NAMESPACE = "ocd";
 

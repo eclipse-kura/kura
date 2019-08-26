@@ -63,10 +63,10 @@ public class NetworkInterfacesTableUi extends Composite {
     Alert notification;
     @UiField
 
-    CellTable<GwtNetInterfaceConfig> interfacesGrid = new CellTable<GwtNetInterfaceConfig>();
+    CellTable<GwtNetInterfaceConfig> interfacesGrid = new CellTable<>();
 
-    private final ListDataProvider<GwtNetInterfaceConfig> interfacesProvider = new ListDataProvider<GwtNetInterfaceConfig>();
-    final SingleSelectionModel<GwtNetInterfaceConfig> selectionModel = new SingleSelectionModel<GwtNetInterfaceConfig>();
+    private final ListDataProvider<GwtNetInterfaceConfig> interfacesProvider = new ListDataProvider<>();
+    final SingleSelectionModel<GwtNetInterfaceConfig> selectionModel = new SingleSelectionModel<>();
     TextColumn<GwtNetInterfaceConfig> col1;
 
     public NetworkInterfacesTableUi(GwtSession s, NetworkTabsUi tabsPanel) {
@@ -211,24 +211,24 @@ public class NetworkInterfacesTableUi extends Composite {
 
             @Override
             public void onSuccess(List<GwtNetInterfaceConfig> result) {
-                ListHandler<GwtNetInterfaceConfig> columnSortHandler = new ListHandler<GwtNetInterfaceConfig>(
+                ListHandler<GwtNetInterfaceConfig> columnSortHandler = new ListHandler<>(
                         NetworkInterfacesTableUi.this.interfacesProvider.getList());
                 columnSortHandler.setComparator(NetworkInterfacesTableUi.this.col1,
                         new Comparator<GwtNetInterfaceConfig>() {
 
-                    @Override
-                    public int compare(GwtNetInterfaceConfig o1, GwtNetInterfaceConfig o2) {
-                        if (o1 == o2) {
-                            return 0;
-                        }
+                            @Override
+                            public int compare(GwtNetInterfaceConfig o1, GwtNetInterfaceConfig o2) {
+                                if (o1 == o2) {
+                                    return 0;
+                                }
 
-                        // Compare the name columns.
-                        if (o1 != null) {
-                            return o2 != null ? compareFromName(o1.getName(), o2.getName()) : 1;
-                        }
-                        return -1;
-                    }
-                });
+                                // Compare the name columns.
+                                if (o1 != null) {
+                                    return o2 != null ? compareFromName(o1.getName(), o2.getName()) : 1;
+                                }
+                                return -1;
+                            }
+                        });
                 NetworkInterfacesTableUi.this.interfacesGrid.addColumnSortHandler(columnSortHandler);
 
                 NetworkInterfacesTableUi.this.interfacesProvider.getList().addAll(result);

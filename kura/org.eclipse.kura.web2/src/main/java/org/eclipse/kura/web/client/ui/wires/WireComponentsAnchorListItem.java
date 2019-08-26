@@ -38,8 +38,8 @@ public class WireComponentsAnchorListItem extends AnchorListItem {
         }
 
         super.addClickHandler(event -> {
-            if (listener != null) {
-                listener.onClick(factoryPid);
+            if (this.listener != null) {
+                this.listener.onClick(factoryPid);
             }
         });
     }

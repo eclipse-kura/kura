@@ -57,7 +57,7 @@ public class GwtWifiChannelModel extends GwtBaseModel {
 
     public static List<GwtWifiChannelModel> getChannels() {
 
-        List<GwtWifiChannelModel> alCannels = new ArrayList<GwtWifiChannelModel>();
+        List<GwtWifiChannelModel> alCannels = new ArrayList<>();
         for (int i = FIRST_2400MHZ_CHANNEL; i <= LAST_2400MHZ_CHANNEL; i++) {
             alCannels.add(new GwtWifiChannelModel(formChannelName(i), i, getCannelFrequencyMHz(i), BAND2400MHZ));
         }

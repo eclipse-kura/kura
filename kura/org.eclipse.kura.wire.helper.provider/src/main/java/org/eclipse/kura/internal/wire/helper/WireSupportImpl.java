@@ -144,7 +144,7 @@ final class WireSupportImpl implements WireSupport, MultiportWireSupport {
             try {
                 final int receiverPortIndex = (Integer) w.getProperties().get(WIRE_RECEIVER_PORT_PROP_NAME.value());
                 final ReceiverPortImpl receiverPort = (ReceiverPortImpl) this.receiverPorts.get(receiverPortIndex);
-                receiverPort.connectedWires.add(w);
+                receiverPort.getConnectedWires().add(w);
                 this.receiverPortByWire.put(w, receiverPort);
             } catch (Exception e) {
                 logger.warn("Failed to assign incomimg wire to port", e);
@@ -180,7 +180,12 @@ final class WireSupportImpl implements WireSupport, MultiportWireSupport {
 
     private abstract class PortImpl implements Port {
 
-        List<Wire> connectedWires = new CopyOnWriteArrayList<>();
+        private List<Wire> connectedWires = new CopyOnWriteArrayList<>();
+
+        
+        public List<Wire> getConnectedWires() {
+            return connectedWires;
+        }
 
         @Override
         public List<Wire> listConnectedWires() {
@@ -192,7 +197,7 @@ final class WireSupportImpl implements WireSupport, MultiportWireSupport {
 
         @Override
         public void emit(WireEnvelope envelope) {
-            for (final Wire wire : this.connectedWires) {
+            for (final Wire wire : this.getConnectedWires()) {
                 wire.update(envelope);
             }
         }
@@ -200,7 +205,7 @@ final class WireSupportImpl implements WireSupport, MultiportWireSupport {
 
     private class ReceiverPortImpl extends PortImpl implements ReceiverPort {
 
-        Consumer<WireEnvelope> consumer = envelope -> {
+        private Consumer<WireEnvelope> consumer = envelope -> {
             // do nothing
         };
 

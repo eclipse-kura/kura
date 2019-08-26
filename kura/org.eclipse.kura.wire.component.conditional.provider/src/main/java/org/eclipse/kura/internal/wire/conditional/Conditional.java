@@ -124,8 +124,8 @@ public final class Conditional implements WireReceiver, WireEmitter, Configurabl
         try {
 
             if (!this.script.isPresent()) {
-                logger.warn(
-                        "The script compilation failed during component configuration update, please review the script.");
+                logger.warn("The script compilation failed during component configuration update, "
+                        + "please review the script.");
                 return;
             }
 
@@ -158,42 +158,42 @@ public final class Conditional implements WireReceiver, WireEmitter, Configurabl
     }
 
     private CompiledScript tryCompileScript(final String script) throws ScriptException {
-        final Compilable engine = ((Compilable) this.scriptEngine);
+        final Compilable engine = (Compilable) this.scriptEngine;
         return engine.compile(script);
     }
 
     private ScriptEngine createEngine() {
         NashornScriptEngineFactory factory = new NashornScriptEngineFactory();
-        ScriptEngine scriptEngine = factory.getScriptEngine(className -> false);
+        ScriptEngine localScriptEngine = factory.getScriptEngine(className -> false);
 
-        if (scriptEngine == null) {
+        if (localScriptEngine == null) {
             throw new IllegalStateException("Failed to create script engine");
         }
 
-        final Bindings engineScopeBindings = scriptEngine.getBindings(ScriptContext.ENGINE_SCOPE);
+        final Bindings engineScopeBindings = localScriptEngine.getBindings(ScriptContext.ENGINE_SCOPE);
         if (engineScopeBindings != null) {
             engineScopeBindings.remove("exit");
             engineScopeBindings.remove("quit");
         }
 
-        final Bindings globalScopeBindings = scriptEngine.getBindings(ScriptContext.GLOBAL_SCOPE);
+        final Bindings globalScopeBindings = localScriptEngine.getBindings(ScriptContext.GLOBAL_SCOPE);
         if (globalScopeBindings != null) {
             globalScopeBindings.remove("exit");
             globalScopeBindings.remove("quit");
         }
 
-        return scriptEngine;
+        return localScriptEngine;
     }
 
     private Bindings createBindings() {
-        Bindings bindings = this.scriptEngine.createBindings();
+        Bindings localBindings = this.scriptEngine.createBindings();
 
-        bindings.put("logger", logger);
+        localBindings.put("logger", logger);
 
-        bindings.remove("exit");
-        bindings.remove("quit");
+        localBindings.remove("exit");
+        localBindings.remove("quit");
 
-        return bindings;
+        return localBindings;
     }
 
     /** {@inheritDoc} */

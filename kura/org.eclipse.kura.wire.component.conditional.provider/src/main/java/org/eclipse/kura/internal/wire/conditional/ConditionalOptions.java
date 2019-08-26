@@ -22,7 +22,8 @@ public class ConditionalOptions {
 
     private static final String CONDITION_PROPERTY_KEY = "condition";
 
-    private static final String DEFAULT_CONDITION = "records[0].TIMER !== null && records[0].TIMER.getValue() > 10 && records[0]['TIMER'].getValue() < 30;";
+    private static final String DEFAULT_CONDITION = "records[0].TIMER !== null && "
+            + "records[0].TIMER.getValue() > 10 && records[0]['TIMER'].getValue() < 30;";
 
     private final Map<String, Object> properties;
 

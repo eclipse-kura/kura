@@ -48,7 +48,7 @@ public class Delay implements WireEmitter, WireReceiver, ConfigurableComponent {
     public void activate(final ComponentContext context, final Map<String, Object> properties) {
         logger.info("acitvating..");
 
-        wireSupport = this.wireHelperService.newWireSupport(this,
+        this.wireSupport = this.wireHelperService.newWireSupport(this,
                 (ServiceReference<WireComponent>) context.getServiceReference());
 
         updated(properties);
@@ -74,7 +74,7 @@ public class Delay implements WireEmitter, WireReceiver, ConfigurableComponent {
 
     @Override
     public void onWireReceive(final WireEnvelope wireEnvelope) {
-        final long delayMs = (long) (random.nextGaussian() * delayStdDev + delayAverage);
+        final long delayMs = (long) (this.random.nextGaussian() * this.delayStdDev + this.delayAverage);
 
         if (delayMs > 0) {
 
@@ -87,7 +87,7 @@ public class Delay implements WireEmitter, WireReceiver, ConfigurableComponent {
             }
         }
 
-        wireSupport.emit(wireEnvelope.getRecords());
+        this.wireSupport.emit(wireEnvelope.getRecords());
     }
 
     @Override

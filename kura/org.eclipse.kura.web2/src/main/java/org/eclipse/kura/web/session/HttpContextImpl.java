@@ -45,7 +45,7 @@ public class HttpContextImpl implements HttpContext {
 
     private boolean handleSecurityInternal(final HttpServletRequest request, final HttpServletResponse response) {
         try {
-            return securityHandler.handleSecurity(request, response);
+            return this.securityHandler.handleSecurity(request, response);
         } catch (final Exception e) {
             return false;
         }
@@ -53,12 +53,12 @@ public class HttpContextImpl implements HttpContext {
 
     @Override
     public URL getResource(String name) {
-        return delegate.getResource(name);
+        return this.delegate.getResource(name);
     }
 
     @Override
     public String getMimeType(String name) {
-        return delegate.getMimeType(name);
+        return this.delegate.getMimeType(name);
     }
 
 }

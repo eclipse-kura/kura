@@ -26,7 +26,6 @@ import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.wire.WireComponent;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireHelperService;
-import org.eclipse.kura.wire.WireRecord;
 import org.eclipse.kura.wire.WireSupport;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
@@ -65,7 +64,7 @@ public class Timer implements WireEmitter, ConfigurableComponent {
 
     private WireSupport wireSupport;
 
-    private static final AtomicInteger instanceCount = new AtomicInteger(0);
+    private static AtomicInteger instanceCount = new AtomicInteger(0);
     private static Scheduler scheduler = null;
 
     /**
@@ -179,7 +178,7 @@ public class Timer implements WireEmitter, ConfigurableComponent {
     }
 
     /**
-     * Perform update operation which internally emits a {@link WireRecord} every
+     * Perform update operation which internally emits a {@link org.eclipse.kura.wire.WireRecord} every
      * interval
      *
      * @throws SchedulerException
@@ -209,11 +208,11 @@ public class Timer implements WireEmitter, ConfigurableComponent {
         if (interval <= 0) {
             throw new IllegalArgumentException("Interval cannot be less than or equal to zero");
         }
-        final Scheduler scheduler = getScheduler();
+        final Scheduler tmpScheduler = getScheduler();
 
         final int id = nextJobId.incrementAndGet();
         if (nonNull(this.jobKey)) {
-            scheduler.deleteJob(this.jobKey);
+            tmpScheduler.deleteJob(this.jobKey);
         }
         this.jobKey = new JobKey("emitJob" + id, GROUP_ID);
         final Trigger trigger = TriggerBuilder.newTrigger().withIdentity("emitTrigger" + id, GROUP_ID)
@@ -225,7 +224,7 @@ public class Timer implements WireEmitter, ConfigurableComponent {
         jobDataMap.putWireSupport(this.wireSupport);
         final JobDetail job = JobBuilder.newJob(EmitJob.class).withIdentity(this.jobKey).setJobData(jobDataMap).build();
 
-        scheduler.scheduleJob(job, trigger);
+        tmpScheduler.scheduleJob(job, trigger);
     }
 
     /**
@@ -240,11 +239,11 @@ public class Timer implements WireEmitter, ConfigurableComponent {
      */
     private void scheduleCronInterval(final String expression) throws SchedulerException {
         requireNonNull(expression, "Cron Expression cannot be null");
-        final Scheduler scheduler = getScheduler();
+        final Scheduler tmpScheduler = getScheduler();
 
         final int id = nextJobId.incrementAndGet();
         if (nonNull(this.jobKey)) {
-            scheduler.deleteJob(this.jobKey);
+            tmpScheduler.deleteJob(this.jobKey);
         }
         this.jobKey = new JobKey("emitJob" + id, GROUP_ID);
         final Trigger trigger = TriggerBuilder.newTrigger().withIdentity("emitTrigger" + id, GROUP_ID)
@@ -254,9 +253,9 @@ public class Timer implements WireEmitter, ConfigurableComponent {
         jobDataMap.putWireSupport(this.wireSupport);
         final JobDetail job = JobBuilder.newJob(EmitJob.class).withIdentity(this.jobKey).setJobData(jobDataMap).build();
 
-        scheduler.getContext().put("wireSupport", this.wireSupport);
+        tmpScheduler.getContext().put("wireSupport", this.wireSupport);
 
-        scheduler.scheduleJob(job, trigger);
+        tmpScheduler.scheduleJob(job, trigger);
     }
 
     /** {@inheritDoc} */

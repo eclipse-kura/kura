@@ -245,8 +245,8 @@ public final class BaseAssetConfiguration {
 
     private static final class ChannelProperty {
 
-        final String channelName;
-        final String propertyName;
+        private final String channelName;
+        private final String propertyName;
 
         ChannelProperty(final String channelName, final String propertyName) {
             this.channelName = channelName;
@@ -254,8 +254,9 @@ public final class BaseAssetConfiguration {
         }
 
         private static boolean isValidChannelName(String channelName) {
-            if (isNull(channelName))
+            if (isNull(channelName)) {
                 return false;
+            }
 
             final String prohibitedChars = CHANNEL_NAME_PROHIBITED_CHARS.value();
 
@@ -289,7 +290,7 @@ public final class BaseAssetConfiguration {
 
     private static final class ChannelParser {
 
-        final Map<String, Map<String, Object>> channels = new HashMap<>();
+        private final Map<String, Map<String, Object>> channels = new HashMap<>();
 
         private Map<String, Object> getChannelProperties(final String channelName) {
             return channels.computeIfAbsent(channelName, k -> new HashMap<>());

@@ -333,16 +333,6 @@ public class XmlJavaMetadataMapper implements XmlJavaDataMapper {
             tObject.setOcdref(ocdref);
         }
 
-        NodeList attributeChilds = object.getChildNodes();
-        Element[] attributeChildElements = getElementNodes(attributeChilds);
-        for (Element node : attributeChildElements) {
-            String localName = node.getNodeName();
-            if (localName.equals(METADATA_DESIGNATE_OBJECT_ATTRIBUTE)) {
-                // parse Attribute
-                // TODO
-            }
-        }
-
         return tObject;
     }
 

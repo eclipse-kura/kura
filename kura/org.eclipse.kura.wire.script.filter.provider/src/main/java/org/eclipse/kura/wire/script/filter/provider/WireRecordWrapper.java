@@ -22,7 +22,11 @@ import jdk.nashorn.api.scripting.AbstractJSObject;
 
 class WireRecordWrapper extends AbstractJSObject {
 
-    Map<String, TypedValue<?>> properties;
+    private final Map<String, TypedValue<?>> properties;
+
+    public Map<String, TypedValue<?>> getProperties() {
+        return this.properties;
+    }
 
     public WireRecordWrapper() {
         this.properties = new HashMap<>();

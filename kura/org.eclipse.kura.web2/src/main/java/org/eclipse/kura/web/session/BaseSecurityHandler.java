@@ -44,8 +44,9 @@ public class BaseSecurityHandler implements SecurityHandler {
         }
 
         int end = path.length() - 1;
-        for (; end > 1 && path.charAt(end) == '/'; end--)
+        for (; end > 1 && path.charAt(end) == '/'; end--) {
             ;
+        }
 
         try {
             response.sendRedirect(path.substring(0, end + 1));

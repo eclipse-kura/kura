@@ -70,7 +70,7 @@
         <!-- Checks for Naming Conventions.                  -->
         <!-- See https://checkstyle.org/config_naming.html -->
         <module name="ConstantName">
-        	<property name="format" value="^log(ger)?|[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"/>
+        	<property name="format" value="^auditLogger|log(ger)?|[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"/>
 		</module>
         <module name="LocalFinalVariableName"/>
         <module name="LocalVariableName"/>
@@ -94,7 +94,7 @@
         <!-- Checks for Size Violations.                    -->
         <!-- See https://checkstyle.org/config_sizes.html -->
         <module name="LineLength">
-        	<property name="max" value="120"/>
+        	<property name="max" value="150"/>
         </module>
         <module name="MethodLength"/>
         <module name="ParameterNumber"/>
@@ -134,7 +134,7 @@
         <module name="HiddenField" >
             <property name="ignoreSetter" value="true" />
             <property name="ignoreConstructorParameter" value="true" />
-            <property name="tokens" value="VARIABLE_DEF,LAMBDA"/>
+            <property name="tokens" value="VARIABLE_DEF"/>
         </module>
         <module name="IllegalInstantiation"/>
         <module name="InnerAssignment"/>
@@ -150,7 +150,10 @@
         <module name="FinalClass"/>
         <module name="HideUtilityClassConstructor"/>
         <module name="InterfaceIsType"/>
-        <module name="VisibilityModifier"/>
+        <module name="VisibilityModifier">
+            <property name="packageAllowed" value="true" />
+            <property name="protectedAllowed" value="true" />
+        </module>
         
         <!-- Miscellaneous other checks.                   -->
         <!-- See https://checkstyle.org/config_misc.html -->

@@ -590,9 +590,9 @@ public class PackagesPanelUi extends Composite {
                 @Override
                 public boolean onDrop(DropEvent event) {
                     final String url = event.getAsText();
-                    packagesDropzone.removeStyleName(DROPZONE_ACTIVE_STYLE_NAME);
+                    PackagesPanelUi.this.packagesDropzone.removeStyleName(DROPZONE_ACTIVE_STYLE_NAME);
                     if (isEclipseMarketplaceUrl(url)) {
-                        confirmDialog.show(MSGS.packagesMarketplaceInstallConfirmMessage(),
+                        PackagesPanelUi.this.confirmDialog.show(MSGS.packagesMarketplaceInstallConfirmMessage(),
                                 () -> eclipseMarketplaceInstall(url));
                     }
                     return true;
@@ -600,13 +600,13 @@ public class PackagesPanelUi extends Composite {
 
                 @Override
                 public boolean onDragOver(DropEvent event) {
-                    packagesDropzone.addStyleName(DROPZONE_ACTIVE_STYLE_NAME);
+                    PackagesPanelUi.this.packagesDropzone.addStyleName(DROPZONE_ACTIVE_STYLE_NAME);
                     return true;
                 }
 
                 @Override
                 public void onDragExit(DropEvent event) {
-                    packagesDropzone.removeStyleName(DROPZONE_ACTIVE_STYLE_NAME);
+                    PackagesPanelUi.this.packagesDropzone.removeStyleName(DROPZONE_ACTIVE_STYLE_NAME);
                 }
             });
         } else {

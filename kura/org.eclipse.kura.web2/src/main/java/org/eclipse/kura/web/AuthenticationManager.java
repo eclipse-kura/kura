@@ -45,7 +45,7 @@ public class AuthenticationManager {
     public boolean authenticate(String username, String password) throws KuraException {
         requireNonNull(this.username);
         requireNonNull(this.password);
-        
+
         try {
             CryptoService cryptoService = ServiceLocator.getInstance().getService(CryptoService.class);
             String sha1Password = cryptoService.sha1Hash(password);

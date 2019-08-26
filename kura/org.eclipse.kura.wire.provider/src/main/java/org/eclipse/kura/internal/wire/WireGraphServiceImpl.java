@@ -395,7 +395,6 @@ public class WireGraphServiceImpl implements ConfigurableComponent, WireGraphSer
     private List<WireComponentConfiguration> getComponentsToCreate(
             List<WireComponentConfiguration> oldWireComponentConfigurations,
             List<WireComponentConfiguration> newWireComponentConfigurations) {
-        // TODO: test if it makes sense to fill the list with all the new and remove as far as a matching old is found;
         List<WireComponentConfiguration> componentsToCreate = new ArrayList<>();
 
         for (WireComponentConfiguration newWireComponentConfiguration : newWireComponentConfigurations) {
@@ -468,7 +467,6 @@ public class WireGraphServiceImpl implements ConfigurableComponent, WireGraphSer
                     newFactoryPid = (String) newComponentConfig.getConfigurationProperties().get(SERVICE_FACTORYPID);
                 }
 
-                // TODO: check better the conditions for this test
                 if (oldPid.equals(newPid) && (newFactoryPid == null || newFactoryPid.equals(oldFactoryPid)
                         || WIRE_ASSET_FACTORY_PID.equals(newFactoryPid))) {
                     found = true;
@@ -612,7 +610,8 @@ public class WireGraphServiceImpl implements ConfigurableComponent, WireGraphSer
     private static Filter getWireComponentConfigurationFilter() {
         try {
             return FrameworkUtil.createFilter(
-                    "(|(objectClass=org.eclipse.kura.wire.WireComponent)(objectClass=org.eclipse.kura.wire.WireEmitter)(objectClass=org.eclipse.kura.wire.WireReceiver))");
+                    "(|(objectClass=org.eclipse.kura.wire.WireComponent)(objectClass=org.eclipse.kura.wire.WireEmitter)"
+                    + "(objectClass=org.eclipse.kura.wire.WireReceiver))");
         } catch (final Exception e) {
             logger.warn("failed to init wire component configuration filter", e);
             return null;

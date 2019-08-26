@@ -9,7 +9,7 @@
  * Contributors:
  *  Eurotech
  *  Amit Kumar Mondal
- *  
+ *
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.h2db.store;
 
@@ -27,6 +27,8 @@ import org.eclipse.kura.db.H2DbService;
  * Record Store related options
  */
 final class H2DbWireRecordStoreOptions {
+
+    private static final int DEFAULT_RECORDS_TO_KEEP = 5000;
 
     private static final String DB_SERVICE_INSTANCE = "db.service.pid";
 
@@ -57,7 +59,7 @@ final class H2DbWireRecordStoreOptions {
      * @return the number of records
      */
     int getNoOfRecordsToKeep() {
-        int noOfRecords = 5000;
+        int noOfRecords = DEFAULT_RECORDS_TO_KEEP;
         final Object cleanUp = this.properties.get(CLEANUP_RECORDS_KEEP);
         if (nonNull(cleanUp) && cleanUp instanceof Integer) {
             noOfRecords = (Integer) cleanUp;

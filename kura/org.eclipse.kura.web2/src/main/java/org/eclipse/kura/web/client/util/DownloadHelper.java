@@ -42,8 +42,9 @@ public final class DownloadHelper {
     public void startDownload(GwtXSRFToken token, String resource) {
         final StringBuilder sbUrl = new StringBuilder();
 
-        sbUrl.append(Console.ADMIN_ROOT).append("/").append(GWT.getModuleName()).append(resource).append(resource.indexOf('?') != -1 ? '&' : '?')
-                .append("xsrfToken=").append(URL.encodeQueryString(token.getToken()));
+        sbUrl.append(Console.ADMIN_ROOT).append("/").append(GWT.getModuleName()).append(resource)
+                .append(resource.indexOf('?') != -1 ? '&' : '?').append("xsrfToken=")
+                .append(URL.encodeQueryString(token.getToken()));
 
         startDownload(sbUrl.toString());
     }

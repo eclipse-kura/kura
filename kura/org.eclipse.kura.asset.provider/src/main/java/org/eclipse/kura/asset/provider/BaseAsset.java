@@ -56,7 +56,6 @@ import org.eclipse.kura.driver.Driver;
 import org.eclipse.kura.driver.PreparedRead;
 import org.eclipse.kura.internal.asset.provider.BaseAssetConfiguration;
 import org.eclipse.kura.internal.asset.provider.DriverTrackerCustomizer;
-import org.eclipse.kura.type.DataType;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
@@ -89,13 +88,13 @@ import org.slf4j.LoggerFactory;
  * The following generic channel properties must always be present in the channel configuration:
  * <ul>
  * <li>{@code +type} identifies the channel type (READ, WRITE or READ_WRITE) as specified by {@code ChannelType}</li>
- * <li>{@code +value.type} identifies the {@link DataType} of the channel.</li>
+ * <li>{@code +value.type} identifies the {@link org.eclipse.kura.type.DataType} of the channel.</li>
  * </ul>
  * For example, the property keys above for a channel named channel1 would be encoded as channel1#+type and
  * channel1#+value.type<br>
  *
  * The values of the <b>+value.type</b> and <b>+type</b> properties must me mappable
- * respectively to a {@link DataType} and {@code ChannelType} instance.
+ * respectively to a {@link org.eclipse.kura.type.DataType} and {@code ChannelType} instance.
  * <br>
  * The value of these property can be either an instance of the corresponding type,
  * or a string representation that equals the value returned by calling the {@code toString()} method

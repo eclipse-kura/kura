@@ -65,7 +65,6 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>4.1.0</version>
                 <extensions>true</extensions>
                 <configuration>
                     <manifestLocation>META-INF</manifestLocation>
@@ -83,7 +82,7 @@
                             about_files=${project.basedir}/about_files/
                         </Include-Resource>
                         <Import-Package>
-                            org.osgi.framework;version="[1.5.0,2.0.0)"
+                            org.osgi.framework;version="[1.5.0,2.0.0)",org.slf4j;version="[1.7,2)"
                         </Import-Package>
                         <Export-Package>
                             javax.comm;version="1.2.0",

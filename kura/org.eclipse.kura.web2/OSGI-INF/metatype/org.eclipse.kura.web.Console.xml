@@ -15,12 +15,12 @@
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
     <OCD id="org.eclipse.kura.web.Console"
          name="WebConsole"
-         description="Web Console configuration">
+         description="Web Console configuration. A change to this view will case the reload of the web server! Spurious error messages can be displayed during the restart.">
 
         <Icon resource="DenaliService" size="32"/>
 
 		<AD id="console.username.value"
-        	name="console.username.value"
+        	name="Console Username"
         	type="String"
         	cardinality="0"
         	required="true"
@@ -29,7 +29,7 @@
         </AD>
 
         <AD id="console.password.value"
-        	name="console.password.value"
+        	name="Console Password"
         	type="Password"
         	cardinality="0"
         	required="true"

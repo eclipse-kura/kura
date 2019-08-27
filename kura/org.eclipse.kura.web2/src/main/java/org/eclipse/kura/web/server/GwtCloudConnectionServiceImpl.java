@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2019 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -29,6 +29,9 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.cloud.factory.CloudServiceFactory;
@@ -42,6 +45,7 @@ import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.server.util.ServiceLocator.ServiceConsumer;
 import org.eclipse.kura.web.server.util.ServiceLocator.ServiceReferenceConsumer;
+import org.eclipse.kura.web.session.Attributes;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtCloudComponentFactories;
@@ -73,10 +77,12 @@ public class GwtCloudConnectionServiceImpl extends OsgiRemoteServiceServlet impl
     private static final String CLOUD_PUBLISHER = CloudPublisher.class.getName();
     private static final String CLOUD_SUBSCRIBER = CloudSubscriber.class.getName();
 
-    private static final Logger logger = LoggerFactory.getLogger(GwtCloudConnectionServiceImpl.class);
+    private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
 
     @Override
     public List<GwtCloudEntry> findCloudEntries() throws GwtKuraException {
+        final HttpServletRequest request = getThreadLocalRequest();
+        final HttpSession session = request.getSession(false);
 
         final List<GwtCloudEntry> result = new ArrayList<>();
 
@@ -106,6 +112,9 @@ public class GwtCloudConnectionServiceImpl extends OsgiRemoteServiceServlet impl
         result.addAll(getPublisherInstances());
         result.addAll(getSubscriberInstances());
 
+        auditLogger.info("UI CloudConnection - Success - Successfully listed cloud entries for user: {}, session {}",
+                session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
+
         return result;
     }
 
@@ -131,6 +140,8 @@ public class GwtCloudConnectionServiceImpl extends OsgiRemoteServiceServlet impl
 
     @Override
     public GwtCloudComponentFactories getCloudComponentFactories() throws GwtKuraException {
+        final HttpServletRequest request = getThreadLocalRequest();
+        final HttpSession session = request.getSession(false);
 
         final List<String> cloudConnectionFactoryPids = new ArrayList<>();
 
@@ -143,12 +154,19 @@ public class GwtCloudConnectionServiceImpl extends OsgiRemoteServiceServlet impl
         result.setCloudConnectionFactoryPids(cloudConnectionFactoryPids);
         result.setPubSubFactories(pubSubFactories);
 
+        auditLogger.info(
+                "UI CloudConnection - Success - Successfully listed cloud component factories for user: {}, session {}",
+                session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
+
         return result;
     }
 
     @Override
     public List<String> findStackPidsByFactory(final String factoryPid, final String cloudServicePid)
             throws GwtKuraException {
+
+        final HttpServletRequest request = getThreadLocalRequest();
+        final HttpSession session = request.getSession(false);
 
         final List<String> result = new ArrayList<>();
 
@@ -157,6 +175,9 @@ public class GwtCloudConnectionServiceImpl extends OsgiRemoteServiceServlet impl
                 result.addAll(factory.getStackComponentsPids(cloudServicePid));
             }
         });
+
+        auditLogger.info("UI CloudConnection - Success - Successfully listed stack pids by factory for user: {}, session {}",
+                session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
 
         return result;
     }
@@ -175,6 +196,13 @@ public class GwtCloudConnectionServiceImpl extends OsgiRemoteServiceServlet impl
                 service.createConfiguration(cloudServicePid);
             }
         });
+
+        final HttpServletRequest request = getThreadLocalRequest();
+        final HttpSession session = request.getSession(false);
+
+        auditLogger.info(
+                "UI CloudConnection - Success - Successfully created cloud service from factory for user: {}, session {}",
+                session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
     }
 
     @Override
@@ -190,6 +218,13 @@ public class GwtCloudConnectionServiceImpl extends OsgiRemoteServiceServlet impl
                 service.deleteConfiguration(cloudServicePid);
             }
         });
+
+        final HttpServletRequest request = getThreadLocalRequest();
+        final HttpSession session = request.getSession(false);
+
+        auditLogger.info(
+                "UI CloudConnection - Success - Successfully deleted cloud service from factory for user: {}, session {}",
+                session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
     }
 
     @Override
@@ -211,6 +246,12 @@ public class GwtCloudConnectionServiceImpl extends OsgiRemoteServiceServlet impl
                 ctx.ungetService(ref);
             }
         });
+
+        final HttpServletRequest request = getThreadLocalRequest();
+        final HttpSession session = request.getSession(false);
+
+        auditLogger.info("UI CloudConnection - Success - Successfully listed cloud service pid for user: {}, session {}",
+                session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
 
         return result.get();
     }
@@ -236,6 +277,12 @@ public class GwtCloudConnectionServiceImpl extends OsgiRemoteServiceServlet impl
             }
         });
 
+        final HttpServletRequest request = getThreadLocalRequest();
+        final HttpSession session = request.getSession(false);
+
+        auditLogger.info("UI CloudConnection - Success - Successfully listed cloud service pid for user: {}, session {}",
+                session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
+
         return result.get();
     }
 
@@ -244,9 +291,16 @@ public class GwtCloudConnectionServiceImpl extends OsgiRemoteServiceServlet impl
             final String cloudConnectionPid) throws GwtKuraException {
         checkXSRFToken(token);
 
+        final HttpServletRequest request = getThreadLocalRequest();
+        final HttpSession session = request.getSession(false);
+
         ServiceLocator.applyToServiceOptionally(ConfigurationService.class, cs -> {
             cs.createFactoryConfiguration(factoryPid, pid, Collections.singletonMap(
                     CloudConnectionConstants.CLOUD_ENDPOINT_SERVICE_PID_PROP_NAME.value(), cloudConnectionPid), true);
+
+            auditLogger.info("UI CloudConnection - Success - Successfully created pub/sub instance for user: {}, session {}",
+                    session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
+
             return (Void) null;
         });
     }
@@ -255,8 +309,15 @@ public class GwtCloudConnectionServiceImpl extends OsgiRemoteServiceServlet impl
     public void deletePubSubInstance(final GwtXSRFToken token, final String pid) throws GwtKuraException {
         checkXSRFToken(token);
 
+        final HttpServletRequest request = getThreadLocalRequest();
+        final HttpSession session = request.getSession(false);
+
         ServiceLocator.applyToServiceOptionally(ConfigurationService.class, cs -> {
             cs.deleteFactoryConfiguration(pid, true);
+
+            auditLogger.info("UI CloudConnection - Success - Successfully deleted pub/sub instance for user: {}, session {}",
+                    session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
+
             return (Void) null;
         });
     }
@@ -276,14 +337,14 @@ public class GwtCloudConnectionServiceImpl extends OsgiRemoteServiceServlet impl
         final Object defaultFactoryPidRegex = component.properties.get(KURA_UI_CSF_PID_REGEX);
 
         if (!(factoryPid instanceof String)) {
-            logger.warn(
+            auditLogger.warn(
                     "component {} defines a CloudPublisher or CloudSubscriber but does not specify the service.pid property, ignoring it",
                     component.name);
             return null;
         }
 
         if (!(ccsfFactoryPid instanceof String)) {
-            logger.warn(
+            auditLogger.warn(
                     "component {} defines a CloudPublisher or CloudSubscriber but does not specify the {} property, ignoring it",
                     component.name, ccsfFactoryPidPropName);
             return null;

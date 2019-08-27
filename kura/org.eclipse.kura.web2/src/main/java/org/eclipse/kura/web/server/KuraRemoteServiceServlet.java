@@ -20,6 +20,7 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.eclipse.kura.web.session.Attributes;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
@@ -34,7 +35,8 @@ public class KuraRemoteServiceServlet extends RemoteServiceServlet {
      *
      */
     private static final long serialVersionUID = 3473193315046407200L;
-    private static Logger logger = LoggerFactory.getLogger(KuraRemoteServiceServlet.class);
+    private static final Logger logger = LoggerFactory.getLogger(KuraRemoteServiceServlet.class);
+    private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
 
     /**
      *
@@ -70,12 +72,14 @@ public class KuraRemoteServiceServlet extends RemoteServiceServlet {
             logger.debug("\tSender IP: {}", req.getRemoteAddr());
             logger.debug("\tSender Host: {}", req.getRemoteHost());
             logger.debug("\tSender Port: {}", req.getRemotePort());
-            logger.debug("\tFull Request URL\n {}?{}\n\n", req.getRequestURL().toString(), req.getQueryString());
+            logger.debug("\tFull Request URL\n {}?{}\n\n", req.getRequestURL(), req.getQueryString());
 
             // forcing the console log out
             session.invalidate();
             logger.debug("Session invalidated.");
 
+            auditLogger.warn("UI XSRF - Failure - XSRF Token validation error for user: {}, session {}",
+                    session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, null, "Invalid XSRF token");
         }
     }

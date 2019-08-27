@@ -37,10 +37,10 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.eclipse.tycho</groupId>
-            <artifactId>org.eclipse.osgi</artifactId>
-            <version>3.8.1.v20120830-144521</version>
-        </dependency>
+			<groupId>org.eclipse.platform</groupId>
+			<artifactId>org.eclipse.osgi</artifactId>
+			<version>3.12.50</version>
+		</dependency>
     </dependencies>
 
     <build>

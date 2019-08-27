@@ -18,6 +18,7 @@ import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -241,7 +242,7 @@ public final class CloudPublisher implements WireReceiver, ConfigurableComponent
             } else if (bodyPropertyValue instanceof StringValue) {
                 kuraPayload.setBody(((String) bodyPropertyValue.getValue()).getBytes(StandardCharsets.UTF_8));
             } else if (bodyPropertyValue instanceof ByteArrayValue) {
-                kuraPayload.setBody(((byte[]) bodyPropertyValue.getValue()));
+                kuraPayload.setBody((byte[]) bodyPropertyValue.getValue());
             } else {
                 logger.warn("The type of the body property must be STRING or BYTE_ARRAY");
             }
@@ -295,8 +296,9 @@ public final class CloudPublisher implements WireReceiver, ConfigurableComponent
         Map<String, TypedValue<?>> wireRecordProps = wireRecord.getProperties();
 
         final Map<String, Object> properties = new HashMap<>();
-        if (wireRecordProps.containsKey(ASSET_NAME_PROPERTY_KEY)) {
-            properties.put(ASSET_NAME_PROPERTY_KEY, wireRecordProps.get(ASSET_NAME_PROPERTY_KEY).getValue());
+        List<String> l = new ArrayList<>(wireRecordProps.keySet());
+        for (String s : l) {
+            properties.put(s, wireRecordProps.get(s).getValue());
         }
         return properties;
     }

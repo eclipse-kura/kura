@@ -1316,12 +1316,16 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                 }
 
                 FirewallOpenPortConfigIP<IP4Address> firewallOpenPortConfigIP = new FirewallOpenPortConfigIP4();
-                if (entry.getPortRange() != null) {
-                    if (entry.getPortRange().indexOf(':') > 0) {
+
+                if (entry.getPortRange().indexOf(':') != -1) {
+                    String[] parts = entry.getPortRange().split(":");
+                    if (Integer.valueOf(parts[0].trim()) < Integer.valueOf(parts[1].trim())) {
                         firewallOpenPortConfigIP.setPortRange(entry.getPortRange());
                     } else {
-                        firewallOpenPortConfigIP.setPort(Integer.parseInt(entry.getPortRange()));
+                        throw new KuraException(KuraErrorCode.BAD_REQUEST);
                     }
+                } else {
+                    firewallOpenPortConfigIP.setPort(Integer.parseInt(entry.getPortRange()));
                 }
                 firewallOpenPortConfigIP
                         .setProtocol(NetProtocol.valueOf(GwtSafeHtmlUtils.htmlEscape(entry.getProtocol())));

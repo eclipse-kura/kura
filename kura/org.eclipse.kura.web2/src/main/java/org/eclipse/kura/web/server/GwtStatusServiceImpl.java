@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 Eurotech and others
+ * Copyright (c) 2011, 2019 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -24,6 +24,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
 import org.eclipse.kura.KuraConnectException;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.CloudService;
@@ -34,7 +37,7 @@ import org.eclipse.kura.data.DataService;
 import org.eclipse.kura.data.DataTransportService;
 import org.eclipse.kura.position.PositionService;
 import org.eclipse.kura.web.server.util.ServiceLocator;
-import org.eclipse.kura.web.server.util.ServiceLocator.ServiceFunction;
+import org.eclipse.kura.web.session.Attributes;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtCloudConnectionInfo;
@@ -57,7 +60,16 @@ import org.slf4j.LoggerFactory;
 
 public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements GwtStatusService {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(GwtNetworkServiceImpl.class);
+    private static final String IP_ACQUISITION = "IP Acquisition: ";
+
+    private static final String MODE = "Mode: ";
+
+    private static final String SUBNET_MASK = "Subnet Mask: ";
+
+    private static final String POSITION_STATUS = "positionStatus";
+
+    private static final Logger logger = LoggerFactory.getLogger(GwtStatusServiceImpl.class);
+    private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
 
     private static final long serialVersionUID = 8256280782910423734L;
 
@@ -84,6 +96,9 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
     public void connectDataService(GwtXSRFToken xsrfToken, String connectionId) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
 
+        final HttpServletRequest request = getThreadLocalRequest();
+        final HttpSession session = request.getSession(false);
+
         Collection<ServiceReference<CloudService>> cloudServiceReferences = ServiceLocator.getInstance()
                 .getServiceReferences(CloudService.class, null);
 
@@ -98,6 +113,7 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
                 for (ServiceReference<DataService> dataServiceReference : dataServiceReferences) {
                     DataService dataService = ServiceLocator.getInstance().getService(dataServiceReference);
                     if (dataService != null) {
+                        GwtKuraException gwtKuraException = null;
                         int counter = 10;
                         try {
                             dataService.connect();
@@ -106,15 +122,25 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
                                 counter--;
                             }
                         } catch (KuraConnectException e) {
-                            s_logger.warn("Error connecting", e);
-                            throw new GwtKuraException(GwtKuraErrorCode.CONNECTION_FAILURE, e,
+                            logger.warn("Error connecting");
+                            gwtKuraException = new GwtKuraException(GwtKuraErrorCode.CONNECTION_FAILURE, e,
                                     "Error connecting. Please review your configuration.");
                         } catch (InterruptedException e) {
-                            s_logger.warn("Interrupt Exception", e);
-                            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e, "Interrupt Exception");
+                            logger.warn("Interrupt Exception");
+                            gwtKuraException = new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e,
+                                    "Interrupt Exception");
                         } catch (IllegalStateException e) {
-                            s_logger.warn("Illegal client state", e);
-                            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e, "Illegal client state");
+                            logger.warn("Illegal client state");
+                            gwtKuraException = new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e,
+                                    "Illegal client state");
+                        }
+
+                        if (gwtKuraException != null) {
+                            auditLogger.warn(
+                                    "UI Status - Failure - Failed to connect data service for user: {}, session: {}, connection id: {}",
+                                    session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId(),
+                                    connectionId);
+                            throw gwtKuraException;
                         }
                     }
                     ServiceLocator.getInstance().ungetService(dataServiceReference);
@@ -134,7 +160,10 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
                 try {
                     cloudConnectionManager.connect();
                 } catch (KuraException e) {
-                    s_logger.warn("Error connecting", e);
+                    logger.warn("Error connecting");
+                    auditLogger.warn(
+                            "UI Status - Failure - Failed to connect data service for user: {}, session: {}, connection id: {}",
+                            session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId(), connectionId);
                     throw new GwtKuraException(GwtKuraErrorCode.CONNECTION_FAILURE, e,
                             "Error connecting. Please review your configuration.");
                 }
@@ -142,11 +171,17 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
             ServiceLocator.getInstance().ungetService(cloudConnectionManagerReference);
         }
 
+        auditLogger.info(
+                "UI Status - Success - Successfully connected data service for user: {}, session: {}, connection id: {}",
+                session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId(), connectionId);
     }
 
     @Override
     public void disconnectDataService(GwtXSRFToken xsrfToken, String connectionId) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
+
+        final HttpServletRequest request = getThreadLocalRequest();
+        final HttpSession session = request.getSession(false);
 
         Collection<ServiceReference<CloudService>> cloudServiceReferences = ServiceLocator.getInstance()
                 .getServiceReferences(CloudService.class, null);
@@ -181,14 +216,20 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
                 try {
                     cloudConnectionManager.disconnect();
                 } catch (KuraException e) {
-                    s_logger.warn("Error connecting", e);
+                    logger.warn("Error disconnecting");
+                    auditLogger.warn(
+                            "UI Status - Failure - Failed to disconnect data service for user: {}, session: {}, connection id: {}",
+                            session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId(), connectionId);
                     throw new GwtKuraException(GwtKuraErrorCode.CONNECTION_FAILURE, e,
-                            "Error connecting. Please review your configuration.");
+                            "Error disconnecting. Please review your configuration.");
                 }
             }
             ServiceLocator.getInstance().ungetService(cloudConnectionManagerReference);
         }
 
+        auditLogger.info(
+                "UI Status - Success - Successfully disconnected data service for user: {}, session: {}, connection id: {}",
+                session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId(), connectionId);
     }
 
     @Override
@@ -273,12 +314,12 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
                 CloudEndpoint cloudEndpoint = ServiceLocator.getInstance().getService(cloudEndpointReference);
 
                 Map<String, String> connectionProps = cloudEndpoint.getInfo();
-                connectionProps.forEach((key, value) -> cloudConnectionInfo.addConnectionProperty(key, value));
+                connectionProps.forEach(cloudConnectionInfo::addConnectionProperty);
 
                 connectionInfos.add(cloudConnectionInfo);
             }
         } catch (GwtKuraException e) {
-            s_logger.warn("Get cloud status failed", e);
+            logger.warn("Get cloud status failed", e);
         }
 
         try {
@@ -298,7 +339,7 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
                 }
             }
         } catch (GwtKuraException e) {
-            s_logger.warn("Get cloud status failed", e);
+            logger.warn("Get cloud status failed", e);
         }
 
         connectionInfos.sort((c1, c2) -> c1.getCloudServicePid().compareTo(c2.getCloudServicePid()));
@@ -415,10 +456,9 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
                                 gwtNetInterfaceConfig.getStatusEnum().getValue()));
                     } else {
                         pairs.add(new GwtGroupedNVPair("networkStatusEthernet", gwtNetInterfaceConfig.getName(),
-                                currentAddress + nl + tab + "Subnet Mask: " + currentSubnetMask + nl + tab + "Mode: "
-                                        + gwtNetInterfaceConfig.getStatusEnum().getValue() + nl + tab
-                                        + "IP Acquisition: " + currentConfigMode + nl + tab + "Router Mode: "
-                                        + currentRouterMode));
+                                currentAddress + nl + tab + SUBNET_MASK + currentSubnetMask + nl + tab + MODE
+                                        + gwtNetInterfaceConfig.getStatusEnum().getValue() + nl + tab + IP_ACQUISITION
+                                        + currentConfigMode + nl + tab + "Router Mode: " + currentRouterMode));
                     }
                 } else if (gwtNetInterfaceConfig.getHwTypeEnum() == GwtNetIfType.WIFI
                         && !gwtNetInterfaceConfig.getName().startsWith("mon")) {
@@ -438,11 +478,11 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
                                 gwtNetInterfaceConfig.getStatusEnum().getValue()));
                     } else {
                         pairs.add(new GwtGroupedNVPair("networkStatusWifi", gwtNetInterfaceConfig.getName(),
-                                currentAddress + nl + tab + "Subnet Mask: " + currentSubnetMask + nl + tab + "Mode: "
-                                        + gwtNetInterfaceConfig.getStatusEnum().getValue() + nl + tab
-                                        + "IP Acquisition: " + currentConfigMode + nl + tab + "Router Mode: "
-                                        + currentRouterMode + nl + tab + "Wireless Mode:" + currentWifiMode + nl + tab
-                                        + "SSID: " + currentWifiSsid + nl));
+                                currentAddress + nl + tab + SUBNET_MASK + currentSubnetMask + nl + tab + MODE
+                                        + gwtNetInterfaceConfig.getStatusEnum().getValue() + nl + tab + IP_ACQUISITION
+                                        + currentConfigMode + nl + tab + "Router Mode: " + currentRouterMode + nl + tab
+                                        + "Wireless Mode:" + currentWifiMode + nl + tab + "SSID: " + currentWifiSsid
+                                        + nl));
                     }
                 } else if (gwtNetInterfaceConfig.getHwTypeEnum() == GwtNetIfType.MODEM) {
                     String currentModemApn = ((GwtModemInterfaceConfig) gwtNetInterfaceConfig).getApn();
@@ -455,15 +495,15 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
                                 gwtNetInterfaceConfig.getStatusEnum().getValue()));
                     } else {
                         pairs.add(new GwtGroupedNVPair("networkStatusModem", gwtNetInterfaceConfig.getName(),
-                                currentAddress + nl + "Subnet Mask: " + currentSubnetMask + nl + tab + "Mode: "
-                                        + gwtNetInterfaceConfig.getStatusEnum().getValue() + nl + tab
-                                        + "IP Acquisition: " + currentConfigMode + nl + tab + "APN: " + currentModemApn
-                                        + nl + tab + "PPP: " + currentModemPppNum));
+                                currentAddress + nl + SUBNET_MASK + currentSubnetMask + nl + tab + MODE
+                                        + gwtNetInterfaceConfig.getStatusEnum().getValue() + nl + tab + IP_ACQUISITION
+                                        + currentConfigMode + nl + tab + "APN: " + currentModemApn + nl + tab + "PPP: "
+                                        + currentModemPppNum));
                     }
                 }
             }
         } catch (GwtKuraException e) {
-            s_logger.warn("Get network status failed", e);
+            logger.warn("Get network status failed");
             throw e;
         }
 
@@ -473,21 +513,16 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
     private List<GwtGroupedNVPair> getPositionStatus() throws GwtKuraException {
         final List<GwtGroupedNVPair> pairs = new ArrayList<>();
 
-        ServiceLocator.applyToServiceOptionally(PositionService.class, new ServiceFunction<PositionService, Void>() {
-
-            @Override
-            public Void apply(PositionService positionService) {
-                if (positionService != null) {
-                    pairs.add(new GwtGroupedNVPair("positionStatus", "Longitude",
-                            Double.toString(Math.toDegrees(positionService.getPosition().getLongitude().getValue()))));
-                    pairs.add(new GwtGroupedNVPair("positionStatus", "Latitude",
-                            Double.toString(Math.toDegrees(positionService.getPosition().getLatitude().getValue()))));
-                    pairs.add(new GwtGroupedNVPair("positionStatus", "Altitude",
-                            positionService.getPosition().getAltitude().toString()));
-                }
-                return null;
+        ServiceLocator.applyToServiceOptionally(PositionService.class, positionService -> {
+            if (positionService != null) {
+                pairs.add(new GwtGroupedNVPair(POSITION_STATUS, "Longitude",
+                        Double.toString(Math.toDegrees(positionService.getPosition().getLongitude().getValue()))));
+                pairs.add(new GwtGroupedNVPair(POSITION_STATUS, "Latitude",
+                        Double.toString(Math.toDegrees(positionService.getPosition().getLatitude().getValue()))));
+                pairs.add(new GwtGroupedNVPair(POSITION_STATUS, "Altitude",
+                        positionService.getPosition().getAltitude().toString()));
             }
-
+            return null;
         });
 
         return pairs;

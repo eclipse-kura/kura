@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -26,6 +26,10 @@ import org.osgi.annotation.versioning.ProviderType;
  */
 @ProviderType
 public abstract class FirewallPortForwardConfigIP<T extends IPAddress> implements FirewallPortForwardConfig {
+
+    private static final int MAX_PORT = 65535;
+
+    private static final int MIN_PORT = 0;
 
     /** The interface name on which this configuration will listen for inbound connections **/
     private String inboundIface;
@@ -88,6 +92,7 @@ public abstract class FirewallPortForwardConfigIP<T extends IPAddress> implement
      * @param sourcePortRange
      *            The (options) permitted source port range for inbound connections
      */
+    @SuppressWarnings("checkstyle:parameterNumber")
     public FirewallPortForwardConfigIP(String inboundIface, String outboundIface, IP4Address address,
             NetProtocol protocol, int inPort, int outPort, boolean masquerade, NetworkPair<T> permittedNetwork,
             String permittedMac, String sourcePortRange) {
@@ -195,6 +200,7 @@ public abstract class FirewallPortForwardConfigIP<T extends IPAddress> implement
     }
 
     @Override
+    @SuppressWarnings("checkstyle:magicNumber")
     public int hashCode() {
         final int prime = 31;
         int result = 1;
@@ -295,7 +301,7 @@ public abstract class FirewallPortForwardConfigIP<T extends IPAddress> implement
             return false;
         }
 
-        if (this.inPort < 0 || this.inPort > 65535 || this.outPort < 0 || this.outPort > 65535) {
+        if (this.inPort < MIN_PORT || this.inPort > MAX_PORT || this.outPort < MIN_PORT || this.outPort > MAX_PORT) {
             return false;
         }
 

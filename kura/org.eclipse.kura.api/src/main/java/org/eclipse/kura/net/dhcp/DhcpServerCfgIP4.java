@@ -81,6 +81,7 @@ public class DhcpServerCfgIP4 extends DhcpServerCfgIP<IP4Address> {
         return sb.toString();
     }
 
+    @SuppressWarnings("checkstyle:magicNumber")
     private static int inet4address2int(Inet4Address inet4addr) {
 
         byte[] baInet4addr = inet4addr.getAddress();

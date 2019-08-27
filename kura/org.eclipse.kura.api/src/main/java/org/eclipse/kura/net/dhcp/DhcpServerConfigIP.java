@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -69,6 +69,7 @@ public abstract class DhcpServerConfigIP<T extends IPAddress> implements DhcpSer
      *            the DNS servers that will get passed to DHCP clients if passDns is true
      */
     @Deprecated
+    @SuppressWarnings("checkstyle:parameterNumber")
     public DhcpServerConfigIP(String interfaceName, boolean enabled, T subnet, T routerAddress, T subnetMask,
             int defaultLeaseTime, int maximumLeaseTime, short prefix, T rangeStart, T rangeEnd, boolean passDns,
             List<T> dnsServers) {

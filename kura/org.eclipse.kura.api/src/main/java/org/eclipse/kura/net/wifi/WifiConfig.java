@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -26,222 +26,224 @@ import org.osgi.annotation.versioning.ProviderType;
 public class WifiConfig implements NetConfig {
 
     /** Mode for the configuration **/
-    private WifiMode m_mode;
+    private WifiMode mode;
 
     /** SSID of the the wifi interface **/
-    private String m_ssid;
+    private String ssid;
 
     /** Channel(s) supported by the wifi interface **/
-    private int[] m_channels;
+    private int[] channels;
 
     /** Security mode of the interface **/
-    private WifiSecurity m_security;
+    private WifiSecurity security;
 
     /** Supported pairwise ciphers **/
-    private WifiCiphers m_pairwiseCiphers;
+    private WifiCiphers pairwiseCiphers;
 
     /** Supported group ciphers **/
-    private WifiCiphers m_groupCiphers;
+    private WifiCiphers groupCiphers;
 
     /** The passkey for the wifi interface **/
-    private Password m_passkey;
+    private Password passkey;
 
     /** The hardware mode **/
-    private String m_hwMode;
+    private String hwMode;
 
     /** Radio mode **/
-    private WifiRadioMode m_radioMode;
+    private WifiRadioMode radioMode;
 
     /** Whether or not to broadcast the SSID **/
-    private boolean m_broadcast;
+    private boolean broadcast;
 
     /** Background scan **/
-    private WifiBgscan m_bgscan;
+    private WifiBgscan bgscan;
 
     /** Ping Access Point **/
-    private boolean m_pingAccessPoint = false;
+    private boolean pingAccessPoint = false;
 
     /** Ignore SSID **/
-    private boolean m_ignoreSSID;
+    private boolean ignoreSSID;
 
     /** The driver of the wifi interface **/
-    private String m_driver;
+    private String driver;
 
     public WifiConfig() {
         super();
     }
 
+    @SuppressWarnings("checkstyle:parameterNumber")
     public WifiConfig(WifiMode mode, String ssid, int[] channels, WifiSecurity security, String passkey, String hwMode,
             boolean broadcast, WifiBgscan bgscan) {
         super();
 
-        this.m_mode = mode;
-        this.m_ssid = ssid;
-        this.m_channels = channels;
-        this.m_security = security;
-        this.m_passkey = new Password(passkey);
-        this.m_hwMode = hwMode;
-        this.m_broadcast = broadcast;
-        this.m_bgscan = bgscan;
+        this.mode = mode;
+        this.ssid = ssid;
+        this.channels = channels;
+        this.security = security;
+        this.passkey = new Password(passkey);
+        this.hwMode = hwMode;
+        this.broadcast = broadcast;
+        this.bgscan = bgscan;
     }
 
     public WifiMode getMode() {
-        return this.m_mode;
+        return this.mode;
     }
 
     public void setMode(WifiMode mode) {
-        this.m_mode = mode;
+        this.mode = mode;
     }
 
     public String getSSID() {
-        return this.m_ssid;
+        return this.ssid;
     }
 
     public void setSSID(String ssid) {
-        this.m_ssid = ssid;
+        this.ssid = ssid;
     }
 
     public String getDriver() {
-        return this.m_driver;
+        return this.driver;
     }
 
     public void setDriver(String driver) {
-        this.m_driver = driver;
+        this.driver = driver;
     }
 
     public int[] getChannels() {
-        return this.m_channels;
+        return this.channels;
     }
 
     public void setChannels(int[] channels) {
-        this.m_channels = channels;
+        this.channels = channels;
     }
 
     public WifiSecurity getSecurity() {
-        return this.m_security;
+        return this.security;
     }
 
     public void setSecurity(WifiSecurity security) {
-        this.m_security = security;
+        this.security = security;
     }
 
     public WifiCiphers getPairwiseCiphers() {
-        return this.m_pairwiseCiphers;
+        return this.pairwiseCiphers;
     }
 
     public void setPairwiseCiphers(WifiCiphers pairwise) {
-        this.m_pairwiseCiphers = pairwise;
+        this.pairwiseCiphers = pairwise;
     }
 
     public WifiCiphers getGroupCiphers() {
-        return this.m_groupCiphers;
+        return this.groupCiphers;
     }
 
     public void setGroupCiphers(WifiCiphers group) {
-        this.m_groupCiphers = group;
+        this.groupCiphers = group;
     }
 
     public Password getPasskey() {
-        return this.m_passkey;
+        return this.passkey;
     }
 
     public void setPasskey(String key) {
         Password psswd = new Password(key);
-        this.m_passkey = psswd;
+        this.passkey = psswd;
     }
 
     public String getHardwareMode() {
-        return this.m_hwMode;
+        return this.hwMode;
     }
 
     public void setHardwareMode(String hwMode) {
-        this.m_hwMode = hwMode;
+        this.hwMode = hwMode;
     }
 
     public WifiRadioMode getRadioMode() {
-        return this.m_radioMode;
+        return this.radioMode;
     }
 
     public void setRadioMode(WifiRadioMode radioMode) {
-        this.m_radioMode = radioMode;
+        this.radioMode = radioMode;
     }
 
     public boolean getBroadcast() {
-        return this.m_broadcast;
+        return this.broadcast;
     }
 
     public void setBroadcast(boolean broadcast) {
-        this.m_broadcast = broadcast;
+        this.broadcast = broadcast;
     }
 
     public WifiBgscan getBgscan() {
-        return this.m_bgscan;
+        return this.bgscan;
     }
 
     public void setBgscan(WifiBgscan bgscan) {
-        this.m_bgscan = bgscan;
+        this.bgscan = bgscan;
     }
 
     public boolean pingAccessPoint() {
-        return this.m_pingAccessPoint;
+        return this.pingAccessPoint;
     }
 
     public void setPingAccessPoint(boolean pingAP) {
-        this.m_pingAccessPoint = pingAP;
+        this.pingAccessPoint = pingAP;
     }
 
     public boolean ignoreSSID() {
-        return this.m_ignoreSSID;
+        return this.ignoreSSID;
     }
 
     public void setIgnoreSSID(boolean ignoreSSID) {
-        this.m_ignoreSSID = ignoreSSID;
+        this.ignoreSSID = ignoreSSID;
     }
 
+    @SuppressWarnings("checkstyle:magicNumber")
     @Override
     public int hashCode() {
         final int prime = 29;
         int result = super.hashCode();
 
-        result = prime * result + (this.m_mode == null ? 0 : this.m_mode.hashCode());
-        result = prime * result + (this.m_ssid == null ? 0 : this.m_ssid.hashCode());
-        result = prime * result + (this.m_driver == null ? 0 : this.m_driver.hashCode());
+        result = prime * result + (this.mode == null ? 0 : this.mode.hashCode());
+        result = prime * result + (this.ssid == null ? 0 : this.ssid.hashCode());
+        result = prime * result + (this.driver == null ? 0 : this.driver.hashCode());
 
-        if (this.m_channels != null) {
-            for (int channel : this.m_channels) {
+        if (this.channels != null) {
+            for (int channel : this.channels) {
                 result = prime * result + channel;
             }
         } else {
             result = prime * result;
         }
 
-        result = prime * result + (this.m_security == null ? 0 : this.m_security.hashCode());
-        result = prime * result + (this.m_passkey == null ? 0 : this.m_passkey.hashCode());
-        result = prime * result + (this.m_hwMode == null ? 0 : this.m_hwMode.hashCode());
-        result = prime * result + (this.m_radioMode == null ? 0 : this.m_radioMode.hashCode());
-        result = prime * result + (this.m_broadcast ? 1021 : 1031);
+        result = prime * result + (this.security == null ? 0 : this.security.hashCode());
+        result = prime * result + (this.passkey == null ? 0 : this.passkey.hashCode());
+        result = prime * result + (this.hwMode == null ? 0 : this.hwMode.hashCode());
+        result = prime * result + (this.radioMode == null ? 0 : this.radioMode.hashCode());
+        result = prime * result + (this.broadcast ? 1021 : 1031);
 
-        result = prime * result + (this.m_pairwiseCiphers == null ? 0 : WifiCiphers.getCode(this.m_pairwiseCiphers));
+        result = prime * result + (this.pairwiseCiphers == null ? 0 : WifiCiphers.getCode(this.pairwiseCiphers));
 
-        result = prime * result + (this.m_groupCiphers == null ? 0 : WifiCiphers.getCode(this.m_groupCiphers));
+        result = prime * result + (this.groupCiphers == null ? 0 : WifiCiphers.getCode(this.groupCiphers));
 
-        if (this.m_bgscan != null) {
+        if (this.bgscan != null) {
 
             result = prime * result
-                    + (this.m_bgscan.getModule() == null ? 0 : WifiBgscanModule.getCode(this.m_bgscan.getModule()));
+                    + (this.bgscan.getModule() == null ? 0 : WifiBgscanModule.getCode(this.bgscan.getModule()));
 
-            result = prime * result + this.m_bgscan.getRssiThreshold();
+            result = prime * result + this.bgscan.getRssiThreshold();
 
-            result = prime * result + this.m_bgscan.getShortInterval();
+            result = prime * result + this.bgscan.getShortInterval();
 
-            result = prime * result + this.m_bgscan.getLongInterval();
+            result = prime * result + this.bgscan.getLongInterval();
         } else {
             result = prime * result;
         }
 
-        result = prime * result + (this.m_pingAccessPoint ? 1 : 0);
+        result = prime * result + (this.pingAccessPoint ? 1 : 0);
 
-        result = prime * result + (this.m_ignoreSSID ? 1 : 0);
+        result = prime * result + (this.ignoreSSID ? 1 : 0);
 
         return result;
     }
@@ -254,46 +256,46 @@ public class WifiConfig implements NetConfig {
 
         WifiConfig other = (WifiConfig) obj;
 
-        if (!compare(this.m_mode, other.m_mode)) {
+        if (!compare(this.mode, other.mode)) {
             return false;
         }
-        if (!compare(this.m_ssid, other.m_ssid)) {
+        if (!compare(this.ssid, other.ssid)) {
             return false;
         }
-        if (!compare(this.m_driver, other.m_driver)) {
+        if (!compare(this.driver, other.driver)) {
             return false;
         }
-        if (!Arrays.equals(this.m_channels, other.m_channels)) {
+        if (!Arrays.equals(this.channels, other.channels)) {
             return false;
         }
-        if (!compare(this.m_security, other.m_security)) {
+        if (!compare(this.security, other.security)) {
             return false;
         }
-        if (!compare(this.m_pairwiseCiphers, other.m_pairwiseCiphers)) {
+        if (!compare(this.pairwiseCiphers, other.pairwiseCiphers)) {
             return false;
         }
-        if (!compare(this.m_groupCiphers, other.m_groupCiphers)) {
+        if (!compare(this.groupCiphers, other.groupCiphers)) {
             return false;
         }
-        if (!compare(this.m_passkey.toString(), other.m_passkey.toString())) {
+        if (!compare(this.passkey.toString(), other.passkey.toString())) {
             return false;
         }
-        if (!compare(this.m_hwMode, other.m_hwMode)) {
+        if (!compare(this.hwMode, other.hwMode)) {
             return false;
         }
-        if (!compare(this.m_radioMode, other.m_radioMode)) {
+        if (!compare(this.radioMode, other.radioMode)) {
             return false;
         }
-        if (!compare(this.m_bgscan, other.m_bgscan)) {
+        if (!compare(this.bgscan, other.bgscan)) {
             return false;
         }
-        if (this.m_broadcast != other.m_broadcast) {
+        if (this.broadcast != other.broadcast) {
             return false;
         }
-        if (this.m_pingAccessPoint != other.pingAccessPoint()) {
+        if (this.pingAccessPoint != other.pingAccessPoint()) {
             return false;
         }
-        if (this.m_ignoreSSID != other.ignoreSSID()) {
+        if (this.ignoreSSID != other.ignoreSSID()) {
             return false;
         }
         return true;
@@ -305,55 +307,55 @@ public class WifiConfig implements NetConfig {
 
     @Override
     public boolean isValid() {
-        return this.m_mode != null ? true : false;
+        return this.mode != null ? true : false;
     }
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("WifiConfig [");
-        if (this.m_mode != null) {
-            sb.append("mode: ").append(this.m_mode).append(" :: ");
+        if (this.mode != null) {
+            sb.append("mode: ").append(this.mode).append(" :: ");
         }
-        if (this.m_ssid != null) {
-            sb.append("ssid: ").append(this.m_ssid).append(" :: ");
+        if (this.ssid != null) {
+            sb.append("ssid: ").append(this.ssid).append(" :: ");
         }
-        sb.append("ignoreSSID: ").append(this.m_ignoreSSID).append(" :: ");
+        sb.append("ignoreSSID: ").append(this.ignoreSSID).append(" :: ");
 
-        if (this.m_driver != null) {
-            sb.append("driver: ").append(this.m_driver).append(" :: ");
+        if (this.driver != null) {
+            sb.append("driver: ").append(this.driver).append(" :: ");
         }
-        if (this.m_channels != null && this.m_channels.length > 0) {
+        if (this.channels != null && this.channels.length > 0) {
             sb.append("channels: ");
-            for (int i = 0; i < this.m_channels.length; i++) {
-                sb.append(this.m_channels[i]);
-                if (i + i < this.m_channels.length) {
+            for (int i = 0; i < this.channels.length; i++) {
+                sb.append(this.channels[i]);
+                if (i + i < this.channels.length) {
                     sb.append(",");
                 }
             }
             sb.append(" :: ");
         }
-        if (this.m_security != null) {
-            sb.append("security: ").append(this.m_security).append(" :: ");
+        if (this.security != null) {
+            sb.append("security: ").append(this.security).append(" :: ");
         }
-        if (this.m_pairwiseCiphers != null) {
-            sb.append("pairwiseCiphers: ").append(this.m_pairwiseCiphers).append(" :: ");
+        if (this.pairwiseCiphers != null) {
+            sb.append("pairwiseCiphers: ").append(this.pairwiseCiphers).append(" :: ");
         }
-        if (this.m_groupCiphers != null) {
-            sb.append("groupCiphers: ").append(this.m_groupCiphers).append(" :: ");
+        if (this.groupCiphers != null) {
+            sb.append("groupCiphers: ").append(this.groupCiphers).append(" :: ");
         }
-        if (this.m_passkey != null) {
-            sb.append("passkey: ").append(this.m_passkey).append(" :: ");
+        if (this.passkey != null) {
+            sb.append("passkey: ").append(this.passkey).append(" :: ");
         }
-        if (this.m_hwMode != null) {
-            sb.append("hwMode: ").append(this.m_hwMode).append(" :: ");
+        if (this.hwMode != null) {
+            sb.append("hwMode: ").append(this.hwMode).append(" :: ");
         }
-        if (this.m_radioMode != null) {
-            sb.append("radioMode: ").append(this.m_radioMode).append(" :: ");
+        if (this.radioMode != null) {
+            sb.append("radioMode: ").append(this.radioMode).append(" :: ");
         }
-        sb.append("broadcast: ").append(this.m_broadcast).append(" :: ");
-        if (this.m_bgscan != null) {
-            sb.append("bgscan: ").append(this.m_bgscan);
+        sb.append("broadcast: ").append(this.broadcast).append(" :: ");
+        if (this.bgscan != null) {
+            sb.append("bgscan: ").append(this.bgscan);
         }
 
         sb.append("]");

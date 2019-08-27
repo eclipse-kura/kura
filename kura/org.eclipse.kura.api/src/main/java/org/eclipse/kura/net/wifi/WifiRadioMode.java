@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -23,15 +23,15 @@ public enum WifiRadioMode {
     RADIO_MODE_80211nHT40below(0x04),
     RADIO_MODE_80211nHT40above(0x05);
 
-    private int m_code;
+    private int code;
 
     private WifiRadioMode(int code) {
-        this.m_code = code;
+        this.code = code;
     }
 
     public static WifiRadioMode parseCode(int code) {
         for (WifiRadioMode mode : WifiRadioMode.values()) {
-            if (mode.m_code == code) {
+            if (mode.code == code) {
                 return mode;
             }
         }
@@ -42,7 +42,7 @@ public enum WifiRadioMode {
     public static int getCode(WifiRadioMode radioMode) {
         for (WifiRadioMode mode : WifiRadioMode.values()) {
             if (mode == radioMode) {
-                return mode.m_code;
+                return mode.code;
             }
         }
 

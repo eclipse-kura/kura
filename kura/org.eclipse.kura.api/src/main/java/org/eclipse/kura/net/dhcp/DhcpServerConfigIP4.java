@@ -55,6 +55,7 @@ public class DhcpServerConfigIP4 extends DhcpServerConfigIP<IP4Address> implemen
      *            the DNS servers that will get passed to DHCP clients if passDns is true
      */
     @Deprecated
+    @SuppressWarnings("checkstyle:parameterNumber")
     public DhcpServerConfigIP4(String interfaceName, boolean enabled, IP4Address subnet, IP4Address routerAddress,
             IP4Address subnetMask, int defaultLeaseTime, int maximumLeaseTime, short prefix, IP4Address rangeStart,
             IP4Address rangeEnd, boolean passDns, List<IP4Address> dnsServers) {

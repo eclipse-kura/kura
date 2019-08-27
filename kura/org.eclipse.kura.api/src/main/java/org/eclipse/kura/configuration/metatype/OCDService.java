@@ -14,7 +14,6 @@ package org.eclipse.kura.configuration.metatype;
 import java.util.List;
 
 import org.eclipse.kura.configuration.ComponentConfiguration;
-import org.eclipse.kura.configuration.ConfigurationService;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -28,7 +27,7 @@ public interface OCDService {
 
     /**
      * Returns the {@link OCD}s of all registered component factories for which an OSGi MetaType is
-     * is registered in the {@link ConfigurationService}.
+     * is registered in the {@link org.eclipse.kura.configuration.ConfigurationService}.
      * <br>
      * The {@link OCD}s are returned in the form of a {@link ComponentConfiguraion} instance. The component factory pid
      * can be obtained by calling {@link ComponentConfiguration#getPid()} method and the actual {@link OCD} can be
@@ -42,7 +41,7 @@ public interface OCDService {
 
     /**
      * Returns the {@link OCD} of the registered component factory identified by the provided {@code factoryPid} and for
-     * which an OSGi MetaType is registered in the {@link ConfigurationService}.
+     * which an OSGi MetaType is registered in the {@link org.eclipse.kura.configuration.ConfigurationService}.
      * <br>
      * The {@link OCD} is returned in the form of a {@link ComponentConfiguraion} instance. The component factory pid
      * can be obtained by calling {@link ComponentConfiguration#getPid()} method and the actual {@link OCD} can be
@@ -56,7 +55,7 @@ public interface OCDService {
     /**
      * Searches the Declarative Services layer for Components implementing any of the specified services and returns a
      * {@link ComponentConfiguration} instance describing it.
-     * If the {@link ConfigurationService} contains a registered OSGi MetaType for a found Component, it will be
+     * If the {@link org.eclipse.kura.configuration.ConfigurationService} contains a registered OSGi MetaType for a found Component, it will be
      * returned inside the {@link ComponentConfiguration} instance.
      * <br>
      * The {@link ComponentConfiguraion} instances in the returned list contain the following information:
@@ -66,7 +65,7 @@ public interface OCDService {
      * </li>
      * <li>
      * The {@link ComponentConfiguration#getDefinition()} method returns the {@link OCD} for the found Component if
-     * it is known to the {@link ConfigurationService}, or {@code null} otherwise.
+     * it is known to the {@link org.eclipse.kura.configuration.ConfigurationService}, or {@code null} otherwise.
      * </li>
      * </ul>
      *
@@ -78,7 +77,7 @@ public interface OCDService {
     public List<ComponentConfiguration> getServiceProviderOCDs(Class<?>... classes);
 
     /**
-     * @see {@link ConfigurationService#getServiceProviderOCDs(Class...)
+     * @see {@link org.eclipse.kura.configuration.ConfigurationService#getServiceProviderOCDs(Class...)
      *
      * @param classNames
      *            The list of service class or interface names to be used as search filter.

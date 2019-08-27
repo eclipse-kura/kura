@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -42,15 +42,15 @@ public enum NetInterfaceState {
     /** The device is in a failure state following an attempt to activate it. */
     FAILED(120);
 
-    private int m_code;
+    private int code;
 
     private NetInterfaceState(int code) {
-        this.m_code = code;
+        this.code = code;
     }
 
     public static NetInterfaceState parseCode(int code) {
         for (NetInterfaceState state : NetInterfaceState.values()) {
-            if (state.m_code == code) {
+            if (state.code == code) {
                 return state;
             }
         }

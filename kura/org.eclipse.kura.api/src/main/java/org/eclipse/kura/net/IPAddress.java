@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -25,6 +25,9 @@ import org.osgi.annotation.versioning.ProviderType;
 @ProviderType
 public abstract class IPAddress {
 
+    private static final int BIT_MASK = 0xff;
+    private static final int BYTE_SIZE = 8;
+    private static final int BYTE_3 = 24;
     private final byte[] address;
     protected java.net.InetAddress javaNetAddress;
 
@@ -59,12 +62,12 @@ public abstract class IPAddress {
     public static IPAddress getByAddress(int addr) throws UnknownHostException {
 
         StringBuffer sb = new StringBuffer();
-        for (int shift = 24; shift > 0; shift -= 8) {
+        for (int shift = BYTE_3; shift > 0; shift -= BYTE_SIZE) {
             // process 3 bytes, from high order byte down
-            sb.append(Integer.toString(addr >>> shift & 0xff));
+            sb.append(Integer.toString(addr >>> shift & BIT_MASK));
             sb.append('.');
         }
-        sb.append(Integer.toString(addr & 0xff));
+        sb.append(Integer.toString(addr & BIT_MASK));
 
         InetAddress jnetAddr = InetAddress.getByName(sb.toString());
         return getByAddress(jnetAddr.getAddress());

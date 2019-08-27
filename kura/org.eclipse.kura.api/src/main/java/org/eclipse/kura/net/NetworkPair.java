@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -27,9 +27,11 @@ import org.osgi.annotation.versioning.ProviderType;
 public class NetworkPair<T extends IPAddress> {
 
     /** The IP Address portion of the NetworkPair **/
+    @SuppressWarnings({"checkstyle:memberName", "checkstyle:visibilityModifier"})
     public T m_ipAddress;
 
     /** The prefix portion of the NetworkPair **/
+    @SuppressWarnings({"checkstyle:memberName", "checkstyle:visibilityModifier"})
     public short m_prefix;
 
     public NetworkPair(T ipAddress, short prefix) {
@@ -55,7 +57,7 @@ public class NetworkPair<T extends IPAddress> {
 
     @Override
     public String toString() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append(this.m_ipAddress.getHostAddress()).append("/").append(this.m_prefix);
 
         return sb.toString();
@@ -69,9 +71,7 @@ public class NetworkPair<T extends IPAddress> {
 
         NetworkPair<?> other = (NetworkPair<?>) o;
 
-        if (!this.m_ipAddress.equals(other.m_ipAddress)) {
-            return false;
-        } else if (this.m_prefix != other.m_prefix) {
+        if (!this.m_ipAddress.equals(other.m_ipAddress) || this.m_prefix != other.m_prefix) {
             return false;
         }
 

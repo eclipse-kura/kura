@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -46,14 +46,14 @@ public class CommURI {
     public static final int FLOWCONTROL_XONXOFF_IN = SerialPort.FLOWCONTROL_XONXOFF_IN;
     public static final int FLOWCONTROL_XONXOFF_OUT = SerialPort.FLOWCONTROL_XONXOFF_OUT;
 
-    private final String m_port;
-    private final int m_baudRate;
-    private final int m_dataBits;
-    private final int m_stopBits;
-    private final int m_parity;
-    private final int m_flowControl;
-    private final int m_openTimeout;
-    private final int m_receiveTimeout;
+    private final String port;
+    private final int baudRate;
+    private final int dataBits;
+    private final int stopBits;
+    private final int parity;
+    private final int flowControl;
+    private final int openTimeout;
+    private final int receiveTimeout;
 
     /**
      * Constructor to build the CommURI
@@ -62,14 +62,14 @@ public class CommURI {
      *            the builder that contains the comm port parameters
      */
     private CommURI(Builder builder) {
-        this.m_port = builder.m_port;
-        this.m_baudRate = builder.m_baudRate;
-        this.m_dataBits = builder.m_dataBits;
-        this.m_stopBits = builder.m_stopBits;
-        this.m_parity = builder.m_parity;
-        this.m_flowControl = builder.m_flowControl;
-        this.m_openTimeout = builder.m_openTimeout;
-        this.m_receiveTimeout = builder.m_receiveTimeout;
+        this.port = builder.m_port;
+        this.baudRate = builder.m_baudRate;
+        this.dataBits = builder.m_dataBits;
+        this.stopBits = builder.m_stopBits;
+        this.parity = builder.m_parity;
+        this.flowControl = builder.m_flowControl;
+        this.openTimeout = builder.m_openTimeout;
+        this.receiveTimeout = builder.m_receiveTimeout;
     }
 
     /**
@@ -78,7 +78,7 @@ public class CommURI {
      * @return a {@link String } representing the port
      */
     public String getPort() {
-        return this.m_port;
+        return this.port;
     }
 
     /**
@@ -87,7 +87,7 @@ public class CommURI {
      * @return an int representing the baud rate
      */
     public int getBaudRate() {
-        return this.m_baudRate;
+        return this.baudRate;
     }
 
     /**
@@ -96,7 +96,7 @@ public class CommURI {
      * @return an int representing the number of data bits
      */
     public int getDataBits() {
-        return this.m_dataBits;
+        return this.dataBits;
     }
 
     /**
@@ -105,7 +105,7 @@ public class CommURI {
      * @return an int representing the number of stop bits
      */
     public int getStopBits() {
-        return this.m_stopBits;
+        return this.stopBits;
     }
 
     /**
@@ -114,7 +114,7 @@ public class CommURI {
      * @return an int representing the parity
      */
     public int getParity() {
-        return this.m_parity;
+        return this.parity;
     }
 
     /**
@@ -123,7 +123,7 @@ public class CommURI {
      * @return an int representing the flow control
      */
     public int getFlowControl() {
-        return this.m_flowControl;
+        return this.flowControl;
     }
 
     /**
@@ -135,7 +135,7 @@ public class CommURI {
      */
     @Deprecated
     public int getTimeout() {
-        return this.m_openTimeout;
+        return this.openTimeout;
     }
 
     /**
@@ -145,7 +145,7 @@ public class CommURI {
      * @since 1.2
      */
     public int getOpenTimeout() {
-        return this.m_openTimeout;
+        return this.openTimeout;
     }
 
     /**
@@ -155,7 +155,7 @@ public class CommURI {
      * @since 1.2
      */
     public int getReceiveTimeout() {
-        return this.m_receiveTimeout;
+        return this.receiveTimeout;
     }
 
     /**
@@ -164,10 +164,10 @@ public class CommURI {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("comm:").append(this.m_port).append(";baudrate=").append(this.m_baudRate).append(";databits=")
-                .append(this.m_dataBits).append(";stopbits=").append(this.m_stopBits).append(";parity=")
-                .append(this.m_parity).append(";flowcontrol=").append(this.m_flowControl).append(";timeout=")
-                .append(this.m_openTimeout).append(";receivetimeout=").append(this.m_receiveTimeout);
+        sb.append("comm:").append(this.port).append(";baudrate=").append(this.baudRate).append(";databits=")
+                .append(this.dataBits).append(";stopbits=").append(this.stopBits).append(";parity=")
+                .append(this.parity).append(";flowcontrol=").append(this.flowControl).append(";timeout=")
+                .append(this.openTimeout).append(";receivetimeout=").append(this.receiveTimeout);
         return sb.toString();
     }
 

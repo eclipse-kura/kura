@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -24,15 +24,15 @@ public enum WifiMode {
     /** Access Point Mode - Coordinated network with one or more central controllers. */
     MASTER(0x03);
 
-    private int m_code;
+    private int code;
 
     private WifiMode(int code) {
-        this.m_code = code;
+        this.code = code;
     }
 
     public static WifiMode parseCode(int code) {
         for (WifiMode mode : WifiMode.values()) {
-            if (mode.m_code == code) {
+            if (mode.code == code) {
                 return mode;
             }
         }
@@ -43,7 +43,7 @@ public enum WifiMode {
     public static int getCode(WifiMode wifiMode) {
         for (WifiMode mode : WifiMode.values()) {
             if (mode == wifiMode) {
-                return mode.m_code;
+                return mode.code;
             }
         }
         return -1;

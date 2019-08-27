@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -32,15 +32,15 @@ public enum NetworkState {
     /** A network device is connected, with global network connectivity. */
     CONNECTED_GLOBAL(70);
 
-    private int m_code;
+    private int code;
 
     private NetworkState(int code) {
-        this.m_code = code;
+        this.code = code;
     }
 
     public static NetworkState parseCode(int code) {
         for (NetworkState state : NetworkState.values()) {
-            if (state.m_code == code) {
+            if (state.code == code) {
                 return state;
             }
         }

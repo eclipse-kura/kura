@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -18,13 +18,13 @@ public enum ModemCdmaServiceProvider {
     AERIS(2),
     VERIZON(3);
 
-    private int m_provider;
+    private int provider;
 
     private ModemCdmaServiceProvider(int provider) {
-        this.m_provider = provider;
+        this.provider = provider;
     }
 
     public int getProvider() {
-        return this.m_provider;
+        return this.provider;
     }
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -48,15 +48,15 @@ public enum WifiSecurity {
     /** Supports WPA and WPA2 encryption. */
     SECURITY_WPA_WPA2(0x4000);
 
-    private int m_code;
+    private int code;
 
     private WifiSecurity(int code) {
-        this.m_code = code;
+        this.code = code;
     }
 
     public static WifiSecurity parseCode(int code) {
         for (WifiSecurity mode : WifiSecurity.values()) {
-            if (mode.m_code == code) {
+            if (mode.code == code) {
                 return mode;
             }
         }
@@ -67,7 +67,7 @@ public enum WifiSecurity {
     public static int getCode(WifiSecurity security) {
         for (WifiSecurity mode : WifiSecurity.values()) {
             if (mode == security) {
-                return mode.m_code;
+                return mode.code;
             }
         }
 

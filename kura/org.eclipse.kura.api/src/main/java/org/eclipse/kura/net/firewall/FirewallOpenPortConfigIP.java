@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -26,6 +26,10 @@ import org.osgi.annotation.versioning.ProviderType;
  */
 @ProviderType
 public abstract class FirewallOpenPortConfigIP<T extends IPAddress> implements FirewallOpenPortConfig {
+
+    private static final int MAX_PORT = 65535;
+
+    private static final int MIN_PORT = 0;
 
     /** The port to open for inbound connections **/
     private int port;
@@ -247,7 +251,7 @@ public abstract class FirewallOpenPortConfigIP<T extends IPAddress> implements F
 
     @Override
     public boolean isValid() {
-        if (this.port < 0 || this.port > 65535) {
+        if (this.port < MIN_PORT || this.port > MAX_PORT) {
             return false;
         }
 

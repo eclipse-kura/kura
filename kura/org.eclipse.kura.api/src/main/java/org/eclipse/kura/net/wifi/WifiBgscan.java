@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -21,69 +21,72 @@ import org.osgi.annotation.versioning.ProviderType;
 @ProviderType
 public class WifiBgscan {
 
-    private WifiBgscanModule m_module = null;
-    private int m_shortInterval = 0;
-    private int m_longInterval = 0;
-    private int m_rssiThreshold = 0;
+    private static final int SCAN_LONG_INTERVAL_POSITION = 3;
+    private static final int SCAN_RSSI_THRESHOLD_POSITION = 2;
+    private static final int SCAN_SHORT_INTERVAL_POSITION = 1;
+    private WifiBgscanModule module = null;
+    private int shortInterval = 0;
+    private int longInterval = 0;
+    private int rssiThreshold = 0;
 
     public WifiBgscan(WifiBgscanModule module, int shortInterval, int rssiThreshold, int longInterval) {
 
-        this.m_module = module;
-        this.m_shortInterval = shortInterval;
-        this.m_rssiThreshold = rssiThreshold;
-        this.m_longInterval = longInterval;
+        this.module = module;
+        this.shortInterval = shortInterval;
+        this.rssiThreshold = rssiThreshold;
+        this.longInterval = longInterval;
     }
 
     public WifiBgscan(WifiBgscan bgscan) {
 
-        this.m_module = bgscan.m_module;
-        this.m_shortInterval = bgscan.m_shortInterval;
-        this.m_rssiThreshold = bgscan.m_rssiThreshold;
-        this.m_longInterval = bgscan.m_longInterval;
+        this.module = bgscan.module;
+        this.shortInterval = bgscan.shortInterval;
+        this.rssiThreshold = bgscan.rssiThreshold;
+        this.longInterval = bgscan.longInterval;
     }
 
     public WifiBgscan(String str) {
 
         if (str == null || str.length() == 0) {
-            this.m_module = WifiBgscanModule.NONE;
+            this.module = WifiBgscanModule.NONE;
         } else {
             String[] sa = str.split(":");
             if (sa[0].equals("simple")) {
-                this.m_module = WifiBgscanModule.SIMPLE;
+                this.module = WifiBgscanModule.SIMPLE;
             } else if (sa[0].equals("learn")) {
-                this.m_module = WifiBgscanModule.LEARN;
+                this.module = WifiBgscanModule.LEARN;
             }
 
-            this.m_shortInterval = Integer.parseInt(sa[1]);
-            this.m_rssiThreshold = Integer.parseInt(sa[2]);
-            this.m_longInterval = Integer.parseInt(sa[3]);
+            this.shortInterval = Integer.parseInt(sa[SCAN_SHORT_INTERVAL_POSITION]);
+            this.rssiThreshold = Integer.parseInt(sa[SCAN_RSSI_THRESHOLD_POSITION]);
+            this.longInterval = Integer.parseInt(sa[SCAN_LONG_INTERVAL_POSITION]);
         }
     }
 
     public WifiBgscanModule getModule() {
-        return this.m_module;
+        return this.module;
     }
 
     public int getShortInterval() {
-        return this.m_shortInterval;
+        return this.shortInterval;
     }
 
     public int getLongInterval() {
-        return this.m_longInterval;
+        return this.longInterval;
     }
 
     public int getRssiThreshold() {
-        return this.m_rssiThreshold;
+        return this.rssiThreshold;
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + m_longInterval;
-        result = prime * result + ((m_module == null) ? 0 : m_module.hashCode());
-        result = prime * result + m_rssiThreshold;
-        result = prime * result + m_shortInterval;
+        result = prime * result + longInterval;
+        result = prime * result + ((module == null) ? 0 : module.hashCode());
+        result = prime * result + rssiThreshold;
+        result = prime * result + shortInterval;
         return result;
     }
 
@@ -101,19 +104,19 @@ public class WifiBgscan {
 
         WifiBgscan bgscan = (WifiBgscan) obj;
 
-        if (this.m_module != bgscan.m_module) {
+        if (this.module != bgscan.module) {
             return false;
         }
 
-        if (this.m_rssiThreshold != bgscan.m_rssiThreshold) {
+        if (this.rssiThreshold != bgscan.rssiThreshold) {
             return false;
         }
 
-        if (this.m_shortInterval != bgscan.m_shortInterval) {
+        if (this.shortInterval != bgscan.shortInterval) {
             return false;
         }
 
-        if (this.m_longInterval != bgscan.m_longInterval) {
+        if (this.longInterval != bgscan.longInterval) {
             return false;
         }
 
@@ -129,20 +132,20 @@ public class WifiBgscan {
     public String toString() {
 
         StringBuffer sb = new StringBuffer();
-        if (this.m_module == WifiBgscanModule.SIMPLE) {
+        if (this.module == WifiBgscanModule.SIMPLE) {
             sb.append("simple:");
-        } else if (this.m_module == WifiBgscanModule.LEARN) {
+        } else if (this.module == WifiBgscanModule.LEARN) {
             sb.append("learn:");
         } else {
             sb.append("");
             return sb.toString();
         }
 
-        sb.append(this.m_shortInterval);
+        sb.append(this.shortInterval);
         sb.append(':');
-        sb.append(this.m_rssiThreshold);
+        sb.append(this.rssiThreshold);
         sb.append(':');
-        sb.append(this.m_longInterval);
+        sb.append(this.longInterval);
 
         return sb.toString();
     }

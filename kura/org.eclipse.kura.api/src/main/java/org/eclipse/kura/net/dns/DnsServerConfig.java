@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -11,7 +11,6 @@
  *******************************************************************************/
 package org.eclipse.kura.net.dns;
 
-import java.util.List;
 import java.util.Set;
 
 import org.eclipse.kura.net.IPAddress;
@@ -30,14 +29,14 @@ public interface DnsServerConfig extends NetConfig {
     /**
      * returns the DNS forwarders associated with this DnsServerConfig
      *
-     * @return a {@link List } of DNS forwarders
+     * @return a {@link java.util.List } of DNS forwarders
      */
     public Set<? extends IPAddress> getForwarders();
 
     /**
      * returns the allowed networks for resolving DNS queries
      *
-     * @return a {@link List } of {@link NetworkPair } representing the networks that are allowed to
+     * @return a {@link java.util.List } of {@link NetworkPair } representing the networks that are allowed to
      *         perform DNS queries
      */
     public Set<? extends NetworkPair<? extends IPAddress>> getAllowedNetworks();

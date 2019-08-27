@@ -59,8 +59,8 @@ public class ModemConfig implements NetConfig {
     private int lcpEchoInterval = 0;
     private int lcpEchoFailure = 0;
     private IPAddress ipAddress = null;
-    private int dataCompression = 0;			// FIXME: change to enum?
-    private int headerCompression = 0;		// FIXME: change to enum?
+    private int dataCompression = 0; // FIXME: change to enum?
+    private int headerCompression = 0; // FIXME: change to enum?
     private boolean gpsEnabled = false;
     private int resetTimeout = 0;
 

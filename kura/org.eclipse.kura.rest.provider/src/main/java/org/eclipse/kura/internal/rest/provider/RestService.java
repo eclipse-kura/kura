@@ -10,6 +10,8 @@
 
 package org.eclipse.kura.internal.rest.provider;
 
+import static java.util.Objects.isNull;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
@@ -20,10 +22,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
-
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.PathSegment;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
@@ -41,6 +44,7 @@ import com.eclipsesource.jaxrs.provider.security.AuthorizationHandler;
 public class RestService
         implements ConfigurableComponent, AuthenticationHandler, AuthorizationHandler, ContainerResponseFilter {
 
+    private static final String REST_FAILURE_RECEIVED_UNAUTHORIZED_REQUEST = "Rest - Failure - Received unauthorized REST request. Method: {}, path: {}, request IP: {}";
     private static final Logger logger = LoggerFactory.getLogger(RestService.class);
     private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
 
@@ -51,6 +55,9 @@ public class RestService
     private Map<String, User> users;
 
     private CryptoService cryptoService;
+    
+    @Context
+    private HttpServletRequest sr;
 
     public void setCryptoService(CryptoService cryptoService) {
         this.cryptoService = cryptoService;
@@ -82,11 +89,16 @@ public class RestService
     public Principal authenticate(ContainerRequestContext request) {
 
         String path = getRequestPath(request);
+        
+        String requestIp = request.getHeaderString("X-FORWARDED-FOR");
+        if (isNull(requestIp)) {
+            requestIp = sr.getRemoteAddr();
+        }
 
         String authHeader = request.getHeaderString("Authorization");
         if (authHeader == null) {
-            auditLogger.warn("UI Rest - Failure - Received unauthorized REST request. Method: {}, path: {}",
-                    request.getMethod(), path);
+            auditLogger.warn(REST_FAILURE_RECEIVED_UNAUTHORIZED_REQUEST,
+                    request.getMethod(), path, requestIp);
             request.abortWith(UNAUTHORIZED_RESPONSE);
             return null;
         }
@@ -94,8 +106,8 @@ public class RestService
         StringTokenizer tokens = new StringTokenizer(authHeader);
         String authScheme = tokens.nextToken();
         if (!"Basic".equals(authScheme)) {
-            auditLogger.warn("UI Rest - Failure - Received unauthorized REST request. Method: {}, path: {}",
-                    request.getMethod(), path);
+            auditLogger.warn(REST_FAILURE_RECEIVED_UNAUTHORIZED_REQUEST,
+                    request.getMethod(), path, requestIp);
             request.abortWith(UNAUTHORIZED_RESPONSE);
             return null;
         }
@@ -116,6 +128,10 @@ public class RestService
             }
         } catch (Exception e) {
         }
+        
+        auditLogger.warn(REST_FAILURE_RECEIVED_UNAUTHORIZED_REQUEST,
+                request.getMethod(), path, requestIp);
+        request.abortWith(UNAUTHORIZED_RESPONSE);
         return null;
     }
 
@@ -147,11 +163,11 @@ public class RestService
 
         int responseStatus = responseContext.getStatus();
         if (responseStatus == Response.Status.OK.getStatusCode()) {
-            auditLogger.info("UI Rest - Success - Request succeeded for user: {}, method: {}, path: {}", user,
+            auditLogger.info("Rest - Success - Request succeeded for user: {}, method: {}, path: {}", user,
                     requestContext.getMethod(), path);
         } else {
             auditLogger.warn(
-                    "UI Rest - Failure - Request failed for user: {}, method: {}, path: {}, response code: {}, message: {}",
+                    "Rest - Failure - Request failed for user: {}, method: {}, path: {}, response code: {}, message: {}",
                     user, requestContext.getMethod(), path, responseStatus, responseContext.getEntity());
         }
 

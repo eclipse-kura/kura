@@ -16,25 +16,27 @@ package javax.comm;
  * @since 1.0
  */
 public class UnsupportedCommOperationException extends Exception {
-	/**
-	 * Define the serial version uid (long) constant.
-	 */
-	private static final long serialVersionUID = -1653996043267525578L;
+    /**
+     * Define the serial version uid (long) constant.
+     */
+    private static final long serialVersionUID = -1653996043267525578L;
 
-	/**
-	 * Constructs an instance of this class.
-	 * @see #UnsupportedCommOperationException(String)
-	 */
-	public UnsupportedCommOperationException() {
-		super();
-	}
+    /**
+     * Constructs an instance of this class.
+     *
+     * @see #UnsupportedCommOperationException(String)
+     */
+    public UnsupportedCommOperationException() {
+        super();
+    }
 
-	/**
-	 * Constructs an instance of this class from the specified str parameter.
-	 * @param str	The str (<code>String</code>) parameter.
-	 * @see #UnsupportedCommOperationException()
-	 */
-	public UnsupportedCommOperationException(final String str) {
-		super(str);
-	}
+    /**
+     * Constructs an instance of this class from the specified str parameter.
+     *
+     * @param str The str (<code>String</code>) parameter.
+     * @see #UnsupportedCommOperationException()
+     */
+    public UnsupportedCommOperationException(final String str) {
+        super(str);
+    }
 }

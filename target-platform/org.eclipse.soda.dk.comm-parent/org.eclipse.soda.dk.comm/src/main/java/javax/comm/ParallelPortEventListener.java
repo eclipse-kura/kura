@@ -10,7 +10,7 @@ package javax.comm;
  * Contributors:                                                         *
  *     IBM - initial API and implementation                              *
  ************************************************************************/
-import java.util.*;
+import java.util.EventListener;
 
 /**
  * @author IBM
@@ -18,9 +18,10 @@ import java.util.*;
  * @since 1.0
  */
 public interface ParallelPortEventListener extends EventListener {
-	/**
-	 * Parallel event with the specified ev parameter.
-	 * @param ev	The ev (<code>ParallelPortEvent</code>) parameter.
-	 */
-	public abstract void parallelEvent(final ParallelPortEvent ev);
+    /**
+     * Parallel event with the specified ev parameter.
+     *
+     * @param ev The ev (<code>ParallelPortEvent</code>) parameter.
+     */
+    public abstract void parallelEvent(final ParallelPortEvent ev);
 }

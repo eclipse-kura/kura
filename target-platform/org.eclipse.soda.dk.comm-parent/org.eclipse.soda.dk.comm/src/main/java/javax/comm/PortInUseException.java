@@ -16,21 +16,22 @@ package javax.comm;
  * @since 1.0
  */
 public class PortInUseException extends Exception {
-	/**
-	 * Define the serial version uid (long) constant.
-	 */
-	private static final long serialVersionUID = -2619871379515236575L;
+    /**
+     * Define the serial version uid (long) constant.
+     */
+    private static final long serialVersionUID = -2619871379515236575L;
 
-	/**
-	 * Define the current owner (String) field.
-	 */
-	public String currentOwner;
+    /**
+     * Define the current owner (String) field.
+     */
+    public String currentOwner;
 
-	/**
-	 * Constructs an instance of this class from the specified co parameter.
-	 * @param co	The co (<code>String</code>) parameter.
-	 */
-	public PortInUseException(final String co) {
-		this.currentOwner = co;
-	}
+    /**
+     * Constructs an instance of this class from the specified co parameter.
+     *
+     * @param co The co (<code>String</code>) parameter.
+     */
+    public PortInUseException(final String co) {
+        this.currentOwner = co;
+    }
 }

@@ -207,7 +207,7 @@ public class ExampleSerialPublisher implements ConfigurableComponent, CloudSubsc
         }
 
         String uri = new CommURI.Builder(port).withBaudRate(baudRate).withDataBits(dataBits).withStopBits(stopBits)
-                .withParity(parity).withTimeout(1000).build().toString();
+                .withParity(parity).withOpenTimeout(1000).build().toString();
 
         try {
             this.commConnection = (CommConnection) this.connectionFactory.createConnection(uri, 1, false);

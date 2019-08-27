@@ -16,8 +16,8 @@ package org.eclipse.soda.dk.comm;
  * @since 1.0
  */
 public class DeviceList {
-	/**
-	 * Define the head entry (DeviceListEntry) field.
-	 */
-	DeviceListEntry headEntry = null;
+    /**
+     * Define the head entry (DeviceListEntry) field.
+     */
+    DeviceListEntry headEntry = null;
 }

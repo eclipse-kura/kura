@@ -10,7 +10,7 @@ package javax.comm;
  * Contributors:                                                         *
  *     IBM - initial API and implementation                              *
  ************************************************************************/
-import java.util.*;
+import java.util.EventListener;
 
 /**
  * @author IBM
@@ -18,9 +18,10 @@ import java.util.*;
  * @since 1.0
  */
 public interface SerialPortEventListener extends EventListener {
-	/**
-	 * Serial event with the specified ev parameter.
-	 * @param ev	The ev (<code>SerialPortEvent</code>) parameter.
-	 */
-	public abstract void serialEvent(final SerialPortEvent ev);
+    /**
+     * Serial event with the specified ev parameter.
+     *
+     * @param ev The ev (<code>SerialPortEvent</code>) parameter.
+     */
+    public abstract void serialEvent(final SerialPortEvent ev);
 }

@@ -16,16 +16,17 @@ package javax.comm;
  * @since 1.0
  */
 public class SerialPortException extends Exception {
-	/**
-	 * Define the serial version uid (long) constant.
-	 */
-	private static final long serialVersionUID = 1409005327231826071L;
+    /**
+     * Define the serial version uid (long) constant.
+     */
+    private static final long serialVersionUID = 1409005327231826071L;
 
-	/**
-	 * Constructs an instance of this class from the specified msg parameter.
-	 * @param msg	The msg (<code>String</code>) parameter.
-	 */
-	public SerialPortException(final String msg) {
-		super(msg);
-	}
+    /**
+     * Constructs an instance of this class from the specified msg parameter.
+     *
+     * @param msg The msg (<code>String</code>) parameter.
+     */
+    public SerialPortException(final String msg) {
+        super(msg);
+    }
 }

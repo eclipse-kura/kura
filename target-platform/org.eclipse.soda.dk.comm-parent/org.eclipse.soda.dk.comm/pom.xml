@@ -41,6 +41,12 @@
             <artifactId>org.eclipse.osgi</artifactId>
             <version>3.13.0.v20180226-1711</version>
         </dependency>
+        <dependency>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-api</artifactId>
+          <scope>provided</scope>
+          <version>1.7.26</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -64,7 +70,7 @@
                 <configuration>
                     <manifestLocation>META-INF</manifestLocation>
                     <instructions>
-                        <Bundle-Activator>org.eclipse.soda.dk.comm.bundle.Activator</Bundle-Activator>
+                        <Bundle-Activator>org.eclipse.soda.dk.comm.internal.Activator</Bundle-Activator>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>%bundle.name</Bundle-Name>
                         <Bundle-Version>${project.version}</Bundle-Version>

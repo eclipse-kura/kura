@@ -16,33 +16,33 @@ package org.eclipse.soda.dk.comm;
  * @since 1.0
  */
 public class DeviceListEntry {
-	/**
-	 * Define the logical name (String) field.
-	 */
-	String logicalName;
+    /**
+     * Define the logical name (String) field.
+     */
+    String logicalName;
 
-	/**
-	 * Define the physical name (String) field.
-	 */
-	String physicalName;
+    /**
+     * Define the physical name (String) field.
+     */
+    String physicalName;
 
-	/**
-	 * Define the port type (int) field.
-	 */
-	int portType;
+    /**
+     * Define the port type (int) field.
+     */
+    int portType;
 
-	/**
-	 * Define the sem id (int) field.
-	 */
-	int semID;
+    /**
+     * Define the sem id (int) field.
+     */
+    int semID;
 
-	/**
-	 * Define the opened (boolean) field.
-	 */
-	boolean opened;
+    /**
+     * Define the opened (boolean) field.
+     */
+    boolean opened;
 
-	/**
-	 * Define the next (DeviceListEntry) field.
-	 */
-	DeviceListEntry next;
+    /**
+     * Define the next (DeviceListEntry) field.
+     */
+    DeviceListEntry next;
 }

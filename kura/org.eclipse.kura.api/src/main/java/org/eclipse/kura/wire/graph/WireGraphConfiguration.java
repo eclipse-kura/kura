@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2019 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -15,7 +15,6 @@ package org.eclipse.kura.wire.graph;
 import java.util.Collections;
 import java.util.List;
 
-import org.eclipse.kura.wire.WireConfiguration;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -24,7 +23,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * <br>
  *
  * @see WireComponentConfiguration
- * @see WireConfiguration
+ * @see org.eclipse.kura.wire.WireConfiguration
  *
  * @noextend This class is not intended to be extended by clients.
  * @since 1.4

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2019 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -21,8 +21,6 @@ import java.util.Map;
 import org.eclipse.kura.annotation.Immutable;
 import org.eclipse.kura.annotation.ThreadSafe;
 import org.eclipse.kura.channel.Channel;
-import org.eclipse.kura.channel.ChannelType;
-import org.eclipse.kura.type.DataType;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -32,8 +30,8 @@ import org.osgi.annotation.versioning.ProviderType;
  * <br>
  *
  * @see Channel
- * @see ChannelType
- * @see DataType
+ * @see org.eclipse.kura.channel.ChannelType
+ * @see org.eclipse.kura.type.DataType
  *
  * @noextend This class is not intended to be extended by clients.
  * @since 1.2

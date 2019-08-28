@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2019 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -14,14 +14,13 @@
 package org.eclipse.kura.wire.multiport;
 
 import org.eclipse.kura.wire.WireComponent;
-import org.eclipse.kura.wire.WireEmitter;
 import org.osgi.annotation.versioning.ConsumerType;
 import org.osgi.service.wireadmin.Consumer;
 
 /**
  * The MultiportWireReceiver interface Represents a wire component which is a data
  * consumer that can receive produced or emitted values from upstream
- * {@link WireEmitter}.
+ * {@link org.eclipse.kura.wire.WireEmitter}.
  *
  * @since 1.4
  */

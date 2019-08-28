@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2019 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -12,10 +12,7 @@ package org.eclipse.kura.asset;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.KuraRuntimeException;
-import org.eclipse.kura.channel.ChannelFlag;
 import org.eclipse.kura.channel.ChannelRecord;
 import org.eclipse.kura.channel.listener.ChannelListener;
 import org.osgi.annotation.versioning.ProviderType;
@@ -59,13 +56,13 @@ public interface Asset {
      *            the set of channel names which are to be read. The channel name
      *            must be unique for every channel belonging to an asset.
      *            Channel names are case sensitive.
-     * @throws KuraRuntimeException
+     * @throws org.eclipse.kura.KuraRuntimeException
      *             if the method is not implemented by the asset then specific
-     *             error code {@code KuraErrorCode#OPERATION_NOT_SUPPORTED}
-     *             needs to be set in the thrown {@link KuraRuntimeException}
+     *             error code {@code org.eclipse.kura.KuraErrorCode#OPERATION_NOT_SUPPORTED}
+     *             needs to be set in the thrown {@link org.eclipse.kura.KuraRuntimeException}
      * @throws KuraException
      *             if the connection to the asset was interrupted, then error
-     *             code {@code KuraErrorCode#CONNECTION_FAILED} needs to be set
+     *             code {@code org.eclipse.kura.KuraErrorCode#CONNECTION_FAILED} needs to be set
      *             in the thrown {@link KuraException}.
      * @throws NullPointerException
      *             if argument is null
@@ -80,13 +77,13 @@ public interface Asset {
      *
      * @see Asset#read(List)
      *
-     * @throws KuraRuntimeException
+     * @throws org.eclipse.kura.KuraRuntimeException
      *             if the method is not implemented by the asset then specific
-     *             error code {@code KuraErrorCode#OPERATION_NOT_SUPPORTED}
-     *             needs to be set in the thrown {@link KuraRuntimeException}
+     *             error code {@code org.eclipse.kura.KuraErrorCode#OPERATION_NOT_SUPPORTED}
+     *             needs to be set in the thrown {@link org.eclipse.kura.KuraRuntimeException}
      * @throws KuraException
      *             if the connection to the asset was interrupted, then error
-     *             code {@code KuraErrorCode#CONNECTION_FAILED} needs to be set
+     *             code {@code org.eclipse.kura.KuraErrorCode#CONNECTION_FAILED} needs to be set
      *             in the thrown {@link KuraException}.
      * @return the list of channel records which comprises the currently read
      *         value in case of success or the reason of failure
@@ -103,18 +100,18 @@ public interface Asset {
      *            Channel names are case sensitive.
      * @param channelListener
      *            the channel listener
-     * @throws KuraRuntimeException
+     * @throws org.eclipse.kura.KuraRuntimeException
      *             if the method is not implemented by the asset then specific
-     *             error code {@link KuraErrorCode#OPERATION_NOT_SUPPORTED}
-     *             needs to be set in the thrown {@link KuraRuntimeException}
+     *             error code {@link org.eclipse.kura.KuraErrorCode#OPERATION_NOT_SUPPORTED}
+     *             needs to be set in the thrown {@link org.eclipse.kura.KuraRuntimeException}
      * @throws KuraException
      *             if the connection to the asset was interrupted, then error
-     *             code {@link KuraErrorCode#CONNECTION_FAILED} needs to be set
+     *             code {@link org.eclipse.kura.KuraErrorCode#CONNECTION_FAILED} needs to be set
      *             in the thrown {@link KuraException} and if the channel is not
-     *             present, error code {@link KuraErrorCode#INTERNAL_ERROR}
+     *             present, error code {@link org.eclipse.kura.KuraErrorCode#INTERNAL_ERROR}
      *             needs to be set in the thrown {@link KuraException}. For any
      *             other internal exception, then error code
-     *             {@link KuraErrorCode#INTERNAL_ERROR} will be set.
+     *             {@link org.eclipse.kura.KuraErrorCode#INTERNAL_ERROR} will be set.
      * @throws NullPointerException
      *             if any of the arguments is null
      * @throws IllegalArgumentException
@@ -129,13 +126,13 @@ public interface Asset {
      *
      * @param channelListener
      *            the channel listener to unregister
-     * @throws KuraRuntimeException
+     * @throws org.eclipse.kura.KuraRuntimeException
      *             if the method is not implemented by the asset then specific
-     *             error code {@code KuraErrorCode#OPERATION_NOT_SUPPORTED}
-     *             needs to be set in the thrown {@link KuraRuntimeException}
+     *             error code {@code org.eclipse.kura.KuraErrorCode#OPERATION_NOT_SUPPORTED}
+     *             needs to be set in the thrown {@link org.eclipse.kura.KuraRuntimeException}
      * @throws KuraException
      *             For any other internal exception, then error code
-     *             {@code KuraErrorCode#INTERNAL_ERROR} will be set.
+     *             {@code org.eclipse.kura.KuraErrorCode#INTERNAL_ERROR} will be set.
      * @throws NullPointerException
      *             if argument is null
      */
@@ -144,7 +141,7 @@ public interface Asset {
     /**
      * Writes the data to the provided communication channels that correspond to
      * the given channel records. The write result is returned by setting the
-     * channel flag {@link ChannelFlag#SUCCESS} in the provided channel
+     * channel flag {@link org.eclipse.kura.channel.ChannelFlag#SUCCESS} in the provided channel
      * records. If the connection to the asset is interrupted, then any
      * necessary resources that correspond to this connection should be cleaned
      * up and a {@link KuraException} with a suitable error code shall be
@@ -155,13 +152,13 @@ public interface Asset {
      *            be written and the values that are to be written. They will be
      *            filled by this function with a channel flag stating whether the
      *            write process is successful or not.
-     * @throws KuraRuntimeException
+     * @throws org.eclipse.kura.KuraRuntimeException
      *             if the method is not implemented by the asset then specific
-     *             error code {@code KuraErrorCode#OPERATION_NOT_SUPPORTED}
-     *             needs to be set in the thrown {@link KuraRuntimeException}
+     *             error code {@code org.eclipse.kura.KuraErrorCode#OPERATION_NOT_SUPPORTED}
+     *             needs to be set in the thrown {@link org.eclipse.kura.KuraRuntimeException}
      * @throws KuraException
      *             if the connection to the asset was interrupted, then error
-     *             code {@code KuraErrorCode#CONNECTION_FAILED} needs to be set
+     *             code {@code org.eclipse.kura.KuraErrorCode#CONNECTION_FAILED} needs to be set
      *             in the thrown {@link KuraException}
      * @throws NullPointerException
      *             if argument is null

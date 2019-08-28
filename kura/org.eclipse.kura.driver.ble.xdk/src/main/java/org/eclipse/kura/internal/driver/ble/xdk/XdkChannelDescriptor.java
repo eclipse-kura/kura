@@ -22,11 +22,11 @@ import org.eclipse.kura.driver.ChannelDescriptor;
 import org.eclipse.kura.util.collection.CollectionUtil;
 
 public final class XdkChannelDescriptor implements ChannelDescriptor {
-	
-	private static final String SENSOR_NAME = "sensor.name";
+
+    private static final String SENSOR_NAME = "sensor.name";
     private static final String XDK_ADDRESS = "xdk.address";
     private static final String NOTIFICATION_PERIOD = "notification.period";
-    
+
     private static void addOptions(Tad target, Enum<?>[] values) {
         final List<Option> options = target.getOption();
         for (Enum<?> value : values) {
@@ -50,13 +50,13 @@ public final class XdkChannelDescriptor implements ChannelDescriptor {
         sensorName.setDefault("TEMPERATURE");
         addOptions(sensorName, SensorName.values());
 
-        final Tad XdkAddress = new Tad();
-        XdkAddress.setName(XDK_ADDRESS);
-        XdkAddress.setId(XDK_ADDRESS);
-        XdkAddress.setDescription(XDK_ADDRESS);
-        XdkAddress.setType(Tscalar.STRING);
-        XdkAddress.setRequired(true);
-        XdkAddress.setDefault("AA:BB:CC:DD:EE:FF");
+        final Tad xdkAddress = new Tad();
+        xdkAddress.setName(XDK_ADDRESS);
+        xdkAddress.setId(XDK_ADDRESS);
+        xdkAddress.setDescription(XDK_ADDRESS);
+        xdkAddress.setType(Tscalar.STRING);
+        xdkAddress.setRequired(true);
+        xdkAddress.setDefault("AA:BB:CC:DD:EE:FF");
 
         final Tad notificationPeriod = new Tad();
         notificationPeriod.setName(NOTIFICATION_PERIOD);
@@ -66,7 +66,7 @@ public final class XdkChannelDescriptor implements ChannelDescriptor {
         notificationPeriod.setRequired(true);
         notificationPeriod.setDefault("100");
 
-        elements.add(XdkAddress);
+        elements.add(xdkAddress);
         elements.add(sensorName);
         elements.add(notificationPeriod);
         return elements;
@@ -84,7 +84,4 @@ public final class XdkChannelDescriptor implements ChannelDescriptor {
         return Integer.parseInt((String) properties.get(NOTIFICATION_PERIOD));
     }
 
-
 }
-
-

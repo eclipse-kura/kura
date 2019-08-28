@@ -37,9 +37,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.eclipse.tycho</groupId>
+            <groupId>org.eclipse.platform</groupId>
             <artifactId>org.eclipse.osgi</artifactId>
-            <version>3.13.0.v20180226-1711</version>
+            <version>3.14.0</version>
         </dependency>
         <dependency>
           <groupId>org.slf4j</groupId>

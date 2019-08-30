@@ -243,6 +243,27 @@ public class ModemMonitorServiceImplTest {
         outputStream.close();
         iwconfigStatus.setOutputStream(outputStream);
         when(esMock.execute(iwconfigCommand)).thenReturn(iwconfigStatus);
+        
+        CommandStatus ethtoolStatus = new CommandStatus(new LinuxExitValue(0));
+        Command ethtoolCommand = new Command("ethtool -i ppp1");
+        ethtoolCommand.setTimeout(60);
+        outputStream = new ByteArrayOutputStream();
+        out = new DataOutputStream(outputStream);
+        out.write(("driver: e1000\n" + 
+                "        version: 7.3.21-k8-NAPI\n" + 
+                "        firmware-version: \n" + 
+                "        expansion-rom-version: \n" + 
+                "        bus-info: 0000:00:03.0\n" + 
+                "        supports-statistics: yes\n" + 
+                "        supports-test: yes\n" + 
+                "        supports-eeprom-access: yes\n" + 
+                "        supports-register-dump: yes\n" + 
+                "        supports-priv-flags: no").getBytes());
+        outputStream.flush();
+        outputStream.close();
+        ethtoolStatus.setOutputStream(outputStream);
+        when(esMock.execute(ethtoolCommand)).thenReturn(ethtoolStatus);
+        
         svc.setExecutorService(esMock);
 
         doAnswer(invocation -> {
@@ -978,6 +999,26 @@ public class ModemMonitorServiceImplTest {
         outputStream.close();
         iwconfigStatus.setOutputStream(outputStream);
         when(esMock.execute(iwconfigCommand)).thenReturn(iwconfigStatus);
+        
+        CommandStatus ethtoolStatus = new CommandStatus(new LinuxExitValue(0));
+        Command ethtoolCommand = new Command("ethtool -i ppp0");
+        ethtoolCommand.setTimeout(60);
+        outputStream = new ByteArrayOutputStream();
+        out = new DataOutputStream(outputStream);
+        out.write(("driver: e1000\n" + 
+                "        version: 7.3.21-k8-NAPI\n" + 
+                "        firmware-version: \n" + 
+                "        expansion-rom-version: \n" + 
+                "        bus-info: 0000:00:03.0\n" + 
+                "        supports-statistics: yes\n" + 
+                "        supports-test: yes\n" + 
+                "        supports-eeprom-access: yes\n" + 
+                "        supports-register-dump: yes\n" + 
+                "        supports-priv-flags: no").getBytes());
+        outputStream.flush();
+        outputStream.close();
+        ethtoolStatus.setOutputStream(outputStream);
+        when(esMock.execute(ethtoolCommand)).thenReturn(ethtoolStatus);
         
         svc.setExecutorService(esMock);
 

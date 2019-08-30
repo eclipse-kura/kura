@@ -808,7 +808,9 @@ public class WifiMonitorServiceImplTest {
         CommandStatus status = new CommandStatus(new LinuxExitValue(0));
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         DataOutputStream out = new DataOutputStream(outputStream);
-        out.write("wlan1     IEEE 802.11  Mode:Master  Tx-Power=31 dBm\n        Retry short limit:7   RTS thr:off   Fragment thr:off\n        Power Management:on".getBytes());
+        out.write(
+                "wlan1     IEEE 802.11  Mode:Master  Tx-Power=31 dBm\n        Retry short limit:7   RTS thr:off   Fragment thr:off\n        Power Management:on"
+                        .getBytes());
         outputStream.flush();
         outputStream.close();
         status.setOutputStream(outputStream);
@@ -990,18 +992,31 @@ public class WifiMonitorServiceImplTest {
         Command infoCommand = new Command("iw dev wlan3 info");
         infoCommand.setTimeout(60);
         when(esMock.execute(infoCommand)).thenReturn(infoStatus);
-        
+
         CommandStatus iwconfigStatus = new CommandStatus(new LinuxExitValue(0));
         Command iwconfigCommand = new Command("iwconfig wlan3");
         iwconfigCommand.setTimeout(60);
         outputStream = new ByteArrayOutputStream();
         out = new DataOutputStream(outputStream);
-        out.write("wlan3     IEEE 802.11  Mode:Master  Tx-Power=31 dBm\n        Retry short limit:7   RTS thr:off   Fragment thr:off\n        Power Management:on".getBytes());
+        out.write(
+                "wlan3     IEEE 802.11  Mode:Master  Tx-Power=31 dBm\n        Retry short limit:7   RTS thr:off   Fragment thr:off\n        Power Management:on"
+                        .getBytes());
         outputStream.flush();
         outputStream.close();
         iwconfigStatus.setOutputStream(outputStream);
         when(esMock.execute(iwconfigCommand)).thenReturn(iwconfigStatus);
-        
+
+        CommandStatus ethtoolStatus = new CommandStatus(new LinuxExitValue(0));
+        Command ethtoolCommand = new Command("ethtool -i wlan3");
+        ethtoolCommand.setTimeout(60);
+        outputStream = new ByteArrayOutputStream();
+        out = new DataOutputStream(outputStream);
+        out.write("driver: e1000\n        version: 7.3.21-k8-NAPI\n        firmware-version: \n        expansion-rom-version: \n        bus-info: 0000:00:03.0\n        supports-statistics: yes\n        supports-test: yes\n        supports-eeprom-access: yes\n        supports-register-dump: yes\n        supports-priv-flags: no".getBytes());
+        outputStream.flush();
+        outputStream.close();
+        ethtoolStatus.setOutputStream(outputStream);
+        when(esMock.execute(ethtoolCommand)).thenReturn(ethtoolStatus);
+
         svc.setExecutorService(esMock);
 
         String interfaceName = "wlan3";

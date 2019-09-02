@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -11,13 +11,12 @@
  *******************************************************************************/
 package org.eclipse.kura.message;
 
-import org.eclipse.kura.cloud.CloudService;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Models a topic for messages posted to the Kura platform.
  * Topics are expected to be in the form of "account/asset/&lt;application_specific&gt;";
- * The system control topic prefix is defined in the {@link CloudService} and defaults
+ * The system control topic prefix is defined in the {@link org.eclipse.kura.cloud.CloudService} and defaults
  * to $EDC.
  *
  * @noextend This class is not intended to be subclassed by clients.

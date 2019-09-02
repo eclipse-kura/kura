@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -22,73 +22,73 @@ import org.osgi.annotation.versioning.ProviderType;
 public abstract class AbstractUsbDevice implements UsbDevice {
 
     /** The vendor ID of the USB device **/
-    private final String m_vendorId;
+    private final String vendorId;
 
     /** The product ID of the USB device **/
-    private final String m_productId;
+    private final String productId;
 
     /** The manufacturer name **/
-    private final String m_manufacturerName;
+    private final String manufacturerName;
 
     /** The product name **/
-    private final String m_productName;
+    private final String productName;
 
-    private final String m_usbBusNumber;
-    private final String m_usbDevicePath;
+    private final String usbBusNumber;
+    private final String usbDevicePath;
 
     public AbstractUsbDevice(String vendorId, String productId, String manufacturerName, String productName,
             String usbBusNumber, String usbDevicePath) {
-        this.m_vendorId = vendorId;
-        this.m_productId = productId;
-        this.m_manufacturerName = manufacturerName;
-        this.m_productName = productName;
-        this.m_usbBusNumber = usbBusNumber;
-        this.m_usbDevicePath = usbDevicePath;
+        this.vendorId = vendorId;
+        this.productId = productId;
+        this.manufacturerName = manufacturerName;
+        this.productName = productName;
+        this.usbBusNumber = usbBusNumber;
+        this.usbDevicePath = usbDevicePath;
     }
 
     public AbstractUsbDevice(AbstractUsbDevice usbDevice) {
-        this.m_vendorId = usbDevice.getVendorId();
-        this.m_productId = usbDevice.getProductId();
-        this.m_manufacturerName = usbDevice.getManufacturerName();
-        this.m_productName = usbDevice.getProductName();
-        this.m_usbBusNumber = usbDevice.getUsbBusNumber();
-        this.m_usbDevicePath = usbDevice.getUsbDevicePath();
+        this.vendorId = usbDevice.getVendorId();
+        this.productId = usbDevice.getProductId();
+        this.manufacturerName = usbDevice.getManufacturerName();
+        this.productName = usbDevice.getProductName();
+        this.usbBusNumber = usbDevice.getUsbBusNumber();
+        this.usbDevicePath = usbDevice.getUsbDevicePath();
     }
 
     @Override
     public String getVendorId() {
-        return this.m_vendorId;
+        return this.vendorId;
     }
 
     @Override
     public String getProductId() {
-        return this.m_productId;
+        return this.productId;
     }
 
     @Override
     public String getManufacturerName() {
-        return this.m_manufacturerName;
+        return this.manufacturerName;
     }
 
     @Override
     public String getProductName() {
-        return this.m_productName;
+        return this.productName;
     }
 
     @Override
     public String getUsbBusNumber() {
-        return this.m_usbBusNumber;
+        return this.usbBusNumber;
     }
 
     @Override
     public String getUsbDevicePath() {
-        return this.m_usbDevicePath;
+        return this.usbDevicePath;
     }
 
     @Override
     public String getUsbPort() {
         StringBuffer sb = new StringBuffer();
-        sb.append(this.m_usbBusNumber).append("-").append(this.m_usbDevicePath);
+        sb.append(this.usbBusNumber).append("-").append(this.usbDevicePath);
         return sb.toString();
     }
 
@@ -96,12 +96,12 @@ public abstract class AbstractUsbDevice implements UsbDevice {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + (this.m_manufacturerName == null ? 0 : this.m_manufacturerName.hashCode());
-        result = prime * result + (this.m_productId == null ? 0 : this.m_productId.hashCode());
-        result = prime * result + (this.m_productName == null ? 0 : this.m_productName.hashCode());
-        result = prime * result + (this.m_usbBusNumber == null ? 0 : this.m_usbBusNumber.hashCode());
-        result = prime * result + (this.m_usbDevicePath == null ? 0 : this.m_usbDevicePath.hashCode());
-        result = prime * result + (this.m_vendorId == null ? 0 : this.m_vendorId.hashCode());
+        result = prime * result + (this.manufacturerName == null ? 0 : this.manufacturerName.hashCode());
+        result = prime * result + (this.productId == null ? 0 : this.productId.hashCode());
+        result = prime * result + (this.productName == null ? 0 : this.productName.hashCode());
+        result = prime * result + (this.usbBusNumber == null ? 0 : this.usbBusNumber.hashCode());
+        result = prime * result + (this.usbDevicePath == null ? 0 : this.usbDevicePath.hashCode());
+        result = prime * result + (this.vendorId == null ? 0 : this.vendorId.hashCode());
         return result;
     }
 
@@ -117,46 +117,46 @@ public abstract class AbstractUsbDevice implements UsbDevice {
             return false;
         }
         AbstractUsbDevice other = (AbstractUsbDevice) obj;
-        if (this.m_manufacturerName == null) {
-            if (other.m_manufacturerName != null) {
+        if (this.manufacturerName == null) {
+            if (other.manufacturerName != null) {
                 return false;
             }
-        } else if (!this.m_manufacturerName.equals(other.m_manufacturerName)) {
+        } else if (!this.manufacturerName.equals(other.manufacturerName)) {
             return false;
         }
-        if (this.m_productId == null) {
-            if (other.m_productId != null) {
+        if (this.productId == null) {
+            if (other.productId != null) {
                 return false;
             }
-        } else if (!this.m_productId.equals(other.m_productId)) {
+        } else if (!this.productId.equals(other.productId)) {
             return false;
         }
-        if (this.m_productName == null) {
-            if (other.m_productName != null) {
+        if (this.productName == null) {
+            if (other.productName != null) {
                 return false;
             }
-        } else if (!this.m_productName.equals(other.m_productName)) {
+        } else if (!this.productName.equals(other.productName)) {
             return false;
         }
-        if (this.m_usbBusNumber == null) {
-            if (other.m_usbBusNumber != null) {
+        if (this.usbBusNumber == null) {
+            if (other.usbBusNumber != null) {
                 return false;
             }
-        } else if (!this.m_usbBusNumber.equals(other.m_usbBusNumber)) {
+        } else if (!this.usbBusNumber.equals(other.usbBusNumber)) {
             return false;
         }
-        if (this.m_usbDevicePath == null) {
-            if (other.m_usbDevicePath != null) {
+        if (this.usbDevicePath == null) {
+            if (other.usbDevicePath != null) {
                 return false;
             }
-        } else if (!this.m_usbDevicePath.equals(other.m_usbDevicePath)) {
+        } else if (!this.usbDevicePath.equals(other.usbDevicePath)) {
             return false;
         }
-        if (this.m_vendorId == null) {
-            if (other.m_vendorId != null) {
+        if (this.vendorId == null) {
+            if (other.vendorId != null) {
                 return false;
             }
-        } else if (!this.m_vendorId.equals(other.m_vendorId)) {
+        } else if (!this.vendorId.equals(other.vendorId)) {
             return false;
         }
         return true;

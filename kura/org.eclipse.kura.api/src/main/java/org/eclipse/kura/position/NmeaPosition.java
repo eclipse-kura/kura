@@ -46,6 +46,8 @@ import org.osgi.annotation.versioning.ProviderType;
 @ProviderType
 public class NmeaPosition {
 
+    private static final double MPH_MULTIPLIER = 2.24;
+    private static final double KMPH_MULTIPLIER = 3.6;
     private double latitude;
     private double longitude;
     private double altitude;
@@ -66,6 +68,7 @@ public class NmeaPosition {
         this(lat, lon, alt, speed, track, 0, 0, 0.0, 0.0, 0.0, 0.0, 0, '0', '0', '0');
     }
 
+    @SuppressWarnings("checkstyle:parameterNumber")
     public NmeaPosition(double lat, double lon, double alt, double speed, double track, int fixQuality,
             int nrSatellites, double dop, double pdop, double hdop, double vdop, int fix3D) {
         this(lat, lon, alt, speed, track, fixQuality, nrSatellites, dop, pdop, hdop, vdop, fix3D, '0', '0', '0');
@@ -74,6 +77,7 @@ public class NmeaPosition {
     /**
      * @since 2.0
      */
+    @SuppressWarnings("checkstyle:parameterNumber")
     public NmeaPosition(double lat, double lon, double alt, double speed, double track, int fixQuality,
             int nrSatellites, double dop, double pdop, double hdop, double vdop, int fix3D, char validF, char hemiLat,
             char hemiLon) {
@@ -131,14 +135,14 @@ public class NmeaPosition {
      * Return the speed in km/h
      */
     public double getSpeedKmh() {
-        return this.speed * 3.6;
+        return this.speed * KMPH_MULTIPLIER;
     }
 
     /**
      * Return the speed in mph
      */
     public double getSpeedMph() {
-        return this.speed * 2.24;
+        return this.speed * MPH_MULTIPLIER;
     }
 
     /**

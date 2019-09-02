@@ -66,6 +66,7 @@ import org.osgi.annotation.versioning.ProviderType;
  */
 @ProviderType
 @NotThreadSafe
+@SuppressWarnings("checkstyle:finalClass")
 public class ChannelRecord {
 
     /**
@@ -279,6 +280,7 @@ public class ChannelRecord {
     }
 
     @Override
+    @SuppressWarnings("checkstyle:magicNumber")
     public int hashCode() {
         final int prime = 31;
         int result = 1;

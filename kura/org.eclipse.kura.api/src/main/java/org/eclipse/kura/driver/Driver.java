@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2019 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -16,7 +16,6 @@ package org.eclipse.kura.driver;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.channel.ChannelRecord;
 import org.eclipse.kura.channel.listener.ChannelListener;
 import org.osgi.annotation.versioning.ProviderType;
@@ -146,10 +145,10 @@ public interface Driver {
      *             if argument is null
      * @throws IllegalArgumentException
      *             if argument is empty
-     * @throws KuraRuntimeException
+     * @throws org.eclipse.kura.KuraRuntimeException
      *             if the method is not implemented by the driver then specific
      *             error code {@code KuraErrorCode#OPERATION_NOT_SUPPORTED}
-     *             needs to be set in the thrown {@link KuraRuntimeException}
+     *             needs to be set in the thrown {@link org.eclipse.kura.KuraRuntimeException}
      */
     public void read(List<ChannelRecord> records) throws ConnectionException;
 
@@ -165,10 +164,10 @@ public interface Driver {
      *             if the connection to the field device is interrupted
      * @throws NullPointerException
      *             any of the arguments is null
-     * @throws KuraRuntimeException
+     * @throws org.eclipse.kura.KuraRuntimeException
      *             if the method is not implemented by the driver then specific
      *             error code {@code KuraErrorCode#OPERATION_NOT_SUPPORTED}
-     *             needs to be set in the thrown {@link KuraRuntimeException}
+     *             needs to be set in the thrown {@link org.eclipse.kura.KuraRuntimeException}
      */
     public void registerChannelListener(Map<String, Object> channelConfig, ChannelListener listener)
             throws ConnectionException;
@@ -183,10 +182,10 @@ public interface Driver {
      *             if the connection to the field device is interrupted
      * @throws NullPointerException
      *             if the argument is null
-     * @throws KuraRuntimeException
+     * @throws org.eclipse.kura.KuraRuntimeException
      *             if the method is not implemented by the driver then specific
      *             error code {@code KuraErrorCode#OPERATION_NOT_SUPPORTED}
-     *             needs to be set in the thrown {@link KuraRuntimeException}
+     *             needs to be set in the thrown {@link org.eclipse.kura.KuraRuntimeException}
      */
     public void unregisterChannelListener(ChannelListener listener) throws ConnectionException;
 
@@ -209,10 +208,10 @@ public interface Driver {
      *             if the argument is null
      * @throws IllegalArgumentException
      *             if the provided list is empty
-     * @throws KuraRuntimeException
+     * @throws org.eclipse.kura.KuraRuntimeException
      *             if the method is not implemented by the driver then specific
      *             error code {@code KuraErrorCode#OPERATION_NOT_SUPPORTED}
-     *             needs to be set in the thrown {@link KuraRuntimeException}
+     *             needs to be set in the thrown {@link org.eclipse.kura.KuraRuntimeException}
      */
     public void write(List<ChannelRecord> records) throws ConnectionException;
 

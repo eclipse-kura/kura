@@ -23,8 +23,10 @@ import org.osgi.annotation.versioning.ProviderType;
  * @noextend This class is not intended to be subclassed by clients.
  */
 @ProviderType
+@SuppressWarnings("checkstyle:finalClass")
 public class CommURI {
 
+    private static final int PORT_URI_OFFSET = 5;
     public static final int DATABITS_5 = SerialPort.DATABITS_5;
     public static final int DATABITS_6 = SerialPort.DATABITS_6;
     public static final int DATABITS_7 = SerialPort.DATABITS_7;
@@ -62,14 +64,14 @@ public class CommURI {
      *            the builder that contains the comm port parameters
      */
     private CommURI(Builder builder) {
-        this.port = builder.m_port;
-        this.baudRate = builder.m_baudRate;
-        this.dataBits = builder.m_dataBits;
-        this.stopBits = builder.m_stopBits;
-        this.parity = builder.m_parity;
-        this.flowControl = builder.m_flowControl;
-        this.openTimeout = builder.m_openTimeout;
-        this.receiveTimeout = builder.m_receiveTimeout;
+        this.port = builder.portConfig;
+        this.baudRate = builder.baudRateConfig;
+        this.dataBits = builder.dataBitsConfig;
+        this.stopBits = builder.stopBitsConfig;
+        this.parity = builder.parityConfig;
+        this.flowControl = builder.flowControlConfig;
+        this.openTimeout = builder.openTimeoutConfig;
+        this.receiveTimeout = builder.receiveTimeoutConfig;
     }
 
     /**
@@ -165,9 +167,9 @@ public class CommURI {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("comm:").append(this.port).append(";baudrate=").append(this.baudRate).append(";databits=")
-                .append(this.dataBits).append(";stopbits=").append(this.stopBits).append(";parity=")
-                .append(this.parity).append(";flowcontrol=").append(this.flowControl).append(";timeout=")
-                .append(this.openTimeout).append(";receivetimeout=").append(this.receiveTimeout);
+                .append(this.dataBits).append(";stopbits=").append(this.stopBits).append(";parity=").append(this.parity)
+                .append(";flowcontrol=").append(this.flowControl).append(";timeout=").append(this.openTimeout)
+                .append(";receivetimeout=").append(this.receiveTimeout);
         return sb.toString();
     }
 
@@ -186,7 +188,7 @@ public class CommURI {
 
         // get port
         int idx = uri.indexOf(";") == -1 ? uri.length() : uri.indexOf(";");
-        String port = uri.substring(5, idx);
+        String port = uri.substring(PORT_URI_OFFSET, idx);
         Builder builder = new Builder(port);
 
         // get params
@@ -228,41 +230,49 @@ public class CommURI {
     @ProviderType
     public static class Builder {
 
-        private final String m_port;
-        private int m_baudRate = 19200;
-        private int m_dataBits = 8;
-        private int m_stopBits = 1;
-        private int m_parity = 0;
-        private int m_flowControl = 0;
-        private int m_openTimeout = 2000;
-        private int m_receiveTimeout = 0;
+        private static final int DEFAULT_RECEIVE_TIMEOUT = 0;
+        private static final int DEFAULT_OPEN_TIMEOUT = 2000;
+        private static final int DEFAULT_FLOW_CONTROL = 0;
+        private static final int DEFAULT_PARITY = 0;
+        private static final int DEFAULT_STOP_BITS = 1;
+        private static final int DEFAULT_DATA_BITS = 8;
+        private static final int DEFAULT_BAUDRATE = 19200;
+
+        private final String portConfig;
+        private int baudRateConfig = DEFAULT_BAUDRATE;
+        private int dataBitsConfig = DEFAULT_DATA_BITS;
+        private int stopBitsConfig = DEFAULT_STOP_BITS;
+        private int parityConfig = DEFAULT_PARITY;
+        private int flowControlConfig = DEFAULT_FLOW_CONTROL;
+        private int openTimeoutConfig = DEFAULT_OPEN_TIMEOUT;
+        private int receiveTimeoutConfig = DEFAULT_RECEIVE_TIMEOUT;
 
         public Builder(String port) {
-            this.m_port = port;
+            this.portConfig = port;
         }
 
         public Builder withBaudRate(int baudRate) {
-            this.m_baudRate = baudRate;
+            this.baudRateConfig = baudRate;
             return this;
         }
 
         public Builder withDataBits(int dataBits) {
-            this.m_dataBits = dataBits;
+            this.dataBitsConfig = dataBits;
             return this;
         }
 
         public Builder withStopBits(int stopBits) {
-            this.m_stopBits = stopBits;
+            this.stopBitsConfig = stopBits;
             return this;
         }
 
         public Builder withParity(int parity) {
-            this.m_parity = parity;
+            this.parityConfig = parity;
             return this;
         }
 
         public Builder withFlowControl(int flowControl) {
-            this.m_flowControl = flowControl;
+            this.flowControlConfig = flowControl;
             return this;
         }
 
@@ -289,7 +299,7 @@ public class CommURI {
          * @since 1.2
          */
         public Builder withOpenTimeout(int timeout) {
-            this.m_openTimeout = timeout;
+            this.openTimeoutConfig = timeout;
             return this;
         }
 
@@ -303,7 +313,7 @@ public class CommURI {
          * @since 1.2
          */
         public Builder withReceiveTimeout(int timeout) {
-            this.m_receiveTimeout = timeout;
+            this.receiveTimeoutConfig = timeout;
             return this;
         }
 

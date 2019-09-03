@@ -13,7 +13,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>properties-maven-plugin</artifactId>
-                <version>1.0-alpha-2</version>
+                <version>1.0.0</version>
                 <executions>
                     <execution>
                         <phase>initialize</phase>
@@ -252,127 +252,47 @@
                                     <artifactId>org.eclipse.soda.dk.comm.macosx</artifactId>
                                     <version>${org.eclipse.soda.dk.comm.version}</version>
                                 </artifactItem>
+                                
                                 <artifactItem>
-                                    <groupId>org.apache.camel</groupId>
-                                    <artifactId>camel-amqp</artifactId>
-                                    <version>${org.apache.camel.camel-amqp.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.camel</groupId>
-                                    <artifactId>camel-core</artifactId>
-                                    <version>${org.apache.camel.camel-core.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.camel</groupId>
-                                    <artifactId>camel-core-osgi</artifactId>
-                                    <version>${org.apache.camel.camel-core-osgi.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.camel</groupId>
-                                    <artifactId>camel-jms</artifactId>
-                                    <version>${org.apache.camel.camel-jms.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.camel</groupId>
-                                    <artifactId>camel-script</artifactId>
-                                    <version>${org.apache.camel.camel-script.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.camel</groupId>
-                                    <artifactId>camel-stream</artifactId>
-                                    <version>${org.apache.camel.camel-stream.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.camel</groupId>
-                                    <artifactId>camel-spring</artifactId>
-                                    <version>${org.apache.camel.camel-spring.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.camel</groupId>
-                                    <artifactId>camel-http-common</artifactId>
-                                    <version>${org.apache.camel.camel-http-common.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.camel</groupId>
-                                    <artifactId>camel-http4</artifactId>
-                                    <version>${org.apache.camel.camel-http4.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.camel</groupId>
-                                    <artifactId>camel-netty4</artifactId>
-                                    <version>${org.apache.camel.camel-netty4.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.camel</groupId>
-                                    <artifactId>camel-netty4-http</artifactId>
-                                    <version>${org.apache.camel.camel-netty4-http.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.camel</groupId>
-                                    <artifactId>camel-gson</artifactId>
-                                    <version>${org.apache.camel.camel-gson.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.camel</groupId>
-                                    <artifactId>camel-groovy</artifactId>
-                                    <version>${org.apache.camel.camel-groovy.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.camel</groupId>
-                                    <artifactId>camel-servlet</artifactId>
-                                    <version>${org.apache.camel.camel-servlet.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.camel</groupId>
-                                    <artifactId>camel-core-xml</artifactId>
-                                    <version>${org.apache.camel.camel-core-xml.version}</version>
-                                </artifactItem>
-
-                                <artifactItem>
-                                    <groupId>org.apache.camel</groupId>
-                                    <artifactId>camel-jackson</artifactId>
-                                    <version>${org.apache.camel.camel-jackson.version}</version>
-                                </artifactItem>
-                                <dependency>
                                     <groupId>org.codehaus.groovy</groupId>
                                     <artifactId>groovy</artifactId>
                                     <version>${org.codehaus.groovy.groovy.version}</version>
-                                </dependency>
-                                <dependency>
+                                </artifactItem>
+                                <artifactItem>
                                     <groupId>org.codehaus.groovy</groupId>
                                     <artifactId>groovy-xml</artifactId>
                                     <version>${org.codehaus.groovy.groovy.version}</version>
-                                </dependency>
-                                <dependency>
+                                </artifactItem>
+                                <artifactItem>
                                     <groupId>org.codehaus.groovy</groupId>
                                     <artifactId>groovy-templates</artifactId>
                                     <version>${org.codehaus.groovy.groovy.version}</version>
-                                </dependency>
-                                <dependency>
+                                </artifactItem>
+                                <artifactItem>
                                     <groupId>org.codehaus.groovy</groupId>
                                     <artifactId>groovy-sql</artifactId>
                                     <version>${org.codehaus.groovy.groovy.version}</version>
-                                </dependency>
-                                <dependency>
+                                </artifactItem>
+                                <artifactItem>
                                     <groupId>org.codehaus.groovy</groupId>
                                     <artifactId>groovy-json</artifactId>
                                     <version>${org.codehaus.groovy.groovy.version}</version>
-                                </dependency>
-                                <dependency>
+                                </artifactItem>
+                                <artifactItem>
                                     <groupId>org.codehaus.groovy</groupId>
                                     <artifactId>groovy-datetime</artifactId>
                                     <version>${org.codehaus.groovy.groovy.version}</version>
-                                </dependency>
-                                <dependency>
+                                </artifactItem>
+                                <artifactItem>
                                     <groupId>org.codehaus.groovy</groupId>
                                     <artifactId>groovy-dateutil</artifactId>
                                     <version>${org.codehaus.groovy.groovy.version}</version>
-                                </dependency>
-                                <dependency>
+                                </artifactItem>
+                                <artifactItem>
                                     <groupId>org.codehaus.groovy</groupId>
                                     <artifactId>groovy-jsr223</artifactId>
                                     <version>${org.codehaus.groovy.groovy.version}</version>
-                                </dependency>
+                                </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
                                     <artifactId>commons-pool</artifactId>
@@ -818,36 +738,7 @@
                                     tofile="target/source/plugins/org.eclipse.soda.dk.comm.x86_64_${org.eclipse.soda.dk.comm.version}.jar" />
                                 <move file="target/source/plugins/org.eclipse.soda.dk.comm.aarch64.jar"
                                     tofile="target/source/plugins/org.eclipse.soda.dk.comm.aarch64_${org.eclipse.soda.dk.comm.version}.jar" />
-                                <move file="target/source/plugins/camel-amqp.jar"
-                                    tofile="target/source/plugins/org.apache.camel.camel-amqp_${org.apache.camel.camel-amqp.version}.jar" />
-                                <move file="target/source/plugins/camel-core.jar"
-                                    tofile="target/source/plugins/org.apache.camel.camel-core_${org.apache.camel.camel-core.version}.jar" />
-                                <move file="target/source/plugins/camel-jms.jar"
-                                    tofile="target/source/plugins/org.apache.camel.camel-jms_${org.apache.camel.camel-jms.version}.jar" />
-                                <move file="target/source/plugins/camel-script.jar"
-                                    tofile="target/source/plugins/org.apache.camel.camel-script_${org.apache.camel.camel-script.version}.jar" />
-                                <move file="target/source/plugins/camel-stream.jar"
-                                    tofile="target/source/plugins/org.apache.camel.camel-stream_${org.apache.camel.camel-stream.version}.jar" />
-                                <move file="target/source/plugins/camel-spring.jar"
-                                    tofile="target/source/plugins/org.apache.camel.camel-spring_${org.apache.camel.camel-spring.version}.jar" />
-                                <move file="target/source/plugins/camel-http-common.jar"
-                                    tofile="target/source/plugins/org.apache.camel.camel-http-common_${org.apache.camel.camel-http-common.version}.jar" />
-                                <move file="target/source/plugins/camel-http4.jar"
-                                    tofile="target/source/plugins/org.apache.camel.camel-http4_${org.apache.camel.camel-http4.version}.jar" />
-                                <move file="target/source/plugins/camel-netty4.jar"
-                                    tofile="target/source/plugins/org.apache.camel.camel-netty4_${org.apache.camel.camel-netty4.version}.jar" />
-                                <move file="target/source/plugins/camel-netty4-http.jar"
-                                    tofile="target/source/plugins/org.apache.camel.camel-netty4-http_${org.apache.camel.camel-netty4-http.version}.jar" />
-                                <move file="target/source/plugins/camel-gson.jar"
-                                    tofile="target/source/plugins/org.apache.camel.camel-gson_${org.apache.camel.camel-gson.version}.jar" />
-                                <move file="target/source/plugins/camel-groovy.jar"
-                                    tofile="target/source/plugins/org.apache.camel.camel-groovy_${org.apache.camel.camel-groovy.version}.jar" />
-                                <move file="target/source/plugins/camel-servlet.jar"
-                                    tofile="target/source/plugins/org.apache.camel.camel-servlet_${org.apache.camel.camel-servlet.version}.jar" />
-                                <move file="target/source/plugins/camel-jackson.jar"
-                                    tofile="target/source/plugins/org.apache.camel.camel-jackson_${org.apache.camel.camel-jackson.version}.jar" />
-                                <move file="target/source/plugins/camel-core-xml.jar"
-                                    tofile="target/source/plugins/org.apache.camel.camel-core-xml_${org.apache.camel.camel-core-xml.version}.jar" />
+                                
                                 <move file="target/source/plugins/groovy.jar"
                                     tofile="target/source/plugins/groovy_${org.codehaus.groovy.groovy-all.version}.jar" />
                                     
@@ -878,8 +769,7 @@
                                     tofile="target/source/plugins/org.apache.servicemix.bundles.commons-codec_${org.apache.servicemix.bundles.commons-codec-mvn.version}.jar" />
                                 <move file="target/source/plugins/commons-logging.jar"
                                     tofile="target/source/plugins/org.apache.commons.logging_${commons-logging.commons-logging.version}.jar" />
-                                <move file="target/source/plugins/camel-core-osgi.jar"
-                                    tofile="target/source/plugins/org.apache.camel.camel-core-osgi_${org.apache.camel.camel-core-osgi.version}.jar" />
+                                
                                 <move file="target/source/plugins/org.apache.servicemix.bundles.spring-beans.jar"
                                     tofile="target/source/plugins/org.apache.servicemix.bundles.spring-beans_${spring.version}.jar" />
                                 <move file="target/source/plugins/org.apache.servicemix.bundles.spring-context.jar"

@@ -42,6 +42,11 @@
             <url>file:///${basedir}/../../../target-platform/p2-repo-common/target/repository/</url>
         </repository>
         <repository>
+            <id>p2-repo-maven</id>
+            <layout>p2</layout>
+            <url>file:///${basedir}/../../../target-platform/p2-repo-mvn-deps/target/repository/</url>
+        </repository>
+        <repository>
             <id>p2-repo-test-deps</id>
             <layout>p2</layout>
             <url>file:///${basedir}/../../../target-platform/p2-repo-test-deps/target/repository/</url>
@@ -55,7 +60,7 @@
         <module>org.eclipse.kura.driver.opcua</module>
         <module>org.eclipse.kura.driver.s7plc</module>
         <module>org.eclipse.kura.driver.ble.sensortag</module>
-	<module>org.eclipse.kura.driver.ble.xdk</module>
+	    <module>org.eclipse.kura.driver.ble.xdk</module>
         <module>org.eclipse.kura.driver.eddystone</module>
         <module>org.eclipse.kura.driver.ibeacon</module>
         <module>org.eclipse.kura.wire.script.filter</module>

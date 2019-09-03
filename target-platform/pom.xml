@@ -26,6 +26,7 @@
 		<module>p2-repo-common</module>
         <module>p2-repo-equinox_3.12.50</module>
         <module>p2-repo-test-deps</module>
+        <module>p2-repo-mvn-deps</module>
     </modules>
 
     <repositories>

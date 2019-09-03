@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
@@ -55,7 +56,7 @@ public class RestService
     private Map<String, User> users;
 
     private CryptoService cryptoService;
-    
+
     @Context
     private HttpServletRequest sr;
 
@@ -89,7 +90,7 @@ public class RestService
     public Principal authenticate(ContainerRequestContext request) {
 
         String path = getRequestPath(request);
-        
+
         String requestIp = request.getHeaderString("X-FORWARDED-FOR");
         if (isNull(requestIp)) {
             requestIp = sr.getRemoteAddr();
@@ -97,8 +98,7 @@ public class RestService
 
         String authHeader = request.getHeaderString("Authorization");
         if (authHeader == null) {
-            auditLogger.warn(REST_FAILURE_RECEIVED_UNAUTHORIZED_REQUEST,
-                    request.getMethod(), path, requestIp);
+            auditLogger.warn(REST_FAILURE_RECEIVED_UNAUTHORIZED_REQUEST, request.getMethod(), path, requestIp);
             request.abortWith(UNAUTHORIZED_RESPONSE);
             return null;
         }
@@ -106,8 +106,7 @@ public class RestService
         StringTokenizer tokens = new StringTokenizer(authHeader);
         String authScheme = tokens.nextToken();
         if (!"Basic".equals(authScheme)) {
-            auditLogger.warn(REST_FAILURE_RECEIVED_UNAUTHORIZED_REQUEST,
-                    request.getMethod(), path, requestIp);
+            auditLogger.warn(REST_FAILURE_RECEIVED_UNAUTHORIZED_REQUEST, request.getMethod(), path, requestIp);
             request.abortWith(UNAUTHORIZED_RESPONSE);
             return null;
         }
@@ -128,9 +127,8 @@ public class RestService
             }
         } catch (Exception e) {
         }
-        
-        auditLogger.warn(REST_FAILURE_RECEIVED_UNAUTHORIZED_REQUEST,
-                request.getMethod(), path, requestIp);
+
+        auditLogger.warn(REST_FAILURE_RECEIVED_UNAUTHORIZED_REQUEST, request.getMethod(), path, requestIp);
         request.abortWith(UNAUTHORIZED_RESPONSE);
         return null;
     }
@@ -159,10 +157,11 @@ public class RestService
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext)
             throws IOException {
         String path = getRequestPath(requestContext);
-        String user = requestContext.getSecurityContext().getUserPrincipal().getName();
+        Principal principal = requestContext.getSecurityContext().getUserPrincipal();
+        String user = principal == null ? null : principal.getName();
 
         int responseStatus = responseContext.getStatus();
-        if (responseStatus == Response.Status.OK.getStatusCode()) {
+        if (user != null && responseStatus == Response.Status.OK.getStatusCode()) {
             auditLogger.info("Rest - Success - Request succeeded for user: {}, method: {}, path: {}", user,
                     requestContext.getMethod(), path);
         } else {

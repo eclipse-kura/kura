@@ -124,6 +124,9 @@
 
 		<!-- Populate config.ini with correct OSGi packages -->
 		<antcall target="osgi-base-config" />
+		
+		<!-- Populate config.ini with over java9 OSGi packages -->
+		<antcall target="osgi-java9-config" />
 
 		<!-- Populate config.ini with correct versions -->
 		<replace file="${project.build.directory}/${build.output.name}/config.ini"
@@ -285,7 +288,6 @@ if [ -z "$KURA_RUNNING" ] ; then
         -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/kura-heapdump.hprof \
         -XX:ErrorFile=/var/log/kura-error.log \
         -XX:+IgnoreUnrecognizedVMOptions \
-        --add-modules=java.sql,java.xml,java.xml.bind \
         -Dkura.os.version=${kura.os.version} \
         -Dkura.arch=${kura.arch} \
         -Dtarget.device=${target.device} \
@@ -331,7 +333,6 @@ if [ -z "$KURA_RUNNING" ] ; then
         -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/kura-heapdump.hprof \
         -XX:ErrorFile=/var/log/kura-error.log \
         -XX:+IgnoreUnrecognizedVMOptions \
-        --add-modules=java.sql,java.xml,java.xml.bind \
         -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000,suspend=n \
         -Dkura.os.version=${kura.os.version} \
         -Dkura.arch=${kura.arch} \
@@ -377,7 +378,6 @@ if [ -z "$KURA_RUNNING" ] ; then
         -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/kura-heapdump.hprof \
         -XX:ErrorFile=/var/log/kura-error.log \
         -XX:+IgnoreUnrecognizedVMOptions \
-        --add-modules=java.sql,java.xml,java.xml.bind \
         -Dkura.os.version=${kura.os.version} \
         -Dkura.arch=${kura.arch} \
         -Dtarget.device=${target.device} \
@@ -590,6 +590,13 @@ fi]]>
 				<exclude name="*.SNAPSHOT.jar" />
 
 			</zipfileset>
+			<zipfileset dir="../target-definition/mvn-deps/repository/plugins"
+				prefix="${build.output.name}/${plugins.folder}">
+
+				<!-- exclude source bundles -->
+				<exclude name="*.source_*.jar" />
+
+			</zipfileset>
 
 			<!-- add .SNAPSHOT as -SNAPSHOT -->
 			<mappedresources>
@@ -781,7 +788,7 @@ fi]]>
 				value="${http.port}" />
 		</propertyfile>
 	</target>
-
+	
 	<!-- OSGi base configs -->
 	<target name="osgi-base-config">
 		<propertyfile
@@ -919,7 +926,23 @@ fi]]>
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.protocol.modbus_${org.eclipse.kura.protocol.modbus.version}.jar@4:start" />
 		</propertyfile>
 	</target>
-
+	<!-- OSGi java9 configs -->
+	<target name="osgi-java9-config">
+		<propertyfile
+			file="${project.build.directory}/${build.output.name}/config.ini">
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/jakarta.activation-api_${jakarta.activation-api.version}.jar@3:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/jakarta.annotation-api_${jakarta.annotation-api.version}.jar@3:start" />			
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/com.sun.activation.javax.activation_${com.sun.activation.version}.jar@3:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/jakarta.xml.bind-api_${jakarta.xml.bind-api.version}.jar@3:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/com.sun.xml.bind.jaxb-impl_${com.sun.xml.bind.jaxb-impl.version}.jar@3:start" />
+			
+		</propertyfile>
+	</target>
 
 	<!-- Kura config targets -->
 	<target name="api-config">

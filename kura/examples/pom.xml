@@ -160,6 +160,11 @@
             <layout>p2</layout>
             <url>file:///${kura.basedir}/target-definition/common/repository/</url>
         </repository>
+        <repository>
+            <id>p2-repo-maven</id>
+            <layout>p2</layout>
+            <url>file:///${kura.basedir}/target-definition/mvn-deps/repository/</url>
+        </repository>
     </repositories>
 
 

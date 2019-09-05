@@ -20,6 +20,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -30,28 +31,44 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
+import org.eclipse.kura.system.SystemService;
+import org.eclipse.kura.web.server.util.ServiceLocator;
+import org.eclipse.kura.web.session.Attributes;
+import org.eclipse.kura.web.shared.GwtKuraException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class LogServlet extends HttpServlet {
 
-    /**
-     *
-     */
     private static final long serialVersionUID = 3969980124054250070L;
 
     private static Logger logger = LoggerFactory.getLogger(LogServlet.class);
+    private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
 
     @Override
     protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
-
-        String logDir = "/var/log";
-        String oldLogsDir = "/var/old_logs";
+        HttpSession session = httpServletRequest.getSession(false);
+        
+        ServiceLocator locator = ServiceLocator.getInstance();
+        SystemService ss = null;
+        try {
+            ss = locator.getService(SystemService.class);
+        } catch (GwtKuraException e1) {
+            logger.warn("Unable to get service");
+            auditLogger.warn("UI Log Download - Failure - Failed to get System Service for user: {}, session: {}",
+                    session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId(), e1);
+            return;
+        }
 
         List<String> paths = new ArrayList<>();
-        paths.add(logDir);
-        paths.add(oldLogsDir);
+
+        String logSourcesVal = ss.getProperties().getProperty("kura.log.download.sources", "/var/log");
+        if (logSourcesVal != null && !logSourcesVal.trim().isEmpty()) {
+            String[] logSources = logSourcesVal.split(",");
+            paths.addAll(Arrays.asList(logSources));
+        }
 
         List<File> fileList = new ArrayList<>();
         paths.stream().forEach(path -> {
@@ -63,6 +80,14 @@ public class LogServlet extends HttpServlet {
             }
         });
 
+        createReply(httpServletResponse, fileList);
+
+        auditLogger.info(
+                "UI Log Download - Success - Successfully returned device logs for user: {}, session: {}",
+                session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
+    }
+
+    private void createReply(HttpServletResponse httpServletResponse, List<File> fileList) {
         try {
             byte[] zip = zipFiles(fileList);
             ServletOutputStream sos = httpServletResponse.getOutputStream();
@@ -74,7 +99,6 @@ public class LogServlet extends HttpServlet {
         } catch (IOException e) {
             logger.warn("Unable to create zip file containing log resources");
         }
-
     }
 
     private byte[] zipFiles(List<File> files) throws IOException {

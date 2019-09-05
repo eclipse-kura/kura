@@ -38,6 +38,8 @@
                         ui:field="systemProperties" />
                     <b:TabListItem dataTarget="#commandPanel" text="Command"
                         ui:field="command" />
+                    <b:TabListItem dataTarget="#logPanel" text="System Logs"
+                        ui:field="log" />
                 </b:NavTabs>
                 <b:TabContent>
                     <b:TabPane b:id="profilePanel" active="true">
@@ -54,6 +56,9 @@
                     </b:TabPane>
                     <b:TabPane b:id="commandPanel">
                         <device:CommandTabUi ui:field="commandPanel"></device:CommandTabUi>
+                    </b:TabPane>
+                    <b:TabPane b:id="logPanel">
+                        <device:LogTabUi ui:field="logPanel"></device:LogTabUi>
                     </b:TabPane>
                 </b:TabContent>
             </b:Well>

@@ -57,6 +57,8 @@ public class DevicePanelUi extends Composite {
     SystemPropertiesTabUi systemPropertiesPanel;
     @UiField
     CommandTabUi commandPanel;
+    @UiField
+    LogTabUi logPanel;
 
     public DevicePanelUi() {
         initWidget(uiBinder.createAndBindUi(this));

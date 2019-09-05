@@ -213,7 +213,7 @@ function require_java_8 {
     echo "SKIP_JAVA_VERSION_CHECK=\"true\""
   	exit 1
   fi
-  if [ $JAVA_VERSION -lt 1.8 ];
+  if [ $(echo "$JAVA_VERSION < 1.8" | bc) -eq 1 ];
   then
     echo "Java version 8 or greater is required for running Kura, please upgrade"
     exit 1

@@ -64,6 +64,7 @@ Import-Package: com.eclipsesource.json;version="0.9.4",
  org.eclipse.kura.util.base;version="[1.0,2.0)",
  org.eclipse.kura.util.configuration;version="[1.0,2.0)",
  org.eclipse.kura.util.service;version="[1.0,2.0)",
+ org.eclipse.kura.web2.ext;version="[1.0,2.0)";resolution:=optional,
  org.eclipse.kura.wire;version="[2.0,3.0)",
  org.eclipse.kura.wire.graph;version="[1.0,2.0)",
  org.osgi.framework;version="1.7.0",
@@ -83,3 +84,5 @@ Import-Package: com.eclipsesource.json;version="0.9.4",
  org.w3c.dom,
  org.xml.sax
 Require-Bundle: com.gwt.user;bundle-version="[1.1.0,2.0.0)"
+Export-Package: org.eclipse.kura.web.api;version="1.0.0"
+

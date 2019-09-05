@@ -19,6 +19,8 @@
   <set-property name="gwt.logging.enabled" value="TRUE"/>
   <!--<set-property name="gwt.logging.consoleHandler" value="ENABLED"/>-->
 
+
+  <inherits name="org.eclipse.kura.web2.ext" />
   <!-- We need the JUnit module in the main module,               -->
   <!-- otherwise eclipse complains (Google plugin bug?)           -->
   <!-- inherits name='com.google.gwt.junit.JUnit' />              -->

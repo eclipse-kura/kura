@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -19,8 +19,11 @@ import org.eclipse.kura.web.client.ui.Tab;
 import org.eclipse.kura.web.shared.model.GwtSession;
 import org.eclipse.kura.web.shared.service.GwtSecurityService;
 import org.eclipse.kura.web.shared.service.GwtSecurityServiceAsync;
+import org.eclipse.kura.web2.ext.WidgetFactory;
 import org.gwtbootstrap3.client.ui.NavTabs;
+import org.gwtbootstrap3.client.ui.TabContent;
 import org.gwtbootstrap3.client.ui.TabListItem;
+import org.gwtbootstrap3.client.ui.TabPane;
 import org.gwtbootstrap3.client.ui.html.Paragraph;
 
 import com.google.gwt.core.client.GWT;
@@ -76,6 +79,10 @@ public class SettingsPanelUi extends Composite {
     TabListItem deviceCert;
     @UiField
     TabListItem security;
+    @UiField
+    TabContent tabContent;
+    @UiField
+    NavTabs navTabs;
 
     @UiField
     HTMLPanel settingsIntro;
@@ -138,6 +145,23 @@ public class SettingsPanelUi extends Composite {
         boolean securityDirty = this.securityPanel.isDirty();
 
         return snapshotsDirty || appCertDirty || sslConfigDirty || serverCertDirty || deviceCertDirty || securityDirty;
+    }
+
+    public void addTab(final String name, final WidgetFactory widgetFactory) {
+
+        final TabPane tabPane = new TabPane();
+        tabPane.setId("__extension__" + name);
+
+        final TabListItem item = new TabListItem(name);
+        item.setDataTarget("#__extension__" + name);
+
+        item.addClickHandler(e -> {
+            tabPane.clear();
+            tabPane.add(widgetFactory.buildWidget());
+        });
+
+        navTabs.add(item);
+        tabContent.add(tabPane);
     }
 
     public void setDirty(boolean b) {

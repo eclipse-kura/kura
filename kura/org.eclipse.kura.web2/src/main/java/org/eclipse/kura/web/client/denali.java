@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -17,11 +17,14 @@ import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.util.FailureHandler;
+import org.eclipse.kura.web.shared.model.GwtClientExtensionBundle;
 import org.eclipse.kura.web.shared.model.GwtGroupedNVPair;
 import org.eclipse.kura.web.shared.model.GwtSession;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtDeviceService;
 import org.eclipse.kura.web.shared.service.GwtDeviceServiceAsync;
+import org.eclipse.kura.web.shared.service.GwtExtensionService;
+import org.eclipse.kura.web.shared.service.GwtExtensionServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityService;
 import org.eclipse.kura.web.shared.service.GwtSecurityServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
@@ -29,6 +32,7 @@ import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.ScriptInjector;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.RootPanel;
 
@@ -41,6 +45,7 @@ public class denali implements EntryPoint {
     private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
     private final GwtDeviceServiceAsync gwtDeviceService = GWT.create(GwtDeviceService.class);
     private final GwtSecurityServiceAsync gwtSecurityService = GWT.create(GwtSecurityService.class);
+    private final GwtExtensionServiceAsync gwtExtensionService = GWT.create(GwtExtensionService.class);
 
     private final EntryClassUi binder = GWT.create(EntryClassUi.class);
 
@@ -52,6 +57,22 @@ public class denali implements EntryPoint {
     @Override
     public void onModuleLoad() {
         RootPanel.get().add(this.binder);
+
+        gwtExtensionService.getConsoleExtensions(new AsyncCallback<List<GwtClientExtensionBundle>>() {
+
+            @Override
+            public void onFailure(Throwable caught) {
+                FailureHandler.handle(caught);
+            }
+
+            @Override
+            public void onSuccess(List<GwtClientExtensionBundle> result) {
+
+                for (final GwtClientExtensionBundle extension : result) {
+                    ScriptInjector.fromUrl(extension.getEntryPointUrl()).inject();
+                }
+            }
+        });
 
         this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 

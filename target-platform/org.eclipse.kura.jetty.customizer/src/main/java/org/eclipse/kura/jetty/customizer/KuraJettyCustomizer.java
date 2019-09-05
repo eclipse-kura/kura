@@ -25,6 +25,7 @@ import org.eclipse.jetty.server.ForwardedRequestCustomizer;
 import org.eclipse.jetty.server.HttpConfiguration.Customizer;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.handler.gzip.GzipHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 
 public class KuraJettyCustomizer extends JettyCustomizer {
@@ -35,11 +36,16 @@ public class KuraJettyCustomizer extends JettyCustomizer {
             return context;
         }
 
-        final ServletContextHandler serletContextHandler = (ServletContextHandler) context;
+        final ServletContextHandler servletContextHandler = (ServletContextHandler) context;
 
-        serletContextHandler.setErrorHandler(new KuraErrorHandler());
+        final GzipHandler gzipHandler = new GzipHandler();
+        gzipHandler.setCompressionLevel(9);
 
-        final SessionCookieConfig cookieConfig = serletContextHandler.getSessionHandler().getSessionCookieConfig();
+        servletContextHandler.setGzipHandler(gzipHandler);
+
+        servletContextHandler.setErrorHandler(new KuraErrorHandler());
+
+        final SessionCookieConfig cookieConfig = servletContextHandler.getSessionHandler().getSessionCookieConfig();
 
         cookieConfig.setHttpOnly(true);
 

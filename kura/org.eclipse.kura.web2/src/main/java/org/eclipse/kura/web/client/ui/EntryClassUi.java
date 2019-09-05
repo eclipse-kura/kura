@@ -33,6 +33,8 @@ import org.eclipse.kura.web.client.ui.wires.WiresPanelUi;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.util.FilterBuilder;
 import org.eclipse.kura.web.client.util.PidTextBox;
+import org.eclipse.kura.web.client.util.request.Request;
+import org.eclipse.kura.web.client.util.request.RequestContext;
 import org.eclipse.kura.web.client.util.request.RequestQueue;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConsoleUserOptions;
@@ -44,6 +46,11 @@ import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSessionService;
 import org.eclipse.kura.web.shared.service.GwtSessionServiceAsync;
+import org.eclipse.kura.web2.ext.AlertSeverity;
+import org.eclipse.kura.web2.ext.AuthenticationHandler;
+import org.eclipse.kura.web2.ext.Context;
+import org.eclipse.kura.web2.ext.ExtensionRegistry;
+import org.eclipse.kura.web2.ext.WidgetFactory;
 import org.gwtbootstrap3.client.ui.Anchor;
 import org.gwtbootstrap3.client.ui.AnchorListItem;
 import org.gwtbootstrap3.client.ui.Button;
@@ -67,6 +74,7 @@ import org.gwtbootstrap3.client.ui.constants.IconType;
 import org.gwtbootstrap3.client.ui.html.Span;
 import org.gwtbootstrap3.client.ui.html.Strong;
 
+import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpHandler;
@@ -82,7 +90,7 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-public class EntryClassUi extends Composite {
+public class EntryClassUi extends Composite implements Context {
 
     interface EntryClassUIUiBinder extends UiBinder<Widget, EntryClassUi> {
     }
@@ -170,6 +178,10 @@ public class EntryClassUi extends Composite {
     Button logoutButton;
     @UiField
     Button headerLogoutButton;
+    @UiField
+    NavPills sidenavPills;
+    @UiField
+    AlertDialog alertDialog;
 
     private static final Messages MSGS = GWT.create(Messages.class);
     private static final EntryClassUIUiBinder uiBinder = GWT.create(EntryClassUIUiBinder.class);
@@ -245,6 +257,15 @@ public class EntryClassUi extends Composite {
 
         initLogoutButtons();
         initServicesTree();
+        initExtensions();
+    }
+
+    private void initExtensions() {
+
+        ExtensionRegistry.get().addExtensionConsumer(e -> {
+            e.onLoad(this);
+        });
+
     }
 
     private void initExceptionReportModal() {
@@ -914,5 +935,105 @@ public class EntryClassUi extends Composite {
         this.statusBinder.setSession(EntryClassUi.this.currentSession);
         this.statusBinder.setParent(this);
         this.statusBinder.loadStatusData();
+    }
+
+    @Override
+    public void addSidenavComponent(final String name, final String icon, final WidgetFactory widgetFactory) {
+        final AnchorListItem item = new AnchorListItem(name);
+
+        try {
+            item.setIcon(IconType.valueOf(icon));
+        } catch (final Exception e) {
+            // do nothing
+        }
+
+        item.addClickHandler(evt -> {
+
+            EntryClassUi.this.contentPanelBody.clear();
+
+            forceTabsCleaning();
+            if (EntryClassUi.this.modal != null) {
+                EntryClassUi.this.modal.hide();
+            }
+            EntryClassUi.this.setSelectedAnchorListItem(item);
+            EntryClassUi.this.contentPanel.setVisible(true);
+            setHeader(name, null);
+            EntryClassUi.this.contentPanelBody.clear();
+
+            EntryClassUi.this.contentPanelBody.add(widgetFactory.buildWidget());
+
+            EntryClassUi.this.deviceBinder.setSession(EntryClassUi.this.currentSession);
+            EntryClassUi.this.deviceBinder.initDevicePanel();
+        });
+
+        this.sidenavPills.add(item);
+    }
+
+    @Override
+    public void addSettingsComponent(final String name, final WidgetFactory factory) {
+        this.settingsBinder.addTab(name, factory);
+    }
+
+    @Override
+    public void addAuthenticationHandler(final AuthenticationHandler authenticationHandler) {
+        // unsupported
+    }
+
+    @Override
+    public void getXSRFToken(Callback<String, String> callback) {
+        this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+
+            @Override
+            public void onSuccess(GwtXSRFToken result) {
+                callback.onSuccess(result.getToken());
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+                callback.onFailure(caught.getMessage());
+            }
+
+        });
+
+    }
+
+    private class WrapperRequest implements Callback<Void, String>, Request {
+
+        private AsyncCallback<Void> wrapped;
+
+        @Override
+        public void onSuccess(Void result) {
+            wrapped.onSuccess(null);
+        }
+
+        @Override
+        public void onFailure(String reason) {
+            wrapped.onFailure(new RuntimeException(reason));
+        }
+
+        @Override
+        public void run(RequestContext context) {
+            this.wrapped = context.callback();
+        }
+
+    }
+
+    @Override
+    public Callback<Void, String> startLongRunningOperation() {
+
+        final WrapperRequest callback = new WrapperRequest();
+
+        RequestQueue.submit(callback);
+
+        return callback;
+
+    }
+
+    @Override
+    public void showAlertDialog(final String message, final AlertSeverity severity,
+            final Callback<Void, Void> callback) {
+        alertDialog.show(message,
+                severity == AlertSeverity.INFO ? AlertDialog.Severity.INFO : AlertDialog.Severity.ALERT,
+                () -> callback.onSuccess(null));
     }
 }

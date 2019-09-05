@@ -63,6 +63,8 @@
 							!net.sourceforge.htmlunit.corejs.javascript,
 							!junit.framework,
 							!org.w3c.css.sac,
+                            !javax.jdo.annotations,
+                            !javax.persistence,
 							javax.servlet.http; version="2.6.0",
 							javax.servlet;version="2.6.0",
 							*

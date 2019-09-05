@@ -62,15 +62,16 @@
                     <transitive>false</transitive>
                 </artifact>
                 <artifact>
-                    <id>jakarta.xml.bind:jakarta.xml.bind-api:${jakarta.xml.bind-api.version}</id>
+                    <id>javax.xml.bind:jaxb-api:${javax.xml.bind.jaxb-api-mvn.version}</id>
                     <source>true</source>
                     <transitive>false</transitive>
                 </artifact>
                 <artifact>                   
-                    <id>com.sun.xml.bind:jaxb-impl:${com.sun.xml.bind.jaxb-impl.version}</id>
+                    <id>com.sun.xml.bind:jaxb-osgi:${com.sun.xml.bind.jaxb-osgi-mvn.version}</id>
                     <source>true</source>
                     <transitive>false</transitive>
-                </artifact>                                
+                </artifact> 
+                                
                 <!-- <artifact><source>true</source><id>jakarta.jws:jakarta.jws-api:jar:${jakarta.jws-api.version}</id></artifact>-->
                 
 		      <!-- End Java 11 -->

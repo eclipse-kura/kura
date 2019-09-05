@@ -1,37 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-
-    Copyright (c) 2016, 2018 Red Hat Inc
-
-     All rights reserved. This program and the accompanying materials
-     are made available under the terms of the Eclipse Public License v1.0
-     which accompanies this distribution, and is available at
-     http://www.eclipse.org/legal/epl-v10.html
-
-    Contributors:
-      Jens Reimann <jreimann@redhat.com> - Initial file
-
+<!-- 
+  Copyright (c) 2016, 2018 Red Hat Inc and others
+  All rights reserved. This program and the accompanying materials
+  are made available under the terms of the Eclipse Public License v1.0
+  which accompanies this distribution, and is available at
+  http://www.eclipse.org/legal/epl-v10.html
+ 
+  Contributors:
+      Red Hat Inc
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	
 	<parent>
-        <groupId>org.eclipse.kura</groupId>
-        <artifactId>target-platform</artifactId>
-        <version>4.2.0-SNAPSHOT</version>
-    </parent>
-
-	<groupId>org.eclipse.kura</groupId>
-	<artifactId>org.eclipse.kura.sun.misc</artifactId>
+		<groupId>org.eclipse.kura</groupId>
+		<artifactId>target-platform</artifactId>
+		<version>4.2.0-SNAPSHOT</version>
+		<relativePath>..</relativePath>
+	</parent>
+	
+	<artifactId>org.eclipse.kura.camel.sun.misc</artifactId>
 	<version>1.0.500-SNAPSHOT</version>
 	<packaging>jar</packaging>
-
-	<name>System extension fragment for 'sun.misc'</name>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
+	
+	<name>Camel :: Core :: Import sun.misc</name>
 
 	<build>
 		<plugins>
@@ -43,9 +40,7 @@
 					<archive>
 						<manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
 						<manifestEntries>
-							<Export-Package>
-                                sun.misc, com.sun
-                            </Export-Package>
+							<Import-Package>com.sun.xml.bind.v2;version="2.3.2"</Import-Package>
 						</manifestEntries>
 					</archive>
 				</configuration>
@@ -64,12 +59,11 @@
 				</executions>
 				<configuration>
 					<instructions>
-						<Fragment-Host>system.bundle; extension:=framework</Fragment-Host>
-						<Bundle-Vendor>Eclipse Kura</Bundle-Vendor>
+						<Fragment-Host>org.apache.camel.camel-core;bundle-version="[2.16.0,2.25.0)"</Fragment-Host>>
 					</instructions>
 				</configuration>
 			</plugin>
+			
 		</plugins>
 	</build>
-
 </project>

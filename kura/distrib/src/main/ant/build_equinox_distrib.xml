@@ -937,9 +937,9 @@ fi]]>
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/com.sun.activation.javax.activation_${com.sun.activation.version}.jar@3:start" />
 			<entry key="osgi.bundles" operation="+"
-				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/jakarta.xml.bind-api_${jakarta.xml.bind-api.version}.jar@3:start" />
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/jaxb-api_${javax.xml.bind.jaxb-api.version}.jar@3:start" />
 			<entry key="osgi.bundles" operation="+"
-				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/com.sun.xml.bind.jaxb-impl_${com.sun.xml.bind.jaxb-impl.version}.jar@3:start" />
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/com.sun.xml.bind.jaxb-osgi_${com.sun.xml.bind.jaxb-osgi.version}.jar@3:start" />
 			
 		</propertyfile>
 	</target>
@@ -1312,10 +1312,8 @@ fi]]>
 	<target name="camel-config">
 		<propertyfile
 			file="${project.build.directory}/${build.output.name}/config.ini">
-			<!--
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.camel.sun.misc_${org.eclipse.kura.camel.sun.misc.version}.jar@3" />
-			-->
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.camel.camel-amqp_${org.apache.camel.camel-amqp.version}.jar@4:start" />
 			<entry key="osgi.bundles" operation="+"

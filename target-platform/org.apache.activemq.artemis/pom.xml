@@ -114,6 +114,7 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>
                 <configuration>
+                    <manifestLocation>META-INF</manifestLocation>
                     <instructions>
                         <Embed-Dependency>*</Embed-Dependency>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
@@ -147,9 +148,11 @@
                             reactor.*;resolution:=optional,
                             rx.*;resolution:=optional,
                             com.codahale.*;resolution:=optional,
+                            org.apache.geronimo.*;resolution:=optional,
                             *
                         </Import-Package>
                         <_exportcontents>org.apache.*</_exportcontents>
+                        <_noee>true</_noee>
                     </instructions>
                 </configuration>
             </plugin>

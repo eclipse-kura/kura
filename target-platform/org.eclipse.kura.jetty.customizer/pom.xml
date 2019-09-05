@@ -58,6 +58,7 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>
                 <configuration>
+                    <manifestLocation>META-INF</manifestLocation>
                     <instructions>
                         <Fragment-Host>org.eclipse.equinox.http.jetty</Fragment-Host>
                     </instructions>

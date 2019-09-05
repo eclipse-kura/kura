@@ -206,9 +206,9 @@ function require_java_8 {
     return 0;
   fi
   JAVA_VERSION=$(java -version 2>&1 | head -n 1 | cut -d'"' -f2 | cut -d'.' -f1,2)
-  if ! [[ $JAVA_VERSION =~ ^(\-|\+)?\d+(\.\d+)?$ ]];
+  if ! [[ $JAVA_VERSION =~ ^([1-9][0-9]*)+(\.[0-9]*)?$ ]];
   then
-  	echo "Failed to determine Java version"
+  	echo "Failed to determine Java version: $JAVA_VERSION"
     echo "If you are sure that Java 8 or greater is installed please re run this script setting the following environment variable:"
     echo "SKIP_JAVA_VERSION_CHECK=\"true\""
   	exit 1

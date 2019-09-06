@@ -47,6 +47,7 @@ import org.eclipse.kura.web.server.GwtWireGraphServiceImpl;
 import org.eclipse.kura.web.server.servlet.ChannelServlet;
 import org.eclipse.kura.web.server.servlet.DeviceSnapshotsServlet;
 import org.eclipse.kura.web.server.servlet.FileServlet;
+import org.eclipse.kura.web.server.servlet.LogServlet;
 import org.eclipse.kura.web.server.servlet.RedirectServlet;
 import org.eclipse.kura.web.server.servlet.SendStatusServlet;
 import org.eclipse.kura.web.server.servlet.SkinServlet;
@@ -264,6 +265,7 @@ public class Console implements ConfigurableComponent {
         this.httpService.unregister(DENALI_MODULE_PATH + "/file");
         this.httpService.unregister(DENALI_MODULE_PATH + "/device_snapshots");
         this.httpService.unregister(DENALI_MODULE_PATH + "/assetsUpDownload");
+        this.httpService.unregister(DENALI_MODULE_PATH + "/log");
         this.httpService.unregister(DENALI_MODULE_PATH + "/skin");
         this.httpService.unregister(DENALI_MODULE_PATH + "/cloudservices");
         this.httpService.unregister(DENALI_MODULE_PATH + "/wires");
@@ -384,6 +386,7 @@ public class Console implements ConfigurableComponent {
                 sessionContext);
         this.httpService.registerServlet(DENALI_MODULE_PATH + "/assetsUpDownload", new ChannelServlet(), null,
                 sessionContext);
+        this.httpService.registerServlet(DENALI_MODULE_PATH + "/log", new LogServlet(), null, resourceContext);
         this.httpService.registerServlet(DENALI_MODULE_PATH + "/skin", new SkinServlet(), null, resourceContext);
         this.httpService.registerServlet(DENALI_MODULE_PATH + "/cloudservices", new GwtCloudConnectionServiceImpl(),
                 null, sessionContext);

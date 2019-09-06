@@ -110,6 +110,7 @@ public class LogServlet extends HttpServlet {
                 zipFile(bytes, zos, file);
             }
             zos.flush();
+            zos.close();
             baos.flush();
             return baos.toByteArray();
         }

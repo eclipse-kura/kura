@@ -21,45 +21,29 @@ public final class JsExtensionRegistry extends JavaScriptObject {
 
     public static native JsExtensionRegistry get()
     /*-{
-          if (!window.top.extensionRegistry) {
-                window.top.extensionRegistry = {
-                    extensions: {},
-                    consumers: []
-                }
-          }
           return window.top.extensionRegistry
     }-*/;
 
     public final native void registerExtension(final JavaScriptObject extension)
     /*-{
-          this.extensions[extension.id] = extension
-          for (var i = 0; i < this.consumers.length; i++) {
-              (this.consumers[i])(extension)
-          }
+          this.registerExtension(extension)
     }-*/;
 
     public final native void unregisterExtension(final JavaScriptObject extension)
     /*-{
-          delete this.extensions[extension.id]
+          this.unregisterExtension(extension)
     }-*/;
 
     public final native void addExtensionConsumer(final Consumer<JavaScriptObject> consumer)
     /*-{
-        this.consumers.push(function (ex) {
+        this.addExtensionConsumer(function (ex) {
             consumer.@java.util.function.Consumer::accept(Ljava/lang/Object;)(ex)
         })
-        for (var p in this.extensions) {
-            consumer.@java.util.function.Consumer::accept(Ljava/lang/Object;)(this.extensions[p])
-        }
     }-*/;
 
     public final native JsArray<JavaScriptObject> getExtensions()
     /*-{
-        var result = []
-        for (var p in this.extensions) {
-            result.push(this.extensions[p])
-        }
-        return result
+        return this.getExtensions()
     }-*/;
 
 }

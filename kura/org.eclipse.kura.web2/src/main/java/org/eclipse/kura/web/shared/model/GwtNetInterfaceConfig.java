@@ -14,8 +14,6 @@ package org.eclipse.kura.web.shared.model;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import org.eclipse.kura.web.client.util.KuraBaseModel;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

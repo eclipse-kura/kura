@@ -7,7 +7,7 @@
      are made available under the terms of the Eclipse Public License v1.0
      which accompanies this distribution, and is available at
      http://www.eclipse.org/legal/epl-v10.html
-     
+
      Contributors:
         Eurotech and/or its affiliates
         Red Hat Inc
@@ -17,7 +17,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
-	
+
 	<parent>
 		<groupId>org.eclipse.kura</groupId>
 		<artifactId>kura</artifactId>
@@ -96,7 +96,7 @@
 					<outputDirectory>src/main/webapp</outputDirectory>
 				</configuration>
 			</plugin>
-			
+
 			<!-- Copy static web files before executing gwt:run -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -120,6 +120,79 @@
 			</plugin>
 
 			<plugin>
+			  <groupId>net.alchim31.maven</groupId>
+			  <artifactId>yuicompressor-maven-plugin</artifactId>
+			  <version>1.5.1</version>
+			  <configuration>
+			    <preProcessAggregates>true</preProcessAggregates>
+			    <aggregations>
+			      <aggregation>
+			        <insertNewLine>true</insertNewLine>
+			        <output>src/main/webapp/login.all.js</output>
+			        <inputDir>${basedir}/src/main/resources/org/eclipse/kura/web/js</inputDir>
+			        <includes>
+					    <include>extensions.js</include>
+			        </includes>
+			      </aggregation>
+			      <aggregation>
+			        <insertNewLine>true</insertNewLine>
+			        <output>src/main/webapp/denali.all.js</output>
+			        <inputDir>${basedir}/src/main/resources/org/eclipse/kura/web/js</inputDir>
+			        <includes>
+			          	<include>jquery.min.js</include>
+					    <include>lodash.min.js</include>
+					    <include>backbone.min.js</include>
+					    <include>joint.min.js</include>
+					    <include>joint.shapes.devs.js</include>
+					    <include>dnd_helper.js</include>
+					    <include>wires_composer.js</include>
+					    <include>wires_blink.js</include>
+					    <include>extensions.js</include>
+			        </includes>
+			      </aggregation>
+			      <aggregation>
+			        <insertNewLine>true</insertNewLine>
+			        <output>src/main/webapp/denali.all.css</output>
+			        <inputDir>${basedir}/src/main/resources/org/eclipse/kura/web/css</inputDir>
+			        <includes>
+			        	<include>joint.min.css</include>
+			          	<include>denali.css</include>
+			        </includes>
+			      </aggregation>
+			    </aggregations>
+			    <includes>
+			    	<include>denali.all.js</include>
+			    	<include>login.all.js</include>
+			    	<include>denali.all.css</include>
+			    </includes>
+			    <jswarn>false</jswarn>
+			    <nosuffix>false</nosuffix>
+			    <sourceDirectory>src/main/webapp/</sourceDirectory>
+			    <outputDirectory>src/main/webapp/</outputDirectory>
+			  </configuration>
+			  <executions>
+			    <execution>
+			      <id>compress_js_css</id>
+			      <phase>process-resources</phase>
+			      <goals>
+			        <goal>compress</goal>
+			      </goals>
+			    </execution>
+			  </executions>
+			</plugin>
+
+            <plugin>
+                <groupId>org.eclipse.tycho</groupId>
+                <artifactId>tycho-compiler-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>**/org/eclipse/kura/web/client/**/*.java</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+
+
+			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>tycho-packaging-plugin</artifactId>
 				<configuration>
@@ -129,13 +202,17 @@
 							<prefix>www/</prefix>
 							<excludes>
 								<exclude>**/WEB-INF/**</exclude>
+								<exclude>**/gwt-unitCache/**/*</exclude>
+								<exclude>**/src/main/resources/**/js/*.js</exclude>
+								<exclude>**/src/main/resources/**/css/*.css</exclude>
+								<exclude>**/src/main/webapp/*.all.js</exclude>
 							</excludes>
 						</fileSet>
 					</additionalFileSets>
 				</configuration>
 			</plugin>
 		</plugins>
-		
+
 		<pluginManagement>
 			<plugins>
 				<!--This plugin's configuration is used to store Eclipse m2e settings
@@ -147,7 +224,7 @@
 					<configuration>
 						<lifecycleMappingMetadata>
 							<pluginExecutions>
-							
+
 								<pluginExecution>
 									<pluginExecutionFilter>
 										<groupId>

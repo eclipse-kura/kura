@@ -9,9 +9,9 @@
  * Contributors:
  *     Eurotech
  *******************************************************************************/
-package org.eclipse.kura.web.client.util;
+package org.eclipse.kura.web.shared.model;
 
-import org.eclipse.kura.web.shared.model.GwtBaseModel;
+import org.eclipse.kura.web.shared.GwtSafeHtmlUtils;
 
 public class KuraBaseModel extends GwtBaseModel {
 

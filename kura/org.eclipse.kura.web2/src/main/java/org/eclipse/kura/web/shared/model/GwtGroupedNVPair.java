@@ -13,9 +13,6 @@ package org.eclipse.kura.web.shared.model;
 
 import java.io.Serializable;
 
-import org.eclipse.kura.web.client.messages.ValidationMessages;
-
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class GwtGroupedNVPair extends GwtBaseModel implements IsSerializable, Serializable {
@@ -91,20 +88,4 @@ public class GwtGroupedNVPair extends GwtBaseModel implements IsSerializable, Se
         return get("version");
     }
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public <X> X get(String property) {
-        if ("groupLoc".equals(property)) {
-            ValidationMessages msgs = GWT.create(ValidationMessages.class);
-            return (X) msgs.getString(getGroup());
-        } else if ("nameLoc".equals(property)) {
-            ValidationMessages msgs = GWT.create(ValidationMessages.class);
-            return (X) msgs.getString(getName());
-        } else if ("statusLoc".equals(property)) {
-            ValidationMessages msgs = GWT.create(ValidationMessages.class);
-            return (X) msgs.getString(getStatus());
-        } else {
-            return super.get(property);
-        }
-    }
 }

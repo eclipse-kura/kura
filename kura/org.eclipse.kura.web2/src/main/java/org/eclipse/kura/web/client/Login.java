@@ -39,7 +39,7 @@ public class Login implements EntryPoint {
             public void onSuccess(List<GwtClientExtensionBundle> result) {
 
                 for (final GwtClientExtensionBundle extension : result) {
-                    ScriptInjector.fromUrl(extension.getEntryPointUrl()).setWindow(ScriptInjector.TOP_WINDOW).inject();
+                    ScriptInjector.fromUrl(extension.getEntryPointUrl()).inject();
                 }
             }
         });

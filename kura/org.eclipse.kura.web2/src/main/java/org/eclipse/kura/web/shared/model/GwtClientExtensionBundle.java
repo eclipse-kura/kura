@@ -13,8 +13,6 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.kura.web.client.util.KuraBaseModel;
-
 public class GwtClientExtensionBundle extends KuraBaseModel implements Serializable {
 
     /**

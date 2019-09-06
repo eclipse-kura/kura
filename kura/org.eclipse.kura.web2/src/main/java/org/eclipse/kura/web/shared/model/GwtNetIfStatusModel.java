@@ -11,7 +11,6 @@
  *******************************************************************************/
 package org.eclipse.kura.web.shared.model;
 
-import org.eclipse.kura.web.client.util.KuraBaseModel;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

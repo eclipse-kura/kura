@@ -12,6 +12,7 @@ package org.eclipse.kura.wire.script.filter.provider;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import javax.script.Bindings;
@@ -19,6 +20,7 @@ import javax.script.Compilable;
 import javax.script.CompiledScript;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
@@ -38,8 +40,6 @@ import org.osgi.service.component.ComponentException;
 import org.osgi.service.wireadmin.Wire;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 
 public class ScriptFilter implements WireEmitter, WireReceiver, ConfigurableComponent {
 
@@ -68,6 +68,7 @@ public class ScriptFilter implements WireEmitter, WireReceiver, ConfigurableComp
         }
     }
 
+    @SuppressWarnings("unchecked")
     public void activate(final ComponentContext componentContext, final Map<String, Object> properties)
             throws ComponentException {
         logger.info("Activating Script Filter...");
@@ -139,8 +140,8 @@ public class ScriptFilter implements WireEmitter, WireReceiver, ConfigurableComp
     }
 
     private ScriptEngine createEngine() {
-        NashornScriptEngineFactory factory = new NashornScriptEngineFactory();
-        ScriptEngine scriptEngine = factory.getScriptEngine(className -> false);
+        ScriptEngineManager sem = new ScriptEngineManager();
+        ScriptEngine scriptEngine = sem.getEngineByName("javascript");
 
         if (scriptEngine == null) {
             throw new IllegalStateException("Failed to get script engine");
@@ -148,6 +149,8 @@ public class ScriptFilter implements WireEmitter, WireReceiver, ConfigurableComp
 
         final Bindings engineScopeBindings = scriptEngine.getBindings(ScriptContext.ENGINE_SCOPE);
         if (engineScopeBindings != null) {
+            engineScopeBindings.put("polyglot.js.allowHostAccess", true);
+            engineScopeBindings.put("polyglot.js.allowHostClassLookup", (Predicate<String>) s -> true);
             engineScopeBindings.remove("exit");
             engineScopeBindings.remove("quit");
         }

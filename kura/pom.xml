@@ -216,9 +216,7 @@
                         <groupId>org.eclipse.tycho</groupId>
                         <artifactId>tycho-compiler-plugin</artifactId>
                         <version>${tycho-version}</version>
-                        <configuration>
-                            <useJDK>BREE</useJDK>
-                        </configuration>
+                        
                     </plugin>
                 </plugins>
             </build>
@@ -355,7 +353,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.0</version>
+                <version>3.8.1</version>
             </plugin>
 
             <plugin>

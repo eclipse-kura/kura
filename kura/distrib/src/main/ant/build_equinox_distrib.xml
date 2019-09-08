@@ -244,12 +244,13 @@
 
 
 		<!-- Add mToolkit to config.ini -->
+		<!--
 		<propertyfile
 			file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.tigris.mtoolkit.iagent.rpc_3.0.0.20110411-0918.jar@5:start" />
 		</propertyfile>
-
+		-->
 
 
 		<propertyfile
@@ -1329,8 +1330,6 @@ fi]]>
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.camel.camel-jms_${org.apache.camel.camel-jms.version}.jar@4:start" />
 			<entry key="osgi.bundles" operation="+"
-				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.camel.camel-script_${org.apache.camel.camel-script.version}.jar@3:start" />
-			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.camel.camel-stream_${org.apache.camel.camel-stream.version}.jar@3:start" />
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.camel_${org.eclipse.kura.camel.version}.jar@4:start" />
@@ -1436,7 +1435,7 @@ fi]]>
 
 	<!-- Artemis config targets -->
 	<target name="artemis-config">
-		<find-jar-version dir="../target-definition/common/repository/plugins"
+		<find-jar-version dir="../target-definition/mvn-deps/repository/plugins"
 			prefix="com.google.guava" property="guava.distrib.version" />
 
 		<propertyfile

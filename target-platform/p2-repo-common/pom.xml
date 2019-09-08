@@ -86,21 +86,7 @@
                                     <artifactId>tinyb.aarch64</artifactId>
                                     <version>${tinyb.version}</version>
                                 </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache</groupId>
-                                    <artifactId>org.apache.commons.net</artifactId>
-                                    <version>${org.apache.commons.net.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>com.google</groupId>
-                                    <artifactId>com.google.protobuf</artifactId>
-                                    <version>${com.google.protobuf.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.paho</groupId>
-                                    <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
-                                    <version>${org.eclipse.paho.client.mqttv3.version}</version>
-                                </artifactItem>
+                                
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.camel.sun.misc</artifactId>
@@ -126,26 +112,14 @@
                                     <artifactId>com.gwt.user</artifactId>
                                     <version>${com.gwt.user.version}</version>
                                 </artifactItem>
-                                <!--<artifactItem>
-									<groupId>com.gwt</groupId>
-									<artifactId>com.gwt.user</artifactId>
-									<version>0.2.0</version>
-								</artifactItem>-->
-                                <artifactItem>
-                                    <groupId>org.hamcrest</groupId>
-                                    <artifactId>org.hamcrest.core</artifactId>
-                                    <version>${org.hamcrest.core.version}</version>
-                                </artifactItem>
+                                
+                                
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.usb4java</artifactId>
                                     <version>${org.usb4java.version}</version>
                                 </artifactItem>
-                                <artifactItem>
-                                    <groupId>com.h2database</groupId>
-                                    <artifactId>h2</artifactId>
-                                    <version>${com.h2database.h2.version}</version>
-                                </artifactItem>
+                                
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
                                     <artifactId>jdk.dio</artifactId>
@@ -167,70 +141,14 @@
                                     <version>${jdk.dio.version}</version>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.slf4j</groupId>
-                                    <artifactId>slf4j-api</artifactId>
-                                    <version>${slf4j.api.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.slf4j</groupId>
-                                    <artifactId>jcl-over-slf4j</artifactId>
-                                    <version>${slf4j.api.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.logging.log4j</groupId>
-                                    <artifactId>log4j-api</artifactId>
-                                    <version>${logging.log4j.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.logging.log4j</groupId>
-                                    <artifactId>log4j-core</artifactId>
-                                    <version>${logging.log4j.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.logging.log4j</groupId>
-                                    <artifactId>log4j-slf4j-impl</artifactId>
-                                    <version>${logging.log4j.version}</version>
-                                </artifactItem>
-                                <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.apache.log4j2-api-config</artifactId>
                                     <version>${org.apache.log4j2-api-config.version}</version>
-                                </artifactItem>
-
-                                <artifactItem>
-                                    <groupId>org.junit</groupId>
-                                    <artifactId>org.junit</artifactId>
-                                    <version>${org.junit.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>commons-fileupload</groupId>
-                                    <artifactId>commons-fileupload</artifactId>
-                                    <version>${org.apache.commons.fileupload.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.commons</groupId>
-                                    <artifactId>commons-exec</artifactId>
-                                    <version>${commons-exec.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
                                     <artifactId>usb4java-javax</artifactId>
                                     <version>${usb4java-javax.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>commons-io</groupId>
-                                    <artifactId>commons-io</artifactId>
-                                    <version>${org.apache.commons.io-mvn.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.commons</groupId>
-                                    <artifactId>commons-lang3</artifactId>
-                                    <version>${org.apache.commons.lang3.maven.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.commons</groupId>
-                                    <artifactId>commons-csv</artifactId>
-                                    <version>${commons-csv.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
@@ -257,126 +175,10 @@
                                     <artifactId>org.eclipse.soda.dk.comm.macosx</artifactId>
                                     <version>${org.eclipse.soda.dk.comm.version}</version>
                                 </artifactItem>
-                                
-                                <artifactItem>
-                                    <groupId>org.codehaus.groovy</groupId>
-                                    <artifactId>groovy</artifactId>
-                                    <version>${org.codehaus.groovy.groovy.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.codehaus.groovy</groupId>
-                                    <artifactId>groovy-xml</artifactId>
-                                    <version>${org.codehaus.groovy.groovy.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.codehaus.groovy</groupId>
-                                    <artifactId>groovy-templates</artifactId>
-                                    <version>${org.codehaus.groovy.groovy.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.codehaus.groovy</groupId>
-                                    <artifactId>groovy-sql</artifactId>
-                                    <version>${org.codehaus.groovy.groovy.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.codehaus.groovy</groupId>
-                                    <artifactId>groovy-json</artifactId>
-                                    <version>${org.codehaus.groovy.groovy.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.codehaus.groovy</groupId>
-                                    <artifactId>groovy-datetime</artifactId>
-                                    <version>${org.codehaus.groovy.groovy.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.codehaus.groovy</groupId>
-                                    <artifactId>groovy-dateutil</artifactId>
-                                    <version>${org.codehaus.groovy.groovy.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.codehaus.groovy</groupId>
-                                    <artifactId>groovy-jsr223</artifactId>
-                                    <version>${org.codehaus.groovy.groovy.version}</version>
-                                </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
                                     <artifactId>commons-pool</artifactId>
                                     <version>${org.eclipse.kura.commons-pool.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.httpcomponents</groupId>
-                                    <artifactId>httpclient-osgi</artifactId>
-                                    <version>${org.apache.httpcomponents.httpclient-osgi.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.httpcomponents</groupId>
-                                    <artifactId>httpcore-osgi</artifactId>
-                                    <version>${org.apache.httpcomponents.httpcore-osgi.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.servicemix.bundles</groupId>
-                                    <artifactId>org.apache.servicemix.bundles.commons-codec</artifactId>
-                                    <version>${org.apache.servicemix.bundles.commons-codec-mvn.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>commons-logging</groupId>
-                                    <artifactId>commons-logging</artifactId>
-                                    <version>${commons-logging.commons-logging-mvn.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.qpid</groupId>
-                                    <artifactId>qpid-jms-client</artifactId>
-                                    <version>${apache-qpid-jms-client.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.qpid</groupId>
-                                    <artifactId>proton-j</artifactId>
-                                    <version>${apache-qpid-proton-j.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.servicemix.bundles</groupId>
-                                    <artifactId>org.apache.servicemix.bundles.spring-beans</artifactId>
-                                    <version>${spring.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.servicemix.bundles</groupId>
-                                    <artifactId>org.apache.servicemix.bundles.spring-aop</artifactId>
-                                    <version>${spring.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.servicemix.bundles</groupId>
-                                    <artifactId>org.apache.servicemix.bundles.aopalliance</artifactId>
-                                    <version>${aopalliance-mvn.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.servicemix.bundles</groupId>
-                                    <artifactId>org.apache.servicemix.bundles.spring-context</artifactId>
-                                    <version>${spring.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.servicemix.bundles</groupId>
-                                    <artifactId>org.apache.servicemix.bundles.spring-core</artifactId>
-                                    <version>${spring.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.servicemix.bundles</groupId>
-                                    <artifactId>org.apache.servicemix.bundles.spring-expression</artifactId>
-                                    <version>${spring.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.servicemix.bundles</groupId>
-                                    <artifactId>org.apache.servicemix.bundles.spring-jms</artifactId>
-                                    <version>${spring.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.servicemix.bundles</groupId>
-                                    <artifactId>org.apache.servicemix.bundles.spring-tx</artifactId>
-                                    <version>${spring.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.osgi</groupId>
-                                    <artifactId>osgi.annotation</artifactId>
-                                    <version>${osgi.annotation.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
@@ -399,217 +201,6 @@
                                     <version>${com.eclipsesource.jaxrs.provider.security.version}</version>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>com.google.code.gson</groupId>
-                                    <artifactId>gson</artifactId>
-                                    <version>${com.google.gson.version}</version>
-                                </artifactItem>
-                                <!-- Artemis Broker -->
-                                <artifactItem>
-                                    <groupId>com.google.guava</groupId>
-                                    <artifactId>guava</artifactId>
-									<version>${guava.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.activemq</groupId>
-                                    <artifactId>artemis-mqtt-protocol</artifactId>
-                                    <version>${org.apache.activemq.artemis.upstream.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.activemq</groupId>
-                                    <artifactId>artemis-amqp-protocol</artifactId>
-                                    <version>${org.apache.activemq.artemis.upstream.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.activemq</groupId>
-                                    <artifactId>artemis-hornetq-protocol</artifactId>
-                                    <version>${org.apache.activemq.artemis.upstream.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.activemq</groupId>
-                                    <artifactId>artemis-stomp-protocol</artifactId>
-                                    <version>${org.apache.activemq.artemis.upstream.version}</version>
-                                </artifactItem>
-
-                                <artifactItem>
-                                    <groupId>org.apache.activemq</groupId>
-                                    <artifactId>activemq-artemis-native</artifactId>
-                                    <version>${org.apache.activemq.artemis-native.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.activemq</groupId>
-                                    <artifactId>artemis-hqclient-protocol</artifactId>
-                                    <version>${org.apache.activemq.artemis.upstream.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>io.netty</groupId>
-                                    <artifactId>netty-buffer</artifactId>
-                                    <version>${io.netty.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>io.netty</groupId>
-                                    <artifactId>netty-codec</artifactId>
-                                    <version>${io.netty.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>io.netty</groupId>
-                                    <artifactId>netty-codec-http</artifactId>
-                                    <version>${io.netty.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>io.netty</groupId>
-                                    <artifactId>netty-codec-http2</artifactId>
-                                    <version>${io.netty.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>io.netty</groupId>
-                                    <artifactId>netty-codec-mqtt</artifactId>
-                                    <version>${io.netty.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>io.netty</groupId>
-                                    <artifactId>netty-codec-dns</artifactId>
-                                    <version>${io.netty.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>io.netty</groupId>
-                                    <artifactId>netty-common</artifactId>
-                                    <version>${io.netty.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>io.netty</groupId>
-                                    <artifactId>netty-handler</artifactId>
-                                    <version>${io.netty.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>io.netty</groupId>
-                                    <artifactId>netty-handler-proxy</artifactId>
-                                    <version>${io.netty.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>io.netty</groupId>
-                                    <artifactId>netty-resolver</artifactId>
-                                    <version>${io.netty.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>io.netty</groupId>
-                                    <artifactId>netty-resolver-dns</artifactId>
-                                    <version>${io.netty.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>io.netty</groupId>
-                                    <artifactId>netty-transport</artifactId>
-                                    <version>${io.netty.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>io.netty</groupId>
-                                    <artifactId>netty-codec-socks</artifactId>
-                                    <version>${io.netty.version}</version>
-                                </artifactItem>
-                                <!-- 
-                                <artifactItem>
-                                    <groupId>io.netty</groupId>
-                                    <artifactId>netty-transport-native-epoll</artifactId>
-                                    <version>${io.netty.version}</version>
-                                </artifactItem>
-                                -->
-                                <artifactItem>
-                                    <groupId>io.netty</groupId>
-                                    <artifactId>netty-transport-native-kqueue</artifactId>
-                                    <version>${io.netty.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>io.netty</groupId>
-                                    <artifactId>netty-transport-native-unix-common</artifactId>
-                                    <version>${io.netty.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>io.netty</groupId>
-                                    <artifactId>netty-transport-native-epoll</artifactId>
-                                    <classifier>linux-x86_64</classifier>
-                                    <version>${io.netty.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>com.fasterxml.jackson.core</groupId>
-                                    <artifactId>jackson-core</artifactId>
-                                    <version>${com.fasterxml.jackson.core.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>com.fasterxml.jackson.core</groupId>
-                                    <artifactId>jackson-databind</artifactId>
-                                    <version>${com.fasterxml.jackson.core.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>com.fasterxml.jackson.core</groupId>
-                                    <artifactId>jackson-annotations</artifactId>
-                                    <version>${com.fasterxml.jackson.core.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>com.fasterxml.jackson.module</groupId>
-                                    <artifactId>jackson-module-jaxb-annotations</artifactId>
-                                    <version>${com.fasterxml.jackson.module.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>com.fasterxml.jackson.dataformat</groupId>
-                                    <artifactId>jackson-dataformat-yaml</artifactId>
-                                    <version>${com.fasterxml.jackson.dataformat.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.mvel</groupId>
-                                    <artifactId>mvel2</artifactId>
-                                    <version>${org.mvel.mvel2.version}</version>
-                                </artifactItem>
-
-                                <artifactItem>
-                                    <groupId>io.glutamate</groupId>
-                                    <artifactId>glutamate</artifactId>
-                                    <version>${io.glutamate.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.yaml</groupId>
-                                    <artifactId>snakeyaml</artifactId>
-                                    <version>${org.yaml.snakeyaml.mvn.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.javassist</groupId>
-                                    <artifactId>javassist</artifactId>
-                                    <version>${org.javassist.mvn.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.servicemix.bundles</groupId>
-                                    <artifactId>org.apache.servicemix.bundles.reflections</artifactId>
-                                    <version>${org.apache.servicemix.bundles.reflections-mvn.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.jboss.logging</groupId>
-                                    <artifactId>jboss-logging</artifactId>
-                                    <version>${org.jboss.logging.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>commons-beanutils</groupId>
-                                    <artifactId>commons-beanutils</artifactId>
-                                    <version>${commons-beanutils.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>commons-collections</groupId>
-                                    <artifactId>commons-collections</artifactId>
-                                    <version>${commons-collections.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.geronimo.specs</groupId>
-                                    <artifactId>geronimo-json_1.0_spec</artifactId>
-                                    <version>1.0-alpha-1</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.geronimo.specs</groupId>
-                                    <artifactId>geronimo-jms_2.0_spec</artifactId>
-                                    <version>1.0-alpha-2</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.geronimo.specs</groupId>
-                                    <artifactId>geronimo-jta_1.1_spec</artifactId>
-                                    <version>${org.apache.geronimo.specs.jta.version}</version>
-                                </artifactItem>
-                                <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.apache.activemq.artemis</artifactId>
                                     <version>${org.apache.activemq.artemis.version}</version>
@@ -618,39 +209,6 @@
                                     <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.jetty.customizer</artifactId>
                                     <version>${org.eclipse.kura.jetty.customizer.version}</version>
-                                </artifactItem>
-
-                                <artifactItem>
-                                    <groupId>org.ow2.asm</groupId>
-                                    <artifactId>asm-all</artifactId>
-                                    <version>${org.objectweb.asm.all-mvn.version}</version>
-                                </artifactItem>
-
-                                <artifactItem>
-                                    <groupId>org.apache.felix</groupId>
-                                    <artifactId>org.apache.felix.fileinstall</artifactId>
-                                    <version>${org.apache.felix.fileinstall.version}</version>
-                                </artifactItem>
-
-                                <artifactItem>
-                                    <groupId>org.apache.felix</groupId>
-                                    <artifactId>org.apache.felix.ipojo</artifactId>
-                                    <version>${org.apache.felix.ipojo.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.felix</groupId>
-                                    <artifactId>org.apache.felix.utils</artifactId>
-                                    <version>${org.apache.felix.utils.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.osgi</groupId>
-                                    <artifactId>osgi.cmpn</artifactId>
-                                    <version>${osgi.cmpn.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.aries.spifly</groupId>
-                                    <artifactId>org.apache.aries.spifly.dynamic.bundle</artifactId>
-                                    <version>${org.apache.aries.spifly-mvn.version}</version>
                                 </artifactItem>
                             </artifactItems>
                             <stripVersion>true</stripVersion>
@@ -687,22 +245,10 @@
                                     tofile="target/source/plugins/tinyb.x86_64_${tinyb.version}.jar" />
                                 <move file="target/source/plugins/tinyb.aarch64.jar"
                                     tofile="target/source/plugins/tinyb.aarch64_${tinyb.version}.jar" />
-                                <move file="target/source/plugins/org.apache.commons.net.jar"
-                                    tofile="target/source/plugins/org.apache.commons.net_${org.apache.commons.net.version}.jar" />
-                                <move file="target/source/plugins/commons-exec.jar"
-                                    tofile="target/source/plugins/org.apache.commons.exec_${org.apache.commons.exec.version}.jar" />
-                                <move file="target/source/plugins/com.google.protobuf.jar"
-                                    tofile="target/source/plugins/com.google.protobuf_${com.google.protobuf.version}.jar" />
-                                <move file="target/source/plugins/org.eclipse.paho.client.mqttv3.jar"
-                                    tofile="target/source/plugins/org.eclipse.paho.client.mqttv3_${org.eclipse.paho.client.mqttv3.version}.jar" />
                                 <move file="target/source/plugins/org.eclipse.kura.sun.misc.jar"
                                     tofile="target/source/plugins/org.eclipse.kura.sun.misc_${org.eclipse.kura.sun.misc.version}.jar" />
                                 <move file="target/source/plugins/org.tigris.mtoolkit.iagent.rpc.jar"
                                     tofile="target/source/plugins/org.tigris.mtoolkit.iagent.rpc_${org.tigris.mtoolkit.iagent.rpc.version}.jar" />
-                                <move file="target/source/plugins/com.gwt.user.jar"
-                                    tofile="target/source/plugins/com.gwt.user_${com.gwt.user.version}.jar" />
-                                <move file="target/source/plugins/org.hamcrest.core.jar"
-                                    tofile="target/source/plugins/org.hamcrest.core_${org.hamcrest.core.version}.jar" />
                                 <move file="target/source/plugins/org.usb4java.jar"
                                     tofile="target/source/plugins/org.usb4java_${org.usb4java.version}.jar" />
                                 <move file="target/source/plugins/jdk.dio.jar"
@@ -713,27 +259,9 @@
                                     tofile="target/source/plugins/jdk.dio.x86_64_${jdk.dio.version}.jar" />
                                 <move file="target/source/plugins/jdk.dio.aarch64.jar"
                                     tofile="target/source/plugins/jdk.dio.aarch64_${jdk.dio.version}.jar" />
-                                <move file="target/source/plugins/slf4j-api.jar"
-                                    tofile="target/source/plugins/slf4j.api_${slf4j.api.version}.jar" />
-                                <move file="target/source/plugins/jcl-over-slf4j.jar"
-                                    tofile="target/source/plugins/jcl-over-slf4j_${slf4j.api.version}.jar" />
-                                <move file="target/source/plugins/log4j-api.jar"
-                                    tofile="target/source/plugins/log4j-api_${logging.log4j.version}.jar" />
-                                <!-- <move file="target/source/plugins/log4j-slf4j-impl.jar" tofile="target/source/plugins/log4j-slf4j-impl_${logging.log4j.version}.jar"/>-->
-                                <move file="target/source/plugins/org.apache.log4j2-api-config.jar"
-                                    tofile="target/source/plugins/org.apache.log4j2-api-config_${org.apache.log4j2-api-config.version}.jar" />
-                                <move file="target/source/plugins/log4j-core.jar"
-                                    tofile="target/source/plugins/log4j-core_${logging.log4j.version}.jar" />
-                                <move file="target/source/plugins/log4j-slf4j-impl.jar"
-                                    tofile="target/source/plugins/log4j-slf4j-impl_${logging.log4j.version}.jar" />
-                                <move file="target/source/plugins/org.junit.jar"
-                                    tofile="target/source/plugins/org.junit_${org.junit.version}.jar" />
-                                <move file="target/source/plugins/commons-fileupload.jar"
-                                    tofile="target/source/plugins/commons-fileupload.jar_${org.apache.commons.fileupload.version}.jar" />
+        
                                 <move file="target/source/plugins/usb4java-javax.jar"
                                     tofile="target/source/plugins/usb4java-javax_${usb4java-javax.version}.jar" />
-                                <move file="target/source/plugins/commons-io.jar"
-                                    tofile="target/source/plugins/org.apache.commons.io_${org.apache.commons.io.version}.jar" />
                                 
                                 <move file="target/source/plugins/org.eclipse.soda.dk.comm.jar"
                                     tofile="target/source/plugins/org.eclipse.soda.dk.comm_${org.eclipse.soda.dk.comm.version}.jar" />
@@ -743,150 +271,8 @@
                                     tofile="target/source/plugins/org.eclipse.soda.dk.comm.x86_64_${org.eclipse.soda.dk.comm.version}.jar" />
                                 <move file="target/source/plugins/org.eclipse.soda.dk.comm.aarch64.jar"
                                     tofile="target/source/plugins/org.eclipse.soda.dk.comm.aarch64_${org.eclipse.soda.dk.comm.version}.jar" />
+                             
                                 
-                                <move file="target/source/plugins/groovy.jar"
-                                    tofile="target/source/plugins/groovy_${org.codehaus.groovy.groovy-all.version}.jar" />
-                                    
-                                    
-                                <move file="target/source/plugins/groovy-xml.jar"
-                                    tofile="target/source/plugins/groovy-xml_${org.codehaus.groovy.groovy.version}.jar" />
-                                <move file="target/source/plugins/groovy-templates.jar"
-                                    tofile="target/source/plugins/groovy-templates_${org.codehaus.groovy.groovy.version}.jar" />
-                                <move file="target/source/plugins/groovy-sql.jar"
-                                    tofile="target/source/plugins/groovy-sql_${org.codehaus.groovy.groovy.version}.jar" />
-                                <move file="target/source/plugins/groovy-json.jar"
-                                    tofile="target/source/plugins/groovy-json_${org.codehaus.groovy.groovy.version}.jar" />
-                                <move file="target/source/plugins/groovy-datetime.jar"
-                                    tofile="target/source/plugins/groovy-datetime_${org.codehaus.groovy.groovy.version}.jar" />
-                                <move file="target/source/plugins/groovy-dateutil.jar"
-                                    tofile="target/source/plugins/groovy-dateutil_${org.codehaus.groovy.groovy.version}.jar" />
-                                <move file="target/source/plugins/groovy-jsr223.jar"
-                                    tofile="target/source/plugins/groovy-jsr223_${org.codehaus.groovy.groovy.version}.jar" />
-                                    
-                                   
-                                <move file="target/source/plugins/commons-pool.jar"
-                                    tofile="target/source/plugins/commons-pool_${org.eclipse.kura.commons-pool.version}.jar" />
-                                <move file="target/source/plugins/httpclient-osgi.jar"
-                                    tofile="target/source/plugins/httpclient-osgi_${org.apache.httpcomponents.httpclient-osgi.version}.jar" />
-                                <move file="target/source/plugins/httpcore-osgi.jar"
-                                    tofile="target/source/plugins/httpcore-osgi_${org.apache.httpcomponents.httpcore-osgi.version}.jar" />
-                                <move file="target/source/plugins/org.apache.servicemix.bundles.commons-codec.jar"
-                                    tofile="target/source/plugins/org.apache.servicemix.bundles.commons-codec_${org.apache.servicemix.bundles.commons-codec-mvn.version}.jar" />
-                                <move file="target/source/plugins/commons-logging.jar"
-                                    tofile="target/source/plugins/org.apache.commons.logging_${commons-logging.commons-logging.version}.jar" />
-                                
-                                <move file="target/source/plugins/org.apache.servicemix.bundles.spring-beans.jar"
-                                    tofile="target/source/plugins/org.apache.servicemix.bundles.spring-beans_${spring.version}.jar" />
-                                <move file="target/source/plugins/org.apache.servicemix.bundles.spring-context.jar"
-                                    tofile="target/source/plugins/org.apache.servicemix.bundles.spring-context_${spring.version}.jar" />
-                                <move file="target/source/plugins/org.apache.servicemix.bundles.spring-core.jar"
-                                    tofile="target/source/plugins/org.apache.servicemix.bundles.spring-core_${spring.version}.jar" />
-                                <move
-                                    file="target/source/plugins/org.apache.servicemix.bundles.spring-expression.jar"
-                                    tofile="target/source/plugins/org.apache.servicemix.bundles.spring-expression_${spring.version}.jar" />
-                                <move file="target/source/plugins/org.apache.servicemix.bundles.spring-jms.jar"
-                                    tofile="target/source/plugins/org.apache.servicemix.bundles.spring-jms_${spring.version}.jar" />
-                                <move file="target/source/plugins/org.apache.servicemix.bundles.spring-tx.jar"
-                                    tofile="target/source/plugins/org.apache.servicemix.bundles.spring-tx_${spring.version}.jar" />
-                                <move file="target/source/plugins/org.apache.servicemix.bundles.spring-aop.jar"
-                                    tofile="target/source/plugins/org.apache.servicemix.bundles.spring-aop_${spring.version}.jar" />
-                                <move file="target/source/plugins/org.apache.servicemix.bundles.aopalliance.jar"
-                                    tofile="target/source/plugins/org.apache.servicemix.bundles.aopalliance_${aopalliance.version}.jar" />
-                                <move file="target/source/plugins/qpid-jms-client.jar"
-                                    tofile="target/source/plugins/org.apache.qpid.jms.client_${apache-qpid-jms-client.version}.jar" />
-                                <move file="target/source/plugins/minimal-json.jar"
-                                    tofile="target/source/plugins/minimal-json_${com.eclipsesource.minimal-json.version}.jar" />
-                                <move file="target/source/plugins/osgi.annotation.jar"
-                                    tofile="target/source/plugins/osgi.annotation_${osgi.annotation.version}.jar" />
-                                <move file="target/source/plugins/com.eclipsesource.jaxrs.jersey-min.jar"
-                                    tofile="target/source/plugins/com.eclipsesource.jaxrs.jersey-min_${com.eclipsesource.jaxrs.jersey-min.version}.jar" />
-                                <move file="target/source/plugins/com.eclipsesource.jaxrs.publisher.jar"
-                                    tofile="target/source/plugins/com.eclipsesource.jaxrs.publisher_${com.eclipsesource.jaxrs.publisher.version}.jar" />
-                                <move file="target/source/plugins/com.eclipsesource.jaxrs.provider.gson.jar"
-                                    tofile="target/source/plugins/com.eclipsesource.jaxrs.provider.gson_${com.eclipsesource.jaxrs.provider.gson.version}.jar" />
-                                <move file="target/source/plugins/com.eclipsesource.jaxrs.provider.security.jar"
-                                    tofile="target/source/plugins/com.eclipsesource.jaxrs.provider.security_${com.eclipsesource.jaxrs.provider.security.version}.jar" />
-                                <move file="target/source/plugins/gson.jar"
-                                    tofile="target/source/plugins/com.google.gson_${com.google.gson.version}.jar" />
-                                <move file="target/source/plugins/glutamate.jar"
-                                    tofile="target/source/plugins/io.glutamate_${io.glutamate.version}.jar" />
-                                <move file="target/source/plugins/org.apache.servicemix.bundles.reflections.jar"
-                                    tofile="target/source/plugins/org.apache.servicemix.bundles.reflections_${org.apache.servicemix.bundles.reflections.version}.jar" />
-                                <move file="target/source/plugins/javassist.jar"
-                                    tofile="target/source/plugins/javassist_${org.javassist.version}.jar" />
-                                <move file="target/source/plugins/snakeyaml.jar"
-                                    tofile="target/source/plugins/org.yaml.snakeyaml_${org.yaml.snakeyaml.version}.jar" />
-                                <!-- Artemis Broker -->
-                                <move file="target/source/plugins/guava.jar"
-                                    tofile="target/source/plugins/guava_${guava.version}.jar" />
-                                <move file="target/source/plugins/artemis-mqtt-protocol.jar"
-                                    tofile="target/source/plugins/artemis-mqtt-protocol_${org.apache.activemq.artemis.upstream.version}.jar" />
-                                <move file="target/source/plugins/netty-buffer.jar"
-                                    tofile="target/source/plugins/netty-buffer_${io.netty.version}.jar" />
-                                <move file="target/source/plugins/netty-codec.jar"
-                                    tofile="target/source/plugins/netty-codec_${io.netty.version}.jar" />
-                                <move file="target/source/plugins/netty-common.jar"
-                                    tofile="target/source/plugins/netty-common_${io.netty.version}.jar" />
-                                <move file="target/source/plugins/netty-codec-http.jar"
-                                    tofile="target/source/plugins/netty-codec-http_${io.netty.version}.jar" />
-                                <move file="target/source/plugins/netty-codec-mqtt.jar"
-                                    tofile="target/source/plugins/netty-codec-mqtt_${io.netty.version}.jar" />
-                                <move file="target/source/plugins/netty-handler.jar"
-                                    tofile="target/source/plugins/netty-handler_${io.netty.version}.jar" />
-                                <move file="target/source/plugins/netty-resolver.jar"
-                                    tofile="target/source/plugins/netty-resolver_${io.netty.version}.jar" />
-                                <move file="target/source/plugins/netty-transport.jar"
-                                    tofile="target/source/plugins/netty-transport_${io.netty.version}.jar" />
-                                <!--
-                                <move file="target/source/plugins/netty-transport-native-epoll.jar"
-                                    tofile="target/source/plugins/netty-transport-native-epoll_${io.netty.version}.jar" />
-                                -->
-                                <move file="target/source/plugins/netty-transport-native-epoll-linux-x86_64.jar"
-                                    tofile="target/source/plugins/netty-transport-native-epoll-linux-x86_64_${io.netty.version}.jar" />
-                                <move file="target/source/plugins/netty-codec-http2.jar"
-                                    tofile="target/source/plugins/netty-codec-http2_${io.netty.version}.jar" />
-                                <move file="target/source/plugins/netty-handler-proxy.jar"
-                                    tofile="target/source/plugins/netty-handler-proxy_${io.netty.version}.jar" />
-                                <move file="target/source/plugins/netty-resolver-dns.jar"
-                                    tofile="target/source/plugins/netty-resolver-dns_${io.netty.version}.jar" />
-                                <move file="target/source/plugins/netty-codec-socks.jar"
-                                    tofile="target/source/plugins/netty-codec-socks_${io.netty.version}.jar" />
-                                <move file="target/source/plugins/netty-codec-dns.jar"
-                                    tofile="target/source/plugins/netty-codec-dns_${io.netty.version}.jar" />
-                                <move file="target/source/plugins/jackson-core.jar"
-                                    tofile="target/source/plugins/jackson-core_${com.fasterxml.jackson.core.version}.jar" />
-                                <move file="target/source/plugins/jackson-databind.jar"
-                                    tofile="target/source/plugins/jackson-databind_${com.fasterxml.jackson.core.version}.jar" />
-                                <move file="target/source/plugins/jackson-annotations.jar"
-                                    tofile="target/source/plugins/jackson-annotations_${com.fasterxml.jackson.core.version}.jar" />
-                                <move file="target/source/plugins/jackson-dataformat-yaml.jar"
-                                    tofile="target/source/plugins/jackson-dataformat-yaml_${com.fasterxml.jackson.dataformat.version}.jar" />
-                                <move file="target/source/plugins/jackson-module-jaxb-annotations.jar"
-                                    tofile="target/source/plugins/jackson-module-jaxb-annotations_${com.fasterxml.jackson.module.version}.jar" />
-                                <move file="target/source/plugins/mvel2.jar"
-                                    tofile="target/source/plugins/mvel2_${org.mvel.mvel2.version}.jar" />
-                                <move file="target/source/plugins/jboss-logging.jar"
-                                    tofile="target/source/plugins/jboss-logging_${org.jboss.logging.version}.jar" />
-                                <move file="target/source/plugins/commons-beanutils.jar"
-									tofile="target/source/plugins/commons-beanutils_${commons-beanutils.version}.jar" />
-                                <move file="target/source/plugins/commons-collections.jar"
-                                    tofile="target/source/plugins/commons-collections_${commons-collections.version}.jar" />
-                                <move file="target/source/plugins/geronimo-json_1.0_spec.jar"
-                                    tofile="target/source/plugins/geronimo-json_1.0_spec_${org.apache.geronimo.specs.json.version}.jar" />
-                                <move file="target/source/plugins/geronimo-jms_2.0_spec.jar"
-                                    tofile="target/source/plugins/geronimo-jms_2.0_spec_${org.apache.geronimo.specs.jms.version}.jar" />
-                                <move file="target/source/plugins/geronimo-jta_1.1_spec.jar"
-                                    tofile="target/source/plugins/geronimo-jta_1.1_spec_${org.apache.geronimo.specs.jta.version}.jar" />
-                                <move file="target/source/plugins/org.apache.activemq.artemis.jar"
-                                    tofile="target/source/plugins/org.apache.activemq.artemis_${org.apache.activemq.artemis.version}.jar" />
-                                <move file="target/source/plugins/asm-all.jar"
-                                    tofile="target/source/plugins/org.objectweb.asm.all_${org.objectweb.asm.all.version}.jar" />
-                                <move file="target/source/plugins/org.apache.felix.fileinstall.jar"
-                                    tofile="target/source/plugins/org.apache.felix.fileinstall_${org.apache.felix.fileinstall.version}.jar" />
-                                <move file="target/source/plugins/org.apache.felix.ipojo.jar"
-                                    tofile="target/source/plugins/org.apache.felix.ipojo_${org.apache.felix.ipojo.version}.jar" />
-                                <move file="target/source/plugins/org.apache.felix.utils.jar"
-                                    tofile="target/source/plugins/org.apache.felix.utils_${org.apache.felix.utils.version}.jar" />
                             </tasks>
                         </configuration>
                     </execution>

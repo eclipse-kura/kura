@@ -204,12 +204,11 @@ public class ExecutorUtil {
 
     private static List<Integer> getPidsInternal(boolean exact, String commandLine) {
         List<Integer> pids = new ArrayList<>();
-        CommandLine pgrepCommandLine = new CommandLine("pgrep");
-        pgrepCommandLine.addArgument("-f"); // Match against full argument lists
-        if (exact) {
-            pgrepCommandLine.addArgument("-x"); // Require an exact match of the process name or argument list
+        CommandLine pidofCommandLine = new CommandLine("pidof");
+        for (String token : commandLine.split("\\s+")) {
+            pidofCommandLine.addArgument(token.replace("-", ""), false); // Remove '-' from commandLine to avoid
+                                                                         // errors
         }
-        pgrepCommandLine.addArgument(commandLine, false);
         DefaultExecutor executor = new DefaultExecutor();
 
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -221,12 +220,12 @@ public class ExecutorUtil {
         executor.setExitValue(0);
         int exitValue = 1;
         try {
-            exitValue = executor.execute(pgrepCommandLine);
+            exitValue = executor.execute(pidofCommandLine);
         } catch (IOException e) {
             logger.debug(FAILED_TO_GET_PID_MESSAGE, commandLine, e);
         }
         if (exitValue == 0) {
-            pids = Arrays.stream(new String(out.toByteArray(), UTF_8).split("\n")).map(Integer::parseInt)
+            pids = Arrays.stream(new String(out.toByteArray(), UTF_8).split("\\s+")).map(Integer::parseInt)
                     .collect(Collectors.toList());
         }
         return pids;
@@ -372,22 +371,11 @@ public class ExecutorUtil {
     }
 
     private static CommandLine buildPrivilegedCommand(Command command) {
-        // Build the command as follows:
-        // sudo -E timeout <timeout> sh -c <command> or
-        // sudo -E <command>
-        CommandLine commandLine = new CommandLine("sudo");
-        commandLine.addArgument("-E"); // to preserve environment
-        if (command.getTimeout() != -1) {
-            commandLine.addArgument("timeout");
-            commandLine.addArgument("-s");
-            commandLine.addArgument(((LinuxSignal) command.getSignal()).name());
-            commandLine.addArgument(String.valueOf(command.getTimeout()));
-            commandLine.addArgument("sh");
-            commandLine.addArgument("-c");
-            commandLine.addArgument(command.getCommandLine(), false);
-        } else {
-            // if not timeout, pass single arguments to commandLine
-            Arrays.stream(command.getCommandLine().split("\\s+")).forEach(s -> commandLine.addArgument(s, false));
+        // Build the command passing single arguments to commandLine
+        String[] tokens = command.getCommandLine().split("\\s+");
+        CommandLine commandLine = new CommandLine(tokens[0]);
+        for (int i = 1; i < tokens.length; i++) {
+            commandLine.addArgument(tokens[i]);
         }
         return commandLine;
     }

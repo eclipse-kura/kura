@@ -27,8 +27,8 @@ import org.apache.commons.io.Charsets;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.executor.Command;
-import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.linux.net.NetworkServiceImpl;
 import org.eclipse.kura.linux.net.wifi.WifiOptions;
 import org.eclipse.kura.net.NetInterfaceType;
@@ -904,10 +904,14 @@ public class LinuxNetworkUtil {
 
             command = new Command("ifup --force " + interfaceName);
             command.setTimeout(60);
+            command.setOutputStream(new ByteArrayOutputStream());
+            command.setErrorStream(new ByteArrayOutputStream());
             status = this.executorService.execute(command);
             if ((Integer) status.getExitStatus().getExitValue() != 0) {
                 command = new Command("ifup " + interfaceName);
                 command.setTimeout(60);
+                command.setOutputStream(new ByteArrayOutputStream());
+                command.setErrorStream(new ByteArrayOutputStream());
                 status = this.executorService.execute(command);
                 if ((Integer) status.getExitStatus().getExitValue() != 0) {
                     throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR,

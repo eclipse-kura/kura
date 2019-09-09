@@ -36,6 +36,29 @@
         <groupId>org.reficio</groupId>
         <artifactId>p2-maven-plugin</artifactId>
         <version>1.3.0</version>
+        <dependencies>
+            <dependency>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <version>4.2.0</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.osgi</groupId>
+                        <artifactId>org.osgi.core</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+                <dependency>
+                <groupId>org.codehaus.groovy</groupId>
+                <artifactId>groovy-all</artifactId>
+                <version>2.5.0-beta-2</version>
+            </dependency>            
+            <dependency>
+                <groupId>biz.aQute.bnd</groupId>
+                <artifactId>biz.aQute.bnd</artifactId>
+                <version>4.0.0</version>
+            </dependency>
+        </dependencies>
         <executions>
           <execution>
             <id>generate-p2-site</id>
@@ -88,6 +111,7 @@
                          m,javax.xml.validation,org.w3c.dom,org.xml.sax",javax.xml.bind.util;v
                          ersion="2.3";uses:="javax.xml.bind,javax.xml.transform.sax"
                          </Export-Package>
+                         <_fixupmessages>"Classes found in the wrong directory";is:=warning</_fixupmessages>
                     </instructions>
                 </artifact>
                 <artifact>                   
@@ -96,6 +120,7 @@
                     <transitive>false</transitive>
                     <override>true</override>
                     <instructions>
+                        <_fixupmessages>"Classes found in the wrong directory";is:=warning</_fixupmessages>
                         <Import-Package>javax.xml.bind;version="2.3",javax.xml.bind.annotation
                          ;version="2.3",javax.xml.bind.annotation.adapters;version="2.3",javax
                          .xml.bind.attachment;version="2.3",javax.xml.bind.helpers;version="2.

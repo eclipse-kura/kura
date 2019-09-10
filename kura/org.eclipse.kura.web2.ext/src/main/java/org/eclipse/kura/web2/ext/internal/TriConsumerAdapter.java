@@ -41,20 +41,10 @@ public class TriConsumerAdapter<T, U, V> implements Adapter<TriConsumer<T, U, V>
 
     @Override
     public TriConsumer<T, U, V> adaptNonNull(final JavaScriptObject jsConsumer) {
-        return new TriConsumer<T, U, V>() {
 
-            @Override
-            public native void accept(T t, U u, V v)
-            /*-{
-                var firstAdapter = this.@org.eclipse.kura.web2.ext.internal.TriConsumerAdapter::firstAdapter
-                var secondAdapter = this.@org.eclipse.kura.web2.ext.internal.TriConsumerAdapter::secondAdapter
-                var thirdAdapter = this.@org.eclipse.kura.web2.ext.internal.TriConsumerAdapter::thirdAdapter
-                var first = firstAdapter.@org.eclipse.kura.web2.ext.internal.Adapter::adaptNullable(Ljava/lang/Object;)(t)
-                var second = secondAdapter.@org.eclipse.kura.web2.ext.internal.Adapter::adaptNullable(Ljava/lang/Object;)(u)
-                var third = thirdAdapter.@org.eclipse.kura.web2.ext.internal.Adapter::adaptNullable(Ljava/lang/Object;)(v)
-                jsConsumer(first, second, third)
-            }-*/;
-        };
+        return (t, u, v) -> JsObject.call(jsConsumer, JsObject.toArray(firstAdapter.adaptNullable(t),
+                secondAdapter.adaptNullable(u), thirdAdapter.adaptNullable(v)));
+
     }
 
 }

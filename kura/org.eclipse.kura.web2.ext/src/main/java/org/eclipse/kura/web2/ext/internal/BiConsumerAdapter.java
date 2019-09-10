@@ -38,18 +38,10 @@ public class BiConsumerAdapter<T, U> implements Adapter<BiConsumer<T, U>> {
 
     @Override
     public BiConsumer<T, U> adaptNonNull(final JavaScriptObject jsConsumer) {
-        return new BiConsumer<T, U>() {
 
-            @Override
-            public native void accept(T t, U u)
-            /*-{
-                var firstAdapter = this.@org.eclipse.kura.web2.ext.internal.BiConsumerAdapter::firstAdapter
-                var secondAdapter = this.@org.eclipse.kura.web2.ext.internal.BiConsumerAdapter::secondAdapter
-                var first = firstAdapter.@org.eclipse.kura.web2.ext.internal.Adapter::adaptNullable(Ljava/lang/Object;)(t)
-                var second = secondAdapter.@org.eclipse.kura.web2.ext.internal.Adapter::adaptNullable(Ljava/lang/Object;)(u)
-                jsConsumer(first, second)
-            }-*/;
-        };
+        return (t, u) -> JsObject.call(jsConsumer,
+                JsObject.toArray(firstAdapter.adaptNullable(t), secondAdapter.adaptNullable(u)));
+
     }
 
 }

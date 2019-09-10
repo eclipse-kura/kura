@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.AlertDialog;
+import org.eclipse.kura.web.client.ui.AlertDialog.ConfirmListener;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.util.PidTextBox;
 import org.eclipse.kura.web.client.util.request.RequestContext;
@@ -290,7 +291,8 @@ public class CloudInstancesUi extends Composite {
 
             if (getSelectedObject() instanceof GwtCloudConnectionEntry
                     && getObjectAfterSelection() instanceof GwtCloudPubSubEntry) {
-                this.alertDialog.show(MSGS.cannotDeleteConnection(), AlertDialog.Severity.ALERT, null);
+                this.alertDialog.show(MSGS.cannotDeleteConnection(), AlertDialog.Severity.ALERT,
+                        (ConfirmListener) null);
                 return;
             }
 
@@ -519,7 +521,7 @@ public class CloudInstancesUi extends Composite {
         final List<GwtCloudEntry> entries = this.pubSubFactoryEntries.get(connectionFactoryPid);
 
         if (entries == null || entries.isEmpty()) {
-            this.alertDialog.show(MSGS.noPubSubFactoriesFound(), AlertDialog.Severity.ALERT, null);
+            this.alertDialog.show(MSGS.noPubSubFactoriesFound(), AlertDialog.Severity.ALERT, (ConfirmListener) null);
             return;
         }
 

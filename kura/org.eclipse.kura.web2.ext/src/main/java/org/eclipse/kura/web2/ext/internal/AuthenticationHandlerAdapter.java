@@ -63,7 +63,7 @@ public class AuthenticationHandlerAdapter implements Adapter<AuthenticationHandl
                 final JavaScriptObject jsString = new IdentityAdapter<>().adaptNullable(userName);
                 final JavaScriptObject jsCallback = CALLBACK_ADAPTER.adaptNullable(callback);
 
-                obj.call(AUTHENTICATE, new JavaScriptObject[] { jsString, jsCallback });
+                obj.call(AUTHENTICATE, JsObject.toArray(jsString, jsCallback));
             }
         };
     }

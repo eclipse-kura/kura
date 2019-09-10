@@ -19,6 +19,7 @@ import static org.eclipse.kura.web.client.util.FilterBuilder.or;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.function.Consumer;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.cloudconnection.CloudConnectionsUi;
@@ -1030,10 +1031,9 @@ public class EntryClassUi extends Composite implements Context {
     }
 
     @Override
-    public void showAlertDialog(final String message, final AlertSeverity severity,
-            final Callback<Void, Void> callback) {
+    public void showAlertDialog(final String message, final AlertSeverity severity, final Consumer<Boolean> callback) {
         alertDialog.show(message,
                 severity == AlertSeverity.INFO ? AlertDialog.Severity.INFO : AlertDialog.Severity.ALERT,
-                () -> callback.onSuccess(null));
+                callback::accept);
     }
 }

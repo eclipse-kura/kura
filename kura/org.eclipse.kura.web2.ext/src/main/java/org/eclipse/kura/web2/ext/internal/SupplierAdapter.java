@@ -34,15 +34,8 @@ public class SupplierAdapter<T> implements Adapter<Supplier<T>> {
 
     @Override
     public Supplier<T> adaptNonNull(JavaScriptObject jsSupplier) {
-        return new Supplier<T>() {
 
-            @Override
-            public native T get()
-            /*-{
-                var adapter = this.@org.eclipse.kura.web2.ext.internal.SupplierAdapter::adapter
-                var v = jsSupplier()
-                return adapter.@org.eclipse.kura.web2.ext.internal.Adapter::adaptNullable(Lcom/google/gwt/core/client/JavaScriptObject;)(v)
-            }-*/;
-        };
+        return () -> adapter.adaptNullable(JsObject.call(jsSupplier));
+
     }
 }

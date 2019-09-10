@@ -10,6 +10,7 @@
 package org.eclipse.kura.web2.ext.internal;
 
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.JsArray;
 
 public final class JsObject extends JavaScriptObject {
 
@@ -36,7 +37,7 @@ public final class JsObject extends JavaScriptObject {
         return this[key](value)
     }-*/;
 
-    public final native JavaScriptObject call(final String key, final JavaScriptObject[] values)
+    public final native JavaScriptObject call(final String key, final JsArray<JavaScriptObject> values)
     /*-{
         return this[key].apply(this, values)
     }-*/;
@@ -50,4 +51,31 @@ public final class JsObject extends JavaScriptObject {
     /*-{
         return string
     }-*/;
+
+    public static final native JavaScriptObject call(final JavaScriptObject func)
+    /*-{
+         return func()
+    }-*/;
+
+    public static final native JavaScriptObject call(final JavaScriptObject func, final JavaScriptObject value)
+    /*-{
+         return func(value)
+    }-*/;
+
+    public static final native JavaScriptObject call(final JavaScriptObject func,
+            final JsArray<JavaScriptObject> values)
+    /*-{
+         return func.apply(null, values)
+    }-*/;
+
+    @SafeVarargs
+    public static final <T extends JavaScriptObject> JsArray<T> toArray(T... args) {
+        final JsArray<T> result = JavaScriptObject.createArray().cast();
+
+        for (T val : args) {
+            result.push(val);
+        }
+
+        return result;
+    }
 }

@@ -18,6 +18,7 @@ import org.eclipse.kura.web.client.configuration.Configurations;
 import org.eclipse.kura.web.client.configuration.HasConfiguration;
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.AlertDialog;
+import org.eclipse.kura.web.client.ui.AlertDialog.ConfirmListener;
 import org.eclipse.kura.web.client.ui.drivers.assets.DriversAndAssetsListUi.DriverAssetInfo;
 import org.eclipse.kura.web.client.util.PidTextBox;
 import org.eclipse.kura.web.shared.AssetConstants;
@@ -181,7 +182,8 @@ public class DriversAndAssetsUi extends Composite implements DriversAndAssetsLis
             final GwtConfigComponent gwtConfig = hasConfiguration.getConfiguration();
             final String configDriverPid = gwtConfig.getParameterValue(AssetConstants.ASSET_DRIVER_PROP.value());
             if (pid.equals(configDriverPid)) {
-                this.confirmDialog.show(MSGS.driversAssetsDeletingDriverWithAssets(), AlertDialog.Severity.ALERT, null);
+                this.confirmDialog.show(MSGS.driversAssetsDeletingDriverWithAssets(), AlertDialog.Severity.ALERT,
+                        (ConfirmListener) null);
                 return;
             }
         }
@@ -194,7 +196,8 @@ public class DriversAndAssetsUi extends Composite implements DriversAndAssetsLis
         final GwtConfigComponent gwtConfig = config.getConfiguration();
 
         if (gwtConfig.isWireComponent()) {
-            this.confirmDialog.show(MSGS.driversAssetsAssetInComposer(), AlertDialog.Severity.ALERT, null);
+            this.confirmDialog.show(MSGS.driversAssetsAssetInComposer(), AlertDialog.Severity.ALERT,
+                    (ConfirmListener) null);
             return;
         }
 
@@ -221,12 +224,14 @@ public class DriversAndAssetsUi extends Composite implements DriversAndAssetsLis
             }
 
             if (this.driverFactoriesList.getSelectedIndex() == 0) {
-                this.confirmDialog.show(MSGS.driversAssetsInvalidDriverFactory(), AlertDialog.Severity.ALERT, null);
+                this.confirmDialog.show(MSGS.driversAssetsInvalidDriverFactory(), AlertDialog.Severity.ALERT,
+                        (ConfirmListener) null);
                 return;
             }
 
             if (this.configurations.isPidExisting(pid)) {
-                this.confirmDialog.show(MSGS.wiresComponentNameAlreadyUsed(pid), AlertDialog.Severity.ALERT, null);
+                this.confirmDialog.show(MSGS.wiresComponentNameAlreadyUsed(pid), AlertDialog.Severity.ALERT,
+                        (ConfirmListener) null);
                 return;
             }
 
@@ -251,7 +256,8 @@ public class DriversAndAssetsUi extends Composite implements DriversAndAssetsLis
             }
 
             if (this.configurations.isPidExisting(pid)) {
-                this.confirmDialog.show(MSGS.wiresComponentNameAlreadyUsed(pid), AlertDialog.Severity.ALERT, null);
+                this.confirmDialog.show(MSGS.wiresComponentNameAlreadyUsed(pid), AlertDialog.Severity.ALERT,
+                        (ConfirmListener) null);
                 return;
             }
 

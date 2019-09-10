@@ -34,16 +34,9 @@ public class ConsumerAdapter<T> implements Adapter<Consumer<T>> {
 
     @Override
     public Consumer<T> adaptNonNull(final JavaScriptObject jsConsumer) {
-        return new Consumer<T>() {
 
-            @Override
-            public native void accept(T t)
-            /*-{
-                var adapter = this.@org.eclipse.kura.web2.ext.internal.ConsumerAdapter::adapter
-                var adapted = adapter.@org.eclipse.kura.web2.ext.internal.Adapter::adaptNullable(Ljava/lang/Object;)(t)
-                jsConsumer(adapted)
-            }-*/;
-        };
+        return t -> JsObject.call(jsConsumer, adapter.adaptNullable(t));
+
     }
 
 }

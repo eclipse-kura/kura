@@ -16,6 +16,7 @@ import java.util.logging.Level;
 
 import org.eclipse.kura.web.client.ui.AbstractServicesUi;
 import org.eclipse.kura.web.client.ui.AlertDialog;
+import org.eclipse.kura.web.client.ui.AlertDialog.ConfirmListener;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.util.request.RequestQueue;
@@ -172,7 +173,7 @@ public class CloudConnectionConfigurationUi extends AbstractServicesUi {
             }
         } else {
             errorLogger.log(Level.SEVERE, "Device configuration error!");
-            alertDialog.show(MSGS.formWithErrorsOrIncomplete(), AlertDialog.Severity.ALERT, null);
+            alertDialog.show(MSGS.formWithErrorsOrIncomplete(), AlertDialog.Severity.ALERT, (ConfirmListener) null);
         }
     }
 

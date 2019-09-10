@@ -9,6 +9,8 @@
  *******************************************************************************/
 package org.eclipse.kura.web2.ext;
 
+import java.util.function.Consumer;
+
 import com.google.gwt.core.client.Callback;
 
 public interface Context {
@@ -23,6 +25,5 @@ public interface Context {
 
     public Callback<Void, String> startLongRunningOperation();
 
-    public void showAlertDialog(final String message, final AlertSeverity severity,
-            final Callback<Void, Void> callback);
+    public void showAlertDialog(final String message, final AlertSeverity severity, final Consumer<Boolean> callback);
 }

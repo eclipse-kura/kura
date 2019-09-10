@@ -11,9 +11,11 @@ package org.eclipse.kura.web.client.ui.login;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.AlertDialog;
+import org.eclipse.kura.web.client.ui.AlertDialog.ConfirmListener;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.service.GwtBannerService;
 import org.eclipse.kura.web.shared.service.GwtBannerServiceAsync;
@@ -142,7 +144,7 @@ public class LoginUi extends Composite implements Context {
                 @Override
                 public void onFailure(String reason) {
                     waitModal.hide();
-                    alertDialog.show(reason, AlertDialog.Severity.ALERT, null);
+                    alertDialog.show(reason, AlertDialog.Severity.ALERT, (ConfirmListener) null);
                 }
             });
         });
@@ -220,7 +222,7 @@ public class LoginUi extends Composite implements Context {
             @Override
             public void onFailure(String reason) {
                 waitModal.hide();
-                alertDialog.show(reason, AlertDialog.Severity.ALERT, null);
+                alertDialog.show(reason, AlertDialog.Severity.ALERT, (ConfirmListener) null);
             }
 
             @Override
@@ -231,10 +233,10 @@ public class LoginUi extends Composite implements Context {
     }
 
     @Override
-    public void showAlertDialog(String message, AlertSeverity severity, Callback<Void, Void> callback) {
+    public void showAlertDialog(String message, AlertSeverity severity, Consumer<Boolean> callback) {
         alertDialog.show(message,
                 severity == AlertSeverity.INFO ? AlertDialog.Severity.INFO : AlertDialog.Severity.ALERT,
-                () -> callback.onSuccess(null));
+                callback::accept);
     }
 
     private class PasswordAuthenticationHandler implements AuthenticationHandler {

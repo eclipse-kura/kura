@@ -9,6 +9,8 @@
  *******************************************************************************/
 package org.eclipse.kura.web2.ext.internal;
 
+import java.util.function.Consumer;
+
 import org.eclipse.kura.web2.ext.AlertSeverity;
 import org.eclipse.kura.web2.ext.AuthenticationHandler;
 import org.eclipse.kura.web2.ext.Context;
@@ -30,8 +32,8 @@ public class ContextAdapter implements Adapter<Context> {
             new IdentityAdapter<>(), new IdentityAdapter<>());
     private static final Adapter<Callback<Void, String>> OPERATION_ADAPTER = new CallbackAdapter<>(
             new IdentityAdapter<>(), new IdentityAdapter<>());
-    private static final Adapter<Callback<Void, Void>> ALERT_ADAPTER = new CallbackAdapter<>(new IdentityAdapter<>(),
-            new IdentityAdapter<>());
+    private static final Adapter<Consumer<Boolean>> ALERT_CALLBACK_ADAPTER = new ConsumerAdapter<>(
+            new BooleanAdapter());
 
     @Override
     public JavaScriptObject adaptNonNull(final Context context) {
@@ -48,8 +50,9 @@ public class ContextAdapter implements Adapter<Context> {
         obj.set(START_LONG_RUNNING_OPERATION,
                 new SupplierAdapter<>(OPERATION_ADAPTER).adaptNullable(context::startLongRunningOperation));
         obj.set(SHOW_ALERT_DIALOG,
-                new TriConsumerAdapter<String, AlertSeverity, Callback<Void, Void>>(new IdentityAdapter<>(),
-                        new EnumAdapter<>(AlertSeverity.class), ALERT_ADAPTER).adaptNullable(context::showAlertDialog));
+                new TriConsumerAdapter<String, AlertSeverity, Consumer<Boolean>>(new IdentityAdapter<>(),
+                        new EnumAdapter<>(AlertSeverity.class), ALERT_CALLBACK_ADAPTER)
+                                .adaptNullable(context::showAlertDialog));
 
         return obj;
     }
@@ -66,7 +69,7 @@ public class ContextAdapter implements Adapter<Context> {
                 final JavaScriptObject jsIcon = new IdentityAdapter<>().adaptNullable(icon);
                 final JavaScriptObject jsElement = new WidgetFactoryAdapter().adaptNullable(factory);
 
-                obj.call(ADD_SIDENAV_COMPONENT, new JavaScriptObject[] { jsName, jsIcon, jsElement });
+                obj.call(ADD_SIDENAV_COMPONENT, JsObject.toArray(jsName, jsIcon, jsElement));
             }
 
             @Override
@@ -76,7 +79,7 @@ public class ContextAdapter implements Adapter<Context> {
                 final JavaScriptObject jsName = new IdentityAdapter<>().adaptNullable(name);
                 final JavaScriptObject jsElement = new WidgetFactoryAdapter().adaptNullable(factory);
 
-                obj.call(ADD_SETTINGS_COMPONENT, new JavaScriptObject[] { jsName, jsElement });
+                obj.call(ADD_SETTINGS_COMPONENT, JsObject.toArray(jsName, jsElement));
             }
 
             @Override
@@ -109,14 +112,14 @@ public class ContextAdapter implements Adapter<Context> {
             }
 
             @Override
-            public void showAlertDialog(String message, AlertSeverity severity, Callback<Void, Void> callback) {
+            public void showAlertDialog(String message, AlertSeverity severity, Consumer<Boolean> callback) {
                 final JsObject obj = jsContext.cast();
 
                 final JavaScriptObject jsMessage = new IdentityAdapter<>().adaptNullable(message);
                 final JavaScriptObject jsSeverity = new EnumAdapter<>(AlertSeverity.class).adaptNullable(severity);
-                final JavaScriptObject jsCallback = ALERT_ADAPTER.adaptNullable(callback);
+                final JavaScriptObject jsCallback = ALERT_CALLBACK_ADAPTER.adaptNullable(callback);
 
-                obj.call(SHOW_ALERT_DIALOG, new JavaScriptObject[] { jsMessage, jsSeverity, jsCallback });
+                obj.call(SHOW_ALERT_DIALOG, JsObject.toArray(jsMessage, jsSeverity, jsCallback));
             }
         };
     }

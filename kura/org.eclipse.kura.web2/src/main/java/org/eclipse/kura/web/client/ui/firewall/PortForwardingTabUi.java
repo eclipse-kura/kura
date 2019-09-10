@@ -16,6 +16,7 @@ import java.util.List;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.AlertDialog;
+import org.eclipse.kura.web.client.ui.AlertDialog.ConfirmListener;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.ui.Tab;
 import org.eclipse.kura.web.client.util.FailureHandler;
@@ -207,23 +208,23 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
                 PortForwardingTabUi.this.gwtNetworkService.findDeviceFirewallPortForwards(token,
                         new AsyncCallback<List<GwtFirewallPortForwardEntry>>() {
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        EntryClassUi.hideWaitModal();
-                        FailureHandler.handle(caught);
-                    }
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                EntryClassUi.hideWaitModal();
+                                FailureHandler.handle(caught);
+                            }
 
-                    @Override
-                    public void onSuccess(List<GwtFirewallPortForwardEntry> result) {
-                        for (GwtFirewallPortForwardEntry pair : result) {
-                            PortForwardingTabUi.this.portForwardDataProvider.getList().add(pair);
-                        }
-                        refreshTable();
+                            @Override
+                            public void onSuccess(List<GwtFirewallPortForwardEntry> result) {
+                                for (GwtFirewallPortForwardEntry pair : result) {
+                                    PortForwardingTabUi.this.portForwardDataProvider.getList().add(pair);
+                                }
+                                refreshTable();
 
-                        PortForwardingTabUi.this.buttonBar.setDirty(false);
-                        EntryClassUi.hideWaitModal();
-                    }
-                });
+                                PortForwardingTabUi.this.buttonBar.setDirty(false);
+                                EntryClassUi.hideWaitModal();
+                            }
+                        });
             }
 
         });
@@ -304,7 +305,7 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
         };
         col4.setCellStyleNames("status-table-row");
         this.portForwardGrid.addColumn(col4, MSGS.firewallPortForwardProtocol());
-        
+
         TextColumn<GwtFirewallPortForwardEntry> col5 = new TextColumn<GwtFirewallPortForwardEntry>() {
 
             @Override
@@ -432,20 +433,20 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
                 PortForwardingTabUi.this.gwtNetworkService.updateDeviceFirewallPortForwards(token,
                         updatedPortForwardConf, new AsyncCallback<Void>() {
 
-                    @Override
-                    public void onFailure(Throwable ex) {
-                        FailureHandler.handle(ex);
-                        EntryClassUi.hideWaitModal();
-                    }
+                            @Override
+                            public void onFailure(Throwable ex) {
+                                FailureHandler.handle(ex);
+                                EntryClassUi.hideWaitModal();
+                            }
 
-                    @Override
-                    public void onSuccess(Void result) {
-                        PortForwardingTabUi.this.buttonBar.setDirty(false);
-                        EntryClassUi.hideWaitModal();
+                            @Override
+                            public void onSuccess(Void result) {
+                                PortForwardingTabUi.this.buttonBar.setDirty(false);
+                                EntryClassUi.hideWaitModal();
 
-                        setDirty(false);
-                    }
-                });
+                                setDirty(false);
+                            }
+                        });
             }
         });
 
@@ -453,13 +454,7 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
 
     @Override
     public void onCancel() {
-        PortForwardingTabUi.this.alertDialog.show(MSGS.deviceConfigDirty(), new AlertDialog.Listener() {
-
-            @Override
-            public void onConfirm() {
-                PortForwardingTabUi.this.refresh();
-            }
-        });
+        PortForwardingTabUi.this.alertDialog.show(MSGS.deviceConfigDirty(), PortForwardingTabUi.this::refresh);
     }
 
     @Override
@@ -522,18 +517,13 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
             return;
         }
 
-        PortForwardingTabUi.this.alertDialog.show(
-                MSGS.firewallOpenPortDeleteConfirmation(String.valueOf(selection.getInPort())),
-                new AlertDialog.Listener() {
-
-                    @Override
-                    public void onConfirm() {
-                        PortForwardingTabUi.this.portForwardDataProvider.getList()
-                                .remove(PortForwardingTabUi.this.selectionModel.getSelectedObject());
-                        refreshTable();
-                        PortForwardingTabUi.this.buttonBar.setDirty(true);
-                        setDirty(true);
-                    }
+        PortForwardingTabUi.this.alertDialog
+                .show(MSGS.firewallOpenPortDeleteConfirmation(String.valueOf(selection.getInPort())), () -> {
+                    PortForwardingTabUi.this.portForwardDataProvider.getList()
+                            .remove(PortForwardingTabUi.this.selectionModel.getSelectedObject());
+                    refreshTable();
+                    PortForwardingTabUi.this.buttonBar.setDirty(true);
+                    setDirty(true);
                 });
     }
 
@@ -592,7 +582,7 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
                     portForwardEntry.setPermittedMAC(PortForwardingTabUi.this.permittedMac.getText());
                     PortForwardingTabUi.this.alertDialog.setTitle(MSGS.warning());
                     PortForwardingTabUi.this.alertDialog.show(MSGS.firewallPortForwardFormNotificationMacFiltering(),
-                            null);
+                            (ConfirmListener) null);
                 }
                 if (PortForwardingTabUi.this.source.getText() != null
                         && !"".equals(PortForwardingTabUi.this.source.getText().trim())) {
@@ -846,13 +836,16 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
                     String permittedNetwork = entry.getPermittedNetwork() != null ? entry.getPermittedNetwork()
                             : "0.0.0.0/0";
                     String newPermittedNetwork = portForwardEntry.getPermittedNetwork() != null
-                            ? portForwardEntry.getPermittedNetwork() : "0.0.0.0/0";
+                            ? portForwardEntry.getPermittedNetwork()
+                            : "0.0.0.0/0";
                     String permittedMAC = entry.getPermittedMAC() != null ? entry.getPermittedMAC().toUpperCase() : "";
                     String newPermittedMAC = portForwardEntry.getPermittedMAC() != null
-                            ? portForwardEntry.getPermittedMAC().toUpperCase() : "";
+                            ? portForwardEntry.getPermittedMAC().toUpperCase()
+                            : "";
                     String sourcePortRange = entry.getSourcePortRange() != null ? entry.getSourcePortRange() : "";
                     String newSourcePortRange = portForwardEntry.getSourcePortRange() != null
-                            ? portForwardEntry.getSourcePortRange() : "";
+                            ? portForwardEntry.getSourcePortRange()
+                            : "";
 
                     if (permittedNetwork.equals(newPermittedNetwork) && permittedMAC.equals(newPermittedMAC)
                             && sourcePortRange.equals(newSourcePortRange)) {

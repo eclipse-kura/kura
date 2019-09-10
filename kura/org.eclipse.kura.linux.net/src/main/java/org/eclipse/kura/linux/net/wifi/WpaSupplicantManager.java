@@ -108,11 +108,11 @@ public class WpaSupplicantManager {
      * @return {@link boolean}
      */
     public boolean isRunning(String ifaceName) {
-        return !this.executorService.getPids(WPA_SUPPLICANT + " -i " + ifaceName, false).isEmpty();
+        return !this.executorService.getPids(WPA_SUPPLICANT + " -i " + ifaceName).isEmpty();
     }
 
     public int getPid(String ifaceName) throws KuraException {
-        List<Pid> pids = this.executorService.getPids(WPA_SUPPLICANT + " -i " + ifaceName, false);
+        List<Pid> pids = this.executorService.getPids(WPA_SUPPLICANT + " -i " + ifaceName);
         if (!pids.isEmpty()) {
             return (Integer) pids.get(0).getPid();
         } else {
@@ -122,7 +122,7 @@ public class WpaSupplicantManager {
     }
 
     public boolean isTempRunning() {
-        return !this.executorService.getPids(WPA_SUPPLICANT + " -c " + TEMP_CONFIG_FILE.toString(), false).isEmpty();
+        return !this.executorService.getPids(WPA_SUPPLICANT + " -c " + TEMP_CONFIG_FILE.toString()).isEmpty();
     }
 
     /**
@@ -131,7 +131,7 @@ public class WpaSupplicantManager {
      * @throws Exception
      */
     public void stop(String ifaceName) throws KuraException {
-        List<Pid> pids = this.executorService.getPids(WPA_SUPPLICANT + " -i " + ifaceName, false);
+        List<Pid> pids = this.executorService.getPids(WPA_SUPPLICANT + " -i " + ifaceName);
         for (Pid pid : pids) {
             if (!this.executorService.stop(pid, LinuxSignal.SIGKILL)) {
                 throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR,

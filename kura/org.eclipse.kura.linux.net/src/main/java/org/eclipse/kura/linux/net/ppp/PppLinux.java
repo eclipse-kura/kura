@@ -19,8 +19,8 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.linux.executor.LinuxPid;
 import org.eclipse.kura.core.linux.executor.LinuxSignal;
 import org.eclipse.kura.executor.Command;
-import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.executor.Pid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -108,7 +108,7 @@ public class PppLinux {
     private Pid getPid(String iface, String port) {
         Pid pid = new LinuxPid(-1);
         synchronized (lock) {
-            List<Pid> pids = this.executorService.getPids(formConnectCommand(iface, port), true);
+            List<Pid> pids = this.executorService.getPids(formConnectCommand(iface, port));
             if (!pids.isEmpty()) {
                 pid = pids.get(0);
             }

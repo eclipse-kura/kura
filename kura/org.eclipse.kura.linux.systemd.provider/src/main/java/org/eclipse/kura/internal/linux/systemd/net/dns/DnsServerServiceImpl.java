@@ -24,8 +24,8 @@ import java.util.StringTokenizer;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.executor.Command;
-import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.internal.linux.net.dns.DnsServerService;
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
@@ -146,7 +146,7 @@ public class DnsServerServiceImpl implements DnsServerService {
     @Override
     public boolean isRunning() {
         // Check if named is running
-        return !this.executorService.getPids(DnsServerServiceImpl.PROC_STRING, false).isEmpty();
+        return !this.executorService.getPids(DnsServerServiceImpl.PROC_STRING).isEmpty();
     }
 
     @Override

@@ -179,9 +179,9 @@ public class DhcpClientManager {
     private List<Pid> getPid(String interfaceName) {
         List<Pid> pids = new ArrayList<>();
         if (dhcpClientTool == DhcpClientTool.DHCLIENT) {
-            pids = this.executorService.getPids(DhcpClientTool.DHCLIENT.getValue() + " " + interfaceName, false);
+            pids = this.executorService.getPids(DhcpClientTool.DHCLIENT.getValue() + " " + interfaceName);
         } else if (dhcpClientTool == DhcpClientTool.UDHCPC) {
-            pids = this.executorService.getPids(DhcpClientTool.UDHCPC.getValue() + " " + interfaceName, false);
+            pids = this.executorService.getPids(DhcpClientTool.UDHCPC.getValue() + " " + interfaceName);
         }
         return pids;
     }

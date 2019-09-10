@@ -191,7 +191,7 @@ public class BluetoothUtil {
      * Utility method to send specific kill commands to processes.
      */
     public static void killCmd(String cmd, Signal signal, CommandExecutorService executorService) {
-        List<Pid> pids = executorService.getPids(cmd, false);
+        List<Pid> pids = executorService.getPids(cmd);
         for (Pid pid : pids) {
             if (!executorService.stop(pid, signal)) {
                 logger.warn("Failed to stop command with pid {}", pid.getPid());

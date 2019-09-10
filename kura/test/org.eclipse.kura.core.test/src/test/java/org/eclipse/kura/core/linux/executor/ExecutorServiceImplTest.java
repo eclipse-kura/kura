@@ -334,13 +334,13 @@ public class ExecutorServiceImplTest {
         command.setSignal(LinuxSignal.SIGTERM);
         service.execute(command, callback);
 
-        List<Pid> pids = service.getPids("sleep 30", true);
+        List<Pid> pids = service.getPids("sleep 30");
         assertFalse(pids.isEmpty());
         for (Pid pid : pids) {
             service.stop(pid, LinuxSignal.SIGTERM);
         }
 
-        pids = service.getPids("sleep 30", true);
+        pids = service.getPids("sleep 30");
         assertTrue(pids.isEmpty());
     }
 
@@ -369,10 +369,10 @@ public class ExecutorServiceImplTest {
         command.setSignal(signal);
         service.execute(command, callback);
 
-        List<Pid> pids = service.getPids("sleep 30", true);
+        List<Pid> pids = service.getPids("sleep 30");
         assertFalse(pids.isEmpty());
         service.kill("sleep 30", signal);
-        pids = service.getPids("sleep 30", true);
+        pids = service.getPids("sleep 30");
         assertTrue(pids.isEmpty());
     }
 
@@ -386,7 +386,7 @@ public class ExecutorServiceImplTest {
         command.setTimeout(30);
         command.setDirectory(TMP);
         service.execute(command, callback);
-        List<Pid> pids = service.getPids("sleep 30", true);
+        List<Pid> pids = service.getPids("sleep 30");
         assertFalse(pids.isEmpty());
         for (Pid pid : pids) {
             assertTrue(service.isRunning(pid));
@@ -406,7 +406,7 @@ public class ExecutorServiceImplTest {
         command.setTimeout(30);
         command.setDirectory(TMP);
         service.execute(command, callback);
-        List<Pid> pids = service.getPids("sleep 30", true);
+        List<Pid> pids = service.getPids("sleep 30");
         assertFalse(pids.isEmpty());
         assertTrue(service.isRunning("sleep 30"));
 
@@ -425,7 +425,7 @@ public class ExecutorServiceImplTest {
         command.setTimeout(30);
         command.setDirectory(TMP);
         service.execute(command, callback);
-        List<Pid> pids = service.getPids("sleep 30", true);
+        List<Pid> pids = service.getPids("sleep 30");
         assertFalse(pids.isEmpty());
 
         String line;

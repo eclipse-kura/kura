@@ -19,8 +19,8 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.linux.executor.LinuxSignal;
 import org.eclipse.kura.executor.Command;
-import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.executor.Pid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,7 +80,7 @@ public class HostapdManager {
     }
 
     public int getPid(String ifaceName) throws KuraException {
-        List<Pid> pids = this.executorService.getPids(formHostapdStartCommand(ifaceName), true);
+        List<Pid> pids = this.executorService.getPids(formHostapdStartCommand(ifaceName));
         if (!pids.isEmpty()) {
             return (Integer) pids.get(0).getPid();
         } else {

@@ -18,8 +18,8 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraProcessExecutionErrorException;
 import org.eclipse.kura.core.linux.executor.LinuxSignal;
 import org.eclipse.kura.executor.Command;
-import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.executor.Pid;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.slf4j.Logger;
@@ -84,7 +84,7 @@ public class DhcpServerManager {
     public boolean disable(String interfaceName) throws KuraException {
         logger.debug("Disable DHCP server for {}", interfaceName);
 
-        List<Pid> pids = this.executorService.getPids(DhcpServerManager.formDhcpdCommand(interfaceName), true);
+        List<Pid> pids = this.executorService.getPids(DhcpServerManager.formDhcpdCommand(interfaceName));
         for (Pid pid : pids) {
             if (this.executorService.stop(pid, LinuxSignal.SIGTERM)) {
                 DhcpServerManager.removePidFile(interfaceName);

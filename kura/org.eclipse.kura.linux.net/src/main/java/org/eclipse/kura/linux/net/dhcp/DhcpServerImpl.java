@@ -25,8 +25,8 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraProcessExecutionErrorException;
 import org.eclipse.kura.core.linux.executor.LinuxSignal;
 import org.eclipse.kura.executor.Command;
-import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.executor.Pid;
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
@@ -201,7 +201,7 @@ public class DhcpServerImpl implements DhcpServer {
         }
 
         // Check if dhcpd is running
-        List<Pid> pids = this.executorService.getPids(formDhcpdCommand(), true);
+        List<Pid> pids = this.executorService.getPids(formDhcpdCommand());
         // If so, kill it.
         for (Pid pid : pids) {
             if (this.executorService.stop(pid, LinuxSignal.SIGTERM)) {

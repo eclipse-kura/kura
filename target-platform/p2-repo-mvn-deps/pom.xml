@@ -903,7 +903,7 @@
                   <transitive>false</transitive>
               </artifact>  
               <artifact>
-                  <id>org.apache.aries.spifly:org.apache.aries.spifly.dynamic.bundle:${org.apache.aries.spifly-mvn.version}</id>
+                  <id>org.apache.aries.spifly:org.apache.aries.spifly.dynamic.bundle:${org.apache.aries.spifly.version}</id>
                   <source>true</source>
                   <transitive>false</transitive>
               </artifact> 

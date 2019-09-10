@@ -92,8 +92,8 @@ public class PrivilegedExecutorServiceImpl implements PrivilegedExecutorService 
     }
 
     @Override
-    public List<Pid> getPids(String commandLine, boolean exact) {
-        return ExecutorUtil.getPids(commandLine, exact);
+    public List<Pid> getPids(String commandLine) {
+        return ExecutorUtil.getPids(commandLine);
     }
 
 }

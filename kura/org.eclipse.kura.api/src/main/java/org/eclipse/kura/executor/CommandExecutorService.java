@@ -89,12 +89,8 @@ public interface CommandExecutorService {
      * 
      * @param commandLine
      *            the command line
-     * @param exact
-     *            if set to true an exact match of the command line will be checked, otherwise the pids of the processes
-     *            that
-     *            at least contain the given command will be returned
      * @return
      */
-    public List<Pid> getPids(String commandLine, boolean exact);
+    public List<Pid> getPids(String commandLine);
 
 }

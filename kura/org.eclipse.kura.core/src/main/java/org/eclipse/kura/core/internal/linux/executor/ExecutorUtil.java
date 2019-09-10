@@ -72,7 +72,7 @@ public class ExecutorUtil {
         CommandLine commandLine = buildUnprivilegedCommand(command);
         CommandStatus status = executeSync(command, commandLine);
         // Set exact parameter to true to get the process forked by the sh command
-        List<Pid> pids = getPids(command.getCommandLine(), true);
+        List<Pid> pids = getPids(command.getCommandLine());
         if (!pids.isEmpty()) {
             status.setPid(pids.get(0));
         }
@@ -83,7 +83,7 @@ public class ExecutorUtil {
         CommandLine commandLine = buildUnprivilegedCommand(command);
         CommandStatus status = executeAsync(command, commandLine, callback);
         // Set exact parameter to true to get the process forked by the sh command
-        List<Pid> pids = getPids(command.getCommandLine(), true);
+        List<Pid> pids = getPids(command.getCommandLine());
         if (!pids.isEmpty()) {
             status.setPid(pids.get(0));
         }
@@ -93,7 +93,7 @@ public class ExecutorUtil {
         CommandLine commandLine = buildPrivilegedCommand(command);
         CommandStatus status = executeSync(command, commandLine);
         // Set exact parameter to true to get the process forked by the sh command
-        List<Pid> pids = getPids(command.getCommandLine(), true);
+        List<Pid> pids = getPids(command.getCommandLine());
         if (!pids.isEmpty()) {
             status.setPid(pids.get(0));
         }
@@ -104,7 +104,7 @@ public class ExecutorUtil {
         CommandLine commandLine = buildPrivilegedCommand(command);
         CommandStatus status = executeAsync(command, commandLine, callback);
         // Set exact parameter to true to get the process forked by the sh command
-        List<Pid> pids = getPids(command.getCommandLine(), true);
+        List<Pid> pids = getPids(command.getCommandLine());
         if (!pids.isEmpty()) {
             status.setPid(pids.get(0));
         }
@@ -124,7 +124,7 @@ public class ExecutorUtil {
 
     public static boolean killUnprivileged(String commandLine, Signal signal) {
         List<Boolean> areAllKilled = new ArrayList<>();
-        List<Pid> pids = getPids(commandLine, true);
+        List<Pid> pids = getPids(commandLine);
         for (Pid pid : pids) {
             areAllKilled.add(stopUnprivileged(pid, signal));
         }
@@ -145,7 +145,7 @@ public class ExecutorUtil {
 
     public static boolean killPrivileged(String commandLine, Signal signal) {
         boolean isKilled = true;
-        List<Pid> pids = getPids(commandLine, true);
+        List<Pid> pids = getPids(commandLine);
         for (Pid pid : pids) {
             isKilled &= stopPrivileged(pid, signal);
         }
@@ -179,16 +179,16 @@ public class ExecutorUtil {
     }
 
     public static boolean isRunning(String commandLine) {
-        return !getPids(commandLine, true).isEmpty();
+        return !getPids(commandLine).isEmpty();
     }
 
-    public static List<Pid> getPids(String commandLine, boolean exact) {
+    public static List<Pid> getPids(String commandLine) {
         // Perform the search for the pid of a command/process for few times, since it could not be available just after
         // a command is run.
         int attempts = GET_PID_ATTEMPTS;
         List<Integer> pids = new ArrayList<>();
         while (attempts > 0 && pids.isEmpty()) {
-            pids = getPidsInternal(exact, commandLine);
+            pids = getPidsInternal(commandLine);
             attempts--;
         }
         if (pids.isEmpty()) {
@@ -202,7 +202,7 @@ public class ExecutorUtil {
         return pids.stream().map(LinuxPid::new).collect(Collectors.toList());
     }
 
-    private static List<Integer> getPidsInternal(boolean exact, String commandLine) {
+    private static List<Integer> getPidsInternal(String commandLine) {
         List<Integer> pids = new ArrayList<>();
         CommandLine pidofCommandLine = new CommandLine("pidof");
         for (String token : commandLine.split("\\s+")) {

@@ -105,8 +105,8 @@ public class UnprivilegedExecutorServiceImpl implements UnprivilegedExecutorServ
     }
 
     @Override
-    public List<Pid> getPids(String commandLine, boolean exact) {
-        return ExecutorUtil.getPids(commandLine, exact);
+    public List<Pid> getPids(String commandLine) {
+        return ExecutorUtil.getPids(commandLine);
     }
 
 }

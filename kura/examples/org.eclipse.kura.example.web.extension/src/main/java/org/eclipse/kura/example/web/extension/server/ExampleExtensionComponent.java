@@ -39,7 +39,7 @@ public class ExampleExtensionComponent {
 
         @Override
         public String getEntryPointUrl() {
-            return "/exampleext/example.nocache.js";
+            return "/exampleext/exampleext.nocache.js";
         }
     };
 
@@ -64,13 +64,7 @@ public class ExampleExtensionComponent {
             final HttpContext context = this.httpService.createDefaultHttpContext();
 
             console.registerLoginServlet("/exampleext/dummylogin", dummyAuth);
-            this.httpService.registerResources("/exampleext", "www/example", context);
-            this.httpService.registerServlet("/exampleext/css",
-                    new RedirectServlet(p -> p.replace("exampleext", "denali")), null, context);
-            this.httpService.registerServlet("/exampleext/fonts",
-                    new RedirectServlet(p -> p.replace("exampleext", "denali")), null, context);
-            this.httpService.registerServlet("/exampleext/js",
-                    new RedirectServlet(p -> p.replace("exampleext", "denali")), null, context);
+            this.httpService.registerResources("/exampleext", "www/exampleext", context);
         } catch (final NamespaceException | ServletException e) {
             logger.warn("failed to register resources", e);
         }
@@ -82,9 +76,6 @@ public class ExampleExtensionComponent {
             this.console.unregisterConsoleExtensionBundle(EXTENSION);
             this.console.unregisterLoginExtensionBundle(EXTENSION);
             this.console.unregisterServlet("/exampleext/dummylogin");
-            this.httpService.unregister("/exampleext/css");
-            this.httpService.unregister("/exampleext/fonts");
-            this.httpService.unregister("/exampleext/js");
             this.httpService.unregister("/exampleext");
         } catch (Exception e) {
             logger.warn("failed to unregister resources", e);

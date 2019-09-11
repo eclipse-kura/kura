@@ -9,7 +9,7 @@
      http://www.eclipse.org/legal/epl-v10.html
 
 -->
-<module rename-to='example'>
+<module rename-to='exampleext'>
 
   <!-- Inherit the core Web Toolkit stuff.                        -->
   <inherits name='com.google.gwt.user.User' />
@@ -22,5 +22,6 @@
   <!-- Specify the paths for translatable code                    -->
   <source path='client' />
   <source path='shared' />
+  <set-property name="user.agent" value="ie9,ie10,gecko1_8,safari"/>
 
 </module>

@@ -9,19 +9,15 @@
  * Contributors:
  *     Eurotech
  *******************************************************************************/
-package org.eclipse.kura.web.client.util;
+package org.eclipse.kura.web.shared;
 
 import java.util.Date;
 
-import org.eclipse.kura.web.client.messages.Messages;
-
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
 
 public class DateUtils {
 
     private static final String YYYY_MM_DD_HH_MM_SS_SSS = "yyyy.MM.dd.HH.mm.ss.SSS";
-    private static final Messages MSGS = GWT.create(Messages.class);
 
     private DateUtils() {
 
@@ -55,7 +51,7 @@ public class DateUtils {
         // return something like "Tomorrow 10:30 am"
         else if (dDayDiff >= 1) {
             DateTimeFormat dtf = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.TIME_MEDIUM);
-            date = MSGS.tomorrow(dtf.format(d));
+            date = "Tomorrow" + dtf.format(d);
         }
 
         // if the modification time is still today, or it is midnight
@@ -63,7 +59,7 @@ public class DateUtils {
         // return something like "Today 10:30 am"
         else if (dDayDiff >= 0) {
             DateTimeFormat dtf = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.TIME_MEDIUM);
-            date = MSGS.today(dtf.format(d));
+            date = "Today" + dtf.format(d);
         }
 
         // if the modification time is yesterday,
@@ -71,7 +67,7 @@ public class DateUtils {
         // return something like "Yesterday 10:30 am"
         else if (dDayDiff >= -1) {
             DateTimeFormat dtf = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.TIME_MEDIUM);
-            date = MSGS.yesterday(dtf.format(d));
+            date = "Yesterday " + dtf.format(d);
         } else {
             date = formatDateTimeInternal(d);
         }

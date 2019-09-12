@@ -133,17 +133,17 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
     TextBox source;
     @UiField
     TextBox destination;
-    
+
     @UiField
     ListBox protocol;
     @UiField
     ListBox enable;
-    
+
     @UiField
     Button submit;
     @UiField
     Button cancel;
-    
+
     @UiField
     AlertDialog alertDialog;
 
@@ -178,23 +178,23 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
                 NatTabUi.this.gwtNetworkService.findDeviceFirewallNATs(token,
                         new AsyncCallback<List<GwtFirewallNatEntry>>() {
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        EntryClassUi.hideWaitModal();
-                        FailureHandler.handle(caught);
-                    }
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                EntryClassUi.hideWaitModal();
+                                FailureHandler.handle(caught);
+                            }
 
-                    @Override
-                    public void onSuccess(List<GwtFirewallNatEntry> result) {
-                        for (GwtFirewallNatEntry pair : result) {
-                            NatTabUi.this.natDataProvider.getList().add(pair);
-                        }
-                        refreshTable();
+                            @Override
+                            public void onSuccess(List<GwtFirewallNatEntry> result) {
+                                for (GwtFirewallNatEntry pair : result) {
+                                    NatTabUi.this.natDataProvider.getList().add(pair);
+                                }
+                                refreshTable();
 
-                        NatTabUi.this.buttonBar.setDirty(false);
-                        EntryClassUi.hideWaitModal();
-                    }
-                });
+                                NatTabUi.this.buttonBar.setDirty(false);
+                                EntryClassUi.hideWaitModal();
+                            }
+                        });
             }
         });
     }
@@ -346,19 +346,19 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
                 NatTabUi.this.gwtNetworkService.updateDeviceFirewallNATs(token, updatedNatConf,
                         new AsyncCallback<Void>() {
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        EntryClassUi.hideWaitModal();
-                        FailureHandler.handle(caught);
-                    }
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                EntryClassUi.hideWaitModal();
+                                FailureHandler.handle(caught);
+                            }
 
-                    @Override
-                    public void onSuccess(Void result) {
-                        setDirty(false);
-                        NatTabUi.this.buttonBar.setDirty(false);
-                        EntryClassUi.hideWaitModal();
-                    }
-                });
+                            @Override
+                            public void onSuccess(Void result) {
+                                setDirty(false);
+                                NatTabUi.this.buttonBar.setDirty(false);
+                                EntryClassUi.hideWaitModal();
+                            }
+                        });
             }
         });
 
@@ -366,13 +366,7 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
 
     @Override
     public void onCancel() {
-        NatTabUi.this.alertDialog.show(MSGS.deviceConfigDirty(), new AlertDialog.Listener() {
-
-            @Override
-            public void onConfirm() {
-                NatTabUi.this.refresh();
-            }
-        });
+        NatTabUi.this.alertDialog.show(MSGS.deviceConfigDirty(), NatTabUi.this::refresh);
     }
 
     @Override
@@ -433,17 +427,13 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
         if (selection == null) {
             return;
         }
-        this.alertDialog.show(MSGS.firewallNatDeleteConfirmation(selection.getInInterface()),
-                new AlertDialog.Listener() {
+        this.alertDialog.show(MSGS.firewallNatDeleteConfirmation(selection.getInInterface()), () -> {
+            NatTabUi.this.natDataProvider.getList().remove(selection);
+            refreshTable();
+            NatTabUi.this.buttonBar.setDirty(true);
+            setDirty(true);
+        });
 
-                    @Override
-                    public void onConfirm() {
-                        NatTabUi.this.natDataProvider.getList().remove(selection);
-                        refreshTable();
-                        NatTabUi.this.buttonBar.setDirty(true);
-                        setDirty(true);
-                    }
-                });
     }
 
     private void initModal() {
@@ -646,9 +636,11 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
                 String destinationNetwork = entry.getDestinationNetwork() != null ? entry.getDestinationNetwork()
                         : "0.0.0.0/0";
                 String newSourceNetwork = firewallNatEntry.getSourceNetwork() != null
-                        ? firewallNatEntry.getSourceNetwork() : "0.0.0.0/0";
+                        ? firewallNatEntry.getSourceNetwork()
+                        : "0.0.0.0/0";
                 String newDestinationNetwork = firewallNatEntry.getDestinationNetwork() != null
-                        ? firewallNatEntry.getDestinationNetwork() : "0.0.0.0/0";
+                        ? firewallNatEntry.getDestinationNetwork()
+                        : "0.0.0.0/0";
 
                 if (entry.getInInterface().equals(firewallNatEntry.getInInterface())
                         && entry.getOutInterface().equals(firewallNatEntry.getOutInterface())

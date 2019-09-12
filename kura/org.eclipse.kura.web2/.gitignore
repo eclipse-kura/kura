@@ -13,3 +13,5 @@ denali/*
 src/main/webapp/com.eurotech.framework.web.denaliJUnit/*
 src/main/webapp/WEB-INF/deploy/*
 src/main/gwt-unitCache
+src/main/webapp/login.all*
+src/main/webapp/denali.all*

@@ -429,7 +429,8 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
                 refreshTable();
             }
         });
-        final AlertDialog.Listener listener = () -> showModal(OpenPortsTabUi.this.selectionModel.getSelectedObject());
+        final AlertDialog.ConfirmListener listener = () -> showModal(
+                OpenPortsTabUi.this.selectionModel.getSelectedObject());
         if (selection.getPortRange().equals("22")) {
             // show warning
             OpenPortsTabUi.this.alertDialog.show(MSGS.firewallOpenPorts22(), listener);

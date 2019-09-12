@@ -17,8 +17,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.eclipse.kura.web.client.util.KuraBaseModel;
-
 public class GwtCloudConnectionInfo extends KuraBaseModel implements Serializable {
 
     private static final String CONNECTION_NAME_KEY = "Connection Name";

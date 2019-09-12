@@ -17,17 +17,22 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
+import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.KuraConfigReadyEvent;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.system.SystemService;
+import org.eclipse.kura.web.api.ClientExtensionBundle;
 import org.eclipse.kura.web.server.GwtAssetServiceImpl;
 import org.eclipse.kura.web.server.GwtBannerServiceImpl;
 import org.eclipse.kura.web.server.GwtCertificatesServiceImpl;
@@ -35,6 +40,7 @@ import org.eclipse.kura.web.server.GwtCloudConnectionServiceImpl;
 import org.eclipse.kura.web.server.GwtComponentServiceImpl;
 import org.eclipse.kura.web.server.GwtDeviceServiceImpl;
 import org.eclipse.kura.web.server.GwtEventServiceImpl;
+import org.eclipse.kura.web.server.GwtExtensionServiceImpl;
 import org.eclipse.kura.web.server.GwtNetworkServiceImpl;
 import org.eclipse.kura.web.server.GwtPackageServiceImpl;
 import org.eclipse.kura.web.server.GwtPasswordAuthenticationServiceImpl;
@@ -44,6 +50,7 @@ import org.eclipse.kura.web.server.GwtSessionServiceImpl;
 import org.eclipse.kura.web.server.GwtSnapshotServiceImpl;
 import org.eclipse.kura.web.server.GwtStatusServiceImpl;
 import org.eclipse.kura.web.server.GwtWireGraphServiceImpl;
+import org.eclipse.kura.web.server.OsgiRemoteServiceServlet;
 import org.eclipse.kura.web.server.servlet.ChannelServlet;
 import org.eclipse.kura.web.server.servlet.DeviceSnapshotsServlet;
 import org.eclipse.kura.web.server.servlet.FileServlet;
@@ -72,7 +79,7 @@ import org.osgi.service.http.NamespaceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Console implements ConfigurableComponent {
+public class Console implements ConfigurableComponent, org.eclipse.kura.web.api.Console {
 
     private static final String EVENT_PATH = "/event";
 
@@ -103,6 +110,13 @@ public class Console implements ConfigurableComponent {
     private EventAdmin eventAdmin;
     private AuthenticationManager authMgr;
     private GwtEventServiceImpl eventService;
+
+    private HttpContext sessionContext;
+
+    private final Set<ServletRegistration> securedServlets = new CopyOnWriteArraySet<>();
+    private final Set<ServletRegistration> loginServlets = new CopyOnWriteArraySet<>();
+    private final Set<ClientExtensionBundle> consoleExtensions = new CopyOnWriteArraySet<>();
+    private final Set<ClientExtensionBundle> loginExtensions = new CopyOnWriteArraySet<>();
 
     private static Console instance;
 
@@ -242,7 +256,7 @@ public class Console implements ConfigurableComponent {
     //
     // ----------------------------------------------------------------
 
-    private void unregisterServlet() {
+    private synchronized void unregisterServlet() {
         this.httpService.unregister("/");
         this.httpService.unregister(ADMIN_ROOT);
         this.httpService.unregister(CONSOLE_PATH);
@@ -271,9 +285,19 @@ public class Console implements ConfigurableComponent {
         this.httpService.unregister(DENALI_MODULE_PATH + "/wires");
         this.httpService.unregister(DENALI_MODULE_PATH + "/wiresSnapshot");
         this.httpService.unregister(DENALI_MODULE_PATH + "/assetservices");
+        this.httpService.unregister(DENALI_MODULE_PATH + "/extension");
+        this.httpService.unregister(LOGIN_MODULE_PATH + "/extension");
         this.httpService.unregister(ADMIN_ROOT + "/sse");
         this.eventService.stop();
         this.httpService.unregister(DENALI_MODULE_PATH + EVENT_PATH);
+
+        for (final ServletRegistration reg : this.securedServlets) {
+            this.httpService.unregister(reg.path);
+        }
+
+        for (final ServletRegistration reg : this.loginServlets) {
+            this.httpService.unregister(reg.path);
+        }
     }
 
     public static Console instance() {
@@ -309,12 +333,13 @@ public class Console implements ConfigurableComponent {
         return session;
     }
 
+    final Set<String> authenticationPaths = new HashSet<>(Arrays.asList(AUTH_PATH, PASSWORD_AUTH_PATH));
+
     private HttpContext initSessionContext(final HttpContext defaultContext) {
 
-        final Set<String> authenticationPaths = new HashSet<>(Arrays.asList(AUTH_PATH, PASSWORD_AUTH_PATH));
         final Set<String> eventPaths = new HashSet<>(Arrays.asList(DENALI_MODULE_PATH + EVENT_PATH, "/sse"));
 
-        final SecurityHandler baseHandler = new BaseSecurityHandler();
+        final SecurityHandler baseHandler = chain(new BaseSecurityHandler());
         final SecurityHandler sessionAuthHandler = new SessionAutorizationSecurityHandler();
         final SecurityHandler sessionExpirationHandler = new SessionExpirationSecurityHandler();
 
@@ -325,7 +350,9 @@ public class Console implements ConfigurableComponent {
                 defaultHandler.sendErrorOnFailure(401));
 
         // exception on authentication paths, allow access without authenticaton but create a session
-        routingHandler.addRouteHandler(authenticationPaths::contains,
+        routingHandler.addRouteHandler(
+                p -> authenticationPaths.contains(p)
+                        || this.loginServlets.stream().anyMatch(r -> r.path.contentEquals(p)),
                 chain(baseHandler, new CreateSessionSecurityHandler()));
 
         // exception on event paths, activity on these paths does not count towards session expiration
@@ -342,12 +369,11 @@ public class Console implements ConfigurableComponent {
         return new HttpContextImpl(new BaseSecurityHandler(), defaultContext);
     }
 
-    private void initHTTPService() throws NamespaceException, ServletException {
+    private synchronized void initHTTPService() throws NamespaceException, ServletException {
 
         final HttpContext defaultContext = this.httpService.createDefaultHttpContext();
-
         final HttpContext resourceContext = initResourceContext(defaultContext);
-        final HttpContext sessionContext = initSessionContext(defaultContext);
+        sessionContext = initSessionContext(defaultContext);
 
         this.httpService.registerResources(ADMIN_ROOT, "www", resourceContext);
         this.httpService.registerResources(AUTH_PATH, "www/auth.html", sessionContext);
@@ -361,6 +387,10 @@ public class Console implements ConfigurableComponent {
 
         this.httpService.registerServlet(PASSWORD_AUTH_PATH,
                 new GwtPasswordAuthenticationServiceImpl(this.authMgr, CONSOLE_PATH), null, sessionContext);
+        this.httpService.registerServlet(DENALI_MODULE_PATH + "/extension", new GwtExtensionServiceImpl(), null,
+                resourceContext);
+        this.httpService.registerServlet(LOGIN_MODULE_PATH + "/extension", new GwtExtensionServiceImpl(), null,
+                resourceContext);
         this.httpService.registerServlet(DENALI_MODULE_PATH + "/session", new GwtSessionServiceImpl(), null,
                 sessionContext);
         this.httpService.registerServlet(DENALI_MODULE_PATH + "/xsrf", new GwtSecurityTokenServiceImpl(), null,
@@ -398,7 +428,125 @@ public class Console implements ConfigurableComponent {
                 sessionContext);
         this.httpService.registerServlet(ADMIN_ROOT + "/sse", new WiresBlinkServlet(), null, sessionContext);
         this.httpService.registerServlet(DENALI_MODULE_PATH + EVENT_PATH, this.eventService, null, sessionContext);
+
+        for (final ServletRegistration reg : this.securedServlets) {
+            this.httpService.registerServlet(reg.path, reg.servlet, null, sessionContext);
+        }
+
+        for (final ServletRegistration reg : this.loginServlets) {
+            this.httpService.registerServlet(reg.path, reg.servlet, null, sessionContext);
+        }
+
         this.eventService.start();
+    }
+
+    public Set<ClientExtensionBundle> getConsoleExtensions() {
+        return consoleExtensions;
+    }
+
+    public Set<ClientExtensionBundle> getLoginExtensions() {
+        return loginExtensions;
+    }
+
+    private static final class ServletRegistration {
+
+        private final String path;
+        private final Servlet servlet;
+
+        public ServletRegistration(String path, Servlet servlet) {
+            this.path = path;
+            this.servlet = servlet;
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((path == null) ? 0 : path.hashCode());
+            result = prime * result + ((servlet == null) ? 0 : servlet.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            ServletRegistration other = (ServletRegistration) obj;
+            if (path == null) {
+                if (other.path != null)
+                    return false;
+            } else if (!path.equals(other.path))
+                return false;
+            return servlet == other.servlet;
+        }
+
+    }
+
+    @Override
+    public void registerConsoleExtensionBundle(ClientExtensionBundle extension) {
+        this.consoleExtensions.add(extension);
+    }
+
+    @Override
+    public void unregisterConsoleExtensionBundle(ClientExtensionBundle extension) {
+        this.consoleExtensions.remove(extension);
+    }
+
+    @Override
+    public void registerLoginExtensionBundle(ClientExtensionBundle extension) {
+        this.loginExtensions.add(extension);
+    }
+
+    @Override
+    public void unregisterLoginExtensionBundle(ClientExtensionBundle extension) {
+        this.loginExtensions.remove(extension);
+    }
+
+    @Override
+    public synchronized void registerSecuredServlet(final String path, final Servlet servlet)
+            throws NamespaceException, ServletException {
+        this.securedServlets.add(new ServletRegistration(path, servlet));
+        this.httpService.registerServlet(path, servlet, null, sessionContext);
+    }
+
+    @Override
+    public synchronized void registerLoginServlet(final String path, final Servlet servlet)
+            throws NamespaceException, ServletException {
+        this.loginServlets.add(new ServletRegistration(path, servlet));
+        this.httpService.registerServlet(path, servlet, null, sessionContext);
+        authenticationPaths.add(path);
+    }
+
+    @Override
+    public synchronized void unregisterServlet(final String path) throws NamespaceException, ServletException {
+        this.securedServlets.removeIf(r -> r.path.contentEquals(path));
+        this.loginServlets.removeIf(r -> r.path.contentEquals(path));
+        this.httpService.unregister(path);
+        this.authenticationPaths.remove(path);
+    }
+
+    @Override
+    public String setAuthenticated(final HttpSession session, final String user) {
+
+        session.setAttribute(Attributes.AUTORIZED_USER.getValue(), user);
+
+        return CONSOLE_PATH;
+    }
+
+    @Override
+    public void checkXSRFToken(final HttpSession session, final String token) throws KuraException {
+        if (!OsgiRemoteServiceServlet.isValidXSRFToken(session, token)) {
+            throw new KuraException(KuraErrorCode.SECURITY_EXCEPTION);
+        }
+    }
+
+    @Override
+    public Optional<String> getUsername(HttpSession session) {
+        return Optional.ofNullable(session.getAttribute(Attributes.AUTORIZED_USER.getValue())).map(o -> (String) o);
     }
 
 }

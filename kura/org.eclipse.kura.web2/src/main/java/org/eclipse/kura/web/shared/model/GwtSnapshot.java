@@ -14,8 +14,7 @@ package org.eclipse.kura.web.shared.model;
 import java.io.Serializable;
 import java.util.Date;
 
-import org.eclipse.kura.web.client.util.DateUtils;
-import org.eclipse.kura.web.client.util.MessageUtils;
+import org.eclipse.kura.web.shared.DateUtils;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
@@ -31,7 +30,7 @@ public class GwtSnapshot extends GwtBaseModel implements IsSerializable, Seriali
     public <X> X get(String property) {
         if ("createdOnFormatted".equals(property)) {
             if (((Date) get("createdOn")).getTime() == 0) {
-                return (X) MessageUtils.get("snapSeeded");
+                return (X) "Seeded Snapshot";
             }
             return (X) DateUtils.formatDateTime((Date) get("createdOn"));
         } else if ("snapshotId".equals(property)) {

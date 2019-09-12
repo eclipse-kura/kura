@@ -24,6 +24,7 @@ import org.eclipse.kura.web.client.configuration.Configurations;
 import org.eclipse.kura.web.client.configuration.HasConfiguration;
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.AlertDialog;
+import org.eclipse.kura.web.client.ui.AlertDialog.ConfirmListener;
 import org.eclipse.kura.web.client.ui.wires.composer.BlinkEffect;
 import org.eclipse.kura.web.client.ui.wires.composer.DropEvent;
 import org.eclipse.kura.web.client.ui.wires.composer.PortNames;
@@ -136,7 +137,7 @@ public class WiresPanelUi extends Composite
                 confirmDialog.show(
                         MSGS.cannotSaveWiresConfigurationInvalid(
                                 invalidConfigurationPids.toString().replaceAll("[\\[\\]]", "")),
-                        AlertDialog.Severity.ALERT, null);
+                        AlertDialog.Severity.ALERT, (ConfirmListener) null);
                 return;
             }
             confirmDialog.show(MSGS.wiresSave(), () -> WiresRPC.updateWiresConfiguration(getGwtWireGraphConfiguration(),
@@ -158,7 +159,7 @@ public class WiresPanelUi extends Composite
                 confirmDialog.show(
                         MSGS.cannotDownloadSnapshotWiresConfigurationInvalid(
                                 invalidConfigurationPids.toString().replaceAll("[\\[\\]]", "")),
-                        AlertDialog.Severity.ALERT, null);
+                        AlertDialog.Severity.ALERT, (ConfirmListener) null);
                 return;
             }
             WiresRPC.downloadWiresSnapshot();
@@ -510,7 +511,8 @@ public class WiresPanelUi extends Composite
     public boolean onNewPidInserted(String pid) {
         boolean isPidValid = this.wireComposer.getWireComponent(pid) == null && !this.configurations.isPidExisting(pid);
         if (!isPidValid) {
-            confirmDialog.show(MSGS.wiresComponentNameAlreadyUsed(pid), AlertDialog.Severity.ALERT, null);
+            confirmDialog.show(MSGS.wiresComponentNameAlreadyUsed(pid), AlertDialog.Severity.ALERT,
+                    (ConfirmListener) null);
         }
         return isPidValid;
     }

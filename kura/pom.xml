@@ -102,7 +102,7 @@
 
         <module>org.eclipse.kura.linux.debian.provider</module>
         <module>org.eclipse.kura.linux.redhat.provider</module>
-        
+
         <module>org.eclipse.kura.http.server.manager</module>
 
         <module>features</module>
@@ -257,6 +257,7 @@
             </activation>
             <modules>
                 <module>org.eclipse.kura.web2</module>
+                <module>org.eclipse.kura.web2.ext</module>
             </modules>
         </profile>
         <profile>

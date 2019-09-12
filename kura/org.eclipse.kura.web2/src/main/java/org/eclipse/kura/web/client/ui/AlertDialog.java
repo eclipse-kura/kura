@@ -34,7 +34,7 @@ public class AlertDialog extends Composite implements HasId {
 
     private static final Messages MSGS = GWT.create(Messages.class);
 
-    private Listener listener;
+    private DismissListener listener;
 
     @UiField
     Button yes;
@@ -63,36 +63,57 @@ public class AlertDialog extends Composite implements HasId {
 
         this.yes.addClickHandler(event -> {
             if (AlertDialog.this.listener != null) {
-                AlertDialog.this.listener.onConfirm();
+                AlertDialog.this.listener.onDismissed(true);
             }
             AlertDialog.this.modal.hide();
         });
 
-        this.no.addClickHandler(event -> AlertDialog.this.modal.hide());
+        this.no.addClickHandler(event -> {
+            if (AlertDialog.this.listener != null) {
+                AlertDialog.this.listener.onDismissed(false);
+            }
+            AlertDialog.this.modal.hide();
+        });
     }
 
-    public void setListener(Listener listener) {
+    public void setListener(DismissListener listener) {
         this.listener = listener;
         this.alertFooter.setVisible(listener != null);
     }
 
-    public void show(String title, String message, Severity severity, Listener listener) {
+    public void show(String title, String message, Severity severity, DismissListener listener) {
         setAlertText(message, severity);
         setTitle(title);
         setListener(listener);
         this.modal.show();
     }
 
-    public void show(String message, Listener listener) {
+    public void show(String title, String message, Severity severity, ConfirmListener listener) {
+        show(title, message, severity, toDismissListener(listener));
+    }
+
+    public void show(String message, DismissListener listener) {
         show(MSGS.confirm(), message, Severity.INFO, listener);
     }
 
-    public void show(String message, Severity severity, Listener listener) {
+    public void show(String message, ConfirmListener listener) {
+        show(message, toDismissListener(listener));
+    }
+
+    public void show(String message, Severity severity, DismissListener listener) {
         show(severity == Severity.INFO ? MSGS.confirm() : MSGS.warning(), message, severity, listener);
     }
 
-    public void show(String title, String message, Listener listener) {
+    public void show(String message, Severity severity, ConfirmListener listener) {
+        show(message, severity, toDismissListener(listener));
+    }
+
+    public void show(String title, String message, DismissListener listener) {
         show(title, message, Severity.INFO, listener);
+    }
+
+    public void show(String title, String message, ConfirmListener listener) {
+        show(title, message, toDismissListener(listener));
     }
 
     public void setAlertText(String message, Severity severity) {
@@ -122,10 +143,28 @@ public class AlertDialog extends Composite implements HasId {
         this.modal.setTitle(title);
     }
 
-    public interface Listener {
+    public interface ConfirmListener {
 
         public void onConfirm();
 
+    }
+
+    public interface DismissListener {
+
+        public void onDismissed(boolean confirmed);
+
+    }
+
+    private static DismissListener toDismissListener(final ConfirmListener listener) {
+        if (listener == null) {
+            return null;
+        }
+
+        return ok -> {
+            if (ok) {
+                listener.onConfirm();
+            }
+        };
     }
 
     public enum Severity {

@@ -23,8 +23,8 @@ if [[ -n "$ipaddr" ]] ; then
 	find=`expr index "$ipaddr" ' '`
 	lind=`expr index "$ipaddr" '/'`
 	echo "IPADDR="${ipaddr:$find:`expr $lind-$find-1`} >> $FILENAME
-	ipgw=`ip route show dev $DEVICE | grep default`
-	echo "GATEWAY="${ipgw:12} >> $FILENAME
+	ipgw=(`ip route show dev $DEVICE | grep default`)
+	echo "GATEWAY="${ipgw[2]} >> $FILENAME
 	#ip route del $ipgw
 
 	# Only add DNS if this is a gateway - this also implies /etc/resolv.conf was overwritten

@@ -9,7 +9,7 @@
  * Contributors:
  *     Eurotech
  *******************************************************************************/
-package org.eclipse.kura.web.client.util;
+package org.eclipse.kura.web.shared;
 
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 

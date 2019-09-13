@@ -15,6 +15,7 @@ import org.eclipse.kura.web.client.configuration.Configurations;
 import org.eclipse.kura.web.client.configuration.HasConfiguration;
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.AlertDialog;
+import org.eclipse.kura.web.client.ui.AlertDialog.ConfirmListener;
 import org.eclipse.kura.web.shared.AssetConstants;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.gwtbootstrap3.client.ui.Panel;
@@ -76,7 +77,7 @@ public class AssetMgmtUi extends Composite {
         this.tab2NavTab.addClickHandler(event -> {
             if (AssetMgmtUi.this.assetConfigUi.isDirty()) {
                 AssetMgmtUi.this.alertDialog.show(MSGS.driversAssetsAssetConfigDirty(), AlertDialog.Severity.ALERT,
-                        null);
+                        (ConfirmListener) null);
                 event.stopPropagation();
                 event.preventDefault();
                 return;

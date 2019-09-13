@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2019 Eurotech and/or its affiliates
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+-->
+<module rename-to='exampleext'>
+
+  <!-- Inherit the core Web Toolkit stuff.                        -->
+  <inherits name='com.google.gwt.user.User' />
+  <inherits name="org.eclipse.kura.web2.ext" />
+  <inherits name='org.gwtbootstrap3.GwtBootstrap3'/>
+
+  <!-- Specify the app entry point class.                         -->
+  <entry-point class='org.eclipse.kura.example.web.extension.client.ExampleEntryPoint' />
+
+  <!-- Specify the paths for translatable code                    -->
+  <source path='client' />
+  <source path='shared' />
+  <set-property name="user.agent" value="ie9,ie10,gecko1_8,safari"/>
+
+</module>

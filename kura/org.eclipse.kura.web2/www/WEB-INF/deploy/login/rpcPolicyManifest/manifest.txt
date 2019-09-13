@@ -1,0 +1,5 @@
+# Module login
+# RPC service class, partial path of RPC policy file
+org.eclipse.kura.web.shared.service.GwtPasswordAuthenticationService, 069AF6548D557744519AAA48DBA5F908.gwt.rpc
+org.eclipse.kura.web.shared.service.GwtBannerService, EE520C4015805E5EC9179F92F04A929F.gwt.rpc
+org.eclipse.kura.web.shared.service.GwtExtensionService, 7C9432B858408D227000923979407AE3.gwt.rpc

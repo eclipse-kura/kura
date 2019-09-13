@@ -63,7 +63,7 @@ public class KuraRemoteServiceServlet extends RemoteServiceServlet {
             throws GwtKuraException {
         HttpSession session = req.getSession(false);
 
-        if (!isValidXSRFToken(session, userToken)) {
+        if (!isValidXSRFToken(session, userToken.getToken())) {
             logger.info("XSRF token is NOT VALID");
 
             if (userToken != null) {
@@ -95,7 +95,7 @@ public class KuraRemoteServiceServlet extends RemoteServiceServlet {
      * @param userToken
      * @return boolean
      */
-    public static boolean isValidXSRFToken(HttpSession session, GwtXSRFToken userToken) {
+    public static boolean isValidXSRFToken(HttpSession session, String userToken) {
         logger.debug("Starting XSRF Token validation...'");
 
         if (userToken == null || session == null) {
@@ -109,23 +109,22 @@ public class KuraRemoteServiceServlet extends RemoteServiceServlet {
             String serverToken = serverXSRFToken.getToken();
 
             // Checking the XSRF validity on the serverToken
-            if (isValidStringToken(serverToken) && isValidStringToken(userToken.getToken())
-                    && serverToken.equals(userToken.getToken())) {
+            if (isValidStringToken(serverToken) && isValidStringToken(userToken) && serverToken.equals(userToken)) {
                 // Checking expire date
-                if (new Date().before(userToken.getExpiresOn())) {
-                    logger.debug("XSRF Token is VALID - {}", userToken.getToken());
+                if (new Date().before(serverXSRFToken.getExpiresOn())) {
+                    logger.debug("XSRF Token is VALID - {}", userToken);
 
                     // Reset used token
                     session.setAttribute(GwtSecurityTokenServiceImpl.XSRF_TOKEN_KEY, null);
                     return true;
                 } else {
                     session.setAttribute(GwtSecurityTokenServiceImpl.XSRF_TOKEN_KEY, null);
-                    logger.error("XSRF Token is EXPIRED - {}", userToken.getToken());
+                    logger.error("XSRF Token is EXPIRED - {}", userToken);
                 }
             }
         }
 
-        logger.debug("XSRF Token is NOT VALID - {}", userToken.getToken());
+        logger.debug("XSRF Token is NOT VALID - {}", userToken);
         return false;
     }
 

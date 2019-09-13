@@ -17,8 +17,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.eclipse.kura.web.client.util.KuraBaseModel;
-
 public class GwtFirewallNatEntry extends KuraBaseModel implements Serializable {
 
     private static final Logger logger = Logger.getLogger(GwtFirewallNatEntry.class.getSimpleName());

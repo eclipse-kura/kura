@@ -77,6 +77,7 @@
         <module>org.eclipse.kura.example.wire.math.singleport.provider</module>
         <module>org.eclipse.kura.example.driver.sensehat</module>
         <module>org.eclipse.kura.wire.devel.component.provider</module>
+        <module>org.eclipse.kura.example.web.extension</module>
         <module>org.eclipse.kura.example.gpio.led</module>
         <module>features</module>
         <module>test</module>

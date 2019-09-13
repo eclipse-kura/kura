@@ -12,12 +12,9 @@
 package org.eclipse.kura.web.client.ui.status;
 
 import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.messages.ValidationMessages;
-import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.util.EventService;
 import org.eclipse.kura.web.client.util.request.RequestQueue;
 import org.eclipse.kura.web.shared.ForwardedEventTopic;
@@ -40,13 +37,13 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.RowStyles;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 
 public class StatusPanelUi extends Composite {
 
-    private static final Logger logger = Logger.getLogger(StatusPanelUi.class.getSimpleName());
     private static StatusPanelUiUiBinder uiBinder = GWT.create(StatusPanelUiUiBinder.class);
 
     interface StatusPanelUiUiBinder extends UiBinder<Widget, StatusPanelUi> {
@@ -60,7 +57,6 @@ public class StatusPanelUi extends Composite {
 
     private GwtSession currentSession;
     private final ListDataProvider<GwtGroupedNVPair> statusGridProvider = new ListDataProvider<>();
-    private EntryClassUi parent;
     @UiField
     Well statusWell;
     @UiField
@@ -69,7 +65,6 @@ public class StatusPanelUi extends Composite {
     CellTable<GwtGroupedNVPair> statusGrid;
 
     public StatusPanelUi() {
-        logger.log(Level.FINER, "Initializing StatusPanelUi...");
         initWidget(uiBinder.createAndBindUi(this));
         // Set text for buttons
         this.statusRefresh.setText(MSG.refresh());
@@ -94,13 +89,28 @@ public class StatusPanelUi extends Composite {
 
         EventService.Handler connectionStateChangeHandler = eventInfo -> {
             if (StatusPanelUi.this.isVisible() && StatusPanelUi.this.isAttached()) {
-                loadStatusData();
+                StatusPanelUi.this.refresh();
             }
         };
 
         EventService.subscribe(ForwardedEventTopic.CLOUD_CONNECTION_STATUS_ESTABLISHED, connectionStateChangeHandler);
         EventService.subscribe(ForwardedEventTopic.CLOUD_CONNECTION_STATUS_LOST, connectionStateChangeHandler);
 
+    }
+
+    public void refresh() {
+        refresh(100);
+    }
+
+    private void refresh(int delay) {
+        Timer timer = new Timer() {
+
+            @Override
+            public void run() {
+                loadStatusData();
+            }
+        };
+        timer.schedule(delay);
     }
 
     // get current session from UI parent
@@ -170,7 +180,6 @@ public class StatusPanelUi extends Composite {
                         })))));
     }
 
-    public void setParent(EntryClassUi parent) {
-        this.parent = parent;
-    }
+    // public void setParent(EntryClassUi parent) {
+    // }
 }

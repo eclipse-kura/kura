@@ -14,6 +14,7 @@ package org.eclipse.kura.web.client.ui.drivers.assets;
 import org.eclipse.kura.web.client.configuration.HasConfiguration;
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.AlertDialog;
+import org.eclipse.kura.web.client.ui.AlertDialog.ConfirmListener;
 import org.gwtbootstrap3.client.ui.Button;
 
 import com.google.gwt.core.client.GWT;
@@ -52,7 +53,8 @@ public class ConfigurationUiButtons extends Composite implements HasConfiguratio
                 return;
             }
             if (!target.isValid()) {
-                confirmDialog.show(MSGS.formWithErrorsOrIncomplete(), AlertDialog.Severity.ALERT, null);
+                confirmDialog.show(MSGS.formWithErrorsOrIncomplete(), AlertDialog.Severity.ALERT,
+                        (ConfirmListener) null);
                 return;
             }
             confirmDialog.show(MSGS.deviceConfigConfirmationNoName(), () -> listener.onApply());
@@ -71,7 +73,7 @@ public class ConfigurationUiButtons extends Composite implements HasConfiguratio
 
     @Override
     public void onConfigurationChanged(HasConfiguration hasConfiguration) {
-        //Not needed
+        // Not needed
     }
 
     @Override

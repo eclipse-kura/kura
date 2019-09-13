@@ -19,22 +19,20 @@
 		<b:Modal ui:field="loginDialog" title="{msgs.login}" closable="false"
 			fade="false" dataBackdrop="FALSE" addStyleNames="login-form">
 			
-			<b:ModalBody>
-				
+			<b:ModalBody ui:field="loginModalBody">
+						<b:FormGroup ui:field="authenticationMethodGroup">
+                            <b:FormLabel for="authenticationMethod" text="Authentication Method"/>
+                            <g:FlowPanel>
+                                <b:ListBox ui:field="authenticationMethod" b:id="authenticationMethod">
+                                </b:ListBox>
+                            </g:FlowPanel>
+                        </b:FormGroup>
 						<b:InputGroup addStyleNames="login-input">
 							<b:InputGroupAddon icon="USER" iconSize="LARGE"
 								addStyleNames="login-icon" />
-							<b:Input placeholder="{msgs.usernameInput}" type="TEXT"
+							<b:Input placeholder="{msgs.usernameInput}" allowBlank="false" type="TEXT"
 								autoComplete="false" ui:field="usernameInput" b:id="login-user" />
 						</b:InputGroup>
-						<b:InputGroup addStyleNames="login-input">
-							<b:InputGroupAddon icon="KEY" iconSize="LARGE"
-								addStyleNames="login-icon" />
-							<b:Input placeholder="{msgs.passwordInput}" type="PASSWORD"
-								autoComplete="false" ui:field="passwordInput"
-								b:id="login-password" />
-						</b:InputGroup>
-					
 			</b:ModalBody>
 			<b:ModalFooter>
 				<b:SubmitButton text="{msgs.login}" b:id="login-button" />

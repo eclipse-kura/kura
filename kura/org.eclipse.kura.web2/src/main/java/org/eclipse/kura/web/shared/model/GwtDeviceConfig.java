@@ -14,7 +14,7 @@ package org.eclipse.kura.web.shared.model;
 import java.io.Serializable;
 import java.util.Date;
 
-import org.eclipse.kura.web.client.util.DateUtils;
+import org.eclipse.kura.web.shared.DateUtils;
 
 public class GwtDeviceConfig extends GwtBaseModel implements Serializable {
 

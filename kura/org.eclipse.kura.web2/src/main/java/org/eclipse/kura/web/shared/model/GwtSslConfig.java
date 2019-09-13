@@ -13,7 +13,7 @@ package org.eclipse.kura.web.shared.model;
 
 import java.io.Serializable;
 
-import org.eclipse.kura.web.client.util.GwtSafeHtmlUtils;
+import org.eclipse.kura.web.shared.GwtSafeHtmlUtils;
 
 public class GwtSslConfig extends GwtBaseModel implements Serializable {
 

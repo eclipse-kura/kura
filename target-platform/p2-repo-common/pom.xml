@@ -222,61 +222,6 @@
                 <artifactId>maven-antrun-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>setup</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <tasks>
-                                <move file="target/source/plugins/com.codeminders.hidapi.jar"
-                                    tofile="target/source/plugins/com.codeminders.hidapi_${com.codeminders.hidapi.version}.jar" />
-                                <move file="target/source/plugins/com.codeminders.hidapi.armv6hf.jar"
-                                    tofile="target/source/plugins/com.codeminders.hidapi.armv6hf_${com.codeminders.hidapi.version}.jar" />
-                                <move file="target/source/plugins/com.codeminders.hidapi.x86_64.jar"
-                                    tofile="target/source/plugins/com.codeminders.hidapi.x86_64_${com.codeminders.hidapi.version}.jar" />
-                                <move file="target/source/plugins/com.codeminders.hidapi.aarch64.jar"
-                                    tofile="target/source/plugins/com.codeminders.hidapi.aarch64_${com.codeminders.hidapi.version}.jar" />
-                                <move file="target/source/plugins/tinyb.jar"
-                                    tofile="target/source/plugins/tinyb_${tinyb.version}.jar" />
-                                <move file="target/source/plugins/tinyb.armv6hf.jar"
-                                    tofile="target/source/plugins/tinyb.armv6hf_${tinyb.version}.jar" />
-                                <move file="target/source/plugins/tinyb.x86_64.jar"
-                                    tofile="target/source/plugins/tinyb.x86_64_${tinyb.version}.jar" />
-                                <move file="target/source/plugins/tinyb.aarch64.jar"
-                                    tofile="target/source/plugins/tinyb.aarch64_${tinyb.version}.jar" />
-                                <move file="target/source/plugins/org.eclipse.kura.sun.misc.jar"
-                                    tofile="target/source/plugins/org.eclipse.kura.sun.misc_${org.eclipse.kura.sun.misc.version}.jar" />
-                                <move file="target/source/plugins/org.tigris.mtoolkit.iagent.rpc.jar"
-                                    tofile="target/source/plugins/org.tigris.mtoolkit.iagent.rpc_${org.tigris.mtoolkit.iagent.rpc.version}.jar" />
-                                <move file="target/source/plugins/org.usb4java.jar"
-                                    tofile="target/source/plugins/org.usb4java_${org.usb4java.version}.jar" />
-                                <move file="target/source/plugins/jdk.dio.jar"
-                                    tofile="target/source/plugins/jdk.dio_${jdk.dio.version}.jar" />
-                                <move file="target/source/plugins/jdk.dio.armv6hf.jar"
-                                    tofile="target/source/plugins/jdk.dio.armv6hf_${jdk.dio.version}.jar" />
-                                <move file="target/source/plugins/jdk.dio.x86_64.jar"
-                                    tofile="target/source/plugins/jdk.dio.x86_64_${jdk.dio.version}.jar" />
-                                <move file="target/source/plugins/jdk.dio.aarch64.jar"
-                                    tofile="target/source/plugins/jdk.dio.aarch64_${jdk.dio.version}.jar" />
-        
-                                <move file="target/source/plugins/usb4java-javax.jar"
-                                    tofile="target/source/plugins/usb4java-javax_${usb4java-javax.version}.jar" />
-                                
-                                <move file="target/source/plugins/org.eclipse.soda.dk.comm.jar"
-                                    tofile="target/source/plugins/org.eclipse.soda.dk.comm_${org.eclipse.soda.dk.comm.version}.jar" />
-                                <move file="target/source/plugins/org.eclipse.soda.dk.comm.armv6hf.jar"
-                                    tofile="target/source/plugins/org.eclipse.soda.dk.comm.armv6hf_${org.eclipse.soda.dk.comm.version}.jar" />
-                                <move file="target/source/plugins/org.eclipse.soda.dk.comm.x86_64.jar"
-                                    tofile="target/source/plugins/org.eclipse.soda.dk.comm.x86_64_${org.eclipse.soda.dk.comm.version}.jar" />
-                                <move file="target/source/plugins/org.eclipse.soda.dk.comm.aarch64.jar"
-                                    tofile="target/source/plugins/org.eclipse.soda.dk.comm.aarch64_${org.eclipse.soda.dk.comm.version}.jar" />
-                             
-                                
-                            </tasks>
-                        </configuration>
-                    </execution>
-                    <execution>
                         <id>install-commons</id>
                         <phase>install</phase>
                         <goals>
@@ -300,7 +245,7 @@
             <plugin>
                 <groupId>org.eclipse.tycho.extras</groupId>
                 <artifactId>tycho-p2-extras-plugin</artifactId>
-                <version>1.1.0</version>
+                <version>1.4.0</version>
                 <executions>
                     <execution>
                         <phase>prepare-package</phase>

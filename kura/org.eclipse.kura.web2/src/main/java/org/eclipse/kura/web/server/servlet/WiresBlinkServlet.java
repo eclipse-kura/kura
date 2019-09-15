@@ -16,8 +16,6 @@ package org.eclipse.kura.web.server.servlet;
 import static org.eclipse.kura.util.base.StringUtil.isNullOrEmpty;
 
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -93,13 +91,13 @@ public final class WiresBlinkServlet extends HttpServlet implements WireAdminLis
      * Performs a GET request for Server Sent Event Value.
      *
      * @param request
-     *            the request
+     *                     the request
      * @param response
-     *            the response
+     *                     the response
      * @throws ServletException
-     *             the servlet exception
+     *                              the servlet exception
      * @throws IOException
-     *             Signals that an I/O exception has occurred.
+     *                              Signals that an I/O exception has occurred.
      */
     @Override
     public void doGet(final HttpServletRequest request, final HttpServletResponse response)
@@ -135,16 +133,8 @@ public final class WiresBlinkServlet extends HttpServlet implements WireAdminLis
         final RequestContext context;
 
         synchronized (this) {
-            final OutputStream outputStream;
 
-            try {
-                outputStream = response.getOutputStream();
-            } catch (final Exception e) {
-                logger.warn("failed to open response stream");
-                return;
-            }
-
-            context = new RequestContext(requestId, outputStream);
+            context = new RequestContext(requestId, response);
             addContext(context);
         }
 
@@ -176,17 +166,15 @@ public final class WiresBlinkServlet extends HttpServlet implements WireAdminLis
     private final class RequestContext {
 
         private final String requestId;
-        private final OutputStream outputStream;
-        private final PrintStream printStream;
+        private final HttpServletResponse response;
         private final Map<WireEvent, Long> lastSentTimestamp = new HashMap<>();
         private final LinkedBlockingQueue<Wire> events = new LinkedBlockingQueue<>(MAX_SIZE_OF_QUEUE);
 
         private boolean run;
 
-        RequestContext(final String requestId, final OutputStream outputStream) {
+        RequestContext(final String requestId, HttpServletResponse response) throws IOException {
             this.requestId = requestId;
-            this.outputStream = outputStream;
-            this.printStream = new PrintStream(outputStream);
+            this.response = response;
             run = true;
         }
 
@@ -221,8 +209,8 @@ public final class WiresBlinkServlet extends HttpServlet implements WireAdminLis
             }
 
             try {
-                printStream.printf("data: %s %s%n%n", wireEvent.emitterKuraServicePid, wireEvent.emitterPort);
-                printStream.flush();
+                response.getWriter().printf("data: %s %s%n%n", wireEvent.emitterKuraServicePid, wireEvent.emitterPort);
+                response.getWriter().flush();
 
                 this.lastSentTimestamp.put(wireEvent, System.currentTimeMillis());
                 return true;
@@ -242,7 +230,7 @@ public final class WiresBlinkServlet extends HttpServlet implements WireAdminLis
             logger.info("Session ended: {}", requestId);
 
             try {
-                outputStream.close();
+                response.getWriter().close();
             } catch (Exception e) {
                 logger.warn("failed to close stream", e);
             }

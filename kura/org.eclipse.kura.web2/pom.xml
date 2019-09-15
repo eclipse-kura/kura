@@ -117,17 +117,6 @@
 			</plugin>
 
 			
-            <plugin>
-                <groupId>org.eclipse.tycho</groupId>
-                <artifactId>tycho-compiler-plugin</artifactId>
-                <configuration>
-                    <excludes>
-                        <exclude>**/org/eclipse/kura/web/client/**/*.java</exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
-
-
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>tycho-packaging-plugin</artifactId>

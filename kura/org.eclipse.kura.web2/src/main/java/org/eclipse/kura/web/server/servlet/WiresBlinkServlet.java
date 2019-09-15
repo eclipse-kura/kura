@@ -128,7 +128,9 @@ public final class WiresBlinkServlet extends HttpServlet implements WireAdminLis
         response.setCharacterEncoding("UTF-8");
         response.setHeader("Cache-control", "no-cache");
         response.setHeader("Connection", "keep-alive");
+        response.setHeader("Access-Control-Allow-Credentials", "true");
         response.setHeader("Access-Control-Allow-Origin", "*"); // required for IE9
+        response.setHeader("Content-Encoding", "identity");
 
         final RequestContext context;
 

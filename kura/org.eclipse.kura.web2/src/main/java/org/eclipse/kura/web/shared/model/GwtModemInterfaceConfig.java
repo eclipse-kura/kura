@@ -249,4 +249,16 @@ public class GwtModemInterfaceConfig extends GwtNetInterfaceConfig {
     public void setGpsSupported(boolean gpsSupported) {
         set("gpsSupported", gpsSupported);
     }
+
+    public boolean isDiversityEnabled() {
+        if (get("diversityEnabled") != null) {
+            return (Boolean) get("diversityEnabled");
+        }
+        return false;
+    }
+
+    public void setDiversityEnabled(boolean diversityEnabled) {
+        set("diversityEnabled", diversityEnabled);
+    }
+
 }

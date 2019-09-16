@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -62,6 +62,7 @@ public class ModemConfig implements NetConfig {
     private int dataCompression = 0;			// FIXME: change to enum?
     private int headerCompression = 0;		// FIXME: change to enum?
     private boolean gpsEnabled = false;
+    private boolean diversityEnabled = false;
     private int resetTimeout = 0;
 
     /**
@@ -498,7 +499,15 @@ public class ModemConfig implements NetConfig {
         this.gpsEnabled = gpsEnabled;
     }
 
-    @Override
+    public boolean isDiversityEnabled() {
+		return diversityEnabled;
+	}
+
+	public void setDiversityEnabled(boolean diversityEnabled) {
+		this.diversityEnabled = diversityEnabled;
+	}
+
+	@Override
     public int hashCode() {
         final int prime = 59;
         int result = super.hashCode();

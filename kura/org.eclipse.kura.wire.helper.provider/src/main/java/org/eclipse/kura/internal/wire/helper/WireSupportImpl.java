@@ -25,7 +25,8 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -60,18 +61,21 @@ final class WireSupportImpl implements WireSupport, MultiportWireSupport {
 
     private final String servicePid;
 
-    private final ExecutorService receiverExecutor;
+    private final String kuraServicePid;
+
+    private ExecutorService emitExecutor;
 
     private final Map<Wire, ReceiverPortImpl> receiverPortByWire;
+
+    private static final long THREAD_TERMINATION_TOUT = 1; // in seconds
 
     WireSupportImpl(final WireComponent wireComponent, final String servicePid, final String kuraServicePid,
             int inputPortCount, int outputPortCount) {
         requireNonNull(wireComponent, "Wire component cannot be null");
         requireNonNull(servicePid, "service pid cannot be null");
         requireNonNull(kuraServicePid, "kura service pid cannot be null");
-        receiverExecutor = new ThreadPoolExecutor(2, 10, 60L, TimeUnit.SECONDS, new SynchronousQueue<>(),
-                new WireDefaultThreadFactory(kuraServicePid), new ThreadPoolExecutor.DiscardOldestPolicy());
         this.servicePid = servicePid;
+        this.kuraServicePid = kuraServicePid;
         this.wireComponent = wireComponent;
 
         if (inputPortCount < 0) {
@@ -105,15 +109,29 @@ final class WireSupportImpl implements WireSupport, MultiportWireSupport {
         for (final EmitterPort port : this.emitterPorts) {
             ((PortImpl) port).connectedWires.clear();
         }
+        if (emitExecutor == null)
+            return;
+        emitExecutor.shutdown();
+        try {
+            this.emitExecutor.awaitTermination(THREAD_TERMINATION_TOUT, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            logger.warn("Interrupted", e);
+            Thread.currentThread().interrupt();
+        }
+        logger.info("EthernetMonitor Thread terminated? - {}", this.emitExecutor.isTerminated());
+        this.emitExecutor = null;
+
     }
 
     /** {@inheritDoc} */
     @Override
     public synchronized void consumersConnected(final Wire[] wires) {
         clearEmitterPorts();
-        if (wires == null) {
+        if (wires == null || wires.length == 0) {
             return;
         }
+        emitExecutor = new ThreadPoolExecutor(2, 10, 0L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(),
+                new WireDefaultThreadFactory(kuraServicePid), new DiscardAbortOldestPolicy());
         for (Wire w : wires) {
             try {
                 final int outputPort = (Integer) w.getProperties().get(WIRE_EMITTER_PORT_PROP_NAME.value());
@@ -130,6 +148,9 @@ final class WireSupportImpl implements WireSupport, MultiportWireSupport {
         requireNonNull(wireRecords, "Wire Records cannot be null");
         final WireEnvelope envelope = createWireEnvelope(wireRecords);
         List<CompletableFuture<Void>> futures = new ArrayList<>();
+        if (emitExecutor == null)
+            emitExecutor = new ThreadPoolExecutor(2, 10, 0L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(),
+                    new WireDefaultThreadFactory(kuraServicePid), new DiscardAbortOldestPolicy());
         for (EmitterPort emitterPort : this.emitterPorts) {
             CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
                 try {
@@ -137,14 +158,14 @@ final class WireSupportImpl implements WireSupport, MultiportWireSupport {
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
-            });
+            }, emitExecutor);
             futures.add(future);
         }
-        try {
-            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
-        } catch (Exception e) {
-            logger.error("emit error", e);
-        }
+
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).whenComplete((v, e) -> {
+            if (e != null)
+                logger.error("emit error", e);
+        });
 
     }
 
@@ -182,12 +203,10 @@ final class WireSupportImpl implements WireSupport, MultiportWireSupport {
         }
         final WireEnvelope envelope = (WireEnvelope) value;
         if (wireComponent instanceof WireReceiver) {
-            receiverExecutor.execute(() -> ((WireReceiver) WireSupportImpl.this.wireComponent).onWireReceive(envelope));
+            ((WireReceiver) this.wireComponent).onWireReceive(envelope);
         } else {
-            receiverExecutor.execute(() -> {
-                final ReceiverPortImpl receiverPort = WireSupportImpl.this.receiverPortByWire.get(wire);
-                receiverPort.consumer.accept(envelope);
-            });
+            final ReceiverPortImpl receiverPort = this.receiverPortByWire.get(wire);
+            receiverPort.consumer.accept(envelope);
         }
     }
 
@@ -259,6 +278,21 @@ final class WireSupportImpl implements WireSupport, MultiportWireSupport {
             if (t.getPriority() != Thread.NORM_PRIORITY)
                 t.setPriority(Thread.NORM_PRIORITY);
             return t;
+        }
+    }
+
+    private static class DiscardAbortOldestPolicy implements RejectedExecutionHandler {
+
+        public DiscardAbortOldestPolicy() {
+        }
+
+        public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
+            if (!e.isShutdown()) {
+                Runnable ar = e.getQueue().poll();
+                if (ar != null)
+                    logger.info("reject thread:{}", ar);
+                e.execute(r);
+            }
         }
     }
 }

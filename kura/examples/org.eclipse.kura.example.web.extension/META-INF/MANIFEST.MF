@@ -7,8 +7,7 @@ Bundle-Vendor: Eclipse Kura
 Bundle-License: Eclipse Public License v1.0
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
-Service-Component: OSGI-INF/*.xml,
- OSGI-INF/example.xml
+Service-Component: OSGI-INF/*.xml
 Bundle-ClassPath: .
 Import-Package: javax.servlet;version="3.1.0",
  javax.servlet.http;version="3.1.0",

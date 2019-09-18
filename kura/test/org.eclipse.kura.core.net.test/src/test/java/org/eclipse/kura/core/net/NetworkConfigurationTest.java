@@ -1342,6 +1342,7 @@ public class NetworkConfigurationTest {
         netConfig.setUsername("username");
         netConfig.setEnabled(true);
         netConfig.setGpsEnabled(true);
+        netConfig.setDiversityEnabled(true);
         netConfigs.add(netConfig);
         netConfigs.add(new MockConfig());
         interfaceAddressConfig2.setNetConfigs(netConfigs);
@@ -1419,6 +1420,7 @@ public class NetworkConfigurationTest {
         expected.put("net.interface.if2.config.username", "username");
         expected.put("net.interface.if2.config.enabled", true);
         expected.put("net.interface.if2.config.gpsEnabled", true);
+        expected.put("net.interface.if2.config.diversityEnabled", true);
 
         expected.put("net.interfaces", "if2,if1");
 
@@ -1746,6 +1748,7 @@ public class NetworkConfigurationTest {
         expected.put("prefix.username", "username");
         expected.put("prefix.enabled", true);
         expected.put("prefix.gpsEnabled", true);
+        expected.put("prefix.diversityEnabled", true);
 
         ModemConfig modemConfig = new ModemConfig();
         modemConfig.setApn("apn");
@@ -1768,6 +1771,7 @@ public class NetworkConfigurationTest {
         modemConfig.setUsername("username");
         modemConfig.setEnabled(true);
         modemConfig.setGpsEnabled(true);
+        modemConfig.setDiversityEnabled(true);
 
         String prefix = "prefix.";
         HashMap<String, Object> properties = new HashMap<>();
@@ -1802,6 +1806,7 @@ public class NetworkConfigurationTest {
         expected.put("prefix.username", "username");
         expected.put("prefix.enabled", true);
         expected.put("prefix.gpsEnabled", true);
+        expected.put("prefix.diversityEnabled", true);
 
         ModemConfig modemConfig = new ModemConfig();
         modemConfig.setApn("apn");
@@ -1824,6 +1829,7 @@ public class NetworkConfigurationTest {
         modemConfig.setUsername("username");
         modemConfig.setEnabled(true);
         modemConfig.setGpsEnabled(true);
+        modemConfig.setDiversityEnabled(true);
 
         String prefix = "prefix.";
         HashMap<String, Object> properties = new HashMap<>();

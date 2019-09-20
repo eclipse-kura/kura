@@ -878,10 +878,32 @@
                   <transitive>false</transitive>
               </artifact>  
               <artifact>
-                  <id>org.ow2.asm:asm-all:${org.objectweb.asm.all-mvn.version}</id>
+                  <id>org.ow2.asm:asm-all:${org.ow2.asm-all.version}</id>
                   <source>true</source>
                   <transitive>false</transitive>
-              </artifact> 
+              </artifact>
+              <!--
+              <artifact>
+                  <id>org.ow2.asm:asm-commons:${org.ow2.asm-mvn.version}</id>
+                  <source>true</source>
+                  <transitive>false</transitive>
+              </artifact>
+              <artifact>
+                  <id>org.ow2.asm:asm-util:${org.ow2.asm-mvn.version}</id>
+                  <source>true</source>
+                  <transitive>false</transitive>
+              </artifact>
+              <artifact>
+                  <id>org.ow2.asm:asm-tree:${org.ow2.asm-mvn.version}</id>
+                  <source>true</source>
+                  <transitive>false</transitive>
+              </artifact>
+              <artifact>
+                  <id>org.ow2.asm:asm-analysis:${org.ow2.asm-mvn.version}</id>
+                  <source>true</source>
+                  <transitive>false</transitive>
+              </artifact>
+              -->
               <artifact>
                   <id>org.apache.felix:org.apache.felix.fileinstall:${org.apache.felix.fileinstall.version}</id>
                   <source>true</source>
@@ -904,6 +926,11 @@
               </artifact>  
               <artifact>
                   <id>org.apache.aries.spifly:org.apache.aries.spifly.dynamic.bundle:${org.apache.aries.spifly.version}</id>
+                  <source>true</source>
+                  <transitive>false</transitive>
+              </artifact> 
+              <artifact>
+                  <id>org.apache.aries:org.apache.aries.util:${org.apache.aries.util.version}</id>
                   <source>true</source>
                   <transitive>false</transitive>
               </artifact> 
@@ -932,7 +959,107 @@
                   <source>true</source>
                   <transitive>false</transitive>
               </artifact>
-              
+              <artifact>
+                  <id>org.graalvm.sdk:graal-sdk:jar:19.2.0.1</id>
+                  <source>true</source>
+                  <transitive>false</transitive>
+              </artifact>
+              <artifact>
+                  <id>org.graalvm.js:js:jar:19.2.0.1</id>
+                  <source>true</source>
+                  <transitive>false</transitive>
+                  <instructions>
+                      <Require-Capability>osgi.extender;filter:="(osgi.extender=osgi.serviceloader.registrar)"</Require-Capability>
+                      <Provide-Capability>
+                            osgi.serviceloader; osgi.serviceloader=com.oracle.truffle.js.runtime.builtins.JSFunctionLookup,
+                            osgi.serviceloader; osgi.serviceloader=com.oracle.truffle.js.runtime.Evaluator
+                      </Provide-Capability>
+                  </instructions>
+              </artifact>
+              <artifact>
+                  <id>org.graalvm.js:js-scriptengine:jar:19.2.0.1</id>
+                  <source>true</source>
+                  <transitive>false</transitive>
+                  <instructions>
+                      <Require-Capability>osgi.extender;filter:="(osgi.extender=osgi.serviceloader.registrar)"</Require-Capability>
+                      <Provide-Capability>
+                            osgi.serviceloader; osgi.serviceloader=javax.script.ScriptEngineFactory
+                      </Provide-Capability>
+                  </instructions>
+              </artifact>
+              <artifact>
+                  <id>org.graalvm.truffle:truffle-api:jar:19.2.0.1</id>
+                  <source>true</source>
+                  <transitive>false</transitive>
+                  <instructions>
+                      <Require-Capability>osgi.extender;filter:="(osgi.extender=osgi.serviceloader.registrar)"</Require-Capability>
+                      <Provide-Capability>
+                            osgi.serviceloader; osgi.serviceloader=org.graalvm.polyglot.impl.AbstractPolyglotimpl,
+                            osgi.serviceloader; osgi.serviceloader=com.oracle.truffle.api.object.LayoutFactory
+                      </Provide-Capability>
+                  </instructions>
+              </artifact>
+              <artifact>
+                  <id>org.eclipse.jetty:jetty-http:jar:${org.eclipse.jetty.http.version}</id>
+                  <source>true</source>
+                  <transitive>false</transitive>
+              </artifact>
+              <artifact>
+                  <id>org.eclipse.jetty:jetty-continuation:jar:${org.eclipse.jetty.continuation.version}</id>
+                  <source>true</source>
+                  <transitive>false</transitive>
+              </artifact>
+              <artifact>
+                  <id>org.eclipse.jetty:jetty-io:jar:${org.eclipse.jetty.io.version}</id>
+                  <source>true</source>
+                  <transitive>false</transitive>
+              </artifact>
+              <artifact>
+                  <id>org.eclipse.jetty:jetty-security:jar:${org.eclipse.jetty.security.version}</id>
+                  <source>true</source>
+                  <transitive>false</transitive>
+              </artifact>
+              <artifact>
+                  <id>org.eclipse.jetty:jetty-server:jar:${org.eclipse.jetty.server.version}</id>
+                  <source>true</source>
+                  <transitive>false</transitive>
+              </artifact>
+              <artifact>
+                  <id>org.eclipse.jetty:jetty-servlet:jar:${org.eclipse.jetty.servlet.version}</id>
+                  <source>true</source>
+                  <transitive>false</transitive>
+              </artifact>
+              <artifact>
+                  <id>org.eclipse.jetty:jetty-servlets:jar:${org.eclipse.jetty.servlets.version}</id>
+                  <source>true</source>
+                  <transitive>false</transitive>
+              </artifact>
+              <artifact>
+                  <id>org.eclipse.jetty:jetty-util:jar:${org.eclipse.jetty.util.version}</id>
+                  <source>true</source>
+                  <transitive>false</transitive>
+              </artifact>
+              <artifact>
+                  <id>org.osgi:org.osgi.service.http.whiteboard:jar:${org.osgi.service.http.whiteboard.version}</id>
+                  <source>true</source>
+                  <transitive>false</transitive>
+              </artifact> 
+              <artifact>
+                  <id>org.apache.felix:org.apache.felix.dependencymanager:jar:${org.apache.felix.dependencymanager.version}</id>
+                  <source>true</source>
+                  <transitive>false</transitive>
+              </artifact>
+              <artifact>
+                  <id>org.apache.felix:org.apache.felix.deploymentadmin:jar:${org.apache.felix.deploymentadmin.version}</id>
+                  <source>true</source>
+                  <transitive>false</transitive>
+              </artifact> 
+              <artifact>
+                  <id>org.knowhowlab.osgi:monitoradmin:jar:${org.knowhowlab.osgi.monitoradmin.version}</id>
+                  <source>true</source>
+                  <transitive>false</transitive>
+              </artifact>                 
+               
 	       </artifacts>
             </configuration>
           </execution>

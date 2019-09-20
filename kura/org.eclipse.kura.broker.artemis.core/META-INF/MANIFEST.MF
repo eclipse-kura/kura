@@ -7,14 +7,14 @@ Bundle-Vendor: Eclipse Kura
 Bundle-License: Eclipse Public License v1.0
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: org.apache.activemq.artemis.core.config;version="2.9.0",
- org.apache.activemq.artemis.core.config.impl;version="2.9.0",
- org.apache.activemq.artemis.core.deployers;version="2.9.0",
- org.apache.activemq.artemis.core.server;version="2.9.0",
- org.apache.activemq.artemis.jms.server.config.impl;version="2.9.0",
- org.apache.activemq.artemis.spi.core.protocol;version="2.9.0",
- org.apache.activemq.artemis.spi.core.security;version="2.9.0",
- org.apache.activemq.artemis.spi.core.security.jaas;version="2.9.0",
+Import-Package: org.apache.activemq.artemis.core.config;version="2.10.0",
+ org.apache.activemq.artemis.core.config.impl;version="2.10.0",
+ org.apache.activemq.artemis.core.deployers;version="2.10.0",
+ org.apache.activemq.artemis.core.server;version="2.10.0",
+ org.apache.activemq.artemis.jms.server.config.impl;version="2.10.0",
+ org.apache.activemq.artemis.spi.core.protocol;version="2.10.0",
+ org.apache.activemq.artemis.spi.core.security;version="2.10.0",
+ org.apache.activemq.artemis.spi.core.security.jaas;version="2.10.0",
  org.eclipse.kura.configuration;version="[1.1,2)",
  org.osgi.framework;version="[1.8,2)",
  org.osgi.util.tracker;version="[1.5,2)",

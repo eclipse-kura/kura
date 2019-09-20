@@ -12,7 +12,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <equinox.download.url>https://mirrors.tuna.tsinghua.edu.cn/eclipse/equinox/drops/R-4.12-201906051800/equinox-SDK-4.12.zip</equinox.download.url>
+        <equinox.download.url>http://mirrors.neusoft.edu.cn/eclipse/equinox/drops/R-4.13-201909161045/equinox-SDK-4.13.zip</equinox.download.url>
     </properties>
 
     <build>
@@ -31,95 +31,6 @@
                             <files>
                                 <file>${basedir}/../config/kura.target-platform.build.properties</file>
                             </files>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>copy-bundles-for-publishing</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>org.apache.felix</groupId>
-                                    <artifactId>org.apache.felix.dependencymanager</artifactId>
-                                    <version>${org.apache.felix.dependencymanager.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.felix</groupId>
-                                    <artifactId>org.apache.felix.deploymentadmin</artifactId>
-                                    <version>${org.apache.felix.deploymentadmin.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.knowhowlab.osgi</groupId>
-                                    <artifactId>monitoradmin</artifactId>
-                                    <version>${org.knowhowlab.osgi.monitoradmin.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.jetty</groupId>
-                                    <artifactId>jetty-http</artifactId>
-                                    <version>${org.eclipse.jetty.http.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.jetty</groupId>
-                                    <artifactId>jetty-continuation</artifactId>
-                                    <version>${org.eclipse.jetty.continuation.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.jetty</groupId>
-                                    <artifactId>jetty-io</artifactId>
-                                    <version>${org.eclipse.jetty.io.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.jetty</groupId>
-                                    <artifactId>jetty-security</artifactId>
-                                    <version>${org.eclipse.jetty.security.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.jetty</groupId>
-                                    <artifactId>jetty-server</artifactId>
-                                    <version>${org.eclipse.jetty.server.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.jetty</groupId>
-                                    <artifactId>jetty-servlet</artifactId>
-                                    <version>${org.eclipse.jetty.servlet.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.jetty</groupId>
-                                    <artifactId>jetty-servlets</artifactId>
-                                    <version>${org.eclipse.jetty.servlets.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.jetty</groupId>
-                                    <artifactId>jetty-util</artifactId>
-                                    <version>${org.eclipse.jetty.util.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.osgi</groupId>
-                                    <artifactId>org.osgi.service.http.whiteboard</artifactId>
-                                    <version>1.1.0</version>
-                                </artifactItem>
-                                <!--
-                                    use wireadming 1.0.800, remove this on full Equinox upgrade
-                                -->
-                                <!-- 
-                                <artifactItem>
-                                    <groupId>org.eclipse.platform</groupId>
-                                    <artifactId>org.eclipse.equinox.wireadmin</artifactId>
-                                    <version>1.0.800</version>
-                                </artifactItem>
-                                 -->
-
-                            </artifactItems>
-                            <stripVersion>true</stripVersion>
-                            <outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>
@@ -175,7 +86,8 @@
                                         <exclude name="plugins/org.sat4j*.jar" />
                                         <exclude name="plugins/org.tukaani*.jar" />
                                         <exclude name="plugins/org.eclipse.ecf*.jar" />
-                                                              
+                                        <exclude name="plugins/org.eclipse.jetty*.jar" />
+                                                            
                                     </patternset>
                                     <mapper type="flatten" />
                                 </unzip>
@@ -217,7 +129,7 @@
             <!-- profile for falling back to non-mirror download links -->
             <id>no-mirror</id>
             <properties>
-                <equinox.download.url>https://mirrors.tuna.tsinghua.edu.cn/eclipse/equinox/drops/R-4.12-201906051800/equinox-SDK-4.12.zip</equinox.download.url>
+                <equinox.download.url>http://mirrors.neusoft.edu.cn/eclipse/equinox/drops/R-4.13-201909161045/equinox-SDK-4.13.zip</equinox.download.url>
             </properties>
         </profile>
     </profiles>

@@ -334,39 +334,39 @@ public class ExecutorUtil {
 
     private static CommandLine buildUnprivilegedCommand(Command command) {
         // Build the command as follows:
-        // sudo -E su - <command_user> -p -c cd <directory>; timeout -s <signal> <timeout> sh -c
-        // <command> or sudo -E su - <command_user> -p -c cd <directory>; <command>
+        // sudo -u <command_user> -s VARS... timeout -s <signal> <timeout> sh -c "cd <directory>; <command>"
+        // or sudo -u <command_user> -s VARS... sh -c "cd <directory>; <command>"
         // The timeout command is added because the commons-exec fails to destroy a process started with sudo
         CommandLine commandLine = new CommandLine("sudo");
-        commandLine.addArgument("-E"); // to preserve environment
-        commandLine.addArgument("su");
-        commandLine.addArgument("-");
+        commandLine.addArgument("-u");
         commandLine.addArgument(ExecutorUtil.commandUsername);
+        commandLine.addArgument("-s");
+
+        Map<String, String> env = command.getEnvironment();
+        if (env != null && !env.isEmpty()) {
+            env.entrySet().stream().forEach(entry -> commandLine.addArgument(entry.getKey() + "=" + entry.getValue()));
+        }
+
+        int timeout = command.getTimeout();
+        if (timeout != -1) {
+            commandLine.addArgument("timeout");
+            commandLine.addArgument("-s");
+            commandLine.addArgument(((LinuxSignal) command.getSignal()).name());
+            commandLine.addArgument(Integer.toString(timeout));
+        }
+
+        commandLine.addArgument("sh");
         commandLine.addArgument("-c");
-        StringBuilder sb = new StringBuilder("cd ");
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("cd ");
         String directory = command.getDirectory();
         String workingDirectory = directory == null || directory.isEmpty() ? TEMP_DIR.getAbsolutePath() : directory;
         sb.append(workingDirectory);
         sb.append("; ");
-        Map<String, String> env = command.getEnvironment();
-        if (env != null && !env.isEmpty()) {
-            env.entrySet().stream()
-                    .forEach(entry -> sb.append(entry.getKey()).append("=").append(entry.getValue()).append(" "));
-        }
-        int timeout = command.getTimeout();
-        if (timeout != -1) {
-            sb.append("timeout ");
-            sb.append("-s ");
-            sb.append(((LinuxSignal) command.getSignal()).name());
-            sb.append(" ");
-            sb.append(timeout);
-            sb.append(" sh -c \"");
-            sb.append(command.getCommandLine());
-            sb.append("\"");
-        } else {
-            sb.append(command.getCommandLine());
-        }
+        sb.append(command.getCommandLine());
         commandLine.addArgument(sb.toString(), false);
+
         return commandLine;
     }
 
@@ -375,7 +375,7 @@ public class ExecutorUtil {
         String[] tokens = command.getCommandLine().split("\\s+");
         CommandLine commandLine = new CommandLine(tokens[0]);
         for (int i = 1; i < tokens.length; i++) {
-            commandLine.addArgument(tokens[i]);
+            commandLine.addArgument(tokens[i], false);
         }
         return commandLine;
     }

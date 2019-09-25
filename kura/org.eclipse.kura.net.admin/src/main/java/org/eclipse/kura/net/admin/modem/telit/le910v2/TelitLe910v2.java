@@ -223,7 +223,7 @@ public class TelitLe910v2 extends TelitHe910 implements HspaCellularModem {
 	}
 
 	@Override
-	public boolean isModemLTE() throws KuraException {
+	public boolean hasDiversityAntenna() throws KuraException {
 		return true;
 	}
 
@@ -236,73 +236,61 @@ public class TelitLe910v2 extends TelitHe910 implements HspaCellularModem {
 		this.diversityEnabled = diversityEnabled;
 	}
 
-	@Override
-	public void enableDiversity() throws KuraException {
-		synchronized (this.atLock) {
-			CommConnection commAtConnection = null;
-			try {
-				String port = getUnusedAtPort();
-				logger.info("sendCommand enable CELL Diversity antenna :: {} command to port {}",
-						TelitLe910v2AtCommands.ENABLE_CELL_DIV.getCommand(), port);
+    @Override
+    public void enableDiversity() throws KuraException {
+        programDiversity(true);
+    }
 
-				commAtConnection = openSerialPort(port);
-				if (!isAtReachable(commAtConnection)) {
-					throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
-				}
+    @Override
+    public void disableDiversity() throws KuraException {
+        programDiversity(false);
+    }
+	
+    private void programDiversity(boolean enabled) throws KuraException {
+        synchronized (this.atLock) {
+            CommConnection commAtConnection = null;
+            try {
+                String port = getUnusedAtPort();
+                if (enabled) {
+                    logger.info("sendCommand enable CELL Diversity antenna :: {} command to port {}",
+                            TelitLe910v2AtCommands.ENABLE_CELL_DIV.getCommand(), port);
+                } else {
+                    logger.info("sendCommand disable CELL Diversity antenna :: {} command to port {}",
+                            TelitLe910v2AtCommands.DISABLE_CELL_DIV.getCommand(), port);
+                }
 
-				byte[] reply = commAtConnection.sendCommand(
-						TelitLe910v2AtCommands.ENABLE_CELL_DIV.getCommand().getBytes(StandardCharsets.US_ASCII), 1000,
-						100);
-				if (reply != null) {
-					String resp = new String(reply);
-					if (resp.contains("OK"))
-						logger.info("CELL DIV successfully enabled");
-					else
-						logger.info("Command returns : {}", resp);
-					this.setDiversityEnabled(true);
-				} else {
-					logger.error("No answer");
-				}
-			} catch (IOException e) {
-				throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
-			} finally {
-				closeSerialPort(commAtConnection);
-			}
-		}
-	}
+                commAtConnection = openSerialPort(port);
+                if (!isAtReachable(commAtConnection)) {
+                    throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
+                }
 
-	@Override
-	public void disableDiversity() throws KuraException {
-		synchronized (this.atLock) {
-			CommConnection commAtConnection = null;
-			try {
-				String port = getUnusedAtPort();
-				logger.info("sendCommand disable CELL Diversity antenna :: {} command to port {}",
-						TelitLe910v2AtCommands.DISABLE_CELL_DIV.getCommand(), port);
-
-				commAtConnection = openSerialPort(port);
-				if (!isAtReachable(commAtConnection)) {
-					throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
-				}
-
-				byte[] reply = commAtConnection.sendCommand(
-						TelitLe910v2AtCommands.DISABLE_CELL_DIV.getCommand().getBytes(StandardCharsets.US_ASCII), 1000,
-						100);
-				if (reply != null) {
-					String resp = new String(reply);
-					if (resp.contains("OK"))
-						logger.info("CELL DIV successfully disabled");
-					else
-						logger.info("Command returns : {}", resp);
-					this.setDiversityEnabled(false);
-				} else {
-					logger.error("No answer");
-				}
-			} catch (IOException e) {
-				throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
-			} finally {
-				closeSerialPort(commAtConnection);
-			}
-		}
-	}
+                byte[] command;
+                if (enabled) {
+                    command = TelitLe910v2AtCommands.ENABLE_CELL_DIV.getCommand().getBytes(StandardCharsets.US_ASCII);
+                } else {
+                    command = TelitLe910v2AtCommands.DISABLE_CELL_DIV.getCommand().getBytes(StandardCharsets.US_ASCII);
+                }
+                byte[] reply = commAtConnection.sendCommand(command, 1000, 100);
+                if (reply != null) {
+                    String resp = new String(reply);
+                    if (resp.contains("OK")) {
+                        if (enabled) {
+                            logger.info("CELL DIV successfully enabled");
+                            this.setDiversityEnabled(true);
+                        } else {
+                            logger.info("CELL DIV successfully disabled");
+                            this.setDiversityEnabled(false);
+                        }
+                    } else
+                        logger.info("Command returns : {}", resp);
+                } else {
+                    logger.error("No answer");
+                }
+            } catch (IOException e) {
+                throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
+            } finally {
+                closeSerialPort(commAtConnection);
+            }
+        }
+    }
 }

@@ -15,8 +15,8 @@ package org.eclipse.kura.net.admin.modem.telit.le910v2;
 public enum TelitLe910v2AtCommands {
 
     PDP_AUTH("at#pdpauth"),
-	ENABLE_CELL_DIV("at#rxdiv=1,1\r\n"),
-	DISABLE_CELL_DIV("at#rxdiv=0,1\r\n");
+    ENABLE_CELL_DIV("at#rxdiv=1,1\r\n"),
+    DISABLE_CELL_DIV("at#rxdiv=0,1\r\n");
 
     private String command;
 

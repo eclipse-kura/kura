@@ -62,7 +62,7 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
 				this.serialNumber = getSerialNumber();
 				this.imsi = getMobileSubscriberIdentity();
 				this.iccid = getIntegratedCirquitCardId();
-				this.model = getModel();
+                this.model = getModel();
 				this.manufacturer = getManufacturer();
 				this.revisionId = getRevisionID();
 				this.gpsSupported = isGpsSupported();
@@ -487,7 +487,7 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
 	}
 
 	@Override
-	public boolean isModemLTE() throws KuraException {
+	public boolean hasDiversityAntenna() throws KuraException {
 		return false;
 	}
 
@@ -498,11 +498,11 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
 
 	@Override
 	public void enableDiversity() throws KuraException {
-		logger.warn("Not a LTE Modem");
+        throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
 	}
 
 	@Override
 	public void disableDiversity() throws KuraException {
-		logger.warn("Not a LTE Modem");
+        throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
 	}
 }

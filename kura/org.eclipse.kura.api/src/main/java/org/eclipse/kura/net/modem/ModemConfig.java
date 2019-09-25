@@ -500,14 +500,14 @@ public class ModemConfig implements NetConfig {
     }
 
     public boolean isDiversityEnabled() {
-		return diversityEnabled;
-	}
+        return diversityEnabled;
+    }
 
-	public void setDiversityEnabled(boolean diversityEnabled) {
-		this.diversityEnabled = diversityEnabled;
-	}
+    public void setDiversityEnabled(boolean diversityEnabled) {
+        this.diversityEnabled = diversityEnabled;
+    }
 
-	@Override
+    @Override
     public int hashCode() {
         final int prime = 59;
         int result = super.hashCode();

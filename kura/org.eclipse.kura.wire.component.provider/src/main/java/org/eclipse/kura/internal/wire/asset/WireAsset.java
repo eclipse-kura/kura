@@ -14,15 +14,24 @@
 package org.eclipse.kura.internal.wire.asset;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 import static org.eclipse.kura.channel.ChannelType.READ_WRITE;
 import static org.eclipse.kura.channel.ChannelType.WRITE;
+import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_PID;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -105,12 +114,14 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
     private WireAssetOptions options = new WireAssetOptions();
 
     private PreparedEmit preparedEmit;
+    private String kuraServicePid;
+    private ExecutorService emitExecutor;
 
     /**
      * Binds the Wire Helper Service.
      *
      * @param wireHelperService
-     *            the new Wire Helper Service
+     *                              the new Wire Helper Service
      */
     public void bindWireHelperService(final WireHelperService wireHelperService) {
         if (isNull(this.wireHelperService)) {
@@ -122,7 +133,7 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
      * Unbinds the Wire Helper Service.
      *
      * @param wireHelperService
-     *            the new Wire Helper Service
+     *                              the new Wire Helper Service
      */
     public void unbindWireHelperService(final WireHelperService wireHelperService) {
         if (this.wireHelperService == wireHelperService) {
@@ -134,30 +145,54 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
      * OSGi service component activation callback.
      *
      * @param componentContext
-     *            the component context
+     *                             the component context
      * @param properties
-     *            the service properties
+     *                             the service properties
      */
+    @SuppressWarnings("unchecked")
     @Override
     protected void activate(final ComponentContext componentContext, final Map<String, Object> properties) {
         logger.debug("Activating Wire Asset...");
-        this.wireSupport = this.wireHelperService.newWireSupport(this,
-                (ServiceReference<WireComponent>) componentContext.getServiceReference());
+        ServiceReference<WireComponent> wireComponentRef = (ServiceReference<WireComponent>) componentContext
+                .getServiceReference();
+        this.wireSupport = this.wireHelperService.newWireSupport(this, wireComponentRef);
+        this.kuraServicePid = (String) wireComponentRef.getProperty(KURA_SERVICE_PID);
         super.activate(componentContext, properties);
+        setupEmitExecutor(properties);
         logger.debug("Activating Wire Asset...Done");
+    }
+
+    private void setupEmitExecutor(Map<String, Object> properties) {
+        if (emitExecutor != null) {
+            emitExecutor.shutdown();
+            emitExecutor = null;
+        }
+        final Object emitMutipleThreadObj = properties.get(WireAssetOptions.EMIT_MUTIPLE_THREAD_PROP_NAME);
+        Boolean emitMutipleThread = emitMutipleThreadObj instanceof Boolean && (Boolean) emitMutipleThreadObj;
+        if (emitMutipleThread) {
+            final Object threadCountObj = properties.get(WireAssetOptions.EMIT_THREAD_COUNT_PROP_NAME);
+            int threadCount = 0;
+            if (nonNull(threadCountObj) && threadCountObj instanceof Integer) {
+                threadCount = (Integer) threadCountObj;
+            }
+            emitExecutor = new ThreadPoolExecutor(threadCount, threadCount, 60L, TimeUnit.SECONDS,
+                    new LinkedBlockingQueue<Runnable>(), new WireDefaultThreadFactory(kuraServicePid),
+                    new ThreadPoolExecutor.AbortPolicy());
+        }
     }
 
     /**
      * OSGi service component update callback.
      *
      * @param properties
-     *            the service properties
+     *                       the service properties
      */
     @Override
     public void updated(final Map<String, Object> properties) {
         logger.debug("Updating Wire Asset...");
         this.options = new WireAssetOptions(properties);
         super.updated(properties);
+        setupEmitExecutor(properties);
         logger.debug("Updating Wire Asset...Done");
     }
 
@@ -165,13 +200,17 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
      * OSGi service component deactivate callback.
      *
      * @param context
-     *            the context
+     *                    the context
      */
     @Override
     protected void deactivate(final ComponentContext context) {
         logger.debug("Deactivating Wire Asset...");
         super.deactivate(context);
         logger.debug("Deactivating Wire Asset...Done");
+        if (emitExecutor != null) {
+            emitExecutor.shutdown();
+            emitExecutor = null;
+        }
     }
 
     /** {@inheritDoc} */
@@ -201,14 +240,24 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
      * receives {@code Non Null} {@link WireEnvelop} from its upstream Wire Component(s).
      *
      * @param wireEnvelope
-     *            the received {@link WireEnvelope}
+     *                         the received {@link WireEnvelope}
      * @throws NullPointerException
-     *             if {@link WireEnvelope} is null
+     *                                  if {@link WireEnvelope} is null
      */
     @Override
     public void onWireReceive(final WireEnvelope wireEnvelope) {
         requireNonNull(wireEnvelope, "Wire Envelope cannot be null");
+        if (this.emitExecutor != null) {
+            CompletableFuture.runAsync(() -> runWireReceive(wireEnvelope), emitExecutor).whenComplete((v, e) -> {
+                if (e != null)
+                    logger.error("emit error", e);
+            });
+        } else
+            runWireReceive(wireEnvelope);
 
+    }
+
+    private void runWireReceive(final WireEnvelope wireEnvelope) {
         emitAllReadChannels();
 
         final List<WireRecord> records = wireEnvelope.getRecords();
@@ -242,10 +291,10 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
      * Determine the channels to write
      *
      * @param records
-     *            the list of {@link WireRecord}s to parse
+     *                    the list of {@link WireRecord}s to parse
      * @return list of Channel Records containing the values to be written
      * @throws NullPointerException
-     *             if argument is null
+     *                                  if argument is null
      */
     private List<ChannelRecord> determineWritingChannels(final WireRecord record) {
         requireNonNull(record, "Wire Record cannot be null");
@@ -278,12 +327,12 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
      * Emit the provided list of channel records to the associated wires.
      *
      * @param channelRecords
-     *            the list of channel records conforming to the aforementioned
-     *            specification
+     *                           the list of channel records conforming to the aforementioned
+     *                           specification
      * @throws NullPointerException
-     *             if provided records list is null
+     *                                      if provided records list is null
      * @throws IllegalArgumentException
-     *             if provided records list is empty
+     *                                      if provided records list is empty
      */
     private void emitChannelRecords(final List<ChannelRecord> channelRecords) {
         requireNonNull(channelRecords, "List of Channel Records cannot be null");
@@ -313,9 +362,9 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
      * Perform Channel Write operation
      *
      * @param channelRecordsToWrite
-     *            the list of {@link ChannelRecord}s
+     *                                  the list of {@link ChannelRecord}s
      * @throws NullPointerException
-     *             if the provided list is null
+     *                                  if the provided list is null
      */
     private void writeChannels(final List<ChannelRecord> channelRecordsToWrite) {
         requireNonNull(channelRecordsToWrite, "List of Channel Records cannot be null");
@@ -432,5 +481,28 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
             return Utils.toWireRecordProperties(channelRecords, options, recordFillers);
         }
 
+    }
+
+    static class WireDefaultThreadFactory implements ThreadFactory {
+
+        private static final AtomicInteger poolNumber = new AtomicInteger(1);
+        private final ThreadGroup group;
+        private final AtomicInteger threadNumber = new AtomicInteger(1);
+        private final String namePrefix;
+
+        WireDefaultThreadFactory(String name) {
+            SecurityManager s = System.getSecurityManager();
+            group = (s != null) ? s.getThreadGroup() : Thread.currentThread().getThreadGroup();
+            namePrefix = "WirePool-" + poolNumber.getAndIncrement() + "-" + name + "-";
+        }
+
+        public Thread newThread(Runnable r) {
+            Thread t = new Thread(group, r, namePrefix + threadNumber.getAndIncrement(), 0);
+            if (t.isDaemon())
+                t.setDaemon(false);
+            if (t.getPriority() != Thread.NORM_PRIORITY)
+                t.setPriority(Thread.NORM_PRIORITY);
+            return t;
+        }
     }
 }

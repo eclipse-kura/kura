@@ -23,29 +23,29 @@
             <Option label="CRON" value="CRON" />
         </AD>
         <AD id="threadCount"
-            name="threadCount"
+            name="%threadCount"
             type="Integer"
             cardinality="0"
             required="true"
             default="2"
-            description="Timer thread count"
+            description="%threadCountDesc"
             min="1"/>
         <AD id="simple.interval"
-            name="simple.interval"
+            name="%simpleInterval"
             type="Integer"
             cardinality="0"
             required="true"
             default="10"
-            description="Interval of the timer ticks, in the time unit specified by the simple.time.unit property (Needs to be set if SIMPLE type is selected)"
+            description="%simpleIntervalDesc"
             min="1"/>
         
         <AD id="simple.time.unit"
-            name="simple.time.unit"
+            name="%simpleTimeUnit"
             type="String"
             cardinality="0"
             required="true"
             default="SECONDS"
-            description="The time unit to be used if SIMPLE type is selected">
+            description="%simpleTimeUnitDesc">
             <Option label="MILLISECONDS" value="MILLISECONDS" />
             <Option label="SECONDS" value="SECONDS" />
             <Option label="MINUTES" value="MINUTES" />
@@ -54,12 +54,12 @@
         </AD>    
         
         <AD id="cron.interval"
-            name="cron.interval"
+            name="%cronInterval"
             type="String"
             cardinality="0"
             required="true"
             default="0/10 * * * * ?"
-            description="Interval in CRON expression (Needs to be set if CRON type is selected) (For more information, please visit http://www.cronmaker.com/ to create your own CRON expression)"/>
+            description="%cronIntervalDesc"/>
            
     </OCD>
     

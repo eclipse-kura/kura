@@ -22,15 +22,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.RejectedExecutionHandler;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 import org.eclipse.kura.wire.WireComponent;
@@ -61,21 +53,15 @@ final class WireSupportImpl implements WireSupport, MultiportWireSupport {
 
     private final String servicePid;
 
-    private final String kuraServicePid;
-
-    private ExecutorService emitExecutor;
-
     private final Map<Wire, ReceiverPortImpl> receiverPortByWire;
-
-    private static final long THREAD_TERMINATION_TOUT = 1; // in seconds
 
     WireSupportImpl(final WireComponent wireComponent, final String servicePid, final String kuraServicePid,
             int inputPortCount, int outputPortCount) {
         requireNonNull(wireComponent, "Wire component cannot be null");
         requireNonNull(servicePid, "service pid cannot be null");
         requireNonNull(kuraServicePid, "kura service pid cannot be null");
+
         this.servicePid = servicePid;
-        this.kuraServicePid = kuraServicePid;
         this.wireComponent = wireComponent;
 
         if (inputPortCount < 0) {
@@ -109,18 +95,6 @@ final class WireSupportImpl implements WireSupport, MultiportWireSupport {
         for (final EmitterPort port : this.emitterPorts) {
             ((PortImpl) port).connectedWires.clear();
         }
-        if (emitExecutor == null)
-            return;
-        emitExecutor.shutdown();
-        try {
-            this.emitExecutor.awaitTermination(THREAD_TERMINATION_TOUT, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            logger.warn("Interrupted", e);
-            Thread.currentThread().interrupt();
-        }
-        logger.info("EthernetMonitor Thread terminated? - {}", this.emitExecutor.isTerminated());
-        this.emitExecutor = null;
-
     }
 
     /** {@inheritDoc} */
@@ -130,8 +104,6 @@ final class WireSupportImpl implements WireSupport, MultiportWireSupport {
         if (wires == null || wires.length == 0) {
             return;
         }
-        emitExecutor = new ThreadPoolExecutor(2, 10, 0L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(),
-                new WireDefaultThreadFactory(kuraServicePid), new DiscardAbortOldestPolicy());
         for (Wire w : wires) {
             try {
                 final int outputPort = (Integer) w.getProperties().get(WIRE_EMITTER_PORT_PROP_NAME.value());
@@ -147,26 +119,9 @@ final class WireSupportImpl implements WireSupport, MultiportWireSupport {
     public synchronized void emit(final List<WireRecord> wireRecords) {
         requireNonNull(wireRecords, "Wire Records cannot be null");
         final WireEnvelope envelope = createWireEnvelope(wireRecords);
-        List<CompletableFuture<Void>> futures = new ArrayList<>();
-        if (emitExecutor == null)
-            emitExecutor = new ThreadPoolExecutor(2, 10, 0L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(),
-                    new WireDefaultThreadFactory(kuraServicePid), new DiscardAbortOldestPolicy());
         for (EmitterPort emitterPort : this.emitterPorts) {
-            CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-                try {
-                    emitterPort.emit(envelope);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }, emitExecutor);
-            futures.add(future);
+            emitterPort.emit(envelope);
         }
-
-        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).whenComplete((v, e) -> {
-            if (e != null)
-                logger.error("emit error", e);
-        });
-
     }
 
     /** {@inheritDoc} */
@@ -256,43 +211,5 @@ final class WireSupportImpl implements WireSupport, MultiportWireSupport {
     @Override
     public WireEnvelope createWireEnvelope(List<WireRecord> records) {
         return new WireEnvelope(servicePid, records);
-    }
-
-    static class WireDefaultThreadFactory implements ThreadFactory {
-
-        private static final AtomicInteger poolNumber = new AtomicInteger(1);
-        private final ThreadGroup group;
-        private final AtomicInteger threadNumber = new AtomicInteger(1);
-        private final String namePrefix;
-
-        WireDefaultThreadFactory(String name) {
-            SecurityManager s = System.getSecurityManager();
-            group = (s != null) ? s.getThreadGroup() : Thread.currentThread().getThreadGroup();
-            namePrefix = "WirePool-" + poolNumber.getAndIncrement() + "-" + name + "-";
-        }
-
-        public Thread newThread(Runnable r) {
-            Thread t = new Thread(group, r, namePrefix + threadNumber.getAndIncrement(), 0);
-            if (t.isDaemon())
-                t.setDaemon(false);
-            if (t.getPriority() != Thread.NORM_PRIORITY)
-                t.setPriority(Thread.NORM_PRIORITY);
-            return t;
-        }
-    }
-
-    private static class DiscardAbortOldestPolicy implements RejectedExecutionHandler {
-
-        public DiscardAbortOldestPolicy() {
-        }
-
-        public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
-            if (!e.isShutdown()) {
-                Runnable ar = e.getQueue().poll();
-                if (ar != null)
-                    logger.info("reject thread:{}", ar);
-                e.execute(r);
-            }
-        }
     }
 }

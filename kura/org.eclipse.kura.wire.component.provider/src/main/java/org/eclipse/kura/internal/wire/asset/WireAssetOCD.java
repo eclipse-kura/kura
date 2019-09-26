@@ -103,6 +103,28 @@ public class WireAssetOCD extends BaseAssetOCD {
 
             addAD(emitAllChannelsAd);
 
+            final Tad emitmutipleThreadAd = new Tad();
+            emitmutipleThreadAd.setId(WireAssetOptions.EMIT_MUTIPLE_THREAD_PROP_NAME);
+            emitmutipleThreadAd.setName(WireAssetOptions.EMIT_MUTIPLE_THREAD_PROP_NAME);
+            emitmutipleThreadAd.setCardinality(0);
+            emitmutipleThreadAd.setType(Tscalar.BOOLEAN);
+            emitmutipleThreadAd.setDescription("Is emit mutiple thread");
+            emitmutipleThreadAd.setRequired(true);
+            emitmutipleThreadAd.setDefault("false");
+
+            addAD(emitmutipleThreadAd);
+
+            final Tad emitThreadCountAd = new Tad();
+            emitThreadCountAd.setId(WireAssetOptions.EMIT_THREAD_COUNT_PROP_NAME);
+            emitThreadCountAd.setName(WireAssetOptions.EMIT_THREAD_COUNT_PROP_NAME);
+            emitThreadCountAd.setCardinality(0);
+            emitThreadCountAd.setType(Tscalar.INTEGER);
+            emitThreadCountAd.setDescription("Emit thread Count");
+            emitThreadCountAd.setRequired(true);
+            emitThreadCountAd.setDefault("0");
+
+            addAD(emitThreadCountAd);
+
             final Tad timestampModeAd = new Tad();
             timestampModeAd.setId(WireAssetOptions.TIMESTAMP_MODE_PROP_NAME);
             timestampModeAd.setName(WireAssetOptions.TIMESTAMP_MODE_PROP_NAME);

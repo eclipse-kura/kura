@@ -10,17 +10,23 @@
 
 package org.eclipse.kura.internal.wire.asset;
 
+import static java.util.Objects.nonNull;
+
 import java.util.Map;
 
 class WireAssetOptions {
 
     public static final String EMIT_ALL_CHANNELS_PROP_NAME = "emit.all.channels";
+    public static final String EMIT_THREAD_COUNT_PROP_NAME = "threadCount";
+    public static final String EMIT_MUTIPLE_THREAD_PROP_NAME = "emit.mutiplethread";
     public static final String TIMESTAMP_MODE_PROP_NAME = "timestamp.mode";
     public static final String EMIT_ERRORS_PROP_NAME = "emit.errors";
 
     private boolean emitAllChannels;
+    private boolean emitMutipleThread;
     private TimestampMode timestampMode;
     private boolean emitErrors;
+    private int threadCount;
 
     public WireAssetOptions() {
     }
@@ -28,15 +34,29 @@ class WireAssetOptions {
     public WireAssetOptions(Map<String, Object> properties) {
         final Object emitAllChannels = properties.get(EMIT_ALL_CHANNELS_PROP_NAME);
         final Object emitErrors = properties.get(EMIT_ERRORS_PROP_NAME);
+        final Object emitMutipleThread = properties.get(EMIT_MUTIPLE_THREAD_PROP_NAME);
+        final Object threadCount = properties.get(EMIT_THREAD_COUNT_PROP_NAME);
 
         this.emitAllChannels = emitAllChannels instanceof Boolean && (Boolean) emitAllChannels;
         this.emitErrors = emitErrors instanceof Boolean && (Boolean) emitErrors;
-
+        this.emitMutipleThread = emitMutipleThread instanceof Boolean && (Boolean) emitMutipleThread;
+        this.threadCount = 0;
+        if (nonNull(threadCount) && threadCount instanceof Integer) {
+            this.threadCount = (Integer) threadCount;
+        }
         this.timestampMode = extractTimestampMode(properties);
     }
 
     public boolean emitAllChannels() {
         return emitAllChannels;
+    }
+
+    public boolean emitMutipleThread() {
+        return emitMutipleThread;
+    }
+
+    public int getThreadCount() {
+        return threadCount;
     }
 
     public TimestampMode getTimestampMode() {

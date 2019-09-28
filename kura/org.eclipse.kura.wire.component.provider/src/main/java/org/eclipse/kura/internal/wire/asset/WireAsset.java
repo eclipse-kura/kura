@@ -25,11 +25,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -115,7 +114,8 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
 
     private PreparedEmit preparedEmit;
     private String kuraServicePid;
-    private ExecutorService emitExecutor;
+    private ScheduledExecutorService emitExecutor;
+    private int threadTimeout = 10000;
 
     /**
      * Binds the Wire Helper Service.
@@ -164,20 +164,22 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
 
     private void setupEmitExecutor(Map<String, Object> properties) {
         if (emitExecutor != null) {
-            emitExecutor.shutdown();
+            emitExecutor.shutdownNow();
             emitExecutor = null;
         }
         final Object emitMutipleThreadObj = properties.get(WireAssetOptions.EMIT_MUTIPLE_THREAD_PROP_NAME);
         Boolean emitMutipleThread = emitMutipleThreadObj instanceof Boolean && (Boolean) emitMutipleThreadObj;
         if (emitMutipleThread) {
             final Object threadCountObj = properties.get(WireAssetOptions.EMIT_THREAD_COUNT_PROP_NAME);
-            int threadCount = 0;
+            int threadCount = 2;
+            final Object threadTimeoutObj = properties.get(WireAssetOptions.EMIT_THREAD_TIMEOUT_PROP_NAME);
             if (nonNull(threadCountObj) && threadCountObj instanceof Integer) {
                 threadCount = (Integer) threadCountObj;
             }
-            emitExecutor = new ThreadPoolExecutor(threadCount, threadCount, 60L, TimeUnit.SECONDS,
-                    new LinkedBlockingQueue<Runnable>(), new WireDefaultThreadFactory(kuraServicePid),
-                    new ThreadPoolExecutor.AbortPolicy());
+            if (nonNull(threadTimeoutObj) && threadTimeoutObj instanceof Integer) {
+                this.threadTimeout = (Integer) threadTimeoutObj;
+            }
+            emitExecutor = Executors.newScheduledThreadPool(threadCount, new WireDefaultThreadFactory(kuraServicePid));
         }
     }
 
@@ -208,7 +210,7 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
         super.deactivate(context);
         logger.debug("Deactivating Wire Asset...Done");
         if (emitExecutor != null) {
-            emitExecutor.shutdown();
+            emitExecutor.shutdownNow();
             emitExecutor = null;
         }
     }
@@ -248,10 +250,9 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
     public void onWireReceive(final WireEnvelope wireEnvelope) {
         requireNonNull(wireEnvelope, "Wire Envelope cannot be null");
         if (this.emitExecutor != null) {
-            CompletableFuture.runAsync(() -> runWireReceive(wireEnvelope), emitExecutor).whenComplete((v, e) -> {
-                if (e != null)
-                    logger.error("emit error", e);
-            });
+            final Future<?> handler = emitExecutor.submit(() -> runWireReceive(wireEnvelope));
+            if (this.threadTimeout > 0)
+                emitExecutor.schedule(() -> handler.cancel(true), this.threadTimeout, TimeUnit.MILLISECONDS);
         } else
             runWireReceive(wireEnvelope);
 

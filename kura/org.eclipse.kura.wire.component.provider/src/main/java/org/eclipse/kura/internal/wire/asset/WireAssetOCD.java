@@ -121,9 +121,20 @@ public class WireAssetOCD extends BaseAssetOCD {
             emitThreadCountAd.setType(Tscalar.INTEGER);
             emitThreadCountAd.setDescription("Emit thread Count");
             emitThreadCountAd.setRequired(true);
-            emitThreadCountAd.setDefault("0");
+            emitThreadCountAd.setDefault("2");
 
             addAD(emitThreadCountAd);
+
+            final Tad emitThreadTimeoutAd = new Tad();
+            emitThreadTimeoutAd.setId(WireAssetOptions.EMIT_THREAD_TIMEOUT_PROP_NAME);
+            emitThreadTimeoutAd.setName(WireAssetOptions.EMIT_THREAD_TIMEOUT_PROP_NAME);
+            emitThreadTimeoutAd.setCardinality(0);
+            emitThreadTimeoutAd.setType(Tscalar.INTEGER);
+            emitThreadTimeoutAd.setDescription("Emit thread TimeOut (millisecond)");
+            emitThreadTimeoutAd.setRequired(true);
+            emitThreadTimeoutAd.setDefault("10000");
+
+            addAD(emitThreadTimeoutAd);
 
             final Tad timestampModeAd = new Tad();
             timestampModeAd.setId(WireAssetOptions.TIMESTAMP_MODE_PROP_NAME);

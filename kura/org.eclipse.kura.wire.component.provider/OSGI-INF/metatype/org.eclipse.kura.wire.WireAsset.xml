@@ -48,6 +48,14 @@
             default="2"
             description="%threadCountDesc"
             min="1"/>
+        <AD id="threadTimeout"
+            name="%threadTimeout"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="10000"
+            description="%threadTimeoutDesc"
+            min="0"/>
         <AD id="timestamp.mode"
             name="%timestampmodename"
             type="String"

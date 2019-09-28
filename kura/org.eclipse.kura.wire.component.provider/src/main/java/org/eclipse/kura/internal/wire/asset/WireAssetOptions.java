@@ -18,6 +18,7 @@ class WireAssetOptions {
 
     public static final String EMIT_ALL_CHANNELS_PROP_NAME = "emit.all.channels";
     public static final String EMIT_THREAD_COUNT_PROP_NAME = "threadCount";
+    public static final String EMIT_THREAD_TIMEOUT_PROP_NAME = "threadTimeout";
     public static final String EMIT_MUTIPLE_THREAD_PROP_NAME = "emit.mutiplethread";
     public static final String TIMESTAMP_MODE_PROP_NAME = "timestamp.mode";
     public static final String EMIT_ERRORS_PROP_NAME = "emit.errors";
@@ -27,6 +28,7 @@ class WireAssetOptions {
     private TimestampMode timestampMode;
     private boolean emitErrors;
     private int threadCount;
+    private int threadTimeout;
 
     public WireAssetOptions() {
     }
@@ -36,13 +38,18 @@ class WireAssetOptions {
         final Object emitErrors = properties.get(EMIT_ERRORS_PROP_NAME);
         final Object emitMutipleThread = properties.get(EMIT_MUTIPLE_THREAD_PROP_NAME);
         final Object threadCount = properties.get(EMIT_THREAD_COUNT_PROP_NAME);
+        final Object threadTimeout = properties.get(EMIT_THREAD_TIMEOUT_PROP_NAME);
 
         this.emitAllChannels = emitAllChannels instanceof Boolean && (Boolean) emitAllChannels;
         this.emitErrors = emitErrors instanceof Boolean && (Boolean) emitErrors;
         this.emitMutipleThread = emitMutipleThread instanceof Boolean && (Boolean) emitMutipleThread;
-        this.threadCount = 0;
+        this.threadCount = 2;
+        this.threadTimeout = 10000;
         if (nonNull(threadCount) && threadCount instanceof Integer) {
             this.threadCount = (Integer) threadCount;
+        }
+        if (nonNull(threadTimeout) && threadTimeout instanceof Integer) {
+            this.threadTimeout = (Integer) threadTimeout;
         }
         this.timestampMode = extractTimestampMode(properties);
     }
@@ -57,6 +64,10 @@ class WireAssetOptions {
 
     public int getThreadCount() {
         return threadCount;
+    }
+
+    public int getThreadTimeout() {
+        return threadTimeout;
     }
 
     public TimestampMode getTimestampMode() {

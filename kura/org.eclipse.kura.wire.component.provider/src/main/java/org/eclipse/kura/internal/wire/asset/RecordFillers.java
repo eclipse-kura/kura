@@ -84,7 +84,8 @@ public final class RecordFillers {
 
         @Override
         public void fill(Map<String, TypedValue<?>> envelopeProperties, ChannelRecord record) {
-            if (record.getChannelStatus().getChannelFlag() == ChannelFlag.SUCCESS) {
+            if (record != null && record.getChannelStatus() != null
+                    && record.getChannelStatus().getChannelFlag() == ChannelFlag.SUCCESS) {
                 envelopeProperties.put(valueKey, record.getValue());
             }
         }

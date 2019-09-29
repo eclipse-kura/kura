@@ -89,7 +89,7 @@ public class WireGraphServiceImpl implements ConfigurableComponent, WireGraphSer
      * Binds the {@link WireAdmin} dependency
      *
      * @param wireAdmin
-     *                      the new {@link WireAdmin} service dependency
+     *            the new {@link WireAdmin} service dependency
      */
     public void bindWireAdmin(final WireAdmin wireAdmin) {
         if (isNull(this.wireAdmin)) {
@@ -101,7 +101,7 @@ public class WireGraphServiceImpl implements ConfigurableComponent, WireGraphSer
      * Unbinds {@link WireAdmin} dependency
      *
      * @param wireAdmin
-     *                      the new {@link WireAdmin} instance
+     *            the new {@link WireAdmin} instance
      */
     public void unbindWireAdmin(final WireAdmin wireAdmin) {
         if (this.wireAdmin == wireAdmin) {

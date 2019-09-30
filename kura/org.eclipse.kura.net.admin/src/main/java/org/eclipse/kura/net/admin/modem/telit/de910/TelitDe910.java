@@ -427,7 +427,7 @@ public class TelitDe910 extends TelitModem implements EvdoCellularModem {
     }
 
     @Override
-    public boolean hasDiversityAntenna() throws KuraException {
+    public boolean hasDiversityAntenna() {
         return false;
     }
 

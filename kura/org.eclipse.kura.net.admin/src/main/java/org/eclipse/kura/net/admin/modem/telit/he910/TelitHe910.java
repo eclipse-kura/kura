@@ -487,7 +487,7 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
 	}
 
 	@Override
-	public boolean hasDiversityAntenna() throws KuraException {
+	public boolean hasDiversityAntenna() {
 		return false;
 	}
 

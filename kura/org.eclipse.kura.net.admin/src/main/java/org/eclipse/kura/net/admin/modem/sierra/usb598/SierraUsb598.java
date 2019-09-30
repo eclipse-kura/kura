@@ -979,7 +979,7 @@ public class SierraUsb598 implements EvdoCellularModem {
         return this.cnsExchange(cnsCommand, 500);
     }
 
-    public boolean hasDiversityAntenna() throws KuraException {
+    public boolean hasDiversityAntenna() {
         return false;
     }
 

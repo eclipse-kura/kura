@@ -638,7 +638,7 @@ public class SierraMc87xx implements HspaCellularModem {
     }
 
     @Override
-    public boolean hasDiversityAntenna() throws KuraException {
+    public boolean hasDiversityAntenna() {
         return false;
     }
 

@@ -163,7 +163,7 @@ public interface CellularModem {
 
     public void disableGps() throws KuraException;
     
-    public boolean hasDiversityAntenna() throws KuraException;
+    public boolean hasDiversityAntenna();
     
     public boolean isDiversityEnabled();
     

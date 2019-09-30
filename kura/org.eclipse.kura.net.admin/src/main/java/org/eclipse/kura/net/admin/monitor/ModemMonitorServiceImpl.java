@@ -933,14 +933,14 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 
                 final String ifaceName = networkService.getModemPppPort(modem.getModemDevice());
 
-                reportSignalStrength(ifaceName);
-
                 if (netInterfaceStatus == NetInterfaceStatus.netIPv4StatusUnmanaged) {
                     logger.warn("The {} interface is configured not to be managed by Kura and will not be monitored.",
                             ifaceName);
                     return;
                 }
                 if (netInterfaceStatus == NetInterfaceStatus.netIPv4StatusEnabledWAN && ifaceName != null) {
+
+                    reportSignalStrength(ifaceName);
 
                     pppService = getPppService(ifaceName, modem.getDataPort());
                     pppSt = pppService.getPppState();

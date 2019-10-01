@@ -7,9 +7,9 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *  Eurotech
- *  Amit Kumar Mondal
- *  Red Hat Inc
+ * Eurotech
+ * Amit Kumar Mondal
+ * Red Hat Inc
  *
  *******************************************************************************/
 package org.eclipse.kura.internal.wire;

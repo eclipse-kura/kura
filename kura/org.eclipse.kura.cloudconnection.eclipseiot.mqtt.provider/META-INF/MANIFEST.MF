@@ -9,7 +9,7 @@ Service-Component: OSGI-INF/*.xml
 Bundle-ClassPath: .,
  lib/com.google.protobuf_2.6.0.jar
 Bundle-ActivationPolicy: lazy
-Import-Package: com.eclipsesource.json;version="0.9.4",
+Import-Package: com.eclipsesource.json;version="0.9.5",
  org.eclipse.kura;version="[1.0,2.0)",
  org.eclipse.kura.certificate;version="[2.0,3.0)",
  org.eclipse.kura.cloud;version="[1.1,1.2)",

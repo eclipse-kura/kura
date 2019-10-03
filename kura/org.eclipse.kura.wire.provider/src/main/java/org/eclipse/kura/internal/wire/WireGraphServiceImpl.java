@@ -349,8 +349,9 @@ public class WireGraphServiceImpl implements ConfigurableComponent, WireGraphSer
                 factoryPid = (String) componentToDelete.getConfiguration().getConfigurationProperties()
                         .get(SERVICE_FACTORYPID);
             }
-            if (factoryPid != null && factoryPid.equals(WIRE_ASSET_FACTORY_PID))
+            if (factoryPid != null && factoryPid.equals(WIRE_ASSET_FACTORY_PID)) {
                 continue;
+            }
             this.configurationService.deleteFactoryConfiguration(componentToDelete.getConfiguration().getPid(), false);
         }
 
@@ -364,8 +365,8 @@ public class WireGraphServiceImpl implements ConfigurableComponent, WireGraphSer
             final Map<String, Object> wireComponentProps = componentToCreate.getProperties();
             final Map<String, Object> configurationProps = configToCreate.getConfigurationProperties();
             String factoryPid = (String) configurationProps.get(SERVICE_FACTORYPID);
-            if (factoryPid != null && factoryPid.equals(WIRE_ASSET_FACTORY_PID))
-                continue;
+            // if (factoryPid != null && factoryPid.equals(WIRE_ASSET_FACTORY_PID))
+            // continue;
             configurationProps.put(Constants.RECEIVER_PORT_COUNT_PROP_NAME.value(),
                     wireComponentProps.get("inputPortCount"));
             configurationProps.put(Constants.EMITTER_PORT_COUNT_PROP_NAME.value(),

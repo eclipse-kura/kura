@@ -499,10 +499,16 @@ public class ModemConfig implements NetConfig {
         this.gpsEnabled = gpsEnabled;
     }
 
+    /**
+     * @since 2.2
+     */
     public boolean isDiversityEnabled() {
         return diversityEnabled;
     }
 
+    /**
+     * @since 2.2
+     */
     public void setDiversityEnabled(boolean diversityEnabled) {
         this.diversityEnabled = diversityEnabled;
     }

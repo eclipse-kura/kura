@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -15,6 +15,7 @@ import java.util.List;
 
 public class GwtModemInterfaceConfig extends GwtNetInterfaceConfig {
 
+    private static final String DIVERSITY_ENABLED_KEY = "diversityEnabled";
     private static final long serialVersionUID = -2586979604841994110L;
 
     public GwtModemInterfaceConfig() {
@@ -251,14 +252,14 @@ public class GwtModemInterfaceConfig extends GwtNetInterfaceConfig {
     }
 
     public boolean isDiversityEnabled() {
-        if (get("diversityEnabled") != null) {
-            return (Boolean) get("diversityEnabled");
+        if (get(DIVERSITY_ENABLED_KEY) != null) {
+            return (Boolean) get(DIVERSITY_ENABLED_KEY);
         }
         return false;
     }
 
     public void setDiversityEnabled(boolean diversityEnabled) {
-        set("diversityEnabled", diversityEnabled);
+        set(DIVERSITY_ENABLED_KEY, diversityEnabled);
     }
 
 }

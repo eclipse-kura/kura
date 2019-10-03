@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -55,6 +55,7 @@ public class HspaModem implements HspaCellularModem {
     protected String revisionId;
     protected int rssi;
     protected Boolean gpsSupported;
+    protected Boolean modemLTE;
     protected String imsi;
     protected String iccid;
 
@@ -550,7 +551,8 @@ public class HspaModem implements HspaCellularModem {
             return "";
         }
 
-        // remove the command and space at the beginning, and the 'OK' and spaces at the end
+        // remove the command and space at the beginning, and the 'OK' and spaces at the
+        // end
         return resp.replaceFirst("^\\S*\\s*", "").replaceFirst("\\s*(OK)?\\s*$", "");
     }
 
@@ -738,5 +740,25 @@ public class HspaModem implements HspaCellularModem {
         StringBuilder sb = new StringBuilder(HspaModemAtCommands.pdpContext.getCommand());
         sb.append("?\r\n");
         return sb.toString();
+    }
+
+    @Override
+    public boolean hasDiversityAntenna() {
+        return false;
+    }
+
+    @Override
+    public boolean isDiversityEnabled() {
+        return false;
+    }
+
+    @Override
+    public void enableDiversity() throws KuraException {
+        throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
+    }
+
+    @Override
+    public void disableDiversity() throws KuraException {
+        throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
     }
 }

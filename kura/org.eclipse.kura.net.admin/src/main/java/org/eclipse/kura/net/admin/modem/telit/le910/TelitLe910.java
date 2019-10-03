@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -13,6 +13,7 @@
 package org.eclipse.kura.net.admin.modem.telit.le910;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.eclipse.kura.KuraErrorCode;
@@ -23,6 +24,7 @@ import org.eclipse.kura.linux.net.modem.SupportedUsbModemsInfo;
 import org.eclipse.kura.net.admin.modem.HspaCellularModem;
 import org.eclipse.kura.net.admin.modem.telit.he910.TelitHe910;
 import org.eclipse.kura.net.admin.modem.telit.he910.TelitHe910AtCommands;
+import org.eclipse.kura.net.admin.modem.telit.le910v2.TelitLe910v2AtCommands;
 import org.eclipse.kura.net.modem.ModemDevice;
 import org.eclipse.kura.net.modem.ModemTechnologyType;
 import org.eclipse.kura.usb.UsbModemDevice;
@@ -32,7 +34,9 @@ import org.slf4j.LoggerFactory;
 
 public class TelitLe910 extends TelitHe910 implements HspaCellularModem {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(TelitLe910.class);
+    private static final Logger logger = LoggerFactory.getLogger(TelitLe910.class);
+
+    private boolean diversityEnabled;
 
     public TelitLe910(ModemDevice device, String platform, ConnectionFactory connectionFactory) {
         super(device, platform, connectionFactory);
@@ -72,7 +76,7 @@ public class TelitLe910 extends TelitHe910 implements HspaCellularModem {
         }
 
         synchronized (this.atLock) {
-            s_logger.debug("sendCommand getSimStatus :: {} command to port {}",
+            logger.debug("sendCommand getSimStatus :: {} command to port {}",
                     TelitHe910AtCommands.GET_SIM_STATUS.getCommand(), port);
             byte[] reply = null;
             CommConnection commAtConnection = null;
@@ -101,5 +105,77 @@ public class TelitLe910 extends TelitHe910 implements HspaCellularModem {
             }
         }
         return simReady;
+    }
+
+    @Override
+    public boolean hasDiversityAntenna() {
+        return true;
+    }
+
+    @Override
+    public boolean isDiversityEnabled() {
+        return this.diversityEnabled;
+    }
+
+    public void setDiversityEnabled(boolean diversityEnabled) {
+        this.diversityEnabled = diversityEnabled;
+    }
+
+    @Override
+    public void enableDiversity() throws KuraException {
+        programDiversity(true);
+    }
+
+    @Override
+    public void disableDiversity() throws KuraException {
+        programDiversity(false);
+    }
+
+    private void programDiversity(boolean enabled) throws KuraException {
+        synchronized (this.atLock) {
+            CommConnection commAtConnection = null;
+            try {
+                String port = getUnusedAtPort();
+                if (enabled) {
+                    logger.info("sendCommand enable CELL Diversity antenna :: {} command to port {}",
+                            TelitLe910v2AtCommands.ENABLE_CELL_DIV.getCommand(), port);
+                } else {
+                    logger.info("sendCommand disable CELL Diversity antenna :: {} command to port {}",
+                            TelitLe910v2AtCommands.DISABLE_CELL_DIV.getCommand(), port);
+                }
+
+                commAtConnection = openSerialPort(port);
+                if (!isAtReachable(commAtConnection)) {
+                    throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
+                }
+
+                byte[] command;
+                if (enabled) {
+                    command = TelitLe910v2AtCommands.ENABLE_CELL_DIV.getCommand().getBytes(StandardCharsets.US_ASCII);
+                } else {
+                    command = TelitLe910v2AtCommands.DISABLE_CELL_DIV.getCommand().getBytes(StandardCharsets.US_ASCII);
+                }
+                byte[] reply = commAtConnection.sendCommand(command, 1000, 100);
+                if (reply != null) {
+                    String resp = new String(reply);
+                    if (resp.contains("OK")) {
+                        if (enabled) {
+                            logger.info("CELL DIV successfully enabled");
+                            this.setDiversityEnabled(true);
+                        } else {
+                            logger.info("CELL DIV successfully disabled");
+                            this.setDiversityEnabled(false);
+                        }
+                    } else
+                        logger.info("Command returns : {}", resp);
+                } else {
+                    logger.error("No answer");
+                }
+            } catch (IOException e) {
+                throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
+            } finally {
+                closeSerialPort(commAtConnection);
+            }
+        }
     }
 }

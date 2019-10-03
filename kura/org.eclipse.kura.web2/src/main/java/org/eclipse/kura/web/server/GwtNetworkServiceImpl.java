@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -594,6 +594,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                                 gwtModemConfig.setLcpEchoFailure(modemConfig.getLcpEchoFailure());
 
                                 gwtModemConfig.setGpsEnabled(modemConfig.isGpsEnabled());
+                                gwtModemConfig.setDiversityEnabled(modemConfig.isDiversityEnabled());
 
                                 gwtModemConfig.setProfileID(modemConfig.getProfileID());
 
@@ -728,7 +729,6 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
         if (GwtNetIfStatus.netIPv4StatusDisabled.name().equals(status)) {
             autoConnect = false;
         }
-
         try {
             // Interface status
             NetInterfaceStatus netInterfaceStatus;
@@ -895,6 +895,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                     modemConfig.setLcpEchoInterval(gwtModemConfig.getLcpEchoInterval());
                     modemConfig.setLcpEchoFailure(gwtModemConfig.getLcpEchoFailure());
                     modemConfig.setGpsEnabled(gwtModemConfig.isGpsEnabled());
+                    modemConfig.setDiversityEnabled(gwtModemConfig.isDiversityEnabled());
 
                     GwtModemAuthType authType = gwtModemConfig.getAuthType();
                     if (authType != null) {

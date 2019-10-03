@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
 
 public class SierraMc87xx implements HspaCellularModem {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(SierraMc87xx.class);
+    private static final Logger logger = LoggerFactory.getLogger(SierraMc87xx.class);
 
     protected static final String MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG = "Modem not available for AT commands";
 
@@ -64,7 +64,7 @@ public class SierraMc87xx implements HspaCellularModem {
     public String getModel() throws KuraException {
         synchronized (this.atLock) {
             if (this.model == null) {
-                s_logger.debug("sendCommand getModelNumber :: {}", SierraMc87xxAtCommands.getModelNumber.getCommand());
+                logger.debug("sendCommand getModelNumber :: {}", SierraMc87xxAtCommands.getModelNumber.getCommand());
                 byte[] reply;
                 CommConnection commAtConnection = openSerialPort(getAtPort());
                 if (!isAtReachable(commAtConnection)) {
@@ -91,8 +91,7 @@ public class SierraMc87xx implements HspaCellularModem {
     public String getManufacturer() throws KuraException {
         synchronized (this.atLock) {
             if (this.manufacturer == null) {
-                s_logger.debug("sendCommand getManufacturer :: {}",
-                        SierraMc87xxAtCommands.getManufacturer.getCommand());
+                logger.debug("sendCommand getManufacturer :: {}", SierraMc87xxAtCommands.getManufacturer.getCommand());
                 byte[] reply;
                 CommConnection commAtConnection = openSerialPort(getAtPort());
                 if (!isAtReachable(commAtConnection)) {
@@ -119,8 +118,7 @@ public class SierraMc87xx implements HspaCellularModem {
     public String getSerialNumber() throws KuraException {
         synchronized (this.atLock) {
             if (this.serialNumber == null) {
-                s_logger.debug("sendCommand getSerialNumber :: {}",
-                        SierraMc87xxAtCommands.getSerialNumber.getCommand());
+                logger.debug("sendCommand getSerialNumber :: {}", SierraMc87xxAtCommands.getSerialNumber.getCommand());
                 byte[] reply;
                 CommConnection commAtConnection = openSerialPort(getAtPort());
                 if (!isAtReachable(commAtConnection)) {
@@ -157,7 +155,7 @@ public class SierraMc87xx implements HspaCellularModem {
     public String getRevisionID() throws KuraException {
         synchronized (this.atLock) {
             if (this.revisionId == null) {
-                s_logger.debug("sendCommand getRevision :: {}", SierraMc87xxAtCommands.getFirmwareVersion.getCommand());
+                logger.debug("sendCommand getRevision :: {}", SierraMc87xxAtCommands.getFirmwareVersion.getCommand());
                 byte[] reply;
                 CommConnection commAtConnection = openSerialPort(getAtPort());
                 if (!isAtReachable(commAtConnection)) {
@@ -205,7 +203,7 @@ public class SierraMc87xx implements HspaCellularModem {
                 closeSerialPort(commAtConnection);
                 ret = true;
             } catch (KuraException e) {
-                s_logger.warn("isPortReachable() :: The {} is not reachable", port);
+                logger.warn("isPortReachable() :: The {} is not reachable", port);
             }
         }
         return ret;
@@ -221,8 +219,7 @@ public class SierraMc87xx implements HspaCellularModem {
 
         int rssi = -113;
         synchronized (this.atLock) {
-            s_logger.debug("sendCommand getSignalStrength :: {}",
-                    SierraMc87xxAtCommands.getSignalStrength.getCommand());
+            logger.debug("sendCommand getSignalStrength :: {}", SierraMc87xxAtCommands.getSignalStrength.getCommand());
             byte[] reply;
             CommConnection commAtConnection = openSerialPort(getAtPort());
             if (!isAtReachable(commAtConnection)) {
@@ -258,7 +255,7 @@ public class SierraMc87xx implements HspaCellularModem {
 
         ModemRegistrationStatus modemRegistrationStatus = ModemRegistrationStatus.UNKNOWN;
         synchronized (this.atLock) {
-            s_logger.debug("sendCommand getSystemInfo :: {}", SierraMc87xxAtCommands.getSystemInfo.getCommand());
+            logger.debug("sendCommand getSystemInfo :: {}", SierraMc87xxAtCommands.getSystemInfo.getCommand());
             byte[] reply;
             CommConnection commAtConnection = openSerialPort(getAtPort());
             if (!isAtReachable(commAtConnection)) {
@@ -319,7 +316,7 @@ public class SierraMc87xx implements HspaCellularModem {
 
         String serviceType = null;
         synchronized (this.atLock) {
-            s_logger.debug("sendCommand getMobileStationClass :: {}",
+            logger.debug("sendCommand getMobileStationClass :: {}",
                     SierraMc87xxAtCommands.getMobileStationClass.getCommand());
             byte[] reply;
             CommConnection commAtConnection = openSerialPort(getAtPort());
@@ -465,7 +462,7 @@ public class SierraMc87xx implements HspaCellularModem {
 
         boolean simReady = false;
         synchronized (this.atLock) {
-            s_logger.debug("sendCommand getSystemInfo :: {}", SierraMc87xxAtCommands.getSystemInfo.getCommand());
+            logger.debug("sendCommand getSystemInfo :: {}", SierraMc87xxAtCommands.getSystemInfo.getCommand());
             byte[] reply;
             CommConnection commAtConnection = openSerialPort(getAtPort());
             if (!isAtReachable(commAtConnection)) {
@@ -576,7 +573,7 @@ public class SierraMc87xx implements HspaCellularModem {
             try {
                 connection = (CommConnection) this.connectionFactory.createConnection(uri, 1, false);
             } catch (Exception e) {
-                s_logger.debug("Exception creating connection: {}", e);
+                logger.debug("Exception creating connection: {}", e);
                 throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
             }
         }
@@ -613,7 +610,8 @@ public class SierraMc87xx implements HspaCellularModem {
             return "";
         }
 
-        // remove the command and space at the beginning, and the 'OK' and spaces at the end
+        // remove the command and space at the beginning, and the 'OK' and spaces at the
+        // end
         return resp.replaceFirst("^\\S*\\s*", "").replaceFirst("\\s*(OK)?\\s*$", "");
     }
 
@@ -637,5 +635,25 @@ public class SierraMc87xx implements HspaCellularModem {
         StringBuilder sb = new StringBuilder(SierraMc87xxAtCommands.pdpContext.getCommand());
         sb.append("?\r\n");
         return sb.toString();
+    }
+
+    @Override
+    public boolean hasDiversityAntenna() {
+        return false;
+    }
+
+    @Override
+    public boolean isDiversityEnabled() {
+        return false;
+    }
+
+    @Override
+    public void enableDiversity() throws KuraException {
+        throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
+    }
+
+    @Override
+    public void disableDiversity() throws KuraException {
+        throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
     }
 }

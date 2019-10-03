@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -87,7 +87,8 @@ public class NetworkConfiguration {
     }
 
     /**
-     * Constructor for create a completely new NetComponentConfiguration based on a set of properties
+     * Constructor for create a completely new NetComponentConfiguration based on a
+     * set of properties
      *
      * @param properties
      *            The properties that represent the new configuration
@@ -104,7 +105,8 @@ public class NetworkConfiguration {
         try {
             availableInterfaces = (String[]) properties.get("net.interfaces");
         } catch (ClassCastException e) {
-            // this means this configuration came from GWT - so convert the comma separated list
+            // this means this configuration came from GWT - so convert the comma separated
+            // list
             String interfaces = (String) properties.get("net.interfaces");
             StringTokenizer st = new StringTokenizer(interfaces, ",");
 
@@ -372,7 +374,8 @@ public class NetworkConfiguration {
         return sb.toString();
     }
 
-    // Returns a List of all modified NetInterfaceConfigs, or if none are specified, all NetInterfaceConfigs
+    // Returns a List of all modified NetInterfaceConfigs, or if none are specified,
+    // all NetInterfaceConfigs
     public List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> getModifiedNetInterfaceConfigs() {
         List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = null;
         if (this.modifiedInterfaceNames != null && !this.modifiedInterfaceNames.isEmpty()) {
@@ -971,6 +974,7 @@ public class NetworkConfiguration {
         properties.put(prefix + "username", modemConfig.getUsername());
         properties.put(prefix + "enabled", modemConfig.isEnabled());
         properties.put(prefix + "gpsEnabled", modemConfig.isGpsEnabled());
+        properties.put(prefix + "diversityEnabled", modemConfig.isDiversityEnabled());
     }
 
     private static ModemConfig getModemConfig(String prefix, Map<String, Object> properties) throws KuraException {
@@ -1081,6 +1085,9 @@ public class NetworkConfiguration {
         boolean gpsEnabled = isGpsEnabled(prefix, properties);
         modemConfig.setGpsEnabled(gpsEnabled);
 
+        boolean diversityEnabled = isDiversityEnabled(prefix, properties);
+        modemConfig.setDiversityEnabled(diversityEnabled);
+
         return modemConfig;
     }
 
@@ -1095,6 +1102,19 @@ public class NetworkConfiguration {
             logger.trace("GPS Enabled is null");
         }
         return gpsEnabled;
+    }
+
+    private static boolean isDiversityEnabled(String prefix, Map<String, Object> properties) {
+        String key;
+        key = prefix + "diversityEnabled";
+        boolean diversityEnabled = false;
+        if (properties.get(key) != null) {
+            diversityEnabled = (Boolean) properties.get(key);
+            logger.trace("Diversity Enabled is {}", diversityEnabled);
+        } else {
+            logger.trace("Diversity Enabled is null");
+        }
+        return diversityEnabled;
     }
 
     private static boolean isEnabled(String prefix, Map<String, Object> properties) {
@@ -1789,7 +1809,7 @@ public class NetworkConfiguration {
                 logger.trace("netInterfaceAddress is instanceof NetInterfaceAddressImpl");
                 NetInterfaceAddressImpl netInterfaceAddressImpl = (NetInterfaceAddressImpl) netInterfaceAddress;
 
-                String addressType = ".ip4";       // TODO: determine dynamically
+                String addressType = ".ip4"; // TODO: determine dynamically
 
                 // populate current address status
                 String key = "net.interface." + interfaceName + addressType + ".address";

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -372,6 +372,18 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 
                         modem.setConfiguration(newNetConfigs);
 
+                        if (modem.hasDiversityAntenna()) {
+                            if (isDiversityEnabledInConfig(newNetConfigs)) {
+                                if (!modem.isDiversityEnabled()) {
+                                    modem.enableDiversity();
+                                }
+                            } else {
+                                if (modem.isDiversityEnabled()) {
+                                    modem.disableDiversity();
+                                }
+                            }
+                        }
+
                         if (modem instanceof EvdoCellularModem) {
                             NetInterfaceStatus netIfaceStatus = getNetInterfaceStatus(newNetConfigs);
                             if (netIfaceStatus == NetInterfaceStatus.netIPv4StatusEnabledWAN) {
@@ -415,6 +427,10 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
         if (oldNetConfigIP4.equals(newNetConfigIP4) && oldModemConfig.equals(newModemConfig)) {
             ret = true;
         }
+        logger.info("old diversity = {},  new diversity = {}", oldModemConfig.isDiversityEnabled(),
+                newModemConfig.isDiversityEnabled());
+        if (oldModemConfig.isDiversityEnabled() != newModemConfig.isDiversityEnabled())
+            ret = false;
         return ret;
     }
 
@@ -493,6 +509,19 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
             }
         }
         return isGpsEnabled;
+    }
+
+    private boolean isDiversityEnabledInConfig(List<NetConfig> netConfigs) {
+        boolean isDiversityEnabled = false;
+        if (netConfigs != null) {
+            for (NetConfig netConfig : netConfigs) {
+                if (netConfig instanceof ModemConfig) {
+                    isDiversityEnabled = ((ModemConfig) netConfig).isDiversityEnabled();
+                    break;
+                }
+            }
+        }
+        return isDiversityEnabled;
     }
 
     private void monitor() {
@@ -904,14 +933,14 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 
                 final String ifaceName = networkService.getModemPppPort(modem.getModemDevice());
 
-                reportSignalStrength(ifaceName);
-
                 if (netInterfaceStatus == NetInterfaceStatus.netIPv4StatusUnmanaged) {
                     logger.warn("The {} interface is configured not to be managed by Kura and will not be monitored.",
                             ifaceName);
                     return;
                 }
                 if (netInterfaceStatus == NetInterfaceStatus.netIPv4StatusEnabledWAN && ifaceName != null) {
+
+                    reportSignalStrength(ifaceName);
 
                     pppService = getPppService(ifaceName, modem.getDataPort());
                     pppSt = pppService.getPppState();
@@ -956,14 +985,27 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
                 }
 
                 // If the modem has been reset in this iteration of the monitor,
-                // do not immediately enable GPS to avoid concurrency issues due to asynchronous events
-                // (possible serial port contention between the PositionService and the trackModem() method),
+                // do not immediately enable GPS to avoid concurrency issues due to asynchronous
+                // events
+                // (possible serial port contention between the PositionService and the
+                // trackModem() method),
                 // GPS will be eventually enabled in the next iteration of the monitor.
                 if (!modemReset && modem.isGpsSupported() && isGpsEnabledInConfig(modem.getConfiguration())) {
                     if (modem instanceof HspaCellularModem && !modem.isGpsEnabled()) {
                         modem.enableGps();
                     }
                     postModemGpsEvent(modem, true);
+                }
+
+                // Same process for eventual DIV antenna.
+                if (!modemReset && modem.hasDiversityAntenna()) {
+                    if (isDiversityEnabledInConfig(modem.getConfiguration())) {
+                        if (!modem.isDiversityEnabled()) {
+                            modem.enableDiversity();
+                        }
+                    } else if (modem.isDiversityEnabled()) {
+                        modem.disableDiversity();
+                    }
                 }
 
             } catch (Exception e) {

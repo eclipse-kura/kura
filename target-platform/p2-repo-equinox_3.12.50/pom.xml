@@ -87,7 +87,8 @@
                                         <exclude name="plugins/org.tukaani*.jar" />
                                         <exclude name="plugins/org.eclipse.ecf*.jar" />
                                         <exclude name="plugins/org.eclipse.jetty*.jar" />
-                                                            
+                                        <exclude name="plugins/org.apache.commons*.jar" /> 
+                                        <exclude name="plugins/org.apache.mina*.jar" />           
                                     </patternset>
                                     <mapper type="flatten" />
                                 </unzip>

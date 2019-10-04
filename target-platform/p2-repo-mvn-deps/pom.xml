@@ -613,12 +613,12 @@
                   <transitive>false</transitive>
               </artifact>   
               <artifact>
-                  <id>org.apache.servicemix.bundles:org.apache.servicemix.bundles.commons-codec:${org.apache.servicemix.bundles.commons-codec-mvn.version}</id>
+                  <id>commons-codec:commons-codec:${org.apache.commons.codec-mvn.version}</id>
                   <source>true</source>
                   <transitive>false</transitive>
               </artifact>   
               <artifact>
-                  <id>commons-logging:commons-logging:${commons-logging.commons-logging-mvn.version}</id>
+                  <id>commons-logging:commons-logging:${org.apache.commons.logging-mvn.version}</id>
                   <source>true</source>
                   <transitive>false</transitive>
               </artifact> 
@@ -882,6 +882,11 @@
                   <source>true</source>
                   <transitive>false</transitive>
               </artifact>
+              <artifact>
+                <id>commons-pool:commons-pool:${org.eclipse.kura.commons-pool-mvn.version}</id>
+                  <source>true</source>
+                  <transitive>false</transitive>
+            </artifact>
               <!--
               <artifact>
                   <id>org.ow2.asm:asm-commons:${org.ow2.asm-mvn.version}</id>
@@ -940,7 +945,7 @@
                   <transitive>false</transitive>
               </artifact>  
               <artifact>
-                  <id>com.google:com.google.protobuf:${com.google.protobuf.version}</id>
+                  <id>com.google.protobuf:protobuf-java:${com.google.protobuf.version}</id>
                   <source>true</source>
                   <transitive>false</transitive>
               </artifact> 

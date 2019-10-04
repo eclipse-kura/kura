@@ -177,11 +177,6 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>commons-pool</artifactId>
-                                    <version>${org.eclipse.kura.commons-pool.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
                                     <artifactId>com.eclipsesource.jaxrs.jersey-min</artifactId>
                                     <version>${com.eclipsesource.jaxrs.jersey-min.version}</version>
                                 </artifactItem>

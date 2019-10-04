@@ -583,7 +583,6 @@ fi]]>
 			<zipfileset dir="../target-definition/common/repository/plugins"
 				prefix="${build.output.name}/${plugins.folder}">
 
-				<exclude name="com.google.protobuf_2.6.0.jar" />
 				<exclude name="org.eclipse.paho.*" />
 				<exclude name="com.gwt.user_*" />
 				<exclude name="org.junit*" />
@@ -981,6 +980,8 @@ fi]]>
 			file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.core.cloud_${org.eclipse.kura.core.cloud.version}.jar@4:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/com.google.protobuf_${com.google.protobuf.version}.jar@4:start" />
 		</propertyfile>
 	</target>
 
@@ -1417,15 +1418,15 @@ fi]]>
 			<entry key="osgi.bundles" operation="+"
 							value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.aries.spifly.dynamic.bundle_${org.apache.aries.spifly.version}.jar@3" />
             <entry key="osgi.bundles" operation="+"
-                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/commons-pool_${org.eclipse.kura.commons-pool.version}.jar@3:start" />
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.commons.pool_${org.eclipse.kura.commons-pool.version}.jar@3:start" />
             <entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.httpcomponents.httpclient_${org.apache.httpcomponents.httpclient-osgi.version}.jar@3:start" />
             <entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.httpcomponents.httpcore_${org.apache.httpcomponents.httpcore-osgi.version}.jar@3:start" />
             <entry key="osgi.bundles" operation="+"
-                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.servicemix.bundles.commons-codec_${org.apache.servicemix.bundles.commons-codec.version}.jar@3:start" />
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.commons.codec_${org.apache.commons.codec.version}.jar@3:start" />
             <entry key="osgi.bundles" operation="+"
-                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.commons.logging_${commons-logging.commons-logging.version}.jar@3:start" />
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.commons.logging_${org.apache.commons.logging.version}.jar@3:start" />
             <entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.servicemix.bundles.spring-aop_${spring.version}.jar@3:start" />
             <entry key="osgi.bundles" operation="+"

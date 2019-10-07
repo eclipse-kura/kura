@@ -883,10 +883,10 @@
                   <transitive>false</transitive>
               </artifact>
               <artifact>
-                <id>commons-pool:commons-pool:${org.eclipse.kura.commons-pool-mvn.version}</id>
+                <id>commons-pool:commons-pool:${org.apache.commons-pool-mvn.version}</id>
                   <source>true</source>
                   <transitive>false</transitive>
-            </artifact>
+              </artifact>
               <!--
               <artifact>
                   <id>org.ow2.asm:asm-commons:${org.ow2.asm-mvn.version}</id>

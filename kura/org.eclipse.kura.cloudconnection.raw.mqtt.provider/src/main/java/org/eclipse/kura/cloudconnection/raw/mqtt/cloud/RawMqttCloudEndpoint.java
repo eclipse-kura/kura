@@ -11,6 +11,7 @@ package org.eclipse.kura.cloudconnection.raw.mqtt.cloud;
 
 import static org.eclipse.kura.cloudconnecton.raw.mqtt.util.Utils.catchAll;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
@@ -21,7 +22,6 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.eclipse.kura.KuraConnectException;
 import org.eclipse.kura.KuraDisconnectException;
-import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraNotConnectedException;
 import org.eclipse.kura.cloud.CloudConnectionEstablishedEvent;
@@ -39,6 +39,7 @@ import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.core.util.MqttTopicUtil;
 import org.eclipse.kura.data.DataService;
 import org.eclipse.kura.data.listener.DataServiceListener;
+import org.eclipse.kura.marshalling.Marshaller;
 import org.eclipse.kura.message.KuraPayload;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
@@ -52,6 +53,7 @@ public class RawMqttCloudEndpoint
     private static final Logger logger = LoggerFactory.getLogger(RawMqttCloudEndpoint.class);
 
     private DataService dataService;
+    private Marshaller jsonMarshaller;
     private EventAdmin eventAdmin;
     private ComponentContext componentContext;
 
@@ -73,6 +75,14 @@ public class RawMqttCloudEndpoint
 
     public void unsetEventAdmin(final EventAdmin eventAdmin) {
         this.eventAdmin = null;
+    }
+
+    public void setJsonMarshaller(Marshaller jsonMarshaller) {
+        this.jsonMarshaller = jsonMarshaller;
+    }
+
+    public void unsetJsonMarshaller(Marshaller jsonMarshaller) {
+        this.jsonMarshaller = null;
     }
 
     public void activated(final ComponentContext componentContext) {
@@ -138,10 +148,11 @@ public class RawMqttCloudEndpoint
 
     public String publish(final PublishOptions options, final KuraPayload kuraPayload) throws KuraException {
 
-        final byte[] body = kuraPayload.getBody();
+        byte[] body = kuraPayload.getBody();
 
         if (body == null) {
-            throw new KuraException(KuraErrorCode.INVALID_PARAMETER, null, null, "missing message body");
+            body = jsonMarshaller.marshal(kuraPayload).getBytes(StandardCharsets.UTF_8);
+            // throw new KuraException(KuraErrorCode.INVALID_PARAMETER, null, null, "missing message body");
         }
 
         final int qos = options.getQos().getValue();

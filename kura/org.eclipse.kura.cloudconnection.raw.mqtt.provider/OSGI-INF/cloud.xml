@@ -22,6 +22,13 @@
               cardinality="1..1" 
               bind="setDataService" 
               unbind="unsetDataService"/>
+   <reference bind="setJsonMarshaller"
+              cardinality="1..1"
+              interface="org.eclipse.kura.marshalling.Marshaller"
+              name="Marshaller"
+              policy="static"
+              target="(kura.service.pid=org.eclipse.kura.json.marshaller.unmarshaller.provider)"
+              unbind="unsetJsonMarshaller"/>
    <property name="kura.ui.service.hide" type="Boolean" value="true"/>
    <reference bind="setEventAdmin" cardinality="1..1" interface="org.osgi.service.event.EventAdmin" name="EventAdmin" policy="static" unbind="unsetEventAdmin"/>
 </scr:component>

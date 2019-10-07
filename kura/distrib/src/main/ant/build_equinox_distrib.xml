@@ -1416,9 +1416,11 @@ fi]]>
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/groovy-jsr223_${org.codehaus.groovy.groovy.version}.jar@3" />	
 			<entry key="osgi.bundles" operation="+"
-							value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.aries.spifly.dynamic.bundle_${org.apache.aries.spifly.version}.jar@3" />
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.aries.spifly.dynamic.bundle_${org.apache.aries.spifly.version}.jar@3" />
             <entry key="osgi.bundles" operation="+"
-                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.commons.pool_${org.eclipse.kura.commons-pool.version}.jar@3:start" />
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.commons.pool_${org.apache.commons-pool.version}.jar@3:start" />
+			<entry key="osgi.bundles" operation="+"
+			    value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.paho.client.mqttv3_${org.eclipse.paho.client.mqttv3.version}.jar@3:start" />
             <entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.httpcomponents.httpclient_${org.apache.httpcomponents.httpclient-osgi.version}.jar@3:start" />
             <entry key="osgi.bundles" operation="+"

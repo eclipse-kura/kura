@@ -1014,7 +1014,7 @@
             <id>raspberry-pi-2-3</id>
             <properties>
                 <project.raspbian.dependencies>hostapd, isc-dhcp-server, iw, dos2unix, bind9, unzip, ethtool, telnet, bluez-hcidump,
-                    wireless-tools, java8-runtime-headless | java8-runtime | java11-runtime-headless | java11-runtime | java12-runtime-headless | java12-runtime</project.raspbian.dependencies>
+                    wireless-tools, java8-runtime-headless | java8-runtime | java11-runtime-headless | java11-runtime | java13-runtime-headless | java13-runtime</project.raspbian.dependencies>
             </properties>
             <activation>
                 <activeByDefault>true</activeByDefault>
@@ -1085,6 +1085,7 @@
                                 </goals>
                                 <configuration>
                                     <verbose>true</verbose>
+                                    <skipPOMs>false</skipPOMs>
                                     <deb>${basedir}/target/kura_${project.version}_raspberry-pi-2-3_installer.deb</deb>
                                     <controlDir>${basedir}/src/main/deb/control</controlDir>
                                     <dataSet>
@@ -1108,7 +1109,7 @@
         <profile>
             <id>raspberry-pi-2-3-nn</id>
             <properties>
-                <project.raspbian.dependencies.nn>dos2unix, unzip, telnet, bluez-hcidump, java8-runtime-headless | java8-runtime | java11-runtime-headless | java11-runtime | java12-runtime-headless | java12-runtime</project.raspbian.dependencies.nn>
+                <project.raspbian.dependencies.nn>dos2unix, unzip, telnet, bluez-hcidump, java8-runtime-headless | java8-runtime | java11-runtime-headless | java11-runtime | java13-runtime-headless | java13-runtime</project.raspbian.dependencies.nn>
             </properties>
             <activation>
                 <activeByDefault>true</activeByDefault>
@@ -1179,6 +1180,7 @@
                                 </goals>
                                 <configuration>
                                     <verbose>true</verbose>
+                                    <skipPOMs>false</skipPOMs>
                                     <deb>${basedir}/target/kura_${project.version}_raspberry-pi-2-3-nn_installer.deb</deb>
                                     <controlDir>${basedir}/src/main/deb/control_nn</controlDir>
                                     <dataSet>
@@ -1202,7 +1204,7 @@
             <id>intel-up2-ubuntu-18</id>
             <properties>
                 <project.raspbian.dependencies>hostapd, isc-dhcp-server, iw, dos2unix, bind9, unzip, ethtool, telnet, bluez-hcidump,
-                    wireless-tools, java8-runtime-headless | java8-runtime | java11-runtime-headless | java11-runtime | java12-runtime-headless | java12-runtime</project.raspbian.dependencies>
+                    wireless-tools, java8-runtime-headless | java8-runtime | java11-runtime-headless | java11-runtime | java13-runtime-headless | java13-runtime</project.raspbian.dependencies>
             </properties>
             <activation>
                 <activeByDefault>true</activeByDefault>
@@ -1274,6 +1276,7 @@
                                 </goals>
                                 <configuration>
                                     <verbose>true</verbose>
+                                    <skipPOMs>false</skipPOMs>
                                     <deb>${basedir}/target/kura_${project.version}_intel-up2-ubuntu-18_installer.deb</deb>
                                     <controlDir>${basedir}/src/main/deb/control</controlDir>
                                     <dataSet>
@@ -1735,7 +1738,7 @@
         <profile>
             <id>rock960-ubuntu-16-nn</id>
             <properties>
-                <project.raspbian.dependencies.nn>dos2unix, unzip, telnet, bluez-hcidump, java8-runtime-headless | java8-runtime | java11-runtime-headless | java11-runtime | java12-runtime-headless | java12-runtime</project.raspbian.dependencies.nn>
+                <project.raspbian.dependencies.nn>dos2unix, unzip, telnet, bluez-hcidump, java8-runtime-headless | java8-runtime | java11-runtime-headless | java11-runtime | java13-runtime-headless | java13-runtime</project.raspbian.dependencies.nn>
             </properties>
             <activation>
                 <activeByDefault>true</activeByDefault>
@@ -1806,6 +1809,7 @@
                                 </goals>
                                 <configuration>
                                     <verbose>true</verbose>
+                                    <skipPOMs>false</skipPOMs>
                                     <deb>${basedir}/target/kura_${project.version}_rock960-ubuntu-16-nn_installer.deb</deb>
                                     <controlDir>${basedir}/src/main/deb/control_nn</controlDir>
                                     <dataSet>
@@ -1830,7 +1834,7 @@
             <id>firefly-rk3399-ubuntu-18</id>
             <properties>
                 <project.raspbian.dependencies>hostapd, isc-dhcp-server, iw, dos2unix, bind9, unzip, ethtool, telnet, bluez-hcidump,
-                    wireless-tools, java8-runtime-headless | java8-runtime | java11-runtime-headless | java11-runtime | java12-runtime-headless | java12-runtime</project.raspbian.dependencies>
+                    wireless-tools, java8-runtime-headless | java8-runtime | java11-runtime-headless | java11-runtime | java13-runtime-headless | java13-runtime</project.raspbian.dependencies>
             </properties>
             <activation>
                 <activeByDefault>true</activeByDefault>
@@ -1902,6 +1906,7 @@
                                 </goals>
                                 <configuration>
                                     <verbose>true</verbose>
+                                    <skipPOMs>false</skipPOMs>
                                     <deb>${basedir}/target/kura_${project.version}_firefly-rk3399-ubuntu-18_installer.deb</deb>
                                     <controlDir>${basedir}/src/main/deb/control</controlDir>
                                     <dataSet>

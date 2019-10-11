@@ -27,6 +27,11 @@ public class LinuxExitValue implements ExitValue {
     }
 
     @Override
+    public String toString() {
+        return String.valueOf(this.exitValue);
+    }
+
+    @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;

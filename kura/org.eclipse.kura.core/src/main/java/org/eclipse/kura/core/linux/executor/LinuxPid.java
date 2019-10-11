@@ -27,6 +27,11 @@ public class LinuxPid implements Pid {
     }
 
     @Override
+    public String toString() {
+        return String.valueOf(this.pid);
+    }
+
+    @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;

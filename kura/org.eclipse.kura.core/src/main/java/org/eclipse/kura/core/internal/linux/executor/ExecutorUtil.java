@@ -18,13 +18,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
@@ -98,12 +98,12 @@ public class ExecutorUtil {
     }
 
     public static boolean killUnprivileged(String[] commandLine, Signal signal) {
-        List<Boolean> areAllKilled = new ArrayList<>();
+        boolean isKilled = true;
         Map<String, Pid> pids = getPids(commandLine);
         for (Pid pid : pids.values()) {
-            areAllKilled.add(stopUnprivileged(pid, signal));
+            isKilled &= stopUnprivileged(pid, signal);
         }
-        return areAllKilled.stream().allMatch(b -> b);
+        return isKilled;
     }
 
     public static boolean stopPrivileged(Pid pid, Signal signal) {
@@ -183,7 +183,7 @@ public class ExecutorUtil {
     }
 
     private static Map<String, Pid> parsePids(ByteArrayOutputStream out, String[] commandLine) {
-        Map<String, Pid> pids = new HashMap<>();
+        Map<String, Integer> pids = new HashMap<>();
         String pid;
         String[] output = new String(out.toByteArray(), UTF_8).split("\n");
         for (String line : output) {
@@ -196,10 +196,13 @@ public class ExecutorUtil {
             // get the remainder of the line showing the command that was issued
             line = line.substring(line.indexOf(st.nextToken()));
             if (checkLine(line, commandLine)) {
-                pids.put(line, new LinuxPid(Integer.parseInt(pid)));
+                pids.put(line, Integer.parseInt(pid));
             }
         }
-        return pids;
+        // Sort pids in reverse order (useful when stop processes...)
+        return pids.entrySet().stream().sorted(Map.Entry.<String, Integer> comparingByValue().reversed())
+                .collect(Collectors.toMap(Map.Entry::getKey, e -> new LinuxPid(e.getValue()), (e1, e2) -> e1,
+                        LinkedHashMap::new));
     }
 
     private static boolean checkLine(String line, String[] tokens) {

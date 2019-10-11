@@ -16,8 +16,8 @@ import java.util.Date;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.executor.Command;
-import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +43,7 @@ public class NtpdClockSyncProvider extends AbstractNtpClockSyncProvider {
         try {
             // Execute a native Linux command to perform the NTP time sync.
             int ntpTimeout = this.ntpTimeout / 1000;
-            Command command = new Command("ntpdate -t " + ntpTimeout + " " + this.ntpHost);
+            Command command = new Command(new String[] { "ntpdate", "-t", Integer.toString(ntpTimeout), this.ntpHost });
             command.setTimeout(60);
             CommandStatus status = this.executorService.execute(command);
             if ((Integer) status.getExitStatus().getExitValue() == 0) {

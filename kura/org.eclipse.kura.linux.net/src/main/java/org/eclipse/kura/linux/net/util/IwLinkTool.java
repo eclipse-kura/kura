@@ -16,8 +16,8 @@ import java.io.ByteArrayOutputStream;
 import org.apache.commons.io.Charsets;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.executor.Command;
-import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -112,10 +112,8 @@ public class IwLinkTool implements LinkTool {
         return true;
     }
 
-    private String formIwLinkCommand(String ifaceName) {
-        StringBuilder sb = new StringBuilder("iw ");
-        sb.append(ifaceName).append(" link");
-        return sb.toString();
+    private String[] formIwLinkCommand(String ifaceName) {
+        return new String[] { "iw", ifaceName, "link" };
     }
 
     @Override

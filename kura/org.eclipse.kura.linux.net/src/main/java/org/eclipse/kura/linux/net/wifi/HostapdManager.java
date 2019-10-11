@@ -14,6 +14,8 @@ package org.eclipse.kura.linux.net.wifi;
 import java.io.File;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -53,7 +55,7 @@ public class HostapdManager {
             }
 
             // start hostapd
-            String launchHostapdCommand = formHostapdStartCommand(ifaceName);
+            String[] launchHostapdCommand = formHostapdStartCommand(ifaceName);
             logger.info("starting hostapd for the {} interface --> {}", ifaceName, launchHostapdCommand);
             CommandStatus status = this.executorService.execute(new Command(launchHostapdCommand));
             int exitValue = (Integer) status.getExitStatus().getExitValue();
@@ -80,7 +82,11 @@ public class HostapdManager {
     }
 
     public int getPid(String ifaceName) throws KuraException {
-        List<Pid> pids = this.executorService.getPids(formHostapdStartCommand(ifaceName));
+        String[] command = formHostapdStartCommand(ifaceName);
+        // Filter the pid whose command exactly matches the connectCommand
+        List<Pid> pids = executorService.getPids(command).entrySet().stream()
+                .filter(entry -> entry.getKey().equals(String.join(" ", command))).map(Map.Entry::getValue)
+                .collect(Collectors.toList());
         if (!pids.isEmpty()) {
             return (Integer) pids.get(0).getPid();
         } else {
@@ -89,13 +95,9 @@ public class HostapdManager {
         }
     }
 
-    private static String formHostapdStartCommand(String ifaceName) {
-        StringBuilder cmd = new StringBuilder();
-
+    private static String[] formHostapdStartCommand(String ifaceName) {
         File configFile = new File(getHostapdConfigFileName(ifaceName));
-        cmd.append(HOSTAPD).append(" -B ").append(configFile.getAbsolutePath());
-
-        return cmd.toString();
+        return new String[] { HOSTAPD, "-B", configFile.getAbsolutePath() };
     }
 
     public static String getHostapdConfigFileName(String ifaceName) {

@@ -13,6 +13,7 @@ package org.eclipse.kura.executor;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.Map;
 
 import org.apache.commons.io.output.NullOutputStream;
@@ -20,7 +21,7 @@ import org.apache.commons.io.output.NullOutputStream;
 /**
  * 
  * The Command class includes the informations needed by the {@link CommandExecutorService} to run a system command.
- * The only mandatory parameter is the commandLine than represent the command to be run:
+ * The only mandatory parameter is the commandLine that represents the command to be run:
  * </br>
  * </br>
  * &nbsp&nbsp Command command = new Command("ls -all");
@@ -35,27 +36,30 @@ import org.apache.commons.io.output.NullOutputStream;
  * <li>in : the input stream representing the input of the command</li>
  * <li>timeout : the timeout in seconds after that the command is stopped. -1 means infinite timeout.</li>
  * <li>signal : the {@link Signal} sent to the command to stop it after timeout</li>
+ * <li>executeInAShell : a flag that indicates if the command should be executed in a shell/terminal. Default is
+ * false.</li>
  * </ul>
  * 
  */
 public class Command {
 
-    private final String commandLine;
+    private final String[] commandLine;
     private String directory;
     private Map<String, String> environment;
     private int timeout = -1;
     private Signal signal;
+    private boolean executeInAShell;
     private OutputStream out;
     private OutputStream err;
     private InputStream in;
 
-    public Command(String commandLine) {
+    public Command(String[] commandLine) {
         this.commandLine = commandLine;
         this.out = new NullOutputStream();
         this.err = new NullOutputStream();
     }
 
-    public String getCommandLine() {
+    public String[] getCommandLine() {
         return commandLine;
     }
 
@@ -91,6 +95,14 @@ public class Command {
         this.signal = signal;
     }
 
+    public boolean isExecutedInAShell() {
+        return this.executeInAShell;
+    }
+
+    public void setExecuteInAShell(boolean executeInAShell) {
+        this.executeInAShell = executeInAShell;
+    }
+
     public OutputStream getOutputStream() {
         return out;
     }
@@ -117,17 +129,17 @@ public class Command {
 
     @Override
     public String toString() {
-        return this.commandLine;
+        return String.join(" ", this.commandLine);
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((commandLine == null) ? 0 : commandLine.hashCode());
+        result = prime * result + Arrays.hashCode(commandLine);
         result = prime * result + ((directory == null) ? 0 : directory.hashCode());
         result = prime * result + ((environment == null) ? 0 : environment.hashCode());
-        result = prime * result + timeout;
+        result = prime * result + (executeInAShell ? 1231 : 1237);
         return result;
     }
 
@@ -140,10 +152,7 @@ public class Command {
         if (getClass() != obj.getClass())
             return false;
         Command other = (Command) obj;
-        if (commandLine == null) {
-            if (other.commandLine != null)
-                return false;
-        } else if (!commandLine.equals(other.commandLine))
+        if (!Arrays.equals(commandLine, other.commandLine))
             return false;
         if (directory == null) {
             if (other.directory != null)
@@ -155,7 +164,7 @@ public class Command {
                 return false;
         } else if (!environment.equals(other.environment))
             return false;
-        if (timeout != other.timeout)
+        if (executeInAShell != other.executeInAShell)
             return false;
         return true;
     }

@@ -11,6 +11,15 @@
  *******************************************************************************/
 package org.eclipse.kura.executor;
 
+import org.osgi.annotation.versioning.ProviderType;
+
+/**
+ * This is a marker interface for the {@link CommandExecutorService}. It'd be used for running commands or starting
+ * processes by an unprivileged user.
+ *
+ * @noimplement This interface is not intended to be implemented by clients.
+ */
+@ProviderType
 public interface UnprivilegedExecutorService extends CommandExecutorService {
 
 }

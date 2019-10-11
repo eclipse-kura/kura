@@ -114,76 +114,63 @@ public class DhcpClientManager {
         return sb.toString();
     }
 
-    private static String formCommand(String interfaceName, boolean useLeasesFile, boolean usePidFile,
+    private static String[] formCommand(String interfaceName, boolean useLeasesFile, boolean usePidFile,
             boolean dontWait) {
-        StringBuilder sb = new StringBuilder();
+        List<String> command = new ArrayList<>();
 
         if (dhcpClientTool == DhcpClientTool.DHCLIENT) {
-            sb.append(DhcpClientTool.DHCLIENT.getValue());
-            sb.append(' ');
+            command.add(DhcpClientTool.DHCLIENT.getValue());
             if (dontWait) {
-                sb.append("-nw");
-                sb.append(' ');
+                command.add("-nw");
             }
             if (useLeasesFile) {
-                sb.append(formLeasesOption(interfaceName));
-                sb.append(' ');
+                command.add("-lf");
+                command.add(DhcpClientLeases.getInstance().getDhclientLeasesFilePath(interfaceName));
             }
             if (usePidFile) {
-                sb.append("-pf ");
-                sb.append(getPidFilename(interfaceName));
-                sb.append(' ');
+                command.add("-pf");
+                command.add(getPidFilename(interfaceName));
             }
-            sb.append(interfaceName);
+            command.add(interfaceName);
         } else if (dhcpClientTool == DhcpClientTool.UDHCPC) {
-            sb.append(DhcpClientTool.UDHCPC.getValue());
-            sb.append(" -i ");
-            sb.append(interfaceName);
-            sb.append(' ');
+            command.add(DhcpClientTool.UDHCPC.getValue());
+            command.add("-i");
+            command.add(interfaceName);
             if (usePidFile) {
-                sb.append("-p ");
-                sb.append(getPidFilename(interfaceName));
-                sb.append(' ');
+                command.add("-p");
+                command.add(getPidFilename(interfaceName));
             }
-            sb.append(" -S");
+            command.add("-S");
         }
-        sb.append("\n");
-        return sb.toString();
+        return command.toArray(new String[0]);
     }
 
-    private static String formReleaseCurrentLeaseCommand(String interfaceName) {
+    private static String[] formReleaseCurrentLeaseCommand(String interfaceName) {
 
-        StringBuilder sb = new StringBuilder();
+        List<String> command = new ArrayList<>();
         if (dhcpClientTool == DhcpClientTool.DHCLIENT) {
-            sb.append(DhcpClientTool.DHCLIENT.getValue());
-            sb.append(" -r ");
-            sb.append(interfaceName);
+            command.add(DhcpClientTool.DHCLIENT.getValue());
+            command.add("-r");
+            command.add(interfaceName);
         } else if (dhcpClientTool == DhcpClientTool.UDHCPC) {
-            sb.append(DhcpClientTool.UDHCPC.getValue());
-            sb.append(" -R ");
-            sb.append("-i ");
-            sb.append(interfaceName);
+            command.add(DhcpClientTool.UDHCPC.getValue());
+            command.add("-R");
+            command.add("-i");
+            command.add(interfaceName);
         }
-        sb.append("\n");
-        return sb.toString();
-    }
-
-    private static String formLeasesOption(String interfaceName) {
-
-        StringBuilder sb = new StringBuilder();
-        sb.append("-lf ");
-        sb.append(DhcpClientLeases.getInstance().getDhclientLeasesFilePath(interfaceName));
-        return sb.toString();
+        return command.toArray(new String[0]);
     }
 
     private List<Pid> getPid(String interfaceName) {
-        List<Pid> pids = new ArrayList<>();
         if (dhcpClientTool == DhcpClientTool.DHCLIENT) {
-            pids = this.executorService.getPids(DhcpClientTool.DHCLIENT.getValue() + " " + interfaceName);
+            return new ArrayList<>(this.executorService
+                    .getPids(new String[] { DhcpClientTool.DHCLIENT.getValue(), interfaceName }).values());
         } else if (dhcpClientTool == DhcpClientTool.UDHCPC) {
-            pids = this.executorService.getPids(DhcpClientTool.UDHCPC.getValue() + " " + interfaceName);
+            return new ArrayList<>(this.executorService
+                    .getPids(new String[] { DhcpClientTool.UDHCPC.getValue(), interfaceName }).values());
+        } else {
+            return new ArrayList<>();
         }
-        return pids;
     }
 
     private boolean isRunning(String interfaceName) {

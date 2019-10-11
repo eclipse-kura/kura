@@ -124,7 +124,7 @@ public class BluetoothLeScanner implements BluetoothProcessListener, BTSnoopList
         if (this.dumpProc != null) {
             logger.info("Killing btdump...");
             BluetoothUtil.stopBtdump(name, this.executorService);
-            BluetoothUtil.killCmd("hcidump -i " + name, LinuxSignal.SIGINT, executorService);
+            BluetoothUtil.killCmd(new String[] { "hcidump", "-i", name }, LinuxSignal.SIGINT, executorService);
             this.dumpProc.destroyBTSnoop();
         } else {
             logger.info("Cannot destroy btdump process...");

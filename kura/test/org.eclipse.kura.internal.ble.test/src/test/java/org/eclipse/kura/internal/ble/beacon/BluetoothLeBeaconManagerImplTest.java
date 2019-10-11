@@ -14,7 +14,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -509,7 +508,7 @@ public class BluetoothLeBeaconManagerImplTest {
         BluetoothLeBeaconManagerImpl svc = new BluetoothLeBeaconManagerImpl() {
 
             @Override
-            protected BluetoothProcess execBtdump(String interfaceName) throws IOException {
+            protected BluetoothProcess execBtDump(String interfaceName) throws IOException {
                 BluetoothProcess proc = mock(BluetoothProcess.class);
                 when(proc.toString()).thenReturn(interfaceName);
 
@@ -526,7 +525,7 @@ public class BluetoothLeBeaconManagerImplTest {
         };
 
         CommandExecutorService esMock = mock(CommandExecutorService.class);
-        when(esMock.kill(anyString(), anyObject())).thenReturn(true);
+        when(esMock.kill(anyObject(), anyObject())).thenReturn(true);
         svc.setExecutorService(esMock);
 
         BluetoothLeAdapter adapter = mock(BluetoothLeAdapter.class);
@@ -562,7 +561,7 @@ public class BluetoothLeBeaconManagerImplTest {
         BluetoothLeBeaconManagerImpl svc = new BluetoothLeBeaconManagerImpl() {
 
             @Override
-            protected BluetoothProcess execBtdump(String interfaceName) throws IOException {
+            protected BluetoothProcess execBtDump(String interfaceName) throws IOException {
                 BluetoothProcess proc = mock(BluetoothProcess.class);
                 when(proc.toString()).thenReturn(interfaceName);
 

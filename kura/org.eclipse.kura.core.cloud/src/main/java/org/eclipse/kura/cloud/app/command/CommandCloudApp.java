@@ -34,8 +34,8 @@ import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.executor.Command;
-import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.osgi.service.component.ComponentContext;
@@ -340,12 +340,13 @@ public class CommandCloudApp implements ConfigurableComponent, PasswordCommandSe
 
     private CommandStatus executeProcessSync(String dir, String[] cmdarray, String[] envp, int timeout,
             OutputStream out, OutputStream err) {
-        Command command = new Command(String.join(" ", cmdarray));
+        Command command = new Command(cmdarray);
         command.setTimeout(timeout);
         command.setDirectory(dir);
         command.setEnvironment(getEnvironmentMap(envp));
         command.setOutputStream(out);
         command.setErrorStream(err);
+        command.setExecuteInAShell(true);
         return this.executorService.execute(command);
     }
 
@@ -354,12 +355,13 @@ public class CommandCloudApp implements ConfigurableComponent, PasswordCommandSe
         Consumer<CommandStatus> callback = status -> {
             // Do nothing...
         };
-        Command command = new Command(String.join(" ", cmdarray));
+        Command command = new Command(cmdarray);
         command.setTimeout(timeout);
         command.setDirectory(dir);
         command.setEnvironment(getEnvironmentMap(envp));
         command.setOutputStream(out);
         command.setErrorStream(err);
+        command.setExecuteInAShell(true);
         this.executorService.execute(command, callback);
     }
 

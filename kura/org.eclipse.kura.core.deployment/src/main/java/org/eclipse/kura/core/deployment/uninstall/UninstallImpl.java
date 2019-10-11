@@ -20,8 +20,8 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.deployment.CloudDeploymentHandlerV2;
 import org.eclipse.kura.core.deployment.UninstallStatus;
 import org.eclipse.kura.executor.Command;
-import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
 import org.osgi.service.deploymentadmin.DeploymentAdmin;
 import org.osgi.service.deploymentadmin.DeploymentPackage;
 import org.slf4j.Logger;
@@ -104,7 +104,7 @@ public class UninstallImpl {
                 Consumer<CommandStatus> commandCallback = status -> {
                     // Do nothing...
                 };
-                this.executorService.execute(new Command("reboot"), commandCallback);
+                this.executorService.execute(new Command(new String[] { "reboot" }), commandCallback);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 logger.error("Failed to reboot system", e);

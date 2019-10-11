@@ -59,8 +59,8 @@ public class BluetoothAdapterImpl implements BluetoothAdapter {
         buildAdapter(name);
     }
 
-    public BluetoothAdapterImpl(String name, BluetoothBeaconCommandListener bbcl, CommandExecutorService executorService)
-            throws KuraException {
+    public BluetoothAdapterImpl(String name, BluetoothBeaconCommandListener bbcl,
+            CommandExecutorService executorService) throws KuraException {
         this.name = name;
         this.bbcl = bbcl;
         this.executorService = executorService;
@@ -192,11 +192,7 @@ public class BluetoothAdapterImpl implements BluetoothAdapter {
                 OCF_ADVERTISING_ENABLE_CMD);
         logger.info("Start Advertising on interface {}", this.name);
         String[] cmd = { "cmd", OGF_CONTROLLER_CMD, OCF_ADVERTISING_ENABLE_CMD, "01" };
-        try {
-            BluetoothUtil.hcitoolCmd(this.name, cmd, bbl, this.executorService);
-        } catch (IOException e) {
-            logger.error("Failed to start beacon advertising", e);
-        }
+        runHcitoolCmd(bbl, cmd);
 
     }
 
@@ -209,11 +205,7 @@ public class BluetoothAdapterImpl implements BluetoothAdapter {
                 OCF_ADVERTISING_ENABLE_CMD);
         logger.info("Stop Advertising on interface {}", this.name);
         String[] cmd = { "cmd", OGF_CONTROLLER_CMD, OCF_ADVERTISING_ENABLE_CMD, "00" };
-        try {
-            BluetoothUtil.hcitoolCmd(this.name, cmd, bbl, this.executorService);
-        } catch (IOException e) {
-            logger.error("Failed to stop beacon advertising", e);
-        }
+        runHcitoolCmd(bbl, cmd);
     }
 
     @Override
@@ -232,11 +224,7 @@ public class BluetoothAdapterImpl implements BluetoothAdapter {
         logger.info("Set Advertising Parameters on interface {}", this.name);
         String[] cmd = { "cmd", OGF_CONTROLLER_CMD, OCF_ADVERTISING_PARAM_CMD, minHex[1], minHex[0], maxHex[1],
                 maxHex[0], "03", "00", "00", "00", "00", "00", "00", "00", "00", "07", "00" };
-        try {
-            BluetoothUtil.hcitoolCmd(this.name, cmd, bbl, this.executorService);
-        } catch (IOException e) {
-            logger.error("Failed to set beacon advertising interval", e);
-        }
+        runHcitoolCmd(bbl, cmd);
 
     }
 
@@ -259,11 +247,7 @@ public class BluetoothAdapterImpl implements BluetoothAdapter {
         logger.debug("Set Advertising Data : hcitool -i {} cmd {} {} {}", this.name, OGF_CONTROLLER_CMD,
                 OCF_ADVERTISING_DATA_CMD, Arrays.toString(dataHex));
         logger.info("Set Advertising Data on interface {}", this.name);
-        try {
-            BluetoothUtil.hcitoolCmd(this.name, cmd, bbl, this.executorService);
-        } catch (IOException e) {
-            logger.error("Failed to set beacon advertising data", e);
-        }
+        runHcitoolCmd(bbl, cmd);
 
     }
 
@@ -283,10 +267,14 @@ public class BluetoothAdapterImpl implements BluetoothAdapter {
             cmd[i + 3] = paramArray[i];
         }
 
+        runHcitoolCmd(bbl, cmd);
+    }
+
+    private void runHcitoolCmd(BluetoothConfigurationProcessListener bbl, String[] cmd) {
         try {
             BluetoothUtil.hcitoolCmd(this.name, cmd, bbl, this.executorService);
         } catch (IOException e) {
-            logger.error("Failed to execute hcitool command", e);
+            logger.error("Failed to set beacon advertising data", e);
         }
     }
 

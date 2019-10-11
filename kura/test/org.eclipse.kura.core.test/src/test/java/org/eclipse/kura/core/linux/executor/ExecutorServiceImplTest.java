@@ -142,7 +142,7 @@ public class ExecutorServiceImplTest {
     @Test
     public void executeSyncCommand() {
         System.out.println(service.getClass().getSimpleName() + ": Test synchronous command execution...");
-        Command command = new Command("ls -all");
+        Command command = new Command(new String[] { "ls", "-all" });
         command.setTimeout(10);
         command.setDirectory(TMP);
         CommandStatus status = service.execute(command);
@@ -152,7 +152,7 @@ public class ExecutorServiceImplTest {
     @Test
     public void executeSyncCommandWithFolder() {
         System.out.println(service.getClass().getSimpleName() + ": Test synchronous command execution with folder...");
-        Command command = new Command("pwd");
+        Command command = new Command(new String[] { "pwd" });
         command.setTimeout(10);
         command.setDirectory(TMP);
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -166,7 +166,7 @@ public class ExecutorServiceImplTest {
     public void executeSyncCommandWithVariables() {
         System.out
                 .println(service.getClass().getSimpleName() + ": Test synchronous command execution with variables...");
-        Command command = new Command("env");
+        Command command = new Command(new String[] { "env" });
         command.setTimeout(10);
         command.setDirectory(TMP);
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -182,7 +182,7 @@ public class ExecutorServiceImplTest {
     @Test
     public void executeSyncCommandWithTimeout() {
         System.out.println(service.getClass().getSimpleName() + ": Test synchronous command execution with timeout...");
-        Command command = new Command("sleep 20");
+        Command command = new Command(new String[] { "sleep", "20" });
         command.setTimeout(10);
         command.setDirectory(TMP);
         long startTime = System.currentTimeMillis();
@@ -203,7 +203,7 @@ public class ExecutorServiceImplTest {
             lock.countDown();
         };
 
-        Command command = new Command("ls -all");
+        Command command = new Command(new String[] { "ls", "-all" });
         command.setTimeout(10);
         command.setDirectory(TMP);
         service.execute(command, callback);
@@ -230,7 +230,7 @@ public class ExecutorServiceImplTest {
             lock.countDown();
         };
 
-        Command command = new Command("pwd");
+        Command command = new Command(new String[] { "pwd" });
         command.setTimeout(10);
         command.setDirectory(TMP);
         command.setOutputStream(outputStream);
@@ -260,7 +260,7 @@ public class ExecutorServiceImplTest {
             lock.countDown();
         };
 
-        Command command = new Command("env");
+        Command command = new Command(new String[] { "env" });
         command.setTimeout(10);
         command.setDirectory(TMP);
         command.setOutputStream(outputStream);
@@ -292,7 +292,7 @@ public class ExecutorServiceImplTest {
             lock.countDown();
         };
 
-        Command command = new Command("sleep 20");
+        Command command = new Command(new String[] { "sleep", "20" });
         command.setTimeout(10);
         command.setDirectory(TMP);
         command.setSignal(LinuxSignal.SIGTERM);
@@ -328,19 +328,19 @@ public class ExecutorServiceImplTest {
         Consumer<CommandStatus> callback = status -> {
             // Do nothing...
         };
-        Command command = new Command("sleep 30");
+        Command command = new Command(new String[] { "sleep", "30" });
         command.setTimeout(10);
         command.setDirectory(TMP);
         command.setSignal(LinuxSignal.SIGTERM);
         service.execute(command, callback);
 
-        List<Pid> pids = service.getPids("sleep 30");
+        Map<String, Pid> pids = service.getPids(new String[] { "sleep", "30" });
         assertFalse(pids.isEmpty());
-        for (Pid pid : pids) {
+        for (Pid pid : pids.values()) {
             service.stop(pid, LinuxSignal.SIGTERM);
         }
 
-        pids = service.getPids("sleep 30");
+        pids = service.getPids(new String[] { "sleep", "30" });
         assertTrue(pids.isEmpty());
     }
 
@@ -363,16 +363,16 @@ public class ExecutorServiceImplTest {
         Consumer<CommandStatus> callback = status -> {
             // Do nothing...
         };
-        Command command = new Command("sleep 30");
+        Command command = new Command(new String[] { "sleep", "30" });
         command.setTimeout(10);
         command.setDirectory(TMP);
         command.setSignal(signal);
         service.execute(command, callback);
 
-        List<Pid> pids = service.getPids("sleep 30");
+        Map<String, Pid> pids = service.getPids(new String[] { "sleep", "30" });
         assertFalse(pids.isEmpty());
-        service.kill("sleep 30", signal);
-        pids = service.getPids("sleep 30");
+        service.kill(new String[] { "sleep", "30" }, signal);
+        pids = service.getPids(new String[] { "sleep", "30" });
         assertTrue(pids.isEmpty());
     }
 
@@ -382,16 +382,16 @@ public class ExecutorServiceImplTest {
         Consumer<CommandStatus> callback = status -> {
             // Do nothing...
         };
-        Command command = new Command("sleep 30");
+        Command command = new Command(new String[] { "sleep", "30" });
         command.setTimeout(30);
         command.setDirectory(TMP);
         service.execute(command, callback);
-        List<Pid> pids = service.getPids("sleep 30");
+        Map<String, Pid> pids = service.getPids(new String[] { "sleep", "30" });
         assertFalse(pids.isEmpty());
-        for (Pid pid : pids) {
+        for (Pid pid : pids.values()) {
             assertTrue(service.isRunning(pid));
         }
-        for (Pid pid : pids) {
+        for (Pid pid : pids.values()) {
             service.stop(pid, LinuxSignal.SIGKILL);
         }
     }
@@ -402,15 +402,15 @@ public class ExecutorServiceImplTest {
         Consumer<CommandStatus> callback = status -> {
             // Do nothing...
         };
-        Command command = new Command("sleep 30");
+        Command command = new Command(new String[] { "sleep", "30" });
         command.setTimeout(30);
         command.setDirectory(TMP);
         service.execute(command, callback);
-        List<Pid> pids = service.getPids("sleep 30");
+        Map<String, Pid> pids = service.getPids(new String[] { "sleep", "30" });
         assertFalse(pids.isEmpty());
-        assertTrue(service.isRunning("sleep 30"));
+        assertTrue(service.isRunning(new String[] { "sleep", "30" }));
 
-        for (Pid pid : pids) {
+        for (Pid pid : pids.values()) {
             service.stop(pid, LinuxSignal.SIGKILL);
         }
     }
@@ -421,11 +421,11 @@ public class ExecutorServiceImplTest {
         Consumer<CommandStatus> callback = status -> {
             // Do nothing...
         };
-        Command command = new Command("sleep 30");
+        Command command = new Command(new String[] { "sleep", "30" });
         command.setTimeout(30);
         command.setDirectory(TMP);
         service.execute(command, callback);
-        List<Pid> pids = service.getPids("sleep 30");
+        Map<String, Pid> pids = service.getPids(new String[] { "sleep", "30" });
         assertFalse(pids.isEmpty());
 
         String line;
@@ -440,7 +440,7 @@ public class ExecutorServiceImplTest {
             Runtime.getRuntime().exec("kill -9 " + pid);
         }
         for (Integer pid : pidNumbers) {
-            assertTrue(pids.contains(new LinuxPid(pid)));
+            assertTrue(pids.values().contains(new LinuxPid(pid)));
         }
     }
 }

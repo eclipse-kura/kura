@@ -14,12 +14,12 @@ package org.eclipse.kura.linux.bluetooth.util;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.StringJoiner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -85,7 +85,7 @@ public class BluetoothUtil {
         String[] commandLine = { HCICONFIG, name, "version" };
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         ByteArrayOutputStream errorStream = new ByteArrayOutputStream();
-        Command command = new Command(String.join(" ", commandLine));
+        Command command = new Command(commandLine);
         command.setTimeout(60);
         command.setOutputStream(outputStream);
         command.setErrorStream(errorStream);
@@ -145,7 +145,7 @@ public class BluetoothUtil {
         String[] commandLine = { HCICONFIG, name };
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         ByteArrayOutputStream errorStream = new ByteArrayOutputStream();
-        Command command = new Command(String.join(" ", commandLine));
+        Command command = new Command(commandLine);
         command.setTimeout(60);
         command.setOutputStream(outputStream);
         command.setErrorStream(errorStream);
@@ -159,7 +159,9 @@ public class BluetoothUtil {
                 }
             }
         } else {
-            logger.error(ERROR_EXECUTING_COMMAND_MESSAGE, String.join(" ", commandLine));
+            if (logger.isErrorEnabled()) {
+                logger.error(ERROR_EXECUTING_COMMAND_MESSAGE, String.join(" ", commandLine));
+            }
         }
 
         return isEnabled;
@@ -174,7 +176,7 @@ public class BluetoothUtil {
         String[] commandLine = { HCICONFIG, name, cmd };
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         ByteArrayOutputStream errorStream = new ByteArrayOutputStream();
-        Command command = new Command(String.join(" ", commandLine));
+        Command command = new Command(commandLine);
         command.setTimeout(60);
         command.setOutputStream(outputStream);
         command.setErrorStream(errorStream);
@@ -182,7 +184,9 @@ public class BluetoothUtil {
         if ((Integer) status.getExitStatus().getExitValue() == 0) {
             outputString = new String(outputStream.toByteArray(), Charsets.UTF_8);
         } else {
-            logger.error(ERROR_EXECUTING_COMMAND_MESSAGE, String.join(" ", commandLine));
+            if (logger.isErrorEnabled()) {
+                logger.error(ERROR_EXECUTING_COMMAND_MESSAGE, String.join(" ", commandLine));
+            }
         }
         return outputString;
     }
@@ -190,9 +194,12 @@ public class BluetoothUtil {
     /*
      * Utility method to send specific kill commands to processes.
      */
-    public static void killCmd(String cmd, Signal signal, CommandExecutorService executorService) {
-        List<Pid> pids = executorService.getPids(cmd);
-        for (Pid pid : pids) {
+    public static void killCmd(String[] cmd, Signal signal, CommandExecutorService executorService) {
+        // Get the pids and filter the ones that exactly match the command
+        Map<String, Pid> pids = executorService.getPids(cmd).entrySet().stream()
+                .filter(entry -> entry.getKey().equals(String.join(" ", cmd)))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        for (Pid pid : pids.values()) {
             if (!executorService.stop(pid, signal)) {
                 logger.warn("Failed to stop command with pid {}", pid.getPid());
             }
@@ -491,18 +498,17 @@ public class BluetoothUtil {
     }
 
     public static boolean stopHcitool(String interfaceName, CommandExecutorService executorService, String... params) {
-        StringJoiner joiner = new StringJoiner(" ");
-        joiner.add(HCITOOL);
-        joiner.add("-i");
-        joiner.add(interfaceName);
-        joiner.add(Arrays.asList(params).stream().collect(Collectors.joining(" ")));
-        return executorService.kill(joiner.toString(), LinuxSignal.SIGINT);
+        List<String> killCommand = new ArrayList<>();
+        killCommand.add(HCITOOL);
+        killCommand.add("-i");
+        killCommand.add(interfaceName);
+        Arrays.asList(params).stream().forEach(s -> killCommand.add(s));
+        return executorService.kill(killCommand.toArray(new String[0]), LinuxSignal.SIGINT);
     }
 
     public static boolean stopBtdump(String interfaceName, CommandExecutorService executorService) {
-        StringJoiner joiner = new StringJoiner(" ");
-        joiner.add(BTDUMP);
-        joiner.add(interfaceName);
-        return executorService.kill(joiner.toString(), null);
+        String[] killCommand = { BTDUMP, interfaceName };
+        return executorService.kill(killCommand, null);
     }
+
 }

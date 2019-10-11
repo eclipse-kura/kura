@@ -21,9 +21,8 @@ import org.apache.commons.io.output.NullOutputStream;
  * The CommandStatus object is returned by the {@link CommandExecutorService} after the execution of a command.
  * It contains all the relevant informations about the result of the command execution.
  * <p>
- * The parameter are the following:
+ * The parameters are the following:
  * <ul>
- * <li>pid : the (optional) process ID of the command</li>
  * <li>exitStatus : the {@link ExitValue} of the command. A value other than 0 means an error. When the command is
  * stopped by timeout the exit value is 124.</li>
  * <li>isTimedout : a flag that signals that the command was stopped by timeout</li>
@@ -35,7 +34,6 @@ import org.apache.commons.io.output.NullOutputStream;
  */
 public class CommandStatus {
 
-    private Pid pid;
     private ExitValue exitStatus;
     private OutputStream outputStream;
     private OutputStream errorStream;
@@ -47,14 +45,6 @@ public class CommandStatus {
         this.outputStream = new NullOutputStream();
         this.errorStream = new NullOutputStream();
         this.isTimedout = false;
-    }
-
-    public Pid getPid() {
-        return this.pid;
-    }
-
-    public void setPid(Pid pid) {
-        this.pid = pid;
     }
 
     public ExitValue getExitStatus() {

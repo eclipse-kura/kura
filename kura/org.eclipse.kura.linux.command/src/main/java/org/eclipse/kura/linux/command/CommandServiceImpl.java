@@ -30,8 +30,8 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.command.CommandService;
 import org.eclipse.kura.executor.Command;
-import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
 
 public class CommandServiceImpl implements CommandService {
 
@@ -77,7 +77,7 @@ public class CommandServiceImpl implements CommandService {
     }
 
     private String runScript(final Path scriptFile) {
-        Command command = new Command(scriptFile.toString());
+        Command command = new Command(new String[] { scriptFile.toString() });
         command.setDirectory(TEMP_DIR.getAbsolutePath());
         command.setOutputStream(new ByteArrayOutputStream());
         command.setErrorStream(new ByteArrayOutputStream());

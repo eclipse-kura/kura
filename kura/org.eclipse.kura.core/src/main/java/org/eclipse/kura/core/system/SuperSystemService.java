@@ -12,8 +12,8 @@ import java.io.ByteArrayOutputStream;
 
 import org.apache.commons.io.Charsets;
 import org.eclipse.kura.executor.Command;
-import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +24,7 @@ public class SuperSystemService {
 
     private static final Logger logger = LoggerFactory.getLogger(SuperSystemService.class);
 
-    protected static String runSystemCommand(String commandLine, CommandExecutorService executorService) {
+    protected static String runSystemCommand(String[] commandLine, CommandExecutorService executorService) {
         String response = "";
         Command command = new Command(commandLine);
         command.setTimeout(60);
@@ -33,13 +33,15 @@ public class SuperSystemService {
         if ((Integer) status.getExitStatus().getExitValue() == 0) {
             response = new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray(), Charsets.UTF_8);
         } else {
-            logger.error("failed to run commands {}", commandLine);
+            if (logger.isErrorEnabled()) {
+                logger.error("failed to run commands {}", String.join(" ", commandLine));
+            }
         }
         return response;
     }
 
-    protected static String runSystemCommand(String[] commands, CommandExecutorService executorService) {
-        return runSystemCommand(String.join(" ", commands), executorService);
+    protected static String runSystemCommand(String commandLine, CommandExecutorService executorService) {
+        return runSystemCommand(commandLine.split("\\s+"), executorService);
     }
 
 }

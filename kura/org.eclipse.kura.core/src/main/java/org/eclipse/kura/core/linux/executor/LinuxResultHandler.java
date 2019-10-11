@@ -19,6 +19,7 @@ import org.eclipse.kura.executor.CommandStatus;
 
 public class LinuxResultHandler implements ExecuteResultHandler {
 
+    private static final int TIMEOUT_EXIT_VALUE = 124;
     private final Consumer<CommandStatus> callback;
     private CommandStatus commandStatus;
 
@@ -43,7 +44,7 @@ public class LinuxResultHandler implements ExecuteResultHandler {
     @Override
     public void onProcessFailed(ExecuteException e) {
         this.commandStatus.setExitStatus(new LinuxExitValue(e.getExitValue()));
-        if (e.getExitValue() == 124) {
+        if (e.getExitValue() == TIMEOUT_EXIT_VALUE) {
             this.commandStatus.setTimedout(true);
         }
         this.callback.accept(this.commandStatus);

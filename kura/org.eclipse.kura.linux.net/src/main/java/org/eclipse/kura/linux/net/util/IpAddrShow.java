@@ -21,8 +21,8 @@ import org.apache.commons.io.Charsets;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.executor.Command;
-import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,14 +61,14 @@ public class IpAddrShow {
         if (this.ifaceName != null) {
             sb.append(" dev ").append(this.ifaceName);
         }
-        String cmd = sb.toString();
+        String[] cmd = sb.toString().split("\\s+");
         Command command = new Command(cmd);
         command.setTimeout(60);
         command.setOutputStream(new ByteArrayOutputStream());
         CommandStatus status = this.executorService.execute(command);
         int exitValue = (Integer) status.getExitStatus().getExitValue();
         if (exitValue != 0) {
-            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, cmd, exitValue);
+            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, sb.toString(), exitValue);
         }
         parseExecLink(new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray(), Charsets.UTF_8));
     }
@@ -137,14 +137,14 @@ public class IpAddrShow {
         if (this.ifaceName != null) {
             sb.append(" dev ").append(this.ifaceName);
         }
-        String cmd = sb.toString();
+        String[] cmd = sb.toString().split("\\s+");
         Command command = new Command(cmd);
         command.setTimeout(60);
         command.setOutputStream(new ByteArrayOutputStream());
         CommandStatus status = this.executorService.execute(command);
         int exitValue = (Integer) status.getExitStatus().getExitValue();
         if (exitValue != 0) {
-            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, cmd, exitValue);
+            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, sb.toString(), exitValue);
         }
         parseExecInet(new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray(), Charsets.UTF_8));
     }

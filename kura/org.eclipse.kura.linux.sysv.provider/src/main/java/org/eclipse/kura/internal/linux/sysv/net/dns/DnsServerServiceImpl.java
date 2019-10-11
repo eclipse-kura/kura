@@ -38,6 +38,8 @@ import org.slf4j.LoggerFactory;
 
 public class DnsServerServiceImpl implements DnsServerService {
 
+    private static final String BIND9_COMMAND = "/etc/init.d/bind9";
+
     private static final Logger logger = LoggerFactory.getLogger(DnsServerServiceImpl.class);
 
     private static final String PERSISTENT_CONFIG_FILE_NAME = "/etc/bind/named.conf";
@@ -146,7 +148,7 @@ public class DnsServerServiceImpl implements DnsServerService {
     @Override
     public boolean isRunning() {
         // Check if named is running
-        return !this.executorService.getPids(DnsServerServiceImpl.PROC_STRING).isEmpty();
+        return this.executorService.isRunning(new String[] { DnsServerServiceImpl.PROC_STRING });
     }
 
     @Override
@@ -158,7 +160,7 @@ public class DnsServerServiceImpl implements DnsServerService {
             stop();
         }
         // Start named
-        CommandStatus status = this.executorService.execute(new Command("/etc/init.d/bind9 start"));
+        CommandStatus status = this.executorService.execute(new Command(new String[] { BIND9_COMMAND, "start" }));
         if ((Integer) status.getExitStatus().getExitValue() == 0) {
             logger.debug("DNS server started.");
             logger.trace("{}", this.dnsServerConfigIP4);
@@ -170,7 +172,7 @@ public class DnsServerServiceImpl implements DnsServerService {
     @Override
     public void stop() throws KuraException {
         // Stop named
-        CommandStatus status = this.executorService.execute(new Command("/etc/init.d/bind9 stop"));
+        CommandStatus status = this.executorService.execute(new Command(new String[] { BIND9_COMMAND, "stop" }));
         if ((Integer) status.getExitStatus().getExitValue() == 0) {
             logger.debug("DNS server stopped.");
             logger.trace("{}", this.dnsServerConfigIP4);
@@ -183,7 +185,7 @@ public class DnsServerServiceImpl implements DnsServerService {
     @Override
     public void restart() throws KuraException {
         // Restart named
-        CommandStatus status = this.executorService.execute(new Command("/etc/init.d/named restart"));
+        CommandStatus status = this.executorService.execute(new Command(new String[] { BIND9_COMMAND, "restart" }));
         if ((Integer) status.getExitStatus().getExitValue() == 0) {
             logger.debug("DNS server restarted.");
         } else {

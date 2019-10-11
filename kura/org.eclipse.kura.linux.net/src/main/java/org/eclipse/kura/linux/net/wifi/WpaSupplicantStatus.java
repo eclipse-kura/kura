@@ -20,8 +20,8 @@ import java.util.Properties;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.executor.Command;
-import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,14 +44,16 @@ public class WpaSupplicantStatus {
     public WpaSupplicantStatus(String iface, CommandExecutorService executorService) throws KuraException {
 
         this.props = new Properties();
-        String cmd = formSupplicantStatusCommand(iface);
+        String[] cmd = formSupplicantStatusCommand(iface);
         Command command = new Command(cmd);
         command.setTimeout(60);
         command.setOutputStream(new ByteArrayOutputStream());
         CommandStatus status = executorService.execute(command);
         int exitValue = (Integer) status.getExitStatus().getExitValue();
         if (exitValue != 0) {
-            logger.error("error executing command --- {} --- exit value = {}", cmd, exitValue);
+            if (logger.isErrorEnabled()) {
+                logger.error("error executing command --- {} --- exit value = {}", String.join(" ", cmd), exitValue);
+            }
             throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, "Failed to get wpa supplicant status");
         }
 
@@ -104,11 +106,7 @@ public class WpaSupplicantStatus {
         return this.props.getProperty(PROP_ADDRESS);
     }
 
-    private static String formSupplicantStatusCommand(String iface) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("wpa_cli -i ");
-        sb.append(iface);
-        sb.append(" status");
-        return sb.toString();
+    private static String[] formSupplicantStatusCommand(String iface) {
+        return new String[] { "wpa_cli", "-i", iface, "status" };
     }
 }

@@ -42,7 +42,9 @@ public class DnsServerServiceImpl implements DnsServerService {
 
     private static final String PERSISTENT_CONFIG_FILE_NAME = "/etc/named.conf";
     private static final String RFC_1912_ZONES_FILENAME = "/etc/named.rfc1912.zones";
-    private static final String PROC_STRING = "named -u named -t";
+    private static final String PROC_STRING = "/usr/sbin/named";
+    private static final String NAMED = "named";
+    private static final String SYSTEMCTL_COMMAND = "/bin/systemctl";
 
     private DnsServerConfigIP4 dnsServerConfigIP4;
     private CommandExecutorService executorService;
@@ -146,7 +148,7 @@ public class DnsServerServiceImpl implements DnsServerService {
     @Override
     public boolean isRunning() {
         // Check if named is running
-        return !this.executorService.getPids(DnsServerServiceImpl.PROC_STRING).isEmpty();
+        return this.executorService.isRunning(new String[] { DnsServerServiceImpl.PROC_STRING });
     }
 
     @Override
@@ -158,7 +160,8 @@ public class DnsServerServiceImpl implements DnsServerService {
             stop();
         }
         // Start named
-        CommandStatus status = this.executorService.execute(new Command("/bin/systemctl start named"));
+        CommandStatus status = this.executorService
+                .execute(new Command(new String[] { SYSTEMCTL_COMMAND, "start", NAMED }));
         if ((Integer) status.getExitStatus().getExitValue() == 0) {
             logger.debug("DNS server started.");
             logger.trace("{}", this.dnsServerConfigIP4);
@@ -170,7 +173,8 @@ public class DnsServerServiceImpl implements DnsServerService {
     @Override
     public void stop() throws KuraException {
         // Stop named
-        CommandStatus status = this.executorService.execute(new Command("/bin/systemctl stop named"));
+        CommandStatus status = this.executorService
+                .execute(new Command(new String[] { SYSTEMCTL_COMMAND, "stop", NAMED }));
         if ((Integer) status.getExitStatus().getExitValue() == 0) {
             logger.debug("DNS server stopped.");
             logger.trace("{}", this.dnsServerConfigIP4);
@@ -183,7 +187,8 @@ public class DnsServerServiceImpl implements DnsServerService {
     @Override
     public void restart() throws KuraException {
         // Restart named
-        CommandStatus status = this.executorService.execute(new Command("/bin/systemctl restart named"));
+        CommandStatus status = this.executorService
+                .execute(new Command(new String[] { SYSTEMCTL_COMMAND, "restart", NAMED }));
         if ((Integer) status.getExitStatus().getExitValue() == 0) {
             logger.debug("DNS server restarted.");
         } else {

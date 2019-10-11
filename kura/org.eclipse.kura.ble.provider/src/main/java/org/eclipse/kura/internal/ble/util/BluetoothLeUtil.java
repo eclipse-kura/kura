@@ -14,11 +14,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.StringJoiner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
@@ -207,18 +205,16 @@ public class BluetoothLeUtil {
     }
 
     public static boolean stopHcitool(String interfaceName, CommandExecutorService executorService, String... params) {
-        StringJoiner joiner = new StringJoiner(" ");
-        joiner.add(HCITOOL);
-        joiner.add("-i");
-        joiner.add(interfaceName);
-        joiner.add(Arrays.asList(params).stream().collect(Collectors.joining(" ")));
-        return executorService.kill(joiner.toString(), LinuxSignal.SIGINT);
+        List<String> killCommand = new ArrayList<>();
+        killCommand.add(HCITOOL);
+        killCommand.add("-i");
+        killCommand.add(interfaceName);
+        Arrays.asList(params).stream().forEach(s -> killCommand.add(s));
+        return executorService.kill(killCommand.toArray(new String[0]), LinuxSignal.SIGINT);
     }
 
     public static boolean stopBtdump(String interfaceName, CommandExecutorService executorService) {
-        StringJoiner joiner = new StringJoiner(" ");
-        joiner.add(BTDUMP);
-        joiner.add(interfaceName);
-        return executorService.kill(joiner.toString(), null);
+        String[] killCommand = { BTDUMP, interfaceName };
+        return executorService.kill(killCommand, null);
     }
 }

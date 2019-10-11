@@ -13,6 +13,8 @@ package org.eclipse.kura.linux.net.ppp;
 
 import java.io.File;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -44,12 +46,12 @@ public class PppLinux {
 
     public void connect(String iface, String port) throws KuraException {
 
-        String cmd = formConnectCommand(iface, port);
+        String[] cmd = formConnectCommand(iface, port);
         Command command = new Command(cmd);
         command.setTimeout(60);
         CommandStatus status = this.executorService.execute(command);
         if ((Integer) status.getExitStatus().getExitValue() != 0) {
-            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, cmd + " command failed");
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, String.join(" ", cmd) + " command failed");
         }
     }
 
@@ -108,7 +110,11 @@ public class PppLinux {
     private Pid getPid(String iface, String port) {
         Pid pid = new LinuxPid(-1);
         synchronized (lock) {
-            List<Pid> pids = this.executorService.getPids(formConnectCommand(iface, port));
+            String[] command = formConnectCommand(iface, port);
+            // Filter the pid whose command exactly matches the connectCommand
+            List<Pid> pids = executorService.getPids(command).entrySet().stream()
+                    .filter(entry -> entry.getKey().equals(String.join(" ", command))).map(Map.Entry::getValue)
+                    .collect(Collectors.toList());
             if (!pids.isEmpty()) {
                 pid = pids.get(0);
             }
@@ -130,9 +136,7 @@ public class PppLinux {
         }
     }
 
-    private static String formConnectCommand(String peer, String port) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(PPP_DAEMON).append(' ').append(port).append(' ').append("call").append(' ').append(peer);
-        return sb.toString();
+    private static String[] formConnectCommand(String peer, String port) {
+        return new String[] { PPP_DAEMON, port, "call", peer };
     }
 }

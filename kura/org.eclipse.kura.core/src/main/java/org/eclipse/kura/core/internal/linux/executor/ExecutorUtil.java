@@ -20,10 +20,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
@@ -45,14 +46,10 @@ import org.slf4j.LoggerFactory;
 
 public class ExecutorUtil {
 
-    private static final String COMMAND = "Command ";
-
-    private static final String FAILED_TO_GET_PID_MESSAGE = "Failed to get pid for command '{}'";
-
     private static final Logger logger = LoggerFactory.getLogger(ExecutorUtil.class);
-
+    private static final String COMMAND = "Command ";
+    private static final String FAILED_TO_GET_PID_MESSAGE = "Failed to get pid for command '{}'";
     private static final File TEMP_DIR = new File(System.getProperty("java.io.tmpdir"));
-    private static final int GET_PID_ATTEMPTS = 5;
 
     private static String commandUsername = "kura";
 
@@ -70,44 +67,22 @@ public class ExecutorUtil {
 
     public static CommandStatus executeUnprivileged(Command command) {
         CommandLine commandLine = buildUnprivilegedCommand(command);
-        CommandStatus status = executeSync(command, commandLine);
-        // Set exact parameter to true to get the process forked by the sh command
-        List<Pid> pids = getPids(command.getCommandLine());
-        if (!pids.isEmpty()) {
-            status.setPid(pids.get(0));
-        }
-        return status;
+        return executeSync(command, commandLine);
     }
 
     public static void executeUnprivileged(Command command, Consumer<CommandStatus> callback) {
         CommandLine commandLine = buildUnprivilegedCommand(command);
-        CommandStatus status = executeAsync(command, commandLine, callback);
-        // Set exact parameter to true to get the process forked by the sh command
-        List<Pid> pids = getPids(command.getCommandLine());
-        if (!pids.isEmpty()) {
-            status.setPid(pids.get(0));
-        }
+        executeAsync(command, commandLine, callback);
     }
 
     public static CommandStatus executePrivileged(Command command) {
         CommandLine commandLine = buildPrivilegedCommand(command);
-        CommandStatus status = executeSync(command, commandLine);
-        // Set exact parameter to true to get the process forked by the sh command
-        List<Pid> pids = getPids(command.getCommandLine());
-        if (!pids.isEmpty()) {
-            status.setPid(pids.get(0));
-        }
-        return status;
+        return executeSync(command, commandLine);
     }
 
     public static void executePrivileged(Command command, Consumer<CommandStatus> callback) {
         CommandLine commandLine = buildPrivilegedCommand(command);
-        CommandStatus status = executeAsync(command, commandLine, callback);
-        // Set exact parameter to true to get the process forked by the sh command
-        List<Pid> pids = getPids(command.getCommandLine());
-        if (!pids.isEmpty()) {
-            status.setPid(pids.get(0));
-        }
+        executeAsync(command, commandLine, callback);
     }
 
     public static boolean stopUnprivileged(Pid pid, Signal signal) {
@@ -122,10 +97,10 @@ public class ExecutorUtil {
         return isStopped;
     }
 
-    public static boolean killUnprivileged(String commandLine, Signal signal) {
+    public static boolean killUnprivileged(String[] commandLine, Signal signal) {
         List<Boolean> areAllKilled = new ArrayList<>();
-        List<Pid> pids = getPids(commandLine);
-        for (Pid pid : pids) {
+        Map<String, Pid> pids = getPids(commandLine);
+        for (Pid pid : pids.values()) {
             areAllKilled.add(stopUnprivileged(pid, signal));
         }
         return areAllKilled.stream().allMatch(b -> b);
@@ -143,10 +118,10 @@ public class ExecutorUtil {
         return isStopped;
     }
 
-    public static boolean killPrivileged(String commandLine, Signal signal) {
+    public static boolean killPrivileged(String[] commandLine, Signal signal) {
         boolean isKilled = true;
-        List<Pid> pids = getPids(commandLine);
-        for (Pid pid : pids) {
+        Map<String, Pid> pids = getPids(commandLine);
+        for (Pid pid : pids.values()) {
             isKilled &= stopPrivileged(pid, signal);
         }
         return isKilled;
@@ -178,37 +153,14 @@ public class ExecutorUtil {
         return isRunning;
     }
 
-    public static boolean isRunning(String commandLine) {
+    public static boolean isRunning(String[] commandLine) {
         return !getPids(commandLine).isEmpty();
     }
 
-    public static List<Pid> getPids(String commandLine) {
-        // Perform the search for the pid of a command/process for few times, since it could not be available just after
-        // a command is run.
-        int attempts = GET_PID_ATTEMPTS;
-        List<Integer> pids = new ArrayList<>();
-        while (attempts > 0 && pids.isEmpty()) {
-            pids = getPidsInternal(commandLine);
-            attempts--;
-        }
-        if (pids.isEmpty()) {
-            return new ArrayList<>();
-        } else {
-            return convertToPid(pids);
-        }
-    }
-
-    public static List<Pid> convertToPid(List<Integer> pids) {
-        return pids.stream().map(LinuxPid::new).collect(Collectors.toList());
-    }
-
-    private static List<Integer> getPidsInternal(String commandLine) {
-        List<Integer> pids = new ArrayList<>();
-        CommandLine pidofCommandLine = new CommandLine("pidof");
-        for (String token : commandLine.split("\\s+")) {
-            pidofCommandLine.addArgument(token.replace("-", ""), false); // Remove '-' from commandLine to avoid
-                                                                         // errors
-        }
+    public static Map<String, Pid> getPids(String[] commandLine) {
+        Map<String, Pid> pids = new HashMap<>();
+        CommandLine psCommandLine = new CommandLine("ps");
+        psCommandLine.addArgument("-ax");
         DefaultExecutor executor = new DefaultExecutor();
 
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -220,15 +172,38 @@ public class ExecutorUtil {
         executor.setExitValue(0);
         int exitValue = 1;
         try {
-            exitValue = executor.execute(pidofCommandLine);
+            exitValue = executor.execute(psCommandLine);
         } catch (IOException e) {
             logger.debug(FAILED_TO_GET_PID_MESSAGE, commandLine, e);
         }
         if (exitValue == 0) {
-            pids = Arrays.stream(new String(out.toByteArray(), UTF_8).split("\\s+")).map(Integer::parseInt)
-                    .collect(Collectors.toList());
+            pids = parsePids(out, commandLine);
         }
         return pids;
+    }
+
+    private static Map<String, Pid> parsePids(ByteArrayOutputStream out, String[] commandLine) {
+        Map<String, Pid> pids = new HashMap<>();
+        String pid;
+        String[] output = new String(out.toByteArray(), UTF_8).split("\n");
+        for (String line : output) {
+            StringTokenizer st = new StringTokenizer(line);
+            pid = st.nextToken();
+            st.nextElement();
+            st.nextElement();
+            st.nextElement();
+
+            // get the remainder of the line showing the command that was issued
+            line = line.substring(line.indexOf(st.nextToken()));
+            if (checkLine(line, commandLine)) {
+                pids.put(line, new LinuxPid(Integer.parseInt(pid)));
+            }
+        }
+        return pids;
+    }
+
+    private static boolean checkLine(String line, String[] tokens) {
+        return Arrays.stream(tokens).parallel().allMatch(line::contains);
     }
 
     private static CommandStatus executeSync(Command command, CommandLine commandLine) {
@@ -292,8 +267,7 @@ public class ExecutorUtil {
         return executor;
     }
 
-    private static CommandStatus executeAsync(Command command, CommandLine commandLine,
-            Consumer<CommandStatus> callback) {
+    private static void executeAsync(Command command, CommandLine commandLine, Consumer<CommandStatus> callback) {
         CommandStatus commandStatus = new CommandStatus(new LinuxExitValue(0));
         commandStatus.setOutputStream(command.getOutputStream());
         commandStatus.setErrorStream(command.getErrorStream());
@@ -318,25 +292,21 @@ public class ExecutorUtil {
             commandStatus.setExitStatus(new LinuxExitValue(1));
             logger.error(COMMAND + commandLine + " failed", e);
         }
-
-        return commandStatus;
     }
 
-    private static String buildKillCommand(Pid pid, Signal signal) {
+    private static String[] buildKillCommand(Pid pid, Signal signal) {
         Integer pidNumber = (Integer) pid.getPid();
-        StringBuilder killCommand = new StringBuilder("kill ");
-        killCommand.append("-" + signal.getSignalNumber() + " ");
-        killCommand.append(pidNumber);
-
-        logger.info("Attempting to send {} to process with pid {}", ((LinuxSignal) signal).name(), pidNumber);
-        return killCommand.toString();
+        if (logger.isInfoEnabled()) {
+            logger.info("Attempting to send {} to process with pid {}", ((LinuxSignal) signal).name(), pidNumber);
+        }
+        return new String[] { "kill", "-" + signal.getSignalNumber(), String.valueOf(pidNumber) };
     }
 
     private static CommandLine buildUnprivilegedCommand(Command command) {
         // Build the command as follows:
-        // sudo -u <command_user> -s VARS... timeout -s <signal> <timeout> sh -c "cd <directory>; <command>"
-        // or sudo -u <command_user> -s VARS... sh -c "cd <directory>; <command>"
-        // The timeout command is added because the commons-exec fails to destroy a process started with sudo
+        // sudo -u <command_user> -s VARS... timeout -s <signal> <timeout> sh -c "<command>"
+        // or sudo -u <command_user> -s VARS... sh -c "<command>"
+        // The timeout command is added because the commons-exec fails to destroy a process started by sudo
         CommandLine commandLine = new CommandLine("sudo");
         commandLine.addArgument("-u");
         commandLine.addArgument(ExecutorUtil.commandUsername);
@@ -357,25 +327,23 @@ public class ExecutorUtil {
 
         commandLine.addArgument("sh");
         commandLine.addArgument("-c");
-
-        StringBuilder sb = new StringBuilder();
-        sb.append("cd ");
-        String directory = command.getDirectory();
-        String workingDirectory = directory == null || directory.isEmpty() ? TEMP_DIR.getAbsolutePath() : directory;
-        sb.append(workingDirectory);
-        sb.append("; ");
-        sb.append(command.getCommandLine());
-        commandLine.addArgument(sb.toString(), false);
+        commandLine.addArgument(String.join(" ", command.getCommandLine()), false);
 
         return commandLine;
     }
 
     private static CommandLine buildPrivilegedCommand(Command command) {
-        // Build the command passing single arguments to commandLine
-        String[] tokens = command.getCommandLine().split("\\s+");
-        CommandLine commandLine = new CommandLine(tokens[0]);
-        for (int i = 1; i < tokens.length; i++) {
-            commandLine.addArgument(tokens[i], false);
+        CommandLine commandLine;
+        if (command.isExecutedInAShell()) {
+            commandLine = new CommandLine("/bin/sh");
+            commandLine.addArgument("-c");
+            commandLine.addArgument(command.toString(), false);
+        } else {
+            String[] tokens = command.getCommandLine();
+            commandLine = new CommandLine(tokens[0]);
+            for (int i = 1; i < tokens.length; i++) {
+                commandLine.addArgument(tokens[i], false);
+            }
         }
         return commandLine;
     }

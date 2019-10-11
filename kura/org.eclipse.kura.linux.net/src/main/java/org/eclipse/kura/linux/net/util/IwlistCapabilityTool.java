@@ -17,8 +17,8 @@ import org.apache.commons.io.Charsets;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.executor.Command;
-import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.net.wifi.WifiInterface.Capability;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +42,7 @@ public final class IwlistCapabilityTool {
             return capabilities;
         }
 
-        String cmd = "iwlist " + ifaceName + " auth";
+        String[] cmd = { "iwlist", ifaceName, "auth" };
         Command command = new Command(cmd);
         command.setTimeout(60);
         command.setOutputStream(new ByteArrayOutputStream());
@@ -50,7 +50,7 @@ public final class IwlistCapabilityTool {
         int exitValue = (Integer) status.getExitStatus().getExitValue();
         if (exitValue != 0) {
             logger.warn("error executing command --- iwlist --- exit value = {}", exitValue);
-            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, cmd, exitValue);
+            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, String.join(" ", cmd), exitValue);
         }
 
         // get the output

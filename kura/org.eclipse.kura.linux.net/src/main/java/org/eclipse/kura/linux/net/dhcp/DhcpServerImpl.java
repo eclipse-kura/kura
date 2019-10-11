@@ -18,6 +18,7 @@ import java.io.FileReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
 
 import org.eclipse.kura.KuraErrorCode;
@@ -201,9 +202,9 @@ public class DhcpServerImpl implements DhcpServer {
         }
 
         // Check if dhcpd is running
-        List<Pid> pids = this.executorService.getPids(formDhcpdCommand());
+        Map<String, Pid> pids = this.executorService.getPids(formDhcpdCommand());
         // If so, kill it.
-        for (Pid pid : pids) {
+        for (Pid pid : pids.values()) {
             if (this.executorService.stop(pid, LinuxSignal.SIGTERM)) {
                 removePidFile();
             } else {
@@ -282,10 +283,13 @@ public class DhcpServerImpl implements DhcpServer {
         return ret;
     }
 
-    private String formDhcpdCommand() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("dhcpd -cf ").append(this.persistentConfigFileName).append(" -pf ")
-                .append(this.persistentPidFilename);
-        return sb.toString();
+    private String[] formDhcpdCommand() {
+        List<String> command = new ArrayList<>();
+        command.add("dhcpd");
+        command.add("-cf");
+        command.add(this.persistentConfigFileName);
+        command.add("-pf ");
+        command.add(this.persistentPidFilename);
+        return command.toArray(new String[0]);
     }
 }

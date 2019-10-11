@@ -11,10 +11,14 @@
  *******************************************************************************/
 package org.eclipse.kura.core.linux.executor.privileged;
 
-import java.util.List;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.Map;
 import java.util.function.Consumer;
 
+import org.apache.commons.io.Charsets;
 import org.eclipse.kura.core.internal.linux.executor.ExecutorUtil;
+import org.eclipse.kura.core.linux.executor.LinuxExitValue;
 import org.eclipse.kura.core.linux.executor.LinuxSignal;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandStatus;
@@ -45,16 +49,22 @@ public class PrivilegedExecutorServiceImpl implements PrivilegedExecutorService 
 
     @Override
     public CommandStatus execute(Command command) {
+        if (command.getCommandLine() == null || command.getCommandLine().length == 0) {
+            return buildErrorStatus();
+        }
         if (command.getSignal() == null) {
-            command.setSignal(LinuxSignal.SIGTERM);
+            command.setSignal(DEFAULT_SIGNAL);
         }
         return ExecutorUtil.executePrivileged(command);
     }
 
     @Override
     public void execute(Command command, Consumer<CommandStatus> callback) {
+        if (command.getCommandLine() == null || command.getCommandLine().length == 0) {
+            callback.accept(buildErrorStatus());
+        }
         if (command.getSignal() == null) {
-            command.setSignal(LinuxSignal.SIGTERM);
+            command.setSignal(DEFAULT_SIGNAL);
         }
         ExecutorUtil.executePrivileged(command, callback);
     }
@@ -71,7 +81,7 @@ public class PrivilegedExecutorServiceImpl implements PrivilegedExecutorService 
     }
 
     @Override
-    public boolean kill(String commandLine, Signal signal) {
+    public boolean kill(String[] commandLine, Signal signal) {
         boolean isKilled = false;
         if (signal == null) {
             isKilled = ExecutorUtil.killPrivileged(commandLine, DEFAULT_SIGNAL);
@@ -87,13 +97,24 @@ public class PrivilegedExecutorServiceImpl implements PrivilegedExecutorService 
     }
 
     @Override
-    public boolean isRunning(String commandLine) {
+    public boolean isRunning(String[] commandLine) {
         return ExecutorUtil.isRunning(commandLine);
     }
 
     @Override
-    public List<Pid> getPids(String commandLine) {
+    public Map<String, Pid> getPids(String[] commandLine) {
         return ExecutorUtil.getPids(commandLine);
     }
 
+    private CommandStatus buildErrorStatus() {
+        CommandStatus status = new CommandStatus(new LinuxExitValue(1));
+        ByteArrayOutputStream err = new ByteArrayOutputStream();
+        try {
+            err.write("The commandLine cannot be empty or not defined".getBytes(Charsets.UTF_8));
+        } catch (IOException e) {
+            logger.error("Cannot write to error stream", e);
+        }
+        status.setErrorStream(err);
+        return status;
+    }
 }

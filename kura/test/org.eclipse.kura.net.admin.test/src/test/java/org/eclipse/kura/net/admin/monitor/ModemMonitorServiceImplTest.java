@@ -211,7 +211,8 @@ public class ModemMonitorServiceImplTest {
         outputStream.flush();
         outputStream.close();
         linkStatus.setOutputStream(outputStream);
-        Command linkStatusCommand = new Command("ip -o link show dev ppp1");
+        String[] cmd = {"ip", "-o", "link", "show", "dev", "ppp1"};
+        Command linkStatusCommand = new Command(cmd);
         linkStatusCommand.setTimeout(60);
         when(esMock.execute(linkStatusCommand)).thenReturn(linkStatus);
         
@@ -224,17 +225,20 @@ public class ModemMonitorServiceImplTest {
         outputStream.flush();
         outputStream.close();
         addrStatus.setOutputStream(outputStream);
-        Command addrStatusCommand = new Command("ip -o -4 addr show dev ppp1");
+        cmd = new String[] {"ip", "-o", "-4", "addr", "show", "dev", "ppp1"};
+        Command addrStatusCommand = new Command(cmd);
         addrStatusCommand.setTimeout(60);
         when(esMock.execute(addrStatusCommand)).thenReturn(addrStatus);
 
         CommandStatus infoStatus = new CommandStatus(new LinuxExitValue(0));
-        Command infoCommand = new Command("iw dev ppp1 info");
+        cmd = new String[] {"iw", "dev", "ppp1", "info"};
+        Command infoCommand = new Command(cmd);
         infoCommand.setTimeout(60);
         when(esMock.execute(infoCommand)).thenReturn(infoStatus);
         
         CommandStatus iwconfigStatus = new CommandStatus(new LinuxExitValue(0));
-        Command iwconfigCommand = new Command("iwconfig ppp1");
+        cmd = new String[] {"iwconfig", "ppp1"};
+        Command iwconfigCommand = new Command(cmd);
         iwconfigCommand.setTimeout(60);
         outputStream = new ByteArrayOutputStream();
         out = new DataOutputStream(outputStream);
@@ -245,7 +249,8 @@ public class ModemMonitorServiceImplTest {
         when(esMock.execute(iwconfigCommand)).thenReturn(iwconfigStatus);
         
         CommandStatus ethtoolStatus = new CommandStatus(new LinuxExitValue(0));
-        Command ethtoolCommand = new Command("ethtool -i ppp1");
+        cmd = new String[] {"ethtool", "-i", "ppp1"};
+        Command ethtoolCommand = new Command(cmd);
         ethtoolCommand.setTimeout(60);
         outputStream = new ByteArrayOutputStream();
         out = new DataOutputStream(outputStream);
@@ -956,7 +961,8 @@ public class ModemMonitorServiceImplTest {
         svc.setNetworkService(nsMock);
         svc.setEventAdmin(mock(EventAdmin.class));
 
-        org.eclipse.kura.executor.CommandExecutorService esMock = mock(org.eclipse.kura.executor.CommandExecutorService.class);
+        org.eclipse.kura.executor.CommandExecutorService esMock = mock(
+                org.eclipse.kura.executor.CommandExecutorService.class);
 
         CommandStatus linkStatus = new CommandStatus(new LinuxExitValue(0));
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -967,7 +973,8 @@ public class ModemMonitorServiceImplTest {
         outputStream.flush();
         outputStream.close();
         linkStatus.setOutputStream(outputStream);
-        Command linkStatusCommand = new Command("ip -o link show dev ppp0");
+        String[] cmd = {"ip", "-o", "link", "show", "dev", "ppp0"};
+        Command linkStatusCommand = new Command(cmd);
         linkStatusCommand.setTimeout(60);
         when(esMock.execute(linkStatusCommand)).thenReturn(linkStatus);
 
@@ -980,46 +987,47 @@ public class ModemMonitorServiceImplTest {
         outputStream.flush();
         outputStream.close();
         addrStatus.setOutputStream(outputStream);
-        Command addrStatusCommand = new Command("ip -o -4 addr show dev ppp0");
+        cmd = new String[] {"ip", "-o", "-4", "addr", "show", "dev", "ppp0"};
+        Command addrStatusCommand = new Command(cmd);
         addrStatusCommand.setTimeout(60);
         when(esMock.execute(addrStatusCommand)).thenReturn(addrStatus);
 
         CommandStatus infoStatus = new CommandStatus(new LinuxExitValue(0));
-        Command infoCommand = new Command("iw dev ppp0 info");
+        cmd = new String[] {"iw", "dev", "ppp0", "info"};
+        Command infoCommand = new Command(cmd);
         infoCommand.setTimeout(60);
         when(esMock.execute(infoCommand)).thenReturn(infoStatus);
-        
+
         CommandStatus iwconfigStatus = new CommandStatus(new LinuxExitValue(0));
-        Command iwconfigCommand = new Command("iwconfig ppp0");
+        cmd = new String[] {"iwconfig", "ppp0"};
+        Command iwconfigCommand = new Command(cmd);
         iwconfigCommand.setTimeout(60);
         outputStream = new ByteArrayOutputStream();
         out = new DataOutputStream(outputStream);
-        out.write("ppp0     IEEE 802.11  Mode:Master  Tx-Power=31 dBm\n        Retry short limit:7   RTS thr:off   Fragment thr:off\n        Power Management:on".getBytes());
+        out.write(
+                "ppp0     IEEE 802.11  Mode:Master  Tx-Power=31 dBm\n        Retry short limit:7   RTS thr:off   Fragment thr:off\n        Power Management:on"
+                        .getBytes());
         outputStream.flush();
         outputStream.close();
         iwconfigStatus.setOutputStream(outputStream);
         when(esMock.execute(iwconfigCommand)).thenReturn(iwconfigStatus);
-        
+
         CommandStatus ethtoolStatus = new CommandStatus(new LinuxExitValue(0));
-        Command ethtoolCommand = new Command("ethtool -i ppp0");
+        cmd = new String[] {"ethtool", "-i", "ppp0"};
+        Command ethtoolCommand = new Command(cmd);
         ethtoolCommand.setTimeout(60);
         outputStream = new ByteArrayOutputStream();
         out = new DataOutputStream(outputStream);
-        out.write(("driver: e1000\n" + 
-                "        version: 7.3.21-k8-NAPI\n" + 
-                "        firmware-version: \n" + 
-                "        expansion-rom-version: \n" + 
-                "        bus-info: 0000:00:03.0\n" + 
-                "        supports-statistics: yes\n" + 
-                "        supports-test: yes\n" + 
-                "        supports-eeprom-access: yes\n" + 
-                "        supports-register-dump: yes\n" + 
-                "        supports-priv-flags: no").getBytes());
+        out.write(("driver: e1000\n" + "        version: 7.3.21-k8-NAPI\n" + "        firmware-version: \n"
+                + "        expansion-rom-version: \n" + "        bus-info: 0000:00:03.0\n"
+                + "        supports-statistics: yes\n" + "        supports-test: yes\n"
+                + "        supports-eeprom-access: yes\n" + "        supports-register-dump: yes\n"
+                + "        supports-priv-flags: no").getBytes());
         outputStream.flush();
         outputStream.close();
         ethtoolStatus.setOutputStream(outputStream);
         when(esMock.execute(ethtoolCommand)).thenReturn(ethtoolStatus);
-        
+
         svc.setExecutorService(esMock);
 
         svc.activate();

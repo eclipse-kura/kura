@@ -39,16 +39,11 @@ import org.slf4j.LoggerFactory;
 
 public class LinuxNetworkUtil {
 
-    private static final String IFCONFIG = "ifconfig ";
-
     private static final Logger logger = LoggerFactory.getLogger(LinuxNetworkUtil.class);
 
     private static Map<String, LinuxIfconfig> ifconfigs = new HashMap<>();
-
     private static final String[] ignoreIfaces = { "can", "sit", "mon.wlan" };
-
     private static final ArrayList<String> tools = new ArrayList<>();
-
     private static final String PPP_IFACE_REGEX = "^ppp\\d+$";
     private static final String MODEM = "MODEM";
     private static final String ETHERNET = "ETHERNET";
@@ -58,6 +53,7 @@ public class LinuxNetworkUtil {
     private static final String FIRMWARE = "firmware";
     private static final String UNKNOWN = "unknown";
     private static final String IW = "iw";
+    private static final String IFCONFIG = "ifconfig";
     private static final String IWCONFIG = "iwconfig";
 
     private static final String LINE_MSG = "line: {}";
@@ -89,15 +85,16 @@ public class LinuxNetworkUtil {
 
     @Deprecated
     private List<String> getAllInterfaceNamesInternal() throws KuraException {
-        String cmd = IFCONFIG + "-a";
+        String[] cmd = { IFCONFIG, "-a" };
         Command command = new Command(cmd);
         command.setTimeout(60);
         command.setOutputStream(new ByteArrayOutputStream());
         CommandStatus status = this.executorService.execute(command);
         int exitValue = (Integer) status.getExitStatus().getExitValue();
         if (exitValue != 0) {
-            logger.error(ERR_EXECUTING_CMD_MSG, cmd, exitValue);
-            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, formFailedCommandMessage(cmd));
+            logger.error(ERR_EXECUTING_CMD_MSG, String.join(" ", cmd), exitValue);
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR,
+                    formFailedCommandMessage(String.join(" ", cmd)));
         }
         return getAllInterfaceNamesInternalParse(
                 new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray(), Charsets.UTF_8));
@@ -360,7 +357,7 @@ public class LinuxNetworkUtil {
         }
 
         LinuxIfconfig linuxIfconfig = new LinuxIfconfig(ifaceName);
-        String cmd = formIfconfigIfaceCommand(ifaceName);
+        String[] cmd = formIfconfigIfaceCommand(ifaceName);
         Command command = new Command(cmd);
         command.setTimeout(60);
         command.setOutputStream(new ByteArrayOutputStream());
@@ -435,7 +432,7 @@ public class LinuxNetworkUtil {
      * Returns false on error
      */
     public boolean canPing(String ipAddress, int count) {
-        String cmd = new StringBuilder().append("ping -c ").append(count).append(" ").append(ipAddress).toString();
+        String[] cmd = { "ping", "-c", String.valueOf(count), ipAddress };
         CommandStatus status = this.executorService.execute(new Command(cmd));
         return ((Integer) status.getExitStatus().getExitValue() == 0);
     }
@@ -539,7 +536,7 @@ public class LinuxNetworkUtil {
         driver.put(VERSION, UNKNOWN);
         driver.put(FIRMWARE, UNKNOWN);
 
-        String ethtoolCmd = "ethtool -i " + interfaceName;
+        String[] ethtoolCmd = { "ethtool", "-i", interfaceName };
         if (toolExists("ethtool")) {
             Command command = new Command(ethtoolCmd);
             command.setTimeout(60);
@@ -547,7 +544,9 @@ public class LinuxNetworkUtil {
             CommandStatus status = this.executorService.execute(command);
             int exitValue = (Integer) status.getExitStatus().getExitValue();
             if (exitValue != 0) {
-                logger.error(ERR_EXECUTING_CMD_MSG, ethtoolCmd, exitValue);
+                if (logger.isErrorEnabled()) {
+                    logger.error(ERR_EXECUTING_CMD_MSG, String.join(" ", ethtoolCmd), exitValue);
+                }
                 return driver;
             }
             getEthernetDriverParse(driver,
@@ -592,7 +591,7 @@ public class LinuxNetworkUtil {
         WifiMode mode = WifiMode.UNKNOWN;
         CommandStatus status;
         Command command;
-        String cmd = "";
+        String[] cmd;
         int exitValue = 0;
         if (toolExists(IW)) {
             cmd = formIwDevIfaceInfoCommand(ifaceName);
@@ -603,7 +602,9 @@ public class LinuxNetworkUtil {
             exitValue = (Integer) status.getExitStatus().getExitValue();
             if (exitValue != 0) {
                 // fallback to iwconfig
-                logger.error(ERR_EXECUTING_CMD_MSG, cmd, exitValue);
+                if (logger.isErrorEnabled()) {
+                    logger.error(ERR_EXECUTING_CMD_MSG, String.join(" ", cmd), exitValue);
+                }
             } else {
                 mode = getWifiModeParseIw(
                         new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray(), Charsets.UTF_8));
@@ -618,8 +619,10 @@ public class LinuxNetworkUtil {
             status = this.executorService.execute(command);
             exitValue = (Integer) status.getExitStatus().getExitValue();
             if (exitValue != 0) {
-                logger.error(ERR_EXECUTING_CMD_MSG, cmd, exitValue);
-                throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, cmd, exitValue);
+                if (logger.isErrorEnabled()) {
+                    logger.error(ERR_EXECUTING_CMD_MSG, String.join(" ", cmd), exitValue);
+                }
+                throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, String.join(" ", cmd), exitValue);
             }
             // get the output
             mode = getWifiModeParseIwconfig(
@@ -683,7 +686,7 @@ public class LinuxNetworkUtil {
         CommandStatus status;
         Command command;
         int exitValue = 0;
-        String cmd = "";
+        String[] cmd;
         if (toolExists(IW)) {
             // start the process
             cmd = formIwDevIfaceLinkCommand(ifaceName);
@@ -694,7 +697,9 @@ public class LinuxNetworkUtil {
             exitValue = (Integer) status.getExitStatus().getExitValue();
             if (exitValue != 0) {
                 // fallback to iwconfig
-                logger.error(ERR_EXECUTING_CMD_MSG, cmd, exitValue);
+                if (logger.isErrorEnabled()) {
+                    logger.error(ERR_EXECUTING_CMD_MSG, String.join(" ", cmd), exitValue);
+                }
             } else {
                 // get the output
                 bitRate = getWifiBitrateParseIw(
@@ -709,8 +714,10 @@ public class LinuxNetworkUtil {
             status = this.executorService.execute(command);
             exitValue = (Integer) status.getExitStatus().getExitValue();
             if (exitValue != 0) {
-                logger.error(ERR_EXECUTING_CMD_MSG, cmd, exitValue);
-                throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, cmd, exitValue);
+                if (logger.isErrorEnabled()) {
+                    logger.error(ERR_EXECUTING_CMD_MSG, String.join(" ", cmd), exitValue);
+                }
+                throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, String.join(" ", cmd), exitValue);
             }
 
             // get the output
@@ -778,7 +785,7 @@ public class LinuxNetworkUtil {
         Command command;
         int exitValue = 0;
         String ssid = null;
-        String cmd = null;
+        String[] cmd;
         if (toolExists(IW)) {
             // start the process
             cmd = formIwDevIfaceLinkCommand(ifaceName);
@@ -789,7 +796,9 @@ public class LinuxNetworkUtil {
             exitValue = (Integer) status.getExitStatus().getExitValue();
             if (exitValue != 0) {
                 // fallback to iwconfig
-                logger.error(ERR_EXECUTING_CMD_MSG, cmd, exitValue);
+                if (logger.isErrorEnabled()) {
+                    logger.error(ERR_EXECUTING_CMD_MSG, String.join(" ", cmd), exitValue);
+                }
             } else {
                 // get the output
                 ssid = getSSIDParseIw(
@@ -804,8 +813,10 @@ public class LinuxNetworkUtil {
             status = this.executorService.execute(command);
             exitValue = (Integer) status.getExitStatus().getExitValue();
             if (exitValue != 0) {
-                logger.error(ERR_EXECUTING_CMD_MSG, cmd, exitValue);
-                throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, cmd, exitValue);
+                if (logger.isErrorEnabled()) {
+                    logger.error(ERR_EXECUTING_CMD_MSG, String.join(" ", cmd), exitValue);
+                }
+                throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, String.join(" ", cmd), exitValue);
             }
 
             // get the output
@@ -866,20 +877,16 @@ public class LinuxNetworkUtil {
             // FIXME:
             // * Do we really need to bring down the interface before deleting addresses?
             if (hasAddress(interfaceName)) {
-                Command command = new Command("ifdown " + interfaceName);
+                Command command = new Command(new String[] { "ifdown", interfaceName });
                 command.setTimeout(60);
-                CommandStatus status = this.executorService.execute(command);
-                if ((Integer) status.getExitStatus().getExitValue() != 0) {
-                    throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR,
-                            "Failed to bring down interface " + interfaceName);
-                }
-                command = new Command(IFCONFIG + interfaceName + " down");
+                // Intentionally ignore exit status
+                this.executorService.execute(command);
+
+                command = new Command(new String[] { IFCONFIG, interfaceName, "down" });
                 command.setTimeout(60);
-                status = this.executorService.execute(command);
-                if ((Integer) status.getExitStatus().getExitValue() != 0) {
-                    throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR,
-                            "Failed to remove adress from interface " + interfaceName);
-                }
+                // Intentionally ignore exit status
+                this.executorService.execute(command);
+
             }
 
             // always leave the Ethernet Controller powered
@@ -894,7 +901,7 @@ public class LinuxNetworkUtil {
                 return;
             }
 
-            Command command = new Command(IFCONFIG + interfaceName + " up");
+            Command command = new Command(new String[] { IFCONFIG, interfaceName, "up" });
             command.setTimeout(60);
             CommandStatus status = this.executorService.execute(command);
             if ((Integer) status.getExitStatus().getExitValue() != 0) {
@@ -902,13 +909,13 @@ public class LinuxNetworkUtil {
                         "Failed to bring up interface " + interfaceName);
             }
 
-            command = new Command("ifup --force " + interfaceName);
+            command = new Command(new String[] { "ifup", "--force", interfaceName });
             command.setTimeout(60);
             command.setOutputStream(new ByteArrayOutputStream());
             command.setErrorStream(new ByteArrayOutputStream());
             status = this.executorService.execute(command);
             if ((Integer) status.getExitStatus().getExitValue() != 0) {
-                command = new Command("ifup " + interfaceName);
+                command = new Command(new String[] { "ifup", interfaceName });
                 command.setTimeout(60);
                 command.setOutputStream(new ByteArrayOutputStream());
                 command.setErrorStream(new ByteArrayOutputStream());
@@ -959,15 +966,17 @@ public class LinuxNetworkUtil {
         // ip addr del 172.16.0.1/32 dev eth0
         // or, to delete all the interface address:
         // ip addr flush dev eth0
-        String cmd = new StringBuilder().append(IFCONFIG).append(interfaceName).append(" 0.0.0.0").toString();
+        String[] cmd = { IFCONFIG, interfaceName, "0.0.0.0" };
         // start the SafeProcess
         Command command = new Command(cmd);
         command.setTimeout(60);
         CommandStatus status = this.executorService.execute(command);
         int exitValue = (Integer) status.getExitStatus().getExitValue();
         if (exitValue != 0) {
-            logger.error(ERR_EXECUTING_CMD_MSG, cmd, exitValue);
-            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, cmd, exitValue);
+            if (logger.isErrorEnabled()) {
+                logger.error(ERR_EXECUTING_CMD_MSG, String.join(" ", cmd), exitValue);
+            }
+            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, String.join(" ", cmd), exitValue);
         }
     }
 
@@ -986,28 +995,20 @@ public class LinuxNetworkUtil {
         return config != null && config.isUp();
     }
 
-    protected static String formIfconfigIfaceCommand(String ifaceName) {
-        StringBuilder sb = new StringBuilder(IFCONFIG);
-        sb.append(ifaceName);
-        return sb.toString();
+    protected static String[] formIfconfigIfaceCommand(String ifaceName) {
+        return new String[] { IFCONFIG, ifaceName };
     }
 
-    protected static String formIwDevIfaceInfoCommand(String ifaceName) {
-        StringBuilder sb = new StringBuilder("iw dev ");
-        sb.append(ifaceName).append(" info");
-        return sb.toString();
+    protected static String[] formIwDevIfaceInfoCommand(String ifaceName) {
+        return new String[] { "iw", "dev", ifaceName, "info" };
     }
 
-    protected static String formIwDevIfaceLinkCommand(String ifaceName) {
-        StringBuilder sb = new StringBuilder("iw dev ");
-        sb.append(ifaceName).append(" link");
-        return sb.toString();
+    protected static String[] formIwDevIfaceLinkCommand(String ifaceName) {
+        return new String[] { "iw", "dev", ifaceName, "link" };
     }
 
-    protected static String formIwconfigIfaceCommand(String ifaceName) {
-        StringBuilder sb = new StringBuilder("iwconfig ");
-        sb.append(ifaceName);
-        return sb.toString();
+    protected static String[] formIwconfigIfaceCommand(String ifaceName) {
+        return new String[] { IWCONFIG, ifaceName };
     }
 
     protected static String formFailedCommandMessage(String cmd) {

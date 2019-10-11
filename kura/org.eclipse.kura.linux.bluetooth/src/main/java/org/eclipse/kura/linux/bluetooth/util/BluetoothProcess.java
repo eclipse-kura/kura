@@ -73,10 +73,12 @@ public class BluetoothProcess {
     }
 
     void exec(String[] cmdArray, final BluetoothProcessListener listener) {
-        logger.debug("Executing: {}", Arrays.toString(cmdArray));
+        if (logger.isDebugEnabled()) {
+            logger.debug("Executing: {}", Arrays.toString(cmdArray));
+        }
         Consumer<CommandStatus> callback = status -> logger.debug("Command ended with exit value {}",
                 status.getExitStatus().getExitValue());
-        Command command = new Command(String.join(" ", cmdArray));
+        Command command = new Command(cmdArray);
         command.setOutputStream(this.outputStream);
         command.setErrorStream(this.errorStream);
         command.setInputStream(this.inputStream);
@@ -109,10 +111,12 @@ public class BluetoothProcess {
             this.parser = new BTSnoopParser();
         }
 
-        logger.debug("Executing: {}", Arrays.toString(cmdArray));
+        if (logger.isDebugEnabled()) {
+            logger.debug("Executing: {}", Arrays.toString(cmdArray));
+        }
         Consumer<CommandStatus> callback = status -> logger.debug("Command ended with exit value {}",
                 status.getExitStatus().getExitValue());
-        Command command = new Command(String.join(" ", cmdArray));
+        Command command = new Command(cmdArray);
         command.setOutputStream(this.outputStream);
         command.setErrorStream(this.errorStream);
         this.executorService.execute(command, callback);

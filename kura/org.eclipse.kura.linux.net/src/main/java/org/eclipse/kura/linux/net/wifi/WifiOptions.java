@@ -19,8 +19,8 @@ import java.util.Map;
 
 import org.apache.commons.io.Charsets;
 import org.eclipse.kura.executor.Command;
-import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,13 +80,15 @@ public class WifiOptions {
             return false;
         }
         boolean ret = false;
-        String cmd = formIwconfigCommand(ifaceName);
+        String[] cmd = formIwconfigCommand(ifaceName);
         Command command = new Command(cmd);
         command.setTimeout(60);
         command.setOutputStream(new ByteArrayOutputStream());
         CommandStatus status = this.executorService.execute(command);
         if ((Integer) status.getExitStatus().getExitValue() != 0) {
-            logger.warn(FAILED_TO_EXECUTE_MSG, cmd);
+            if (logger.isWarnEnabled()) {
+                logger.warn(FAILED_TO_EXECUTE_MSG, String.join(" ", cmd));
+            }
             return ret;
         }
         for (String line : new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray(), Charsets.UTF_8)
@@ -99,16 +101,11 @@ public class WifiOptions {
         return ret;
     }
 
-    private static String formIwDevInfoCommand(String ifaceName) {
-        StringBuilder sb = new StringBuilder("iw dev ");
-        sb.append(ifaceName).append(" info");
-
-        return sb.toString();
+    private static String[] formIwDevInfoCommand(String ifaceName) {
+        return new String[] { "iw", "dev", ifaceName, "info" };
     }
 
-    private static String formIwconfigCommand(String ifaceName) {
-        StringBuilder sb = new StringBuilder("iwconfig ");
-        sb.append(ifaceName);
-        return sb.toString();
+    private static String[] formIwconfigCommand(String ifaceName) {
+        return new String[] { "iwconfig", ifaceName };
     }
 }

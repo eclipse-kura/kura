@@ -12,8 +12,10 @@
 package org.eclipse.kura.linux.net.wifi;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -69,7 +71,7 @@ public class WpaSupplicantManager {
             }
 
             // start wpa_supplicant
-            String wpaSupplicantCommand = formSupplicantStartCommand(interfaceName, configFile);
+            String[] wpaSupplicantCommand = formSupplicantStartCommand(interfaceName, configFile);
             logger.info("starting wpa_supplicant for the {} interface -> {}", interfaceName, wpaSupplicantCommand);
             Command command = new Command(wpaSupplicantCommand);
             command.setTimeout(60);
@@ -89,17 +91,9 @@ public class WpaSupplicantManager {
     /*
      * This method forms wpa_supplicant start command
      */
-    private String formSupplicantStartCommand(String ifaceName, File configFile) {
-        StringBuilder sb = new StringBuilder();
-
-        sb.append("wpa_supplicant -B -D ");
-        sb.append(this.supplicantDriver);
-        sb.append(" -i ");
-        sb.append(ifaceName);
-        sb.append(" -c ");
-        sb.append(configFile);
-
-        return sb.toString();
+    private String[] formSupplicantStartCommand(String ifaceName, File configFile) {
+        return new String[] { WPA_SUPPLICANT, "-B", "-D", this.supplicantDriver, "-i", ifaceName, "-c",
+                configFile.getAbsolutePath() };
     }
 
     /**
@@ -108,11 +102,12 @@ public class WpaSupplicantManager {
      * @return {@link boolean}
      */
     public boolean isRunning(String ifaceName) {
-        return !this.executorService.getPids(WPA_SUPPLICANT + " -i " + ifaceName).isEmpty();
+        return this.executorService.isRunning(new String[] { WPA_SUPPLICANT, "-i", ifaceName });
     }
 
     public int getPid(String ifaceName) throws KuraException {
-        List<Pid> pids = this.executorService.getPids(WPA_SUPPLICANT + " -i " + ifaceName);
+        List<Pid> pids = new ArrayList<>(
+                this.executorService.getPids(new String[] { WPA_SUPPLICANT, "-i", ifaceName }).values());
         if (!pids.isEmpty()) {
             return (Integer) pids.get(0).getPid();
         } else {
@@ -122,7 +117,7 @@ public class WpaSupplicantManager {
     }
 
     public boolean isTempRunning() {
-        return !this.executorService.getPids(WPA_SUPPLICANT + " -c " + TEMP_CONFIG_FILE.toString()).isEmpty();
+        return this.executorService.isRunning(new String[] { WPA_SUPPLICANT, "-c", TEMP_CONFIG_FILE.toString() });
     }
 
     /**
@@ -131,8 +126,8 @@ public class WpaSupplicantManager {
      * @throws Exception
      */
     public void stop(String ifaceName) throws KuraException {
-        List<Pid> pids = this.executorService.getPids(WPA_SUPPLICANT + " -i " + ifaceName);
-        for (Pid pid : pids) {
+        Map<String, Pid> pids = this.executorService.getPids(new String[] { WPA_SUPPLICANT, "-i", ifaceName });
+        for (Pid pid : pids.values()) {
             if (!this.executorService.stop(pid, LinuxSignal.SIGKILL)) {
                 throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR,
                         "Failed to stop hostapd for interface " + ifaceName);

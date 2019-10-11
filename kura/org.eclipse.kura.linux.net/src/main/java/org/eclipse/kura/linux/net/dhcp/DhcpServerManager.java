@@ -12,7 +12,9 @@
 package org.eclipse.kura.linux.net.dhcp;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraProcessExecutionErrorException;
@@ -84,8 +86,8 @@ public class DhcpServerManager {
     public boolean disable(String interfaceName) throws KuraException {
         logger.debug("Disable DHCP server for {}", interfaceName);
 
-        List<Pid> pids = this.executorService.getPids(DhcpServerManager.formDhcpdCommand(interfaceName));
-        for (Pid pid : pids) {
+        Map<String, Pid> pids = this.executorService.getPids(DhcpServerManager.formDhcpdCommand(interfaceName));
+        for (Pid pid : pids.values()) {
             if (this.executorService.stop(pid, LinuxSignal.SIGTERM)) {
                 DhcpServerManager.removePidFile(interfaceName);
             } else {
@@ -136,17 +138,20 @@ public class DhcpServerManager {
         return sb.toString();
     }
 
-    private static String formDhcpdCommand(String interfaceName) {
-        StringBuilder sb = new StringBuilder();
+    private static String[] formDhcpdCommand(String interfaceName) {
+        List<String> command = new ArrayList<>();
         if (dhcpServerTool == DhcpServerTool.DHCPD) {
-            sb.append(DhcpServerTool.DHCPD.getValue());
-            sb.append(" -cf ").append(DhcpServerManager.getConfigFilename(interfaceName));
-            sb.append(" -pf ").append(DhcpServerManager.getPidFilename(interfaceName));
+            command.add(DhcpServerTool.DHCPD.getValue());
+            command.add("-cf");
+            command.add(DhcpServerManager.getConfigFilename(interfaceName));
+            command.add("-pf");
+            command.add(DhcpServerManager.getPidFilename(interfaceName));
         } else if (dhcpServerTool == DhcpServerTool.UDHCPD) {
-            sb.append(DhcpServerTool.UDHCPD.getValue());
-            sb.append(" -f -S ");
-            sb.append(DhcpServerManager.getConfigFilename(interfaceName));
+            command.add(DhcpServerTool.UDHCPD.getValue());
+            command.add("-f");
+            command.add("-S");
+            command.add(DhcpServerManager.getConfigFilename(interfaceName));
         }
-        return sb.toString();
+        return command.toArray(new String[0]);
     }
 }

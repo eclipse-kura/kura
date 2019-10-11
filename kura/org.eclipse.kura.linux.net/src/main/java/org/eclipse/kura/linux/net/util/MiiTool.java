@@ -16,8 +16,8 @@ import java.io.ByteArrayOutputStream;
 import org.apache.commons.io.Charsets;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.executor.Command;
-import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,7 +57,7 @@ public class MiiTool implements LinkTool {
      */
     @Override
     public boolean get() throws KuraException {
-        Command command = new Command("mii-tool " + this.ifaceName);
+        Command command = new Command(new String[] { "mii-tool", this.ifaceName });
         command.setTimeout(60);
         command.setOutputStream(new ByteArrayOutputStream());
         CommandStatus status = this.executorService.execute(command);

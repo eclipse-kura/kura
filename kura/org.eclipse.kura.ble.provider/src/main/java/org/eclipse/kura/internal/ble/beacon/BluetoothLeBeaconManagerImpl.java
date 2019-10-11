@@ -80,7 +80,7 @@ public class BluetoothLeBeaconManagerImpl
         logger.debug("Deactivating Bluetooth Le Beacon Manager...");
     }
 
-    protected BluetoothProcess execBtdump(String interfaceName) throws IOException {
+    protected BluetoothProcess execBtDump(String interfaceName) throws IOException {
         return BluetoothLeUtil.btdumpCmd(interfaceName, this.executorService, this);
     }
 
@@ -305,7 +305,7 @@ public class BluetoothLeBeaconManagerImpl
             logger.info("Starting bluetooth beacon scan on {}", interfaceName);
             try {
                 this.hcitoolProc = execHcitool(interfaceName, "lescan-passive", "--duplicates");
-                this.dumpProc = execBtdump(interfaceName);
+                this.dumpProc = execBtDump(interfaceName);
             } catch (IOException e) {
                 throw new KuraBluetoothCommandException(e, "Start bluetooth beacon scan failed");
             }
@@ -334,8 +334,7 @@ public class BluetoothLeBeaconManagerImpl
     public boolean checkStopScanCondition(String interfaceName) {
         // Stop scanning on given interface if only one scanner is scanning
         boolean stopScan = false;
-        if (scanners.containsKey(interfaceName)
-                && scanners.get(interfaceName).stream().mapToInt(e -> e.isScanning() ? 1 : 0).sum() == 1) {
+        if (scanners.containsKey(interfaceName) && getScannersCount(interfaceName) == 1) {
             stopScan = true;
         }
         return stopScan;
@@ -344,8 +343,7 @@ public class BluetoothLeBeaconManagerImpl
     public boolean checkStartScanCondition(String interfaceName) {
         // Start scanning on given interface if no one is already scanning
         boolean startScan = false;
-        if (scanners.containsKey(interfaceName)
-                && scanners.get(interfaceName).stream().mapToInt(e -> e.isScanning() ? 1 : 0).sum() == 0) {
+        if (scanners.containsKey(interfaceName) && getScannersCount(interfaceName) == 0) {
             startScan = true;
         }
         return startScan;
@@ -404,5 +402,9 @@ public class BluetoothLeBeaconManagerImpl
     @Override
     public void processBTSnoopErrorStream(String string) {
         // Not used
+    }
+
+    private int getScannersCount(String interfaceName) {
+        return scanners.get(interfaceName).stream().mapToInt(e -> e.isScanning() ? 1 : 0).sum();
     }
 }

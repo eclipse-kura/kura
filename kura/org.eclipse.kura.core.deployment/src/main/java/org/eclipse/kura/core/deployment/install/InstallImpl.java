@@ -38,8 +38,8 @@ import org.eclipse.kura.core.deployment.InstallStatus;
 import org.eclipse.kura.core.deployment.download.DeploymentPackageDownloadOptions;
 import org.eclipse.kura.core.linux.executor.LinuxSignal;
 import org.eclipse.kura.executor.Command;
-import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.osgi.service.deploymentadmin.DeploymentAdmin;
 import org.osgi.service.deploymentadmin.DeploymentException;
@@ -138,7 +138,7 @@ public class InstallImpl {
                 Consumer<CommandStatus> commandCallback = status -> {
                     // Do nothing...
                 };
-                this.executorService.execute(new Command("reboot"), commandCallback);
+                this.executorService.execute(new Command(new String[] { "reboot" }), commandCallback);
             }
         } catch (Exception e) {
             logger.info("Install failed!");
@@ -159,14 +159,14 @@ public class InstallImpl {
             throw new KuraProcessExecutionErrorException(e, "Failed to get script path");
         }
 
-        Command command = new Command("chmod 700 " + shFilePath);
+        Command command = new Command(new String[] { "chmod", "700", shFilePath });
         command.setTimeout(60);
         status = this.executorService.execute(command);
         if ((Integer) status.getExitStatus().getExitValue() != 0) {
             throw new KuraProcessExecutionErrorException("Failed to change file mode");
         }
 
-        status = this.executorService.execute(new Command(shFilePath));
+        status = this.executorService.execute(new Command(new String[] { shFilePath }));
         if ((Integer) status.getExitStatus().getExitValue() != 0) {
             throw new KuraProcessExecutionErrorException("Failed to execute script");
         }
@@ -228,24 +228,25 @@ public class InstallImpl {
                         logger.error("Failed to get script path");
                     }
 
-                    Command command = new Command("chmod 700 " + fileEntryPath);
+                    Command command = new Command(new String[] { "chmod", "700", fileEntryPath });
                     command.setTimeout(60);
                     status = this.executorService.execute(command);
                     if ((Integer) status.getExitStatus().getExitValue() != 0) {
                         logger.error("Failed to change file mode");
                     }
 
+                    String[] commandLine = { fileEntryPath };
                     try {
-                        status = this.executorService.execute(new Command(fileEntryPath));
+                        status = this.executorService.execute(new Command(commandLine));
                         if ((Integer) status.getExitStatus().getExitValue() == 0) {
                             sendSysUpdateSuccess(fileEntry.getName(), notificationPublisher);
                         } else {
                             sendSysUpdateFailure(fileEntry.getName(), notificationPublisher);
                         }
                     } finally {
-                        fileEntry.delete();
-                        if (status.getPid() != null) {
-                            this.executorService.stop(status.getPid(), LinuxSignal.SIGKILL);
+                        this.executorService.kill(commandLine, LinuxSignal.SIGKILL);
+                        if (fileEntry.delete()) {
+                            logger.error("Cannot delete file {}", fileEntry);
                         }
                     }
 

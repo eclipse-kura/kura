@@ -971,7 +971,8 @@ public class WifiMonitorServiceImplTest {
         outputStream.flush();
         outputStream.close();
         linkStatus.setOutputStream(outputStream);
-        Command linkStatusCommand = new Command("ip -o link show dev wlan3");
+        String[] cmd = { "ip", "-o", "link", "show", "dev", "wlan3" };
+        Command linkStatusCommand = new Command(cmd);
         linkStatusCommand.setTimeout(60);
         when(esMock.execute(linkStatusCommand)).thenReturn(linkStatus);
 
@@ -984,17 +985,20 @@ public class WifiMonitorServiceImplTest {
         outputStream.flush();
         outputStream.close();
         addrStatus.setOutputStream(outputStream);
-        Command addrStatusCommand = new Command("ip -o -4 addr show dev wlan3");
+        cmd = new String[] { "ip", "-o", "-4", "addr", "show", "dev", "wlan3" };
+        Command addrStatusCommand = new Command(cmd);
         addrStatusCommand.setTimeout(60);
         when(esMock.execute(addrStatusCommand)).thenReturn(addrStatus);
 
         CommandStatus infoStatus = new CommandStatus(new LinuxExitValue(0));
-        Command infoCommand = new Command("iw dev wlan3 info");
+        cmd = new String[] { "iw", "dev", "wlan3", "info" };
+        Command infoCommand = new Command(cmd);
         infoCommand.setTimeout(60);
         when(esMock.execute(infoCommand)).thenReturn(infoStatus);
 
         CommandStatus iwconfigStatus = new CommandStatus(new LinuxExitValue(0));
-        Command iwconfigCommand = new Command("iwconfig wlan3");
+        cmd = new String[] { "iwconfig", "wlan3" };
+        Command iwconfigCommand = new Command(cmd);
         iwconfigCommand.setTimeout(60);
         outputStream = new ByteArrayOutputStream();
         out = new DataOutputStream(outputStream);
@@ -1007,11 +1011,14 @@ public class WifiMonitorServiceImplTest {
         when(esMock.execute(iwconfigCommand)).thenReturn(iwconfigStatus);
 
         CommandStatus ethtoolStatus = new CommandStatus(new LinuxExitValue(0));
-        Command ethtoolCommand = new Command("ethtool -i wlan3");
+        cmd = new String[] { "ethtool", "-i", "wlan3" };
+        Command ethtoolCommand = new Command(cmd);
         ethtoolCommand.setTimeout(60);
         outputStream = new ByteArrayOutputStream();
         out = new DataOutputStream(outputStream);
-        out.write("driver: e1000\n        version: 7.3.21-k8-NAPI\n        firmware-version: \n        expansion-rom-version: \n        bus-info: 0000:00:03.0\n        supports-statistics: yes\n        supports-test: yes\n        supports-eeprom-access: yes\n        supports-register-dump: yes\n        supports-priv-flags: no".getBytes());
+        out.write(
+                "driver: e1000\n        version: 7.3.21-k8-NAPI\n        firmware-version: \n        expansion-rom-version: \n        bus-info: 0000:00:03.0\n        supports-statistics: yes\n        supports-test: yes\n        supports-eeprom-access: yes\n        supports-register-dump: yes\n        supports-priv-flags: no"
+                        .getBytes());
         outputStream.flush();
         outputStream.close();
         ethtoolStatus.setOutputStream(outputStream);

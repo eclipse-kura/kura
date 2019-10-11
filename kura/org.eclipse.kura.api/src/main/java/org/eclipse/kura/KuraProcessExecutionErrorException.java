@@ -14,7 +14,7 @@ package org.eclipse.kura;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
- * KuraOerationFailedException is raised when a operation fails.
+ * KuraProcessExecutionErrorException is raised when a command/process execution fails.
  * 
  * @noextend This class is not intended to be subclassed by clients.
  */

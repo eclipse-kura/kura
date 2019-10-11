@@ -70,34 +70,42 @@ public class IwlistScanTool implements IScanTool {
     @Override
     public List<WifiAccessPoint> scan() throws KuraException {
 
-        StringBuilder sb = new StringBuilder();
-        sb.append("ifconfig ").append(this.ifaceName).append(" up");
-        Command ifconfigCommand = new Command(sb.toString());
+        String[] cmdIfconfig = { "ifconfig", this.ifaceName, "up" };
+        Command ifconfigCommand = new Command(cmdIfconfig);
         ifconfigCommand.setErrorStream(new ByteArrayOutputStream());
         CommandStatus ifconfigCommandStatus = executorService.execute(ifconfigCommand);
         if ((Integer) ifconfigCommandStatus.getExitStatus().getExitValue() != 0) {
-            logger.error("failed to execute the {} command {}", sb, new String(
-                    ((ByteArrayOutputStream) ifconfigCommandStatus.getErrorStream()).toByteArray(), Charsets.UTF_8));
+            if (logger.isErrorEnabled()) {
+                logger.error("failed to execute the {} command {}", String.join(" ", cmdIfconfig),
+                        new String(((ByteArrayOutputStream) ifconfigCommandStatus.getErrorStream()).toByteArray(),
+                                Charsets.UTF_8));
+            }
         }
 
-        List<WifiAccessPoint> wifiAccessPoints = new ArrayList<>();
+        List<WifiAccessPoint> wifiAccessPoints;
         synchronized (lock) {
 
-            String cmd = formIwlistScanCommand(IwlistScanTool.this.ifaceName);
-            logger.info("scan() :: executing: {}", cmd);
+            String[] cmdIwList = formIwlistScanCommand(IwlistScanTool.this.ifaceName);
+            if (logger.isInfoEnabled()) {
+                logger.info("scan() :: executing: {}", String.join(" ", cmdIwList));
+            }
             IwlistScanTool.this.status = false;
-            Command iwListCommand = new Command(cmd);
+            Command iwListCommand = new Command(cmdIwList);
             iwListCommand.setTimeout(IwlistScanTool.this.timeout);
             iwListCommand.setOutputStream(new ByteArrayOutputStream());
             CommandStatus iwListCommandStatus = executorService.execute(iwListCommand);
             int exitValue = (Integer) iwListCommandStatus.getExitStatus().getExitValue();
-            logger.info("scan() :: {} command returns status = {}", cmd, exitValue);
+            if (logger.isInfoEnabled()) {
+                logger.info("scan() :: {} command returns status = {}", String.join(" ", cmdIwList), exitValue);
+            }
             if (exitValue == 0) {
                 IwlistScanTool.this.status = true;
                 IwlistScanTool.this.scanOutput = new ByteArrayInputStream(
                         ((ByteArrayOutputStream) iwListCommandStatus.getOutputStream()).toByteArray());
             } else {
-                logger.error("scan() :: failed to execute {} error code is {}", cmd, exitValue);
+                if (logger.isErrorEnabled()) {
+                    logger.error("scan() :: failed to execute {} error code is {}", String.join(" ", cmdIwList), exitValue);
+                }
             }
 
             if (!this.status) {
@@ -308,9 +316,7 @@ public class IwlistScanTool implements IScanTool {
         }
     }
 
-    private String formIwlistScanCommand(String interfaceName) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("iwlist ").append(interfaceName).append(" scanning");
-        return sb.toString();
+    private String[] formIwlistScanCommand(String interfaceName) {
+        return new String[] { "iwlist", interfaceName, "scanning" };
     }
 }

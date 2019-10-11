@@ -65,12 +65,14 @@ public class IwScanTool extends ScanTool implements IScanTool {
     @Override
     public List<WifiAccessPoint> scan() throws KuraException {
 
-        List<WifiAccessPoint> wifiAccessPoints = new ArrayList<>();
+        List<WifiAccessPoint> wifiAccessPoints;
         synchronized (lock) {
             activateInterface();
 
-            String cmd = formIwScanCommand(IwScanTool.this.ifaceName);
-            logger.info("scan() :: executing: {}", cmd);
+            String[] cmd = formIwScanCommand(IwScanTool.this.ifaceName);
+            if (logger.isInfoEnabled()) {
+                logger.info("scan() :: executing: {}", String.join(" ", cmd));
+            }
             IwScanTool.this.status = false;
             Command iwScanCommand = new Command(cmd);
             iwScanCommand.setTimeout(IwScanTool.this.timeout);
@@ -78,16 +80,20 @@ public class IwScanTool extends ScanTool implements IScanTool {
             iwScanCommand.setErrorStream(new ByteArrayOutputStream());
             CommandStatus iwCommandStatus = executorService.execute(iwScanCommand);
             int exitValue = (Integer) iwCommandStatus.getExitStatus().getExitValue();
-            logger.info("scan() :: {} command returns status = {}", cmd, exitValue);
+            if (logger.isInfoEnabled()) {
+                logger.info("scan() :: {} command returns status = {}", String.join(" ", cmd), exitValue);
+            }
             // If timedout, the exit value is 124
             if (exitValue == 0 || exitValue == 124) {
                 IwScanTool.this.status = true;
                 IwScanTool.this.scanOutput = new ByteArrayInputStream(
                         ((ByteArrayOutputStream) iwCommandStatus.getOutputStream()).toByteArray());
             } else {
-                logger.error("scan() :: failed to execute {} error code is {}", cmd, exitValue);
-                logger.error("scan() :: STDERR: {}", new String(
-                        ((ByteArrayOutputStream) iwCommandStatus.getErrorStream()).toByteArray(), Charsets.UTF_8));
+                if (logger.isErrorEnabled()) {
+                    logger.error("scan() :: failed to execute {} error code is {}", String.join(" ", cmd), exitValue);
+                    logger.error("scan() :: STDERR: {}", new String(
+                            ((ByteArrayOutputStream) iwCommandStatus.getErrorStream()).toByteArray(), Charsets.UTF_8));
+                }
             }
 
             if (!this.status) {
@@ -106,21 +112,18 @@ public class IwScanTool extends ScanTool implements IScanTool {
     }
 
     private void activateInterface() throws KuraException {
-        StringBuilder cmd = new StringBuilder();
-
         if (!this.linuxNetworkUtil.hasAddress(this.ifaceName)) {
             // activate the interface
-            cmd.append("ip link set ").append(this.ifaceName).append(" up");
-            CommandStatus commandStatus = this.executorService.execute(new Command(cmd.toString()));
+            String[] cmdIpLink = { "ip", "link", "set", this.ifaceName, "up" };
+            CommandStatus commandStatus = this.executorService.execute(new Command(cmdIpLink));
             if ((Integer) commandStatus.getExitStatus().getExitValue() != 0) {
                 throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR,
                         "Failed to activate interface " + this.ifaceName);
             }
 
             // remove the previous ip address (needed on mgw)
-            cmd = new StringBuilder();
-            cmd.append("ip addr flush dev ").append(this.ifaceName);
-            commandStatus = this.executorService.execute(new Command(cmd.toString()));
+            String[] cmdIpAddr = { "ip", "addr", "flush", "dev", this.ifaceName };
+            commandStatus = this.executorService.execute(new Command(cmdIpAddr));
             if ((Integer) commandStatus.getExitStatus().getExitValue() != 0) {
                 throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR,
                         "Failed to remove address for interface " + this.ifaceName);
@@ -194,9 +197,7 @@ public class IwScanTool extends ScanTool implements IScanTool {
         return currentAP;
     }
 
-    private String formIwScanCommand(String interfaceName) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("iw dev ").append(interfaceName).append(" scan");
-        return sb.toString();
+    private String[] formIwScanCommand(String interfaceName) {
+        return new String[] { "iw", "dev", interfaceName, "scan" };
     }
 }

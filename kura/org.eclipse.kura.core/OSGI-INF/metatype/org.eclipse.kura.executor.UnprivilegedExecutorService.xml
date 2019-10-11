@@ -23,7 +23,7 @@
             cardinality="0"
             required="true"
             default="kura"
-            description="The name of the user for executing command on the system."/>
+            description="The name of the user for executing commands on the system using the UnprivilegedExecutorService."/>
 
     </OCD>
 

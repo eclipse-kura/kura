@@ -20,8 +20,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.eclipse.kura.executor.Command;
-import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.system.SystemAdminService;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -171,16 +171,17 @@ public class SystemAdminServiceImpl extends SuperSystemService implements System
 
     @Override
     public void reboot() {
-        String cmd = "";
+        Command command;
         if (OS_LINUX.equals(getOsName()) || OS_MAC_OSX.equals(getOsName())) {
-            cmd = "reboot";
+            String[] cmd = { "reboot" };
+            command = new Command(cmd);
         } else if (getOsName().toLowerCase().startsWith(OS_WINDOWS)) {
-            cmd = "shutdown -r";
+            String[] cmd = { "shutdown", "-r" };
+            command = new Command(cmd);
         } else {
             logger.error("Unsupported OS for reboot()");
             return;
         }
-        Command command = new Command(cmd);
         command.setTimeout(60);
         CommandStatus status = this.executorService.execute(command);
         if ((Integer) status.getExitStatus().getExitValue() != 0) {
@@ -190,14 +191,14 @@ public class SystemAdminServiceImpl extends SuperSystemService implements System
 
     @Override
     public void sync() {
-        String cmd = "";
+        Command command;
         if (OS_LINUX.equals(getOsName()) || OS_MAC_OSX.equals(getOsName())) {
-            cmd = "sync";
+            String[] cmd = { "sync" };
+            command = new Command(cmd);
         } else {
             logger.error("Unsupported OS for sync()");
             return;
         }
-        Command command = new Command(cmd);
         command.setTimeout(60);
         CommandStatus status = this.executorService.execute(command);
         if ((Integer) status.getExitStatus().getExitValue() != 0) {

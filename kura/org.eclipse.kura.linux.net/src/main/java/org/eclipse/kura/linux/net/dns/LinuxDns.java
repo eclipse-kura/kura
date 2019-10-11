@@ -29,8 +29,8 @@ import java.util.StringTokenizer;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.executor.Command;
-import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.linux.net.dhcp.DhcpClientLeases;
 import org.eclipse.kura.net.IPAddress;
 import org.slf4j.Logger;
@@ -208,7 +208,7 @@ public class LinuxDns {
     private void backupDnsFile(CommandExecutorService executorService) throws KuraException {
         File file = new File(DNS_FILE_NAME);
         if (file.exists()) {
-            Command command = new Command("mv " + DNS_FILE_NAME + " " + BACKUP_DNS_FILE_NAME);
+            Command command = new Command(new String[] { "mv", DNS_FILE_NAME, BACKUP_DNS_FILE_NAME });
             command.setTimeout(60);
             CommandStatus status = executorService.execute(command);
             if ((Integer) status.getExitStatus().getExitValue() != 0) {
@@ -222,7 +222,7 @@ public class LinuxDns {
     }
 
     private void setDnsPppLink(String sPppDnsFileName, CommandExecutorService executorService) throws KuraException {
-        Command command = new Command("ln -sf " + sPppDnsFileName + " " + DNS_FILE_NAME);
+        Command command = new Command(new String[] { "ln", "-sf", sPppDnsFileName, DNS_FILE_NAME });
         command.setTimeout(60);
         CommandStatus status = executorService.execute(command);
         if ((Integer) status.getExitStatus().getExitValue() != 0) {
@@ -237,7 +237,7 @@ public class LinuxDns {
     private void unsetDnsPppLink(String pppDnsFilename, CommandExecutorService executorService) throws KuraException {
         File file = new File(DNS_FILE_NAME);
         if (file.exists()) {
-            Command command = new Command("rm " + DNS_FILE_NAME);
+            Command command = new Command(new String[] { "rm", DNS_FILE_NAME });
             command.setTimeout(60);
             CommandStatus status = executorService.execute(command);
             if ((Integer) status.getExitStatus().getExitValue() != 0) {
@@ -260,7 +260,7 @@ public class LinuxDns {
     }
 
     private void restoreDnsFileFromBackup(CommandExecutorService executorService) throws KuraException {
-        Command command = new Command("mv " + BACKUP_DNS_FILE_NAME + " " + DNS_FILE_NAME);
+        Command command = new Command(new String[] { "mv", BACKUP_DNS_FILE_NAME, DNS_FILE_NAME });
         command.setTimeout(60);
         CommandStatus status = executorService.execute(command);
         if ((Integer) status.getExitStatus().getExitValue() != 0) {
@@ -273,7 +273,7 @@ public class LinuxDns {
     }
 
     private void createEmptyDnsFile(CommandExecutorService executorService) throws KuraException {
-        Command command = new Command("touch " + DNS_FILE_NAME);
+        Command command = new Command(new String[] { "touch", DNS_FILE_NAME });
         command.setTimeout(60);
         CommandStatus status = executorService.execute(command);
         if ((Integer) status.getExitStatus().getExitValue() != 0) {

@@ -24,8 +24,8 @@ import java.util.regex.Pattern;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.executor.Command;
-import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.net.wifi.WifiInterface.Capability;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -126,7 +126,8 @@ public class IwCapabilityTool {
         return capabilities;
     }
 
-    public static InputStream exec(final String commandLine, CommandExecutorService executorService) throws KuraException {
+    public static InputStream exec(final String[] commandLine, CommandExecutorService executorService)
+            throws KuraException {
         Command command = new Command(commandLine);
         command.setOutputStream(new ByteArrayOutputStream());
         CommandStatus status = executorService.execute(command);
@@ -145,10 +146,10 @@ public class IwCapabilityTool {
             throws KuraException {
         try {
 
-            final int phy = parseWiphyIndex(exec("iw " + interfaceName + " info", executorService))
+            final int phy = parseWiphyIndex(exec(new String[] { "iw", interfaceName, "info" }, executorService))
                     .orElseThrow(() -> new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR,
                             "failed to get phy index for " + interfaceName));
-            return parseCapabilities(exec("iw phy" + phy + " info", executorService));
+            return parseCapabilities(exec(new String[] { "iw", "phy", String.valueOf(phy), "info" }, executorService));
 
         } catch (final KuraException e) {
             throw e;

@@ -13,14 +13,15 @@ package org.eclipse.kura.linux.net.route;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.StringTokenizer;
 
 import org.apache.commons.io.Charsets;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.executor.Command;
-import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IP6Address;
 import org.eclipse.kura.net.IPAddress;
@@ -35,7 +36,7 @@ public class RouteServiceImpl implements RouteService {
     private static final Logger logger = LoggerFactory.getLogger(RouteServiceImpl.class);
 
     private static final String FAILED_TO_EXECUTE_MSG = "Failed to execute {} ";
-
+    private static final String ROUTE = "route";
     private static final String INADDR_ANY = "0.0.0.0";
     private static final String LOCALHOST = "127.0.0.1";
 
@@ -50,14 +51,16 @@ public class RouteServiceImpl implements RouteService {
             throws KuraException {
         RouteConfig tmpRoute = null;
 
-        String commandLine = formRouteAddCommand(destination, gateway, netmask, iface, metric);
+        String[] commandLine = formRouteAddCommand(destination, gateway, netmask, iface, metric);
         Command command = new Command(commandLine);
         command.setTimeout(60);
         CommandStatus status = this.executorService.execute(command);
         int exitValue = (Integer) status.getExitStatus().getExitValue();
         if (exitValue != 0) {
-            logger.error("Error adding static Route: {}", commandLine);
-            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, commandLine, exitValue);
+            if (logger.isErrorEnabled()) {
+                logger.error("Error adding static Route: {}", String.join(" ", commandLine));
+            }
+            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, String.join(" ", commandLine), exitValue);
         }
 
         if (destination instanceof IP4Address) {
@@ -73,24 +76,31 @@ public class RouteServiceImpl implements RouteService {
         }
     }
 
-    private String formRouteAddCommand(IPAddress destination, IPAddress gateway, IPAddress netmask, String iface,
+    private String[] formRouteAddCommand(IPAddress destination, IPAddress gateway, IPAddress netmask, String iface,
             int metric) {
-        StringBuilder command = new StringBuilder();
-        command.append("route add -net ").append(destination.getHostAddress());
+        List<String> command = new ArrayList<>();
+        command.add(ROUTE);
+        command.add("add");
+        command.add("-net");
+        command.add(destination.getHostAddress());
         if (netmask != null) {
-            command.append(" netmask ").append(netmask.getHostAddress());
+            command.add("netmask");
+            command.add(netmask.getHostAddress());
         }
         if ((gateway != null) && (gateway.getHostAddress().compareTo(INADDR_ANY) != 0)
                 && (gateway.getHostAddress().compareTo(LOCALHOST) != 0)) {
-            command.append(" gw ").append(gateway.getHostAddress());
+            command.add("gw");
+            command.add(gateway.getHostAddress());
         }
         if (iface != null) {
-            command.append(" dev ").append(iface);
+            command.add("dev");
+            command.add(iface);
         }
         if (metric != 0 && metric != -1) {
-            command.append(" metric ").append(metric);
+            command.add("metric");
+            command.add(Integer.toString(metric));
         }
-        return command.toString();
+        return command.toArray(new String[0]);
     }
 
     @Override
@@ -132,13 +142,15 @@ public class RouteServiceImpl implements RouteService {
     @Override
     public RouteConfig[] getRoutes() {
         RouteConfig[] routes = new RouteConfig[0];
-        String commandLine = "route -n";
+        String[] commandLine = { ROUTE, "-n" };
         Command command = new Command(commandLine);
         command.setTimeout(60);
         command.setOutputStream(new ByteArrayOutputStream());
         CommandStatus status = this.executorService.execute(command);
         if ((Integer) status.getExitStatus().getExitValue() != 0) {
-            logger.warn(FAILED_TO_EXECUTE_MSG, commandLine);
+            if (logger.isErrorEnabled()) {
+                logger.warn(FAILED_TO_EXECUTE_MSG, String.join(" ", commandLine));
+            }
         } else {
             routes = parseGetRoutes(
                     new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray(), Charsets.UTF_8));
@@ -166,14 +178,16 @@ public class RouteServiceImpl implements RouteService {
             throws KuraException {
         RouteConfig tmpRoute = null;
 
-        String commandLine = formRouteDeleteCommand(destination, gateway, netmask, iface);
+        String[] commandLine = formRouteDeleteCommand(destination, gateway, netmask, iface);
         Command command = new Command(commandLine);
         command.setTimeout(60);
         CommandStatus status = this.executorService.execute(command);
         int exitValue = (Integer) status.getExitStatus().getExitValue();
         if (exitValue != 0) {
-            logger.error("Error removing static route: {}", commandLine);
-            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, commandLine, exitValue);
+            if (logger.isErrorEnabled()) {
+                logger.error("Error removing static route: {}", String.join(" ", commandLine));
+            }
+            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, String.join(" ", commandLine), exitValue);
         }
 
         if (destination instanceof IP4Address) {
@@ -189,19 +203,25 @@ public class RouteServiceImpl implements RouteService {
         }
     }
 
-    private String formRouteDeleteCommand(IPAddress destination, IPAddress gateway, IPAddress netmask, String iface) {
-        StringBuilder command = new StringBuilder();
-        command.append("route del -net ").append(destination.getHostAddress());
+    private String[] formRouteDeleteCommand(IPAddress destination, IPAddress gateway, IPAddress netmask, String iface) {
+        List<String> command = new ArrayList<>();
+        command.add(ROUTE);
+        command.add("del");
+        command.add("-net");
+        command.add(destination.getHostAddress());
         if (netmask != null) {
-            command.append(" netmask ").append(netmask.getHostAddress());
+            command.add("netmask");
+            command.add(netmask.getHostAddress());
         }
         if ((gateway != null) && (gateway.getHostAddress().compareTo(LOCALHOST) != 0)) {
-            command.append(" gw ").append(gateway.getHostAddress());
+            command.add("gw");
+            command.add(gateway.getHostAddress());
         }
         if (iface != null) {
-            command.append(" dev ").append(iface);
+            command.add("dev");
+            command.add(iface);
         }
-        return command.toString();
+        return command.toArray(new String[0]);
     }
 
     private RouteConfig entryToRoute(String entry) {

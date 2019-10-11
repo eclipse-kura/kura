@@ -22,8 +22,8 @@ import org.eclipse.kura.clock.ClockEvent;
 import org.eclipse.kura.clock.ClockService;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.executor.Command;
-import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
 import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -187,7 +187,7 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
         boolean bClockUpToDate = false;
         if (offset != 0) {
             long time = System.currentTimeMillis() + offset;
-            Command command = new Command("date -s @" + time / 1000);
+            Command command = new Command(new String[] { "date", "-s", "@", Long.toString(time / 1000) });
             command.setTimeout(60);
             CommandStatus status = this.executorService.execute(command);
             final int rc = (Integer) status.getExitStatus().getExitValue();
@@ -208,7 +208,7 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
             updateHwClock = (Boolean) this.properties.get(PROP_CLOCK_SET_HWCLOCK);
         }
         if (updateHwClock) {
-            Command command = new Command("hwclock --utc --systohc");
+            Command command = new Command(new String[] { "hwclock", "--utc", "--systohc" });
             command.setTimeout(60);
             CommandStatus status = this.executorService.execute(command);
             final int rc = (Integer) status.getExitStatus().getExitValue();

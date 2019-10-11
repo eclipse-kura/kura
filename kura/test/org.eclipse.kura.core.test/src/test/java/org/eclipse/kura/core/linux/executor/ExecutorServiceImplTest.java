@@ -12,16 +12,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -44,7 +40,6 @@ import org.eclipse.kura.executor.Pid;
 import org.eclipse.kura.executor.Signal;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -292,10 +287,9 @@ public class ExecutorServiceImplTest {
             lock.countDown();
         };
 
-        Command command = new Command(new String[] { "sleep", "20" });
+        Command command = new Command(new String[] { "sleep", "30" });
         command.setTimeout(10);
         command.setDirectory(TMP);
-        command.setSignal(LinuxSignal.SIGTERM);
         long startTime = System.currentTimeMillis();
         service.execute(command, callback);
 
@@ -308,85 +302,91 @@ public class ExecutorServiceImplTest {
 
         assertFalse(exitStatus.get() == 0);
         assertTrue(isTimedout.get());
-        assertTrue(stopTime - startTime < 20000);
+        assertTrue(stopTime - startTime < 25000);
     }
 
     @Test
-    public void stopCommand() {
+    public void stopCommand() throws InterruptedException {
         System.out.println(service.getClass().getSimpleName() + ": Test stop command execution...");
         stopCommandInternal(false);
     }
 
     @Test
-    public void stopCommandForce() {
+    public void stopCommandForce() throws InterruptedException {
         System.out.println(service.getClass().getSimpleName() + ": Test force stop command execution...");
         stopCommandInternal(true);
     }
 
-    private void stopCommandInternal(boolean force) {
+    private void stopCommandInternal(boolean force) throws InterruptedException {
 
+        Signal signal = null;
+        if (force) {
+            signal = LinuxSignal.SIGTERM;
+        }
         Consumer<CommandStatus> callback = status -> {
             // Do nothing...
         };
-        Command command = new Command(new String[] { "sleep", "30" });
-        command.setTimeout(10);
+        Command command = new Command(new String[] { "sleep", "40" });
+        command.setTimeout(60);
         command.setDirectory(TMP);
         command.setSignal(LinuxSignal.SIGTERM);
         service.execute(command, callback);
 
-        Map<String, Pid> pids = service.getPids(new String[] { "sleep", "30" });
+        Thread.sleep(2000);
+        Map<String, Pid> pids = service.getPids(new String[] { "sleep", "40" });
         assertFalse(pids.isEmpty());
         for (Pid pid : pids.values()) {
-            service.stop(pid, LinuxSignal.SIGTERM);
+            service.stop(pid, signal);
         }
 
-        pids = service.getPids(new String[] { "sleep", "30" });
+        pids = service.getPids(new String[] { "sleep", "40" });
         assertTrue(pids.isEmpty());
     }
 
-    @Ignore
     @Test
-    public void killCommandWithDefaultSignal() {
+    public void killCommandWithDefaultSignal() throws InterruptedException {
         System.out.println(service.getClass().getSimpleName() + ": Test kill command execution...");
         killCommandInternal(null);
     }
 
-    @Ignore
     @Test
-    public void killCommandWithSignal() {
+    public void killCommandWithSignal() throws InterruptedException {
         System.out.println(service.getClass().getSimpleName() + ": Test force kill command execution...");
         killCommandInternal(LinuxSignal.SIGTERM);
     }
 
-    private void killCommandInternal(Signal signal) {
+    private void killCommandInternal(Signal signal) throws InterruptedException {
 
         Consumer<CommandStatus> callback = status -> {
             // Do nothing...
         };
-        Command command = new Command(new String[] { "sleep", "30" });
+        Command command = new Command(new String[] { "sleep", "50" });
         command.setTimeout(10);
         command.setDirectory(TMP);
         command.setSignal(signal);
         service.execute(command, callback);
 
-        Map<String, Pid> pids = service.getPids(new String[] { "sleep", "30" });
+        Thread.sleep(2000);
+        Map<String, Pid> pids = service.getPids(new String[] { "sleep", "50" });
         assertFalse(pids.isEmpty());
-        service.kill(new String[] { "sleep", "30" }, signal);
-        pids = service.getPids(new String[] { "sleep", "30" });
+        service.kill(new String[] { "sleep", "50" }, signal);
+        pids = service.getPids(new String[] { "sleep", "50" });
         assertTrue(pids.isEmpty());
     }
 
     @Test
-    public void isRunningPid() {
+    public void isRunningPid() throws InterruptedException {
         System.out.println(service.getClass().getSimpleName() + ": Test isRunning with pid...");
         Consumer<CommandStatus> callback = status -> {
             // Do nothing...
         };
-        Command command = new Command(new String[] { "sleep", "30" });
+        Command command = new Command(new String[] { "sleep", "60" });
         command.setTimeout(30);
         command.setDirectory(TMP);
         service.execute(command, callback);
-        Map<String, Pid> pids = service.getPids(new String[] { "sleep", "30" });
+
+        Thread.sleep(2000);
+        Map<String, Pid> pids = service.getPids(new String[] { "sleep", "60" });
         assertFalse(pids.isEmpty());
         for (Pid pid : pids.values()) {
             assertTrue(service.isRunning(pid));
@@ -397,18 +397,20 @@ public class ExecutorServiceImplTest {
     }
 
     @Test
-    public void isRunningCommand() {
+    public void isRunningCommand() throws InterruptedException {
         System.out.println(service.getClass().getSimpleName() + ": Test isRunning with command...");
         Consumer<CommandStatus> callback = status -> {
             // Do nothing...
         };
-        Command command = new Command(new String[] { "sleep", "30" });
+        Command command = new Command(new String[] { "sleep", "70" });
         command.setTimeout(30);
         command.setDirectory(TMP);
         service.execute(command, callback);
-        Map<String, Pid> pids = service.getPids(new String[] { "sleep", "30" });
+
+        Thread.sleep(2000);
+        Map<String, Pid> pids = service.getPids(new String[] { "sleep", "70" });
         assertFalse(pids.isEmpty());
-        assertTrue(service.isRunning(new String[] { "sleep", "30" }));
+        assertTrue(service.isRunning(new String[] { "sleep", "70" }));
 
         for (Pid pid : pids.values()) {
             service.stop(pid, LinuxSignal.SIGKILL);
@@ -416,31 +418,19 @@ public class ExecutorServiceImplTest {
     }
 
     @Test
-    public void getPids() throws IOException {
+    public void getPids() throws IOException, InterruptedException {
         System.out.println(service.getClass().getSimpleName() + ": Test get command pids...");
         Consumer<CommandStatus> callback = status -> {
             // Do nothing...
         };
-        Command command = new Command(new String[] { "sleep", "30" });
+        Command command = new Command(new String[] { "sleep", "80" });
         command.setTimeout(30);
         command.setDirectory(TMP);
         service.execute(command, callback);
-        Map<String, Pid> pids = service.getPids(new String[] { "sleep", "30" });
-        assertFalse(pids.isEmpty());
 
-        String line;
-        List<Integer> pidNumbers = new ArrayList<>();
-        Process proc = Runtime.getRuntime().exec(new String[] { "pgrep", "-f", "-x", "sleep 30" });
-        BufferedReader input = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-        while ((line = input.readLine()) != null) {
-            pidNumbers.add(Integer.parseInt(line));
-        }
-        input.close();
-        for (Integer pid : pidNumbers) {
-            Runtime.getRuntime().exec("kill -9 " + pid);
-        }
-        for (Integer pid : pidNumbers) {
-            assertTrue(pids.values().contains(new LinuxPid(pid)));
-        }
+        Thread.sleep(2000);
+        Map<String, Pid> pids = service.getPids(new String[] { "sleep", "80" });
+        // Check that the running processes are 4 (unprivileged service) or 1 (privileged service)
+        assertTrue(pids.size() == 1 || pids.size() == 4);
     }
 }

@@ -32,30 +32,6 @@
             default="false"
             description="%emitallchannelsdesc">
         </AD>
-        <AD id="emit.mutiplethread"
-            name="%emitmutipleThread"
-            type="Boolean"
-            cardinality="0"
-            required="true"
-            default="false"
-            description="%emitmutipleThreadDesc">
-        </AD>
-        <AD id="threadCount"
-            name="%threadCount"
-            type="Integer"
-            cardinality="0"
-            required="true"
-            default="2"
-            description="%threadCountDesc"
-            min="1"/>
-        <AD id="threadTimeout"
-            name="%threadTimeout"
-            type="Integer"
-            cardinality="0"
-            required="true"
-            default="10000"
-            description="%threadTimeoutDesc"
-            min="0"/>
         <AD id="timestamp.mode"
             name="%timestampmodename"
             type="String"
@@ -76,7 +52,7 @@
             cardinality="0"
             required="true"
             default="false"
-            description="Specifies wheter errors should be included or not in the emitted envelope">
+            description="%emiterrorsdesc">
         </AD>
            
     </OCD>

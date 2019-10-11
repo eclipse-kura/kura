@@ -19,12 +19,9 @@ import org.eclipse.kura.web.client.ui.Tab;
 import org.eclipse.kura.web.shared.model.GwtSession;
 import org.eclipse.kura.web.shared.service.GwtSecurityService;
 import org.eclipse.kura.web.shared.service.GwtSecurityServiceAsync;
-<<<<<<< HEAD
 import org.eclipse.kura.web2.ext.WidgetFactory;
 import org.gwtbootstrap3.client.ui.NavTabs;
 import org.gwtbootstrap3.client.ui.TabContent;
-=======
->>>>>>> Added executor services and tests
 import org.gwtbootstrap3.client.ui.TabListItem;
 import org.gwtbootstrap3.client.ui.TabPane;
 import org.gwtbootstrap3.client.ui.html.Paragraph;

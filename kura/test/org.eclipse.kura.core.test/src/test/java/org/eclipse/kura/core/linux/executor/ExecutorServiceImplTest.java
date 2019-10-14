@@ -302,37 +302,33 @@ public class ExecutorServiceImplTest {
 
         assertFalse(exitStatus.get() == 0);
         assertTrue(isTimedout.get());
-        assertTrue(stopTime - startTime < 25000);
+        assertTrue(stopTime - startTime < 20000);
     }
 
     @Test
     public void stopCommand() throws InterruptedException {
         System.out.println(service.getClass().getSimpleName() + ": Test stop command execution...");
-        stopCommandInternal(false);
+        stopCommandInternal(null);
     }
 
     @Test
     public void stopCommandForce() throws InterruptedException {
         System.out.println(service.getClass().getSimpleName() + ": Test force stop command execution...");
-        stopCommandInternal(true);
+        stopCommandInternal(LinuxSignal.SIGKILL);
     }
 
-    private void stopCommandInternal(boolean force) throws InterruptedException {
+    private void stopCommandInternal(Signal signal) throws InterruptedException {
 
-        Signal signal = null;
-        if (force) {
-            signal = LinuxSignal.SIGTERM;
-        }
         Consumer<CommandStatus> callback = status -> {
             // Do nothing...
         };
         Command command = new Command(new String[] { "sleep", "40" });
         command.setTimeout(60);
         command.setDirectory(TMP);
-        command.setSignal(LinuxSignal.SIGTERM);
+        command.setSignal(signal);
         service.execute(command, callback);
 
-        Thread.sleep(2000);
+        TimeUnit.SECONDS.sleep(2);
         Map<String, Pid> pids = service.getPids(new String[] { "sleep", "40" });
         assertFalse(pids.isEmpty());
         for (Pid pid : pids.values()) {
@@ -352,7 +348,7 @@ public class ExecutorServiceImplTest {
     @Test
     public void killCommandWithSignal() throws InterruptedException {
         System.out.println(service.getClass().getSimpleName() + ": Test force kill command execution...");
-        killCommandInternal(LinuxSignal.SIGTERM);
+        killCommandInternal(LinuxSignal.SIGKILL);
     }
 
     private void killCommandInternal(Signal signal) throws InterruptedException {
@@ -366,7 +362,7 @@ public class ExecutorServiceImplTest {
         command.setSignal(signal);
         service.execute(command, callback);
 
-        Thread.sleep(2000);
+        TimeUnit.SECONDS.sleep(2);
         Map<String, Pid> pids = service.getPids(new String[] { "sleep", "50" });
         assertFalse(pids.isEmpty());
         service.kill(new String[] { "sleep", "50" }, signal);
@@ -385,7 +381,7 @@ public class ExecutorServiceImplTest {
         command.setDirectory(TMP);
         service.execute(command, callback);
 
-        Thread.sleep(2000);
+        TimeUnit.SECONDS.sleep(2);
         Map<String, Pid> pids = service.getPids(new String[] { "sleep", "60" });
         assertFalse(pids.isEmpty());
         for (Pid pid : pids.values()) {
@@ -407,11 +403,10 @@ public class ExecutorServiceImplTest {
         command.setDirectory(TMP);
         service.execute(command, callback);
 
-        Thread.sleep(2000);
+        TimeUnit.SECONDS.sleep(2);
         Map<String, Pid> pids = service.getPids(new String[] { "sleep", "70" });
         assertFalse(pids.isEmpty());
         assertTrue(service.isRunning(new String[] { "sleep", "70" }));
-
         for (Pid pid : pids.values()) {
             service.stop(pid, LinuxSignal.SIGKILL);
         }
@@ -428,7 +423,7 @@ public class ExecutorServiceImplTest {
         command.setDirectory(TMP);
         service.execute(command, callback);
 
-        Thread.sleep(2000);
+        TimeUnit.SECONDS.sleep(2);
         Map<String, Pid> pids = service.getPids(new String[] { "sleep", "80" });
         // Check that the running processes are 4 (unprivileged service) or 1 (privileged service)
         assertTrue(pids.size() == 1 || pids.size() == 4);

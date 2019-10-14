@@ -887,6 +887,16 @@
                   <source>true</source>
                   <transitive>false</transitive>
               </artifact>
+              <artifact>
+                <id>org.quartz-scheduler:quartz:${org.quartz-scheduler.quartz.version}</id>
+                  <source>true</source>
+                  <transitive>false</transitive>
+                  <override>true</override>
+                  <instructions>
+                        <Import-Package>*;resolution:=optional</Import-Package>
+                        <Export-Package>*</Export-Package>
+                  </instructions>
+              </artifact>
               <!--
               <artifact>
                   <id>org.ow2.asm:asm-commons:${org.ow2.asm-mvn.version}</id>

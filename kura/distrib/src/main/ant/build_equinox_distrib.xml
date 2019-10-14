@@ -1434,6 +1434,8 @@ fi]]>
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.servicemix.bundles.spring-aop_${spring.version}.jar@3:start" />
             <entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.servicemix.bundles.aopalliance_${aopalliance.version}.jar@3:start" />
+			<entry key="osgi.bundles" operation="+"
+			                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.quartz-scheduler.quartz_${org.quartz-scheduler.quartz.version}.jar@3:start" />
 		</propertyfile>
 	</target>
 

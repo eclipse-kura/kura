@@ -33,6 +33,7 @@ import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.commons.io.Charsets;
 import org.eclipse.kura.core.linux.executor.privileged.PrivilegedExecutorServiceImpl;
 import org.eclipse.kura.core.linux.executor.unprivileged.UnprivilegedExecutorServiceImpl;
+import org.eclipse.kura.core.testutil.AssumingIsNotMac;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.executor.CommandStatus;
@@ -40,6 +41,7 @@ import org.eclipse.kura.executor.Pid;
 import org.eclipse.kura.executor.Signal;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -53,6 +55,9 @@ public class ExecutorServiceImplTest {
     public ExecutorServiceImplTest(CommandExecutorService service) {
         ExecutorServiceImplTest.service = service;
     }
+
+    @ClassRule
+    public static AssumingIsNotMac assumingIsNotMac = new AssumingIsNotMac();
 
     @Parameterized.Parameters
     public static Collection<CommandExecutorService> getServices() {
@@ -428,4 +433,5 @@ public class ExecutorServiceImplTest {
         // Check that the running processes are 4 (unprivileged service) or 1 (privileged service)
         assertTrue(pids.size() == 1 || pids.size() == 4);
     }
+
 }

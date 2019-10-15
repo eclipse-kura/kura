@@ -84,7 +84,7 @@ public class SystemAdminServiceImpl extends SuperSystemService implements System
 
         if (getOsName().toLowerCase().startsWith(OS_WINDOWS)) {
             try {
-                String[] lastBootUpTime = runSystemCommand("wmic os get LastBootUpTime ", this.executorService)
+                String[] lastBootUpTime = runSystemCommand("wmic os get LastBootUpTime ", false, this.executorService)
                         .split("\n");
                 if (lastBootUpTime[0].toLowerCase().startsWith("lastbootuptime")) {
                     String lastBoot = lastBootUpTime[2];
@@ -129,7 +129,7 @@ public class SystemAdminServiceImpl extends SuperSystemService implements System
             }
         } else if (OS_MAC_OSX.equals(getOsName())) {
             try {
-                String systemUptime = runSystemCommand("uptime", this.executorService);
+                String systemUptime = runSystemCommand("uptime", false, this.executorService);
                 if (!systemUptime.isEmpty()) {
                     String[] uptimeParts = systemUptime.split("up\\s+")[1].split("\\s*,\\s*");
                     int days = 0, hours = 0, mins = 0;

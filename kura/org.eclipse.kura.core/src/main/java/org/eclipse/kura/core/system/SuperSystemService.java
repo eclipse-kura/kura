@@ -24,7 +24,8 @@ public class SuperSystemService {
 
     private static final Logger logger = LoggerFactory.getLogger(SuperSystemService.class);
 
-    protected static String runSystemCommand(String[] commandLine, CommandExecutorService executorService) {
+    protected static String runSystemCommand(String[] commandLine, boolean runInShell,
+            CommandExecutorService executorService) {
         String response = "";
         Command command = new Command(commandLine);
         command.setTimeout(60);
@@ -40,8 +41,9 @@ public class SuperSystemService {
         return response;
     }
 
-    protected static String runSystemCommand(String commandLine, CommandExecutorService executorService) {
-        return runSystemCommand(commandLine.split("\\s+"), executorService);
+    protected static String runSystemCommand(String commandLine, boolean runInShell,
+            CommandExecutorService executorService) {
+        return runSystemCommand(commandLine.split("\\s+"), runInShell, executorService);
     }
 
 }

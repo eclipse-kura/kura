@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -23,6 +23,7 @@ import org.eclipse.kura.core.net.NetInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
 import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
+import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.linux.net.iptables.LinuxFirewall;
 import org.eclipse.kura.linux.net.iptables.NATRule;
 import org.eclipse.kura.net.NetConfig;
@@ -38,7 +39,9 @@ public class FirewallAutoNatConfigReader implements NetworkConfigurationVisitor 
 
     private static final Logger logger = LoggerFactory.getLogger(FirewallAutoNatConfigReader.class);
 
+    private static final String NET_INTERFACE = "net.interface.";
     private static FirewallAutoNatConfigReader instance;
+    private CommandExecutorService executorService;
 
     public static FirewallAutoNatConfigReader getInstance() {
 
@@ -49,18 +52,24 @@ public class FirewallAutoNatConfigReader implements NetworkConfigurationVisitor 
     }
 
     @Override
+    public void setExecutorService(CommandExecutorService executorService) {
+        this.executorService = executorService;
+    }
+
+    @Override
     public void visit(NetworkConfiguration config) throws KuraException {
         List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = config
                 .getNetInterfaceConfigs();
         for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {
             getConfig(netInterfaceConfig, getKuranetProperties());
         }
+        // After every visit, unset the executorService. This must be set before every call.
+        this.executorService = null;
     }
 
     protected Set<NATRule> getAutoNatRules() throws KuraException {
-        LinuxFirewall firewall = LinuxFirewall.getInstance();
-        Set<NATRule> natRules = firewall.getAutoNatRules();
-        return natRules;
+        LinuxFirewall firewall = new LinuxFirewall(this.executorService);
+        return firewall.getAutoNatRules();
     }
 
     protected Properties getKuranetProperties() {
@@ -93,34 +102,34 @@ public class FirewallAutoNatConfigReader implements NetworkConfigurationVisitor 
         String srcIface = null;
         String dstIface = null;
         String prop;
-        StringBuilder sb = new StringBuilder().append("net.interface.").append(interfaceName)
+        StringBuilder sb = new StringBuilder().append(NET_INTERFACE).append(interfaceName)
                 .append(".config.nat.enabled");
         if ((prop = kuraProps.getProperty(sb.toString())) != null) {
             natEnabled = Boolean.parseBoolean(prop);
         }
 
-        sb = new StringBuilder().append("net.interface.").append(interfaceName).append(".config.nat.masquerade");
+        sb = new StringBuilder().append(NET_INTERFACE).append(interfaceName).append(".config.nat.masquerade");
         if ((prop = kuraProps.getProperty(sb.toString())) != null) {
             useMasquerade = Boolean.parseBoolean(prop);
         }
 
-        sb = new StringBuilder().append("net.interface.").append(interfaceName).append(".config.nat.src.interface");
+        sb = new StringBuilder().append(NET_INTERFACE).append(interfaceName).append(".config.nat.src.interface");
         if ((prop = kuraProps.getProperty(sb.toString())) != null) {
             srcIface = prop;
         }
 
-        sb = new StringBuilder().append("net.interface.").append(interfaceName).append(".config.nat.dst.interface");
+        sb = new StringBuilder().append(NET_INTERFACE).append(interfaceName).append(".config.nat.dst.interface");
         if ((prop = kuraProps.getProperty(sb.toString())) != null) {
             dstIface = prop;
         }
 
         if (natEnabled) {
-            addNatConfig(netInterfaceConfig, interfaceName, srcIface, dstIface, useMasquerade);
+            addNatConfig(netInterfaceConfig, srcIface, dstIface, useMasquerade);
         }
     }
 
     private void addNatConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig,
-            String interfaceName, String srcIface, String dstIface, boolean useMasquerade) throws KuraException {
+            String srcIface, String dstIface, boolean useMasquerade) throws KuraException {
 
         FirewallAutoNatConfig natConfig = new FirewallAutoNatConfig(srcIface, dstIface, useMasquerade);
         NetInterfaceAddressConfig netInterfaceAddressConfig = ((AbstractNetInterface<?>) netInterfaceConfig)
@@ -153,8 +162,8 @@ public class FirewallAutoNatConfigReader implements NetworkConfigurationVisitor 
                 if (rule.getSourceInterface().equals(interfaceName)) {
                     logger.debug("found NAT rule: {}", rule);
 
-                    addNatConfig(netInterfaceConfig, interfaceName, rule.getSourceInterface(),
-                            rule.getDestinationInterface(), rule.isMasquerade());
+                    addNatConfig(netInterfaceConfig, rule.getSourceInterface(), rule.getDestinationInterface(),
+                            rule.isMasquerade());
                 }
             }
         }

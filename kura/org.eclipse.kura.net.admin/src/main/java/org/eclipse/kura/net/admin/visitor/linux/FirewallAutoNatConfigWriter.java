@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -21,6 +21,7 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.net.AbstractNetInterface;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
+import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.linux.net.iptables.LinuxFirewall;
 import org.eclipse.kura.linux.net.iptables.NATRule;
 import org.eclipse.kura.net.NetConfig;
@@ -37,9 +38,12 @@ import org.slf4j.LoggerFactory;
 
 public class FirewallAutoNatConfigWriter implements NetworkConfigurationVisitor {
 
+    private static final String NET_INTERFACE = "net.interface.";
+
     private static final Logger logger = LoggerFactory.getLogger(FirewallAutoNatConfigWriter.class);
 
     private static FirewallAutoNatConfigWriter instance;
+    private CommandExecutorService executorService;
 
     public static FirewallAutoNatConfigWriter getInstance() {
 
@@ -47,6 +51,10 @@ public class FirewallAutoNatConfigWriter implements NetworkConfigurationVisitor 
             instance = new FirewallAutoNatConfigWriter();
         }
         return instance;
+    }
+
+    public void setExecutorService(CommandExecutorService executorService) {
+        this.executorService = executorService;
     }
 
     @Override
@@ -63,6 +71,9 @@ public class FirewallAutoNatConfigWriter implements NetworkConfigurationVisitor 
         }
 
         applyNatConfig(config);
+
+        // After every visit, unset the executorService. This must be set before every call.
+        this.executorService = null;
     }
 
     private void writeConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig,
@@ -95,14 +106,14 @@ public class FirewallAutoNatConfigWriter implements NetworkConfigurationVisitor 
             kuraProps = new Properties();
         }
 
-        StringBuilder sb = new StringBuilder().append("net.interface.").append(interfaceName)
+        StringBuilder sb = new StringBuilder().append(NET_INTERFACE).append(interfaceName)
                 .append(".config.nat.enabled");
         kuraProps.put(sb.toString(), Boolean.toString(natEnabled));
         if (natEnabled && srcIface != null && dstIface != null) {
-            sb = new StringBuilder().append("net.interface.").append(interfaceName).append(".config.nat.dst.interface");
+            sb = new StringBuilder().append(NET_INTERFACE).append(interfaceName).append(".config.nat.dst.interface");
             kuraProps.put(sb.toString(), dstIface);
 
-            sb = new StringBuilder().append("net.interface.").append(interfaceName).append(".config.nat.masquerade");
+            sb = new StringBuilder().append(NET_INTERFACE).append(interfaceName).append(".config.nat.masquerade");
             kuraProps.put(sb.toString(), Boolean.toString(useMasquerade));
         }
 
@@ -111,7 +122,7 @@ public class FirewallAutoNatConfigWriter implements NetworkConfigurationVisitor 
     }
 
     protected void applyNatConfig(NetworkConfiguration networkConfig) throws KuraException {
-        LinuxFirewall firewall = LinuxFirewall.getInstance();
+        LinuxFirewall firewall = new LinuxFirewall(this.executorService);
         firewall.replaceAllNatRules(getNatConfigs(networkConfig));
         firewall.enable();
     }
@@ -151,12 +162,13 @@ public class FirewallAutoNatConfigWriter implements NetworkConfigurationVisitor 
                     if (netConfig instanceof NetConfigIP4) {
                         status = ((NetConfigIP4) netConfig).getStatus();
                     } else if (netConfig instanceof FirewallAutoNatConfig) {
-                        logger.debug("getNatConfigs() :: FirewallAutoNatConfig: {}",
-                                ((FirewallAutoNatConfig) netConfig).toString());
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("getNatConfigs() :: FirewallAutoNatConfig: {}",
+                                    ((FirewallAutoNatConfig) netConfig));
+                        }
                         isNat = true;
-                    } else if (netConfig instanceof FirewallNatConfig) {
-                        logger.debug("getNatConfigs() ::  FirewallNatConfig: {}",
-                                ((FirewallNatConfig) netConfig).toString());
+                    } else if (netConfig instanceof FirewallNatConfig && logger.isDebugEnabled()) {
+                        logger.debug("getNatConfigs() ::  FirewallNatConfig: {}", ((FirewallNatConfig) netConfig));
                     }
                 }
 
@@ -170,8 +182,7 @@ public class FirewallAutoNatConfigWriter implements NetworkConfigurationVisitor 
             // create a nat rule for each interface to all potential wan interfaces
             for (String sourceInterface : natList) {
                 for (String destinationInterface : wanList) {
-                    logger.debug(
-                            "Got NAT rule for source: " + sourceInterface + ", destination: " + destinationInterface);
+                    logger.debug("Got NAT rule for source: {}, destination: {}", sourceInterface, destinationInterface);
                     natConfigs.add(new NATRule(sourceInterface, destinationInterface, true));
                 }
             }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -14,14 +14,15 @@ package org.eclipse.kura.linux.net.iptables;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.core.util.ProcessUtil;
-import org.eclipse.kura.core.util.SafeProcess;
+import org.eclipse.kura.KuraProcessExecutionErrorException;
+import org.eclipse.kura.executor.Command;
+import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetworkPair;
@@ -37,8 +38,6 @@ public class LinuxFirewall {
 
     private static final Logger logger = LoggerFactory.getLogger(LinuxFirewall.class);
 
-    private static LinuxFirewall linuxFirewall;
-
     private static Object lock = new Object();
 
     private static final String IP_FORWARD_FILE_NAME = "/proc/sys/net/ipv4/ip_forward";
@@ -51,13 +50,17 @@ public class LinuxFirewall {
     private Set<NATRule> natRules;
     private boolean allowIcmp;
     private boolean allowForwarding;
+    private final IptablesConfig iptables;
+    private final CommandExecutorService executorService;
 
-    private LinuxFirewall() {
+    public LinuxFirewall(CommandExecutorService executorService) {
+        this.executorService = executorService;
+        this.iptables = new IptablesConfig(this.executorService);
         try {
             File cfgFile = new File(FIREWALL_CONFIG_FILE_NAME);
             if (!cfgFile.exists()) {
-                IptablesConfig.applyBlockPolicy();
-                IptablesConfig.save();
+                this.iptables.applyBlockPolicy();
+                this.iptables.save();
             } else {
                 logger.debug("{} file already exists", cfgFile);
             }
@@ -71,21 +74,13 @@ public class LinuxFirewall {
         }
     }
 
-    public static LinuxFirewall getInstance() {
-        if (linuxFirewall == null) {
-            linuxFirewall = new LinuxFirewall();
-        }
-        return linuxFirewall;
-    }
-
     public void initialize() throws KuraException {
         logger.debug("initialize() :: initializing firewall ...");
-        IptablesConfig iptables = new IptablesConfig();
-        iptables.restore();
-        this.localRules = iptables.getLocalRules();
-        this.portForwardRules = iptables.getPortForwardRules();
-        this.autoNatRules = iptables.getAutoNatRules();
-        this.natRules = iptables.getNatRules();
+        this.iptables.restore();
+        this.localRules = this.iptables.getLocalRules();
+        this.portForwardRules = this.iptables.getPortForwardRules();
+        this.autoNatRules = this.iptables.getAutoNatRules();
+        this.natRules = this.iptables.getNatRules();
         this.allowIcmp = true;
         this.allowForwarding = false;
         logger.debug("initialize() :: Parsing current firewall configuraion");
@@ -101,12 +96,12 @@ public class LinuxFirewall {
                 logger.debug("permittedNetworkPrefix: {}", permittedNetworkPrefix);
 
                 newLocalRule = new LocalRule(port, protocol,
-                        new NetworkPair<IP4Address>((IP4Address) IPAddress.parseHostAddress(permittedNetwork),
+                        new NetworkPair<>((IP4Address) IPAddress.parseHostAddress(permittedNetwork),
                                 Short.parseShort(permittedNetworkPrefix)),
                         permittedInterfaceName, unpermittedInterfaceName, permittedMAC, sourcePortRange);
             } else {
                 newLocalRule = new LocalRule(port, protocol,
-                        new NetworkPair<IP4Address>((IP4Address) IPAddress.parseHostAddress("0.0.0.0"), (short) 0),
+                        new NetworkPair<>((IP4Address) IPAddress.parseHostAddress("0.0.0.0"), (short) 0),
                         permittedInterfaceName, permittedInterfaceName, permittedMAC, sourcePortRange);
             }
 
@@ -131,11 +126,11 @@ public class LinuxFirewall {
                     }
                 }
                 if (addRule) {
-                    logger.info("Adding local rule to firewall configuration: {}", newLocalRule.toString());
+                    logger.info("Adding local rule to firewall configuration: {}", newLocalRule);
                     this.localRules.add(newLocalRule);
                     doUpdate = true;
                 } else {
-                    logger.warn("Not adding local rule that is already present: {}", newLocalRule.toString());
+                    logger.warn("Not adding local rule that is already present: {}", newLocalRule);
                 }
             }
             if (doUpdate) {
@@ -181,13 +176,11 @@ public class LinuxFirewall {
                     }
                 }
                 if (addRule) {
-                    logger.info("Adding port forward rule to firewall configuration: {}",
-                            newPortForwardRule.toString());
+                    logger.info("Adding port forward rule to firewall configuration: {}", newPortForwardRule);
                     this.portForwardRules.add(newPortForwardRule);
                     doUpdate = true;
                 } else {
-                    logger.warn("Not adding port forward rule that is already present: {}",
-                            newPortForwardRule.toString());
+                    logger.warn("Not adding port forward rule that is already present: {}", newPortForwardRule);
                 }
             }
             if (doUpdate) {
@@ -219,9 +212,9 @@ public class LinuxFirewall {
             }
 
             NATRule newNatRule = new NATRule(sourceInterface, destinationInterface, masquerade);
-            ArrayList<NATRule> natRules = new ArrayList<>();
-            natRules.add(newNatRule);
-            addAutoNatRules(natRules);
+            ArrayList<NATRule> natRuleList = new ArrayList<>();
+            natRuleList.add(newNatRule);
+            addAutoNatRules(natRuleList);
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
         }
@@ -253,9 +246,9 @@ public class LinuxFirewall {
             NATRule newNatRule = new NATRule(sourceInterface, destinationInterface, protocol, source, destination,
                     masquerade);
 
-            ArrayList<NATRule> natRules = new ArrayList<>();
-            natRules.add(newNatRule);
-            addNatRules(natRules);
+            ArrayList<NATRule> natRuleList = new ArrayList<>();
+            natRuleList.add(newNatRule);
+            addNatRules(natRuleList);
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
         }
@@ -282,11 +275,11 @@ public class LinuxFirewall {
                     }
                 }
                 if (addRule) {
-                    logger.info("Adding auto NAT rule to firewall configuration: {}", newNatRule.toString());
+                    logger.info("Adding auto NAT rule to firewall configuration: {}", newNatRule);
                     rules.add(newNatRule);
                     doUpdate = true;
                 } else {
-                    logger.warn("Not adding auto nat rule that is already present: {}", newNatRule.toString());
+                    logger.warn("Not adding auto nat rule that is already present: {}", newNatRule);
                 }
             }
             if (doUpdate) {
@@ -346,7 +339,7 @@ public class LinuxFirewall {
         try {
             this.portForwardRules.remove(rule);
             if (this.autoNatRules != null && this.autoNatRules.isEmpty() && this.natRules != null
-                    && this.natRules.isEmpty() && this.portForwardRules != null && this.portForwardRules.isEmpty()) {
+                    && this.natRules.isEmpty() && this.portForwardRules.isEmpty()) {
 
                 this.allowForwarding = false;
             }
@@ -362,8 +355,8 @@ public class LinuxFirewall {
         }
         try {
             this.autoNatRules.remove(rule);
-            if (this.autoNatRules != null && this.autoNatRules.isEmpty() && this.natRules != null
-                    && this.natRules.isEmpty() && this.portForwardRules != null && this.portForwardRules.isEmpty()) {
+            if (this.autoNatRules.isEmpty() && this.natRules != null && this.natRules.isEmpty()
+                    && this.portForwardRules != null && this.portForwardRules.isEmpty()) {
 
                 this.allowForwarding = false;
             }
@@ -396,7 +389,7 @@ public class LinuxFirewall {
         }
     }
 
-    public void replaceAllNatRules(LinkedHashSet<NATRule> newNatRules) throws KuraException {
+    public void replaceAllNatRules(Set<NATRule> newNatRules) throws KuraException {
         try {
             this.autoNatRules = newNatRules;
             if (this.autoNatRules != null && !this.autoNatRules.isEmpty()
@@ -459,10 +452,10 @@ public class LinuxFirewall {
                 || this.natRules != null && !this.natRules.isEmpty()) {
             this.allowForwarding = true;
         }
-        IptablesConfig iptables = new IptablesConfig(this.localRules, this.portForwardRules, this.autoNatRules,
-                this.natRules, this.allowIcmp);
-        iptables.save(IptablesConfig.FIREWALL_TMP_CONFIG_FILE_NAME);
-        IptablesConfig.restore(IptablesConfig.FIREWALL_TMP_CONFIG_FILE_NAME);
+        IptablesConfig newIptables = new IptablesConfig(this.localRules, this.portForwardRules, this.autoNatRules,
+                this.natRules, this.allowIcmp, this.executorService);
+        newIptables.save(IptablesConfig.FIREWALL_TMP_CONFIG_FILE_NAME);
+        newIptables.restore(IptablesConfig.FIREWALL_TMP_CONFIG_FILE_NAME);
         logger.debug("Managing port forwarding...");
         enableForwarding(this.allowForwarding);
         runCustomFirewallScript();
@@ -483,22 +476,17 @@ public class LinuxFirewall {
     /*
      * Runs custom firewall script
      */
-    private static void runCustomFirewallScript() throws KuraException {
-        SafeProcess proc = null;
-        try {
-            File file = new File(CUSTOM_FIREWALL_SCRIPT_NAME);
-            if (file.exists()) {
-                logger.info("Running custom firewall script - {}", CUSTOM_FIREWALL_SCRIPT_NAME);
-                proc = ProcessUtil.exec("sh " + CUSTOM_FIREWALL_SCRIPT_NAME);
-                proc.waitFor();
-            }
-        } catch (Exception e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-        } finally {
-            if (proc != null) {
-                ProcessUtil.destroy(proc);
+    private void runCustomFirewallScript() throws KuraException {
+        File file = new File(CUSTOM_FIREWALL_SCRIPT_NAME);
+        if (file.exists()) {
+            logger.info("Running custom firewall script - {}", CUSTOM_FIREWALL_SCRIPT_NAME);
+            Command command = new Command(new String[] { "sh", CUSTOM_FIREWALL_SCRIPT_NAME });
+            CommandStatus status = this.executorService.execute(command);
+            if ((Integer) status.getExitStatus().getExitValue() != 0) {
+                throw new KuraProcessExecutionErrorException("Failed to apply custom firewall script");
             }
         }
+
     }
 
     public void enable() throws KuraException {
@@ -506,7 +494,7 @@ public class LinuxFirewall {
     }
 
     public void disable() throws KuraException {
-        IptablesConfig.clearAllChains();
+        this.iptables.clearAllChains();
     }
 
     public void allowIcmp() {
@@ -528,7 +516,7 @@ public class LinuxFirewall {
     private void update() throws KuraException {
         synchronized (lock) {
             applyRules();
-            IptablesConfig.save();
+            this.iptables.save();
         }
     }
 }

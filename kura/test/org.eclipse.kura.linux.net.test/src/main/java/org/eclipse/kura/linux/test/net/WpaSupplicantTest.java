@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -11,15 +11,9 @@
  *******************************************************************************/
 package org.eclipse.kura.linux.test.net;
 
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.kura.core.linux.executor.LinuxExitValue;
-import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.linux.net.wifi.WpaSupplicantManager;
 import org.eclipse.kura.test.annotation.TestTarget;
@@ -34,9 +28,20 @@ public class WpaSupplicantTest extends TestCase {
 
     private static final Logger s_logger = LoggerFactory.getLogger(WpaSupplicantTest.class);
 
-    private static CountDownLatch dependencyLatch = new CountDownLatch(0);	// initialize with number of dependencies
+    private static CountDownLatch dependencyLatch = new CountDownLatch(1);	// initialize with number of dependencies
     private static final String IFACE_NAME = "wlan0";
     private WpaSupplicantManager wpaSupplicantManager;
+    private static CommandExecutorService executorService;
+
+    public void setExecutorService(CommandExecutorService executorService) {
+        WpaSupplicantTest.executorService = executorService;
+        dependencyLatch.countDown();
+    }
+
+    public void unsetExecutorService(CommandExecutorService executorService) {
+        WpaSupplicantTest.executorService = null;
+        dependencyLatch.countDown();
+    }
 
     @Override
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
@@ -49,10 +54,7 @@ public class WpaSupplicantTest extends TestCase {
             fail("OSGi dependencies unfulfilled");
             System.exit(1);
         }
-        CommandExecutorService executorServiceMock = mock(CommandExecutorService.class);
-        CommandStatus status = new CommandStatus(new LinuxExitValue(0));
-        when(executorServiceMock.execute(anyObject())).thenReturn(status);
-        this.wpaSupplicantManager = new WpaSupplicantManager(executorServiceMock);
+        this.wpaSupplicantManager = new WpaSupplicantManager(WpaSupplicantTest.executorService);
     }
 
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })

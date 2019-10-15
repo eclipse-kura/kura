@@ -967,7 +967,6 @@ public class LinuxNetworkUtil {
         // or, to delete all the interface address:
         // ip addr flush dev eth0
         String[] cmd = { IFCONFIG, interfaceName, "0.0.0.0" };
-        // start the SafeProcess
         Command command = new Command(cmd);
         command.setTimeout(60);
         CommandStatus status = this.executorService.execute(command);

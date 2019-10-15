@@ -30,6 +30,7 @@ import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
 import org.eclipse.kura.core.net.modem.ModemInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.modem.ModemInterfaceConfigImpl;
+import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.linux.net.dns.LinuxDns;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemInfo;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemsInfo;
@@ -81,6 +82,11 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
         }
 
         return instance;
+    }
+
+    @Override
+    public void setExecutorService(CommandExecutorService executorService) {
+        // Not needed
     }
 
     @Override

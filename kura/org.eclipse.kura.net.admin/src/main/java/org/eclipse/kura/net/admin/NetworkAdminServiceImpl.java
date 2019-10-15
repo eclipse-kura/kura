@@ -1144,7 +1144,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
             }
         }
 
-        LinuxFirewall firewall = LinuxFirewall.getInstance();
+        LinuxFirewall firewall = new LinuxFirewall(this.executorService);
         if (desiredNatRules != null) {
             firewall.replaceAllNatRules(desiredNatRules);
         } else {

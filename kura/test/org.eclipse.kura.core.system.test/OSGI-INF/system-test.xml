@@ -19,5 +19,6 @@
               interface="org.eclipse.kura.system.SystemService"
               name="SystemService"
               policy="static"/>
+   <reference bind="setExecutorService" cardinality="1..1" interface="org.eclipse.kura.executor.PrivilegedExecutorService" name="PrivilegedExecutorService" policy="static"/>
 </scr:component>
 

@@ -11,10 +11,6 @@
  *******************************************************************************/
 package org.eclipse.kura.linux.test.net;
 
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -25,11 +21,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.core.linux.executor.LinuxExitValue;
 import org.eclipse.kura.core.net.util.NetworkUtil;
-import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.executor.CommandExecutorService;
-import org.eclipse.kura.linux.net.dhcp.DhcpServerFactory;
 import org.eclipse.kura.linux.net.dhcp.DhcpServerImpl;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.eclipse.kura.net.IP4Address;
@@ -50,7 +43,7 @@ public class DhcpServerTest extends TestCase {
 
     private static final Logger logger = LoggerFactory.getLogger(DhcpServerTest.class);
 
-    private static CountDownLatch dependencyLatch = new CountDownLatch(0);	// initialize with number of dependencies
+    private static CountDownLatch dependencyLatch = new CountDownLatch(1);	// initialize with number of dependencies
 
     private DhcpServerImpl dhcpServer;
 
@@ -58,21 +51,22 @@ public class DhcpServerTest extends TestCase {
     private static String oldConfigBackup = TMPDIR + "/dhcpd.conf.backup";
 
     private static final String TEST_INTERFACE = "eth0";
-    private CommandExecutorService executorServiceMock;
+    private static CommandExecutorService executorService;
+
+    public void setExecutorService(CommandExecutorService executorService) {
+        DhcpServerTest.executorService = executorService;
+        dependencyLatch.countDown();
+    }
+
+    public void unsetExecutorService(CommandExecutorService executorService) {
+        DhcpServerTest.executorService = null;
+        dependencyLatch.countDown();
+    }
 
     @Override
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @BeforeClass
     public void setUp() {
-        this.executorServiceMock = mock(CommandExecutorService.class);
-        CommandStatus status = new CommandStatus(new LinuxExitValue(0));
-        when(this.executorServiceMock.execute(anyObject())).thenReturn(status);
-        try {
-            this.dhcpServer = DhcpServerFactory.getInstance(TEST_INTERFACE, true, true, this.executorServiceMock);
-        } catch (Exception e) {
-            logger.error("Failed to get Dhcp server instance", e);
-        }
-
         File tmpDir = new File(TMPDIR);
         tmpDir.mkdirs();
 
@@ -137,7 +131,7 @@ public class DhcpServerTest extends TestCase {
 
         try {
             // Setup note: Assumes the existence of the test interface, and that it can be brought up with an ip address
-            LinuxNetworkUtil linuxNetworkUtil = new LinuxNetworkUtil(this.executorServiceMock);
+            LinuxNetworkUtil linuxNetworkUtil = new LinuxNetworkUtil(DhcpServerTest.executorService);
             linuxNetworkUtil.disableInterface(TEST_INTERFACE);
             linuxNetworkUtil.enableInterface(TEST_INTERFACE);
 

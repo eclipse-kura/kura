@@ -28,7 +28,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.kura.core.testutil.TestUtil;
-import org.eclipse.kura.core.util.ProcessUtil;
+import org.eclipse.kura.executor.Command;
+import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.test.annotation.TestTarget;
 import org.junit.BeforeClass;
@@ -37,7 +39,8 @@ import org.junit.Test;
 public class SystemServiceTest {
 
     private static SystemService systemService = null;
-    private static CountDownLatch dependencyLatch = new CountDownLatch(1);	// initialize with number of dependencies
+    private static CommandExecutorService executorService = null;
+    private static CountDownLatch dependencyLatch = new CountDownLatch(2);	// initialize with number of dependencies
     private static boolean onCloudbees = false;
 
     @BeforeClass
@@ -49,6 +52,12 @@ public class SystemServiceTest {
             Thread.currentThread().interrupt();
             fail("OSGi dependencies unfulfilled");
         }
+    }
+
+    protected void setExecutorService(CommandExecutorService ces) {
+        executorService = ces;
+        onCloudbees = systemService.getOsName().contains("Cloudbees");
+        dependencyLatch.countDown();
     }
 
     protected void setSystemService(SystemService sms) {
@@ -297,16 +306,15 @@ public class SystemServiceTest {
         String osName = systemService.getOsName();
         if (!osName.contains("indows")) {
             if ("Linux".equals(osName)) {
-                try {
-                    ProcessUtil.exec("dmidecode");
-
-                    // note: this assert works locally and on travis, but not on hudson
-                    // assertNotEquals("UNKNOWN", modelName);
-
-                    assertNotEquals("DevModelName", modelName);
-                } catch (IOException e) {
+                CommandStatus status = executorService.execute(new Command(new String[] { "dmidecode" }));
+                if ((Integer) status.getExitStatus().getExitValue() != 0) {
                     assertEquals("UNKNOWN", modelName);
                 }
+
+                // note: this assert works locally and on travis, but not on hudson
+                // assertNotEquals("UNKNOWN", modelName);
+
+                assertNotEquals("DevModelName", modelName);
             }
         } else {
             assertEquals("UNKNOWN", modelName);
@@ -333,16 +341,14 @@ public class SystemServiceTest {
         String osName = systemService.getOsName();
         if (!osName.contains("indows")) {
             if ("Linux".equals(osName)) {
-                try {
-                    ProcessUtil.exec("dmidecode");
-
-                    // note: this assert works locally and on travis, but not on hudson
-                    // assertNotEquals("UNKNOWN", serialNumber);
-
-                    assertNotEquals("DevSerialNumber", serialNumber);
-                } catch (IOException e) {
+                CommandStatus status = executorService.execute(new Command(new String[] { "dmidecode" }));
+                if ((Integer) status.getExitStatus().getExitValue() != 0) {
                     assertEquals("UNKNOWN", serialNumber);
                 }
+                // note: this assert works locally and on travis, but not on hudson
+                // assertNotEquals("UNKNOWN", serialNumber);
+
+                assertNotEquals("DevSerialNumber", serialNumber);
             }
         } else {
             assertEquals("UNKNOWN", serialNumber);

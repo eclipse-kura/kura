@@ -11,15 +11,9 @@
  *******************************************************************************/
 package org.eclipse.kura.linux.test.net;
 
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.kura.core.linux.executor.LinuxExitValue;
-import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.linux.net.wifi.HostapdManager;
 import org.eclipse.kura.test.annotation.TestTarget;
@@ -33,10 +27,21 @@ import junit.framework.TestCase;
 public class HostapdTest extends TestCase {
 
     private static final Logger s_logger = LoggerFactory.getLogger(HostapdTest.class);
-    private static CountDownLatch dependencyLatch = new CountDownLatch(0);  // initialize with number of dependencies
+    private static CountDownLatch dependencyLatch = new CountDownLatch(1);  // initialize with number of dependencies
 
     private static final String IFACE_NAME = "wlan0";
     private HostapdManager hostapdManager;
+    private static CommandExecutorService executorService;
+
+    public void setExecutorService(CommandExecutorService executorService) {
+        HostapdTest.executorService = executorService;
+        dependencyLatch.countDown();
+    }
+
+    public void unsetExecutorService(CommandExecutorService executorService) {
+        HostapdTest.executorService = null;
+        dependencyLatch.countDown();
+    }
 
     @Override
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
@@ -50,10 +55,7 @@ public class HostapdTest extends TestCase {
             fail("OSGi dependencies unfulfilled");
             System.exit(1);
         }
-        CommandExecutorService executorServiceMock = mock(CommandExecutorService.class);
-        CommandStatus status = new CommandStatus(new LinuxExitValue(0));
-        when(executorServiceMock.execute(anyObject())).thenReturn(status);
-        this.hostapdManager = new HostapdManager(executorServiceMock);
+        this.hostapdManager = new HostapdManager(HostapdTest.executorService);
     }
 
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })

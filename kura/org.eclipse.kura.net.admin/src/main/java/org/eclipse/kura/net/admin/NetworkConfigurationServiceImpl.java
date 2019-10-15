@@ -71,11 +71,11 @@ import org.slf4j.LoggerFactory;
 public class NetworkConfigurationServiceImpl
         implements NetworkConfigurationService, SelfConfiguringComponent, EventHandler {
 
-    public static final String UNCONFIGURED_MODEM_REGEX = "^\\d+-\\d+(\\.\\d+)*$";
-
     private static final Logger logger = LoggerFactory.getLogger(NetworkConfigurationServiceImpl.class);
 
     private static final String[] EVENT_TOPICS = { KuraConfigReadyEvent.KURA_CONFIG_EVENT_READY_TOPIC };
+    private static final String NET_INTERFACES = "net.interfaces";
+    public static final String UNCONFIGURED_MODEM_REGEX = "^\\d+-\\d+(\\.\\d+)*$";
 
     private NetworkService networkService;
     private EventAdmin eventAdmin;
@@ -232,7 +232,7 @@ public class NetworkConfigurationServiceImpl
                 // dynamically insert the type properties..
                 Map<String, Object> modifiedProps = new HashMap<>();
                 modifiedProps.putAll(properties);
-                String interfaces = (String) properties.get("net.interfaces");
+                String interfaces = (String) properties.get(NET_INTERFACES);
                 StringTokenizer st = new StringTokenizer(interfaces, ",");
                 while (st.hasMoreTokens()) {
                     String interfaceName = st.nextToken();
@@ -248,6 +248,7 @@ public class NetworkConfigurationServiceImpl
                 NetworkConfiguration networkConfig = new NetworkConfiguration(modifiedProps);
 
                 for (NetworkConfigurationVisitor visitor : this.writeVisitors) {
+                    visitor.setExecutorService(this.executorService);
                     networkConfig.accept(visitor);
                 }
 
@@ -362,6 +363,7 @@ public class NetworkConfigurationServiceImpl
 
         // populate the NetInterfaceConfigs
         for (NetworkConfigurationVisitor visitor : this.readVisitors) {
+            visitor.setExecutorService(this.executorService);
             networkConfiguration.accept(visitor);
         }
 
@@ -423,8 +425,8 @@ public class NetworkConfigurationServiceImpl
         List<UsbNetDevice> usbNetDevices = this.usbService.getUsbNetDevices();
 
         Tad tad = objectFactory.createTad();
-        tad.setId("net.interfaces");
-        tad.setName("net.interfaces");
+        tad.setId(NET_INTERFACES);
+        tad.setName(NET_INTERFACES);
         tad.setType(Tscalar.STRING);
         tad.setCardinality(10000);
         tad.setRequired(true);

@@ -369,8 +369,17 @@ public class WireGraphServiceImpl implements ConfigurableComponent, WireGraphSer
                     wireComponentProps.get("inputPortCount"));
             configurationProps.put(Constants.EMITTER_PORT_COUNT_PROP_NAME.value(),
                     wireComponentProps.get("outputPortCount"));
-            this.configurationService.createFactoryConfiguration(factoryPid, configToCreate.getPid(),
-                    configurationProps, false);
+            if (factoryPid != null && factoryPid.equals(WIRE_ASSET_FACTORY_PID)) {
+                if (this.configurationService.getComponentConfiguration(configToCreate.getPid()) != null)
+                    continue;
+            }
+            try {
+                this.configurationService.createFactoryConfiguration(factoryPid, configToCreate.getPid(),
+                        configurationProps, false);
+            } catch (Exception e) {
+                this.configurationService.deleteFactoryConfiguration(configToCreate.getPid(), false);
+                throw e;
+            }
         }
 
         // Evaluate updatable components

@@ -7,9 +7,9 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- * Eurotech
- * Amit Kumar Mondal
- * Red Hat Inc
+ *  Eurotech
+ *  Amit Kumar Mondal
+ *  Red Hat Inc
  *
  *******************************************************************************/
 package org.eclipse.kura.internal.wire;
@@ -360,19 +360,35 @@ public class WireGraphServiceImpl implements ConfigurableComponent, WireGraphSer
         // create new components
         List<WireComponentConfiguration> componentsToCreate = getComponentsToCreate(currentWireComponents,
                 newWireComponentConfigurations);
+        List<String> createdPids = new ArrayList<>();
         for (WireComponentConfiguration componentToCreate : componentsToCreate) {
             final ComponentConfiguration configToCreate = componentToCreate.getConfiguration();
             final Map<String, Object> wireComponentProps = componentToCreate.getProperties();
             final Map<String, Object> configurationProps = configToCreate.getConfigurationProperties();
             String factoryPid = (String) configurationProps.get(SERVICE_FACTORYPID);
-            // if (factoryPid != null && factoryPid.equals(WIRE_ASSET_FACTORY_PID))
-            // continue;
+
             configurationProps.put(Constants.RECEIVER_PORT_COUNT_PROP_NAME.value(),
                     wireComponentProps.get("inputPortCount"));
             configurationProps.put(Constants.EMITTER_PORT_COUNT_PROP_NAME.value(),
                     wireComponentProps.get("outputPortCount"));
-            this.configurationService.createFactoryConfiguration(factoryPid, configToCreate.getPid(),
-                    configurationProps, false);
+            if (factoryPid != null && factoryPid.equals(WIRE_ASSET_FACTORY_PID)
+                    && this.configurationService.getComponentConfiguration(configToCreate.getPid()) != null) {
+                continue;
+            }
+            try {
+                this.configurationService.createFactoryConfiguration(factoryPid, configToCreate.getPid(),
+                        configurationProps, false);
+            } catch (Exception e) {
+                for (String createdPid : createdPids) {
+                    try {
+                        this.configurationService.deleteFactoryConfiguration(createdPid, false);
+                    } catch (Exception e1) {
+
+                    }
+                }
+                throw e;
+            }
+            createdPids.add(configToCreate.getPid());
         }
 
         // Evaluate updatable components

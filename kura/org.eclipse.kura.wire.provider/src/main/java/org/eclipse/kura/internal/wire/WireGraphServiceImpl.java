@@ -359,6 +359,7 @@ public class WireGraphServiceImpl implements ConfigurableComponent, WireGraphSer
         // create new components
         List<WireComponentConfiguration> componentsToCreate = getComponentsToCreate(currentWireComponents,
                 newWireComponentConfigurations);
+        List<String> createdPids = new ArrayList<>();
         for (WireComponentConfiguration componentToCreate : componentsToCreate) {
             final ComponentConfiguration configToCreate = componentToCreate.getConfiguration();
             final Map<String, Object> wireComponentProps = componentToCreate.getProperties();
@@ -369,17 +370,23 @@ public class WireGraphServiceImpl implements ConfigurableComponent, WireGraphSer
                     wireComponentProps.get("inputPortCount"));
             configurationProps.put(Constants.EMITTER_PORT_COUNT_PROP_NAME.value(),
                     wireComponentProps.get("outputPortCount"));
-            if (factoryPid != null && factoryPid.equals(WIRE_ASSET_FACTORY_PID)) {
-                if (this.configurationService.getComponentConfiguration(configToCreate.getPid()) != null)
-                    continue;
+            if (factoryPid != null && factoryPid.equals(WIRE_ASSET_FACTORY_PID)
+                    && this.configurationService.getComponentConfiguration(configToCreate.getPid()) != null) {
+                continue;
             }
             try {
                 this.configurationService.createFactoryConfiguration(factoryPid, configToCreate.getPid(),
                         configurationProps, false);
             } catch (Exception e) {
-                this.configurationService.deleteFactoryConfiguration(configToCreate.getPid(), false);
+                for (String createdPid : createdPids)
+                    try {
+                        this.configurationService.deleteFactoryConfiguration(createdPid, false);
+                    } catch (Exception e1) {
+
+                    }
                 throw e;
             }
+            createdPids.add(configToCreate.getPid());
         }
 
         // Evaluate updatable components

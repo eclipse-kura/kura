@@ -1118,7 +1118,9 @@ fi]]>
 		<propertyfile
 			file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
-				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/com.gwt.user_${com.gwt.user.version}.jar@3" />
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/com.google.gwt.user_${gwt-user.version}.jar@3" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.gwtbootstrap3_${org.gwtbootstrap3.version}.jar@3" />
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.web2_${org.eclipse.kura.web2.version}.jar@6:start" />
 			<entry key="osgi.bundles" operation="+"

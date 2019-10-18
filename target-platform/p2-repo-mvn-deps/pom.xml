@@ -897,6 +897,16 @@
                         <Export-Package>*</Export-Package>
                   </instructions>
               </artifact>
+              <artifact>
+                <id>com.google.gwt:gwt-user:${gwt-user.version}</id>
+                  <source>true</source>
+                  <transitive>false</transitive>
+              </artifact>
+              <artifact>
+                <id>org.gwtbootstrap3:gwtbootstrap3:${org.gwtbootstrap3.version}</id>
+                  <source>true</source>
+                  <transitive>false</transitive>
+              </artifact>
               <!--
               <artifact>
                   <id>org.ow2.asm:asm-commons:${org.ow2.asm-mvn.version}</id>

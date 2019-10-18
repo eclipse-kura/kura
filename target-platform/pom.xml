@@ -18,7 +18,7 @@
         <module>usb4java-javax</module>
         <module>org.eclipse.soda.dk.comm-parent</module>
         <module>jdk.dio-parent</module>
-        <module>com.gwt.user</module>
+        <!-- <module>com.gwt.user</module> -->
         <module>tinyb-parent</module>
         <module>moquette-broker</module>
         <module>org.apache.log4j2-api-config</module>

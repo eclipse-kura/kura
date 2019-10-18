@@ -135,7 +135,7 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
         }
         // enumerate all other threads
         final ThreadGroup[] groups = new ThreadGroup[2 * rootGroup.activeGroupCount()];
-        rootGroup.enumerate(groups,false);
+        rootGroup.enumerate(groups, false);
         Arrays.sort(groups, ThreadGroupComparator.getInstance());
         for (ThreadGroup group : groups) {
 

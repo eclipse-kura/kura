@@ -226,6 +226,16 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
     }
 
     @Override
+    public void createFactoryComponent(GwtXSRFToken xsrfToken, String factoryPid, String pid, String name,
+            String componentDescription) throws GwtKuraException {
+        this.checkXSRFToken(xsrfToken);
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("name", name);
+        properties.put("componentDescription", componentDescription);
+        internalCreateFactoryComponent(factoryPid, pid, properties);
+    }
+
+    @Override
     public void createFactoryComponent(GwtXSRFToken xsrfToken, String factoryPid, String pid,
             GwtConfigComponent properties) throws GwtKuraException {
         this.checkXSRFToken(xsrfToken);
@@ -620,15 +630,25 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
 
             if (props != null && props.get(SERVICE_FACTORY_PID) != null) {
                 String pid = stripPidPrefix(config.getPid());
-                gwtConfig.setComponentName(pid);
+                String name = pid;
+                if (props.containsKey("name"))
+                    name = (String) props.get("name");
+                if (name == null || name.equals(""))
+                    name = pid;
+                gwtConfig.setComponentName(name);
                 gwtConfig.setFactoryComponent(true);
                 gwtConfig.setFactoryPid(String.valueOf(props.get(ConfigurationAdmin.SERVICE_FACTORYPID)));
             } else {
                 gwtConfig.setComponentName(ocd.getName());
                 gwtConfig.setFactoryComponent(false);
             }
-
-            gwtConfig.setComponentDescription(ocd.getDescription());
+            String descCription = "";
+            if (props.containsKey("componentDescription"))
+                descCription = (String) props.get("componentDescription");
+            if (descCription == null || descCription.equals(""))
+                gwtConfig.setComponentDescription(ocd.getDescription());
+            else
+                gwtConfig.setComponentDescription(descCription);
             if (ocd.getIcon() != null && !ocd.getIcon().isEmpty()) {
                 Icon icon = ocd.getIcon().get(0);
                 gwtConfig.setComponentIcon(icon.getResource());

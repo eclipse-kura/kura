@@ -183,7 +183,7 @@
 													b:id="servicesSearchField" />
 												<b:InputGroupButton
 													addStyleNames="services-add">
-													<b:Tooltip title="Create a new Component"
+													<b:Tooltip title="{msgs.createNewComponent}"
 														placement="TOP">
 														<b:Button icon="PLUS" size="SMALL"
 															dataTarget="#myModal" dataToggle="MODAL"
@@ -315,13 +315,27 @@
 							<b:ListBox b:id="formFactory" ui:field="factoriesList" />
 						</b:FormGroup>
 						<b:FormGroup>
-							<b:FormLabel for="formName"
-								ui:field="componentInstanceNameLabel" />
+							<b:FormLabel for="formPid"
+								ui:field="componentInstancePidLabel" />
 							<b:HelpBlock iconType="EXCLAMATION_TRIANGLE" />
-							<kura.util:PidTextBox b:id="formName"
-								ui:field="componentName" autoComplete="false"
+							<kura.util:PidTextBox b:id="formPid"
+								ui:field="componentPid" autoComplete="false"
 								validateOnBlur="true" />
 						</b:FormGroup>
+                        <b:FormGroup>
+                            <b:FormLabel for="formName"
+                                ui:field="componentInstanceNameLabel" />
+                            <b:HelpBlock iconType="EXCLAMATION_TRIANGLE" />
+                            <b:TextBox b:id="formName"
+                                ui:field="componentName" autoComplete="false"/>
+                        </b:FormGroup>
+                        <b:FormGroup>
+                            <b:FormLabel for="formDesc"
+                                ui:field="componentInstanceDescLabel" />
+                            <b:HelpBlock iconType="EXCLAMATION_TRIANGLE" />
+                            <b:TextArea b:id="formDesc"
+                                ui:field="componentDesc" autoComplete="false"/>
+                        </b:FormGroup>
 					</b:FieldSet>
 				</b:Form>
 			</b:ModalBody>

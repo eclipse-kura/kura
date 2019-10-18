@@ -49,11 +49,11 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
+                <version>4.1.0</version>
                 <extensions>true</extensions>
                 <configuration>
                     <manifestLocation>META-INF</manifestLocation>
                     <instructions>
-                        <Bundle-Activator>org.eclipse.soda.dk.comm.bundle.Activator</Bundle-Activator>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>%bundle.name</Bundle-Name>
                         <Bundle-Version>${project.version}</Bundle-Version>

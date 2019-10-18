@@ -68,6 +68,7 @@ import org.gwtbootstrap3.client.ui.Panel;
 import org.gwtbootstrap3.client.ui.PanelBody;
 import org.gwtbootstrap3.client.ui.PanelHeader;
 import org.gwtbootstrap3.client.ui.Row;
+import org.gwtbootstrap3.client.ui.TextArea;
 import org.gwtbootstrap3.client.ui.TextBox;
 import org.gwtbootstrap3.client.ui.constants.IconSize;
 import org.gwtbootstrap3.client.ui.constants.IconType;
@@ -155,6 +156,10 @@ public class EntryClassUi extends Composite implements Context {
     @UiField
     FormLabel componentInstanceNameLabel;
     @UiField
+    FormLabel componentInstanceDescLabel;
+    @UiField
+    FormLabel componentInstancePidLabel;
+    @UiField
     Button buttonNewComponent;
     @UiField
     Button buttonNewComponentCancel;
@@ -165,7 +170,11 @@ public class EntryClassUi extends Composite implements Context {
     @UiField
     Button factoriesButton;
     @UiField
-    PidTextBox componentName;
+    TextBox componentName;
+    @UiField
+    TextArea componentDesc;
+    @UiField
+    PidTextBox componentPid;
     @UiField
     Button sidenavButton;
     @UiField
@@ -646,6 +655,8 @@ public class EntryClassUi extends Composite implements Context {
         this.factoriesButton.addClickHandler(event -> {
             // always empty the PID input field
             EntryClassUi.this.componentName.setValue("");
+            EntryClassUi.this.componentPid.setValue("");
+            EntryClassUi.this.componentDesc.setValue("");
             EntryClassUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
                 @Override
@@ -683,6 +694,9 @@ public class EntryClassUi extends Composite implements Context {
         this.newFactoryComponentFormLabel.setText(MSGS.servicesComponentFactoryFactory());
         this.componentInstanceNameLabel.setText(MSGS.servicesComponentFactoryName());
         this.componentName.setPlaceholder(MSGS.servicesComponentFactoryNamePlaceholder());
+        this.componentInstanceDescLabel.setText(MSGS.servicesComponentDesc());
+        this.componentInstancePidLabel.setText(MSGS.servicesComponentPid());
+        this.componentPid.setPlaceholder(MSGS.servicesComponentPidPlaceholder());
         this.buttonNewComponent.setText(MSGS.submitButton());
         this.buttonNewComponentCancel.setText(MSGS.cancelButton());
 
@@ -690,7 +704,9 @@ public class EntryClassUi extends Composite implements Context {
         this.buttonNewComponent.addClickHandler(event -> {
 
             String factoryPid = EntryClassUi.this.factoriesList.getSelectedValue();
-            String pid = EntryClassUi.this.componentName.getPid();
+            String name = EntryClassUi.this.componentName.getText();
+            String pid = EntryClassUi.this.componentPid.getPid();
+            String desc = EntryClassUi.this.componentDesc.getText();
             if (pid == null) {
                 return;
             }
@@ -704,7 +720,7 @@ public class EntryClassUi extends Composite implements Context {
                     context -> EntryClassUi.this.gwtXSRFService.generateSecurityToken(context.callback(token -> {
 
                         EntryClassUi.this.newFactoryComponentModal.hide();
-                        EntryClassUi.this.gwtComponentService.createFactoryComponent(token, factoryPid, pid,
+                        EntryClassUi.this.gwtComponentService.createFactoryComponent(token, factoryPid, pid, name, desc,
                                 context.callback(new AsyncCallback<Void>() {
 
                                     @Override
@@ -733,7 +749,7 @@ public class EntryClassUi extends Composite implements Context {
         this.contentPanel.setVisible(true);
 
         if (item != null) {
-            setHeader(item.getComponentName(), item.getComponentDescription());
+            setHeader(item.getComponentName() + "(" + item.getComponentId() + ")", item.getComponentDescription());
         }
 
         this.contentPanelBody.add(this.servicesUi);

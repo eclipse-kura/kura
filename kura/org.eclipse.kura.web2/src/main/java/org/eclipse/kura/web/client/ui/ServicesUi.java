@@ -135,6 +135,7 @@ public class ServicesUi extends AbstractServicesUi {
         this.apply.setEnabled(false);
         this.reset.setEnabled(false);
         this.delete.setEnabled(this.configurableComponent.isFactoryComponent());
+        this.delete.setVisible(this.configurableComponent.isFactoryComponent());
     }
 
     @Override

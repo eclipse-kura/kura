@@ -749,7 +749,10 @@ public class EntryClassUi extends Composite implements Context {
         this.contentPanel.setVisible(true);
 
         if (item != null) {
-            setHeader(item.getComponentName() + "(" + item.getComponentId() + ")", item.getComponentDescription());
+            if (item.isFactoryComponent())
+                setHeader(item.getComponentName() + "(" + item.getComponentId() + ")", item.getComponentDescription());
+            else
+                setHeader(item.getComponentName(), item.getComponentDescription());
         }
 
         this.contentPanelBody.add(this.servicesUi);

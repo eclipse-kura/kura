@@ -756,6 +756,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
             Boolean isPostProcess = (Boolean) properties.get(POST_PROCESS_NAME_PROP_NAME);
             String scriptSource = (String) properties.get(POST_PROCESS_CODE_NAME_PROP_NAME);
             String cloudAccountName = (String) properties.get(CLOUD_ACCOUNT_NAME_PROP_NAME);
+            String topicClientId = clientId;
             if (isPostProcess != null && isPostProcess && scriptSource != null && !scriptSource.equals("")) {
                 Binding binding = new Binding();
                 GroovyShell shell = new GroovyShell(binding);
@@ -763,6 +764,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
                 binding.setProperty("userName", userName);
                 binding.setProperty("passwordString", password.toString());
                 binding.setProperty("cloudAccountName", cloudAccountName);
+                binding.setProperty("topicClientId", topicClientId);
                 binding.setProperty("clientId", clientId);
                 try {
                     Script script = shell.parse(scriptSource);
@@ -770,6 +772,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
                     userName = (String) script.getProperty("userName");
                     passwordString = (String) script.getProperty("passwordString");
                     cloudAccountName = (String) script.getProperty("cloudAccountName");
+                    topicClientId = (String) script.getProperty("topicClientId");
                     clientId = (String) script.getProperty("clientId");
                 } catch (Exception e) {
                     logger.error("Script parse error:{}", e);
@@ -793,7 +796,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
                 if (properties.get(CLOUD_ACCOUNT_NAME_PROP_NAME) != null) {
                     this.topicContext.put(TOPIC_ACCOUNT_NAME_CTX_NAME, cloudAccountName);
                 }
-                this.topicContext.put(TOPIC_DEVICE_ID_CTX_NAME, clientId);
+                this.topicContext.put(TOPIC_DEVICE_ID_CTX_NAME, topicClientId);
             }
 
             String willTopic = (String) properties.get(MQTT_LWT_TOPIC_PROP_NAME);

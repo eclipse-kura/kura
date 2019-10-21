@@ -137,9 +137,9 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
 
                         if (gwtKuraException != null) {
                             auditLogger.warn(
-                                    "UI Status - Failure - Failed to connect data service for user: {}, session: {}, connection id: {}",
+                                    "UI Status - Failure - Failed to connect data service for user: {}, session: {}, connection id: {} ",
                                     session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId(),
-                                    connectionId);
+                                    connectionId, gwtKuraException);
                             throw gwtKuraException;
                         }
                     }

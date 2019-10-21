@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.web.shared;
 
+import java.io.Serializable;
 import java.util.MissingResourceException;
 
 /**
@@ -30,7 +31,7 @@ import java.util.MissingResourceException;
  * @author mcarrer
  *
  */
-public class GwtKuraException extends Exception {
+public class GwtKuraException extends Exception implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

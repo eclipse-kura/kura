@@ -13,170 +13,186 @@
       Benjamin Cabé <benjamin@eclipse.org>
 
 -->
-<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="OSGI-INF/l10n/MqttDataTransport">
     <OCD id="org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport" 
-         name="MqttDataTransport" 
-         description="The MqttDataTransport provides an MQTT connection. Its configuration parameters are used to determine the MQTT broker and the credentials to connect to the broker.">
+         name="%name" 
+         description="%description">
 
         <Icon resource="MqttDataTransport" size="32"/>
                 
         <AD id="broker-url"
-            name="Broker-url"
+            name="%brokerUrl"
             type="String"
             cardinality="0" 
             required="true"
             default="mqtt://broker-url:1883/" 
-            description="URL of the mqtt broker to connect to. Everyware Cloud: mqtt://broker-sandbox.everyware-cloud.com:1883/, mqtts://broker-sandbox.everyware-cloud.com:8883/, ws://broker-sandbox.everyware-cloud.com:8080/ or wss://broker-sandbox.everyware-cloud.com:443/. Eclipse IoT: mqtt://mqtt.eclipse.org:1883/, mqtts://mqtt.eclipse.org:8883/."/>
+            description="%brokerUrlDesc"/>
 
         <AD id="topic.context.account-name"
-            name="Topic Context Account-Name"
+            name="%topicContextAccountName"
             type="String"
             cardinality="0"
             required="false"
             default="account-name"
-            description="The value of this attribute will replace the '#account-name' token found in publishing topics. For connections to remote management servers, this is generally the name of the server side account."/>
+            description="%topicContextAccountNameDesc"/>
 
         <AD id="username"  
-            name="Username"
+            name="%username"
             type="String"
             cardinality="0"
             required="false"
             default="username" 
-            description="Username to be used when connecting to the MQTT broker."/>
+            description="%usernameDesc"/>
 
         <AD id="password"  
-            name="Password"
+            name="%password"
             type="Password"
             cardinality="0" 
             required="false"
             default="password" 
-            description="Password to be used when connecting to the MQTT broker."/>
+            description="%passwordDesc"/>
 
         <AD id="client-id"
-            name="Client-id"
+            name="%clientId"
             type="String"
             cardinality="0"
             required="false"
             default="" 
-            description="Client identifier to be used when connecting to the MQTT broker. The identifier has to be unique within your account. Characters '/', '+', '#' and '.' are invalid and they will be replaced by '-'. If left empty, this is automatically determined by the client software as the MAC address of the main network interface (in general uppercase and without ':')."/>
-        
+            description="%clientIdDesc"/>
+            
+        <AD id="post-process"
+            name="%postProcess"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="%postProcessDesc"/>
+            
+        <AD id="post-process-code"
+            name="%postProcessCode"
+            type="String"
+            cardinality="0"
+            default="// userName    passwordString   cloudAccountName   clientId"
+            required="false"
+            description="%postProcessCodeDesc"/>    
+            
         <AD id="keep-alive"  
-            name="Keep-alive"
+            name="%keepAlive"
             type="Integer"
             cardinality="0" 
             required="true"
             default="30"
-            description="Frequency in seconds for the periodic MQTT PING message."/>
+            description="%keepAlive"/>
             
         <AD id="timeout"
-            name="Timeout"
+            name="%timeout"
             type="Integer"
             cardinality="0" 
             required="true"
             default="10"
-            description="Timeout used for all interactions with the MQTT broker."/>
+            description="%timeoutDesc"/>
 
         <AD id="clean-session"
-            name="Clean-session"
+            name="%cleanSession"
             type="Boolean"
             cardinality="0"
             required="true"
             default="true"
-            description="MQTT Clean Session flag."/>
+            description="%cleanSessionDesc"/>
             
         <AD id="lwt.topic"
-            name="LWT Topic"
+            name="%lWTTopic"
             type="String"
             cardinality="0"
             required="false"
             default="$EDC/#account-name/#client-id/MQTT/LWT"
-            description="MQTT Last Will and Testament topic. The tokens '#account-name' and '#client-id' will be replaced by the values of the properties topic.context.account-name and client-id"/>
+            description="%lWTTopicDesc"/>
             
         <AD id="lwt.payload"
-            name="LWT Payload"
+            name="%lWTPayload"
             type="String"
             cardinality="0"
             default=""
             required="false"
-            description="MQTT Last Will and Testament payload as a string."/>
+            description="%lWTPayloadDesc"/>
             
         <AD id="lwt.qos"  
-            name="LWT Qos"
+            name="%lWTQos"
             type="Integer"
             cardinality="0"
             required="false"
             default="0"
-            description="MQTT Last Will and Testament QoS (0..2).">
+            description="%lWTQosDesc">
             <Option label="0" value="0"/>
             <Option label="1" value="1"/>
             <Option label="2" value="2"/>
         </AD>
             
         <AD id="lwt.retain"
-            name="LWT Retain"
+            name="%lWTRetain"
             type="Boolean"
             cardinality="0"
             required="false"
             default="false"
-            description="MQTT Last Will and Testament Retain flag."/>
+            description="%lWTRetainDesc"/>
             
         <AD id="in-flight.persistence"
-            name="In-flight Persistence"
+            name="%inFlightPersistence"
             type="String"
             cardinality="0" 
             required="true"
             default="memory"
-            description="Storage type where in-flight messages are persisted across reconnections.">
+            description="%inFlightPersistenceDesc">
            <Option label="file" value="file"/>
            <Option label="memory" value="memory"/>
         </AD>
             
         <AD id="protocol-version"  
-            name="Protocol-version"
+            name="%protocolVersion"
             type="Integer"
             cardinality="0"
             required="false"
             default="4"
-            description="MQTT Protocol Version.">
+            description="%protocolVersionDesc">
             <Option label="3.1" value="3"/>
             <Option label="3.1.1" value="4"/>
         </AD>
         
         <AD id="ssl.default.protocol"
-            name="SSL Default Protocol"
+            name="%sSLDefaultProtocol"
             type="String"
             cardinality="0"
             required="false"
             default=""
-            description="The protocol to use to initialize the SSLContext. If not specified, the protocol specified in the SslManagerService will be used."/>
+            description="%sSLDefaultProtocolDesc"/>
                         
         <AD id="ssl.hostname.verification"
-            name="SSL Hostname Verification"
+            name="%sSLHostnameVerification"
             type="String"
             cardinality="0"
             required="true"
             default="use-ssl-service-config"
-            description="Enable or disable hostname verification.">
-        	<Option label="Rely on SSL Manager Service configuration" value="use-ssl-service-config" />
-        	<Option label="True" value="true" />
-        	<Option label="False" value="false" />
+            description="%sSLHostnameVerificationDesc">
+        	<Option label="%labelUseSslServiceConfig" value="use-ssl-service-config" />
+        	<Option label="%labelYes" value="true" />
+        	<Option label="%labelNo" value="false" />
         </AD>
         
         <AD id="ssl.default.cipherSuites"
-            name="SSL Default Cipher Suites"
+            name="%sSLDefaultCipherSuites"
             type="String"
             cardinality="0"
             required="false"
             default=""
-            description="Comma-separated list of allosed ciphers. If not specified, the SslManagerService configuration will be used."/>
+            description="%sSLDefaultCipherSuitesDesc"/>
             
         <AD id="ssl.certificate.alias"
-            name="SSL Certificate Alias"
+            name="%sSLCertificateAlias"
             type="String"
             cardinality="0"
             required="false"
             default=""
-            description="The alias to use. If not specified, the value in topic.context.account-name will be used."/>
+            description="%sSLCertificateAliasDesc"/>
         
         </OCD>
     <Designate pid = "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport" factoryPid = "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport">

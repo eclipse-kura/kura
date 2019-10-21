@@ -37,10 +37,12 @@ import org.eclipse.kura.configuration.metatype.AD;
 import org.eclipse.kura.configuration.metatype.Designate;
 import org.eclipse.kura.configuration.metatype.MetaData;
 import org.eclipse.kura.configuration.metatype.OCD;
+import org.eclipse.kura.configuration.metatype.Option;
 import org.eclipse.kura.configuration.metatype.Scalar;
 import org.eclipse.kura.core.configuration.metatype.Tad;
 import org.eclipse.kura.core.configuration.metatype.Tmetadata;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
+import org.eclipse.kura.core.configuration.metatype.Toption;
 import org.eclipse.kura.core.util.IOUtil;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.marshalling.Unmarshaller;
@@ -250,6 +252,12 @@ public class ComponentUtil {
                 List<AD> ads = tocd.getAD();
                 for (AD ad : ads) {
                     Tad tad = (Tad) ad;
+                    if (tad.getOption() != null) {
+                        for (Option option : tad.getOption()) {
+                            Toption toption = (Toption) option;
+                            toption.setLabel(getLocalized(rb, toption.getLabel()));
+                        }
+                    }
                     tad.setName(getLocalized(rb, tad.getName()));
                     tad.setDescription(getLocalized(rb, tad.getDescription()));
                 }

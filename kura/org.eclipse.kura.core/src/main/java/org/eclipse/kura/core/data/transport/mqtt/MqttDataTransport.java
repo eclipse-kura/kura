@@ -56,6 +56,10 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import groovy.lang.Binding;
+import groovy.lang.GroovyShell;
+import groovy.lang.Script;
+
 public class MqttDataTransport implements DataTransportService, MqttCallback, ConfigurableComponent, SslServiceListener,
         CloudConnectionStatusComponent {
 
@@ -80,6 +84,10 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
     private static final String MQTT_USERNAME_PROP_NAME = "username";
     private static final String MQTT_PASSWORD_PROP_NAME = "password";
     private static final String MQTT_CLIENT_ID_PROP_NAME = "client-id";
+
+    private static final String POST_PROCESS_NAME_PROP_NAME = "post-process";
+    private static final String POST_PROCESS_CODE_NAME_PROP_NAME = "post-process-code";
+
     private static final String MQTT_KEEP_ALIVE_PROP_NAME = "keep-alive";
     private static final String MQTT_CLEAN_SESSION_PROP_NAME = "clean-session";
 
@@ -739,15 +747,40 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
             ValidationUtil.notNull(properties.get(MQTT_CLEAN_SESSION_PROP_NAME), MQTT_CLEAN_SESSION_PROP_NAME);
 
             String userName = (String) properties.get(MQTT_USERNAME_PROP_NAME);
+
+            Password password = (Password) properties.get(MQTT_PASSWORD_PROP_NAME);
+            String passwordString = "";
+            if (password != null)
+                passwordString = password.toString();
+
+            Boolean isPostProcess = (Boolean) properties.get(POST_PROCESS_NAME_PROP_NAME);
+            String scriptSource = (String) properties.get(POST_PROCESS_CODE_NAME_PROP_NAME);
+            String cloudAccountName = (String) properties.get(CLOUD_ACCOUNT_NAME_PROP_NAME);
+            if (isPostProcess != null && isPostProcess && scriptSource != null && !scriptSource.equals("")) {
+                Binding binding = new Binding();
+                GroovyShell shell = new GroovyShell(binding);
+                binding.setVariable("logger", logger);
+                binding.setProperty("userName", userName);
+                binding.setProperty("passwordString", password.toString());
+                binding.setProperty("cloudAccountName", cloudAccountName);
+                binding.setProperty("clientId", clientId);
+                try {
+                    Script script = shell.parse(scriptSource);
+                    script.run();
+                    userName = (String) script.getProperty("userName");
+                    passwordString = (String) script.getProperty("passwordString");
+                    cloudAccountName = (String) script.getProperty("cloudAccountName");
+                    clientId = (String) script.getProperty("clientId");
+                } catch (Exception e) {
+                    logger.error("Script parse error:{}", e);
+                }
+            }
             if (userName != null && !userName.isEmpty()) {
                 conOpt.setUserName(userName);
             }
-
-            Password password = (Password) properties.get(MQTT_PASSWORD_PROP_NAME);
-            if (password != null && password.toString().length() != 0) {
-                conOpt.setPassword(password.getPassword());
+            if (passwordString.length() != 0) {
+                conOpt.setPassword(passwordString.toCharArray());
             }
-
             conOpt.setKeepAliveInterval((Integer) properties.get(MQTT_KEEP_ALIVE_PROP_NAME));
             conOpt.setConnectionTimeout((Integer) properties.get(MQTT_TIMEOUT_PROP_NAME));
 
@@ -758,8 +791,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
             synchronized (this.topicContext) {
                 this.topicContext.clear();
                 if (properties.get(CLOUD_ACCOUNT_NAME_PROP_NAME) != null) {
-                    this.topicContext.put(TOPIC_ACCOUNT_NAME_CTX_NAME,
-                            (String) properties.get(CLOUD_ACCOUNT_NAME_PROP_NAME));
+                    this.topicContext.put(TOPIC_ACCOUNT_NAME_CTX_NAME, cloudAccountName);
                 }
                 this.topicContext.put(TOPIC_DEVICE_ID_CTX_NAME, clientId);
             }

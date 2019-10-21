@@ -76,7 +76,10 @@ public class CloudPayloadJsonDecoder {
                 } else if (METRICS.value().equalsIgnoreCase(name) && value.isObject()) {
                     decodeMetric(payload, value.asObject());
                 } else {
-                    throw new IllegalArgumentException(String.format("Unrecognized value: %s", name));
+                    JsonObject obj = new JsonObject();
+                    obj.add(name, value);
+                    decodeMetric(payload, obj);
+                    logger.error("Unrecognized value: {}", name);
                 }
             }
         } catch (Exception e) {
@@ -200,7 +203,10 @@ public class CloudPayloadJsonDecoder {
         } else if (name.equalsIgnoreCase("bytes")) {
             javaValue = Base64.getDecoder().decode(value0.asString());
         } else {
-            throw new IllegalArgumentException(String.format("metric typed object %s is incorrect!", value));
+            if (!member.getValue().isObject())
+                javaValue = member.getValue().toString();
+            else
+                throw new IllegalArgumentException(String.format("metric typed object %s is incorrect!", value));
         }
         return javaValue;
     }

@@ -13,99 +13,98 @@
       Benjamin Cabé <benjamin@eclipse.org>
 
 -->
-<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="OSGI-INF/l10n/CloudService">
     <OCD id="org.eclipse.kura.cloud.CloudService" 
-         name="CloudService" 
-         description="The CloudService allows for setting a user friendly name for the current device. It also provides the option to compress message payloads to reduce network traffic.">
+         name="%name" 
+         description="%description">
 
         <Icon resource="CloudService" size="32"/>
         
         <AD id="device.display-name"
-            name="Device Display-Name"
+            name="%deviceDisplayName"
             type="String"
             cardinality="0"
             required="true"
             default="device-name"
-            description="Friendly name of the device. Device name is the common name of the device (eg: Reliagate 20-25, Raspberry Pi, etc.). Hostname will use the linux hostname utility. 
-            				Custom allows for defining a unique string. Server defined relies on the remote management server to define a name.">
-        	<Option label="Set display name as device name" value="device-name" />
-        	<Option label="Set display name from hostname" value="hostname" />
-        	<Option label="Custom" value="custom" />
-        	<Option label="Server defined" value="server" />
+            description="%deviceDisplayNameDesc">
+        	<Option label="%labelDeviceName" value="device-name" />
+        	<Option label="%labelHostname" value="hostname" />
+        	<Option label="%labelCustom" value="custom" />
+        	<Option label="%labelServer" value="server" />
         </AD>
         
         <AD id="device.custom-name"
-        	name="Device Custom-Name"
+        	name="%deviceCustomName"
         	type="String"
         	cardinality="0"
         	required="false"
         	default=""
-        	description='Custom name for the device. This value is applied ONLY if device.display-name is set to "Custom"'>
+        	description="%deviceCustomNameDesc">
         </AD>
                     
         <AD id="topic.control-prefix"
-            name="Topic Control-Prefix"
+            name="%topicControlPrefix"
             type="String"
             cardinality="0"
             required="true"
             default="$EDC"
-            description='Topic prefix for system and device management messages.'>
+            description="%topicControlPrefixDesc">
         </AD>
                     
         <AD id="encode.gzip"
-            name="Encode gzip"
+            name="%encodeGzip"
             type="Boolean"
             cardinality="0"
             required="false"
             default="true"
-            description="Compress message payloads before sending them to the remote server to reduce the network traffic.">
+            description="%encodeGzip">
         </AD>
         
         <AD id="republish.mqtt.birth.cert.on.gps.lock"
-            name="Republish Mqtt Birth Cert On Gps Lock"
+            name="%republishGpsLock"
             type="Boolean"
             cardinality="0"
             required="true"
             default="false"
-            description="Whether or not to republish the MQTT Birth Certificate on GPS lock event"/>
+            description="%republishGpsLockDesc"/>
         
         <AD id="republish.mqtt.birth.cert.on.modem.detect"
-            name="Republish Mqtt Birth Cert On Modem Detect"
+            name="%republishCertDetect"
             type="Boolean"
             cardinality="0"
             required="true"
             default="false"
-            description="Whether or not to republish the MQTT Birth Certificate on modem detection event"/>
+            description="%republishCertDetectDesc"/>
             
         <AD id="enable.default.subscriptions"
-            name="Enable Default Subscriptions"
+            name="%enableDefaultSubscriptions"
             type="Boolean"
             cardinality="0"
             required="true"
             default="true"
-            description="Manages the default subscriptions to the gateway management MQTT topics. When disabled, the gateway will not be remotely manageable."/>
+            description="%enableDefaultSubscriptionsDesc"/>
             
         <AD id="birth.cert.policy"
-            name="Birth Cert Policy"
+            name="%birthCertPolicy"
             type="String"
             cardinality="0"
             required="true"
             default="birth-connect-reconnect"
-            description="Specify the birth certificate policy.">
-            <Option label="Disable publishing" value="disable" />
-            <Option label="Publish birth on connect" value="birth-connect" />
-            <Option label="Publish birth on connect and reconnect" value="birth-connect-reconnect" />
+            description="%birthCertPolicyDesc">
+            <Option label="%labelDisablePublishing" value="disable" />
+            <Option label="%labelBirthConnect" value="birth-connect" />
+            <Option label="%labelBirthConnectReconnect" value="birth-connect-reconnect" />
         </AD>
         
         <AD id="payload.encoding"
-            name="Payload Encoding"
+            name="%payloadEncoding"
             type="String"
             cardinality="0"
             required="true"
             default="simple-json"
-            description="Specify the message payload encoding.">
-            <Option label="Kura Protobuf" value="kura-protobuf" />
-            <Option label="Simple JSON" value="simple-json" />
+            description="%payloadEncodingDesc">
+            <Option label="%labelProtobuf" value="kura-protobuf" />
+            <Option label="%labelJson" value="simple-json" />
         </AD>
     </OCD>
     

@@ -12,7 +12,6 @@
  *******************************************************************************/
 package org.eclipse.kura.web.shared;
 
-import java.io.Serializable;
 import java.util.MissingResourceException;
 
 /**
@@ -31,12 +30,23 @@ import java.util.MissingResourceException;
  * @author mcarrer
  *
  */
-public class GwtKuraException extends Exception implements Serializable {
+public class GwtKuraException extends Exception {
 
     private static final long serialVersionUID = 1L;
 
     protected GwtKuraErrorCode m_errorCode;
     protected String[] m_arguments;
+    protected StackTraceElement[] stackTrace;
+    protected String detailMessage;
+
+    public String getDetailMessage() {
+        return detailMessage;
+    }
+
+    @Override
+    public StackTraceElement[] getStackTrace() {
+        return this.stackTrace;
+    }
 
     @SuppressWarnings("unused")
     private GwtKuraException() {
@@ -50,11 +60,23 @@ public class GwtKuraException extends Exception implements Serializable {
     @SuppressWarnings("unused")
     private GwtKuraException(String message, Throwable cause) {
         super(message, cause);
+        stackTrace(cause);
     }
 
     @SuppressWarnings("unused")
     private GwtKuraException(Throwable t) {
         super(t);
+        stackTrace(t);
+    }
+
+    private void stackTrace(Throwable cause) {
+        if (cause != null) {
+            this.stackTrace = cause.getStackTrace();
+            Throwable topCause = cause;
+            while (topCause.getCause() != null && topCause.getMessage() != null)
+                topCause = topCause.getCause();
+            this.detailMessage = topCause.getMessage();
+        }
     }
 
     /**
@@ -79,11 +101,13 @@ public class GwtKuraException extends Exception implements Serializable {
      */
     public GwtKuraException(GwtKuraErrorCode errorCode, Throwable cause) {
         super(cause);
+        stackTrace(cause);
         this.m_errorCode = errorCode;
     }
 
     public GwtKuraException(GwtKuraErrorCode errorCode, Throwable cause, String... arguments) {
         super(cause);
+        stackTrace(cause);
         this.m_errorCode = errorCode;
         this.m_arguments = arguments;
     }

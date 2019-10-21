@@ -100,6 +100,8 @@ public class FailureHandler {
             } else {
                 errorMessageBuilder.append(MSGS.genericError());
             }
+            if (gee.getDetailMessage() != null)
+                errorMessageBuilder.append("\n" + gee.getDetailMessage());
 
         } else if (caught instanceof StatusCodeException && ((StatusCodeException) caught).getStatusCode() == 0) {
             // the current operation was interrupted as the user started a new one

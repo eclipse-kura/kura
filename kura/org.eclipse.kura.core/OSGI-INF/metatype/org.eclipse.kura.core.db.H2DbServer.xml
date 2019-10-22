@@ -9,38 +9,38 @@
      http://www.eclipse.org/legal/epl-v10.htmls
 
 -->
-<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="OSGI-INF/l10n/H2DbServer">
     <OCD id="org.eclipse.kura.core.db.H2DbServer" 
-         name="H2DbServer" 
-         description="H2 based database server.">
+         name="%name" 
+         description="%description">
 
         <AD id="db.server.enabled"
-            name="db.server.enabled"
+            name="%dbServerEnabled"
             type="Boolean"
             cardinality="0" 
             required="true"
             default="false"
-            description="Specifies whether the DB server is enabled or not."/>
+            description="%dbServerEnabledDesc"/>
 
         <AD id="db.server.type"
-            name="db.server.type"
+            name="%dbServerType"
             type="String"
             cardinality="0" 
             required="true"
             default="TCP"
-            description="Specifies the server type, see http://www.h2database.com/javadoc/org/h2/tools/Server.html for more details.">
+            description="%dbServerTypeDesc">
             <Option label="WEB" value="WEB" />
             <Option label="TCP" value="TCP" />
             <Option label="PG" value="PG" />
         </AD>
 
         <AD id="db.server.commandline"
-            name="db.server.commandline"
+            name="%dbServerCommandline"
             type="String"
             cardinality="0" 
             required="true"
             default="-tcpPort 9123 -tcpAllowOthers -ifExists"
-            description="Specifies the parameters for the server, see http://www.h2database.com/javadoc/org/h2/tools/Server.html for more details. The listening port must be manually openend in the Firewall configuration section in order to allow external connections."/>
+            description="%dbServerCommandlineDesc"/>
         
     </OCD>
     <Designate pid="org.eclipse.kura.core.db.H2DbServer" factoryPid="org.eclipse.kura.core.db.H2DbServer">

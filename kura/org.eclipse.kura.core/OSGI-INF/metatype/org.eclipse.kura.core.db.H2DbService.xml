@@ -9,63 +9,61 @@
      http://www.eclipse.org/legal/epl-v10.htmls
 
 -->
-<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="OSGI-INF/l10n/H2DbService">
     <OCD id="org.eclipse.kura.core.db.H2DbService" 
-         name="DbService" 
-         description="H2 based database service.">
+         name="%name" 
+         description="%description">
 
         <AD id="db.connector.url"
-            name="Connector URL"
+            name="%connectorURL"
             type="String"
             cardinality="0" 
             required="true"
             default="jdbc:h2:mem:kuradb"
-            description="JDBC connector URL of the database instance. See http://www.h2database.com/html/features.html for more information. 
-            Passing the USER and PASSWORD parameters in the connector URL is not supported, these paramters will be ignored if present. 
-            Please use the db.user and db.password fields to provide the credentials."/>
+            description="%connectorURLDesc"/>
 
         <AD id="db.user"
-            name="User"
+            name="%user"
             type="String"
             cardinality="0" 
             required="true"
             default="SA"
-            description="Specifies the user for the database connection."/>
+            description="%userDesc"/>
 
         <AD id="db.password"
-            name="Password"
+            name="%password"
             type="Password"
             cardinality="0" 
             required="false"
             default=""
-            description="Specifies the password. The default password is the empty string."/>
+            description="%passwordDesc"/>
             
         <AD id="db.checkpoint.interval.seconds"
-            name="Checkpoint interval (seconds)"
+            name="%checkpoint"
             type="Integer"
             cardinality="0" 
             required="true"
             default="900"
             min="5"
-            description="H2DbService instances support running periodic checkpoints to ensure data consistency. This parameter specifies the interval in seconds between two successive checkpoints. This setting has no effect for in-memory database instances."/>
+            description="%checkpointDesc"/>
             
         <AD id="db.defrag.interval.minutes"
-            name="Defrag interval (minutes)"
+            name="%defragInterval"
             type="Integer"
             cardinality="0" 
             required="true"
             default="15"
             min="0"
-            description="H2DbService instances support running periodic defragmentation. This parameter specifies the interval in minutes beetween two successive checkpoints, set to zero to disable. This setting has no effect for in-memory database instances. Existing database connections will be closed during the defragmentation process and need to be reopened by the applications."/>    
+            description="%defragIntervalDesc"/>    
             
          <AD id="db.connection.pool.max.size"
-            name="Connection pool max size"
+            name="%poolMaxSize"
             type="Integer"
             cardinality="0" 
             required="true"
             default="10"
             min="1"
-            description="The H2DbService manages connections using a connection pool. This parameter defines the maximum number of connections for the pool"/>
+            description="%poolMaxSizeDesc"/>
         </OCD>
     <Designate pid="org.eclipse.kura.core.db.H2DbService" factoryPid="org.eclipse.kura.core.db.H2DbService">
         <Object ocdref="org.eclipse.kura.core.db.H2DbService"/>

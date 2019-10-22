@@ -7,26 +7,26 @@
     which accompanies this distribution, and is available at
     http://www.eclipse.org/legal/epl-v10.html
 -->
-<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="OSGI-INF/l10n/SimpleMQTTBroker">
 	<OCD
 		id="org.eclipse.kura.broker.artemis.simple.mqtt.BrokerInstance"
-		name="Simple Artemis MQTT Broker"
-		description="A simple MQTT broker instance based on Apache ActiveMQ Artemis">
+		name="%name"
+		description="%description">
 
 		<AD
 			id="enabled"
-			name="Enabled"
+			name="%enabled"
 			type="Boolean"
 			cardinality="1"
 			required="true"
 			default="false"
-			description="Enables the broker instance">
+			description="%enabledDesc">
 		</AD>
 
 		<AD
 			id="address"
-			name="MQTT address"
-			description="The address the MQTT broker listens for incoming connections. Be sure to check if the firewall is configured correctly to allow access to this address."
+			name="%address"
+			description="%addressDesc"
 			type="String"
 			cardinality="1"
 			required="false"
@@ -34,8 +34,8 @@
 
 		<AD
 			id="port"
-			name="MQTT port"
-			description="The port of the MQTT broker. Be sure to check if the firewall is configured correctly to allow access to this port."
+			name="%port"
+			description="%portDesc"
 			type="Integer"
 			cardinality="1"
 			required="true"
@@ -43,8 +43,8 @@
 
 		<AD
 			id="user"
-			name="User name"
-			description="The user name required to access to the broker"
+			name="%user"
+			description="%userDesc"
 			type="String"
 			cardinality="1"
 			required="false"
@@ -53,7 +53,7 @@
 		<AD
 			id="password"
 			name="Password of the user"
-			description="The password required to connect. If the password is empty, no password will be required to connect."
+			description="%passwordDesc"
 			type="Password"
 			cardinality="1"
 			required="false"

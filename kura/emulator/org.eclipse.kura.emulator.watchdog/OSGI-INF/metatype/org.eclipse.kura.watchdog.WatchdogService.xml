@@ -12,20 +12,20 @@
       Eurotech
 
 -->
-<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="OSGI-INF/l10n/WatchdogService">
     <OCD id="org.eclipse.kura.watchdog.WatchdogService" 
-         name="WatchdogService" 
-         description="Emulated implementation of the WatchdogService">         
+         name="%name" 
+         description="%description">         
 
         <Icon resource="WatchdogService" size="32"/>
         
         <AD id="enabled"  
-            name="enabled"
+            name="%enable"
             type="Boolean"
             cardinality="0" 
             required="true"
             default="false" 
-            description="The emulated WatchdogService is always disabled."/>
+            description="%enableDesc"/>
                     
     </OCD>
     <Designate pid="org.eclipse.kura.watchdog.WatchdogService">

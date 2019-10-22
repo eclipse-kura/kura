@@ -7,26 +7,26 @@
     which accompanies this distribution, and is available at
     http://www.eclipse.org/legal/epl-v10.html
 -->
-<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="OSGI-INF/l10n/MQTTBroker">
 	<OCD
 		id="org.eclipse.kura.broker.artemis.xml.BrokerInstance"
-		name="ActiveMQ Artemis Broker"
-		description="ActiveMQ Artemis Broker instance, configured using XML">
+		name="%name"
+		description="%description">
 
 		<AD
 			id="enabled"
-			name="Enabled"
+			name="%enabled"
 			type="Boolean"
 			cardinality="0"
 			required="true"
 			default="false"
-			description="Enables the broker instance">
+			description="%enabledDesc">
 		</AD>
 
 		<AD
 			id="brokerXml"
-			name="Broker XML"
-			description="Broker XML configuration. An empty broker configuration will disable the broker.|TextArea"
+			name="%brokerXml"
+			description="%brokerXmlDesc"
 			type="String"
 			cardinality="1"
 			required="false"
@@ -34,8 +34,8 @@
 
 		<AD
 			id="requiredProtocols"
-			name="Required protocols"
-			description="A comma seperated list of all required protocol factories (e.g. AMQP or MQTT)"
+			name="%requiredProtocols"
+			description="%requiredProtocolsDesc"
 			type="String"
 			cardinality="-1"
 			required="false"
@@ -43,16 +43,16 @@
 
 		<AD
 			id="users"
-			name="User configuration"
-			description="User configuration in the format: user=password|role1,role2,...|TextArea"
+			name="%users"
+			description="%usersDesc"
 			type="String"
 			cardinality="1"
 			required="false" />
 
 		<AD
 			id="defaultUser"
-			name="Default user name"
-			description="The name of the default user"
+			name="%defaultUser"
+			description="%defaultUserDesc"
 			type="String"
 			cardinality="1"
 			required="false" />

@@ -12,45 +12,45 @@
       Eurotech
 
 -->
-<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="OSGI-INF/l10n/WatchdogService">
     <OCD id="org.eclipse.kura.watchdog.WatchdogService"
-         name="WatchdogService" 
-         description="The WatchdogService handles the hardware watchdog of the platform.  The parameter define the ping periodicity of the hardware watchdog to ensure it doesn't reboot.">
+         name="%name" 
+         description="%description">
         
         <Icon resource="WatchdogService" size="32"/>
         
         <AD id="enabled"  
-            name="Watchdog enable"
+            name="%enable"
             type="Boolean"
             cardinality="0" 
             required="true"
             default="false" 
-            description="The WatchdogService monitors CriticalComponentS and reboots the system if one of them hangs. Once enabled the WatchdogService starts refreshing the hardware watchdog which will reset the system if WatchdogService hangs."/>
+            description="%enableDesc"/>
         
         <AD id="pingInterval"
-            name="Watchdog refresh interval"
+            name="%refreshInterval"
             type="Integer"
             cardinality="0"
             required="true"
             default="10000"
             max="60000"
-            description="Watchdog refresh interval in ms. The value can be set between 1 and 60 seconds."/>
+            description="%refreshIntervalDesc"/>
 
         <AD id="watchdogDevice"
-            name="Watchdog device path"
+            name="%devicePath"
             type="String"
             cardinality="0"
             required="true"
             default="/dev/watchdog"
-            description="Watchdog device path e.g. /dev/watchdog."/>
+            description="%devicePathDesc"/>
             
         <AD id="rebootCauseFilePath"
-            name="Reboot Cause File Path"
+            name="%rebootCauseFilePath"
             type="String"
             cardinality="0"
             required="true"
             default="/opt/eclipse/kura/data/kura-reboot-cause"
-            description="The path for the file that will contain the reboot cause information."/>
+            description="%rebootCauseFilePathDesc"/>
             
     </OCD>
     <Designate pid="org.eclipse.kura.watchdog.WatchdogService">

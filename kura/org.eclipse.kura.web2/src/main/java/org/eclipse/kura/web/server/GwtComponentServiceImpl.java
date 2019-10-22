@@ -629,12 +629,11 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
             }
 
             if (props != null && props.get(SERVICE_FACTORY_PID) != null) {
-                String pid = stripPidPrefix(config.getPid());
-                String name = pid;
+                String name = ocd.getName();
                 if (props.containsKey("name"))
                     name = (String) props.get("name");
                 if (name == null || name.equals(""))
-                    name = pid;
+                    name = stripPidPrefix(config.getPid());
                 gwtConfig.setComponentName(name);
                 gwtConfig.setFactoryComponent(true);
                 gwtConfig.setFactoryPid(String.valueOf(props.get(ConfigurationAdmin.SERVICE_FACTORYPID)));

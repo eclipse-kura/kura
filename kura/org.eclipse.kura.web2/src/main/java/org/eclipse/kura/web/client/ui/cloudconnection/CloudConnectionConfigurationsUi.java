@@ -165,7 +165,9 @@ public class CloudConnectionConfigurationsUi extends Composite {
     }
 
     private void renderTabs(GwtConfigComponent config, boolean isFirstEntry) {
-        final String simplifiedComponentName = getSimplifiedComponentName(config);
+        String simplifiedComponentName = getSimplifiedComponentName(config);
+        if (config.getComponentName() != null && !config.getComponentName().equals(""))
+            simplifiedComponentName = config.getComponentName();
         TabListItem item = new TabListItem(simplifiedComponentName);
         item.setDataTarget("#" + simplifiedComponentName);
         item.addClickHandler(event -> {

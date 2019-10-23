@@ -18,6 +18,7 @@
     xmlns:b="urn:import:org.gwtbootstrap3.client.ui" xmlns:b.html="urn:import:org.gwtbootstrap3.client.ui.html"
     xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt"
     xmlns:settings="urn:import:org.eclipse.kura.web.client.ui.settings">
+    <ui:with field="msgs" type="org.eclipse.kura.web.client.messages.Messages"/>
     <ui:style>
     .important {
     	font-weight: bold;
@@ -42,17 +43,17 @@
         <b:Row>
             <b:Well size="SMALL">
                 <b:NavTabs ui:field="navTabs">
-                    <b:TabListItem dataTarget="#snapshotsPanel" text="Snapshots"
+                    <b:TabListItem dataTarget="#snapshotsPanel" text="{msgs.settingsSnapshots}"
                         ui:field="snapshots" active="true"/>
-                    <b:TabListItem dataTarget="#appCertPanel" text="Application Certificate"
+                    <b:TabListItem dataTarget="#appCertPanel" text="{msgs.settingsAddBundleCerts}"
                         ui:field="appCert" visible="false"/>
-                    <b:TabListItem dataTarget="#sslConfigPanel" text="SSL Configuration"
+                    <b:TabListItem dataTarget="#sslConfigPanel" text="{msgs.settingsSSLConfiguration}"
                         ui:field="sslConfig" />
-                    <b:TabListItem dataTarget="#serverCertPanel" text="Server SSL Certificate"
+                    <b:TabListItem dataTarget="#serverCertPanel" text="{msgs.settingsAddCertificates}"
                         ui:field="serverCert" />
-                    <b:TabListItem dataTarget="#deviceCertPanel" text="Device SSL Certificate"
+                    <b:TabListItem dataTarget="#deviceCertPanel" text="{msgs.settingsAddMAuthCertificates}"
                         ui:field="deviceCert" />
-                    <b:TabListItem dataTarget="#securityPanel" text="Security Policies"
+                    <b:TabListItem dataTarget="#securityPanel" text="{msgs.settingsSecurityOptions}"
                         ui:field="security" visible="false"/>
                 </b:NavTabs>
                 <b:TabContent ui:field="tabContent">

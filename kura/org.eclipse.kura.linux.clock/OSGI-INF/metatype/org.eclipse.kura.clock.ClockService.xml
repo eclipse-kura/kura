@@ -12,92 +12,92 @@
       Eurotech
 
 -->
-<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="OSGI-INF/l10n/ClockService">
     <OCD id="org.eclipse.kura.clock.ClockService" 
-         name="ClockService" 
-         description="ClockService Configuration">
+         name="%name" 
+         description="%description">
         
         <Icon resource="ClockService" size="32"/>
         
        	<AD id="enabled"
-            name="enabled"
+            name="%enabled"
             type="Boolean"
             cardinality="0"
             required="true"
             default="false"
-            description="Whether or not to enable the ClockService"/>
+            description="%enabledDesc"/>
             
         <AD id="clock.set.hwclock"  
-            name="clock.set.hwclock"
+            name="%setHwclock"
             type="Boolean"
             cardinality="0" 
             required="true"
             default="true" 
-            description="Whether or not to sync the system hardware clock after the system time gets set"/>
+            description="%setHwclockDesc"/>
         
         <AD id="clock.provider"  
-            name="clock.provider"
+            name="%clockProvider"
             type="String"
             cardinality="0" 
             required="true"
             default="java-ntp" 
-            description="Source for setting the system clock">
+            description="%clockProviderDesc">
            <Option label="java-ntp" value="java-ntp"/>
            <Option label="ntpd"     value="ntpd"/>
         </AD>
 
         <AD id="clock.ntp.host"  
-            name="clock.ntp.host"
+            name="%ntpHost"
             type="String"
             cardinality="0" 
             required="true"
             default="0.pool.ntp.org" 
-            description="The hostname that provides the system time via NTP"/>
+            description="%ntpHostDesc"/>
 
         <AD id="clock.ntp.port"  
-            name="clock.ntp.port"
+            name="%ntpPort"
             type="Integer"
             cardinality="0" 
             required="true"
             min="1"
             max="65535"
             default="123" 
-            description="The port number that provides the system time via NTP"/>
+            description="%ntpPortDesc"/>
 
         <AD id="clock.ntp.timeout"  
-            name="clock.ntp.timeout"
+            name="%ntpTimeout"
             type="Integer"
             cardinality="0" 
             required="true"
             min="1000"
             default="10000" 
-            description="The NTP timeout in milliseconds"/>
+            description="%ntpTimeoutDesc"/>
 
         <AD id="clock.ntp.max-retry"  
-            name="clock.ntp.max-retry"
+            name="%ntpMaxRetry"
             type="Integer"
             cardinality="0" 
             required="true"
             min="0"
             default="0" 
-            description="The maximum number of retries for the initial synchronization (with interval clock.ntp.retry.interval). If set to 0 the service will retry forever."/>
+            description="%ntpMaxRetryDesc"/>
 
         <AD id="clock.ntp.retry.interval"  
-            name="clock.ntp.retry.interval"
+            name="%ntpRetryInterval"
             type="Integer"
             cardinality="0" 
             required="true"
             min="1"
             default="5" 
-            description="When sync fails, interval in seconds between each retry."/>
+            description="%ntpRetryIntervalDesc"/>
 
         <AD id="clock.ntp.refresh-interval"  
-            name="clock.ntp.refresh-interval"
+            name="%ntpRefreshInterval"
             type="Integer"
             cardinality="0" 
             required="true"
             default="3600" 
-            description="Whether or not to sync the clock and if so, the frequency in seconds.  If less than zero - no update, if equal to zero - sync once at startup, if greater than zero - the frequency in seconds to perform a new clock sync"/>
+            description="%ntpRefreshIntervalDesc"/>
 
     </OCD>
     <Designate pid="org.eclipse.kura.clock.ClockService">

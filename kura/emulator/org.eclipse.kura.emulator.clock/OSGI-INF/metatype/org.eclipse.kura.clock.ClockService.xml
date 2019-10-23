@@ -12,20 +12,20 @@
       Eurotech
 
 -->
-<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="OSGI-INF/l10n/ClockService">
     <OCD id="org.eclipse.kura.clock.ClockService" 
-         name="ClockService" 
-         description="Emulated implementation of the ClockService">
+         name="%name" 
+         description="%description">
         
         <Icon resource="ClockService" size="32"/>
         
        	<AD id="enabled"
-            name="enabled"
+            name="%enabled"
             type="Boolean"
             cardinality="0"
             required="true"
             default="false"
-            description="The emulated ClockService is always disabled."/>
+            description="%enabledDesc"/>
 
     </OCD>
     <Designate pid="org.eclipse.kura.clock.ClockService">

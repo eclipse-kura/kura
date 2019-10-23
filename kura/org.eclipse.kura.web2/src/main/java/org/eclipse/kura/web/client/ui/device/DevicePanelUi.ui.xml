@@ -18,7 +18,7 @@
     xmlns:b="urn:import:org.gwtbootstrap3.client.ui" xmlns:b.html="urn:import:org.gwtbootstrap3.client.ui.html"
     xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt"
     xmlns:device="urn:import:org.eclipse.kura.web.client.ui.device">
-
+    <ui:with field="msgs" type="org.eclipse.kura.web.client.messages.Messages"/>
     <b:Container fluid="true" addStyleNames="device-panel">
         <b:Row>
             <g:HTMLPanel ui:field="deviceIntro">
@@ -28,17 +28,17 @@
         <b:Row>
             <b:Well addStyleNames="device-well" size="SMALL">
                 <b:NavTabs>
-                    <b:TabListItem dataTarget="#profilePanel" text="Profile"
+                    <b:TabListItem dataTarget="#profilePanel" text="{msgs.deviceTabProfile}"
                         ui:field="profile" active="true"/>
-                    <b:TabListItem dataTarget="#bundlesPanel" text="Bundles"
+                    <b:TabListItem dataTarget="#bundlesPanel" text="{msgs.deviceTabBundles}"
                         ui:field="bundles" />
-                    <b:TabListItem dataTarget="#threadsPanel" text="Threads"
+                    <b:TabListItem dataTarget="#threadsPanel" text="{msgs.deviceTabThreads}"
                         ui:field="threads" />
-                    <b:TabListItem dataTarget="#systemPropertiesPanel" text="System Properties"
+                    <b:TabListItem dataTarget="#systemPropertiesPanel" text="{msgs.deviceTabSystemProperties}"
                         ui:field="systemProperties" />
-                    <b:TabListItem dataTarget="#commandPanel" text="Command"
+                    <b:TabListItem dataTarget="#commandPanel" text="{msgs.deviceTabCommand}"
                         ui:field="command" />
-                    <b:TabListItem dataTarget="#logPanel" text="System Logs"
+                    <b:TabListItem dataTarget="#logPanel" text="{msgs.deviceTabSystemLogs}"
                         ui:field="log" />
                 </b:NavTabs>
                 <b:TabContent>

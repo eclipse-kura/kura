@@ -12,56 +12,56 @@
       Eurotech
 
 -->
-<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="OSGI-INF/l10n/CommandService">
     <OCD id="org.eclipse.kura.cloud.app.command.CommandCloudApp" 
-         name="CommandService" 
-         description="Command service configuration">
+         name="%name" 
+         description="%description">
          
         <Icon resource="CommandPasswordService" size="32"/>
 
         <AD id="command.enable"
-            name="Command Enable"
+            name="%enabled"
             type="Boolean"
             cardinality="0"
             required="true"
             default="false"
-            description="Enables or disables the Command Service">
+            description="%enabledDesc">
         </AD>
         
         <AD id="command.password.value"
-        	name="Command Password Value"
+        	name="%password"
         	type="Password"
         	cardinality="0"
         	required="false"
         	default=""
-        	description="If set, this password allows to protect the command messages.">
+        	description="%passwordDesc">
         </AD>
         
         <AD id="command.working.directory"
-        	name="Command Working Directory"
+        	name="%directory"
         	type="String"
         	cardinality="0"
         	required="false"
         	default=""
-        	description="Specifies the working directory where the command execution is performed. (Defaults to the system specified temporary directory.)">
+        	description="%directoryDesc">
         </AD>
         
         <AD id="command.timeout"
-        	name="Command Timeout"
+        	name="%timeout"
         	type="Integer"
         	cardinality="0"
         	required="false"
         	default="60"
-        	description="Timeout (in seconds) for the command execution.">
+        	description="%timeoutDesc">
         </AD>
         
         <AD id="command.environment"
-        	name="Command Environment"
+        	name="%environment"
         	type="String"
         	cardinality="0"
         	required="false"
         	default=""
-        	description="Space separated list of environment variables in the form key=value.">
+        	description="%environmentDesc">
         </AD>
                     
     </OCD>

@@ -106,7 +106,7 @@ public class LoginUi extends Composite implements Context {
     }
 
     private void initLoginBannerModal() {
-        this.accessBannerModal.setTitle(MSGS.warning());
+        this.accessBannerModal.setTitle(MSGS.info());
         this.buttonAccessBannerModalOk.setText(MSGS.okButton());
 
         this.gwtBannerService.getLoginBanner(new AsyncCallback<String>() {

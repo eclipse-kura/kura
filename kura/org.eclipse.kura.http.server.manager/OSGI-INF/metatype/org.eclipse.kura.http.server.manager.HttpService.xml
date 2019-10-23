@@ -12,61 +12,61 @@
       Eurotech
 
 -->
-<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="OSGI-INF/l10n/HttpService">
     <OCD id="org.eclipse.kura.http.server.manager.HttpService"
-         name="HttpService" 
-         description="This service allows the user to enable and configure the http and https connectors in Kura web server. Every change to this service will cause a restart of the web server and a possible temporary UI unavailability.">
+         name="%name" 
+         description="%description">
 
         <AD id="http.enabled"
-            name="HTTP Enabled"
+            name="%enabled"
             type="Boolean"
             cardinality="0"
             required="true"
             default="true"
-            description="Specifies if the http service is enabled.">
+            description="%enabledDesc">
         </AD>
         
         <AD id="http.port"  
-            name="HTTP Port"
+            name="%port"
             type="Integer"
             cardinality="0" 
             required="true"
             default="8080" 
-            description="Allows to specify the port used by the http service for plain, unencrypted communication.">
+            description="%portDesc">
         </AD>
         
         <AD id="https.enabled"
-            name="HTTPS Enabled"
+            name="%httpsEnabled"
             type="Boolean"
             cardinality="0"
             required="true"
             default="false"
-            description="Specifies if the https service is enabled.">
+            description="%httpsEnabledDesc">
         </AD>
         
         <AD id="https.port"  
-            name="HTTPS Port"
+            name="%httpsPort"
             type="Integer"
             cardinality="0" 
             required="true"
             default="443" 
-            description="Allows to specify the port used by the https service for encrypted communication.">
+            description="%httpsPortDesc">
         </AD>
         
         <AD id="https.keystore.path"  
-            name="HTTPS Keystore Path"
+            name="%httpsKeystorePath"
             type="String"
             cardinality="0" 
             required="false"
-            description="Specifies the path to the keystore used for https communication."/>
+            description="%httpsKeystorePathDesc"/>
         
         <AD id="https.keystore.password"  
-            name="HTTPS Keystore Password"
+            name="%httpsKeystorePassword"
             type="Password"
             cardinality="0" 
             required="false"
             default="changeit" 
-            description="Specifies the password for accessing and verifying the configured keystore."/>
+            description="%httpsKeystorePasswordDesc"/>
     </OCD>
     
     <Designate pid="org.eclipse.kura.http.server.manager.HttpService">

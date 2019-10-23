@@ -7,36 +7,36 @@
      which accompanies this distribution, and is available at
      http://www.eclipse.org/legal/epl-v10.html
 -->
-<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="OSGI-INF/l10n/RestService">
     <OCD id="org.eclipse.kura.internal.rest.provider.RestService" 
-         name="RestService" 
-         description="This service allows to configure credentials and roles to be used with Kura REST APIs">
+         name="%name" 
+         description="%description">
          
          <AD id="user.name"
-            name="user.name"
+            name="%userName"
             type="String"
             cardinality="3"
             required="false"
             default="admin,,"
-            description="Specifies the list of users allowed to use the REST APIs">
+            description="%userNameDesc">
         </AD>
         
         <AD id="password"
-            name="password"
+            name="%password"
             type="Password"
             cardinality="3"
             required="false"
             default="admin,,"
-            description="Specifies the password for each user"> 
+            description="%passwordDesc"> 
         </AD>
         
         <AD id="roles"
-            name="roles"
+            name="%roles"
             type="String"
             cardinality="3"
             required="false"
             default="assets,,"
-            description="The list of roles for each user as a list separated by the ';' character">
+            description="%rolesDesc">
         </AD>
     </OCD>
     

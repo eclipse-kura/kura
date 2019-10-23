@@ -325,13 +325,14 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
         } else {
             char[] oldPassword = getOldKeystorePassword(keystorePath);
 
-            char[] newPassword = null;
+            char[] newPassword = new char[] {};
             try {
                 newPassword = this.cryptoService.decryptAes(this.options.getSslKeystorePassword().toCharArray());
             } catch (KuraException e) {
                 logger.warn("Failed to decrypt keystore password");
             }
-            updateKeystorePassword(oldPassword, newPassword);
+            if (!Arrays.equals(oldPassword, newPassword))
+                updateKeystorePassword(oldPassword, newPassword);
         }
     }
 

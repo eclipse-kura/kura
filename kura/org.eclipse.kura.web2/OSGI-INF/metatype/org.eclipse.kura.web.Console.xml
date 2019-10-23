@@ -12,103 +12,103 @@
       Eurotech
 
 -->
-<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="OSGI-INF/l10n/WebConsole">
     <OCD id="org.eclipse.kura.web.Console"
-         name="WebConsole"
-         description="Web Console configuration. A change to this view will case the reload of the web server! Spurious error messages can be displayed during the restart.">
+         name="%name"
+         description="%description">
 
         <Icon resource="DenaliService" size="32"/>
 
 		<AD id="console.username.value"
-        	name="Console Username"
+        	name="%username"
         	type="String"
         	cardinality="0"
         	required="true"
         	default="admin"
-        	description="Device's web username.">
+        	description="%usernameDesc">
         </AD>
 
         <AD id="console.password.value"
-        	name="Console Password"
+        	name="%password"
         	type="Password"
         	cardinality="0"
         	required="true"
         	default="admin"
-        	description="Device's web console password. A non empty value should be set.">
+        	description="%passwordDesc">
         </AD>
 
         <AD id="app.root"
-            name="Web Server Entry Point"
+            name="%root"
             type="String"
             cardinality="0"
             required="true"
             default="/admin/console"
-            description="Default Web Server Entry Point for Applications running of framework\'s Web Server">
+            description="%rootDesc">
         </AD>
 
         <AD id="session.max.inactivity.interval"
-            name="Session max inactivity interval"
+            name="%sessionMaxInactivityInterval"
             type="Integer"
             cardinality="0"
             required="true"
             default="15"
             min="1"
-            description="The session max inactivity interval in minutes. If no interaction with the Web UI is performed for the value of this parameter in minutes, a new login will be requested.">
+            description="%sessionMaxInactivityIntervalDesc">
         </AD>
         
         <AD id="access.banner.enabled"
-            name="Access Banner Enabled"
+            name="%bannerEnabled"
             type="Boolean"
             cardinality="0"
             required="true"
             default="false"
-            description="Enables or disables the displaying of a customizable banner at user login.">
+            description="%bannerEnabledDesc">
         </AD>
         
         <AD id="access.banner.content"
-            name="Access Banner Content"
+            name="%bannerContent"
             type="String"
             cardinality="0"
             required="false"
             default=""
-            description="Access banner content. To be displayed at every user access, if the feature is enabled.">
+            description="%bannerContentDesc">
         </AD>
         
         <AD id="new.password.min.length"
-            name="Minimum password length"
+            name="%minPasswordLength"
             type="Integer"
             cardinality="0"
             required="true"
             default="8"
             min="1"
-            description="The minimum length to be enforced for new passwords. Set to 0 to disable.">
+            description="%minPasswordLengthDesc">
         </AD>
         
         <AD id="new.password.require.digits"
-            name="Require digits in new password"
+            name="%passwordRequireDigits"
             type="Boolean"
             cardinality="0"
             required="true"
             default="false"
-            description="If set to true, new passwords will be accepted only if containing at least one digit.">
+            description="%passwordRequireDigitsDesc">
         </AD>
         
         <AD id="new.password.require.special.characters"
-            name="Require special characters in new password"
+            name="%passwordRequireSpecialCharacters"
             type="Boolean"
             cardinality="0"
             required="true"
             default="false"
-            description="If set to true, new passwords will be accepted only if containing at least one non alphanumeric character.">
+            description="%passwordRequireSpecialCharactersDesc">
         </AD>
         
         <AD id="new.password.require.both.cases"
-            name="Require uppercase and lowercase characters in new passwords"
+            name="%passwordRequireBothCases"
             type="Boolean"
             cardinality="0"
             required="true"
             default="false"
-            description="If set to true, new passwords will be accepted only if containing both uppercase and lowercase alphanumeric characters.">
+            description="%passwordRequireBothCasesDesc">
         </AD>
 
     </OCD>

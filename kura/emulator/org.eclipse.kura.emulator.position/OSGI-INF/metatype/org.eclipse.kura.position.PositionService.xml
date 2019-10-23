@@ -12,40 +12,40 @@
       Eurotech
 
 -->
-<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="OSGI-INF/l10n/PositionService">
     <OCD id="org.eclipse.kura.position.PositionService"
-         name="PositionService" 
-         description="Emulated implementation of the PositionService.">
+         name="%name" 
+         description="%description">
         
         <Icon resource="PositionService" size="32"/>
         
         <AD id="enabled"
-            name="enabled"
+            name="%enabled"
             type="Boolean"
             cardinality="0"
             required="true"
             default="true"
-            description="The emulated PositionService is always enabled and using sample GPS positions."/>
+            description="%enabledDesc"/>
         
         <AD id="useGpsd"
-            name="useGpsd"
+            name="%useGpsd"
             type="Boolean"
             cardinality="0"
             required="true"
             default="false"
-            description="If true uses the gpsd service daemon. This implies that this daemon must be installed and active first."/>
+            description="%useGpsdDesc"/>
             
          <AD id="source"
-            name="source"
+            name="%source"
             type="String"
             cardinality="0"
             required="true"
             default="boston"
-            description="Select the data source file to use.">
-            <Option label="Boston" value="boston" />
-            <Option label="Denver" value="denver" />
-            <Option label="Paris" value="paris" />
+            description="%sourceDesc">
             <Option label="Test" value="test" />
+            <Option label="Test1" value="test1" />
+            <Option label="Test2" value="test2" />
+            <Option label="Test3" value="test3" />
          </AD>
                 
     </OCD>

@@ -40,8 +40,12 @@
   <inherits name="com.google.gwt.i18n.I18N"/>
   <inherits name="com.google.gwt.http.HTTP" />
 
+  <set-configuration-property name="locale.searchorder"
+        value="queryparam,cookie,meta,useragent" />
+ 
   <!-- Locales: English language, independent of country -->
   <extend-property name="locale" values="zh_CN"/>
+  <extend-property name="locale" values="en"/>
   <set-property-fallback name="locale" value="zh_CN"/>
   
   <!-- Specify the app entry point class.                         -->

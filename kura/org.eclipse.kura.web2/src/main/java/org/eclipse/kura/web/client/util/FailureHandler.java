@@ -49,11 +49,11 @@ public class FailureHandler {
     }
 
     public static void showErrorMessage(String message) {
-        showErrorMessage("Warning", message, null);
+        showErrorMessage(MSGS.warning(), message, null);
     }
 
     public static void showErrorMessage(final String message, final StackTraceElement[] stackTrace) {
-        showErrorMessage("Warning", message, stackTrace);
+        showErrorMessage(MSGS.warning(), message, stackTrace);
     }
 
     public static void showErrorMessage(final String title, final String message,

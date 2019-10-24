@@ -18,6 +18,7 @@ import java.net.URL;
 import java.text.ParseException;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -28,8 +29,27 @@ public class OsgiRemoteServiceServlet extends KuraRemoteServiceServlet {
 
     private static final long serialVersionUID = -8826193840033103296L;
 
+    private String locale;
+
+    public String getLocale() {
+        return locale;
+    }
+
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String locale = req.getParameter("locale");
+        if (locale == null || locale.equals("")) {
+            Cookie[] cookies = req.getCookies();
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals("GWT_LOCALE")) {
+                    locale = cookie.getValue();
+                    break;
+                }
+            }
+        }
+        if (locale == null || locale.equals(""))
+            locale = System.getProperty("osgi.nl");
+        this.locale = locale;
         // Cache the current thread
         Thread currentThread = Thread.currentThread();
         // We are going to swap the class loader

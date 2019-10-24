@@ -56,6 +56,8 @@ public interface ComponentConfiguration {
      */
     public OCD getDefinition();
 
+    public OCD getLocalizedDefinition(String locale);
+
     /**
      * Returns the Dictionary of properties currently used by this component.
      *

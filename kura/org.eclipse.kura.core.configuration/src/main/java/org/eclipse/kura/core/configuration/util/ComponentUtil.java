@@ -37,12 +37,9 @@ import org.eclipse.kura.configuration.metatype.AD;
 import org.eclipse.kura.configuration.metatype.Designate;
 import org.eclipse.kura.configuration.metatype.MetaData;
 import org.eclipse.kura.configuration.metatype.OCD;
-import org.eclipse.kura.configuration.metatype.Option;
 import org.eclipse.kura.configuration.metatype.Scalar;
-import org.eclipse.kura.core.configuration.metatype.Tad;
 import org.eclipse.kura.core.configuration.metatype.Tmetadata;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
-import org.eclipse.kura.core.configuration.metatype.Toption;
 import org.eclipse.kura.core.util.IOUtil;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.marshalling.Unmarshaller;
@@ -224,7 +221,7 @@ public class ComponentUtil {
      *
      * @param ctx
      * @param pid
-     *                ID of the service whose OCD should be loaded
+     *            ID of the service whose OCD should be loaded
      * @return
      * @throws IOException
      * @throws XMLStreamException
@@ -242,27 +239,13 @@ public class ComponentUtil {
             metaData = unmarshal(metatypeXml, Tmetadata.class);
         }
         if (metaData != null) {
-            String locale = System.getProperty("osgi.nl");
             String localization = metaData.getLocalization();
             URL[] urls = findAllEntries(bundle, localization);
-            ResourceBundle rb = getResourceBundle(localization, locale, urls);
             List<OCD> ocds = metaData.getOCD();
             for (OCD ocd : ocds) {
                 Tocd tocd = (Tocd) ocd;
-                tocd.setName(getLocalized(rb, tocd.getName()));
-                tocd.setDescription(getLocalized(rb, tocd.getDescription()));
-                List<AD> ads = tocd.getAD();
-                for (AD ad : ads) {
-                    Tad tad = (Tad) ad;
-                    if (tad.getOption() != null) {
-                        for (Option option : tad.getOption()) {
-                            Toption toption = (Toption) option;
-                            toption.setLabel(getLocalized(rb, toption.getLabel()));
-                        }
-                    }
-                    tad.setName(getLocalized(rb, tad.getName()));
-                    tad.setDescription(getLocalized(rb, tad.getDescription()));
-                }
+                tocd.setLocaleUrls(urls);
+                tocd.setLocalization(localization);
             }
 
         }
@@ -347,7 +330,7 @@ public class ComponentUtil {
         return searchCandidates;
     }
 
-    private static ResourceBundle getResourceBundle(String localization, String locale, URL[] urls) {
+    public static ResourceBundle getResourceBundle(String localization, String locale, URL[] urls) {
 
         String[] searchCandidates = getSearchCandidates(locale);
 
@@ -381,19 +364,21 @@ public class ComponentUtil {
 
     private static URL getLocaleUrl(URL[] urls, String[] searchCandidates, String resourceBase) {
         resourceBase = resourceBase == null ? Constants.BUNDLE_LOCALIZATION_DEFAULT_BASENAME : resourceBase;
-        for (URL url : urls) {
-            String path = url.getPath();
-            for (int idx = 0; idx < searchCandidates.length; idx++) {
+
+        for (int idx = 0; idx < searchCandidates.length; idx++) {
+            for (URL url : urls) {
+                String path = url.getPath();
                 if (searchCandidates[idx] != null
                         && path.equals("/" + resourceBase + searchCandidates[idx] + RESOURCE_FILE_EXT)) {
                     return url;
                 }
             }
         }
+
         return null;
     }
 
-    private static String getLocalized(ResourceBundle rb, String key) {
+    public static String getLocalized(ResourceBundle rb, String key) {
 
         if (key == null) {
             return null;
@@ -424,7 +409,7 @@ public class ComponentUtil {
      * contain any extra post-processing of the loaded information.
      *
      * @param resourceUrl
-     *                        Url of the MetaData XML file which needs to be loaded
+     *            Url of the MetaData XML file which needs to be loaded
      * @return
      * @throws IOException
      * @throws XMLStreamException
@@ -452,7 +437,7 @@ public class ComponentUtil {
      * contain any extra post-processing of the loaded information.
      *
      * @param pid
-     *                ID of the service whose OCD should be loaded
+     *            ID of the service whose OCD should be loaded
      * @return
      * @throws IOException
      * @throws XMLStreamException
@@ -485,7 +470,7 @@ public class ComponentUtil {
      *
      * @param ctx
      * @param pid
-     *                ID of the service whose OCD should be loaded
+     *            ID of the service whose OCD should be loaded
      * @return
      * @throws IOException
      * @throws XMLStreamException

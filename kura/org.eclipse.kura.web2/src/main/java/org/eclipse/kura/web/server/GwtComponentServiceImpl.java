@@ -563,7 +563,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
     private GwtConfigComponent addNonMetatypeProperties(GwtConfigComponent baseGwtConfig,
             ComponentConfiguration config) {
         GwtConfigComponent gwtConfigComponent = null;
-        OCD ocd = config.getDefinition();
+        OCD ocd = config.getLocalizedDefinition(this.getLocale());
         if (ocd != null && baseGwtConfig != null) {
             gwtConfigComponent = new GwtConfigComponent();
 
@@ -617,7 +617,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
     private GwtConfigComponent createMetatypeOnlyGwtComponentConfigurationInternal(ComponentConfiguration config) {
         GwtConfigComponent gwtConfig = null;
 
-        OCD ocd = config.getDefinition();
+        OCD ocd = config.getLocalizedDefinition(this.getLocale());
         if (ocd != null) {
 
             gwtConfig = new GwtConfigComponent();
@@ -702,7 +702,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
 
     private List<GwtConfigParameter> getADProperties(ComponentConfiguration config) {
         List<GwtConfigParameter> gwtParams = new ArrayList<>();
-        OCD ocd = config.getDefinition();
+        OCD ocd = config.getLocalizedDefinition(this.getLocale());
         for (AD ad : ocd.getAD()) {
             GwtConfigParameter gwtParam = new GwtConfigParameter();
             gwtParam.setId(ad.getId());

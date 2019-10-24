@@ -18,6 +18,7 @@
 
 package org.eclipse.kura.core.configuration.metatype;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -66,6 +67,25 @@ public class Tocd implements OCD {
     protected String name;
     protected String description;
     protected String id;
+    protected URL[] localeUrls;
+    protected String localization;
+
+    public String getLocalization() {
+        return localization;
+    }
+
+    public void setLocalization(String localization) {
+        this.localization = localization;
+    }
+
+    public URL[] getLocaleUrls() {
+        return localeUrls;
+    }
+
+    public void setLocaleUrls(URL[] localeUrls) {
+        this.localeUrls = localeUrls;
+    }
+
     private final Map<QName, String> otherAttributes = new HashMap<QName, String>();
 
     /**

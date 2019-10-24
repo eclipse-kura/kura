@@ -35,6 +35,12 @@
 						</b:InputGroup>
 			</b:ModalBody>
 			<b:ModalFooter>
+                <b:InputGroup addStyleNames="login-input">
+                    <b:InputGroupAddon icon="USER" iconSize="LARGE"
+                        addStyleNames="login-icon" />
+                    <b:ListBox ui:field="languageBox" />
+                </b:InputGroup>
+                <b.html:Br/>
 				<b:SubmitButton text="{msgs.login}" b:id="login-button" />
 			</b:ModalFooter>
 		

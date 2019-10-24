@@ -9,6 +9,7 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.login;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -41,8 +42,10 @@ import org.gwtbootstrap3.client.ui.html.Strong;
 
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
@@ -80,6 +83,8 @@ public class LoginUi extends Composite implements Context {
     @UiField
     ListBox authenticationMethod;
     @UiField
+    ListBox languageBox;
+    @UiField
     ModalBody loginModalBody;
     @UiField
     FormGroup authenticationMethodGroup;
@@ -103,6 +108,30 @@ public class LoginUi extends Composite implements Context {
         setAuthenticationMethod("Password");
 
         ExtensionRegistry.get().addExtensionConsumer(e -> e.onLoad(this));
+        String currentLocale = LocaleInfo.getCurrentLocale().getLocaleName();
+        String[] localeNames = LocaleInfo.getAvailableLocaleNames();
+        for (String localeName : localeNames) {
+            if (!localeName.equals("default")) {
+                String nativeName = LocaleInfo.getLocaleNativeDisplayName(localeName);
+                languageBox.addItem(nativeName, localeName);
+                if (localeName.equals(currentLocale)) {
+                    languageBox.setSelectedIndex(languageBox.getItemCount() - 1);
+                }
+            }
+        }
+        languageBox.addChangeHandler(event -> {
+            String localeName = languageBox.getValue(languageBox.getSelectedIndex());
+            if (localeName == null || localeName.equals("default")) {
+                localeName = "zh_CN";
+            }
+            Date now = new Date();
+            long nowLong = now.getTime();
+            nowLong = nowLong + (1000 * 60 * 60 * 24 * 21);
+            now.setTime(nowLong);
+            Cookies.setCookie("GWT_LOCALE", localeName, now);
+
+            Window.Location.reload();
+        });
     }
 
     private void initLoginBannerModal() {

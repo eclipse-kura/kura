@@ -61,7 +61,7 @@ public class ChannelServlet extends HttpServlet {
      * Instance of Base Asset Channel Descriptor
      */
     private static final GwtConfigComponent WIRE_ASSET_CHANNEL_DESCRIPTOR = GwtServerUtil.toGwtConfigComponent(null,
-            WireAssetChannelDescriptor.get().getDescriptor());
+            WireAssetChannelDescriptor.get().getDescriptor(), "");
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -93,7 +93,7 @@ public class ChannelServlet extends HttpServlet {
                     writer.write(out.toString());
                 }
             }
-            
+
             auditLogger.info(
                     "UI Channel Servlet - Success - Successfully wrote Channel CSV description for user: {}, session: {}, asset pid: {}, driver pid: {}",
                     session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId(), assetPid, driverPid);

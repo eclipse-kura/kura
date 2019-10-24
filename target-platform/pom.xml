@@ -20,7 +20,7 @@
         <module>jdk.dio-parent</module>
         <!-- <module>com.gwt.user</module> -->
         <module>tinyb-parent</module>
-        <module>moquette-broker</module>
+        <!-- <module>moquette-broker</module>-->
         <module>org.apache.log4j2-api-config</module>
         <module>org.eclipse.kura.jetty.customizer</module>
 	<module>p2-repo-common</module>
@@ -30,6 +30,16 @@
     </modules>
 
     <repositories>
+        <repository>
+            <id>bintray</id>
+            <url>https://jcenter.bintray.com</url>
+            <releases>
+              <enabled>true</enabled>
+            </releases>
+            <snapshots>
+              <enabled>false</enabled>
+            </snapshots>
+        </repository>
         <repository>
             <id>kura_addons</id>
             <name>Kura Addons Maven Repository</name>

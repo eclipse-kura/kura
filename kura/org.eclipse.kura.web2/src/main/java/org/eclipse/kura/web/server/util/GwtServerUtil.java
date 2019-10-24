@@ -277,9 +277,9 @@ public final class GwtServerUtil {
         return properties;
     }
 
-    private static List<GwtConfigParameter> getADProperties(ComponentConfiguration config) {
+    private static List<GwtConfigParameter> getADProperties(ComponentConfiguration config, String locale) {
         List<GwtConfigParameter> gwtParams = new ArrayList<>();
-        OCD ocd = config.getDefinition();
+        OCD ocd = config.getLocalizedDefinition(locale);
         for (AD ad : ocd.getAD()) {
             GwtConfigParameter gwtParam = new GwtConfigParameter();
             gwtParam.setId(ad.getId());
@@ -335,10 +335,10 @@ public final class GwtServerUtil {
         return gwtParams;
     }
 
-    public static GwtConfigComponent toGwtConfigComponent(ComponentConfiguration config) {
+    public static GwtConfigComponent toGwtConfigComponent(ComponentConfiguration config, String locale) {
         GwtConfigComponent gwtConfig = null;
 
-        OCD ocd = config.getDefinition();
+        OCD ocd = config.getLocalizedDefinition(locale);
         if (ocd != null) {
 
             gwtConfig = new GwtConfigComponent();
@@ -374,13 +374,13 @@ public final class GwtServerUtil {
             List<GwtConfigParameter> gwtParams = new ArrayList<>();
             gwtConfig.setParameters(gwtParams);
 
-            List<GwtConfigParameter> metatypeProps = getADProperties(config);
+            List<GwtConfigParameter> metatypeProps = getADProperties(config, locale);
             gwtParams.addAll(metatypeProps);
         }
         return gwtConfig;
     }
 
-    public static GwtConfigComponent toGwtConfigComponent(String pid, Object descriptor) {
+    public static GwtConfigComponent toGwtConfigComponent(String pid, Object descriptor, String locale) {
         if (!(descriptor instanceof List<?>)) {
             return null;
         }
@@ -396,7 +396,7 @@ public final class GwtServerUtil {
             ocd.addAD((Tad) ad);
         }
 
-        return GwtServerUtil.toGwtConfigComponent(new ComponentConfigurationImpl(pid, ocd, null));
+        return GwtServerUtil.toGwtConfigComponent(new ComponentConfigurationImpl(pid, ocd, null), locale);
     }
 
     public static ComponentConfiguration fromGwtConfigComponent(GwtConfigComponent gwtCompConfig,
@@ -439,11 +439,11 @@ public final class GwtServerUtil {
         return currentCC;
     }
 
-    public static GwtConfigComponent toGwtConfigComponent(DriverDescriptor descriptor) {
+    public static GwtConfigComponent toGwtConfigComponent(DriverDescriptor descriptor, String locale) {
         final Object channelDescriptor = descriptor.getChannelDescriptor();
         if (channelDescriptor == null) {
             return null;
         }
-        return toGwtConfigComponent(descriptor.getPid(), channelDescriptor);
+        return toGwtConfigComponent(descriptor.getPid(), channelDescriptor, locale);
     }
 }

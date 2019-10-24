@@ -533,11 +533,7 @@
                   <source>true</source>
                   <transitive>false</transitive>
               </artifact>   
-              <artifact>
-                  <id>org.junit:org.junit:${org.junit.version}</id>
-                  <source>true</source>
-                  <transitive>false</transitive>
-              </artifact>  
+              
               <artifact>
                   <id>commons-fileupload:commons-fileupload:${org.apache.commons.fileupload.version}</id>
                   <source>true</source>
@@ -980,11 +976,7 @@
                   <source>true</source>
                   <transitive>false</transitive>
               </artifact>
-              <artifact>
-                  <id>org.hamcrest:org.hamcrest.core:${org.hamcrest.core.version}</id>
-                  <source>true</source>
-                  <transitive>false</transitive>
-              </artifact>
+              
               <artifact>
                   <id>org.graalvm.sdk:graal-sdk:jar:19.2.0.1</id>
                   <source>true</source>

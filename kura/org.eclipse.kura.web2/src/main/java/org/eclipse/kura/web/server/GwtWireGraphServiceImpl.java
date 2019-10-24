@@ -36,6 +36,7 @@ import org.eclipse.kura.configuration.metatype.AD;
 import org.eclipse.kura.configuration.metatype.OCDService;
 import org.eclipse.kura.configuration.metatype.Option;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
+import org.eclipse.kura.core.configuration.metatype.Tocd;
 import org.eclipse.kura.driver.descriptor.DriverDescriptor;
 import org.eclipse.kura.driver.descriptor.DriverDescriptorService;
 import org.eclipse.kura.internal.wire.asset.WireAssetChannelDescriptor;
@@ -79,11 +80,11 @@ public final class GwtWireGraphServiceImpl extends OsgiRemoteServiceServlet impl
 
     private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
 
-    private static final GwtConfigComponent WIRE_ASSET_OCD = GwtServerUtil.toGwtConfigComponent(
-            new ComponentConfigurationImpl("org.eclipse.kura.wire.WireAsset", new WireAssetOCD(), new HashMap<>()));
+    // private static final GwtConfigComponent WIRE_ASSET_OCD = GwtServerUtil.toGwtConfigComponent(
+    // new ComponentConfigurationImpl("org.eclipse.kura.wire.WireAsset", new WireAssetOCD(), new HashMap<>()), "");
 
-    private static final GwtConfigComponent WIRE_ASSET_CHANNEL_DESCRIPTOR = GwtServerUtil.toGwtConfigComponent(null,
-            WireAssetChannelDescriptor.get().getDescriptor());
+    // private static final GwtConfigComponent WIRE_ASSET_CHANNEL_DESCRIPTOR = GwtServerUtil.toGwtConfigComponent(null,
+    // WireAssetChannelDescriptor.get().getDescriptor(), "");
 
     private static final Filter DRIVER_FILTER = getFilterUnchecked("(objectClass=org.eclipse.kura.driver.Driver)");
     private static final Filter ADDITIONAL_CONFIGS_FILTER = getFilterUnchecked(
@@ -162,7 +163,7 @@ public final class GwtWireGraphServiceImpl extends OsgiRemoteServiceServlet impl
             final boolean isAssetNotInGraph = factoryPid != null && "org.eclipse.kura.wire.WireAsset".equals(factoryPid)
                     && !wireComponentsInGraph.contains(pid);
             if (isDriver || isAssetNotInGraph) {
-                final GwtConfigComponent gwtConfig = GwtServerUtil.toGwtConfigComponent(config);
+                final GwtConfigComponent gwtConfig = GwtServerUtil.toGwtConfigComponent(config, this.getLocale());
                 gwtConfig.setIsDriver(isDriver);
                 result.add(gwtConfig);
             }
@@ -194,7 +195,7 @@ public final class GwtWireGraphServiceImpl extends OsgiRemoteServiceServlet impl
                     }
                     final String pid = config.getPid();
                     final GwtWireComponentConfiguration gwtWireComponentConfig = new GwtWireComponentConfiguration();
-                    GwtConfigComponent gwtConfig = GwtServerUtil.toGwtConfigComponent(config);
+                    GwtConfigComponent gwtConfig = GwtServerUtil.toGwtConfigComponent(config, this.getLocale());
                     if (gwtConfig == null) {
                         gwtConfig = new GwtConfigComponent();
                         gwtConfig.setComponentId(pid);
@@ -333,7 +334,9 @@ public final class GwtWireGraphServiceImpl extends OsgiRemoteServiceServlet impl
     @Deprecated
     private GwtConfigComponent getWireAssetDefinition() { // TODO provide a metatype for WireAsset
 
-        return WIRE_ASSET_OCD;
+        return GwtServerUtil.toGwtConfigComponent(
+                new ComponentConfigurationImpl("org.eclipse.kura.wire.WireAsset", new WireAssetOCD(), new HashMap<>()),
+                this.getLocale());
     }
 
     private void fillWireComponentDefinitions(List<GwtWireComponentDescriptor> resultDescriptors,
@@ -343,6 +346,11 @@ public final class GwtWireGraphServiceImpl extends OsgiRemoteServiceServlet impl
                 wireComponentDefinitionService -> {
                     for (WireComponentDefinition wireComponentDefinition : wireComponentDefinitionService
                             .getComponentDefinitions()) {
+                        ComponentConfigurationImpl impl = (ComponentConfigurationImpl) wireComponentDefinition
+                                .getComponentOCD();
+                        Tocd ocd0 = (Tocd) impl.getLocalizedDefinition(this.getLocale());
+                        impl.setDefinition(ocd0);
+
                         final GwtWireComponentDescriptor result = new GwtWireComponentDescriptor(
                                 toComponentName(wireComponentDefinition), wireComponentDefinition.getFactoryPid(),
                                 wireComponentDefinition.getMinInputPorts(), wireComponentDefinition.getMaxInputPorts(),
@@ -354,7 +362,7 @@ public final class GwtWireGraphServiceImpl extends OsgiRemoteServiceServlet impl
                                 wireComponentDefinition.getOutputPortNames());
 
                         final GwtConfigComponent ocd = GwtServerUtil
-                                .toGwtConfigComponent(wireComponentDefinition.getComponentOCD());
+                                .toGwtConfigComponent(wireComponentDefinition.getComponentOCD(), this.getLocale());
                         if (ocd != null) {
                             resultDefinitions.add(ocd);
                         }
@@ -386,7 +394,7 @@ public final class GwtWireGraphServiceImpl extends OsgiRemoteServiceServlet impl
         ServiceLocator.applyToServiceOptionally(OCDService.class, ocdService -> {
 
             for (ComponentConfiguration config : ocdService.getServiceProviderOCDs("org.eclipse.kura.driver.Driver")) {
-                final GwtConfigComponent descriptor = GwtServerUtil.toGwtConfigComponent(config);
+                final GwtConfigComponent descriptor = GwtServerUtil.toGwtConfigComponent(config, this.getLocale());
                 if (descriptor != null) {
                     descriptor.setIsDriver(true);
                     resultDefinitions.add(descriptor);
@@ -400,7 +408,8 @@ public final class GwtWireGraphServiceImpl extends OsgiRemoteServiceServlet impl
 
         ServiceLocator.applyToServiceOptionally(DriverDescriptorService.class, driverDescriptorService -> {
 
-            driverDescriptorService.listDriverDescriptors().stream().map(GwtServerUtil::toGwtConfigComponent)
+            driverDescriptorService.listDriverDescriptors().stream()
+                    .map(descriptor -> GwtServerUtil.toGwtConfigComponent(descriptor, this.getLocale()))
                     .filter(Objects::nonNull).forEach(resultDescriptors::add);
             return (Void) null;
         });
@@ -427,6 +436,8 @@ public final class GwtWireGraphServiceImpl extends OsgiRemoteServiceServlet impl
         result.setComponentDefinitions(componentDefinitions);
         result.setWireComponentDescriptors(componentDescriptors);
         result.setDriverDescriptors(driverDescriptors);
+        GwtConfigComponent WIRE_ASSET_CHANNEL_DESCRIPTOR = GwtServerUtil.toGwtConfigComponent(null,
+                WireAssetChannelDescriptor.get().getDescriptor(), this.getLocale());
         result.setBaseChannelDescriptor(WIRE_ASSET_CHANNEL_DESCRIPTOR);
 
         return result;

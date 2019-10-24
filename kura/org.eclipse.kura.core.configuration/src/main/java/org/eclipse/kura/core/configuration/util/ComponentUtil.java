@@ -241,6 +241,7 @@ public class ComponentUtil {
         if (metaData != null) {
             String localization = metaData.getLocalization();
             URL[] urls = findAllEntries(bundle, localization);
+            metaData.setLocaleUrls(urls);
             List<OCD> ocds = metaData.getOCD();
             for (OCD ocd : ocds) {
                 Tocd tocd = (Tocd) ocd;
@@ -331,7 +332,8 @@ public class ComponentUtil {
     }
 
     public static ResourceBundle getResourceBundle(String localization, String locale, URL[] urls) {
-
+        if (urls == null)
+            return null;
         String[] searchCandidates = getSearchCandidates(locale);
 
         URL resourceUrl = getLocaleUrl(urls, searchCandidates, localization);
@@ -363,6 +365,8 @@ public class ComponentUtil {
     }
 
     private static URL getLocaleUrl(URL[] urls, String[] searchCandidates, String resourceBase) {
+        if (urls == null)
+            return null;
         resourceBase = resourceBase == null ? Constants.BUNDLE_LOCALIZATION_DEFAULT_BASENAME : resourceBase;
 
         for (int idx = 0; idx < searchCandidates.length; idx++) {

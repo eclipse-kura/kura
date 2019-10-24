@@ -8,9 +8,9 @@ Bundle-License: Eclipse Public License v1.0
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Fragment-Host: org.eclipse.kura.rest.asset.provider
 Import-Package: org.eclipse.kura.core.testutil;version="1.0.0",
- org.junit;version="4.12.0",
- org.junit.runner;version="4.12.0",
- org.junit.runners;version="4.12.0",
+ org.junit,
+ org.junit.runner,
+ org.junit.runners,
  org.mockito;version="1.10.19",
  org.mockito.invocation;version="1.10.19",
  org.mockito.stubbing;version="1.10.19",

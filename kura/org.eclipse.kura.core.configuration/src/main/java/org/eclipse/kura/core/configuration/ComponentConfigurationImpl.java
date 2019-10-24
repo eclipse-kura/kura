@@ -83,8 +83,12 @@ public class ComponentConfigurationImpl implements ComponentConfiguration {
 
     @Override
     public OCD getLocalizedDefinition(String locale) {
+        if (definition == null)
+            return null;
         ResourceBundle rb = ComponentUtil.getResourceBundle(definition.getLocalization(), locale,
                 definition.getLocaleUrls());
+        if (rb == null)
+            return definition;
         Tocd localeDefinition = new Tocd();
         localeDefinition.setName(ComponentUtil.getLocalized(rb, definition.getName()));
         localeDefinition.setDescription(ComponentUtil.getLocalized(rb, definition.getDescription()));

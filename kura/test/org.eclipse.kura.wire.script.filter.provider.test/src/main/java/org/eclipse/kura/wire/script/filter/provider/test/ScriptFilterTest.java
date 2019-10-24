@@ -10,7 +10,7 @@ package org.eclipse.kura.wire.script.filter.provider.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Matchers.anyObject;
+import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -97,7 +97,7 @@ public class ScriptFilterTest {
     public void testReceive() throws SQLException {
         Wire wire = mock(Wire.class);
         doAnswer(invocation -> {
-            WireEnvelope envelope = invocation.getArgumentAt(0, WireEnvelope.class);
+            WireEnvelope envelope = invocation.getArgument(0, WireEnvelope.class);
 
             assertEquals(2, envelope.getRecords().size());
 

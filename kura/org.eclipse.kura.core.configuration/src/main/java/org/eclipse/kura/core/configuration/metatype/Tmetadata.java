@@ -18,6 +18,7 @@
 
 package org.eclipse.kura.core.configuration.metatype;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -61,6 +62,16 @@ public class Tmetadata implements MetaData {
     protected List<Tocd> ocd;
     protected List<Tdesignate> designate;
     protected List<Object> any;
+    protected URL[] localeUrls;
+
+    public URL[] getLocaleUrls() {
+        return localeUrls;
+    }
+
+    public void setLocaleUrls(URL[] localeUrls) {
+        this.localeUrls = localeUrls;
+    }
+
     protected String localization;
     private final Map<QName, String> otherAttributes = new HashMap<QName, String>();
 

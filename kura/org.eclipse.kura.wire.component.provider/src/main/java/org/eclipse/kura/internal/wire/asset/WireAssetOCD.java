@@ -60,6 +60,8 @@ public class WireAssetOCD extends BaseAssetOCD {
 
         }
         if (meta != null) {
+            this.localization = meta.getLocalization();
+            this.localeUrls = meta.getLocaleUrls();
             this.ad.clear();
             for (OCD ocd : meta.getOCD()) {
                 setId(ocd.getId());

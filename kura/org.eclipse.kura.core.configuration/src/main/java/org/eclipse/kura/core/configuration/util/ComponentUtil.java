@@ -87,21 +87,21 @@ public class ComponentUtil {
                 final List<String> pids = new ArrayList<>();
                 pids.addAll(Arrays.asList(mti.getPids()));
                 pids.addAll(Arrays.asList(mti.getFactoryPids()));
-                if (pids != null) {
-                    for (String pid : pids) {
 
-                        final Tmetadata metadata;
-                        try {
-                            metadata = readMetadata(bnd, pid);
-                            if (metadata != null) {
-                                bundleMetadata.put(pid, metadata);
-                            }
-                        } catch (Exception e) {
-                            // ignore: Metadata for the specified pid is not found
-                            logger.warn("Error loading Metadata for pid " + pid, e);
+                for (String pid : pids) {
+
+                    final Tmetadata metadata;
+                    try {
+                        metadata = readMetadata(bnd, pid);
+                        if (metadata != null) {
+                            bundleMetadata.put(pid, metadata);
                         }
+                    } catch (Exception e) {
+                        // ignore: Metadata for the specified pid is not found
+                        logger.warn("Error loading Metadata for pid " + pid, e);
                     }
                 }
+
             }
         } finally {
             ctx.ungetService(ref);
@@ -224,7 +224,7 @@ public class ComponentUtil {
      *
      * @param ctx
      * @param pid
-     *            ID of the service whose OCD should be loaded
+     *                ID of the service whose OCD should be loaded
      * @return
      * @throws IOException
      * @throws XMLStreamException
@@ -243,7 +243,9 @@ public class ComponentUtil {
         }
         if (metaData != null) {
             String locale = System.getProperty("osgi.nl");
-            ResourceBundle rb = getResourceBundle(metaData.getLocalization(), locale, bundle);
+            String localization = metaData.getLocalization();
+            URL[] urls = findAllEntries(bundle, localization);
+            ResourceBundle rb = getResourceBundle(localization, locale, urls);
             List<OCD> ocds = metaData.getOCD();
             for (OCD ocd : ocds) {
                 Tocd tocd = (Tocd) ocd;
@@ -272,9 +274,7 @@ public class ComponentUtil {
     public static final char DIRECTORY_SEP = '/';
     public static final char KEY_SIGN = '%';
 
-    private static ResourceBundle getResourceBundle(String localization, String locale, final Bundle bundle) {
-
-        String resourceBase = localization == null ? Constants.BUNDLE_LOCALIZATION_DEFAULT_BASENAME : localization;
+    private static String[] getSearchCandidates(String locale) {
 
         // There are seven searching candidates possible:
         // baseName +
@@ -344,17 +344,14 @@ public class ComponentUtil {
 
         // The final candidate.
         searchCandidates[6] = ""; //$NON-NLS-1$
+        return searchCandidates;
+    }
 
-        URL resourceUrl = null;
-        URL[] urls = null;
+    private static ResourceBundle getResourceBundle(String localization, String locale, URL[] urls) {
 
-        for (int idx = 0; idx < searchCandidates.length && resourceUrl == null; idx++) {
-            urls = searchCandidates[idx] == null ? null
-                    : findEntries(bundle, resourceBase + searchCandidates[idx] + RESOURCE_FILE_EXT);
-            if (urls != null && urls.length > 0) {
-                resourceUrl = urls[0];
-            }
-        }
+        String[] searchCandidates = getSearchCandidates(locale);
+
+        URL resourceUrl = getLocaleUrl(urls, searchCandidates, localization);
 
         if (resourceUrl != null) {
             try {
@@ -366,29 +363,34 @@ public class ComponentUtil {
         return null;
     }
 
-    private static URL[] findEntries(Bundle bundle, String path) {
+    private static URL[] findAllEntries(Bundle bundle, String path) {
+        path = path == null ? Constants.BUNDLE_LOCALIZATION_DEFAULT_BASENAME : path;
         String directory = "/"; //$NON-NLS-1$
         String file = "*"; //$NON-NLS-1$
         int index = path.lastIndexOf(DIRECTORY_SEP);
-        switch (index) {
-        case -1:
-            file = path;
-            break;
-        case 0:
-            if (path.length() > 1) {
-                file = path.substring(1);
-            }
-            break;
-        default:
+        if (index > 0)
             directory = path.substring(0, index);
-            file = path.substring(index + 1);
-        }
+
         Enumeration<URL> entries = bundle.findEntries(directory, file, false);
         if (entries == null) {
-            return null;
+            return new URL[0];
         }
         List<URL> list = Collections.list(entries);
         return list.toArray(new URL[list.size()]);
+    }
+
+    private static URL getLocaleUrl(URL[] urls, String[] searchCandidates, String resourceBase) {
+        resourceBase = resourceBase == null ? Constants.BUNDLE_LOCALIZATION_DEFAULT_BASENAME : resourceBase;
+        for (URL url : urls) {
+            String path = url.getPath();
+            for (int idx = 0; idx < searchCandidates.length; idx++) {
+                if (searchCandidates[idx] != null
+                        && path.equals("/" + resourceBase + searchCandidates[idx] + RESOURCE_FILE_EXT)) {
+                    return url;
+                }
+            }
+        }
+        return null;
     }
 
     private static String getLocalized(ResourceBundle rb, String key) {
@@ -422,7 +424,7 @@ public class ComponentUtil {
      * contain any extra post-processing of the loaded information.
      *
      * @param resourceUrl
-     *            Url of the MetaData XML file which needs to be loaded
+     *                        Url of the MetaData XML file which needs to be loaded
      * @return
      * @throws IOException
      * @throws XMLStreamException
@@ -450,7 +452,7 @@ public class ComponentUtil {
      * contain any extra post-processing of the loaded information.
      *
      * @param pid
-     *            ID of the service whose OCD should be loaded
+     *                ID of the service whose OCD should be loaded
      * @return
      * @throws IOException
      * @throws XMLStreamException
@@ -483,7 +485,7 @@ public class ComponentUtil {
      *
      * @param ctx
      * @param pid
-     *            ID of the service whose OCD should be loaded
+     *                ID of the service whose OCD should be loaded
      * @return
      * @throws IOException
      * @throws XMLStreamException

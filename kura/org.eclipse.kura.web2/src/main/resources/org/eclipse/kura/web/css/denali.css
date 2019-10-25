@@ -916,6 +916,15 @@ img.x-tree3-node-icon {
 	fill: red;
 }
 
+.devs.Atomic.selected .body {
+	stroke: red;
+	fill: orange;
+}
+
+.devs.Atomic.selected .label, .devs.Atomic.selected .port-label, .devs.Atomic.selected circle {
+	fill: green;
+}
+
 .port {
 	position: relative;
 }

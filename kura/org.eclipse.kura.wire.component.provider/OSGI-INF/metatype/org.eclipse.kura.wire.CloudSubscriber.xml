@@ -7,38 +7,38 @@
      which accompanies this distribution, and is available at
      http://www.eclipse.org/legal/epl-v10.html
 -->
-<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="OSGI-INF/l10n/CloudSubscriber">
     <OCD id="org.eclipse.kura.wire.CloudSubscriber" 
-         name="Subscriber" 
-         description="A wire component which subscribes data from the cloud platform">
+         name="%name" 
+         description="%description">
 
         <AD id="CloudSubscriber.target"
-            name="CloudSubscriber Target Filter"
+            name="%cloudSubscriberTargetFilter"
             type="String"
             cardinality="0"
             required="true"
             default="(kura.service.pid=changeme)"
-            description="Specifies, as an OSGi target filter, the pid of the Cloud Subscriber used to receive messages from the cloud platform.">
+            description="%cloudSubscriberTargetFilterDesc">
         </AD>
         
         <AD id="set.property.from.body"
-            name="Set property from message body"
+            name="%messageBody"
             type="String"
             cardinality="0"
             required="false"
             default=""
-            description="If set to a non empty value, the publisher will add a metric to the emitted envelope containing the received message body content. The name of the emitted property is the value of this parameter, its type depends on the Body property type parameter">
+            description="%messageBodyDesc">
         </AD>
         
         <AD id="body.property.type"
-            name="Body property type"
+            name="%bodyPropertyType"
             type="String"
             cardinality="0"
             required="true"
             default="BYTE_ARRAY"
-            description="Defines the payload body type.">
-            <Option label="STRING" value="STRING" />
-            <Option label="BYTE_ARRAY" value="BYTE_ARRAY" />
+            description="%bodyPropertyTypeDesc">
+            <Option label="%stringLabel" value="STRING" />
+            <Option label="%byteArrayLabel" value="BYTE_ARRAY" />
         </AD>
 
     </OCD>

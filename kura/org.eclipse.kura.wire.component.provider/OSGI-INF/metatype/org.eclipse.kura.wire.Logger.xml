@@ -7,20 +7,20 @@
      which accompanies this distribution, and is available at
      http://www.eclipse.org/legal/epl-v10.html
 -->
-<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="OSGI-INF/l10n/Logger">
     <OCD id="org.eclipse.kura.wire.Logger" 
-         name="Logger" 
-         description="A wire component which logs data as received from upstream connected Wire Components">
+         name="%name" 
+         description="%description">
          
          <AD id="log.verbosity"
-            name="log.verbosity"
+            name="%logVerbosity"
             type="String"
             cardinality="0"
             required="true"
             default="QUIET"
-            description="Specifies the logging verbosity to be used to log the information contained in the received Wire Envelope">
-            <Option label="VERBOSE" value="VERBOSE" />
-            <Option label="QUIET" value="QUIET" />
+            description="%logVerbosityDesc">
+            <Option label="%verboseLabel" value="VERBOSE" />
+            <Option label="%quietLabel" value="QUIET" />
         </AD>
     </OCD>
     

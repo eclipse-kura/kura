@@ -7,39 +7,39 @@
      which accompanies this distribution, and is available at
      http://www.eclipse.org/legal/epl-v10.html
 -->
-<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="OSGI-INF/l10n/CloudPublisher">
     <OCD id="org.eclipse.kura.wire.CloudPublisher" 
-         name="Publisher" 
-         description="A wire component which publishes data to the cloud platform">
+         name="%name" 
+         description="%description">
 
         <AD id="CloudPublisher.target"
-            name="CloudPublisher Target Filter"
+            name="%cloudPublisherTargetFilter"
             type="String"
             cardinality="0"
             required="true"
             default="(kura.service.pid=changeme)"
-            description="Specifies, as an OSGi target filter, the pid of the Cloud Publisher used to publish messages to the cloud platform.">
+            description="%cloudPublisherTargetFilterDesc">
         </AD>
         
         <AD id="publish.position"
-            name="Publish Position"
+            name="%publishPosition"
             type="String"
             cardinality="0"
             required="true"
             default="none"
-            description="Whether or not the gateway's position should be published in the message. Choices are: None - means that no position will be published; Basic - only altitude, longitude and latitude values will be published; Full - available NMEA properties will be mapped to a KuraPosition object and published.">
-            <Option label="None" value="none" />
-            <Option label="Basic" value="basic" />
-            <Option label="Full" value="full" />
+            description="%publishPositionDesc">
+            <Option label="%noneLabel" value="none" />
+            <Option label="%basicLabel" value="basic" />
+            <Option label="%fullLabel" value="full" />
         </AD>
         
         <AD id="set.body.from.property"
-            name="Set body from envelope property"
+            name="%fromEnvelope"
             type="String"
             cardinality="0"
             required="false"
             default=""
-            description="If set to a non empty value, the publisher will set the message body to the value of the provided STRING or BYTE_ARRAY metric.">
+            description="%fromEnvelopeDesc">
         </AD>
     </OCD>
     

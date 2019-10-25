@@ -90,6 +90,11 @@ public final class WireComponent extends JavaScriptObject {
         this.setValid(isValid)
     }-*/;
 
+    public native void setSelected(boolean selected)
+    /*-{
+        this.setSelected(selected)
+    }-*/;
+
     public static WireComponent fromGwt(GwtWireComponentConfiguration config) {
         final GwtConfigComponent configuration = config.getConfiguration();
 

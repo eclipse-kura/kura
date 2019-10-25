@@ -114,7 +114,8 @@ public final class CloudPublisher implements WireReceiver, ConfigurableComponent
     }
 
     public void unsetCloudPublisher(org.eclipse.kura.cloudconnection.publisher.CloudPublisher cloudPublisher) {
-        this.cloudConnectionPublisher = null;
+        if (this.cloudConnectionPublisher == cloudPublisher)
+            this.cloudConnectionPublisher = null;
     }
 
     // ----------------------------------------------------------------

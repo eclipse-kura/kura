@@ -134,8 +134,10 @@ var WireComposer = function (element) {
 		if (self.selectedComponent != component) {
 			if (self.selectedComponent) {
 				self.dispatchWireComponentDeselected(self.selectedComponent)
+				self.selectedComponent.setSelected(false)
 			}
 			self.selectedComponent = component
+			self.selectedComponent.setSelected(true)
 			self.fillRenderingProperties(cellView.model)
 			self.dispatchWireComponentSelected(component)
 		}
@@ -262,6 +264,7 @@ WireComposer.prototype.getSelectedWireComponent = function () {
 WireComposer.prototype.deselectWireComponent = function () {
 	if (this.selectedComponent) {
 		this.dispatchWireComponentDeselected(self.selectedComponent)
+		this.selectedComponent.setSelected(false)
 		this.selectedComponent = null
 	}
 }
@@ -545,6 +548,18 @@ WireComponent.prototype.setValid = function (isValid) {
 		this.v.removeClass('invalid')
 	} else {
 		this.v.addClass('invalid')
+	}
+}
+
+WireComponent.prototype.setSelected = function (selected) {
+	if (!this.v) {
+		return
+	}
+
+	if (selected) {
+		this.v.addClass('selected')
+	} else {
+		this.v.removeClass('selected')
 	}
 }
 

@@ -7,28 +7,27 @@
      which accompanies this distribution, and is available at
      http://www.eclipse.org/legal/epl-v10.html
 -->
-<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="OSGI-INF/l10n/Fifo">
     <OCD id="org.eclipse.kura.wire.Fifo" 
-         name="Fifo" 
-         description="A wire component that adds the received envelopes to a FIFO queue, and delivers them using a dedicated thread.">
+         name="%name" 
+         description="%description">
 
         <AD id="queue.capacity"
-            name="queue.capacity"
+            name="%queueCapacity"
             type="Integer"
             cardinality="0"
             required="true"
             default="50"
-            description="The maximum number of envelopes that can be stored in the queue of this FIFO component">
+            description="%queueCapacityDesc">
         </AD>
         
         <AD id="discard.envelopes"
-            name="discard.envelopes"
+            name="%discardEnvelopes"
             type="Boolean"
             cardinality="0"
             required="true"
             default="false"
-            description="Defines the behavior in case of full queue: if set to true new envelopes will be dropped,
-             otherwise, if an emitter delivers an envelope to this component it will block until the envelope can be successfully enqueued.">
+            description="%discardEnvelopesDesc">
         </AD>
         
     </OCD>

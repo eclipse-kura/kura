@@ -104,7 +104,8 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
 
     public void unsetCloudSubscriber(org.eclipse.kura.cloudconnection.subscriber.CloudSubscriber cloudSubscriber) {
         this.cloudSubscriber.unregisterCloudSubscriberListener(CloudSubscriber.this);
-        this.cloudSubscriber = null;
+        if (this.cloudSubscriber == cloudSubscriber)
+            this.cloudSubscriber = null;
     }
 
     // ----------------------------------------------------------------

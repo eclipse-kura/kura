@@ -279,7 +279,11 @@ public final class GwtServerUtil {
 
     private static List<GwtConfigParameter> getADProperties(ComponentConfiguration config, String locale) {
         List<GwtConfigParameter> gwtParams = new ArrayList<>();
-        OCD ocd = config.getLocalizedDefinition(locale);
+        OCD ocd = null;
+        if (locale == null)
+            ocd = config.getDefinition();
+        else
+            ocd = config.getLocalizedDefinition(locale);
         for (AD ad : ocd.getAD()) {
             GwtConfigParameter gwtParam = new GwtConfigParameter();
             gwtParam.setId(ad.getId());
@@ -337,8 +341,11 @@ public final class GwtServerUtil {
 
     public static GwtConfigComponent toGwtConfigComponent(ComponentConfiguration config, String locale) {
         GwtConfigComponent gwtConfig = null;
-
-        OCD ocd = config.getLocalizedDefinition(locale);
+        OCD ocd = null;
+        if (locale == null)
+            ocd = config.getDefinition();
+        else
+            ocd = config.getLocalizedDefinition(locale);
         if (ocd != null) {
 
             gwtConfig = new GwtConfigComponent();
@@ -380,7 +387,8 @@ public final class GwtServerUtil {
         return gwtConfig;
     }
 
-    public static GwtConfigComponent toGwtConfigComponent(String pid, Object descriptor, String locale) {
+    public static GwtConfigComponent toGwtConfigComponent(ComponentConfiguration comConfig, Object descriptor,
+            String locale) {
         if (!(descriptor instanceof List<?>)) {
             return null;
         }
@@ -388,7 +396,12 @@ public final class GwtServerUtil {
         final List<?> ads = (List<?>) descriptor;
 
         final Tocd ocd = new Tocd();
-        ocd.setId(pid);
+        if (comConfig != null) {
+            ocd.setId(comConfig.getPid());
+            Tocd configOcd = (Tocd) comConfig.getDefinition();
+            ocd.setLocalization(configOcd.getLocalization());
+            ocd.setLocaleUrls(configOcd.getLocaleUrls());
+        }
         for (final Object ad : ads) {
             if (!(ad instanceof Tad)) {
                 return null;
@@ -396,7 +409,8 @@ public final class GwtServerUtil {
             ocd.addAD((Tad) ad);
         }
 
-        return GwtServerUtil.toGwtConfigComponent(new ComponentConfigurationImpl(pid, ocd, null), locale);
+        return GwtServerUtil.toGwtConfigComponent(
+                new ComponentConfigurationImpl(comConfig == null ? "" : comConfig.getPid(), ocd, null), locale);
     }
 
     public static ComponentConfiguration fromGwtConfigComponent(GwtConfigComponent gwtCompConfig,
@@ -444,6 +458,6 @@ public final class GwtServerUtil {
         if (channelDescriptor == null) {
             return null;
         }
-        return toGwtConfigComponent(descriptor.getPid(), channelDescriptor, locale);
+        return toGwtConfigComponent(descriptor.getComConfig(), channelDescriptor, locale);
     }
 }

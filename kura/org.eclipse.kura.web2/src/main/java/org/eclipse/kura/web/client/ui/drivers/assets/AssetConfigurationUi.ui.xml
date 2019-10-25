@@ -59,7 +59,7 @@
                                 <b:PanelBody b:id="channelTable" addStyleNames="channel-configuration-table">
                                     <gwt:CellTable bordered="true" condensed="true" striped="true" hover="true"
                                         ui:field="channelTable" />
-                                    <b.html:Paragraph ui:field="emptyTableLabel" addStyleNames="empty-table-label" text="No channels defined"></b.html:Paragraph>
+                                    <b.html:Paragraph ui:field="emptyTableLabel" addStyleNames="empty-table-label" text="{msgs.noChannelsDefined}"></b.html:Paragraph>
                                 </b:PanelBody>
                                 <b:PanelFooter>
                                     <cv:SimplePager location="CENTER" ui:field="channelPager" />

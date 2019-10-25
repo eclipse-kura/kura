@@ -36,7 +36,7 @@
 			</b:ModalBody>
 			<b:ModalFooter>
                 <b:InputGroup addStyleNames="login-input">
-                    <b:InputGroupAddon icon="USER" iconSize="LARGE"
+                    <b:InputGroupAddon icon="LANGUAGE" iconSize="LARGE"
                         addStyleNames="login-icon" />
                     <b:ListBox ui:field="languageBox" />
                 </b:InputGroup>

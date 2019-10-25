@@ -24,9 +24,9 @@ public class WireAssetChannelDescriptor extends BaseChannelDescriptor {
         super();
 
         final Tad listen = new Tad();
-        listen.setName(LISTEN_PROP_NAME.value().substring(1));
+        listen.setName("%" + LISTEN_PROP_NAME.value().substring(1));
         listen.setId(LISTEN_PROP_NAME.value());
-        listen.setDescription("Specifies if WireAsset should emit envelopes on Channel events");
+        listen.setDescription("%listenDesc");
         listen.setType(Tscalar.BOOLEAN);
         listen.setRequired(true);
         listen.setDefault("false");

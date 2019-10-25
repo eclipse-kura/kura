@@ -18,6 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.eclipse.kura.configuration.ComponentConfiguration;
+import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.driver.Driver;
 import org.eclipse.kura.driver.descriptor.DriverDescriptor;
 import org.eclipse.kura.driver.descriptor.DriverDescriptorService;
@@ -46,14 +48,24 @@ public class DriverDescriptorServiceImpl implements DriverDescriptorService {
         String filterString = String.format("(&(kura.service.pid=%s))", driverPid);
 
         final ServiceReference<Driver>[] refs = getDriverServiceReferences(filterString);
+        ServiceReference<ConfigurationService> sr = this.bundleContext.getServiceReference(ConfigurationService.class);
         try {
             for (final ServiceReference<Driver> driverServiceReference : refs) {
+                ConfigurationService cs = this.bundleContext.getService(sr);
+                ComponentConfiguration comConfig = null;
+                try {
+                    comConfig = cs.getComponentConfiguration(driverPid);
+                } catch (Exception e) {
+
+                }
                 String factoryPid = driverServiceReference.getProperty(SERVICE_FACTORYPID).toString();
                 Driver driver = this.bundleContext.getService(driverServiceReference);
                 driverDescriptor = newDriverDescriptor(driverPid, factoryPid, driver);
+                driverDescriptor.setComConfig(comConfig);
             }
         } finally {
             ungetDriverServiceReferences(refs);
+            bundleContext.ungetService(sr);
         }
 
         return Optional.ofNullable(driverDescriptor);
@@ -64,15 +76,27 @@ public class DriverDescriptorServiceImpl implements DriverDescriptorService {
         List<DriverDescriptor> driverDescriptors = new ArrayList<>();
 
         final ServiceReference<Driver>[] refs = getDriverServiceReferences(null);
+        ServiceReference<ConfigurationService> sr = this.bundleContext.getServiceReference(ConfigurationService.class);
         try {
             for (final ServiceReference<Driver> driverServiceReference : refs) {
                 String driverPid = driverServiceReference.getProperty(KURA_SERVICE_PID).toString();
                 String factoryPid = driverServiceReference.getProperty(SERVICE_FACTORYPID).toString();
+
+                ConfigurationService cs = this.bundleContext.getService(sr);
+                ComponentConfiguration comConfig = null;
+                try {
+                    comConfig = cs.getComponentConfiguration(driverPid);
+                } catch (Exception e) {
+
+                }
                 Driver driver = this.bundleContext.getService(driverServiceReference);
-                driverDescriptors.add(newDriverDescriptor(driverPid, factoryPid, driver));
+                DriverDescriptor driverDescriptor = newDriverDescriptor(driverPid, factoryPid, driver);
+                driverDescriptor.setComConfig(comConfig);
+                driverDescriptors.add(driverDescriptor);
             }
         } finally {
             ungetDriverServiceReferences(refs);
+            bundleContext.ungetService(sr);
         }
 
         return driverDescriptors;

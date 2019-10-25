@@ -34,7 +34,11 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.eclipse.kura.asset.Asset;
+import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.metatype.AD;
+import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
+import org.eclipse.kura.core.configuration.metatype.Tad;
+import org.eclipse.kura.core.configuration.metatype.Tocd;
 import org.eclipse.kura.driver.Driver;
 import org.eclipse.kura.internal.wire.asset.WireAssetChannelDescriptor;
 import org.eclipse.kura.web.server.KuraRemoteServiceServlet;
@@ -60,8 +64,8 @@ public class ChannelServlet extends HttpServlet {
     /**
      * Instance of Base Asset Channel Descriptor
      */
-    private static final GwtConfigComponent WIRE_ASSET_CHANNEL_DESCRIPTOR = GwtServerUtil.toGwtConfigComponent(null,
-            WireAssetChannelDescriptor.get().getDescriptor(), "");
+    private static final GwtConfigComponent WIRE_ASSET_CHANNEL_DESCRIPTOR = GwtServerUtil
+            .toGwtConfigComponent(toComponentConfiguration(WireAssetChannelDescriptor.get().getDescriptor()), null);
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -152,6 +156,23 @@ public class ChannelServlet extends HttpServlet {
         }
 
         return !error.get();
+    }
+
+    private static ComponentConfiguration toComponentConfiguration(Object descriptor) {
+        if (!(descriptor instanceof List<?>)) {
+            return null;
+        }
+
+        final List<?> ads = (List<?>) descriptor;
+
+        final Tocd ocd = new Tocd();
+        for (final Object ad : ads) {
+            if (!(ad instanceof Tad)) {
+                return null;
+            }
+            ocd.addAD((Tad) ad);
+        }
+        return new ComponentConfigurationImpl("", ocd, null);
     }
 
     private void withAsset(final String kuraServicePid, final ServiceConsumer<Asset> consumer) throws Exception {

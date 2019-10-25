@@ -15,6 +15,7 @@ package org.eclipse.kura.web.client.ui.wires;
 
 import org.eclipse.kura.web.client.configuration.Configurations;
 import org.eclipse.kura.web.client.configuration.HasConfiguration;
+import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.ConfigurableComponentUi;
 import org.eclipse.kura.web.client.ui.drivers.assets.AssetConfigurationUi;
 import org.eclipse.kura.web.client.ui.drivers.assets.AssetModel;
@@ -33,6 +34,7 @@ import com.google.gwt.user.client.ui.Widget;
 public class ConfigurationAreaUi extends Composite {
 
     private static ConfigurationAreaUiUiBinder uiBinder = GWT.create(ConfigurationAreaUiUiBinder.class);
+    private static final Messages MSGS = GWT.create(Messages.class);
 
     interface ConfigurationAreaUiUiBinder extends UiBinder<Widget, ConfigurationAreaUi> {
     }
@@ -94,7 +96,7 @@ public class ConfigurationAreaUi extends Composite {
                 this.genericWireComponentUi = (ConfigurableComponentUi) driverConfiguration;
             } else {
                 this.genericWireComponentUi = new ConfigurableComponentUi(driverConfiguration.getConfiguration());
-                this.genericWireComponentUi.setTitle("Driver - " + driverPid);
+                this.genericWireComponentUi.setTitle(MSGS.driverLabel(driverPid));
                 this.genericWireComponentUi.renderForm();
             }
 

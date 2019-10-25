@@ -86,10 +86,10 @@ public class BaseChannelDescriptor implements ChannelDescriptor {
 
         final Tad enabled = new Tad();
         enabled.setId(AssetConstants.ENABLED.value());
-        enabled.setName(AssetConstants.ENABLED.value().substring(1));
+        enabled.setName("%" + AssetConstants.ENABLED.value().substring(1));
         enabled.setType(Tscalar.BOOLEAN);
         enabled.setDefault("true");
-        enabled.setDescription("Determines if the channel is enabled or not");
+        enabled.setDescription("%enabledDesc");
         enabled.setCardinality(0);
         enabled.setRequired(true);
 
@@ -97,19 +97,19 @@ public class BaseChannelDescriptor implements ChannelDescriptor {
 
         final Tad name = new Tad();
         name.setId(NAME.value());
-        name.setName(NAME.value().substring(1));
+        name.setName("%channel" + NAME.value().substring(1));
         name.setType(Tscalar.STRING);
         name.setDefault("Channel-1");
-        name.setDescription("Name of the Channel");
+        name.setDescription("%channelnameDesc");
         name.setCardinality(0);
         name.setRequired(true);
 
         this.defaultElements.add(name);
 
         final Tad type = new Tad();
-        type.setName(TYPE.value().substring(1));
+        type.setName("%channel" + TYPE.value().substring(1));
         type.setId(TYPE.value());
-        type.setDescription("Type of the channel");
+        type.setDescription("%channeltypeDesc");
         type.setType(Tscalar.STRING);
         type.setRequired(true);
         type.setDefault(ChannelType.READ.name());
@@ -119,9 +119,9 @@ public class BaseChannelDescriptor implements ChannelDescriptor {
         this.defaultElements.add(type);
 
         final Tad valueType = new Tad();
-        valueType.setName(VALUE_TYPE.value().substring(1));
+        valueType.setName("%channel" + VALUE_TYPE.value().substring(1));
         valueType.setId(VALUE_TYPE.value());
-        valueType.setDescription("Value type of the channel");
+        valueType.setDescription("%channelvalue.typeDesc");
         valueType.setType(Tscalar.STRING);
         valueType.setRequired(true);
         valueType.setDefault(DataType.INTEGER.name());

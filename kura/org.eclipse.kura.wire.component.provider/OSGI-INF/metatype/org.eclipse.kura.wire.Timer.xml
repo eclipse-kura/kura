@@ -13,12 +13,12 @@
          description="%description">
 
         <AD id="type"
-            name="type"
+            name="%type"
             type="String"
             cardinality="0"
             required="true"
             default="SIMPLE"
-            description="The type specifier for the interval">
+            description="%typeDesc">
             <Option label="SIMPLE" value="SIMPLE" />
             <Option label="CRON" value="CRON" />
         </AD>

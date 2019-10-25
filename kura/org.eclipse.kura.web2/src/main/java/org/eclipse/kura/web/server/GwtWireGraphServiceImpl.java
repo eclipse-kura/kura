@@ -36,6 +36,7 @@ import org.eclipse.kura.configuration.metatype.AD;
 import org.eclipse.kura.configuration.metatype.OCDService;
 import org.eclipse.kura.configuration.metatype.Option;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
+import org.eclipse.kura.core.configuration.metatype.Tad;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
 import org.eclipse.kura.driver.descriptor.DriverDescriptor;
 import org.eclipse.kura.driver.descriptor.DriverDescriptorService;
@@ -80,8 +81,8 @@ public final class GwtWireGraphServiceImpl extends OsgiRemoteServiceServlet impl
 
     private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
 
-    // private static final GwtConfigComponent WIRE_ASSET_OCD = GwtServerUtil.toGwtConfigComponent(
-    // new ComponentConfigurationImpl("org.eclipse.kura.wire.WireAsset", new WireAssetOCD(), new HashMap<>()), "");
+    private static final ComponentConfiguration WIRE_ASSET_OCD_CONFIG = new ComponentConfigurationImpl(
+            "org.eclipse.kura.wire.WireAsset", new WireAssetOCD(), new HashMap<>());
 
     // private static final GwtConfigComponent WIRE_ASSET_CHANNEL_DESCRIPTOR = GwtServerUtil.toGwtConfigComponent(null,
     // WireAssetChannelDescriptor.get().getDescriptor(), "");
@@ -334,9 +335,7 @@ public final class GwtWireGraphServiceImpl extends OsgiRemoteServiceServlet impl
     @Deprecated
     private GwtConfigComponent getWireAssetDefinition() { // TODO provide a metatype for WireAsset
 
-        return GwtServerUtil.toGwtConfigComponent(
-                new ComponentConfigurationImpl("org.eclipse.kura.wire.WireAsset", new WireAssetOCD(), new HashMap<>()),
-                this.getLocale());
+        return GwtServerUtil.toGwtConfigComponent(WIRE_ASSET_OCD_CONFIG, this.getLocale());
     }
 
     private void fillWireComponentDefinitions(List<GwtWireComponentDescriptor> resultDescriptors,
@@ -348,8 +347,12 @@ public final class GwtWireGraphServiceImpl extends OsgiRemoteServiceServlet impl
                             .getComponentDefinitions()) {
                         ComponentConfigurationImpl impl = (ComponentConfigurationImpl) wireComponentDefinition
                                 .getComponentOCD();
-                        Tocd ocd0 = (Tocd) impl.getLocalizedDefinition(this.getLocale());
-                        impl.setDefinition(ocd0);
+                        if (impl.getPid().equals(WIRE_ASSET_OCD_CONFIG.getPid())) {
+                            impl.setDefinition((Tocd) WIRE_ASSET_OCD_CONFIG.getLocalizedDefinition(this.getLocale()));
+                        } else {
+                            Tocd ocd0 = (Tocd) impl.getLocalizedDefinition(this.getLocale());
+                            impl.setDefinition(ocd0);
+                        }
 
                         final GwtWireComponentDescriptor result = new GwtWireComponentDescriptor(
                                 toComponentName(wireComponentDefinition), wireComponentDefinition.getFactoryPid(),
@@ -362,7 +365,7 @@ public final class GwtWireGraphServiceImpl extends OsgiRemoteServiceServlet impl
                                 wireComponentDefinition.getOutputPortNames());
 
                         final GwtConfigComponent ocd = GwtServerUtil
-                                .toGwtConfigComponent(wireComponentDefinition.getComponentOCD(), this.getLocale());
+                                .toGwtConfigComponent(wireComponentDefinition.getComponentOCD(), null);
                         if (ocd != null) {
                             resultDefinitions.add(ocd);
                         }
@@ -436,11 +439,32 @@ public final class GwtWireGraphServiceImpl extends OsgiRemoteServiceServlet impl
         result.setComponentDefinitions(componentDefinitions);
         result.setWireComponentDescriptors(componentDescriptors);
         result.setDriverDescriptors(driverDescriptors);
-        GwtConfigComponent WIRE_ASSET_CHANNEL_DESCRIPTOR = GwtServerUtil.toGwtConfigComponent(null,
-                WireAssetChannelDescriptor.get().getDescriptor(), this.getLocale());
-        result.setBaseChannelDescriptor(WIRE_ASSET_CHANNEL_DESCRIPTOR);
+        GwtConfigComponent wireAssetChannelDescriptor = GwtServerUtil.toGwtConfigComponent(
+                toComponentConfiguration("", WireAssetChannelDescriptor.get().getDescriptor()), this.getLocale());
+        result.setBaseChannelDescriptor(wireAssetChannelDescriptor);
 
         return result;
+    }
+
+    private ComponentConfiguration toComponentConfiguration(String pid, Object descriptor) {
+        if (!(descriptor instanceof List<?>)) {
+            return null;
+        }
+
+        final List<?> ads = (List<?>) descriptor;
+
+        final Tocd ocd = new Tocd();
+        ocd.setId(pid);
+        for (final Object ad : ads) {
+            if (!(ad instanceof Tad)) {
+                return null;
+            }
+            ocd.addAD((Tad) ad);
+        }
+        Tocd tocd = (Tocd) WIRE_ASSET_OCD_CONFIG.getDefinition();
+        ocd.setLocalization(tocd.getLocalization());
+        ocd.setLocaleUrls(tocd.getLocaleUrls());
+        return new ComponentConfigurationImpl(pid, ocd, null);
     }
 
     private static Filter getFilterUnchecked(final String filter) {

@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.driver.descriptor;
 
+import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.driver.ChannelDescriptor;
 import org.eclipse.kura.driver.Driver;
 import org.osgi.annotation.versioning.ProviderType;
@@ -34,6 +35,15 @@ public class DriverDescriptor {
     private final String pid;
     private final String factoryPid;
     private final Object channelDescriptor;
+    private ComponentConfiguration ComConfig;
+
+    public ComponentConfiguration getComConfig() {
+        return ComConfig;
+    }
+
+    public void setComConfig(ComponentConfiguration comConfig) {
+        ComConfig = comConfig;
+    }
 
     public DriverDescriptor(String pid, String factoryPid, Object channelDescriptor) {
         this.pid = pid;

@@ -39,7 +39,7 @@
   <set-configuration-property name="locale.cookie"
     value="GWT_LOCALE" />
   <set-configuration-property name="locale.searchorder"
-        value="queryparam,cookie,meta,useragent" />
+        value="cookie,meta,useragent" />
   
   <!-- Locales: English language, independent of country -->
   <extend-property name="locale" values="zh_CN"/>

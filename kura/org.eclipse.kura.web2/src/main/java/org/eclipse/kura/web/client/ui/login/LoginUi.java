@@ -116,22 +116,27 @@ public class LoginUi extends Composite implements Context {
                 languageBox.addItem(nativeName, localeName);
                 if (localeName.equals(currentLocale)) {
                     languageBox.setSelectedIndex(languageBox.getItemCount() - 1);
+                    setLocaleCookie(localeName);
                 }
             }
         }
         languageBox.addChangeHandler(event -> {
             String localeName = languageBox.getValue(languageBox.getSelectedIndex());
-            if (localeName == null || localeName.equals("default")) {
-                localeName = "zh_CN";
-            }
-            Date now = new Date();
-            long nowLong = now.getTime();
-            nowLong = nowLong + (1000 * 60 * 60 * 24 * 21);
-            now.setTime(nowLong);
-            Cookies.setCookie("GWT_LOCALE", localeName, now);
+            setLocaleCookie(localeName);
 
             Window.Location.reload();
         });
+    }
+
+    private void setLocaleCookie(String localeName) {
+        if (localeName == null || localeName.equals("default")) {
+            localeName = "zh_CN";
+        }
+        Date now = new Date();
+        long nowLong = now.getTime();
+        nowLong = nowLong + (1000 * 60 * 60 * 24 * 21);
+        now.setTime(nowLong);
+        Cookies.setCookie("GWT_LOCALE", localeName, now);
     }
 
     private void initLoginBannerModal() {

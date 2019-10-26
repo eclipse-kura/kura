@@ -168,6 +168,16 @@ public class Configurations {
         return result;
     }
 
+    public Map<String, String> getDriverFactoryPidNames() {
+        final Map<String, String> result = new HashMap<>();
+        for (Entry<String, GwtConfigComponent> entry : this.componentDefinitions.entrySet()) {
+            if (entry.getValue().isDriver()) {
+                result.put(entry.getKey(), entry.getValue().getComponentName());
+            }
+        }
+        return result;
+    }
+
     public List<String> getDriverPids() {
         final ArrayList<String> result = new ArrayList<>();
         for (Entry<String, HasConfiguration> entry : this.currentConfigurations.entrySet()) {

@@ -126,9 +126,12 @@ public class DriversAndAssetsUi extends Composite implements DriversAndAssetsLis
     private void init() {
         DriversAndAssetsUi.this.driverFactoriesList.clear();
         DriversAndAssetsUi.this.driverFactoriesList.addItem(SELECT_COMPONENT);
-        for (String driverFactoryPid : this.configurations.getDriverFactoryPids()) {
-            DriversAndAssetsUi.this.driverFactoriesList.addItem(driverFactoryPid);
-        }
+        this.configurations.getDriverFactoryPidNames().forEach((driverFactoryPid, driverFactoryName) -> {
+            DriversAndAssetsUi.this.driverFactoriesList.addItem(driverFactoryName, driverFactoryPid);
+        });
+        // for (String driverFactoryPid : this.configurations.getDriverFactoryPids()) {
+        // DriversAndAssetsUi.this.driverFactoriesList.addItem(driverFactoryPid);
+        // }
 
         clearDirtyState();
         this.driverAndAssetsListUi.refresh();
@@ -242,6 +245,8 @@ public class DriversAndAssetsUi extends Composite implements DriversAndAssetsLis
                 this.configurations.setChannelDescriptor(pid, result);
                 this.newDriverModal.hide();
                 this.driverAndAssetsListUi.refresh();
+            }, error -> {
+                this.newDriverModal.hide();
             });
         });
     }

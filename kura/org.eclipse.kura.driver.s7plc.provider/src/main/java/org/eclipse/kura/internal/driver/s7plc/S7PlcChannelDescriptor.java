@@ -83,9 +83,9 @@ public final class S7PlcChannelDescriptor implements ChannelDescriptor {
         final List<Tad> elements = CollectionUtil.newArrayList();
 
         final Tad dbType = new Tad();
-        dbType.setName(S7_DB_TYPE);
+        dbType.setName("%" + S7_DB_TYPE);
         dbType.setId(S7_DB_TYPE);
-        dbType.setDescription("DB TYPE");
+        dbType.setDescription("%s7.db.typeDesc");
         dbType.setType(Tscalar.INTEGER);
         dbType.setRequired(true);
         dbType.setDefault(String.valueOf(S7.S7AreaDB));
@@ -98,9 +98,9 @@ public final class S7PlcChannelDescriptor implements ChannelDescriptor {
         elements.add(dbType);
 
         final Tad s7ElementType = new Tad();
-        s7ElementType.setName(S7_ELEMENT_TYPE_ID);
+        s7ElementType.setName("%" + S7_ELEMENT_TYPE_ID);
         s7ElementType.setId(S7_ELEMENT_TYPE_ID);
-        s7ElementType.setDescription("S7 Data Type");
+        s7ElementType.setDescription("%s7.data.typeDesc");
         s7ElementType.setType(Tscalar.STRING);
         s7ElementType.setRequired(true);
         s7ElementType.setDefault(S7PlcDataType.INT.name());
@@ -112,9 +112,9 @@ public final class S7PlcChannelDescriptor implements ChannelDescriptor {
         elements.add(s7ElementType);
 
         final Tad areaNo = new Tad();
-        areaNo.setName(DATA_BLOCK_NO_ID);
+        areaNo.setName("%" + DATA_BLOCK_NO_ID);
         areaNo.setId(DATA_BLOCK_NO_ID);
-        areaNo.setDescription("DB number");
+        areaNo.setDescription("%data.block.noDesc");
         areaNo.setType(Tscalar.INTEGER);
         areaNo.setRequired(true);
         areaNo.setDefault("0");
@@ -122,9 +122,9 @@ public final class S7PlcChannelDescriptor implements ChannelDescriptor {
         elements.add(areaNo);
 
         final Tad offset = new Tad();
-        offset.setName(OFFSET_ID);
+        offset.setName("%" + OFFSET_ID);
         offset.setId(OFFSET_ID);
-        offset.setDescription("offset");
+        offset.setDescription("%offsetDesc");
         offset.setType(Tscalar.INTEGER);
         offset.setRequired(true);
         offset.setDefault("0");
@@ -132,9 +132,9 @@ public final class S7PlcChannelDescriptor implements ChannelDescriptor {
         elements.add(offset);
 
         final Tad byteCount = new Tad();
-        byteCount.setName(BYTE_COUNT_ID);
+        byteCount.setName("%" + BYTE_COUNT_ID);
         byteCount.setId(BYTE_COUNT_ID);
-        byteCount.setDescription("Byte Count");
+        byteCount.setDescription("%byte.countDesc");
         byteCount.setType(Tscalar.INTEGER);
         byteCount.setRequired(true);
         byteCount.setDefault("0");
@@ -142,9 +142,9 @@ public final class S7PlcChannelDescriptor implements ChannelDescriptor {
         elements.add(byteCount);
 
         final Tad bitIndex = new Tad();
-        bitIndex.setName(BIT_INDEX_ID);
+        bitIndex.setName("%" + BIT_INDEX_ID);
         bitIndex.setId(BIT_INDEX_ID);
-        bitIndex.setDescription("Bit Index");
+        bitIndex.setDescription("%bit.indexDesc");
         bitIndex.setType(Tscalar.INTEGER);
         bitIndex.setRequired(true);
         bitIndex.setMin("0");

@@ -258,6 +258,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
             String filterString = "(" + ConfigurationService.KURA_SERVICE_PID + "=" + pid + ")";
 
             if (!ServiceUtil.waitForService(filterString, SERVICE_WAIT_TIMEOUT, TimeUnit.SECONDS).isPresent()) {
+                cs.deleteFactoryConfiguration(pid, true);
                 throw new GwtKuraException("Created component did not start in " + SERVICE_WAIT_TIMEOUT + " seconds");
             }
 

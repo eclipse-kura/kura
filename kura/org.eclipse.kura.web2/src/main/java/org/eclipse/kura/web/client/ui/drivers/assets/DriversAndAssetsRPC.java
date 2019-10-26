@@ -226,13 +226,14 @@ public final class DriversAndAssetsRPC {
     }
 
     public static void createNewDriver(final String factoryPid, final String pid,
-            final Callback<GwtConfigComponent> callback) {
+            final Callback<GwtConfigComponent> callback, final ErrorCallback<Throwable> errorCallback) {
         EntryClassUi.showWaitModal();
         gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
             @Override
             public void onFailure(Throwable ex) {
                 EntryClassUi.hideWaitModal();
+                errorCallback.onError(ex);
                 FailureHandler.handle(ex);
             }
 
@@ -243,6 +244,7 @@ public final class DriversAndAssetsRPC {
                     @Override
                     public void onFailure(Throwable ex) {
                         EntryClassUi.hideWaitModal();
+                        errorCallback.onError(ex);
                         FailureHandler.handle(ex);
                     }
 
@@ -253,6 +255,7 @@ public final class DriversAndAssetsRPC {
                             @Override
                             public void onFailure(Throwable ex) {
                                 EntryClassUi.hideWaitModal();
+                                errorCallback.onError(ex);
                                 FailureHandler.handle(ex);
                             }
 
@@ -264,6 +267,7 @@ public final class DriversAndAssetsRPC {
                                             @Override
                                             public void onFailure(Throwable ex) {
                                                 EntryClassUi.hideWaitModal();
+                                                errorCallback.onError(ex);
                                                 FailureHandler.handle(ex);
                                             }
 
@@ -315,5 +319,10 @@ public final class DriversAndAssetsRPC {
     public static interface Callback<T> {
 
         public void onSuccess(T result);
+    }
+
+    public static interface ErrorCallback<T extends Throwable> {
+
+        public void onError(T result);
     }
 }

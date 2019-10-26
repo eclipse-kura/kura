@@ -11,72 +11,72 @@
       Amit Kumar Mondal (admin@amitinside.com)
       Eurotech
 -->
-<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="OSGI-INF/l10n/s7plc">
     <OCD id="org.eclipse.kura.driver.s7plc" 
-         name="S7PlcDriver" 
-         description="S7PLC Driver">
+         name="%name" 
+         description="%description">
 
         <AD id="host.ip"
-            name="host.ip"
+            name="%hostIp"
             type="String"
             cardinality="0"
             required="true"
             default="0"
-            description="S7 PLC Host IP Address">
+            description="%hostIpDesc">
         </AD>
         
         <AD id="host.port"
-            name="host.port"
+            name="%hostPort"
             type="Integer"
             cardinality="0"
             required="true"
             default="102"
-            description="S7 PLC Port">
+            description="%hostPortDesc">
         </AD>
         
         <AD id="rack"
-            name="rack"
+            name="%rack"
             type="Integer"
             cardinality="0"
             required="true"
             default="0"
-            description="S7 PLC Rack">
+            description="%rack">
         </AD>
         
         <AD id="slot"
-            name="slot"
+            name="%slot"
             type="Integer"
             cardinality="0"
             required="true"
             default="2"
-            description="S7 PLC Slot">
+            description="%slotDesc">
         </AD>
         
         <AD id="authenticate"
-            name="authenticate"
+            name="%authenticate"
             type="Boolean"
             cardinality="0"
             required="true"
             default="false"
-            description="If set to true the driver will send to the PLC the session password provided in the configuration.">
+            description="%authenticateDesc">
         </AD>
         
         <AD id="password"
-            name="password"
+            name="%password"
             type="Password"
             cardinality="0"
             required="false"
             default=""
-            description="The session password.">
+            description="%passwordDesc">
         </AD>
         
         <AD id="read.minimum.gap.size"
-            name="read.minimum.gap.size"
+            name="%gapSize"
             type="Integer"
             cardinality="0"
             required="true"
             default="0"
-            description="Defines the minimum gap size for read requests in bytes, if set to a non zero value the driver will aggregate read requests for non consecutive addresses if their distance is lesser than this parameter.">
+            description="%gapSizeDesc">
         </AD>
 
     </OCD>

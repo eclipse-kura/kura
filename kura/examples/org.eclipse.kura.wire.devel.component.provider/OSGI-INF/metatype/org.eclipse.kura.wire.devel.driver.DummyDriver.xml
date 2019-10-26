@@ -9,7 +9,7 @@
 
 -->
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="OSGI-INF/l10n/Dummy">
-    <OCD id="org.eclipse.kura.wire.devel.driver.Dummy" 
+    <OCD id="org.eclipse.kura.wire.devel.driver.DummyDriver" 
          name="%name" 
          description="%description">
          
@@ -59,7 +59,7 @@
          </AD>
     
     </OCD>
-    <Designate pid="org.eclipse.kura.wire.devel.driver.Dummy" factoryPid="org.eclipse.kura.wire.devel.driver.Dummy">
-        <Object ocdref="org.eclipse.kura.wire.devel.driver.Dummy"/>
+    <Designate pid="org.eclipse.kura.wire.devel.driver.DummyDriver" factoryPid="org.eclipse.kura.wire.devel.driver.DummyDriver">
+        <Object ocdref="org.eclipse.kura.wire.devel.driver.DummyDriver"/>
     </Designate>
 </MetaData>

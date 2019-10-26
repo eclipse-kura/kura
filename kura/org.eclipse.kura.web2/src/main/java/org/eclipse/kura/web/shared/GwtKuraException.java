@@ -55,6 +55,7 @@ public class GwtKuraException extends Exception {
 
     public GwtKuraException(String message) {
         super(message);
+        stackTrace(null);
     }
 
     @SuppressWarnings("unused")
@@ -76,6 +77,12 @@ public class GwtKuraException extends Exception {
             while (topCause.getCause() != null && topCause.getMessage() != null)
                 topCause = topCause.getCause();
             this.detailMessage = topCause.getMessage();
+        } else {
+            this.stackTrace = super.getStackTrace();
+            Throwable topCause = this;
+            while (topCause.getCause() != null && topCause.getMessage() != null)
+                topCause = topCause.getCause();
+            this.detailMessage = topCause.getMessage();
         }
     }
 
@@ -89,6 +96,7 @@ public class GwtKuraException extends Exception {
      */
     public GwtKuraException(GwtKuraErrorCode errorCode) {
         this.m_errorCode = errorCode;
+        stackTrace(null);
     }
 
     /**
@@ -101,15 +109,15 @@ public class GwtKuraException extends Exception {
      */
     public GwtKuraException(GwtKuraErrorCode errorCode, Throwable cause) {
         super(cause);
-        stackTrace(cause);
         this.m_errorCode = errorCode;
+        stackTrace(cause);
     }
 
     public GwtKuraException(GwtKuraErrorCode errorCode, Throwable cause, String... arguments) {
         super(cause);
-        stackTrace(cause);
         this.m_errorCode = errorCode;
         this.m_arguments = arguments;
+        stackTrace(cause);
     }
 
     /**
@@ -152,8 +160,12 @@ public class GwtKuraException extends Exception {
                 && this.m_arguments.length == 1) {
             return this.m_arguments[0];
         }
+        String msg = null;
+        if (this.m_errorCode == null) {
+            msg = super.getMessage();
+        } else
+            msg = this.m_errorCode.toString();
 
-        String msg = this.m_errorCode.toString();
         try {
             // ValidationMessages MSGS = GWT.create(ValidationMessages.class);
             // String msgPattern = MSGS.getString(m_errorCode.name());

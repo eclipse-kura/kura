@@ -26,6 +26,9 @@ public final class GwtWireComponentDescriptor extends GwtBaseModel implements Se
     private int minOutputPorts;
     private int maxOutputPorts;
     private int defaultOutputPorts;
+
+    private int toolsSorted = 0;
+
     private Map<Integer, String> inputPortNames;
     private Map<Integer, String> outputPortNames;
 
@@ -121,5 +124,13 @@ public final class GwtWireComponentDescriptor extends GwtBaseModel implements Se
 
     public void setOutputPortNames(Map<Integer, String> outputPortNames) {
         this.outputPortNames = outputPortNames;
+    }
+
+    public int getToolsSorted() {
+        return toolsSorted;
+    }
+
+    public void setToolsSorted(int toolsSorted) {
+        this.toolsSorted = toolsSorted;
     }
 }

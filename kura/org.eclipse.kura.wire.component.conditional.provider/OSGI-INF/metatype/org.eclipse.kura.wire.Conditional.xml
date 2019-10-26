@@ -7,18 +7,17 @@
      which accompanies this distribution, and is available at
      http://www.eclipse.org/legal/epl-v10.html
 -->
-<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="OSGI-INF/l10n/Conditional">
     <OCD id="org.eclipse.kura.wire.Conditional"
-         name="Conditional"
-         description="A wire component that allows to forward the received envelopes to different ports depending on a boolean condition">
+         name="%name"
+         description="%description">
 
          <AD id="condition"
-            name="condition"
+            name="%condition"
             type="String" cardinality="0"
             required="true"
             default="records[0].TIMER !== null &amp;&amp; records[0].TIMER.getValue() &gt; 10 &amp;&amp; records[0]['TIMER'].getValue() &lt; 30;&#10;"
-            description="The boolean expression to be evaluated by this component when a wire envelope is
-             received.">
+            description="%conditionDesc">
         </AD>
     </OCD>
 

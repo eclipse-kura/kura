@@ -10,4 +10,5 @@
       <provide interface="org.osgi.service.wireadmin.Producer"/>
       <provide interface="org.eclipse.kura.wire.WireEmitter"/>
    </service>
+   <property name="kura.ui.toolsSorted" type="Integer" value="300"/>
 </scr:component>

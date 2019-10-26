@@ -26,6 +26,7 @@
    </service>
    <property name="service.pid" value="org.eclipse.kura.wire.Fifo"/>
    <property name="kura.ui.service.hide" type="Boolean" value="true"/>
+   <property name="kura.ui.toolsSorted" type="Integer" value="750"/>
    <reference bind="bindWireHelperService"
    	          cardinality="1..1"
    	          interface="org.eclipse.kura.wire.WireHelperService"

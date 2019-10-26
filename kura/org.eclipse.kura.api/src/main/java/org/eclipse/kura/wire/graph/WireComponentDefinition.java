@@ -30,6 +30,8 @@ public class WireComponentDefinition {
     private int maxOutputPorts;
     private int defaultOutputPorts;
 
+    private int toolsSorted = 0;
+
     private Map<Integer, String> inputPortNames;
     private Map<Integer, String> outputPortNames;
 
@@ -113,5 +115,13 @@ public class WireComponentDefinition {
 
     public void setComponentOCD(ComponentConfiguration componentOCD) {
         this.componentOCD = componentOCD;
+    }
+
+    public int getToolsSorted() {
+        return toolsSorted;
+    }
+
+    public void setToolsSorted(int toolsSorted) {
+        this.toolsSorted = toolsSorted;
     }
 }

@@ -8,18 +8,18 @@
      http://www.eclipse.org/legal/epl-v10.html
 
 -->
-<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="OSGI-INF/l10n/Sink">
     <OCD id="org.eclipse.kura.wire.devel.sink.Sink" 
-         name="Sink" 
-         description="A no-op receiver component">
+         name="%name" 
+         description="%description">
          
     <AD id="measure.timings"
-        name="measure.timings"
+        name="%measureTimings"
         type="Boolean"
         cardinality="0"
         required="true"
         default="true"
-        description="If set to true the component will print on the log the time interval in milliseconds between the last two received envelopes"/>
+        description="%measureTimingsDesc"/>
         
     </OCD>
     <Designate pid="org.eclipse.kura.wire.devel.sink.Sink" factoryPid="org.eclipse.kura.wire.devel.sink.Sink">

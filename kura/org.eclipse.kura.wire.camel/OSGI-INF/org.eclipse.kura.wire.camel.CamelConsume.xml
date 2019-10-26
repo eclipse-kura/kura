@@ -8,4 +8,5 @@
       <provide interface="org.eclipse.kura.wire.WireComponent"/>
       <provide interface="org.osgi.service.wireadmin.Producer"/>
    </service>
+   <property name="kura.ui.toolsSorted" type="Integer" value="400"/>
 </scr:component>

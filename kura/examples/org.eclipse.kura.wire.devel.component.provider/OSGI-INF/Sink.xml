@@ -24,6 +24,7 @@
       <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
    </service>
    <property name="service.pid" value="org.eclipse.kura.wire.devel.sink.Sink"/>
+   <property name="kura.ui.toolsSorted" type="Integer" value="200"/>
    <reference bind="bindWireHelperService"
    	          cardinality="1..1"
    	          interface="org.eclipse.kura.wire.WireHelperService"

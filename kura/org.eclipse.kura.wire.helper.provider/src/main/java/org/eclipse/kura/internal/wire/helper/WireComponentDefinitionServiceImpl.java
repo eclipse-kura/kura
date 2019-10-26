@@ -108,6 +108,9 @@ public class WireComponentDefinitionServiceImpl implements WireComponentDefiniti
     private WireComponentDefinition getDefinitionLegacy(ComponentDescriptionDTO componentDescriptionDTO,
             ComponentConfiguration ocd) {
         WireComponentDefinition wireComponentDefinition = new WireComponentDefinition();
+        Object sortedObj = componentDescriptionDTO.properties.get("kura.ui.toolsSorted");
+        if (sortedObj != null)
+            wireComponentDefinition.setToolsSorted((int) sortedObj);
         wireComponentDefinition.setFactoryPid(componentDescriptionDTO.name);
         for (String service : componentDescriptionDTO.serviceInterfaces) {
             if (WIRE_EMITTER.equals(service)) {
@@ -129,7 +132,9 @@ public class WireComponentDefinitionServiceImpl implements WireComponentDefiniti
             ComponentDescriptionDTO componentDescriptionDTO, ComponentConfiguration ocd) {
         final Map<?, ?> componentProperties = componentDescriptionDTO.properties;
         final WireComponentDefinition wireComponentDefinition = new WireComponentDefinition();
-
+        Object sortedObj = componentDescriptionDTO.properties.get("kura.ui.toolsSorted");
+        if (sortedObj != null)
+            wireComponentDefinition.setToolsSorted((int) sortedObj);
         wireComponentDefinition.setFactoryPid(componentDescriptionDTO.name);
         wireComponentDefinition.setMinInputPorts((int) componentProperties.get("input.cardinality.minimum"));
         wireComponentDefinition.setMaxInputPorts((int) componentProperties.get("input.cardinality.maximum"));

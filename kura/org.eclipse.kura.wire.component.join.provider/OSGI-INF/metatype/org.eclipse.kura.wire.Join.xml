@@ -7,17 +7,17 @@
      which accompanies this distribution, and is available at
      http://www.eclipse.org/legal/epl-v10.html
 -->
-<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="OSGI-INF/l10n/Join">
     <OCD id="org.eclipse.kura.wire.Join"
-         name="Join"
-         description="A wire component merges the properties contained in envelopes received on different ports into a single envelope. If properties with the same name are received on different ports at the same time, the component will emit the value received on the port having the greatest index.">
+         name="%name"
+         description="%description">
 
          <AD id="barrier"
-            name="barrier"
+            name="%barrier"
             type="Boolean" cardinality="0"
             required="true"
             default="true"
-            description="Specifies if the component should use a barrier for input ports or perform caching of messages">
+            description="%barrierDesc">
         </AD>
     </OCD>
 

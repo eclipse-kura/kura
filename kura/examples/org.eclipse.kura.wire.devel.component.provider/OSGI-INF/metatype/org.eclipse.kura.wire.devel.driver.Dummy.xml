@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Copyright (c) 2018 Eurotech and/or its affiliates and others
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="OSGI-INF/l10n/Dummy">
+    <OCD id="org.eclipse.kura.wire.devel.driver.Dummy" 
+         name="%name" 
+         description="%description">
+         
+        <AD id="connection.delay"
+            name="%connectionDelay"
+            type="Integer"
+            cardinality="0"
+            required="false"
+            default="0"
+            description="%connectionDelayDesc">
+         </AD>
+         
+         <AD id="channel.descriptor.issues"
+            name="%descriptorIssues"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="NONE"
+            description="%descriptorIssuesDesc">
+            <Option label="%noneLabel" value="NONE" />
+            <Option label="%throwLable" value="THROW" />
+            <Option label="%returnNullLabel" value="RETURN_NULL" />
+            <Option label="%returnIvalidLabel" value="RETURN_INVALID_OBJECT" />
+         </AD>
+         
+         <AD id="prepared.read.issues"
+            name="%readIssues"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="NONE"
+            description="%readIssuesDesc">
+            <Option label="%noneLabel" value="NONE" />
+            <Option label="%throwLable" value="THROW" />
+            <Option label="%returnNullLabel" value="RETURN_NULL" />
+         </AD>
+         
+         <AD id="connection.issues"
+            name="%connectionIssues"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="NONE"
+            description="%connectionIssuesDesc">
+            <Option label="%noneLabel" value="NONE" />
+            <Option label="%throwLable" value="THROW" />
+         </AD>
+    
+    </OCD>
+    <Designate pid="org.eclipse.kura.wire.devel.driver.Dummy" factoryPid="org.eclipse.kura.wire.devel.driver.Dummy">
+        <Object ocdref="org.eclipse.kura.wire.devel.driver.Dummy"/>
+    </Designate>
+</MetaData>

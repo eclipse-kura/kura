@@ -369,7 +369,7 @@ public final class GwtWireGraphServiceImpl extends OsgiRemoteServiceServlet impl
                         if (ocd != null) {
                             resultDefinitions.add(ocd);
                         }
-
+                        result.setToolsSorted(wireComponentDefinition.getToolsSorted());
                         resultDescriptors.add(result);
                     }
                     resultDefinitions.add(getWireAssetDefinition());

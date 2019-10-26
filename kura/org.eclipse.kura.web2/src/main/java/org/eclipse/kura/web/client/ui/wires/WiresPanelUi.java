@@ -195,9 +195,14 @@ public class WiresPanelUi extends Composite
             sortedDescriptors.add(descriptor.getValue());
         }
 
-        Collections.sort(sortedDescriptors,
-                (o1, o2) -> Integer.compare(o1.getMinInputPorts() * 2 + o1.getMinOutputPorts(),
-                        o2.getMinInputPorts() * 2 + o2.getMinOutputPorts()));
+        Collections.sort(sortedDescriptors, (o1, o2) -> {
+            int comp = Integer.compare(o2.getToolsSorted(), o1.getToolsSorted());
+            if (comp == 0)
+                return Integer.compare(o1.getMinInputPorts() * 2 + o1.getMinOutputPorts(),
+                        o2.getMinInputPorts() * 2 + o2.getMinOutputPorts());
+            else
+                return comp;
+        });
 
         for (GwtWireComponentDescriptor descriptor : sortedDescriptors) {
             final WireComponentsAnchorListItem item = new WireComponentsAnchorListItem(getComponentLabel(descriptor),

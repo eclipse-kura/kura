@@ -26,6 +26,7 @@
       <provide interface="org.osgi.service.wireadmin.Consumer"/>
    </service>
    <property name="service.pid" value="org.eclipse.kura.wire.devel.delay.Delay"/>
+   <property name="kura.ui.toolsSorted" type="Integer" value="250"/>
    <reference bind="bindWireHelperService"
    	          cardinality="1..1"
    	          interface="org.eclipse.kura.wire.WireHelperService"

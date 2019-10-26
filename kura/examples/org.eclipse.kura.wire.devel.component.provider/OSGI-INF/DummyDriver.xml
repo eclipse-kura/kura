@@ -14,9 +14,11 @@
                deactivate="deactivate" 
                modified="updated"
                enabled="true" 
+               immediate="true"
                configuration-policy="require"> 
    <implementation class="org.eclipse.kura.wire.devel.driver.dummy.DummyDriver"/>
-   <property name="service.pid" value="org.eclipse.kura.wire.devel.driver.dummy"/>
+   <property name="service.pid" value="org.eclipse.kura.wire.devel.driver.DummyDriver"/>
+   <property name="kura.ui.toolsSorted" type="Integer" value="150"/>
    <service>
       <provide interface="org.eclipse.kura.driver.Driver"/>
       <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>

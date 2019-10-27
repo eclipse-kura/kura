@@ -25,7 +25,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -45,7 +44,7 @@ import org.slf4j.LoggerFactory;
  * Admin and Javascript through Server Sent Events (SSE). This is mainly required
  * for Kura Wires to delegate the emit events.
  */
-public final class WiresBlinkServlet extends HttpServlet implements WireAdminListener {
+public final class WiresBlinkServlet extends LocaleServlet implements WireAdminListener {
 
     /** The Logger Instance. */
     private static final Logger logger = LoggerFactory.getLogger(WiresBlinkServlet.class);

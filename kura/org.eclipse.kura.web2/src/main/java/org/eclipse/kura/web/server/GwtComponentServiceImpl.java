@@ -45,6 +45,7 @@ import org.eclipse.kura.configuration.metatype.AD;
 import org.eclipse.kura.configuration.metatype.Icon;
 import org.eclipse.kura.configuration.metatype.OCD;
 import org.eclipse.kura.configuration.metatype.Option;
+import org.eclipse.kura.locale.LocaleContextHolder;
 import org.eclipse.kura.util.service.ServiceUtil;
 import org.eclipse.kura.web.server.util.GwtServerUtil;
 import org.eclipse.kura.web.server.util.KuraExceptionHandler;
@@ -564,7 +565,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
     private GwtConfigComponent addNonMetatypeProperties(GwtConfigComponent baseGwtConfig,
             ComponentConfiguration config) {
         GwtConfigComponent gwtConfigComponent = null;
-        OCD ocd = config.getLocalizedDefinition(this.getLocale());
+        OCD ocd = config.getLocalizedDefinition(LocaleContextHolder.getLocale().getLanguage());
         if (ocd != null && baseGwtConfig != null) {
             gwtConfigComponent = new GwtConfigComponent();
 
@@ -618,7 +619,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
     private GwtConfigComponent createMetatypeOnlyGwtComponentConfigurationInternal(ComponentConfiguration config) {
         GwtConfigComponent gwtConfig = null;
 
-        OCD ocd = config.getLocalizedDefinition(this.getLocale());
+        OCD ocd = config.getLocalizedDefinition(LocaleContextHolder.getLocale().getLanguage());
         if (ocd != null) {
 
             gwtConfig = new GwtConfigComponent();
@@ -703,7 +704,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
 
     private List<GwtConfigParameter> getADProperties(ComponentConfiguration config) {
         List<GwtConfigParameter> gwtParams = new ArrayList<>();
-        OCD ocd = config.getLocalizedDefinition(this.getLocale());
+        OCD ocd = config.getLocalizedDefinition(LocaleContextHolder.getLocale().getLanguage());
         for (AD ad : ocd.getAD()) {
             GwtConfigParameter gwtParam = new GwtConfigParameter();
             gwtParam.setId(ad.getId());

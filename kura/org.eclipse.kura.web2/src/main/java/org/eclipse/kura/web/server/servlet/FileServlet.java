@@ -33,7 +33,6 @@ import java.util.zip.ZipInputStream;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -70,7 +69,7 @@ import org.osgi.service.metatype.MetaTypeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FileServlet extends HttpServlet {
+public class FileServlet extends LocaleServlet {
 
     private static final String FAILED_TO_MANAGE_ASSET_CONFIGURATION_UPLOAD_FOR_USER_SESSION_CAUSE = "UI Asset - Failure - Failed to manage asset configuration upload for user: {}, session: {}. Cause: ";
 
@@ -529,7 +528,7 @@ public class FileServlet extends HttpServlet {
 
     }
 
-    private void doPostConfigurationSnapshot(HttpServletRequest req) throws ServletException, IOException  {
+    private void doPostConfigurationSnapshot(HttpServletRequest req) throws ServletException, IOException {
 
         UploadRequest upload = new UploadRequest(this.diskFileItemFactory);
 

@@ -11,15 +11,21 @@
  *******************************************************************************/
 package org.eclipse.kura.web.server;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.eclipse.kura.locale.LocaleContextHolder;
 import org.eclipse.kura.web.session.Attributes;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
@@ -37,6 +43,32 @@ public class KuraRemoteServiceServlet extends RemoteServiceServlet {
     private static final long serialVersionUID = 3473193315046407200L;
     private static final Logger logger = LoggerFactory.getLogger(KuraRemoteServiceServlet.class);
     private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
+
+    @Override
+    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String localeName = null;
+        Cookie[] cookies = req.getCookies();
+        for (Cookie cookie : cookies) {
+            if (cookie.getName().equals("GWT_LOCALE")) {
+                localeName = cookie.getValue();
+                break;
+            }
+        }
+
+        if (localeName == null || localeName.equals(""))
+            localeName = System.getProperty("osgi.nl");
+        Locale locale = null;
+        if (localeName != null)
+            locale = new Locale(localeName);
+        else
+            locale = req.getLocale();
+        try {
+            LocaleContextHolder.setLocale(locale);
+            super.service(req, resp);
+        } finally {
+            LocaleContextHolder.resetLocaleContext();
+        }
+    }
 
     /**
      *

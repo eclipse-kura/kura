@@ -23,7 +23,6 @@ import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -34,7 +33,7 @@ import org.eclipse.kura.web.shared.GwtKuraException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SkinServlet extends HttpServlet {
+public class SkinServlet extends LocaleServlet {
 
     private static final long serialVersionUID = -556598856721497972L;
 

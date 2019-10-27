@@ -16,11 +16,13 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
+import java.util.Locale;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.eclipse.kura.locale.LocaleContextHolder;
 
 import com.google.gwt.user.server.rpc.SerializationPolicy;
 import com.google.gwt.user.server.rpc.SerializationPolicyLoader;
@@ -29,35 +31,19 @@ public class OsgiRemoteServiceServlet extends KuraRemoteServiceServlet {
 
     private static final long serialVersionUID = -8826193840033103296L;
 
-    private String locale;
-
-    public String getLocale() {
-        return locale;
-    }
-
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String locale = req.getParameter("locale");
-        if (locale == null || locale.equals("")) {
-            Cookie[] cookies = req.getCookies();
-            for (Cookie cookie : cookies) {
-                if (cookie.getName().equals("GWT_LOCALE")) {
-                    locale = cookie.getValue();
-                    break;
-                }
-            }
-        }
-        if (locale == null || locale.equals(""))
-            locale = System.getProperty("osgi.nl");
-        this.locale = locale;
         // Cache the current thread
+        Locale locale = LocaleContextHolder.getLocale();
         Thread currentThread = Thread.currentThread();
         // We are going to swap the class loader
         ClassLoader oldContextClassLoader = currentThread.getContextClassLoader();
         currentThread.setContextClassLoader(this.getClass().getClassLoader());
         try {
+            LocaleContextHolder.setLocale(locale);
             super.service(req, resp);
         } finally {
+            LocaleContextHolder.resetLocaleContext();
             currentThread.setContextClassLoader(oldContextClassLoader);
         }
     }
@@ -70,12 +56,12 @@ public class OsgiRemoteServiceServlet extends KuraRemoteServiceServlet {
      * alternative approach.
      *
      * @param request
-     *            the HTTP request being serviced
+     *                          the HTTP request being serviced
      * @param moduleBaseURL
-     *            as specified in the incoming payload
+     *                          as specified in the incoming payload
      * @param strongName
-     *            a strong name that uniquely identifies a serialization policy
-     *            file
+     *                          a strong name that uniquely identifies a serialization policy
+     *                          file
      * @return a {@link SerializationPolicy} for the given module base URL and
      *         strong name, or <code>null</code> if there is none
      */

@@ -28,7 +28,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -40,7 +39,7 @@ import org.eclipse.kura.web.shared.GwtKuraException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LogServlet extends HttpServlet {
+public class LogServlet extends LocaleServlet {
 
     private static final long serialVersionUID = 3969980124054250070L;
 
@@ -50,7 +49,7 @@ public class LogServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
         HttpSession session = httpServletRequest.getSession(false);
-        
+
         ServiceLocator locator = ServiceLocator.getInstance();
         SystemService ss = null;
         try {
@@ -82,8 +81,7 @@ public class LogServlet extends HttpServlet {
 
         createReply(httpServletResponse, fileList);
 
-        auditLogger.info(
-                "UI Log Download - Success - Successfully returned device logs for user: {}, session: {}",
+        auditLogger.info("UI Log Download - Success - Successfully returned device logs for user: {}, session: {}",
                 session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
     }
 

@@ -301,6 +301,7 @@ if [ -z "$KURA_RUNNING" ] ; then
         -Dkura.custom.configuration=file:${DIR}/user/kura_custom.properties \
         -Ddpa.configuration=${DIR}/data/dpa.properties \
         -Dlog4j.configurationFile=file:${DIR}/user/log4j.xml \
+		-Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager \
 		-Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.Log4j2LogDelegateFactory \
         -Djava.security.policy=${DIR}/framework/jdk.dio.policy \
         -Djdk.dio.registry=${DIR}/framework/jdk.dio.properties \
@@ -349,6 +350,7 @@ if [ -z "$KURA_RUNNING" ] ; then
         -Dkura.custom.configuration=file:${DIR}/user/kura_custom.properties \
         -Ddpa.configuration=${DIR}/data/dpa.properties \
         -Dlog4j.configurationFile=file:${DIR}/user/log4j.xml \
+		-Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager \
 		-Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.Log4j2LogDelegateFactory \
         -Djava.security.policy=${DIR}/framework/jdk.dio.policy \
         -Djdk.dio.registry=${DIR}/framework/jdk.dio.properties \
@@ -395,6 +397,7 @@ if [ -z "$KURA_RUNNING" ] ; then
         -Dkura.custom.configuration=file:${DIR}/user/kura_custom.properties \
         -Ddpa.configuration=${DIR}/data/dpa.properties \
         -Dlog4j.configurationFile=file:${DIR}/user/log4j.xml \
+		-Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager \
 		-Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.Log4j2LogDelegateFactory \
         -Djava.security.policy=${DIR}/framework/jdk.dio.policy \
         -Djdk.dio.registry=${DIR}/framework/jdk.dio.properties \
@@ -871,8 +874,6 @@ fi]]>
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/slf4j.api_${slf4j.api.version}.jar@3:start" />
 			<entry key="osgi.bundles" operation="+"
-				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/jcl.over.slf4j_${slf4j.api.version}.jar@3:start" />
-			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.log4j2-api-config_${org.apache.log4j2-api-config.version}.jar@3" />
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.logging.log4j.api_${logging.log4j.version}.jar@3:start" />
@@ -880,6 +881,8 @@ fi]]>
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.logging.log4j.core_${logging.log4j.version}.jar@3:start" />
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.logging.log4j.slf4j-impl_${logging.log4j.version}.jar@3:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.logging.log4j.jul_${logging.log4j.version}.jar@3:start" />
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/minimal-json_${com.eclipsesource.minimal-json.version}.jar" />
 			<entry key="osgi.bundles" operation="+"

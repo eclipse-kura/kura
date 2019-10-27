@@ -302,7 +302,6 @@ if [ -z "$KURA_RUNNING" ] ; then
         -Ddpa.configuration=${DIR}/data/dpa.properties \
         -Dlog4j.configurationFile=file:${DIR}/user/log4j.xml \
 		-Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager \
-		-Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.Log4j2LogDelegateFactory \
         -Djava.security.policy=${DIR}/framework/jdk.dio.policy \
         -Djdk.dio.registry=${DIR}/framework/jdk.dio.properties \
         -Djdk.tls.trustNameService=true \
@@ -351,7 +350,6 @@ if [ -z "$KURA_RUNNING" ] ; then
         -Ddpa.configuration=${DIR}/data/dpa.properties \
         -Dlog4j.configurationFile=file:${DIR}/user/log4j.xml \
 		-Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager \
-		-Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.Log4j2LogDelegateFactory \
         -Djava.security.policy=${DIR}/framework/jdk.dio.policy \
         -Djdk.dio.registry=${DIR}/framework/jdk.dio.properties \
         -Djdk.tls.trustNameService=true \
@@ -398,7 +396,6 @@ if [ -z "$KURA_RUNNING" ] ; then
         -Ddpa.configuration=${DIR}/data/dpa.properties \
         -Dlog4j.configurationFile=file:${DIR}/user/log4j.xml \
 		-Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager \
-		-Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.Log4j2LogDelegateFactory \
         -Djava.security.policy=${DIR}/framework/jdk.dio.policy \
         -Djdk.dio.registry=${DIR}/framework/jdk.dio.properties \
         -Djdk.tls.trustNameService=true \

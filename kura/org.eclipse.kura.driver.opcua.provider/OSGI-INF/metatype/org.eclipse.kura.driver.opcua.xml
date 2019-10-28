@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    Copyright (c) 2017 Eurotech and/or its affiliates
+    Copyright (c) 2016, 2019 Eurotech and/or its affiliates and others
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -8,80 +8,198 @@
      http://www.eclipse.org/legal/epl-v10.html
 
     Contributors:
-      Amit Kumar Mondal (admin@amitinside.com)
       Eurotech
+      Amit Kumar Mondal
 -->
-<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="OSGI-INF/l10n/s7plc">
-    <OCD id="org.eclipse.kura.driver.s7plc" 
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="OSGI-INF/l10n/OpcUaDriver">
+    <OCD id="org.eclipse.kura.driver.opcua" 
          name="%name" 
          description="%description">
 
-        <AD id="host.ip"
-            name="%hostIp"
+        <AD id="endpoint.ip"
+            name="%endpointIp"
             type="String"
             cardinality="0"
             required="true"
-            default="0"
-            description="%hostIpDesc">
-        </AD>
-        
-        <AD id="host.port"
-            name="%hostPort"
-            type="Integer"
-            cardinality="0"
-            required="true"
-            default="102"
-            description="%hostPortDesc">
-        </AD>
-        
-        <AD id="rack"
-            name="%rack"
-            type="Integer"
-            cardinality="0"
-            required="true"
-            default="0"
-            description="%rack">
-        </AD>
-        
-        <AD id="slot"
-            name="%slot"
-            type="Integer"
-            cardinality="0"
-            required="true"
-            default="2"
-            description="%slotDesc">
-        </AD>
-        
-        <AD id="authenticate"
-            name="%authenticate"
-            type="Boolean"
-            cardinality="0"
-            required="true"
-            default="false"
-            description="%authenticateDesc">
-        </AD>
-        
-        <AD id="password"
-            name="%password"
-            type="Password"
-            cardinality="0"
-            required="false"
-            default=""
-            description="%passwordDesc">
-        </AD>
-        
-        <AD id="read.minimum.gap.size"
-            name="%gapSize"
-            type="Integer"
-            cardinality="0"
-            required="true"
-            default="0"
-            description="%gapSizeDesc">
+            default="default-server"
+            description="%endpointIpDesc">
         </AD>
 
+        <AD id="endpoint.port"
+            name="%endpointPort"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="53530"
+            min="1"
+            description="%endpointPortDesc">
+        </AD>
+        
+        <AD id="server.name"
+            name="%serverName"
+            type="String"
+            cardinality="0"
+            required="false"
+            default="OPC-UA-Server"
+            description="%serverNameDesc">
+        </AD>
+        
+        <AD id="force.endpoint.url"
+            name="%forceEndpointUrl"
+            type="Boolean"
+            cardinality="0"
+            required="false"
+            default="false"
+            description="%forceEndpointUrlDesc">
+        </AD>
+        
+        <AD id="session.timeout"
+            name="%sessionTimeout"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="120"
+            description="%sessionTimeoutDesc">
+        </AD>
+        
+        <AD id="request.timeout"
+            name="%requestTimeout"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="60"
+            description="%requestTimeoutDesc">
+        </AD>
+        
+        <AD id="acknowledge.timeout"
+            name="%acknowledgeTimeout"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="40"
+            description="%acknowledgeTimeoutDesc">
+        </AD>
+        
+        <AD id="application.name" 
+        	name="%applicationName" 
+        	type="String"
+			cardinality="0" 
+			required="true" 
+			default="opc-ua client"
+			description="%applicationNameDesc" />
+			
+		<AD id="application.uri" 
+			name="%applicationUri" 
+			type="String"
+			cardinality="0" 
+			required="true" 
+			default="urn:kura:opcua:client"
+			description="%applicationUriDesc" />
+			
+		<AD id="subscription.publish.interval" 
+			name="%subscriptionPubInterval"
+			type="Long" 
+			cardinality="0" 
+			required="true" 
+			default="1000"
+			description="%subscriptionPubIntervalDesc">
+		</AD>
+			
+		<AD id="certificate.location" 
+			name="%keystorePath" 
+			type="String"
+			cardinality="0" 
+			required="true" 
+			default="PFX or JKS Keystore"
+			description="%keystorePathDesc" />
+			
+		<AD id="security.policy" 
+			name="%securityPolicy"
+			type="Integer" 
+			cardinality="0" 
+			required="true" 
+			default="0"
+			description="%securityPolicyDesc">
+			<Option label="None" value="0" />
+			<Option label="Basic128Rsa15" value="1" />
+			<Option label="Basic256" value="2" />
+			<Option label="Basic256Sha256" value="3" />
+		</AD>
+		
+		<AD id="username" 
+			name="%username"
+			type="String" 
+			cardinality="0" 
+			required="false" 
+			default=""
+			description="%usernameDesc" />
+		
+		<AD id="password" 
+			name="%password"
+			type="Password" 
+			cardinality="0" 
+			required="false" 
+			default=""
+			description="%passwordDesc" />
+		
+		<AD id="keystore.client.alias" 
+			name="%certAlias" 
+			type="String"
+			cardinality="0" 
+			required="true" 
+			default="client-ai"
+			description="%certAliasDesc" />
+
+		<AD id="authenticate.server" 
+			name="%enableServerAuth"
+			type="Boolean" 
+			cardinality="0" 
+			required="true" 
+			default="false"
+			description="%enableServerAuthDesc" />
+		
+		<AD id="keystore.type" 
+			name="%keystoreType"
+			type="String" 
+			cardinality="0" 
+			required="true" 
+			default="PKCS12"
+			description="%keystoreTypeDesc">
+			<Option label="PKCS11" value="PKCS11" />
+			<Option label="PKCS12" value="PKCS12" />
+			<Option label="JKS" value="JKS" />
+		</AD>
+
+		<AD id="keystore.password" 
+			name="%keystorePassword"
+			type="Password" 
+			cardinality="0" 
+			required="true" 
+			default="password"
+			description="%keystorePasswordDesc" />
+			
+		<AD id="max.request.items" 
+			name="%maxReqItems"
+			type="Integer" 
+			cardinality="0" 
+			required="true" 
+			default="200"
+			description="%maxReqItemsDesc" />
+			
+		<AD id="subtree.subscription.name.format" 
+			name="%subtreeNameFormat"
+			type="String" 
+			cardinality="0" 
+			required="true" 
+			default="BROWSE_PATH"
+			description="%subtreeNameFormatDesc">
+			<Option label="BROWSE_PATH" value="BROWSE_PATH" />
+			<Option label="NODE_ID" value="NODE_ID" />
+		</AD>
+        
     </OCD>
     
-    <Designate pid="org.eclipse.kura.driver.s7plc" factoryPid="org.eclipse.kura.driver.s7plc">
-        <Object ocdref="org.eclipse.kura.driver.s7plc"/>
+    <Designate pid="org.eclipse.kura.driver.opcua" factoryPid="org.eclipse.kura.driver.opcua">
+        <Object ocdref="org.eclipse.kura.driver.opcua"/>
     </Designate>
 </MetaData>

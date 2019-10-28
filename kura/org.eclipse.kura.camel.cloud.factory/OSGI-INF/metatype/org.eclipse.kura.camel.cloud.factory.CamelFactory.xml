@@ -12,32 +12,32 @@
       Red Hat Inc - Initial API and implementation
 
 -->
-<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="OSGI-INF/l10n/CamelFactory">
     <OCD id="org.eclipse.kura.camel.cloud.factory.CamelFactory"
-         name="Camel Cloud Client" 
-         description="Camel Cloud Client factory">
+         name="%name" 
+         description="%description">
         
          <AD id="xml"
-            name="Router XML"
+            name="%xml"
             type="String"
             cardinality="1"
             required="true"
-            description="The camel XML router configuration|TextArea"/>
+            description="%xmlDesc"/>
             
         <AD id="initCode"
-            name="JavaScript init code"
+            name="%initCode"
             type="String"
             cardinality="1"
             required="false"
-            description="JavaScript code which is called when the router is initialized first. The camel context is avaiable in the variable 'camelContext'.|TextArea"/>
+            description="%initCodeDesc"/>
             
         <AD id="enableJmx"
-            name="Enable Camel JMX support"
+            name="%enableJmx"
             type="Boolean"
             cardinality="1"
             required="true"
             default="true"
-            description="This setting controls if JMX support for the Camel context will be activated or not."/>
+            description="%enableJmxDesc"/>
     </OCD>
 
     <Designate pid="org.eclipse.kura.camel.cloud.factory.CamelFactory" factoryPid="org.eclipse.kura.camel.cloud.factory.CamelFactory">

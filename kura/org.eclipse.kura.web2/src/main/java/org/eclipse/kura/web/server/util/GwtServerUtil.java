@@ -399,8 +399,10 @@ public final class GwtServerUtil {
         if (comConfig != null) {
             ocd.setId(comConfig.getPid());
             Tocd configOcd = (Tocd) comConfig.getDefinition();
-            ocd.setLocalization(configOcd.getLocalization());
-            ocd.setLocaleUrls(configOcd.getLocaleUrls());
+            if (configOcd != null) {
+                ocd.setLocalization(configOcd.getLocalization());
+                ocd.setLocaleUrls(configOcd.getLocaleUrls());
+            }
         }
         for (final Object ad : ads) {
             if (!(ad instanceof Tad)) {

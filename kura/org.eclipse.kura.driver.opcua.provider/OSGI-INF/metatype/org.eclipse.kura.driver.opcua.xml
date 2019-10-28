@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    Copyright (c) 2016, 2019 Eurotech and/or its affiliates and others
+    Copyright (c) 2017 Eurotech and/or its affiliates
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -8,200 +8,80 @@
      http://www.eclipse.org/legal/epl-v10.html
 
     Contributors:
+      Amit Kumar Mondal (admin@amitinside.com)
       Eurotech
-      Amit Kumar Mondal
 -->
-<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
-    <OCD id="org.eclipse.kura.driver.opcua" 
-         name="OpcUaDriver" 
-         description="OPC-UA Driver">
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="OSGI-INF/l10n/s7plc">
+    <OCD id="org.eclipse.kura.driver.s7plc" 
+         name="%name" 
+         description="%description">
 
-        <AD id="endpoint.ip"
-            name="Endpoint IP"
+        <AD id="host.ip"
+            name="%hostIp"
             type="String"
             cardinality="0"
             required="true"
-            default="default-server"
-            description="OPC-UA Endpoint IP Address">
+            default="0"
+            description="%hostIpDesc">
         </AD>
-
-        <AD id="endpoint.port"
-            name="Endpoint port"
+        
+        <AD id="host.port"
+            name="%hostPort"
             type="Integer"
             cardinality="0"
             required="true"
-            default="53530"
-            min="1"
-            description="OPC-UA Endpoint Port">
+            default="102"
+            description="%hostPortDesc">
         </AD>
         
-        <AD id="server.name"
-            name="Server Name"
-            type="String"
+        <AD id="rack"
+            name="%rack"
+            type="Integer"
             cardinality="0"
-            required="false"
-            default="OPC-UA-Server"
-            description="OPC-UA Server Name">
+            required="true"
+            default="0"
+            description="%rack">
         </AD>
         
-        <AD id="force.endpoint.url"
-            name="Force endpoint URL"
+        <AD id="slot"
+            name="%slot"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="2"
+            description="%slotDesc">
+        </AD>
+        
+        <AD id="authenticate"
+            name="%authenticate"
             type="Boolean"
             cardinality="0"
-            required="false"
+            required="true"
             default="false"
-            description="If set to true the driver will use the hostname, port, and server name parameters specified in the configuration instead of the values contained in endpoint descriptions fetched from the server.">
+            description="%authenticateDesc">
         </AD>
         
-        <AD id="session.timeout"
-            name="Session timeout"
+        <AD id="password"
+            name="%password"
+            type="Password"
+            cardinality="0"
+            required="false"
+            default=""
+            description="%passwordDesc">
+        </AD>
+        
+        <AD id="read.minimum.gap.size"
+            name="%gapSize"
             type="Integer"
             cardinality="0"
             required="true"
-            default="120"
-            description="Session timeout (in seconds)">
+            default="0"
+            description="%gapSizeDesc">
         </AD>
-        
-        <AD id="request.timeout"
-            name="Request timeout"
-            type="Integer"
-            cardinality="0"
-            required="true"
-            default="60"
-            description="Request timeout (in seconds)">
-        </AD>
-        
-        <AD id="acknowledge.timeout"
-            name="Acknowledge timeout"
-            type="Integer"
-            cardinality="0"
-            required="true"
-            default="40"
-            description="The time to wait for the server response to the 'Hello' message (in seconds)">
-        </AD>
-        
-        <AD id="application.name" 
-        	name="Application name" 
-        	type="String"
-			cardinality="0" 
-			required="true" 
-			default="opc-ua client"
-			description="OPC-UA application name" />
-			
-		<AD id="application.uri" 
-			name="Application URI" 
-			type="String"
-			cardinality="0" 
-			required="true" 
-			default="urn:kura:opcua:client"
-			description="OPC-UA application uri" />
-			
-		<AD id="subscription.publish.interval" 
-			name="Subscription publish interval"
-			type="Long" 
-			cardinality="0" 
-			required="true" 
-			default="1000"
-			description="The publish interval in milliseconds for the subscription created by the driver.">
-		</AD>
-			
-		<AD id="certificate.location" 
-			name="Keystore path" 
-			type="String"
-			cardinality="0" 
-			required="true" 
-			default="PFX or JKS Keystore"
-			description="Absolute path of the PKCS or JKS keystore that contains the OPC-UA client certificate, private key and trusted server certificates" />
-			
-		<AD id="security.policy" 
-			name="Security policy"
-			type="Integer" 
-			cardinality="0" 
-			required="true" 
-			default="0"
-			description="Security Policy">
-			<Option label="None" value="0" />
-			<Option label="Basic128Rsa15" value="1" />
-			<Option label="Basic256" value="2" />
-			<Option label="Basic256Sha256" value="3" />
-		</AD>
-		
-		<AD id="username" 
-			name="Username"
-			type="String" 
-			cardinality="0" 
-			required="false" 
-			default=""
-			description="OPC-UA server username" />
-		
-		<AD id="password" 
-			name="Password"
-			type="Password" 
-			cardinality="0" 
-			required="false" 
-			default=""
-			description="OPC-UA server password" />
-		
-		<AD id="keystore.client.alias" 
-			name="Client certificate alias" 
-			type="String"
-			cardinality="0" 
-			required="true" 
-			default="client-ai"
-			description="Alias for the client certificate in the keystore" />
 
-		<AD id="authenticate.server" 
-			name="Enable server authentication"
-			type="Boolean" 
-			cardinality="0" 
-			required="true" 
-			default="false"
-			description="Specifies whether to enable or not server certificate verification" />
-		
-		<AD id="keystore.type" 
-			name="Keystore type"
-			type="String" 
-			cardinality="0" 
-			required="true" 
-			default="PKCS12"
-			description="Keystore type">
-			<Option label="PKCS11" value="PKCS11" />
-			<Option label="PKCS12" value="PKCS12" />
-			<Option label="JKS" value="JKS" />
-		</AD>
-
-		<AD id="keystore.password" 
-			name="Keystore password"
-			type="Password" 
-			cardinality="0" 
-			required="true" 
-			default="password"
-			description="Configurable Property to set keystore password (default set to password)" />
-			
-		<AD id="max.request.items" 
-			name="Max request items"
-			type="Integer" 
-			cardinality="0" 
-			required="true" 
-			default="200"
-			description="Maximum number of items that will be included in a single request to the server." />
-			
-		<AD id="subtree.subscription.name.format" 
-			name="Subtree subscription events channel name format"
-			type="String" 
-			cardinality="0" 
-			required="true" 
-			default="BROWSE_PATH"
-			description="The format to be used for channel name for subtree subscriptions. 
-			If set to BROWSE_PATH, the channel name will contain the browse path of the source node relative to the subscription root. 
-			If set to NODE_ID, the name will contain the node id of the source node.">
-			<Option label="BROWSE_PATH" value="BROWSE_PATH" />
-			<Option label="NODE_ID" value="NODE_ID" />
-		</AD>
-        
     </OCD>
     
-    <Designate pid="org.eclipse.kura.driver.opcua" factoryPid="org.eclipse.kura.driver.opcua">
-        <Object ocdref="org.eclipse.kura.driver.opcua"/>
+    <Designate pid="org.eclipse.kura.driver.s7plc" factoryPid="org.eclipse.kura.driver.s7plc">
+        <Object ocdref="org.eclipse.kura.driver.s7plc"/>
     </Designate>
 </MetaData>

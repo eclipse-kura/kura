@@ -37,6 +37,11 @@ import org.eclipse.milo.opcua.sdk.client.model.types.objects.BaseEventType;
 import org.eclipse.milo.opcua.sdk.client.subscriptions.OpcUaSubscriptionManager;
 import org.eclipse.milo.opcua.stack.core.AttributeId;
 import org.eclipse.milo.opcua.stack.core.Identifiers;
+import org.eclipse.milo.opcua.stack.core.NamespaceTable;
+import org.eclipse.milo.opcua.stack.core.serialization.EncodingLimits;
+import org.eclipse.milo.opcua.stack.core.serialization.SerializationContext;
+import org.eclipse.milo.opcua.stack.core.types.DataTypeManager;
+import org.eclipse.milo.opcua.stack.core.types.OpcUaDataTypeManager;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DateTime;
 import org.eclipse.milo.opcua.stack.core.types.builtin.ExtensionObject;
@@ -60,14 +65,37 @@ public class SubscriptionManager implements SubscriptionListener, ListenerRegist
 
     private static final Logger logger = LoggerFactory.getLogger(SubscriptionManager.class);
     private static final ExtensionObject DEFAULT_EVENT_FILTER = ExtensionObject
-            .encode(new EventFilter(new SimpleAttributeOperand[] {
-                    new SimpleAttributeOperand(Identifiers.BaseEventType,
-                            new QualifiedName[] { new QualifiedName(0, BaseEventType.TIME.getBrowseName()) },
-                            AttributeId.Value.uid(), null),
-                    new SimpleAttributeOperand(Identifiers.BaseEventType,
-                            new QualifiedName[] { new QualifiedName(0, BaseEventType.MESSAGE.getBrowseName()) },
-                            AttributeId.Value.uid(), null) },
-                    new ContentFilter(null)));
+            .encode(new SerializationContext() {
+
+                private final NamespaceTable namespaceTable = new NamespaceTable();
+
+                @Override
+                public EncodingLimits getEncodingLimits() {
+                    return EncodingLimits.DEFAULT;
+                }
+
+                @Override
+                public NamespaceTable getNamespaceTable() {
+                    return namespaceTable;
+                }
+
+                @Override
+                public DataTypeManager getDataTypeManager() {
+                    return OpcUaDataTypeManager.getInstance();
+                }
+
+            },
+                    new EventFilter(
+                            new SimpleAttributeOperand[] {
+                                    new SimpleAttributeOperand(Identifiers.BaseEventType,
+                                            new QualifiedName[] {
+                                                    new QualifiedName(0, BaseEventType.TIME.getBrowseName()) },
+                                            AttributeId.Value.uid(), null),
+                                    new SimpleAttributeOperand(Identifiers.BaseEventType,
+                                            new QualifiedName[] {
+                                                    new QualifiedName(0, BaseEventType.MESSAGE.getBrowseName()) },
+                                            AttributeId.Value.uid(), null) },
+                            new ContentFilter(null)));
 
     private final OpcUaClient client;
     private final OpcUaOptions options;
@@ -201,7 +229,7 @@ public class SubscriptionManager implements SubscriptionListener, ListenerRegist
         protected CompletableFuture<Void> createMonitoredItems(final UaSubscription subscription,
                 final List<MonitoredItemHandler> handlers) {
             final List<MonitoredItemCreateRequest> requests = handlers.stream()
-                    .map(handler -> handler.getMonitoredItemCreateRequest(client.nextRequestHandle()))
+                    .map(handler -> handler.getMonitoredItemCreateRequest(subscription.getSubscriptionId()))
                     .collect(Collectors.toList());
 
             logger.debug("Creating {} monitored items", handlers.size());

@@ -52,7 +52,7 @@
 
 		<AD
 			id="password"
-			name="Password of the user"
+			name="%password"
 			description="%passwordDesc"
 			type="Password"
 			cardinality="1"

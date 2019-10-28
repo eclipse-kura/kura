@@ -925,12 +925,32 @@ fi]]>
 			<!-- additional configs -->
 			<entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.felix.fileinstall_${org.apache.felix.fileinstall.version}.jar@3:start" />
-            <entry key="osgi.bundles" operation="+"
-                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.driver.opcua.provider_${org.eclipse.kura.driver.opcua.provider.version}.jar@4:start" />
 			<entry key="osgi.bundles" operation="+"
 			    value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.driver.s7plc.provider_${org.eclipse.kura.driver.s7plc.provider.version}.jar@4:start" />
             <entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.protocol.modbus_${org.eclipse.kura.protocol.modbus.version}.jar@4:start" />
+			<entry key="osgi.bundles" operation="+"
+			    value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.driver.opcua.provider_${org.eclipse.kura.driver.opcua.provider.version}.jar@4:start" />
+			<entry key="osgi.bundles" operation="+"
+			    value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.milo.bsd-parser-core_${org.eclipse.milo.version}.jar@4:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.milo.bsd-parser-gson_${org.eclipse.milo.version}.jar@4:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.milo.sdk-client_${org.eclipse.milo.version}.jar@4:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.milo.sdk-core_${org.eclipse.milo.version}.jar@4:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.milo.stack-client_${org.eclipse.milo.version}.jar@4:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.milo.stack-core_${org.eclipse.milo.version}.jar@4:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/com.digitalpetri.fsm.strict-machine_${strict-machine.version}.jar@4:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/com.digitalpetri.netty.channel-fsm_${netty-channel-fsm.version}.jar@4:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/bcpkix_${org.bouncycastle.version}.jar@4:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/bcprov_${org.bouncycastle.version}.jar@4:start" />
 		</propertyfile>
 	</target>
 	<!-- OSGi java9 configs -->

@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.milo.opcua.stack.core.UaException;
-import org.eclipse.milo.opcua.stack.core.application.CertificateValidator;
+import org.eclipse.milo.opcua.stack.core.security.CertificateValidator;
 import org.eclipse.milo.opcua.stack.core.util.CertificateValidationUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

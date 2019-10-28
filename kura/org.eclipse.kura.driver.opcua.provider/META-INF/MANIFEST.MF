@@ -43,12 +43,7 @@ Import-Package: com.google.common.base,
  org.xml.sax
 Service-Component: OSGI-INF/*.xml
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Bundle-ClassPath: .,
- lib/jool.jar,
- lib/jsr305.jar,
- lib/sdk-client.jar,
- lib/sdk-core.jar,
- lib/stack-client.jar,
- lib/stack-core.jar,
- lib/bsd-parser-core.jar,
- lib/bsd-parser-gson.jar
+Require-Bundle: org.eclipse.milo.sdk-client,
+ org.eclipse.milo.stack-core,
+ org.eclipse.milo.stack-client,
+ org.eclipse.milo.sdk-core

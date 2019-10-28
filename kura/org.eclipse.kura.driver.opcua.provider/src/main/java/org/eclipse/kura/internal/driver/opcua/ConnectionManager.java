@@ -15,7 +15,6 @@ import static org.eclipse.kura.internal.driver.opcua.Utils.fillStatus;
 import static org.eclipse.kura.internal.driver.opcua.Utils.runSafe;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -32,7 +31,8 @@ import org.eclipse.milo.opcua.sdk.client.OpcUaClient;
 import org.eclipse.milo.opcua.sdk.client.api.UaClient;
 import org.eclipse.milo.opcua.sdk.client.api.config.OpcUaClientConfig;
 import org.eclipse.milo.opcua.sdk.client.api.config.OpcUaClientConfigBuilder;
-import org.eclipse.milo.opcua.stack.client.UaTcpStackClient;
+import org.eclipse.milo.opcua.stack.client.DiscoveryClient;
+import org.eclipse.milo.opcua.stack.core.UaException;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.eclipse.milo.opcua.stack.core.types.builtin.StatusCode;
@@ -85,7 +85,7 @@ public class ConnectionManager {
 
         logger.debug("Fetching endpoint list for: {}", endpointString);
 
-        return UaTcpStackClient.getEndpoints(endpointString)
+        return DiscoveryClient.getEndpoints(endpointString)
                 .thenCompose(endpoints -> tryConnectToEndpoints(options, endpoints)) //
                 .thenApply(client -> new ConnectionManager((OpcUaClient) client, options, failureHandler, registrations,
                         subtreeListenerRegistrations)) //
@@ -191,7 +191,7 @@ public class ConnectionManager {
         return endPointBuilder.toString();
     }
 
-    private static void dumpEndpoints(final String message, final EndpointDescription[] availableEndpoints) {
+    private static void dumpEndpoints(final String message, final List<EndpointDescription> availableEndpoints) {
         if (logger.isDebugEnabled()) {
             for (final EndpointDescription desc : availableEndpoints) {
                 logger.debug("{}: {}", message, desc.getEndpointUrl());
@@ -204,7 +204,7 @@ public class ConnectionManager {
     }
 
     private static CompletableFuture<UaClient> tryConnectToEndpoints(final OpcUaOptions options,
-            final EndpointDescription[] availableEndpoints) {
+            final List<EndpointDescription> availableEndpoints) {
 
         dumpEndpoints("found endpoint", availableEndpoints);
 
@@ -239,10 +239,10 @@ public class ConnectionManager {
     }
 
     private static List<EndpointDescription> filterEndpoints(final OpcUaOptions options,
-            final EndpointDescription[] availableEndpoints) {
+            final List<EndpointDescription> availableEndpoints) {
 
-        return Arrays.stream(availableEndpoints)
-                .filter(e -> e.getSecurityPolicyUri().equals(options.getSecurityPolicy().getSecurityPolicyUri()))
+        return availableEndpoints.stream()
+                .filter(e -> e.getSecurityPolicyUri().equals(options.getSecurityPolicy().getUri()))
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
@@ -295,7 +295,13 @@ public class ConnectionManager {
                     .setKeyPair(certificateManager.getClientKeyPair())
                     .setCertificate(certificateManager.getClientCertificate()).build();
 
-            final OpcUaClient cl = new OpcUaClient(clientConfigBuilder.build());
+            OpcUaClient cl = null;
+            try {
+                cl = OpcUaClient.create(clientConfigBuilder.build());
+            } catch (UaException e) {
+                future.completeExceptionally(
+                        e);
+            }
 
             cl.connect() //
                     .whenComplete((c, err) -> {

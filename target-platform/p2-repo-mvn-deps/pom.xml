@@ -1083,8 +1083,63 @@
                   <transitive>false</transitive>
               </artifact>                 
               <artifact>
-                   <id>com.eclipsesource.minimal-json:minimal-json:jar:${com.eclipsesource.minimal-json.version}</id>
-                   <source>true</source>
+                  <id>com.eclipsesource.minimal-json:minimal-json:jar:${com.eclipsesource.minimal-json.version}</id>
+                  <source>true</source>
+                  <transitive>false</transitive>
+              </artifact>
+              <artifact>
+                  <id>org.eclipse.milo:bsd-parser-core:jar:${org.eclipse.milo.version}</id>
+                  <source>true</source>
+                  <transitive>false</transitive>
+              </artifact>
+              <artifact>
+                  <id>org.eclipse.milo:bsd-parser-gson:jar:${org.eclipse.milo.version}</id>
+                  <source>true</source>
+                  <transitive>false</transitive>
+              </artifact>
+              <artifact>
+                  <id>org.eclipse.milo:sdk-client:jar:${org.eclipse.milo.version}</id>
+                  <source>true</source>
+                  <transitive>false</transitive>
+              </artifact>
+              <artifact>
+                  <id>org.eclipse.milo:sdk-core:jar:${org.eclipse.milo.version}</id>
+                  <source>true</source>
+                  <transitive>false</transitive>
+              </artifact>
+              <artifact>
+                  <id>org.eclipse.milo:stack-client:jar:${org.eclipse.milo.version}</id>
+                  <source>true</source>
+                  <transitive>false</transitive>
+              </artifact>
+              <artifact>
+                  <id>org.eclipse.milo:stack-core:jar:${org.eclipse.milo.version}</id>
+                  <source>true</source>
+                  <transitive>false</transitive>
+              </artifact>
+              <artifact>
+                  <id>org.jooq:jool:jar:${org.jooq.jool.version}</id>
+                  <source>true</source>
+                  <transitive>false</transitive>
+              </artifact>
+              <artifact>
+                  <id>com.digitalpetri.fsm:strict-machine:jar:${strict-machine-mvn.version}</id>
+                  <source>true</source>
+                  <transitive>false</transitive>
+              </artifact>
+              <artifact>
+                  <id>com.digitalpetri.netty:netty-channel-fsm:jar:${netty-channel-fsm-mvn.version}</id>
+                  <source>true</source>
+                  <transitive>false</transitive>
+              </artifact>
+              <artifact>
+                  <id>org.bouncycastle:bcpkix-jdk15on:jar:${org.bouncycastle-mvn.version}</id>
+                  <source>true</source>
+                  <transitive>false</transitive>
+              </artifact>
+              <artifact>
+                  <id>org.bouncycastle:bcprov-jdk15on:jar:${org.bouncycastle-mvn.version}</id>
+                  <source>true</source>
                   <transitive>false</transitive>
               </artifact>
 	       </artifacts>

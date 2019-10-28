@@ -33,6 +33,8 @@ import javax.servlet.http.HttpSession;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.metatype.AD;
+import org.eclipse.kura.configuration.metatype.Icon;
+import org.eclipse.kura.configuration.metatype.OCD;
 import org.eclipse.kura.configuration.metatype.OCDService;
 import org.eclipse.kura.configuration.metatype.Option;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
@@ -44,6 +46,7 @@ import org.eclipse.kura.internal.wire.asset.WireAssetChannelDescriptor;
 import org.eclipse.kura.internal.wire.asset.WireAssetOCD;
 import org.eclipse.kura.locale.LocaleContextHolder;
 import org.eclipse.kura.web.server.util.GwtServerUtil;
+import org.eclipse.kura.web.server.util.KuraExceptionHandler;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.session.Attributes;
 import org.eclipse.kura.web.shared.FilterUtil;
@@ -61,6 +64,7 @@ import org.eclipse.kura.web.shared.model.GwtWireGraph;
 import org.eclipse.kura.web.shared.model.GwtWireGraphConfiguration;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtWireGraphService;
+import org.eclipse.kura.wire.WireHelperService;
 import org.eclipse.kura.wire.graph.MultiportWireConfiguration;
 import org.eclipse.kura.wire.graph.WireComponentConfiguration;
 import org.eclipse.kura.wire.graph.WireComponentDefinition;
@@ -80,6 +84,8 @@ import org.slf4j.LoggerFactory;
  */
 public final class GwtWireGraphServiceImpl extends OsgiRemoteServiceServlet implements GwtWireGraphService {
 
+    private static final String DRIVER_PID = "driver.pid";
+    private static final String SERVICE_FACTORY_PID = "service.factoryPid";
     private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
 
     private static final ComponentConfiguration WIRE_ASSET_OCD_CONFIG = new ComponentConfigurationImpl(
@@ -507,7 +513,183 @@ public final class GwtWireGraphServiceImpl extends OsgiRemoteServiceServlet impl
         final GwtWireComposerStaticInfo staticInfo = getWireComposerStaticInfoInternal();
         final GwtWireGraphConfiguration wireGraphConfiguration = getWiresConfigurationInternal();
 
+        List<GwtConfigComponent> gwtConfigs = new ArrayList<>();
+        try {
+
+            List<ComponentConfiguration> configs = ServiceLocator.applyToServiceOptionally(ConfigurationService.class,
+                    ConfigurationService::getComponentConfigurations);
+            for (ComponentConfiguration config : configs) {
+                if (wireGraphConfiguration.getAllActivePids().stream().anyMatch(a -> a.equals(config.getPid())))
+                    continue;
+                if (config.getConfigurationProperties().get(ConfigurationService.KURA_SERVICE_PID) == null)
+                    continue;
+                final Object factoryPid = config.getConfigurationProperties()
+                        .get(ConfigurationAdmin.SERVICE_FACTORYPID);
+                ComponentConfiguration facroryconfig = null;
+                if (factoryPid == null)
+                    continue;
+
+                facroryconfig = ServiceLocator.applyToServiceOptionally(ConfigurationService.class,
+                        cs -> cs.getDefaultComponentConfiguration((String) factoryPid));
+                if (facroryconfig == null || facroryconfig.getDefinition() == null)
+                    auditLogger.info("configs:{}", config);
+                else if (config.getDefinition() == null)
+                    ((ComponentConfigurationImpl) config).setDefinition((Tocd) facroryconfig.getDefinition());
+                if (config.getDefinition() != null) {
+                    GwtConfigComponent gwtConfigComponent = createMetatypeOnlyGwtComponentConfiguration(config);
+
+                    if (gwtConfigComponent != null) {
+                        if (staticInfo.getComponentDefinitions().stream()
+                                .anyMatch(def -> def.getComponentId().equals(factoryPid) && def.isDriver()))
+                            gwtConfigComponent.setIsDriver(true);
+                        gwtConfigs.add(gwtConfigComponent);
+                    } else {
+                        ServiceLocator.withAllServices(ConfigurationService.class, null,
+                                cs -> cs.deleteFactoryConfiguration(config.getPid(), true));
+                        auditLogger.warn("delete unsue conponent:{}", config);
+                    }
+                } else {
+                    ServiceLocator.withAllServices(ConfigurationService.class, null,
+                            cs -> cs.deleteFactoryConfiguration(config.getPid(), true));
+                    auditLogger.warn("delete unsue conponent:{}", config);
+                }
+            }
+            if (!gwtConfigs.isEmpty())
+                wireGraphConfiguration.getAdditionalConfigurations().addAll(gwtConfigs);
+        } catch (Exception e) {
+
+            KuraExceptionHandler.handle(e);
+        }
+
         return new GwtWireGraph(staticInfo, wireGraphConfiguration);
+    }
+
+    private GwtConfigComponent createMetatypeOnlyGwtComponentConfiguration(ComponentConfiguration config)
+            throws GwtKuraException {
+        final GwtConfigComponent gwtConfig = createMetatypeOnlyGwtComponentConfigurationInternal(config);
+        if (gwtConfig != null) {
+            gwtConfig.setIsWireComponent(ServiceLocator.applyToServiceOptionally(WireHelperService.class,
+                    wireHelperService -> wireHelperService.getServicePid(gwtConfig.getComponentName()) != null));
+        }
+        return gwtConfig;
+    }
+
+    private GwtConfigComponent createMetatypeOnlyGwtComponentConfigurationInternal(ComponentConfiguration config) {
+        GwtConfigComponent gwtConfig = null;
+
+        OCD ocd = config.getLocalizedDefinition(LocaleContextHolder.getLocale().getLanguage());
+        if (ocd != null) {
+
+            gwtConfig = new GwtConfigComponent();
+            gwtConfig.setComponentId(config.getPid());
+
+            Map<String, Object> props = config.getConfigurationProperties();
+            if (props != null && props.get(DRIVER_PID) != null) {
+                gwtConfig.set(DRIVER_PID, props.get(DRIVER_PID));
+            }
+
+            if (props != null && props.get(SERVICE_FACTORY_PID) != null) {
+                String name = ocd.getName();
+                if (props.containsKey("name"))
+                    name = (String) props.get("name");
+                if (name == null || name.equals(""))
+                    name = stripPidPrefix(config.getPid());
+                gwtConfig.setComponentName(name);
+                gwtConfig.setFactoryComponent(true);
+                gwtConfig.setFactoryPid(String.valueOf(props.get(ConfigurationAdmin.SERVICE_FACTORYPID)));
+            } else {
+                gwtConfig.setComponentName(ocd.getName());
+                gwtConfig.setFactoryComponent(false);
+            }
+            String descCription = "";
+            if (props.containsKey("componentDescription"))
+                descCription = (String) props.get("componentDescription");
+            if (descCription == null || descCription.equals(""))
+                gwtConfig.setComponentDescription(ocd.getDescription());
+            else
+                gwtConfig.setComponentDescription(descCription);
+            if (ocd.getIcon() != null && !ocd.getIcon().isEmpty()) {
+                Icon icon = ocd.getIcon().get(0);
+                gwtConfig.setComponentIcon(icon.getResource());
+            }
+
+            List<GwtConfigParameter> gwtParams = new ArrayList<>();
+            gwtConfig.setParameters(gwtParams);
+
+            if (config.getConfigurationProperties() != null) {
+                List<GwtConfigParameter> metatypeProps = getADProperties(config);
+                gwtParams.addAll(metatypeProps);
+            }
+        }
+        return gwtConfig;
+    }
+
+    private List<GwtConfigParameter> getADProperties(ComponentConfiguration config) {
+        List<GwtConfigParameter> gwtParams = new ArrayList<>();
+        OCD ocd = config.getLocalizedDefinition(LocaleContextHolder.getLocale().getLanguage());
+        for (AD ad : ocd.getAD()) {
+            GwtConfigParameter gwtParam = new GwtConfigParameter();
+            gwtParam.setId(ad.getId());
+            gwtParam.setName(ad.getName());
+            gwtParam.setDescription(ad.getDescription());
+            gwtParam.setType(GwtConfigParameterType.valueOf(ad.getType().name()));
+            gwtParam.setRequired(ad.isRequired());
+            gwtParam.setCardinality(ad.getCardinality());
+            if (ad.getOption() != null && !ad.getOption().isEmpty()) {
+                Map<String, String> options = new HashMap<>();
+                for (Option option : ad.getOption()) {
+                    options.put(option.getLabel(), option.getValue());
+                }
+                gwtParam.setOptions(options);
+            }
+            gwtParam.setMin(ad.getMin());
+            gwtParam.setMax(ad.getMax());
+
+            // handle the value based on the cardinality of the attribute
+            int cardinality = ad.getCardinality();
+            Object value = config.getConfigurationProperties().get(ad.getId());
+            if (value != null) {
+                if (cardinality == 0 || cardinality == 1 || cardinality == -1) {
+                    if (gwtParam.getType().equals(GwtConfigParameterType.PASSWORD)) {
+                        gwtParam.setValue(GwtServerUtil.PASSWORD_PLACEHOLDER);
+                    } else {
+                        gwtParam.setValue(String.valueOf(value));
+                    }
+                } else {
+                    // this could be an array value
+                    if (value instanceof Object[]) {
+                        Object[] objValues = (Object[]) value;
+                        List<String> strValues = new ArrayList<>();
+                        for (Object v : objValues) {
+                            if (v != null) {
+                                if (gwtParam.getType().equals(GwtConfigParameterType.PASSWORD)) {
+                                    strValues.add(GwtServerUtil.PASSWORD_PLACEHOLDER);
+                                } else {
+                                    strValues.add(String.valueOf(v));
+                                }
+                            }
+                        }
+                        gwtParam.setValues(strValues.toArray(new String[] {}));
+                    }
+                }
+            }
+            gwtParams.add(gwtParam);
+        }
+        return gwtParams;
+    }
+
+    private String stripPidPrefix(String pid) {
+        int start = pid.lastIndexOf('.');
+        if (start < 0) {
+            return pid;
+        } else {
+            int begin = start + 1;
+            if (begin < pid.length()) {
+                return pid.substring(begin);
+            } else {
+                return pid;
+            }
+        }
     }
 
 }

@@ -78,7 +78,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
     @Override
     public void visit(NetworkConfiguration config) throws KuraException {
         if (this.executorService == null) {
-            throw new KuraProcessExecutionErrorException("The CommandExecutorService cannot be null");
+            throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, "The CommandExecutorService cannot be null");
         }
 
         List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = config

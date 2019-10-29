@@ -49,6 +49,9 @@ public class LinuxWriteVisitor implements NetworkConfigurationVisitor {
             visitor.setExecutorService(this.executorService);
             visitor.visit(config);
         }
+
+        // After every visit, unset the executorService. This must be set before every call.
+        this.executorService = null;
     }
 
     @Override

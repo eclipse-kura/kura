@@ -38,14 +38,12 @@ public class UsbModemDriver {
 
     public int install(CommandExecutorService executorService) {
         logger.info("installing driver: {}", this.name);
-        return (Integer) executorService.execute(new Command(new String[] { "modprobe", this.name })).getExitStatus()
-                .getExitValue();
+        return manageDriver(executorService, "modprobe");
     }
 
     public int remove(CommandExecutorService executorService) {
         logger.info("removing driver: {}", this.name);
-        return (Integer) executorService.execute(new Command(new String[] { "rmmod", this.name })).getExitStatus()
-                .getExitValue();
+        return manageDriver(executorService, "rmmod");
     }
 
     public String getName() {
@@ -100,5 +98,10 @@ public class UsbModemDriver {
 
             context.ungetService(reference);
         }
+    }
+
+    private Integer manageDriver(CommandExecutorService executorService, String command) {
+        return (Integer) executorService.execute(new Command(new String[] { command, this.name })).getExitStatus()
+                .getExitValue();
     }
 }

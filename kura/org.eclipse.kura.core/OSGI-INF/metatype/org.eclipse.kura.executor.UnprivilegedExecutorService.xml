@@ -15,7 +15,7 @@
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
     <OCD id="org.eclipse.kura.executor.UnprivilegedExecutorService"
          name="UnprivilegedExecutorService"
-         description="The UnprivilegedExecutorService is responsible to execute command on the system with a specific user.">
+         description="The UnprivilegedExecutorService is responsible to execute commands on the system with a specific and limited user.">
 
         <AD id="command.username"
             name="command.username"

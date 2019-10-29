@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.core.net.AbstractNetInterface;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
 import org.eclipse.kura.core.net.WifiInterfaceConfigImpl;
@@ -30,29 +29,29 @@ import org.slf4j.LoggerFactory;
 
 public class WifiConfigWriter implements NetworkConfigurationVisitor {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(WifiConfigWriter.class);
+    private static final Logger logger = LoggerFactory.getLogger(WifiConfigWriter.class);
 
-    private static WifiConfigWriter s_instance;
-
-    private final List<NetworkConfigurationVisitor> m_visitors;
+    private static WifiConfigWriter wifiConfigWriterInstance;
+    private final List<NetworkConfigurationVisitor> visitors;
+    private CommandExecutorService executorService;
 
     private WifiConfigWriter() {
-        this.m_visitors = new ArrayList<NetworkConfigurationVisitor>();
-        this.m_visitors.add(WpaSupplicantConfigWriter.getInstance());
-        this.m_visitors.add(HostapdConfigWriter.getInstance());
+        this.visitors = new ArrayList<>();
+        this.visitors.add(WpaSupplicantConfigWriter.getInstance());
+        this.visitors.add(HostapdConfigWriter.getInstance());
     }
 
     public static WifiConfigWriter getInstance() {
-        if (s_instance == null) {
-            s_instance = new WifiConfigWriter();
+        if (wifiConfigWriterInstance == null) {
+            wifiConfigWriterInstance = new WifiConfigWriter();
         }
 
-        return s_instance;
+        return wifiConfigWriterInstance;
     }
 
     @Override
     public void setExecutorService(CommandExecutorService executorService) {
-        // Not needed
+        this.executorService = executorService;
     }
 
     @Override
@@ -67,27 +66,31 @@ public class WifiConfigWriter implements NetworkConfigurationVisitor {
         }
 
         // Write wpa_supplicant and hostapd configs
-        for (NetworkConfigurationVisitor visitor : this.m_visitors) {
+        for (NetworkConfigurationVisitor visitor : this.visitors) {
+            visitor.setExecutorService(this.executorService);
             visitor.visit(config);
         }
+
+        // After every visit, unset the executorService. This must be set before every call.
+        this.executorService = null;
     }
 
     // Write common wifi config
     private void writeConfig(WifiInterfaceConfigImpl wifiInterfaceConfig) throws KuraException {
         String interfaceName = wifiInterfaceConfig.getName();
-        s_logger.debug("Writing wifi config for {}", interfaceName);
+        logger.debug("Writing wifi config for {}", interfaceName);
 
-        WifiInterfaceAddressConfig wifiInterfaceAddressConfig = (WifiInterfaceAddressConfig) ((AbstractNetInterface<?>) wifiInterfaceConfig)
+        WifiInterfaceAddressConfig wifiInterfaceAddressConfig = (WifiInterfaceAddressConfig) (wifiInterfaceConfig)
                 .getNetInterfaceAddressConfig();
 
         // Store the selected wifi mode
         WifiMode wifiMode = wifiInterfaceAddressConfig.getMode();
-        s_logger.debug("Store wifiMode: {}", wifiMode);
+        logger.debug("Store wifiMode: {}", wifiMode);
         StringBuilder key = new StringBuilder("net.interface." + interfaceName + ".config.wifi.mode");
         try {
             KuranetConfig.setProperty(key.toString(), wifiMode.toString());
         } catch (Exception e) {
-            s_logger.error("Failed to save kuranet config", e);
+            logger.error("Failed to save kuranet config", e);
             throw KuraException.internalError(e);
         }
     }

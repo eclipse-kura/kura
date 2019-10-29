@@ -171,38 +171,30 @@ public class SystemAdminServiceImpl extends SuperSystemService implements System
 
     @Override
     public void reboot() {
-        Command command;
         if (OS_LINUX.equals(getOsName()) || OS_MAC_OSX.equals(getOsName())) {
-            String[] cmd = { "reboot" };
-            command = new Command(cmd);
+            executeCommand(new String[] { "reboot" });
         } else if (getOsName().toLowerCase().startsWith(OS_WINDOWS)) {
-            String[] cmd = { "shutdown", "-r" };
-            command = new Command(cmd);
+            executeCommand(new String[] { "shutdown", "-r" });
         } else {
             logger.error("Unsupported OS for reboot()");
-            return;
-        }
-        command.setTimeout(60);
-        CommandStatus status = this.executorService.execute(command);
-        if ((Integer) status.getExitStatus().getExitValue() != 0) {
-            logger.error("failed to issue reboot");
         }
     }
 
     @Override
     public void sync() {
-        Command command;
         if (OS_LINUX.equals(getOsName()) || OS_MAC_OSX.equals(getOsName())) {
-            String[] cmd = { "sync" };
-            command = new Command(cmd);
+            executeCommand(new String[] { "sync" });
         } else {
             logger.error("Unsupported OS for sync()");
-            return;
         }
+    }
+
+    private void executeCommand(String[] cmd) {
+        Command command = new Command(cmd);
         command.setTimeout(60);
         CommandStatus status = this.executorService.execute(command);
         if ((Integer) status.getExitStatus().getExitValue() != 0) {
-            logger.error("failed to issue sync command");
+            logger.error("failed to issue {} command", cmd[0]);
         }
     }
 

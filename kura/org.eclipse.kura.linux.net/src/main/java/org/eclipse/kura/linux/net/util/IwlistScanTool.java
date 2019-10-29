@@ -74,12 +74,9 @@ public class IwlistScanTool implements IScanTool {
         Command ifconfigCommand = new Command(cmdIfconfig);
         ifconfigCommand.setErrorStream(new ByteArrayOutputStream());
         CommandStatus ifconfigCommandStatus = executorService.execute(ifconfigCommand);
-        if ((Integer) ifconfigCommandStatus.getExitStatus().getExitValue() != 0) {
-            if (logger.isErrorEnabled()) {
-                logger.error("failed to execute the {} command {}", String.join(" ", cmdIfconfig),
-                        new String(((ByteArrayOutputStream) ifconfigCommandStatus.getErrorStream()).toByteArray(),
-                                Charsets.UTF_8));
-            }
+        if ((Integer) ifconfigCommandStatus.getExitStatus().getExitValue() != 0 && logger.isErrorEnabled()) {
+            logger.error("failed to execute the {} command {}", String.join(" ", cmdIfconfig), new String(
+                    ((ByteArrayOutputStream) ifconfigCommandStatus.getErrorStream()).toByteArray(), Charsets.UTF_8));
         }
 
         List<WifiAccessPoint> wifiAccessPoints;
@@ -104,7 +101,8 @@ public class IwlistScanTool implements IScanTool {
                         ((ByteArrayOutputStream) iwListCommandStatus.getOutputStream()).toByteArray());
             } else {
                 if (logger.isErrorEnabled()) {
-                    logger.error("scan() :: failed to execute {} error code is {}", String.join(" ", cmdIwList), exitValue);
+                    logger.error("scan() :: failed to execute {} error code is {}", String.join(" ", cmdIwList),
+                            exitValue);
                 }
             }
 

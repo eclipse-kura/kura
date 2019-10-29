@@ -11,9 +11,9 @@
  *******************************************************************************/
 package org.eclipse.kura.core.linux.executor;
 
-import org.eclipse.kura.executor.ExitValue;
+import org.eclipse.kura.executor.ExitStatus;
 
-public class LinuxExitValue implements ExitValue {
+public class LinuxExitValue implements ExitStatus {
 
     private Integer exitValue;
 

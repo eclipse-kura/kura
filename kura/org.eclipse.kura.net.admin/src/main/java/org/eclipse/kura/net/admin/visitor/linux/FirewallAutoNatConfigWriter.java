@@ -18,6 +18,7 @@ import java.util.Properties;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.KuraProcessExecutionErrorException;
 import org.eclipse.kura.core.net.AbstractNetInterface;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
@@ -59,6 +60,9 @@ public class FirewallAutoNatConfigWriter implements NetworkConfigurationVisitor 
 
     @Override
     public void visit(NetworkConfiguration config) throws KuraException {
+        if (this.executorService == null) {
+            throw new KuraProcessExecutionErrorException("The CommandExecutorService cannot be null");
+        }
 
         List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = config
                 .getModifiedNetInterfaceConfigs();

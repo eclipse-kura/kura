@@ -401,7 +401,7 @@ public class BluetoothLeBeaconManagerImpl
 
     @Override
     public void processBTSnoopErrorStream(String string) {
-        // Not used
+        throw new UnsupportedOperationException("Process of BTSnoop error stream is not supported");
     }
 
     private int getScannersCount(String interfaceName) {

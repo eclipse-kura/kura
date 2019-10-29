@@ -80,11 +80,6 @@ public class BluetoothServiceImpl implements BluetoothService {
         }
     }
 
-    // --------------------------------------------------------------------
-    //
-    // Local methods
-    //
-    // --------------------------------------------------------------------
     public static BundleContext getBundleContext() {
         return componentContext.getBundleContext();
     }

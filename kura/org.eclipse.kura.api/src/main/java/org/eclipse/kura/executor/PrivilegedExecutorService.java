@@ -14,8 +14,9 @@ package org.eclipse.kura.executor;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
- * This is a marker interface for the {@link CommandExecutorService}. It'd be used for running commands or starting
- * processes by a privileged user.
+ * This is a marker interface for the {@link CommandExecutorService}. It provides methods for starting system processes
+ * or executing system commands using a privileged user. The privileged user is the same that started Kura, so this
+ * interface provides the highest available level of permissions.
  *
  * @noimplement This interface is not intended to be implemented by clients.
  */

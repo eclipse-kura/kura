@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
 public class ExecutorUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(ExecutorUtil.class);
-    private static final String COMMAND = "Command ";
+    private static final String COMMAND_MESSAGE = "Command ";
     private static final String FAILED_TO_GET_PID_MESSAGE = "Failed to get pid for command '{}'";
     private static final File TEMP_DIR = new File(System.getProperty("java.io.tmpdir"));
 
@@ -230,10 +230,10 @@ public class ExecutorUtil {
             }
         } catch (ExecuteException e) {
             exitStatus = e.getExitValue();
-            logger.debug(COMMAND + commandLine + " returned error code " + exitStatus, e);
+            logger.debug(COMMAND_MESSAGE + " {} returned error code {}", commandLine, exitStatus, e);
         } catch (IOException e) {
             exitStatus = 1;
-            logger.error(COMMAND + commandLine + " failed", e);
+            logger.error(COMMAND_MESSAGE + " {} failed", commandLine, e);
         } finally {
             commandStatus.setExitStatus(new LinuxExitValue(exitStatus));
             commandStatus.setTimedout(executor.getWatchdog().killedProcess());
@@ -293,7 +293,7 @@ public class ExecutorUtil {
             }
         } catch (IOException e) {
             commandStatus.setExitStatus(new LinuxExitValue(1));
-            logger.error(COMMAND + commandLine + " failed", e);
+            logger.error(COMMAND_MESSAGE + commandLine + " failed", e);
         }
     }
 

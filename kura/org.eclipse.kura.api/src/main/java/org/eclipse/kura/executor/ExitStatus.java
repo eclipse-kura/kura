@@ -14,13 +14,18 @@ package org.eclipse.kura.executor;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
- * This interface provides a method to retrieve the exit value of a system commands.
+ * This interface provides a method to retrieve the exit status of a system commands.
  *
  * @noimplement This interface is not intended to be implemented by clients.
  */
 @ProviderType
-public interface ExitValue {
+public interface ExitStatus {
 
+    /**
+     * Return a value representing the exit status of a command or process
+     * 
+     * @return an object that represents the exit status
+     */
     public Object getExitValue();
 
 }

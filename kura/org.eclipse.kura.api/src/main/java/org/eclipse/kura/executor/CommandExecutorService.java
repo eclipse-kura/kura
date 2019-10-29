@@ -49,8 +49,9 @@ public interface CommandExecutorService {
      * @param pid
      *            the {@link Pid} of the process to be stopped
      * @param signal
-     *            the {@link Signal} send to the process to stop it. If null, a default signal will be send
-     * @return true if the stop was succeeded
+     *            the {@link Signal} sent to the process to stop it. If null, a default signal will be sent.
+     *            The type of the default signal is implementation specific
+     * @return a boolean value that is true if the stop operation succeeded
      */
     public boolean stop(Pid pid, Signal signal);
 
@@ -61,8 +62,9 @@ public interface CommandExecutorService {
      * @param commandLine
      *            the command to be killed
      * @param signal
-     *            the {@link Signal} sent to the command to kill it. If null, a default signal will be sent
-     * @return true if the kill was succeeded
+     *            the {@link Signal} sent to the command to kill it. If null, a default signal will be sent.
+     *            The type of the default signal is implementation specific
+     * @return a boolean value that is true if the kill operation succeeded
      */
     public boolean kill(String[] commandLine, Signal signal);
 
@@ -71,7 +73,7 @@ public interface CommandExecutorService {
      * 
      * @param pid
      *            the {@link Pid} object of the process
-     * @return true if the process is running, false otherwise
+     * @return a boolean value that is true if the process is running
      */
     public boolean isRunning(Pid pid);
 
@@ -81,7 +83,7 @@ public interface CommandExecutorService {
      * 
      * @param commandLine
      *            the command to be checked
-     * @return true if the command is running, false otherwise
+     * @return a boolean value that is true if the command is running
      */
     public boolean isRunning(String[] commandLine);
 

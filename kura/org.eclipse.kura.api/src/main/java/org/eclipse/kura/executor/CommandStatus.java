@@ -23,7 +23,7 @@ import org.apache.commons.io.output.NullOutputStream;
  * <p>
  * The parameters are the following:
  * <ul>
- * <li>exitStatus : the {@link ExitValue} of the command. A value other than 0 means an error. When the command is
+ * <li>exitStatus : the {@link ExitStatus} of the command. A value other than 0 means an error. When the command is
  * stopped by timeout the exit value is 124.</li>
  * <li>isTimedout : a flag that signals that the command was stopped by timeout</li>
  * <li>outputStream : the output of the command</li>
@@ -34,24 +34,24 @@ import org.apache.commons.io.output.NullOutputStream;
  */
 public class CommandStatus {
 
-    private ExitValue exitStatus;
+    private ExitStatus exitStatus;
     private OutputStream outputStream;
     private OutputStream errorStream;
     private InputStream inputStream;
     private boolean isTimedout;
 
-    public CommandStatus(ExitValue exitStatus) {
+    public CommandStatus(ExitStatus exitStatus) {
         this.exitStatus = exitStatus;
         this.outputStream = new NullOutputStream();
         this.errorStream = new NullOutputStream();
         this.isTimedout = false;
     }
 
-    public ExitValue getExitStatus() {
+    public ExitStatus getExitStatus() {
         return this.exitStatus;
     }
 
-    public void setExitStatus(ExitValue exitStatus) {
+    public void setExitStatus(ExitStatus exitStatus) {
         this.exitStatus = exitStatus;
     }
 

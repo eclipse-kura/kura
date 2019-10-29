@@ -44,16 +44,16 @@ public class LinuxReadVisitor implements NetworkConfigurationVisitor {
     }
 
     @Override
-    public void setExecutorService(CommandExecutorService executorService) {
-        this.executorService = executorService;
-    }
-
-    @Override
     public void visit(NetworkConfiguration config) throws KuraException {
         for (NetworkConfigurationVisitor visitor : this.visitors) {
             visitor.setExecutorService(this.executorService);
             visitor.visit(config);
         }
+    }
+
+    @Override
+    public void setExecutorService(CommandExecutorService executorService) {
+        this.executorService = executorService;
     }
 
 }

@@ -222,7 +222,14 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
     protected void addConfigurableComponent(final ServiceReference<ConfigurableComponent> reference) {
 
-        final String servicePid = makeString(reference.getProperty(Constants.SERVICE_PID));
+        Object serviceIds = reference.getProperty(Constants.SERVICE_PID);
+        String servicePid = makeString(serviceIds);
+        if (serviceIds instanceof List) {
+            @SuppressWarnings("unchecked")
+            List<String> servicePids = (List<String>) serviceIds;
+            if (servicePids.size() > 1)
+                servicePid = servicePids.get(servicePids.size() - 1);
+        }
 
         if (servicePid == null) {
             return;

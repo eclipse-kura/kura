@@ -159,7 +159,7 @@ public class DhcpClientManager {
             sb.append(interfaceName);
             sb.append(' ');
             if (usePidFile) {
-            	sb.append("-p ");
+                sb.append("-p ");
                 sb.append(getPidFilename(interfaceName));
                 sb.append(' ');
             }

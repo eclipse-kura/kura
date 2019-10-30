@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -12,81 +12,88 @@
 package org.eclipse.kura.linux.net.wifi;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.core.linux.util.LinuxProcessUtil;
+import org.eclipse.kura.core.linux.executor.LinuxSignal;
+import org.eclipse.kura.executor.Command;
+import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
+import org.eclipse.kura.executor.Pid;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
-import org.eclipse.kura.net.wifi.WifiMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class WpaSupplicantManager {
 
+    private static final String WPA_SUPPLICANT = "wpa_supplicant";
+
     private static Logger logger = LoggerFactory.getLogger(WpaSupplicantManager.class);
 
     private static final File TEMP_CONFIG_FILE = new File("/tmp/wpa_supplicant.conf");
 
-    private static String supplicantDriver = null;
+    private String supplicantDriver = null;
+    private final CommandExecutorService executorService;
+    private final LinuxNetworkUtil linuxNetworkUtil;
+    private final WifiOptions wifiOptions;
 
-    private WpaSupplicantManager() {
+    public WpaSupplicantManager(CommandExecutorService executorService) {
+        this.linuxNetworkUtil = new LinuxNetworkUtil(executorService);
+        this.wifiOptions = new WifiOptions(executorService);
+        this.executorService = executorService;
     }
 
-    public static void start(String interfaceName, final WifiMode mode, String driver) throws KuraException {
-        start(interfaceName, mode, driver, new File(getWpaSupplicantConfigFilename(interfaceName)));
+    public void start(String interfaceName, String driver) throws KuraException {
+        start(interfaceName, driver, new File(getWpaSupplicantConfigFilename(interfaceName)));
     }
 
-    public static void startTemp(String interfaceName, final WifiMode mode, String driver) throws KuraException {
-        start(interfaceName, mode, driver, TEMP_CONFIG_FILE);
+    public void startTemp(String interfaceName, String driver) throws KuraException {
+        start(interfaceName, driver, TEMP_CONFIG_FILE);
     }
 
-    private static synchronized void start(String interfaceName, final WifiMode mode, String driver, File configFile)
-            throws KuraException {
+    private synchronized void start(String interfaceName, String driver, File configFile) throws KuraException {
         logger.debug("enable WPA Supplicant");
 
         try {
-            if (WpaSupplicantManager.isRunning(interfaceName)) {
+            if (isRunning(interfaceName)) {
                 stop(interfaceName);
             }
 
             String drv = getDriver(interfaceName);
             if (drv != null) {
-
-                supplicantDriver = drv;
+                this.supplicantDriver = drv;
             } else {
-                supplicantDriver = driver;
+                this.supplicantDriver = driver;
             }
 
             // start wpa_supplicant
-            String wpaSupplicantCommand = formSupplicantStartCommand(interfaceName, configFile);
+            String[] wpaSupplicantCommand = formSupplicantStartCommand(interfaceName, configFile);
             logger.info("starting wpa_supplicant for the {} interface -> {}", interfaceName, wpaSupplicantCommand);
-            int stat = LinuxProcessUtil.start(wpaSupplicantCommand);
-            if (stat != 0 && stat != 255) {
+            Command command = new Command(wpaSupplicantCommand);
+            command.setTimeout(60);
+            CommandStatus status = this.executorService.execute(command);
+            int exitValue = (Integer) status.getExitStatus().getExitValue();
+            if (exitValue != 0 && exitValue != 255) {
                 logger.error("failed to start wpa_supplicant for the {} interface for unknown reason - errorCode={}",
-                        interfaceName, stat);
-                throw KuraException.internalError("failed to start hostapd for unknown reason");
+                        interfaceName, exitValue);
+                throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, "failed to start hostapd for unknown reason");
             }
         } catch (Exception e) {
             logger.error("Exception while enabling WPA Supplicant!", e);
-            throw KuraException.internalError(e);
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, "Exception while enabling WPA Supplicant!");
         }
     }
 
     /*
      * This method forms wpa_supplicant start command
      */
-    private static String formSupplicantStartCommand(String ifaceName, File configFile) {
-        StringBuilder sb = new StringBuilder();
-
-        sb.append("wpa_supplicant -B -D ");
-        sb.append(supplicantDriver);
-        sb.append(" -i ");
-        sb.append(ifaceName);
-        sb.append(" -c ");
-        sb.append(configFile);
-
-        return sb.toString();
+    private String[] formSupplicantStartCommand(String ifaceName, File configFile) {
+        return new String[] { WPA_SUPPLICANT, "-B", "-D", this.supplicantDriver, "-i", ifaceName, "-c",
+                configFile.getAbsolutePath() };
     }
 
     /**
@@ -94,38 +101,23 @@ public class WpaSupplicantManager {
      *
      * @return {@link boolean}
      */
-    public static boolean isRunning(String ifaceName) throws KuraException {
-        try {
-            boolean ret = false;
-            if (getPid(ifaceName) > 0) {
-                ret = true;
-            }
-            logger.trace("isRunning() :: --> {}", ret);
-            return ret;
-        } catch (Exception e) {
-            throw KuraException.internalError(e);
+    public boolean isRunning(String ifaceName) {
+        return this.executorService.isRunning(new String[] { WPA_SUPPLICANT, "-i", ifaceName });
+    }
+
+    public int getPid(String ifaceName) throws KuraException {
+        List<Pid> pids = new ArrayList<>(
+                this.executorService.getPids(new String[] { WPA_SUPPLICANT, "-i", ifaceName }).values());
+        if (!pids.isEmpty()) {
+            return (Integer) pids.get(0).getPid();
+        } else {
+            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR,
+                    "Failed to get wpa_supplicant pid for interface " + ifaceName);
         }
     }
 
-    public static int getPid(String ifaceName) throws KuraException {
-        try {
-            String[] tokens = { "-i " + ifaceName };
-            int pid = LinuxProcessUtil.getPid("wpa_supplicant", tokens);
-            logger.trace("getPid() :: pid={}", pid);
-            return pid;
-        } catch (Exception e) {
-            throw KuraException.internalError(e);
-        }
-    }
-
-    public static boolean isTempRunning() throws KuraException {
-        try {
-            String[] tokens = { "-c " + TEMP_CONFIG_FILE };
-            int pid = LinuxProcessUtil.getPid("wpa_supplicant", tokens);
-            return pid > -1;
-        } catch (Exception e) {
-            throw KuraException.internalError(e);
-        }
+    public boolean isTempRunning() {
+        return this.executorService.isRunning(new String[] { WPA_SUPPLICANT, "-c", TEMP_CONFIG_FILE.toString() });
     }
 
     /**
@@ -133,18 +125,15 @@ public class WpaSupplicantManager {
      *
      * @throws Exception
      */
-    public static void stop(String ifaceName) throws KuraException {
-        try {
-
-            LinuxProcessUtil.stopAndKill(getPid(ifaceName));
-
-            if (ifaceName != null) {
-                LinuxNetworkUtil.disableInterface(ifaceName);
-                Thread.sleep(1000);
+    public void stop(String ifaceName) throws KuraException {
+        Map<String, Pid> pids = this.executorService.getPids(new String[] { WPA_SUPPLICANT, "-i", ifaceName });
+        for (Pid pid : pids.values()) {
+            if (!this.executorService.stop(pid, LinuxSignal.SIGKILL)) {
+                throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR,
+                        "Failed to stop hostapd for interface " + ifaceName);
             }
-        } catch (Exception e) {
-            throw KuraException.internalError(e);
         }
+        this.linuxNetworkUtil.disableInterface(ifaceName);
     }
 
     public static String getWpaSupplicantConfigFilename(String ifaceName) {
@@ -155,11 +144,11 @@ public class WpaSupplicantManager {
         return sb.toString();
     }
 
-    public static String getDriver(String iface) throws KuraException {
+    public String getDriver(String iface) throws KuraException {
         String driver = null;
         Collection<String> supportedWifiOptions = null;
         try {
-            supportedWifiOptions = WifiOptions.getSupportedOptions(iface);
+            supportedWifiOptions = this.wifiOptions.getSupportedOptions(iface);
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e);
         }

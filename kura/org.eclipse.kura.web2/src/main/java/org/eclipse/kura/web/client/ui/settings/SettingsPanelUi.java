@@ -27,8 +27,6 @@ import org.gwtbootstrap3.client.ui.TabPane;
 import org.gwtbootstrap3.client.ui.html.Paragraph;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -68,6 +66,9 @@ public class SettingsPanelUi extends Composite {
     SecurityTabUi securityPanel;
 
     @UiField
+    CommandUserTabUi commandUserPanel;
+
+    @UiField
     TabListItem snapshots;
     @UiField
     TabListItem appCert;
@@ -83,6 +84,8 @@ public class SettingsPanelUi extends Composite {
     TabContent tabContent;
     @UiField
     NavTabs navTabs;
+    @UiField
+    TabListItem commandUser;
 
     @UiField
     HTMLPanel settingsIntro;
@@ -101,6 +104,7 @@ public class SettingsPanelUi extends Composite {
 
             @Override
             public void onFailure(Throwable caught) {
+                // Do nothing
             }
 
             @Override
@@ -114,16 +118,11 @@ public class SettingsPanelUi extends Composite {
         this.gwtSecurityService.isSecurityServiceAvailable(callback);
 
         this.snapshots.addClickHandler(new Tab.RefreshHandler(this.snapshotsPanel));
-        this.sslConfig.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                SettingsPanelUi.this.sslConfigPanel.load();
-            }
-        });
+        this.sslConfig.addClickHandler(event -> SettingsPanelUi.this.sslConfigPanel.load());
         this.serverCert.addClickHandler(new Tab.RefreshHandler(this.serverCertPanel));
         this.deviceCert.addClickHandler(new Tab.RefreshHandler(this.deviceCertPanel));
         this.security.addClickHandler(new Tab.RefreshHandler(this.securityPanel));
+        this.commandUser.addClickHandler(event -> SettingsPanelUi.this.commandUserPanel.load());
     }
 
     public void load() {
@@ -143,8 +142,10 @@ public class SettingsPanelUi extends Composite {
         boolean serverCertDirty = this.serverCertPanel.isDirty();
         boolean deviceCertDirty = this.deviceCertPanel.isDirty();
         boolean securityDirty = this.securityPanel.isDirty();
+        boolean commandUserDirty = this.commandUserPanel.isDirty();
 
-        return snapshotsDirty || appCertDirty || sslConfigDirty || serverCertDirty || deviceCertDirty || securityDirty;
+        return snapshotsDirty || appCertDirty || sslConfigDirty || serverCertDirty || deviceCertDirty || securityDirty
+                || commandUserDirty;
     }
 
     public void addTab(final String name, final WidgetFactory widgetFactory) {
@@ -172,5 +173,6 @@ public class SettingsPanelUi extends Composite {
         this.serverCertPanel.setDirty(b);
         this.deviceCertPanel.setDirty(b);
         this.securityPanel.setDirty(b);
+        this.commandUserPanel.setDirty(b);
     }
 }

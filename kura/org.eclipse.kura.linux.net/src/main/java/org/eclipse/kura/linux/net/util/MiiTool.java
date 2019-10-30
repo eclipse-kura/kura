@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -11,13 +11,13 @@
  *******************************************************************************/
 package org.eclipse.kura.linux.net.util;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.io.ByteArrayOutputStream;
 
-import org.eclipse.kura.KuraErrorCode;
+import org.apache.commons.io.Charsets;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.core.util.ProcessUtil;
-import org.eclipse.kura.core.util.SafeProcess;
+import org.eclipse.kura.executor.Command;
+import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,14 +35,19 @@ public class MiiTool implements LinkTool {
     private boolean linkDetected = false;
     private int speed = 0; // in b/s
 
+    private CommandExecutorService executorService;
+
     /**
      * MiiTool constructor
      *
      * @param ifaceName
      *            - interface name as {@link String}
+     * @param executorService
+     *            - the {@link org.eclipse.kura.executor.CommandExecutorService} used to run the command
      */
-    public MiiTool(String ifaceName) {
+    public MiiTool(String ifaceName, CommandExecutorService executorService) {
         this.ifaceName = ifaceName;
+        this.executorService = executorService;
     }
 
     /*
@@ -52,40 +57,28 @@ public class MiiTool implements LinkTool {
      */
     @Override
     public boolean get() throws KuraException {
-        SafeProcess proc = null;
-        boolean result = false;
-        try {
-            // start the process
-            proc = ProcessUtil.exec("mii-tool " + this.ifaceName);
-            result = proc.waitFor() == 0 ? true : false;
-            parse(proc);
-            return result;
-        } catch (Exception e) {
-            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e);
-        } finally {
-            if (proc != null) {
-                ProcessUtil.destroy(proc);
-            }
-        }
+        Command command = new Command(new String[] { "mii-tool", this.ifaceName });
+        command.setTimeout(60);
+        command.setOutputStream(new ByteArrayOutputStream());
+        CommandStatus status = this.executorService.execute(command);
+        boolean result = (Integer) status.getExitStatus().getExitValue() == 0;
+        parse(new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray(), Charsets.UTF_8));
+
+        return result;
     }
 
-    private void parse(SafeProcess proc) throws KuraException {
-        try (InputStreamReader isr = new InputStreamReader(proc.getInputStream());
-                BufferedReader br = new BufferedReader(isr)) {
-            String line = null;
-            boolean isLinkDetected = false;
-            int spd = 0;
-            while ((line = br.readLine()) != null) {
-                if (line.startsWith(this.ifaceName) && (line.indexOf("link ok") > -1)) {
-                    isLinkDetected = true;
-                    spd = parseLine(line);
-                }
+    private void parse(String commandOutput) {
+        boolean isLinkDetected = false;
+        int spd = 0;
+        String[] lines = commandOutput.split("\n");
+        for (String line : lines) {
+            if (line.startsWith(this.ifaceName) && (line.indexOf("link ok") > -1)) {
+                isLinkDetected = true;
+                spd = parseLine(line);
             }
-            this.speed = spd;
-            this.linkDetected = isLinkDetected;
-        } catch (Exception e) {
-            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e);
         }
+        this.speed = spd;
+        this.linkDetected = isLinkDetected;
     }
 
     private int parseLine(String line) {

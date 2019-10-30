@@ -25,7 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
@@ -53,6 +52,7 @@ import org.eclipse.kura.core.deployment.xml.XmlDeploymentPackage;
 import org.eclipse.kura.core.deployment.xml.XmlDeploymentPackages;
 import org.eclipse.kura.data.DataTransportService;
 import org.eclipse.kura.deployment.hook.DeploymentHook;
+import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.marshalling.Marshaller;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
@@ -140,8 +140,9 @@ public class CloudDeploymentHandlerV2 implements ConfigurableComponent, RequestH
     private DeploymentAdmin deploymentAdmin;
     private SystemService systemService;
     private DeploymentHookManager deploymentHookManager;
+    private CommandExecutorService executorService;
 
-    private static ExecutorService executor = Executors.newSingleThreadExecutor();
+    private static java.util.concurrent.ExecutorService executor = Executors.newSingleThreadExecutor();
 
     private Future<?> downloaderFuture;
     private Future<?> installerFuture;
@@ -226,6 +227,14 @@ public class CloudDeploymentHandlerV2 implements ConfigurableComponent, RequestH
         }
     }
 
+    public void setExecutorService(CommandExecutorService executorService) {
+        this.executorService = executorService;
+    }
+
+    public void unsetExecutorService(CommandExecutorService executorService) {
+        this.executorService = null;
+    }
+
     // ----------------------------------------------------------------
     //
     // Activation APIs
@@ -243,7 +252,7 @@ public class CloudDeploymentHandlerV2 implements ConfigurableComponent, RequestH
         String packagesPath = options.getPackagesPath();
         String kuraDataDir = options.getKuraDataDir();
 
-        installImplementation = new InstallImpl(CloudDeploymentHandlerV2.this, kuraDataDir);
+        installImplementation = new InstallImpl(CloudDeploymentHandlerV2.this, kuraDataDir, this.executorService);
         installImplementation.setPackagesPath(packagesPath);
         installImplementation.setDpaConfPath(dpaConfPath);
         installImplementation.setDeploymentAdmin(CloudDeploymentHandlerV2.this.deploymentAdmin);
@@ -425,7 +434,7 @@ public class CloudDeploymentHandlerV2 implements ConfigurableComponent, RequestH
     }
 
     protected UninstallImpl createUninstallImpl() {
-        return new UninstallImpl(this, this.deploymentAdmin);
+        return new UninstallImpl(this, this.deploymentAdmin, this.executorService);
     }
 
     protected File getDpDownloadFile(final DeploymentPackageInstallOptions options) throws IOException {
@@ -712,11 +721,7 @@ public class CloudDeploymentHandlerV2 implements ConfigurableComponent, RequestH
                         try {
                             uninstallImplementation.uninstaller(options, packageName);
                         } catch (Exception e) {
-                            try {
-                                uninstallImplementation.uninstallFailedAsync(options, packageName, e);
-                            } catch (KuraException e1) {
-
-                            }
+                            uninstallImplementation.uninstallFailedAsync(options, packageName, e);
                         } finally {
                             CloudDeploymentHandlerV2.this.installOptions = null;
                             CloudDeploymentHandlerV2.this.isInstalling = false;

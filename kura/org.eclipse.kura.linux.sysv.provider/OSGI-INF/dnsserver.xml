@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2018 Eurotech and/or its affiliates
+    Copyright (c) 2018, 2019 Eurotech and/or its affiliates
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -18,4 +18,5 @@
       <provide interface="org.eclipse.kura.internal.linux.net.dns.DnsServerService"/>
    </service>
    <property name="service.pid" value="org.eclipse.kura.net.sysv.provider.DnsServerService"/>
+   <reference bind="setExecutorService" cardinality="1..1" interface="org.eclipse.kura.executor.PrivilegedExecutorService" name="PrivilegedExecutorService" policy="static" unbind="unsetExecutorService"/>
 </scr:component>

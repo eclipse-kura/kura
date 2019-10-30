@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -24,6 +24,7 @@ import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
 import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.util.NetworkUtil;
+import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.internal.linux.net.NetInterfaceConfigSerializationService;
 import org.eclipse.kura.linux.net.dhcp.DhcpClientLeases;
 import org.eclipse.kura.linux.net.dns.LinuxDns;
@@ -78,6 +79,11 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
 
         }
         return instance;
+    }
+
+    @Override
+    public void setExecutorService(CommandExecutorService executorService) {
+        // Not needed
     }
 
     @Override

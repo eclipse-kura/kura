@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2019 Eurotech and/or its affiliates and others
  *
  *   All rights reserved. This program and the accompanying materials
  *   are made available under the terms of the Eclipse Public License v1.0
@@ -123,7 +123,8 @@ public class CloudDeploymentHandlerV2Test {
 
     @Test(expected = ComponentException.class)
     @Ignore
-    public void testActivateMissingDpaPathException() throws NoSuchFieldException, KuraException, InvalidSyntaxException {
+    public void testActivateMissingDpaPathException()
+            throws NoSuchFieldException, KuraException, InvalidSyntaxException {
         CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
         TestUtil.setFieldValue(handler, COMPONENT_OPTIONS_FIELD, new CloudDeploymentHandlerV2Options(new HashMap<>()));
 
@@ -135,7 +136,7 @@ public class CloudDeploymentHandlerV2Test {
 
         handler.setSystemService(systemService);
         when(systemService.getProperties()).thenReturn(new Properties());
-        
+
         BundleContext bundleContext = mock(BundleContext.class);
         Filter filter = mock(Filter.class);
         when(bundleContext.createFilter(anyString())).thenReturn(filter);
@@ -204,7 +205,7 @@ public class CloudDeploymentHandlerV2Test {
         handler.setSystemService(systemService);
         when(systemService.getProperties()).thenReturn(systemServiceProps);
         System.setProperty("dpa.configuration", "/opt/eclipse/kura/kura/dpa.properties");
-        
+
         BundleContext bundleContext = mock(BundleContext.class);
         Filter filter = mock(Filter.class);
         when(bundleContext.createFilter(anyString())).thenReturn(filter);
@@ -327,7 +328,7 @@ public class CloudDeploymentHandlerV2Test {
         KuraRequestPayload request = new KuraRequestPayload();
         KuraMessage message = new KuraMessage(request, reqResources);
 
-        InstallImpl ilMock = new InstallImpl(null, null);
+        InstallImpl ilMock = new InstallImpl(null, null, null);
         TestUtil.setFieldValue(deployment, "installImplementation", ilMock);
 
         KuraMessage resMessage = deployment.doGet(null, message);
@@ -354,7 +355,7 @@ public class CloudDeploymentHandlerV2Test {
         String dpName = "heater";
         String dpVersion = "1.0.0";
         DeploymentPackageInstallOptions options = new DeploymentPackageInstallOptions(dpName, dpVersion);
-        InstallImpl ilMock = new InstallImpl(null, null);
+        InstallImpl ilMock = new InstallImpl(null, null, null);
         TestUtil.setFieldValue(deployment, "installImplementation", ilMock);
         TestUtil.setFieldValue(deployment, "isInstalling", true);
         TestUtil.setFieldValue(ilMock, "options", options);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Eurotech and others
+ * Copyright (c) 2018, 2019 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -17,14 +17,15 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.SyncFailedException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.core.linux.util.LinuxProcessUtil;
+import org.eclipse.kura.executor.Command;
+import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.internal.linux.net.dns.DnsServerService;
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
@@ -37,6 +38,8 @@ import org.slf4j.LoggerFactory;
 
 public class DnsServerServiceImpl implements DnsServerService {
 
+    private static final String BIND9_COMMAND = "/etc/init.d/bind9";
+
     private static final Logger logger = LoggerFactory.getLogger(DnsServerServiceImpl.class);
 
     private static final String PERSISTENT_CONFIG_FILE_NAME = "/etc/bind/named.conf";
@@ -44,6 +47,15 @@ public class DnsServerServiceImpl implements DnsServerService {
     private static final String PROC_STRING = "/usr/sbin/named";
 
     private DnsServerConfigIP4 dnsServerConfigIP4;
+    private CommandExecutorService executorService;
+
+    public void setExecutorService(CommandExecutorService executorService) {
+        this.executorService = executorService;
+    }
+
+    public void unsetExecutorService(CommandExecutorService executorService) {
+        this.executorService = null;
+    }
 
     protected void activate() {
         logger.info("Activating LinuxNamed...");
@@ -135,68 +147,50 @@ public class DnsServerServiceImpl implements DnsServerService {
 
     @Override
     public boolean isRunning() {
-        try {
-            // Check if named is running
-            int pid = LinuxProcessUtil.getPid(DnsServerServiceImpl.PROC_STRING);
-            return pid > -1;
-        } catch (Exception e) {
-            return false;
-        }
+        // Check if named is running
+        return this.executorService.isRunning(new String[] { DnsServerServiceImpl.PROC_STRING });
     }
 
     @Override
     public void start() throws KuraException {
         // write config happened during 'set config' step
-        try {
-            // Check if named is running
-            int pid = LinuxProcessUtil.getPid(DnsServerServiceImpl.PROC_STRING);
-            if (pid > -1) {
-                // If so, disable it
-                logger.error("DNS server is already running, bringing it down...");
-                stop();
-            }
-            // Start named
-            int result = LinuxProcessUtil.start("/etc/init.d/bind9 start");
-
-            if (result == 0) {
-                logger.debug("DNS server started.");
-                logger.trace("{}", this.dnsServerConfigIP4);
-            } else {
-                throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR);
-            }
-
-        } catch (Exception e) {
-            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e);
+        if (isRunning()) {
+            // If so, disable it
+            logger.error("DNS server is already running, bringing it down...");
+            stop();
+        }
+        // Start named
+        CommandStatus status = this.executorService.execute(new Command(new String[] { BIND9_COMMAND, "start" }));
+        if ((Integer) status.getExitStatus().getExitValue() == 0) {
+            logger.debug("DNS server started.");
+            logger.trace("{}", this.dnsServerConfigIP4);
+        } else {
+            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, "Failed to start named");
         }
     }
 
     @Override
     public void stop() throws KuraException {
-        try {
-            int result = LinuxProcessUtil.start("/etc/init.d/bind9 stop");
-
-            if (result == 0) {
-                logger.debug("DNS server stopped.");
-                logger.trace("{}", this.dnsServerConfigIP4);
-            } else {
-                logger.debug("tried to kill DNS server for interface but it is not running");
-                throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR);
-            }
-        } catch (Exception e) {
-            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e);
+        // Stop named
+        CommandStatus status = this.executorService.execute(new Command(new String[] { BIND9_COMMAND, "stop" }));
+        if ((Integer) status.getExitStatus().getExitValue() == 0) {
+            logger.debug("DNS server stopped.");
+            logger.trace("{}", this.dnsServerConfigIP4);
+        } else {
+            logger.debug("tried to kill DNS server for interface but it is not running");
+            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, "Failed to stop named");
         }
     }
 
     @Override
     public void restart() throws KuraException {
-        try {
-            if (LinuxProcessUtil.start("/etc/init.d/named restart") == 0) {
-                logger.debug("DNS server restarted.");
-            } else {
-                throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, "error restarting");
-            }
-        } catch (Exception e) {
-            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e);
+        // Restart named
+        CommandStatus status = this.executorService.execute(new Command(new String[] { BIND9_COMMAND, "restart" }));
+        if ((Integer) status.getExitStatus().getExitValue() == 0) {
+            logger.debug("DNS server restarted.");
+        } else {
+            logger.debug("tried to kill DNS server for interface but it is not running");
+            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, "Failed to restart named");
         }
     }
 
@@ -206,8 +200,8 @@ public class DnsServerServiceImpl implements DnsServerService {
                 || this.dnsServerConfigIP4.getAllowedNetworks() == null) {
             return false;
         }
-        return this.dnsServerConfigIP4.getForwarders().isEmpty()
-                || this.dnsServerConfigIP4.getAllowedNetworks().isEmpty() ? false : true;
+        return !(this.dnsServerConfigIP4.getForwarders().isEmpty()
+                || this.dnsServerConfigIP4.getAllowedNetworks().isEmpty());
     }
 
     @Override
@@ -235,17 +229,17 @@ public class DnsServerServiceImpl implements DnsServerService {
                 PrintWriter pw = new PrintWriter(fos);) {
             // build up the file
             if (isConfigured()) {
-                logger.debug("writing custom named.conf to {} with: {}", DnsServerServiceImpl.PERSISTENT_CONFIG_FILE_NAME,
-                        this.dnsServerConfigIP4);
+                logger.debug("writing custom named.conf to {} with: {}",
+                        DnsServerServiceImpl.PERSISTENT_CONFIG_FILE_NAME, this.dnsServerConfigIP4);
                 pw.print(getForwardingNamedFile());
             } else {
-                logger.debug("writing default named.conf to {} with: {}", DnsServerServiceImpl.PERSISTENT_CONFIG_FILE_NAME,
-                        this.dnsServerConfigIP4);
+                logger.debug("writing default named.conf to {} with: {}",
+                        DnsServerServiceImpl.PERSISTENT_CONFIG_FILE_NAME, this.dnsServerConfigIP4);
                 pw.print(getDefaultNamedFile());
             }
             pw.flush();
             fos.getFD().sync();
-        } 
+        }
     }
 
     private String getForwardingNamedFile() {

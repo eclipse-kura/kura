@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -27,7 +27,7 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.net.AbstractNetInterface;
 import org.eclipse.kura.core.net.EthernetInterfaceConfigImpl;
 import org.eclipse.kura.core.net.NetworkConfiguration;
-import org.eclipse.kura.linux.net.dhcp.DhcpServerManager;
+import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.linux.net.route.RouteService;
 import org.eclipse.kura.linux.net.route.RouteServiceImpl;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
@@ -48,7 +48,6 @@ import org.eclipse.kura.net.dhcp.DhcpServerConfig4;
 import org.eclipse.kura.net.dhcp.DhcpServerConfigIP4;
 import org.eclipse.kura.net.firewall.FirewallAutoNatConfig;
 import org.eclipse.kura.net.route.RouteConfig;
-import org.eclipse.kura.system.SystemService;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
@@ -76,12 +75,13 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
     private NetworkAdminService netAdminService;
     private NetworkConfigurationService netConfigService;
     private RouteService routeService;
-    private SystemService systemService;
+    private CommandExecutorService executorService;
 
     private final Map<String, InterfaceState> interfaceState = new HashMap<>();
     private final Map<String, NetInterfaceConfig<NetInterfaceAddressConfig>> networkConfiguration = new HashMap<>();
     private final Map<String, NetInterfaceConfig<NetInterfaceAddressConfig>> newNetworkConfiguration = new HashMap<>();
     private ExecutorService executor;
+    private LinuxNetworkUtil linuxNetworkUtil;
 
     // ----------------------------------------------------------------
     //
@@ -113,13 +113,14 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
         this.netConfigService = null;
     }
 
-    public void setSystemService(SystemService systemService) {
-        this.systemService = systemService;
+    public void setExecutorService(CommandExecutorService executorService) {
+        this.executorService = executorService;
     }
 
-    public void unsetSystemService(SystemService systemService) {
-        this.systemService = null;
+    public void unsetExecutorService(CommandExecutorService executorService) {
+        this.executorService = null;
     }
+
     // ----------------------------------------------------------------
     //
     // Activation APIs
@@ -134,7 +135,8 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
         d.put(EventConstants.EVENT_TOPIC, EVENT_TOPICS);
         componentContext.getBundleContext().registerService(EventHandler.class.getName(), this, d);
 
-        this.routeService = RouteServiceImpl.getInstance();
+        this.routeService = new RouteServiceImpl(this.executorService);
+        this.linuxNetworkUtil = new LinuxNetworkUtil(this.executorService);
 
         this.executor = Executors.newCachedThreadPool();
 
@@ -184,14 +186,18 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
     }
 
     protected InterfaceState getEthernetInterfaceState(String interfaceName, boolean isL2Only) throws KuraException {
-        return new InterfaceState(NetInterfaceType.ETHERNET, interfaceName, isL2Only);
+        InterfaceStateBuilder builder = new InterfaceStateBuilder(this.executorService);
+        builder.setType(NetInterfaceType.ETHERNET);
+        builder.setInterfaceName(interfaceName);
+        builder.setL2OnlyInterface(isL2Only);
+        return builder.buildInterfaceState();
     }
 
     protected void startInterfaceIfDown(String interfaceName) throws KuraException {
         // Make sure the Ethernet Controllers are powered
         // FIXME:MC it should be possible to refactor this under the InterfaceState to avoid dual checks
-        if (!LinuxNetworkUtil.isUp(interfaceName)) {
-            LinuxNetworkUtil.bringUpDeletingAddress(interfaceName);
+        if (!this.linuxNetworkUtil.isUp(interfaceName)) {
+            this.linuxNetworkUtil.bringUpDeletingAddress(interfaceName);
         }
     }
 
@@ -357,27 +363,20 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
                             this.netAdminService.disableInterface(interfaceName);
                             this.netAdminService.enableInterface(interfaceName, isDhcpClient);
                         }
-                    } else if (netInterfaceStatus == NetInterfaceStatus.netIPv4StatusEnabledLAN) {
-                        if (isDhcpClient) {
-                            RouteConfig rconf = this.routeService.getDefaultRoute(interfaceName);
-                            if (rconf != null) {
-                                logger.debug("{} is configured for LAN/DHCP - removing GATEWAY route ...",
-                                        rconf.getInterfaceName());
-                                Boolean isRemoveStaticRoute = Boolean.valueOf(this.systemService.getProperties()
-                                        .getProperty("kura.net.removestaticroute", "true"));
-                                if (isRemoveStaticRoute)
-                                    this.routeService.removeStaticRoute(rconf.getDestination(), rconf.getGateway(),
-                                            rconf.getNetmask(), rconf.getInterfaceName());
-                            }
+                    } else if (netInterfaceStatus == NetInterfaceStatus.netIPv4StatusEnabledLAN && isDhcpClient) {
+                        RouteConfig rconf = this.routeService.getDefaultRoute(interfaceName);
+                        if (rconf != null) {
+                            logger.debug("{} is configured for LAN/DHCP - removing GATEWAY route ...",
+                                    rconf.getInterfaceName());
+                            this.routeService.removeStaticRoute(rconf.getDestination(), rconf.getGateway(),
+                                    rconf.getNetmask(), rconf.getInterfaceName());
                         }
                     }
 
-                    if (dhcpServerEnabled && !DhcpServerManager.isRunning(interfaceName)) {
-                        logger.debug("Starting DHCP server for {}", interfaceName);
+                    if (dhcpServerEnabled) {
                         this.netAdminService.manageDhcpServer(interfaceName, true);
                     }
-                } else if (DhcpServerManager.isRunning(interfaceName)) {
-                    logger.debug("Stopping DHCP server for {}", interfaceName);
+                } else {
                     this.netAdminService.manageDhcpServer(interfaceName, false);
                 }
 

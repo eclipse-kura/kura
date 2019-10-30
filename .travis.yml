@@ -3,7 +3,7 @@ language: java
 jdk:
 - openjdk8
 
-sudo: false
+sudo: true
 dist: trusty
 
 cache:
@@ -26,6 +26,7 @@ before_script:
   - export M2_HOME=$PWD/maven
   - export PATH=${M2_HOME}/maven/bin:${PATH}
   - hash -r
+  - sudo useradd kura
 
 addons:
   apt:
@@ -49,3 +50,6 @@ jobs:
       - $M2_HOME/bin/mvn -f kura/examples/pom.xml clean install
     - # stage name not required, will continue to use the previous 
       script: $M2_HOME/bin/mvn -f kura/test/pom.xml clean install
+
+after_script:
+  - sudo userdel kura

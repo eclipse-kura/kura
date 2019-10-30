@@ -35,5 +35,5 @@
    <service>
       <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
       <provide interface="org.eclipse.kura.web.api.Console"/>
-   </service>   
+   </service>
 </scr:component>

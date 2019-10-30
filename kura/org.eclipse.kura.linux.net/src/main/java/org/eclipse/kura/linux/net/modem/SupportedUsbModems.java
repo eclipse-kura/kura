@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and others
+ * Copyright (c) 2011, 2019 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -18,11 +18,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.exec.CommandLine;
-import org.apache.commons.exec.DefaultExecutor;
-import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.output.NullOutputStream;
+import org.eclipse.kura.executor.Command;
+import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,21 +64,21 @@ public class SupportedUsbModems {
     private SupportedUsbModems() {
     }
 
-    public static void installModemDrivers() {
+    public static void installModemDrivers(CommandExecutorService executorService) {
         List<LsusbEntry> lsusbEntries = null;
         try {
-            lsusbEntries = getLsusbInfo();
+            lsusbEntries = getLsusbInfo(executorService);
         } catch (IOException e) {
             logger.error("failed to obtain lsusb information", e);
         }
         for (SupportedUsbModemInfo modem : SupportedUsbModemInfo.values()) {
             try {
-                if (isAttached(modem.getVendorId(), modem.getProductId(), lsusbEntries)) {
+                if (isAttached(modem.getVendorId(), modem.getProductId(), lsusbEntries, executorService)) {
                     // modprobe driver
                     logger.info("The {}:{} USB modem device is attached", modem.getVendorId(), modem.getProductId());
                     List<? extends UsbModemDriver> drivers = modem.getDeviceDrivers();
                     for (UsbModemDriver driver : drivers) {
-                        driver.install();
+                        driver.install(executorService);
                     }
                 }
             } catch (Exception e) {
@@ -121,13 +120,14 @@ public class SupportedUsbModems {
         return SupportedUsbModems.getModem(vendorId, productId, productName) != null;
     }
 
-    public static boolean isAttached(String vendor, String product) throws IOException {
+    public static boolean isAttached(String vendor, String product, CommandExecutorService executorService)
+            throws IOException {
         boolean retVal = false;
         if (vendor == null || product == null) {
             return retVal;
         }
-        List<LsusbEntry> lsusbEntries = getLsusbInfo();
-        if (lsusbEntries != null && !lsusbEntries.isEmpty()) {
+        List<LsusbEntry> lsusbEntries = getLsusbInfo(executorService);
+        if (!lsusbEntries.isEmpty()) {
             for (LsusbEntry lsusbEntry : lsusbEntries) {
                 if (vendor.equals(lsusbEntry.vendor) && product.equals(lsusbEntry.product)) {
                     retVal = true;
@@ -138,10 +138,11 @@ public class SupportedUsbModems {
         return retVal;
     }
 
-    private static boolean isAttached(String vendor, String product, List<LsusbEntry> lsusbEntries) throws IOException {
+    private static boolean isAttached(String vendor, String product, List<LsusbEntry> lsusbEntries,
+            CommandExecutorService executorService) throws IOException {
         boolean attached = false;
         if (lsusbEntries == null || lsusbEntries.isEmpty()) {
-            attached = isAttached(vendor, product);
+            attached = isAttached(vendor, product, executorService);
         } else {
             for (LsusbEntry lsusbEntry : lsusbEntries) {
                 if (vendor != null && product != null && vendor.equals(lsusbEntry.vendor)
@@ -164,27 +165,24 @@ public class SupportedUsbModems {
      * @throws IOException
      *             if executing the commands fails
      */
-    private static List<String> execute(final String command) throws IOException {
-        final DefaultExecutor executor = new DefaultExecutor();
+    private static List<String> execute(final String commandLine, CommandExecutorService executorService)
+            throws IOException {
+        Command command = new Command(commandLine.split("\\s+"));
+        command.setTimeout(60);
+        command.setOutputStream(new ByteArrayOutputStream());
 
-        final ByteArrayOutputStream out = new ByteArrayOutputStream();
-        executor.setStreamHandler(new PumpStreamHandler(out, NullOutputStream.NULL_OUTPUT_STREAM));
+        CommandStatus status = executorService.execute(command);
+        logger.debug("Called {} - rc = {}", commandLine, (Integer) status.getExitStatus().getExitValue());
 
-        int rc = executor.execute(CommandLine.parse(command));
-
-        logger.debug("Called {} - rc = {}", command, rc);
-
-        return IOUtils.readLines(new ByteArrayInputStream(out.toByteArray()));
+        return IOUtils
+                .readLines(new ByteArrayInputStream(((ByteArrayOutputStream) command.getOutputStream()).toByteArray()));
     }
 
-    private static List<LsusbEntry> getLsusbInfo() throws IOException {
+    private static List<LsusbEntry> getLsusbInfo(CommandExecutorService executorService) throws IOException {
         final List<LsusbEntry> lsusbEntries = new ArrayList<>();
 
-        for (final String line : execute("lsusb")) {
-            LsusbEntry lsusbEntry = getLsusbEntry(line);
-            if (lsusbEntry != null) {
-                lsusbEntries.add(lsusbEntry);
-            }
+        for (final String line : execute("lsusb", executorService)) {
+            lsusbEntries.add(getLsusbEntry(line));
         }
         return lsusbEntries;
     }

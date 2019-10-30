@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -11,23 +11,21 @@
  *******************************************************************************/
 package org.eclipse.kura.linux.test.net;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.kura.KuraErrorCode;
+import org.apache.commons.io.Charsets;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.core.util.ProcessUtil;
-import org.eclipse.kura.core.util.SafeProcess;
+import org.eclipse.kura.KuraProcessExecutionErrorException;
+import org.eclipse.kura.executor.Command;
+import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.linux.net.iptables.LinuxFirewall;
 import org.eclipse.kura.test.annotation.TestTarget;
 import org.junit.AfterClass;
@@ -40,21 +38,32 @@ import junit.framework.TestCase;
 
 public class IPTablesTest extends TestCase {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(IPTablesTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(IPTablesTest.class);
 
-    private static CountDownLatch dependencyLatch = new CountDownLatch(0);	// initialize with number of dependencies
+    private static CountDownLatch dependencyLatch = new CountDownLatch(1);	// initialize with number of dependencies
 
-    private static LinuxFirewall s_firewall;
+    private static LinuxFirewall firewall;
 
     private static final String TMPDIR = "/tmp/" + IPTablesTest.class.getName();
     private static String oldConfig = TMPDIR + "/iptables_"
             + new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date());
+    private static CommandExecutorService executorService;
+
+    public void setExecutorService(CommandExecutorService executorService) {
+        IPTablesTest.executorService = executorService;
+        dependencyLatch.countDown();
+    }
+
+    public void unsetExecutorService(CommandExecutorService executorService) {
+        IPTablesTest.executorService = null;
+        dependencyLatch.countDown();
+    }
 
     @Override
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @BeforeClass
     public void setUp() {
-        s_firewall = LinuxFirewall.getInstance();
+        firewall = new LinuxFirewall(IPTablesTest.executorService);
 
         File tmpDir = new File(TMPDIR);
         tmpDir.mkdirs();
@@ -69,7 +78,7 @@ public class IPTablesTest extends TestCase {
 
         // Backup current iptables config
         try {
-            s_logger.info("Backing up current iptables config to " + oldConfig);
+            logger.info("Backing up current iptables config to " + oldConfig);
 
             // Write current config to file
             FileOutputStream fos = new FileOutputStream(oldConfig);
@@ -88,10 +97,10 @@ public class IPTablesTest extends TestCase {
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testDisable() {
-        s_logger.info("Test disable firewall");
+        logger.info("Test disable firewall");
 
         try {
-            s_firewall.disable();
+            firewall.disable();
 
             String config = getCurrentIptablesConfig();
             assertFalse("testDisable: config does not append to any tables", config.contains("-A"));
@@ -103,10 +112,10 @@ public class IPTablesTest extends TestCase {
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testEnable() {
-        s_logger.info("Test enable firewall");
+        logger.info("Test enable firewall");
 
         try {
-            s_firewall.enable();
+            firewall.enable();
 
             String config = getCurrentIptablesConfig();
             assertTrue("testEnable: config appends some rules", config.contains("-A"));
@@ -118,13 +127,13 @@ public class IPTablesTest extends TestCase {
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testLocalRule() {
-        s_logger.info("Test local rule");
+        logger.info("Test local rule");
 
         int testPort = 12345;
 
         try {
-            s_firewall.addLocalRule(testPort, "tcp", null, null, null, null, null, null);
-            s_firewall.enable();
+            firewall.addLocalRule(testPort, "tcp", null, null, null, null, null, null);
+            firewall.enable();
 
             String config = getCurrentIptablesConfig();
             assertTrue("testEnable: config appends some rules", config.contains("-A"));
@@ -138,13 +147,13 @@ public class IPTablesTest extends TestCase {
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testNatRule() {
-        s_logger.info("Test NAT rule");
+        logger.info("Test NAT rule");
 
         String testIface = "test123";
 
         try {
-            s_firewall.addNatRule(testIface, testIface, false);
-            s_firewall.enable();
+            firewall.addNatRule(testIface, testIface, false);
+            firewall.enable();
 
             String config = getCurrentIptablesConfig();
             assertTrue("testEnable: config appends some rules", config.contains("-A"));
@@ -157,7 +166,7 @@ public class IPTablesTest extends TestCase {
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testPortForwardRule() {
-        s_logger.info("Test port forward rule");
+        logger.info("Test port forward rule");
 
         String testInboundIface = "testInboundIface";
         String testOutboundIface = "testOutboundIface";
@@ -166,9 +175,9 @@ public class IPTablesTest extends TestCase {
         int testPort2 = 65432;
 
         try {
-            s_firewall.addPortForwardRule(testInboundIface, testOutboundIface, testAddress, "tcp", testPort1, testPort2,
+            firewall.addPortForwardRule(testInboundIface, testOutboundIface, testAddress, "tcp", testPort1, testPort2,
                     false, null, null, null, null);
-            s_firewall.enable();
+            firewall.enable();
 
             String config = getCurrentIptablesConfig();
             assertTrue("testEnable: config appends some rules", config.contains("-A"));
@@ -195,67 +204,27 @@ public class IPTablesTest extends TestCase {
     @AfterClass()
     public void tearDown() {
         // Restore old iptables config
-        SafeProcess proc = null;
-        try {
-            s_logger.info("Restoring iptables config from " + oldConfig);
+        logger.info("Restoring iptables config from " + oldConfig);
 
-            // Read current config from file
-            FileReader fr = new FileReader(new File(oldConfig));
-
-            int in;
-            StringBuffer data = new StringBuffer();
-            while ((in = fr.read()) != -1) {
-                data.append((char) in);
-            }
-            fr.close();
-
-            // Restore old config
-            proc = ProcessUtil.exec("iptables-restore");
-            OutputStreamWriter osr = new OutputStreamWriter(proc.getOutputStream());
-            BufferedWriter bw = new BufferedWriter(osr);
-            bw.write(data.toString());
-            bw.flush();
-            bw.close();
-
-            proc.waitFor();
-        } catch (Exception e) {
+        Command command = new Command(new String[] { "iptables-restore", "<", oldConfig });
+        command.setExecuteInAShell(true);
+        CommandStatus status = IPTablesTest.executorService.execute(command);
+        if ((Integer) status.getExitStatus().getExitValue() != 0) {
             fail("Error restoring iptables config");
-        } finally {
-            if (proc != null) {
-                ProcessUtil.destroy(proc);
-            }
         }
     }
 
     private String getCurrentIptablesConfig() throws KuraException {
-        SafeProcess proc = null;
-        try {
-            proc = ProcessUtil.exec("iptables-save");
-            if (proc.waitFor() != 0) {
-                s_logger.error("error executing command --- iptables-save --- exit value = " + proc.exitValue());
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
-            }
-
-            InputStreamReader isr = new InputStreamReader(proc.getInputStream());
-            BufferedReader br = new BufferedReader(isr);
-
-            StringBuffer configBuffer = new StringBuffer();
-            String line = null;
-            while ((line = br.readLine()) != null) {
-                configBuffer.append(line).append("\n");
-            }
-            br.close();
-
-            proc.waitFor();
-
-            return configBuffer.toString();
-        } catch (Exception e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-        } finally {
-            if (proc != null) {
-                ProcessUtil.destroy(proc);
-            }
+        Command command = new Command(new String[] { "iptables-save" });
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        command.setOutputStream(out);
+        CommandStatus status = IPTablesTest.executorService.execute(command);
+        Integer exitValue = (Integer) status.getExitStatus().getExitValue();
+        if (exitValue != 0) {
+            logger.error("error executing command --- iptables-save --- exit value = {}", exitValue);
+            throw new KuraProcessExecutionErrorException("Error saving iptables config");
         }
+        return new String(out.toByteArray(), Charsets.UTF_8);
     }
 
 }

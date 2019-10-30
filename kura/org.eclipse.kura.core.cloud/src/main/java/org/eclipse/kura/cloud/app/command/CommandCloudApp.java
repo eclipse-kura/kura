@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -13,12 +13,16 @@ package org.eclipse.kura.cloud.app.command;
 
 import static org.eclipse.kura.cloudconnection.request.RequestHandlerMessageConstants.ARGS_KEY;
 
-import java.io.File;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
+import org.apache.commons.io.Charsets;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
@@ -29,6 +33,9 @@ import org.eclipse.kura.command.PasswordCommandService;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.crypto.CryptoService;
+import org.eclipse.kura.executor.Command;
+import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.osgi.service.component.ComponentContext;
@@ -52,6 +59,8 @@ public class CommandCloudApp implements ConfigurableComponent, PasswordCommandSe
     private CryptoService cryptoService;
 
     private boolean currentStatus;
+
+    private CommandExecutorService executorService;
 
     /* EXEC */
     public static final String RESOURCE_COMMAND = "command";
@@ -77,7 +86,8 @@ public class CommandCloudApp implements ConfigurableComponent, PasswordCommandSe
         try {
             requestHandlerRegistry.registerRequestHandler(APP_ID, this);
         } catch (KuraException e) {
-            logger.info("Unable to register request handler {} in {}", APP_ID, requestHandlerRegistry.getClass().getName());
+            logger.info("Unable to register request handler {} in {}", APP_ID,
+                    requestHandlerRegistry.getClass().getName());
         }
     }
 
@@ -85,8 +95,17 @@ public class CommandCloudApp implements ConfigurableComponent, PasswordCommandSe
         try {
             requestHandlerRegistry.unregister(APP_ID);
         } catch (KuraException e) {
-            logger.info("Unable to register request handler {} in {}", APP_ID, requestHandlerRegistry.getClass().getName());
+            logger.info("Unable to register request handler {} in {}", APP_ID,
+                    requestHandlerRegistry.getClass().getName());
         }
+    }
+
+    public void setExecutorService(CommandExecutorService executorService) {
+        this.executorService = executorService;
+    }
+
+    public void unsetExecutorService(CommandExecutorService executorService) {
+        this.executorService = null;
     }
 
     // ----------------------------------------------------------------
@@ -176,8 +195,7 @@ public class CommandCloudApp implements ConfigurableComponent, PasswordCommandSe
 
         KuraCommandResponsePayload commandResp = new KuraCommandResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
 
-        boolean isExecutionAllowed = verifyPasswords(commandPassword, receivedPassword);
-        if (isExecutionAllowed) {
+        if (verifyPasswords(commandPassword, receivedPassword)) {
 
             String command = commandReq.getCommand();
             if (command == null || command.trim().isEmpty()) {
@@ -200,29 +218,16 @@ public class CommandCloudApp implements ConfigurableComponent, PasswordCommandSe
                 }
             }
 
-            Process proc = null;
-            try {
-                proc = createExecutionProcess(dir, cmdarray, envp);
-            } catch (Throwable t) {
-                logger.error("Error executing command {}", t);
-                throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR);
-            }
+            boolean runAsync = commandReq.isRunAsync() != null && commandReq.isRunAsync();
 
-            boolean runAsync = commandReq.isRunAsync() != null ? commandReq.isRunAsync() : false;
-            int timeout = getTimeout(commandReq);
-
-            ProcessMonitorThread pmt = new ProcessMonitorThread(proc, commandReq.getStdin(), timeout);
-            pmt.start();
-
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            ByteArrayOutputStream errorStream = new ByteArrayOutputStream();
             if (!runAsync) {
-                try {
-                    pmt.join();
-                    prepareResponseNoTimeout(commandResp, pmt);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    pmt.interrupt();
-                    prepareTimeoutResponse(commandResp, pmt);
-                }
+                CommandStatus status = executeProcessSync(dir, cmdarray, envp, getTimeout(commandReq), outputStream,
+                        errorStream);
+                prepareResponse(commandResp, status, outputStream, errorStream);
+            } else {
+                executeProcessAsync(dir, cmdarray, envp, getTimeout(commandReq), outputStream, errorStream);
             }
 
         } else {
@@ -239,34 +244,20 @@ public class CommandCloudApp implements ConfigurableComponent, PasswordCommandSe
         if (verificationEnabled) {
 
             Password commandPassword = (Password) this.properties.get(COMMAND_PASSWORD_ID);
-            boolean isExecutionAllowed = verifyPasswords(commandPassword, password);
-            if (isExecutionAllowed) {
+            if (verifyPasswords(commandPassword, password)) {
 
                 String[] cmdArray = cmd.split(" ");
                 String defaultDir = getDefaultWorkDir();
                 String[] environment = getDefaultEnvironment();
-                try {
-                    Process proc = createExecutionProcess(defaultDir, cmdArray, environment);
-
-                    int timeout = getDefaultTimeout();
-                    ProcessMonitorThread pmt = new ProcessMonitorThread(proc, null, timeout);
-                    pmt.start();
-
-                    try {
-                        pmt.join();
-                        // until the process finishes, exitValue is null; in case of timeout, it remains null
-                        if (pmt.getExitValue() != null && pmt.getExitValue() == 0) {
-                            return pmt.getStdout();
-                        } else {
-                            return pmt.getStderr();
-                        }
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                        pmt.interrupt();
-                        throw KuraException.internalError(e);
-                    }
-                } catch (IOException ex) {
-                    throw new KuraException(KuraErrorCode.INTERNAL_ERROR, ex);
+                int timeout = getDefaultTimeout();
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                ByteArrayOutputStream errorStream = new ByteArrayOutputStream();
+                CommandStatus stats = executeProcessSync(defaultDir, cmdArray, environment, timeout, outputStream,
+                        errorStream);
+                if (stats.getExitStatus() != null && (Integer) stats.getExitStatus().getExitValue() == 0) {
+                    return new String(((ByteArrayOutputStream) stats.getOutputStream()).toByteArray(), Charsets.UTF_8);
+                } else {
+                    return new String(((ByteArrayOutputStream) stats.getErrorStream()).toByteArray(), Charsets.UTF_8);
                 }
             } else {
                 throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
@@ -347,10 +338,40 @@ public class CommandCloudApp implements ConfigurableComponent, PasswordCommandSe
         return pwd.equals(receivedPassword);
     }
 
-    private Process createExecutionProcess(String dir, String[] cmdarray, String[] envp) throws IOException {
-        Runtime rt = Runtime.getRuntime();
-        File fileDir = dir == null ? null : new File(dir);
-        return rt.exec(cmdarray, envp, fileDir);
+    private CommandStatus executeProcessSync(String dir, String[] cmdarray, String[] envp, int timeout,
+            OutputStream out, OutputStream err) {
+        Command command = new Command(cmdarray);
+        command.setTimeout(timeout);
+        command.setDirectory(dir);
+        command.setEnvironment(getEnvironmentMap(envp));
+        command.setOutputStream(out);
+        command.setErrorStream(err);
+        command.setExecuteInAShell(true);
+        return this.executorService.execute(command);
+    }
+
+    private void executeProcessAsync(String dir, String[] cmdarray, String[] envp, int timeout, OutputStream out,
+            OutputStream err) {
+        Consumer<CommandStatus> callback = status -> {
+            // Do nothing...
+        };
+        Command command = new Command(cmdarray);
+        command.setTimeout(timeout);
+        command.setDirectory(dir);
+        command.setEnvironment(getEnvironmentMap(envp));
+        command.setOutputStream(out);
+        command.setErrorStream(err);
+        command.setExecuteInAShell(true);
+        this.executorService.execute(command, callback);
+    }
+
+    private Map<String, String> getEnvironmentMap(String[] envp) {
+        Map<String, String> environment = new HashMap<>();
+        if (envp != null && envp.length > 0) {
+            Arrays.asList(envp).stream().filter(pair -> !pair.isEmpty()).map(pair -> pair.split("="))
+                    .forEach(item -> environment.put(item[0], item[1]));
+        }
+        return environment;
     }
 
     private String[] prepareCommandArray(KuraCommandRequestPayload req, String command) {
@@ -370,24 +391,19 @@ public class CommandCloudApp implements ConfigurableComponent, PasswordCommandSe
         return cmdarray;
     }
 
-    private void prepareResponseNoTimeout(KuraCommandResponsePayload resp, ProcessMonitorThread pmt) {
-        if (pmt.getException() != null) {
-            resp.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
-            resp.setException(pmt.getException());
+    private void prepareResponse(KuraCommandResponsePayload resp, CommandStatus status, ByteArrayOutputStream out,
+            ByteArrayOutputStream err) {
+        resp.setStderr(new String(err.toByteArray(), Charsets.UTF_8));
+        resp.setStdout(new String(out.toByteArray(), Charsets.UTF_8));
+        if (status.isTimedout()) {
+            resp.setTimedout(true);
         } else {
-            resp.setTimedout(pmt.isTimedOut());
-
-            if (!pmt.isTimedOut()) {
-                resp.setExitCode(pmt.getExitValue());
+            resp.setExitCode((Integer) status.getExitStatus().getExitValue());
+            resp.setTimedout(false);
+            if ((Integer) status.getExitStatus().getExitValue() != 0) {
+                resp.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
+                resp.setExceptionMessage(new String(err.toByteArray(), Charsets.UTF_8));
             }
         }
-        resp.setStderr(pmt.getStderr());
-        resp.setStdout(pmt.getStdout());
-    }
-
-    private void prepareTimeoutResponse(KuraCommandResponsePayload resp, ProcessMonitorThread pmt) {
-        resp.setStderr(pmt.getStderr());
-        resp.setStdout(pmt.getStdout());
-        resp.setTimedout(true);
     }
 }

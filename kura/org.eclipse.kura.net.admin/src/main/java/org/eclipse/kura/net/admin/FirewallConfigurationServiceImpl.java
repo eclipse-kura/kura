@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2018 Eurotech and others.
+ * Copyright (c) 2016, 2019 Eurotech and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,6 +28,7 @@ import org.eclipse.kura.core.configuration.metatype.Tad;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
 import org.eclipse.kura.core.configuration.metatype.Tscalar;
 import org.eclipse.kura.core.net.FirewallConfiguration;
+import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.linux.net.iptables.LinuxFirewall;
 import org.eclipse.kura.linux.net.iptables.LocalRule;
 import org.eclipse.kura.linux.net.iptables.NATRule;
@@ -54,6 +55,7 @@ public class FirewallConfigurationServiceImpl implements FirewallConfigurationSe
 
     private EventAdmin eventAdmin;
     private LinuxFirewall firewall;
+    private CommandExecutorService executorService;
 
     public void setEventAdmin(EventAdmin eventAdmin) {
         this.eventAdmin = eventAdmin;
@@ -61,6 +63,14 @@ public class FirewallConfigurationServiceImpl implements FirewallConfigurationSe
 
     public void unsetEventAdmin(EventAdmin eventAdmin) {
         this.eventAdmin = null;
+    }
+
+    public void setExecutorService(CommandExecutorService executorService) {
+        this.executorService = executorService;
+    }
+
+    public void unsetEventAdmin(CommandExecutorService executorService) {
+        this.executorService = null;
     }
 
     protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
@@ -314,7 +324,7 @@ public class FirewallConfigurationServiceImpl implements FirewallConfigurationSe
 
     protected LinuxFirewall getLinuxFirewall() {
         if (this.firewall == null) {
-            this.firewall = LinuxFirewall.getInstance();
+            this.firewall = new LinuxFirewall(this.executorService);
         }
 
         return this.firewall;

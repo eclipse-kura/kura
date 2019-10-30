@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -23,19 +23,23 @@ import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.KuraProcessExecutionErrorException;
 import org.eclipse.kura.cloudconnection.publisher.CloudNotificationPublisher;
 import org.eclipse.kura.core.deployment.CloudDeploymentHandlerV2;
 import org.eclipse.kura.core.deployment.DeploymentPackageOptions;
 import org.eclipse.kura.core.deployment.InstallStatus;
 import org.eclipse.kura.core.deployment.download.DeploymentPackageDownloadOptions;
-import org.eclipse.kura.core.util.ProcessUtil;
-import org.eclipse.kura.core.util.SafeProcess;
+import org.eclipse.kura.core.linux.executor.LinuxSignal;
+import org.eclipse.kura.executor.Command;
+import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.osgi.service.deploymentadmin.DeploymentAdmin;
 import org.osgi.service.deploymentadmin.DeploymentException;
@@ -45,7 +49,7 @@ import org.slf4j.LoggerFactory;
 
 public class InstallImpl {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(InstallImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(InstallImpl.class);
 
     private static final int PROGRESS_COMPLETE = 100;
     private static final String MESSAGE_CONFIGURATION_FILE_NOT_SPECIFIED = "Configuration file not specified";
@@ -60,38 +64,41 @@ public class InstallImpl {
     private DeploymentPackageInstallOptions options;
     private final CloudDeploymentHandlerV2 callback;
     private DeploymentAdmin deploymentAdmin;
-    private Properties m_installPersistance;
+    private Properties installPersistance;
     private String dpaConfPath;
-    private final String m_installVerifDir;
-    private final String m_installPersistanceDir;
+    private final String installVerifDir;
+    private final String installPersistanceDir;
     private String packagesPath;
+    private CommandExecutorService executorService;
 
-    public InstallImpl(CloudDeploymentHandlerV2 callback, String kuraDataDir) {
+    public InstallImpl(CloudDeploymentHandlerV2 callback, String kuraDataDir, CommandExecutorService executorService) {
         this.callback = callback;
 
         StringBuilder pathSB = new StringBuilder();
         pathSB.append(kuraDataDir);
         pathSB.append(File.separator);
         pathSB.append(PERSISTANCE_FOLDER_NAME);
-        this.m_installPersistanceDir = pathSB.toString();
-        File installPersistanceDir = new File(this.m_installPersistanceDir);
-        if (!installPersistanceDir.exists()) {
-            installPersistanceDir.mkdir();
+        this.installPersistanceDir = pathSB.toString();
+        File installPersistanceDirFile = new File(this.installPersistanceDir);
+        if (!installPersistanceDirFile.exists()) {
+            installPersistanceDirFile.mkdir();
         }
 
         pathSB = new StringBuilder();
-        pathSB.append(this.m_installPersistanceDir);
+        pathSB.append(this.installPersistanceDir);
         pathSB.append(File.separator);
         pathSB.append(PERSISTANCE_VERIFICATION_FOLDER_NAME);
-        this.m_installVerifDir = pathSB.toString();
-        File installVerificationDir = new File(this.m_installVerifDir);
+        this.installVerifDir = pathSB.toString();
+        File installVerificationDir = new File(this.installVerifDir);
         if (!installVerificationDir.exists()) {
             installVerificationDir.mkdir();
         }
+
+        this.executorService = executorService;
     }
 
     public String getVerificationDirectory() {
-        return this.m_installVerifDir;
+        return this.installVerifDir;
     }
 
     public Properties getDeployedPackages() {
@@ -99,7 +106,7 @@ public class InstallImpl {
         try (FileInputStream fis = new FileInputStream(this.dpaConfPath);) {
             deployedPackages.load(fis);
         } catch (IOException e) {
-            s_logger.error("Error opening package configuration file", e);
+            logger.error("Error opening package configuration file", e);
         }
         return deployedPackages;
     }
@@ -120,24 +127,22 @@ public class InstallImpl {
         this.dpaConfPath = dpaConfPath;
     }
 
-    public void installDp(DeploymentPackageInstallOptions options, File dpFile) throws KuraException {
-        SafeProcess proc = null;
+    public void installDp(DeploymentPackageInstallOptions options, File dpFile) {
         try {
             installDeploymentPackageInternal(dpFile);
             installCompleteAsync(options, dpFile.getName());
-            s_logger.info("Install completed!");
+            logger.info("Install completed!");
 
             if (options.isReboot()) {
                 Thread.sleep(options.getRebootDelay());
-                proc = ProcessUtil.exec("reboot");
+                Consumer<CommandStatus> commandCallback = status -> {
+                    // Do nothing...
+                };
+                this.executorService.execute(new Command(new String[] { "reboot" }), commandCallback);
             }
         } catch (Exception e) {
-            s_logger.info("Install failed!");
+            logger.info("Install failed!");
             installFailedAsync(options, dpFile.getName(), e);
-        } finally {
-            if (proc != null) {
-                ProcessUtil.destroy(proc);
-            }
         }
     }
 
@@ -146,27 +151,26 @@ public class InstallImpl {
         updateInstallPersistance(shFile.getName(), options);
 
         // Script Exec
-        SafeProcess proc = null;
+        CommandStatus status;
+        String shFilePath;
         try {
-            proc = ProcessUtil.exec("chmod 700 " + shFile.getCanonicalPath());
+            shFilePath = shFile.getCanonicalPath();
         } catch (IOException e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
-        } finally {
-            if (proc != null) {
-                ProcessUtil.destroy(proc);
-            }
+            throw new KuraProcessExecutionErrorException(e, "Failed to get script path");
         }
 
-        SafeProcess proc2 = null;
-        try {
-            proc2 = ProcessUtil.exec(shFile.getCanonicalPath());
-        } catch (IOException e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
-        } finally {
-            if (proc2 != null) {
-                ProcessUtil.destroy(proc2);
-            }
+        Command command = new Command(new String[] { "chmod", "700", shFilePath });
+        command.setTimeout(60);
+        status = this.executorService.execute(command);
+        if ((Integer) status.getExitStatus().getExitValue() != 0) {
+            throw new KuraProcessExecutionErrorException("Failed to change file mode");
         }
+
+        status = this.executorService.execute(new Command(new String[] { shFilePath }));
+        if ((Integer) status.getExitStatus().getExitValue() != 0) {
+            throw new KuraProcessExecutionErrorException("Failed to execute script");
+        }
+
     }
 
     public void installInProgressSyncMessage(KuraResponsePayload respPayload) {
@@ -181,7 +185,7 @@ public class InstallImpl {
         respPayload.addMetric(KuraInstallPayload.METRIC_INSTALL_STATUS, InstallStatus.IDLE.getStatusString());
     }
 
-    public void installCompleteAsync(DeploymentPackageOptions options, String dpName) throws KuraException {
+    public void installCompleteAsync(DeploymentPackageOptions options, String dpName) {
         KuraInstallPayload notify = new KuraInstallPayload(options.getClientId());
         notify.setTimestamp(new Date());
         notify.setInstallStatus(InstallStatus.COMPLETED.getStatusString());
@@ -192,8 +196,7 @@ public class InstallImpl {
         this.callback.publishMessage(options, notify, RESOURCE_INSTALL);
     }
 
-    public void installFailedAsync(DeploymentPackageInstallOptions options, String dpName, Exception e)
-            throws KuraException {
+    public void installFailedAsync(DeploymentPackageInstallOptions options, String dpName, Exception e) {
         KuraInstallPayload notify = new KuraInstallPayload(options.getClientId());
         notify.setTimestamp(new Date());
         notify.setInstallStatus(InstallStatus.FAILED.getStatusString());
@@ -207,41 +210,43 @@ public class InstallImpl {
         this.callback.publishMessage(options, notify, RESOURCE_INSTALL);
     }
 
-    public void sendInstallConfirmations(String notificationPublisherPid, CloudNotificationPublisher notificationPublisher) {
-        s_logger.info("Ready to send Confirmations");
+    public void sendInstallConfirmations(String notificationPublisherPid,
+            CloudNotificationPublisher notificationPublisher) {
+        logger.info("Ready to send Confirmations");
 
-        File verificationDir = new File(this.m_installVerifDir);
+        File verificationDir = new File(this.installVerifDir);
         if (verificationDir.listFiles() != null) {
 
             for (File fileEntry : verificationDir.listFiles()) {
                 if (fileEntry.isFile() && (fileEntry.getName().endsWith(".sh") || fileEntry.getName().endsWith(".bat"))
                         && isCorrectNotificationPublisher(notificationPublisherPid, fileEntry.getName())) {
-                    SafeProcess proc = null;
+                    CommandStatus status;
+                    String fileEntryPath = "";
                     try {
-                        proc = ProcessUtil.exec("chmod 700 " + fileEntry.getCanonicalPath());
+                        fileEntryPath = fileEntry.getCanonicalPath();
                     } catch (IOException e) {
-
-                    } finally {
-                        if (proc != null) {
-                            ProcessUtil.destroy(proc);
-                        }
+                        logger.error("Failed to get script path");
                     }
 
-                    SafeProcess proc2 = null;
+                    Command command = new Command(new String[] { "chmod", "700", fileEntryPath });
+                    command.setTimeout(60);
+                    status = this.executorService.execute(command);
+                    if ((Integer) status.getExitStatus().getExitValue() != 0) {
+                        logger.error("Failed to change file mode");
+                    }
+
+                    String[] commandLine = { fileEntryPath };
                     try {
-                        proc2 = ProcessUtil.exec(fileEntry.getCanonicalPath());
-                        int exitValue = proc2.exitValue();
-                        if (exitValue == 0) {
+                        status = this.executorService.execute(new Command(commandLine));
+                        if ((Integer) status.getExitStatus().getExitValue() == 0) {
                             sendSysUpdateSuccess(fileEntry.getName(), notificationPublisher);
                         } else {
                             sendSysUpdateFailure(fileEntry.getName(), notificationPublisher);
                         }
-                    } catch (Exception e) {
-
                     } finally {
-                        fileEntry.delete();
-                        if (proc2 != null) {
-                            ProcessUtil.destroy(proc2);
+                        this.executorService.kill(commandLine, LinuxSignal.SIGKILL);
+                        if (fileEntry.delete()) {
+                            logger.error("Cannot delete file {}", fileEntry);
                         }
                     }
 
@@ -272,8 +277,8 @@ public class InstallImpl {
             // packages directory unless it's already there.
 
             if (!downloadedFile.getCanonicalPath().equals(dpPersistentFile.getCanonicalPath())) {
-                s_logger.debug("dpFile.getCanonicalPath(): {}", downloadedFile.getCanonicalPath());
-                s_logger.debug("dpPersistentFile.getCanonicalPath(): {}", dpPersistentFile.getCanonicalPath());
+                logger.debug("dpFile.getCanonicalPath(): {}", downloadedFile.getCanonicalPath());
+                logger.debug("dpPersistentFile.getCanonicalPath(): {}", dpPersistentFile.getCanonicalPath());
                 FileUtils.copyFile(downloadedFile, dpPersistentFile);
                 addPackageToConfFile(dp.getName(), "file:" + dpPersistentFilePath);
             }
@@ -292,35 +297,34 @@ public class InstallImpl {
     }
 
     private void updateInstallPersistance(String fileName, DeploymentPackageOptions options) {
-        this.m_installPersistance = new Properties();
-        this.m_installPersistance.setProperty(DeploymentPackageOptions.METRIC_DP_CLIENT_ID, options.getClientId());
-        this.m_installPersistance.setProperty(DeploymentPackageOptions.METRIC_JOB_ID,
-                Long.toString(options.getJobId()));
-        this.m_installPersistance.setProperty(DeploymentPackageOptions.METRIC_DP_NAME, fileName);
-        this.m_installPersistance.setProperty(DeploymentPackageOptions.METRIC_DP_VERSION, options.getDpVersion());
-        this.m_installPersistance.setProperty(CloudDeploymentHandlerV2.METRIC_REQUESTER_CLIENT_ID,
+        this.installPersistance = new Properties();
+        this.installPersistance.setProperty(DeploymentPackageOptions.METRIC_DP_CLIENT_ID, options.getClientId());
+        this.installPersistance.setProperty(DeploymentPackageOptions.METRIC_JOB_ID, Long.toString(options.getJobId()));
+        this.installPersistance.setProperty(DeploymentPackageOptions.METRIC_DP_NAME, fileName);
+        this.installPersistance.setProperty(DeploymentPackageOptions.METRIC_DP_VERSION, options.getDpVersion());
+        this.installPersistance.setProperty(CloudDeploymentHandlerV2.METRIC_REQUESTER_CLIENT_ID,
                 options.getRequestClientId());
-        this.m_installPersistance.setProperty(PERSISTANCE_FILE_NAME, fileName);
-        this.m_installPersistance.setProperty(DeploymentPackageOptions.NOTIFICATION_PUBLISHER_PID_KEY,
+        this.installPersistance.setProperty(PERSISTANCE_FILE_NAME, fileName);
+        this.installPersistance.setProperty(DeploymentPackageOptions.NOTIFICATION_PUBLISHER_PID_KEY,
                 options.getNotificationPublisherPid());
 
-        if (this.m_installPersistanceDir == null) {
-            s_logger.warn(MESSAGE_CONFIGURATION_FILE_NOT_SPECIFIED);
+        if (this.installPersistanceDir == null) {
+            logger.warn(MESSAGE_CONFIGURATION_FILE_NOT_SPECIFIED);
             return;
         }
 
         StringBuilder pathSB = new StringBuilder();
-        pathSB.append(this.m_installPersistanceDir);
+        pathSB.append(this.installPersistanceDir);
         pathSB.append(File.separator);
         pathSB.append(fileName);
         pathSB.append(PERSISTANCE_SUFFIX);
         String persistanceFile = pathSB.toString();
         try (FileOutputStream fos = new FileOutputStream(persistanceFile);) {
-            this.m_installPersistance.store(fos, null);
+            this.installPersistance.store(fos, null);
             fos.flush();
             fos.getFD().sync();
         } catch (IOException e) {
-            s_logger.error("Error writing remote install configuration file", e);
+            logger.error("Error writing remote install configuration file", e);
         }
     }
 
@@ -329,7 +333,7 @@ public class InstallImpl {
         deployedPackages.setProperty(packageName, packageUrl);
 
         if (this.dpaConfPath == null) {
-            s_logger.warn(MESSAGE_CONFIGURATION_FILE_NOT_SPECIFIED);
+            logger.warn(MESSAGE_CONFIGURATION_FILE_NOT_SPECIFIED);
             return;
         }
 
@@ -338,7 +342,7 @@ public class InstallImpl {
             fos.flush();
             fos.getFD().sync();
         } catch (IOException e) {
-            s_logger.error("Error writing package configuration file", e);
+            logger.error("Error writing package configuration file", e);
         }
     }
 
@@ -347,33 +351,23 @@ public class InstallImpl {
         deployedPackages.remove(packageName);
 
         if (this.dpaConfPath == null) {
-            s_logger.warn(MESSAGE_CONFIGURATION_FILE_NOT_SPECIFIED);
+            logger.warn(MESSAGE_CONFIGURATION_FILE_NOT_SPECIFIED);
             return;
         }
 
-        FileOutputStream fos = null;
-        try {
-            fos = new FileOutputStream(this.dpaConfPath);
+        try (FileOutputStream fos = new FileOutputStream(this.dpaConfPath)) {
             deployedPackages.store(fos, null);
             fos.flush();
             fos.getFD().sync();
         } catch (IOException e) {
-            s_logger.error("Error writing package configuration file", e);
-        } finally {
-            try {
-                if (fos != null) {
-                    fos.close();
-                }
-            } catch (IOException e) {
-                s_logger.error("Exception while closing opened resources!", e);
-            }
+            logger.error("Error writing package configuration file", e);
         }
     }
 
-    private void sendSysUpdateSuccess(String verificationFileName, CloudNotificationPublisher notificationPublisher) throws KuraException {
-        s_logger.info("Ready to send success after install");
+    private void sendSysUpdateSuccess(String verificationFileName, CloudNotificationPublisher notificationPublisher) {
+        logger.info("Ready to send success after install");
         String executableName = verificationFileName.split("_verifier")[0];
-        File installDir = new File(this.m_installPersistanceDir);
+        File installDir = new File(this.installPersistanceDir);
         for (File fileEntry : installDir.listFiles()) {
 
             if (fileEntry.isFile() && fileEntry.getName().endsWith(PERSISTANCE_SUFFIX)
@@ -400,21 +394,17 @@ public class InstallImpl {
                 deployOptions.setNotificationPublisherPid(notificationPid);
                 deployOptions.setNotificationPublisher(notificationPublisher);
 
-                try {
-                    installCompleteAsync(deployOptions, fileSystemFileName);
-                    s_logger.info("Sent install complete");
-                    fileEntry.delete();
-                    break;
-                } catch (KuraException e) {
-                    throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
-                }
+                installCompleteAsync(deployOptions, fileSystemFileName);
+                logger.info("Sent install complete");
+                fileEntry.delete();
+                break;
             }
 
         }
     }
 
-    private void sendSysUpdateFailure(String verificationFileName, CloudNotificationPublisher notificationPublisher) throws KuraException {
-        File installDir = new File(this.m_installPersistanceDir);
+    private void sendSysUpdateFailure(String verificationFileName, CloudNotificationPublisher notificationPublisher) {
+        File installDir = new File(this.installPersistanceDir);
         for (final File fileEntry : installDir.listFiles()) {
             if (fileEntry.isFile() && fileEntry.getName().endsWith(PERSISTANCE_SUFFIX)
                     && fileEntry.getName().contains(verificationFileName)) {
@@ -428,7 +418,7 @@ public class InstallImpl {
                 String fileSystemFileName = downloadProperties.getProperty(PERSISTANCE_FILE_NAME);
                 String requestClientId = downloadProperties
                         .getProperty(CloudDeploymentHandlerV2.METRIC_REQUESTER_CLIENT_ID);
-                
+
                 String notificationPid = downloadProperties
                         .getProperty(DeploymentPackageOptions.NOTIFICATION_PUBLISHER_PID_KEY);
 
@@ -440,15 +430,10 @@ public class InstallImpl {
                 deployOptions.setNotificationPublisherPid(notificationPid);
                 deployOptions.setNotificationPublisher(notificationPublisher);
 
-                try {
-                    installFailedAsync(deployOptions, fileSystemFileName,
-                            new KuraException(KuraErrorCode.INTERNAL_ERROR));
-                    s_logger.info("Sent install failed");
-                    fileEntry.delete();
-                    break;
-                } catch (KuraException e) {
-                    throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
-                }
+                installFailedAsync(deployOptions, fileSystemFileName, new KuraException(KuraErrorCode.INTERNAL_ERROR));
+                logger.info("Sent install failed");
+                fileEntry.delete();
+                break;
             }
         }
     }
@@ -458,14 +443,14 @@ public class InstallImpl {
         try (FileReader fr = new FileReader(installedDpPersistance);) {
             downloadProperies.load(fr);
         } catch (IOException e) {
-            s_logger.error("Exception loading install configuration file", e);
+            logger.error("Exception loading install configuration file", e);
         }
         return downloadProperies;
     }
 
     public boolean isCorrectNotificationPublisher(String pid, String verificationFileName) {
 
-        try (Stream<Path> filesStream = Files.list(Paths.get(this.m_installPersistanceDir))) {
+        try (Stream<Path> filesStream = Files.list(Paths.get(this.installPersistanceDir))) {
             List<Path> availableFiles = filesStream.filter(Files::isRegularFile).filter(filePath -> {
                 boolean isPersistanceFile = filePath.toFile().getName().endsWith(PERSISTANCE_SUFFIX);
                 if (isPersistanceFile) {
@@ -486,7 +471,7 @@ public class InstallImpl {
             }
             return result;
         } catch (IOException e) {
-            s_logger.info("Unable to parse persistance dir");
+            logger.info("Unable to parse persistance dir");
         }
         return false;
     }

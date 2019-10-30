@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2019 Eurotech and/or its affiliates and others
  *
  *   All rights reserved. This program and the accompanying materials
  *   are made available under the terms of the Eclipse Public License v1.0
@@ -13,6 +13,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,11 +26,14 @@ import java.util.List;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.core.linux.executor.LinuxExitValue;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.WifiInterfaceConfigImpl;
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.core.util.IOUtil;
+import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetConfigIP4;
 import org.eclipse.kura.net.NetInterfaceAddressConfig;
@@ -86,6 +92,11 @@ public class HostapdConfigTest {
         interfaceAddressConfigs.add(wifiInterfaceAddressConfig);
         netInterfaceConfig.setNetInterfaceAddresses(interfaceAddressConfigs);
 
+        CommandExecutorService esMock = mock(CommandExecutorService.class);
+        CommandStatus status = new CommandStatus(new LinuxExitValue(0));
+        when(esMock.execute(anyObject())).thenReturn(status);
+
+        writer.setExecutorService(esMock);
         writer.visit(config);
 
         File f = new File(TEMP_FILE);
@@ -132,6 +143,11 @@ public class HostapdConfigTest {
         netInterfaceConfig.setNetInterfaceAddresses(interfaceAddressConfigs);
 
         try {
+            CommandExecutorService esMock = mock(CommandExecutorService.class);
+            CommandStatus status = new CommandStatus(new LinuxExitValue(0));
+            when(esMock.execute(anyObject())).thenReturn(status);
+
+            writer.setExecutorService(esMock);
             writer.visit(config);
         } catch (KuraException e) {
             assertEquals(KuraErrorCode.INTERNAL_ERROR, e.getCode());
@@ -207,6 +223,11 @@ public class HostapdConfigTest {
         interfaceAddressConfigs.add(wifiInterfaceAddressConfig);
         netInterfaceConfig.setNetInterfaceAddresses(interfaceAddressConfigs);
 
+        CommandExecutorService esMock = mock(CommandExecutorService.class);
+        CommandStatus status = new CommandStatus(new LinuxExitValue(0));
+        when(esMock.execute(anyObject())).thenReturn(status);
+
+        writer.setExecutorService(esMock);
         writer.visit(config);
 
         File f = new File(TEMP_FILE);
@@ -319,6 +340,11 @@ public class HostapdConfigTest {
         interfaceAddressConfigs.add(wifiInterfaceAddressConfig);
         netInterfaceConfig.setNetInterfaceAddresses(interfaceAddressConfigs);
 
+        CommandExecutorService esMock = mock(CommandExecutorService.class);
+        CommandStatus status = new CommandStatus(new LinuxExitValue(0));
+        when(esMock.execute(anyObject())).thenReturn(status);
+
+        writer.setExecutorService(esMock);
         writer.visit(config);
 
         File f = new File(TEMP_FILE);
@@ -343,6 +369,8 @@ public class HostapdConfigTest {
         NetworkConfiguration config2 = new NetworkConfiguration();
         WifiInterfaceConfigImpl netInterfaceConfig2 = new WifiInterfaceConfigImpl(intfName);
         config2.addNetInterfaceConfig(netInterfaceConfig2);
+
+        reader.setExecutorService(esMock);
         reader.visit(config2);
 
         List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = config2
@@ -540,6 +568,11 @@ public class HostapdConfigTest {
         interfaceAddressConfigs.add(wifiInterfaceAddressConfig);
         netInterfaceConfig.setNetInterfaceAddresses(interfaceAddressConfigs);
 
+        CommandExecutorService esMock = mock(CommandExecutorService.class);
+        CommandStatus status = new CommandStatus(new LinuxExitValue(0));
+        when(esMock.execute(anyObject())).thenReturn(status);
+
+        writer.setExecutorService(esMock);
         writer.visit(config);
 
         File f = new File(TEMP_FILE);
@@ -564,6 +597,7 @@ public class HostapdConfigTest {
         NetworkConfiguration config2 = new NetworkConfiguration();
         WifiInterfaceConfigImpl netInterfaceConfig2 = new WifiInterfaceConfigImpl(intfName);
         config2.addNetInterfaceConfig(netInterfaceConfig2);
+        reader.setExecutorService(esMock);
         reader.visit(config2);
 
         List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = config2

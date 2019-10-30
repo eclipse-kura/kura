@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2019 Eurotech and/or its affiliates and others
  *
  *   All rights reserved. This program and the accompanying materials
  *   are made available under the terms of the Eclipse Public License v1.0
@@ -13,6 +13,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -34,6 +35,7 @@ import org.eclipse.kura.bluetooth.le.beacon.BluetoothLeBeaconEncoder;
 import org.eclipse.kura.bluetooth.le.beacon.BluetoothLeBeaconScanner;
 import org.eclipse.kura.bluetooth.le.beacon.listener.BluetoothLeBeaconListener;
 import org.eclipse.kura.core.testutil.TestUtil;
+import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.internal.ble.util.BluetoothProcess;
 import org.junit.Test;
 import org.osgi.service.component.ComponentContext;
@@ -506,7 +508,7 @@ public class BluetoothLeBeaconManagerImplTest {
         BluetoothLeBeaconManagerImpl svc = new BluetoothLeBeaconManagerImpl() {
 
             @Override
-            protected BluetoothProcess execBtdump(String interfaceName) throws IOException {
+            protected BluetoothProcess execBtDump(String interfaceName) throws IOException {
                 BluetoothProcess proc = mock(BluetoothProcess.class);
                 when(proc.toString()).thenReturn(interfaceName);
 
@@ -521,6 +523,10 @@ public class BluetoothLeBeaconManagerImplTest {
                 return proc;
             }
         };
+
+        CommandExecutorService esMock = mock(CommandExecutorService.class);
+        when(esMock.kill(anyObject(), anyObject())).thenReturn(true);
+        svc.setExecutorService(esMock);
 
         BluetoothLeAdapter adapter = mock(BluetoothLeAdapter.class);
         BluetoothLeBeaconDecoder<BluetoothLeBeacon> decoder = null;
@@ -555,7 +561,7 @@ public class BluetoothLeBeaconManagerImplTest {
         BluetoothLeBeaconManagerImpl svc = new BluetoothLeBeaconManagerImpl() {
 
             @Override
-            protected BluetoothProcess execBtdump(String interfaceName) throws IOException {
+            protected BluetoothProcess execBtDump(String interfaceName) throws IOException {
                 BluetoothProcess proc = mock(BluetoothProcess.class);
                 when(proc.toString()).thenReturn(interfaceName);
 

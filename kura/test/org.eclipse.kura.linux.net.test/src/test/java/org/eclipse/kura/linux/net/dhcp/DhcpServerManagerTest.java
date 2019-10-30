@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2019 Eurotech and/or its affiliates and others
  *
  *   All rights reserved. This program and the accompanying materials
  *   are made available under the terms of the Eclipse Public License v1.0
@@ -18,15 +18,15 @@ public class DhcpServerManagerTest {
     @Test
     public void testGetConfigFilename() throws NoSuchFieldException {
         String interfaceName = "eth0";
-        TestUtil.setFieldValue(new DhcpServerManager(), "dhcpServerTool", DhcpServerTool.NONE);
+        TestUtil.setFieldValue(new DhcpServerManager(null), "dhcpServerTool", DhcpServerTool.NONE);
         String fileName = DhcpServerManager.getConfigFilename(interfaceName);
         assertEquals("/etc/", fileName);
 
-        TestUtil.setFieldValue(new DhcpServerManager(), "dhcpServerTool", DhcpServerTool.DHCPD);
+        TestUtil.setFieldValue(new DhcpServerManager(null), "dhcpServerTool", DhcpServerTool.DHCPD);
         fileName = DhcpServerManager.getConfigFilename(interfaceName);
         assertEquals("/etc/dhcpd-eth0.conf", fileName);
 
-        TestUtil.setFieldValue(new DhcpServerManager(), "dhcpServerTool", DhcpServerTool.UDHCPD);
+        TestUtil.setFieldValue(new DhcpServerManager(null), "dhcpServerTool", DhcpServerTool.UDHCPD);
         fileName = DhcpServerManager.getConfigFilename(interfaceName);
         assertEquals("/etc/udhcpd-eth0.conf", fileName);
     }
@@ -34,15 +34,15 @@ public class DhcpServerManagerTest {
     @Test
     public void testGetPidFilename() throws NoSuchFieldException {
         String interfaceName = "eth0";
-        TestUtil.setFieldValue(new DhcpServerManager(), "dhcpServerTool", DhcpServerTool.NONE);
+        TestUtil.setFieldValue(new DhcpServerManager(null), "dhcpServerTool", DhcpServerTool.NONE);
         String fileName = DhcpServerManager.getPidFilename(interfaceName);
         assertEquals("/var/run/", fileName);
 
-        TestUtil.setFieldValue(new DhcpServerManager(), "dhcpServerTool", DhcpServerTool.DHCPD);
+        TestUtil.setFieldValue(new DhcpServerManager(null), "dhcpServerTool", DhcpServerTool.DHCPD);
         fileName = DhcpServerManager.getPidFilename(interfaceName);
         assertEquals("/var/run/dhcpd-eth0.pid", fileName);
 
-        TestUtil.setFieldValue(new DhcpServerManager(), "dhcpServerTool", DhcpServerTool.UDHCPD);
+        TestUtil.setFieldValue(new DhcpServerManager(null), "dhcpServerTool", DhcpServerTool.UDHCPD);
         fileName = DhcpServerManager.getPidFilename(interfaceName);
         assertEquals("/var/run/udhcpd-eth0.pid", fileName);
     }

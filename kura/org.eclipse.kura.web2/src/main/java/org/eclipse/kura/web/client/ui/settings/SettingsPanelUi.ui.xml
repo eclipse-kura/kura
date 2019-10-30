@@ -55,6 +55,8 @@
                         ui:field="deviceCert" />
                     <b:TabListItem dataTarget="#securityPanel" text="{msgs.settingsSecurityOptions}"
                         ui:field="security" visible="false"/>
+                    <b:TabListItem dataTarget="#commandUserPanel" text="Command User"
+                        ui:field="commandUser" />
                 </b:NavTabs>
                 <b:TabContent ui:field="tabContent">
                     <b:TabPane b:id="snapshotsPanel" active="true">
@@ -74,6 +76,9 @@
                     </b:TabPane>
                     <b:TabPane b:id="securityPanel">
                         <settings:SecurityTabUi ui:field="securityPanel"></settings:SecurityTabUi>
+                    </b:TabPane>
+                    <b:TabPane b:id="commandUserPanel">
+                        <settings:CommandUserTabUi ui:field="commandUserPanel"></settings:CommandUserTabUi>
                     </b:TabPane>
                 </b:TabContent>
             </b:Well>

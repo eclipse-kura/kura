@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2017 Eurotech and/or its affiliates
+    Copyright (c) 2017, 2019 Eurotech and/or its affiliates
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -15,4 +15,5 @@
       <provide interface="org.eclipse.kura.bluetooth.le.beacon.BluetoothLeBeaconManager"/>
    </service>
    <property name="service.pid" value="org.eclipse.kura.bluetooth.le.beacon.BluetoothLeBeaconManager"/>
+   <reference bind="setExecutorService" cardinality="1..1" interface="org.eclipse.kura.executor.PrivilegedExecutorService" name="PrivilegedExecutorService" policy="static" unbind="unsetExecutorService"/>
 </scr:component>

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -11,14 +11,19 @@
  *******************************************************************************/
 package org.eclipse.kura.linux.net.ppp;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStreamReader;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.core.linux.util.LinuxProcessUtil;
-import org.eclipse.kura.core.linux.util.ProcessStats;
+import org.eclipse.kura.core.linux.executor.LinuxPid;
+import org.eclipse.kura.core.linux.executor.LinuxSignal;
+import org.eclipse.kura.executor.Command;
+import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
+import org.eclipse.kura.executor.Pid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,42 +38,43 @@ public class PppLinux {
     private static final Logger logger = LoggerFactory.getLogger(PppLinux.class);
     private static Object lock = new Object();
     private static final String PPP_DAEMON = "/usr/sbin/pppd";
+    private final CommandExecutorService executorService;
 
-    public static void connect(String iface, String port) throws KuraException {
+    public PppLinux(CommandExecutorService executorService) {
+        this.executorService = executorService;
+    }
 
-        String cmd = formConnectCommand(iface, port);
-        try {
-            int status = LinuxProcessUtil.start(cmd);
-            if (status != 0) {
-                throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, cmd + " command failed");
-            }
-        } catch (Exception e) {
-            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e);
+    public void connect(String iface, String port) throws KuraException {
+
+        String[] cmd = formConnectCommand(iface, port);
+        Command command = new Command(cmd);
+        command.setTimeout(60);
+        CommandStatus status = this.executorService.execute(command);
+        if ((Integer) status.getExitStatus().getExitValue() != 0) {
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, String.join(" ", cmd) + " command failed");
         }
     }
 
-    public static void disconnect(String iface, String port) throws KuraException {
+    public void disconnect(String iface, String port) {
 
-        int pid = getPid(iface, port);
-        if (pid >= 0) {
+        Pid pid = getPid(iface, port);
+        if ((Integer) pid.getPid() >= 0) {
             logger.info("stopping {} pid={}", iface, pid);
 
-            LinuxProcessUtil.stopAndKill(pid);
-
-            if (LinuxProcessUtil.stop(pid)) {
-                logger.warn("Failed to disconnect {}", iface);
-            } else {
+            if (this.executorService.stop(pid, LinuxSignal.SIGKILL)) {
                 deleteLock(port);
+            } else {
+                logger.warn("Failed to disconnect {}", iface);
             }
         }
     }
 
-    public static boolean isPppProcessRunning(String iface, String port) throws KuraException {
+    public boolean isPppProcessRunning(String iface, String port) {
 
-        return getPid(iface, port) > 0 ? true : false;
+        return (Integer) getPid(iface, port).getPid() > 0;
     }
 
-    public static boolean isPppProcessRunning(String iface, String port, int tout) throws KuraException {
+    public boolean isPppProcessRunning(String iface, String port, int tout) {
 
         if (tout <= 0L) {
             return isPppProcessRunning(iface, port);
@@ -101,31 +107,17 @@ public class PppLinux {
         return isPppRunning;
     }
 
-    private static int getPid(String iface, String port) throws KuraException {
-        int pid;
+    private Pid getPid(String iface, String port) {
+        Pid pid = new LinuxPid(-1);
         synchronized (lock) {
-            String[] pgrepCmd = { "pgrep", "-f", "" };
-            pgrepCmd[2] = formConnectCommand(iface, port);
-            try {
-                ProcessStats processStats = LinuxProcessUtil.startWithStats(pgrepCmd);
-                pid = parseGetPid(processStats, iface);
-            } catch (Exception e) {
-                throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e);
+            String[] command = formConnectCommand(iface, port);
+            // Filter the pid whose command exactly matches the connectCommand
+            List<Pid> pids = executorService.getPids(command).entrySet().stream()
+                    .filter(entry -> entry.getKey().equals(String.join(" ", command))).map(Map.Entry::getValue)
+                    .collect(Collectors.toList());
+            if (!pids.isEmpty()) {
+                pid = pids.get(0);
             }
-        }
-        return pid;
-    }
-
-    private static int parseGetPid(ProcessStats processStats, String iface) throws KuraException {
-        int pid = -1;
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(processStats.getInputStream()))) {
-            String line = br.readLine();
-            if (line != null && line.length() > 0) {
-                pid = Integer.parseInt(line);
-                logger.trace("getPid() :: pppd pid={} for {}", pid, iface);
-            }
-        } catch (Exception e) {
-            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e);
         }
         return pid;
     }
@@ -144,9 +136,7 @@ public class PppLinux {
         }
     }
 
-    private static String formConnectCommand(String peer, String port) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(PPP_DAEMON).append(' ').append(port).append(' ').append("call").append(' ').append(peer);
-        return sb.toString();
+    private static String[] formConnectCommand(String peer, String port) {
+        return new String[] { PPP_DAEMON, port, "call", peer };
     }
 }

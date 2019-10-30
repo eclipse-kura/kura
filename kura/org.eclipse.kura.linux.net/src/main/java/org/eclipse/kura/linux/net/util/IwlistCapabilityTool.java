@@ -9,19 +9,16 @@
  *******************************************************************************/
 package org.eclipse.kura.linux.net.util;
 
-import static org.eclipse.kura.linux.net.util.LinuxNetworkUtil.formFailedCommandMessage;
-import static org.eclipse.kura.linux.net.util.LinuxNetworkUtil.formInterruptedCommandMessage;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.ByteArrayOutputStream;
 import java.util.EnumSet;
 import java.util.Set;
 
+import org.apache.commons.io.Charsets;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.core.util.ProcessUtil;
-import org.eclipse.kura.core.util.SafeProcess;
+import org.eclipse.kura.executor.Command;
+import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.net.wifi.WifiInterface.Capability;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +33,8 @@ public final class IwlistCapabilityTool {
     /*
      * Returns an empty capabilities set if the interface is not found or on error
      */
-    public static Set<Capability> probeCapabilities(String ifaceName) throws KuraException {
+    public static Set<Capability> probeCapabilities(String ifaceName, CommandExecutorService executorService)
+            throws KuraException {
         Set<Capability> capabilities = EnumSet.noneOf(Capability.class);
 
         // ignore logical interfaces like "1-1.2"
@@ -44,58 +42,42 @@ public final class IwlistCapabilityTool {
             return capabilities;
         }
 
-        SafeProcess proc = null;
-        String cmd = "iwlist " + ifaceName + " auth";
-        try {
-            // start the process
-            proc = ProcessUtil.exec(cmd);
-            if (proc.waitFor() != 0) {
-                logger.warn("error executing command --- iwlist --- exit value = {}", proc.exitValue());
-                throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, cmd, proc.exitValue());
-            }
-
-            // get the output
-            getWifiCapabilitiesParse(cmd, capabilities, proc);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formInterruptedCommandMessage(cmd));
-        } catch (Exception e) {
-            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
-        } finally {
-            if (proc != null) {
-                ProcessUtil.destroy(proc);
-            }
+        String[] cmd = { "iwlist", ifaceName, "auth" };
+        Command command = new Command(cmd);
+        command.setTimeout(60);
+        command.setOutputStream(new ByteArrayOutputStream());
+        CommandStatus status = executorService.execute(command);
+        int exitValue = (Integer) status.getExitStatus().getExitValue();
+        if (exitValue != 0) {
+            logger.warn("error executing command --- iwlist --- exit value = {}", exitValue);
+            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, String.join(" ", cmd), exitValue);
         }
+
+        // get the output
+        getWifiCapabilitiesParse(capabilities,
+                new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray(), Charsets.UTF_8));
         return capabilities;
     }
 
-    private static void getWifiCapabilitiesParse(String cmd, Set<Capability> capabilities, SafeProcess proc)
-            throws KuraException {
+    private static void getWifiCapabilitiesParse(Set<Capability> capabilities, String commandOutput) {
+        for (String line : commandOutput.split("\n")) {
+            // Remove all whitespace
+            String cleanLine = line.replaceAll("\\s", "");
 
-        try (InputStreamReader isr = new InputStreamReader(proc.getInputStream());
-                BufferedReader br = new BufferedReader(isr)) {
-            String line = null;
-            while ((line = br.readLine()) != null) {
-                // Remove all whitespace
-                String cleanLine = line.replaceAll("\\s", "");
-
-                if ("WPA".equals(cleanLine)) {
-                    capabilities.add(Capability.WPA);
-                } else if ("WPA2".equals(cleanLine)) {
-                    capabilities.add(Capability.RSN);
-                } else if ("CIPHER-TKIP".equals(cleanLine)) {
-                    capabilities.add(Capability.CIPHER_TKIP);
-                } else if ("CIPHER-CCMP".equals(cleanLine)) {
-                    capabilities.add(Capability.CIPHER_CCMP);
-                    // TODO: WEP options don't always seem to be displayed?
-                } else if ("WEP-104".equals(cleanLine)) {
-                    capabilities.add(Capability.CIPHER_WEP104);
-                } else if ("WEP-40".equals(cleanLine)) {
-                    capabilities.add(Capability.CIPHER_WEP40);
-                }
+            if ("WPA".equals(cleanLine)) {
+                capabilities.add(Capability.WPA);
+            } else if ("WPA2".equals(cleanLine)) {
+                capabilities.add(Capability.RSN);
+            } else if ("CIPHER-TKIP".equals(cleanLine)) {
+                capabilities.add(Capability.CIPHER_TKIP);
+            } else if ("CIPHER-CCMP".equals(cleanLine)) {
+                capabilities.add(Capability.CIPHER_CCMP);
+                // TODO: WEP options don't always seem to be displayed?
+            } else if ("WEP-104".equals(cleanLine)) {
+                capabilities.add(Capability.CIPHER_WEP104);
+            } else if ("WEP-40".equals(cleanLine)) {
+                capabilities.add(Capability.CIPHER_WEP40);
             }
-        } catch (IOException e) {
-            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
         }
     }
 }

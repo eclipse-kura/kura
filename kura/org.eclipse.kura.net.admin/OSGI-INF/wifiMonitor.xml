@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+    Copyright (c) 2011, 2019 Eurotech and/or its affiliates
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -23,34 +23,9 @@
               bind="setEventAdmin"
               unbind="unsetEventAdmin"
               interface="org.osgi.service.event.EventAdmin"/>
-   <reference bind="setNetworkService" 
-   			  cardinality="1..1" 
-   			  interface="org.eclipse.kura.net.NetworkService" 
-   			  name="NetworkService" 
-   			  policy="static" 
-   			  unbind="unsetNetworkService"/>
-   <reference bind="setNetworkAdminService" 
-   			  cardinality="1..1" 
-   			  interface="org.eclipse.kura.net.NetworkAdminService" 
-   			  name="NetworkAdminService" 
-   			  policy="static" 
-   			  unbind="unsetNetworkAdminService"/>
-   <reference bind="setNetworkConfigurationService" 
-   			  cardinality="1..1" 
-   			  interface="org.eclipse.kura.net.admin.NetworkConfigurationService" 
-   			  name="NetworkConfigurationService" 
-   			  policy="static" 
-   			  unbind="unsetNetworkConfigurationService"/>
-   <reference bind="setWifiDriverService" 
-   			  cardinality="0..1" 
-   			  interface="org.eclipse.kura.internal.linux.net.wifi.WifiDriverService" 
-   			  name="WifiDriverService" 
-   			  policy="static" 
-   			  unbind="unsetWifiDriverService"/>
-   <reference name="SystemService"
-              bind="setSystemService"
-              unbind="unsetSystemService"
-              cardinality="1..1"
-              policy="static"
-              interface="org.eclipse.kura.system.SystemService"/>
+   <reference bind="setNetworkService" cardinality="1..1" interface="org.eclipse.kura.net.NetworkService" name="NetworkService" policy="static" unbind="unsetNetworkService"/>
+   <reference bind="setNetworkAdminService" cardinality="1..1" interface="org.eclipse.kura.net.NetworkAdminService" name="NetworkAdminService" policy="static" unbind="unsetNetworkAdminService"/>
+   <reference bind="setNetworkConfigurationService" cardinality="1..1" interface="org.eclipse.kura.net.admin.NetworkConfigurationService" name="NetworkConfigurationService" policy="static" unbind="unsetNetworkConfigurationService"/>
+   <reference bind="setWifiDriverService" cardinality="0..1" interface="org.eclipse.kura.internal.linux.net.wifi.WifiDriverService" name="WifiDriverService" policy="static" unbind="unsetWifiDriverService"/>
+   <reference bind="setExecutorService" cardinality="1..1" interface="org.eclipse.kura.executor.PrivilegedExecutorService" name="PrivilegedExecutorService" policy="static" unbind="unsetExecutorService"/>
 </scr:component>

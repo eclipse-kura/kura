@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2019 Eurotech and/or its affiliates and others
  *
  *   All rights reserved. This program and the accompanying materials
  *   are made available under the terms of the Eclipse Public License v1.0
@@ -12,15 +12,17 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.anyLong;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -38,11 +40,15 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.comm.CommURI;
+import org.eclipse.kura.core.linux.executor.LinuxExitValue;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.modem.ModemInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.modem.ModemInterfaceConfigImpl;
 import org.eclipse.kura.core.net.modem.ModemInterfaceImpl;
 import org.eclipse.kura.core.testutil.TestUtil;
+import org.eclipse.kura.executor.Command;
+import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetConfigIP4;
@@ -122,9 +128,9 @@ public class ModemMonitorServiceImplTest {
         assertTrue(((Map) TestUtil.getFieldValue(svc, "modems")).isEmpty());
     }
 
+    @SuppressWarnings("unchecked")
     @Test
-    public void testActivateWithUsbModem()
-            throws Throwable {
+    public void testActivateWithUsbModem() throws Throwable {
         // enters creation of a modem, and ends up activating the GPS
 
         ModemMonitorServiceImpl svc = new ModemMonitorServiceImpl() {
@@ -133,14 +139,14 @@ public class ModemMonitorServiceImplTest {
             protected Class<? extends CellularModemFactory> getModemFactoryClass(ModemDevice modemDevice) {
                 return TestModemFactory.class;
             }
-            
+
             @Override
             IModemLinkService getPppService(String interfaceName, String port) {
                 final IModemLinkService modemLinkServiceMock = mock(IModemLinkService.class);
                 try {
                     when(modemLinkServiceMock.getPppState()).thenReturn(PppState.CONNECTED);
                 } catch (KuraException e) {
-                    //no need
+                    // no need
                 }
                 return modemLinkServiceMock;
             }
@@ -194,6 +200,77 @@ public class ModemMonitorServiceImplTest {
         EventAdmin eaMock = mock(EventAdmin.class);
         svc.setEventAdmin(eaMock);
 
+        CommandExecutorService esMock = mock(CommandExecutorService.class);
+
+        CommandStatus linkStatus = new CommandStatus(new LinuxExitValue(0));
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        DataOutputStream out = new DataOutputStream(outputStream);
+        out.write(
+                "3: ppp1: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc pfifo_fast state DOWN mode DEFAULT group default qlen 1000\\    link/ether b8:27:eb:ed:9c:83 brd ff:ff:ff:ff:ff:ff"
+                        .getBytes());
+        outputStream.flush();
+        outputStream.close();
+        linkStatus.setOutputStream(outputStream);
+        String[] cmd = {"ip", "-o", "link", "show", "dev", "ppp1"};
+        Command linkStatusCommand = new Command(cmd);
+        linkStatusCommand.setTimeout(60);
+        when(esMock.execute(linkStatusCommand)).thenReturn(linkStatus);
+        
+        CommandStatus addrStatus = new CommandStatus(new LinuxExitValue(0));
+        outputStream = new ByteArrayOutputStream();
+        out = new DataOutputStream(outputStream);
+        out.write(
+                "3: ppp1    inet 172.16.1.1/24 brd 172.16.1.255 scope global ppp1\\       valid_lft forever preferred_lft forever"
+                        .getBytes());
+        outputStream.flush();
+        outputStream.close();
+        addrStatus.setOutputStream(outputStream);
+        cmd = new String[] {"ip", "-o", "-4", "addr", "show", "dev", "ppp1"};
+        Command addrStatusCommand = new Command(cmd);
+        addrStatusCommand.setTimeout(60);
+        when(esMock.execute(addrStatusCommand)).thenReturn(addrStatus);
+
+        CommandStatus infoStatus = new CommandStatus(new LinuxExitValue(0));
+        cmd = new String[] {"iw", "dev", "ppp1", "info"};
+        Command infoCommand = new Command(cmd);
+        infoCommand.setTimeout(60);
+        when(esMock.execute(infoCommand)).thenReturn(infoStatus);
+        
+        CommandStatus iwconfigStatus = new CommandStatus(new LinuxExitValue(0));
+        cmd = new String[] {"iwconfig", "ppp1"};
+        Command iwconfigCommand = new Command(cmd);
+        iwconfigCommand.setTimeout(60);
+        outputStream = new ByteArrayOutputStream();
+        out = new DataOutputStream(outputStream);
+        out.write("ppp1     IEEE 802.11  Mode:Master  Tx-Power=31 dBm\n        Retry short limit:7   RTS thr:off   Fragment thr:off\n        Power Management:on".getBytes());
+        outputStream.flush();
+        outputStream.close();
+        iwconfigStatus.setOutputStream(outputStream);
+        when(esMock.execute(iwconfigCommand)).thenReturn(iwconfigStatus);
+        
+        CommandStatus ethtoolStatus = new CommandStatus(new LinuxExitValue(0));
+        cmd = new String[] {"ethtool", "-i", "ppp1"};
+        Command ethtoolCommand = new Command(cmd);
+        ethtoolCommand.setTimeout(60);
+        outputStream = new ByteArrayOutputStream();
+        out = new DataOutputStream(outputStream);
+        out.write(("driver: e1000\n" + 
+                "        version: 7.3.21-k8-NAPI\n" + 
+                "        firmware-version: \n" + 
+                "        expansion-rom-version: \n" + 
+                "        bus-info: 0000:00:03.0\n" + 
+                "        supports-statistics: yes\n" + 
+                "        supports-test: yes\n" + 
+                "        supports-eeprom-access: yes\n" + 
+                "        supports-register-dump: yes\n" + 
+                "        supports-priv-flags: no").getBytes());
+        outputStream.flush();
+        outputStream.close();
+        ethtoolStatus.setOutputStream(outputStream);
+        when(esMock.execute(ethtoolCommand)).thenReturn(ethtoolStatus);
+        
+        svc.setExecutorService(esMock);
+
         doAnswer(invocation -> {
             Event event = invocation.getArgumentAt(0, Event.class);
 
@@ -243,14 +320,13 @@ public class ModemMonitorServiceImplTest {
         // modem mock
         setModemMock(modemDevice);
 
-        
         TestUtil.setFieldValue(svc, "task", mock(Future.class));
 
         svc.activate();
         svc.sync();
 
         TestUtil.invokePrivate(svc, "monitor");
-        
+
         verify(eaMock, times(5)).postEvent(anyObject());
 
         assertTrue((boolean) TestUtil.getFieldValue(svc, "serviceActivated"));
@@ -328,7 +404,7 @@ public class ModemMonitorServiceImplTest {
 
         WifiMonitorServiceImpl svc = new WifiMonitorServiceImpl();
 
-        String topic = "topic"; // wrong event topic
+        String topic = "topic"; // wrong event topicx
         Map<String, ?> properties = null;
         Event event = new Event(topic, properties);
 
@@ -884,6 +960,75 @@ public class ModemMonitorServiceImplTest {
 
         svc.setNetworkService(nsMock);
         svc.setEventAdmin(mock(EventAdmin.class));
+
+        org.eclipse.kura.executor.CommandExecutorService esMock = mock(
+                org.eclipse.kura.executor.CommandExecutorService.class);
+
+        CommandStatus linkStatus = new CommandStatus(new LinuxExitValue(0));
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        DataOutputStream out = new DataOutputStream(outputStream);
+        out.write(
+                "3: ppp0: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc pfifo_fast state DOWN mode DEFAULT group default qlen 1000\\    link/ether b8:27:eb:ed:9c:83 brd ff:ff:ff:ff:ff:ff"
+                        .getBytes());
+        outputStream.flush();
+        outputStream.close();
+        linkStatus.setOutputStream(outputStream);
+        String[] cmd = {"ip", "-o", "link", "show", "dev", "ppp0"};
+        Command linkStatusCommand = new Command(cmd);
+        linkStatusCommand.setTimeout(60);
+        when(esMock.execute(linkStatusCommand)).thenReturn(linkStatus);
+
+        CommandStatus addrStatus = new CommandStatus(new LinuxExitValue(0));
+        outputStream = new ByteArrayOutputStream();
+        out = new DataOutputStream(outputStream);
+        out.write(
+                "3: ppp0    inet 172.16.1.1/24 brd 172.16.1.255 scope global ppp0\\       valid_lft forever preferred_lft forever"
+                        .getBytes());
+        outputStream.flush();
+        outputStream.close();
+        addrStatus.setOutputStream(outputStream);
+        cmd = new String[] {"ip", "-o", "-4", "addr", "show", "dev", "ppp0"};
+        Command addrStatusCommand = new Command(cmd);
+        addrStatusCommand.setTimeout(60);
+        when(esMock.execute(addrStatusCommand)).thenReturn(addrStatus);
+
+        CommandStatus infoStatus = new CommandStatus(new LinuxExitValue(0));
+        cmd = new String[] {"iw", "dev", "ppp0", "info"};
+        Command infoCommand = new Command(cmd);
+        infoCommand.setTimeout(60);
+        when(esMock.execute(infoCommand)).thenReturn(infoStatus);
+
+        CommandStatus iwconfigStatus = new CommandStatus(new LinuxExitValue(0));
+        cmd = new String[] {"iwconfig", "ppp0"};
+        Command iwconfigCommand = new Command(cmd);
+        iwconfigCommand.setTimeout(60);
+        outputStream = new ByteArrayOutputStream();
+        out = new DataOutputStream(outputStream);
+        out.write(
+                "ppp0     IEEE 802.11  Mode:Master  Tx-Power=31 dBm\n        Retry short limit:7   RTS thr:off   Fragment thr:off\n        Power Management:on"
+                        .getBytes());
+        outputStream.flush();
+        outputStream.close();
+        iwconfigStatus.setOutputStream(outputStream);
+        when(esMock.execute(iwconfigCommand)).thenReturn(iwconfigStatus);
+
+        CommandStatus ethtoolStatus = new CommandStatus(new LinuxExitValue(0));
+        cmd = new String[] {"ethtool", "-i", "ppp0"};
+        Command ethtoolCommand = new Command(cmd);
+        ethtoolCommand.setTimeout(60);
+        outputStream = new ByteArrayOutputStream();
+        out = new DataOutputStream(outputStream);
+        out.write(("driver: e1000\n" + "        version: 7.3.21-k8-NAPI\n" + "        firmware-version: \n"
+                + "        expansion-rom-version: \n" + "        bus-info: 0000:00:03.0\n"
+                + "        supports-statistics: yes\n" + "        supports-test: yes\n"
+                + "        supports-eeprom-access: yes\n" + "        supports-register-dump: yes\n"
+                + "        supports-priv-flags: no").getBytes());
+        outputStream.flush();
+        outputStream.close();
+        ethtoolStatus.setOutputStream(outputStream);
+        when(esMock.execute(ethtoolCommand)).thenReturn(ethtoolStatus);
+
+        svc.setExecutorService(esMock);
 
         svc.activate();
         svc.addModem("ppp0", mockModem);

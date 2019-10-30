@@ -7,11 +7,12 @@ Bundle-Vendor: Eclipse Kura
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .
 Bundle-ActivationPolicy: lazy
-Import-Package: org.junit,
- org.junit.runners,
- org.slf4j;version="[1.7.0,2.0.0)",
+Import-Package: org.eclipse.kura.core.linux.executor;version="1.0.0",
  org.eclipse.kura.core.testutil;version="1.0.0",
+ org.junit,
+ org.junit.runners,
  org.mockito;version="1.10.19",
  org.mockito.invocation;version="1.10.19",
- org.mockito.stubbing;version="1.10.19"
+ org.mockito.stubbing;version="1.10.19",
+ org.slf4j;version="1.6.4"
 Fragment-Host: org.eclipse.kura.core.cloud;bundle-version="1.1.500"

@@ -20,6 +20,7 @@
    </service>
    
    <property name="kura.ui.service.hide" type="Boolean" value="true"/>
+   <property name="kura.ui.factory.hide" type="Boolean" value="true"/>
    
    <reference name="DataTransportService"
               bind="setDataTransportService" 

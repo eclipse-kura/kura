@@ -38,10 +38,10 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.cloud.factory.CloudServiceFactory;
+import org.eclipse.kura.cloudconnection.factory.CloudConnectionFactory;
 import org.eclipse.kura.configuration.ComponentConfiguration;
-import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
-import org.eclipse.kura.configuration.SelfConfiguringComponent;
 import org.eclipse.kura.configuration.metatype.AD;
 import org.eclipse.kura.configuration.metatype.Icon;
 import org.eclipse.kura.configuration.metatype.OCD;
@@ -100,7 +100,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
     private static final String DRIVER_PID = "driver.pid";
     private static final String KURA_SERVICE_PID = ConfigurationService.KURA_SERVICE_PID;
     private static final String SERVICE_FACTORY_PID = "service.factoryPid";
-    private static final String KURA_UI_SERVICE_HIDE = "kura.ui.service.hide";
+    // private static final String KURA_UI_SERVICE_HIDE = "kura.ui.service.hide";
     private static final String PATTERN_SERVICE_PROVIDE_DRIVER = "provide interface=\"org.eclipse.kura.driver.Driver\"";
 
     private static final int SERVICE_WAIT_TIMEOUT = 60;
@@ -312,7 +312,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
 
         ConfigurationService cs = ServiceLocator.getInstance().getService(ConfigurationService.class);
         List<String> result = new ArrayList<>();
-        List<String> servicesToBeHidden = new ArrayList<>();
+        List<String> cloudConnectionFactoriesToBeHidden = new ArrayList<>();
 
         // finding all wire components to remove from the list as these factory
         // instances
@@ -324,7 +324,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
         List<String> hiddenFactories = findFactoryHideComponents();
 
         // finding services with kura.service.ui.hide property
-        fillServicesToHideList(servicesToBeHidden);
+        fillCloudConnectionFactoriesToHideList(cloudConnectionFactoriesToBeHidden);
 
         // get all the factory PIDs tracked by Configuration Service
         result.addAll(cs.getFactoryComponentPids());
@@ -332,17 +332,9 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
         // remove all the wire components and the services to be hidden as these
         // are shown in different UI
         result.removeAll(allWireComponents);
-        result.removeAll(servicesToBeHidden);
+        result.removeAll(cloudConnectionFactoriesToBeHidden);
         result.removeAll(hiddenFactories);
-        result.stream().forEach(pid -> {
-            try {
-                ComponentConfigurationImpl cc = (ComponentConfigurationImpl) cs.getDefaultComponentConfiguration(pid);
-                OCD ocd = cc.getLocalizedDefinition(LocaleContextHolder.getLocale().getLanguage());
-                auditLogger.info("ccc:{}", ocd);
-            } catch (KuraException e) {
 
-            }
-        });
         auditLogger.info(SUCCESSFULLY_LISTED_COMPONENT_CONFIGS_MESSAGE,
                 session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
         return result;
@@ -357,7 +349,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
             try {
                 cc = (ComponentConfigurationImpl) cs.getDefaultComponentConfiguration(pid);
             } catch (KuraException e) {
-                return "error";
+                return "error:" + pid;
             }
             OCD ocd = cc.getLocalizedDefinition(LocaleContextHolder.getLocale().getLanguage());
             return ocd.getName();
@@ -440,11 +432,26 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
     }
 
     private List<String> findFactoryHideComponents() throws GwtKuraException {
+        final String hideStr = "kura.ui.factory.hide";
         return ServiceLocator.applyToServiceOptionally(ServiceComponentRuntime.class,
-                scr -> scr.getComponentDescriptionDTOs().stream()
-                        .filter(dto -> dto.properties.containsKey("kura.ui.factory.hide")
-                                || Arrays.asList(dto.serviceInterfaces).contains("org.eclipse.kura.driver.Driver"))
-                        .map(dto -> dto.name).collect(Collectors.toList()));
+                scr -> scr.getComponentDescriptionDTOs().stream().filter(dto -> {
+
+                    if (dto.properties.containsKey(hideStr)) {
+                        Boolean ishide = false;
+                        Object ishideObj = dto.properties.get(hideStr);
+                        if (ishideObj instanceof Boolean)
+                            ishide = (Boolean) ishideObj;
+                        else
+                            ishide = Boolean.parseBoolean(ishideObj.toString());
+                        if (ishide == null || ishide.equals(Boolean.TRUE))
+                            return true;
+                        else
+                            return false;
+                    } else if (Arrays.asList(dto.serviceInterfaces).contains("org.eclipse.kura.driver.Driver"))
+                        return true;
+                    else
+                        return false;
+                }).map(dto -> dto.name).collect(Collectors.toList()));
     }
 
     private List<ComponentConfiguration> sortConfigurationsByName(List<ComponentConfiguration> configs) {
@@ -485,25 +492,23 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
         }
     }
 
-    private void fillServicesToHideList(List<String> hidePidsList) throws GwtKuraException {
-        Collection<ServiceReference<ConfigurableComponent>> configurableComponentReferences = ServiceLocator
-                .getInstance().getServiceReferences(ConfigurableComponent.class, null);
-
-        Collection<ServiceReference<SelfConfiguringComponent>> selfConfiguringComponentReferences = ServiceLocator
-                .getInstance().getServiceReferences(SelfConfiguringComponent.class, null);
-
-        List<ServiceReference<?>> componentReferences = new ArrayList<>();
-        componentReferences.addAll(configurableComponentReferences);
-        componentReferences.addAll(selfConfiguringComponentReferences);
-
-        for (ServiceReference<?> componentReference : componentReferences) {
-            Object propertyObject = componentReference.getProperty(KURA_SERVICE_PID);
-            if (componentReference.getProperty(KURA_UI_SERVICE_HIDE) != null && propertyObject != null) {
-                String servicePid = (String) propertyObject;
-                hidePidsList.add(servicePid);
+    private void fillCloudConnectionFactoriesToHideList(List<String> hidePidsList) throws GwtKuraException {
+        ServiceLocator.withAllServiceReferences(CloudConnectionFactory.class, null, (ref, ctx) -> {
+            try {
+                CloudConnectionFactory cloudServiceFactory = ctx.getService(ref);
+                hidePidsList.add(cloudServiceFactory.getFactoryPid());
+            } finally {
+                ctx.ungetService(ref);
             }
-            ServiceLocator.getInstance().ungetService(componentReference);
-        }
+        });
+        ServiceLocator.withAllServiceReferences(CloudServiceFactory.class, null, (ref, ctx) -> {
+            try {
+                CloudServiceFactory cloudServiceFactory = ctx.getService(ref);
+                hidePidsList.add(cloudServiceFactory.getFactoryPid());
+            } finally {
+                ctx.ungetService(ref);
+            }
+        });
     }
 
     private List<GwtConfigComponent> findFilteredComponentConfigurationsInternal() throws GwtKuraException {

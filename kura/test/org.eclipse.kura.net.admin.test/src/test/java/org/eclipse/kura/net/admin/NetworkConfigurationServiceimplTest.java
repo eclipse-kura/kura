@@ -43,6 +43,7 @@ import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
 import org.eclipse.kura.core.net.WifiInterfaceImpl;
 import org.eclipse.kura.core.net.modem.ModemInterfaceImpl;
 import org.eclipse.kura.core.testutil.TestUtil;
+import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.net.NetInterface;
 import org.eclipse.kura.net.NetInterfaceAddress;
 import org.eclipse.kura.net.NetInterfaceAddressConfig;
@@ -57,7 +58,6 @@ import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventHandler;
-
 
 public class NetworkConfigurationServiceimplTest {
 
@@ -266,6 +266,11 @@ public class NetworkConfigurationServiceimplTest {
 
                 invocations[0] = true;
             }
+
+            @Override
+            public void setExecutorService(CommandExecutorService executorService) {
+                // Do nothing...
+            }
         };
         visitors.add(visitor);
         TestUtil.setFieldValue(svc, "writeVisitors", visitors);
@@ -345,6 +350,11 @@ public class NetworkConfigurationServiceimplTest {
             public void visit(NetworkConfiguration config) throws KuraException {
                 visited.set(true);
             }
+
+            @Override
+            public void setExecutorService(CommandExecutorService executorService) {
+                // Do nothing...
+            }
         };
         visitors.add(visitor);
         TestUtil.setFieldValue(svc, "readVisitors", visitors);
@@ -392,6 +402,11 @@ public class NetworkConfigurationServiceimplTest {
 
             @Override
             public void visit(NetworkConfiguration config) throws KuraException {
+            }
+
+            @Override
+            public void setExecutorService(CommandExecutorService executorService) {
+                // Do nothing...
             }
         };
         visitors.add(visitor);
@@ -477,6 +492,11 @@ public class NetworkConfigurationServiceimplTest {
             public void visit(NetworkConfiguration config) throws KuraException {
                 visited.set(true);
             }
+
+            @Override
+            public void setExecutorService(CommandExecutorService executorService) {
+                // Do nothing...
+            }
         };
         visitors.add(visitor);
         TestUtil.setFieldValue(svc, "readVisitors", visitors);
@@ -530,7 +550,7 @@ public class NetworkConfigurationServiceimplTest {
                 assertTrue(ad.isRequired());
                 adsConfigured++;
             }
-            
+
             if ("net.interface.eth2.config.dhcpClient4.enabled".equals(ad.getId())) {
                 assertEquals("net.interface.eth2.config.dhcpClient4.enabled", ad.getName());
                 assertEquals("BOOLEAN", ad.getType().name());
@@ -677,7 +697,7 @@ public class NetworkConfigurationServiceimplTest {
                 assertTrue(ad.isRequired());
                 adsConfigured++;
             }
-            
+
             if ("net.interface.wlan1.config.dhcpClient4.enabled".equals(ad.getId())) {
                 assertEquals("net.interface.wlan1.config.dhcpClient4.enabled", ad.getName());
                 assertEquals("BOOLEAN", ad.getType().name());

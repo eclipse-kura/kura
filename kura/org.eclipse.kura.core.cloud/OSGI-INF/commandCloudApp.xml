@@ -32,4 +32,5 @@
      	<provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
    	</service>
    	<property name="service.pid" type="String" value="org.eclipse.kura.cloud.app.command.CommandCloudApp"/>
+    <reference bind="setExecutorService" cardinality="1..1" interface="org.eclipse.kura.executor.PrivilegedExecutorService" name="PrivilegedExecutorService" policy="static" unbind="unsetExecutorService"/>
 </scr:component>

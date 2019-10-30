@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 Eurotech and others
+ * Copyright (c) 2011, 2019 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -17,7 +17,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.net.InetAddress;
@@ -28,16 +27,17 @@ import java.net.UnknownHostException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Properties;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.util.IOUtil;
 import org.eclipse.kura.core.util.NetUtil;
-import org.eclipse.kura.core.util.ProcessUtil;
-import org.eclipse.kura.core.util.SafeProcess;
+import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.net.NetInterface;
 import org.eclipse.kura.net.NetInterfaceAddress;
 import org.eclipse.kura.net.NetworkService;
@@ -50,9 +50,21 @@ import org.slf4j.LoggerFactory;
 
 public class SystemServiceImpl extends SuperSystemService implements SystemService {
 
+    private static final String DMIDECODE_COMMAND = "dmidecode -t system";
+
+    private static final String SPACES_REGEX = ":\\s+";
+
+    private static final String BIN_SH = "/bin/sh";
+
+    private static final String LINUX_2_6_34_12_WR4_3_0_0_STANDARD = "2.6.34.12-WR4.3.0.0_standard";
+
+    private static final String LINUX_2_6_34_9_WR4_2_0_0_STANDARD = "2.6.34.9-WR4.2.0.0_standard";
+
     private static final Logger logger = LoggerFactory.getLogger(SystemServiceImpl.class);
 
     private static final String CLOUDBEES_SECURITY_SETTINGS_PATH = "/private/eurotech/settings-security.xml";
+    private static final String LOG4J_CONFIGURATION = "log4j.configuration";
+    private static final String DPA_CONFIGURATION = "dpa.configuration";
     private static final String KURA_PATH = "/opt/eclipse/kura";
     private static final String OS_WINDOWS = "windows";
 
@@ -62,6 +74,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
     private ComponentContext componentContext;
 
     private NetworkService networkService;
+    private CommandExecutorService executorService;
 
     // ----------------------------------------------------------------
     //
@@ -74,6 +87,14 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
     public void unsetNetworkService(NetworkService networkService) {
         this.networkService = null;
+    }
+
+    public void setExecutorService(CommandExecutorService executorService) {
+        this.executorService = executorService;
+    }
+
+    public void unsetExecutorService(CommandExecutorService executorService) {
+        this.executorService = null;
     }
 
     // ----------------------------------------------------------------
@@ -112,15 +133,15 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
                 updateTriggered = true;
                 logger.warn("Overridding invalid kura.properties location");
             }
-            if (System.getProperty("dpa.configuration") != null
-                    && System.getProperty("dpa.configuration").trim().equals("kura/dpa.properties")) {
-                System.setProperty("dpa.configuration", "/opt/eclipse/kura/data/dpa.properties");
+            if (System.getProperty(DPA_CONFIGURATION) != null
+                    && System.getProperty(DPA_CONFIGURATION).trim().equals("kura/dpa.properties")) {
+                System.setProperty(DPA_CONFIGURATION, "/opt/eclipse/kura/data/dpa.properties");
                 updateTriggered = true;
                 logger.warn("Overridding invalid dpa.properties location");
             }
-            if (System.getProperty("log4j.configuration") != null
-                    && System.getProperty("log4j.configuration").trim().equals("file:kura/log4j.properties")) {
-                System.setProperty("log4j.configuration", "file:/opt/eclipse/kura/user/log4j.properties");
+            if (System.getProperty(LOG4J_CONFIGURATION) != null
+                    && System.getProperty(LOG4J_CONFIGURATION).trim().equals("file:kura/log4j.properties")) {
+                System.setProperty(LOG4J_CONFIGURATION, "file:/opt/eclipse/kura/user/log4j.properties");
                 updateTriggered = true;
                 logger.warn("Overridding invalid log4j.properties location");
             }
@@ -132,26 +153,13 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             String kuraFrameworkConfig = System.getProperty(KEY_KURA_FRAMEWORK_CONFIG_DIR);
             String kuraUserConfig = System.getProperty(KEY_KURA_USER_CONFIG_DIR);
             String kuraConfig = System.getProperty(KURA_CONFIG);
-            String kuraProperties = readResource(KURA_PROPS_FILE);
+            String kuraProps = readResource(KURA_PROPS_FILE);
 
-            if (kuraProperties != null) {
-                kuraDefaults.load(new StringReader(kuraProperties));
+            if (kuraProps != null) {
+                kuraDefaults.load(new StringReader(kuraProps));
                 logger.info("Loaded Jar Resource kura.properties.");
             } else if (kuraConfig != null) {
-                try {
-                    final URL kuraConfigUrl = new URL(kuraConfig);
-                    final InputStream in = kuraConfigUrl.openStream();
-                    try {
-                        kuraDefaults.load(in);
-                    } finally {
-                        if (in != null) {
-                            in.close();
-                        }
-                    }
-                    logger.info("Loaded URL kura.properties: {}", kuraConfig);
-                } catch (Exception e) {
-                    logger.warn("Could not open kuraConfig URL", e);
-                }
+                loadKuraDefaults(kuraDefaults, kuraConfig);
             } else if (kuraFrameworkConfig != null) {
                 File kuraPropsFile = new File(kuraFrameworkConfig + File.separator + KURA_PROPS_FILE);
                 if (kuraPropsFile.exists()) {
@@ -194,20 +202,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
                 kuraCustomProps.load(new StringReader(kuraCustomProperties));
                 logger.info("Loaded Jar Resource: {}", KURA_CUSTOM_PROPS_FILE);
             } else if (kuraCustomConfig != null) {
-                try {
-                    final URL kuraConfigUrl = new URL(kuraCustomConfig);
-                    final InputStream in = kuraConfigUrl.openStream();
-                    try {
-                        kuraCustomProps.load(in);
-                    } finally {
-                        if (in != null) {
-                            in.close();
-                        }
-                    }
-                    logger.info("Loaded URL kura_custom.properties: {}", kuraCustomConfig);
-                } catch (Exception e) {
-                    logger.warn("Could not open kuraCustomConfig URL: ", e);
-                }
+                loadKuraCustom(kuraCustomProps, kuraCustomConfig);
             } else if (kuraUserConfig != null) {
                 File kuraCustomPropsFile = new File(kuraUserConfig + File.separator + KURA_CUSTOM_PROPS_FILE);
                 if (kuraCustomPropsFile.exists()) {
@@ -231,7 +226,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             // more path overrides based on earlier Kura problem with relative paths
             if (kuraDefaults.getProperty(KEY_KURA_HOME_DIR) != null
                     && kuraDefaults.getProperty(KEY_KURA_HOME_DIR).trim().equals("kura")) {
-                kuraDefaults.setProperty(KEY_KURA_HOME_DIR, "/opt/eclipse/kura");
+                kuraDefaults.setProperty(KEY_KURA_HOME_DIR, KURA_PATH);
                 updateTriggered = true;
                 logger.warn("Overridding invalid kura.home location");
             }
@@ -470,10 +465,33 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
                 createDirIfNotExists(getKuraTemporaryConfigDirectory());
             }
 
-            logger.info(new StringBuffer().append("Kura version ").append(getKuraVersion()).append(" is starting")
-                    .toString());
+            logger.info("Kura version {} is starting", getKuraVersion());
         } catch (IOException e) {
             throw new ComponentException("Error loading default properties", e);
+        }
+    }
+
+    private void loadKuraCustom(Properties kuraCustomProps, String kuraCustomConfig) {
+        try {
+            final URL kuraConfigUrl = new URL(kuraCustomConfig);
+            try (InputStream in = kuraConfigUrl.openStream()) {
+                kuraCustomProps.load(in);
+            }
+            logger.info("Loaded URL kura_custom.properties: {}", kuraCustomConfig);
+        } catch (Exception e) {
+            logger.warn("Could not open kuraCustomConfig URL: ", e);
+        }
+    }
+
+    private void loadKuraDefaults(Properties kuraDefaults, String kuraConfig) {
+        try {
+            final URL kuraConfigUrl = new URL(kuraConfig);
+            try (InputStream in = kuraConfigUrl.openStream()) {
+                kuraDefaults.load(in);
+            }
+            logger.info("Loaded URL kura.properties: {}", kuraConfig);
+        } catch (Exception e) {
+            logger.warn("Could not open kuraConfig URL", e);
         }
     }
 
@@ -512,92 +530,85 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
     @Override
     public String getPrimaryMacAddress() {
         String primaryNetworkInterfaceName = getPrimaryNetworkInterfaceName();
-        String macAddress = null;
-        InetAddress ip;
 
         if (OS_MAC_OSX.equals(getOsName())) {
-            SafeProcess proc = null;
-            try {
-                logger.info("executing: ifconfig and looking for {}", primaryNetworkInterfaceName);
-                proc = ProcessUtil.exec("ifconfig");
-                BufferedReader br = null;
-                try {
-                    proc.waitFor();
-                    br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-                    String line = null;
-                    while ((line = br.readLine()) != null) {
-                        if (line.startsWith(primaryNetworkInterfaceName)) {
-                            // get the next line and save the MAC
-                            line = br.readLine();
-                            if (line == null) {
-                                throw new IOException("Null imput!");
-                            }
-                            if (!line.trim().startsWith("ether")) {
-                                line = br.readLine();
-                            }
-                            String[] splitLine = line.split(" ");
-                            if (splitLine.length > 0) {
-                                return splitLine[1].toUpperCase();
-                            }
-                        }
-                    }
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    logger.error("Exception while executing ifconfig!", e);
-                } finally {
-                    if (br != null) {
-                        try {
-                            br.close();
-                        } catch (IOException ex) {
-                            logger.error("I/O Exception while closing BufferedReader!");
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                logger.error("Failed to get network interfaces", e);
-            } finally {
-                if (proc != null) {
-                    ProcessUtil.destroy(proc);
-                }
-            }
+            return getPrimaryMacAddressOSX(primaryNetworkInterfaceName);
         } else if (getOsName().toLowerCase().startsWith(OS_WINDOWS)) {
-            try {
-                logger.info("executing: InetAddress.getLocalHost {}", primaryNetworkInterfaceName);
-                ip = InetAddress.getLocalHost();
-                // Windows options are either ethX or wlanX, and eth0 may really not be the correct one
-                InetAddress ip2 = getPrimaryIPWindows("eth");
-                if (ip2 == null) {
-                    ip2 = getPrimaryIPWindows("wlan");
-                }
-                if (ip2 != null) {
-                    ip = ip2;
-                }
-                NetworkInterface network = NetworkInterface.getByInetAddress(ip);
-                byte[] mac = network.getHardwareAddress();
-                macAddress = NetUtil.hardwareAddressToString(mac);
-                logger.info("macAddress {}", macAddress);
-            } catch (UnknownHostException e) {
-                logger.error(e.getLocalizedMessage());
-            } catch (SocketException e) {
-                logger.error(e.getLocalizedMessage());
-            }
+            return getPrimaryMacAddressWindows(primaryNetworkInterfaceName);
         } else {
-            try {
-                List<NetInterface<? extends NetInterfaceAddress>> interfaces = this.networkService
-                        .getNetworkInterfaces();
-                if (interfaces != null) {
-                    for (NetInterface<? extends NetInterfaceAddress> iface : interfaces) {
-                        if (iface.getName() != null && getPrimaryNetworkInterfaceName().equals(iface.getName())) {
-                            macAddress = NetUtil.hardwareAddressToString(iface.getHardwareAddress());
-                            break;
-                        }
+            return getPrimaryMacAddressLinux(primaryNetworkInterfaceName);
+        }
+    }
+
+    private String getPrimaryMacAddressOSX(String primaryNetworkInterfaceName) {
+        String macAddress = null;
+        try {
+            logger.info("executing: ifconfig and looking for {}", primaryNetworkInterfaceName);
+            List<String> out = Arrays
+                    .asList(runSystemCommand("ifconfig", false, this.executorService).split("\\r?\\n"));
+            ListIterator<String> iterator = out.listIterator();
+            String line;
+            while (iterator.hasNext()) {
+                line = iterator.next();
+                if (line.startsWith(primaryNetworkInterfaceName)) {
+                    // get the next line and save the MAC
+                    line = iterator.next();
+                    if (line == null) {
+                        throw new IOException("Null input!");
+                    }
+                    if (!line.trim().startsWith("ether")) {
+                        line = iterator.next();
+                    }
+                    String[] splitLine = line.split(" ");
+                    if (splitLine.length > 0) {
+                        macAddress = splitLine[1].toUpperCase();
                     }
                 }
-            } catch (KuraException e) {
-                logger.error("Failed to get network interfaces", e);
             }
+        } catch (IOException e) {
+            logger.error("Failed to get network interfaces", e);
         }
+        return macAddress;
+    }
 
+    private String getPrimaryMacAddressWindows(String primaryNetworkInterfaceName) {
+        String macAddress = null;
+        try {
+            logger.info("executing: InetAddress.getLocalHost {}", primaryNetworkInterfaceName);
+            InetAddress ip = InetAddress.getLocalHost();
+            // Windows options are either ethX or wlanX, and eth0 may really not be the correct one
+            InetAddress ip2 = getPrimaryIPWindows("eth");
+            if (ip2 == null) {
+                ip2 = getPrimaryIPWindows("wlan");
+            }
+            if (ip2 != null) {
+                ip = ip2;
+            }
+            NetworkInterface network = NetworkInterface.getByInetAddress(ip);
+            byte[] mac = network.getHardwareAddress();
+            macAddress = NetUtil.hardwareAddressToString(mac);
+            logger.info("macAddress {}", macAddress);
+        } catch (UnknownHostException | SocketException e) {
+            logger.error(e.getLocalizedMessage());
+        }
+        return macAddress;
+    }
+
+    private String getPrimaryMacAddressLinux(String primaryNetworkInterfaceName) {
+        String macAddress = null;
+        try {
+            List<NetInterface<? extends NetInterfaceAddress>> interfaces = this.networkService.getNetworkInterfaces();
+            if (interfaces != null) {
+                for (NetInterface<? extends NetInterfaceAddress> iface : interfaces) {
+                    if (iface.getName() != null && primaryNetworkInterfaceName.equals(iface.getName())) {
+                        macAddress = NetUtil.hardwareAddressToString(iface.getHardwareAddress());
+                        break;
+                    }
+                }
+            }
+        } catch (KuraException e) {
+            logger.error("Failed to get network interfaces", e);
+        }
         return macAddress;
     }
 
@@ -637,7 +648,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             } else if (OS_LINUX.equals(getOsName())) {
                 return "eth0";
             } else if (getOsName().toLowerCase().startsWith(OS_WINDOWS)) {
-                return "windows";
+                return OS_WINDOWS;
             } else {
                 logger.error("Unsupported platform");
                 return null;
@@ -941,24 +952,24 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
         String biosVersion = UNSUPPORTED;
 
         if (OS_LINUX.equals(getOsName())) {
-            if ("2.6.34.9-WR4.2.0.0_standard".equals(getOsVersion())
-                    || "2.6.34.12-WR4.3.0.0_standard".equals(getOsVersion())) {
-                biosVersion = runSystemCommand("eth_vers_bios");
+            if (LINUX_2_6_34_9_WR4_2_0_0_STANDARD.equals(getOsVersion())
+                    || LINUX_2_6_34_12_WR4_3_0_0_STANDARD.equals(getOsVersion())) {
+                biosVersion = runSystemCommand("eth_vers_bios", false, this.executorService);
             } else {
-                String biosTmp = runSystemCommand("dmidecode -s bios-version");
+                String biosTmp = runSystemCommand("dmidecode -s bios-version", false, this.executorService);
                 if (biosTmp.length() > 0 && !biosTmp.contains("Permission denied")) {
                     biosVersion = biosTmp;
                 }
             }
         } else if (OS_MAC_OSX.equals(getOsName())) {
-            String[] cmds = { "/bin/sh", "-c", "system_profiler SPHardwareDataType | grep 'Boot ROM'" };
-            String biosTmp = runSystemCommand(cmds);
+            String[] cmds = { BIN_SH, "-c", "system_profiler SPHardwareDataType | grep 'Boot ROM'" };
+            String biosTmp = runSystemCommand(cmds, true, this.executorService);
             if (biosTmp.contains(": ")) {
-                biosVersion = biosTmp.split(":\\s+")[1];
+                biosVersion = biosTmp.split(SPACES_REGEX)[1];
             }
         } else if (getOsName().toLowerCase().startsWith(OS_WINDOWS)) {
             String[] cmds = { "wmic", "bios", "get", "smbiosbiosversion" };
-            String biosTmp = runSystemCommand(cmds);
+            String biosTmp = runSystemCommand(cmds, false, this.executorService);
             if (biosTmp.contains("SMBIOSBIOSVersion")) {
                 biosVersion = biosTmp.split("SMBIOSBIOSVersion\\s+")[1];
                 biosVersion = biosVersion.trim();
@@ -977,12 +988,13 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
         String deviceName = UNKNOWN;
         if (OS_MAC_OSX.equals(getOsName())) {
-            String displayTmp = runSystemCommand("scutil --get ComputerName");
+            String displayTmp = runSystemCommand("scutil --get ComputerName", false, this.executorService);
             if (displayTmp.length() > 0) {
                 deviceName = displayTmp;
             }
-        } else if (OS_LINUX.equals(getOsName()) || OS_CLOUDBEES.equals(getOsName()) || getOsName().toLowerCase().startsWith(OS_WINDOWS)) {
-            String displayTmp = runSystemCommand("hostname");
+        } else if (OS_LINUX.equals(getOsName()) || OS_CLOUDBEES.equals(getOsName())
+                || getOsName().toLowerCase().startsWith(OS_WINDOWS)) {
+            String displayTmp = runSystemCommand("hostname", false, this.executorService);
             if (displayTmp.length() > 0) {
                 deviceName = displayTmp;
             }
@@ -1000,11 +1012,12 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
         String fwVersion = UNSUPPORTED;
 
         if (OS_LINUX.equals(getOsName()) && getOsVersion() != null) {
-            if (getOsVersion().startsWith("2.6.34.9-WR4.2.0.0_standard")
-                    || getOsVersion().startsWith("2.6.34.12-WR4.3.0.0_standard")) {
-                fwVersion = runSystemCommand("eth_vers_cpld") + " " + runSystemCommand("eth_vers_uctl");
+            if (getOsVersion().startsWith(LINUX_2_6_34_9_WR4_2_0_0_STANDARD)
+                    || getOsVersion().startsWith(LINUX_2_6_34_12_WR4_3_0_0_STANDARD)) {
+                fwVersion = runSystemCommand("eth_vers_cpld", false, this.executorService) + " "
+                        + runSystemCommand("eth_vers_uctl", false, this.executorService);
             } else if (getOsVersion().startsWith("3.0.35-12.09.01+yocto")) {
-                fwVersion = runSystemCommand("eth_vers_avr");
+                fwVersion = runSystemCommand("eth_vers_avr", false, this.executorService);
             }
         }
         return fwVersion;
@@ -1020,18 +1033,18 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
         String modelId = UNKNOWN;
 
         if (OS_MAC_OSX.equals(getOsName())) {
-            String modelTmp = runSystemCommand("sysctl -b hw.model");
+            String modelTmp = runSystemCommand("sysctl -b hw.model", false, this.executorService);
             if (modelTmp.length() > 0) {
                 modelId = modelTmp;
             }
         } else if (OS_LINUX.equals(getOsName())) {
-            String modelTmp = runSystemCommand("dmidecode -t system");
+            String modelTmp = runSystemCommand(DMIDECODE_COMMAND, false, this.executorService);
             if (modelTmp.contains("Version: ")) {
                 modelId = modelTmp.split("Version:\\s+")[1].split("\n")[0];
             }
         } else if (getOsName().toLowerCase().startsWith(OS_WINDOWS)) {
             String[] cmds = { "wmic", "baseboard", "get", "Version" };
-            String biosTmp = runSystemCommand(cmds);
+            String biosTmp = runSystemCommand(cmds, false, this.executorService);
             if (biosTmp.contains("Version")) {
                 modelId = biosTmp.split("Version\\s+")[1];
                 modelId = modelId.trim();
@@ -1051,19 +1064,19 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
         String modelName = UNKNOWN;
 
         if (OS_MAC_OSX.equals(getOsName())) {
-            String[] cmds = { "/bin/sh", "-c", "system_profiler SPHardwareDataType | grep 'Model Name'" };
-            String modelTmp = runSystemCommand(cmds);
+            String[] cmds = { BIN_SH, "-c", "system_profiler SPHardwareDataType | grep 'Model Name'" };
+            String modelTmp = runSystemCommand(cmds, true, this.executorService);
             if (modelTmp.contains(": ")) {
-                modelName = modelTmp.split(":\\s+")[1];
+                modelName = modelTmp.split(SPACES_REGEX)[1];
             }
         } else if (OS_LINUX.equals(getOsName())) {
-            String modelTmp = runSystemCommand("dmidecode -t system");
+            String modelTmp = runSystemCommand(DMIDECODE_COMMAND, false, this.executorService);
             if (modelTmp.contains("Product Name: ")) {
                 modelName = modelTmp.split("Product Name:\\s+")[1].split("\n")[0];
             }
         } else if (getOsName().toLowerCase().startsWith(OS_WINDOWS)) {
             String[] cmds = { "wmic", "baseboard", "get", "Product" };
-            String biosTmp = runSystemCommand(cmds);
+            String biosTmp = runSystemCommand(cmds, false, this.executorService);
             if (biosTmp.contains("Product")) {
                 modelName = biosTmp.split("Product\\s+")[1];
                 modelName = modelName.trim();
@@ -1083,9 +1096,10 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
         String partNumber = UNSUPPORTED;
 
         if (OS_LINUX.equals(getOsName())) {
-            if ("2.6.34.9-WR4.2.0.0_standard".equals(getOsVersion())
-                    || "2.6.34.12-WR4.3.0.0_standard".equals(getOsVersion())) {
-                partNumber = runSystemCommand("eth_partno_bsp") + " " + runSystemCommand("eth_partno_epr");
+            if (LINUX_2_6_34_9_WR4_2_0_0_STANDARD.equals(getOsVersion())
+                    || LINUX_2_6_34_12_WR4_3_0_0_STANDARD.equals(getOsVersion())) {
+                partNumber = runSystemCommand("eth_partno_bsp", false, this.executorService) + " "
+                        + runSystemCommand("eth_partno_epr", false, this.executorService);
             }
         }
 
@@ -1102,19 +1116,19 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
         String serialNum = UNKNOWN;
 
         if (OS_MAC_OSX.equals(getOsName())) {
-            String[] cmds = { "/bin/sh", "-c", "system_profiler SPHardwareDataType | grep 'Serial Number'" };
-            String serialTmp = runSystemCommand(cmds);
+            String[] cmds = { BIN_SH, "-c", "system_profiler SPHardwareDataType | grep 'Serial Number'" };
+            String serialTmp = runSystemCommand(cmds, true, this.executorService);
             if (serialTmp.contains(": ")) {
-                serialNum = serialTmp.split(":\\s+")[1];
+                serialNum = serialTmp.split(SPACES_REGEX)[1];
             }
         } else if (OS_LINUX.equals(getOsName())) {
-            String serialTmp = runSystemCommand("dmidecode -t system");
+            String serialTmp = runSystemCommand(DMIDECODE_COMMAND, false, this.executorService);
             if (serialTmp.contains("Serial Number: ")) {
                 serialNum = serialTmp.split("Serial Number:\\s+")[1].split("\n")[0];
             }
         } else if (getOsName().toLowerCase().startsWith(OS_WINDOWS)) {
             String[] cmds = { "wmic", "bios", "get", "SerialNumber" };
-            String biosTmp = runSystemCommand(cmds);
+            String biosTmp = runSystemCommand(cmds, false, this.executorService);
             if (biosTmp.contains("SerialNumber")) {
                 serialNum = biosTmp.split("SerialNumber\\s+")[1];
                 serialNum = serialNum.trim();
@@ -1157,10 +1171,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
         if (servicesToIgnore != null && !servicesToIgnore.trim().isEmpty()) {
             String[] servicesArray = servicesToIgnore.split(",");
             if (servicesArray != null && servicesArray.length > 0) {
-                for (String service : servicesArray) {
-                    services.add(service);
-                }
-                return services;
+                services = Arrays.asList(servicesArray);
             }
         }
 
@@ -1191,9 +1202,10 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
         String hostname = UNKNOWN;
 
         if (OS_MAC_OSX.equals(getOsName())) {
-            hostname = runSystemCommand("scutil --get ComputerName");
-        } else if (OS_LINUX.equals(getOsName()) || OS_CLOUDBEES.equals(getOsName()) || getOsName().toLowerCase().startsWith(OS_WINDOWS)) {
-            hostname = runSystemCommand("hostname");
+            hostname = runSystemCommand("scutil --get ComputerName", false, this.executorService);
+        } else if (OS_LINUX.equals(getOsName()) || OS_CLOUDBEES.equals(getOsName())
+                || getOsName().toLowerCase().startsWith(OS_WINDOWS)) {
+            hostname = runSystemCommand("hostname", false, this.executorService);
         }
 
         return hostname;

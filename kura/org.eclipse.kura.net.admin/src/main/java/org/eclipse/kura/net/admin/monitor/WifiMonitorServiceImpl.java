@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -34,16 +34,17 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.net.AbstractNetInterface;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.WifiInterfaceConfigImpl;
+import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.internal.board.BoardPowerState;
 import org.eclipse.kura.internal.linux.net.wifi.WifiDriverService;
 import org.eclipse.kura.linux.net.route.RouteService;
 import org.eclipse.kura.linux.net.route.RouteServiceImpl;
 import org.eclipse.kura.linux.net.util.IScanTool;
 import org.eclipse.kura.linux.net.util.IwLinkTool;
+import org.eclipse.kura.linux.net.util.IwconfigLinkTool;
 import org.eclipse.kura.linux.net.util.LinkTool;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.eclipse.kura.linux.net.util.ScanTool;
-import org.eclipse.kura.linux.net.util.iwconfigLinkTool;
 import org.eclipse.kura.linux.net.wifi.WifiOptions;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetConfig;
@@ -92,6 +93,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
     private EventAdmin eventAdmin;
     private NetworkAdminService netAdminService;
     private NetworkConfigurationService netConfigService;
+    private CommandExecutorService executorService;
     private List<WifiClientMonitorListener> listeners;
     private Set<String> enabledInterfaces;
     private Set<String> disabledInterfaces;
@@ -100,6 +102,8 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
     private ExecutorService executor;
     private NetworkConfiguration currentNetworkConfiguration;
     private NetworkConfiguration newNetConfiguration;
+    private RouteService routeService;
+    private LinuxNetworkUtil linuxNetworkUtil;
 
     private WifiDriverService wifiDriverService;
 
@@ -149,6 +153,14 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
         this.wifiDriverService = null;
     }
 
+    public void setExecutorService(CommandExecutorService executorService) {
+        this.executorService = executorService;
+    }
+
+    public void unsetExecutorService(CommandExecutorService executorService) {
+        this.executorService = null;
+    }
+
     protected void activate(ComponentContext componentContext) {
         logger.debug("Activating WifiMonitor Service...");
         this.first = true;
@@ -157,6 +169,8 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
         this.unmanagedInterfaces = new HashSet<>();
         this.interfaceStatuses = new HashMap<>();
         this.executor = Executors.newSingleThreadExecutor();
+        this.routeService = new RouteServiceImpl(this.executorService);
+        this.linuxNetworkUtil = new LinuxNetworkUtil(this.executorService);
         stopThread = new AtomicBoolean();
         Dictionary<String, String[]> d = new Hashtable<>();
         d.put(EventConstants.EVENT_TOPIC, EVENT_TOPICS);
@@ -194,28 +208,29 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
     }
 
     protected LinkTool getLinkTool(String interfaceName) throws KuraException {
-        Collection<String> supportedWifiOptions = WifiOptions.getSupportedOptions(interfaceName);
+        Collection<String> supportedWifiOptions = new WifiOptions(this.executorService)
+                .getSupportedOptions(interfaceName);
         LinkTool linkTool = null;
         if (!supportedWifiOptions.isEmpty()) {
             if (supportedWifiOptions.contains(WifiOptions.WIFI_MANAGED_DRIVER_NL80211)) {
-                linkTool = new IwLinkTool(interfaceName);
+                linkTool = new IwLinkTool(interfaceName, this.executorService);
             } else if (supportedWifiOptions.contains(WifiOptions.WIFI_MANAGED_DRIVER_WEXT)) {
-                linkTool = new iwconfigLinkTool(interfaceName);
+                linkTool = new IwconfigLinkTool(interfaceName, this.executorService);
             }
         }
         return linkTool;
     }
 
     protected NetInterfaceType getNetworkType(String interfaceName) throws KuraException {
-        return LinuxNetworkUtil.getType(interfaceName);
+        return this.linuxNetworkUtil.getType(interfaceName);
     }
 
     protected RouteService getRouteService() {
-        return RouteServiceImpl.getInstance();
+        return this.routeService;
     }
 
     protected IScanTool getScanTool(String interfaceName) throws KuraException {
-        return ScanTool.get(interfaceName);
+        return ScanTool.get(interfaceName, this.executorService);
     }
 
     protected boolean isWifiDeviceOn(String interfaceName) {
@@ -299,10 +314,12 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                         // Update the current wifi state
                         this.interfaceStatuses.remove(interfaceName);
                         NetConfigIP4 netConfig = ((AbstractNetInterface<?>) wifiInterfaceConfig).getIP4config();
-                        boolean isL2Only = netConfig.getStatus() == NetInterfaceStatus.netIPv4StatusL2Only ? true
-                                : false;
-                        this.interfaceStatuses.put(interfaceName,
-                                new InterfaceState(NetInterfaceType.WIFI, interfaceName, isL2Only));
+                        boolean isL2Only = netConfig.getStatus() == NetInterfaceStatus.netIPv4StatusL2Only;
+                        InterfaceStateBuilder builder = new InterfaceStateBuilder(this.executorService);
+                        builder.setInterfaceName(interfaceName);
+                        builder.setType(NetInterfaceType.WIFI);
+                        builder.setL2OnlyInterface(isL2Only);
+                        this.interfaceStatuses.put(interfaceName, builder.buildInterfaceState());
                     }
 
                     // Get current state
@@ -424,14 +441,13 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                             NetConfigIP4 netConfigIP4 = ((AbstractNetInterface<?>) wifiInterfaceConfig).getIP4config();
                             if (netConfigIP4.getStatus().equals(NetInterfaceStatus.netIPv4StatusEnabledLAN)
                                     && netConfigIP4.isDhcp()) {
-                                RouteService rs = RouteServiceImpl.getInstance();
-                                RouteConfig rconf = rs.getDefaultRoute(interfaceName);
+                                RouteConfig rconf = this.routeService.getDefaultRoute(interfaceName);
                                 if (rconf != null) {
                                     logger.debug(
                                             "monitor() :: {} is configured for LAN/DHCP - removing GATEWAY route ...",
                                             rconf.getInterfaceName());
-                                    rs.removeStaticRoute(rconf.getDestination(), rconf.getGateway(), rconf.getNetmask(),
-                                            rconf.getInterfaceName());
+                                    this.routeService.removeStaticRoute(rconf.getDestination(), rconf.getGateway(),
+                                            rconf.getNetmask(), rconf.getInterfaceName());
                                 }
                             }
                         } else if (WifiMode.MASTER.equals(wifiConfig.getMode()) && !wifiState.isLinkUp()) {
@@ -1005,9 +1021,13 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
             }
             WifiConfig wifiConfig = getWifiConfig(wifiInterfaceConfig);
             boolean isL2Only = ((AbstractNetInterface<?>) wifiInterfaceConfig).getIP4config()
-                    .getStatus() == NetInterfaceStatus.netIPv4StatusL2Only ? true : false;
+                    .getStatus() == NetInterfaceStatus.netIPv4StatusL2Only;
             if (wifiConfig != null) {
-                statuses.put(interfaceName, new WifiInterfaceState(interfaceName, wifiConfig.getMode(), isL2Only));
+                InterfaceStateBuilder builder = new InterfaceStateBuilder(this.executorService);
+                builder.setInterfaceName(interfaceName);
+                builder.setWifiMode(wifiConfig.getMode());
+                builder.setL2OnlyInterface(isL2Only);
+                statuses.put(interfaceName, builder.buildWifiInterfaceState());
             }
         }
         return statuses;

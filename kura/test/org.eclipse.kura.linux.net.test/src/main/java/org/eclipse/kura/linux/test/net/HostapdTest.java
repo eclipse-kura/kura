@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -14,6 +14,7 @@ package org.eclipse.kura.linux.test.net;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.linux.net.wifi.HostapdManager;
 import org.eclipse.kura.test.annotation.TestTarget;
 import org.junit.BeforeClass;
@@ -26,9 +27,21 @@ import junit.framework.TestCase;
 public class HostapdTest extends TestCase {
 
     private static final Logger s_logger = LoggerFactory.getLogger(HostapdTest.class);
-    private static CountDownLatch dependencyLatch = new CountDownLatch(0);  // initialize with number of dependencies
+    private static CountDownLatch dependencyLatch = new CountDownLatch(1);  // initialize with number of dependencies
 
     private static final String IFACE_NAME = "wlan0";
+    private HostapdManager hostapdManager;
+    private static CommandExecutorService executorService;
+
+    public void setExecutorService(CommandExecutorService executorService) {
+        HostapdTest.executorService = executorService;
+        dependencyLatch.countDown();
+    }
+
+    public void unsetExecutorService(CommandExecutorService executorService) {
+        HostapdTest.executorService = null;
+        dependencyLatch.countDown();
+    }
 
     @Override
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
@@ -42,6 +55,7 @@ public class HostapdTest extends TestCase {
             fail("OSGi dependencies unfulfilled");
             System.exit(1);
         }
+        this.hostapdManager = new HostapdManager(HostapdTest.executorService);
     }
 
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
@@ -50,10 +64,10 @@ public class HostapdTest extends TestCase {
         s_logger.info("Test start hostapd");
 
         try {
-            HostapdManager.start(IFACE_NAME);
-            assertTrue("hostapd is started", HostapdManager.isRunning(IFACE_NAME));
+            this.hostapdManager.start(IFACE_NAME);
+            assertTrue("hostapd is started", this.hostapdManager.isRunning(IFACE_NAME));
 
-            boolean validPid = (HostapdManager.getPid(IFACE_NAME) > 0) ? true : false;
+            boolean validPid = (this.hostapdManager.getPid(IFACE_NAME) > 0) ? true : false;
             assertTrue("Valid hostapd PID", validPid);
         } catch (Exception e) {
             fail("testEnable failed: " + e);
@@ -66,8 +80,8 @@ public class HostapdTest extends TestCase {
         s_logger.info("Test stop hostapd");
 
         try {
-            HostapdManager.stop(IFACE_NAME);
-            assertFalse("hostapd is disabled", HostapdManager.isRunning(IFACE_NAME));
+            this.hostapdManager.stop(IFACE_NAME);
+            assertFalse("hostapd is disabled", this.hostapdManager.isRunning(IFACE_NAME));
         } catch (Exception e) {
             fail("testDisable failed: " + e);
         }

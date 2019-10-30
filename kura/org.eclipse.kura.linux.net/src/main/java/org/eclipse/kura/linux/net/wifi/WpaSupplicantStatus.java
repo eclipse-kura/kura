@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -11,13 +11,17 @@
  *******************************************************************************/
 package org.eclipse.kura.linux.net.wifi;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Properties;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.core.util.ProcessUtil;
-import org.eclipse.kura.core.util.SafeProcess;
+import org.eclipse.kura.executor.Command;
+import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,31 +41,32 @@ public class WpaSupplicantStatus {
 
     private Properties props = null;
 
-    public WpaSupplicantStatus(String iface) throws KuraException {
+    public WpaSupplicantStatus(String iface, CommandExecutorService executorService) throws KuraException {
 
         this.props = new Properties();
-        SafeProcess proc = null;
+        String[] cmd = formSupplicantStatusCommand(iface);
+        Command command = new Command(cmd);
+        command.setTimeout(60);
+        command.setOutputStream(new ByteArrayOutputStream());
+        CommandStatus status = executorService.execute(command);
+        int exitValue = (Integer) status.getExitStatus().getExitValue();
+        if (exitValue != 0) {
+            if (logger.isErrorEnabled()) {
+                logger.error("error executing command --- {} --- exit value = {}", String.join(" ", cmd), exitValue);
+            }
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, "Failed to get wpa supplicant status");
+        }
+
         try {
-            proc = ProcessUtil.exec(formSupplicantStatusCommand(iface));
-            if (proc.waitFor() != 0) {
-                logger.error("error executing command --- {} --- exit value = {}", formSupplicantStatusCommand(iface),
-                        proc.exitValue());
-                throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR);
-            }
+            this.props.load(new ByteArrayInputStream(((ByteArrayOutputStream) status.getOutputStream()).toByteArray()));
+        } catch (IOException e) {
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, "Failed to parse wpa supplicant status");
+        }
 
-            this.props.load(proc.getInputStream());
-
-            Enumeration<Object> keys = this.props.keys();
-            while (keys.hasMoreElements()) {
-                String key = (String) keys.nextElement();
-                logger.trace("[WpaSupplicant Status] {} = {}", key, this.props.getProperty(key));
-            }
-        } catch (Exception e) {
-            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, e);
-        } finally {
-            if (proc != null) {
-                ProcessUtil.destroy(proc);
-            }
+        Enumeration<Object> keys = this.props.keys();
+        while (keys.hasMoreElements()) {
+            String key = (String) keys.nextElement();
+            logger.trace("[WpaSupplicant Status] {} = {}", key, this.props.getProperty(key));
         }
     }
 
@@ -101,11 +106,7 @@ public class WpaSupplicantStatus {
         return this.props.getProperty(PROP_ADDRESS);
     }
 
-    private static String formSupplicantStatusCommand(String iface) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("wpa_cli -i ");
-        sb.append(iface);
-        sb.append(" status");
-        return sb.toString();
+    private static String[] formSupplicantStatusCommand(String iface) {
+        return new String[] { "wpa_cli", "-i", iface, "status" };
     }
 }

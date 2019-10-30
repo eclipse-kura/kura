@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -17,34 +17,45 @@ import java.util.List;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
+import org.eclipse.kura.executor.CommandExecutorService;
 
 public class LinuxWriteVisitor implements NetworkConfigurationVisitor {
 
-    private static LinuxWriteVisitor s_instance;
+    private static LinuxWriteVisitor instance;
+    private CommandExecutorService executorService;
 
-    private final List<NetworkConfigurationVisitor> m_visitors;
+    private final List<NetworkConfigurationVisitor> visitors;
 
     private LinuxWriteVisitor() {
-        this.m_visitors = new ArrayList<NetworkConfigurationVisitor>();
-        this.m_visitors.add(IfcfgConfigWriter.getInstance());
-        this.m_visitors.add(WifiConfigWriter.getInstance());
-        this.m_visitors.add(PppConfigWriter.getInstance());
-        this.m_visitors.add(DhcpConfigWriter.getInstance());
-        this.m_visitors.add(FirewallAutoNatConfigWriter.getInstance());
+        this.visitors = new ArrayList<>();
+        this.visitors.add(IfcfgConfigWriter.getInstance());
+        this.visitors.add(WifiConfigWriter.getInstance());
+        this.visitors.add(PppConfigWriter.getInstance());
+        this.visitors.add(DhcpConfigWriter.getInstance());
+        this.visitors.add(FirewallAutoNatConfigWriter.getInstance());
     }
 
     public static LinuxWriteVisitor getInstance() {
-        if (s_instance == null) {
-            s_instance = new LinuxWriteVisitor();
+        if (instance == null) {
+            instance = new LinuxWriteVisitor();
         }
 
-        return s_instance;
+        return instance;
     }
 
     @Override
     public void visit(NetworkConfiguration config) throws KuraException {
-        for (NetworkConfigurationVisitor visitor : this.m_visitors) {
+        for (NetworkConfigurationVisitor visitor : this.visitors) {
+            visitor.setExecutorService(this.executorService);
             visitor.visit(config);
         }
+
+        // After every visit, unset the executorService. This must be set before every call.
+        this.executorService = null;
+    }
+
+    @Override
+    public void setExecutorService(CommandExecutorService executorService) {
+        this.executorService = executorService;
     }
 }

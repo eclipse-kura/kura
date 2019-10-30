@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2019 Eurotech and/or its affiliates and others
  *
  *   All rights reserved. This program and the accompanying materials
  *   are made available under the terms of the Eclipse Public License v1.0
@@ -22,6 +22,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -38,12 +41,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.core.linux.executor.LinuxExitValue;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.WifiAccessPointImpl;
 import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.WifiInterfaceConfigImpl;
 import org.eclipse.kura.core.net.modem.ModemInterfaceConfigImpl;
 import org.eclipse.kura.core.testutil.TestUtil;
+import org.eclipse.kura.executor.Command;
+import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.linux.net.route.RouteService;
 import org.eclipse.kura.linux.net.util.IScanTool;
 import org.eclipse.kura.linux.net.util.LinkTool;
@@ -423,12 +430,12 @@ public class WifiMonitorServiceImplTest {
         // no new configuration => only disable interfaces
 
         WifiMonitorServiceImpl svc = new WifiMonitorServiceImpl();
-        
+
         String interfaceName = "wlan1";
 
         Set<String> interfaces = new HashSet<>();
         interfaces.add(interfaceName);
-        
+
         WifiInterfaceConfigImpl wifiInterfaceConfig = new WifiBuilder(interfaceName)
                 .addWifiInterfaceAddressConfig(WifiMode.UNKNOWN)
                 .addNetConfigIP4(NetInterfaceStatus.netIPv4StatusDisabled, false).build();
@@ -436,13 +443,13 @@ public class WifiMonitorServiceImplTest {
         NetworkConfiguration nc = new NetworkConfiguration();
         nc.addNetInterfaceConfig(wifiInterfaceConfig);
         TestUtil.setFieldValue(svc, "newNetConfiguration", nc); // add to new configurations - enabled for enabling
-        
+
         TestUtil.invokePrivate(svc, "updateInterfacesLists", interfaces);
-        
+
         Set<String> enabled = (Set<String>) TestUtil.getFieldValue(svc, "enabledInterfaces");
         Set<String> disabled = (Set<String>) TestUtil.getFieldValue(svc, "disabledInterfaces");
         Set<String> unmanaged = (Set<String>) TestUtil.getFieldValue(svc, "unmanagedInterfaces");
-        
+
         assertNotNull(enabled);
         assertTrue(enabled.isEmpty());
         assertNotNull(disabled);
@@ -493,7 +500,7 @@ public class WifiMonitorServiceImplTest {
         String interfaceName1 = "wlan0";
         String interfaceName2 = "wlan1";
         String interfaceName3 = "wlan2";
-        
+
         Set<String> interfaces = new HashSet<>();
         interfaces.add(interfaceName1);
         interfaces.add(interfaceName2);
@@ -791,13 +798,25 @@ public class WifiMonitorServiceImplTest {
     }
 
     @Test
-    public void testGetSignalLevelNoInterface() throws NoSuchFieldException, UnknownHostException, KuraException {
+    public void testGetSignalLevelNoInterface() throws NoSuchFieldException, KuraException, IOException {
         // test with interface status not filled for the selected interface
 
         String wlan1 = "wlan1";
         String ssid = "mySSID";
 
+        CommandExecutorService esMock = mock(CommandExecutorService.class);
+        CommandStatus status = new CommandStatus(new LinuxExitValue(0));
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        DataOutputStream out = new DataOutputStream(outputStream);
+        out.write(
+                "wlan1     IEEE 802.11  Mode:Master  Tx-Power=31 dBm\n        Retry short limit:7   RTS thr:off   Fragment thr:off\n        Power Management:on"
+                        .getBytes());
+        outputStream.flush();
+        outputStream.close();
+        status.setOutputStream(outputStream);
+        when(esMock.execute(anyObject())).thenReturn(status);
         WifiMonitorServiceImpl svc = new WifiMonitorServiceImpl();
+        svc.setExecutorService(esMock);
 
         Map<String, InterfaceState> stats = new HashMap<>();
         TestUtil.setFieldValue(svc, "interfaceStatuses", stats);
@@ -940,6 +959,72 @@ public class WifiMonitorServiceImplTest {
                 return type;
             }
         };
+
+        CommandExecutorService esMock = mock(CommandExecutorService.class);
+
+        CommandStatus linkStatus = new CommandStatus(new LinuxExitValue(0));
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        DataOutputStream out = new DataOutputStream(outputStream);
+        out.write(
+                "3: wlan3: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc pfifo_fast state DOWN mode DEFAULT group default qlen 1000\\    link/ether b8:27:eb:ed:9c:83 brd ff:ff:ff:ff:ff:ff"
+                        .getBytes());
+        outputStream.flush();
+        outputStream.close();
+        linkStatus.setOutputStream(outputStream);
+        String[] cmd = { "ip", "-o", "link", "show", "dev", "wlan3" };
+        Command linkStatusCommand = new Command(cmd);
+        linkStatusCommand.setTimeout(60);
+        when(esMock.execute(linkStatusCommand)).thenReturn(linkStatus);
+
+        CommandStatus addrStatus = new CommandStatus(new LinuxExitValue(0));
+        outputStream = new ByteArrayOutputStream();
+        out = new DataOutputStream(outputStream);
+        out.write(
+                "3: wlan3    inet 172.16.1.1/24 brd 172.16.1.255 scope global wlan3\\       valid_lft forever preferred_lft forever"
+                        .getBytes());
+        outputStream.flush();
+        outputStream.close();
+        addrStatus.setOutputStream(outputStream);
+        cmd = new String[] { "ip", "-o", "-4", "addr", "show", "dev", "wlan3" };
+        Command addrStatusCommand = new Command(cmd);
+        addrStatusCommand.setTimeout(60);
+        when(esMock.execute(addrStatusCommand)).thenReturn(addrStatus);
+
+        CommandStatus infoStatus = new CommandStatus(new LinuxExitValue(0));
+        cmd = new String[] { "iw", "dev", "wlan3", "info" };
+        Command infoCommand = new Command(cmd);
+        infoCommand.setTimeout(60);
+        when(esMock.execute(infoCommand)).thenReturn(infoStatus);
+
+        CommandStatus iwconfigStatus = new CommandStatus(new LinuxExitValue(0));
+        cmd = new String[] { "iwconfig", "wlan3" };
+        Command iwconfigCommand = new Command(cmd);
+        iwconfigCommand.setTimeout(60);
+        outputStream = new ByteArrayOutputStream();
+        out = new DataOutputStream(outputStream);
+        out.write(
+                "wlan3     IEEE 802.11  Mode:Master  Tx-Power=31 dBm\n        Retry short limit:7   RTS thr:off   Fragment thr:off\n        Power Management:on"
+                        .getBytes());
+        outputStream.flush();
+        outputStream.close();
+        iwconfigStatus.setOutputStream(outputStream);
+        when(esMock.execute(iwconfigCommand)).thenReturn(iwconfigStatus);
+
+        CommandStatus ethtoolStatus = new CommandStatus(new LinuxExitValue(0));
+        cmd = new String[] { "ethtool", "-i", "wlan3" };
+        Command ethtoolCommand = new Command(cmd);
+        ethtoolCommand.setTimeout(60);
+        outputStream = new ByteArrayOutputStream();
+        out = new DataOutputStream(outputStream);
+        out.write(
+                "driver: e1000\n        version: 7.3.21-k8-NAPI\n        firmware-version: \n        expansion-rom-version: \n        bus-info: 0000:00:03.0\n        supports-statistics: yes\n        supports-test: yes\n        supports-eeprom-access: yes\n        supports-register-dump: yes\n        supports-priv-flags: no"
+                        .getBytes());
+        outputStream.flush();
+        outputStream.close();
+        ethtoolStatus.setOutputStream(outputStream);
+        when(esMock.execute(ethtoolCommand)).thenReturn(ethtoolStatus);
+
+        svc.setExecutorService(esMock);
 
         String interfaceName = "wlan3";
 

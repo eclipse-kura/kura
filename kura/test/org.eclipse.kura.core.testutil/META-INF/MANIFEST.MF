@@ -5,7 +5,12 @@ Bundle-SymbolicName: org.eclipse.kura.core.testutil;singleton:=true
 Bundle-Version: 4.2.0.qualifier
 Bundle-Vendor: Eclipse Kura
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: org.slf4j;version="1.6.4"
+Import-Package: junit.framework;version="4.12.0",
+ org.junit;version="4.12.0",
+ org.junit.rules;version="4.12.0",
+ org.junit.runner;version="4.12.0",
+ org.junit.runners.model;version="4.12.0",
+ org.slf4j;version="1.6.4"
 Bundle-ActivationPolicy: lazy
 Comment: Unit testing utilities
 Export-Package: org.eclipse.kura.core.testutil;version="1.0.0"

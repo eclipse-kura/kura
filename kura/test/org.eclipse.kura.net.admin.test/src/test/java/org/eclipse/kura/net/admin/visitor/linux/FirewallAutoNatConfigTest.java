@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2019 Eurotech and/or its affiliates and others
  *
  *   All rights reserved. This program and the accompanying materials
  *   are made available under the terms of the Eclipse Public License v1.0
@@ -13,6 +13,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -23,12 +26,15 @@ import java.util.Set;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.core.linux.executor.LinuxExitValue;
 import org.eclipse.kura.core.net.EthernetInterfaceConfigImpl;
 import org.eclipse.kura.core.net.NetInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.WifiInterfaceConfigImpl;
 import org.eclipse.kura.core.testutil.TestUtil;
+import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.linux.net.iptables.NATRule;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetConfigIP4;
@@ -75,6 +81,11 @@ public class FirewallAutoNatConfigTest {
 
         NetworkConfiguration config = prepareNetworkConfiguration(intfName, destinationInterface, false, false);
 
+        CommandExecutorService esMock = mock(CommandExecutorService.class);
+        CommandStatus status = new CommandStatus(new LinuxExitValue(0));
+        when(esMock.execute(anyObject())).thenReturn(status);
+
+        writer.setExecutorService(esMock);
         writer.visit(config);
 
         assertTrue("Configuration expected to be applied.", visited[0]);
@@ -240,6 +251,11 @@ public class FirewallAutoNatConfigTest {
 
         NetworkConfiguration config = prepareNetworkConfiguration(intfName, destinationInterface, false, true);
 
+        CommandExecutorService esMock = mock(CommandExecutorService.class);
+        CommandStatus status = new CommandStatus(new LinuxExitValue(0));
+        when(esMock.execute(anyObject())).thenReturn(status);
+
+        reader.setExecutorService(esMock);
         reader.visit(config);
 
         assertEquals(1, config.getNetInterfaceConfigs().size());
@@ -279,6 +295,20 @@ public class FirewallAutoNatConfigTest {
 
         NetworkConfiguration config = prepareNetworkConfiguration(intfName, destinationInterface, false, true);
 
+        CommandExecutorService esMock = mock(CommandExecutorService.class);
+        CommandStatus status = new CommandStatus(new LinuxExitValue(0));
+        // ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        // DataOutputStream out = new DataOutputStream(outputStream);
+        // out.write(
+        // "wlan1 IEEE 802.11 Mode:Master Tx-Power=31 dBm\n Retry short limit:7 RTS thr:off Fragment thr:off\n Power
+        // Management:on"
+        // .getBytes());
+        // outputStream.flush();
+        // outputStream.close();
+        // status.setOutputStream(outputStream);
+        when(esMock.execute(anyObject())).thenReturn(status);
+
+        reader.setExecutorService(esMock);
         reader.visit(config);
 
         assertEquals(1, config.getNetInterfaceConfigs().size());
@@ -386,6 +416,11 @@ public class FirewallAutoNatConfigTest {
 
         NetworkConfiguration config = prepareNetworkConfiguration(intfName, destinationInterface, false, true);
 
+        CommandExecutorService esMock = mock(CommandExecutorService.class);
+        CommandStatus status = new CommandStatus(new LinuxExitValue(0));
+        when(esMock.execute(anyObject())).thenReturn(status);
+
+        reader.setExecutorService(esMock);
         reader.visit(config);
 
         assertEquals(1, config.getNetInterfaceConfigs().size());

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2019 Eurotech and/or its affiliates and others
  *
  *   All rights reserved. This program and the accompanying materials
  *   are made available under the terms of the Eclipse Public License v1.0
@@ -15,13 +15,13 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
+import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,12 +30,15 @@ import java.util.concurrent.ScheduledExecutorService;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.clock.ClockEvent;
+import org.eclipse.kura.core.linux.executor.LinuxExitValue;
 import org.eclipse.kura.core.testutil.TestUtil;
-import org.eclipse.kura.core.util.SafeProcess;
+import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
 import org.junit.Test;
 import org.osgi.service.event.EventAdmin;
 
 public class ClockServiceImplTest {
+
     @Test
     public void testActivateException() {
         // error log output only
@@ -179,7 +182,11 @@ public class ClockServiceImplTest {
         assumeTrue("Only run this test on Linux", System.getProperty("os.name").matches("[Ll]inux"));
         assumeTrue("Only run this test as root", "root".equals(System.getProperty("user.name")));
 
+        CommandStatus status = new CommandStatus(new LinuxExitValue(0));
+        CommandExecutorService serviceMock = mock(CommandExecutorService.class);
+        when(serviceMock.execute(anyObject())).thenReturn(status);
         ClockServiceImpl svc = new ClockServiceImpl();
+        svc.setExecutorService(serviceMock);
 
         EventAdmin eaMock = mock(EventAdmin.class);
         svc.setEventAdmin(eaMock);
@@ -195,44 +202,14 @@ public class ClockServiceImplTest {
     }
 
     @Test
-    public void testClockUpdateExceptions() throws Throwable {
-        // test the service's onClockUpdate() with clock update exceptions; test of proper logging, mostly
-
-        ClockServiceImpl svc = new ClockServiceImpl() {
-
-            @Override
-            protected SafeProcess exec(String command) throws IOException {
-                throw new IOException("test");
-            }
-        };
-
-        EventAdmin eaMock = mock(EventAdmin.class);
-        svc.setEventAdmin(eaMock);
-
-        Map<String, Object> properties = new HashMap<>();
-        properties.put("enabled", true);
-        properties.put("clock.set.hwclock", true);
-        TestUtil.setFieldValue(svc, "properties", properties);
-
-        svc.onClockUpdate(1);
-
-        verify(eaMock, times(0)).postEvent(isA(ClockEvent.class)); // sys clock not updated
-    }
-
-    @Test
     public void testClockUpdateErrors() throws Throwable {
         // test the service's onClockUpdate() with clock update failures; test of proper logging, mostly
 
-        ClockServiceImpl svc = new ClockServiceImpl() {
-
-            @Override
-            protected SafeProcess exec(String command) throws IOException {
-                SafeProcess processMock = mock(SafeProcess.class);
-                when(processMock.exitValue()).thenReturn(1);
-
-                return processMock;
-            }
-        };
+        CommandStatus status = new CommandStatus(new LinuxExitValue(1));
+        CommandExecutorService serviceMock = mock(CommandExecutorService.class);
+        when(serviceMock.execute(anyObject())).thenReturn(status);
+        ClockServiceImpl svc = new ClockServiceImpl();
+        svc.setExecutorService(serviceMock);
 
         EventAdmin eaMock = mock(EventAdmin.class);
         svc.setEventAdmin(eaMock);
@@ -251,16 +228,11 @@ public class ClockServiceImplTest {
     public void testClockUpdate() throws Throwable {
         // test the service's onClockUpdate()
 
-        ClockServiceImpl svc = new ClockServiceImpl() {
-
-            @Override
-            protected SafeProcess exec(String command) throws IOException {
-                SafeProcess processMock = mock(SafeProcess.class);
-                when(processMock.exitValue()).thenReturn(0);
-
-                return processMock;
-            }
-        };
+        CommandStatus status = new CommandStatus(new LinuxExitValue(0));
+        CommandExecutorService serviceMock = mock(CommandExecutorService.class);
+        when(serviceMock.execute(anyObject())).thenReturn(status);
+        ClockServiceImpl svc = new ClockServiceImpl();
+        svc.setExecutorService(serviceMock);
 
         EventAdmin eaMock = mock(EventAdmin.class);
         svc.setEventAdmin(eaMock);

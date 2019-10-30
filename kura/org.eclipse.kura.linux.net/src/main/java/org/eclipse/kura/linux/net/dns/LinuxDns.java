@@ -28,8 +28,9 @@ import java.util.StringTokenizer;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.core.util.ProcessUtil;
-import org.eclipse.kura.core.util.SafeProcess;
+import org.eclipse.kura.executor.Command;
+import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.linux.net.dhcp.DhcpClientLeases;
 import org.eclipse.kura.net.IPAddress;
 import org.slf4j.Logger;
@@ -42,7 +43,7 @@ public class LinuxDns {
     private static final String DNS_FILE_NAME = "/etc/resolv.conf";
     private static final String[] PPP_DNS_FILES = { "/var/run/ppp/resolv.conf", "/etc/ppp/resolv.conf" };
     private static final String BACKUP_DNS_FILE_NAME = "/etc/resolv.conf.save";
-
+    private static final int COMMAND_TIMEOUT = 60;
     private static final String NAMESERVER = "nameserver";
 
     private static LinuxDns linuxDns = null;
@@ -143,7 +144,7 @@ public class LinuxDns {
 
         for (IPAddress server : servers) {
             if (server.equals(serverIpAddress)) {
-                logger.info("removed the DNS server: " + serverIpAddress);
+                logger.info("removed the DNS server: {}", serverIpAddress);
             } else {
                 // keep it for the new Dns file
                 newServers.add(server);
@@ -172,20 +173,20 @@ public class LinuxDns {
         writeDnsFile(servers);
     }
 
-    public synchronized void setPppDns() throws KuraException {
+    public synchronized void setPppDns(CommandExecutorService executorService) throws KuraException {
         String sPppDnsFileName = getPppDnsFileName();
         if ((sPppDnsFileName == null) || isPppDnsSet()) {
             return;
         }
-        backupDnsFile();
-        setDnsPppLink(sPppDnsFileName);
+        backupDnsFile(executorService);
+        setDnsPppLink(sPppDnsFileName, executorService);
     }
 
-    public synchronized void unsetPppDns() throws KuraException {
+    public synchronized void unsetPppDns(CommandExecutorService executorService) throws KuraException {
         if (isPppDnsSet()) {
             String pppDnsFilename = getPppDnsFileName();
-            unsetDnsPppLink(pppDnsFilename);
-            restoreDnsFile();
+            unsetDnsPppLink(pppDnsFilename, executorService);
+            restoreDnsFile(executorService);
 
             // remove actual PPP DNS file
             File pppDnsFile = new File(pppDnsFilename);
@@ -204,129 +205,82 @@ public class LinuxDns {
         return ret;
     }
 
-    private void backupDnsFile() throws KuraException {
+    private void backupDnsFile(CommandExecutorService executorService) throws KuraException {
         File file = new File(DNS_FILE_NAME);
         if (file.exists()) {
-            SafeProcess proc = null;
-            try {
-                proc = ProcessUtil.exec("mv " + DNS_FILE_NAME + " " + BACKUP_DNS_FILE_NAME);
-                if (proc.waitFor() != 0) {
-                    logger.error("Failed to move the {} file to {}. The 'mv' command has failed ...", DNS_FILE_NAME,
-                            BACKUP_DNS_FILE_NAME);
-                    throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR,
-                            "Failed to backup DNS file " + DNS_FILE_NAME);
-                } else {
-                    logger.info("successfully backed up {}", DNS_FILE_NAME);
-                }
-            } catch (Exception e) {
-                logger.error("Failed to move the {} file to {}", DNS_FILE_NAME, BACKUP_DNS_FILE_NAME, e);
-                throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR,
-                        "Failed to backup DNS file " + DNS_FILE_NAME);
-            } finally {
-                if (proc != null) {
-                    ProcessUtil.destroy(proc);
-                }
-            }
-        }
-    }
-
-    private void setDnsPppLink(String sPppDnsFileName) throws KuraException {
-        SafeProcess proc = null;
-        try {
-            proc = ProcessUtil.exec("ln -sf " + sPppDnsFileName + " " + DNS_FILE_NAME);
-            if (proc.waitFor() != 0) {
-                logger.error("failed to create symbolic link: {} -> {}", DNS_FILE_NAME, sPppDnsFileName);
-                throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR,
-                        "failed to create symbolic link to " + sPppDnsFileName);
+            Command command = new Command(new String[] { "mv", DNS_FILE_NAME, BACKUP_DNS_FILE_NAME });
+            command.setTimeout(COMMAND_TIMEOUT);
+            CommandStatus status = executorService.execute(command);
+            if ((Integer) status.getExitStatus().getExitValue() != 0) {
+                logger.error("Failed to move the {} file to {}. The 'mv' command has failed ...", DNS_FILE_NAME,
+                        BACKUP_DNS_FILE_NAME);
+                throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, "Failed to backup DNS file " + DNS_FILE_NAME);
             } else {
-                logger.info("DNS is set to use ppp resolv.conf");
-            }
-        } catch (Exception e) {
-            logger.error("failed to create symbolic link: {} -> {} ", DNS_FILE_NAME, sPppDnsFileName, e);
-            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR,
-                    "failed to create symbolic link to " + sPppDnsFileName);
-        } finally {
-            if (proc != null) {
-                ProcessUtil.destroy(proc);
+                logger.info("successfully backed up {}", DNS_FILE_NAME);
             }
         }
     }
 
-    private void unsetDnsPppLink(String pppDnsFilename) throws KuraException {
+    private void setDnsPppLink(String sPppDnsFileName, CommandExecutorService executorService) throws KuraException {
+        Command command = new Command(new String[] { "ln", "-sf", sPppDnsFileName, DNS_FILE_NAME });
+        command.setTimeout(COMMAND_TIMEOUT);
+        CommandStatus status = executorService.execute(command);
+        if ((Integer) status.getExitStatus().getExitValue() != 0) {
+            logger.error("failed to create symbolic link: {} -> {}", DNS_FILE_NAME, sPppDnsFileName);
+            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR,
+                    "failed to create symbolic link to " + sPppDnsFileName);
+        } else {
+            logger.info("DNS is set to use ppp resolv.conf");
+        }
+    }
 
+    private void unsetDnsPppLink(String pppDnsFilename, CommandExecutorService executorService) throws KuraException {
         File file = new File(DNS_FILE_NAME);
         if (file.exists()) {
-            SafeProcess proc = null;
-            try {
-                proc = ProcessUtil.exec("rm " + DNS_FILE_NAME);
-                if (proc.waitFor() != 0) {
-                    logger.error("failed to delete {} symlink that points to {}", DNS_FILE_NAME, pppDnsFilename);
-                    throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR,
-                            "failed to delete " + DNS_FILE_NAME + " symlink that points to " + pppDnsFilename);
-                } else {
-                    logger.info("successfully removed symlink that points to {}", pppDnsFilename);
-                }
-            } catch (Exception e) {
-                logger.error("failed to delete {} symlink that points to {} ", DNS_FILE_NAME, pppDnsFilename, e);
-                throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR,
+            Command command = new Command(new String[] { "rm", DNS_FILE_NAME });
+            command.setTimeout(COMMAND_TIMEOUT);
+            CommandStatus status = executorService.execute(command);
+            if ((Integer) status.getExitStatus().getExitValue() != 0) {
+                logger.error("failed to delete {} symlink that points to {}", DNS_FILE_NAME, pppDnsFilename);
+                throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR,
                         "failed to delete " + DNS_FILE_NAME + " symlink that points to " + pppDnsFilename);
-
-            } finally {
-                if (proc != null) {
-                    ProcessUtil.destroy(proc);
-                }
+            } else {
+                logger.info("successfully removed symlink that points to {}", pppDnsFilename);
             }
         }
     }
 
-    private void restoreDnsFile() throws KuraException {
+    private void restoreDnsFile(CommandExecutorService executorService) throws KuraException {
         File file = new File(BACKUP_DNS_FILE_NAME);
         if (file.exists()) {
-            restoreDnsFileFromBackup();
+            restoreDnsFileFromBackup(executorService);
         } else {
-            createEmptyDnsFile();
+            createEmptyDnsFile(executorService);
         }
     }
 
-    private void restoreDnsFileFromBackup() throws KuraException {
-        SafeProcess proc = null;
-        try {
-            proc = ProcessUtil.exec("mv " + BACKUP_DNS_FILE_NAME + " " + DNS_FILE_NAME);
-            if (proc.waitFor() != 0) {
-                logger.error("failed to restore {} to {}", BACKUP_DNS_FILE_NAME, DNS_FILE_NAME);
-                throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR,
-                        "failed to restore " + BACKUP_DNS_FILE_NAME + " to " + DNS_FILE_NAME);
-            } else {
-                logger.info("successfully restored {} from {}", DNS_FILE_NAME, BACKUP_DNS_FILE_NAME);
-            }
-        } catch (Exception e) {
-            logger.error("failed to restore {} to {}", BACKUP_DNS_FILE_NAME, DNS_FILE_NAME, e);
-            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR,
+    private void restoreDnsFileFromBackup(CommandExecutorService executorService) throws KuraException {
+        Command command = new Command(new String[] { "mv", BACKUP_DNS_FILE_NAME, DNS_FILE_NAME });
+        command.setTimeout(COMMAND_TIMEOUT);
+        CommandStatus status = executorService.execute(command);
+        if ((Integer) status.getExitStatus().getExitValue() != 0) {
+            logger.error("failed to restore {} to {}", BACKUP_DNS_FILE_NAME, DNS_FILE_NAME);
+            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR,
                     "failed to restore " + BACKUP_DNS_FILE_NAME + " to " + DNS_FILE_NAME);
-        } finally {
-            if (proc != null) {
-                ProcessUtil.destroy(proc);
-            }
+        } else {
+            logger.info("successfully restored {} from {}", DNS_FILE_NAME, BACKUP_DNS_FILE_NAME);
         }
     }
 
-    private void createEmptyDnsFile() throws KuraException {
-        SafeProcess proc = null;
-        try {
-            proc = ProcessUtil.exec("touch " + DNS_FILE_NAME);
-            if (proc.waitFor() != 0) {
-                logger.error("failed to create empty {}", DNS_FILE_NAME);
-                throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, "failed to create empty " + DNS_FILE_NAME);
-            } else {
-                logger.info("successfully created empty {}", DNS_FILE_NAME);
-            }
-        } catch (Exception e) {
-            logger.error("failed to create empty {}", DNS_FILE_NAME, e);
-            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, "failed to create empty " + DNS_FILE_NAME);
-        } finally {
-            if (proc != null) {
-                ProcessUtil.destroy(proc);
-            }
+    private void createEmptyDnsFile(CommandExecutorService executorService) throws KuraException {
+        Command command = new Command(new String[] { "touch", DNS_FILE_NAME });
+        command.setTimeout(COMMAND_TIMEOUT);
+        CommandStatus status = executorService.execute(command);
+        if ((Integer) status.getExitStatus().getExitValue() != 0) {
+            logger.error("failed to create empty {}", DNS_FILE_NAME);
+            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, "failed to create empty " + DNS_FILE_NAME);
+        } else {
+            logger.info("successfully created empty {}", DNS_FILE_NAME);
         }
     }
 
@@ -368,7 +322,7 @@ public class LinuxDns {
         return path;
     }
 
-    private boolean isLinkToPppDnsFile(final String dnsFileName) throws IOException {
+    private boolean isLinkToPppDnsFile() throws IOException {
         final String pppDnsFileName = getPppDnsFileName();
 
         if (pppDnsFileName == null) {
@@ -381,7 +335,7 @@ public class LinuxDns {
     private synchronized void writeDnsFile(Set<IPAddress> servers) {
         logger.debug("Writing DNS servers to file");
         try {
-            if (Files.isSymbolicLink(Paths.get(DNS_FILE_NAME)) && !isLinkToPppDnsFile(DNS_FILE_NAME)) {
+            if (Files.isSymbolicLink(Paths.get(DNS_FILE_NAME)) && !isLinkToPppDnsFile()) {
                 Files.delete(Paths.get(DNS_FILE_NAME));
             }
         } catch (IOException e) {

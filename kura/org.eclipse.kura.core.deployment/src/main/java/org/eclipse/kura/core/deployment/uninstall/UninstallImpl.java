@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -14,12 +14,14 @@ package org.eclipse.kura.core.deployment.uninstall;
 import java.io.File;
 import java.net.URL;
 import java.util.Date;
+import java.util.function.Consumer;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.deployment.CloudDeploymentHandlerV2;
 import org.eclipse.kura.core.deployment.UninstallStatus;
-import org.eclipse.kura.core.util.ProcessUtil;
-import org.eclipse.kura.core.util.SafeProcess;
+import org.eclipse.kura.executor.Command;
+import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
 import org.osgi.service.deploymentadmin.DeploymentAdmin;
 import org.osgi.service.deploymentadmin.DeploymentPackage;
 import org.slf4j.Logger;
@@ -27,19 +29,22 @@ import org.slf4j.LoggerFactory;
 
 public class UninstallImpl {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(UninstallImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(UninstallImpl.class);
 
     public static final String RESOURCE_UNINSTALL = "uninstall";
 
     private final CloudDeploymentHandlerV2 callback;
-    private final DeploymentAdmin m_deploymentAdmin;
+    private final DeploymentAdmin deploymentAdmin;
+    private final CommandExecutorService executorService;
 
-    public UninstallImpl(CloudDeploymentHandlerV2 callback, DeploymentAdmin deploymentAdmin) {
+    public UninstallImpl(CloudDeploymentHandlerV2 callback, DeploymentAdmin deploymentAdmin,
+            CommandExecutorService executorService) {
         this.callback = callback;
-        this.m_deploymentAdmin = deploymentAdmin;
+        this.deploymentAdmin = deploymentAdmin;
+        this.executorService = executorService;
     }
 
-    private void uninstallCompleteAsync(DeploymentPackageUninstallOptions options, String dpName) throws KuraException {
+    private void uninstallCompleteAsync(DeploymentPackageUninstallOptions options, String dpName) {
         KuraUninstallPayload notify = new KuraUninstallPayload(options.getClientId());
         notify.setTimestamp(new Date());
         notify.setUninstallStatus(UninstallStatus.COMPLETED.getStatusString());
@@ -50,8 +55,7 @@ public class UninstallImpl {
         this.callback.publishMessage(options, notify, RESOURCE_UNINSTALL);
     }
 
-    public void uninstallFailedAsync(DeploymentPackageUninstallOptions options, String dpName, Exception e)
-            throws KuraException {
+    public void uninstallFailedAsync(DeploymentPackageUninstallOptions options, String dpName, Exception e) {
         KuraUninstallPayload notify = new KuraUninstallPayload(options.getClientId());
         notify.setTimestamp(new Date());
         notify.setUninstallStatus(UninstallStatus.FAILED.getStatusString());
@@ -68,14 +72,14 @@ public class UninstallImpl {
         try {
             String name = packageName;
             if (name != null) {
-                DeploymentPackage dp = this.m_deploymentAdmin.getDeploymentPackage(name);
+                DeploymentPackage dp = this.deploymentAdmin.getDeploymentPackage(name);
                 if (dp != null) {
                     dp.uninstall();
                     String sUrl = CloudDeploymentHandlerV2.installImplementation.getDeployedPackages()
                             .getProperty(name);
                     File dpFile = new File(new URL(sUrl).getPath());
                     if (!dpFile.delete()) {
-                        s_logger.warn("Cannot delete file at URL: {}", sUrl);
+                        logger.warn("Cannot delete file at URL: {}", sUrl);
                     }
                     CloudDeploymentHandlerV2.installImplementation.removePackageFromConfFile(name);
                 }
@@ -89,22 +93,21 @@ public class UninstallImpl {
         }
     }
 
-    private static void deviceReboot(DeploymentPackageUninstallOptions options) {
+    private void deviceReboot(DeploymentPackageUninstallOptions options) {
         if (options.isReboot()) {
-            s_logger.info("Reboot requested...");
-            SafeProcess proc = null;
             try {
+                logger.info("Reboot requested...");
                 int delay = options.getRebootDelay();
-                s_logger.info("Sleeping for {} ms.", delay);
+                logger.info("Sleeping for {} ms.", delay);
                 Thread.sleep(delay);
-                s_logger.info("Rebooting...");
-                proc = ProcessUtil.exec("reboot");
-            } catch (Exception e) {
-                s_logger.info("Rebooting... Failure!");
-            } finally {
-                if (proc != null) {
-                    ProcessUtil.destroy(proc);
-                }
+                logger.info("Rebooting...");
+                Consumer<CommandStatus> commandCallback = status -> {
+                    // Do nothing...
+                };
+                this.executorService.execute(new Command(new String[] { "reboot" }), commandCallback);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                logger.error("Failed to reboot system", e);
             }
         }
     }

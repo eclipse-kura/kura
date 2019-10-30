@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -31,6 +31,7 @@ import org.eclipse.kura.bluetooth.le.beacon.BluetoothLeBeaconEncoder;
 import org.eclipse.kura.bluetooth.le.beacon.BluetoothLeBeaconManager;
 import org.eclipse.kura.bluetooth.le.beacon.BluetoothLeBeaconScanner;
 import org.eclipse.kura.bluetooth.le.beacon.listener.BluetoothLeBeaconListener;
+import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.internal.ble.util.BTSnoopListener;
 import org.eclipse.kura.internal.ble.util.BluetoothLeUtil;
 import org.eclipse.kura.internal.ble.util.BluetoothProcess;
@@ -39,6 +40,8 @@ import org.osgi.service.component.ComponentContext;
 
 public class BluetoothLeBeaconManagerImpl
         implements BluetoothLeBeaconManager<BluetoothLeBeacon>, BTSnoopListener, BluetoothProcessListener {
+
+    private static final String COMMAND_MESSAGE = "Command ";
 
     private static final String SET_ADVERTISING_PARAMETERS_HCITOOL_MESSAGE = "Set Advertising Parameters : hcitool -i {} {}";
 
@@ -58,6 +61,15 @@ public class BluetoothLeBeaconManagerImpl
     private BluetoothProcess dumpProc;
     private BluetoothProcess hcitoolProc;
     private Map<BluetoothLeBeaconListener<BluetoothLeBeacon>, Class<?>> listeners;
+    private CommandExecutorService executorService;
+
+    public void setExecutorService(CommandExecutorService executorService) {
+        this.executorService = executorService;
+    }
+
+    public void unsetExecutorService(CommandExecutorService executorService) {
+        this.executorService = null;
+    }
 
     protected void activate(ComponentContext context) {
         logger.info("Activating Bluetooth Le Beacon Manager...");
@@ -68,12 +80,12 @@ public class BluetoothLeBeaconManagerImpl
         logger.debug("Deactivating Bluetooth Le Beacon Manager...");
     }
 
-    protected BluetoothProcess execBtdump(String interfaceName) throws IOException {
-        return BluetoothLeUtil.btdumpCmd(interfaceName, this);
+    protected BluetoothProcess execBtDump(String interfaceName) throws IOException {
+        return BluetoothLeUtil.btdumpCmd(interfaceName, this.executorService, this);
     }
 
     protected BluetoothProcess execHcitool(String interfaceName, String... cmd) throws IOException {
-        return BluetoothLeUtil.hcitoolCmd(interfaceName, cmd, this);
+        return BluetoothLeUtil.hcitoolCmd(interfaceName, cmd, this.executorService, this);
     }
 
     @Override
@@ -238,12 +250,14 @@ public class BluetoothLeBeaconManagerImpl
             // The Unknown HCI Command error code indicates that the Controller does not understand the HCI
             // Command Packet OpCode that the Host sent.
             logger.debug("Command {} failed. Error: Unknown HCI Command (01)", command);
-            throw new KuraBluetoothCommandException("Command " + command + " failed. Error: Unknown HCI Command (01)");
+            throw new KuraBluetoothCommandException(
+                    COMMAND_MESSAGE + command + " failed. Error: Unknown HCI Command (01)");
         case "03":
             // The Hardware Failure error code indicates to the Host that something in the Controller has failed
             // in a manner that cannot be described with any other error code.
             logger.debug("Command {} failed. Error: Hardware Failure (03)", command);
-            throw new KuraBluetoothCommandException("Command " + command + " failed. Error: Hardware Failure (03)");
+            throw new KuraBluetoothCommandException(
+                    COMMAND_MESSAGE + command + " failed. Error: Hardware Failure (03)");
         case "0c":
             // The Command Disallowed error code indicates that the command requested cannot be executed because
             // the Controller is in a state where it cannot process this command at this time. This error code is
@@ -255,16 +269,16 @@ public class BluetoothLeBeaconManagerImpl
             // in the HCI command is not supported.
             logger.debug("Command {} failed. Error: Unsupported Feature or Parameter Value (11)", command);
             throw new KuraBluetoothCommandException(
-                    "Command " + command + " failed. Unsupported Feature or Parameter Value (11)");
+                    COMMAND_MESSAGE + command + " failed. Unsupported Feature or Parameter Value (11)");
         case "12":
             // The Invalid HCI Command Parameters error code indicates that at least one of the HCI command
             // parameters is invalid.
             logger.debug("Command {} failed. Error: Invalid HCI Command Parameters (12)", command);
             throw new KuraBluetoothCommandException(
-                    "Command " + command + " failed. Error: Invalid HCI Command Parameters (12)");
+                    COMMAND_MESSAGE + command + " failed. Error: Invalid HCI Command Parameters (12)");
         default:
             logger.debug("Command {} failed. Error {}", command, exitCode);
-            throw new KuraBluetoothCommandException("Command " + command + " failed. Error " + exitCode);
+            throw new KuraBluetoothCommandException(COMMAND_MESSAGE + command + " failed. Error " + exitCode);
         }
     }
 
@@ -291,7 +305,7 @@ public class BluetoothLeBeaconManagerImpl
             logger.info("Starting bluetooth beacon scan on {}", interfaceName);
             try {
                 this.hcitoolProc = execHcitool(interfaceName, "lescan-passive", "--duplicates");
-                this.dumpProc = execBtdump(interfaceName);
+                this.dumpProc = execBtDump(interfaceName);
             } catch (IOException e) {
                 throw new KuraBluetoothCommandException(e, "Start bluetooth beacon scan failed");
             }
@@ -308,15 +322,19 @@ public class BluetoothLeBeaconManagerImpl
             if (this.dumpProc != null) {
                 this.dumpProc.destroyBTSnoop();
             }
+            boolean isHcitoolStopped = BluetoothLeUtil.stopHcitool(interfaceName, this.executorService,
+                    "lescan-passive", "--duplicates");
+            boolean isBtdumpStopped = BluetoothLeUtil.stopBtdump(interfaceName, this.executorService);
+            if (!isHcitoolStopped || !isBtdumpStopped) {
+                logger.warn("Failed to stop beacon scan");
+            }
         }
     }
 
     public boolean checkStopScanCondition(String interfaceName) {
         // Stop scanning on given interface if only one scanner is scanning
         boolean stopScan = false;
-        if (!scanners.containsKey(interfaceName)) {
-            stopScan = false;
-        } else if (scanners.get(interfaceName).stream().mapToInt(e -> e.isScanning() ? 1 : 0).sum() == 1) {
+        if (scanners.containsKey(interfaceName) && getScannersCount(interfaceName) == 1) {
             stopScan = true;
         }
         return stopScan;
@@ -325,9 +343,7 @@ public class BluetoothLeBeaconManagerImpl
     public boolean checkStartScanCondition(String interfaceName) {
         // Start scanning on given interface if no one is already scanning
         boolean startScan = false;
-        if (!scanners.containsKey(interfaceName)) {
-            startScan = false;
-        } else if (scanners.get(interfaceName).stream().mapToInt(e -> e.isScanning() ? 1 : 0).sum() == 0) {
+        if (scanners.containsKey(interfaceName) && getScannersCount(interfaceName) == 0) {
             startScan = true;
         }
         return startScan;
@@ -353,8 +369,9 @@ public class BluetoothLeBeaconManagerImpl
 
             // Get the active decoders
             List<BluetoothLeBeaconDecoder<BluetoothLeBeacon>> decoders = scanners.values().stream()
-                    .flatMap(List::stream).filter(scanner -> scanner.isScanning()).map(scanner -> scanner.getDecoder())
-                    .distinct().collect(Collectors.toList());
+                    .flatMap(List::stream).filter(BluetoothLeBeaconScannerImpl<BluetoothLeBeacon>::isScanning)
+                    .map(BluetoothLeBeaconScannerImpl<BluetoothLeBeacon>::getDecoder).distinct()
+                    .collect(Collectors.toList());
 
             List<BluetoothLeBeacon> beacons = new ArrayList<>();
             for (AdvertisingReportRecord report : reportRecords) {
@@ -369,17 +386,25 @@ public class BluetoothLeBeaconManagerImpl
             }
 
             // Notify listeners
-            if (!beacons.isEmpty() && !this.listeners.isEmpty()) {
-                for (Entry<BluetoothLeBeaconListener<BluetoothLeBeacon>, Class<?>> entry : this.listeners.entrySet()) {
-                    beacons.stream().filter(beacon -> entry.getValue() == beacon.getClass())
-                            .collect(Collectors.toList()).forEach(entry.getKey()::onBeaconsReceived);
-                }
+            notifyListeners(beacons);
+        }
+    }
+
+    private void notifyListeners(List<BluetoothLeBeacon> beacons) {
+        if (!beacons.isEmpty() && !this.listeners.isEmpty()) {
+            for (Entry<BluetoothLeBeaconListener<BluetoothLeBeacon>, Class<?>> entry : this.listeners.entrySet()) {
+                beacons.stream().filter(beacon -> entry.getValue() == beacon.getClass()).collect(Collectors.toList())
+                        .forEach(entry.getKey()::onBeaconsReceived);
             }
         }
     }
 
     @Override
     public void processBTSnoopErrorStream(String string) {
-        // Not used
+        throw new UnsupportedOperationException("Process of BTSnoop error stream is not supported");
+    }
+
+    private int getScannersCount(String interfaceName) {
+        return scanners.get(interfaceName).stream().mapToInt(e -> e.isScanning() ? 1 : 0).sum();
     }
 }

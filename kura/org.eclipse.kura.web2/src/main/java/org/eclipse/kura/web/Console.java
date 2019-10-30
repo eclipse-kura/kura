@@ -98,6 +98,8 @@ public class Console implements ConfigurableComponent, org.eclipse.kura.web.api.
 
     private static final Logger logger = LoggerFactory.getLogger(Console.class);
 
+    private HttpContext resourceContext;
+
     private String appRoot;
     private int sessionMaxInactiveInterval;
     private ComponentContext componentContext;
@@ -213,14 +215,28 @@ public class Console implements ConfigurableComponent, org.eclipse.kura.web.api.
         this.componentContext = context;
     }
 
-    protected void updated(Map<String, Object> properties) {
+    protected void updated(Map<String, Object> properties) throws ServletException, NamespaceException {
         boolean webEnabled = Boolean.parseBoolean(this.systemService.getKuraWebEnabled());
         if (!webEnabled) {
             return;
         }
 
-        unregisterServlet();
-        doUpdate(properties);
+        ConsoleOptions options = new ConsoleOptions(properties);
+
+        Console.setConsoleOptions(options);
+
+        try {
+            updateAuthenticationManager(options.getUsername(), options.getUserPassword());
+        } catch (Exception e) {
+            logger.warn("Error Updating Web properties", e);
+        }
+
+        setAppRoot(options.getAppRoot());
+        setSessionMaxInactiveInterval(options.getSessionMaxInactivityInterval());
+        this.httpService.unregister("/");
+        this.httpService.registerServlet("/", new RedirectServlet("/"::equals, this.appRoot), null,
+                this.resourceContext);
+
     }
 
     private void doUpdate(Map<String, Object> properties) {
@@ -372,8 +388,9 @@ public class Console implements ConfigurableComponent, org.eclipse.kura.web.api.
     private synchronized void initHTTPService() throws NamespaceException, ServletException {
 
         final HttpContext defaultContext = this.httpService.createDefaultHttpContext();
-        final HttpContext resourceContext = initResourceContext(defaultContext);
-        sessionContext = initSessionContext(defaultContext);
+
+        this.resourceContext = initResourceContext(defaultContext);
+        final HttpContext sessionContext = initSessionContext(defaultContext);
 
         this.httpService.registerResources(ADMIN_ROOT, "www", resourceContext);
         this.httpService.registerResources(AUTH_PATH, "www/auth.html", sessionContext);

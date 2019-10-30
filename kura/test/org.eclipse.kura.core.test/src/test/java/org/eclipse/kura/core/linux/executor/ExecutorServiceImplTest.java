@@ -33,6 +33,7 @@ import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.commons.io.Charsets;
 import org.eclipse.kura.core.linux.executor.privileged.PrivilegedExecutorServiceImpl;
 import org.eclipse.kura.core.linux.executor.unprivileged.UnprivilegedExecutorServiceImpl;
+import org.eclipse.kura.core.testutil.AssumingIsNotJenkins;
 import org.eclipse.kura.core.testutil.AssumingIsNotMac;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
@@ -52,17 +53,15 @@ public class ExecutorServiceImplTest {
     private static final String TMP = "/tmp";
     private static CommandExecutorService service;
 
-    public ExecutorServiceImplTest(CommandExecutorService service) {
-        ExecutorServiceImplTest.service = service;
-    }
+    @ClassRule
+    public static final AssumingIsNotMac assumingIsNotMac = new AssumingIsNotMac();
 
     @ClassRule
-    public static AssumingIsNotMac assumingIsNotMac = new AssumingIsNotMac();
+    public static final AssumingIsNotJenkins assumingIsNotJenkins = new AssumingIsNotJenkins();
 
     @Parameterized.Parameters
     public static Collection<CommandExecutorService> getServices() {
-        return Arrays.asList(new CommandExecutorService[] { new UnprivilegedExecutorServiceImpl(),
-                new PrivilegedExecutorServiceImpl() });
+        return Arrays.asList(new UnprivilegedExecutorServiceImpl(), new PrivilegedExecutorServiceImpl());
     }
 
     @BeforeClass

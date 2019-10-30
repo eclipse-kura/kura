@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
@@ -45,6 +46,7 @@ import org.eclipse.kura.configuration.metatype.AD;
 import org.eclipse.kura.configuration.metatype.Icon;
 import org.eclipse.kura.configuration.metatype.OCD;
 import org.eclipse.kura.configuration.metatype.Option;
+import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.locale.LocaleContextHolder;
 import org.eclipse.kura.util.service.ServiceUtil;
 import org.eclipse.kura.web.server.util.GwtServerUtil;
@@ -332,10 +334,34 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
         result.removeAll(allWireComponents);
         result.removeAll(servicesToBeHidden);
         result.removeAll(hiddenFactories);
+        result.stream().forEach(pid -> {
+            try {
+                ComponentConfigurationImpl cc = (ComponentConfigurationImpl) cs.getDefaultComponentConfiguration(pid);
+                OCD ocd = cc.getLocalizedDefinition(LocaleContextHolder.getLocale().getLanguage());
+                auditLogger.info("ccc:{}", ocd);
+            } catch (KuraException e) {
 
+            }
+        });
         auditLogger.info(SUCCESSFULLY_LISTED_COMPONENT_CONFIGS_MESSAGE,
                 session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
         return result;
+    }
+
+    @Override
+    public Map<String, String> findFactoryComponentPidNames(GwtXSRFToken xsrfToken) throws GwtKuraException {
+        ConfigurationService cs = ServiceLocator.getInstance().getService(ConfigurationService.class);
+        List<String> result = findFactoryComponents(xsrfToken);
+        return result.stream().collect(Collectors.toMap(id -> id, pid -> {
+            ComponentConfigurationImpl cc;
+            try {
+                cc = (ComponentConfigurationImpl) cs.getDefaultComponentConfiguration(pid);
+            } catch (KuraException e) {
+                return "error";
+            }
+            OCD ocd = cc.getLocalizedDefinition(LocaleContextHolder.getLocale().getLanguage());
+            return ocd.getName();
+        }));
     }
 
     // TODO this is a workaround that gives some time to a BaseAsset to track its driver so that it is
@@ -416,8 +442,9 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
     private List<String> findFactoryHideComponents() throws GwtKuraException {
         return ServiceLocator.applyToServiceOptionally(ServiceComponentRuntime.class,
                 scr -> scr.getComponentDescriptionDTOs().stream()
-                        .filter(dto -> dto.properties.containsKey("kura.ui.factory.hide")).map(dto -> dto.name)
-                        .collect(Collectors.toList()));
+                        .filter(dto -> dto.properties.containsKey("kura.ui.factory.hide")
+                                || Arrays.asList(dto.serviceInterfaces).contains("org.eclipse.kura.driver.Driver"))
+                        .map(dto -> dto.name).collect(Collectors.toList()));
     }
 
     private List<ComponentConfiguration> sortConfigurationsByName(List<ComponentConfiguration> configs) {

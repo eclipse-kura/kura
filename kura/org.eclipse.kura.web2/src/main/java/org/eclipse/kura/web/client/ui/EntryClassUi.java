@@ -19,6 +19,7 @@ import static org.eclipse.kura.web.client.util.FilterBuilder.or;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 import org.eclipse.kura.web.client.messages.Messages;
@@ -666,8 +667,8 @@ public class EntryClassUi extends Composite implements Context {
 
                 @Override
                 public void onSuccess(GwtXSRFToken token) {
-                    EntryClassUi.this.gwtComponentService.findFactoryComponents(token,
-                            new AsyncCallback<List<String>>() {
+                    EntryClassUi.this.gwtComponentService.findFactoryComponentPidNames(token,
+                            new AsyncCallback<Map<String, String>>() {
 
                                 @Override
                                 public void onFailure(Throwable ex) {
@@ -675,12 +676,12 @@ public class EntryClassUi extends Composite implements Context {
                                 }
 
                                 @Override
-                                public void onSuccess(final List<String> result) {
+                                public void onSuccess(final Map<String, String> result) {
                                     EntryClassUi.this.factoriesList.clear();
                                     EntryClassUi.this.factoriesList.addItem(SELECT_COMPONENT);
-                                    for (final String servicePid : result) {
-                                        EntryClassUi.this.factoriesList.addItem(servicePid);
-                                    }
+                                    result.entrySet().forEach(entry -> EntryClassUi.this.factoriesList
+                                            .addItem(entry.getValue(), entry.getKey()));
+
                                     EntryClassUi.this.newFactoryComponentModal.show();
                                 }
                             });

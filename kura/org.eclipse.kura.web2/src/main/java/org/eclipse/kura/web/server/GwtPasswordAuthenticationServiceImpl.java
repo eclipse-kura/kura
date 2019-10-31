@@ -11,6 +11,8 @@ package org.eclipse.kura.web.server;
 
 import static java.util.Objects.isNull;
 
+import java.util.function.Supplier;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
@@ -28,7 +30,7 @@ public class GwtPasswordAuthenticationServiceImpl extends OsgiRemoteServiceServl
         implements GwtPasswordAuthenticationService {
 
     private static final String UI_LOGIN_FAILURE_MESSAGE = "UI Login - Failure - Login failed for user: {}, request IP: {}";
-    
+
     private static final Logger logger = LoggerFactory.getLogger(GwtPasswordAuthenticationServiceImpl.class);
     private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
 
@@ -38,10 +40,10 @@ public class GwtPasswordAuthenticationServiceImpl extends OsgiRemoteServiceServl
     private static final long serialVersionUID = 1L;
 
     private final AuthenticationManager authenticationManager;
-    private final String redirectPath;
+    private final Supplier<String> redirectPath;
 
     public GwtPasswordAuthenticationServiceImpl(final AuthenticationManager authenticationManager,
-            final String redirectPath) {
+            final Supplier<String> redirectPath) {
         this.authenticationManager = authenticationManager;
         this.redirectPath = redirectPath;
     }
@@ -68,7 +70,7 @@ public class GwtPasswordAuthenticationServiceImpl extends OsgiRemoteServiceServl
             auditLogger.info("UI Login - Success - Login for user: {}, session id: {}, request IP: {}", username,
                     session.getId(), requestIp);
 
-            return this.redirectPath;
+            return this.redirectPath.get();
 
         } catch (final Exception e) {
             session.invalidate();

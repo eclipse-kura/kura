@@ -415,13 +415,14 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         } else if (this.servicePidByPid.containsKey(pid)) {
             throw new KuraException(KuraErrorCode.INVALID_PARAMETER, "pid " + pid + " already exists");
         }
-
+        Configuration config = null;
         try {
             // Second argument in createFactoryConfiguration is a bundle location. If left null the new bundle location
             // will be bound to the location of the first bundle that registers a Managed Service Factory with a
             // corresponding PID
             logger.info("Creating new configuration for factory pid {} and pid {}", factoryPid, pid);
-            String servicePid = this.configurationAdmin.createFactoryConfiguration(factoryPid, null).getPid();
+            config = this.configurationAdmin.createFactoryConfiguration(factoryPid, null);
+            String servicePid = config.getPid();
 
             logger.info("Updating newly created configuration for pid {}", pid);
 
@@ -436,17 +437,16 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
             mergedProperties.put(ConfigurationService.KURA_SERVICE_PID, pid);
 
             Dictionary<String, Object> dict = CollectionsUtil.mapToDictionary(mergedProperties);
-            Configuration config = this.configurationAdmin.getConfiguration(servicePid, "?");
             config.update(dict);
 
-            registerComponentConfiguration(pid, servicePid, factoryPid);
+            registerNewFactoryComponentConfiguration(pid, servicePid, factoryPid);
 
             this.pendingDeletePids.remove(pid);
 
             if (takeSnapshot) {
                 snapshot();
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, e,
                     "Cannot create component instance for factory " + factoryPid);
         }
@@ -678,27 +678,63 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
             logger.warn("Either PID (kura.service.pid) {} or Service PID (service.pid) {} is null", pid, servicePid);
             return;
         }
-
-        if (!this.allActivatedPids.contains(pid)) {
-            // register the component instance
-            logger.info("Registering ConfigurableComponent - {}....", pid);
-            this.servicePidByPid.put(pid, servicePid);
-            if (factoryPid != null) {
-                this.factoryPidByPid.put(pid, factoryPid);
-                Tocd factoryOCD = this.ocds.get(factoryPid);
-                if (factoryOCD != null) {
-                    try {
-                        updateWithDefaultConfiguration(pid, factoryOCD);
-                    } catch (KuraException e) {
-                        logger.info("Error seeding updated configuration for pid: {}", pid);
-                    } catch (IOException e) {
-                        logger.info("Error seeding updated configuration for pid: {}", pid);
-                    }
-                }
+        if (this.allActivatedPids.contains(pid)) {
+            logger.error("Error create component, have doublic pid:{}", pid);
+            try {
+                Configuration config = this.configurationAdmin.getConfiguration(servicePid, "?");
+                config.delete();
+            } catch (IOException e) {
+                logger.error("delete service component error,servicePid:{}", servicePid);
             }
-            this.allActivatedPids.add(pid);
-            logger.info("Registering ConfigurableComponent - {}....Done", pid);
+            unregisterComponentConfiguration(pid);
+            return;
         }
+        logger.info("Registering ConfigurableComponent - {}....", pid);
+        if (factoryPid != null) {
+            if (!this.servicePidByPid.containsKey(pid))
+                logger.error("servicePid:{} not created,PID is:{}", servicePid, pid);
+            if (!this.factoryPidByPid.containsKey(pid))
+                logger.error("factoryPidByPid:{} not created,PID is:{}", factoryPidByPid, pid);
+        } else if (this.servicePidByPid.containsKey(pid)) {
+            logger.error("non factory conponent is already created,servicePidByPid is:{},PID is:{}", servicePid, pid);
+            logger.error("exsit non factory conponent servicePidByPid is:{},PID is:{}", this.servicePidByPid.get(pid),
+                    pid);
+        }
+        this.servicePidByPid.put(pid, servicePid);
+        this.allActivatedPids.add(pid);
+        logger.info("Registering ConfigurableComponent - {}....Done", pid);
+    }
+
+    synchronized void registerNewFactoryComponentConfiguration(final String pid, final String servicePid,
+            final String factoryPid) throws KuraException {
+        if (pid == null || servicePid == null) {
+            logger.warn("Either PID (kura.service.pid) {} or Service PID (service.pid) {} is null", pid, servicePid);
+            return;
+        }
+        if (this.allActivatedPids.contains(pid)) {
+            throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, null,
+                    "Error create factory configuration for component " + pid);
+        }
+        logger.info("Registering New Factory ConfigurableComponent - {}....", pid);
+        if (this.servicePidByPid.containsKey(pid)) {
+            logger.error("servicePid:{} is already created,PID is:{}", servicePid, pid);
+        }
+        this.servicePidByPid.put(pid, servicePid);
+        if (factoryPid == null) {
+            logger.error("factoryPid can not be null, servicePid is:{},pid is:{}", servicePid, pid);
+            return;
+        }
+        this.factoryPidByPid.put(pid, factoryPid);
+        Tocd factoryOCD = this.ocds.get(factoryPid);
+        if (factoryOCD != null) {
+            try {
+                updateWithDefaultConfiguration(pid, factoryOCD);
+            } catch (KuraException | IOException e) {
+                logger.info("Error seeding updated configuration for pid: {}", pid);
+            }
+        }
+        logger.info("Registering New Factory ConfigurableComponent - {}....Done", pid);
+
     }
 
     synchronized void registerSelfConfiguringComponent(final String pid, final String servicePid) {
@@ -1768,7 +1804,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
      * Convert property value to string
      *
      * @param value
-     *            the input value
+     *                  the input value
      * @return the string property value, or {@code null}
      */
     private static String makeString(Object value) {

@@ -9,7 +9,5 @@
    <property name="osgi.command.function" type="String">
       createConfiguration
    </property>
-   <property name="kura.ui.csf.pid.default" type="String" value="org.eclipse.kura.cloudconnection.eclipseiot.mqtt.ConnectionManager"/>
-   <property name="kura.ui.csf.pid.regex" type="String" value="^org.eclipse.kura.cloudconnection.eclipseiot.mqtt.ConnectionManager(\-[a-zA-Z0-9]+)?$"/>
    <property name="service.pid" type="String" value="org.eclipse.kura.cloudconnection.eclipseiot.mqtt.DefaultCloudConnectionFactory"/>
 </scr:component>

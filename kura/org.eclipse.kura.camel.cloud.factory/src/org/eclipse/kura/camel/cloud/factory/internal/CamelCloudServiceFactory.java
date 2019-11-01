@@ -18,7 +18,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -77,17 +76,7 @@ public class CamelCloudServiceFactory implements CloudServiceFactory {
 
         props.put("cloud.service.pid", pid);
 
-        this.configurationService.createFactoryConfiguration(FACTORY_ID, fromUserPid(pid), props, true);
-    }
-
-    private static String fromUserPid(final String pid) {
-        Objects.requireNonNull(pid);
-        return pid + "-CloudFactory";
-    }
-
-    private static String fromInternalPid(final String pid) {
-        Objects.requireNonNull(pid);
-        return pid.replaceAll("-CloudFactory$", "");
+        this.configurationService.createFactoryConfiguration(FACTORY_ID, pid, props, true);
     }
 
     /**
@@ -145,7 +134,7 @@ public class CamelCloudServiceFactory implements CloudServiceFactory {
 
     @Override
     public void deleteConfiguration(final String pid) throws KuraException {
-        delete(this.configurationService, fromUserPid(pid));
+        delete(this.configurationService, pid);
     }
 
     @Override
@@ -155,16 +144,16 @@ public class CamelCloudServiceFactory implements CloudServiceFactory {
 
     @Override
     public List<String> getStackComponentsPids(final String pid) throws KuraException {
-        return Collections.singletonList(fromUserPid(pid));
+        return Collections.singletonList(pid);
     }
 
     @Override
     public Set<String> getManagedCloudServicePids() throws KuraException {
         final Set<String> result = new HashSet<>();
-
-        for (final ComponentConfiguration cc : this.configurationService.getComponentConfigurations()) {
+        List<ComponentConfiguration> configs = this.configurationService.getComponentConfigurations();
+        for (final ComponentConfiguration cc : configs) {
             if (cc.getDefinition() != null && FACTORY_ID.equals(cc.getDefinition().getId())) {
-                result.add(fromInternalPid(cc.getPid()));
+                result.add(cc.getPid());
             }
         }
 

@@ -10,43 +10,39 @@
 package org.eclipse.kura.cloudconnection.raw.mqtt.factory;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.CloudEndpoint;
 import org.eclipse.kura.cloudconnection.factory.CloudConnectionFactory;
+import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentConstants;
 
 public class RawMqttCloudConnectionFactory implements CloudConnectionFactory {
 
-    private static final String FACTORY_PID = "org.eclipse.kura.cloudconnection.raw.mqtt.factory.RawMqttCloudConnectionFactory";
-
     // The following constants must match the factory component definitions
-    private static final String CLOUD_ENDPOINT_FACTORY_PID = "org.eclipse.kura.cloudconnection.raw.mqtt.cloud.RawMqttCloudEndpoint";
+    private static final String CLOUD_SERVICE_FACTORY_PID = "org.eclipse.kura.cloudconnection.raw.mqtt.cloud.RawMqttCloudEndpoint";
     private static final String DATA_SERVICE_FACTORY_PID = "org.eclipse.kura.data.DataService";
     private static final String DATA_TRANSPORT_SERVICE_FACTORY_PID = "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport";
 
-    private static final String CLOUD_SERVICE_PID = "org.eclipse.kura.cloudconnection.raw.mqtt.CloudEndpoint";
-    private static final String DATA_SERVICE_PID = "org.eclipse.kura.cloudconnection.raw.mqtt.DataService";
     private static final String DATA_TRANSPORT_SERVICE_PID = "org.eclipse.kura.cloudconnection.raw.mqtt.MqttDataTransport";
 
     private static final String DATA_SERVICE_REFERENCE_NAME = "DataService";
     private static final String DATA_TRANSPORT_SERVICE_REFERENCE_NAME = "DataTransportService";
 
-    private static final String REFERENCE_TARGET_VALUE_FORMAT = "(" + ConfigurationService.KURA_SERVICE_PID + "=%s)";
-
-    private static final Pattern MANAGED_CLOUD_SERVICE_PID_PATTERN = Pattern
-            .compile("^org\\.eclipse\\.kura\\.cloudconnection\\.raw\\.mqtt\\.CloudEndpoint(-[a-zA-Z0-9]+)?$");
+    private static final String REFERENCE_TARGET_VALUE_FORMAT = "(" + Constants.SERVICE_PID + "=%s)";
 
     private ConfigurationService configurationService;
 
@@ -62,96 +58,104 @@ public class RawMqttCloudConnectionFactory implements CloudConnectionFactory {
 
     @Override
     public String getFactoryPid() {
-        return CLOUD_ENDPOINT_FACTORY_PID;
+        return CLOUD_SERVICE_FACTORY_PID;
     }
 
     @Override
     public void createConfiguration(String pid) throws KuraException {
-        String[] parts = pid.split("-");
-        if (parts.length != 0 && CLOUD_SERVICE_PID.equals(parts[0])) {
-            String suffix = null;
-            if (parts.length > 1) {
-                suffix = parts[1];
-            }
 
-            String dataServicePid = DATA_SERVICE_PID;
-            String dataTransportServicePid = DATA_TRANSPORT_SERVICE_PID;
-            if (suffix != null) {
-                dataServicePid += "-" + suffix;
-                dataTransportServicePid += "-" + suffix;
-            }
+        String dataTransportServicePid = this.configurationService.createFactoryConfiguration(
+                DATA_TRANSPORT_SERVICE_FACTORY_PID, DATA_TRANSPORT_SERVICE_PID + "-" + new Date().getTime(), null,
+                false);
+        Map<String, Object> dataServiceProperties = new HashMap<String, Object>();
+        String name = DATA_TRANSPORT_SERVICE_REFERENCE_NAME + ComponentConstants.REFERENCE_TARGET_SUFFIX;
+        dataServiceProperties.put(name, String.format(REFERENCE_TARGET_VALUE_FORMAT, dataTransportServicePid));
 
-            // create the CloudService layer and set the selective dependency on the DataService PID
-            Map<String, Object> cloudServiceProperties = new HashMap<>();
-            String name = DATA_SERVICE_REFERENCE_NAME + ComponentConstants.REFERENCE_TARGET_SUFFIX;
-            cloudServiceProperties.put(name, String.format(REFERENCE_TARGET_VALUE_FORMAT, dataServicePid));
-            cloudServiceProperties.put(KURA_CLOUD_CONNECTION_FACTORY_PID, FACTORY_PID);
+        String dataServicePid = this.configurationService.createFactoryConfiguration(DATA_SERVICE_FACTORY_PID,
+                DATA_SERVICE_FACTORY_PID + "-" + new Date().getTime(), dataServiceProperties, false);
 
-            this.configurationService.createFactoryConfiguration(CLOUD_ENDPOINT_FACTORY_PID, pid,
-                    cloudServiceProperties, false);
-
-            // create the DataService layer and set the selective dependency on the DataTransportService PID
-            Map<String, Object> dataServiceProperties = new HashMap<>();
-            name = DATA_TRANSPORT_SERVICE_REFERENCE_NAME + ComponentConstants.REFERENCE_TARGET_SUFFIX;
-            dataServiceProperties.put(name, String.format(REFERENCE_TARGET_VALUE_FORMAT, dataTransportServicePid));
-
-            this.configurationService.createFactoryConfiguration(DATA_SERVICE_FACTORY_PID, dataServicePid,
-                    dataServiceProperties, false);
-
-            // create the DataTransportService layer and take a snapshot
-            this.configurationService.createFactoryConfiguration(DATA_TRANSPORT_SERVICE_FACTORY_PID,
-                    dataTransportServicePid, null, true);
-        } else {
-            throw new KuraException(KuraErrorCode.INVALID_PARAMETER, "Invalid PID '{}'", pid);
-        }
+        Map<String, Object> cloudServiceProperties = new HashMap<>();
+        name = DATA_SERVICE_REFERENCE_NAME + ComponentConstants.REFERENCE_TARGET_SUFFIX;
+        cloudServiceProperties.put(name, String.format(REFERENCE_TARGET_VALUE_FORMAT, dataServicePid));
+        this.configurationService.createFactoryConfiguration(CLOUD_SERVICE_FACTORY_PID, pid, cloudServiceProperties,
+                true);
     }
 
     @Override
     public void deleteConfiguration(String pid) throws KuraException {
-        String[] parts = pid.split("-");
-        if (parts.length != 0 && CLOUD_SERVICE_PID.equals(parts[0])) {
-            String suffix = null;
-            if (parts.length > 1) {
-                suffix = parts[1];
-            }
+        ComponentConfiguration config = this.configurationService.getComponentConfiguration(pid);
+        String dataServicePid = null;
+        String dataTransportServicePid = null;
+        String name = DATA_SERVICE_REFERENCE_NAME + ComponentConstants.REFERENCE_TARGET_SUFFIX;
+        String dataServiceServicePid = (String) config.getConfigurationProperties().get(name);
+        if (dataServiceServicePid != null) {
+            String[] names = dataServiceServicePid.split("=");
+            if (names.length == 2)
+                dataServiceServicePid = names[1];
+            dataServiceServicePid = dataServiceServicePid.substring(0, dataServiceServicePid.indexOf(')'));
 
-            String dataServicePid = DATA_SERVICE_PID;
-            String dataTransportServicePid = DATA_TRANSPORT_SERVICE_PID;
-            if (suffix != null) {
-                dataServicePid += "-" + suffix;
-                dataTransportServicePid += "-" + suffix;
+            if (dataServiceServicePid != null)
+                dataServicePid = this.configurationService.getPidByServicePid(dataServiceServicePid);
+            if (dataServicePid != null) {
+                config = this.configurationService.getComponentConfiguration(dataServicePid);
+                name = DATA_TRANSPORT_SERVICE_REFERENCE_NAME + ComponentConstants.REFERENCE_TARGET_SUFFIX;
+                String dataTransportServiceServicePid = (String) config.getConfigurationProperties().get(name);
+                if (dataTransportServiceServicePid != null) {
+                    names = dataTransportServiceServicePid.split("=");
+                    if (names.length == 2)
+                        dataTransportServiceServicePid = names[1];
+                    dataTransportServiceServicePid = dataTransportServiceServicePid.substring(0,
+                            dataTransportServiceServicePid.indexOf(')'));
+                    dataTransportServicePid = this.configurationService
+                            .getPidByServicePid(dataTransportServiceServicePid);
+                }
             }
-
-            this.configurationService.deleteFactoryConfiguration(pid, false);
-            this.configurationService.deleteFactoryConfiguration(dataServicePid, false);
-            this.configurationService.deleteFactoryConfiguration(dataTransportServicePid, true);
         }
+
+        this.configurationService.deleteFactoryConfiguration(pid, false);
+        if (dataServicePid != null)
+            this.configurationService.deleteFactoryConfiguration(dataServicePid, false);
+        if (dataTransportServicePid != null)
+            this.configurationService.deleteFactoryConfiguration(dataTransportServicePid, true);
     }
 
     @Override
     public List<String> getStackComponentsPids(String pid) throws KuraException {
-        List<String> componentPids = new ArrayList<>();
-        String[] parts = pid.split("-");
-        if (parts.length != 0 && CLOUD_SERVICE_PID.equals(parts[0])) {
-            String suffix = null;
-            if (parts.length > 1) {
-                suffix = parts[1];
-            }
+        ComponentConfiguration config = this.configurationService.getComponentConfiguration(pid);
+        String dataServicePid = null;
+        String dataTransportServicePid = null;
+        String name = DATA_SERVICE_REFERENCE_NAME + ComponentConstants.REFERENCE_TARGET_SUFFIX;
+        String dataServiceServicePid = (String) config.getConfigurationProperties().get(name);
+        if (dataServiceServicePid != null) {
+            String[] names = dataServiceServicePid.split("=");
+            if (names.length == 2)
+                dataServiceServicePid = names[1];
+            dataServiceServicePid = dataServiceServicePid.substring(0, dataServiceServicePid.indexOf(')'));
 
-            String dataServicePid = DATA_SERVICE_PID;
-            String dataTransportServicePid = DATA_TRANSPORT_SERVICE_PID;
-            if (suffix != null) {
-                dataServicePid += "-" + suffix;
-                dataTransportServicePid += "-" + suffix;
+            if (dataServiceServicePid != null)
+                dataServicePid = this.configurationService.getPidByServicePid(dataServiceServicePid);
+            if (dataServicePid != null) {
+                config = this.configurationService.getComponentConfiguration(dataServicePid);
+                name = DATA_TRANSPORT_SERVICE_REFERENCE_NAME + ComponentConstants.REFERENCE_TARGET_SUFFIX;
+                String dataTransportServiceServicePid = (String) config.getConfigurationProperties().get(name);
+                if (dataTransportServiceServicePid != null) {
+                    names = dataTransportServiceServicePid.split("=");
+                    if (names.length == 2)
+                        dataTransportServiceServicePid = names[1];
+                    dataTransportServiceServicePid = dataTransportServiceServicePid.substring(0,
+                            dataTransportServiceServicePid.indexOf(')'));
+                    dataTransportServicePid = this.configurationService
+                            .getPidByServicePid(dataTransportServiceServicePid);
+                }
             }
-
-            componentPids.add(pid);
-            componentPids.add(dataServicePid);
-            componentPids.add(dataTransportServicePid);
-            return componentPids;
-        } else {
-            throw new KuraException(KuraErrorCode.INVALID_PARAMETER, "Invalid PID '{}'", pid);
         }
+
+        List<String> componentPids = new ArrayList<String>();
+
+        componentPids.add(pid);
+        componentPids.add(dataServicePid);
+        componentPids.add(dataTransportServicePid);
+        return componentPids;
     }
 
     @Override
@@ -166,9 +170,8 @@ public class RawMqttCloudConnectionFactory implements CloudConnectionFactory {
                 if (!(kuraServicePid instanceof String)) {
                     return false;
                 }
-
-                return MANAGED_CLOUD_SERVICE_PID_PATTERN.matcher((String) kuraServicePid).matches()
-                        && (FACTORY_PID.equals(ref.getProperty(KURA_CLOUD_CONNECTION_FACTORY_PID)));
+                final String factoryPid = (String) ref.getProperty(ConfigurationAdmin.SERVICE_FACTORYPID);
+                return factoryPid.equals(CLOUD_SERVICE_FACTORY_PID);
             }).map(ref -> (String) ref.getProperty(ConfigurationService.KURA_SERVICE_PID)).collect(Collectors.toSet());
         } catch (InvalidSyntaxException e) {
             throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID, e);

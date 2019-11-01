@@ -131,12 +131,13 @@ public interface ConfigurationService {
      *            from the provided properties and then it will merge them with the initial map.
      * @param takeSnapshot
      *            if set to true a snapshot will be taken.
+     * @return
      * @throws KuraException
      *             if pid is null, it already exists or creation fails.
      *
      * @since 1.0.8
      */
-    public void createFactoryConfiguration(String factoryPid, String pid, Map<String, Object> properties,
+    public String createFactoryConfiguration(String factoryPid, String pid, Map<String, Object> properties,
             boolean takeSnapshot) throws KuraException;
 
     /**
@@ -362,4 +363,6 @@ public interface ConfigurationService {
      *             if the snapshot is not found
      */
     public void rollback(long id) throws KuraException;
+
+    public String getPidByServicePid(String servicePid);
 }

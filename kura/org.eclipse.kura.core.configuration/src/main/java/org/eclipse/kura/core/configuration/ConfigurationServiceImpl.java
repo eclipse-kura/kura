@@ -243,7 +243,14 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
     protected void removeConfigurableComponent(final ServiceReference<ConfigurableComponent> reference) {
 
-        final String servicePid = makeString(reference.getProperty(Constants.SERVICE_PID));
+        Object serviceIds = reference.getProperty(Constants.SERVICE_PID);
+        String servicePid = makeString(serviceIds);
+        if (serviceIds instanceof List) {
+            @SuppressWarnings("unchecked")
+            List<String> servicePids = (List<String>) serviceIds;
+            if (servicePids.size() > 1)
+                servicePid = servicePids.get(servicePids.size() - 1);
+        }
 
         if (servicePid == null) {
             return;
@@ -256,7 +263,14 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
     protected void addSelfConfiguringComponent(final ServiceReference<SelfConfiguringComponent> reference) {
 
-        final String servicePid = makeString(reference.getProperty(Constants.SERVICE_PID));
+        Object serviceIds = reference.getProperty(Constants.SERVICE_PID);
+        String servicePid = makeString(serviceIds);
+        if (serviceIds instanceof List) {
+            @SuppressWarnings("unchecked")
+            List<String> servicePids = (List<String>) serviceIds;
+            if (servicePids.size() > 1)
+                servicePid = servicePids.get(servicePids.size() - 1);
+        }
 
         if (servicePid == null) {
             return;
@@ -269,7 +283,14 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
     protected void removeSelfConfiguringComponent(final ServiceReference<SelfConfiguringComponent> reference) {
 
-        final String servicePid = makeString(reference.getProperty(Constants.SERVICE_PID));
+        Object serviceIds = reference.getProperty(Constants.SERVICE_PID);
+        String servicePid = makeString(serviceIds);
+        if (serviceIds instanceof List) {
+            @SuppressWarnings("unchecked")
+            List<String> servicePids = (List<String>) serviceIds;
+            if (servicePids.size() > 1)
+                servicePid = servicePids.get(servicePids.size() - 1);
+        }
 
         if (servicePid == null) {
             return;
@@ -302,6 +323,20 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
             return Collections.emptySet();
         }
         return Collections.unmodifiableSet(this.allActivatedPids);
+    }
+
+    @Override
+    public String getPidByServicePid(String servicePid) {
+        if (this.servicePidByPid.isEmpty()) {
+            return null;
+        }
+        Optional<Entry<String, String>> opton = this.servicePidByPid.entrySet().stream().filter(entry -> {
+            return entry.getValue().equals(servicePid);
+        }).findFirst();
+        if (opton.isEmpty())
+            return null;
+        else
+            return opton.get().getKey();
     }
 
     // Don't perform internal calls to this method
@@ -408,21 +443,22 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
     }
 
     @Override
-    public synchronized void createFactoryConfiguration(String factoryPid, String pid, Map<String, Object> properties,
+    public synchronized String createFactoryConfiguration(String factoryPid, String pid, Map<String, Object> properties,
             boolean takeSnapshot) throws KuraException {
         if (pid == null) {
             throw new KuraException(KuraErrorCode.INVALID_PARAMETER, "pid cannot be null");
         } else if (this.servicePidByPid.containsKey(pid)) {
             throw new KuraException(KuraErrorCode.INVALID_PARAMETER, "pid " + pid + " already exists");
         }
-        Configuration config = null;
+        String servicePid = null;
+
         try {
             // Second argument in createFactoryConfiguration is a bundle location. If left null the new bundle location
             // will be bound to the location of the first bundle that registers a Managed Service Factory with a
             // corresponding PID
             logger.info("Creating new configuration for factory pid {} and pid {}", factoryPid, pid);
-            config = this.configurationAdmin.createFactoryConfiguration(factoryPid, null);
-            String servicePid = config.getPid();
+            Configuration config = this.configurationAdmin.createFactoryConfiguration(factoryPid, null);
+            servicePid = config.getPid();
 
             logger.info("Updating newly created configuration for pid {}", pid);
 
@@ -450,6 +486,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
             throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, e,
                     "Cannot create component instance for factory " + factoryPid);
         }
+        return servicePid;
     }
 
     @Override
@@ -689,12 +726,16 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
             unregisterComponentConfiguration(pid);
             return;
         }
-        logger.info("Registering ConfigurableComponent - {}....", pid);
+        logger.info("Registering ConfigurableComponent - pid:{},servicePid:{},factoryPid:{} ....", pid, servicePid,
+                factoryPid);
         if (factoryPid != null) {
-            if (!this.servicePidByPid.containsKey(pid))
-                logger.error("servicePid:{} not created,PID is:{}", servicePid, pid);
-            if (!this.factoryPidByPid.containsKey(pid))
-                logger.error("factoryPidByPid:{} not created,PID is:{}", factoryPidByPid, pid);
+            if (!this.factoryPidByPid.containsKey(pid)) {
+                if (this.servicePidByPid.containsKey(pid))
+                    logger.error("servicePid:{} did not deleted,PID is:{},factoryPid is:{}", servicePid, pid,
+                            factoryPid);
+                logger.info("factoryPidByPid:{} reCreated,PID is:{}", factoryPid, pid);
+                this.factoryPidByPid.put(pid, factoryPid);
+            }
         } else if (this.servicePidByPid.containsKey(pid)) {
             logger.error("non factory conponent is already created,servicePidByPid is:{},PID is:{}", servicePid, pid);
             logger.error("exsit non factory conponent servicePidByPid is:{},PID is:{}", this.servicePidByPid.get(pid),
@@ -1804,7 +1845,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
      * Convert property value to string
      *
      * @param value
-     *                  the input value
+     *            the input value
      * @return the string property value, or {@code null}
      */
     private static String makeString(Object value) {

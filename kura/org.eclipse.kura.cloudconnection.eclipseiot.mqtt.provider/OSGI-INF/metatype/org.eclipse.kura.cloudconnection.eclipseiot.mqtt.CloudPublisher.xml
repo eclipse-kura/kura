@@ -12,31 +12,31 @@
       Eurotech
 
 -->
-<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="OSGI-INF/l10n/CloudPublisher">
     <OCD id="org.eclipse.kura.cloudconnection.eclipseiot.mqtt.CloudPublisher" 
-         name="CloudPublisher" 
-         description="The Eclipse IoT Cloud Publisher provides a service to publish messages to a cloud platform compatible with the Eclipse IoT MQTT topic namespace.">
+         name="%name" 
+         description="%description">
         
         <AD id="semantic.topic"
-            name="Semantic Topic"
+            name="%topic"
             type="String"
             cardinality="0"
             required="false"
             default="W1/A1/$assetName"
-            description='The MQTT topic suffix providing the message interpretation. Wildcards can be defined in the topic by specifing a $something in this field. The publisher will try to match "something" with a corresponding property in the received KuraMessage. If possible, the $something placeholder will be substituted with the value specified in the KuraMessage received from the user application.'>
+            description='%topicDesc'>
         </AD>
         
         <AD id="message.type"
-            name="Kind of Message"
+            name="%messageType"
             type="String"
             cardinality="0"
             required="true"
             default="telemetryQos0"
-            description="Type of message to be published.">
-            <Option label="Telemetry QoS 0" value="telemetryQos0" />
-            <Option label="Telemetry QoS 1" value="telemetryQos1" />
-            <Option label="Event" value="events" />
-            <Option label="Alert" value="alerts" />
+            description="%messageTypeDesc">
+            <Option label="%qos1Label" value="telemetryQos0" />
+            <Option label="%qos2Label" value="telemetryQos1" />
+            <Option label="%eventLabel" value="events" />
+            <Option label="%alertLabel" value="alerts" />
         </AD>
     </OCD>
     

@@ -8,7 +8,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Service-Component: OSGI-INF/*.xml
 Bundle-ClassPath: .
 Bundle-ActivationPolicy: lazy
-Import-Package: com.eclipsesource.json;version="0.9.4",
+Import-Package: com.eclipsesource.json;version="0.9.5",
  javax.crypto,
  javax.xml.namespace,
  javax.xml.parsers,
@@ -20,7 +20,7 @@ Import-Package: com.eclipsesource.json;version="0.9.4",
  org.eclipse.kura.cloud;version="[1.1,1.2)",
  org.eclipse.kura.cloudconnection.request;version="[1.0,2.0)",
  org.eclipse.kura.cloudconnection.message;version="[1.0,2.0)",
- org.eclipse.kura.configuration;version="[1.2,2.0)",
+ org.eclipse.kura.configuration;version="[1.2,3.0)",
  org.eclipse.kura.configuration.metatype;version="[1.1,2.0)",
  org.eclipse.kura.core.util;version="[1.0,2.0)",
  org.eclipse.kura.crypto;version="[1.0,2.0)",

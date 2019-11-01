@@ -378,7 +378,8 @@ public class Console implements ConfigurableComponent, org.eclipse.kura.web.api.
                 chain(baseHandler, sessionAuthHandler).sendErrorOnFailure(401));
 
         // exception on admin console path, redirect to login page on failure instead of sending 401 status
-        routingHandler.addRouteHandler(consoleOptions.getAppRoot()::equals,
+        // why consoleOptions.getAppRoot()::equals does't work?
+        routingHandler.addRouteHandler(p->consoleOptions.getAppRoot().equals(p),
                 defaultHandler.redirectOnFailure(AUTH_PATH));
 
         return new HttpContextImpl(routingHandler, defaultContext);

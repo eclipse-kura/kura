@@ -9,10 +9,10 @@
      http://www.eclipse.org/legal/epl-v10.html
 
 -->
-<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="OSGI-INF/l10n/RawMqttCloudEndpoint">
     <OCD id="org.eclipse.kura.cloudconnection.raw.mqtt.cloud.RawMqttCloudEndpoint" 
-         name="RawMqttCloudEndpoint" 
-         description="A CloudEndpoint that allows to publish MQTT messages without restrictions or assumptions on payload format.">
+         name="%name" 
+         description="%description">
 
         <Icon resource="CloudService" size="32"/>
     </OCD>

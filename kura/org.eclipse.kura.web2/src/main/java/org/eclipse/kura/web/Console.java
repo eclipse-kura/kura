@@ -222,7 +222,7 @@ public class Console implements ConfigurableComponent, org.eclipse.kura.web.api.
         }
 
         ConsoleOptions options = new ConsoleOptions(properties);
-        String oldAppRoot = consoleOptions.getAppRoot();
+        String oldAppRoot = this.appRoot;
         Console.setConsoleOptions(options);
 
         try {
@@ -233,10 +233,10 @@ public class Console implements ConfigurableComponent, org.eclipse.kura.web.api.
 
         setAppRoot(options.getAppRoot());
         setSessionMaxInactiveInterval(options.getSessionMaxInactivityInterval());
-        if (!oldAppRoot.equals(options.getAppRoot())) {
+        if (!oldAppRoot.equals(this.appRoot)) {
             // This should be taken effect at the next time login in or refresh the page.
             this.httpService.unregister(oldAppRoot);
-            this.httpService.registerResources(consoleOptions.getAppRoot(), "www/denali.html", this.sessionContext);
+            this.httpService.registerResources(this.appRoot, "www/denali.html", this.sessionContext);
 
         }
 
@@ -278,7 +278,7 @@ public class Console implements ConfigurableComponent, org.eclipse.kura.web.api.
     private synchronized void unregisterServlet() {
         this.httpService.unregister("/");
         this.httpService.unregister(ADMIN_ROOT);
-        this.httpService.unregister(consoleOptions.getAppRoot());
+        this.httpService.unregister(this.appRoot);
         this.httpService.unregister(AUTH_PATH);
 
         this.httpService.unregister(AUTH_RESOURCE_PATH);
@@ -378,9 +378,8 @@ public class Console implements ConfigurableComponent, org.eclipse.kura.web.api.
                 chain(baseHandler, sessionAuthHandler).sendErrorOnFailure(401));
 
         // exception on admin console path, redirect to login page on failure instead of sending 401 status
-        // why consoleOptions.getAppRoot()::equals does't work?
-        routingHandler.addRouteHandler(p->consoleOptions.getAppRoot().equals(p),
-                defaultHandler.redirectOnFailure(AUTH_PATH));
+        // why this.appRoot:equals does't work?
+        routingHandler.addRouteHandler(p -> this.appRoot.equals(p), defaultHandler.redirectOnFailure(AUTH_PATH));
 
         return new HttpContextImpl(routingHandler, defaultContext);
     }
@@ -398,7 +397,7 @@ public class Console implements ConfigurableComponent, org.eclipse.kura.web.api.
 
         this.httpService.registerResources(ADMIN_ROOT, "www", this.resourceContext);
         this.httpService.registerResources(AUTH_PATH, "www/auth.html", this.sessionContext);
-        this.httpService.registerResources(consoleOptions.getAppRoot(), "www/denali.html", this.sessionContext);
+        this.httpService.registerResources(this.appRoot, "www/denali.html", this.sessionContext);
         this.httpService.registerServlet(LOGIN_MODULE_PATH + "/banner", new GwtBannerServiceImpl(), null,
                 this.resourceContext);
 
@@ -561,7 +560,7 @@ public class Console implements ConfigurableComponent, org.eclipse.kura.web.api.
 
         session.setAttribute(Attributes.AUTORIZED_USER.getValue(), user);
 
-        return consoleOptions.getAppRoot();
+        return this.appRoot;
     }
 
     @Override

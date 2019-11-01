@@ -11,6 +11,7 @@ package org.eclipse.kura.web;
 
 import static org.eclipse.kura.web.session.SecurityHandler.chain;
 
+import java.awt.Event;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -20,11 +21,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.logging.Logger;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import javax.xml.ws.spi.http.HttpContext;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -70,13 +73,10 @@ import org.eclipse.kura.web.session.SessionAutorizationSecurityHandler;
 import org.eclipse.kura.web.session.SessionExpirationSecurityHandler;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventProperties;
-import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Console implements ConfigurableComponent, org.eclipse.kura.web.api.Console {
@@ -378,7 +378,7 @@ public class Console implements ConfigurableComponent, org.eclipse.kura.web.api.
                 chain(baseHandler, sessionAuthHandler).sendErrorOnFailure(401));
 
         // exception on admin console path, redirect to login page on failure instead of sending 401 status
-        // why this.appRoot:equals does't work?
+        // why this.appRoot::equals does't work?
         routingHandler.addRouteHandler(p -> this.appRoot.equals(p), defaultHandler.redirectOnFailure(AUTH_PATH));
 
         return new HttpContextImpl(routingHandler, defaultContext);

@@ -23,6 +23,7 @@
     <properties>
         <kura.basedir>${project.basedir}/../..</kura.basedir>
     </properties>
+    
     <build>
         <plugins>
             <plugin>
@@ -156,7 +157,7 @@
                             <autoStart>true</autoStart>
                         </bundle>
                         <bundle>
-                            <id>org.junit</id>
+                            <id>junit</id>
                             <level>4</level>
                             <autoStart>true</autoStart>
                         </bundle>
@@ -195,6 +196,43 @@
                             <level>4</level>
                             <autoStart>true</autoStart>
                         </bundle>
+                        <bundle>
+                            <id>org.eclipse.kura.core.deployment</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        
+                        <bundle>
+                            <id>jakarta.activation-api</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>jakarta.annotation-api</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>com.sun.activation.javax.activation</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>jaxb-api</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>com.sun.xml.bind.jaxb-osgi</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.apache.felix.deploymentadmin</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        
                     </bundleStartLevel>
                     <dependencies>
                         <dependency>
@@ -253,6 +291,7 @@
                             <type>p2-installable-unit</type>
                             <artifactId>org.eclipse.osgi</artifactId>
                         </dependency>
+                        
                         <dependency>
                             <type>p2-installable-unit</type>
                             <artifactId>org.eclipse.osgi.services</artifactId>
@@ -275,7 +314,7 @@
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>
-                            <artifactId>org.junit</artifactId>
+                            <artifactId>junit</artifactId>
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>
@@ -284,6 +323,34 @@
                         <dependency>
                             <type>p2-installable-unit</type>
                             <artifactId>org.apache.logging.log4j.api</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>jakarta.activation-api</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>jakarta.annotation-api</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>com.sun.activation.javax.activation</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>jaxb-api</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>com.sun.xml.bind.jaxb-osgi</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>eclipse-plugin</type>
+                            <artifactId>org.eclipse.kura.core.deployment</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>org.apache.felix.deploymentadmin</artifactId>
                         </dependency>
                     </dependencies>
                 </configuration>
@@ -305,11 +372,7 @@
                                 <id>org.eclipse.kura.api</id>
                                 <versionRange>0.0.0</versionRange>
                             </requirement>
-                            <requirement>
-                                <type>eclipse-plugin</type>
-                                <id>org.eclipse.kura.xml.marshaller.unmarshaller.provider</id>
-                                <versionRange>0.0.0</versionRange>
-                            </requirement>
+                            
                             <requirement>
                                 <type>eclipse-plugin</type>
                                 <id>org.eclipse.kura.core.configuration</id>
@@ -353,6 +416,47 @@
                             <requirement>
                                 <type>p2-installable-unit</type>
                                 <id>org.apache.logging.log4j.slf4j-impl</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            
+                            <requirement>
+                                <type>p2-installable-unit</type>
+                                <id>jakarta.activation-api</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>p2-installable-unit</type>
+                                <id>jakarta.annotation-api</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>p2-installable-unit</type>
+                                <id>com.sun.activation.javax.activation</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>p2-installable-unit</type>
+                                <id>jaxb-api</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>p2-installable-unit</type>
+                                <id>com.sun.xml.bind.jaxb-osgi</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>eclipse-plugin</type>
+                                <id>org.eclipse.kura.core.deployment</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>p2-installable-unit</type>
+                                <id>org.apache.felix.deploymentadmin</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>p2-installable-unit</type>
+                                <id>junit</id>
                                 <versionRange>0.0.0</versionRange>
                             </requirement>
                         </extraRequirements>

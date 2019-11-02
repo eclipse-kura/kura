@@ -5,4 +5,4 @@ LABEL maintainer "Eclipse Kura Developers <kura-dev@eclipse.org>"
 
 RUN \
     yum -y install gdb && \
-    debuginfo-install -y java-1.8.0-openjdk-headless
+    debuginfo-install -y java-11-openjdk-headless

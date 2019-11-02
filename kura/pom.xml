@@ -17,7 +17,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.eclipse.kura</groupId>
     <artifactId>kura</artifactId>
-    <version>4.2.0-SNAPSHOT</version>
+    <version>4.3.0-SNAPSHOT</version>
 
     <packaging>pom</packaging>
 
@@ -132,7 +132,7 @@
         <sonar.jacoco.reportPath>target/jacoco.exec</sonar.jacoco.reportPath>
 
         <!-- BND baseline plugin -->
-        <bnd.baseline.version>4.2.0</bnd.baseline.version>
+        <bnd.baseline.version>4.3.0</bnd.baseline.version>
         <bnd.baseline.continueOnError>false</bnd.baseline.continueOnError>
 
         <kura.skip.can>true</kura.skip.can>
@@ -293,7 +293,6 @@
             <url>https://raw.github.com/eurotech/kura_addons/mvn-repo/</url>
             <snapshots>
                 <enabled>true</enabled>
-                <updatePolicy>always</updatePolicy>
             </snapshots>
         </repository>
         <!--
@@ -498,7 +497,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.8</version>
                 <executions>
                     <execution>
                         <id>verify-jdeps</id>

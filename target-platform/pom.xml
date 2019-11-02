@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.eclipse.kura</groupId>
     <artifactId>target-platform</artifactId>
-    <version>4.2.0-SNAPSHOT</version>
+    <version>4.3.0-SNAPSHOT</version>
 
     <packaging>pom</packaging>
 
@@ -23,7 +23,7 @@
         <!-- <module>moquette-broker</module>-->
         <module>org.apache.log4j2-api-config</module>
         <module>org.eclipse.kura.jetty.customizer</module>
-	<module>p2-repo-common</module>
+	    <module>p2-repo-common</module>
         <module>p2-repo-equinox_3.12.50</module>
         <module>p2-repo-test-deps</module>
         <module>p2-repo-mvn-deps</module>
@@ -46,7 +46,6 @@
             <url>https://raw.github.com/eurotech/kura_addons/mvn-repo/</url>
             <snapshots>
                 <enabled>true</enabled>
-                <updatePolicy>always</updatePolicy>
             </snapshots>
         </repository>
         <repository>

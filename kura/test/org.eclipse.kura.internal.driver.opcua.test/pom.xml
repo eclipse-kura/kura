@@ -16,7 +16,7 @@ Copyright (c) 2017, 2019 Eurotech and/or its affiliates and others
     <parent>
         <groupId>org.eclipse.kura</groupId>
         <artifactId>test</artifactId>
-        <version>4.2.0-SNAPSHOT</version>
+        <version>4.3.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>org.eclipse.kura.internal.driver.opcua.test</artifactId>

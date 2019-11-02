@@ -13,10 +13,10 @@ ARG PACKED=false
 ENV \
   GIT_REPO=${GIT_REPO:-https://github.com/eclipse/kura.git} \
   GIT_BRANCH=${GIT_BRANCH:-develop} \
-  JAVA_HOME=/usr/lib/jvm/jre-1.8.0 \
+  JAVA_HOME=/usr/lib/jvm/jre-11-openjdk \
   MAVEN_PROPS=-DskipTests \
   KURA_DIR=/opt/eclipse/kura \
-  LAUNCHER_VERSION="1.5.200.v20180922-1751"
+  LAUNCHER_VERSION="1.5.500.v20190715-1310"
 
 COPY . /context
 
@@ -25,7 +25,7 @@ RUN \
     chmod a+x -R /usr/local/bin && \
     yum -y update && \
     yum -y install scl-utils scl-utils-build centos-release-scl && \
-    yum -y install git java-1.8.0-openjdk-devel rh-maven35 && \
+    yum -y install git java-11-openjdk-devel rh-maven35 && \
     \
     if [ -d /context/.git ]; then \
       mv /context /kura; \
@@ -47,8 +47,8 @@ RUN \
     ) && \
     ls -la /kura/kura/distrib/target && \
     yum -y history undo last && \
-    yum -y install java-1.8.0-openjdk-headless && \
-    yum -y install procps zip unzip gzip tar psmisc socat telnet dos2unix openssl net-tools hostname which && \
+    yum -y install java-11-openjdk-headless && \
+    yum -y install procps zip unzip gzip tar psmisc socat telnet dos2unix openssl net-tools hostname libaio which && \
     yum -y clean all && rm -rf /var/cache/yum && \
     /kura/kura/distrib/target/kura_*_intel-up2-centos-7-nn_installer.sh && \
     chmod a+rw -R /opt/eclipse && \

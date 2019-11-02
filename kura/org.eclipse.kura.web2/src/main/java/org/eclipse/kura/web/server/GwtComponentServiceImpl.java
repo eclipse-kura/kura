@@ -256,15 +256,15 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
 
         ConfigurationService cs = ServiceLocator.getInstance().getService(ConfigurationService.class);
         try {
-            cs.createFactoryConfiguration(factoryPid, pid, properties, true);
+            cs.createFactoryConfiguration(factoryPid, pid, properties, false);
 
             String filterString = "(" + ConfigurationService.KURA_SERVICE_PID + "=" + pid + ")";
 
             if (!ServiceUtil.waitForService(filterString, SERVICE_WAIT_TIMEOUT, TimeUnit.SECONDS).isPresent()) {
-                cs.deleteFactoryConfiguration(pid, true);
+                cs.deleteFactoryConfiguration(pid, false);
                 throw new GwtKuraException("Created component did not start in " + SERVICE_WAIT_TIMEOUT + " seconds");
             }
-
+            cs.snapshot();
             auditLogger.info("UI Component - Success - Successfully created component config for user: {}, session {}",
                     session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
         } catch (KuraException e) {

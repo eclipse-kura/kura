@@ -105,7 +105,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
     // contains all the PIDs (aka kura.service.pid) - both of configurable and self configuring components
     private final Set<String> allActivatedPids;
-
+    private final Set<String> waittingForActivatedPids;
     // contains the self configuring components ONLY!
     private final Set<String> activatedSelfConfigComponents;
 
@@ -188,6 +188,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
     public ConfigurationServiceImpl() {
         this.allActivatedPids = new HashSet<>();
+        this.waittingForActivatedPids = new HashSet<>();
         this.activatedSelfConfigComponents = new HashSet<>();
         this.pendingDeletePids = new HashSet<>();
         this.ocds = new HashMap<>();
@@ -715,6 +716,8 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
             logger.warn("Either PID (kura.service.pid) {} or Service PID (service.pid) {} is null", pid, servicePid);
             return;
         }
+        if (this.waittingForActivatedPids.contains(pid))
+            this.waittingForActivatedPids.remove(pid);
         if (this.allActivatedPids.contains(pid)) {
             logger.error("Error create component, have doublic pid:{}", pid);
             try {
@@ -766,7 +769,9 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
             return;
         }
         this.factoryPidByPid.put(pid, factoryPid);
+        this.waittingForActivatedPids.add(pid);
         Tocd factoryOCD = this.ocds.get(factoryPid);
+
         if (factoryOCD != null) {
             try {
                 updateWithDefaultConfiguration(pid, factoryOCD);
@@ -783,14 +788,21 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
             logger.warn("PID (kura.service.pid) is null");
             return;
         }
+        if (this.waittingForActivatedPids.contains(pid))
+            this.waittingForActivatedPids.remove(pid);
         logger.info("Registering SelfConfiguringComponent - {}....", pid);
-        if (!this.allActivatedPids.contains(pid)) {
-            this.allActivatedPids.add(pid);
-        }
-        if (!this.activatedSelfConfigComponents.contains(pid)) {
+        if (!this.servicePidByPid.containsKey(pid)) {
+            logger.error("servicePid:{} is not created by Factory,PID is:{}", servicePid, pid);
             this.servicePidByPid.put(pid, servicePid);
-            this.activatedSelfConfigComponents.add(pid);
         }
+        if (this.allActivatedPids.contains(pid)) {
+            logger.error("pid:{} is already actived, servicePid is:{}", pid, servicePid);
+        }
+        this.allActivatedPids.add(pid);
+        if (this.activatedSelfConfigComponents.contains(pid)) {
+            logger.error("pid:{} is already in SelfConfigComponents, servicePid is:{}", pid, servicePid);
+        } else
+            this.activatedSelfConfigComponents.add(pid);
         logger.info("Registering SelfConfiguringComponent - {}....Done", pid);
     }
 
@@ -930,6 +942,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         // assemble all the configurations we have
         // clone the list to avoid concurrent modifications
         List<String> allPids = new ArrayList<>(this.allActivatedPids);
+        allPids.addAll(this.waittingForActivatedPids);
         for (String pid : allPids) {
             try {
                 ComponentConfiguration cc = getComponentConfigurationInternal(pid);

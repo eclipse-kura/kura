@@ -118,7 +118,7 @@ body {
 }
 
 .headerLogo {
-	height: 1cm !important;
+	height: 1.5cm !important;
 }
 
 table {
@@ -529,7 +529,7 @@ Login START
 }
 
 .login-background {
-    background-image: url(eclipse/kura/icons/eclipse_foundation_logo.png), url(eclipse/kura/icons/kura_login_logo.png),url(eclipse/kura/icons/kura_login_background.png);
+    background-image: url(eclipse/kura/icons/yofc_login_background.png), url(eclipse/kura/icons/yofc_login_logo.png),url(eclipse/kura/icons/yofc_login_background.png);
     background-repeat: no-repeat, no-repeat, no-repeat;
     background-position: 5% 5%, 95% 5%, center;
     background-size: 250px,250px,cover;
@@ -537,10 +537,11 @@ Login START
     min-height: 100%;
     position: fixed;
     width: 100%;
+    z-index: 1050;
 }
 
 .login-form {
-    padding-top: 15%;
+    padding-top: 5%;
 }
 
 @media screen and (max-width: 992px) {
@@ -1133,16 +1134,16 @@ Packages panel dropzone END
 
 div.copyright:after {
 	content:
-		' Eurotech,YOFC and others. EPL v1.0';
+		' 长飞光纤光缆股份有限公司 ';
 }
 
 div.headerLogo { 
-	height: 			38px;
+	height: 			5px;
 	margin: 			5px 0px 5px 15px;
 	vertical-align: 	baseline;
-	background: 		url(eclipse/kura/icons/kura_logo_small.png);
+	background: 		url(eclipse/kura/icons/yofc_logo_small.png);
 	background-repeat: 	no-repeat;
-	background-size: 	contain;
+	background-size: 	100% 100%;
 	background-position: center !important;
 	margin-left: 0 !important;
 	margin-right: 0 !important;

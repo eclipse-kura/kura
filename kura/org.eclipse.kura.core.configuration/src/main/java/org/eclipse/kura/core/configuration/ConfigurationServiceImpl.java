@@ -326,20 +326,6 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         return Collections.unmodifiableSet(this.allActivatedPids);
     }
 
-    @Override
-    public String getPidByServicePid(String servicePid) {
-        if (this.servicePidByPid.isEmpty()) {
-            return null;
-        }
-        Optional<Entry<String, String>> opton = this.servicePidByPid.entrySet().stream().filter(entry -> {
-            return entry.getValue().equals(servicePid);
-        }).findFirst();
-        if (opton.isEmpty())
-            return null;
-        else
-            return opton.get().getKey();
-    }
-
     // Don't perform internal calls to this method
     @Override
     public List<ComponentConfiguration> getComponentConfigurations() throws KuraException {
@@ -444,14 +430,13 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
     }
 
     @Override
-    public synchronized String createFactoryConfiguration(String factoryPid, String pid, Map<String, Object> properties,
+    public synchronized void createFactoryConfiguration(String factoryPid, String pid, Map<String, Object> properties,
             boolean takeSnapshot) throws KuraException {
         if (pid == null) {
             throw new KuraException(KuraErrorCode.INVALID_PARAMETER, "pid cannot be null");
         } else if (this.servicePidByPid.containsKey(pid)) {
             throw new KuraException(KuraErrorCode.INVALID_PARAMETER, "pid " + pid + " already exists");
         }
-        String servicePid = null;
 
         try {
             // Second argument in createFactoryConfiguration is a bundle location. If left null the new bundle location
@@ -459,7 +444,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
             // corresponding PID
             logger.info("Creating new configuration for factory pid {} and pid {}", factoryPid, pid);
             Configuration config = this.configurationAdmin.createFactoryConfiguration(factoryPid, null);
-            servicePid = config.getPid();
+            String servicePid = config.getPid();
 
             logger.info("Updating newly created configuration for pid {}", pid);
 
@@ -487,7 +472,6 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
             throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, e,
                     "Cannot create component instance for factory " + factoryPid);
         }
-        return servicePid;
     }
 
     @Override

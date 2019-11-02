@@ -364,11 +364,11 @@ public class CloudInstancesUi extends Composite {
             public String getValue(GwtCloudEntry object) {
 
                 if (object instanceof GwtCloudConnectionEntry) {
-                    return "Cloud connection";
+                    return MSGS.cloudConnection();
                 }
 
-                return ((GwtCloudPubSubEntry) object).getType() == GwtCloudPubSubEntry.Type.PUBLISHER ? "Publisher"
-                        : "Subscriber";
+                return ((GwtCloudPubSubEntry) object).getType() == GwtCloudPubSubEntry.Type.PUBLISHER ? MSGS.publisher()
+                        : MSGS.subscriber();
             }
 
         };

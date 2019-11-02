@@ -28,8 +28,8 @@ import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.data.DataService;
 import org.eclipse.kura.data.DataTransportService;
+import org.eclipse.kura.locale.LocaleContextHolder;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -169,7 +169,7 @@ public class DefaultCloudConnectionFactory implements CloudConnectionFactory {
     private static final String DATA_SERVICE_REFERENCE_NAME = "DataService";
     private static final String DATA_TRANSPORT_SERVICE_REFERENCE_NAME = "DataTransportService";
 
-    private static final String REFERENCE_TARGET_VALUE_FORMAT = "(" + Constants.SERVICE_PID + "=%s)";
+    private static final String REFERENCE_TARGET_VALUE_FORMAT = "(" + ConfigurationService.KURA_SERVICE_PID + "=%s)";
 
     private ConfigurationService configurationService;
 
@@ -185,21 +185,28 @@ public class DefaultCloudConnectionFactory implements CloudConnectionFactory {
 
     @Override
     public String getFactoryPid() {
-        return CLOUD_SERVICE_FACTORY_PID;
+        try {
+            ComponentConfiguration config = this.configurationService
+                    .getDefaultComponentConfiguration(CLOUD_SERVICE_FACTORY_PID);
+            return config.getLocalizedDefinition(LocaleContextHolder.getLocale().getLanguage()).getName();
+        } catch (Exception e) {
+            return CLOUD_SERVICE_FACTORY_PID;
+        }
     }
 
     @Override
     public void createConfiguration(String pid) throws KuraException {
 
-        String dataTransportServicePid = this.configurationService.createFactoryConfiguration(
-                DATA_TRANSPORT_SERVICE_FACTORY_PID, DATA_TRANSPORT_SERVICE_PID + "-" + new Date().getTime(), null,
-                false);
+        String dataTransportServicePid = DATA_TRANSPORT_SERVICE_PID + "-" + new Date().getTime();
+        this.configurationService.createFactoryConfiguration(DATA_TRANSPORT_SERVICE_FACTORY_PID,
+                dataTransportServicePid, null, false);
         Map<String, Object> dataServiceProperties = new HashMap<String, Object>();
         String name = DATA_TRANSPORT_SERVICE_REFERENCE_NAME + ComponentConstants.REFERENCE_TARGET_SUFFIX;
         dataServiceProperties.put(name, String.format(REFERENCE_TARGET_VALUE_FORMAT, dataTransportServicePid));
 
-        String dataServicePid = this.configurationService.createFactoryConfiguration(DATA_SERVICE_FACTORY_PID,
-                DATA_SERVICE_FACTORY_PID + "-" + new Date().getTime(), dataServiceProperties, false);
+        String dataServicePid = DATA_SERVICE_FACTORY_PID + "-" + new Date().getTime();
+        this.configurationService.createFactoryConfiguration(DATA_SERVICE_FACTORY_PID, dataServicePid,
+                dataServiceProperties, false);
 
         Map<String, Object> cloudServiceProperties = new HashMap<>();
         name = DATA_SERVICE_REFERENCE_NAME + ComponentConstants.REFERENCE_TARGET_SUFFIX;
@@ -210,79 +217,55 @@ public class DefaultCloudConnectionFactory implements CloudConnectionFactory {
 
     @Override
     public void deleteConfiguration(String pid) throws KuraException {
-        ComponentConfiguration config = this.configurationService.getComponentConfiguration(pid);
-        String dataServicePid = null;
-        String dataTransportServicePid = null;
-        String name = DATA_SERVICE_REFERENCE_NAME + ComponentConstants.REFERENCE_TARGET_SUFFIX;
-        String dataServiceServicePid = (String) config.getConfigurationProperties().get(name);
-        if (dataServiceServicePid != null) {
-            String[] names = dataServiceServicePid.split("=");
-            if (names.length == 2)
-                dataServiceServicePid = names[1];
-            dataServiceServicePid = dataServiceServicePid.substring(0, dataServiceServicePid.indexOf(')'));
-
-            if (dataServiceServicePid != null)
-                dataServicePid = this.configurationService.getPidByServicePid(dataServiceServicePid);
-            if (dataServicePid != null) {
-                config = this.configurationService.getComponentConfiguration(dataServicePid);
-                name = DATA_TRANSPORT_SERVICE_REFERENCE_NAME + ComponentConstants.REFERENCE_TARGET_SUFFIX;
-                String dataTransportServiceServicePid = (String) config.getConfigurationProperties().get(name);
-                if (dataTransportServiceServicePid != null) {
-                    names = dataTransportServiceServicePid.split("=");
-                    if (names.length == 2)
-                        dataTransportServiceServicePid = names[1];
-                    dataTransportServiceServicePid = dataTransportServiceServicePid.substring(0,
-                            dataTransportServiceServicePid.indexOf(')'));
-                    dataTransportServicePid = this.configurationService
-                            .getPidByServicePid(dataTransportServiceServicePid);
-                }
-            }
-        }
+        String[] result = getTargetPids(pid);
 
         this.configurationService.deleteFactoryConfiguration(pid, false);
-        if (dataServicePid != null)
-            this.configurationService.deleteFactoryConfiguration(dataServicePid, false);
-        if (dataTransportServicePid != null)
-            this.configurationService.deleteFactoryConfiguration(dataTransportServicePid, true);
+        if (result[0] != null)
+            this.configurationService.deleteFactoryConfiguration(result[0], false);
+        if (result[1] != null)
+            this.configurationService.deleteFactoryConfiguration(result[1], true);
     }
 
     @Override
     public List<String> getStackComponentsPids(String pid) throws KuraException {
-        ComponentConfiguration config = this.configurationService.getComponentConfiguration(pid);
-        String dataServicePid = null;
-        String dataTransportServicePid = null;
-        String name = DATA_SERVICE_REFERENCE_NAME + ComponentConstants.REFERENCE_TARGET_SUFFIX;
-        String dataServiceServicePid = (String) config.getConfigurationProperties().get(name);
-        if (dataServiceServicePid != null) {
-            String[] names = dataServiceServicePid.split("=");
-            if (names.length == 2)
-                dataServiceServicePid = names[1];
-            dataServiceServicePid = dataServiceServicePid.substring(0, dataServiceServicePid.indexOf(')'));
-
-            if (dataServiceServicePid != null)
-                dataServicePid = this.configurationService.getPidByServicePid(dataServiceServicePid);
-            if (dataServicePid != null) {
-                config = this.configurationService.getComponentConfiguration(dataServicePid);
-                name = DATA_TRANSPORT_SERVICE_REFERENCE_NAME + ComponentConstants.REFERENCE_TARGET_SUFFIX;
-                String dataTransportServiceServicePid = (String) config.getConfigurationProperties().get(name);
-                if (dataTransportServiceServicePid != null) {
-                    names = dataTransportServiceServicePid.split("=");
-                    if (names.length == 2)
-                        dataTransportServiceServicePid = names[1];
-                    dataTransportServiceServicePid = dataTransportServiceServicePid.substring(0,
-                            dataTransportServiceServicePid.indexOf(')'));
-                    dataTransportServicePid = this.configurationService
-                            .getPidByServicePid(dataTransportServiceServicePid);
-                }
-            }
-        }
 
         List<String> componentPids = new ArrayList<String>();
 
+        String[] result = getTargetPids(pid);
         componentPids.add(pid);
-        componentPids.add(dataServicePid);
-        componentPids.add(dataTransportServicePid);
+        componentPids.add(result[0]);
+        componentPids.add(result[1]);
         return componentPids;
+    }
+
+    private String[] getTargetPids(String pid) throws KuraException {
+        String[] result = new String[2];
+        ComponentConfiguration config = this.configurationService.getComponentConfiguration(pid);
+        String dataTransportServicePid = null;
+        String name = DATA_SERVICE_REFERENCE_NAME + ComponentConstants.REFERENCE_TARGET_SUFFIX;
+        String dataServicePid = (String) config.getConfigurationProperties().get(name);
+        if (dataServicePid != null) {
+            String[] names = dataServicePid.split("=");
+            if (names.length == 2)
+                dataServicePid = names[1];
+            dataServicePid = dataServicePid.substring(0, dataServicePid.indexOf(')'));
+
+            if (dataServicePid != null) {
+                config = this.configurationService.getComponentConfiguration(dataServicePid);
+                name = DATA_TRANSPORT_SERVICE_REFERENCE_NAME + ComponentConstants.REFERENCE_TARGET_SUFFIX;
+                dataTransportServicePid = (String) config.getConfigurationProperties().get(name);
+                if (dataTransportServicePid != null) {
+                    names = dataTransportServicePid.split("=");
+                    if (names.length == 2)
+                        dataTransportServicePid = names[1];
+                    dataTransportServicePid = dataTransportServicePid.substring(0,
+                            dataTransportServicePid.indexOf(')'));
+                }
+            }
+        }
+        result[0] = dataServicePid;
+        result[1] = dataTransportServicePid;
+        return result;
     }
 
     @Override

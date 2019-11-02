@@ -26,6 +26,7 @@ import org.eclipse.kura.camel.component.Configuration;
 import org.eclipse.kura.cloud.factory.CloudServiceFactory;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.locale.LocaleContextHolder;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -139,7 +140,12 @@ public class CamelCloudServiceFactory implements CloudServiceFactory {
 
     @Override
     public String getFactoryPid() {
-        return FACTORY_ID;
+        try {
+            ComponentConfiguration config = this.configurationService.getDefaultComponentConfiguration(FACTORY_ID);
+            return config.getLocalizedDefinition(LocaleContextHolder.getLocale().getLanguage()).getName();
+        } catch (Exception e) {
+            return FACTORY_ID;
+        }
     }
 
     @Override

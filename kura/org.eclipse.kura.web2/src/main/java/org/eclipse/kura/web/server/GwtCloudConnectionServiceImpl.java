@@ -41,7 +41,9 @@ import org.eclipse.kura.cloudconnection.CloudEndpoint;
 import org.eclipse.kura.cloudconnection.factory.CloudConnectionFactory;
 import org.eclipse.kura.cloudconnection.publisher.CloudPublisher;
 import org.eclipse.kura.cloudconnection.subscriber.CloudSubscriber;
+import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.locale.LocaleContextHolder;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.server.util.ServiceLocator.ServiceConsumer;
 import org.eclipse.kura.web.server.util.ServiceLocator.ServiceReferenceConsumer;
@@ -88,16 +90,14 @@ public class GwtCloudConnectionServiceImpl extends OsgiRemoteServiceServlet impl
 
         withAllCloudConnectionFactories(service -> {
 
-            final String factoryPid = service.getFactoryPid();
-            if (factoryPid == null) {
-                return;
-            }
-
             for (final String pid : service.getManagedCloudConnectionPids()) {
                 if (pid == null) {
                     continue;
                 }
-
+                final String factoryPid = service.getFactoryPid();
+                if (factoryPid == null) {
+                    return;
+                }
                 final GwtCloudConnectionEntry cloudConnectionEntry = new GwtCloudConnectionEntry();
                 cloudConnectionEntry.setCloudConnectionFactoryPid(factoryPid);
                 cloudConnectionEntry.setPid(pid);
@@ -375,10 +375,19 @@ public class GwtCloudConnectionServiceImpl extends OsgiRemoteServiceServlet impl
 
     private static GwtCloudPubSubEntry toGwt(final ServiceReference<?> ref, final GwtCloudPubSubEntry.Type type) {
         final Object ccsPid = ref.getProperty(CloudConnectionConstants.CLOUD_ENDPOINT_SERVICE_PID_PROP_NAME.value());
-        final Object factoryPid = ref.getProperty(ConfigurationAdmin.SERVICE_FACTORYPID);
+        Object factoryPid = ref.getProperty(ConfigurationAdmin.SERVICE_FACTORYPID);
 
         if (!(ccsPid instanceof String && factoryPid instanceof String)) {
             return null;
+        }
+        String factoryName = "";
+        try {
+            factoryName = ServiceLocator.applyToServiceOptionally(ConfigurationService.class, cs -> {
+                ComponentConfiguration config = cs.getDefaultComponentConfiguration((String) factoryPid);
+                return config.getLocalizedDefinition(LocaleContextHolder.getLocale().getLanguage()).getName();
+            });
+        } catch (GwtKuraException e) {
+            factoryName = (String) factoryPid;
         }
 
         final String kuraServicePid = (String) ref.getProperty(ConfigurationService.KURA_SERVICE_PID);
@@ -387,7 +396,7 @@ public class GwtCloudConnectionServiceImpl extends OsgiRemoteServiceServlet impl
 
         result.setPid(kuraServicePid);
         result.setCloudConnectionPid((String) ccsPid);
-        result.setFactoryPid((String) factoryPid);
+        result.setFactoryPid(factoryName);
         result.setType(type);
 
         return result;

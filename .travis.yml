@@ -1,7 +1,7 @@
 language: java
 
 jdk:
-- openjdk8
+- openjdk11
 
 sudo: true
 dist: trusty
@@ -13,13 +13,14 @@ cache:
   - target-platform/p2-repo-common/target
   - target-platform/p2-repo-equinox_3.12.50/target
   - target-platform/p2-repo-test-deps/target
+  - target-platform/p2-repo-mvn-deps/target
 
 before_script:
   - echo ==== Setting up toolchain.xml ====
   - ls /usr/lib/jvm
   - cp kura/setups/toolchains/toolchains-travis.xml ~/.m2/toolchains.xml
   - echo ==== Setting up Maven 3.3 for Travis ====
-  - wget -O maven.tar.gz http://archive.apache.org/dist/maven/maven-3/3.3.9/binaries/apache-maven-3.3.9-bin.tar.gz
+  - wget -O maven.tar.gz http://archive.apache.org/dist/maven/maven-3/3.6.2/binaries/apache-maven-3.6.2-bin.tar.gz
   - mkdir maven
   - cd maven ; tar --strip-components 1 -xzf ../maven.tar.gz ; cd ..
   - chmod a+x maven/bin/mvn
@@ -32,7 +33,7 @@ addons:
   apt:
     packages:
       - dos2unix
-      - openjdk-8-jdk
+      - openjdk-11-jdk
 
 jobs:
   include:

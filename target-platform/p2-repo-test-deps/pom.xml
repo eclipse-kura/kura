@@ -145,6 +145,7 @@
                          ="4.12.0",org.junit.runners.model;version="4.12.0",org.junit.runners.
                          parameterized;version="4.12.0",org.junit.validator;version="4.12.0"
                          </Export-Package>
+                         <Bundle-SymbolicName>org.junit</Bundle-SymbolicName>
                     </instructions>
               </artifact>    
            </artifacts>

@@ -7,7 +7,7 @@ Bundle-Vendor: Eclipse Kura
 Bundle-License: Eclipse Public License v1.0
 Fragment-Host: org.eclipse.kura.asset.provider;bundle-version="1.0.200"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Require-Bundle: junit;bundle-version="4.12.0"
+Require-Bundle: org.junit;bundle-version="4.12.0"
 Import-Package: org.eclipse.kura.core.configuration.metatype;version="[1.0,2.0)",
  org.eclipse.kura.test.annotation;version="[1.0,2.0)"
 Automatic-Module-Name: org.eclipse.kura.asset.provider.test

@@ -58,6 +58,16 @@
                             <autoStart>true</autoStart>
                         </bundle>
                         <bundle>
+                            <id>org.apache.felix.deploymentadmin</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.apache.felix.dependencymanager</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
                             <id>org.eclipse.equinox.cm</id>
                             <level>4</level>
                             <autoStart>true</autoStart>
@@ -157,6 +167,14 @@
                         <dependency>
                             <type>p2-installable-unit</type>
                             <artifactId>org.apache.felix.scr</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>org.apache.felix.deploymentadmin</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>org.apache.felix.dependencymanager</artifactId>
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>

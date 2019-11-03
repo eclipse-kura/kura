@@ -1,7 +1,7 @@
 language: java
 
 jdk:
-- openjdk11
+- openjdk8
 
 sudo: true
 dist: trusty
@@ -33,7 +33,7 @@ addons:
   apt:
     packages:
       - dos2unix
-      - openjdk-11-jdk
+      - openjdk-8-jdk
 
 jobs:
   include:

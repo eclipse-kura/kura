@@ -23,7 +23,6 @@
     <properties>
         <kura.basedir>${project.basedir}/../..</kura.basedir>
     </properties>
-    
     <build>
         <plugins>
             <plugin>
@@ -53,6 +52,16 @@
                     <bundleStartLevel>
                         <bundle>
                             <id>org.apache.felix.scr</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>                        
+                        <bundle>
+                            <id>org.apache.felix.deploymentadmin</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.apache.felix.dependencymanager</id>
                             <level>4</level>
                             <autoStart>true</autoStart>
                         </bundle>
@@ -152,12 +161,7 @@
                             <autoStart>true</autoStart>
                         </bundle>
                         <bundle>
-                            <id>mqtt-client</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
-                            <id>junit</id>
+                            <id>org.junit</id>
                             <level>4</level>
                             <autoStart>true</autoStart>
                         </bundle>
@@ -196,11 +200,6 @@
                             <level>4</level>
                             <autoStart>true</autoStart>
                         </bundle>
-                        <bundle>
-                            <id>org.eclipse.kura.core.deployment</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
                         
                         <bundle>
                             <id>jakarta.activation-api</id>
@@ -228,11 +227,11 @@
                             <autoStart>true</autoStart>
                         </bundle>
                         <bundle>
-                            <id>org.apache.felix.deploymentadmin</id>
+                            <id>org.apache.aries.spifly.dynamic.bundle</id>
                             <level>4</level>
                             <autoStart>true</autoStart>
                         </bundle>
-                        
+                                      
                     </bundleStartLevel>
                     <dependencies>
                         <dependency>
@@ -246,6 +245,14 @@
                         <dependency>
                             <type>p2-installable-unit</type>
                             <artifactId>org.apache.felix.scr</artifactId>
+                        </dependency> 
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>org.apache.felix.deploymentadmin</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>org.apache.felix.dependencymanager</artifactId>
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>
@@ -291,7 +298,6 @@
                             <type>p2-installable-unit</type>
                             <artifactId>org.eclipse.osgi</artifactId>
                         </dependency>
-                        
                         <dependency>
                             <type>p2-installable-unit</type>
                             <artifactId>org.eclipse.osgi.services</artifactId>
@@ -314,7 +320,7 @@
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>
-                            <artifactId>junit</artifactId>
+                            <artifactId>org.junit</artifactId>
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>
@@ -324,6 +330,7 @@
                             <type>p2-installable-unit</type>
                             <artifactId>org.apache.logging.log4j.api</artifactId>
                         </dependency>
+                        
                         <dependency>
                             <type>p2-installable-unit</type>
                             <artifactId>jakarta.activation-api</artifactId>
@@ -345,12 +352,8 @@
                             <artifactId>com.sun.xml.bind.jaxb-osgi</artifactId>
                         </dependency>
                         <dependency>
-                            <type>eclipse-plugin</type>
-                            <artifactId>org.eclipse.kura.core.deployment</artifactId>
-                        </dependency>
-                        <dependency>
                             <type>p2-installable-unit</type>
-                            <artifactId>org.apache.felix.deploymentadmin</artifactId>
+                            <artifactId>org.apache.aries.spifly.dynamic.bundle</artifactId>
                         </dependency>
                     </dependencies>
                 </configuration>
@@ -372,7 +375,11 @@
                                 <id>org.eclipse.kura.api</id>
                                 <versionRange>0.0.0</versionRange>
                             </requirement>
-                            
+                            <requirement>
+                                <type>eclipse-plugin</type>
+                                <id>org.eclipse.kura.xml.marshaller.unmarshaller.provider</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
                             <requirement>
                                 <type>eclipse-plugin</type>
                                 <id>org.eclipse.kura.core.configuration</id>
@@ -418,7 +425,6 @@
                                 <id>org.apache.logging.log4j.slf4j-impl</id>
                                 <versionRange>0.0.0</versionRange>
                             </requirement>
-                            
                             <requirement>
                                 <type>p2-installable-unit</type>
                                 <id>jakarta.activation-api</id>
@@ -443,22 +449,7 @@
                                 <type>p2-installable-unit</type>
                                 <id>com.sun.xml.bind.jaxb-osgi</id>
                                 <versionRange>0.0.0</versionRange>
-                            </requirement>
-                            <requirement>
-                                <type>eclipse-plugin</type>
-                                <id>org.eclipse.kura.core.deployment</id>
-                                <versionRange>0.0.0</versionRange>
-                            </requirement>
-                            <requirement>
-                                <type>p2-installable-unit</type>
-                                <id>org.apache.felix.deploymentadmin</id>
-                                <versionRange>0.0.0</versionRange>
-                            </requirement>
-                            <requirement>
-                                <type>p2-installable-unit</type>
-                                <id>junit</id>
-                                <versionRange>0.0.0</versionRange>
-                            </requirement>
+                            </requirement>       
                         </extraRequirements>
                     </dependency-resolution>
                 </configuration>

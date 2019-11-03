@@ -14,12 +14,14 @@ import static org.eclipse.kura.camel.cloud.factory.internal.CamelFactory.FACTORY
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.camel.component.Configuration;
@@ -27,6 +29,7 @@ import org.eclipse.kura.cloud.factory.CloudServiceFactory;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.locale.LocaleContextHolder;
+import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -76,8 +79,16 @@ public class CamelCloudServiceFactory implements CloudServiceFactory {
         }
 
         props.put("cloud.service.pid", pid);
+        String factoryPid = FACTORY_ID + "-" + new Date().getTime();
+        this.configurationService.createFactoryConfiguration(FACTORY_ID, factoryPid, props, true);
+    }
 
-        this.configurationService.createFactoryConfiguration(FACTORY_ID, pid, props, true);
+    private static Filter getFilterUnchecked(final String filter) {
+        try {
+            return FrameworkUtil.createFilter(filter);
+        } catch (final Exception e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     /**
@@ -135,7 +146,9 @@ public class CamelCloudServiceFactory implements CloudServiceFactory {
 
     @Override
     public void deleteConfiguration(final String pid) throws KuraException {
-        delete(this.configurationService, pid);
+        List<ComponentConfiguration> configs = configurationService
+                .getComponentConfigurations(getFilterUnchecked("(|(cloud.service.pid=" + pid + "))"));
+        configs.stream().forEach(config -> delete(this.configurationService, config.getPid()));
     }
 
     @Override
@@ -150,16 +163,19 @@ public class CamelCloudServiceFactory implements CloudServiceFactory {
 
     @Override
     public List<String> getStackComponentsPids(final String pid) throws KuraException {
-        return Collections.singletonList(pid);
+        List<ComponentConfiguration> configs = configurationService
+                .getComponentConfigurations(getFilterUnchecked("(|(cloud.service.pid=" + pid + "))"));
+        return configs.stream().map(ComponentConfiguration::getPid).collect(Collectors.toList());
     }
 
     @Override
     public Set<String> getManagedCloudServicePids() throws KuraException {
         final Set<String> result = new HashSet<>();
-        List<ComponentConfiguration> configs = this.configurationService.getComponentConfigurations();
-        for (final ComponentConfiguration cc : configs) {
+
+        for (final ComponentConfiguration cc : this.configurationService.getComponentConfigurations()) {
             if (cc.getDefinition() != null && FACTORY_ID.equals(cc.getDefinition().getId())) {
-                result.add(cc.getPid());
+                String pid = (String) cc.getConfigurationProperties().get("cloud.service.pid");
+                result.add(pid);
             }
         }
 

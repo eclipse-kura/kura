@@ -24,7 +24,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <tycho-version>1.4.0</tycho-version>
+        <tycho-version>1.5.1</tycho-version>
 
         <!-- SCM: Note that we are in the "kura" sub-dir here already -->
         <tycho.scmUrl>scm:git:ssh://github.com/eclipse/kura/kura</tycho.scmUrl>
@@ -254,14 +254,19 @@
                 <configuration>
                     <environments>
                         <environment>
-                            <os>win32</os>
-                            <ws>win32</ws>
-                            <arch>x86</arch>
+                          <os>win32</os>
+                          <ws>win32</ws>
+                          <arch>x86_64</arch>
                         </environment>
                         <environment>
-                            <os>linux</os>
-                            <ws>gtk</ws>
-                            <arch>x86</arch>
+                          <os>linux</os>
+                          <ws>gtk</ws>
+                          <arch>x86_64</arch>
+                        </environment>
+                        <environment>
+                          <os>macosx</os>
+                          <ws>cocoa</ws>
+                          <arch>x86_64</arch>
                         </environment>
                     </environments>
                 </configuration>
@@ -317,13 +322,198 @@
                 <artifactId>tycho-surefire-plugin</artifactId>
                 <version>${tycho-version}</version>
                 <configuration>
+                    <argLine>${tycho.argline}</argLine>
+                    <failIfNoTests>false</failIfNoTests>
                     <providerHint>junit4</providerHint>
-                    <argLine>${jacocoArgs} -Deurotech.framework.mode=emulator -Dds.showtrace=true</argLine>
+                    <bundleStartLevel>
+                        <bundle>
+                            <id>org.apache.felix.scr</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.apache.felix.deploymentadmin</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.apache.felix.dependencymanager</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundleStartLevel>
+                            <id>org.eclipse.equinox.cm</id>
+                            <autoStart>true</autoStart>
+                            <level>1</level>
+                        </bundleStartLevel>
+                        <bundleStartLevel>
+                            <id>org.apache.camel.camel-core</id>
+                            <autoStart>true</autoStart>
+                            <level>2</level>
+                        </bundleStartLevel>
+                        <bundleStartLevel>
+                            <id>org.eclipse.kura.camel</id>
+                            <autoStart>true</autoStart>
+                            <level>3</level>
+                        </bundleStartLevel>
+                        <bundle>
+                            <id>org.apache.log4j2-api-config</id>
+                            <level>4</level>
+                            <autoStart>false</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.apache.logging.log4j.api</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.apache.logging.log4j.core</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                        	<id>org.apache.logging.log4j.slf4j-impl</id>
+                        	<level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        
+                        <bundle>
+                            <id>jakarta.annotation-api</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>com.sun.activation.javax.activation</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>jaxb-api</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>com.sun.xml.bind.jaxb-osgi</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        
+                    </bundleStartLevel>
                     <dependencies>
                         <dependency>
                             <type>p2-installable-unit</type>
-                            <artifactId>org.eclipse.equinox.ds</artifactId>
+                            <artifactId>org.eclipse.kura.core</artifactId>
                         </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>org.eclipse.equinox.console</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>org.apache.felix.scr</artifactId>
+                        </dependency> 
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>org.apache.felix.deploymentadmin</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>org.apache.felix.dependencymanager</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>org.eclipse.core.runtime</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>org.eclipse.equinox.io</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>org.eclipse.equinox.app</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>org.eclipse.equinox.cm</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>org.eclipse.equinox.common</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>org.eclipse.equinox.event</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>org.eclipse.equinox.metatype</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>org.eclipse.equinox.preferences</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>org.eclipse.equinox.registry</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>org.eclipse.equinox.util</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>org.eclipse.osgi</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>org.eclipse.osgi.services</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>org.eclipse.osgi.util</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>org.hamcrest.core</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>org.eclipse.equinox.launcher</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>slf4j.api</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>org.junit</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>org.apache.commons.io</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>org.apache.logging.log4j.api</artifactId>
+                        </dependency>
+                        
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>jakarta.annotation-api</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>com.sun.activation.javax.activation</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>jaxb-api</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>com.sun.xml.bind.jaxb-osgi</artifactId>
+                        </dependency>
+                        
                     </dependencies>
                 </configuration>
             </plugin>
@@ -360,7 +550,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.8</version>
                 <executions>
                     <execution>
                         <id>verify-jdeps</id>

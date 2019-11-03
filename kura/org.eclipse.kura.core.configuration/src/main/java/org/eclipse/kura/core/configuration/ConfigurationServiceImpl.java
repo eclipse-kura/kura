@@ -929,6 +929,8 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         allPids.addAll(this.waittingForActivatedPids);
         for (String pid : allPids) {
             try {
+                if (pid.equals("唯一"))
+                    logger.debug("");
                 ComponentConfiguration cc = getComponentConfigurationInternal(pid);
                 if (cc != null) {
                     configs.add(cc);

@@ -70,11 +70,6 @@
             <configuration>
               <artifacts>
 		      <!-- Java 11 -->
-        		<artifact>
-                    <id>jakarta.activation:jakarta.activation-api:${jakarta.activation-api.version}</id>
-                    <source>true</source>
-                    <transitive>false</transitive>              
-                </artifact>
                 <artifact>                    
                     <id>com.sun.activation:javax.activation:${com.sun.activation.version}</id>
                     <source>true</source>

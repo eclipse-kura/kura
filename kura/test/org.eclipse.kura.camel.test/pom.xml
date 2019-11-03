@@ -26,7 +26,32 @@
     <properties>
         <kura.basedir>${project.basedir}/../..</kura.basedir>
     </properties>
-
+    <dependencies>
+        <dependency>
+            <groupId>com.sun.activation</groupId>
+            <artifactId>javax.activation</artifactId>
+            <version>1.2.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.annotation</groupId>
+            <artifactId>jakarta.annotation-api</artifactId>
+            <version>1.3.4</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <version>2.4.0-b180830.0359</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-osgi</artifactId>
+            <version>2.4.0-b180830.0438</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
     <build>
         <plugins>
             <plugin>
@@ -34,13 +59,14 @@
                 <artifactId>tycho-surefire-plugin</artifactId>
                 <version>${tycho-version}</version>
                 <configuration>
-                    <providerHint>junit4</providerHint>
+                    <argLine>${tycho.argline}</argLine>
                     <failIfNoTests>false</failIfNoTests>
-
+                    <providerHint>junit4</providerHint>
+                    <useUnlimitedThreads>false</useUnlimitedThreads>
                     <bundleStartLevel>
                         <bundle>
                             <id>org.apache.felix.scr</id>
-                            <level>4</level>
+                            <level>1</level>
                             <autoStart>true</autoStart>
                         </bundle>
                         <bundle>
@@ -61,12 +87,22 @@
                         <bundleStartLevel>
                             <id>org.apache.camel.camel-core</id>
                             <autoStart>true</autoStart>
-                            <level>2</level>
+                            <level>4</level>
+                        </bundleStartLevel>
+                        <bundleStartLevel>
+                            <id>org.apache.camel.camel-core-osgi</id>
+                            <autoStart>true</autoStart>
+                            <level>4</level>
+                        </bundleStartLevel>
+                        <bundleStartLevel>
+                            <id>org.apache.camel.camel-core-xml</id>
+                            <autoStart>true</autoStart>
+                            <level>4</level>
                         </bundleStartLevel>
                         <bundleStartLevel>
                             <id>org.eclipse.kura.camel</id>
                             <autoStart>true</autoStart>
-                            <level>3</level>
+                            <level>4</level>
                         </bundleStartLevel>
                         <bundle>
                             <id>org.apache.log4j2-api-config</id>
@@ -89,11 +125,6 @@
                             <autoStart>true</autoStart>
                         </bundle>
                         <bundle>
-                            <id>jakarta.activation-api</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
                             <id>jakarta.annotation-api</id>
                             <level>4</level>
                             <autoStart>true</autoStart>
@@ -113,11 +144,7 @@
                             <level>4</level>
                             <autoStart>true</autoStart>
                         </bundle>
-                        <bundle>
-                            <id>org.apache.aries.spifly.dynamic.bundle</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
+                        
                     </bundleStartLevel>
                     <dependencies>
                         <dependency>
@@ -142,7 +169,15 @@
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>
-                            <artifactId>org.eclipse.core.runtime</artifactId>
+                            <artifactId>org.apache.camel.camel-core</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>org.apache.camel.camel-core-osgi</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>org.apache.camel.camel-core-xml</artifactId>
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>
@@ -219,10 +254,6 @@
                         
                         <dependency>
                             <type>p2-installable-unit</type>
-                            <artifactId>jakarta.activation-api</artifactId>
-                        </dependency>
-                        <dependency>
-                            <type>p2-installable-unit</type>
                             <artifactId>jakarta.annotation-api</artifactId>
                         </dependency>
                         <dependency>
@@ -237,27 +268,15 @@
                             <type>p2-installable-unit</type>
                             <artifactId>com.sun.xml.bind.jaxb-osgi</artifactId>
                         </dependency>
-                        <dependency>
-                            <type>p2-installable-unit</type>
-                            <artifactId>org.apache.aries.spifly.dynamic.bundle</artifactId>
-                        </dependency>
                     </dependencies>
                 </configuration>
             </plugin>
-
-            <plugin>
-                <groupId>org.eclipse.tycho</groupId>
-                <artifactId>tycho-compiler-plugin</artifactId>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
-            </plugin>
-
             <plugin>
                 <groupId>org.eclipse.tycho</groupId>
                 <artifactId>target-platform-configuration</artifactId>
                 <configuration>
+                    <argLine>-consoleLog</argLine>
+                    <resolver>p2</resolver>
                     <dependency-resolution>
                         <extraRequirements>
                             <requirement>
@@ -289,13 +308,30 @@
                     </dependency-resolution>
                 </configuration>
             </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-checkstyle-plugin</artifactId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>2.8.2</version>
                 <configuration>
                     <skip>true</skip>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco.version}</version>
+                <executions>
+                    <execution>
+                        <phase>process-test-classes</phase>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                        <configuration>
+                            <destFile>${sonar.jacoco.reportPath}</destFile>
+                            <propertyName>jacocoArgs</propertyName>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

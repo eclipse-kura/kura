@@ -958,8 +958,6 @@ fi]]>
 		<propertyfile
 			file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
-				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/jakarta.activation-api_${jakarta.activation-api.version}.jar@3:start" />
-			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/jakarta.annotation-api_${jakarta.annotation-api.version}.jar@3:start" />			
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/com.sun.activation.javax.activation_${com.sun.activation.version}.jar@3:start" />

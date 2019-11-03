@@ -202,11 +202,6 @@
                         </bundle>
                         
                         <bundle>
-                            <id>jakarta.activation-api</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
                             <id>jakarta.annotation-api</id>
                             <level>4</level>
                             <autoStart>true</autoStart>
@@ -226,12 +221,7 @@
                             <level>4</level>
                             <autoStart>true</autoStart>
                         </bundle>
-                        <bundle>
-                            <id>org.apache.aries.spifly.dynamic.bundle</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                                      
+                            
                     </bundleStartLevel>
                     <dependencies>
                         <dependency>
@@ -330,11 +320,7 @@
                             <type>p2-installable-unit</type>
                             <artifactId>org.apache.logging.log4j.api</artifactId>
                         </dependency>
-                        
-                        <dependency>
-                            <type>p2-installable-unit</type>
-                            <artifactId>jakarta.activation-api</artifactId>
-                        </dependency>
+                       
                         <dependency>
                             <type>p2-installable-unit</type>
                             <artifactId>jakarta.annotation-api</artifactId>
@@ -351,10 +337,7 @@
                             <type>p2-installable-unit</type>
                             <artifactId>com.sun.xml.bind.jaxb-osgi</artifactId>
                         </dependency>
-                        <dependency>
-                            <type>p2-installable-unit</type>
-                            <artifactId>org.apache.aries.spifly.dynamic.bundle</artifactId>
-                        </dependency>
+                        
                     </dependencies>
                 </configuration>
             </plugin>
@@ -425,11 +408,7 @@
                                 <id>org.apache.logging.log4j.slf4j-impl</id>
                                 <versionRange>0.0.0</versionRange>
                             </requirement>
-                            <requirement>
-                                <type>p2-installable-unit</type>
-                                <id>jakarta.activation-api</id>
-                                <versionRange>0.0.0</versionRange>
-                            </requirement>
+                           
                             <requirement>
                                 <type>p2-installable-unit</type>
                                 <id>jakarta.annotation-api</id>

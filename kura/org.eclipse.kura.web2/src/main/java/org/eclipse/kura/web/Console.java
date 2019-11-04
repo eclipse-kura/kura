@@ -219,11 +219,6 @@ public class Console implements ConfigurableComponent, org.eclipse.kura.web.api.
             return;
         }
 
-        unregisterServlet();
-        doUpdate(properties);
-    }
-
-    private void doUpdate(Map<String, Object> properties) {
         ConsoleOptions options = new ConsoleOptions(properties);
 
         Console.setConsoleOptions(options);
@@ -236,6 +231,11 @@ public class Console implements ConfigurableComponent, org.eclipse.kura.web.api.
 
         setAppRoot(options.getAppRoot());
         setSessionMaxInactiveInterval(options.getSessionMaxInactivityInterval());
+
+    }
+
+    private void doUpdate(Map<String, Object> properties) {
+        updated(properties);
 
         try {
             initHTTPService();
@@ -386,7 +386,7 @@ public class Console implements ConfigurableComponent, org.eclipse.kura.web.api.
         this.httpService.registerServlet(CONSOLE_RESOURCE_PATH, new SendStatusServlet(404), null, resourceContext);
 
         this.httpService.registerServlet(PASSWORD_AUTH_PATH,
-                new GwtPasswordAuthenticationServiceImpl(this.authMgr, CONSOLE_PATH), null, sessionContext);
+                new GwtPasswordAuthenticationServiceImpl(this.authMgr, () -> this.appRoot), null, sessionContext);
         this.httpService.registerServlet(DENALI_MODULE_PATH + "/extension", new GwtExtensionServiceImpl(), null,
                 resourceContext);
         this.httpService.registerServlet(LOGIN_MODULE_PATH + "/extension", new GwtExtensionServiceImpl(), null,

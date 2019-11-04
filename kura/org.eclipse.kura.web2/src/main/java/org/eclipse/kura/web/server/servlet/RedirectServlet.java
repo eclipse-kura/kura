@@ -11,7 +11,6 @@ package org.eclipse.kura.web.server.servlet;
 
 import java.io.IOException;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -31,9 +30,9 @@ public class RedirectServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     private final Predicate<String> shouldRedirect;
-    private final Supplier<String> location;
+    private final String location;
 
-    public RedirectServlet(final Predicate<String> shouldRedirect, final Supplier<String> location) {
+    public RedirectServlet(final Predicate<String> shouldRedirect, final String location) {
         this.shouldRedirect = shouldRedirect;
         this.location = location;
     }
@@ -78,7 +77,7 @@ public class RedirectServlet extends HttpServlet {
             final String path = req.getRequestURI();
 
             if (shouldRedirect.test(path)) {
-                resp.sendRedirect(location.get());
+                resp.sendRedirect(location);
             } else {
                 resp.sendError(404);
             }

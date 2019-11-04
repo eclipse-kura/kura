@@ -623,14 +623,11 @@ public class EntryClassUi extends Composite implements Context {
 
                     @Override
                     public void onSuccess(GwtXSRFToken result) {
-                        EntryClassUi.this.gwtSessionService.logout(result, new AsyncCallback<String>() {
+                        EntryClassUi.this.gwtSessionService.logout(result, new AsyncCallback<Void>() {
 
                             @Override
-                            public void onSuccess(String result) {
-                                if (result == null || result.equals(""))
-                                    Window.Location.reload();
-                                else
-                                    Window.Location.replace(result);
+                            public void onSuccess(Void result) {
+                                Window.Location.reload();
                             }
 
                             @Override

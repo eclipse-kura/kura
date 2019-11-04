@@ -311,7 +311,7 @@
                 <esf:value>true</esf:value>
             </esf:property>
             <esf:property name="device.custom-name" array="false" encrypted="false" type="String">
-                <esf:value>YOFC IOT</esf:value>
+                <esf:value>Kura IOT</esf:value>
             </esf:property>
         </esf:properties>
     </esf:configuration>

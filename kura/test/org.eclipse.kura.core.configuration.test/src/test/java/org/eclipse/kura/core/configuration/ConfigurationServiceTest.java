@@ -24,6 +24,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -1373,6 +1374,17 @@ public class ConfigurationServiceTest {
                 }
                 return null;
             }
+            
+            @Override
+            protected <T> T unmarshal(final File file, final Class<T> clazz) throws KuraException {
+                XmlMarshallUnmarshallImpl xmlMarshaller = new XmlMarshallUnmarshallImpl();
+                try {
+                    return xmlMarshaller.unmarshal(new FileInputStream(file), clazz);
+                }
+                catch (final Exception e) {
+                    throw new KuraException(KuraErrorCode.DECODER_ERROR, e);
+                }
+            }
         };
 
         long snapshotID = 123;
@@ -1526,6 +1538,7 @@ public class ConfigurationServiceTest {
 
                 return xmlComponentConfigurations;
             }
+           
         };
 
         List<ComponentConfigurationImpl> result = (List<ComponentConfigurationImpl>) TestUtil.invokePrivate(cs,
@@ -1580,6 +1593,7 @@ public class ConfigurationServiceTest {
                 calls[1]++;
                 throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR);
             }
+            
         };
 
         List<ComponentConfigurationImpl> result = (List<ComponentConfigurationImpl>) TestUtil.invokePrivate(cs,
@@ -1611,6 +1625,7 @@ public class ConfigurationServiceTest {
             String getSnapshotsDirectory() {
                 return dir;
             }
+            
         };
 
         try {
@@ -1662,6 +1677,17 @@ public class ConfigurationServiceTest {
 
                 return xmlMarshaller.unmarshal(xmlString, clazz);
             }
+            
+            @Override
+            protected <T> T unmarshal(final File file, final Class<T> clazz) throws KuraException {
+                XmlMarshallUnmarshallImpl xmlMarshaller = new XmlMarshallUnmarshallImpl();
+                try {
+                    return xmlMarshaller.unmarshal(new FileInputStream(file), clazz);
+                }
+                catch (final Exception e) {
+                    throw new KuraException(KuraErrorCode.DECODER_ERROR, e);
+                }
+            }
 
             @Override
             protected String marshal(Object object) {
@@ -1673,6 +1699,7 @@ public class ConfigurationServiceTest {
                 }
                 return null;
             }
+            
         };
 
         CryptoService cryptoServiceMock = mock(CryptoService.class);
@@ -1761,6 +1788,16 @@ public class ConfigurationServiceTest {
 
                 return xmlMarshaller.unmarshal(xmlString, clazz);
             }
+            @Override
+            protected <T> T unmarshal(final File file, final Class<T> clazz) throws KuraException {
+                XmlMarshallUnmarshallImpl xmlMarshaller = new XmlMarshallUnmarshallImpl();
+                try {
+                    return xmlMarshaller.unmarshal(new FileInputStream(file), clazz);
+                }
+                catch (final Exception e) {
+                    throw new KuraException(KuraErrorCode.DECODER_ERROR, e);
+                }
+            }
 
             @Override
             protected String marshal(Object object) {
@@ -1820,6 +1857,16 @@ public class ConfigurationServiceTest {
                 XmlMarshallUnmarshallImpl xmlMarshaller = new XmlMarshallUnmarshallImpl();
 
                 return xmlMarshaller.unmarshal(xmlString, clazz);
+            }
+            @Override
+            protected <T> T unmarshal(final File file, final Class<T> clazz) throws KuraException {
+                XmlMarshallUnmarshallImpl xmlMarshaller = new XmlMarshallUnmarshallImpl();
+                try {
+                    return xmlMarshaller.unmarshal(new FileInputStream(file), clazz);
+                }
+                catch (final Exception e) {
+                    throw new KuraException(KuraErrorCode.DECODER_ERROR, e);
+                }
             }
 
             @Override
@@ -2117,6 +2164,17 @@ public class ConfigurationServiceTest {
 
                 return xmlMarshaller.unmarshal(xmlString, clazz);
             }
+            
+            @Override
+            protected <T> T unmarshal(final File file, final Class<T> clazz) throws KuraException {
+                XmlMarshallUnmarshallImpl xmlMarshaller = new XmlMarshallUnmarshallImpl();
+                try {
+                    return xmlMarshaller.unmarshal(new FileInputStream(file), clazz);
+                }
+                catch (final Exception e) {
+                    throw new KuraException(KuraErrorCode.DECODER_ERROR, e);
+                }
+            }
 
             @Override
             protected String marshal(Object object) {
@@ -2197,6 +2255,17 @@ public class ConfigurationServiceTest {
                 XmlMarshallUnmarshallImpl xmlMarshaller = new XmlMarshallUnmarshallImpl();
 
                 return xmlMarshaller.unmarshal(xmlString, clazz);
+            }
+            
+            @Override
+            protected <T> T unmarshal(final File file, final Class<T> clazz) throws KuraException {
+                XmlMarshallUnmarshallImpl xmlMarshaller = new XmlMarshallUnmarshallImpl();
+                try {
+                    return xmlMarshaller.unmarshal(new FileInputStream(file), clazz);
+                }
+                catch (final Exception e) {
+                    throw new KuraException(KuraErrorCode.DECODER_ERROR, e);
+                }
             }
 
             @Override
@@ -2282,6 +2351,17 @@ public class ConfigurationServiceTest {
                 XmlMarshallUnmarshallImpl xmlMarshaller = new XmlMarshallUnmarshallImpl();
 
                 return xmlMarshaller.unmarshal(xmlString, clazz);
+            }
+            
+            @Override
+            protected <T> T unmarshal(final File file, final Class<T> clazz) throws KuraException {
+                XmlMarshallUnmarshallImpl xmlMarshaller = new XmlMarshallUnmarshallImpl();
+                try {
+                    return xmlMarshaller.unmarshal(new FileInputStream(file), clazz);
+                }
+                catch (final Exception e) {
+                    throw new KuraException(KuraErrorCode.DECODER_ERROR, e);
+                }
             }
 
             @Override
@@ -2383,6 +2463,17 @@ public class ConfigurationServiceTest {
 
                 return xmlMarshaller.unmarshal(xmlString, clazz);
             }
+            
+            @Override
+            protected <T> T unmarshal(final File file, final Class<T> clazz) throws KuraException {
+                XmlMarshallUnmarshallImpl xmlMarshaller = new XmlMarshallUnmarshallImpl();
+                try {
+                    return xmlMarshaller.unmarshal(new FileInputStream(file), clazz);
+                }
+                catch (final Exception e) {
+                    throw new KuraException(KuraErrorCode.DECODER_ERROR, e);
+                }
+            }
 
             @Override
             protected String marshal(Object object) {
@@ -2394,6 +2485,7 @@ public class ConfigurationServiceTest {
                 }
                 return null;
             }
+            
         };
 
         configurationService.setCryptoService(csMock);
@@ -2970,7 +3062,17 @@ public class ConfigurationServiceTest {
 
                 return xmlMarshaller.unmarshal(xmlString, clazz);
             }
-
+            @Override
+            protected <T> T unmarshal(final File file, final Class<T> clazz) throws KuraException {
+                XmlMarshallUnmarshallImpl xmlMarshaller = new XmlMarshallUnmarshallImpl();
+                try {
+                    return xmlMarshaller.unmarshal(new FileInputStream(file), clazz);
+                }
+                catch (final Exception e) {
+                    throw new KuraException(KuraErrorCode.DECODER_ERROR, e);
+                }
+            }
+            
             @Override
             protected String marshal(Object object) {
                 XmlMarshallUnmarshallImpl xmlMarshaller = new XmlMarshallUnmarshallImpl();

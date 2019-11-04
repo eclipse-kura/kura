@@ -34,7 +34,7 @@ public class GwtSessionServiceImpl extends OsgiRemoteServiceServlet implements G
     private static final long serialVersionUID = 1L;
 
     @Override
-    public String logout(GwtXSRFToken xsrfToken) throws GwtKuraException {
+    public void logout(GwtXSRFToken xsrfToken) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
 
         final HttpServletRequest request = getThreadLocalRequest();
@@ -58,7 +58,6 @@ public class GwtSessionServiceImpl extends OsgiRemoteServiceServlet implements G
                 response.addCookie(cookie);
             }
         }
-        return Console.instance().getApplicationRoot();
     }
 
     @Override

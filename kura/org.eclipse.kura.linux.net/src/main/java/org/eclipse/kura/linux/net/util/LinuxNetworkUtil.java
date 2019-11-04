@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.logging.Logger;
 
 import org.apache.commons.io.Charsets;
 import org.eclipse.kura.KuraErrorCode;
@@ -35,6 +34,7 @@ import org.eclipse.kura.linux.net.wifi.WifiOptions;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.wifi.WifiInterface.Capability;
 import org.eclipse.kura.net.wifi.WifiMode;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class LinuxNetworkUtil {

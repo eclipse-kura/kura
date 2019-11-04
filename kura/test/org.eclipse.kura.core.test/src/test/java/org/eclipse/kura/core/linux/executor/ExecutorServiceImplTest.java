@@ -53,9 +53,15 @@ public class ExecutorServiceImplTest {
     private static final String TMP = "/tmp";
     private static CommandExecutorService service;
 
+    public ExecutorServiceImplTest(CommandExecutorService service) {
+        ExecutorServiceImplTest.service = service;
+    }
+
+    // Don't run tests on MAC OS X
     @ClassRule
     public static final AssumingIsNotMac assumingIsNotMac = new AssumingIsNotMac();
 
+    // Don't run tests on Jenkins
     @ClassRule
     public static final AssumingIsNotJenkins assumingIsNotJenkins = new AssumingIsNotJenkins();
 

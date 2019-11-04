@@ -72,54 +72,20 @@ public class IwconfigLinkTool implements LinkTool {
         for (String line : commandOutput.split("\n")) {
             line = line.trim();
             if (line.contains(MODE)) {
-                int modeInd = line.indexOf(MODE);
-                if (modeInd >= 0) {
-                    String mode = line.substring(modeInd + MODE.length());
-                    mode = mode.substring(0, mode.indexOf(' '));
-                    if ("Managed".equals(mode)) {
-                        int apInd = line.indexOf("Access Point:");
-                        if (apInd > 0) {
-                            line = line.substring(apInd + "Access Point:".length()).trim();
-                            if (line.startsWith("Not-Associated")) {
-                                break;
-                            }
-                            associated = true;
-                        }
-                    } else {
-                        break;
-                    }
-                }
+                associated = parseMode(line);
             } else if (line.contains(BIT_RATE)) {
-                int bitRateInd = line.indexOf(BIT_RATE);
-                line = line.substring(bitRateInd + BIT_RATE.length());
-                line = line.substring(0, line.indexOf(' '));
-                double bitrate = Double.parseDouble(line) * 1000000;
-                this.speed = (int) Math.round(bitrate);
+                parseBitrate(line);
             } else if (line.contains(SIGNAL_LEVEL)) {
-                int sigLevelInd = line.indexOf(SIGNAL_LEVEL);
-                line = line.substring(sigLevelInd + SIGNAL_LEVEL.length());
-                line = line.substring(0, line.indexOf(' '));
-                int sig = 0;
-                if (line.contains("/")) {
-                    // Could also be of format 39/100
-                    final String[] parts = line.split("/");
-                    sig = (int) Float.parseFloat(parts[0]);
-                    if (sig <= 0) {
-                        sig = -100;
-                    } else if (sig >= 100) {
-                        sig = -50;
-                    } else {
-                        sig = sig / 2 - 100;
-                    }
-                } else {
-                    sig = Integer.parseInt(line);
-                }
-
+                int sig = parseSignalLevel(line);
                 if (associated && sig > -100) { // TODO: adjust this threshold?
                     logger.debug("get() :: !! Link Detected !!");
                     this.signal = sig;
                     this.linkDetected = true;
                 }
+            }
+
+            if (!associated) {
+                break;
             }
         }
     }
@@ -147,5 +113,54 @@ public class IwconfigLinkTool implements LinkTool {
     @Override
     public int getSignal() {
         return this.signal;
+    }
+
+    private boolean parseMode(String line) {
+        boolean associated = false;
+        int modeInd = line.indexOf(MODE);
+        if (modeInd >= 0) {
+            String mode = line.substring(modeInd + MODE.length());
+            mode = mode.substring(0, mode.indexOf(' '));
+            if ("Managed".equals(mode)) {
+                int apInd = line.indexOf("Access Point:");
+                if (apInd > 0) {
+                    line = line.substring(apInd + "Access Point:".length()).trim();
+                    if (!line.startsWith("Not-Associated")) {
+                        associated = true;
+                    }
+                }
+            }
+        }
+        return associated;
+    }
+
+    private void parseBitrate(String line) {
+        int bitRateInd = line.indexOf(BIT_RATE);
+        line = line.substring(bitRateInd + BIT_RATE.length());
+        line = line.substring(0, line.indexOf(' '));
+        double bitrate = Double.parseDouble(line) * 1000000;
+        this.speed = (int) Math.round(bitrate);
+    }
+
+    private int parseSignalLevel(String line) {
+        int sigLevelInd = line.indexOf(SIGNAL_LEVEL);
+        line = line.substring(sigLevelInd + SIGNAL_LEVEL.length());
+        line = line.substring(0, line.indexOf(' '));
+        int sig = 0;
+        if (line.contains("/")) {
+            // Could also be of format 39/100
+            final String[] parts = line.split("/");
+            sig = (int) Float.parseFloat(parts[0]);
+            if (sig <= 0) {
+                sig = -100;
+            } else if (sig >= 100) {
+                sig = -50;
+            } else {
+                sig = sig / 2 - 100;
+            }
+        } else {
+            sig = Integer.parseInt(line);
+        }
+        return sig;
     }
 }

@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.logging.Logger;
 
 import org.apache.commons.io.Charsets;
 import org.eclipse.kura.KuraErrorCode;
@@ -34,10 +35,11 @@ import org.eclipse.kura.linux.net.wifi.WifiOptions;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.wifi.WifiInterface.Capability;
 import org.eclipse.kura.net.wifi.WifiMode;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class LinuxNetworkUtil {
+
+    private static final String ETHTOOL_COMMAND = "ethtool";
 
     private static final Logger logger = LoggerFactory.getLogger(LinuxNetworkUtil.class);
 
@@ -176,46 +178,54 @@ public class LinuxNetworkUtil {
 
         try {
             if (ifaceType == NetInterfaceType.WIFI) {
-                Collection<String> supportedWifiOptions = this.wifiOptions.getSupportedOptions(ifaceName);
-                LinkTool linkTool = null;
-                if (!supportedWifiOptions.isEmpty()) {
-                    if (supportedWifiOptions.contains(WifiOptions.WIFI_MANAGED_DRIVER_NL80211)) {
-                        linkTool = new IwLinkTool(ifaceName, this.executorService);
-                    } else if (supportedWifiOptions.contains(WifiOptions.WIFI_MANAGED_DRIVER_WEXT)) {
-                        linkTool = new IwconfigLinkTool(ifaceName, this.executorService);
-                    }
-                }
-
-                if (linkTool != null && linkTool.get()) {
-                    return linkTool.isLinkDetected();
-                } else {
-                    logger.error("link tool failed to detect the status of {}", ifaceName);
-                    return false;
-                }
+                return isWifiLinkUpInternal(ifaceName);
             } else if (ifaceType == NetInterfaceType.ETHERNET) {
-                LinkTool linkTool = null;
-                if (toolExists("ethtool")) {
-                    linkTool = new EthTool(ifaceName, this.executorService);
-                } else if (toolExists("mii-tool")) {
-                    linkTool = new MiiTool(ifaceName, this.executorService);
-                }
-
-                if (linkTool != null) {
-                    if (linkTool.get()) {
-                        return linkTool.isLinkDetected();
-                    } else {
-                        throw new KuraException(KuraErrorCode.INTERNAL_ERROR,
-                                "link tool failed to detect the ethernet status of " + ifaceName);
-                    }
-                } else {
-                    throw new KuraException(KuraErrorCode.INTERNAL_ERROR,
-                            "ethtool or mii-tool must be included with the Linux distro");
-                }
+                return isEthernetLinkUpInternal(ifaceName);
             } else {
                 throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "Unsupported NetInterfaceType: " + ifaceType);
             }
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+        }
+    }
+
+    private boolean isEthernetLinkUpInternal(String ifaceName) throws KuraException {
+        LinkTool linkTool = null;
+        if (toolExists(ETHTOOL_COMMAND)) {
+            linkTool = new EthTool(ifaceName, this.executorService);
+        } else if (toolExists("mii-tool")) {
+            linkTool = new MiiTool(ifaceName, this.executorService);
+        }
+
+        if (linkTool != null) {
+            if (linkTool.get()) {
+                return linkTool.isLinkDetected();
+            } else {
+                throw new KuraException(KuraErrorCode.INTERNAL_ERROR,
+                        "link tool failed to detect the ethernet status of " + ifaceName);
+            }
+        } else {
+            throw new KuraException(KuraErrorCode.INTERNAL_ERROR,
+                    "ethtool or mii-tool must be included with the Linux distro");
+        }
+    }
+
+    private boolean isWifiLinkUpInternal(String ifaceName) throws KuraException {
+        Collection<String> supportedWifiOptions = this.wifiOptions.getSupportedOptions(ifaceName);
+        LinkTool linkTool = null;
+        if (!supportedWifiOptions.isEmpty()) {
+            if (supportedWifiOptions.contains(WifiOptions.WIFI_MANAGED_DRIVER_NL80211)) {
+                linkTool = new IwLinkTool(ifaceName, this.executorService);
+            } else if (supportedWifiOptions.contains(WifiOptions.WIFI_MANAGED_DRIVER_WEXT)) {
+                linkTool = new IwconfigLinkTool(ifaceName, this.executorService);
+            }
+        }
+
+        if (linkTool != null && linkTool.get()) {
+            return linkTool.isLinkDetected();
+        } else {
+            logger.error("link tool failed to detect the status of {}", ifaceName);
+            return false;
         }
     }
 
@@ -307,13 +317,7 @@ public class LinuxNetworkUtil {
 
             // determine if wifi
             if (config.getType() == NetInterfaceType.ETHERNET) {
-                Collection<String> wifiOptions = this.wifiOptions.getSupportedOptions(ifaceName);
-                if (!wifiOptions.isEmpty()) {
-                    for (String op : wifiOptions) {
-                        logger.trace("WiFi option supported on {} : {}", ifaceName, op);
-                    }
-                    config.setType(NetInterfaceType.WIFI);
-                }
+                setWifiConfig(ifaceName, config);
             }
 
             // determine driver
@@ -328,20 +332,34 @@ public class LinuxNetworkUtil {
         } catch (KuraException e) {
             if (e.getCode() == KuraErrorCode.OS_COMMAND_ERROR || e.getCode() == KuraErrorCode.PROCESS_EXECUTION_ERROR) {
                 // Assuming ifconfig fails because a PPP link went down and its interface cannot be found
-                if (ifaceName.matches(PPP_IFACE_REGEX)) {
-                    File pppFile = new File(NetworkServiceImpl.PPP_PEERS_DIR + ifaceName);
-                    if (pppFile.exists()) {
-                        LinuxIfconfig config = new LinuxIfconfig(ifaceName);
-                        config.setType(NetInterfaceType.valueOf(MODEM));
-                        return config;
-                    }
-                }
+                return getPppConfig(ifaceName);
             } else {
                 logger.warn("FIXME: IpAddrShow failed. Falling back to old ifconfig method", e);
                 return getInterfaceConfigurationInternal(ifaceName);
             }
         }
-        return null;
+    }
+
+    private void setWifiConfig(String ifaceName, LinuxIfconfig config) {
+        Collection<String> wifiSupportedOptions = this.wifiOptions.getSupportedOptions(ifaceName);
+        if (!wifiSupportedOptions.isEmpty()) {
+            for (String op : wifiSupportedOptions) {
+                logger.trace("WiFi option supported on {} : {}", ifaceName, op);
+            }
+            config.setType(NetInterfaceType.WIFI);
+        }
+    }
+
+    private LinuxIfconfig getPppConfig(String ifaceName) {
+        LinuxIfconfig config = null;
+        if (ifaceName.matches(PPP_IFACE_REGEX)) {
+            File pppFile = new File(NetworkServiceImpl.PPP_PEERS_DIR + ifaceName);
+            if (pppFile.exists()) {
+                config = new LinuxIfconfig(ifaceName);
+                config.setType(NetInterfaceType.valueOf(MODEM));
+            }
+        }
+        return config;
     }
 
     @Deprecated
@@ -398,23 +416,7 @@ public class LinuxNetworkUtil {
                 }
             }
 
-            i = line.indexOf("inet addr:");
-            if (i > -1) {
-                String ipAddress = line.substring(i + 10, line.indexOf(' ', i + 10));
-                linuxIfconfig.setInetAddress(ipAddress);
-
-                i = line.indexOf("Mask:");
-                if (i > -1) {
-                    String netmask = line.substring(i + 5);
-                    linuxIfconfig.setInetMask(netmask);
-                }
-
-                i = line.indexOf("Bcast:");
-                if (i > -1) {
-                    String broadcast = line.substring(i + 6, line.indexOf(' ', i + 6));
-                    linuxIfconfig.setInetBcast(broadcast);
-                }
-            }
+            getInterfaceAddress(linuxIfconfig, line);
 
             i = line.indexOf("MTU:");
             if (i > -1) {
@@ -424,6 +426,27 @@ public class LinuxNetworkUtil {
 
             if (line.contains("MULTICAST")) {
                 linuxIfconfig.setMulticast(true);
+            }
+        }
+    }
+
+    private void getInterfaceAddress(LinuxIfconfig linuxIfconfig, String line) {
+        int i;
+        i = line.indexOf("inet addr:");
+        if (i > -1) {
+            String ipAddress = line.substring(i + 10, line.indexOf(' ', i + 10));
+            linuxIfconfig.setInetAddress(ipAddress);
+
+            i = line.indexOf("Mask:");
+            if (i > -1) {
+                String netmask = line.substring(i + 5);
+                linuxIfconfig.setInetMask(netmask);
+            }
+
+            i = line.indexOf("Bcast:");
+            if (i > -1) {
+                String broadcast = line.substring(i + 6, line.indexOf(' ', i + 6));
+                linuxIfconfig.setInetBcast(broadcast);
             }
         }
     }
@@ -536,8 +559,8 @@ public class LinuxNetworkUtil {
         driver.put(VERSION, UNKNOWN);
         driver.put(FIRMWARE, UNKNOWN);
 
-        String[] ethtoolCmd = { "ethtool", "-i", interfaceName };
-        if (toolExists("ethtool")) {
+        String[] ethtoolCmd = { ETHTOOL_COMMAND, "-i", interfaceName };
+        if (toolExists(ETHTOOL_COMMAND)) {
             Command command = new Command(ethtoolCmd);
             command.setTimeout(60);
             command.setOutputStream(new ByteArrayOutputStream());

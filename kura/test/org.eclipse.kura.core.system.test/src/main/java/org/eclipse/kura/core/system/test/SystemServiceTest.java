@@ -41,7 +41,7 @@ public class SystemServiceTest {
     private static SystemService systemService = null;
     private static CommandExecutorService executorService = null;
     private static CountDownLatch dependencyLatch = new CountDownLatch(2);	// initialize with number of dependencies
-    private static boolean onCloudbees = false;
+    private boolean onCloudbees = false;
 
     @BeforeClass
     public static void setUp() {

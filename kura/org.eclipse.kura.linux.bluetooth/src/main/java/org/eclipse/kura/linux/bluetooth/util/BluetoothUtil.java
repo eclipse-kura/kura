@@ -96,30 +96,7 @@ public class BluetoothUtil {
             // TODO: Pull more parameters from hciconfig?
             props.put("leReady", "false");
             for (String result : outputLines) {
-                if (result.indexOf(BD_ADDRESS) >= 0) {
-                    // Address reported as:
-                    // BD Address: xx:xx:xx:xx:xx:xx ACL MTU: xx:xx SCO MTU: xx:x
-                    String[] ss = result.split(" ");
-                    String address = "";
-                    for (String sss : ss) {
-                        if (sss.matches("^([0-9a-fA-F][0-9a-fA-F]:){5}([0-9a-fA-F][0-9a-fA-F])$")) {
-                            address = sss;
-                            break;
-                        }
-                    }
-                    // String address = result.substring(index + BD_ADDRESS.length());
-                    // String[] tmpAddress = address.split("\\s", 2);
-                    // address = tmpAddress[0].trim();
-                    props.put("address", address);
-                    logger.trace("Bluetooth adapter address set to: {}", address);
-                }
-                if (result.indexOf(HCI_VERSION) >= 0) {
-                    // HCI version : 4.0 (0x6) or HCI version : 4.1 (0x7)
-                    if (result.indexOf("0x6") >= 0 || result.indexOf("0x7") >= 0) {
-                        props.put("leReady", "true");
-                        logger.trace("Bluetooth adapter is LE ready");
-                    }
-                }
+                parseCommandResult(props, result);
             }
         } else {
             // Check Enput stream
@@ -134,6 +111,31 @@ public class BluetoothUtil {
         }
 
         return props;
+    }
+
+    private static void parseCommandResult(Map<String, String> props, String result) {
+        if (result.indexOf(BD_ADDRESS) >= 0) {
+            // Address reported as:
+            // BD Address: xx:xx:xx:xx:xx:xx ACL MTU: xx:xx SCO MTU: xx:x
+            String[] ss = result.split(" ");
+            String address = "";
+            for (String sss : ss) {
+                if (sss.matches("^([0-9a-fA-F][0-9a-fA-F]:){5}([0-9a-fA-F][0-9a-fA-F])$")) {
+                    address = sss;
+                    break;
+                }
+            }
+            // String address = result.substring(index + BD_ADDRESS.length());
+            // String[] tmpAddress = address.split("\\s", 2);
+            // address = tmpAddress[0].trim();
+            props.put("address", address);
+            logger.trace("Bluetooth adapter address set to: {}", address);
+        }
+        if (result.indexOf(HCI_VERSION) >= 0 && (result.indexOf("0x6") >= 0 || result.indexOf("0x7") >= 0)) {
+            // HCI version : 4.0 (0x6) or HCI version : 4.1 (0x7)
+            props.put("leReady", "true");
+            logger.trace("Bluetooth adapter is LE ready");
+        }
     }
 
     /*

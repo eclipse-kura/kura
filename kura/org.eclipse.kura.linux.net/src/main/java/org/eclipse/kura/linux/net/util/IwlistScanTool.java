@@ -127,7 +127,7 @@ public class IwlistScanTool implements IScanTool {
         // get the output
         String line = null;
         String ssid = null;
-        List<Long> bitrate = null;
+        List<Long> bitrate = new ArrayList<>();
         long frequency = -1;
         byte[] hardwareAddress = null;
         WifiMode mode = null;
@@ -154,7 +154,7 @@ public class IwlistScanTool implements IScanTool {
 
                     // reset
                     ssid = null;
-                    bitrate = null;
+                    bitrate = new ArrayList<>();
                     frequency = -1;
                     hardwareAddress = null;
                     mode = null;
@@ -163,31 +163,17 @@ public class IwlistScanTool implements IScanTool {
                     wpaSecurity = null;
 
                     // parse out the MAC
-                    StringTokenizer st = new StringTokenizer(line, " ");
-                    st.nextToken(); // eat Cell
-                    st.nextToken(); // eat Cell #
-                    st.nextToken(); // eat '-'
-                    st.nextToken(); // eat 'Address:'
-                    String macAddressString = st.nextToken();
-                    if (macAddressString != null) {
-                        hardwareAddress = NetworkUtil.macToBytes(macAddressString);
-                    }
+                    hardwareAddress = parseHardwareAddress(line);
                 } else if (line.startsWith("ESSID:")) {
                     ssid = line.substring("ESSID:".length() + 1, line.length() - 1);
                 } else if (line.startsWith("Quality=")) {
                     strength = parseStrength(line);
                 } else if (line.startsWith("Mode:")) {
-                    line = line.substring("Mode:".length());
-                    if ("Master".equals(line)) {
-                        mode = WifiMode.MASTER;
-                    }
+                    mode = parseMode(line);
                 } else if (line.startsWith("Frequency:")) {
                     line = line.substring("Frequency:".length(), line.indexOf(' '));
                     frequency = (long) (Float.parseFloat(line) * 1000);
                 } else if (line.startsWith("Bit Rates:")) {
-                    if (bitrate == null) {
-                        bitrate = new ArrayList<>();
-                    }
                     bitrate.addAll(parseBitRate(line));
                 } else if (line.contains("IE: IEEE 802.11i/WPA2")) {
                     rsnSecurity = setWifiSecurity(br);
@@ -212,6 +198,29 @@ public class IwlistScanTool implements IScanTool {
             wifiAccessPoints.add(wifiAccessPoint);
         }
         return wifiAccessPoints;
+    }
+
+    private byte[] parseHardwareAddress(String line) {
+        byte[] hardwareAddress = null;
+        StringTokenizer st = new StringTokenizer(line, " ");
+        st.nextToken(); // eat Cell
+        st.nextToken(); // eat Cell #
+        st.nextToken(); // eat '-'
+        st.nextToken(); // eat 'Address:'
+        String macAddressString = st.nextToken();
+        if (macAddressString != null) {
+            hardwareAddress = NetworkUtil.macToBytes(macAddressString);
+        }
+        return hardwareAddress;
+    }
+
+    private WifiMode parseMode(String line) {
+        WifiMode mode = null;
+        line = line.substring("Mode:".length());
+        if ("Master".equals(line)) {
+            mode = WifiMode.MASTER;
+        }
+        return mode;
     }
 
     private List<Long> parseBitRate(String line) {

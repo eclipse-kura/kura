@@ -51,15 +51,15 @@ public class DhcpServerTest extends TestCase {
     private static String oldConfigBackup = TMPDIR + "/dhcpd.conf.backup";
 
     private static final String TEST_INTERFACE = "eth0";
-    private static CommandExecutorService executorService;
+    private CommandExecutorService executorService;
 
     public void setExecutorService(CommandExecutorService executorService) {
-        DhcpServerTest.executorService = executorService;
+        this.executorService = executorService;
         dependencyLatch.countDown();
     }
 
     public void unsetExecutorService(CommandExecutorService executorService) {
-        DhcpServerTest.executorService = null;
+        this.executorService = null;
         dependencyLatch.countDown();
     }
 
@@ -131,7 +131,7 @@ public class DhcpServerTest extends TestCase {
 
         try {
             // Setup note: Assumes the existence of the test interface, and that it can be brought up with an ip address
-            LinuxNetworkUtil linuxNetworkUtil = new LinuxNetworkUtil(DhcpServerTest.executorService);
+            LinuxNetworkUtil linuxNetworkUtil = new LinuxNetworkUtil(this.executorService);
             linuxNetworkUtil.disableInterface(TEST_INTERFACE);
             linuxNetworkUtil.enableInterface(TEST_INTERFACE);
 

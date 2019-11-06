@@ -220,37 +220,41 @@ public class InstallImpl {
             for (File fileEntry : verificationDir.listFiles()) {
                 if (fileEntry.isFile() && (fileEntry.getName().endsWith(".sh") || fileEntry.getName().endsWith(".bat"))
                         && isCorrectNotificationPublisher(notificationPublisherPid, fileEntry.getName())) {
-                    CommandStatus status;
-                    String fileEntryPath = "";
-                    try {
-                        fileEntryPath = fileEntry.getCanonicalPath();
-                    } catch (IOException e) {
-                        logger.error("Failed to get script path");
-                    }
-
-                    Command command = new Command(new String[] { "chmod", "700", fileEntryPath });
-                    command.setTimeout(60);
-                    status = this.executorService.execute(command);
-                    if ((Integer) status.getExitStatus().getExitValue() != 0) {
-                        logger.error("Failed to change file mode");
-                    }
-
-                    String[] commandLine = { fileEntryPath };
-                    try {
-                        status = this.executorService.execute(new Command(commandLine));
-                        if ((Integer) status.getExitStatus().getExitValue() == 0) {
-                            sendSysUpdateSuccess(fileEntry.getName(), notificationPublisher);
-                        } else {
-                            sendSysUpdateFailure(fileEntry.getName(), notificationPublisher);
-                        }
-                    } finally {
-                        this.executorService.kill(commandLine, LinuxSignal.SIGKILL);
-                        if (fileEntry.delete()) {
-                            logger.error("Cannot delete file {}", fileEntry);
-                        }
-                    }
+                    runScriptAndNotify(notificationPublisher, fileEntry);
 
                 }
+            }
+        }
+    }
+
+    private void runScriptAndNotify(CloudNotificationPublisher notificationPublisher, File fileEntry) {
+        CommandStatus status;
+        String fileEntryPath = "";
+        try {
+            fileEntryPath = fileEntry.getCanonicalPath();
+        } catch (IOException e) {
+            logger.error("Failed to get script path");
+        }
+
+        Command command = new Command(new String[] { "chmod", "700", fileEntryPath });
+        command.setTimeout(60);
+        status = this.executorService.execute(command);
+        if ((Integer) status.getExitStatus().getExitValue() != 0) {
+            logger.error("Failed to change file mode");
+        }
+
+        String[] commandLine = { fileEntryPath };
+        try {
+            status = this.executorService.execute(new Command(commandLine));
+            if ((Integer) status.getExitStatus().getExitValue() == 0) {
+                sendSysUpdateSuccess(fileEntry.getName(), notificationPublisher);
+            } else {
+                sendSysUpdateFailure(fileEntry.getName(), notificationPublisher);
+            }
+        } finally {
+            this.executorService.kill(commandLine, LinuxSignal.SIGKILL);
+            if (fileEntry.delete()) {
+                logger.error("Cannot delete file {}", fileEntry);
             }
         }
     }

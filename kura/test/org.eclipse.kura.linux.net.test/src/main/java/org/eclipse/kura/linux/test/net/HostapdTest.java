@@ -31,15 +31,15 @@ public class HostapdTest extends TestCase {
 
     private static final String IFACE_NAME = "wlan0";
     private HostapdManager hostapdManager;
-    private static CommandExecutorService executorService;
+    private CommandExecutorService executorService;
 
     public void setExecutorService(CommandExecutorService executorService) {
-        HostapdTest.executorService = executorService;
+        this.executorService = executorService;
         dependencyLatch.countDown();
     }
 
     public void unsetExecutorService(CommandExecutorService executorService) {
-        HostapdTest.executorService = null;
+        this.executorService = null;
         dependencyLatch.countDown();
     }
 
@@ -55,7 +55,7 @@ public class HostapdTest extends TestCase {
             fail("OSGi dependencies unfulfilled");
             System.exit(1);
         }
-        this.hostapdManager = new HostapdManager(HostapdTest.executorService);
+        this.hostapdManager = new HostapdManager(this.executorService);
     }
 
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })

@@ -41,21 +41,20 @@ public class IPTablesTest extends TestCase {
     private static final Logger logger = LoggerFactory.getLogger(IPTablesTest.class);
 
     private static CountDownLatch dependencyLatch = new CountDownLatch(1);	// initialize with number of dependencies
-
     private static LinuxFirewall firewall;
 
     private static final String TMPDIR = "/tmp/" + IPTablesTest.class.getName();
     private static String oldConfig = TMPDIR + "/iptables_"
             + new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date());
-    private static CommandExecutorService executorService;
+    private CommandExecutorService executorService;
 
     public void setExecutorService(CommandExecutorService executorService) {
-        IPTablesTest.executorService = executorService;
+        this.executorService = executorService;
         dependencyLatch.countDown();
     }
 
     public void unsetExecutorService(CommandExecutorService executorService) {
-        IPTablesTest.executorService = null;
+        this.executorService = null;
         dependencyLatch.countDown();
     }
 
@@ -63,7 +62,7 @@ public class IPTablesTest extends TestCase {
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @BeforeClass
     public void setUp() {
-        firewall = new LinuxFirewall(IPTablesTest.executorService);
+        firewall = new LinuxFirewall(this.executorService);
 
         File tmpDir = new File(TMPDIR);
         tmpDir.mkdirs();
@@ -208,7 +207,7 @@ public class IPTablesTest extends TestCase {
 
         Command command = new Command(new String[] { "iptables-restore", "<", oldConfig });
         command.setExecuteInAShell(true);
-        CommandStatus status = IPTablesTest.executorService.execute(command);
+        CommandStatus status = this.executorService.execute(command);
         if ((Integer) status.getExitStatus().getExitValue() != 0) {
             fail("Error restoring iptables config");
         }
@@ -218,7 +217,7 @@ public class IPTablesTest extends TestCase {
         Command command = new Command(new String[] { "iptables-save" });
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         command.setOutputStream(out);
-        CommandStatus status = IPTablesTest.executorService.execute(command);
+        CommandStatus status = this.executorService.execute(command);
         Integer exitValue = (Integer) status.getExitStatus().getExitValue();
         if (exitValue != 0) {
             logger.error("error executing command --- iptables-save --- exit value = {}", exitValue);

@@ -185,21 +185,7 @@ public class IpAddrShow {
                 logger.debug("inet: '{}'", inet);
 
                 if (inet != null) {
-                    String[] parts = inet.split("/");
-                    if (parts.length > 0) {
-                        String inetaddr = parts[0];
-                        config.setInetAddress(inetaddr);
-                        String sprefix = null;
-                        if (parts.length > 1) {
-                            sprefix = parts[1];
-                        }
-                        int prefix = 32;
-                        if (sprefix != null) {
-                            prefix = Integer.valueOf(sprefix);
-                        }
-                        String inetmask = prefix2inetmask(prefix);
-                        config.setInetMask(inetmask);
-                    }
+                    parseInet(config, inet);
                 }
 
                 String bcast = findValue(line, "brd", " ");
@@ -212,6 +198,24 @@ public class IpAddrShow {
             }
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e);
+        }
+    }
+
+    private void parseInet(LinuxIfconfig config, String inet) throws UnknownHostException {
+        String[] parts = inet.split("/");
+        if (parts.length > 0) {
+            String inetaddr = parts[0];
+            config.setInetAddress(inetaddr);
+            String sprefix = null;
+            if (parts.length > 1) {
+                sprefix = parts[1];
+            }
+            int prefix = 32;
+            if (sprefix != null) {
+                prefix = Integer.valueOf(sprefix);
+            }
+            String inetmask = prefix2inetmask(prefix);
+            config.setInetMask(inetmask);
         }
     }
 

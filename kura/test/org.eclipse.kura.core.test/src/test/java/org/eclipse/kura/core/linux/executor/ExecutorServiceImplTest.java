@@ -33,6 +33,7 @@ import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.commons.io.Charsets;
 import org.eclipse.kura.core.linux.executor.privileged.PrivilegedExecutorServiceImpl;
 import org.eclipse.kura.core.linux.executor.unprivileged.UnprivilegedExecutorServiceImpl;
+import org.eclipse.kura.core.testutil.AssumingIsNotJenkins;
 import org.eclipse.kura.core.testutil.AssumingIsNotMac;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
@@ -56,13 +57,17 @@ public class ExecutorServiceImplTest {
         ExecutorServiceImplTest.service = service;
     }
 
+    // Don't run tests on MAC OS X
     @ClassRule
-    public static AssumingIsNotMac assumingIsNotMac = new AssumingIsNotMac();
+    public static final AssumingIsNotMac assumingIsNotMac = new AssumingIsNotMac();
+
+    // Don't run tests on Jenkins
+    @ClassRule
+    public static final AssumingIsNotJenkins assumingIsNotJenkins = new AssumingIsNotJenkins();
 
     @Parameterized.Parameters
     public static Collection<CommandExecutorService> getServices() {
-        return Arrays.asList(new CommandExecutorService[] { new UnprivilegedExecutorServiceImpl(),
-                new PrivilegedExecutorServiceImpl() });
+        return Arrays.asList(new UnprivilegedExecutorServiceImpl(), new PrivilegedExecutorServiceImpl());
     }
 
     @BeforeClass

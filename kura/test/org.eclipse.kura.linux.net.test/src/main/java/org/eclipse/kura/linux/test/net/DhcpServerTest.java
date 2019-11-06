@@ -51,15 +51,15 @@ public class DhcpServerTest extends TestCase {
     private static String oldConfigBackup = TMPDIR + "/dhcpd.conf.backup";
 
     private static final String TEST_INTERFACE = "eth0";
-    private static CommandExecutorService executorService;
+    private CommandExecutorService executorService;
 
     public void setExecutorService(CommandExecutorService executorService) {
-        DhcpServerTest.executorService = executorService;
+        this.executorService = executorService;
         dependencyLatch.countDown();
     }
 
     public void unsetExecutorService(CommandExecutorService executorService) {
-        DhcpServerTest.executorService = null;
+        this.executorService = null;
         dependencyLatch.countDown();
     }
 
@@ -131,7 +131,7 @@ public class DhcpServerTest extends TestCase {
 
         try {
             // Setup note: Assumes the existence of the test interface, and that it can be brought up with an ip address
-            LinuxNetworkUtil linuxNetworkUtil = new LinuxNetworkUtil(DhcpServerTest.executorService);
+            LinuxNetworkUtil linuxNetworkUtil = new LinuxNetworkUtil(this.executorService);
             linuxNetworkUtil.disableInterface(TEST_INTERFACE);
             linuxNetworkUtil.enableInterface(TEST_INTERFACE);
 
@@ -207,42 +207,34 @@ public class DhcpServerTest extends TestCase {
     public void tearDown() {
 
         if (this.dhcpServer != null) {
-            try {
+            try (FileOutputStream fos = new FileOutputStream(this.dhcpServer.getConfigFilename());
+                    PrintWriter pw = new PrintWriter(fos)) {
                 this.dhcpServer.disable();
-            } catch (Exception e) {
-                // continue anyway
-            }
-        }
+                logger.info("Restoring dhcpd config from " + oldConfigBackup);
 
-        // Restore old dhcpd config
-        try {
-            logger.info("Restoring dhcpd config from " + oldConfigBackup);
+                // Read current config from file
+                File backupFile = new File(oldConfigBackup);
+                StringBuffer data = new StringBuffer();
 
-            // Read current config from file
-            File backupFile = new File(oldConfigBackup);
-            StringBuffer data = new StringBuffer();
+                if (backupFile.exists()) {
+                    FileReader fr = new FileReader(backupFile);
 
-            if (backupFile.exists()) {
-                FileReader fr = new FileReader(backupFile);
-
-                int in;
-                while ((in = fr.read()) != -1) {
-                    data.append((char) in);
+                    int in;
+                    while ((in = fr.read()) != -1) {
+                        data.append((char) in);
+                    }
+                    fr.close();
                 }
-                fr.close();
-            }
 
-            // Write backup config to file
-            FileOutputStream fos = new FileOutputStream(this.dhcpServer.getConfigFilename());
-            PrintWriter pw = new PrintWriter(fos);
-            pw.write(data.toString());
-            pw.flush();
-            fos.getFD().sync();
-            pw.close();
-            fos.close();
-        } catch (Exception e) {
-            fail("Error restoring dhcpd config");
+                // Write backup config to file
+                pw.write(data.toString());
+                pw.flush();
+                fos.getFD().sync();
+            } catch (Exception e) {
+                fail("Error restoring dhcpd config");
+            }
         }
+
     }
 
 }

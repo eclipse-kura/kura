@@ -467,7 +467,7 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
 
         NetConfigIP4 netConfigIP4 = new NetConfigIP4(netInterfaceStatus, true, true);
 
-        key = new StringBuilder("net.interface.").append(interfaceName).append(".config.dnsServers");
+        key = new StringBuilder(NET_INTERFACE).append(interfaceName).append(".config.dnsServers");
         String dnsServersStr = getKuranetProperty(key.toString());
         List<IP4Address> dnsServersList = new ArrayList<>();
 

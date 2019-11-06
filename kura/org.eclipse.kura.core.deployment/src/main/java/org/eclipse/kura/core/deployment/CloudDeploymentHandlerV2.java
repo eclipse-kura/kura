@@ -28,6 +28,7 @@ import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.apache.commons.io.Charsets;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
@@ -86,7 +87,7 @@ public class CloudDeploymentHandlerV2 implements ConfigurableComponent, RequestH
                     .getService(reference);
             String notificationPublisherPid = (String) reference.getProperty("kura.service.pid");
 
-            installImplementation.sendInstallConfirmations(notificationPublisherPid,
+            CloudDeploymentHandlerV2.this.installImplementation.sendInstallConfirmations(notificationPublisherPid,
                     CloudDeploymentHandlerV2.this.cloudNotificationPublisher);
 
             return CloudDeploymentHandlerV2.this.cloudNotificationPublisher;
@@ -111,6 +112,10 @@ public class CloudDeploymentHandlerV2 implements ConfigurableComponent, RequestH
     public static final String RESOURCE_PACKAGES = "packages";
     public static final String RESOURCE_BUNDLES = "bundles";
 
+    private static final String CANNOT_FIND_RESOURCE_MESSAGE = "Cannot find resource with name: {}";
+    private static final String NONE_RESOURCE_FOUND_MESSAGE = "Expected one resource but found none";
+    private static final String BAD_REQUEST_TOPIC_MESSAGE = "Bad request topic: {}";
+
     /* EXEC */
     public static final String RESOURCE_DOWNLOAD = "download";
     public static final String RESOURCE_INSTALL = "install";
@@ -132,7 +137,7 @@ public class CloudDeploymentHandlerV2 implements ConfigurableComponent, RequestH
     private static String pendingPackageUrl = null;
     private static DownloadImpl downloadImplementation;
     private static UninstallImpl uninstallImplementation;
-    public static InstallImpl installImplementation;
+    private InstallImpl installImplementation;
 
     private CloudDeploymentHandlerV2Options componentOptions;
 
@@ -252,10 +257,10 @@ public class CloudDeploymentHandlerV2 implements ConfigurableComponent, RequestH
         String packagesPath = options.getPackagesPath();
         String kuraDataDir = options.getKuraDataDir();
 
-        installImplementation = new InstallImpl(CloudDeploymentHandlerV2.this, kuraDataDir, this.executorService);
-        installImplementation.setPackagesPath(packagesPath);
-        installImplementation.setDpaConfPath(dpaConfPath);
-        installImplementation.setDeploymentAdmin(CloudDeploymentHandlerV2.this.deploymentAdmin);
+        this.installImplementation = new InstallImpl(CloudDeploymentHandlerV2.this, kuraDataDir, this.executorService);
+        this.installImplementation.setPackagesPath(packagesPath);
+        this.installImplementation.setDpaConfPath(dpaConfPath);
+        this.installImplementation.setDeploymentAdmin(CloudDeploymentHandlerV2.this.deploymentAdmin);
 
         this.cloudPublisherTrackerCustomizer = new CloudNotificationPublisherTrackerCustomizer();
         initCloudPublisherTracking();
@@ -273,7 +278,7 @@ public class CloudDeploymentHandlerV2 implements ConfigurableComponent, RequestH
         }
         this.deploymentHookManager.updateAssociations(associations);
 
-        this.installVerificationDir = installImplementation.getVerificationDirectory();
+        this.installVerificationDir = this.installImplementation.getVerificationDirectory();
     }
 
     protected void deactivate(ComponentContext componentContext) {
@@ -336,8 +341,8 @@ public class CloudDeploymentHandlerV2 implements ConfigurableComponent, RequestH
         }
 
         if (resources.isEmpty()) {
-            logger.error("Bad request topic: {}", resources);
-            logger.error("Expected one resource but found none");
+            logger.error(BAD_REQUEST_TOPIC_MESSAGE, resources);
+            logger.error(NONE_RESOURCE_FOUND_MESSAGE);
             throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
 
@@ -351,8 +356,8 @@ public class CloudDeploymentHandlerV2 implements ConfigurableComponent, RequestH
         } else if (resources.get(0).equals(RESOURCE_BUNDLES)) {
             resPayload = doGetBundles();
         } else {
-            logger.error("Bad request topic: {}", resources);
-            logger.error("Cannot find resource with name: {}", resources.get(0));
+            logger.error(BAD_REQUEST_TOPIC_MESSAGE, resources);
+            logger.error(CANNOT_FIND_RESOURCE_MESSAGE, resources.get(0));
             throw new KuraException(KuraErrorCode.NOT_FOUND);
         }
 
@@ -372,8 +377,8 @@ public class CloudDeploymentHandlerV2 implements ConfigurableComponent, RequestH
         }
 
         if (resources.isEmpty()) {
-            logger.error("Bad request topic: {}", resources);
-            logger.error("Expected one resource but found none");
+            logger.error(BAD_REQUEST_TOPIC_MESSAGE, resources);
+            logger.error(NONE_RESOURCE_FOUND_MESSAGE);
             throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
 
@@ -392,8 +397,8 @@ public class CloudDeploymentHandlerV2 implements ConfigurableComponent, RequestH
             String bundleId = resources.size() >= 2 ? resources.get(1) : null; // no checking is done before
             resPayload = doExecStartStopBundle(false, bundleId);
         } else {
-            logger.error("Bad request topic: {}", resources);
-            logger.error("Cannot find resource with name: {}", resources.get(0));
+            logger.error(BAD_REQUEST_TOPIC_MESSAGE, resources);
+            logger.error(CANNOT_FIND_RESOURCE_MESSAGE, resources.get(0));
             throw new KuraException(KuraErrorCode.NOT_FOUND);
         }
         return new KuraMessage(resPayload);
@@ -412,8 +417,8 @@ public class CloudDeploymentHandlerV2 implements ConfigurableComponent, RequestH
         }
 
         if (resources.isEmpty()) {
-            logger.error("Bad request topic: {}", resources);
-            logger.error("Expected one resource but found none");
+            logger.error(BAD_REQUEST_TOPIC_MESSAGE, resources);
+            logger.error(NONE_RESOURCE_FOUND_MESSAGE);
             throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
 
@@ -421,20 +426,19 @@ public class CloudDeploymentHandlerV2 implements ConfigurableComponent, RequestH
         if (resources.get(0).equals(RESOURCE_DOWNLOAD)) {
             resPayload = doDelDownload();
         } else {
-            logger.error("Bad request topic: {}", resources);
-            logger.error("Cannot find resource with name: {}", resources.get(0));
+            logger.error(BAD_REQUEST_TOPIC_MESSAGE, resources);
+            logger.error(CANNOT_FIND_RESOURCE_MESSAGE, resources.get(0));
             throw new KuraException(KuraErrorCode.NOT_FOUND);
         }
         return new KuraMessage(resPayload);
     }
 
     protected DownloadImpl createDownloadImpl(final DeploymentPackageDownloadOptions options) {
-        DownloadImpl downloadImplementation = new DownloadImpl(options, this);
-        return downloadImplementation;
+        return new DownloadImpl(options, this);
     }
 
     protected UninstallImpl createUninstallImpl() {
-        return new UninstallImpl(this, this.deploymentAdmin, this.executorService);
+        return new UninstallImpl(this, this.deploymentAdmin, this.executorService, this.installImplementation);
     }
 
     protected File getDpDownloadFile(final DeploymentPackageInstallOptions options) throws IOException {
@@ -646,7 +650,7 @@ public class CloudDeploymentHandlerV2 implements ConfigurableComponent, RequestH
                 this.isInstalling = true;
                 final File dpFile = getDpDownloadFile(options);
 
-                installImplementation.setOptions(options);
+                this.installImplementation.setOptions(options);
 
                 Map<String, String> requestProperties = requestContext.getContextProperties();
                 String notificationPublisherPid = requestProperties.get(NOTIFICATION_PUBLISHER_PID.name());
@@ -770,10 +774,10 @@ public class CloudDeploymentHandlerV2 implements ConfigurableComponent, RequestH
                         } else {
                             bundle.stop();
                         }
-                        logger.info("{} bundle ID {} ({})",
-                                new Object[] { start ? "Started" : "Stopped", id, bundle.getSymbolicName() });
+                        logger.info("{} bundle ID {} ({})", start ? "Started" : "Stopped", id,
+                                bundle.getSymbolicName());
                     } catch (BundleException e) {
-                        logger.error("Failed to {} bundle {}: {}", new Object[] { start ? "start" : "stop", id, e });
+                        logger.error("Failed to {} bundle {}: {}", start ? RESOURCE_START : RESOURCE_STOP, id, e);
                         throw new KuraException(KuraErrorCode.BAD_REQUEST);
                     }
                 }
@@ -785,9 +789,9 @@ public class CloudDeploymentHandlerV2 implements ConfigurableComponent, RequestH
     private KuraPayload doGetInstall() {
         KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
         if (this.isInstalling) {
-            installImplementation.installInProgressSyncMessage(respPayload);
+            this.installImplementation.installInProgressSyncMessage(respPayload);
         } else {
-            installImplementation.installIdleSyncMessage(respPayload);
+            this.installImplementation.installIdleSyncMessage(respPayload);
         }
         return respPayload;
     }
@@ -840,7 +844,7 @@ public class CloudDeploymentHandlerV2 implements ConfigurableComponent, RequestH
         try {
             String s = marshal(xdps);
             respPayload.setTimestamp(new Date());
-            respPayload.setBody(s.getBytes("UTF-8"));
+            respPayload.setBody(s.getBytes(Charsets.UTF_8));
         } catch (Exception e) {
             logger.error("Error getting resource {}: {}", RESOURCE_PACKAGES, e);
         }
@@ -901,7 +905,7 @@ public class CloudDeploymentHandlerV2 implements ConfigurableComponent, RequestH
         try {
             String s = marshal(xmlBundles);
             respPayload.setTimestamp(new Date());
-            respPayload.setBody(s.getBytes("UTF-8"));
+            respPayload.setBody(s.getBytes(Charsets.UTF_8));
         } catch (Exception e) {
             logger.error("Error getting resource {}", RESOURCE_BUNDLES, e);
         }
@@ -911,9 +915,9 @@ public class CloudDeploymentHandlerV2 implements ConfigurableComponent, RequestH
     public void installDownloadedFile(File dpFile, DeploymentPackageInstallOptions options) throws KuraException {
         try {
             if (options.getSystemUpdate()) {
-                installImplementation.installSh(options, dpFile);
+                this.installImplementation.installSh(options, dpFile);
             } else {
-                installImplementation.installDp(options, dpFile);
+                this.installImplementation.installDp(options, dpFile);
             }
             final DeploymentHook hook = options.getDeploymentHook();
             if (hook != null) {
@@ -921,7 +925,7 @@ public class CloudDeploymentHandlerV2 implements ConfigurableComponent, RequestH
             }
         } catch (Exception e) {
             logger.info("Install exception");
-            installImplementation.installFailedAsync(options, dpFile.getName(), e);
+            this.installImplementation.installFailedAsync(options, dpFile.getName(), e);
         }
     }
 

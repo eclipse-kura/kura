@@ -1095,12 +1095,10 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
         String partNumber = UNSUPPORTED;
 
-        if (OS_LINUX.equals(getOsName())) {
-            if (LINUX_2_6_34_9_WR4_2_0_0_STANDARD.equals(getOsVersion())
-                    || LINUX_2_6_34_12_WR4_3_0_0_STANDARD.equals(getOsVersion())) {
-                partNumber = runSystemCommand("eth_partno_bsp", false, this.executorService) + " "
-                        + runSystemCommand("eth_partno_epr", false, this.executorService);
-            }
+        if (OS_LINUX.equals(getOsName()) && (LINUX_2_6_34_9_WR4_2_0_0_STANDARD.equals(getOsVersion())
+                || LINUX_2_6_34_12_WR4_3_0_0_STANDARD.equals(getOsVersion()))) {
+            partNumber = runSystemCommand("eth_partno_bsp", false, this.executorService) + " "
+                    + runSystemCommand("eth_partno_epr", false, this.executorService);
         }
 
         return partNumber;

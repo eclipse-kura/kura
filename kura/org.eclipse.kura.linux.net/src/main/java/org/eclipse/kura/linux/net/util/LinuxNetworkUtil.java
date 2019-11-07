@@ -85,6 +85,10 @@ public class LinuxNetworkUtil {
         }
     }
 
+    /**
+     * 
+     * @deprecated
+     */
     @Deprecated
     private List<String> getAllInterfaceNamesInternal() throws KuraException {
         String[] cmd = { IFCONFIG, "-a" };
@@ -94,7 +98,9 @@ public class LinuxNetworkUtil {
         CommandStatus status = this.executorService.execute(command);
         int exitValue = (Integer) status.getExitStatus().getExitValue();
         if (exitValue != 0) {
-            logger.error(ERR_EXECUTING_CMD_MSG, String.join(" ", cmd), exitValue);
+            if (logger.isErrorEnabled()) {
+                logger.error(ERR_EXECUTING_CMD_MSG, String.join(" ", cmd), exitValue);
+            }
             throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR,
                     formFailedCommandMessage(String.join(" ", cmd)));
         }
@@ -102,6 +108,10 @@ public class LinuxNetworkUtil {
                 new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray(), Charsets.UTF_8));
     }
 
+    /**
+     * 
+     * @deprecated
+     */
     @Deprecated
     private static List<String> getAllInterfaceNamesInternalParse(String commandOutput) {
         List<String> ifaces = new ArrayList<>();
@@ -169,6 +179,10 @@ public class LinuxNetworkUtil {
         }
     }
 
+    /**
+     * 
+     * @deprecated
+     */
     @Deprecated
     private boolean isLinkUpInternal(NetInterfaceType ifaceType, String ifaceName) throws KuraException {
         // ignore logical interfaces like "1-1.2"
@@ -362,6 +376,10 @@ public class LinuxNetworkUtil {
         return config;
     }
 
+    /**
+     * 
+     * @deprecated
+     */
     @Deprecated
     private LinuxIfconfig getInterfaceConfigurationInternal(String ifaceName) throws KuraException {
         // ignore logical interfaces like "1-1.2"
@@ -400,6 +418,10 @@ public class LinuxNetworkUtil {
         return linuxIfconfig;
     }
 
+    /**
+     * 
+     * @deprecated
+     */
     @Deprecated
     private void getInterfaceConfigurationInternalParse(String ifaceName, LinuxIfconfig linuxIfconfig,
             String commandOutput) throws KuraException {
@@ -490,6 +512,10 @@ public class LinuxNetworkUtil {
         return ifaceType;
     }
 
+    /**
+     * 
+     * @deprecated
+     */
     @Deprecated
     private NetInterfaceType getInterfaceType(String ifaceName, String line) throws KuraException {
 
@@ -511,9 +537,9 @@ public class LinuxNetworkUtil {
 
         // determine if wifi
         if (ETHERNET.equals(stringType)) {
-            Collection<String> wifiOptions = this.wifiOptions.getSupportedOptions(ifaceName);
-            if (!wifiOptions.isEmpty()) {
-                for (String op : wifiOptions) {
+            Collection<String> supportedWifiOptions = this.wifiOptions.getSupportedOptions(ifaceName);
+            if (!supportedWifiOptions.isEmpty()) {
+                for (String op : supportedWifiOptions) {
                     logger.trace("WiFi option supported on {} : {}", ifaceName, op);
                 }
                 stringType = "WIFI";

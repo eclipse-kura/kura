@@ -22,19 +22,13 @@ import org.eclipse.kura.executor.CommandStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class IwconfigLinkTool implements LinkTool {
+public class IwconfigLinkTool extends LinkToolImpl implements LinkTool {
 
     private static final Logger logger = LoggerFactory.getLogger(IwconfigLinkTool.class);
 
     private static final String MODE = "Mode:";
     private static final String SIGNAL_LEVEL = "Signal level=";
     private static final String BIT_RATE = "Bit Rate=";
-
-    private String interfaceName = null;
-    private boolean linkDetected = false;
-    private int speed = 0; // in b/s
-    private String duplex = null;
-    private int signal = 0;
 
     private CommandExecutorService executorService;
 
@@ -47,14 +41,14 @@ public class IwconfigLinkTool implements LinkTool {
      *            - the {@link org.eclipse.kura.executor.CommandExecutorService} used to run the command
      */
     public IwconfigLinkTool(String ifaceName, CommandExecutorService executorService) {
-        this.interfaceName = ifaceName;
-        this.duplex = "half";
+        setIfaceName(ifaceName);
+        setDuplex("half");
         this.executorService = executorService;
     }
 
     @Override
     public boolean get() throws KuraException {
-        Command command = new Command(new String[] { "iwconfig", this.interfaceName });
+        Command command = new Command(new String[] { "iwconfig", getIfaceName() });
         command.setTimeout(60);
         command.setOutputStream(new ByteArrayOutputStream());
         CommandStatus status = this.executorService.execute(command);
@@ -79,8 +73,8 @@ public class IwconfigLinkTool implements LinkTool {
                 int sig = parseSignalLevel(line);
                 if (associated && sig > -100) { // TODO: adjust this threshold?
                     logger.debug("get() :: !! Link Detected !!");
-                    this.signal = sig;
-                    this.linkDetected = true;
+                    setSignal(sig);
+                    setLinkDetected(true);
                 }
             }
 
@@ -88,31 +82,6 @@ public class IwconfigLinkTool implements LinkTool {
                 break;
             }
         }
-    }
-
-    @Override
-    public String getIfaceName() {
-        return this.interfaceName;
-    }
-
-    @Override
-    public boolean isLinkDetected() {
-        return this.linkDetected;
-    }
-
-    @Override
-    public int getSpeed() {
-        return this.speed;
-    }
-
-    @Override
-    public String getDuplex() {
-        return this.duplex;
-    }
-
-    @Override
-    public int getSignal() {
-        return this.signal;
     }
 
     private boolean parseMode(String line) {
@@ -139,7 +108,7 @@ public class IwconfigLinkTool implements LinkTool {
         line = line.substring(bitRateInd + BIT_RATE.length());
         line = line.substring(0, line.indexOf(' '));
         double bitrate = Double.parseDouble(line) * 1000000;
-        this.speed = (int) Math.round(bitrate);
+        setSpeed((int) Math.round(bitrate));
     }
 
     private int parseSignalLevel(String line) {

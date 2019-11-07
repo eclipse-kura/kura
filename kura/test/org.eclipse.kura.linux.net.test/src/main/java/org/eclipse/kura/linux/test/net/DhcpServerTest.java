@@ -210,7 +210,7 @@ public class DhcpServerTest extends TestCase {
             try (FileOutputStream fos = new FileOutputStream(this.dhcpServer.getConfigFilename());
                     PrintWriter pw = new PrintWriter(fos)) {
                 this.dhcpServer.disable();
-                logger.info("Restoring dhcpd config from " + oldConfigBackup);
+                logger.info("Restoring dhcpd config from {}", oldConfigBackup);
 
                 // Read current config from file
                 File backupFile = new File(oldConfigBackup);

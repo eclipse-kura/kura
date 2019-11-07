@@ -253,8 +253,10 @@ public class InstallImpl {
             }
         } finally {
             this.executorService.kill(commandLine, LinuxSignal.SIGKILL);
-            if (fileEntry.delete()) {
-                logger.error("Cannot delete file {}", fileEntry);
+            try {
+                Files.delete(fileEntry.toPath());
+            } catch (IOException e) {
+                logger.error("Cannot delete file {}", fileEntry, e);
             }
         }
     }

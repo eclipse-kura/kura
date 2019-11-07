@@ -21,15 +21,9 @@ import org.eclipse.kura.executor.CommandStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class IwLinkTool implements LinkTool {
+public class IwLinkTool extends LinkToolImpl implements LinkTool {
 
     private static final Logger logger = LoggerFactory.getLogger(IwLinkTool.class);
-
-    private String interfaceName = null;
-    private boolean linkDetected = false;
-    private int speed = 0; // in b/s
-    private String duplex = null;
-    private int signal = 0;
 
     private CommandExecutorService executorService;
 
@@ -42,14 +36,14 @@ public class IwLinkTool implements LinkTool {
      *            - the {@link org.eclipse.kura.executor.CommandExecutorService} used to run the command
      */
     public IwLinkTool(String ifaceName, CommandExecutorService executorService) {
-        this.interfaceName = ifaceName;
-        this.duplex = "half";
+        setIfaceName(ifaceName);
+        setDuplex("half");
         this.executorService = executorService;
     }
 
     @Override
     public boolean get() throws KuraException {
-        Command command = new Command(formIwLinkCommand(this.interfaceName));
+        Command command = new Command(formIwLinkCommand(getIfaceName()));
         command.setTimeout(60);
         command.setOutputStream(new ByteArrayOutputStream());
         CommandStatus status = this.executorService.execute(command);
@@ -88,8 +82,8 @@ public class IwLinkTool implements LinkTool {
             try {
                 int sig = Integer.parseInt(parts[1]);
                 if (sig > -100) {     // TODO: adjust this threshold?
-                    this.signal = sig;
-                    this.linkDetected = true;
+                    setSignal(sig);
+                    setLinkDetected(true);
                 }
             } catch (NumberFormatException e) {
                 logger.debug("Could not parse '{}' as int in line: {}", parts[1], line);
@@ -103,7 +97,7 @@ public class IwLinkTool implements LinkTool {
                 if ("MBit/s".equals(parts[3])) {
                     bitrate *= 1000000;
                 }
-                this.speed = (int) Math.round(bitrate);
+                setSpeed((int) Math.round(bitrate));
             } catch (NumberFormatException e) {
                 logger.debug("Could not parse '{}' as double in line: {}", parts[2], line);
                 return false;
@@ -116,28 +110,4 @@ public class IwLinkTool implements LinkTool {
         return new String[] { "iw", ifaceName, "link" };
     }
 
-    @Override
-    public String getIfaceName() {
-        return this.interfaceName;
-    }
-
-    @Override
-    public boolean isLinkDetected() {
-        return this.linkDetected;
-    }
-
-    @Override
-    public int getSpeed() {
-        return this.speed;
-    }
-
-    @Override
-    public String getDuplex() {
-        return this.duplex;
-    }
-
-    @Override
-    public int getSignal() {
-        return this.signal;
-    }
 }

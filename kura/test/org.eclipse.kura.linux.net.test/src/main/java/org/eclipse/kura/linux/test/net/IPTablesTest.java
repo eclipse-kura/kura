@@ -40,8 +40,11 @@ public class IPTablesTest extends TestCase {
 
     private static final Logger logger = LoggerFactory.getLogger(IPTablesTest.class);
 
+    private static final String TEST_ENABLE_FAILED_MESSAGE = "testEnable failed: ";
+    private static final String TEST_ENABLE_MESSAGE = "testEnable: config appends some rules";
+
     private static CountDownLatch dependencyLatch = new CountDownLatch(1);	// initialize with number of dependencies
-    private static LinuxFirewall firewall;
+    private LinuxFirewall firewall;
 
     private static final String TMPDIR = "/tmp/" + IPTablesTest.class.getName();
     private static String oldConfig = TMPDIR + "/iptables_"
@@ -71,22 +74,19 @@ public class IPTablesTest extends TestCase {
         try {
             dependencyLatch.await(5, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             fail("OSGi dependencies unfulfilled");
             System.exit(1);
         }
 
         // Backup current iptables config
-        try {
-            logger.info("Backing up current iptables config to " + oldConfig);
+        try (FileOutputStream fos = new FileOutputStream(oldConfig); PrintWriter pw = new PrintWriter(fos);) {
+            logger.info("Backing up current iptables config to {}", oldConfig);
 
             // Write current config to file
-            FileOutputStream fos = new FileOutputStream(oldConfig);
-            PrintWriter pw = new PrintWriter(fos);
             pw.write(getCurrentIptablesConfig());
             pw.flush();
             fos.getFD().sync();
-            pw.close();
-            fos.close();
         } catch (Exception e) {
             fail("Error backing up current iptables config");
             System.exit(1);
@@ -117,9 +117,9 @@ public class IPTablesTest extends TestCase {
             firewall.enable();
 
             String config = getCurrentIptablesConfig();
-            assertTrue("testEnable: config appends some rules", config.contains("-A"));
+            assertTrue(TEST_ENABLE_MESSAGE, config.contains("-A"));
         } catch (KuraException e) {
-            fail("testEnable failed: " + e);
+            fail(TEST_ENABLE_FAILED_MESSAGE + e);
         }
     }
 
@@ -135,11 +135,11 @@ public class IPTablesTest extends TestCase {
             firewall.enable();
 
             String config = getCurrentIptablesConfig();
-            assertTrue("testEnable: config appends some rules", config.contains("-A"));
+            assertTrue(TEST_ENABLE_MESSAGE, config.contains("-A"));
             assertTrue("testEnable: config has a rule that uses the test port - " + testPort,
                     config.contains(Integer.toString(testPort)));
         } catch (KuraException e) {
-            fail("testEnable failed: " + e);
+            fail(TEST_ENABLE_FAILED_MESSAGE + e);
         }
     }
 
@@ -155,10 +155,10 @@ public class IPTablesTest extends TestCase {
             firewall.enable();
 
             String config = getCurrentIptablesConfig();
-            assertTrue("testEnable: config appends some rules", config.contains("-A"));
+            assertTrue(TEST_ENABLE_MESSAGE, config.contains("-A"));
             assertTrue("testEnable: config has a rule that uses the test values", config.contains(testIface));
         } catch (KuraException e) {
-            fail("testEnable failed: " + e);
+            fail(TEST_ENABLE_FAILED_MESSAGE + e);
         }
     }
 
@@ -179,7 +179,7 @@ public class IPTablesTest extends TestCase {
             firewall.enable();
 
             String config = getCurrentIptablesConfig();
-            assertTrue("testEnable: config appends some rules", config.contains("-A"));
+            assertTrue(TEST_ENABLE_MESSAGE, config.contains("-A"));
 
             // Look for a rule containing all of the test values
             boolean pass = false;
@@ -194,7 +194,7 @@ public class IPTablesTest extends TestCase {
 
             assertTrue("testEnable: config has a port forward rule that uses the test values", pass);
         } catch (KuraException e) {
-            fail("testEnable failed: " + e);
+            fail(TEST_ENABLE_FAILED_MESSAGE + e);
         }
     }
 
@@ -203,7 +203,7 @@ public class IPTablesTest extends TestCase {
     @AfterClass()
     public void tearDown() {
         // Restore old iptables config
-        logger.info("Restoring iptables config from " + oldConfig);
+        logger.info("Restoring iptables config from {}", oldConfig);
 
         Command command = new Command(new String[] { "iptables-restore", "<", oldConfig });
         command.setExecuteInAShell(true);

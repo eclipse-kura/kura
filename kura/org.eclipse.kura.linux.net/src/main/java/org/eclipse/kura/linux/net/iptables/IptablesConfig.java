@@ -19,6 +19,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -95,13 +96,13 @@ public class IptablesConfig {
             writer.println(COMMIT);
             writer.println(FILTER);
             writer.println(COMMIT);
+
+            File configFile = new File(FIREWALL_TMP_CONFIG_FILE_NAME);
+            if (configFile.exists()) {
+                restore(FIREWALL_TMP_CONFIG_FILE_NAME);
+            }
         } catch (IOException e) {
-            logger.error("clear() :: failed to clear all chains ", e);
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-        }
-        File configFile = new File(FIREWALL_TMP_CONFIG_FILE_NAME);
-        if (configFile.exists()) {
-            restore(FIREWALL_TMP_CONFIG_FILE_NAME);
+            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e, "clear() :: failed to clear all chains");
         }
     }
 
@@ -114,13 +115,14 @@ public class IptablesConfig {
             writer.println(ALLOW_ALL_TRAFFIC_TO_LOOPBACK);
             writer.println(ALLOW_ONLY_INCOMING_TO_OUTGOING);
             writer.println(COMMIT);
+
+            File configFile = new File(FIREWALL_TMP_CONFIG_FILE_NAME);
+            if (configFile.exists()) {
+                restore(FIREWALL_TMP_CONFIG_FILE_NAME);
+            }
         } catch (IOException e) {
-            logger.error("applyBlockPolicy() :: failed to clear all chains ", e);
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-        }
-        File configFile = new File(FIREWALL_TMP_CONFIG_FILE_NAME);
-        if (configFile.exists()) {
-            restore(FIREWALL_TMP_CONFIG_FILE_NAME);
+            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e,
+                    "applyBlockPolicy() :: failed to clear all chains");
         }
     }
 
@@ -130,20 +132,9 @@ public class IptablesConfig {
     public void save() throws KuraException {
         int exitValue = -1;
         if (this.executorService != null) {
-            Command command = new Command(new String[] { "iptables-save" });
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            ByteArrayOutputStream err = new ByteArrayOutputStream();
-            command.setErrorStream(err);
-            command.setOutputStream(out);
-            CommandStatus status = this.executorService.execute(command);
+            CommandStatus status = execute(new String[] { "iptables-save" });
+            iptablesSave((ByteArrayOutputStream) status.getOutputStream());
             exitValue = (Integer) status.getExitStatus().getExitValue();
-            if (exitValue != 0) {
-                if (logger.isErrorEnabled()) {
-                    logger.error("save() :: failed - {}", new String(err.toByteArray(), Charsets.UTF_8));
-                }
-                throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, "Failed to execute the iptable-save command");
-            }
-            iptablesSave(out);
         } else {
             logger.error(COMMAND_EXECUTOR_SERVICE_MESSAGE);
             throw new IllegalArgumentException(COMMAND_EXECUTOR_SERVICE_MESSAGE);
@@ -160,6 +151,23 @@ public class IptablesConfig {
         }
     }
 
+    private CommandStatus execute(String[] commandLine) throws KuraException {
+        Command command = new Command(commandLine);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ByteArrayOutputStream err = new ByteArrayOutputStream();
+        command.setErrorStream(err);
+        command.setOutputStream(out);
+        CommandStatus status = this.executorService.execute(command);
+        int exitValue = (Integer) status.getExitStatus().getExitValue();
+        if (exitValue != 0) {
+            if (logger.isErrorEnabled()) {
+                logger.error("command {} :: failed - {}", command, new String(err.toByteArray(), Charsets.UTF_8));
+            }
+            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, "Failed to execute the {} command", command);
+        }
+        return status;
+    }
+
     /*
      * Restores (using iptables-restore) firewall settings from temporary iptables configuration file.
      * Temporary configuration file is deleted upon completion.
@@ -168,28 +176,20 @@ public class IptablesConfig {
         int exitValue = -1;
         try {
             if (this.executorService != null) {
-                Command command = new Command(new String[] { "iptables-restore", filename });
-                ByteArrayOutputStream out = new ByteArrayOutputStream();
-                ByteArrayOutputStream err = new ByteArrayOutputStream();
-                command.setErrorStream(err);
-                command.setOutputStream(out);
-                CommandStatus status = this.executorService.execute(command);
+                CommandStatus status = execute(new String[] { "iptables-restore", filename });
                 exitValue = (Integer) status.getExitStatus().getExitValue();
-                if (exitValue != 0) {
-                    if (logger.isErrorEnabled()) {
-                        logger.error("restore() :: failed - {}", new String(err.toByteArray(), Charsets.UTF_8));
-                    }
-                    throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR,
-                            "Failed to execute the iptable-save command");
-                }
             } else {
                 logger.error(COMMAND_EXECUTOR_SERVICE_MESSAGE);
                 throw new IllegalArgumentException(COMMAND_EXECUTOR_SERVICE_MESSAGE);
             }
         } finally {
-            File configFile = new File(filename);
-            if (configFile.exists() && configFile.delete()) {
-                logger.debug("restore() :: removing the {} file", filename);
+            try {
+                File configFile = new File(filename);
+                if (Files.deleteIfExists(configFile.toPath())) {
+                    logger.debug("restore() :: removing the {} file", filename);
+                }
+            } catch (IOException e) {
+                logger.error("Cannot delete file {}", filename, e);
             }
         }
 

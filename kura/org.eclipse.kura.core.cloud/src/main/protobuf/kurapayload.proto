@@ -2,6 +2,8 @@
 // To compile:
 // protoc --proto_path=src/main/protobuf --java_out=src/main/java src/main/protobuf/kurapayload.proto
 //
+syntax = "proto2";
+
 package kuradatatypes;
 
 option java_package         = "org.eclipse.kura.core.message.protobuf";

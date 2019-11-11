@@ -39,10 +39,9 @@ import org.junit.Test;
 public class SystemServiceTest {
 
     private static final String UNKNOWN = "UNKNOWN";
-    private static final String LINUX = "Linux" // Ubuntu
-    ;
-    private SystemService systemService = null;
-    private CommandExecutorService executorService = null;
+    private static final String LINUX = "Linux"; // Ubuntu
+    private static SystemService systemService = null;
+    private static CommandExecutorService executorService = null;
     private static CountDownLatch dependencyLatch = new CountDownLatch(2);	// initialize with number of dependencies
     private boolean onCloudbees = false;
 
@@ -50,7 +49,9 @@ public class SystemServiceTest {
     public static void setUp() {
         // Wait for OSGi dependencies
         try {
-            dependencyLatch.await(10, TimeUnit.SECONDS);
+            if (!dependencyLatch.await(10, TimeUnit.SECONDS)) {
+                fail("OSGi dependencies unfulfilled");
+            }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             fail("OSGi dependencies unfulfilled");
@@ -59,7 +60,6 @@ public class SystemServiceTest {
 
     protected void setExecutorService(CommandExecutorService ces) {
         executorService = ces;
-        onCloudbees = systemService.getOsName().contains("Cloudbees");
         dependencyLatch.countDown();
     }
 

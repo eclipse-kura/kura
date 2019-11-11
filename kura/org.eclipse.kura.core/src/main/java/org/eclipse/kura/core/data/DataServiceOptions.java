@@ -135,7 +135,7 @@ public class DataServiceOptions {
             throw new IllegalArgumentException("Illegal time unit");
         }
 
-        return timeUnit.toMillis(1);
+        return timeUnit.toNanos(1);
     }
 
     String getDbServiceInstancePid() {

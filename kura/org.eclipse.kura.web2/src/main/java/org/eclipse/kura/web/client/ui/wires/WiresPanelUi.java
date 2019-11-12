@@ -468,6 +468,8 @@ public class WiresPanelUi extends Composite
 
     @Override
     public void onWireComponentDeleted(WireComponent component) {
+        if (!WIRE_ASSET_PID.equals(component.getFactoryPid()))
+            configurations.deleteConfiguration(component.getPid());
         configurations.deleteConfiguration(component.getPid());
         updateDirtyState();
         this.btnGraphDelete.setEnabled(wireComposer.getWireComponentCount() > 0);

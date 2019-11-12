@@ -714,6 +714,10 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
         }
 
         boolean shouldResetModem(final long modemResetTimeout) {
+            
+            if (modemResetTimeout == 0) {
+                return false;
+            }
 
             if (startTime == -1) {
                 startTime = System.currentTimeMillis();

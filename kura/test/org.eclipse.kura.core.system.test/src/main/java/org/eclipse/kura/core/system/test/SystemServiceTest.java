@@ -38,6 +38,8 @@ import org.junit.Test;
 
 public class SystemServiceTest {
 
+    private static final String UNKNOWN = "UNKNOWN";
+    private static final String LINUX = "Linux"; // Ubuntu
     private static SystemService systemService = null;
     private static CommandExecutorService executorService = null;
     private static CountDownLatch dependencyLatch = new CountDownLatch(2);	// initialize with number of dependencies
@@ -47,7 +49,9 @@ public class SystemServiceTest {
     public static void setUp() {
         // Wait for OSGi dependencies
         try {
-            dependencyLatch.await(10, TimeUnit.SECONDS);
+            if (!dependencyLatch.await(10, TimeUnit.SECONDS)) {
+                fail("OSGi dependencies unfulfilled");
+            }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             fail("OSGi dependencies unfulfilled");
@@ -56,7 +60,6 @@ public class SystemServiceTest {
 
     protected void setExecutorService(CommandExecutorService ces) {
         executorService = ces;
-        onCloudbees = systemService.getOsName().contains("Cloudbees");
         dependencyLatch.countDown();
     }
 
@@ -118,8 +121,7 @@ public class SystemServiceTest {
     @Test
     public void testGetOsDistro() {
         String[] expected = { "DevOsDitribution",   			// emulated
-                "Linux" 									// Ubuntu
-        };
+                LINUX };
 
         try {
             boolean foundMatch = false;
@@ -182,7 +184,7 @@ public class SystemServiceTest {
 
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
-    public void testGetOsVersion() {
+    public void testGetOsVersion() throws IOException {
         String osVersion = System.getProperty("os.version");
         StringBuilder sbOsVersion = new StringBuilder();
         sbOsVersion.append(osVersion);
@@ -198,7 +200,6 @@ public class SystemServiceTest {
                     kernelVersionData.append(tempLine);
                 }
                 sbOsVersion.append(kernelVersionData.toString());
-            } catch (IOException e) {
             }
         }
 
@@ -305,10 +306,10 @@ public class SystemServiceTest {
 
         String osName = systemService.getOsName();
         if (!osName.contains("indows")) {
-            if ("Linux".equals(osName)) {
+            if (LINUX.equals(osName)) {
                 CommandStatus status = executorService.execute(new Command(new String[] { "dmidecode" }));
                 if ((Integer) status.getExitStatus().getExitValue() != 0) {
-                    assertEquals("UNKNOWN", modelName);
+                    assertEquals(UNKNOWN, modelName);
                 }
 
                 // note: this assert works locally and on travis, but not on hudson
@@ -317,7 +318,7 @@ public class SystemServiceTest {
                 assertNotEquals("DevModelName", modelName);
             }
         } else {
-            assertEquals("UNKNOWN", modelName);
+            assertEquals(UNKNOWN, modelName);
         }
     }
 
@@ -340,10 +341,10 @@ public class SystemServiceTest {
 
         String osName = systemService.getOsName();
         if (!osName.contains("indows")) {
-            if ("Linux".equals(osName)) {
+            if (LINUX.equals(osName)) {
                 CommandStatus status = executorService.execute(new Command(new String[] { "dmidecode" }));
                 if ((Integer) status.getExitStatus().getExitValue() != 0) {
-                    assertEquals("UNKNOWN", serialNumber);
+                    assertEquals(UNKNOWN, serialNumber);
                 }
                 // note: this assert works locally and on travis, but not on hudson
                 // assertNotEquals("UNKNOWN", serialNumber);
@@ -351,7 +352,7 @@ public class SystemServiceTest {
                 assertNotEquals("DevSerialNumber", serialNumber);
             }
         } else {
-            assertEquals("UNKNOWN", serialNumber);
+            assertEquals(UNKNOWN, serialNumber);
         }
     }
 }

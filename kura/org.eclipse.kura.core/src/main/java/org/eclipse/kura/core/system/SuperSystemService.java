@@ -30,6 +30,7 @@ public class SuperSystemService {
         Command command = new Command(commandLine);
         command.setTimeout(60);
         command.setOutputStream(new ByteArrayOutputStream());
+        command.setExecuteInAShell(runInShell);
         CommandStatus status = executorService.execute(command);
         if ((Integer) status.getExitStatus().getExitValue() == 0) {
             response = new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray(), Charsets.UTF_8);

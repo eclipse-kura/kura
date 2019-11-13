@@ -156,7 +156,7 @@ public class SystemAdminServiceImpl extends SuperSystemService implements System
                         // Only showing mins
                         mins = Integer.parseInt(uptimePart.split("\\s*mins")[0]);
                     } else {
-                        logger.error("uptime could not be parsed correctly: " + uptimeParts[0]);
+                        logger.error("uptime could not be parsed correctly: {}", uptimeParts[0]);
                     }
 
                     uptime = (long) ((days * 24 + hours) * 60 + mins) * 60;

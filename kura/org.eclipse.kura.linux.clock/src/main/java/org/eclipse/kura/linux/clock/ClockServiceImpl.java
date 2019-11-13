@@ -187,7 +187,7 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
         boolean bClockUpToDate = false;
         if (offset != 0) {
             long time = System.currentTimeMillis() + offset;
-            Command command = new Command(new String[] { "date", "-s", "@", Long.toString(time / 1000) });
+            Command command = new Command(new String[] { "date", "-s", "@" + Long.toString(time / 1000) });
             command.setTimeout(60);
             CommandStatus status = this.executorService.execute(command);
             final int rc = (Integer) status.getExitStatus().getExitValue();
@@ -195,8 +195,9 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
                 bClockUpToDate = true;
                 logger.info("System Clock Updated to {}", new Date());
             } else {
-                logger.error("Unexpected error while updating System Clock - rc = {}, it should've been {}", rc,
-                        new Date());
+                logger.error(
+                        "Unexpected error while updating System Clock - rc = {}, CommandLine:{}, it should've been {}",
+                        rc, command.getCommandLine(), new Date());
             }
         } else {
             bClockUpToDate = true;

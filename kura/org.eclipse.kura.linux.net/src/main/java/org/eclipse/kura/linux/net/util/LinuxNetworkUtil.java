@@ -1076,6 +1076,30 @@ public class LinuxNetworkUtil {
         return config != null ? config.isUp() : false;
     }
 
+    /*
+     * returns the number of times the linux has gone up or down
+     * If an error occurs, it return 0
+     */
+    public static int getCarrierChanges(String interfaceName) {
+        // ignore logical interfaces like "1-1.2"
+        if (Character.isDigit(interfaceName.charAt(0))) {
+            return 0;
+        }
+
+        StringBuilder sb = new StringBuilder("/sys/class/net/").append(interfaceName);
+        sb.append("/carrier_changes");
+
+        String fileName = sb.toString();
+        try (FileReader fr = new FileReader(fileName); BufferedReader br = new BufferedReader(fr);) {
+            int changes = Integer.parseInt(br.readLine());
+            logger.debug("interface {} carrier changes {}", interfaceName, changes);
+            return changes;
+        } catch (IOException | NumberFormatException e) {
+            logger.error("error reading {}, error message {}", fileName, e.getMessage());
+        }
+        return 0;
+    }
+
     static String formIfconfigIfaceCommand(String ifaceName) {
         StringBuilder sb = new StringBuilder("ifconfig ");
         sb.append(ifaceName);

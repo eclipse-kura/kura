@@ -27,12 +27,14 @@ public class InterfaceState {
     private final boolean up;
     protected boolean link;
     private final IPAddress ipAddress;
+    private final int carrierChanges;
 
-    public InterfaceState(String interfaceName, boolean up, boolean link, IPAddress ipAddress) {
+    public InterfaceState(String interfaceName, boolean up, boolean link, IPAddress ipAddress, int carrierChanges) {
         this.name = interfaceName;
         this.up = up;
         this.link = link;
         this.ipAddress = ipAddress;
+        this.carrierChanges = carrierChanges;
     }
 
     public InterfaceState(NetInterfaceType type, String interfaceName) throws KuraException {
@@ -43,6 +45,7 @@ public class InterfaceState {
         logger.debug("InterfaceState() :: {} - up?={}", interfaceName, this.up);
         ConnectionInfo connInfo = new ConnectionInfoImpl(interfaceName);
         this.ipAddress = connInfo.getIpAddress();
+        this.carrierChanges = LinuxNetworkUtil.getCarrierChanges(interfaceName);
     }
 
     public InterfaceState(NetInterfaceType type, String interfaceName, boolean isL2OnlyInterface) throws KuraException {
@@ -53,6 +56,7 @@ public class InterfaceState {
         logger.debug("InterfaceState() :: {} - up?={}", interfaceName, this.up);
         ConnectionInfo connInfo = new ConnectionInfoImpl(interfaceName);
         this.ipAddress = connInfo.getIpAddress();
+        this.carrierChanges = LinuxNetworkUtil.getCarrierChanges(interfaceName);
     }
 
     @Override
@@ -63,6 +67,7 @@ public class InterfaceState {
         result = prime * result + (this.link ? 1231 : 1237);
         result = prime * result + (this.up ? 1231 : 1237);
         result = prime * result + (this.ipAddress != null ? this.ipAddress.hashCode() : 0);
+        result = prime * result + (this.carrierChanges);
         return result;
     }
 
@@ -98,7 +103,9 @@ public class InterfaceState {
         } else if (other.ipAddress != null) {
             return false;
         }
-
+        if (this.carrierChanges != other.carrierChanges) {
+            return false;
+        }
         return true;
     }
 
@@ -118,6 +125,10 @@ public class InterfaceState {
         return this.ipAddress;
     }
 
+    public int getCarrierChanges() {
+        return carrierChanges;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -128,6 +139,8 @@ public class InterfaceState {
         sb.append(this.up);
         sb.append(", IP Address: ");
         sb.append(this.ipAddress);
+        sb.append(", Carrier changes: ");
+        sb.append(this.carrierChanges);
         return sb.toString();
     }
 }

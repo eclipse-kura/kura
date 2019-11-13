@@ -59,6 +59,8 @@ import org.eclipse.kura.net.admin.modem.PppFactory;
 import org.eclipse.kura.net.admin.modem.PppState;
 import org.eclipse.kura.net.admin.modem.SupportedUsbModemsFactoryInfo;
 import org.eclipse.kura.net.admin.modem.SupportedUsbModemsFactoryInfo.UsbModemFactoryInfo;
+import org.eclipse.kura.net.admin.monitor.ModemMonitorServiceImpl.ModemResetTimer;
+import org.eclipse.kura.net.admin.monitor.ModemMonitorServiceImpl.MonitoredModem;
 import org.eclipse.kura.net.admin.visitor.linux.util.KuranetConfig;
 import org.eclipse.kura.net.modem.CellularModem;
 import org.eclipse.kura.net.modem.ModemAddedEvent;
@@ -977,7 +979,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
                     ConnectionInfo connInfo = new ConnectionInfoImpl(ifaceName);
                     InterfaceState interfaceState = new InterfaceState(ifaceName,
                             LinuxNetworkUtil.hasAddress(ifaceName), pppSt == PppState.CONNECTED,
-                            connInfo.getIpAddress());
+                            connInfo.getIpAddress(), 0);
                     newInterfaceStatuses.put(ifaceName, interfaceState);
 
                 } else {

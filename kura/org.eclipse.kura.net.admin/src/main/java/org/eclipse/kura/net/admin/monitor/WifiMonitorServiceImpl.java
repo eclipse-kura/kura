@@ -281,7 +281,10 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                 // Check all interfaces configured to be enabled.
                 // This includes the interfaces that might have been enabled by the above configuration change.
                 // Get fresh interface statuses and post status change events.
-                Map<String, InterfaceState> oldStatues = new HashMap<>(this.interfaceStatuses);
+                Map<String, InterfaceState> oldStatuses = new HashMap<>();
+                if (this.interfaceStatuses != null) {
+                    oldStatuses.putAll(this.interfaceStatuses);
+                }
                 Map<String, InterfaceState> newStatuses = getInterfaceStatuses(this.enabledInterfaces);
                 checkStatusChange(this.interfaceStatuses, newStatuses);
                 this.interfaceStatuses = newStatuses;
@@ -440,7 +443,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                             }
 
                             // Check if wifi network reconnected between monitor executions
-                            InterfaceState oldState = oldStatues.get(interfaceName);
+                            InterfaceState oldState = oldStatuses.get(interfaceName);
                             if (!dhcpLeaseRenewed && isDhcpClient && (oldState == null
                                     || oldState.getCarrierChanges() != wifiState.getCarrierChanges())) {
                                 logger.debug("monitor() :: carrier changes - renewing DHCP lease {}", interfaceName);

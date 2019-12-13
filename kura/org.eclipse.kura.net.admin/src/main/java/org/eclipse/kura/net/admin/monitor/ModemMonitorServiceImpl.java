@@ -996,7 +996,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
                     ConnectionInfo connInfo = new ConnectionInfoImpl(ifaceName);
                     InterfaceState interfaceState = new InterfaceState(ifaceName,
                             this.linuxNetworkUtil.hasAddress(ifaceName), pppSt == PppState.CONNECTED,
-                            connInfo.getIpAddress());
+                            connInfo.getIpAddress(), this.linuxNetworkUtil.getCarrierChanges(ifaceName));
                     newInterfaceStatuses.put(ifaceName, interfaceState);
 
                 } else {

@@ -19,23 +19,25 @@ public class InterfaceState {
     private final boolean up;
     protected boolean link;
     private final IPAddress ipAddress;
+    private final int carrierChanges;
 
     /**
      *
      * @param interfaceName
-     *            interface name as {@link String}
+     *                          interface name as {@link String}
      * @param up
-     *            if true the interface is up
+     *                          if true the interface is up
      * @param link
-     *            if true the interface has link
+     *                          if true the interface has link
      * @param ipAddress
-     *            the {@link IPAddress} assigned to the interface
+     *                          the {@link IPAddress} assigned to the interface
      */
-    public InterfaceState(String interfaceName, boolean up, boolean link, IPAddress ipAddress) {
+    public InterfaceState(String interfaceName, boolean up, boolean link, IPAddress ipAddress, int carrierChanges) {
         this.name = interfaceName;
         this.up = up;
         this.link = link;
         this.ipAddress = ipAddress;
+        this.carrierChanges = carrierChanges;
     }
 
     public String getName() {
@@ -54,6 +56,10 @@ public class InterfaceState {
         return this.ipAddress;
     }
 
+    public int getCarrierChanges() {
+        return this.carrierChanges;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -64,6 +70,8 @@ public class InterfaceState {
         sb.append(this.up);
         sb.append(", IP Address: ");
         sb.append(this.ipAddress);
+        sb.append(", Carrier changes: ");
+        sb.append(this.carrierChanges);
         return sb.toString();
     }
 
@@ -75,6 +83,7 @@ public class InterfaceState {
         result = prime * result + (this.link ? 1231 : 1237);
         result = prime * result + (this.name == null ? 0 : this.name.hashCode());
         result = prime * result + (this.up ? 1231 : 1237);
+        result = prime * result + (this.carrierChanges);
         return result;
     }
 
@@ -108,6 +117,9 @@ public class InterfaceState {
             return false;
         }
         if (this.up != other.up) {
+            return false;
+        }
+        if (this.carrierChanges != other.carrierChanges) {
             return false;
         }
         return true;

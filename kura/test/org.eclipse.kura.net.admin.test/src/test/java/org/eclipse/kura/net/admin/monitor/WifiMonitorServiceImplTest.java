@@ -651,8 +651,8 @@ public class WifiMonitorServiceImplTest {
         String wlan2 = "wlan2";
         String wlan3 = "wlan3";
 
-        InterfaceState wlan3OldState = new InterfaceState(wlan3, true, true, IPAddress.parseHostAddress("10.10.0.3"));
-        InterfaceState wlan3NewState = new InterfaceState(wlan3, true, true, IPAddress.parseHostAddress("10.10.0.4"));
+        InterfaceState wlan3OldState = new InterfaceState(wlan3, true, true, IPAddress.parseHostAddress("10.10.0.3"), 2);
+        InterfaceState wlan3NewState = new InterfaceState(wlan3, true, true, IPAddress.parseHostAddress("10.10.0.4"), 2);
 
         EventAdmin eaMock = mock(EventAdmin.class);
         svc.setEventAdmin(eaMock);
@@ -676,13 +676,13 @@ public class WifiMonitorServiceImplTest {
         }).when(eaMock).postEvent(anyObject());
 
         Map<String, InterfaceState> oldStatuses = new HashMap<>();
-        oldStatuses.put(wlan1, new InterfaceState(wlan1, true, true, IPAddress.parseHostAddress("10.10.0.1")));
-        oldStatuses.put(wlan2, new InterfaceState(wlan2, true, true, IPAddress.parseHostAddress("10.10.0.2"))); // disabled
+        oldStatuses.put(wlan1, new InterfaceState(wlan1, true, true, IPAddress.parseHostAddress("10.10.0.1"), 2));
+        oldStatuses.put(wlan2, new InterfaceState(wlan2, true, true, IPAddress.parseHostAddress("10.10.0.2"), 2)); // disabled
         oldStatuses.put(wlan3, wlan3OldState);
 
         Map<String, InterfaceState> newStatuses = new HashMap<>();
-        newStatuses.put(wlan0, new InterfaceState(wlan0, true, true, IPAddress.parseHostAddress("10.10.0.0"))); // enabled
-        newStatuses.put(wlan1, new InterfaceState(wlan1, true, true, IPAddress.parseHostAddress("10.10.0.1")));
+        newStatuses.put(wlan0, new InterfaceState(wlan0, true, true, IPAddress.parseHostAddress("10.10.0.0"), 2)); // enabled
+        newStatuses.put(wlan1, new InterfaceState(wlan1, true, true, IPAddress.parseHostAddress("10.10.0.1"), 2));
         newStatuses.put(wlan3, wlan3NewState); // modified
 
         TestUtil.invokePrivate(svc, "checkStatusChange", oldStatuses, newStatuses);
@@ -842,7 +842,7 @@ public class WifiMonitorServiceImplTest {
         WifiMonitorServiceImpl svc = getServiceWithScanTool(ssid, 0, ltMock);
 
         Map<String, InterfaceState> stats = new HashMap<>();
-        stats.put(wlan1, new InterfaceState(wlan1, true, true, IPAddress.parseHostAddress("10.10.0.1")));
+        stats.put(wlan1, new InterfaceState(wlan1, true, true, IPAddress.parseHostAddress("10.10.0.1"), 2));
 
         TestUtil.setFieldValue(svc, "interfaceStatuses", stats);
 
@@ -869,7 +869,7 @@ public class WifiMonitorServiceImplTest {
         WifiMonitorServiceImpl svc = getServiceWithScanTool(ssid, -5, ltMock);
 
         Map<String, InterfaceState> stats = new HashMap<>();
-        stats.put(wlan1, new InterfaceState(wlan1, true, true, IPAddress.parseHostAddress("10.10.0.1")));
+        stats.put(wlan1, new InterfaceState(wlan1, true, true, IPAddress.parseHostAddress("10.10.0.1"), 2));
 
         TestUtil.setFieldValue(svc, "interfaceStatuses", stats);
 
@@ -897,7 +897,7 @@ public class WifiMonitorServiceImplTest {
         WifiMonitorServiceImpl svc = getServiceWithScanTool(ssid, 5, ltMock);
 
         Map<String, InterfaceState> stats = new HashMap<>();
-        stats.put(wlan1, new InterfaceState(wlan1, true, true, IPAddress.parseHostAddress("10.10.0.1")));
+        stats.put(wlan1, new InterfaceState(wlan1, true, true, IPAddress.parseHostAddress("10.10.0.1"), 2));
 
         TestUtil.setFieldValue(svc, "interfaceStatuses", stats);
 

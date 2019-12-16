@@ -386,7 +386,7 @@ public class Console implements ConfigurableComponent, org.eclipse.kura.web.api.
         this.httpService.registerServlet(CONSOLE_RESOURCE_PATH, new SendStatusServlet(404), null, resourceContext);
 
         this.httpService.registerServlet(PASSWORD_AUTH_PATH,
-                new GwtPasswordAuthenticationServiceImpl(this.authMgr, () -> this.appRoot), null, sessionContext);
+                new GwtPasswordAuthenticationServiceImpl(this.authMgr, CONSOLE_PATH), null, sessionContext);
         this.httpService.registerServlet(DENALI_MODULE_PATH + "/extension", new GwtExtensionServiceImpl(), null,
                 resourceContext);
         this.httpService.registerServlet(LOGIN_MODULE_PATH + "/extension", new GwtExtensionServiceImpl(), null,

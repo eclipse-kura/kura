@@ -20,6 +20,25 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 
+import org.eclipse.kura.web.client.configuration.Configurations;
+import org.eclipse.kura.web.client.configuration.HasConfiguration;
+import org.eclipse.kura.web.client.messages.Messages;
+import org.eclipse.kura.web.client.ui.AlertDialog;
+import org.eclipse.kura.web.client.ui.AlertDialog.ConfirmListener;
+import org.eclipse.kura.web.client.ui.wires.composer.BlinkEffect;
+import org.eclipse.kura.web.client.ui.wires.composer.DropEvent;
+import org.eclipse.kura.web.client.ui.wires.composer.PortNames;
+import org.eclipse.kura.web.client.ui.wires.composer.Wire;
+import org.eclipse.kura.web.client.ui.wires.composer.WireComponent;
+import org.eclipse.kura.web.client.ui.wires.composer.WireComposer;
+import org.eclipse.kura.web.shared.AssetConstants;
+import org.eclipse.kura.web.shared.IdHelper;
+import org.eclipse.kura.web.shared.model.GwtConfigComponent;
+import org.eclipse.kura.web.shared.model.GwtWireComponentConfiguration;
+import org.eclipse.kura.web.shared.model.GwtWireComponentDescriptor;
+import org.eclipse.kura.web.shared.model.GwtWireComposerStaticInfo;
+import org.eclipse.kura.web.shared.model.GwtWireConfiguration;
+import org.eclipse.kura.web.shared.model.GwtWireGraphConfiguration;
 import org.gwtbootstrap3.client.ui.Alert;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.NavPills;
@@ -35,25 +54,6 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
-
-import src.main.java.org.eclipse.kura.web.client.configuration.Configurations;
-import src.main.java.org.eclipse.kura.web.client.configuration.HasConfiguration;
-import src.main.java.org.eclipse.kura.web.client.ui.AlertDialog;
-import src.main.java.org.eclipse.kura.web.client.ui.AlertDialog.ConfirmListener;
-import src.main.java.org.eclipse.kura.web.client.ui.wires.composer.BlinkEffect;
-import src.main.java.org.eclipse.kura.web.client.ui.wires.composer.PortNames;
-import src.main.java.org.eclipse.kura.web.client.ui.wires.composer.Wire;
-import src.main.java.org.eclipse.kura.web.client.ui.wires.composer.WireComponent;
-import src.main.java.org.eclipse.kura.web.client.ui.wires.composer.WireComposer;
-import src.main.java.org.eclipse.kura.web.shared.AssetConstants;
-import src.main.java.org.eclipse.kura.web.shared.IdHelper;
-import src.main.java.org.eclipse.kura.web.shared.model.GwtConfigComponent;
-import src.main.java.org.eclipse.kura.web.shared.model.GwtWireComponentConfiguration;
-import src.main.java.org.eclipse.kura.web.shared.model.GwtWireComponentDescriptor;
-import src.main.java.org.eclipse.kura.web.shared.model.GwtWireComposerStaticInfo;
-import src.main.java.org.eclipse.kura.web.shared.model.GwtWireConfiguration;
-import src.main.java.org.eclipse.kura.web.shared.model.GwtWireGraphConfiguration;
-import target.generated-sources.gwt.org.eclipse.kura.web.client.messages.Messages;
 
 public class WiresPanelUi extends Composite
         implements WireComposer.Listener, HasConfiguration.Listener, WiresDialogs.Listener {

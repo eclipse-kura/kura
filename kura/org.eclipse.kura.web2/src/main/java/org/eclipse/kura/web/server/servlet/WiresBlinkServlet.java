@@ -16,6 +16,8 @@ package org.eclipse.kura.web.server.servlet;
 import static org.eclipse.kura.util.base.StringUtil.isNullOrEmpty;
 
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -128,15 +130,22 @@ public final class WiresBlinkServlet extends HttpServlet implements WireAdminLis
         response.setCharacterEncoding("UTF-8");
         response.setHeader("Cache-control", "no-cache");
         response.setHeader("Connection", "keep-alive");
-        response.setHeader("Access-Control-Allow-Credentials", "true");
         response.setHeader("Access-Control-Allow-Origin", "*"); // required for IE9
         response.setHeader("Content-Encoding", "identity");
 
         final RequestContext context;
 
         synchronized (this) {
+            final OutputStream outputStream;
 
-            context = new RequestContext(requestId, response);
+            try {
+                outputStream = response.getOutputStream();
+            } catch (final Exception e) {
+                logger.warn("failed to open response stream");
+                return;
+            }
+
+            context = new RequestContext(requestId, outputStream);
             addContext(context);
         }
 
@@ -168,15 +177,17 @@ public final class WiresBlinkServlet extends HttpServlet implements WireAdminLis
     private final class RequestContext {
 
         private final String requestId;
-        private final HttpServletResponse response;
+        private final OutputStream outputStream;
+        private final PrintStream printStream;
         private final Map<WireEvent, Long> lastSentTimestamp = new HashMap<>();
         private final LinkedBlockingQueue<Wire> events = new LinkedBlockingQueue<>(MAX_SIZE_OF_QUEUE);
 
         private boolean run;
 
-        RequestContext(final String requestId, HttpServletResponse response) throws IOException {
+        RequestContext(final String requestId, final OutputStream outputStream) {
             this.requestId = requestId;
-            this.response = response;
+            this.outputStream = outputStream;
+            this.printStream = new PrintStream(outputStream);
             run = true;
         }
 
@@ -211,8 +222,8 @@ public final class WiresBlinkServlet extends HttpServlet implements WireAdminLis
             }
 
             try {
-                response.getWriter().printf("data: %s %s%n%n", wireEvent.emitterKuraServicePid, wireEvent.emitterPort);
-                response.getWriter().flush();
+                printStream.printf("data: %s %s%n%n", wireEvent.emitterKuraServicePid, wireEvent.emitterPort);
+                printStream.flush();
 
                 this.lastSentTimestamp.put(wireEvent, System.currentTimeMillis());
                 return true;
@@ -232,7 +243,7 @@ public final class WiresBlinkServlet extends HttpServlet implements WireAdminLis
             logger.info("Session ended: {}", requestId);
 
             try {
-                response.getWriter().close();
+                outputStream.close();
             } catch (Exception e) {
                 logger.warn("failed to close stream", e);
             }

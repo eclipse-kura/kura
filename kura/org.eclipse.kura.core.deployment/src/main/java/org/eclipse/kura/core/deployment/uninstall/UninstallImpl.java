@@ -19,6 +19,7 @@ import java.util.function.Consumer;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.deployment.CloudDeploymentHandlerV2;
 import org.eclipse.kura.core.deployment.UninstallStatus;
+import org.eclipse.kura.core.deployment.install.InstallImpl;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.executor.CommandStatus;
@@ -36,12 +37,14 @@ public class UninstallImpl {
     private final CloudDeploymentHandlerV2 callback;
     private final DeploymentAdmin deploymentAdmin;
     private final CommandExecutorService executorService;
+    private final InstallImpl installImplementation;
 
     public UninstallImpl(CloudDeploymentHandlerV2 callback, DeploymentAdmin deploymentAdmin,
-            CommandExecutorService executorService) {
+            CommandExecutorService executorService, InstallImpl installImplementation) {
         this.callback = callback;
         this.deploymentAdmin = deploymentAdmin;
         this.executorService = executorService;
+        this.installImplementation = installImplementation;
     }
 
     private void uninstallCompleteAsync(DeploymentPackageUninstallOptions options, String dpName) {
@@ -75,13 +78,12 @@ public class UninstallImpl {
                 DeploymentPackage dp = this.deploymentAdmin.getDeploymentPackage(name);
                 if (dp != null) {
                     dp.uninstall();
-                    String sUrl = CloudDeploymentHandlerV2.installImplementation.getDeployedPackages()
-                            .getProperty(name);
+                    String sUrl = this.installImplementation.getDeployedPackages().getProperty(name);
                     File dpFile = new File(new URL(sUrl).getPath());
                     if (!dpFile.delete()) {
                         logger.warn("Cannot delete file at URL: {}", sUrl);
                     }
-                    CloudDeploymentHandlerV2.installImplementation.removePackageFromConfFile(name);
+                    this.installImplementation.removePackageFromConfFile(name);
                 }
                 uninstallCompleteAsync(options, name);
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2019 Eurotech and others
+ * Copyright (c) 2019 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -9,7 +9,7 @@
  * Contributors:
  *     Eurotech
  *******************************************************************************/
-package org.eclipse.kura.internal.linux.sysv.net.dns;
+package org.eclipse.kura.linux.net.dns;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -17,6 +17,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.UnknownHostException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -26,7 +27,6 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.executor.CommandStatus;
-import org.eclipse.kura.internal.linux.net.dns.DnsServerService;
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetworkPair;
@@ -36,15 +36,11 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DnsServerServiceImpl implements DnsServerService {
+public abstract class LinuxDnsServer {
 
-    private static final String BIND9_COMMAND = "/etc/init.d/bind9";
-
-    private static final Logger logger = LoggerFactory.getLogger(DnsServerServiceImpl.class);
-
-    private static final String PERSISTENT_CONFIG_FILE_NAME = "/etc/bind/named.conf";
-    private static final String RFC_1912_ZONES_FILENAME = "/etc/named.rfc1912.zones";
-    private static final String PROC_STRING = "/usr/sbin/named";
+    private static final Logger logger = LoggerFactory.getLogger(LinuxDnsServer.class);
+    public static final String NAMED = "named";
+    public static final String SYSTEMCTL_COMMAND = "/bin/systemctl";
 
     private DnsServerConfigIP4 dnsServerConfigIP4;
     private CommandExecutorService executorService;
@@ -58,11 +54,11 @@ public class DnsServerServiceImpl implements DnsServerService {
     }
 
     protected void activate() {
-        logger.info("Activating LinuxNamed...");
+        logger.info("Activating LinuxDnsServer...");
         try {
             init();
         } catch (KuraException e) {
-            logger.info("Error activating LinuxNamed...");
+            logger.info("Error activating LinuxDnsServer...");
             if (this.dnsServerConfigIP4 == null) {
                 Set<IP4Address> forwarders = new HashSet<>();
                 HashSet<NetworkPair<IP4Address>> allowedNetworks = new HashSet<>();
@@ -72,11 +68,11 @@ public class DnsServerServiceImpl implements DnsServerService {
     }
 
     protected void deactivate(ComponentContext componentContext) {
-        logger.info("Deactivating LinuxNamed...");
+        logger.info("Deactivating LinuxDnsServer...");
     }
 
     private void init() throws KuraException {
-        File configFile = new File(DnsServerServiceImpl.PERSISTENT_CONFIG_FILE_NAME);
+        File configFile = new File(getDnsConfigFileName());
         if (!configFile.exists() || !isForwardOnlyConfiguration(configFile)) {
             logger.debug("There is no current DNS server configuration that allows forwarding");
             return;
@@ -90,40 +86,52 @@ public class DnsServerServiceImpl implements DnsServerService {
         try (FileReader fr = new FileReader(configFile); BufferedReader br = new BufferedReader(fr)) {
             String line;
             while ((line = br.readLine()) != null) {
-                StringTokenizer st = new StringTokenizer(line);
-                while (st.hasMoreTokens()) {
-                    String token = st.nextToken();
-                    if ("forwarders".equals(token)) {
-                        // get the forwarders 'forwarders {192.168.1.1;192.168.2.1;};'
-                        StringTokenizer st2 = new StringTokenizer(st.nextToken(), "{} ;");
-                        while (st2.hasMoreTokens()) {
-                            String forwarder = st2.nextToken();
-                            if (forwarder != null && !"".equals(forwarder.trim())) {
-                                logger.debug("found forwarder: {}", forwarder);
-                                forwarders.add((IP4Address) IPAddress.parseHostAddress(forwarder));
-                            }
-                        }
-                    } else if ("allow-query".equals(token)) {
-                        // get the networks 'allow-query {192.168.2.0/24;192.168.3.0/24};'
-                        StringTokenizer st2 = new StringTokenizer(st.nextToken(), "{} ;");
-                        while (st2.hasMoreTokens()) {
-                            String allowedNetwork = st2.nextToken();
-                            if (allowedNetwork != null && !"".equals(allowedNetwork.trim())) {
-                                String[] splitNetwork = allowedNetwork.split("/");
-                                allowedNetworks
-                                        .add(new NetworkPair<>((IP4Address) IPAddress.parseHostAddress(splitNetwork[0]),
-                                                Short.parseShort(splitNetwork[1])));
-                            }
-                        }
-                    }
-                }
+                parseDnsConfigFile(forwarders, allowedNetworks, line);
             }
 
             // set the configuration and return
             this.dnsServerConfigIP4 = new DnsServerConfigIP4(forwarders, allowedNetworks);
-        } catch (Exception e) {
-            logger.error("init() :: failed to read the {} configuration file ", configFile.getName(), e);
+        } catch (IOException e) {
             throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, e);
+        }
+    }
+
+    private void parseDnsConfigFile(Set<IP4Address> forwarders, Set<NetworkPair<IP4Address>> allowedNetworks,
+            String line) throws UnknownHostException {
+        StringTokenizer st = new StringTokenizer(line);
+        while (st.hasMoreTokens()) {
+            String token = st.nextToken();
+            if ("forwarders".equals(token)) {
+                getForwarders(forwarders, st);
+            } else if ("allow-query".equals(token)) {
+                getAllowedNetworks(allowedNetworks, st);
+            }
+        }
+    }
+
+    private void getAllowedNetworks(Set<NetworkPair<IP4Address>> allowedNetworks, StringTokenizer st)
+            throws UnknownHostException {
+        // get the networks 'allow-query {192.168.2.0/24;192.168.3.0/24};'
+        StringTokenizer st2 = new StringTokenizer(st.nextToken(), "{} ;");
+        while (st2.hasMoreTokens()) {
+            String allowedNetwork = st2.nextToken();
+            if (allowedNetwork != null && !"".equals(allowedNetwork.trim())) {
+                String[] splitNetwork = allowedNetwork.split("/");
+                allowedNetworks.add(new NetworkPair<>((IP4Address) IPAddress.parseHostAddress(splitNetwork[0]),
+                        Short.parseShort(splitNetwork[1])));
+            }
+        }
+    }
+
+    private void getForwarders(Set<IP4Address> forwarders, StringTokenizer st) throws UnknownHostException {
+        // get the forwarders 'forwarders {192.168.1.1;192.168.2.1;};'
+        StringTokenizer st2 = new StringTokenizer(st.nextToken(), "{} ;");
+        while (st2.hasMoreTokens()) {
+            String forwarder = st2.nextToken();
+            if (forwarder != null && !"".equals(forwarder.trim())) {
+                logger.debug("found forwarder: {}", forwarder);
+                forwarders.add((IP4Address) IPAddress.parseHostAddress(forwarder));
+            }
         }
     }
 
@@ -137,21 +145,17 @@ public class DnsServerServiceImpl implements DnsServerService {
                     break;
                 }
             }
-        } catch (Exception e) {
-            logger.error("isForwardOnlyConfiguration() :: failed to read the {} configuration file ",
-                    configFile.getName(), e);
+        } catch (IOException e) {
             throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, e);
         }
         return forwardingConfig;
     }
 
-    @Override
     public boolean isRunning() {
         // Check if named is running
-        return this.executorService.isRunning(new String[] { DnsServerServiceImpl.PROC_STRING });
+        return this.executorService.isRunning(new String[] { getDnsServiceName() });
     }
 
-    @Override
     public void start() throws KuraException {
         // write config happened during 'set config' step
         if (isRunning()) {
@@ -160,7 +164,7 @@ public class DnsServerServiceImpl implements DnsServerService {
             stop();
         }
         // Start named
-        CommandStatus status = this.executorService.execute(new Command(new String[] { BIND9_COMMAND, "start" }));
+        CommandStatus status = this.executorService.execute(new Command(getDnsStartCommand()));
         if ((Integer) status.getExitStatus().getExitValue() == 0) {
             logger.debug("DNS server started.");
             logger.trace("{}", this.dnsServerConfigIP4);
@@ -169,10 +173,9 @@ public class DnsServerServiceImpl implements DnsServerService {
         }
     }
 
-    @Override
     public void stop() throws KuraException {
         // Stop named
-        CommandStatus status = this.executorService.execute(new Command(new String[] { BIND9_COMMAND, "stop" }));
+        CommandStatus status = this.executorService.execute(new Command(getDnsStopCommand()));
         if ((Integer) status.getExitStatus().getExitValue() == 0) {
             logger.debug("DNS server stopped.");
             logger.trace("{}", this.dnsServerConfigIP4);
@@ -182,10 +185,9 @@ public class DnsServerServiceImpl implements DnsServerService {
         }
     }
 
-    @Override
     public void restart() throws KuraException {
         // Restart named
-        CommandStatus status = this.executorService.execute(new Command(new String[] { BIND9_COMMAND, "restart" }));
+        CommandStatus status = this.executorService.execute(new Command(getDnsRestartCommand()));
         if ((Integer) status.getExitStatus().getExitValue() == 0) {
             logger.debug("DNS server restarted.");
         } else {
@@ -194,7 +196,6 @@ public class DnsServerServiceImpl implements DnsServerService {
         }
     }
 
-    @Override
     public boolean isConfigured() {
         if (this.dnsServerConfigIP4 == null || this.dnsServerConfigIP4.getForwarders() == null
                 || this.dnsServerConfigIP4.getAllowedNetworks() == null) {
@@ -204,7 +205,6 @@ public class DnsServerServiceImpl implements DnsServerService {
                 || this.dnsServerConfigIP4.getAllowedNetworks().isEmpty());
     }
 
-    @Override
     public void setConfig(DnsServerConfig dnsServerConfig) {
         if (this.dnsServerConfigIP4 == null) {
             logger.warn("Set DNS server configuration to null");
@@ -219,22 +219,22 @@ public class DnsServerServiceImpl implements DnsServerService {
         }
     }
 
-    @Override
     public DnsServerConfig getConfig() {
         return this.dnsServerConfigIP4;
     }
 
     private void writeConfig() throws IOException {
-        try (FileOutputStream fos = new FileOutputStream(DnsServerServiceImpl.PERSISTENT_CONFIG_FILE_NAME);
+        String persistentConfigFileName = getDnsConfigFileName();
+        try (FileOutputStream fos = new FileOutputStream(persistentConfigFileName);
                 PrintWriter pw = new PrintWriter(fos);) {
             // build up the file
             if (isConfigured()) {
-                logger.debug("writing custom named.conf to {} with: {}",
-                        DnsServerServiceImpl.PERSISTENT_CONFIG_FILE_NAME, this.dnsServerConfigIP4);
+                logger.debug("writing custom named.conf to {} with: {}", persistentConfigFileName,
+                        this.dnsServerConfigIP4);
                 pw.print(getForwardingNamedFile());
             } else {
-                logger.debug("writing default named.conf to {} with: {}",
-                        DnsServerServiceImpl.PERSISTENT_CONFIG_FILE_NAME, this.dnsServerConfigIP4);
+                logger.debug("writing default named.conf to {} with: {}", persistentConfigFileName,
+                        this.dnsServerConfigIP4);
                 pw.print(getDefaultNamedFile());
             }
             pw.flush();
@@ -275,7 +275,7 @@ public class DnsServerServiceImpl implements DnsServerService {
                 .append("\tfile \"named.ca\";\n") //
                 .append("};\n") //
                 .append("include \"") //
-                .append(DnsServerServiceImpl.RFC_1912_ZONES_FILENAME) //
+                .append(getDnsRfcZonesFileName()) //
                 .append("\";\n");
 
         return sb.toString();
@@ -294,8 +294,8 @@ public class DnsServerServiceImpl implements DnsServerService {
                 .append("options {\n") //
                 .append("\tlisten-on port 53 { 127.0.0.1; };\n") //
                 .append("\tlisten-on-v6 port 53 { ::1; };\n") //
-                .append("\tdirectory	\"/var/named\";\n") //
-                .append("\tdump-file	\"/var/named/data/cache_dump.db\";\n") //
+                .append("\tdirectory    \"/var/named\";\n") //
+                .append("\tdump-file    \"/var/named/data/cache_dump.db\";\n") //
                 .append("\tstatistics-file \"/var/named/data/named_stats.txt\";\n") //
                 .append("\tmemstatistics-file \"/var/named/data/named_mem_stats.txt\";\n") //
                 .append("\tallow-query     { localhost; };\n") //
@@ -317,8 +317,32 @@ public class DnsServerServiceImpl implements DnsServerService {
                 .append("};\n") //
                 .append("\n") //
                 .append("include \"") //
-                .append(DnsServerServiceImpl.RFC_1912_ZONES_FILENAME) //
+                .append(getDnsRfcZonesFileName()) //
                 .append("\";\n"); //
         return sb.toString();
+    }
+
+    public String getDnsConfigFileName() {
+        return "/etc/bind/named.conf";
+    }
+
+    public String getDnsRfcZonesFileName() {
+        return "/etc/named.rfc1912.zones";
+    }
+
+    public String getDnsServiceName() {
+        return "/usr/sbin/named";
+    }
+
+    public String[] getDnsStartCommand() {
+        return new String[] { SYSTEMCTL_COMMAND, "start", NAMED };
+    }
+
+    public String[] getDnsRestartCommand() {
+        return new String[] { SYSTEMCTL_COMMAND, "restart", NAMED };
+    }
+
+    public String[] getDnsStopCommand() {
+        return new String[] { SYSTEMCTL_COMMAND, "stop", NAMED };
     }
 }

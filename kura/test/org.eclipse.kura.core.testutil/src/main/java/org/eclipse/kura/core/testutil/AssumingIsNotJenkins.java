@@ -8,12 +8,14 @@
  ******************************************************************************/
 package org.eclipse.kura.core.testutil;
 
+import java.io.File;
+
 import org.junit.AssumptionViolatedException;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
-public class AssumingIsNotMac implements TestRule {
+public class AssumingIsNotJenkins implements TestRule {
 
     @Override
     public Statement apply(Statement base, Description description) {
@@ -21,8 +23,9 @@ public class AssumingIsNotMac implements TestRule {
 
             @Override
             public void evaluate() throws Throwable {
-                if (System.getProperty("os.name").toLowerCase().contains("mac")) {
-                    throw new AssumptionViolatedException("Mac OS X not supported. Skipping tests!");
+                File tempFile = new File("/tmp/isJenkins.txt");
+                if (tempFile.exists()) {
+                    throw new AssumptionViolatedException("Jenkins detected. Skipping tests!");
                 } else {
                     base.evaluate();
                 }

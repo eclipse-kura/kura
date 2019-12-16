@@ -31,15 +31,15 @@ public class WpaSupplicantTest extends TestCase {
     private static CountDownLatch dependencyLatch = new CountDownLatch(1);	// initialize with number of dependencies
     private static final String IFACE_NAME = "wlan0";
     private WpaSupplicantManager wpaSupplicantManager;
-    private static CommandExecutorService executorService;
+    private CommandExecutorService executorService;
 
     public void setExecutorService(CommandExecutorService executorService) {
-        WpaSupplicantTest.executorService = executorService;
+        this.executorService = executorService;
         dependencyLatch.countDown();
     }
 
     public void unsetExecutorService(CommandExecutorService executorService) {
-        WpaSupplicantTest.executorService = null;
+        this.executorService = null;
         dependencyLatch.countDown();
     }
 
@@ -54,7 +54,7 @@ public class WpaSupplicantTest extends TestCase {
             fail("OSGi dependencies unfulfilled");
             System.exit(1);
         }
-        this.wpaSupplicantManager = new WpaSupplicantManager(WpaSupplicantTest.executorService);
+        this.wpaSupplicantManager = new WpaSupplicantManager(this.executorService);
     }
 
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })

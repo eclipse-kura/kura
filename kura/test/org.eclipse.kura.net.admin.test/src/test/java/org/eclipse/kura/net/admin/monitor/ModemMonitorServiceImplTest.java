@@ -727,8 +727,8 @@ public class ModemMonitorServiceImplTest {
         String ppp2 = "wlan2";
         String ppp3 = "wlan3";
 
-        InterfaceState ppp3OldState = new InterfaceState(ppp3, true, true, IPAddress.parseHostAddress("10.10.0.3"));
-        InterfaceState ppp3NewState = new InterfaceState(ppp3, true, true, IPAddress.parseHostAddress("10.10.0.4"));
+        InterfaceState ppp3OldState = new InterfaceState(ppp3, true, true, IPAddress.parseHostAddress("10.10.0.3"), 2);
+        InterfaceState ppp3NewState = new InterfaceState(ppp3, true, true, IPAddress.parseHostAddress("10.10.0.4"), 2);
 
         EventAdmin eaMock = mock(EventAdmin.class);
         svc.setEventAdmin(eaMock);
@@ -752,13 +752,13 @@ public class ModemMonitorServiceImplTest {
         }).when(eaMock).postEvent(anyObject());
 
         Map<String, InterfaceState> oldStatuses = new HashMap<>();
-        oldStatuses.put(ppp1, new InterfaceState(ppp1, true, true, IPAddress.parseHostAddress("10.10.0.1")));
-        oldStatuses.put(ppp2, new InterfaceState(ppp2, true, true, IPAddress.parseHostAddress("10.10.0.2"))); // disabled
+        oldStatuses.put(ppp1, new InterfaceState(ppp1, true, true, IPAddress.parseHostAddress("10.10.0.1"), 2));
+        oldStatuses.put(ppp2, new InterfaceState(ppp2, true, true, IPAddress.parseHostAddress("10.10.0.2"), 2)); // disabled
         oldStatuses.put(ppp3, ppp3OldState);
 
         Map<String, InterfaceState> newStatuses = new HashMap<>();
-        newStatuses.put(ppp0, new InterfaceState(ppp0, true, true, IPAddress.parseHostAddress("10.10.0.0"))); // enabled
-        newStatuses.put(ppp1, new InterfaceState(ppp1, true, true, IPAddress.parseHostAddress("10.10.0.1")));
+        newStatuses.put(ppp0, new InterfaceState(ppp0, true, true, IPAddress.parseHostAddress("10.10.0.0"), 2)); // enabled
+        newStatuses.put(ppp1, new InterfaceState(ppp1, true, true, IPAddress.parseHostAddress("10.10.0.1"), 2));
         newStatuses.put(ppp3, ppp3NewState); // modified
 
         TestUtil.invokePrivate(svc, "checkStatusChange", oldStatuses, newStatuses);

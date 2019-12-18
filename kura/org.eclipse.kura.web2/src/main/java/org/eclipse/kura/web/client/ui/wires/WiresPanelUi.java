@@ -109,19 +109,19 @@ public class WiresPanelUi extends Composite
     interface WiresPanelUiUiBinder extends UiBinder<Widget, WiresPanelUi> {
     }
 
-    private WireComposer wireComposer;
-    private BlinkEffect blinkEffect;
+    private final WireComposer wireComposer;
+    private final BlinkEffect blinkEffect;
 
-    private WireComponentDescriptors descriptors = new WireComponentDescriptors();
-    private Configurations configurations = new Configurations();
+    private final WireComponentDescriptors descriptors = new WireComponentDescriptors();
+    private final Configurations configurations = new Configurations();
 
     public WiresPanelUi() {
         initWidget(uiBinder.createAndBindUi(this));
 
-        this.wireComposer = WireComposer.create(composer.getElement());
+        this.wireComposer = WireComposer.create(this.composer.getElement());
         this.wireComposer.setListener(this);
 
-        this.blinkEffect = BlinkEffect.create(wireComposer);
+        this.blinkEffect = BlinkEffect.create(this.wireComposer);
 
         this.dialogs.setListener(this);
         initButtons();
@@ -132,31 +132,32 @@ public class WiresPanelUi extends Composite
         this.btnZoomOut.addClickHandler(event -> WiresPanelUi.this.wireComposer.zoomOut());
         this.btnZoomFit.addClickHandler(event -> WiresPanelUi.this.wireComposer.fitContent(true));
         this.btnSave.addClickHandler(event -> {
-            final List<String> invalidConfigurationPids = configurations.getInvalidConfigurationPids();
+            final List<String> invalidConfigurationPids = this.configurations.getInvalidConfigurationPids();
             if (!invalidConfigurationPids.isEmpty()) {
-                confirmDialog.show(
+                this.confirmDialog.show(
                         MSGS.cannotSaveWiresConfigurationInvalid(
                                 invalidConfigurationPids.toString().replaceAll("[\\[\\]]", "")),
                         AlertDialog.Severity.ALERT, (ConfirmListener) null);
                 return;
             }
-            confirmDialog.show(MSGS.wiresSave(), () -> WiresRPC.updateWiresConfiguration(getGwtWireGraphConfiguration(),
-                    getModifiedDriverConfigurations(), result -> clearDirtyState()));
+            this.confirmDialog.show(MSGS.wiresSave(),
+                    () -> WiresRPC.updateWiresConfiguration(getGwtWireGraphConfiguration(),
+                            getModifiedDriverConfigurations(), result -> clearDirtyState()));
         });
         this.btnReset.addClickHandler(
                 event -> WiresPanelUi.this.confirmDialog.show(MSGS.deviceConfigDirty(), WiresPanelUi.this::load));
-        this.btnDelete.addClickHandler(event -> confirmDialog.show(MSGS.wiresComponentDeleteAlert(), () -> {
-            final WireComponent component = wireComposer.getSelectedWireComponent();
+        this.btnDelete.addClickHandler(event -> this.confirmDialog.show(MSGS.wiresComponentDeleteAlert(), () -> {
+            final WireComponent component = this.wireComposer.getSelectedWireComponent();
             if (component != null) {
-                wireComposer.deleteWireComponent(component);
+                this.wireComposer.deleteWireComponent(component);
             }
         }));
-        this.btnGraphDelete
-                .addClickHandler(event -> confirmDialog.show(MSGS.wiresGraphDeleteAlert(), () -> wireComposer.clear()));
+        this.btnGraphDelete.addClickHandler(
+                event -> this.confirmDialog.show(MSGS.wiresGraphDeleteAlert(), () -> this.wireComposer.clear()));
         this.btnDownload.addClickHandler(event -> {
-            final List<String> invalidConfigurationPids = configurations.getInvalidConfigurationPids();
+            final List<String> invalidConfigurationPids = this.configurations.getInvalidConfigurationPids();
             if (!invalidConfigurationPids.isEmpty()) {
-                confirmDialog.show(
+                this.confirmDialog.show(
                         MSGS.cannotDownloadSnapshotWiresConfigurationInvalid(
                                 invalidConfigurationPids.toString().replaceAll("[\\[\\]]", "")),
                         AlertDialog.Severity.ALERT, (ConfirmListener) null);
@@ -175,10 +176,10 @@ public class WiresPanelUi extends Composite
         WiresRPC.loadWireGraph(result -> {
             loadStaticInformation(result.getStaticInfo());
             loadGraph(result.getWireGraphConfiguration());
-            dialogs.setDriverPids(configurations.getDriverPids());
-            dialogs.setAssetPids(getAssetsNotInComposer());
-            configurations.setAllActivePids(result.getWireGraphConfiguration().getAllActivePids());
-            blinkEffect.setEnabled(true);
+            this.dialogs.setDriverPids(this.configurations.getDriverPids());
+            this.dialogs.setAssetPids(getAssetsNotInComposer());
+            this.configurations.setAllActivePids(result.getWireGraphConfiguration().getAllActivePids());
+            this.blinkEffect.setEnabled(true);
             clearDirtyState();
         });
 
@@ -191,7 +192,7 @@ public class WiresPanelUi extends Composite
 
         final List<GwtWireComponentDescriptor> sortedDescriptors = new ArrayList<>();
 
-        for (Entry<String, GwtWireComponentDescriptor> descriptor : descriptors.getDescriptors().entrySet()) {
+        for (Entry<String, GwtWireComponentDescriptor> descriptor : this.descriptors.getDescriptors().entrySet()) {
             sortedDescriptors.add(descriptor.getValue());
         }
 
@@ -212,33 +213,33 @@ public class WiresPanelUi extends Composite
         this.configurations.setBaseChannelDescriptor(staticInfo.getBaseChannelDescriptor());
         this.configurations.setComponentDefinitions(staticInfo.getComponentDefinitions());
         this.descriptors.setDescriptors(staticInfo.getWireComponentDescriptors());
-        this.dialogs.setDriverFactoryPids(configurations.getDriverFactoryPids());
+        this.dialogs.setDriverFactoryPids(this.configurations.getDriverFactoryPids());
         populateComponentsPanel();
     }
 
     private void loadGraph(GwtWireGraphConfiguration configuration) {
-        wireComposer.clear();
+        this.wireComposer.clear();
         final List<GwtConfigComponent> configurationList = new ArrayList<>();
 
         for (GwtWireComponentConfiguration config : configuration.getWireComponentConfigurations()) {
             configurationList.add(config.getConfiguration());
             final WireComponent component = WireComponent.fromGwt(config);
-            final GwtWireComponentDescriptor descriptor = descriptors.getDescriptor(component.getFactoryPid());
+            final GwtWireComponentDescriptor descriptor = this.descriptors.getDescriptor(component.getFactoryPid());
             // TODO: place port names in GwtWireComponentConfiguration
             if (descriptor != null) {
                 component.getRenderingProperties().setInputPortNames(PortNames.fromMap(descriptor.getInputPortNames()));
                 component.getRenderingProperties()
                         .setOutputPortNames(PortNames.fromMap(descriptor.getOutputPortNames()));
             }
-            wireComposer.addWireComponent(component);
+            this.wireComposer.addWireComponent(component);
         }
 
         for (GwtWireConfiguration config : configuration.getWires()) {
-            wireComposer.addWire(Wire.fromGwt(config));
+            this.wireComposer.addWire(Wire.fromGwt(config));
         }
 
         configurationList.addAll(configuration.getAdditionalConfigurations());
-        configurations.setComponentConfigurations(configurationList);
+        this.configurations.setComponentConfigurations(configurationList);
 
         for (final WireComponent component : this.wireComposer.getWireComponents()) {
             try {
@@ -249,7 +250,7 @@ public class WiresPanelUi extends Composite
             }
         }
 
-        wireComposer.fitContent(false);
+        this.wireComposer.fitContent(false);
     }
 
     private GwtWireGraphConfiguration getGwtWireGraphConfiguration() {
@@ -257,14 +258,14 @@ public class WiresPanelUi extends Composite
 
         final List<GwtWireComponentConfiguration> wireComponentConfigurations = new ArrayList<>();
 
-        for (WireComponent component : wireComposer.getWireComponents()) {
+        for (WireComponent component : this.wireComposer.getWireComponents()) {
             wireComponentConfigurations
-                    .add(component.toGwt(configurations.getConfiguration(component.getPid()).getConfiguration()));
+                    .add(component.toGwt(this.configurations.getConfiguration(component.getPid()).getConfiguration()));
         }
 
         final List<GwtWireConfiguration> wires = new ArrayList<>();
 
-        for (Wire wire : wireComposer.getWires()) {
+        for (Wire wire : this.wireComposer.getWires()) {
             wires.add(wire.toGwt());
         }
 
@@ -276,7 +277,7 @@ public class WiresPanelUi extends Composite
 
     private List<GwtConfigComponent> getModifiedDriverConfigurations() {
         List<GwtConfigComponent> result = new ArrayList<>();
-        for (HasConfiguration config : configurations.getConfigurations()) {
+        for (HasConfiguration config : this.configurations.getConfigurations()) {
             if (config.isDirty() && config.isValid()) {
                 final GwtConfigComponent gwtConfig = config.getConfiguration();
                 if (gwtConfig.isDriver()) {
@@ -330,25 +331,26 @@ public class WiresPanelUi extends Composite
     }
 
     private WireComponent createAsset(String pid, String driverPid) {
-        final HasConfiguration assetConfig = configurations.createAndRegisterConfiguration(pid, WIRE_ASSET_PID);
+        final HasConfiguration assetConfig = this.configurations.createAndRegisterConfiguration(pid, WIRE_ASSET_PID);
         assetConfig.getConfiguration().getParameter(AssetConstants.ASSET_DRIVER_PROP.value()).setValue(driverPid);
-        return descriptors.createNewComponent(pid, WIRE_ASSET_PID);
+        return this.descriptors.createNewComponent(pid, WIRE_ASSET_PID);
     }
 
     public void showComponentCreationDialog(final String factoryPid) {
-        if (descriptors.getDescriptor(factoryPid) == null) {
+        if (this.descriptors.getDescriptor(factoryPid) == null) {
             return;
         }
         this.dialogs.pickComponent(factoryPid, new WiresDialogs.Callback() {
 
             @Override
             public void onNewComponentCreated(String pid) {
-                wireComposer.addWireComponent(descriptors.createNewComponent(pid, factoryPid));
+                WiresPanelUi.this.wireComposer
+                        .addWireComponent(WiresPanelUi.this.descriptors.createNewComponent(pid, factoryPid));
             }
 
             @Override
             public void onNewAssetCreated(String pid, String driverPid) {
-                wireComposer.addWireComponent(createAsset(pid, driverPid));
+                WiresPanelUi.this.wireComposer.addWireComponent(createAsset(pid, driverPid));
             }
 
             @Override
@@ -377,7 +379,7 @@ public class WiresPanelUi extends Composite
     }
 
     public void unload() {
-        blinkEffect.setEnabled(false);
+        this.blinkEffect.setEnabled(false);
     }
 
     private List<String> getAssetsNotInComposer() {
@@ -385,7 +387,7 @@ public class WiresPanelUi extends Composite
         final Iterator<String> i = assetPids.iterator();
         while (i.hasNext()) {
             final String pid = i.next();
-            if (wireComposer.getWireComponent(pid) != null) {
+            if (this.wireComposer.getWireComponent(pid) != null) {
                 i.remove();
             }
         }
@@ -394,7 +396,7 @@ public class WiresPanelUi extends Composite
 
     private HasConfiguration validateAndGetWireComponentConfiguration(String pid) {
         try {
-            final HasConfiguration configuration = configurations.getConfiguration(pid);
+            final HasConfiguration configuration = this.configurations.getConfiguration(pid);
             if (configuration == null) {
                 throw new IllegalArgumentException(MSGS.errorComponentConfigurationMissing(pid));
             }
@@ -404,16 +406,16 @@ public class WiresPanelUi extends Composite
             }
             if (WIRE_ASSET_PID.equals(gwtConfig.getFactoryId())) {
                 final String driverPid = gwtConfig.getParameterValue(DRIVER_PID);
-                if (configurations.getConfiguration(driverPid) == null) {
+                if (this.configurations.getConfiguration(driverPid) == null) {
                     throw new IllegalArgumentException(MSGS.errorDriverConfigurationMissing(pid, driverPid));
                 }
-                if (configurations.getChannelDescriptor(driverPid) == null) {
+                if (this.configurations.getChannelDescriptor(driverPid) == null) {
                     throw new IllegalArgumentException(MSGS.errorDriverDescriptorMissingForAsset(pid, driverPid));
                 }
             }
             return configuration;
         } catch (IllegalArgumentException e) {
-            configurations.invalidateConfiguration(pid);
+            this.configurations.invalidateConfiguration(pid);
             throw e;
         } catch (Exception e) {
             throw new IllegalArgumentException(MSGS.errorUnexpectedErrorLoadingComponentConfig(pid));
@@ -460,17 +462,19 @@ public class WiresPanelUi extends Composite
     public void onWireComponentCreated(WireComponent component) {
         this.btnGraphDelete.setEnabled(true);
         updateDirtyState();
-        if (configurations.getConfiguration(component.getPid()) == null) {
-            configurations.createAndRegisterConfiguration(component.getPid(), component.getFactoryPid());
+        if (this.configurations.getConfiguration(component.getPid()) == null) {
+            this.configurations.createAndRegisterConfiguration(component.getPid(), component.getFactoryPid());
         }
         this.dialogs.setAssetPids(getAssetsNotInComposer());
     }
 
     @Override
     public void onWireComponentDeleted(WireComponent component) {
-        configurations.deleteConfiguration(component.getPid());
+        if (!WIRE_ASSET_PID.equals(component.getFactoryPid())) {
+            this.configurations.deleteConfiguration(component.getPid());
+        }
         updateDirtyState();
-        this.btnGraphDelete.setEnabled(wireComposer.getWireComponentCount() > 0);
+        this.btnGraphDelete.setEnabled(this.wireComposer.getWireComponentCount() > 0);
         this.dialogs.setAssetPids(getAssetsNotInComposer());
     }
 
@@ -486,7 +490,7 @@ public class WiresPanelUi extends Composite
 
             @Override
             public void onNewComponentCreated(String pid) {
-                event.complete(descriptors.createNewComponent(pid, factoryPid));
+                event.complete(WiresPanelUi.this.descriptors.createNewComponent(pid, factoryPid));
             }
 
             @Override
@@ -511,7 +515,7 @@ public class WiresPanelUi extends Composite
     public boolean onNewPidInserted(String pid) {
         boolean isPidValid = this.wireComposer.getWireComponent(pid) == null && !this.configurations.isPidExisting(pid);
         if (!isPidValid) {
-            confirmDialog.show(MSGS.wiresComponentNameAlreadyUsed(pid), AlertDialog.Severity.ALERT,
+            this.confirmDialog.show(MSGS.wiresComponentNameAlreadyUsed(pid), AlertDialog.Severity.ALERT,
                     (ConfirmListener) null);
         }
         return isPidValid;
@@ -519,9 +523,9 @@ public class WiresPanelUi extends Composite
 
     @Override
     public void onNewDriverCreated(String pid, String factoryPid, GwtConfigComponent descriptor) {
-        configurations.createAndRegisterConfiguration(pid, factoryPid);
-        configurations.setChannelDescriptor(pid, descriptor);
-        dialogs.setDriverPids(configurations.getDriverPids());
+        this.configurations.createAndRegisterConfiguration(pid, factoryPid);
+        this.configurations.setChannelDescriptor(pid, descriptor);
+        this.dialogs.setDriverPids(this.configurations.getDriverPids());
     }
 
     @Override

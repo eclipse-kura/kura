@@ -309,6 +309,12 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
                             logger.debug("link is down - disabling {}", interfaceName);
                             disableInterface(interfaceName);
                             interfaceStateChanged = true;
+                        } else if (isDhcpClient && (prevInterfaceState == null || currentInterfaceState
+                                .getCarrierChanges() != prevInterfaceState.getCarrierChanges())) {
+                            // Carrier counter changed - cable has been plugged or unplugged
+                            logger.debug("link is up, carrier changes counter updated - enabling {}", interfaceName);
+                            this.netAdminService.enableInterface(interfaceName, isDhcpClient);
+                            interfaceStateChanged = true;
                         }
                     } else {
                         // State is currently down

@@ -33,6 +33,7 @@ public class InterfaceStateBuilder {
     private boolean up;
     protected boolean link;
     private IPAddress ipAddress;
+    private int carrierChanges;
     private boolean isL2OnlyInterface;
     private NetInterfaceType type;
     private WifiMode wifiMode;
@@ -93,6 +94,14 @@ public class InterfaceStateBuilder {
         this.wifiMode = wifiMode;
     }
 
+    public int getCarrierChanges() {
+        return this.carrierChanges;
+    }
+
+    public void setCarrierChanges(int carrierChanges) {
+        this.carrierChanges = carrierChanges;
+    }
+
     public static Logger getLogger() {
         return logger;
     }
@@ -117,8 +126,9 @@ public class InterfaceStateBuilder {
             logger.debug("InterfaceState() :: {} - up?={}", this.interfaceName, this.up);
             ConnectionInfo connInfo = new ConnectionInfoImpl(this.interfaceName);
             this.ipAddress = connInfo.getIpAddress();
+            this.carrierChanges = this.linuxNetworkUtil.getCarrierChanges(this.interfaceName);
         }
-        return new InterfaceState(this.interfaceName, this.up, this.link, this.ipAddress);
+        return new InterfaceState(this.interfaceName, this.up, this.link, this.ipAddress, this.carrierChanges);
     }
 
     public WifiInterfaceState buildWifiInterfaceState() throws KuraException {
@@ -133,7 +143,8 @@ public class InterfaceStateBuilder {
         ConnectionInfo connInfo = new ConnectionInfoImpl(this.interfaceName);
         this.ipAddress = connInfo.getIpAddress();
         setWifiLinkState(this.interfaceName, this.wifiMode);
-        return new WifiInterfaceState(this.interfaceName, this.up, this.link, this.ipAddress);
+        this.carrierChanges = this.linuxNetworkUtil.getCarrierChanges(this.interfaceName);
+        return new WifiInterfaceState(this.interfaceName, this.up, this.link, this.ipAddress, this.carrierChanges);
     }
 
     private void setWifiLinkState(String interfaceName, WifiMode wifiMode) throws KuraException {

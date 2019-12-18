@@ -281,6 +281,10 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                 // Check all interfaces configured to be enabled.
                 // This includes the interfaces that might have been enabled by the above configuration change.
                 // Get fresh interface statuses and post status change events.
+                Map<String, InterfaceState> oldStatuses = new HashMap<>();
+                if (this.interfaceStatuses != null) {
+                    oldStatuses.putAll(this.interfaceStatuses);
+                }
                 Map<String, InterfaceState> newStatuses = getInterfaceStatuses(this.enabledInterfaces);
                 checkStatusChange(this.interfaceStatuses, newStatuses);
                 this.interfaceStatuses = newStatuses;
@@ -419,28 +423,35 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                                 up = false;
                             }
 
+                            NetConfigIP4 netConfigIP4 = ((AbstractNetInterface<?>) wifiInterfaceConfig).getIP4config();
+                            boolean isDhcpClient = netConfigIP4 != null && netConfigIP4.isDhcp();
+                            boolean dhcpLeaseRenewed = false;
                             logger.debug("monitor() :: pingAccessPoint()? {}", wifiConfig.pingAccessPoint());
-                            if (wifiConfig.pingAccessPoint()) {
-                                NetConfigIP4 netConfigIP4 = ((AbstractNetInterface<?>) wifiInterfaceConfig)
-                                        .getIP4config();
-                                if (netConfigIP4 != null && netConfigIP4.isDhcp()) {
-                                    boolean isApReachable = false;
-                                    for (int i = 0; i < 3; i++) {
-                                        isApReachable = isAccessPointReachable(interfaceName, 1000);
-                                        if (isApReachable) {
-                                            break;
-                                        }
-                                        sleep(1000);
+                            if (isDhcpClient && wifiConfig.pingAccessPoint()) {
+                                boolean isApReachable = false;
+                                for (int i = 0; i < 3; i++) {
+                                    isApReachable = isAccessPointReachable(interfaceName, 1000);
+                                    if (isApReachable) {
+                                        break;
                                     }
-                                    if (!isApReachable) {
-                                        this.netAdminService.renewDhcpLease(interfaceName);
-                                    }
+                                    sleep(1000);
+                                }
+                                if (!isApReachable) {
+                                    this.netAdminService.renewDhcpLease(interfaceName);
+                                    dhcpLeaseRenewed = true;
                                 }
                             }
 
-                            NetConfigIP4 netConfigIP4 = ((AbstractNetInterface<?>) wifiInterfaceConfig).getIP4config();
-                            if (netConfigIP4.getStatus().equals(NetInterfaceStatus.netIPv4StatusEnabledLAN)
-                                    && netConfigIP4.isDhcp()) {
+                            // Check if wifi network reconnected between monitor executions
+                            InterfaceState oldState = oldStatuses.get(interfaceName);
+                            if (!dhcpLeaseRenewed && isDhcpClient && (oldState == null
+                                    || oldState.getCarrierChanges() != wifiState.getCarrierChanges())) {
+                                logger.debug("monitor() :: carrier changes - renewing DHCP lease {}", interfaceName);
+                                this.netAdminService.renewDhcpLease(interfaceName);
+                            }
+
+                            if (isDhcpClient
+                                    && netConfigIP4.getStatus().equals(NetInterfaceStatus.netIPv4StatusEnabledLAN)) {
                                 RouteConfig rconf = this.routeService.getDefaultRoute(interfaceName);
                                 if (rconf != null) {
                                     logger.debug(
@@ -481,6 +492,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                 logger.warn("Error during WiFi Monitor handle event", e);
             }
         }
+
     }
 
     private void checkStatusChange(Map<String, InterfaceState> oldStatuses, Map<String, InterfaceState> newStatuses) {

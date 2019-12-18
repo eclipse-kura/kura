@@ -39,6 +39,31 @@ Getting Started
 Development for Kura can be done in Eclipse IDE using the Kura Development Environment, in a gateway or in a Docker container.
 
 ## Development Environment
+
+### Supported Development Platforms
+The Eclipse Installer based setup works for the main used platforms like Linux, Mac Os and Windows.
+
+###Prerequisites
+Before installing Kura, you need to have the following programs installed in your OS. 
+####Java
+A Java JDK 1.8 is required to build Kura.
+####Maven
+Kura requires Maven version 3.5.x.
+
+#####Steps for Mac OS 
+Using Brew you can easily install both Java and Maven from the command line.
+For Java you can use an JDK 1.8. For this example we used adoptopenjdk8 and maven\@3.5
+Use the following commands on a Mac OS terminal 
+For Java:
+`brew tap adoptopenjdk/openjdk
+brew cask install adoptopenjdk8`
+Run `java -version`to make sure it installed correctly.
+For Maven:
+`brew install maven@3.5`
+Run `mvn -version`to ensure that the PATH links have been formed
+If that is an unknown command try running `brew link maven@3.5 --force`
+
+###Eclipse 
 The simplest way to start developing on Eclipse Kura is to use an Eclipse Installer based setup.
 To correctly setup the environment, proceed as follows:
 - Start the Eclipse Installer
@@ -58,8 +83,6 @@ For further information, building and deployment instructions, please visit the 
 
 To raise an issue, please report a bug on [GitHub issues](https://github.com/eclipse/kura/issues/new).
 
-### Supported Development Platforms
-The Eclipse Installer based setup works for the main used platforms like Linux, Mac Os and Windows.
 
 
 ### Known Issues

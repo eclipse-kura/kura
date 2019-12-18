@@ -42,7 +42,13 @@ public enum SupportedUsbModemInfo {
     Sierra_USB598("USB598", "1199", "0025", 4, 1, 0, 0, -1, 5000, 10000, Arrays.asList(ModemTechnologyType.EVDO), Arrays
             .asList(new UsbModemDriver("sierra", "1199", "0025")), ""),
     Ublox_SARA_U2("SARA-U2", "1546", "1102", 7, 0, 1, 0, -1, 5000, 10000, Arrays
-            .asList(ModemTechnologyType.HSPA), Arrays.asList(new UsbModemDriver("cdc_acm", "1546", "1102")), "");
+            .asList(ModemTechnologyType.HSPA), Arrays.asList(new UsbModemDriver("cdc_acm", "1546", "1102")), ""),
+    Quectel_EC25("EC25", "2c7c", "0125", 4, 0, 3, 3, 1, 5000, 10000, Arrays.asList(ModemTechnologyType.LTE,
+            ModemTechnologyType.HSPA,
+            ModemTechnologyType.UMTS), Arrays.asList(new UsbModemDriver("cdc_acm", "2c7c", "0125")), ""),
+    Quectel_BG96("BG96", "2c7c", "0296", 4, 0, 3, 3, 1, 5000, 10000, Arrays.asList(ModemTechnologyType.LTE,
+            ModemTechnologyType.HSPA,
+            ModemTechnologyType.UMTS), Arrays.asList(new UsbModemDriver("cdc_acm", "2c7c", "0296")), "");
 
     private String deviceName;
     private String vendorId;

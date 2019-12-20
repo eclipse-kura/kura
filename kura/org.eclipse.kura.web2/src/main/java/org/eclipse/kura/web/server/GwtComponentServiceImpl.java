@@ -16,6 +16,7 @@ package org.eclipse.kura.web.server;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -208,6 +209,18 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
             //
             // apply them
             cs.updateConfiguration(gwtCompConfig.getComponentId(), properties);
+            ServiceLocator.withAllServices("(" + KURA_SERVICE_PID + "=" + currentConfigProp.get(KURA_SERVICE_PID) + ")",
+                    service -> {
+                        Class<?> clazz = service.getClass();
+                        try {
+                            Method m = clazz.getDeclaredMethod("isInvalidateSession");
+                            Object isInValidate = m.invoke(service);
+                            if (isInValidate instanceof Boolean && Boolean.TRUE.equals(isInValidate)) {
+                                session.invalidate();
+                            }
+                        } catch (NoSuchMethodException | SecurityException e) {
+                        }
+                    });
             auditLogger.info(
                     "UI Component - Success - Successfully updated component config for user: {}, session {}, component ID: {}",
                     session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId(),

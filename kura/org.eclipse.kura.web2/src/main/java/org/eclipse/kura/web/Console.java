@@ -160,6 +160,9 @@ public class Console implements ConfigurableComponent, org.eclipse.kura.web.api.
         this.eventAdmin = null;
     }
 
+    private ConsoleOptions preOptions;
+    private Boolean invalidateSession = false;
+
     // ----------------------------------------------------------------
     //
     // Activation APIs
@@ -191,6 +194,10 @@ public class Console implements ConfigurableComponent, org.eclipse.kura.web.api.
         this.eventAdmin.postEvent(new Event(KuraConfigReadyEvent.KURA_CONFIG_EVENT_READY_TOPIC, eventProps));
     }
 
+    public Boolean isInvalidateSession() {
+        return invalidateSession;
+    }
+
     private void updateAuthenticationManager(String username, String password)
             throws KuraException, NoSuchAlgorithmException, UnsupportedEncodingException {
 
@@ -219,23 +226,29 @@ public class Console implements ConfigurableComponent, org.eclipse.kura.web.api.
             return;
         }
 
-        unregisterServlet();
-        doUpdate(properties);
-    }
-
-    private void doUpdate(Map<String, Object> properties) {
         ConsoleOptions options = new ConsoleOptions(properties);
 
         Console.setConsoleOptions(options);
-
-        try {
-            updateAuthenticationManager(options.getUsername(), options.getUserPassword());
-        } catch (Exception e) {
-            logger.warn("Error Updating Web properties", e);
-        }
+        if (this.preOptions != null && this.preOptions.getUsername().equals(options.getUsername())
+                && this.preOptions.getUserPassword().equals(options.getUserPassword()))
+            this.invalidateSession = false;
+        else
+            this.invalidateSession = true;
+        if (Boolean.TRUE.equals(this.invalidateSession))
+            try {
+                updateAuthenticationManager(options.getUsername(), options.getUserPassword());
+            } catch (Exception e) {
+                logger.warn("Error Updating Web properties", e);
+            }
 
         setAppRoot(options.getAppRoot());
         setSessionMaxInactiveInterval(options.getSessionMaxInactivityInterval());
+        this.preOptions = options;
+
+    }
+
+    private void doUpdate(Map<String, Object> properties) {
+        updated(properties);
 
         try {
             initHTTPService();

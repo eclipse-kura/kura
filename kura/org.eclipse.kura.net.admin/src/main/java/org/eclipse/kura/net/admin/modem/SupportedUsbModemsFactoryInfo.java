@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -28,6 +28,8 @@ import org.eclipse.kura.net.admin.modem.telit.le910v2.TelitLe910v2ConfigGenerato
 import org.eclipse.kura.net.admin.modem.telit.le910v2.TelitLe910v2ModemFactory;
 import org.eclipse.kura.net.admin.modem.ublox.generic.UbloxModemConfigGenerator;
 import org.eclipse.kura.net.admin.modem.ublox.generic.UbloxModemFactory;
+import org.eclipse.kura.net.admin.modem.zte.me3630.ZteMe3630ConfigGenerator;
+import org.eclipse.kura.net.admin.modem.zte.me3630.ZteMe3630ModemFactory;
 
 public class SupportedUsbModemsFactoryInfo {
 
@@ -44,7 +46,8 @@ public class SupportedUsbModemsFactoryInfo {
         Sierra_MC8775(SupportedUsbModemInfo.Sierra_MC8775, SierraMc87xxModemFactory.class, SierraMc87xxConfigGenerator.class),
         Sierra_MC8790(SupportedUsbModemInfo.Sierra_MC8790, SierraMc87xxModemFactory.class, SierraMc87xxConfigGenerator.class),
         Sierra_USB598(SupportedUsbModemInfo.Sierra_USB598, SierraUsb598ModemFactory.class, SierraUsb598ConfigGenerator.class),
-        Ublox_SARA_U2(SupportedUsbModemInfo.Ublox_SARA_U2, UbloxModemFactory.class, UbloxModemConfigGenerator.class);
+        Ublox_SARA_U2(SupportedUsbModemInfo.Ublox_SARA_U2, UbloxModemFactory.class, UbloxModemConfigGenerator.class),
+        Zte_ME3630(SupportedUsbModemInfo.Zte_ME3630, ZteMe3630ModemFactory.class, ZteMe3630ConfigGenerator.class);
 
         private final SupportedUsbModemInfo m_usbModemInfo;
         private final Class<? extends CellularModemFactory> m_factoryClass;

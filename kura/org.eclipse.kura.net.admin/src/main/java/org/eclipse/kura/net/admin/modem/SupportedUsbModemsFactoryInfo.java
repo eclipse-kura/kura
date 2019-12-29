@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Sterwen-Technology for Quectel modems
  *******************************************************************************/
 package org.eclipse.kura.net.admin.modem;
 
@@ -50,7 +51,7 @@ public class SupportedUsbModemsFactoryInfo {
         Sierra_MC8790(SupportedUsbModemInfo.Sierra_MC8790, SierraMc87xxModemFactory.class, SierraMc87xxConfigGenerator.class),
         Sierra_USB598(SupportedUsbModemInfo.Sierra_USB598, SierraUsb598ModemFactory.class, SierraUsb598ConfigGenerator.class),
         Ublox_SARA_U2(SupportedUsbModemInfo.Ublox_SARA_U2, UbloxModemFactory.class, HspaModemConfigGenerator.class),
-        Quectel_EC25(SupportedUsbModemInfo.Quectel_EC25, QuectelEC25ModemFactory.class, QuectelEC25ConfigGenerator.class);
+        Quectel_EC25(SupportedUsbModemInfo.Quectel_EC25, QuectelEC25ModemFactory.class, QuectelEC25ConfigGenerator.class),
 		Quectel_BG96(SupportedUsbModemInfo.Quectel_BG96, QuectelBG96ModemFactory.class, QuectelBG96ConfigGenerator.class);
 
         private final SupportedUsbModemInfo m_usbModemInfo;

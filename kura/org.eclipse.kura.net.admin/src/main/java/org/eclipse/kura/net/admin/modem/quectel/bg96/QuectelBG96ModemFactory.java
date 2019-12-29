@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2019 Sterwen-Technology
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Sterwen-Technology
  *******************************************************************************/
 package org.eclipse.kura.net.admin.modem.quectel.bg96;
 
@@ -26,7 +27,6 @@ import org.osgi.util.tracker.ServiceTracker;
 /**
  * Defines Quectel BG96 Modem Factory
  *
- * @author ilya.binshtok
  *
  */
 public class QuectelBG96ModemFactory extends AbstractCellularModemFactory<QuectelBG96> {
@@ -62,16 +62,16 @@ public class QuectelBG96ModemFactory extends AbstractCellularModemFactory<Quecte
     public CellularModem obtainCellularModemService(ModemDevice modemDevice, String platform) throws Exception {
 
         String key = modemDevice.getProductName();
-        QuectelBG96 quectelEc25 = this.m_modemServices.get(key);
+        QuectelBG96 quectelBg96 = this.m_modemServices.get(key);
 
-        if (quectelEc25 == null) {
-            quectelEc25 = new QuectelBG96(modemDevice, platform, this.connectionFactory);
-            this.m_modemServices.put(key, quectelEc25);
+        if (quectelBg96 == null) {
+            quectelBg96 = new QuectelBG96(modemDevice, platform, this.connectionFactory);
+            this.m_modemServices.put(key, quectelBg96);
         } else {
-            quectelEc25.setModemDevice(modemDevice);
+            quectelBg96.setModemDevice(modemDevice);
         }
 
-        return quectelEc25;
+        return quectelBg96;
     }
 
     @Override

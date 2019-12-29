@@ -1,5 +1,6 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
+ * 				2019 Sterwen-Technology
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,6 +9,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Sterwen-Technology for Quectel Modems
  *******************************************************************************/
 package org.eclipse.kura.linux.net.modem;
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2019 Sterwen Technology
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -26,12 +26,11 @@ import org.osgi.util.tracker.ServiceTracker;
 /**
  * Defines Quectel EC25 Modem Factory
  *
- * @author ilya.binshtok
  *
  */
 public class QuectelEC25ModemFactory implements CellularModemFactory {
 
-    // private static final Logger s_logger = LoggerFactory.getLogger(TelitHe910ModemFactory.class);
+    private static final Logger logger = LoggerFactory.getLogger(TelitHe910ModemFactory.class);
 
     private static QuectelEC25ModemFactory s_factoryInstance = null;
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2019 Sterwen-Technology
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Sterwen-Technology
  *******************************************************************************/
 package org.eclipse.kura.net.admin.modem.quectel.bg96;
 
@@ -36,12 +37,12 @@ import org.slf4j.LoggerFactory;
  */
 public class QuectelBG96 extends HspaModem implements HspaCellularModem {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(QuectelBG96.class);
+    private static final Logger logger = LoggerFactory.getLogger(QuectelBG96.class);
 
-    private final int m_pdpContext = 1;
+    private final int pdpContext = 1;
 
     /**
-     * TelitHe910 modem constructor
+     * Quectel BG96 modem constructor
      *
      * @param usbDevice
      *            - modem USB device as {@link UsbModemDevice}
@@ -68,14 +69,14 @@ public class QuectelBG96 extends HspaModem implements HspaCellularModem {
                     this.gpsSupported = isGpsSupported();
                     this.rssi = getSignalStrength();
 
-                    s_logger.trace("{} :: Serial Number={}", getClass().getName(), this.serialNumber);
-                    s_logger.trace("{} :: IMSI={}", getClass().getName(), this.imsi);
-                    s_logger.trace("{} :: ICCID={}", getClass().getName(), this.iccid);
-                    s_logger.trace("{} :: Model={}", getClass().getName(), this.model);
-                    s_logger.trace("{} :: Manufacturer={}", getClass().getName(), this.manufacturer);
-                    s_logger.trace("{} :: Revision ID={}", getClass().getName(), this.revisionId);
-                    s_logger.trace("{} :: GPS Supported={}", getClass().getName(), this.gpsSupported);
-                    s_logger.trace("{} :: RSSI={}", getClass().getName(), this.rssi);
+                    logger.trace("{} :: Serial Number={}", getClass().getName(), this.serialNumber);
+                    logger.trace("{} :: IMSI={}", getClass().getName(), this.imsi);
+                    logger.trace("{} :: ICCID={}", getClass().getName(), this.iccid);
+                    logger.trace("{} :: Model={}", getClass().getName(), this.model);
+                    logger.trace("{} :: Manufacturer={}", getClass().getName(), this.manufacturer);
+                    logger.trace("{} :: Revision ID={}", getClass().getName(), this.revisionId);
+                    logger.trace("{} :: GPS Supported={}", getClass().getName(), this.gpsSupported);
+                    logger.trace("{} :: RSSI={}", getClass().getName(), this.rssi);
                 }
             }
         } catch (KuraException e) {
@@ -96,7 +97,7 @@ public class QuectelBG96 extends HspaModem implements HspaCellularModem {
         }
 
         synchronized (this.atLock) {
-            s_logger.debug("sendCommand getSimStatus :: {} command to port {}",
+            logger.debug("sendCommand getSimStatus :: {} command to port {}",
                     QuectelBG96AtCommands.getSimStatus.getCommand(), port);
             byte[] reply = null;
             CommConnection commAtConnection = null;
@@ -118,28 +119,6 @@ public class QuectelBG96 extends HspaModem implements HspaCellularModem {
                     }
                 }
 
-                if (!simReady) {
-                    // reply = commAtConnection.sendCommand(
-                    // QuectelBG96AtCommands.simulateSimNotInserted.getCommand().getBytes(), 1000, 100);
-                    // if (reply != null) {
-                    // sleep(5000);
-                    // reply = commAtConnection.sendCommand(
-                    // QuectelBG96AtCommands.simulateSimInserted.getCommand().getBytes(), 1000, 100);
-                    // if (reply != null) {
-                    // sleep(1000);
-                    // reply = commAtConnection
-                    // .sendCommand(QuectelBG96AtCommands.getSimStatus.getCommand().getBytes(), 1000, 100);
-                    //
-                    // if (reply != null) {
-                    // String simStatus = getResponseString(reply);
-                    // String[] simStatusSplit = simStatus.split(",");
-                    // if (simStatusSplit.length > 1 && Integer.valueOf(simStatusSplit[1]) > 0) {
-                    // simReady = true;
-                    // }
-                    // }
-                    // }
-                    // }
-                }
             } catch (IOException e) {
                 throw new KuraException(KuraErrorCode.UNAVAILABLE_DEVICE, e);
             } catch (KuraException e) {
@@ -156,7 +135,7 @@ public class QuectelBG96 extends HspaModem implements HspaCellularModem {
 
         ModemRegistrationStatus modemRegistrationStatus = ModemRegistrationStatus.UNKNOWN;
         synchronized (this.atLock) {
-            s_logger.debug("sendCommand getRegistrationStatus :: {}",
+            logger.debug("sendCommand getRegistrationStatus :: {}",
                     QuectelBG96AtCommands.getRegistrationStatus.getCommand());
             byte[] reply = null;
             CommConnection commAtConnection = openSerialPort(getAtPort());
@@ -203,7 +182,7 @@ public class QuectelBG96 extends HspaModem implements HspaCellularModem {
 
         long txCnt = 0;
         synchronized (this.atLock) {
-            s_logger.debug("sendCommand getGprsSessionDataVolume :: {}",
+            logger.debug("sendCommand getGprsSessionDataVolume :: {}",
                     QuectelBG96AtCommands.getGprsSessionDataVolume.getCommand());
             byte[] reply = null;
             CommConnection commAtConnection = openSerialPort(getAtPort());
@@ -231,7 +210,7 @@ public class QuectelBG96 extends HspaModem implements HspaCellularModem {
                             splitData = pdp.trim().split(",");
                             if (splitData.length >= 4) {
                                 int pdpNo = Integer.parseInt(splitData[0]);
-                                if (pdpNo == this.m_pdpContext) {
+                                if (pdpNo == this.pdpContext) {
                                     txCnt = Integer.parseInt(splitData[2]);
                                 }
                             }
@@ -248,7 +227,7 @@ public class QuectelBG96 extends HspaModem implements HspaCellularModem {
     public long getCallRxCounter() throws KuraException {
         long rxCnt = 0;
         synchronized (this.atLock) {
-            s_logger.debug("sendCommand getGprsSessionDataVolume :: {}",
+            logger.debug("sendCommand getGprsSessionDataVolume :: {}",
                     QuectelBG96AtCommands.getGprsSessionDataVolume.getCommand());
             byte[] reply = null;
             CommConnection commAtConnection = openSerialPort(getAtPort());
@@ -276,7 +255,7 @@ public class QuectelBG96 extends HspaModem implements HspaCellularModem {
                             splitData = pdp.trim().split(",");
                             if (splitData.length >= 4) {
                                 int pdpNo = Integer.parseInt(splitData[0]);
-                                if (pdpNo == this.m_pdpContext) {
+                                if (pdpNo == this.pdpContext) {
                                     rxCnt = Integer.parseInt(splitData[3]);
                                 }
                             }
@@ -293,7 +272,7 @@ public class QuectelBG96 extends HspaModem implements HspaCellularModem {
     public String getServiceType() throws KuraException {
         String serviceType = null;
         synchronized (this.atLock) {
-            s_logger.debug("sendCommand getMobileStationClass :: {}",
+            logger.debug("sendCommand getMobileStationClass :: {}",
                     QuectelBG96AtCommands.getMobileStationClass.getCommand());
             byte[] reply = null;
             CommConnection commAtConnection = openSerialPort(getAtPort());
@@ -364,12 +343,12 @@ public class QuectelBG96 extends HspaModem implements HspaCellularModem {
 
     @Override
     public void enableGps() throws KuraException {
-        s_logger.warn("Modem GPS not supported");
+        logger.warn("Modem GPS not supported");
     }
 
     @Override
     public void disableGps() throws KuraException {
-        s_logger.warn("Modem GPS not supported");
+        logger.warn("Modem GPS not supported");
     }
 
 }

@@ -85,26 +85,16 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
         }
     }
 
-    /**
-     * Unbinds the Wire Helper Service.
-     *
-     * @param wireHelperService
-     *            the new Wire Helper Service
-     */
-    public void unbindWireHelperService(final WireHelperService wireHelperService) {
-        if (this.wireHelperService == wireHelperService) {
-            this.wireHelperService = null;
-        }
-    }
-
     public void setCloudSubscriber(org.eclipse.kura.cloudconnection.subscriber.CloudSubscriber cloudSubscriber) {
         this.cloudSubscriber = cloudSubscriber;
         this.cloudSubscriber.registerCloudSubscriberListener(CloudSubscriber.this);
     }
 
     public void unsetCloudSubscriber(org.eclipse.kura.cloudconnection.subscriber.CloudSubscriber cloudSubscriber) {
-        this.cloudSubscriber.unregisterCloudSubscriberListener(CloudSubscriber.this);
-        this.cloudSubscriber = null;
+        cloudSubscriber.unregisterCloudSubscriberListener(CloudSubscriber.this);
+        if (this.cloudSubscriber == cloudSubscriber) {
+            this.cloudSubscriber = null;
+        }
     }
 
     // ----------------------------------------------------------------
@@ -126,7 +116,7 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
         this.wireSupport = this.wireHelperService.newWireSupport(this,
                 (ServiceReference<WireComponent>) componentContext.getServiceReference());
 
-        options = new CloudSubscriberOptions(properties);
+        this.options = new CloudSubscriberOptions(properties);
         logger.debug("Activating Cloud Subscriber Wire Component... Done");
     }
 
@@ -139,7 +129,7 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
     public void updated(final Map<String, Object> properties) {
         logger.debug("Updating Cloud Subscriber Wire Component...");
 
-        options = new CloudSubscriberOptions(properties);
+        this.options = new CloudSubscriberOptions(properties);
 
         logger.debug("Updating Cloud Subscriber Wire Component... Done");
     }
@@ -200,7 +190,7 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
         final Optional<String> bodyProperty = this.options.getBodyProperty();
 
         if (bodyProperty.isPresent()) {
-            emitBody(wireProperties, payload, bodyProperty.get(), options.getBodyPropertyType());
+            emitBody(wireProperties, payload, bodyProperty.get(), this.options.getBodyPropertyType());
         }
 
         final WireRecord wireRecord = new WireRecord(wireProperties);

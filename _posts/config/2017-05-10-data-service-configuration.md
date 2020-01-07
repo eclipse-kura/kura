@@ -43,6 +43,13 @@ The DataService offers methods and configuration options to manage the connectio
 - **enable.rate.limit** - Enables the token bucket message rate limiting.
 
 - **rate.limit.average** - The average message publishing rate. It is intended as the number of messages per unit of time.
+  
+{% include alerts.html message="The maximum allowed message rate is **1 message per millisecond**, so the following limitations are applied:
+
+- 86400000 per DAY
+- 3600000 per HOUR
+- 60000 messages per MINUTE
+- 1000 messages per SECOND" %}
 
 - **rate.limit.time.unit** - The time unit for the rate.limit.average.
 

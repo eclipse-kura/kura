@@ -482,7 +482,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
             boolean hostnameVerification) throws NoSuchAlgorithmException, KeyManagementException {
         // inits the SSL context
         SSLContext sslCtx;
-        if (protocol == null) {
+        if (protocol == null || protocol.isEmpty()) {
             sslCtx = SSLContext.getDefault();
         } else {
             sslCtx = SSLContext.getInstance(protocol);

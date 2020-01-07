@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+    Copyright (c) 2011, 2018 Eurotech and/or its affiliates
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -25,7 +25,7 @@
             cardinality="0"
             required="false"
             default="TLSv1.2"
-            description="The protocol to use to initialize the SSLContext. If not specified, TLSv1 will be used."/>
+            description="The protocol to use to initialize the SSLContext. If not specified, the default JVM SSL Context will be used."/>
 
         <AD id="ssl.hostname.verification"
         	name="ssl.hostname.verification"

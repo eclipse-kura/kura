@@ -139,7 +139,7 @@
             required="true"
             default="1"
             min="1"
-            description="The average message publish rate in number of messages per unit of time. (e.g. 10 messages per MINUTE)"/>
+            description="The average message publish rate in number of messages per unit of time (e.g. 10 messages per MINUTE). The maximum rate is 1000 messages per SECOND."/>
         
         <AD id="rate.limit.time.unit"
             name="Rate Limit Time Unit"

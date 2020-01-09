@@ -59,11 +59,6 @@ public class DeviceSnapshotsServlet extends HttpServlet {
 
         String snapshotId = request.getParameter("snapshotId");
 
-        response.setCharacterEncoding("UTF-8");
-        response.setContentType("application/xml");
-        response.setHeader("Content-Disposition", "attachment; filename=snapshot_" + snapshotId + ".xml");
-        response.setHeader("Cache-Control", "no-transform, max-age=0");
-
         try (PrintWriter writer = response.getWriter();) {
 
             ServiceLocator locator = ServiceLocator.getInstance();
@@ -84,6 +79,12 @@ public class DeviceSnapshotsServlet extends HttpServlet {
                 //
                 // marshall the response and write it
                 String result = marshal(xmlConfigs);
+
+                response.setCharacterEncoding("UTF-8");
+                response.setContentType("application/xml");
+                response.setHeader("Content-Disposition", "attachment; filename=snapshot_" + sid + ".xml");
+                response.setHeader("Cache-Control", "no-transform, max-age=0");
+
                 writer.write(result);
 
                 auditLogger.info(
@@ -91,7 +92,7 @@ public class DeviceSnapshotsServlet extends HttpServlet {
                         session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId(), snapshotId);
             }
         } catch (Exception e) {
-            logger.error("Error creating Excel export");
+            logger.error("Error exporting snapshot");
             auditLogger.warn("UI Snapshots - Failure - Failed to export device snapshot for user: {}, session: {}",
                     session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId(), e);
             throw new ServletException(e);

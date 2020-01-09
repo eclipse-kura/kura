@@ -41,6 +41,5 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Service-Component: OSGI-INF/*.xml
 Bundle-ClassPath: lib/quartz-2.2.3.jar,
- .,
- lib/quartz-jobs-2.2.3.jar
+ .
 Export-Package: org.eclipse.kura.internal.wire.asset;version="1.0.0"

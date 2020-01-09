@@ -239,7 +239,7 @@ public class TimerTest {
             final int finalCount = count.get();
 
             assertTrue("count should be at least 9 but was " + finalCount, finalCount >= 9);
-            assertTrue("count should be at most 11 but was " + finalCount, finalCount <= 11);
+            assertTrue("count should be at most 12 but was " + finalCount, finalCount <= 12);
         }
 
     }

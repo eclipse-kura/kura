@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     3 PORT d.o.o.
  *******************************************************************************/
 package org.eclipse.kura.net.admin.modem;
 
@@ -23,6 +24,8 @@ import org.eclipse.kura.net.admin.modem.sierra.mc87xx.SierraMc87xxConfigGenerato
 import org.eclipse.kura.net.admin.modem.sierra.mc87xx.SierraMc87xxModemFactory;
 import org.eclipse.kura.net.admin.modem.sierra.usb598.SierraUsb598ConfigGenerator;
 import org.eclipse.kura.net.admin.modem.sierra.usb598.SierraUsb598ModemFactory;
+import org.eclipse.kura.net.admin.modem.simtech.sim7000.SimTechSim7000ConfigGenerator;
+import org.eclipse.kura.net.admin.modem.simtech.sim7000.SimTechSim7000ModemFactory;
 import org.eclipse.kura.net.admin.modem.telit.de910.TelitDe910ConfigGenerator;
 import org.eclipse.kura.net.admin.modem.telit.de910.TelitDe910ModemFactory;
 import org.eclipse.kura.net.admin.modem.telit.he910.TelitHe910ConfigGenerator;
@@ -52,6 +55,7 @@ public class SupportedUsbModemsFactoryInfo {
         Sierra_USB598(SupportedUsbModemInfo.Sierra_USB598, SierraUsb598ModemFactory.class, SierraUsb598ConfigGenerator.class),
         Ublox_SARA_U2(SupportedUsbModemInfo.Ublox_SARA_U2, UbloxModemFactory.class, UbloxModemConfigGenerator.class),
         Zte_ME3630(SupportedUsbModemInfo.Zte_ME3630, ZteMe3630ModemFactory.class, ZteMe3630ConfigGenerator.class),
+        SimTech_SIM7000(SupportedUsbModemInfo.SimTech_SIM7000, SimTechSim7000ModemFactory.class, SimTechSim7000ConfigGenerator.class),
         QUECTEL_EG25(SupportedUsbModemInfo.QUECTEL_EG25, QuectelEG25ModemFactory.class, QuectelEG25ConfigGenerator.class),
         HUAWEI_MS2372(SupportedUsbModemInfo.HUAWEI_MS2372, HuaweiModemFactory.class, HspaModemConfigGenerator.class);
 

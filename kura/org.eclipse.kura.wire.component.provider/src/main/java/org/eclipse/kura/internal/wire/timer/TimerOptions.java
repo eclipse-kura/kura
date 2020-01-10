@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -9,7 +9,7 @@
  * Contributors:
  *  Eurotech
  *  Amit Kumar Mondal
- *  
+ *
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.timer;
 
@@ -18,6 +18,8 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import org.eclipse.kura.configuration.ConfigurationService;
 
 /**
  * The Class TimerOptions is responsible to contain all the Timer related
@@ -88,6 +90,10 @@ final class TimerOptions {
             type = (String) timerType;
         }
         return type;
+    }
+
+    String getOwnPid() {
+        return (String) this.properties.get(ConfigurationService.KURA_SERVICE_PID);
     }
 
     long getSimpleTimeUnitMultiplier() throws IllegalArgumentException {

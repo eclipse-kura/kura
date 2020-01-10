@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2017, 2018 Eurotech and/or its affiliates and others
+    Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -40,6 +40,7 @@
                     <providerHint>junit4</providerHint>
                     <useUnlimitedThreads>false</useUnlimitedThreads>
                     <argLine>${tycho.argline}
+                    	-Dosgi.console=5002
                         -DbuildingWithTycho=true -Dosgi.locking=none
                         -Dds.showtrace=true -Djava.io.tmpdir=/tmp
                         -Dorg.osgi.framework.storage=/tmp/osgi/framework_storage
@@ -48,7 +49,7 @@
                         -Dkura.snapshots=${project.basedir}/target/
                         -Dkura.configuration=file:${kura.basedir}/emulator/org.eclipse.kura.emulator/src/main/resources/kura.properties
                         -Ddpa.configuration=/tmp/kura/dpa.properties</argLine>
-                    <appArgLine>-consoleLog -console 1450</appArgLine>
+                    <appArgLine>-consoleLog -console 5002</appArgLine>
                     <bundleStartLevel>
                         <bundle>
                             <id>org.eclipse.equinox.ds</id>
@@ -102,6 +103,11 @@
                         </bundle>
                         <bundle>
                             <id>org.eclipse.equinox.util</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.eclipse.equinox.wireadmin</id>
                             <level>4</level>
                             <autoStart>true</autoStart>
                         </bundle>
@@ -191,13 +197,33 @@
                             <autoStart>true</autoStart>
                         </bundle>
                         <bundle>
-                            <id>org.eclipse.kura.json.marshaller.unmarshaller.provider</id>
+                            <id>org.eclipse.kura.wire.provider</id>
                             <level>4</level>
                             <autoStart>true</autoStart>
                         </bundle>
                         <bundle>
+                            <id>org.eclipse.kura.json.marshaller.unmarshaller.provider</id>
+                            <level>3</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
                             <id>org.eclipse.kura.xml.marshaller.unmarshaller.provider</id>
-                            <level>4</level>
+                            <level>3</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.apache.felix.gogo.shell</id>
+                            <level>3</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.apache.felix.gogo.runtime</id>
+                            <level>3</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.apache.felix.gogo.command</id>
+                            <level>3</level>
                             <autoStart>true</autoStart>
                         </bundle>
                     </bundleStartLevel>
@@ -276,11 +302,27 @@
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>
+                            <artifactId>org.eclipse.equinox.wireadmin</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
                             <artifactId>org.junit</artifactId>
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>
                             <artifactId>org.apache.commons.io</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>org.apache.felix.gogo.shell</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>org.apache.felix.gogo.runtime</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>org.apache.felix.gogo.command</artifactId>
                         </dependency>
                     </dependencies>
                 </configuration>
@@ -330,6 +372,16 @@
                             <requirement>
                                 <type>eclipse-plugin</type>
                                 <id>org.eclipse.kura.wire.helper.provider</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>eclipse-plugin</type>
+                                <id>org.eclipse.kura.wire.provider</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>eclipse-plugin</type>
+                                <id>org.eclipse.kura.json.marshaller.unmarshaller.provider</id>
                                 <versionRange>0.0.0</versionRange>
                             </requirement>
                             <requirement>

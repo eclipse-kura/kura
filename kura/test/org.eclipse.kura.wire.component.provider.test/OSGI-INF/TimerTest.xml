@@ -1,22 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright (c) 2019 Eurotech and/or its affiliates and others All rights 
-	reserved. This program and the accompanying materials are made available 
-	under the terms of the Eclipse Public License v1.0 which accompanies this 
-	distribution, and is available at http://www.eclipse.org/legal/epl-v10.html -->
+<!--
+
+Copyright (c) 2020 Eurotech and/or its affiliates and others
+
+  All rights reserved. This program and the accompanying materials
+  are made available under the terms of the Eclipse Public License v1.0
+  which accompanies this distribution, and is available at
+  http://www.eclipse.org/legal/epl-v10.html
+
+-->
 <scr:component
 	xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
 	activate="activate"
-	enabled="true" 
+	enabled="true"
 	immediate="true"
 	name="org.eclipse.kura.internal.wire.timer.test.TimerTest">
 	<implementation class="org.eclipse.kura.internal.wire.timer.test.TimerTest" />
-	<reference 
+	<reference
 	    bind="bindWireGraphService"
 	    cardinality="1..1"
 		interface="org.eclipse.kura.wire.graph.WireGraphService"
 		name="WireGraphService"
 		policy="static" />
-	<reference 
+	<reference
 	    bind="bindConfigurationService"
 	    cardinality="1..1"
 		interface="org.eclipse.kura.configuration.ConfigurationService"

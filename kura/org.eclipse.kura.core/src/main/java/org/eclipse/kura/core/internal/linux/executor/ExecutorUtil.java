@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2019, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -27,9 +27,9 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.apache.commons.exec.CommandLine;
-import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteException;
 import org.apache.commons.exec.ExecuteWatchdog;
+import org.apache.commons.exec.Executor;
 import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.commons.exec.environment.EnvironmentUtils;
 import org.apache.commons.io.output.NullOutputStream;
@@ -39,6 +39,7 @@ import org.eclipse.kura.core.linux.executor.LinuxResultHandler;
 import org.eclipse.kura.core.linux.executor.LinuxSignal;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandStatus;
+import org.eclipse.kura.executor.ExecutorFactory;
 import org.eclipse.kura.executor.Pid;
 import org.eclipse.kura.executor.Signal;
 import org.slf4j.Logger;
@@ -51,41 +52,46 @@ public class ExecutorUtil {
     private static final String FAILED_TO_GET_PID_MESSAGE = "Failed to get pid for command '{}'";
     private static final File TEMP_DIR = new File(System.getProperty("java.io.tmpdir"));
 
-    private static String commandUsername = "kura";
+    private String commandUsername = "kura";
+    private ExecutorFactory executorFactory;
 
-    private ExecutorUtil() {
-        // Empty private constructor
+    public ExecutorUtil() {
+        this.executorFactory = new DefaultExecutorFactory();
     }
 
-    public static String getCommandUsername() {
+    public void setExecutorFactory(ExecutorFactory executorFactory) {
+        this.executorFactory = executorFactory;
+    }
+
+    public String getCommandUsername() {
         return commandUsername;
     }
 
-    public static void setCommandUsername(String commandUsername) {
-        ExecutorUtil.commandUsername = commandUsername;
+    public void setCommandUsername(String commandUsername) {
+        this.commandUsername = commandUsername;
     }
 
-    public static CommandStatus executeUnprivileged(Command command) {
-        CommandLine commandLine = buildUnprivilegedCommand(command);
+    public CommandStatus executeUnprivileged(Command command) {
+        CommandLine commandLine = buildUnprivilegedCommand(command, this.commandUsername);
         return executeSync(command, commandLine);
     }
 
-    public static void executeUnprivileged(Command command, Consumer<CommandStatus> callback) {
-        CommandLine commandLine = buildUnprivilegedCommand(command);
+    public void executeUnprivileged(Command command, Consumer<CommandStatus> callback) {
+        CommandLine commandLine = buildUnprivilegedCommand(command, this.commandUsername);
         executeAsync(command, commandLine, callback);
     }
 
-    public static CommandStatus executePrivileged(Command command) {
+    public CommandStatus executePrivileged(Command command) {
         CommandLine commandLine = buildPrivilegedCommand(command);
         return executeSync(command, commandLine);
     }
 
-    public static void executePrivileged(Command command, Consumer<CommandStatus> callback) {
+    public void executePrivileged(Command command, Consumer<CommandStatus> callback) {
         CommandLine commandLine = buildPrivilegedCommand(command);
         executeAsync(command, commandLine, callback);
     }
 
-    public static boolean stopUnprivileged(Pid pid, Signal signal) {
+    public boolean stopUnprivileged(Pid pid, Signal signal) {
         boolean isStopped = true;
         if (isRunning(pid)) {
             Command killCommand = new Command(buildKillCommand(pid, signal));
@@ -97,7 +103,7 @@ public class ExecutorUtil {
         return isStopped;
     }
 
-    public static boolean killUnprivileged(String[] commandLine, Signal signal) {
+    public boolean killUnprivileged(String[] commandLine, Signal signal) {
         boolean isKilled = true;
         Map<String, Pid> pids = getPids(commandLine);
         for (Pid pid : pids.values()) {
@@ -106,7 +112,7 @@ public class ExecutorUtil {
         return isKilled;
     }
 
-    public static boolean stopPrivileged(Pid pid, Signal signal) {
+    public boolean stopPrivileged(Pid pid, Signal signal) {
         boolean isStopped = true;
         if (isRunning(pid)) {
             Command killCommand = new Command(buildKillCommand(pid, signal));
@@ -118,7 +124,7 @@ public class ExecutorUtil {
         return isStopped;
     }
 
-    public static boolean killPrivileged(String[] commandLine, Signal signal) {
+    public boolean killPrivileged(String[] commandLine, Signal signal) {
         boolean isKilled = true;
         Map<String, Pid> pids = getPids(commandLine);
         for (Pid pid : pids.values()) {
@@ -127,12 +133,12 @@ public class ExecutorUtil {
         return isKilled;
     }
 
-    public static boolean isRunning(Pid pid) {
+    public boolean isRunning(Pid pid) {
         boolean isRunning = false;
         String pidString = ((Integer) pid.getPid()).toString();
         String psCommand = "ps -p " + pidString;
         CommandLine commandLine = CommandLine.parse(psCommand);
-        DefaultExecutor executor = new DefaultExecutor();
+        Executor executor = this.executorFactory.getExecutor();
 
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
         final ByteArrayOutputStream err = new ByteArrayOutputStream();
@@ -153,15 +159,15 @@ public class ExecutorUtil {
         return isRunning;
     }
 
-    public static boolean isRunning(String[] commandLine) {
+    public boolean isRunning(String[] commandLine) {
         return !getPids(commandLine).isEmpty();
     }
 
-    public static Map<String, Pid> getPids(String[] commandLine) {
+    public Map<String, Pid> getPids(String[] commandLine) {
         Map<String, Pid> pids = new HashMap<>();
         CommandLine psCommandLine = new CommandLine("ps");
         psCommandLine.addArgument("-ax");
-        DefaultExecutor executor = new DefaultExecutor();
+        Executor executor = this.executorFactory.getExecutor();
 
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
         final ByteArrayOutputStream err = new ByteArrayOutputStream();
@@ -187,16 +193,18 @@ public class ExecutorUtil {
         String pid;
         String[] output = new String(out.toByteArray(), UTF_8).split("\n");
         for (String line : output) {
-            StringTokenizer st = new StringTokenizer(line);
-            pid = st.nextToken();
-            st.nextElement();
-            st.nextElement();
-            st.nextElement();
+            if (!line.isEmpty()) {
+                StringTokenizer st = new StringTokenizer(line);
+                pid = st.nextToken();
+                st.nextElement();
+                st.nextElement();
+                st.nextElement();
 
-            // get the remainder of the line showing the command that was issued
-            line = line.substring(line.indexOf(st.nextToken()));
-            if (checkLine(line, commandLine)) {
-                pids.put(line, Integer.parseInt(pid));
+                // get the remainder of the line showing the command that was issued
+                line = line.substring(line.indexOf(st.nextToken()));
+                if (checkLine(line, commandLine)) {
+                    pids.put(line, Integer.parseInt(pid));
+                }
             }
         }
         // Sort pids in reverse order (useful when stop processes...)
@@ -209,13 +217,13 @@ public class ExecutorUtil {
         return Arrays.stream(tokens).parallel().allMatch(line::contains);
     }
 
-    private static CommandStatus executeSync(Command command, CommandLine commandLine) {
+    private CommandStatus executeSync(Command command, CommandLine commandLine) {
         CommandStatus commandStatus = new CommandStatus(new LinuxExitValue(0));
         commandStatus.setOutputStream(command.getOutputStream());
         commandStatus.setErrorStream(command.getErrorStream());
         commandStatus.setInputStream(command.getInputStream());
 
-        DefaultExecutor executor = configureExecutor(command);
+        Executor executor = configureExecutor(command);
 
         int exitStatus = 0;
         logger.debug("Executing: {}", commandLine);
@@ -242,8 +250,8 @@ public class ExecutorUtil {
         return commandStatus;
     }
 
-    private static DefaultExecutor configureExecutor(Command command) {
-        DefaultExecutor executor = new DefaultExecutor();
+    private Executor configureExecutor(Command command) {
+        Executor executor = this.executorFactory.getExecutor();
         int timeout = command.getTimeout();
         ExecuteWatchdog watchdog = timeout == -1 ? new ExecuteWatchdog(ExecuteWatchdog.INFINITE_TIMEOUT)
                 : new ExecuteWatchdog(timeout * 1000L);
@@ -270,13 +278,13 @@ public class ExecutorUtil {
         return executor;
     }
 
-    private static void executeAsync(Command command, CommandLine commandLine, Consumer<CommandStatus> callback) {
+    private void executeAsync(Command command, CommandLine commandLine, Consumer<CommandStatus> callback) {
         CommandStatus commandStatus = new CommandStatus(new LinuxExitValue(0));
         commandStatus.setOutputStream(command.getOutputStream());
         commandStatus.setErrorStream(command.getErrorStream());
         commandStatus.setInputStream(command.getInputStream());
 
-        DefaultExecutor executor = configureExecutor(command);
+        Executor executor = this.executorFactory.getExecutor();
 
         LinuxResultHandler resultHandler = new LinuxResultHandler(callback);
         resultHandler.setStatus(commandStatus);
@@ -305,14 +313,14 @@ public class ExecutorUtil {
         return new String[] { "kill", "-" + signal.getSignalNumber(), String.valueOf(pidNumber) };
     }
 
-    private static CommandLine buildUnprivilegedCommand(Command command) {
+    private static CommandLine buildUnprivilegedCommand(Command command, String commandUsername) {
         // Build the command as follows:
         // sudo -u <command_user> -s VARS... timeout -s <signal> <timeout> sh -c "<command>"
         // or sudo -u <command_user> -s VARS... sh -c "<command>"
         // The timeout command is added because the commons-exec fails to destroy a process started by sudo
         CommandLine commandLine = new CommandLine("sudo");
         commandLine.addArgument("-u");
-        commandLine.addArgument(ExecutorUtil.commandUsername);
+        commandLine.addArgument(commandUsername);
         commandLine.addArgument("-s");
 
         Map<String, String> env = command.getEnvironment();

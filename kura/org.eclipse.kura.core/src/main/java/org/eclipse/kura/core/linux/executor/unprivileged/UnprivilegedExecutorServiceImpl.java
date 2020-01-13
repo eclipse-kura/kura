@@ -23,6 +23,7 @@ import org.eclipse.kura.core.linux.executor.LinuxExitValue;
 import org.eclipse.kura.core.linux.executor.LinuxSignal;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandStatus;
+import org.eclipse.kura.executor.ExecutorFactory;
 import org.eclipse.kura.executor.Pid;
 import org.eclipse.kura.executor.Signal;
 import org.eclipse.kura.executor.UnprivilegedExecutorService;
@@ -38,20 +39,33 @@ public class UnprivilegedExecutorServiceImpl implements UnprivilegedExecutorServ
     @SuppressWarnings("unused")
     private ComponentContext ctx;
     private UnprivilegedExecutorServiceOptions options;
+    private ExecutorUtil executorUtil;
+
+    public UnprivilegedExecutorServiceImpl() {
+        this.executorUtil = new ExecutorUtil();
+    }
 
     protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
         logger.info("activate...");
 
         this.ctx = componentContext;
         this.options = new UnprivilegedExecutorServiceOptions(properties);
-        ExecutorUtil.setCommandUsername(this.options.getCommandUsername());
+        this.executorUtil.setCommandUsername(this.options.getCommandUsername());
+        this.executorUtil = new ExecutorUtil();
     }
 
     public void update(Map<String, Object> properties) {
         logger.info("updated...");
 
         this.options = new UnprivilegedExecutorServiceOptions(properties);
-        ExecutorUtil.setCommandUsername(this.options.getCommandUsername());
+        this.executorUtil.setCommandUsername(this.options.getCommandUsername());
+    }
+
+    @Override
+    public void setExecutorFactory(ExecutorFactory executorFactory) {
+        if (this.executorUtil != null) {
+            this.executorUtil.setExecutorFactory(executorFactory);
+        }
     }
 
     protected void deactivate(ComponentContext componentContext) {
@@ -67,7 +81,7 @@ public class UnprivilegedExecutorServiceImpl implements UnprivilegedExecutorServ
         if (command.getSignal() == null) {
             command.setSignal(DEFAULT_SIGNAL);
         }
-        return ExecutorUtil.executeUnprivileged(command);
+        return this.executorUtil.executeUnprivileged(command);
     }
 
     @Override
@@ -78,16 +92,16 @@ public class UnprivilegedExecutorServiceImpl implements UnprivilegedExecutorServ
         if (command.getSignal() == null) {
             command.setSignal(DEFAULT_SIGNAL);
         }
-        ExecutorUtil.executeUnprivileged(command, callback);
+        this.executorUtil.executeUnprivileged(command, callback);
     }
 
     @Override
     public boolean stop(Pid pid, Signal signal) {
         boolean isStopped = false;
         if (signal == null) {
-            isStopped = ExecutorUtil.stopUnprivileged(pid, DEFAULT_SIGNAL);
+            isStopped = this.executorUtil.stopUnprivileged(pid, DEFAULT_SIGNAL);
         } else {
-            isStopped = ExecutorUtil.stopUnprivileged(pid, signal);
+            isStopped = this.executorUtil.stopUnprivileged(pid, signal);
         }
         return isStopped;
     }
@@ -96,26 +110,26 @@ public class UnprivilegedExecutorServiceImpl implements UnprivilegedExecutorServ
     public boolean kill(String[] commandLine, Signal signal) {
         boolean isKilled = false;
         if (signal == null) {
-            isKilled = ExecutorUtil.killUnprivileged(commandLine, DEFAULT_SIGNAL);
+            isKilled = this.executorUtil.killUnprivileged(commandLine, DEFAULT_SIGNAL);
         } else {
-            isKilled = ExecutorUtil.killUnprivileged(commandLine, signal);
+            isKilled = this.executorUtil.killUnprivileged(commandLine, signal);
         }
         return isKilled;
     }
 
     @Override
     public boolean isRunning(Pid pid) {
-        return ExecutorUtil.isRunning(pid);
+        return this.executorUtil.isRunning(pid);
     }
 
     @Override
     public boolean isRunning(String[] commandLine) {
-        return ExecutorUtil.isRunning(commandLine);
+        return this.executorUtil.isRunning(commandLine);
     }
 
     @Override
     public Map<String, Pid> getPids(String[] commandLine) {
-        return ExecutorUtil.getPids(commandLine);
+        return this.executorUtil.getPids(commandLine);
     }
 
     private CommandStatus buildErrorStatus() {

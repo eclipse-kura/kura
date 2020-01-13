@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2019, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -23,6 +23,14 @@ import org.osgi.annotation.versioning.ProviderType;
  */
 @ProviderType
 public interface CommandExecutorService {
+
+    /**
+     * Set the {@link ExecutorFactory} to be used to generate the command executor.
+     * 
+     * @param the
+     *            {@link ExecutorFactory}
+     */
+    public void setExecutorFactory(ExecutorFactory executorFactory);
 
     /**
      * Synchronously executes a system command.

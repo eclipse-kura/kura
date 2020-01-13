@@ -22,6 +22,7 @@ import org.eclipse.kura.core.linux.executor.LinuxExitValue;
 import org.eclipse.kura.core.linux.executor.LinuxSignal;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandStatus;
+import org.eclipse.kura.executor.ExecutorFactory;
 import org.eclipse.kura.executor.Pid;
 import org.eclipse.kura.executor.PrivilegedExecutorService;
 import org.eclipse.kura.executor.Signal;
@@ -33,18 +34,31 @@ public class PrivilegedExecutorServiceImpl implements PrivilegedExecutorService 
 
     private static final Logger logger = LoggerFactory.getLogger(PrivilegedExecutorServiceImpl.class);
     private static final LinuxSignal DEFAULT_SIGNAL = LinuxSignal.SIGTERM;
+    private ExecutorUtil executorUtil;
 
     @SuppressWarnings("unused")
     private ComponentContext ctx;
 
+    public PrivilegedExecutorServiceImpl() {
+        this.executorUtil = new ExecutorUtil();
+    }
+
     protected void activate(ComponentContext componentContext) {
         logger.info("activate...");
         this.ctx = componentContext;
+        this.executorUtil = new ExecutorUtil();
     }
 
     protected void deactivate(ComponentContext componentContext) {
         logger.info("deactivate...");
         this.ctx = null;
+    }
+
+    @Override
+    public void setExecutorFactory(ExecutorFactory executorFactory) {
+        if (this.executorUtil != null) {
+            this.executorUtil.setExecutorFactory(executorFactory);
+        }
     }
 
     @Override
@@ -55,7 +69,7 @@ public class PrivilegedExecutorServiceImpl implements PrivilegedExecutorService 
         if (command.getSignal() == null) {
             command.setSignal(DEFAULT_SIGNAL);
         }
-        return ExecutorUtil.executePrivileged(command);
+        return this.executorUtil.executePrivileged(command);
     }
 
     @Override
@@ -66,16 +80,16 @@ public class PrivilegedExecutorServiceImpl implements PrivilegedExecutorService 
         if (command.getSignal() == null) {
             command.setSignal(DEFAULT_SIGNAL);
         }
-        ExecutorUtil.executePrivileged(command, callback);
+        this.executorUtil.executePrivileged(command, callback);
     }
 
     @Override
     public boolean stop(Pid pid, Signal signal) {
         boolean isStopped = false;
         if (signal == null) {
-            isStopped = ExecutorUtil.stopPrivileged(pid, DEFAULT_SIGNAL);
+            isStopped = this.executorUtil.stopPrivileged(pid, DEFAULT_SIGNAL);
         } else {
-            isStopped = ExecutorUtil.stopPrivileged(pid, signal);
+            isStopped = this.executorUtil.stopPrivileged(pid, signal);
         }
         return isStopped;
     }
@@ -84,26 +98,26 @@ public class PrivilegedExecutorServiceImpl implements PrivilegedExecutorService 
     public boolean kill(String[] commandLine, Signal signal) {
         boolean isKilled = false;
         if (signal == null) {
-            isKilled = ExecutorUtil.killPrivileged(commandLine, DEFAULT_SIGNAL);
+            isKilled = this.executorUtil.killPrivileged(commandLine, DEFAULT_SIGNAL);
         } else {
-            isKilled = ExecutorUtil.killPrivileged(commandLine, signal);
+            isKilled = this.executorUtil.killPrivileged(commandLine, signal);
         }
         return isKilled;
     }
 
     @Override
     public boolean isRunning(Pid pid) {
-        return ExecutorUtil.isRunning(pid);
+        return this.executorUtil.isRunning(pid);
     }
 
     @Override
     public boolean isRunning(String[] commandLine) {
-        return ExecutorUtil.isRunning(commandLine);
+        return this.executorUtil.isRunning(commandLine);
     }
 
     @Override
     public Map<String, Pid> getPids(String[] commandLine) {
-        return ExecutorUtil.getPids(commandLine);
+        return this.executorUtil.getPids(commandLine);
     }
 
     private CommandStatus buildErrorStatus() {

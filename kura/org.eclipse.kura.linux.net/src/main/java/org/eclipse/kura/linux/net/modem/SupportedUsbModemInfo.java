@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     3 PORT d.o.o.
  *******************************************************************************/
 package org.eclipse.kura.linux.net.modem;
 
@@ -43,9 +44,11 @@ public enum SupportedUsbModemInfo {
             .asList(new UsbModemDriver("sierra", "1199", "0025")), ""),
     Ublox_SARA_U2("SARA-U2", "1546", "1102", 7, 0, 1, 0, -1, 5000, 10000, Arrays
             .asList(ModemTechnologyType.HSPA), Arrays.asList(new UsbModemDriver("cdc_acm", "1546", "1102")), ""),
-    Zte_ME3630("ME3630", "19d2", "1476", 3, 0, 2, 2, 1, 5000, 10000, Arrays.asList(ModemTechnologyType.LTE,
+    Zte_ME3630("ME3630", "19d2", "1476", 3, 0, 1, 2, 1, 5000, 10000, Arrays.asList(ModemTechnologyType.LTE,
             ModemTechnologyType.GSM_GPRS,
-            ModemTechnologyType.UMTS), Arrays.asList(new OptionModemDriver("19d2", "1476")), "");
+            ModemTechnologyType.UMTS), Arrays.asList(new OptionModemDriver("19d2", "1476")), ""),
+    SimTech_SIM7000("SIM7000", "1e0e", "9001", 5, 0, 3, 2, 3, 5000, 10000, Arrays.asList(ModemTechnologyType.LTE,
+            ModemTechnologyType.GSM_GPRS), Arrays.asList(new OptionModemDriver("1e0e", "9001")), "");
 
     private String deviceName;
     private String vendorId;

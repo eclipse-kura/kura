@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -670,7 +671,7 @@ public class FileServlet extends HttpServlet {
             String filename = item.getName();
             is = item.getInputStream();
 
-            String filePath = System.getProperty(JAVA_IO_TMPDIR) + File.separator + "bundle.dp";
+            String filePath = System.getProperty(JAVA_IO_TMPDIR) + File.separator + UUID.randomUUID() + ".dp";
 
             localFile = new File(filePath);
             if (localFile.exists()) {

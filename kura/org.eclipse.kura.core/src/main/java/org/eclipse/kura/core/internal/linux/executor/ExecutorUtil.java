@@ -33,7 +33,6 @@ import org.apache.commons.exec.Executor;
 import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.commons.exec.environment.EnvironmentUtils;
 import org.apache.commons.io.output.NullOutputStream;
-import org.eclipse.kura.core.linux.executor.LinuxExitValue;
 import org.eclipse.kura.core.linux.executor.LinuxPid;
 import org.eclipse.kura.core.linux.executor.LinuxResultHandler;
 import org.eclipse.kura.core.linux.executor.LinuxSignal;
@@ -98,7 +97,7 @@ public class ExecutorUtil {
             killCommand.setTimeout(60);
             killCommand.setSignal(signal);
             CommandStatus commandStatus = executeUnprivileged(killCommand);
-            isStopped = (Integer) commandStatus.getExitStatus().getExitValue() == 0;
+            isStopped = commandStatus.getExitStatus() == 0;
         }
         return isStopped;
     }
@@ -119,7 +118,7 @@ public class ExecutorUtil {
             killCommand.setTimeout(60);
             killCommand.setSignal(signal);
             CommandStatus commandStatus = executePrivileged(killCommand);
-            isStopped = (Integer) commandStatus.getExitStatus().getExitValue() == 0;
+            isStopped = commandStatus.getExitStatus() == 0;
         }
         return isStopped;
     }
@@ -135,7 +134,7 @@ public class ExecutorUtil {
 
     public boolean isRunning(Pid pid) {
         boolean isRunning = false;
-        String pidString = ((Integer) pid.getPid()).toString();
+        String pidString = String.valueOf(pid.getPid());
         String psCommand = "ps -p " + pidString;
         CommandLine commandLine = CommandLine.parse(psCommand);
         Executor executor = this.executorFactory.getExecutor();
@@ -218,7 +217,7 @@ public class ExecutorUtil {
     }
 
     private CommandStatus executeSync(Command command, CommandLine commandLine) {
-        CommandStatus commandStatus = new CommandStatus(new LinuxExitValue(0));
+        CommandStatus commandStatus = new CommandStatus(0);
         commandStatus.setOutputStream(command.getOutputStream());
         commandStatus.setErrorStream(command.getErrorStream());
         commandStatus.setInputStream(command.getInputStream());
@@ -243,7 +242,7 @@ public class ExecutorUtil {
             exitStatus = 1;
             logger.error(COMMAND_MESSAGE + " {} failed", commandLine, e);
         } finally {
-            commandStatus.setExitStatus(new LinuxExitValue(exitStatus));
+            commandStatus.setExitStatus(exitStatus);
             commandStatus.setTimedout(executor.getWatchdog().killedProcess());
         }
 
@@ -279,7 +278,7 @@ public class ExecutorUtil {
     }
 
     private void executeAsync(Command command, CommandLine commandLine, Consumer<CommandStatus> callback) {
-        CommandStatus commandStatus = new CommandStatus(new LinuxExitValue(0));
+        CommandStatus commandStatus = new CommandStatus(0);
         commandStatus.setOutputStream(command.getOutputStream());
         commandStatus.setErrorStream(command.getErrorStream());
         commandStatus.setInputStream(command.getInputStream());
@@ -300,13 +299,13 @@ public class ExecutorUtil {
                 executor.execute(commandLine, resultHandler);
             }
         } catch (IOException e) {
-            commandStatus.setExitStatus(new LinuxExitValue(1));
+            commandStatus.setExitStatus(1);
             logger.error(COMMAND_MESSAGE + commandLine + " failed", e);
         }
     }
 
     private static String[] buildKillCommand(Pid pid, Signal signal) {
-        Integer pidNumber = (Integer) pid.getPid();
+        int pidNumber = pid.getPid();
         if (logger.isInfoEnabled()) {
             logger.info("Attempting to send {} to process with pid {}", ((LinuxSignal) signal).name(), pidNumber);
         }

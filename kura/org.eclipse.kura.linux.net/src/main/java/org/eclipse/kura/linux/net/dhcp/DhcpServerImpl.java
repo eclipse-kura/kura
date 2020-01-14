@@ -181,7 +181,7 @@ public class DhcpServerImpl implements DhcpServer {
         }
         // Start dhcpd
         CommandStatus status = this.executorService.execute(new Command(formDhcpdCommand()));
-        if ((Integer) status.getExitStatus().getExitValue() == 0) {
+        if (status.getExitStatus() == 0) {
             logger.debug("DHCP server started.");
             logger.trace(this.dhcpServerConfig4.toString());
             return true;

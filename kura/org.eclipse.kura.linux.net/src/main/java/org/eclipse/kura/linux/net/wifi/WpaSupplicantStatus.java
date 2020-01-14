@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -49,7 +49,7 @@ public class WpaSupplicantStatus {
         command.setTimeout(60);
         command.setOutputStream(new ByteArrayOutputStream());
         CommandStatus status = executorService.execute(command);
-        int exitValue = (Integer) status.getExitStatus().getExitValue();
+        int exitValue = status.getExitStatus();
         if (exitValue != 0) {
             if (logger.isErrorEnabled()) {
                 logger.error("error executing command --- {} --- exit value = {}", String.join(" ", cmd), exitValue);

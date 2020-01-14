@@ -190,7 +190,7 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
             Command command = new Command(new String[] { "date", "-s", "@" + Long.toString(time / 1000) });
             command.setTimeout(60);
             CommandStatus status = this.executorService.execute(command);
-            final int rc = (Integer) status.getExitStatus().getExitValue();
+            final int rc = status.getExitStatus();
             if (rc == 0) {
                 bClockUpToDate = true;
                 logger.info("System Clock Updated to {}", new Date());
@@ -212,7 +212,7 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
             Command command = new Command(new String[] { "hwclock", "--utc", "--systohc" });
             command.setTimeout(60);
             CommandStatus status = this.executorService.execute(command);
-            final int rc = (Integer) status.getExitStatus().getExitValue();
+            final int rc = status.getExitStatus();
             if (rc == 0) {
                 logger.info("Hardware Clock Updated");
             } else {

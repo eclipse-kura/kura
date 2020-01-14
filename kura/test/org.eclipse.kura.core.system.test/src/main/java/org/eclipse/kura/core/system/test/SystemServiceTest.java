@@ -308,7 +308,7 @@ public class SystemServiceTest {
         if (!osName.contains("indows")) {
             if (LINUX.equals(osName)) {
                 CommandStatus status = executorService.execute(new Command(new String[] { "dmidecode" }));
-                if ((Integer) status.getExitStatus().getExitValue() != 0) {
+                if (status.getExitStatus() != 0) {
                     assertEquals(UNKNOWN, modelName);
                 }
 
@@ -343,7 +343,7 @@ public class SystemServiceTest {
         if (!osName.contains("indows")) {
             if (LINUX.equals(osName)) {
                 CommandStatus status = executorService.execute(new Command(new String[] { "dmidecode" }));
-                if ((Integer) status.getExitStatus().getExitValue() != 0) {
+                if (status.getExitStatus() != 0) {
                     assertEquals(UNKNOWN, serialNumber);
                 }
                 // note: this assert works locally and on travis, but not on hudson

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2019 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
  *
  *   All rights reserved. This program and the accompanying materials
  *   are made available under the terms of the Eclipse Public License v1.0
@@ -26,7 +26,6 @@ import java.util.List;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.core.linux.executor.LinuxExitValue;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.WifiInterfaceConfigImpl;
@@ -49,11 +48,21 @@ import org.junit.Test;
 
 public class HostapdConfigTest {
 
+    private static final String UPDATE_RADIO_MODE = "updateRadioMode";
+    private static final String UPDATE_WPA = "updateWPA";
+    private static final String UPDATE_WEP_PASS_KEY = "updateWepPassKey";
+    private static final String TEST_PASS = "CAFEBABE00";
+    private static final String FILE_SHOULD_HAVE_BEEN_CREATED = "File should have been created";
+    private static final String FILE_SHOULD_HAVE_BEEN_MOVED = "File should have been moved";
+    private static final String TEST_SSID = "testSSID";
+    private static final String NET_ADMIN_PATH = "../../org.eclipse.kura.net.admin";
+    private static final String WIFI_DRIVER = "wifiDriver";
+    private static final String TESTINTERFACE = "testinterface";
     private static final String TEMP_FILE = "/tmp/kura/hostapd/hostapd.config-temp";
     private static final String FINAL_FILE = "/tmp/kura/hostapd/hostapd.config-";
 
     @Test
-    public void testWriteOnlyWifi() throws UnknownHostException, KuraException {
+    public void testWriteOnlyWifi() throws KuraException {
         // solely wifi AP configuration doesn't get written
 
         HostapdConfigWriter writer = new HostapdConfigWriter() {
@@ -72,10 +81,10 @@ public class HostapdConfigTest {
         NetworkConfiguration config = new NetworkConfiguration();
 
         List<String> interfaces = new ArrayList<>();
-        interfaces.add("testinterface");
+        interfaces.add(TESTINTERFACE);
         config.setModifiedInterfaceNames(interfaces);
 
-        WifiInterfaceConfigImpl netInterfaceConfig = new WifiInterfaceConfigImpl("testinterface");
+        WifiInterfaceConfigImpl netInterfaceConfig = new WifiInterfaceConfigImpl(TESTINTERFACE);
         config.addNetInterfaceConfig(netInterfaceConfig);
 
         List<WifiInterfaceAddressConfig> interfaceAddressConfigs = new ArrayList<>();
@@ -83,7 +92,7 @@ public class HostapdConfigTest {
         List<NetConfig> netConfigs = new ArrayList<>();
         WifiConfig wifiConfig = new WifiConfig();
         wifiConfig.setMode(WifiMode.MASTER);
-        wifiConfig.setDriver("wifiDriver");
+        wifiConfig.setDriver(WIFI_DRIVER);
         netConfigs.add(wifiConfig);
         wifiConfig = new WifiConfig(); // add one without a driver
         wifiConfig.setMode(WifiMode.MASTER);
@@ -93,7 +102,7 @@ public class HostapdConfigTest {
         netInterfaceConfig.setNetInterfaceAddresses(interfaceAddressConfigs);
 
         CommandExecutorService esMock = mock(CommandExecutorService.class);
-        CommandStatus status = new CommandStatus(new LinuxExitValue(0));
+        CommandStatus status = new CommandStatus(0);
         when(esMock.execute(anyObject())).thenReturn(status);
 
         writer.setExecutorService(esMock);
@@ -105,7 +114,7 @@ public class HostapdConfigTest {
     }
 
     @Test
-    public void testWriteUnsupportedSecurityType() throws UnknownHostException, KuraException {
+    public void testWriteUnsupportedSecurityType() throws KuraException {
         // don't configure a supported security type => exception
         HostapdConfigWriter writer = new HostapdConfigWriter() {
 
@@ -123,10 +132,10 @@ public class HostapdConfigTest {
         NetworkConfiguration config = new NetworkConfiguration();
 
         List<String> interfaces = new ArrayList<>();
-        interfaces.add("testinterface");
+        interfaces.add(TESTINTERFACE);
         config.setModifiedInterfaceNames(interfaces);
 
-        WifiInterfaceConfigImpl netInterfaceConfig = new WifiInterfaceConfigImpl("testinterface");
+        WifiInterfaceConfigImpl netInterfaceConfig = new WifiInterfaceConfigImpl(TESTINTERFACE);
         config.addNetInterfaceConfig(netInterfaceConfig);
 
         List<WifiInterfaceAddressConfig> interfaceAddressConfigs = new ArrayList<>();
@@ -134,7 +143,7 @@ public class HostapdConfigTest {
         List<NetConfig> netConfigs = new ArrayList<>();
         WifiConfig wifiConfig = new WifiConfig();
         wifiConfig.setMode(WifiMode.MASTER);
-        wifiConfig.setDriver("wifiDriver");
+        wifiConfig.setDriver(WIFI_DRIVER);
         netConfigs.add(wifiConfig);
         NetConfigIP4 netConfig = new NetConfigIP4(NetInterfaceStatus.netIPv4StatusEnabledWAN, true, true);
         netConfigs.add(netConfig);
@@ -144,7 +153,7 @@ public class HostapdConfigTest {
 
         try {
             CommandExecutorService esMock = mock(CommandExecutorService.class);
-            CommandStatus status = new CommandStatus(new LinuxExitValue(0));
+            CommandStatus status = new CommandStatus(0);
             when(esMock.execute(anyObject())).thenReturn(status);
 
             writer.setExecutorService(esMock);
@@ -187,18 +196,15 @@ public class HostapdConfigTest {
 
             @Override
             protected String readResource(String path) throws IOException {
-                URL url = new File("../../org.eclipse.kura.net.admin", path).getAbsoluteFile().toURI().toURL();
-
-                String s = IOUtil.readResource(url);
-
-                return s;
+                URL url = new File(NET_ADMIN_PATH, path).getAbsoluteFile().toURI().toURL();
+                return IOUtil.readResource(url);
             }
         };
 
         NetworkConfiguration config = new NetworkConfiguration();
 
         List<String> interfaces = new ArrayList<>();
-        String intfName = "testinterface";
+        String intfName = TESTINTERFACE;
         interfaces.add(intfName);
         config.setModifiedInterfaceNames(interfaces);
 
@@ -210,9 +216,9 @@ public class HostapdConfigTest {
         List<NetConfig> netConfigs = new ArrayList<>();
         WifiConfig wifiConfig = new WifiConfig();
         wifiConfig.setMode(WifiMode.MASTER);
-        wifiConfig.setDriver("wifiDriver");
+        wifiConfig.setDriver(WIFI_DRIVER);
         wifiConfig.setSecurity(WifiSecurity.NONE);
-        wifiConfig.setSSID("testSSID");
+        wifiConfig.setSSID(TEST_SSID);
         wifiConfig.setRadioMode(WifiRadioMode.RADIO_MODE_80211a);
         int[] channels = { 1 };
         wifiConfig.setChannels(channels);
@@ -224,7 +230,7 @@ public class HostapdConfigTest {
         netInterfaceConfig.setNetInterfaceAddresses(interfaceAddressConfigs);
 
         CommandExecutorService esMock = mock(CommandExecutorService.class);
-        CommandStatus status = new CommandStatus(new LinuxExitValue(0));
+        CommandStatus status = new CommandStatus(0);
         when(esMock.execute(anyObject())).thenReturn(status);
 
         writer.setExecutorService(esMock);
@@ -233,8 +239,8 @@ public class HostapdConfigTest {
         File f = new File(TEMP_FILE);
         File ff = new File(FINAL_FILE + intfName);
 
-        assertFalse("File should have been moved", f.exists());
-        assertTrue("File should have been created", ff.exists());
+        assertFalse(FILE_SHOULD_HAVE_BEEN_MOVED, f.exists());
+        assertTrue(FILE_SHOULD_HAVE_BEEN_CREATED, ff.exists());
 
         HostapdConfigReader reader = new HostapdConfigReader() {
 
@@ -269,9 +275,9 @@ public class HostapdConfigTest {
         assertTrue(na0cfg0 instanceof WifiConfig);
         WifiConfig wc = (WifiConfig) na0cfg0;
         assertEquals(WifiMode.MASTER, wc.getMode());
-        assertEquals("wifiDriver", wc.getDriver());
+        assertEquals(WIFI_DRIVER, wc.getDriver());
         assertEquals(WifiSecurity.SECURITY_NONE, wc.getSecurity());
-        assertEquals("testSSID", wc.getSSID());
+        assertEquals(TEST_SSID, wc.getSSID());
         assertEquals(WifiRadioMode.RADIO_MODE_80211a, wc.getRadioMode());
         assertArrayEquals(channels, wc.getChannels());
     }
@@ -302,11 +308,8 @@ public class HostapdConfigTest {
 
             @Override
             protected String readResource(String path) throws IOException {
-                URL url = new File("../../org.eclipse.kura.net.admin", path).getAbsoluteFile().toURI().toURL();
-
-                String s = IOUtil.readResource(url);
-
-                return s;
+                URL url = new File(NET_ADMIN_PATH, path).getAbsoluteFile().toURI().toURL();
+                return IOUtil.readResource(url);
             }
         };
 
@@ -325,11 +328,11 @@ public class HostapdConfigTest {
         List<NetConfig> netConfigs = new ArrayList<>();
         WifiConfig wifiConfig = new WifiConfig();
         wifiConfig.setMode(WifiMode.MASTER);
-        wifiConfig.setDriver("wifiDriver");
+        wifiConfig.setDriver(WIFI_DRIVER);
         wifiConfig.setSecurity(WifiSecurity.SECURITY_WEP);
-        String pass = "CAFEBABE00";
+        String pass = TEST_PASS;
         wifiConfig.setPasskey(pass);
-        wifiConfig.setSSID("testSSID");
+        wifiConfig.setSSID(TEST_SSID);
         wifiConfig.setRadioMode(WifiRadioMode.RADIO_MODE_80211b);
         int[] channels = { 1 };
         wifiConfig.setChannels(channels);
@@ -341,7 +344,7 @@ public class HostapdConfigTest {
         netInterfaceConfig.setNetInterfaceAddresses(interfaceAddressConfigs);
 
         CommandExecutorService esMock = mock(CommandExecutorService.class);
-        CommandStatus status = new CommandStatus(new LinuxExitValue(0));
+        CommandStatus status = new CommandStatus(0);
         when(esMock.execute(anyObject())).thenReturn(status);
 
         writer.setExecutorService(esMock);
@@ -350,8 +353,8 @@ public class HostapdConfigTest {
         File f = new File(TEMP_FILE);
         File ff = new File(FINAL_FILE + intfName);
 
-        assertFalse("File should have been moved", f.exists());
-        assertTrue("File should have been created", ff.exists());
+        assertFalse(FILE_SHOULD_HAVE_BEEN_MOVED, f.exists());
+        assertTrue(FILE_SHOULD_HAVE_BEEN_CREATED, ff.exists());
 
         HostapdConfigReader reader = new HostapdConfigReader() {
 
@@ -388,10 +391,10 @@ public class HostapdConfigTest {
         assertTrue(na0cfg0 instanceof WifiConfig);
         WifiConfig wc = (WifiConfig) na0cfg0;
         assertEquals(WifiMode.MASTER, wc.getMode());
-        assertEquals("wifiDriver", wc.getDriver());
+        assertEquals(WIFI_DRIVER, wc.getDriver());
         assertEquals(WifiSecurity.SECURITY_WEP, wc.getSecurity());
         assertArrayEquals(pass.toCharArray(), wc.getPasskey().getPassword());
-        assertEquals("testSSID", wc.getSSID());
+        assertEquals(TEST_SSID, wc.getSSID());
         assertEquals(WifiRadioMode.RADIO_MODE_80211b, wc.getRadioMode());
         assertArrayEquals(channels, wc.getChannels());
     }
@@ -400,50 +403,50 @@ public class HostapdConfigTest {
     public void testWepPass() throws Throwable {
         HostapdConfigWriter writer = new HostapdConfigWriter();
 
-        String pass = "CAFEBABE00";
+        String pass = TEST_PASS;
         WifiConfig wifiConfig = new WifiConfig();
         wifiConfig.setMode(WifiMode.MASTER);
-        wifiConfig.setDriver("wifiDriver");
+        wifiConfig.setDriver(WIFI_DRIVER);
         wifiConfig.setSecurity(WifiSecurity.SECURITY_WEP);
         wifiConfig.setPasskey(pass);
-        wifiConfig.setSSID("testSSID");
+        wifiConfig.setSSID(TEST_SSID);
         wifiConfig.setRadioMode(WifiRadioMode.RADIO_MODE_80211a);
         int[] channels = { 1 };
         wifiConfig.setChannels(channels);
 
         String hostapd = "wep_key0=KURA_WEP_KEY\n";
 
-        String result = (String) TestUtil.invokePrivate(writer, "updateWepPassKey", wifiConfig, hostapd);
+        String result = (String) TestUtil.invokePrivate(writer, UPDATE_WEP_PASS_KEY, wifiConfig, hostapd);
 
-        assertEquals("wep_key0=CAFEBABE00\n", result);
+        assertEquals("wep_key0=" + TEST_PASS + "\n", result);
 
         wifiConfig.setPasskey("12345678901234567890123456");
-        result = (String) TestUtil.invokePrivate(writer, "updateWepPassKey", wifiConfig, hostapd);
+        result = (String) TestUtil.invokePrivate(writer, UPDATE_WEP_PASS_KEY, wifiConfig, hostapd);
         assertEquals("wep_key0=12345678901234567890123456\n", result);
 
         wifiConfig.setPasskey("12345678901234567890123456789012");
-        result = (String) TestUtil.invokePrivate(writer, "updateWepPassKey", wifiConfig, hostapd);
+        result = (String) TestUtil.invokePrivate(writer, UPDATE_WEP_PASS_KEY, wifiConfig, hostapd);
         assertEquals("wep_key0=12345678901234567890123456789012\n", result);
 
         wifiConfig.setPasskey("12345");
-        result = (String) TestUtil.invokePrivate(writer, "updateWepPassKey", wifiConfig, hostapd);
+        result = (String) TestUtil.invokePrivate(writer, UPDATE_WEP_PASS_KEY, wifiConfig, hostapd);
         assertEquals("wep_key0=3132333435\n", result);
 
         wifiConfig.setPasskey("asdfg");
-        result = (String) TestUtil.invokePrivate(writer, "updateWepPassKey", wifiConfig, hostapd);
+        result = (String) TestUtil.invokePrivate(writer, UPDATE_WEP_PASS_KEY, wifiConfig, hostapd);
         assertEquals("wep_key0=6173646667\n", result);
 
         wifiConfig.setPasskey("asdfgasdfgasd");
-        result = (String) TestUtil.invokePrivate(writer, "updateWepPassKey", wifiConfig, hostapd);
+        result = (String) TestUtil.invokePrivate(writer, UPDATE_WEP_PASS_KEY, wifiConfig, hostapd);
         assertEquals("wep_key0=61736466676173646667617364\n", result);
 
         wifiConfig.setPasskey("asdfgasdfgasdfga");
-        result = (String) TestUtil.invokePrivate(writer, "updateWepPassKey", wifiConfig, hostapd);
+        result = (String) TestUtil.invokePrivate(writer, UPDATE_WEP_PASS_KEY, wifiConfig, hostapd);
         assertEquals("wep_key0=61736466676173646667617364666761\n", result);
 
         wifiConfig.setPasskey(null);
         try {
-            result = (String) TestUtil.invokePrivate(writer, "updateWepPassKey", wifiConfig, hostapd);
+            result = (String) TestUtil.invokePrivate(writer, UPDATE_WEP_PASS_KEY, wifiConfig, hostapd);
             fail("Exception was expected");
         } catch (NullPointerException e) {
             // OK
@@ -452,7 +455,7 @@ public class HostapdConfigTest {
         // test wrong password lengths
         wifiConfig.setPasskey("");
         try {
-            result = (String) TestUtil.invokePrivate(writer, "updateWepPassKey", wifiConfig, hostapd);
+            result = (String) TestUtil.invokePrivate(writer, UPDATE_WEP_PASS_KEY, wifiConfig, hostapd);
             fail("Exception was expected");
         } catch (KuraException e) {
             assertEquals(KuraErrorCode.INTERNAL_ERROR, e.getCode());
@@ -463,7 +466,7 @@ public class HostapdConfigTest {
             key += i % 10;
             wifiConfig.setPasskey(key);
             try {
-                result = (String) TestUtil.invokePrivate(writer, "updateWepPassKey", wifiConfig, hostapd);
+                result = (String) TestUtil.invokePrivate(writer, UPDATE_WEP_PASS_KEY, wifiConfig, hostapd);
                 if (i != 5 && i != 10 && i != 13 && i != 16 && i != 26 && i != 32) {
                     fail("Exception was expected: " + i);
                 }
@@ -479,7 +482,7 @@ public class HostapdConfigTest {
         // test wrong characters at different lengths
         wifiConfig.setPasskey("CAFEBABE0G");
         try {
-            result = (String) TestUtil.invokePrivate(writer, "updateWepPassKey", wifiConfig, hostapd);
+            result = (String) TestUtil.invokePrivate(writer, UPDATE_WEP_PASS_KEY, wifiConfig, hostapd);
             fail("Exception was expected");
         } catch (KuraException e) {
             assertEquals(KuraErrorCode.INTERNAL_ERROR, e.getCode());
@@ -487,7 +490,7 @@ public class HostapdConfigTest {
         }
         wifiConfig.setPasskey("1234567890123456789012345H");
         try {
-            result = (String) TestUtil.invokePrivate(writer, "updateWepPassKey", wifiConfig, hostapd);
+            result = (String) TestUtil.invokePrivate(writer, UPDATE_WEP_PASS_KEY, wifiConfig, hostapd);
             fail("Exception was expected");
         } catch (KuraException e) {
             assertEquals(KuraErrorCode.INTERNAL_ERROR, e.getCode());
@@ -495,7 +498,7 @@ public class HostapdConfigTest {
         }
         wifiConfig.setPasskey("1234567890123456789012345678901H");
         try {
-            result = (String) TestUtil.invokePrivate(writer, "updateWepPassKey", wifiConfig, hostapd);
+            result = (String) TestUtil.invokePrivate(writer, UPDATE_WEP_PASS_KEY, wifiConfig, hostapd);
             fail("Exception was expected");
         } catch (KuraException e) {
             assertEquals(KuraErrorCode.INTERNAL_ERROR, e.getCode());
@@ -529,11 +532,8 @@ public class HostapdConfigTest {
 
             @Override
             protected String readResource(String path) throws IOException {
-                URL url = new File("../../org.eclipse.kura.net.admin", path).getAbsoluteFile().toURI().toURL();
-
-                String s = IOUtil.readResource(url);
-
-                return s;
+                URL url = new File(NET_ADMIN_PATH, path).getAbsoluteFile().toURI().toURL();
+                return IOUtil.readResource(url);
             }
         };
 
@@ -552,12 +552,12 @@ public class HostapdConfigTest {
         List<NetConfig> netConfigs = new ArrayList<>();
         WifiConfig wifiConfig = new WifiConfig();
         wifiConfig.setMode(WifiMode.MASTER);
-        wifiConfig.setDriver("wifiDriver");
+        wifiConfig.setDriver(WIFI_DRIVER);
         wifiConfig.setSecurity(WifiSecurity.SECURITY_WPA2);
-        String pass = "CAFEBABE00";
+        String pass = TEST_PASS;
         wifiConfig.setPasskey(pass);
         wifiConfig.setPairwiseCiphers(WifiCiphers.CCMP_TKIP);
-        wifiConfig.setSSID("testSSID");
+        wifiConfig.setSSID(TEST_SSID);
         wifiConfig.setRadioMode(WifiRadioMode.RADIO_MODE_80211nHT40below);
         int[] channels = { 1 };
         wifiConfig.setChannels(channels);
@@ -569,7 +569,7 @@ public class HostapdConfigTest {
         netInterfaceConfig.setNetInterfaceAddresses(interfaceAddressConfigs);
 
         CommandExecutorService esMock = mock(CommandExecutorService.class);
-        CommandStatus status = new CommandStatus(new LinuxExitValue(0));
+        CommandStatus status = new CommandStatus(0);
         when(esMock.execute(anyObject())).thenReturn(status);
 
         writer.setExecutorService(esMock);
@@ -578,8 +578,8 @@ public class HostapdConfigTest {
         File f = new File(TEMP_FILE);
         File ff = new File(FINAL_FILE + intfName);
 
-        assertFalse("File should have been moved", f.exists());
-        assertTrue("File should have been created", ff.exists());
+        assertFalse(FILE_SHOULD_HAVE_BEEN_MOVED, f.exists());
+        assertTrue(FILE_SHOULD_HAVE_BEEN_CREATED, ff.exists());
 
         HostapdConfigReader reader = new HostapdConfigReader() {
 
@@ -615,11 +615,11 @@ public class HostapdConfigTest {
         assertTrue(na0cfg0 instanceof WifiConfig);
         WifiConfig wc = (WifiConfig) na0cfg0;
         assertEquals(WifiMode.MASTER, wc.getMode());
-        assertEquals("wifiDriver", wc.getDriver());
+        assertEquals(WIFI_DRIVER, wc.getDriver());
         assertEquals(WifiSecurity.SECURITY_WPA2, wc.getSecurity());
         assertEquals(WifiCiphers.CCMP_TKIP, wc.getPairwiseCiphers());
         assertArrayEquals(pass.toCharArray(), wc.getPasskey().getPassword());
-        assertEquals("testSSID", wc.getSSID());
+        assertEquals(TEST_SSID, wc.getSSID());
         assertEquals(WifiRadioMode.RADIO_MODE_80211nHT40below, wc.getRadioMode());
         assertArrayEquals(channels, wc.getChannels());
     }
@@ -628,39 +628,39 @@ public class HostapdConfigTest {
     public void testWpa() throws Throwable {
         HostapdConfigWriter writer = new HostapdConfigWriter();
 
-        String pass = "CAFEBABE00";
+        String pass = TEST_PASS;
         WifiConfig wifiConfig = new WifiConfig();
         wifiConfig.setMode(WifiMode.MASTER);
-        wifiConfig.setDriver("wifiDriver");
+        wifiConfig.setDriver(WIFI_DRIVER);
         wifiConfig.setSecurity(WifiSecurity.SECURITY_WPA);
         wifiConfig.setPairwiseCiphers(WifiCiphers.TKIP);
         wifiConfig.setPasskey(pass);
-        wifiConfig.setSSID("testSSID");
+        wifiConfig.setSSID(TEST_SSID);
         wifiConfig.setRadioMode(WifiRadioMode.RADIO_MODE_80211a);
         int[] channels = { 1 };
         wifiConfig.setChannels(channels);
 
         String hostapd = "wpa=KURA_SECURITY\nwpa_pairwise=KURA_PAIRWISE_CIPHER\nwpa_passphrase=KURA_PASSPHRASE\n";
 
-        String result = (String) TestUtil.invokePrivate(writer, "updateWPA", wifiConfig, hostapd);
+        String result = (String) TestUtil.invokePrivate(writer, UPDATE_WPA, wifiConfig, hostapd);
 
-        assertEquals("wpa=1\nwpa_pairwise=TKIP\nwpa_passphrase=CAFEBABE00\n", result);
+        assertEquals("wpa=1\nwpa_pairwise=TKIP\nwpa_passphrase=" + TEST_PASS + "\n", result);
 
         wifiConfig.setSecurity(WifiSecurity.SECURITY_WPA2);
         wifiConfig.setPairwiseCiphers(WifiCiphers.CCMP);
-        result = (String) TestUtil.invokePrivate(writer, "updateWPA", wifiConfig, hostapd);
-        assertEquals("wpa=2\nwpa_pairwise=CCMP\nwpa_passphrase=CAFEBABE00\n", result);
+        result = (String) TestUtil.invokePrivate(writer, UPDATE_WPA, wifiConfig, hostapd);
+        assertEquals("wpa=2\nwpa_pairwise=CCMP\nwpa_passphrase=" + TEST_PASS + "\n", result);
 
         wifiConfig.setSecurity(WifiSecurity.SECURITY_WPA_WPA2);
         wifiConfig.setPairwiseCiphers(WifiCiphers.CCMP_TKIP);
         wifiConfig.setPasskey("CAFEBABE000000000");
-        result = (String) TestUtil.invokePrivate(writer, "updateWPA", wifiConfig, hostapd);
+        result = (String) TestUtil.invokePrivate(writer, UPDATE_WPA, wifiConfig, hostapd);
         assertEquals("wpa=3\nwpa_pairwise=CCMP TKIP\nwpa_passphrase=CAFEBABE000000000\n", result);
 
         // test no cipher
         wifiConfig.setPairwiseCiphers(null);
         try {
-            result = (String) TestUtil.invokePrivate(writer, "updateWPA", wifiConfig, hostapd);
+            result = (String) TestUtil.invokePrivate(writer, UPDATE_WPA, wifiConfig, hostapd);
             fail("Exception was expected");
         } catch (KuraException e) {
             assertEquals(KuraErrorCode.INTERNAL_ERROR, e.getCode());
@@ -670,7 +670,7 @@ public class HostapdConfigTest {
         wifiConfig.setPairwiseCiphers(WifiCiphers.CCMP_TKIP);
         wifiConfig.setPasskey("");
         try {
-            result = (String) TestUtil.invokePrivate(writer, "updateWPA", wifiConfig, hostapd);
+            result = (String) TestUtil.invokePrivate(writer, UPDATE_WPA, wifiConfig, hostapd);
             fail("Exception was expected");
         } catch (KuraException e) {
             assertEquals(KuraErrorCode.INTERNAL_ERROR, e.getCode());
@@ -681,7 +681,7 @@ public class HostapdConfigTest {
             key += i % 10;
             wifiConfig.setPasskey(key);
             try {
-                result = (String) TestUtil.invokePrivate(writer, "updateWPA", wifiConfig, hostapd);
+                result = (String) TestUtil.invokePrivate(writer, UPDATE_WPA, wifiConfig, hostapd);
                 if (i < 8 || i >= 64) {
                     fail("Exception was expected: " + i);
                 }
@@ -701,42 +701,42 @@ public class HostapdConfigTest {
 
         WifiConfig wifiConfig = new WifiConfig();
         wifiConfig.setMode(WifiMode.MASTER);
-        wifiConfig.setDriver("wifiDriver");
+        wifiConfig.setDriver(WIFI_DRIVER);
         wifiConfig.setSecurity(WifiSecurity.NONE);
-        wifiConfig.setSSID("testSSID");
+        wifiConfig.setSSID(TEST_SSID);
         wifiConfig.setRadioMode(WifiRadioMode.RADIO_MODE_80211a);
         int[] channels = { 1 };
         wifiConfig.setChannels(channels);
 
         String hostapd = "hw_mode=KURA_HW_MODE\nwme_enabled=KURA_WME_ENABLED\nieee80211n=KURA_IEEE80211N\nht_capab=KURA_HTCAPAB";
 
-        String result = (String) TestUtil.invokePrivate(writer, "updateRadioMode", wifiConfig, hostapd);
+        String result = (String) TestUtil.invokePrivate(writer, UPDATE_RADIO_MODE, wifiConfig, hostapd);
 
         assertEquals("hw_mode=a\nwme_enabled=0\nieee80211n=0\n", result);
 
         wifiConfig.setRadioMode(WifiRadioMode.RADIO_MODE_80211b);
-        result = (String) TestUtil.invokePrivate(writer, "updateRadioMode", wifiConfig, hostapd);
+        result = (String) TestUtil.invokePrivate(writer, UPDATE_RADIO_MODE, wifiConfig, hostapd);
         assertEquals("hw_mode=b\nwme_enabled=0\nieee80211n=0\n", result);
 
         wifiConfig.setRadioMode(WifiRadioMode.RADIO_MODE_80211g);
-        result = (String) TestUtil.invokePrivate(writer, "updateRadioMode", wifiConfig, hostapd);
+        result = (String) TestUtil.invokePrivate(writer, UPDATE_RADIO_MODE, wifiConfig, hostapd);
         assertEquals("hw_mode=g\nwme_enabled=0\nieee80211n=0\n", result);
 
         wifiConfig.setRadioMode(WifiRadioMode.RADIO_MODE_80211nHT20);
-        result = (String) TestUtil.invokePrivate(writer, "updateRadioMode", wifiConfig, hostapd);
+        result = (String) TestUtil.invokePrivate(writer, UPDATE_RADIO_MODE, wifiConfig, hostapd);
         assertEquals("hw_mode=g\nwme_enabled=1\nieee80211n=1\nht_capab=[SHORT-GI-20]", result);
 
         wifiConfig.setRadioMode(WifiRadioMode.RADIO_MODE_80211nHT40above);
-        result = (String) TestUtil.invokePrivate(writer, "updateRadioMode", wifiConfig, hostapd);
+        result = (String) TestUtil.invokePrivate(writer, UPDATE_RADIO_MODE, wifiConfig, hostapd);
         assertEquals("hw_mode=g\nwme_enabled=1\nieee80211n=1\nht_capab=[HT40+][SHORT-GI-20][SHORT-GI-40]", result);
 
         wifiConfig.setRadioMode(WifiRadioMode.RADIO_MODE_80211nHT40below);
-        result = (String) TestUtil.invokePrivate(writer, "updateRadioMode", wifiConfig, hostapd);
+        result = (String) TestUtil.invokePrivate(writer, UPDATE_RADIO_MODE, wifiConfig, hostapd);
         assertEquals("hw_mode=g\nwme_enabled=1\nieee80211n=1\nht_capab=[HT40-][SHORT-GI-20][SHORT-GI-40]", result);
 
         wifiConfig.setRadioMode(null);
         try {
-            result = (String) TestUtil.invokePrivate(writer, "updateRadioMode", wifiConfig, hostapd);
+            result = (String) TestUtil.invokePrivate(writer, UPDATE_RADIO_MODE, wifiConfig, hostapd);
             fail("Exception was expected");
         } catch (KuraException e) {
             assertEquals(KuraErrorCode.INTERNAL_ERROR, e.getCode());

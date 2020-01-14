@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -208,7 +208,7 @@ public class IPTablesTest extends TestCase {
         Command command = new Command(new String[] { "iptables-restore", "<", oldConfig });
         command.setExecuteInAShell(true);
         CommandStatus status = this.executorService.execute(command);
-        if ((Integer) status.getExitStatus().getExitValue() != 0) {
+        if (status.getExitStatus() != 0) {
             fail("Error restoring iptables config");
         }
     }
@@ -218,7 +218,7 @@ public class IPTablesTest extends TestCase {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         command.setOutputStream(out);
         CommandStatus status = this.executorService.execute(command);
-        Integer exitValue = (Integer) status.getExitStatus().getExitValue();
+        Integer exitValue = status.getExitStatus();
         if (exitValue != 0) {
             logger.error("error executing command --- iptables-save --- exit value = {}", exitValue);
             throw new KuraProcessExecutionErrorException("Error saving iptables config");

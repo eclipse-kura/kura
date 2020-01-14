@@ -162,12 +162,12 @@ public class InstallImpl {
         Command command = new Command(new String[] { "chmod", "700", shFilePath });
         command.setTimeout(60);
         status = this.executorService.execute(command);
-        if ((Integer) status.getExitStatus().getExitValue() != 0) {
+        if (status.getExitStatus() != 0) {
             throw new KuraProcessExecutionErrorException("Failed to change file mode");
         }
 
         status = this.executorService.execute(new Command(new String[] { shFilePath }));
-        if ((Integer) status.getExitStatus().getExitValue() != 0) {
+        if (status.getExitStatus() != 0) {
             throw new KuraProcessExecutionErrorException("Failed to execute script");
         }
 
@@ -239,14 +239,14 @@ public class InstallImpl {
         Command command = new Command(new String[] { "chmod", "700", fileEntryPath });
         command.setTimeout(60);
         status = this.executorService.execute(command);
-        if ((Integer) status.getExitStatus().getExitValue() != 0) {
+        if (status.getExitStatus() != 0) {
             logger.error("Failed to change file mode");
         }
 
         String[] commandLine = { fileEntryPath };
         try {
             status = this.executorService.execute(new Command(commandLine));
-            if ((Integer) status.getExitStatus().getExitValue() == 0) {
+            if (status.getExitStatus() == 0) {
                 sendSysUpdateSuccess(fileEntry.getName(), notificationPublisher);
             } else {
                 sendSysUpdateFailure(fileEntry.getName(), notificationPublisher);

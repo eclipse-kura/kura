@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2019 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
  *
  *   All rights reserved. This program and the accompanying materials
  *   are made available under the terms of the Eclipse Public License v1.0
@@ -38,11 +38,10 @@ import org.eclipse.kura.cloud.CloudClient;
 import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
 import org.eclipse.kura.configuration.Password;
-import org.eclipse.kura.core.linux.executor.LinuxExitValue;
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.crypto.CryptoService;
-import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
@@ -369,7 +368,7 @@ public class CommandCloudAppTest {
         int exitVal = 0;
 
         KuraCommandResponsePayload resp = new KuraCommandResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
-        CommandStatus status = new CommandStatus(new LinuxExitValue(0));
+        CommandStatus status = new CommandStatus(0);
         status.setErrorStream(baes);
         status.setOutputStream(baos);
         status.setTimedout(false);
@@ -396,7 +395,7 @@ public class CommandCloudAppTest {
         baes.write(err.getBytes(UTF_8));
 
         KuraCommandResponsePayload resp = new KuraCommandResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
-        CommandStatus status = new CommandStatus(new LinuxExitValue(1));
+        CommandStatus status = new CommandStatus(1);
         status.setErrorStream(baes);
         status.setOutputStream(baos);
         status.setTimedout(false);
@@ -423,7 +422,7 @@ public class CommandCloudAppTest {
         baes.write(err.getBytes(UTF_8));
 
         KuraCommandResponsePayload resp = new KuraCommandResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
-        CommandStatus status = new CommandStatus(new LinuxExitValue(0));
+        CommandStatus status = new CommandStatus(0);
         status.setErrorStream(baes);
         status.setOutputStream(baos);
         status.setTimedout(true);
@@ -565,7 +564,7 @@ public class CommandCloudAppTest {
         baos.write("OK".getBytes(UTF_8));
         ByteArrayOutputStream baes = new ByteArrayOutputStream(3);
         baes.write("err".getBytes(UTF_8));
-        CommandStatus status = new CommandStatus(new LinuxExitValue(0));
+        CommandStatus status = new CommandStatus(0);
         status.setErrorStream(baes);
         status.setOutputStream(baos);
         status.setTimedout(false);
@@ -618,7 +617,7 @@ public class CommandCloudAppTest {
         baos.write("NOK".getBytes(UTF_8));
         ByteArrayOutputStream baes = new ByteArrayOutputStream(3);
         baes.write("err".getBytes(UTF_8));
-        CommandStatus status = new CommandStatus(new LinuxExitValue(0));
+        CommandStatus status = new CommandStatus(0);
         status.setErrorStream(baes);
         status.setOutputStream(baos);
         status.setTimedout(false);
@@ -663,7 +662,7 @@ public class CommandCloudAppTest {
         baos.write("OK".getBytes(UTF_8));
         ByteArrayOutputStream baes = new ByteArrayOutputStream(3);
         baes.write("err".getBytes(UTF_8));
-        CommandStatus status = new CommandStatus(new LinuxExitValue(0));
+        CommandStatus status = new CommandStatus(0);
         status.setErrorStream(baes);
         status.setOutputStream(baos);
         status.setTimedout(false);
@@ -732,7 +731,7 @@ public class CommandCloudAppTest {
         baos.write("OK".getBytes(UTF_8));
         ByteArrayOutputStream baes = new ByteArrayOutputStream(3);
         baes.write("err".getBytes(UTF_8));
-        CommandStatus status = new CommandStatus(new LinuxExitValue(0));
+        CommandStatus status = new CommandStatus(0);
         status.setErrorStream(baes);
         status.setOutputStream(baos);
         status.setTimedout(false);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2019 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
  *
  *   All rights reserved. This program and the accompanying materials
  *   are made available under the terms of the Eclipse Public License v1.0
@@ -40,7 +40,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.comm.CommURI;
-import org.eclipse.kura.core.linux.executor.LinuxExitValue;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.modem.ModemInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.modem.ModemInterfaceConfigImpl;
@@ -202,7 +201,7 @@ public class ModemMonitorServiceImplTest {
 
         CommandExecutorService esMock = mock(CommandExecutorService.class);
 
-        CommandStatus linkStatus = new CommandStatus(new LinuxExitValue(0));
+        CommandStatus linkStatus = new CommandStatus(0);
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         DataOutputStream out = new DataOutputStream(outputStream);
         out.write(
@@ -216,7 +215,7 @@ public class ModemMonitorServiceImplTest {
         linkStatusCommand.setTimeout(60);
         when(esMock.execute(linkStatusCommand)).thenReturn(linkStatus);
         
-        CommandStatus addrStatus = new CommandStatus(new LinuxExitValue(0));
+        CommandStatus addrStatus = new CommandStatus(0);
         outputStream = new ByteArrayOutputStream();
         out = new DataOutputStream(outputStream);
         out.write(
@@ -230,13 +229,13 @@ public class ModemMonitorServiceImplTest {
         addrStatusCommand.setTimeout(60);
         when(esMock.execute(addrStatusCommand)).thenReturn(addrStatus);
 
-        CommandStatus infoStatus = new CommandStatus(new LinuxExitValue(0));
+        CommandStatus infoStatus = new CommandStatus(0);
         cmd = new String[] {"iw", "dev", "ppp1", "info"};
         Command infoCommand = new Command(cmd);
         infoCommand.setTimeout(60);
         when(esMock.execute(infoCommand)).thenReturn(infoStatus);
         
-        CommandStatus iwconfigStatus = new CommandStatus(new LinuxExitValue(0));
+        CommandStatus iwconfigStatus = new CommandStatus(0);
         cmd = new String[] {"iwconfig", "ppp1"};
         Command iwconfigCommand = new Command(cmd);
         iwconfigCommand.setTimeout(60);
@@ -248,7 +247,7 @@ public class ModemMonitorServiceImplTest {
         iwconfigStatus.setOutputStream(outputStream);
         when(esMock.execute(iwconfigCommand)).thenReturn(iwconfigStatus);
         
-        CommandStatus ethtoolStatus = new CommandStatus(new LinuxExitValue(0));
+        CommandStatus ethtoolStatus = new CommandStatus(0);
         cmd = new String[] {"ethtool", "-i", "ppp1"};
         Command ethtoolCommand = new Command(cmd);
         ethtoolCommand.setTimeout(60);
@@ -964,7 +963,7 @@ public class ModemMonitorServiceImplTest {
         org.eclipse.kura.executor.CommandExecutorService esMock = mock(
                 org.eclipse.kura.executor.CommandExecutorService.class);
 
-        CommandStatus linkStatus = new CommandStatus(new LinuxExitValue(0));
+        CommandStatus linkStatus = new CommandStatus(0);
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         DataOutputStream out = new DataOutputStream(outputStream);
         out.write(
@@ -978,7 +977,7 @@ public class ModemMonitorServiceImplTest {
         linkStatusCommand.setTimeout(60);
         when(esMock.execute(linkStatusCommand)).thenReturn(linkStatus);
 
-        CommandStatus addrStatus = new CommandStatus(new LinuxExitValue(0));
+        CommandStatus addrStatus = new CommandStatus(0);
         outputStream = new ByteArrayOutputStream();
         out = new DataOutputStream(outputStream);
         out.write(
@@ -992,13 +991,13 @@ public class ModemMonitorServiceImplTest {
         addrStatusCommand.setTimeout(60);
         when(esMock.execute(addrStatusCommand)).thenReturn(addrStatus);
 
-        CommandStatus infoStatus = new CommandStatus(new LinuxExitValue(0));
+        CommandStatus infoStatus = new CommandStatus(0);
         cmd = new String[] {"iw", "dev", "ppp0", "info"};
         Command infoCommand = new Command(cmd);
         infoCommand.setTimeout(60);
         when(esMock.execute(infoCommand)).thenReturn(infoStatus);
 
-        CommandStatus iwconfigStatus = new CommandStatus(new LinuxExitValue(0));
+        CommandStatus iwconfigStatus = new CommandStatus(0);
         cmd = new String[] {"iwconfig", "ppp0"};
         Command iwconfigCommand = new Command(cmd);
         iwconfigCommand.setTimeout(60);
@@ -1012,7 +1011,7 @@ public class ModemMonitorServiceImplTest {
         iwconfigStatus.setOutputStream(outputStream);
         when(esMock.execute(iwconfigCommand)).thenReturn(iwconfigStatus);
 
-        CommandStatus ethtoolStatus = new CommandStatus(new LinuxExitValue(0));
+        CommandStatus ethtoolStatus = new CommandStatus(0);
         cmd = new String[] {"ethtool", "-i", "ppp0"};
         Command ethtoolCommand = new Command(cmd);
         ethtoolCommand.setTimeout(60);

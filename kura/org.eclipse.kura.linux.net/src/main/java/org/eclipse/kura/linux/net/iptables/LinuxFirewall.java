@@ -482,7 +482,7 @@ public class LinuxFirewall {
             logger.info("Running custom firewall script - {}", CUSTOM_FIREWALL_SCRIPT_NAME);
             Command command = new Command(new String[] { "sh", CUSTOM_FIREWALL_SCRIPT_NAME });
             CommandStatus status = this.executorService.execute(command);
-            if ((Integer) status.getExitStatus().getExitValue() != 0) {
+            if (status.getExitStatus() != 0) {
                 throw new KuraProcessExecutionErrorException("Failed to apply custom firewall script");
             }
         }

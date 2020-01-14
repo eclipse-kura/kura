@@ -72,7 +72,7 @@ public class DhcpServerManager {
         if (configFile.exists()) {
             CommandStatus status = this.executorService
                     .execute(new Command(DhcpServerManager.formDhcpdCommand(interfaceName)));
-            if ((Integer) status.getExitStatus().getExitValue() == 0) {
+            if (status.getExitStatus() == 0) {
                 logger.debug("DHCP server started.");
                 return true;
             } else {

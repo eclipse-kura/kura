@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -97,7 +97,7 @@ public class LinuxNetworkUtil {
         command.setTimeout(60);
         command.setOutputStream(new ByteArrayOutputStream());
         CommandStatus status = this.executorService.execute(command);
-        int exitValue = (Integer) status.getExitStatus().getExitValue();
+        int exitValue = status.getExitStatus();
         if (exitValue != 0) {
             if (logger.isErrorEnabled()) {
                 logger.error(ERR_EXECUTING_CMD_MSG, String.join(" ", cmd), exitValue);
@@ -399,7 +399,7 @@ public class LinuxNetworkUtil {
         command.setTimeout(60);
         command.setOutputStream(new ByteArrayOutputStream());
         CommandStatus status = this.executorService.execute(command);
-        int exitValue = (Integer) status.getExitStatus().getExitValue();
+        int exitValue = status.getExitStatus();
         if (exitValue == 0) {
             getInterfaceConfigurationInternalParse(ifaceName, linuxIfconfig,
                     new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray(), Charsets.UTF_8));
@@ -480,7 +480,7 @@ public class LinuxNetworkUtil {
     public boolean canPing(String ipAddress, int count) {
         String[] cmd = { "ping", "-c", String.valueOf(count), ipAddress };
         CommandStatus status = this.executorService.execute(new Command(cmd));
-        return ((Integer) status.getExitStatus().getExitValue() == 0);
+        return (status.getExitStatus() == 0);
     }
 
     /*
@@ -592,7 +592,7 @@ public class LinuxNetworkUtil {
             command.setTimeout(60);
             command.setOutputStream(new ByteArrayOutputStream());
             CommandStatus status = this.executorService.execute(command);
-            int exitValue = (Integer) status.getExitStatus().getExitValue();
+            int exitValue = status.getExitStatus();
             if (exitValue != 0) {
                 if (logger.isErrorEnabled()) {
                     logger.error(ERR_EXECUTING_CMD_MSG, String.join(" ", ethtoolCmd), exitValue);
@@ -649,7 +649,7 @@ public class LinuxNetworkUtil {
             command.setTimeout(60);
             command.setOutputStream(new ByteArrayOutputStream());
             status = this.executorService.execute(command);
-            exitValue = (Integer) status.getExitStatus().getExitValue();
+            exitValue = status.getExitStatus();
             if (exitValue != 0) {
                 // fallback to iwconfig
                 if (logger.isErrorEnabled()) {
@@ -667,7 +667,7 @@ public class LinuxNetworkUtil {
             command.setTimeout(60);
             command.setOutputStream(new ByteArrayOutputStream());
             status = this.executorService.execute(command);
-            exitValue = (Integer) status.getExitStatus().getExitValue();
+            exitValue = status.getExitStatus();
             if (exitValue != 0) {
                 if (logger.isErrorEnabled()) {
                     logger.error(ERR_EXECUTING_CMD_MSG, String.join(" ", cmd), exitValue);
@@ -744,7 +744,7 @@ public class LinuxNetworkUtil {
             command.setTimeout(60);
             command.setOutputStream(new ByteArrayOutputStream());
             status = this.executorService.execute(command);
-            exitValue = (Integer) status.getExitStatus().getExitValue();
+            exitValue = status.getExitStatus();
             if (exitValue != 0) {
                 // fallback to iwconfig
                 if (logger.isErrorEnabled()) {
@@ -762,7 +762,7 @@ public class LinuxNetworkUtil {
             command.setTimeout(60);
             command.setOutputStream(new ByteArrayOutputStream());
             status = this.executorService.execute(command);
-            exitValue = (Integer) status.getExitStatus().getExitValue();
+            exitValue = status.getExitStatus();
             if (exitValue != 0) {
                 if (logger.isErrorEnabled()) {
                     logger.error(ERR_EXECUTING_CMD_MSG, String.join(" ", cmd), exitValue);
@@ -843,7 +843,7 @@ public class LinuxNetworkUtil {
             command.setTimeout(60);
             command.setOutputStream(new ByteArrayOutputStream());
             status = this.executorService.execute(command);
-            exitValue = (Integer) status.getExitStatus().getExitValue();
+            exitValue = status.getExitStatus();
             if (exitValue != 0) {
                 // fallback to iwconfig
                 if (logger.isErrorEnabled()) {
@@ -861,7 +861,7 @@ public class LinuxNetworkUtil {
             command.setTimeout(60);
             command.setOutputStream(new ByteArrayOutputStream());
             status = this.executorService.execute(command);
-            exitValue = (Integer) status.getExitStatus().getExitValue();
+            exitValue = status.getExitStatus();
             if (exitValue != 0) {
                 if (logger.isErrorEnabled()) {
                     logger.error(ERR_EXECUTING_CMD_MSG, String.join(" ", cmd), exitValue);
@@ -954,7 +954,7 @@ public class LinuxNetworkUtil {
             Command command = new Command(new String[] { IFCONFIG, interfaceName, "up" });
             command.setTimeout(60);
             CommandStatus status = this.executorService.execute(command);
-            if ((Integer) status.getExitStatus().getExitValue() != 0) {
+            if (status.getExitStatus() != 0) {
                 throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR,
                         "Failed to bring up interface " + interfaceName);
             }
@@ -964,13 +964,13 @@ public class LinuxNetworkUtil {
             command.setOutputStream(new ByteArrayOutputStream());
             command.setErrorStream(new ByteArrayOutputStream());
             status = this.executorService.execute(command);
-            if ((Integer) status.getExitStatus().getExitValue() != 0) {
+            if (status.getExitStatus() != 0) {
                 command = new Command(new String[] { "ifup", interfaceName });
                 command.setTimeout(60);
                 command.setOutputStream(new ByteArrayOutputStream());
                 command.setErrorStream(new ByteArrayOutputStream());
                 status = this.executorService.execute(command);
-                if ((Integer) status.getExitStatus().getExitValue() != 0) {
+                if (status.getExitStatus() != 0) {
                     throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR,
                             "Failed to bring up interface " + interfaceName);
                 }
@@ -1020,7 +1020,7 @@ public class LinuxNetworkUtil {
         Command command = new Command(cmd);
         command.setTimeout(60);
         CommandStatus status = this.executorService.execute(command);
-        int exitValue = (Integer) status.getExitStatus().getExitValue();
+        int exitValue = status.getExitStatus();
         if (exitValue != 0) {
             if (logger.isErrorEnabled()) {
                 logger.error(ERR_EXECUTING_CMD_MSG, String.join(" ", cmd), exitValue);

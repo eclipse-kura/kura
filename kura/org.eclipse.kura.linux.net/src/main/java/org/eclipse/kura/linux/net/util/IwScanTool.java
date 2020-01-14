@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -79,7 +79,7 @@ public class IwScanTool extends ScanTool implements IScanTool {
             iwScanCommand.setOutputStream(new ByteArrayOutputStream());
             iwScanCommand.setErrorStream(new ByteArrayOutputStream());
             CommandStatus iwCommandStatus = executorService.execute(iwScanCommand);
-            int exitValue = (Integer) iwCommandStatus.getExitStatus().getExitValue();
+            int exitValue = iwCommandStatus.getExitStatus();
             if (logger.isInfoEnabled()) {
                 logger.info("scan() :: {} command returns status = {}", String.join(" ", cmd), exitValue);
             }
@@ -116,7 +116,7 @@ public class IwScanTool extends ScanTool implements IScanTool {
             // activate the interface
             String[] cmdIpLink = { "ip", "link", "set", this.ifaceName, "up" };
             CommandStatus commandStatus = this.executorService.execute(new Command(cmdIpLink));
-            if ((Integer) commandStatus.getExitStatus().getExitValue() != 0) {
+            if (commandStatus.getExitStatus() != 0) {
                 throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR,
                         "Failed to activate interface " + this.ifaceName);
             }
@@ -124,7 +124,7 @@ public class IwScanTool extends ScanTool implements IScanTool {
             // remove the previous ip address (needed on mgw)
             String[] cmdIpAddr = { "ip", "addr", "flush", "dev", this.ifaceName };
             commandStatus = this.executorService.execute(new Command(cmdIpAddr));
-            if ((Integer) commandStatus.getExitStatus().getExitValue() != 0) {
+            if (commandStatus.getExitStatus() != 0) {
                 throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR,
                         "Failed to remove address for interface " + this.ifaceName);
             }

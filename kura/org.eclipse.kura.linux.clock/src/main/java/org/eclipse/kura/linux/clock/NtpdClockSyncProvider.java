@@ -46,7 +46,7 @@ public class NtpdClockSyncProvider extends AbstractNtpClockSyncProvider {
             Command command = new Command(new String[] { "ntpdate", "-t", Integer.toString(ntpTimeout), this.ntpHost });
             command.setTimeout(60);
             CommandStatus status = this.executorService.execute(command);
-            if ((Integer) status.getExitStatus().getExitValue() == 0) {
+            if (status.getExitStatus() == 0) {
                 logger.info("System Clock Synchronized with {}", this.ntpHost);
                 this.lastSync = new Date();
 

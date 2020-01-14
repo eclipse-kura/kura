@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2019 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
  *
  *   All rights reserved. This program and the accompanying materials
  *   are made available under the terms of the Eclipse Public License v1.0
@@ -26,7 +26,6 @@ import java.util.Set;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.core.linux.executor.LinuxExitValue;
 import org.eclipse.kura.core.net.EthernetInterfaceConfigImpl;
 import org.eclipse.kura.core.net.NetInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.NetworkConfiguration;
@@ -48,6 +47,15 @@ import org.junit.Test;
 
 public class FirewallAutoNatConfigTest {
 
+    private static final String EXCEPTION_EXPECTED = "Exception expected.";
+    private static final String CONFIG_NAT_SRC_INTERFACE = ".config.nat.src.interface";
+    private static final String DEST_INTERFACE = "destInterface";
+    private static final String TEST_INTERFACE = "testInterface";
+    private static final String CONFIG_NAT_MASQUERADE = ".config.nat.masquerade";
+    private static final String CONFIG_NAT_DST_INTERFACE = ".config.nat.dst.interface";
+    private static final String CONFIG_NAT_ENABLED = ".config.nat.enabled";
+    private static final String NET_INTERFACE_DOT = "net.interface.";
+
     @Test
     public void testWriterVisit() throws KuraException {
         String intfName = "testinterface";
@@ -63,11 +71,11 @@ public class FirewallAutoNatConfigTest {
 
             @Override
             protected void storeKuranetProperties(Properties kuraProps) throws KuraException {
-                String enabled = (String) kuraProps.get("net.interface." + intfName + ".config.nat.enabled");
+                String enabled = (String) kuraProps.get(NET_INTERFACE_DOT + intfName + CONFIG_NAT_ENABLED);
                 assertTrue(Boolean.parseBoolean(enabled));
-                String dst = (String) kuraProps.get("net.interface." + intfName + ".config.nat.dst.interface");
+                String dst = (String) kuraProps.get(NET_INTERFACE_DOT + intfName + CONFIG_NAT_DST_INTERFACE);
                 assertEquals(destinationInterface, dst);
-                String masq = (String) kuraProps.get("net.interface." + intfName + ".config.nat.masquerade");
+                String masq = (String) kuraProps.get(NET_INTERFACE_DOT + intfName + CONFIG_NAT_MASQUERADE);
                 assertTrue(Boolean.parseBoolean(masq));
 
                 visited[1] = true;
@@ -82,7 +90,7 @@ public class FirewallAutoNatConfigTest {
         NetworkConfiguration config = prepareNetworkConfiguration(intfName, destinationInterface, false, false);
 
         CommandExecutorService esMock = mock(CommandExecutorService.class);
-        CommandStatus status = new CommandStatus(new LinuxExitValue(0));
+        CommandStatus status = new CommandStatus(0);
         when(esMock.execute(anyObject())).thenReturn(status);
 
         writer.setExecutorService(esMock);
@@ -164,8 +172,8 @@ public class FirewallAutoNatConfigTest {
 
     @Test
     public void testReaderVisitNoFirewallFileNullAddressList() throws KuraException {
-        String intfName = "testInterface";
-        String destinationInterface = "destInterface";
+        String intfName = TEST_INTERFACE;
+        String destinationInterface = DEST_INTERFACE;
 
         FirewallAutoNatConfigReader reader = new FirewallAutoNatConfigReader() {
 
@@ -173,10 +181,10 @@ public class FirewallAutoNatConfigTest {
             protected Properties getKuranetProperties() {
                 Properties properties = new Properties();
 
-                properties.put("net.interface." + intfName + ".config.nat.enabled", "true");
-                properties.put("net.interface." + intfName + ".config.nat.dst.interface", destinationInterface);
-                properties.put("net.interface." + intfName + ".config.nat.src.interface", intfName);
-                properties.put("net.interface." + intfName + ".config.nat.masquerade", "true");
+                properties.put(NET_INTERFACE_DOT + intfName + CONFIG_NAT_ENABLED, "true");
+                properties.put(NET_INTERFACE_DOT + intfName + CONFIG_NAT_DST_INTERFACE, destinationInterface);
+                properties.put(NET_INTERFACE_DOT + intfName + CONFIG_NAT_SRC_INTERFACE, intfName);
+                properties.put(NET_INTERFACE_DOT + intfName + CONFIG_NAT_MASQUERADE, "true");
 
                 return properties;
             }
@@ -190,7 +198,7 @@ public class FirewallAutoNatConfigTest {
 
         try {
             reader.visit(config);
-            fail("Exception expected.");
+            fail(EXCEPTION_EXPECTED);
         } catch (KuraException e) {
             assertEquals(KuraErrorCode.CONFIGURATION_ERROR, e.getCode());
         }
@@ -198,8 +206,8 @@ public class FirewallAutoNatConfigTest {
 
     @Test
     public void testReaderVisitNoFirewallFileEmptyAddressList() throws KuraException {
-        String intfName = "testInterface";
-        String destinationInterface = "destInterface";
+        String intfName = TEST_INTERFACE;
+        String destinationInterface = DEST_INTERFACE;
 
         FirewallAutoNatConfigReader reader = new FirewallAutoNatConfigReader() {
 
@@ -207,10 +215,10 @@ public class FirewallAutoNatConfigTest {
             protected Properties getKuranetProperties() {
                 Properties properties = new Properties();
 
-                properties.put("net.interface." + intfName + ".config.nat.enabled", "true");
-                properties.put("net.interface." + intfName + ".config.nat.dst.interface", destinationInterface);
-                properties.put("net.interface." + intfName + ".config.nat.src.interface", intfName);
-                properties.put("net.interface." + intfName + ".config.nat.masquerade", "true");
+                properties.put(NET_INTERFACE_DOT + intfName + CONFIG_NAT_ENABLED, "true");
+                properties.put(NET_INTERFACE_DOT + intfName + CONFIG_NAT_DST_INTERFACE, destinationInterface);
+                properties.put(NET_INTERFACE_DOT + intfName + CONFIG_NAT_SRC_INTERFACE, intfName);
+                properties.put(NET_INTERFACE_DOT + intfName + CONFIG_NAT_MASQUERADE, "true");
 
                 return properties;
             }
@@ -223,7 +231,7 @@ public class FirewallAutoNatConfigTest {
 
         try {
             reader.visit(config);
-            fail("Exception expected.");
+            fail(EXCEPTION_EXPECTED);
         } catch (KuraException e) {
             assertEquals(KuraErrorCode.CONFIGURATION_ERROR, e.getCode());
         }
@@ -231,8 +239,8 @@ public class FirewallAutoNatConfigTest {
 
     @Test
     public void testReaderVisitNoFirewallFile() throws KuraException {
-        String intfName = "testInterface";
-        String destinationInterface = "destInterface";
+        String intfName = TEST_INTERFACE;
+        String destinationInterface = DEST_INTERFACE;
 
         FirewallAutoNatConfigReader reader = new FirewallAutoNatConfigReader() {
 
@@ -240,10 +248,10 @@ public class FirewallAutoNatConfigTest {
             protected Properties getKuranetProperties() {
                 Properties properties = new Properties();
 
-                properties.put("net.interface." + intfName + ".config.nat.enabled", "true");
-                properties.put("net.interface." + intfName + ".config.nat.dst.interface", destinationInterface);
-                properties.put("net.interface." + intfName + ".config.nat.src.interface", intfName);
-                properties.put("net.interface." + intfName + ".config.nat.masquerade", "true");
+                properties.put(NET_INTERFACE_DOT + intfName + CONFIG_NAT_ENABLED, "true");
+                properties.put(NET_INTERFACE_DOT + intfName + CONFIG_NAT_DST_INTERFACE, destinationInterface);
+                properties.put(NET_INTERFACE_DOT + intfName + CONFIG_NAT_SRC_INTERFACE, intfName);
+                properties.put(NET_INTERFACE_DOT + intfName + CONFIG_NAT_MASQUERADE, "true");
 
                 return properties;
             }
@@ -252,7 +260,7 @@ public class FirewallAutoNatConfigTest {
         NetworkConfiguration config = prepareNetworkConfiguration(intfName, destinationInterface, false, true);
 
         CommandExecutorService esMock = mock(CommandExecutorService.class);
-        CommandStatus status = new CommandStatus(new LinuxExitValue(0));
+        CommandStatus status = new CommandStatus(0);
         when(esMock.execute(anyObject())).thenReturn(status);
 
         reader.setExecutorService(esMock);
@@ -275,8 +283,8 @@ public class FirewallAutoNatConfigTest {
 
     @Test
     public void testReaderVisitNoFirewallFileNoNat() throws KuraException {
-        String intfName = "testInterface";
-        String destinationInterface = "destInterface";
+        String intfName = TEST_INTERFACE;
+        String destinationInterface = DEST_INTERFACE;
 
         FirewallAutoNatConfigReader reader = new FirewallAutoNatConfigReader() {
 
@@ -284,10 +292,10 @@ public class FirewallAutoNatConfigTest {
             protected Properties getKuranetProperties() {
                 Properties properties = new Properties();
 
-                properties.put("net.interface." + intfName + ".config.nat.enabled", "false");
-                properties.put("net.interface." + intfName + ".config.nat.dst.interface", destinationInterface);
-                properties.put("net.interface." + intfName + ".config.nat.src.interface", intfName);
-                properties.put("net.interface." + intfName + ".config.nat.masquerade", "true");
+                properties.put(NET_INTERFACE_DOT + intfName + CONFIG_NAT_ENABLED, "false");
+                properties.put(NET_INTERFACE_DOT + intfName + CONFIG_NAT_DST_INTERFACE, destinationInterface);
+                properties.put(NET_INTERFACE_DOT + intfName + CONFIG_NAT_SRC_INTERFACE, intfName);
+                properties.put(NET_INTERFACE_DOT + intfName + CONFIG_NAT_MASQUERADE, "true");
 
                 return properties;
             }
@@ -296,16 +304,7 @@ public class FirewallAutoNatConfigTest {
         NetworkConfiguration config = prepareNetworkConfiguration(intfName, destinationInterface, false, true);
 
         CommandExecutorService esMock = mock(CommandExecutorService.class);
-        CommandStatus status = new CommandStatus(new LinuxExitValue(0));
-        // ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        // DataOutputStream out = new DataOutputStream(outputStream);
-        // out.write(
-        // "wlan1 IEEE 802.11 Mode:Master Tx-Power=31 dBm\n Retry short limit:7 RTS thr:off Fragment thr:off\n Power
-        // Management:on"
-        // .getBytes());
-        // outputStream.flush();
-        // outputStream.close();
-        // status.setOutputStream(outputStream);
+        CommandStatus status = new CommandStatus(0);
         when(esMock.execute(anyObject())).thenReturn(status);
 
         reader.setExecutorService(esMock);
@@ -322,8 +321,8 @@ public class FirewallAutoNatConfigTest {
 
     @Test
     public void testReaderVisitWithFirewallFileNullAddressList() throws KuraException {
-        String intfName = "testInterface";
-        String destinationInterface = "destInterface";
+        String intfName = TEST_INTERFACE;
+        String destinationInterface = DEST_INTERFACE;
         FirewallAutoNatConfigReader reader = new FirewallAutoNatConfigReader() {
 
             @Override
@@ -349,7 +348,7 @@ public class FirewallAutoNatConfigTest {
         config.addNetInterfaceConfig(netInterfaceConfig);
         try {
             reader.visit(config);
-            fail("Exception expected.");
+            fail(EXCEPTION_EXPECTED);
         } catch (KuraException e) {
             assertEquals(KuraErrorCode.CONFIGURATION_ERROR, e.getCode());
         }
@@ -357,8 +356,8 @@ public class FirewallAutoNatConfigTest {
 
     @Test
     public void testReaderVisitWithFirewallFileEmptyAddressList() throws KuraException {
-        String intfName = "testInterface";
-        String destinationInterface = "destInterface";
+        String intfName = TEST_INTERFACE;
+        String destinationInterface = DEST_INTERFACE;
 
         FirewallAutoNatConfigReader reader = new FirewallAutoNatConfigReader() {
 
@@ -385,7 +384,7 @@ public class FirewallAutoNatConfigTest {
 
         try {
             reader.visit(config);
-            fail("Exception expected.");
+            fail(EXCEPTION_EXPECTED);
         } catch (KuraException e) {
             assertEquals(KuraErrorCode.CONFIGURATION_ERROR, e.getCode());
         }
@@ -393,8 +392,8 @@ public class FirewallAutoNatConfigTest {
 
     @Test
     public void testReaderVisitWithFirewallFile() throws KuraException {
-        String intfName = "testInterface";
-        String destinationInterface = "destInterface";
+        String intfName = TEST_INTERFACE;
+        String destinationInterface = DEST_INTERFACE;
 
         FirewallAutoNatConfigReader reader = new FirewallAutoNatConfigReader() {
 
@@ -417,7 +416,7 @@ public class FirewallAutoNatConfigTest {
         NetworkConfiguration config = prepareNetworkConfiguration(intfName, destinationInterface, false, true);
 
         CommandExecutorService esMock = mock(CommandExecutorService.class);
-        CommandStatus status = new CommandStatus(new LinuxExitValue(0));
+        CommandStatus status = new CommandStatus(0);
         when(esMock.execute(anyObject())).thenReturn(status);
 
         reader.setExecutorService(esMock);

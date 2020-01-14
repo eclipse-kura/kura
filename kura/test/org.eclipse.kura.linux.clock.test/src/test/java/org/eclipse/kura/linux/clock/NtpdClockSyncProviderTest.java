@@ -18,10 +18,9 @@ import static org.mockito.Mockito.when;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.core.linux.executor.LinuxExitValue;
 import org.eclipse.kura.core.testutil.TestUtil;
-import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
 import org.junit.Test;
 
 public class NtpdClockSyncProviderTest {
@@ -29,7 +28,7 @@ public class NtpdClockSyncProviderTest {
     @Test
     public void testSynch() throws KuraException, NoSuchFieldException {
 
-        CommandStatus status = new CommandStatus(new LinuxExitValue(0));
+        CommandStatus status = new CommandStatus(0);
         CommandExecutorService serviceMock = mock(CommandExecutorService.class);
         when(serviceMock.execute(anyObject())).thenReturn(status);
         NtpdClockSyncProvider provider = new NtpdClockSyncProvider(serviceMock);
@@ -55,7 +54,7 @@ public class NtpdClockSyncProviderTest {
     @Test
     public void testSynchError() throws KuraException, NoSuchFieldException {
 
-        CommandStatus status = new CommandStatus(new LinuxExitValue(1));
+        CommandStatus status = new CommandStatus(1);
         CommandExecutorService serviceMock = mock(CommandExecutorService.class);
         when(serviceMock.execute(anyObject())).thenReturn(status);
         NtpdClockSyncProvider provider = new NtpdClockSyncProvider(serviceMock);

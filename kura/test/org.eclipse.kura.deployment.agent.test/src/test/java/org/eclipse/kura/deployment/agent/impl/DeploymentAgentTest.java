@@ -43,6 +43,9 @@ import org.osgi.service.event.EventAdmin;
 
 public class DeploymentAgentTest {
 
+    private static final String VERSION_1_0_0 = "1.0.0";
+    private static final String DP_NAME = "dpName";
+
     @Test
     public void testInstallDeploymentPackageAsyncAlreadyDeploying() throws Exception {
         // test the exception thrown when package is already queued
@@ -109,7 +112,7 @@ public class DeploymentAgentTest {
 
         TestUtil.setFieldValue(svc, "uninstPackageNames", queue);
 
-        String name = "dpName";
+        String name = DP_NAME;
 
         queue.offer(name);
 
@@ -136,7 +139,7 @@ public class DeploymentAgentTest {
 
         TestUtil.setFieldValue(svc, "uninstPackageNames", queue);
 
-        String name = "dpName";
+        String name = DP_NAME;
 
         assertFalse(svc.isUninstallingDeploymentPackage(name));
 
@@ -205,7 +208,7 @@ public class DeploymentAgentTest {
 
         Queue<String> queue = new ConcurrentLinkedQueue<>();
 
-        String name = "dpName";
+        String name = DP_NAME;
         final Properties deployedPackages = new Properties();
         deployedPackages.put(name, "file:///tmp/nonExistingDp.dp");
 
@@ -278,7 +281,7 @@ public class DeploymentAgentTest {
         }).when(eaMock).postEvent(anyObject());
 
         DeploymentPackage dp = mock(DeploymentPackage.class);
-        when(dp.getName()).thenReturn("dpName");
+        when(dp.getName()).thenReturn(DP_NAME);
         when(dp.getVersion()).thenReturn(new Version(1, 1, 0));
 
         TestUtil.invokePrivate(svc, "postInstalledEvent", dp, "dpUrl", true, null);
@@ -353,7 +356,8 @@ public class DeploymentAgentTest {
         // test installation of packages stored in the configuration file
 
         DeploymentPackage dp = mock(DeploymentPackage.class);
-        when(dp.getName()).thenReturn("dpName");
+        when(dp.getName()).thenReturn(DP_NAME);
+        when(dp.getVersion()).thenReturn(new Version(VERSION_1_0_0));
 
         DeploymentAgent svc = new DeploymentAgent();
 
@@ -386,9 +390,10 @@ public class DeploymentAgentTest {
         String str = new String(buf);
 
         assertTrue("DP file location should have been added to config file",
-                str.contains("file\\:target/testdp.dp") || str.contains("file\\:target\\\\testdp.dp"));
+                str.contains("file\\:target/" + DP_NAME + "_" + VERSION_1_0_0 + ".dp")
+                        || str.contains("file\\:target\\\\" + DP_NAME + "_" + VERSION_1_0_0 + ".dp"));
 
-        assertTrue("DP file should have been copied", new File("target/testdp.dp").exists());
+        assertTrue("DP file should have been copied", new File("target/" + DP_NAME + "_" + VERSION_1_0_0 + ".dp").exists());
     }
 
     @Test

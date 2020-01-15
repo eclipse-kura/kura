@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 Eurotech and others
+ * Copyright (c) 2011, 2020 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,7 +8,7 @@
  *
  * Contributors:
  *     Eurotech
- *     Red Hat Inc - Clean up kura properties handling
+ *     Red Hat Inc
  *******************************************************************************/
 package org.eclipse.kura.deployment.agent.impl;
 
@@ -231,7 +231,9 @@ public class DeploymentAgent implements DeploymentAgentService {
     }
 
     public void unsetDeploymentAdmin(DeploymentAdmin deploymentAdmin) {
-        this.deploymentAdmin = null;
+        if (this.deploymentAdmin == deploymentAdmin) {
+            this.deploymentAdmin = null;
+        }
     }
 
     protected void setEventAdmin(EventAdmin eventAdmin) {
@@ -239,7 +241,9 @@ public class DeploymentAgent implements DeploymentAgentService {
     }
 
     protected void unsetEventAdmin(EventAdmin eventAdmin) {
-        this.eventAdmin = null;
+        if (this.eventAdmin == eventAdmin) {
+            this.eventAdmin = null;
+        }
     }
 
     public void setSystemService(SystemService systemService) {
@@ -247,7 +251,9 @@ public class DeploymentAgent implements DeploymentAgentService {
     }
 
     public void unsetSystemService(SystemService systemService) {
-        this.systemService = null;
+        if (this.systemService == systemService) {
+            this.systemService = null;
+        }
     }
 
     @Override
@@ -452,16 +458,13 @@ public class DeploymentAgent implements DeploymentAgentService {
             dpFile = getFileFromFilesystem(url);
         }
 
-        // Get the file base name from the URL
-        String urlPath = url.getPath();
-        String[] parts = urlPath.split("/");
-        String dpBasename = parts[parts.length - 1];
-        String dpPersistentFilePath = this.packagesPath + File.separator + dpBasename;
-        File dpPersistentFile = new File(dpPersistentFilePath);
-
         DeploymentPackage dp = null;
         try (InputStream dpInputStream = new FileInputStream(dpFile);) {
             dp = this.deploymentAdmin.installDeploymentPackage(dpInputStream);
+
+            String dpFsName = dp.getName() + "_" + dp.getVersion() + ".dp";
+            String dpPersistentFilePath = this.packagesPath + File.separator + dpFsName;
+            File dpPersistentFile = new File(dpPersistentFilePath);
 
             // Now we need to copy the deployment package file to the Kura
             // packages directory unless it's already there.
@@ -474,7 +477,7 @@ public class DeploymentAgent implements DeploymentAgentService {
         } finally {
             // The file from which we have installed the deployment package will be deleted
             // unless it's a persistent deployment package file.
-            if (!dpFile.getCanonicalPath().equals(dpPersistentFile.getCanonicalPath())) {
+            if (!dpFile.getCanonicalPath().startsWith(this.packagesPath)) {
                 Files.delete(dpFile.toPath());
                 logger.debug("Deleted file: {}", dpFile.getName());
             }

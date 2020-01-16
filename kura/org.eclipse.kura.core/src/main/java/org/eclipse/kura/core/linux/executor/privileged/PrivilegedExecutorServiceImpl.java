@@ -33,22 +33,17 @@ public class PrivilegedExecutorServiceImpl implements PrivilegedExecutorService 
 
     private static final Logger logger = LoggerFactory.getLogger(PrivilegedExecutorServiceImpl.class);
     private static final LinuxSignal DEFAULT_SIGNAL = LinuxSignal.SIGTERM;
-    private ExecutorUtil executorUtil;
+    private ExecutorUtil executorUtil = new ExecutorUtil();
 
     @SuppressWarnings("unused")
     private ComponentContext ctx;
 
-    public PrivilegedExecutorServiceImpl() {
-        this.executorUtil = new ExecutorUtil();
-    }
-
-    protected void activate(ComponentContext componentContext) {
+    public void activate(ComponentContext componentContext) {
         logger.info("activate...");
         this.ctx = componentContext;
-        this.executorUtil = new ExecutorUtil();
     }
 
-    protected void deactivate(ComponentContext componentContext) {
+    public void deactivate(ComponentContext componentContext) {
         logger.info("deactivate...");
         this.ctx = null;
     }

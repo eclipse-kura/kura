@@ -38,19 +38,14 @@ public class UnprivilegedExecutorServiceImpl implements UnprivilegedExecutorServ
     @SuppressWarnings("unused")
     private ComponentContext ctx;
     private UnprivilegedExecutorServiceOptions options;
-    private ExecutorUtil executorUtil;
+    private ExecutorUtil executorUtil = new ExecutorUtil();
 
-    public UnprivilegedExecutorServiceImpl() {
-        this.executorUtil = new ExecutorUtil();
-    }
-
-    protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
+    public void activate(ComponentContext componentContext, Map<String, Object> properties) {
         logger.info("activate...");
 
         this.ctx = componentContext;
         this.options = new UnprivilegedExecutorServiceOptions(properties);
         this.executorUtil.setCommandUsername(this.options.getCommandUsername());
-        this.executorUtil = new ExecutorUtil();
     }
 
     public void update(Map<String, Object> properties) {
@@ -60,16 +55,16 @@ public class UnprivilegedExecutorServiceImpl implements UnprivilegedExecutorServ
         this.executorUtil.setCommandUsername(this.options.getCommandUsername());
     }
 
+    public void deactivate(ComponentContext componentContext) {
+        logger.info("deactivate...");
+        this.ctx = null;
+    }
+
     @Override
     public void setExecutorFactory(ExecutorFactory executorFactory) {
         if (this.executorUtil != null) {
             this.executorUtil.setExecutorFactory(executorFactory);
         }
-    }
-
-    protected void deactivate(ComponentContext componentContext) {
-        logger.info("deactivate...");
-        this.ctx = null;
     }
 
     @Override

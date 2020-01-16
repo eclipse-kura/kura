@@ -93,7 +93,7 @@ public class ExecutorServiceImplTest {
         command.setTimeout(10);
         command.setDirectory(TMP);
         CommandStatus status = service.execute(command);
-        assertTrue(status.getExitStatus() == 0);
+        assertTrue(status.getExitStatus().isSuccessful());
     }
 
     @SuppressWarnings("unchecked")
@@ -130,7 +130,7 @@ public class ExecutorServiceImplTest {
         env.put("MYVAR", "MYVALUE");
         command.setEnvironment(env);
         CommandStatus status = service.execute(command);
-        assertTrue(status.getExitStatus() == 0);
+        assertTrue(status.getExitStatus().isSuccessful());
     }
 
     @Test
@@ -159,7 +159,7 @@ public class ExecutorServiceImplTest {
         command.setTimeout(10);
         command.setDirectory(TMP);
         CommandStatus status = service.execute(command);
-        assertFalse(status.getExitStatus() == 0);
+        assertFalse(status.getExitStatus().isSuccessful());
         assertTrue(status.isTimedout());
     }
 
@@ -193,7 +193,7 @@ public class ExecutorServiceImplTest {
         command.setDirectory(TMP);
         command.setExecuteInAShell(true);
         CommandStatus status = service.execute(command);
-        assertTrue(status.getExitStatus() == 0);
+        assertTrue(status.getExitStatus().isSuccessful());
     }
 
     @Test
@@ -203,7 +203,8 @@ public class ExecutorServiceImplTest {
         command.setTimeout(10);
         command.setDirectory(TMP);
         CommandStatus status = service.execute(command);
-        assertTrue(status.getExitStatus() == 1);
+        assertFalse(status.getExitStatus().isSuccessful());
+        assertTrue(status.getExitStatus().getExitCode() == 1);
     }
 
     @Test
@@ -212,7 +213,7 @@ public class ExecutorServiceImplTest {
         CountDownLatch lock = new CountDownLatch(1);
         AtomicInteger exitStatus = new AtomicInteger(1);
         Consumer<CommandStatus> callback = status -> {
-            exitStatus.set(status.getExitStatus());
+            exitStatus.set(status.getExitStatus().getExitCode());
             lock.countDown();
         };
 
@@ -222,7 +223,7 @@ public class ExecutorServiceImplTest {
         if (service instanceof PrivilegedExecutorServiceImpl) {
             CommandLine privilegedCommandLine = new CommandLine("ls").addArgument("-all");
             doAnswer((Answer<InvocationOnMock>) invocation -> {
-                callback.accept(new CommandStatus(0));
+                callback.accept(new CommandStatus(new LinuxExitStatus(0)));
                 return null;
             }).when(mockExecutor).execute(Matchers.argThat(new CommandLineMatcher(privilegedCommandLine)),
                     isA(LinuxResultHandler.class));
@@ -231,7 +232,7 @@ public class ExecutorServiceImplTest {
                     .addArgument("-s").addArgument(TIMEOUT).addArgument("-s").addArgument(SIGTERM).addArgument("10");
             unprivilegedCommandLine.addArgument("sh").addArgument("-c").addArgument(LIST_COMMAND, false);
             doAnswer((Answer<InvocationOnMock>) invocation -> {
-                callback.accept(new CommandStatus(0));
+                callback.accept(new CommandStatus(new LinuxExitStatus(0)));
                 return null;
             }).when(mockExecutor).execute(Matchers.argThat(new CommandLineMatcher(unprivilegedCommandLine)),
                     isA(LinuxResultHandler.class));
@@ -264,7 +265,7 @@ public class ExecutorServiceImplTest {
         CountDownLatch lock = new CountDownLatch(1);
         AtomicInteger exitStatus = new AtomicInteger(1);
         Consumer<CommandStatus> callback = status -> {
-            exitStatus.set(status.getExitStatus());
+            exitStatus.set(status.getExitStatus().getExitCode());
             lock.countDown();
         };
 
@@ -274,7 +275,7 @@ public class ExecutorServiceImplTest {
         if (service instanceof PrivilegedExecutorServiceImpl) {
             CommandLine privilegedCommandLine = new CommandLine("env");
             doAnswer((Answer<InvocationOnMock>) invocation -> {
-                callback.accept(new CommandStatus(0));
+                callback.accept(new CommandStatus(new LinuxExitStatus(0)));
                 return null;
             }).when(mockExecutor).execute(Matchers.argThat(new CommandLineMatcher(privilegedCommandLine)), anyMap(),
                     isA(LinuxResultHandler.class));
@@ -284,7 +285,7 @@ public class ExecutorServiceImplTest {
                     .addArgument(SIGTERM).addArgument("10");
             unprivilegedCommandLine.addArgument("sh").addArgument("-c").addArgument("env", false);
             doAnswer((Answer<InvocationOnMock>) invocation -> {
-                callback.accept(new CommandStatus(0));
+                callback.accept(new CommandStatus(new LinuxExitStatus(0)));
                 return null;
             }).when(mockExecutor).execute(Matchers.argThat(new CommandLineMatcher(unprivilegedCommandLine)), anyMap(),
                     isA(LinuxResultHandler.class));
@@ -320,7 +321,7 @@ public class ExecutorServiceImplTest {
         AtomicInteger exitStatus = new AtomicInteger(1);
         AtomicBoolean isTimedout = new AtomicBoolean(false);
         Consumer<CommandStatus> callback = status -> {
-            exitStatus.set(status.getExitStatus());
+            exitStatus.set(status.getExitStatus().getExitCode());
             isTimedout.set(status.isTimedout());
             lock.countDown();
         };
@@ -331,7 +332,7 @@ public class ExecutorServiceImplTest {
         if (service instanceof PrivilegedExecutorServiceImpl) {
             CommandLine privilegedCommandLine = new CommandLine("sleep").addArgument("30");
             doAnswer((Answer<InvocationOnMock>) invocation -> {
-                CommandStatus status = new CommandStatus(143);
+                CommandStatus status = new CommandStatus(new LinuxExitStatus(143));
                 status.setTimedout(true);
                 callback.accept(status);
                 return null;
@@ -342,7 +343,7 @@ public class ExecutorServiceImplTest {
                     .addArgument("-s").addArgument(TIMEOUT).addArgument("-s").addArgument(SIGTERM).addArgument("10");
             unprivilegedCommandLine.addArgument("sh").addArgument("-c").addArgument("sleep 30", false);
             doAnswer((Answer<InvocationOnMock>) invocation -> {
-                CommandStatus status = new CommandStatus(124);
+                CommandStatus status = new CommandStatus(new LinuxExitStatus(124));
                 status.setTimedout(true);
                 callback.accept(status);
                 return null;
@@ -366,7 +367,7 @@ public class ExecutorServiceImplTest {
         }
 
         assertTrue(result);
-        assertFalse(exitStatus.get() == 0);
+        assertTrue(exitStatus.get() == 143 || exitStatus.get() == 124);
         assertTrue(isTimedout.get());
     }
 

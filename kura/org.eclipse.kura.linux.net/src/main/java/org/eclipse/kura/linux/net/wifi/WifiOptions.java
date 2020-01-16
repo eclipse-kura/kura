@@ -72,7 +72,7 @@ public class WifiOptions {
         Command command = new Command(formIwDevInfoCommand(ifaceName));
         command.setTimeout(60);
         CommandStatus status = this.executorService.execute(command);
-        return status.getExitStatus() == 0;
+        return status.getExitStatus().isSuccessful();
     }
 
     private boolean isWextDriverSupported(String ifaceName) {
@@ -85,7 +85,7 @@ public class WifiOptions {
         command.setTimeout(60);
         command.setOutputStream(new ByteArrayOutputStream());
         CommandStatus status = this.executorService.execute(command);
-        if (status.getExitStatus() != 0) {
+        if (!status.getExitStatus().isSuccessful()) {
             if (logger.isWarnEnabled()) {
                 logger.warn(FAILED_TO_EXECUTE_MSG, String.join(" ", cmd));
             }

@@ -254,7 +254,7 @@ public class CommandCloudApp implements ConfigurableComponent, PasswordCommandSe
                 ByteArrayOutputStream errorStream = new ByteArrayOutputStream();
                 CommandStatus stats = executeProcessSync(defaultDir, cmdArray, environment, timeout, outputStream,
                         errorStream);
-                if (stats.getExitStatus() == 0) {
+                if (stats.getExitStatus().isSuccessful()) {
                     return new String(((ByteArrayOutputStream) stats.getOutputStream()).toByteArray(), Charsets.UTF_8);
                 } else {
                     return new String(((ByteArrayOutputStream) stats.getErrorStream()).toByteArray(), Charsets.UTF_8);
@@ -398,9 +398,9 @@ public class CommandCloudApp implements ConfigurableComponent, PasswordCommandSe
         if (status.isTimedout()) {
             resp.setTimedout(true);
         } else {
-            resp.setExitCode(status.getExitStatus());
+            resp.setExitCode(status.getExitStatus().getExitCode());
             resp.setTimedout(false);
-            if (status.getExitStatus() != 0) {
+            if (!status.getExitStatus().isSuccessful()) {
                 resp.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
                 resp.setExceptionMessage(new String(err.toByteArray(), Charsets.UTF_8));
             }

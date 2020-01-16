@@ -47,10 +47,10 @@ public final class IwlistCapabilityTool {
         command.setTimeout(60);
         command.setOutputStream(new ByteArrayOutputStream());
         CommandStatus status = executorService.execute(command);
-        int exitValue = status.getExitStatus();
-        if (exitValue != 0) {
-            logger.warn("error executing command --- iwlist --- exit value = {}", exitValue);
-            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, String.join(" ", cmd), exitValue);
+        if (!status.getExitStatus().isSuccessful()) {
+            logger.warn("error executing command --- iwlist --- exit value = {}", status.getExitStatus().getExitCode());
+            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, String.join(" ", cmd),
+                    status.getExitStatus().getExitCode());
         }
 
         // get the output

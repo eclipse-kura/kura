@@ -63,7 +63,7 @@ public class MiiTool implements LinkTool {
         CommandStatus status = this.executorService.execute(command);
         parse(new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray(), Charsets.UTF_8));
 
-        return status.getExitStatus() == 0;
+        return status.getExitStatus().isSuccessful();
     }
 
     private void parse(String commandOutput) {

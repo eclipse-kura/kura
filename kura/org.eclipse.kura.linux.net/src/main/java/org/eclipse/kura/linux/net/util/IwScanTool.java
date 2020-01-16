@@ -79,7 +79,7 @@ public class IwScanTool extends ScanTool implements IScanTool {
             iwScanCommand.setOutputStream(new ByteArrayOutputStream());
             iwScanCommand.setErrorStream(new ByteArrayOutputStream());
             CommandStatus iwCommandStatus = executorService.execute(iwScanCommand);
-            int exitValue = iwCommandStatus.getExitStatus();
+            int exitValue = iwCommandStatus.getExitStatus().getExitCode();
             if (logger.isInfoEnabled()) {
                 logger.info("scan() :: {} command returns status = {}", String.join(" ", cmd), exitValue);
             }
@@ -116,7 +116,7 @@ public class IwScanTool extends ScanTool implements IScanTool {
             // activate the interface
             String[] cmdIpLink = { "ip", "link", "set", this.ifaceName, "up" };
             CommandStatus commandStatus = this.executorService.execute(new Command(cmdIpLink));
-            if (commandStatus.getExitStatus() != 0) {
+            if (!commandStatus.getExitStatus().isSuccessful()) {
                 throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR,
                         "Failed to activate interface " + this.ifaceName);
             }
@@ -124,7 +124,7 @@ public class IwScanTool extends ScanTool implements IScanTool {
             // remove the previous ip address (needed on mgw)
             String[] cmdIpAddr = { "ip", "addr", "flush", "dev", this.ifaceName };
             commandStatus = this.executorService.execute(new Command(cmdIpAddr));
-            if (commandStatus.getExitStatus() != 0) {
+            if (!commandStatus.getExitStatus().isSuccessful()) {
                 throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR,
                         "Failed to remove address for interface " + this.ifaceName);
             }

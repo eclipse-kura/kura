@@ -74,7 +74,7 @@ public class IwlistScanTool implements IScanTool {
         Command ifconfigCommand = new Command(cmdIfconfig);
         ifconfigCommand.setErrorStream(new ByteArrayOutputStream());
         CommandStatus ifconfigCommandStatus = executorService.execute(ifconfigCommand);
-        if (ifconfigCommandStatus.getExitStatus() != 0 && logger.isErrorEnabled()) {
+        if (!ifconfigCommandStatus.getExitStatus().isSuccessful() && logger.isErrorEnabled()) {
             logger.error("failed to execute the {} command {}", String.join(" ", cmdIfconfig), new String(
                     ((ByteArrayOutputStream) ifconfigCommandStatus.getErrorStream()).toByteArray(), Charsets.UTF_8));
         }
@@ -91,11 +91,11 @@ public class IwlistScanTool implements IScanTool {
             iwListCommand.setTimeout(IwlistScanTool.this.timeout);
             iwListCommand.setOutputStream(new ByteArrayOutputStream());
             CommandStatus iwListCommandStatus = executorService.execute(iwListCommand);
-            int exitValue = iwListCommandStatus.getExitStatus();
+            int exitValue = iwListCommandStatus.getExitStatus().getExitCode();
             if (logger.isInfoEnabled()) {
                 logger.info("scan() :: {} command returns status = {}", String.join(" ", cmdIwList), exitValue);
             }
-            if (exitValue == 0) {
+            if (iwListCommandStatus.getExitStatus().isSuccessful()) {
                 IwlistScanTool.this.status = true;
                 IwlistScanTool.this.scanOutput = new ByteArrayInputStream(
                         ((ByteArrayOutputStream) iwListCommandStatus.getOutputStream()).toByteArray());

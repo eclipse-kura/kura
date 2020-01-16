@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -162,12 +162,12 @@ public class InstallImpl {
         Command command = new Command(new String[] { "chmod", "700", shFilePath });
         command.setTimeout(60);
         status = this.executorService.execute(command);
-        if (status.getExitStatus() != 0) {
+        if (!status.getExitStatus().isSuccessful()) {
             throw new KuraProcessExecutionErrorException("Failed to change file mode");
         }
 
         status = this.executorService.execute(new Command(new String[] { shFilePath }));
-        if (status.getExitStatus() != 0) {
+        if (!status.getExitStatus().isSuccessful()) {
             throw new KuraProcessExecutionErrorException("Failed to execute script");
         }
 
@@ -239,14 +239,14 @@ public class InstallImpl {
         Command command = new Command(new String[] { "chmod", "700", fileEntryPath });
         command.setTimeout(60);
         status = this.executorService.execute(command);
-        if (status.getExitStatus() != 0) {
+        if (!status.getExitStatus().isSuccessful()) {
             logger.error("Failed to change file mode");
         }
 
         String[] commandLine = { fileEntryPath };
         try {
             status = this.executorService.execute(new Command(commandLine));
-            if (status.getExitStatus() == 0) {
+            if (status.getExitStatus().isSuccessful()) {
                 sendSysUpdateSuccess(fileEntry.getName(), notificationPublisher);
             } else {
                 sendSysUpdateFailure(fileEntry.getName(), notificationPublisher);

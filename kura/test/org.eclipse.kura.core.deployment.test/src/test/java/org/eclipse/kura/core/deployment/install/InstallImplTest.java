@@ -33,6 +33,7 @@ import org.eclipse.kura.core.deployment.CloudDeploymentHandlerV2;
 import org.eclipse.kura.core.deployment.DeploymentPackageOptions;
 import org.eclipse.kura.core.deployment.InstallStatus;
 import org.eclipse.kura.core.deployment.download.DeploymentPackageDownloadOptions;
+import org.eclipse.kura.core.linux.executor.LinuxExitStatus;
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.executor.CommandStatus;
@@ -306,7 +307,7 @@ public class InstallImplTest {
     @Test
     public void testSendInstallConfirmations() throws IOException, KuraException {
         CloudDeploymentHandlerV2 callbackMock = mock(CloudDeploymentHandlerV2.class);
-        CommandStatus status = new CommandStatus(0);
+        CommandStatus status = new CommandStatus(new LinuxExitStatus(0));
         CommandExecutorService serviceMock = mock(CommandExecutorService.class);
         when(serviceMock.execute(anyObject())).thenReturn(status);
         String kuraDataDir = "/tmp";
@@ -386,7 +387,7 @@ public class InstallImplTest {
     @Test
     public void testSendInstallConfirmationsError() throws IOException, KuraException {
         CloudDeploymentHandlerV2 callbackMock = mock(CloudDeploymentHandlerV2.class);
-        CommandStatus status = new CommandStatus(1);
+        CommandStatus status = new CommandStatus(new LinuxExitStatus(1));
         CommandExecutorService serviceMock = mock(CommandExecutorService.class);
         when(serviceMock.execute(anyObject())).thenReturn(status);
         String kuraDataDir = "/tmp";

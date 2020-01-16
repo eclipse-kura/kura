@@ -134,7 +134,7 @@ public class IptablesConfig {
         if (this.executorService != null) {
             CommandStatus status = execute(new String[] { "iptables-save" });
             iptablesSave((ByteArrayOutputStream) status.getOutputStream());
-            exitValue = status.getExitStatus();
+            exitValue = status.getExitStatus().getExitCode();
         } else {
             logger.error(COMMAND_EXECUTOR_SERVICE_MESSAGE);
             throw new IllegalArgumentException(COMMAND_EXECUTOR_SERVICE_MESSAGE);
@@ -158,8 +158,7 @@ public class IptablesConfig {
         command.setErrorStream(err);
         command.setOutputStream(out);
         CommandStatus status = this.executorService.execute(command);
-        int exitValue = status.getExitStatus();
-        if (exitValue != 0) {
+        if (!status.getExitStatus().isSuccessful()) {
             if (logger.isErrorEnabled()) {
                 logger.error("command {} :: failed - {}", command, new String(err.toByteArray(), Charsets.UTF_8));
             }
@@ -177,7 +176,7 @@ public class IptablesConfig {
         try {
             if (this.executorService != null) {
                 CommandStatus status = execute(new String[] { "iptables-restore", filename });
-                exitValue = status.getExitStatus();
+                exitValue = status.getExitStatus().getExitCode();
             } else {
                 logger.error(COMMAND_EXECUTOR_SERVICE_MESSAGE);
                 throw new IllegalArgumentException(COMMAND_EXECUTOR_SERVICE_MESSAGE);

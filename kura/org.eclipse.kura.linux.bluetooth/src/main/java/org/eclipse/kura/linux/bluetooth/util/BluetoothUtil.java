@@ -90,7 +90,7 @@ public class BluetoothUtil {
         command.setOutputStream(outputStream);
         command.setErrorStream(errorStream);
         CommandStatus status = executorService.execute(command);
-        if (status.getExitStatus() == 0) {
+        if (status.getExitStatus().isSuccessful()) {
             // Check Input stream
             String[] outputLines = new String(outputStream.toByteArray(), Charsets.UTF_8).split("\n");
             // TODO: Pull more parameters from hciconfig?
@@ -152,7 +152,7 @@ public class BluetoothUtil {
         command.setOutputStream(outputStream);
         command.setErrorStream(errorStream);
         CommandStatus status = executorService.execute(command);
-        if (status.getExitStatus() == 0) {
+        if (status.getExitStatus().isSuccessful()) {
             String[] outputLines = new String(outputStream.toByteArray(), Charsets.UTF_8).split("\n");
             for (String line : outputLines) {
                 if (line.contains("UP")) {
@@ -183,7 +183,7 @@ public class BluetoothUtil {
         command.setOutputStream(outputStream);
         command.setErrorStream(errorStream);
         CommandStatus status = executorService.execute(command);
-        if (status.getExitStatus() == 0) {
+        if (status.getExitStatus().isSuccessful()) {
             outputString = new String(outputStream.toByteArray(), Charsets.UTF_8);
         } else {
             if (logger.isErrorEnabled()) {

@@ -59,7 +59,7 @@ public class DhcpClientManager {
         }
         logger.info("enable() :: Starting DHCP client for {}", interfaceName);
         CommandStatus status = this.executorService.execute(new Command(formCommand(interfaceName, true, true, true)));
-        if (status.getExitStatus() != 0) {
+        if (!status.getExitStatus().isSuccessful()) {
             throw new KuraProcessExecutionErrorException("Failed to start dhcp client on interface " + interfaceName);
         }
     }
@@ -82,7 +82,7 @@ public class DhcpClientManager {
         Command command = new Command(formReleaseCurrentLeaseCommand(interfaceName));
         command.setTimeout(60);
         CommandStatus status = this.executorService.execute(command);
-        if (status.getExitStatus() != 0) {
+        if (!status.getExitStatus().isSuccessful()) {
             throw new KuraProcessExecutionErrorException("Failed to release current lease");
         }
     }

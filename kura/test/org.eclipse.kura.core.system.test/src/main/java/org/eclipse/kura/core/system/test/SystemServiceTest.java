@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -308,7 +308,7 @@ public class SystemServiceTest {
         if (!osName.contains("indows")) {
             if (LINUX.equals(osName)) {
                 CommandStatus status = executorService.execute(new Command(new String[] { "dmidecode" }));
-                if (status.getExitStatus() != 0) {
+                if (!status.getExitStatus().isSuccessful()) {
                     assertEquals(UNKNOWN, modelName);
                 }
 
@@ -343,7 +343,7 @@ public class SystemServiceTest {
         if (!osName.contains("indows")) {
             if (LINUX.equals(osName)) {
                 CommandStatus status = executorService.execute(new Command(new String[] { "dmidecode" }));
-                if (status.getExitStatus() != 0) {
+                if (!status.getExitStatus().isSuccessful()) {
                     assertEquals(UNKNOWN, serialNumber);
                 }
                 // note: this assert works locally and on travis, but not on hudson

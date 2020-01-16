@@ -193,7 +193,7 @@ public class SystemAdminServiceImpl extends SuperSystemService implements System
         Command command = new Command(cmd);
         command.setTimeout(60);
         CommandStatus status = this.executorService.execute(command);
-        if (status.getExitStatus() != 0) {
+        if (!status.getExitStatus().isSuccessful()) {
             logger.error("failed to issue {} command", cmd[0]);
         }
     }

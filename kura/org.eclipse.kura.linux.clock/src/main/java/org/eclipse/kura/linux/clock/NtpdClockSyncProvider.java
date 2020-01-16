@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -46,7 +46,7 @@ public class NtpdClockSyncProvider extends AbstractNtpClockSyncProvider {
             Command command = new Command(new String[] { "ntpdate", "-t", Integer.toString(ntpTimeout), this.ntpHost });
             command.setTimeout(60);
             CommandStatus status = this.executorService.execute(command);
-            if (status.getExitStatus() == 0) {
+            if (status.getExitStatus().isSuccessful()) {
                 logger.info("System Clock Synchronized with {}", this.ntpHost);
                 this.lastSync = new Date();
 

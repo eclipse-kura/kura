@@ -131,11 +131,11 @@ public class IwCapabilityTool {
         Command command = new Command(commandLine);
         command.setOutputStream(new ByteArrayOutputStream());
         CommandStatus status = executorService.execute(command);
-        final int exitValue = status.getExitStatus();
 
-        if (exitValue != 0) {
-            logger.warn("error executing command --- {} --- exit value = {}", commandLine, exitValue);
-            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, commandLine, exitValue);
+        if (!status.getExitStatus().isSuccessful()) {
+            logger.warn("error executing command --- {} --- exit value = {}", commandLine,
+                    status.getExitStatus().getExitCode());
+            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, commandLine, status.getExitStatus().getExitCode());
         }
 
         return new ByteArrayInputStream(((ByteArrayOutputStream) status.getOutputStream()).toByteArray());

@@ -82,7 +82,7 @@ public class CommandServiceImpl implements CommandService {
         command.setOutputStream(new ByteArrayOutputStream());
         command.setErrorStream(new ByteArrayOutputStream());
         CommandStatus status = this.executorService.execute(command);
-        if (status.getExitStatus() == 0) {
+        if (status.getExitStatus().isSuccessful()) {
             return new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray(), Charsets.UTF_8);
         } else {
             return new String(((ByteArrayOutputStream) status.getErrorStream()).toByteArray(), Charsets.UTF_8);

@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.core.linux.executor.LinuxExitStatus;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.executor.CommandStatus;
 import org.junit.Test;
@@ -65,7 +66,7 @@ public class BluetoothProcessTest {
         baos.write("test\\r?\\n".getBytes(UTF_8));
         ByteArrayOutputStream baes = new ByteArrayOutputStream(3);
         baes.write("testerror\\r?\\n".getBytes(UTF_8));
-        CommandStatus status = new CommandStatus(0);
+        CommandStatus status = new CommandStatus(new LinuxExitStatus(0));
         status.setErrorStream(baes);
         status.setOutputStream(baos);
         status.setTimedout(false);

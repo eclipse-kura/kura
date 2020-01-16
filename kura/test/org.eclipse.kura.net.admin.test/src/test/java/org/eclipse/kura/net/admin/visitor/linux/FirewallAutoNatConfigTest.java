@@ -26,6 +26,7 @@ import java.util.Set;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.core.linux.executor.LinuxExitStatus;
 import org.eclipse.kura.core.net.EthernetInterfaceConfigImpl;
 import org.eclipse.kura.core.net.NetInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.NetworkConfiguration;
@@ -90,7 +91,7 @@ public class FirewallAutoNatConfigTest {
         NetworkConfiguration config = prepareNetworkConfiguration(intfName, destinationInterface, false, false);
 
         CommandExecutorService esMock = mock(CommandExecutorService.class);
-        CommandStatus status = new CommandStatus(0);
+        CommandStatus status = new CommandStatus(new LinuxExitStatus(0));
         when(esMock.execute(anyObject())).thenReturn(status);
 
         writer.setExecutorService(esMock);
@@ -260,7 +261,7 @@ public class FirewallAutoNatConfigTest {
         NetworkConfiguration config = prepareNetworkConfiguration(intfName, destinationInterface, false, true);
 
         CommandExecutorService esMock = mock(CommandExecutorService.class);
-        CommandStatus status = new CommandStatus(0);
+        CommandStatus status = new CommandStatus(new LinuxExitStatus(0));
         when(esMock.execute(anyObject())).thenReturn(status);
 
         reader.setExecutorService(esMock);
@@ -304,7 +305,7 @@ public class FirewallAutoNatConfigTest {
         NetworkConfiguration config = prepareNetworkConfiguration(intfName, destinationInterface, false, true);
 
         CommandExecutorService esMock = mock(CommandExecutorService.class);
-        CommandStatus status = new CommandStatus(0);
+        CommandStatus status = new CommandStatus(new LinuxExitStatus(0));
         when(esMock.execute(anyObject())).thenReturn(status);
 
         reader.setExecutorService(esMock);
@@ -416,7 +417,7 @@ public class FirewallAutoNatConfigTest {
         NetworkConfiguration config = prepareNetworkConfiguration(intfName, destinationInterface, false, true);
 
         CommandExecutorService esMock = mock(CommandExecutorService.class);
-        CommandStatus status = new CommandStatus(0);
+        CommandStatus status = new CommandStatus(new LinuxExitStatus(0));
         when(esMock.execute(anyObject())).thenReturn(status);
 
         reader.setExecutorService(esMock);

@@ -76,7 +76,7 @@ public class WpaSupplicantManager {
             Command command = new Command(wpaSupplicantCommand);
             command.setTimeout(60);
             CommandStatus status = this.executorService.execute(command);
-            int exitValue = status.getExitStatus();
+            int exitValue = status.getExitStatus().getExitCode();
             if (exitValue != 0 && exitValue != 255) {
                 logger.error("failed to start wpa_supplicant for the {} interface for unknown reason - errorCode={}",
                         interfaceName, exitValue);

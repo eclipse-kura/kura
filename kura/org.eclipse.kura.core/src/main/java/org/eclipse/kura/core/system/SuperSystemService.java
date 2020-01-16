@@ -32,7 +32,7 @@ public class SuperSystemService {
         command.setOutputStream(new ByteArrayOutputStream());
         command.setExecuteInAShell(runInShell);
         CommandStatus status = executorService.execute(command);
-        if (status.getExitStatus() == 0) {
+        if (status.getExitStatus().isSuccessful()) {
             response = new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray(), Charsets.UTF_8);
         } else {
             if (logger.isErrorEnabled()) {

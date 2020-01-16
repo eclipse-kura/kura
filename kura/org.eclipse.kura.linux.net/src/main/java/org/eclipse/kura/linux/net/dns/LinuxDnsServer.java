@@ -165,7 +165,7 @@ public abstract class LinuxDnsServer {
         }
         // Start named
         CommandStatus status = this.executorService.execute(new Command(getDnsStartCommand()));
-        if (status.getExitStatus() == 0) {
+        if (status.getExitStatus().isSuccessful()) {
             logger.debug("DNS server started.");
             logger.trace("{}", this.dnsServerConfigIP4);
         } else {
@@ -176,7 +176,7 @@ public abstract class LinuxDnsServer {
     public void stop() throws KuraException {
         // Stop named
         CommandStatus status = this.executorService.execute(new Command(getDnsStopCommand()));
-        if (status.getExitStatus() == 0) {
+        if (status.getExitStatus().isSuccessful()) {
             logger.debug("DNS server stopped.");
             logger.trace("{}", this.dnsServerConfigIP4);
         } else {
@@ -188,7 +188,7 @@ public abstract class LinuxDnsServer {
     public void restart() throws KuraException {
         // Restart named
         CommandStatus status = this.executorService.execute(new Command(getDnsRestartCommand()));
-        if (status.getExitStatus() == 0) {
+        if (status.getExitStatus().isSuccessful()) {
             logger.debug("DNS server restarted.");
         } else {
             logger.debug("tried to kill DNS server for interface but it is not running");

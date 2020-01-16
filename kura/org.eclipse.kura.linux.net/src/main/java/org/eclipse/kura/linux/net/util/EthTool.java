@@ -66,10 +66,9 @@ public class EthTool implements LinkTool {
         command.setTimeout(60);
         command.setOutputStream(new ByteArrayOutputStream());
         CommandStatus status = this.executorService.execute(command);
-        boolean result = status.getExitStatus() == 0;
         parse(new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray(), Charsets.UTF_8));
 
-        return result;
+        return status.getExitStatus().isSuccessful();
     }
 
     private void parse(String commandOutput) {

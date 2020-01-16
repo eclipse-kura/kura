@@ -47,13 +47,12 @@ public class IwLinkTool extends LinkToolImpl implements LinkTool {
         command.setTimeout(60);
         command.setOutputStream(new ByteArrayOutputStream());
         CommandStatus status = this.executorService.execute(command);
-        int exitValue = status.getExitStatus();
-        if (exitValue != 0) {
-            logger.warn("The iwconfig returned with exit value {}", exitValue);
-            return false;
+        if (status.getExitStatus().isSuccessful()) {
+            parse(new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray(), Charsets.UTF_8));
+        } else {
+            logger.warn("The iwconfig returned with exit value {}", status.getExitStatus().getExitCode());
         }
-        parse(new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray(), Charsets.UTF_8));
-        return true;
+        return status.getExitStatus().isSuccessful();
     }
 
     private boolean parse(String commandOutput) {

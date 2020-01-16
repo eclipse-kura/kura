@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -76,7 +76,7 @@ public class WpaSupplicantManager {
             Command command = new Command(wpaSupplicantCommand);
             command.setTimeout(60);
             CommandStatus status = this.executorService.execute(command);
-            int exitValue = (Integer) status.getExitStatus().getExitValue();
+            int exitValue = (Integer) status.getExitStatus().getExitCode();
             if (exitValue != 0 && exitValue != 255) {
                 logger.error("failed to start wpa_supplicant for the {} interface for unknown reason - errorCode={}",
                         interfaceName, exitValue);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -211,7 +211,7 @@ public class LinuxDns {
             Command command = new Command(new String[] { "mv", DNS_FILE_NAME, BACKUP_DNS_FILE_NAME });
             command.setTimeout(COMMAND_TIMEOUT);
             CommandStatus status = executorService.execute(command);
-            if ((Integer) status.getExitStatus().getExitValue() != 0) {
+            if (!status.getExitStatus().isSuccessful()) {
                 logger.error("Failed to move the {} file to {}. The 'mv' command has failed ...", DNS_FILE_NAME,
                         BACKUP_DNS_FILE_NAME);
                 throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, "Failed to backup DNS file " + DNS_FILE_NAME);
@@ -225,7 +225,7 @@ public class LinuxDns {
         Command command = new Command(new String[] { "ln", "-sf", sPppDnsFileName, DNS_FILE_NAME });
         command.setTimeout(COMMAND_TIMEOUT);
         CommandStatus status = executorService.execute(command);
-        if ((Integer) status.getExitStatus().getExitValue() != 0) {
+        if (!status.getExitStatus().isSuccessful()) {
             logger.error("failed to create symbolic link: {} -> {}", DNS_FILE_NAME, sPppDnsFileName);
             throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR,
                     "failed to create symbolic link to " + sPppDnsFileName);
@@ -240,7 +240,7 @@ public class LinuxDns {
             Command command = new Command(new String[] { "rm", DNS_FILE_NAME });
             command.setTimeout(COMMAND_TIMEOUT);
             CommandStatus status = executorService.execute(command);
-            if ((Integer) status.getExitStatus().getExitValue() != 0) {
+            if (!status.getExitStatus().isSuccessful()) {
                 logger.error("failed to delete {} symlink that points to {}", DNS_FILE_NAME, pppDnsFilename);
                 throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR,
                         "failed to delete " + DNS_FILE_NAME + " symlink that points to " + pppDnsFilename);
@@ -263,7 +263,7 @@ public class LinuxDns {
         Command command = new Command(new String[] { "mv", BACKUP_DNS_FILE_NAME, DNS_FILE_NAME });
         command.setTimeout(COMMAND_TIMEOUT);
         CommandStatus status = executorService.execute(command);
-        if ((Integer) status.getExitStatus().getExitValue() != 0) {
+        if (!status.getExitStatus().isSuccessful()) {
             logger.error("failed to restore {} to {}", BACKUP_DNS_FILE_NAME, DNS_FILE_NAME);
             throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR,
                     "failed to restore " + BACKUP_DNS_FILE_NAME + " to " + DNS_FILE_NAME);
@@ -276,7 +276,7 @@ public class LinuxDns {
         Command command = new Command(new String[] { "touch", DNS_FILE_NAME });
         command.setTimeout(COMMAND_TIMEOUT);
         CommandStatus status = executorService.execute(command);
-        if ((Integer) status.getExitStatus().getExitValue() != 0) {
+        if (!status.getExitStatus().isSuccessful()) {
             logger.error("failed to create empty {}", DNS_FILE_NAME);
             throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, "failed to create empty " + DNS_FILE_NAME);
         } else {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -74,7 +74,7 @@ public class IwlistScanTool implements IScanTool {
         Command ifconfigCommand = new Command(cmdIfconfig);
         ifconfigCommand.setErrorStream(new ByteArrayOutputStream());
         CommandStatus ifconfigCommandStatus = executorService.execute(ifconfigCommand);
-        if ((Integer) ifconfigCommandStatus.getExitStatus().getExitValue() != 0 && logger.isErrorEnabled()) {
+        if (!ifconfigCommandStatus.getExitStatus().isSuccessful() && logger.isErrorEnabled()) {
             logger.error("failed to execute the {} command {}", String.join(" ", cmdIfconfig), new String(
                     ((ByteArrayOutputStream) ifconfigCommandStatus.getErrorStream()).toByteArray(), Charsets.UTF_8));
         }
@@ -91,11 +91,11 @@ public class IwlistScanTool implements IScanTool {
             iwListCommand.setTimeout(IwlistScanTool.this.timeout);
             iwListCommand.setOutputStream(new ByteArrayOutputStream());
             CommandStatus iwListCommandStatus = executorService.execute(iwListCommand);
-            int exitValue = (Integer) iwListCommandStatus.getExitStatus().getExitValue();
+            int exitValue = iwListCommandStatus.getExitStatus().getExitCode();
             if (logger.isInfoEnabled()) {
                 logger.info("scan() :: {} command returns status = {}", String.join(" ", cmdIwList), exitValue);
             }
-            if (exitValue == 0) {
+            if (iwListCommandStatus.getExitStatus().isSuccessful()) {
                 IwlistScanTool.this.status = true;
                 IwlistScanTool.this.scanOutput = new ByteArrayInputStream(
                         ((ByteArrayOutputStream) iwListCommandStatus.getOutputStream()).toByteArray());

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -55,12 +55,12 @@ public class RouteServiceImpl implements RouteService {
         Command command = new Command(commandLine);
         command.setTimeout(60);
         CommandStatus status = this.executorService.execute(command);
-        int exitValue = (Integer) status.getExitStatus().getExitValue();
-        if (exitValue != 0) {
+        if (!status.getExitStatus().isSuccessful()) {
             if (logger.isErrorEnabled()) {
                 logger.error("Error adding static Route: {}", String.join(" ", commandLine));
             }
-            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, String.join(" ", commandLine), exitValue);
+            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, String.join(" ", commandLine),
+                    status.getExitStatus().getExitCode());
         }
 
         if (destination instanceof IP4Address) {
@@ -147,7 +147,7 @@ public class RouteServiceImpl implements RouteService {
         command.setTimeout(60);
         command.setOutputStream(new ByteArrayOutputStream());
         CommandStatus status = this.executorService.execute(command);
-        if ((Integer) status.getExitStatus().getExitValue() != 0) {
+        if (!status.getExitStatus().isSuccessful()) {
             if (logger.isErrorEnabled()) {
                 logger.warn(FAILED_TO_EXECUTE_MSG, String.join(" ", commandLine));
             }
@@ -182,12 +182,12 @@ public class RouteServiceImpl implements RouteService {
         Command command = new Command(commandLine);
         command.setTimeout(60);
         CommandStatus status = this.executorService.execute(command);
-        int exitValue = (Integer) status.getExitStatus().getExitValue();
-        if (exitValue != 0) {
+        if (!status.getExitStatus().isSuccessful()) {
             if (logger.isErrorEnabled()) {
                 logger.error("Error removing static route: {}", String.join(" ", commandLine));
             }
-            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, String.join(" ", commandLine), exitValue);
+            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, String.join(" ", commandLine),
+                    status.getExitStatus().getExitCode());
         }
 
         if (destination instanceof IP4Address) {

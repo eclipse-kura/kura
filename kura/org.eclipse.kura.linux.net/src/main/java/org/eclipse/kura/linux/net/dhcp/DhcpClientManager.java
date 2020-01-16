@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -59,7 +59,7 @@ public class DhcpClientManager {
         }
         logger.info("enable() :: Starting DHCP client for {}", interfaceName);
         CommandStatus status = this.executorService.execute(new Command(formCommand(interfaceName, true, true, true)));
-        if ((Integer) status.getExitStatus().getExitValue() != 0) {
+        if (!status.getExitStatus().isSuccessful()) {
             throw new KuraProcessExecutionErrorException("Failed to start dhcp client on interface " + interfaceName);
         }
     }
@@ -83,7 +83,7 @@ public class DhcpClientManager {
         Command command = new Command(formReleaseCurrentLeaseCommand(interfaceName));
         command.setTimeout(60);
         CommandStatus status = this.executorService.execute(command);
-        if ((Integer) status.getExitStatus().getExitValue() != 0) {
+        if (!status.getExitStatus().isSuccessful()) {
             throw new KuraProcessExecutionErrorException("Failed to release current lease");
         }
     }

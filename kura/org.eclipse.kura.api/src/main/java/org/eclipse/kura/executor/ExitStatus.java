@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2019, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -14,7 +14,7 @@ package org.eclipse.kura.executor;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
- * This interface provides a method to retrieve the exit status of a system commands.
+ * This interface provides a method to retrieve the exit status of a system command.
  *
  * @noimplement This interface is not intended to be implemented by clients.
  */
@@ -22,10 +22,17 @@ import org.osgi.annotation.versioning.ProviderType;
 public interface ExitStatus {
 
     /**
-     * Return a value representing the exit status of a command or process
+     * Returns a value representing the exit status of a command or process
      * 
-     * @return an object that represents the exit status
+     * @return an integer that represents the exit code
      */
-    public Object getExitValue();
+    public int getExitCode();
+
+    /**
+     * Returns if a command or process is successful
+     * 
+     * @return a boolean that is true if the command is successful, false otherwise
+     */
+    public boolean isSuccessful();
 
 }

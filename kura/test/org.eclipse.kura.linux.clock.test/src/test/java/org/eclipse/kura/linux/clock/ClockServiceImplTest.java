@@ -30,7 +30,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.clock.ClockEvent;
-import org.eclipse.kura.core.linux.executor.LinuxExitValue;
+import org.eclipse.kura.core.linux.executor.LinuxExitStatus;
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.executor.CommandStatus;
@@ -182,7 +182,7 @@ public class ClockServiceImplTest {
         assumeTrue("Only run this test on Linux", System.getProperty("os.name").matches("[Ll]inux"));
         assumeTrue("Only run this test as root", "root".equals(System.getProperty("user.name")));
 
-        CommandStatus status = new CommandStatus(new LinuxExitValue(0));
+        CommandStatus status = new CommandStatus(new LinuxExitStatus(0));
         CommandExecutorService serviceMock = mock(CommandExecutorService.class);
         when(serviceMock.execute(anyObject())).thenReturn(status);
         ClockServiceImpl svc = new ClockServiceImpl();
@@ -205,7 +205,7 @@ public class ClockServiceImplTest {
     public void testClockUpdateErrors() throws Throwable {
         // test the service's onClockUpdate() with clock update failures; test of proper logging, mostly
 
-        CommandStatus status = new CommandStatus(new LinuxExitValue(1));
+        CommandStatus status = new CommandStatus(new LinuxExitStatus(1));
         CommandExecutorService serviceMock = mock(CommandExecutorService.class);
         when(serviceMock.execute(anyObject())).thenReturn(status);
         ClockServiceImpl svc = new ClockServiceImpl();
@@ -228,7 +228,7 @@ public class ClockServiceImplTest {
     public void testClockUpdate() throws Throwable {
         // test the service's onClockUpdate()
 
-        CommandStatus status = new CommandStatus(new LinuxExitValue(0));
+        CommandStatus status = new CommandStatus(new LinuxExitStatus(0));
         CommandExecutorService serviceMock = mock(CommandExecutorService.class);
         when(serviceMock.execute(anyObject())).thenReturn(status);
         ClockServiceImpl svc = new ClockServiceImpl();

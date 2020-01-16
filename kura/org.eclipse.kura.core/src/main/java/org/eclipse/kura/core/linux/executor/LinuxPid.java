@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2019, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -15,14 +15,14 @@ import org.eclipse.kura.executor.Pid;
 
 public class LinuxPid implements Pid {
 
-    private Integer pid;
+    private int pid;
 
     public LinuxPid(int pid) {
         this.pid = pid;
     }
 
     @Override
-    public Object getPid() {
+    public int getPid() {
         return this.pid;
     }
 
@@ -35,7 +35,7 @@ public class LinuxPid implements Pid {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((pid == null) ? 0 : pid.hashCode());
+        result = prime * result + pid;
         return result;
     }
 
@@ -48,12 +48,7 @@ public class LinuxPid implements Pid {
         if (getClass() != obj.getClass())
             return false;
         LinuxPid other = (LinuxPid) obj;
-        if (pid == null) {
-            if (other.pid != null)
-                return false;
-        } else if (!pid.equals(other.pid))
-            return false;
-        return true;
+        return this.pid != other.pid;
     }
 
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Eurotech and/or its affiliates and others
+ * Copyright (c) 2019, 2020 Eurotech and/or its affiliates and others
  *
  *   All rights reserved. This program and the accompanying materials
  *   are made available under the terms of the Eclipse Public License v1.0
@@ -151,7 +151,7 @@ public class ExecutorServiceImplTest {
         command.setTimeout(10);
         command.setDirectory(TMP);
         CommandStatus status = service.execute(command);
-        assertTrue(((Integer) status.getExitStatus().getExitValue()) == 0);
+        assertTrue(status.getExitStatus().isSuccessful());
     }
 
     @Test
@@ -163,7 +163,7 @@ public class ExecutorServiceImplTest {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         command.setOutputStream(outputStream);
         CommandStatus status = service.execute(command);
-        assertTrue(((Integer) status.getExitStatus().getExitValue()) == 0);
+        assertTrue(status.getExitStatus().isSuccessful());
         assertEquals(TMP + "\n", new String(outputStream.toByteArray(), Charsets.UTF_8));
     }
 
@@ -180,7 +180,7 @@ public class ExecutorServiceImplTest {
         env.put("MYVAR", "MYVALUE");
         command.setEnvironment(env);
         CommandStatus status = service.execute(command);
-        assertTrue(((Integer) status.getExitStatus().getExitValue()) == 0);
+        assertTrue(status.getExitStatus().isSuccessful());
         assertTrue(new String(outputStream.toByteArray(), Charsets.UTF_8).contains("MYVAR=MYVALUE"));
     }
 
@@ -193,7 +193,7 @@ public class ExecutorServiceImplTest {
         long startTime = System.currentTimeMillis();
         CommandStatus status = service.execute(command);
         long stopTime = System.currentTimeMillis();
-        assertFalse(((Integer) status.getExitStatus().getExitValue()) == 0);
+        assertFalse(status.getExitStatus().isSuccessful());
         assertTrue(status.isTimedout());
         assertTrue(stopTime - startTime < 20000);
     }
@@ -204,7 +204,7 @@ public class ExecutorServiceImplTest {
         CountDownLatch lock = new CountDownLatch(1);
         AtomicInteger exitStatus = new AtomicInteger(1);
         Consumer<CommandStatus> callback = status -> {
-            exitStatus.set((Integer) status.getExitStatus().getExitValue());
+            exitStatus.set(status.getExitStatus().getExitCode());
             lock.countDown();
         };
 
@@ -213,12 +213,14 @@ public class ExecutorServiceImplTest {
         command.setDirectory(TMP);
         service.execute(command, callback);
 
+        boolean result = false;
         try {
-            lock.await(20, TimeUnit.SECONDS);
+            result = lock.await(20, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
 
+        assertTrue(result);
         assertTrue(exitStatus.get() == 0);
     }
 
@@ -230,7 +232,7 @@ public class ExecutorServiceImplTest {
         AtomicReference<String> stdout = new AtomicReference<String>("");
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         Consumer<CommandStatus> callback = status -> {
-            exitStatus.set((Integer) status.getExitStatus().getExitValue());
+            exitStatus.set(status.getExitStatus().getExitCode());
             stdout.set(new String(outputStream.toByteArray(), Charsets.UTF_8));
             lock.countDown();
         };
@@ -241,12 +243,14 @@ public class ExecutorServiceImplTest {
         command.setOutputStream(outputStream);
         service.execute(command, callback);
 
+        boolean result = false;
         try {
-            lock.await(20, TimeUnit.SECONDS);
+            result = lock.await(20, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
 
+        assertTrue(result);
         assertTrue(exitStatus.get() == 0);
         assertEquals(TMP + "\n", stdout.get());
     }
@@ -260,7 +264,7 @@ public class ExecutorServiceImplTest {
         AtomicReference<String> stdout = new AtomicReference<String>("");
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         Consumer<CommandStatus> callback = status -> {
-            exitStatus.set((Integer) status.getExitStatus().getExitValue());
+            exitStatus.set(status.getExitStatus().getExitCode());
             stdout.set(new String(outputStream.toByteArray(), Charsets.UTF_8));
             lock.countDown();
         };
@@ -274,12 +278,14 @@ public class ExecutorServiceImplTest {
         command.setEnvironment(env);
         service.execute(command, callback);
 
+        boolean result = false;
         try {
-            lock.await(20, TimeUnit.SECONDS);
+            result = lock.await(20, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
 
+        assertTrue(result);
         assertTrue(exitStatus.get() == 0);
         assertTrue(stdout.get().contains("MYVAR=MYVALUE"));
     }
@@ -292,7 +298,7 @@ public class ExecutorServiceImplTest {
         AtomicInteger exitStatus = new AtomicInteger(1);
         AtomicBoolean isTimedout = new AtomicBoolean(false);
         Consumer<CommandStatus> callback = status -> {
-            exitStatus.set((Integer) status.getExitStatus().getExitValue());
+            exitStatus.set(status.getExitStatus().getExitCode());
             isTimedout.set(status.isTimedout());
             lock.countDown();
         };
@@ -303,13 +309,15 @@ public class ExecutorServiceImplTest {
         long startTime = System.currentTimeMillis();
         service.execute(command, callback);
 
+        boolean result = false;
         try {
-            lock.await(20, TimeUnit.SECONDS);
+            result = lock.await(20, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
         long stopTime = System.currentTimeMillis();
 
+        assertTrue(result);
         assertFalse(exitStatus.get() == 0);
         assertTrue(isTimedout.get());
         assertTrue(stopTime - startTime < 20000);
@@ -423,7 +431,7 @@ public class ExecutorServiceImplTest {
     }
 
     @Test
-    public void getPids() throws IOException, InterruptedException {
+    public void getPids() throws InterruptedException {
         System.out.println(service.getClass().getSimpleName() + ": Test get command pids...");
         Consumer<CommandStatus> callback = status -> {
             // Do nothing...

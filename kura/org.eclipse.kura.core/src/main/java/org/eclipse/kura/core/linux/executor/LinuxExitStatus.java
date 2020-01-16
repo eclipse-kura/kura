@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2019, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -13,17 +13,22 @@ package org.eclipse.kura.core.linux.executor;
 
 import org.eclipse.kura.executor.ExitStatus;
 
-public class LinuxExitValue implements ExitStatus {
+public class LinuxExitStatus implements ExitStatus {
 
-    private Integer exitValue;
+    private int exitValue;
 
-    public LinuxExitValue(int exitStatus) {
+    public LinuxExitStatus(int exitStatus) {
         this.exitValue = exitStatus;
     }
 
     @Override
-    public Object getExitValue() {
+    public int getExitCode() {
         return this.exitValue;
+    }
+
+    @Override
+    public boolean isSuccessful() {
+        return this.exitValue == 0;
     }
 
     @Override
@@ -35,7 +40,7 @@ public class LinuxExitValue implements ExitStatus {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((exitValue == null) ? 0 : exitValue.hashCode());
+        result = prime * result + exitValue;
         return result;
     }
 
@@ -47,13 +52,8 @@ public class LinuxExitValue implements ExitStatus {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        LinuxExitValue other = (LinuxExitValue) obj;
-        if (exitValue == null) {
-            if (other.exitValue != null)
-                return false;
-        } else if (!exitValue.equals(other.exitValue))
-            return false;
-        return true;
+        LinuxExitStatus other = (LinuxExitStatus) obj;
+        return this.exitValue == other.exitValue;
     }
 
 }

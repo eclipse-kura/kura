@@ -13,11 +13,22 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.kura.KuraException;
+import org.eclipse.kura.configuration.ComponentConfiguration;
+import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.web.server.util.KuraExceptionHandler;
+import org.eclipse.kura.web.server.util.ServiceLocator;
+import org.eclipse.kura.web.shared.GwtKuraException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class GwtConfigComponent extends KuraBaseModel implements Serializable {
 
     private static final long serialVersionUID = -6388356998309026758L;
 
     private List<GwtConfigParameter> m_parameters;
+    
+    private static final java.util.logging.Logger logger = LoggerFactory.getLogger(GwtConfigComponent.class);
 
     public GwtConfigComponent() {
         this.m_parameters = new ArrayList<GwtConfigParameter>();
@@ -134,4 +145,20 @@ public class GwtConfigComponent extends KuraBaseModel implements Serializable {
         return null;
     }
 
+    public String getOCDComponentName(String factoryPid) throws GwtKuraException, KuraException {
+    	try {
+			ConfigurationService cs = ServiceLocator.getInstance().getService(ConfigurationService.class);
+			List<ComponentConfiguration> ocds = cs.getComponentConfigurations();
+			
+			for (ComponentConfiguration componentOCD : ocds) {
+				if (componentOCD.getPid().equals(factoryPid)) {
+					return componentOCD.getDefinition().getName();
+				}
+			}
+		} catch (Exception e) {
+			logger.warn("Failure to get meetatype information for factory pid {}", factoryPid);
+			KuraExceptionHandler.handle(e);
+		}
+    	return null;
+    }
 }

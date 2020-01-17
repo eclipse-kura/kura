@@ -34,7 +34,7 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
 
     private static final String PROP_CLOCK_PROVIDER = "clock.provider";
     private static final String PROP_CLOCK_SET_HWCLOCK = "clock.set.hwclock";
-    private static final String PROP_HWCLOCK_DEVICE = "hwclock.device";
+    private static final String PROP_RTC_FILENAME = "rtc.filename";
     private static final String PROP_ENABLED = "enabled";
 
     private static final Logger logger = LoggerFactory.getLogger(ClockServiceImpl.class);
@@ -209,7 +209,7 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
             updateHwClock = (Boolean) this.properties.get(PROP_CLOCK_SET_HWCLOCK);
         }
 
-        String path = (String) this.properties.getOrDefault(PROP_HWCLOCK_DEVICE, "/dev/rtc0");
+        String path = (String) this.properties.getOrDefault(PROP_RTC_FILENAME, "/dev/rtc0");
 
         if (updateHwClock) {
             Command command = new Command(new String[] { "hwclock", "--utc", "--systohc", "-f", path });

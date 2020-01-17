@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2019, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -47,8 +47,8 @@ public final class IwlistCapabilityTool {
         command.setTimeout(60);
         command.setOutputStream(new ByteArrayOutputStream());
         CommandStatus status = executorService.execute(command);
-        int exitValue = (Integer) status.getExitStatus().getExitValue();
-        if (exitValue != 0) {
+        int exitValue = (Integer) status.getExitStatus().getExitCode();
+        if (!status.getExitStatus().isSuccessful()) {
             logger.warn("error executing command --- iwlist --- exit value = {}", exitValue);
             throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, String.join(" ", cmd), exitValue);
         }

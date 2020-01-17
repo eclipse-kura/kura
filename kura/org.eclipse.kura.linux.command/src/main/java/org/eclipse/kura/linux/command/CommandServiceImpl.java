@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2019 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -82,7 +82,7 @@ public class CommandServiceImpl implements CommandService {
         command.setOutputStream(new ByteArrayOutputStream());
         command.setErrorStream(new ByteArrayOutputStream());
         CommandStatus status = this.executorService.execute(command);
-        if ((Integer) status.getExitStatus().getExitValue() == 0) {
+        if (status.getExitStatus().isSuccessful()) {
             return new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray(), Charsets.UTF_8);
         } else {
             return new String(((ByteArrayOutputStream) status.getErrorStream()).toByteArray(), Charsets.UTF_8);

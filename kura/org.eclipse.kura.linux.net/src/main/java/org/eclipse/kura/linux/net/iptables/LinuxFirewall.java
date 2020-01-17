@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -482,7 +482,7 @@ public class LinuxFirewall {
             logger.info("Running custom firewall script - {}", CUSTOM_FIREWALL_SCRIPT_NAME);
             Command command = new Command(new String[] { "sh", CUSTOM_FIREWALL_SCRIPT_NAME });
             CommandStatus status = this.executorService.execute(command);
-            if ((Integer) status.getExitStatus().getExitValue() != 0) {
+            if (!status.getExitStatus().isSuccessful()) {
                 throw new KuraProcessExecutionErrorException("Failed to apply custom firewall script");
             }
         }

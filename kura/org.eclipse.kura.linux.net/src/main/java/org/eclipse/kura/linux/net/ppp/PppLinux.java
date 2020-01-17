@@ -50,7 +50,7 @@ public class PppLinux {
         Command command = new Command(cmd);
         command.setTimeout(60);
         CommandStatus status = this.executorService.execute(command);
-        if ((Integer) status.getExitStatus().getExitValue() != 0) {
+        if (!status.getExitStatus().isSuccessful()) {
             throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, String.join(" ", cmd) + " command failed");
         }
     }

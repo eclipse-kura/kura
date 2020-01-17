@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -181,7 +181,7 @@ public class DhcpServerImpl implements DhcpServer {
         }
         // Start dhcpd
         CommandStatus status = this.executorService.execute(new Command(formDhcpdCommand()));
-        if ((Integer) status.getExitStatus().getExitValue() == 0) {
+        if (status.getExitStatus().isSuccessful()) {
             logger.debug("DHCP server started.");
             logger.trace(this.dhcpServerConfig4.toString());
             return true;

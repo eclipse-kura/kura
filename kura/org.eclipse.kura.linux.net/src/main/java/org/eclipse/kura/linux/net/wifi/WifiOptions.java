@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -72,7 +72,7 @@ public class WifiOptions {
         Command command = new Command(formIwDevInfoCommand(ifaceName));
         command.setTimeout(60);
         CommandStatus status = this.executorService.execute(command);
-        return (Integer) status.getExitStatus().getExitValue() == 0;
+        return status.getExitStatus().isSuccessful();
     }
 
     private boolean isWextDriverSupported(String ifaceName) {
@@ -85,7 +85,7 @@ public class WifiOptions {
         command.setTimeout(60);
         command.setOutputStream(new ByteArrayOutputStream());
         CommandStatus status = this.executorService.execute(command);
-        if ((Integer) status.getExitStatus().getExitValue() != 0) {
+        if (!status.getExitStatus().isSuccessful()) {
             if (logger.isWarnEnabled()) {
                 logger.warn(FAILED_TO_EXECUTE_MSG, String.join(" ", cmd));
             }

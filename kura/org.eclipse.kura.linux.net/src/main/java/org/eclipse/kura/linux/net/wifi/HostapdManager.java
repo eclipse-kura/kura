@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -58,10 +58,9 @@ public class HostapdManager {
             String[] launchHostapdCommand = formHostapdStartCommand(ifaceName);
             logger.info("starting hostapd for the {} interface --> {}", ifaceName, launchHostapdCommand);
             CommandStatus status = this.executorService.execute(new Command(launchHostapdCommand));
-            int exitValue = (Integer) status.getExitStatus().getExitValue();
-            if (exitValue != 0) {
+            if (!status.getExitStatus().isSuccessful()) {
                 logger.error("failed to start hostapd for the {} interface for unknown reason - errorCode={}",
-                        ifaceName, exitValue);
+                        ifaceName, status.getExitStatus().getExitCode());
                 throw KuraException.internalError("failed to start hostapd for unknown reason");
             }
             Thread.sleep(1000);

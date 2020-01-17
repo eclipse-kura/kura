@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2019, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -33,7 +33,7 @@ import org.apache.commons.exec.ExecuteWatchdog;
 import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.commons.exec.environment.EnvironmentUtils;
 import org.apache.commons.io.output.NullOutputStream;
-import org.eclipse.kura.core.linux.executor.LinuxExitValue;
+import org.eclipse.kura.core.linux.executor.LinuxExitStatus;
 import org.eclipse.kura.core.linux.executor.LinuxPid;
 import org.eclipse.kura.core.linux.executor.LinuxResultHandler;
 import org.eclipse.kura.core.linux.executor.LinuxSignal;
@@ -92,7 +92,7 @@ public class ExecutorUtil {
             killCommand.setTimeout(60);
             killCommand.setSignal(signal);
             CommandStatus commandStatus = executeUnprivileged(killCommand);
-            isStopped = (Integer) commandStatus.getExitStatus().getExitValue() == 0;
+            isStopped = commandStatus.getExitStatus().isSuccessful();
         }
         return isStopped;
     }
@@ -113,7 +113,7 @@ public class ExecutorUtil {
             killCommand.setTimeout(60);
             killCommand.setSignal(signal);
             CommandStatus commandStatus = executePrivileged(killCommand);
-            isStopped = (Integer) commandStatus.getExitStatus().getExitValue() == 0;
+            isStopped = commandStatus.getExitStatus().isSuccessful();
         }
         return isStopped;
     }
@@ -210,7 +210,7 @@ public class ExecutorUtil {
     }
 
     private static CommandStatus executeSync(Command command, CommandLine commandLine) {
-        CommandStatus commandStatus = new CommandStatus(new LinuxExitValue(0));
+        CommandStatus commandStatus = new CommandStatus(new LinuxExitStatus(0));
         commandStatus.setOutputStream(command.getOutputStream());
         commandStatus.setErrorStream(command.getErrorStream());
         commandStatus.setInputStream(command.getInputStream());
@@ -235,7 +235,7 @@ public class ExecutorUtil {
             exitStatus = 1;
             logger.error(COMMAND_MESSAGE + " {} failed", commandLine, e);
         } finally {
-            commandStatus.setExitStatus(new LinuxExitValue(exitStatus));
+            commandStatus.setExitStatus(new LinuxExitStatus(exitStatus));
             commandStatus.setTimedout(executor.getWatchdog().killedProcess());
         }
 
@@ -271,7 +271,7 @@ public class ExecutorUtil {
     }
 
     private static void executeAsync(Command command, CommandLine commandLine, Consumer<CommandStatus> callback) {
-        CommandStatus commandStatus = new CommandStatus(new LinuxExitValue(0));
+        CommandStatus commandStatus = new CommandStatus(new LinuxExitStatus(0));
         commandStatus.setOutputStream(command.getOutputStream());
         commandStatus.setErrorStream(command.getErrorStream());
         commandStatus.setInputStream(command.getInputStream());
@@ -292,7 +292,7 @@ public class ExecutorUtil {
                 executor.execute(commandLine, resultHandler);
             }
         } catch (IOException e) {
-            commandStatus.setExitStatus(new LinuxExitValue(1));
+            commandStatus.setExitStatus(new LinuxExitStatus(1));
             logger.error(COMMAND_MESSAGE + commandLine + " failed", e);
         }
     }

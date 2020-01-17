@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2019 Eurotech and others
+ * Copyright (c) 2011, 2020 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -190,14 +190,13 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
             Command command = new Command(new String[] { "date", "-s", "@" + Long.toString(time / 1000) });
             command.setTimeout(60);
             CommandStatus status = this.executorService.execute(command);
-            final int rc = (Integer) status.getExitStatus().getExitValue();
-            if (rc == 0) {
+            if (status.getExitStatus().isSuccessful()) {
                 bClockUpToDate = true;
                 logger.info("System Clock Updated to {}", new Date());
             } else {
                 logger.error(
                         "Unexpected error while updating System Clock - rc = {}, CommandLine:{}, it should've been {}",
-                        rc, command.getCommandLine(), new Date());
+                        status.getExitStatus().getExitCode(), command.getCommandLine(), new Date());
             }
         } else {
             bClockUpToDate = true;
@@ -212,11 +211,11 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
             Command command = new Command(new String[] { "hwclock", "--utc", "--systohc" });
             command.setTimeout(60);
             CommandStatus status = this.executorService.execute(command);
-            final int rc = (Integer) status.getExitStatus().getExitValue();
-            if (rc == 0) {
+            if (status.getExitStatus().isSuccessful()) {
                 logger.info("Hardware Clock Updated");
             } else {
-                logger.error("Unexpected error while updating Hardware Clock - rc = {}", rc);
+                logger.error("Unexpected error while updating Hardware Clock - rc = {}",
+                        status.getExitStatus().getExitCode());
             }
         }
 

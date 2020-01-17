@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -254,7 +254,7 @@ public class CommandCloudApp implements ConfigurableComponent, PasswordCommandSe
                 ByteArrayOutputStream errorStream = new ByteArrayOutputStream();
                 CommandStatus stats = executeProcessSync(defaultDir, cmdArray, environment, timeout, outputStream,
                         errorStream);
-                if (stats.getExitStatus() != null && (Integer) stats.getExitStatus().getExitValue() == 0) {
+                if (stats.getExitStatus() != null && stats.getExitStatus().isSuccessful()) {
                     return new String(((ByteArrayOutputStream) stats.getOutputStream()).toByteArray(), Charsets.UTF_8);
                 } else {
                     return new String(((ByteArrayOutputStream) stats.getErrorStream()).toByteArray(), Charsets.UTF_8);
@@ -398,9 +398,9 @@ public class CommandCloudApp implements ConfigurableComponent, PasswordCommandSe
         if (status.isTimedout()) {
             resp.setTimedout(true);
         } else {
-            resp.setExitCode((Integer) status.getExitStatus().getExitValue());
+            resp.setExitCode(status.getExitStatus().getExitCode());
             resp.setTimedout(false);
-            if ((Integer) status.getExitStatus().getExitValue() != 0) {
+            if (!status.getExitStatus().isSuccessful()) {
                 resp.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
                 resp.setExceptionMessage(new String(err.toByteArray(), Charsets.UTF_8));
             }

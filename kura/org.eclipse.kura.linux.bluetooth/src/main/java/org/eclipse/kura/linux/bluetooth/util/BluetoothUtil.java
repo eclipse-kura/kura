@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -90,7 +90,7 @@ public class BluetoothUtil {
         command.setOutputStream(outputStream);
         command.setErrorStream(errorStream);
         CommandStatus status = executorService.execute(command);
-        if ((Integer) status.getExitStatus().getExitValue() == 0) {
+        if (status.getExitStatus().isSuccessful()) {
             // Check Input stream
             String[] outputLines = new String(outputStream.toByteArray(), Charsets.UTF_8).split("\n");
             // TODO: Pull more parameters from hciconfig?
@@ -152,7 +152,7 @@ public class BluetoothUtil {
         command.setOutputStream(outputStream);
         command.setErrorStream(errorStream);
         CommandStatus status = executorService.execute(command);
-        if ((Integer) status.getExitStatus().getExitValue() == 0) {
+        if (status.getExitStatus().isSuccessful()) {
             String[] outputLines = new String(outputStream.toByteArray(), Charsets.UTF_8).split("\n");
             for (String line : outputLines) {
                 if (line.contains("UP")) {
@@ -183,7 +183,7 @@ public class BluetoothUtil {
         command.setOutputStream(outputStream);
         command.setErrorStream(errorStream);
         CommandStatus status = executorService.execute(command);
-        if ((Integer) status.getExitStatus().getExitValue() == 0) {
+        if (status.getExitStatus().isSuccessful()) {
             outputString = new String(outputStream.toByteArray(), Charsets.UTF_8);
         } else {
             if (logger.isErrorEnabled()) {

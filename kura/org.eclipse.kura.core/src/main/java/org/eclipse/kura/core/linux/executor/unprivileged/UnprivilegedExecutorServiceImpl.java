@@ -19,7 +19,7 @@ import java.util.function.Consumer;
 import org.apache.commons.io.Charsets;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.core.internal.linux.executor.ExecutorUtil;
-import org.eclipse.kura.core.linux.executor.LinuxExitValue;
+import org.eclipse.kura.core.linux.executor.LinuxExitStatus;
 import org.eclipse.kura.core.linux.executor.LinuxSignal;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandStatus;
@@ -119,7 +119,7 @@ public class UnprivilegedExecutorServiceImpl implements UnprivilegedExecutorServ
     }
 
     private CommandStatus buildErrorStatus() {
-        CommandStatus status = new CommandStatus(new LinuxExitValue(1));
+        CommandStatus status = new CommandStatus(new LinuxExitStatus(1));
         ByteArrayOutputStream err = new ByteArrayOutputStream();
         try {
             err.write("The commandLine cannot be empty or not defined".getBytes(Charsets.UTF_8));

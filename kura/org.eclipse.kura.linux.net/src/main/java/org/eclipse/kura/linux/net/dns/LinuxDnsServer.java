@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Eurotech and others
+ * Copyright (c) 2019, 2020 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -165,7 +165,7 @@ public abstract class LinuxDnsServer {
         }
         // Start named
         CommandStatus status = this.executorService.execute(new Command(getDnsStartCommand()));
-        if ((Integer) status.getExitStatus().getExitValue() == 0) {
+        if (status.getExitStatus().isSuccessful()) {
             logger.debug("DNS server started.");
             logger.trace("{}", this.dnsServerConfigIP4);
         } else {
@@ -176,7 +176,7 @@ public abstract class LinuxDnsServer {
     public void stop() throws KuraException {
         // Stop named
         CommandStatus status = this.executorService.execute(new Command(getDnsStopCommand()));
-        if ((Integer) status.getExitStatus().getExitValue() == 0) {
+        if (status.getExitStatus().isSuccessful()) {
             logger.debug("DNS server stopped.");
             logger.trace("{}", this.dnsServerConfigIP4);
         } else {
@@ -188,7 +188,7 @@ public abstract class LinuxDnsServer {
     public void restart() throws KuraException {
         // Restart named
         CommandStatus status = this.executorService.execute(new Command(getDnsRestartCommand()));
-        if ((Integer) status.getExitStatus().getExitValue() == 0) {
+        if (status.getExitStatus().isSuccessful()) {
             logger.debug("DNS server restarted.");
         } else {
             logger.debug("tried to kill DNS server for interface but it is not running");

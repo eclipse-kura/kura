@@ -38,13 +38,13 @@ public class LinuxResultHandler implements ExecuteResultHandler {
 
     @Override
     public void onProcessComplete(int exitValue) {
-        this.commandStatus.setExitStatus(new LinuxExitValue(exitValue));
+        this.commandStatus.setExitStatus(new LinuxExitStatus(exitValue));
         this.callback.accept(this.commandStatus);
     }
 
     @Override
     public void onProcessFailed(ExecuteException e) {
-        this.commandStatus.setExitStatus(new LinuxExitValue(e.getExitValue()));
+        this.commandStatus.setExitStatus(new LinuxExitStatus(e.getExitValue()));
         // The PrivilegedExecutorService kills a command with SIGTERM and exits with 143 when timedout; the
         // UnprivilegedExecutorService uses timeout command that exits with 124.
         if (e.getExitValue() == TIMEOUT_EXIT_VALUE || e.getExitValue() == SIGTERM_EXIT_VALUE) {

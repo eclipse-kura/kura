@@ -49,10 +49,10 @@ public class WpaSupplicantStatus {
         command.setTimeout(60);
         command.setOutputStream(new ByteArrayOutputStream());
         CommandStatus status = executorService.execute(command);
-        int exitValue = (Integer) status.getExitStatus().getExitValue();
-        if (exitValue != 0) {
+        if (!status.getExitStatus().isSuccessful()) {
             if (logger.isErrorEnabled()) {
-                logger.error("error executing command --- {} --- exit value = {}", String.join(" ", cmd), exitValue);
+                logger.error("error executing command --- {} --- exit value = {}", String.join(" ", cmd),
+                        status.getExitStatus().getExitCode());
             }
             throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, "Failed to get wpa supplicant status");
         }

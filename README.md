@@ -45,11 +45,11 @@ The Eclipse Installer based setup works for the main used platforms like Linux, 
 
 ### Prerequisites
 Before installing Kura, you need to have the following programs installed in your OS
-* JDK 1.8 
+* JDK 1.8
 * Maven 3.5.x
 
 #### Installing Prerequisites in Mac OS 
-Using Brew you can easily install both Java and Maven from the command line.
+Using [Brew](https://brew.sh/) you can easily install both Java and Maven from the command line.
 
 Use the following commands in a terminal
 
@@ -67,6 +67,20 @@ brew install maven@3.5
 Run `mvn -version`to ensure that Maven has been added to the PATH.
 If Maven cannot be found, try running `brew link maven@3.5 --force`.  
 
+#### Installing Prerequisites in Linux
+For Java
+```
+sudo apt install openjdk-8-jdk
+```
+For Maven
+Download the Maven X version from the [Apache Archives](https://archive.apache.org/dist/maven/maven-3/)
+
+Move the tarball to the X folder and run this command 
+
+```
+tar xzvf apache-maven-3.X.X-bin.tar.gz
+```
+Then add the bin folder to the PATH in .....
 
 ### Eclipse IDE
 The simplest way to start developing on Eclipse Kura is to use an Eclipse Installer based setup.

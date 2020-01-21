@@ -37,6 +37,7 @@ import org.eclipse.kura.web.client.util.PidTextBox;
 import org.eclipse.kura.web.client.util.request.Request;
 import org.eclipse.kura.web.client.util.request.RequestContext;
 import org.eclipse.kura.web.client.util.request.RequestQueue;
+import org.eclipse.kura.web.shared.IdHelper;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConsoleUserOptions;
 import org.eclipse.kura.web.shared.model.GwtSession;
@@ -735,7 +736,7 @@ public class EntryClassUi extends Composite implements Context {
         this.contentPanel.setVisible(true);
 
         if (item != null) {
-            setHeader(item.getComponentName(), item.getComponentDescription());
+            setHeader(item.getOCDComponentHeader(), item.getComponentDescription());
         }
 
         this.contentPanelBody.add(this.servicesUi);

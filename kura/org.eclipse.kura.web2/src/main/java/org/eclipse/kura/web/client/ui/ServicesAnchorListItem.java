@@ -13,10 +13,8 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui;
 
-import org.eclipse.kura.KuraException;
 import org.eclipse.kura.web.Console;
 import org.eclipse.kura.web.client.messages.Messages;
-import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.gwtbootstrap3.client.ui.AnchorListItem;
 import org.gwtbootstrap3.client.ui.Button;
@@ -39,12 +37,11 @@ public class ServicesAnchorListItem extends AnchorListItem {
     ServicesAnchorListItem instance;
     private static final Messages MSGS = GWT.create(Messages.class);
 
-    public ServicesAnchorListItem (GwtConfigComponent service, EntryClassUi mainUi) throws GwtKuraException, KuraException {
+    public ServicesAnchorListItem (GwtConfigComponent service, EntryClassUi mainUi) {
         super();
         this.ui = mainUi;
         this.item = service;
         this.instance = this;
-        String ocdComponentName = this.item.getOCDComponentName(this.item.getFactoryId());
 
         IconType icon = getIcon(item);
         if (icon == null) {
@@ -55,11 +52,7 @@ public class ServicesAnchorListItem extends AnchorListItem {
 	            imageTag.append(imageURL);
 	            imageTag.append("' height='14' width='14'/>");
 	            imageTag.append(" ");
-	            if (ocdComponentName != null) {
-	            	imageTag.append(ocdComponentName + " - " + this.item.getComponentName());
-	            } else {
-	            	imageTag.append(this.item.getFactoryId() + " - " + this.item.getComponentName());
-	            }
+	            imageTag.append(this.item.getComponentName());
 	            super.anchor.setHTML(imageTag.toString());
             } else {
                 super.setIcon(IconType.CHEVRON_CIRCLE_RIGHT);

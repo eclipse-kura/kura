@@ -13,13 +13,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.kura.KuraException;
-import org.eclipse.kura.configuration.ComponentConfiguration;
-import org.eclipse.kura.configuration.ConfigurationService;
-import org.eclipse.kura.web.server.util.KuraExceptionHandler;
-import org.eclipse.kura.web.server.util.ServiceLocator;
-import org.eclipse.kura.web.shared.GwtKuraException;
-import org.slf4j.Logger;
+import org.eclipse.kura.web.shared.IdHelper;
 import org.slf4j.LoggerFactory;
 
 public class GwtConfigComponent extends KuraBaseModel implements Serializable {
@@ -145,20 +139,7 @@ public class GwtConfigComponent extends KuraBaseModel implements Serializable {
         return null;
     }
 
-    public String getOCDComponentName(String factoryPid) throws GwtKuraException, KuraException {
-    	try {
-			ConfigurationService cs = ServiceLocator.getInstance().getService(ConfigurationService.class);
-			List<ComponentConfiguration> ocds = cs.getComponentConfigurations();
-			
-			for (ComponentConfiguration componentOCD : ocds) {
-				if (componentOCD.getPid().equals(factoryPid)) {
-					return componentOCD.getDefinition().getName();
-				}
-			}
-		} catch (Exception e) {
-			logger.warn("Failure to get metatype information for factory pid {}", factoryPid);
-			KuraExceptionHandler.handle(e);
-		}
-    	return null;
+    public String getOCDComponentHeader() {
+    	return IdHelper.getLastIdComponent(this.get("factoryPid")) + " - " + this.get("componentName");
     }
 }

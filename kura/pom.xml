@@ -266,12 +266,6 @@
                 <check.plugins.exist.remote>true</check.plugins.exist.remote>
             </properties>
         </profile>
-        <profile>
-             <id>check-style</id>
-             <properties>
-                 <skip.check.style>false</skip.check.style>
-             </properties>
-         </profile>
     </profiles>
 
     <repositories>

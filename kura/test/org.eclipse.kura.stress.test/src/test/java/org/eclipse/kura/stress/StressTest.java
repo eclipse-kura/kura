@@ -48,12 +48,12 @@ public class StressTest {
         stress.activate(componentContext, properties);
 
         // check Stress initialized correctly
-        assertNotNull(TestUtil.getFieldValue(stress, "m_properties"));
-        assertEquals(properties, TestUtil.getFieldValue(stress, "m_properties"));
+        assertNotNull(TestUtil.getFieldValue(stress, "properties"));
+        assertEquals(properties, TestUtil.getFieldValue(stress, "properties"));
 
-        ScheduledExecutorService worker = (ScheduledExecutorService) TestUtil.getFieldValue(stress, "m_worker");
+        ScheduledExecutorService worker = (ScheduledExecutorService) TestUtil.getFieldValue(stress, "worker");
         @SuppressWarnings("unchecked")
-        List<ScheduledFuture<?>> taskList = (List<ScheduledFuture<?>>) TestUtil.getFieldValue(stress, "m_handle");
+        List<ScheduledFuture<?>> taskList = (List<ScheduledFuture<?>>) TestUtil.getFieldValue(stress, "handle");
         assertEquals(properties.get(HEAP_THREADS_PROP_NAME), taskList.size());
 
         // let the stress run for a while
@@ -87,7 +87,7 @@ public class StressTest {
 
         stress.deactivate(componentContext);
 
-        ScheduledExecutorService worker = (ScheduledExecutorService) TestUtil.getFieldValue(stress, "m_worker");
+        ScheduledExecutorService worker = (ScheduledExecutorService) TestUtil.getFieldValue(stress, "worker");
         worker.awaitTermination(1, TimeUnit.SECONDS);
         assertTrue("Stress not shutdown properly", worker.isShutdown());
     }
@@ -108,11 +108,11 @@ public class StressTest {
         stress.updated(propertiesUpdated);
 
         // check Stress updated correctly
-        assertEquals(propertiesUpdated, TestUtil.getFieldValue(stress, "m_properties"));
+        assertEquals(propertiesUpdated, TestUtil.getFieldValue(stress, "properties"));
 
-        ScheduledExecutorService worker = (ScheduledExecutorService) TestUtil.getFieldValue(stress, "m_worker");
+        ScheduledExecutorService worker = (ScheduledExecutorService) TestUtil.getFieldValue(stress, "worker");
         @SuppressWarnings("unchecked")
-        List<ScheduledFuture<?>> taskList = (List<ScheduledFuture<?>>) TestUtil.getFieldValue(stress, "m_handle");
+        List<ScheduledFuture<?>> taskList = (List<ScheduledFuture<?>>) TestUtil.getFieldValue(stress, "handle");
 
         // let the stress run for a while
         Thread.sleep(1000);

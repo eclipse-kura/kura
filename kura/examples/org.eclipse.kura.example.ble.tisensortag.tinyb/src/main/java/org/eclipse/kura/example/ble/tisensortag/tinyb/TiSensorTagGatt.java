@@ -15,6 +15,10 @@ import java.util.UUID;
 
 public class TiSensorTagGatt {
 
+    private TiSensorTagGatt() {
+
+    }
+
     // These values are for TI CC2541 and TI CC2650
     // Refer to http://processors.wiki.ti.com/images/archive/a/a8/20130111154127!BLE_SensorTag_GATT_Server.pdf for the
     // CC2541

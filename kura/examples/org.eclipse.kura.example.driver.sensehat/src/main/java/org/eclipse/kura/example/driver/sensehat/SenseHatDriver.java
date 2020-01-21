@@ -50,7 +50,7 @@ public class SenseHatDriver implements Driver, ConfigurableComponent, JoystickEv
     private static SenseHatInterface senseHatInterface;
     private static AtomicInteger senseHatInterfaceRefCnt = new AtomicInteger(0);
 
-    private Map<Resource, Set<ChannelListenerRegistration>> channelListeners = new HashMap<>();
+    private final Map<Resource, Set<ChannelListenerRegistration>> channelListeners = new HashMap<>();
 
     public void bindSenseHat(final SenseHat senseHat) {
         this.senseHat = senseHat;
@@ -81,7 +81,7 @@ public class SenseHatDriver implements Driver, ConfigurableComponent, JoystickEv
 
     public void activate(final Map<String, Object> properties) {
         logger.info("Activating SenseHat Driver...");
-        getSensehatInterface(senseHat);
+        getSensehatInterface(this.senseHat);
         senseHatInterface.addJoystickEventListener(this);
         logger.info("Activating SenseHat Driver... Done");
     }
@@ -179,13 +179,13 @@ public class SenseHatDriver implements Driver, ConfigurableComponent, JoystickEv
         @Override
         public List<ChannelRecord> execute() throws ConnectionException {
 
-            senseHatInterface.runReadRequest(readRequest);
-            return Collections.unmodifiableList(readRequest.getRecords());
+            senseHatInterface.runReadRequest(this.readRequest);
+            return Collections.unmodifiableList(this.readRequest.getRecords());
         }
 
         @Override
         public List<ChannelRecord> getChannelRecords() {
-            return Collections.unmodifiableList(readRequest.getRecords());
+            return Collections.unmodifiableList(this.readRequest.getRecords());
         }
 
         @Override
@@ -326,7 +326,7 @@ public class SenseHatDriver implements Driver, ConfigurableComponent, JoystickEv
     @Override
     public void onJoystickEvent(Resource event, long timestamp) {
         final TypedValue<?> value = TypedValues.newLongValue(timestamp);
-        final Set<ChannelListenerRegistration> listeners = channelListeners.get(event);
+        final Set<ChannelListenerRegistration> listeners = this.channelListeners.get(event);
         if (listeners == null) {
             return;
         }
@@ -353,26 +353,31 @@ public class SenseHatDriver implements Driver, ConfigurableComponent, JoystickEv
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + ((channelName == null) ? 0 : channelName.hashCode());
-            result = prime * result + ((listener == null) ? 0 : listener.hashCode());
+            result = prime * result + (this.channelName == null ? 0 : this.channelName.hashCode());
+            result = prime * result + (this.listener == null ? 0 : this.listener.hashCode());
             return result;
         }
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj)
+            if (this == obj) {
                 return true;
-            if (obj == null)
+            }
+            if (obj == null) {
                 return false;
-            if (getClass() != obj.getClass())
+            }
+            if (getClass() != obj.getClass()) {
                 return false;
+            }
             ChannelListenerRegistration other = (ChannelListenerRegistration) obj;
-            if (channelName == null) {
-                if (other.channelName != null)
+            if (this.channelName == null) {
+                if (other.channelName != null) {
                     return false;
-            } else if (!channelName.equals(other.channelName))
+                }
+            } else if (!this.channelName.equals(other.channelName)) {
                 return false;
-            return listener != other.listener;
+            }
+            return this.listener != other.listener;
         }
     }
 

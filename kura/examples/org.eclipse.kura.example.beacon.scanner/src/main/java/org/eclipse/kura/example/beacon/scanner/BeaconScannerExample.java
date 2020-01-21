@@ -37,8 +37,8 @@ public class BeaconScannerExample implements ConfigurableComponent, BluetoothBea
     private static final String DEFAULT_COMPANY_CODE = "004c";
 
     // Configurable State
-    private String adapterName;		// eg. hci0
-    private int rateLimit;			// eg. 5000ms
+    private String adapterName; // eg. hci0
+    private int rateLimit; // eg. 5000ms
     private String companyCode;
     private Boolean enableScanning;
 

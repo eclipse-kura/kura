@@ -306,7 +306,7 @@ public class ExampleSerialPublisher implements ConfigurableComponent, CloudSubsc
                             this.cloudPublisher.publish(message);
                             logger.info("Published message: {}", payload);
                         } catch (Exception e) {
-                            logger.error("Cannot publish message: {}",message,  e);
+                            logger.error("Cannot publish message: {}", message,  e);
                         }
 
                         sb = new StringBuilder();

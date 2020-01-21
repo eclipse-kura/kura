@@ -10,15 +10,12 @@
 package org.eclipse.kura.wire.devel;
 
 import java.util.Base64;
-import java.util.Base64.Decoder;
 
 import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
 
 public final class DataTypeHelper {
-
-    private static final Decoder decoder = Base64.getDecoder();
 
     private DataTypeHelper() {
         throw new IllegalAccessError();
@@ -33,7 +30,7 @@ public final class DataTypeHelper {
         case FLOAT:
             return TypedValues.newFloatValue(Float.parseFloat(valueString));
         case BYTE_ARRAY:
-            return TypedValues.newByteArrayValue(decoder.decode(valueString));
+            return TypedValues.newByteArrayValue(Base64.getDecoder().decode(valueString));
         case DOUBLE:
             return TypedValues.newDoubleValue(Double.parseDouble(valueString));
         case STRING:

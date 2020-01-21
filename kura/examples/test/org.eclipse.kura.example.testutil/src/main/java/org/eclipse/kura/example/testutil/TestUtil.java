@@ -20,6 +20,10 @@ import org.slf4j.LoggerFactory;
  */
 public class TestUtil {
 
+    private TestUtil() {
+
+    }
+
     private static final Logger logger = LoggerFactory.getLogger(TestUtil.class);
 
     private static Field getField(Object svc, String fieldName) throws NoSuchFieldException {

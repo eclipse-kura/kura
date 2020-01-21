@@ -62,8 +62,8 @@ public abstract class AbstractSimplePublisher implements ConfigurableComponent {
 
         // create new filter and instance
 
-        final String cloudServiceFilter = makeCloudServiceFilter(properties);
-        this.camel = createCamelRunner(cloudServiceFilter);
+        final String cloudServiceFilterTmp = makeCloudServiceFilter(properties);
+        this.camel = createCamelRunner(cloudServiceFilterTmp);
 
         // set routes
 
@@ -85,15 +85,15 @@ public abstract class AbstractSimplePublisher implements ConfigurableComponent {
     public void updated(final Map<String, Object> properties) throws Exception {
         logger.info("Updating: {}", properties);
 
-        final String cloudServiceFilter = makeCloudServiceFilter(properties);
-        if (!this.cloudServiceFilter.equals(cloudServiceFilter)) {
+        final String cloudServiceFilterTmp = makeCloudServiceFilter(properties);
+        if (!this.cloudServiceFilter.equals(cloudServiceFilterTmp)) {
             // update the routes and the filter
 
             // stop the camel context first
             this.camel.stop();
 
             // create a new camel runner, with new dependencies
-            this.camel = createCamelRunner(cloudServiceFilter);
+            this.camel = createCamelRunner(cloudServiceFilterTmp);
 
             // set the routes
             this.camel.setRoutes(fromProperties(properties));

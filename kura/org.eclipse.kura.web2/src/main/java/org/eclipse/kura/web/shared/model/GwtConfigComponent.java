@@ -156,7 +156,7 @@ public class GwtConfigComponent extends KuraBaseModel implements Serializable {
 				}
 			}
 		} catch (Exception e) {
-			logger.warn("Failure to get meetatype information for factory pid {}", factoryPid);
+			logger.warn("Failure to get metatype information for factory pid {}", factoryPid);
 			KuraExceptionHandler.handle(e);
 		}
     	return null;

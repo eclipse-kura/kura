@@ -28,7 +28,7 @@ public class GwtPasswordAuthenticationServiceImpl extends OsgiRemoteServiceServl
         implements GwtPasswordAuthenticationService {
 
     private static final String UI_LOGIN_FAILURE_MESSAGE = "UI Login - Failure - Login failed for user: {}, request IP: {}";
-    
+
     private static final Logger logger = LoggerFactory.getLogger(GwtPasswordAuthenticationServiceImpl.class);
     private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
 

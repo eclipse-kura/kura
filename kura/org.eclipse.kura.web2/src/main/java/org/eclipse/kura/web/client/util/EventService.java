@@ -33,7 +33,7 @@ public final class EventService {
     private static final EventService instance = new EventService();
 
     private final GwtEventServiceAsync gwtEventService = GWT.create(GwtEventService.class);
-    private HashMap<String, LinkedList<Handler>> subscribedHandlers = new HashMap<>();
+    private final HashMap<String, LinkedList<Handler>> subscribedHandlers = new HashMap<>();
     private long lastEventTimestamp = 0;
     private Timer resendTimer;
 
@@ -48,13 +48,14 @@ public final class EventService {
     }
 
     private EventService() {
-        ((ServiceDefTarget) gwtEventService).setRpcRequestBuilder(new TimeoutRequestBuilder());
-        gwtEventService.getLastEventTimestamp(new AsyncCallback<String>() {
+        ((ServiceDefTarget) this.gwtEventService).setRpcRequestBuilder(new TimeoutRequestBuilder());
+        this.gwtEventService.getLastEventTimestamp(new AsyncCallback<String>() {
 
             @Override
             public void onSuccess(String result) {
-                lastEventTimestamp = Long.parseLong(result);
-                gwtEventService.getNextEvents(Long.toString(lastEventTimestamp), eventCallback);
+                EventService.this.lastEventTimestamp = Long.parseLong(result);
+                EventService.this.gwtEventService.getNextEvents(Long.toString(EventService.this.lastEventTimestamp),
+                        EventService.this.eventCallback);
             }
 
             @Override
@@ -75,23 +76,24 @@ public final class EventService {
 
             stopResendTimer();
 
-            gwtEventService.getNextEvents(Long.toString(lastEventTimestamp), eventCallback);
+            EventService.this.gwtEventService.getNextEvents(Long.toString(EventService.this.lastEventTimestamp),
+                    EventService.this.eventCallback);
         }
 
         @Override
         public void onFailure(Throwable caught) {
             startResendTimer(ON_FAILURE_RESEND_DELAY);
         }
-        
+
         private void processEvent(GwtEventInfo event) {
 
             if (event == null) {
                 return;
             }
 
-            lastEventTimestamp = Long.parseLong(event.getTimestamp());
+            EventService.this.lastEventTimestamp = Long.parseLong(event.getTimestamp());
 
-            LinkedList<Handler> topicHandlers = subscribedHandlers.get(event.getTopic());
+            LinkedList<Handler> topicHandlers = EventService.this.subscribedHandlers.get(event.getTopic());
 
             if (topicHandlers != null) {
                 for (Handler handler : topicHandlers) {
@@ -99,26 +101,27 @@ public final class EventService {
                 }
             }
         }
-        
+
         private void startResendTimer(int timeout) {
             stopResendTimer();
 
-            resendTimer = new Timer() {
+            EventService.this.resendTimer = new Timer() {
 
                 @Override
                 public void run() {
-                    gwtEventService.getNextEvents(Long.toString(lastEventTimestamp), eventCallback);
+                    EventService.this.gwtEventService.getNextEvents(Long.toString(EventService.this.lastEventTimestamp),
+                            EventService.this.eventCallback);
                 }
             };
-            resendTimer.schedule(timeout);
+            EventService.this.resendTimer.schedule(timeout);
         }
-        
+
         private void stopResendTimer() {
-            if (resendTimer != null) {
-                resendTimer.cancel();
+            if (EventService.this.resendTimer != null) {
+                EventService.this.resendTimer.cancel();
             }
 
-            resendTimer = null;
+            EventService.this.resendTimer = null;
         }
     };
 
@@ -139,6 +142,7 @@ public final class EventService {
     }
 
     public interface Handler {
+
         public void handleEvent(GwtEventInfo eventInfo);
     }
 }

@@ -284,7 +284,7 @@ public class LinuxProcessUtil {
     /**
      * This method takes a pid and returns a boolean that defines if the corresponding process is running or not in the
      * host system.
-     * 
+     *
      * @param pid
      *            integer representing the process id that has to be verified.
      * @return true if the process in running in the system, false otherwise.

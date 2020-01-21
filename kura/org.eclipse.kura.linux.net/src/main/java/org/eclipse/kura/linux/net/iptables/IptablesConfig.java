@@ -259,7 +259,7 @@ public class IptablesConfig {
                 }
             }
             if (this.autoNatRules != null && !this.autoNatRules.isEmpty()) {
-                List<NatPostroutingChainRule> appliedNatPostroutingChainRules = new ArrayList<NatPostroutingChainRule>();
+                List<NatPostroutingChainRule> appliedNatPostroutingChainRules = new ArrayList<>();
                 for (NATRule autoNatRule : this.autoNatRules) {
                     boolean found = false;
                     NatPostroutingChainRule natPostroutingChainRule = autoNatRule.getNatPostroutingChainRule();

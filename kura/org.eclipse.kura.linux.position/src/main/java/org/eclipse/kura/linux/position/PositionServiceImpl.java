@@ -265,7 +265,8 @@ public class PositionServiceImpl
         final Measurement track = new Measurement(java.lang.Math.toRadians(0), Unit.rad);
 
         this.staticPosition = new Position(latitude, longitude, altitude, speed, track);
-        this.staticNmeaPosition = new NmeaPosition(latitudeDeg, longitudeDeg, altitudeNmea, 0, 0, 0, 0, 0, 0, 0, 0, 0, (char)0, (char)0, (char)0);
+        this.staticNmeaPosition = new NmeaPosition(latitudeDeg, longitudeDeg, altitudeNmea, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                (char) 0, (char) 0, (char) 0);
     }
 
     private GpsDevice openGpsDevice(CommURI uri) {

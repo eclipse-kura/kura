@@ -64,13 +64,7 @@ public class CamelRunner {
     public static ContextFactory createOsgiFactory(final BundleContext bundleContext) {
         Objects.requireNonNull(bundleContext);
 
-        return new ContextFactory() {
-
-            @Override
-            public CamelContext createContext(final Registry registry) {
-                return new OsgiDefaultCamelContext(bundleContext, registry);
-            }
-        };
+        return registry -> new OsgiDefaultCamelContext(bundleContext, registry);
     }
 
     /**
@@ -83,13 +77,7 @@ public class CamelRunner {
     public static RegistryFactory createOsgiRegistry(final BundleContext bundleContext) {
         Objects.requireNonNull(bundleContext);
 
-        return new RegistryFactory() {
-
-            @Override
-            public Registry createRegistry() {
-                return new OsgiServiceRegistry(bundleContext);
-            }
-        };
+        return () -> new OsgiServiceRegistry(bundleContext);
     }
 
     public static RegistryFactory createOsgiRegistry(final BundleContext bundleContext,
@@ -100,27 +88,23 @@ public class CamelRunner {
             return createOsgiRegistry(bundleContext);
         }
 
-        return new RegistryFactory() {
+        return () -> {
+            final List<Registry> registries = new LinkedList<>();
 
-            @Override
-            public Registry createRegistry() {
-                final List<Registry> registries = new LinkedList<>();
+            // add simple registry
 
-                // add simple registry
+            final SimpleRegistry simple = new SimpleRegistry();
+            simple.putAll(services);
 
-                final SimpleRegistry simple = new SimpleRegistry();
-                simple.putAll(services);
+            registries.add(simple);
 
-                registries.add(simple);
+            // add OSGi registry
 
-                // add OSGi registry
+            registries.add(new OsgiServiceRegistry(bundleContext));
 
-                registries.add(new OsgiServiceRegistry(bundleContext));
+            // return composite
 
-                // return composite
-
-                return new CompositeRegistry(registries);
-            }
+            return new CompositeRegistry(registries);
         };
     }
 
@@ -359,13 +343,7 @@ public class CamelRunner {
         }
 
         public static ServiceConsumer<CloudService, CamelContext> addAsCloudComponent(final String componentName) {
-            return new ServiceConsumer<CloudService, CamelContext>() {
-
-                @Override
-                public void consume(CamelContext context, CloudService service) {
-                    context.addComponent(componentName, new KuraCloudComponent(context, service));
-                }
-            };
+            return (context, service) -> context.addComponent(componentName, new KuraCloudComponent(context, service));
         }
 
         /**
@@ -385,7 +363,7 @@ public class CamelRunner {
 
         /**
          * Add a context lifecylce listener.
-         * 
+         *
          * @param listener
          *            The listener to add
          * @return the builder instance
@@ -409,21 +387,21 @@ public class CamelRunner {
          * @return the new instance
          */
         public CamelRunner build() {
-            final List<BeforeStart> beforeStarts = new ArrayList<>(this.beforeStarts);
-            final List<ServiceDependency<?, CamelContext>> dependencies = new ArrayList<>(this.dependencies);
+            final List<BeforeStart> beforeStartsTemp = new ArrayList<>(this.beforeStarts);
+            final List<ServiceDependency<?, CamelContext>> dependenciesTemp = new ArrayList<>(this.dependencies);
 
             if (this.disableJmx) {
-                beforeStarts.add(camelContext -> camelContext.disableJMX());
+                beforeStartsTemp.add(CamelContext::disableJMX);
             }
             if (this.shutdownTimeout > 0) {
-                final int shutdownTimeout = this.shutdownTimeout;
-                beforeStarts.add(camelContext -> {
+                final int shutdownTimeoutTemp = this.shutdownTimeout;
+                beforeStartsTemp.add(camelContext -> {
                     camelContext.getShutdownStrategy().setTimeUnit(TimeUnit.SECONDS);
-                    camelContext.getShutdownStrategy().setTimeout(shutdownTimeout);
+                    camelContext.getShutdownStrategy().setTimeout(shutdownTimeoutTemp);
                 });
             }
-            return new CamelRunner(this.registryFactory, this.contextFactory, beforeStarts, this.lifecycleListeners,
-                    dependencies);
+            return new CamelRunner(this.registryFactory, this.contextFactory, beforeStartsTemp, this.lifecycleListeners,
+                    dependenciesTemp);
         }
     }
 
@@ -512,14 +490,14 @@ public class CamelRunner {
 
         final Registry registry = createRegistry();
 
-        final CamelContext context = createContext(registry);
-        beforeStart(context);
+        final CamelContext camelContext = createContext(registry);
+        beforeStart(camelContext);
 
         for (final ServiceDependency.Handle<CamelContext> dep : dependencies) {
-            dep.consume(context);
+            dep.consume(camelContext);
         }
 
-        this.context = context;
+        this.context = camelContext;
 
         this.routes.applyRoutes(this.context);
         this.context.start();
@@ -653,10 +631,10 @@ public class CamelRunner {
 
         this.routes = routes;
 
-        final CamelContext context = this.context;
-        if (context != null) {
+        final CamelContext camelContext = this.context;
+        if (camelContext != null) {
             try {
-                this.routes.applyRoutes(context);
+                this.routes.applyRoutes(camelContext);
             } catch (final Exception e) {
                 throw new RuntimeException(e);
             }

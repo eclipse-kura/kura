@@ -15,7 +15,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class GwtWifiWirelessModeModel extends KuraBaseModel {
-    
+
     private static final Logger logger = Logger.getLogger(GwtWifiWirelessModeModel.class.getSimpleName());
 
     private static final long serialVersionUID = -6095963356000494663L;

@@ -20,7 +20,7 @@ public abstract class LinkToolImpl {
     private int signal = 0;
 
     public String getIfaceName() {
-        return interfaceName;
+        return this.interfaceName;
     }
 
     public void setIfaceName(String interfaceName) {
@@ -28,7 +28,7 @@ public abstract class LinkToolImpl {
     }
 
     public boolean isLinkDetected() {
-        return linkDetected;
+        return this.linkDetected;
     }
 
     public void setLinkDetected(boolean linkDetected) {
@@ -36,7 +36,7 @@ public abstract class LinkToolImpl {
     }
 
     public int getSpeed() {
-        return speed;
+        return this.speed;
     }
 
     public void setSpeed(int speed) {
@@ -44,7 +44,7 @@ public abstract class LinkToolImpl {
     }
 
     public String getDuplex() {
-        return duplex;
+        return this.duplex;
     }
 
     public void setDuplex(String duplex) {
@@ -52,7 +52,7 @@ public abstract class LinkToolImpl {
     }
 
     public int getSignal() {
-        return signal;
+        return this.signal;
     }
 
     public void setSignal(int signal) {

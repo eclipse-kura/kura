@@ -66,7 +66,7 @@ public class Tocd implements OCD {
     protected String name;
     protected String description;
     protected String id;
-    private final Map<QName, String> otherAttributes = new HashMap<QName, String>();
+    private final Map<QName, String> otherAttributes = new HashMap<>();
 
     /**
      * Gets the value of the ad property.
@@ -94,14 +94,14 @@ public class Tocd implements OCD {
     @Override
     public List<AD> getAD() {
         if (this.ad == null) {
-            this.ad = new ArrayList<Tad>();
+            this.ad = new ArrayList<>();
         }
-        return new ArrayList<AD>(this.ad);
+        return new ArrayList<>(this.ad);
     }
 
     public void addAD(Tad tad) {
         if (this.ad == null) {
-            this.ad = new ArrayList<Tad>();
+            this.ad = new ArrayList<>();
         }
 
         this.ad.add(tad);
@@ -133,14 +133,14 @@ public class Tocd implements OCD {
     @Override
     public List<Icon> getIcon() {
         if (this.icon == null) {
-            this.icon = new ArrayList<Ticon>();
+            this.icon = new ArrayList<>();
         }
-        return new ArrayList<Icon>(this.icon);
+        return new ArrayList<>(this.icon);
     }
 
     public void setIcon(Ticon ti) {
         if (this.icon == null) {
-            this.icon = new ArrayList<Ticon>();
+            this.icon = new ArrayList<>();
         }
         this.icon.add(ti);
     }
@@ -171,14 +171,14 @@ public class Tocd implements OCD {
      */
     public List<Object> getAny() {
         if (this.any == null) {
-            this.any = new ArrayList<Object>();
+            this.any = new ArrayList<>();
         }
         return this.any;
     }
 
     public void setAny(Object o) {
         if (this.any == null) {
-            this.any = new ArrayList<Object>();
+            this.any = new ArrayList<>();
         }
         this.any.add(o);
     }

@@ -34,47 +34,47 @@ import org.slf4j.LoggerFactory;
 
 public class RemoteTargetTest {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(RemoteTargetTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(RemoteTargetTest.class);
 
     private static final String TEST_HEADER = "Unit-Test";
 
-    private SystemService m_systemService;
-    private CloudService m_cloudService;
-    private CloudClient m_cloudClient;
+    private SystemService systemService;
+    private CloudService cloudService;
+    private CloudClient cloudClient;
 
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
-    private ConfigurationAdmin m_configAdmin;
+    private ConfigurationAdmin configAdmin;
     private BundleTracker<?> bundleTracker;
     private TestExtender testExtender;
 
     public void setSystemService(SystemService systemService) {
-        this.m_systemService = systemService;
+        this.systemService = systemService;
     }
 
     public void unsetSystemService(SystemService systemService) {
-        this.m_systemService = null;
+        this.systemService = null;
     }
 
     public void setCloudService(CloudService cloudService) {
-        this.m_cloudService = cloudService;
+        this.cloudService = cloudService;
         try {
-            this.m_cloudClient = cloudService.newCloudClient("RemoteTargetTest");
+            this.cloudClient = cloudService.newCloudClient("RemoteTargetTest");
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     public void unsetCloudService(CloudService cloudService) {
-        this.m_cloudService = null;
+        this.cloudService = null;
     }
 
     public void setConfigAdmin(ConfigurationAdmin configAdmin) {
-        this.m_configAdmin = configAdmin;
+        this.configAdmin = configAdmin;
     }
 
     public void unsetConfigAdmin(ConfigurationAdmin configAdmin) {
-        this.m_configAdmin = configAdmin;
+        this.configAdmin = configAdmin;
     }
 
     protected void activate(final ComponentContext componentContext) {
@@ -94,8 +94,8 @@ public class RemoteTargetTest {
     }
 
     private void runTests(ComponentContext componentContext) {
-        s_logger.debug("m_systemService.getPlatform(): " + this.m_systemService.getPlatform());
-        this.testExtender = new TestExtender(this.m_systemService.getPlatform(), componentContext.getBundleContext());
+        logger.debug("systemService.getPlatform(): " + this.systemService.getPlatform());
+        this.testExtender = new TestExtender(this.systemService.getPlatform(), componentContext.getBundleContext());
 
         this.bundleTracker = new BundleTracker<Object>(componentContext.getBundleContext(),
                 Bundle.RESOLVED | Bundle.ACTIVE | Bundle.INSTALLED, this.testExtender);
@@ -109,16 +109,16 @@ public class RemoteTargetTest {
                 if ("org.eclipse.kura.net.admin".equals(bundle.getSymbolicName())) {
                     netAdminBundle = bundle;
 
-                    s_logger.debug("Disabling network admin bundle");
+                    logger.debug("Disabling network admin bundle");
                     try {
                         netAdminBundle.stop();
                     } catch (BundleException e) {
-                        s_logger.warn("Could not stop net admin bundle", e);
+                        logger.warn("Could not stop net admin bundle", e);
                     }
                 }
             }
 
-            s_logger.debug("Starting tests");
+            logger.debug("Starting tests");
             startingTests();
 
             for (Bundle bundle : currentBundles) {
@@ -134,15 +134,15 @@ public class RemoteTargetTest {
             finishedTests();
 
             if (netAdminBundle != null) {
-                s_logger.debug("Re-enabling network admin bundle");
+                logger.debug("Re-enabling network admin bundle");
                 try {
                     netAdminBundle.start();
                 } catch (BundleException e) {
-                    s_logger.warn("Could not start net admin bundle", e);
+                    logger.warn("Could not start net admin bundle", e);
                 }
             }
 
-            s_logger.warn("Tests finished - shutting down");
+            logger.warn("Tests finished - shutting down");
             System.exit(0);
         }
 
@@ -197,7 +197,7 @@ public class RemoteTargetTest {
     private void startingTests() {
         // hijack the settings
         try {
-            Configuration mqttConfig = this.m_configAdmin
+            Configuration mqttConfig = this.configAdmin
                     .getConfiguration("org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport",  "?");
             Dictionary<String, Object> mqttProps = mqttConfig.getProperties();
             mqttProps.put("broker-url", "mqtt://broker-sandbox.everyware-cloud.com:1883/");
@@ -206,19 +206,19 @@ public class RemoteTargetTest {
             mqttProps.put("password", "PYtv3?s@");
             mqttConfig.update(mqttProps);
 
-            Configuration dataConfig = this.m_configAdmin.getConfiguration("org.eclipse.kura.data.DataService", "?");
+            Configuration dataConfig = this.configAdmin.getConfiguration("org.eclipse.kura.data.DataService", "?");
             Dictionary<String, Object> dataProps = dataConfig.getProperties();
             dataProps.put("connect.auto-on-startup", true);
             dataConfig.update(dataProps);
         } catch (Exception e) {
             e.printStackTrace();
-            s_logger.error("Failed to reconfigure the broker settings - failing out");
+            logger.error("Failed to reconfigure the broker settings - failing out");
             System.exit(-1);
         }
 
         // wait for connection?
-        while (!this.m_cloudService.isConnected()) {
-            s_logger.warn("waiting for the cloud client to connect");
+        while (!this.cloudService.isConnected()) {
+            logger.warn("waiting for the cloud client to connect");
             try {
                 Thread.sleep(1000);
             } catch (Exception e) {
@@ -228,7 +228,7 @@ public class RemoteTargetTest {
 
         KuraPayload payload = new KuraPayload();
         try {
-            this.m_cloudClient.publish("test/start", payload, 1, false);
+            this.cloudClient.publish("test/start", payload, 1, false);
         } catch (KuraException e) {
             e.printStackTrace();
         }
@@ -236,8 +236,8 @@ public class RemoteTargetTest {
 
     private void finishedTests() {
         // wait for connection??
-        while (!this.m_cloudService.isConnected()) {
-            s_logger.warn("waiting for the cloud client to connect");
+        while (!this.cloudService.isConnected()) {
+            logger.warn("waiting for the cloud client to connect");
             try {
                 Thread.sleep(1000);
             } catch (Exception e) {
@@ -247,7 +247,7 @@ public class RemoteTargetTest {
 
         KuraPayload payload = new KuraPayload();
         try {
-            this.m_cloudClient.publish("test/finished", payload, 1, false);
+            this.cloudClient.publish("test/finished", payload, 1, false);
         } catch (KuraException e) {
             e.printStackTrace();
         }

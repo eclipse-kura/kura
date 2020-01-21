@@ -40,7 +40,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * <li>latitudeHemisphere : hemisphere of the latitude = N or S
  * <li>longitudeHemisphere : hemisphere of the longitude = E or W
  * </ul>
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 @ProviderType
@@ -223,7 +223,7 @@ public class NmeaPosition {
      * @since 2.0
      */
     public char getValidFix() {
-        return validFix;
+        return this.validFix;
     }
 
     /**
@@ -237,7 +237,7 @@ public class NmeaPosition {
      * @since 2.0
      */
     public char getLatitudeHemisphere() {
-        return latitudeHemisphere;
+        return this.latitudeHemisphere;
     }
 
     /**
@@ -251,7 +251,7 @@ public class NmeaPosition {
      * @since 2.0
      */
     public char getLongitudeHemisphere() {
-        return longitudeHemisphere;
+        return this.longitudeHemisphere;
     }
 
     /**

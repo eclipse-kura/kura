@@ -44,7 +44,7 @@ public class IwlistScanTool implements IScanTool {
     private static final Object lock = new Object();
     private String ifaceName;
     private int timeout;
-    private CommandExecutorService executorService;
+    private final CommandExecutorService executorService;
 
     private InputStream scanOutput;
     private boolean status;
@@ -73,7 +73,7 @@ public class IwlistScanTool implements IScanTool {
         String[] cmdIfconfig = { "ifconfig", this.ifaceName, "up" };
         Command ifconfigCommand = new Command(cmdIfconfig);
         ifconfigCommand.setErrorStream(new ByteArrayOutputStream());
-        CommandStatus ifconfigCommandStatus = executorService.execute(ifconfigCommand);
+        CommandStatus ifconfigCommandStatus = this.executorService.execute(ifconfigCommand);
         if (!ifconfigCommandStatus.getExitStatus().isSuccessful() && logger.isErrorEnabled()) {
             logger.error("failed to execute the {} command {}", String.join(" ", cmdIfconfig), new String(
                     ((ByteArrayOutputStream) ifconfigCommandStatus.getErrorStream()).toByteArray(), Charsets.UTF_8));
@@ -90,7 +90,7 @@ public class IwlistScanTool implements IScanTool {
             Command iwListCommand = new Command(cmdIwList);
             iwListCommand.setTimeout(IwlistScanTool.this.timeout);
             iwListCommand.setOutputStream(new ByteArrayOutputStream());
-            CommandStatus iwListCommandStatus = executorService.execute(iwListCommand);
+            CommandStatus iwListCommandStatus = this.executorService.execute(iwListCommand);
             int exitValue = iwListCommandStatus.getExitStatus().getExitCode();
             if (logger.isInfoEnabled()) {
                 logger.info("scan() :: {} command returns status = {}", String.join(" ", cmdIwList), exitValue);

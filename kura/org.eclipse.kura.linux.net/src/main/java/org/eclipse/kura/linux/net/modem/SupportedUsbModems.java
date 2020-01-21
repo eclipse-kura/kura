@@ -172,7 +172,7 @@ public class SupportedUsbModems {
         command.setOutputStream(new ByteArrayOutputStream());
 
         CommandStatus status = executorService.execute(command);
-        logger.debug("Called {} - rc = {}", commandLine, (Integer) status.getExitStatus().getExitCode());
+        logger.debug("Called {} - rc = {}", commandLine, status.getExitStatus().getExitCode());
 
         return IOUtils
                 .readLines(new ByteArrayInputStream(((ByteArrayOutputStream) command.getOutputStream()).toByteArray()));

@@ -45,8 +45,16 @@ package org.eclipse.kura.core.configuration.metatype;
  *
  */
 public enum Tscalar {
-    STRING("String"), LONG("Long"), DOUBLE("Double"), FLOAT("Float"), INTEGER("Integer"), BYTE("Byte"), CHAR(
-            "Char"), BOOLEAN("Boolean"), SHORT("Short"), PASSWORD("Password");
+    STRING("String"),
+    LONG("Long"),
+    DOUBLE("Double"),
+    FLOAT("Float"),
+    INTEGER("Integer"),
+    BYTE("Byte"),
+    CHAR("Char"),
+    BOOLEAN("Boolean"),
+    SHORT("Short"),
+    PASSWORD("Password");
 
     private final String value;
 

@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
@@ -44,7 +45,8 @@ import com.eclipsesource.jaxrs.provider.security.AuthorizationHandler;
 public class RestService
         implements ConfigurableComponent, AuthenticationHandler, AuthorizationHandler, ContainerResponseFilter {
 
-    private static final String REST_FAILURE_RECEIVED_UNAUTHORIZED_REQUEST = "Rest - Failure - Received unauthorized REST request. Method: {}, path: {}, request IP: {}";
+    private static final String REST_FAILURE_RECEIVED_UNAUTHORIZED_REQUEST = "Rest - Failure - "
+            + "Received unauthorized REST request. Method: {}, path: {}, request IP: {}";
     private static final Logger logger = LoggerFactory.getLogger(RestService.class);
     private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
 
@@ -55,7 +57,7 @@ public class RestService
     private Map<String, User> users;
 
     private CryptoService cryptoService;
-    
+
     @Context
     private HttpServletRequest sr;
 
@@ -89,16 +91,15 @@ public class RestService
     public Principal authenticate(ContainerRequestContext request) {
 
         String path = getRequestPath(request);
-        
+
         String requestIp = request.getHeaderString("X-FORWARDED-FOR");
         if (isNull(requestIp)) {
-            requestIp = sr.getRemoteAddr();
+            requestIp = this.sr.getRemoteAddr();
         }
 
         String authHeader = request.getHeaderString("Authorization");
         if (authHeader == null) {
-            auditLogger.warn(REST_FAILURE_RECEIVED_UNAUTHORIZED_REQUEST,
-                    request.getMethod(), path, requestIp);
+            auditLogger.warn(REST_FAILURE_RECEIVED_UNAUTHORIZED_REQUEST, request.getMethod(), path, requestIp);
             request.abortWith(UNAUTHORIZED_RESPONSE);
             return null;
         }
@@ -106,8 +107,7 @@ public class RestService
         StringTokenizer tokens = new StringTokenizer(authHeader);
         String authScheme = tokens.nextToken();
         if (!"Basic".equals(authScheme)) {
-            auditLogger.warn(REST_FAILURE_RECEIVED_UNAUTHORIZED_REQUEST,
-                    request.getMethod(), path, requestIp);
+            auditLogger.warn(REST_FAILURE_RECEIVED_UNAUTHORIZED_REQUEST, request.getMethod(), path, requestIp);
             request.abortWith(UNAUTHORIZED_RESPONSE);
             return null;
         }
@@ -128,9 +128,8 @@ public class RestService
             }
         } catch (Exception e) {
         }
-        
-        auditLogger.warn(REST_FAILURE_RECEIVED_UNAUTHORIZED_REQUEST,
-                request.getMethod(), path, requestIp);
+
+        auditLogger.warn(REST_FAILURE_RECEIVED_UNAUTHORIZED_REQUEST, request.getMethod(), path, requestIp);
         request.abortWith(UNAUTHORIZED_RESPONSE);
         return null;
     }

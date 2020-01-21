@@ -19,8 +19,8 @@ public class Constants {
     public static final int LABEL_WIDTH_INFO = 150;
 
     public static final String LABEL_MARGIN_TOP_SEPARATOR = "25px";
-    
+
     private Constants() {
-        
+
     }
 }

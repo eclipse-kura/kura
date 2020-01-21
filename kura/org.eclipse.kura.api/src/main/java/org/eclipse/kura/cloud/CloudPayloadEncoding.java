@@ -13,7 +13,7 @@ package org.eclipse.kura.cloud;
 
 /**
  * This enum specifies the supported payload encodings.
- * 
+ *
  * @since 1.2
  */
 public enum CloudPayloadEncoding {

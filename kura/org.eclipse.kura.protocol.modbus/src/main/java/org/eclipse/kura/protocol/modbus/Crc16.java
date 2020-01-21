@@ -17,7 +17,7 @@ package org.eclipse.kura.protocol.modbus;
 public class Crc16 {
 
     private Crc16() {
-    };
+    }
 
     /**
      * calculate the crc for the passed buffer

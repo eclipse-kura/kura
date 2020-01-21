@@ -28,7 +28,7 @@ public class Login implements EntryPoint {
 
     @Override
     public void onModuleLoad() {
-        gwtExtensionService.getLoginExtensions(new AsyncCallback<List<GwtClientExtensionBundle>>() {
+        this.gwtExtensionService.getLoginExtensions(new AsyncCallback<List<GwtClientExtensionBundle>>() {
 
             @Override
             public void onFailure(Throwable caught) {

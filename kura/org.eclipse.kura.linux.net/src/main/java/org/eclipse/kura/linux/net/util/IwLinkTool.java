@@ -25,7 +25,7 @@ public class IwLinkTool extends LinkToolImpl implements LinkTool {
 
     private static final Logger logger = LoggerFactory.getLogger(IwLinkTool.class);
 
-    private CommandExecutorService executorService;
+    private final CommandExecutorService executorService;
 
     /**
      * constructor

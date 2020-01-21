@@ -1,31 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <parent>
         <groupId>org.eclipse.kura</groupId>
         <artifactId>target-platform</artifactId>
         <version>4.2.0-SNAPSHOT</version>
     </parent>
-
     <artifactId>org.usb4java</artifactId>
     <version>1.2.600-SNAPSHOT</version>
     <packaging>bundle</packaging>
-
     <name>usb4java</name>
     <description>usb4java libraries using libusb</description>
     <url>usb4java.org/</url>
-
     <properties>
         <maven.compiler.source>1.6</maven.compiler.source>
         <maven.compiler.target>1.6</maven.compiler.target>
     </properties>
-
     <dependencies>
-    
-    	<!--  
+        <!--  
         <dependency>
             <groupId>javax.usb</groupId>
             <artifactId>javax.usb.common</artifactId>
@@ -34,14 +26,13 @@
             <systemPath>${basedir}/src/lib/javax.usb.common-1.0.2.jar</systemPath>
         </dependency>
 		-->
-       <dependency>
+        <dependency>
             <groupId>org.usb4java</groupId>
             <artifactId>org.usb4java</artifactId>
             <version>1.2.0</version>
             <scope>system</scope>
             <systemPath>${basedir}/src/lib/usb4java-1.2.0.jar</systemPath>
         </dependency>
-        
         <dependency>
             <groupId>org.usb4java</groupId>
             <artifactId>org.usb4java.linux-arm</artifactId>
@@ -49,30 +40,26 @@
             <scope>system</scope>
             <systemPath>${basedir}/src/lib/libusb4java-1.2.0-linux-arm.jar</systemPath>
         </dependency>
-        
-         <dependency>
+        <dependency>
             <groupId>org.usb4java</groupId>
             <artifactId>org.usb4java.linux-x86_64</artifactId>
             <version>1.2.0</version>
             <scope>system</scope>
             <systemPath>${basedir}/src/lib/libusb4java-1.2.0-linux-x86_64.jar</systemPath>
         </dependency>
-
     </dependencies>
-
-
     <build>
-    <resources>
-      <resource>
-        <directory>src/main/resources</directory>
-      </resource>
-      <resource>
-        <directory>.</directory>
-        <includes>
-          <include>plugin.xml</include>
-        </includes>
-      </resource>
-    </resources>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+            <resource>
+                <directory>.</directory>
+                <includes>
+                    <include>plugin.xml</include>
+                </includes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -90,7 +77,7 @@
                 <version>2.3.5</version>
                 <extensions>true</extensions>
                 <configuration>
-		    <manifestLocation>META-INF</manifestLocation>
+                    <manifestLocation>META-INF</manifestLocation>
                     <instructions>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.name}</Bundle-Name>
@@ -111,57 +98,62 @@
                     </instructions>
                 </configuration>
             </plugin>
-            
-	    <plugin>
-        	<artifactId>maven-dependency-plugin</artifactId>
-        	<executions>
-        	  <execution>
-        	    <id>copy-dependencies</id>
-        	    <phase>package</phase>
-        	    <goals>
-        	      <goal>copy-dependencies</goal>
-        	    </goals>
-        	  </execution>
-        	</executions>
-	   </plugin>
-	   
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
         <pluginManagement>
-        	<plugins>
-        		<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
-        		<plugin>
-        			<groupId>org.eclipse.m2e</groupId>
-        			<artifactId>lifecycle-mapping</artifactId>
-        			<version>1.0.0</version>
-        			<configuration>
-        				<lifecycleMappingMetadata>
-        					<pluginExecutions>
-        						<pluginExecution>
-        							<pluginExecutionFilter>
-        								<groupId>
+            <plugins>
+                <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+                <plugin>
+                    <groupId>org.eclipse.m2e</groupId>
+                    <artifactId>lifecycle-mapping</artifactId>
+                    <version>1.0.0</version>
+                    <configuration>
+                        <lifecycleMappingMetadata>
+                            <pluginExecutions>
+                                <pluginExecution>
+                                    <pluginExecutionFilter>
+                                        <groupId>
         									org.apache.maven.plugins
         								</groupId>
-        								<artifactId>
+                                        <artifactId>
         									maven-dependency-plugin
         								</artifactId>
-        								<versionRange>
+                                        <versionRange>
         									[2.1,)
         								</versionRange>
-        								<goals>
-        									<goal>
+                                        <goals>
+                                            <goal>
         										copy-dependencies
         									</goal>
-        								</goals>
-        							</pluginExecutionFilter>
-        							<action>
-        								<ignore></ignore>
-        							</action>
-        						</pluginExecution>
-        					</pluginExecutions>
-        				</lifecycleMappingMetadata>
-        			</configuration>
-        		</plugin>
-        	</plugins>
+                                        </goals>
+                                    </pluginExecutionFilter>
+                                    <action>
+                                        <ignore/>
+                                    </action>
+                                </pluginExecution>
+                            </pluginExecutions>
+                        </lifecycleMappingMetadata>
+                    </configuration>
+                </plugin>
+            </plugins>
         </pluginManagement>
     </build>
 </project>

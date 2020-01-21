@@ -56,13 +56,13 @@ public class SubtreeSubscriptionManager implements ListenerRegistrationRegistry.
         this.client = client;
         this.registrations = registrations;
         this.subtreeRegistrations = new ListenerRegistrationRegistry();
-        this.subscriptionManager = new SubscriptionManager(options, client, queue, subtreeRegistrations);
+        this.subscriptionManager = new SubscriptionManager(options, client, queue, this.subtreeRegistrations);
         this.channelNameFormat = options.getSubtreeSubscriptionChannelNameFormat();
 
         synchronized (this) {
             registrations.addRegistrationItemListener(this);
-            registrations.getRegisteredListeners().values().stream().flatMap(Collection::stream).forEach(req -> this
-                    .registerChannelListener((TreeListenParams) req.getParameters(), req.getChannelListener()));
+            registrations.getRegisteredListeners().values().stream().flatMap(Collection::stream).forEach(
+                    req -> registerChannelListener((TreeListenParams) req.getParameters(), req.getChannelListener()));
         }
     }
 
@@ -94,7 +94,7 @@ public class SubtreeSubscriptionManager implements ListenerRegistrationRegistry.
 
             final ListenParams nodeParams = new SubtreeNodeListenParams(readValueId, subtreeParams);
 
-            final String channelName = channelNameFormat == ChannelNameFormat.BROWSE_PATH ? path
+            final String channelName = this.channelNameFormat == ChannelNameFormat.BROWSE_PATH ? path
                     : nodeId.get().toParseableString();
 
             requests.add(new ListenRequest(nodeParams, ChannelRecord.createReadRecord(channelName, DataType.STRING),
@@ -102,7 +102,7 @@ public class SubtreeSubscriptionManager implements ListenerRegistrationRegistry.
 
         });
 
-        pendingVisits.add(new PendingVisit(visit, listener));
+        this.pendingVisits.add(new PendingVisit(visit, listener));
 
         visit.getFuture() //
                 .thenAccept(ok -> {
@@ -112,7 +112,7 @@ public class SubtreeSubscriptionManager implements ListenerRegistrationRegistry.
                         }
 
                         logger.info("subscribing to {} nodes", requests.size());
-                        subtreeRegistrations.registerListeners(requests);
+                        this.subtreeRegistrations.registerListeners(requests);
                     }
                 }) //
                 .whenComplete((ok, err) -> removeVisit(visit));
@@ -123,7 +123,7 @@ public class SubtreeSubscriptionManager implements ListenerRegistrationRegistry.
             throw new IllegalStateException("already closed");
         }
 
-        pendingVisits.removeIf(v -> {
+        this.pendingVisits.removeIf(v -> {
             if (v.listener == listener) {
                 v.visit.stop();
                 return true;
@@ -131,38 +131,38 @@ public class SubtreeSubscriptionManager implements ListenerRegistrationRegistry.
             return false;
         });
 
-        subtreeRegistrations.unregisterListener(listener);
+        this.subtreeRegistrations.unregisterListener(listener);
     }
 
     public synchronized CompletableFuture<Void> close() {
-        isClosed = true;
+        this.isClosed = true;
 
-        registrations.removeRegistrationItemListener(this);
+        this.registrations.removeRegistrationItemListener(this);
 
         final List<CompletableFuture<Void>> visitFutures = new ArrayList<>();
 
-        for (final PendingVisit pendingVisit : pendingVisits) {
+        for (final PendingVisit pendingVisit : this.pendingVisits) {
             pendingVisit.visit.stop();
             visitFutures.add(pendingVisit.visit.getFuture());
         }
 
-        pendingVisits.clear();
+        this.pendingVisits.clear();
 
         return CompletableFuture.allOf(visitFutures.toArray(new CompletableFuture<?>[visitFutures.size()])) //
-                .thenCompose(ok -> subscriptionManager.close());
+                .thenCompose(ok -> this.subscriptionManager.close());
     }
 
     private synchronized void removeVisit(final TreeVisit visit) {
-        pendingVisits.removeIf(v -> v.visit == visit);
+        this.pendingVisits.removeIf(v -> v.visit == visit);
     }
 
     private synchronized boolean isClosed() {
-        return isClosed;
+        return this.isClosed;
     }
 
     private TreeVisit visitSubtree(final SingleNodeListenParams rootParams,
             final BiConsumer<String, ReferenceDescription> visitor) {
-        final TreeVisit visit = new TreeVisit(client, rootParams.getReadValueId().getNodeId(), visitor);
+        final TreeVisit visit = new TreeVisit(this.client, rootParams.getReadValueId().getNodeId(), visitor);
 
         visit.run();
 
@@ -171,8 +171,8 @@ public class SubtreeSubscriptionManager implements ListenerRegistrationRegistry.
 
     private static class PendingVisit {
 
-        private TreeVisit visit;
-        private ChannelListener listener;
+        private final TreeVisit visit;
+        private final ChannelListener listener;
 
         public PendingVisit(final TreeVisit visit, final ChannelListener listener) {
             this.visit = visit;

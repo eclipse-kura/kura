@@ -54,6 +54,6 @@ public class GwtChannelRecord extends KuraBaseModel implements Serializable {
     }
 
     public StackTraceElement[] getExceptionStackTrace() {
-        return stackTrace;
+        return this.stackTrace;
     }
 }

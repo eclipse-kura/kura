@@ -4,9 +4,9 @@ import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * @noextend This class is not intended to be subclassed by clients.
- * 
+ *
  * @deprecated This class is deprecated in favor of {@link BluetoothLeIBeacon}
- * 
+ *
  */
 @ProviderType
 @Deprecated

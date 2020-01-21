@@ -12,6 +12,7 @@
 package org.eclipse.kura.cloud;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.cloudconnection.CloudConnectionManager;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**

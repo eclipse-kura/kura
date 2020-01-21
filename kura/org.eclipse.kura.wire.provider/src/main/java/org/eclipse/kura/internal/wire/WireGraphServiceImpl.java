@@ -430,7 +430,6 @@ public class WireGraphServiceImpl implements ConfigurableComponent, WireGraphSer
     private List<WireComponentConfiguration> getComponentsToCreate(
             List<WireComponentConfiguration> oldWireComponentConfigurations,
             List<WireComponentConfiguration> newWireComponentConfigurations) {
-        // TODO: test if it makes sense to fill the list with all the new and remove as far as a matching old is found;
         List<WireComponentConfiguration> componentsToCreate = new ArrayList<>();
 
         Set<String> oldPids = oldWireComponentConfigurations.stream().map(com -> com.getConfiguration().getPid())
@@ -597,7 +596,8 @@ public class WireGraphServiceImpl implements ConfigurableComponent, WireGraphSer
     private static Filter getWireComponentConfigurationFilter() {
         try {
             return FrameworkUtil.createFilter(
-                    "(|(objectClass=org.eclipse.kura.wire.WireComponent)(objectClass=org.eclipse.kura.wire.WireEmitter)(objectClass=org.eclipse.kura.wire.WireReceiver))");
+                    "(|(objectClass=org.eclipse.kura.wire.WireComponent)(objectClass=org.eclipse.kura.wire.WireEmitter)"
+                    + "(objectClass=org.eclipse.kura.wire.WireReceiver))");
         } catch (final Exception e) {
             logger.warn("failed to init wire component configuration filter", e);
             return null;

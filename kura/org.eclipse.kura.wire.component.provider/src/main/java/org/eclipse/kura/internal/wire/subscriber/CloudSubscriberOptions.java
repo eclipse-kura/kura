@@ -30,7 +30,7 @@ final class CloudSubscriberOptions {
     }
 
     Optional<String> getBodyProperty() {
-        final Object propertyRaw = properties.get(CONF_BODY_PROPERTY);
+        final Object propertyRaw = this.properties.get(CONF_BODY_PROPERTY);
 
         if (!(propertyRaw instanceof String)) {
             return Optional.empty();
@@ -47,7 +47,7 @@ final class CloudSubscriberOptions {
 
     DataType getBodyPropertyType() {
         try {
-            return DataType.valueOf((String) properties.get(CONF_BODY_PROPERTY_TYPE));
+            return DataType.valueOf((String) this.properties.get(CONF_BODY_PROPERTY_TYPE));
         } catch (final Exception e) {
             return DataType.BYTE_ARRAY;
         }

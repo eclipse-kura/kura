@@ -46,7 +46,7 @@ public class DataMessage {
         this.createdOn = b.createdOn;
         this.publishedOn = b.publishedOn;
         this.publishedMessageId = b.publishedMessageId;
-        ;
+
         this.confirmedOn = b.confirmedOn;
         this.payload = b.payload;
         this.priority = b.priority;

@@ -43,8 +43,7 @@ public class HttpServiceOptions {
     public HttpServiceOptions(final Map<String, Object> properties, final String kuraHome) {
         Property<String> httpsKeystorePathProp = new Property<>(PROP_HTTPS_KEYSTORE_PATH,
                 kuraHome + "/user/security/httpskeystore.ks");
-        
-        
+
         this.httpEnabled = HTTP_ENABLED.get(properties);
         this.httpPort = HTTP_PORT.get(properties);
         this.httpsEnabled = HTTPS_ENABLED.get(properties);
@@ -121,7 +120,7 @@ public class HttpServiceOptions {
         } else if (!this.httpsKeystorePath.equals(other.httpsKeystorePath)) {
             return false;
         }
-        
+
         boolean result = true;
         if (this.httpsPort != other.httpsPort) {
             result = false;

@@ -52,8 +52,8 @@ public class LogTabUi extends Composite {
 
     public LogTabUi() {
         initWidget(uiBinder.createAndBindUi(this));
-        
-        logLabel.setText(MSGS.logDownload());
+
+        this.logLabel.setText(MSGS.logDownload());
 
         this.execute.setText(MSGS.download());
         this.execute.addClickHandler(

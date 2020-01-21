@@ -66,7 +66,7 @@ public class Tdesignate implements Designate {
     protected String bundle;
     protected Boolean optional;
     protected Boolean merge;
-    private final Map<QName, String> otherAttributes = new HashMap<QName, String>();
+    private final Map<QName, String> otherAttributes = new HashMap<>();
 
     /**
      * Gets the value of the object property.
@@ -119,7 +119,7 @@ public class Tdesignate implements Designate {
      */
     public List<Object> getAny() {
         if (this.any == null) {
-            this.any = new ArrayList<Object>();
+            this.any = new ArrayList<>();
         }
         return this.any;
     }

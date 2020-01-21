@@ -71,10 +71,10 @@ public class Request<T> {
     }
 
     public T getParameters() {
-        return params;
+        return this.params;
     }
 
     public ChannelRecord getRecord() {
-        return record;
+        return this.record;
     }
 }

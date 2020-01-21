@@ -170,7 +170,7 @@ final class OpcUaOptions {
     String getKeyStorePath() {
         String applicationCert = null;
         final Object certificate = this.properties.get(APPLICATION_CERTIFICATE);
-        if (nonNull(certificate) && (certificate instanceof String)) {
+        if (nonNull(certificate) && certificate instanceof String) {
             applicationCert = certificate.toString();
         }
         return applicationCert;
@@ -184,7 +184,7 @@ final class OpcUaOptions {
     String getApplicationName() {
         String applicationName = null;
         final Object appName = this.properties.get(APPLICATION_NAME);
-        if (nonNull(appName) && (appName instanceof String)) {
+        if (nonNull(appName) && appName instanceof String) {
             applicationName = appName.toString();
         }
         return applicationName;
@@ -198,7 +198,7 @@ final class OpcUaOptions {
     String getApplicationUri() {
         String applicationUri = null;
         final Object appUri = this.properties.get(APPLICATION_URI);
-        if (nonNull(appUri) && (appUri instanceof String)) {
+        if (nonNull(appUri) && appUri instanceof String) {
             applicationUri = appUri.toString();
         }
         return applicationUri;
@@ -211,8 +211,8 @@ final class OpcUaOptions {
      */
     IdentityProvider getIdentityProvider() {
         IdentityProvider identityProvider;
-        final String username = this.getUsername();
-        final String password = this.getPassword();
+        final String username = getUsername();
+        final String password = getPassword();
         if (StringUtil.isNullOrEmpty(username) && StringUtil.isNullOrEmpty(password)) {
             identityProvider = new AnonymousProvider();
         } else {
@@ -229,7 +229,7 @@ final class OpcUaOptions {
     String getIp() {
         String ipAddress = null;
         final Object ip = this.properties.get(IP);
-        if (nonNull(ip) && (ip instanceof String)) {
+        if (nonNull(ip) && ip instanceof String) {
             ipAddress = ip.toString();
         }
         return ipAddress;
@@ -243,7 +243,7 @@ final class OpcUaOptions {
     String getKeystoreClientAlias() {
         String clientAlias = null;
         final Object alias = this.properties.get(KEYSTORE_CLIENT_ALIAS);
-        if (nonNull(alias) && (alias instanceof String)) {
+        if (nonNull(alias) && alias instanceof String) {
             clientAlias = alias.toString();
         }
         return clientAlias;
@@ -258,7 +258,7 @@ final class OpcUaOptions {
         String password = null;
         Password decryptedPassword;
         final Object keystorePass = this.properties.get(KEYSTORE_PASSWORD);
-        if (nonNull(keystorePass) && (keystorePass instanceof String)) {
+        if (nonNull(keystorePass) && keystorePass instanceof String) {
             try {
                 decryptedPassword = new Password(this.cryptoService.decryptAes(keystorePass.toString().toCharArray()));
                 password = new String(decryptedPassword.getPassword());
@@ -272,7 +272,7 @@ final class OpcUaOptions {
     boolean isServerAuthenticationEnabled() {
         boolean shouldAuthenticateServer = false;
         final Object shouldAuthenticateServerRaw = this.properties.get(AUTHENTICATE_SERVER);
-        if (nonNull(shouldAuthenticateServerRaw) && (shouldAuthenticateServerRaw instanceof Boolean)) {
+        if (nonNull(shouldAuthenticateServerRaw) && shouldAuthenticateServerRaw instanceof Boolean) {
             shouldAuthenticateServer = (Boolean) shouldAuthenticateServerRaw;
         }
         return shouldAuthenticateServer;
@@ -286,7 +286,7 @@ final class OpcUaOptions {
     String getKeystoreType() {
         String keystoreType = null;
         final Object type = this.properties.get(KEYSTORE_TYPE);
-        if (nonNull(type) && (type instanceof String)) {
+        if (nonNull(type) && type instanceof String) {
             keystoreType = type.toString();
         }
         return keystoreType;
@@ -301,7 +301,7 @@ final class OpcUaOptions {
         final Object pass = this.properties.get(PASSWORD);
         Password decryptedPassword;
         String password = null;
-        if (nonNull(pass) && (pass instanceof String)) {
+        if (nonNull(pass) && pass instanceof String) {
             try {
                 decryptedPassword = new Password(this.cryptoService.decryptAes(pass.toString().toCharArray()));
                 password = new String(decryptedPassword.getPassword());
@@ -320,7 +320,7 @@ final class OpcUaOptions {
     int getPort() {
         int port = 0;
         final Object endpointPort = this.properties.get(PORT);
-        if (nonNull(endpointPort) && (endpointPort instanceof Integer)) {
+        if (nonNull(endpointPort) && endpointPort instanceof Integer) {
             port = (Integer) endpointPort;
         }
         return port;
@@ -334,7 +334,7 @@ final class OpcUaOptions {
     int getRequestTimeout() {
         int requestTimeout = 0;
         final Object reqTimeout = this.properties.get(REQUEST_TIMEOUT);
-        if (nonNull(reqTimeout) && (reqTimeout instanceof Integer)) {
+        if (nonNull(reqTimeout) && reqTimeout instanceof Integer) {
             requestTimeout = (Integer) reqTimeout;
         }
         return requestTimeout * 1000;
@@ -343,7 +343,7 @@ final class OpcUaOptions {
     int getAcknowledgeTimeout() {
         int acknowledgeTimeout = 40;
         final Object ackTimeout = this.properties.get(ACKNOWLEDGE_TIMEOUT);
-        if (nonNull(ackTimeout) && (ackTimeout instanceof Integer)) {
+        if (nonNull(ackTimeout) && ackTimeout instanceof Integer) {
             acknowledgeTimeout = (Integer) ackTimeout;
         }
         return acknowledgeTimeout * 1000;
@@ -357,7 +357,7 @@ final class OpcUaOptions {
     SecurityPolicy getSecurityPolicy() {
         int securityPolicy = 0;
         final Object policy = this.properties.get(SECURITY_POLICY);
-        if (nonNull(policy) && (policy instanceof Integer)) {
+        if (nonNull(policy) && policy instanceof Integer) {
             securityPolicy = (Integer) policy;
         }
         switch (securityPolicy) {
@@ -380,7 +380,7 @@ final class OpcUaOptions {
     String getServerName() {
         String serverName = null;
         final Object name = this.properties.get(SERVER_NAME);
-        if (nonNull(name) && (name instanceof String)) {
+        if (nonNull(name) && name instanceof String) {
             serverName = name.toString();
         }
         return serverName;
@@ -394,7 +394,7 @@ final class OpcUaOptions {
     int getSessionTimeout() {
         int sessionTimeout = 0;
         final Object timeout = this.properties.get(SESSION_TIMEOUT);
-        if (nonNull(timeout) && (timeout instanceof Integer)) {
+        if (nonNull(timeout) && timeout instanceof Integer) {
             sessionTimeout = (Integer) timeout;
         }
         return sessionTimeout * 1000;
@@ -408,7 +408,7 @@ final class OpcUaOptions {
     String getUsername() {
         String username = null;
         final Object name = this.properties.get(USERNAME);
-        if (nonNull(name) && (name instanceof String)) {
+        if (nonNull(name) && name instanceof String) {
             username = name.toString();
         }
         return username;
@@ -440,12 +440,12 @@ final class OpcUaOptions {
 
     CertificateManager getCertificateManager() {
 
-        if (certificateManager == null) {
-            certificateManager = new ExternalKeystoreCertificateManager(getKeyStorePath(), getKeystoreType(),
+        if (this.certificateManager == null) {
+            this.certificateManager = new ExternalKeystoreCertificateManager(getKeyStorePath(), getKeystoreType(),
                     getKeystorePassword(), getKeystoreClientAlias(), isServerAuthenticationEnabled());
         }
 
-        return certificateManager;
+        return this.certificateManager;
     }
 
     ChannelNameFormat getSubtreeSubscriptionChannelNameFormat() {

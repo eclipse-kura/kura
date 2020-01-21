@@ -18,7 +18,7 @@ import org.osgi.service.event.Event;
 
 /**
  * Emitted when a new access point is found by the device.
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 @ProviderType

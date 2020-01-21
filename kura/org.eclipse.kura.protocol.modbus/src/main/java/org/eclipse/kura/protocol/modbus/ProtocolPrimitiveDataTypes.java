@@ -23,7 +23,7 @@ public class ProtocolPrimitiveDataTypes {
      *
      */
     private ProtocolPrimitiveDataTypes() {
-    };
+    }
 
     /**
      * defined for completeness, typically never used

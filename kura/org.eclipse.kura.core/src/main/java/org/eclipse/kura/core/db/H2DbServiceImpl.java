@@ -106,8 +106,8 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
     }
 
     public void updated(Map<String, Object> properties) {
-        pendingUpdates.incrementAndGet();
-        executor.submit(() -> this.updateInternal(properties));
+        this.pendingUpdates.incrementAndGet();
+        this.executor.submit(() -> updateInternal(properties));
     }
 
     public void deactivate() {
@@ -135,14 +135,14 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
 
     @Override
     public Connection getConnection() throws SQLException {
-        if (pendingUpdates.get() > 0) {
+        if (this.pendingUpdates.get() > 0) {
             syncWithExecutor();
         }
 
         final Lock lock = this.rwLock.readLock();
         lock.lock();
         try {
-            return this.getConnectionInternal();
+            return getConnectionInternal();
         } finally {
             lock.unlock();
         }
@@ -150,7 +150,7 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
 
     @Override
     public <T> T withConnection(ConnectionCallable<T> callable) throws SQLException {
-        if (pendingUpdates.get() > 0) {
+        if (this.pendingUpdates.get() > 0) {
             syncWithExecutor();
         }
 
@@ -259,19 +259,19 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
             }
 
             final char[] passwordFromConfig = newConfiguration.getEncryptedPassword();
-            final char[] password = lastSessionPassword != null ? lastSessionPassword : passwordFromConfig;
+            final char[] password = this.lastSessionPassword != null ? this.lastSessionPassword : passwordFromConfig;
 
-            if (connectionPool == null) {
+            if (this.connectionPool == null) {
                 openConnectionPool(newConfiguration, decryptPassword(password));
-                lastSessionPassword = password;
+                this.lastSessionPassword = password;
             }
             setParameters(newConfiguration);
 
             if (!newConfiguration.isZipBased() && !Arrays.equals(password, passwordFromConfig)) {
                 final String decryptedPassword = decryptPassword(passwordFromConfig);
                 changePassword(newConfiguration.getUser(), decryptedPassword);
-                dataSource.setPassword(decryptedPassword);
-                lastSessionPassword = passwordFromConfig;
+                this.dataSource.setPassword(decryptedPassword);
+                this.lastSessionPassword = passwordFromConfig;
             }
 
             if (newConfiguration.isFileBased()) {
@@ -289,7 +289,7 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
             logger.error("Database initialization failed", e);
         } finally {
             lock.unlock();
-            pendingUpdates.decrementAndGet();
+            this.pendingUpdates.decrementAndGet();
         }
     }
 
@@ -303,7 +303,7 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
 
     private void syncWithExecutor() {
         try {
-            executor.submit(() -> {
+            this.executor.submit(() -> {
             }).get();
         } catch (final Exception e) {
             throw new IllegalStateException(e);
@@ -317,7 +317,7 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
 
         Connection conn = null;
         try {
-            conn = connectionPool.getConnection();
+            conn = this.connectionPool.getConnection();
         } catch (SQLException e) {
             logger.error("Error getting connection", e);
             throw e;
@@ -343,8 +343,8 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
     }
 
     private void shutdownDb() throws SQLException {
-        lastSessionPassword = null;
-        if (connectionPool == null) {
+        this.lastSessionPassword = null;
+        if (this.connectionPool == null) {
             return;
         }
 
@@ -354,7 +354,7 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
         Connection conn = null;
         Statement stmt = null;
         try {
-            conn = dataSource.getConnection();
+            conn = this.dataSource.getConnection();
             stmt = conn.createStatement();
             stmt.execute("SHUTDOWN");
         } finally {
@@ -363,19 +363,19 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
         }
 
         disposeConnectionPool();
-        activeInstances.remove(configuration.getBaseUrl());
+        activeInstances.remove(this.configuration.getBaseUrl());
     }
 
     private void openConnectionPool(H2DbServiceOptions configuration, String password) {
         logger.info("Opening database with url: {}", configuration.getDbUrl());
 
-        dataSource = new JdbcDataSource();
+        this.dataSource = new JdbcDataSource();
 
-        dataSource.setURL(configuration.getDbUrl());
-        dataSource.setUser(configuration.getUser());
-        dataSource.setPassword(password);
+        this.dataSource.setURL(configuration.getDbUrl());
+        this.dataSource.setUser(configuration.getUser());
+        this.dataSource.setPassword(password);
 
-        connectionPool = JdbcConnectionPool.create(dataSource);
+        this.connectionPool = JdbcConnectionPool.create(this.dataSource);
 
         openDatabase(configuration, true);
     }
@@ -422,7 +422,7 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
     }
 
     private String decryptPassword(char[] encryptedPassword) throws KuraException {
-        final char[] decodedPasswordChars = cryptoService.decryptAes(encryptedPassword);
+        final char[] decodedPasswordChars = this.cryptoService.decryptAes(encryptedPassword);
         return new String(decodedPasswordChars);
     }
 
@@ -441,7 +441,7 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
         if (delaySeconds <= 0) {
             return;
         }
-        this.checkpointTask = executor.scheduleWithFixedDelay(new CheckpointTask(), delaySeconds, delaySeconds,
+        this.checkpointTask = this.executor.scheduleWithFixedDelay(new CheckpointTask(), delaySeconds, delaySeconds,
                 TimeUnit.SECONDS);
     }
 
@@ -458,7 +458,7 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
         if (delayMinutes <= 0) {
             return;
         }
-        this.checkpointTask = executor.scheduleWithFixedDelay(new DefragTask(config), delayMinutes, delayMinutes,
+        this.checkpointTask = this.executor.scheduleWithFixedDelay(new DefragTask(config), delayMinutes, delayMinutes,
                 TimeUnit.MINUTES);
     }
 
@@ -495,7 +495,7 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
             Connection conn = null;
             Statement stmt = null;
             try {
-                conn = dataSource.getConnection();
+                conn = H2DbServiceImpl.this.dataSource.getConnection();
                 stmt = conn.createStatement();
                 stmt.execute("SHUTDOWN DEFRAG");
             } finally {
@@ -506,14 +506,14 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
 
         @Override
         public void run() {
-            final Lock lock = rwLock.writeLock();
+            final Lock lock = H2DbServiceImpl.this.rwLock.writeLock();
             lock.lock();
             try {
                 logger.info("shutting down and defragmenting db...");
                 shutdownDefrag();
                 disposeConnectionPool();
-                final String password = decryptPassword(configuration.getEncryptedPassword());
-                openConnectionPool(configuration, password);
+                final String password = decryptPassword(this.configuration.getEncryptedPassword());
+                openConnectionPool(this.configuration, password);
                 logger.info("shutting down and defragmenting db...done");
             } catch (final Exception e) {
                 logger.error("failed to shutdown and defrag db", e);

@@ -17,10 +17,10 @@ import java.util.List;
 
 public class Test {
 
-    private Method m_beforeClass;
-    private Method m_afterClass;
-    private Method m_before;
-    private Method m_after;
+    private Method beforeClass;
+    private Method afterClass;
+    private Method before;
+    private Method after;
     private final List<Method> tests;
 
     public Test() {
@@ -28,35 +28,35 @@ public class Test {
     }
 
     public Method getBeforeClass() {
-        return this.m_beforeClass;
+        return this.beforeClass;
     }
 
     public void setBeforeClass(Method beforeClass) {
-        this.m_beforeClass = beforeClass;
+        this.beforeClass = beforeClass;
     }
 
     public Method getAfterClass() {
-        return this.m_afterClass;
+        return this.afterClass;
     }
 
     public void setAfterClass(Method afterClass) {
-        this.m_afterClass = afterClass;
+        this.afterClass = afterClass;
     }
 
     public Method getBefore() {
-        return this.m_before;
+        return this.before;
     }
 
     public void setBefore(Method before) {
-        this.m_before = before;
+        this.before = before;
     }
 
     public Method getAfter() {
-        return this.m_after;
+        return this.after;
     }
 
     public void setAfter(Method after) {
-        this.m_after = after;
+        this.after = after;
     }
 
     public List<Method> getTests() {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -14,7 +14,6 @@ package org.eclipse.kura.configuration.metatype;
 import java.util.List;
 
 import org.eclipse.kura.configuration.ComponentConfiguration;
-import org.eclipse.kura.configuration.ConfigurationService;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -30,7 +29,7 @@ public interface OCDService {
      * Returns the {@link OCD}s of all registered component factories for which an OSGi MetaType is
      * is registered in the {@link ConfigurationService}.
      * <br>
-     * The {@link OCD}s are returned in the form of a {@link ComponentConfiguraion} instance. The component factory pid
+     * The {@link OCD}s are returned in the form of a {@link ComponentConfiguration} instance. The component factory pid
      * can be obtained by calling {@link ComponentConfiguration#getPid()} method and the actual {@link OCD} can be
      * obtained by calling the {@link ComponentConfiguration#getDefinition()} method.
      *
@@ -44,7 +43,7 @@ public interface OCDService {
      * Returns the {@link OCD} of the registered component factory identified by the provided {@code factoryPid} and for
      * which an OSGi MetaType is registered in the {@link ConfigurationService}.
      * <br>
-     * The {@link OCD} is returned in the form of a {@link ComponentConfiguraion} instance. The component factory pid
+     * The {@link OCD} is returned in the form of a {@link ComponentConfiguration} instance. The component factory pid
      * can be obtained by calling {@link ComponentConfiguration#getPid()} method and the actual {@link OCD} can be
      * obtained by calling the {@link ComponentConfiguration#getDefinition()} method.
      *
@@ -59,7 +58,7 @@ public interface OCDService {
      * If the {@link ConfigurationService} contains a registered OSGi MetaType for a found Component, it will be
      * returned inside the {@link ComponentConfiguration} instance.
      * <br>
-     * The {@link ComponentConfiguraion} instances in the returned list contain the following information:
+     * The {@link ComponentConfiguration} instances in the returned list contain the following information:
      * <ul>
      * <li>
      * The {@link ComponentConfiguration#getPid()} method returns the Component name.

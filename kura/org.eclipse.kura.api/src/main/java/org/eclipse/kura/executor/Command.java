@@ -19,7 +19,7 @@ import java.util.Map;
 import org.apache.commons.io.output.NullOutputStream;
 
 /**
- * 
+ *
  * The Command class includes the informations needed by the {@link CommandExecutorService} to run a system command.
  * The only mandatory parameter is the commandLine that represents the command to be run:
  * </br>
@@ -39,7 +39,7 @@ import org.apache.commons.io.output.NullOutputStream;
  * <li>executeInAShell : a flag that indicates if the command should be executed in a shell/terminal. Default is
  * false.</li>
  * </ul>
- * 
+ *
  */
 public class Command {
 
@@ -60,11 +60,11 @@ public class Command {
     }
 
     public String[] getCommandLine() {
-        return commandLine;
+        return this.commandLine;
     }
 
     public String getDirectory() {
-        return directory;
+        return this.directory;
     }
 
     public void setDirectory(String directory) {
@@ -72,7 +72,7 @@ public class Command {
     }
 
     public Map<String, String> getEnvironment() {
-        return environment;
+        return this.environment;
     }
 
     public void setEnvironment(Map<String, String> environment) {
@@ -80,7 +80,7 @@ public class Command {
     }
 
     public int getTimeout() {
-        return timeout;
+        return this.timeout;
     }
 
     public void setTimeout(int timeout) {
@@ -88,7 +88,7 @@ public class Command {
     }
 
     public Signal getSignal() {
-        return signal;
+        return this.signal;
     }
 
     public void setSignal(Signal signal) {
@@ -104,7 +104,7 @@ public class Command {
     }
 
     public OutputStream getOutputStream() {
-        return out;
+        return this.out;
     }
 
     public void setOutputStream(OutputStream out) {
@@ -112,7 +112,7 @@ public class Command {
     }
 
     public OutputStream getErrorStream() {
-        return err;
+        return this.err;
     }
 
     public void setErrorStream(OutputStream err) {
@@ -120,7 +120,7 @@ public class Command {
     }
 
     public InputStream getInputStream() {
-        return in;
+        return this.in;
     }
 
     public void setInputStream(InputStream in) {
@@ -136,36 +136,45 @@ public class Command {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + Arrays.hashCode(commandLine);
-        result = prime * result + ((directory == null) ? 0 : directory.hashCode());
-        result = prime * result + ((environment == null) ? 0 : environment.hashCode());
-        result = prime * result + (executeInAShell ? 1231 : 1237);
+        result = prime * result + Arrays.hashCode(this.commandLine);
+        result = prime * result + (this.directory == null ? 0 : this.directory.hashCode());
+        result = prime * result + (this.environment == null ? 0 : this.environment.hashCode());
+        result = prime * result + (this.executeInAShell ? 1231 : 1237);
         return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         Command other = (Command) obj;
-        if (!Arrays.equals(commandLine, other.commandLine))
+        if (!Arrays.equals(this.commandLine, other.commandLine)) {
             return false;
-        if (directory == null) {
-            if (other.directory != null)
+        }
+        if (this.directory == null) {
+            if (other.directory != null) {
                 return false;
-        } else if (!directory.equals(other.directory))
+            }
+        } else if (!this.directory.equals(other.directory)) {
             return false;
-        if (environment == null) {
-            if (other.environment != null)
+        }
+        if (this.environment == null) {
+            if (other.environment != null) {
                 return false;
-        } else if (!environment.equals(other.environment))
+            }
+        } else if (!this.environment.equals(other.environment)) {
             return false;
-        if (executeInAShell != other.executeInAShell)
+        }
+        if (this.executeInAShell != other.executeInAShell) {
             return false;
+        }
         return true;
     }
 

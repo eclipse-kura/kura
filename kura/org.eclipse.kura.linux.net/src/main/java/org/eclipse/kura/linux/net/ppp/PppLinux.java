@@ -58,7 +58,7 @@ public class PppLinux {
     public void disconnect(String iface, String port) {
 
         Pid pid = getPid(iface, port);
-        if ((Integer) pid.getPid() >= 0) {
+        if (pid.getPid() >= 0) {
             logger.info("stopping {} pid={}", iface, pid);
 
             if (this.executorService.stop(pid, LinuxSignal.SIGKILL)) {
@@ -71,7 +71,7 @@ public class PppLinux {
 
     public boolean isPppProcessRunning(String iface, String port) {
 
-        return (Integer) getPid(iface, port).getPid() > 0;
+        return getPid(iface, port).getPid() > 0;
     }
 
     public boolean isPppProcessRunning(String iface, String port, int tout) {
@@ -112,7 +112,7 @@ public class PppLinux {
         synchronized (lock) {
             String[] command = formConnectCommand(iface, port);
             // Filter the pid whose command exactly matches the connectCommand
-            List<Pid> pids = executorService.getPids(command).entrySet().stream()
+            List<Pid> pids = this.executorService.getPids(command).entrySet().stream()
                     .filter(entry -> entry.getKey().equals(String.join(" ", command))).map(Map.Entry::getValue)
                     .collect(Collectors.toList());
             if (!pids.isEmpty()) {

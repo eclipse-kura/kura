@@ -72,18 +72,18 @@ public class XmlRouterComponent extends AbstractXmlCamelComponent {
 
         // JMX
 
-        final boolean disableJmx = asBoolean(properties, DISABLE_JMX, false);
-        builder.disableJmx(disableJmx);
+        final boolean disableJmxTemp = asBoolean(properties, DISABLE_JMX, false);
+        builder.disableJmx(disableJmxTemp);
 
         // parse configuration
 
         final Set<String> newRequiredComponents = parseRequirements(asString(properties, COMPONENT_PREREQS));
         final Set<String> newRequiredLanguages = parseRequirements(asString(properties, LANGUAGE_PREREQS));
 
-        final Map<String, String> cloudServiceRequirements = parseCloudServiceRequirements(
+        final Map<String, String> cloudServiceRequirementsTemp = parseCloudServiceRequirements(
                 asString(properties, CLOUD_SERVICE_PREREQS));
 
-        final String initCode = parseInitCode(properties);
+        final String initCodeTemp = parseInitCode(properties);
 
         // set component requirements
 
@@ -102,7 +102,7 @@ public class XmlRouterComponent extends AbstractXmlCamelComponent {
         // set cloud service requirements
 
         logger.debug("Setting new cloud service requirements");
-        for (final Map.Entry<String, String> entry : cloudServiceRequirements.entrySet()) {
+        for (final Map.Entry<String, String> entry : cloudServiceRequirementsTemp.entrySet()) {
             final String filter;
             if (entry.getValue().startsWith("(")) {
                 filter = entry.getValue();
@@ -113,12 +113,12 @@ public class XmlRouterComponent extends AbstractXmlCamelComponent {
             builder.cloudService(null, filter, Builder.addAsCloudComponent(entry.getKey()));
         }
 
-        if (!initCode.isEmpty()) {
+        if (!initCodeTemp.isEmpty()) {
 
             // call init code before context start
 
             builder.addBeforeStart(camelContext -> {
-                scriptInitCamelContext(camelContext, initCode, XmlRouterComponent.class.getClassLoader());
+                scriptInitCamelContext(camelContext, initCodeTemp, XmlRouterComponent.class.getClassLoader());
             });
         }
 
@@ -133,24 +133,24 @@ public class XmlRouterComponent extends AbstractXmlCamelComponent {
 
         this.requiredComponents = newRequiredComponents;
         this.requiredLanguages = newRequiredLanguages;
-        this.cloudServiceRequirements = cloudServiceRequirements;
-        this.initCode = initCode;
-        this.disableJmx = disableJmx;
+        this.cloudServiceRequirements = cloudServiceRequirementsTemp;
+        this.initCode = initCodeTemp;
+        this.disableJmx = disableJmxTemp;
     }
 
     @Override
     protected boolean isRestartNeeded(final Map<String, Object> properties) {
 
-        final boolean disableJmx = asBoolean(properties, DISABLE_JMX, false);
+        final boolean disableJmxTemp = asBoolean(properties, DISABLE_JMX, false);
 
         final Set<String> newRequiredComponents = parseRequirements(asString(properties, COMPONENT_PREREQS));
 
-        final Map<String, String> cloudServiceRequirements = parseCloudServiceRequirements(
+        final Map<String, String> cloudServiceRequirementsTemp = parseCloudServiceRequirements(
                 asString(properties, CLOUD_SERVICE_PREREQS));
 
-        final String initCode = parseInitCode(properties);
+        final String initCodeTemp = parseInitCode(properties);
 
-        if (this.disableJmx != disableJmx) {
+        if (this.disableJmx != disableJmxTemp) {
             logger.debug("Require restart due to '{}' change", DISABLE_JMX);
             return true;
         }
@@ -165,12 +165,12 @@ public class XmlRouterComponent extends AbstractXmlCamelComponent {
             return true;
         }
 
-        if (!this.cloudServiceRequirements.equals(cloudServiceRequirements)) {
+        if (!this.cloudServiceRequirements.equals(cloudServiceRequirementsTemp)) {
             logger.debug("Require restart due to '{}' change", CLOUD_SERVICE_PREREQS);
             return true;
         }
 
-        if (!this.initCode.equals(initCode)) {
+        if (!this.initCode.equals(initCodeTemp)) {
             logger.debug("Require restart due to '{}' change", INIT_CODE);
             return true;
         }

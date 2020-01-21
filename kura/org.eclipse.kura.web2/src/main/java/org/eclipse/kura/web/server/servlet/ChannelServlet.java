@@ -87,7 +87,7 @@ public class ChannelServlet extends HttpServlet {
                     writer.write(out.toString());
                 }
             }
-            
+
             auditLogger.info(
                     "UI Channel Servlet - Success - Successfully wrote Channel CSV description for user: {}, session: {}, asset pid: {}, driver pid: {}",
                     session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId(), assetPid, driverPid);

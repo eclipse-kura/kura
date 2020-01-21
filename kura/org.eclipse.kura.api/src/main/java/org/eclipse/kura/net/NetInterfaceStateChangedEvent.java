@@ -18,7 +18,7 @@ import org.osgi.service.event.Event;
 
 /**
  * Event raised when the state of a network interface has changed.
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 @ProviderType

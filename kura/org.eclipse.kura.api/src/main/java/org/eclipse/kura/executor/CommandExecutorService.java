@@ -26,7 +26,7 @@ public interface CommandExecutorService {
 
     /**
      * Synchronously executes a system command.
-     * 
+     *
      * @param command
      *            the {@link Command} to be executed
      * @return a {@link CommandStatus} object
@@ -35,7 +35,7 @@ public interface CommandExecutorService {
 
     /**
      * Asynchronously executes a system command.
-     * 
+     *
      * @param command
      *            the {@link Command} to be executed
      * @param callback
@@ -45,7 +45,7 @@ public interface CommandExecutorService {
 
     /**
      * Stops the system process identified by the given {@link Pid}.
-     * 
+     *
      * @param pid
      *            the {@link Pid} of the process to be stopped
      * @param signal
@@ -58,7 +58,7 @@ public interface CommandExecutorService {
     /**
      * Kills the system commands containing all the tokens in the given command line.
      * If more processes are found, all of them will be killed.
-     * 
+     *
      * @param commandLine
      *            the command to be killed
      * @param signal
@@ -70,7 +70,7 @@ public interface CommandExecutorService {
 
     /**
      * Returns true if the process identified by the given Pid is running.
-     * 
+     *
      * @param pid
      *            the {@link Pid} object of the process
      * @return a boolean value that is true if the process is running
@@ -80,7 +80,7 @@ public interface CommandExecutorService {
     /**
      * Returns true if at least one process containing all the tokens in the given command line is found.
      * It is equivalent to !getPids(commandLine).isEmpty().
-     * 
+     *
      * @param commandLine
      *            the command to be checked
      * @return a boolean value that is true if the command is running
@@ -90,7 +90,7 @@ public interface CommandExecutorService {
     /**
      * This method searches for running processes containing all the tokens in the command line.
      * It returns a map whose keys are the commands found and the values are the associated {@link Pid}s.
-     * 
+     *
      * @param commandLine
      *            the command line
      * @return a map of commands and associated {@link Pid}

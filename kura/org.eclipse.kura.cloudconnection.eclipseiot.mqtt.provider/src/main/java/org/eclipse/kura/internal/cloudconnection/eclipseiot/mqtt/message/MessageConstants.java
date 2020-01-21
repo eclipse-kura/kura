@@ -9,9 +9,8 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message;
 
-
 public enum MessageConstants {
-    
+
     FULL_TOPIC,
     QOS,
     RETAIN,

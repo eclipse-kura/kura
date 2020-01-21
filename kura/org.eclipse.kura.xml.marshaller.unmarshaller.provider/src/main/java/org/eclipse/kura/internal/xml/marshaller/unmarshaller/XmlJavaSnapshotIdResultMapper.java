@@ -26,7 +26,6 @@ public class XmlJavaSnapshotIdResultMapper implements XmlJavaDataMapper {
     public Element marshal(Document doc, Object object) {
         Element snapshotIDs = doc.createElement(ESF_NAMESPACE + ":" + SNAPSHOT_IDS);
         snapshotIDs.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:esf", "http://eurotech.com/esf/2.0");
-        // TODO: add xml schema to EUROTECH site
         snapshotIDs.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:ocd",
                 "http://www.osgi.org/xmlns/metatype/v1.2.0");
         doc.appendChild(snapshotIDs);

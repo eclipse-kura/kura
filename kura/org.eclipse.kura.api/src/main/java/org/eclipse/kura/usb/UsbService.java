@@ -20,7 +20,7 @@ import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * OSGi interface for getting JSR-80 javax.usb.UsbServices currently available in the system.
- * 
+ *
  * @noimplement This interface is not intended to be implemented by clients.
  */
 @ProviderType

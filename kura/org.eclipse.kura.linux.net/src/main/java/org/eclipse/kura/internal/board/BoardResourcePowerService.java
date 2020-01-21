@@ -31,7 +31,7 @@ public interface BoardResourcePowerService {
 
     /**
      * Disables the resource specified by the passed identifier
-     * 
+     *
      * @param identifier
      *            a String object used to univocally identify a resource in the board.
      * @throws IOException
@@ -40,7 +40,7 @@ public interface BoardResourcePowerService {
 
     /**
      * Resets the resource specified by the passed identifier
-     * 
+     *
      * @param identifier
      *            a String object used to univocally identify a resource in the board.
      * @throws IOException
@@ -49,7 +49,7 @@ public interface BoardResourcePowerService {
 
     /**
      * Returns the state of the resource specified by the passed identifier
-     * 
+     *
      * @param identifier
      *            a String object used to univocally identify a resource in the board.
      * @return a {@link BoardPowerState} representing the current status

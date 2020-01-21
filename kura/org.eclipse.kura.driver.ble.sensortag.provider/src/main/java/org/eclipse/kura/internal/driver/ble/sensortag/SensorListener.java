@@ -56,15 +56,15 @@ public class SensorListener {
     }
 
     public List<ChannelListener> getListeners() {
-        return listeners;
+        return this.listeners;
     }
 
     public List<String> getChannelNames() {
-        return channelNames;
+        return this.channelNames;
     }
 
     public List<SensorName> getSensorNames() {
-        return sensorNames;
+        return this.sensorNames;
     }
 
     public void addListener(ChannelListener listener) {
@@ -88,7 +88,7 @@ public class SensorListener {
     }
 
     public int getPeriod() {
-        return period;
+        return this.period;
     }
 
     public void removeAll(int index) {

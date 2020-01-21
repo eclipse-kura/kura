@@ -37,7 +37,6 @@ import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
 import org.eclipse.kura.wire.WireComponent;
 import org.eclipse.kura.wire.WireEmitter;
-import org.eclipse.kura.wire.WireEnvelope;
 import org.eclipse.kura.wire.WireHelperService;
 import org.eclipse.kura.wire.WireRecord;
 import org.eclipse.kura.wire.WireSupport;
@@ -47,11 +46,11 @@ import org.osgi.service.wireadmin.Wire;
 
 /**
  * The Class CloudSubscriber is the specific Wire Component to subscribe a list
- * of {@link WireRecord}s as received in {@link WireEnvelope} from the configured cloud
+ * of {@link WireRecord}s as received in {@link org.eclipse.kura.wire.WireEnvelope} from the configured cloud
  * platform.<br/>
  * <br/>
  *
- * For every {@link WireRecord} as found in {@link WireEnvelope} will be wrapped inside a Kura
+ * For every {@link WireRecord} as found in {@link org.eclipse.kura.wire.WireEnvelope} will be wrapped inside a Kura
  * Payload and will be sent to the Cloud Platform. Unlike Cloud Publisher Wire
  * Component, the user can only avail to wrap every {@link WireRecord} in the default
  * Google Protobuf Payload.

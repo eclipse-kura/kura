@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 
 public class Stress implements ConfigurableComponent {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(Stress.class);
+    private static final Logger logger = LoggerFactory.getLogger(Stress.class);
 
     private static final String HEAP_ENABLE_PROP_NAME = "heap.enable";
     private static final String HEAP_THREADS_PROP_NAME = "heap.threads";
@@ -37,10 +37,10 @@ public class Stress implements ConfigurableComponent {
     private static final String HEAP_LOG_PROP_NAME = "heap.log";
     private static final String HEAP_DELAY_MS_PROP_NAME = "heap.delay";
 
-    private final ScheduledExecutorService m_worker;
-    private final List<ScheduledFuture<?>> m_handle;
+    private final ScheduledExecutorService worker;
+    private final List<ScheduledFuture<?>> handle;
 
-    private Map<String, Object> m_properties;
+    private Map<String, Object> properties;
 
     // ----------------------------------------------------------------
     //
@@ -50,8 +50,8 @@ public class Stress implements ConfigurableComponent {
 
     public Stress() {
         super();
-        this.m_worker = Executors.newScheduledThreadPool(5);
-        this.m_handle = new ArrayList<ScheduledFuture<?>>();
+        this.worker = Executors.newScheduledThreadPool(5);
+        this.handle = new ArrayList<ScheduledFuture<?>>();
     }
 
     // ----------------------------------------------------------------
@@ -61,39 +61,39 @@ public class Stress implements ConfigurableComponent {
     // ----------------------------------------------------------------
 
     protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
-        s_logger.info("Activating Stress...");
+        logger.info("Activating Stress...");
 
-        this.m_properties = properties;
+        this.properties = properties;
         for (String s : properties.keySet()) {
-            s_logger.info("Activate - " + s + ": " + properties.get(s));
+            logger.info("Activate - " + s + ": " + properties.get(s));
         }
 
         doUpdate();
 
-        s_logger.info("Activating Stress... Done.");
+        logger.info("Activating Stress... Done.");
     }
 
     protected void deactivate(ComponentContext componentContext) {
-        s_logger.debug("Deactivating Stress...");
+        logger.debug("Deactivating Stress...");
 
         // shutting down the worker and cleaning up the properties
-        this.m_worker.shutdown();
+        this.worker.shutdown();
 
-        s_logger.debug("Deactivating Stress... Done.");
+        logger.debug("Deactivating Stress... Done.");
     }
 
     public void updated(Map<String, Object> properties) {
-        s_logger.info("Updated Stress...");
+        logger.info("Updated Stress...");
 
         // store the properties received
-        this.m_properties = properties;
+        this.properties = properties;
         for (String s : properties.keySet()) {
-            s_logger.info("Update - " + s + ": " + properties.get(s));
+            logger.info("Update - " + s + ": " + properties.get(s));
         }
 
         // try to kick off a new job
         doUpdate();
-        s_logger.info("Updated Stress... Done.");
+        logger.info("Updated Stress... Done.");
     }
 
     // ----------------------------------------------------------------
@@ -107,25 +107,25 @@ public class Stress implements ConfigurableComponent {
      */
     private void doUpdate() {
         // cancel a current worker handle if one if active
-        for (ScheduledFuture<?> handle : this.m_handle) {
-            if (handle != null) {
-                handle.cancel(true);
+        for (ScheduledFuture<?> handleItem : this.handle) {
+            if (handleItem != null) {
+                handleItem.cancel(true);
             }
         }
 
-        final boolean enable = (Boolean) this.m_properties.get(HEAP_ENABLE_PROP_NAME);
-        final int threads = (Integer) this.m_properties.get(HEAP_THREADS_PROP_NAME);
-        final int size = 1024 * (Integer) this.m_properties.get(HEAP_KBYTES_PROP_NAME);
-        final int stride = 1024 * (Integer) this.m_properties.get(HEAP_STRIDE_KBYTES_PROP_NAME);
-        final int hang = (Integer) this.m_properties.get(HEAP_HANG_MS_PROP_NAME);
-        final int interval = (Integer) this.m_properties.get(HEAP_INTERVAL_MS_PROP_NAME);
-        final boolean log = (Boolean) this.m_properties.get(HEAP_LOG_PROP_NAME);
-        final int delay = (Integer) this.m_properties.get(HEAP_DELAY_MS_PROP_NAME);
+        final boolean enable = (Boolean) this.properties.get(HEAP_ENABLE_PROP_NAME);
+        final int threads = (Integer) this.properties.get(HEAP_THREADS_PROP_NAME);
+        final int size = 1024 * (Integer) this.properties.get(HEAP_KBYTES_PROP_NAME);
+        final int stride = 1024 * (Integer) this.properties.get(HEAP_STRIDE_KBYTES_PROP_NAME);
+        final int hang = (Integer) this.properties.get(HEAP_HANG_MS_PROP_NAME);
+        final int interval = (Integer) this.properties.get(HEAP_INTERVAL_MS_PROP_NAME);
+        final boolean log = (Boolean) this.properties.get(HEAP_LOG_PROP_NAME);
+        final int delay = (Integer) this.properties.get(HEAP_DELAY_MS_PROP_NAME);
 
         if (enable) {
             for (int i = 0; i < threads; i++) {
                 final int tid = i;
-                ScheduledFuture<?> handle = this.m_worker.scheduleAtFixedRate(new Runnable() {
+                ScheduledFuture<?> futureHandle = this.worker.scheduleAtFixedRate(new Runnable() {
 
                     @Override
                     public void run() {
@@ -133,19 +133,19 @@ public class Stress implements ConfigurableComponent {
                         Thread.currentThread().setName("Heap stress thread #" + tid);
 
                         if (log) {
-                            s_logger.info("Heap stress thread #{} allocating...", tid);
+                            logger.info("Heap stress thread #{} allocating...", tid);
                         }
 
                         stressHeap(size, stride, hang);
 
                         if (log) {
-                            s_logger.info("Heap stress thread #{} allocating... done", tid);
+                            logger.info("Heap stress thread #{} allocating... done", tid);
                         }
 
                         Thread.currentThread().setName(name);
                     }
                 }, delay * i, interval, TimeUnit.MILLISECONDS);
-                this.m_handle.add(handle);
+                this.handle.add(futureHandle);
             }
         }
     }
@@ -167,7 +167,7 @@ public class Stress implements ConfigurableComponent {
                 }
             }
         } catch (InterruptedException e) {
-            s_logger.warn("Interrupted", e);
+            logger.warn("Interrupted", e);
         }
     }
 }

@@ -13,5 +13,9 @@ package org.eclipse.kura.net.modem;
 
 public enum ModemRegistrationStatus {
 
-    UNKNOWN, NOT_REGISTERED, REGISTERED_HOME, REGISTERED_ROAMING, REGISTRATION_DENIED
+    UNKNOWN,
+    NOT_REGISTERED,
+    REGISTERED_HOME,
+    REGISTERED_ROAMING,
+    REGISTRATION_DENIED
 }

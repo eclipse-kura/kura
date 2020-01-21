@@ -23,16 +23,16 @@ public class SubtreeNodeListenParams extends ListenParams {
 
     @Override
     public double getSamplingInterval() {
-        return rootParams.getSamplingInterval();
+        return this.rootParams.getSamplingInterval();
     }
 
     @Override
     public long getQueueSize() {
-        return rootParams.getQueueSize();
+        return this.rootParams.getQueueSize();
     }
 
     @Override
     public boolean getDiscardOldest() {
-        return rootParams.getDiscardOldest();
+        return this.rootParams.getDiscardOldest();
     }
 }

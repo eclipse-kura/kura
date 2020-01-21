@@ -204,7 +204,7 @@ public class CloudConnectionManagerImpl
     public void unsetEventAdmin(EventAdmin eventAdmin) {
         this.eventAdmin = null;
     }
-    
+
     public void setJsonUnmarshaller(Unmarshaller jsonUnmarshaller) {
         this.jsonUnmarshaller = jsonUnmarshaller;
     }

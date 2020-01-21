@@ -25,7 +25,7 @@ public class ModbusTransmissionMode {
      *
      */
     private ModbusTransmissionMode() {
-    };
+    }
 
     public static final String RTU = "RTU";
     public static final String ASCII = "ASCII";

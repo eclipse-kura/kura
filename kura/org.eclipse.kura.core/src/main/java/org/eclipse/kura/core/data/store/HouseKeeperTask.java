@@ -25,7 +25,7 @@ public class HouseKeeperTask implements Runnable {
     private static final Logger s_logger = LoggerFactory.getLogger(HouseKeeperTask.class);
 
     private final int m_purgeAge;
-    private boolean doRepair;
+    private final boolean doRepair;
     private final DataStore m_store;
 
     public HouseKeeperTask(DataStore store, int purgeAge, boolean doRepair) {
@@ -42,7 +42,7 @@ public class HouseKeeperTask implements Runnable {
 
             //
             // check and attempt to repair the store
-            if (doRepair) {
+            if (this.doRepair) {
                 s_logger.info("HouseKeeperTask: Check store...");
                 this.m_store.repair();
             }
@@ -59,12 +59,9 @@ public class HouseKeeperTask implements Runnable {
             // m_store.deleteOverflowMessages(maxNumMsgs);
 
             s_logger.info("HouseKeeperTask ended.");
-        }
-        //
-        // do not throw the exception as that will stop future executions
-        catch (KuraStoreException me) {
+        } catch (KuraStoreException me) { // do not throw the exception as that will stop future executions
             s_logger.warn("HouseCleaningTask exception", me);
-        } catch (Throwable t) {
+        } catch (Throwable t) { // do not throw the exception as that will stop future executions
             if (t instanceof InterruptedException) {
                 s_logger.info("HouseCleaningTask stopped");
             } else {

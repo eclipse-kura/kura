@@ -43,7 +43,7 @@ public class WifiOptions {
     private static final String FAILED_TO_EXECUTE_MSG = "Failed to execute {} ";
 
     private static Map<String, Collection<String>> wifiOpt = new HashMap<>();
-    private CommandExecutorService executorService;
+    private final CommandExecutorService executorService;
 
     public WifiOptions(CommandExecutorService executorService) {
         this.executorService = executorService;

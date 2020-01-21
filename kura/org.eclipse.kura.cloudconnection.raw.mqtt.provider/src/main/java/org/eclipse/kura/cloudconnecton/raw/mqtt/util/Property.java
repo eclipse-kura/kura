@@ -37,38 +37,39 @@ public class Property<T> {
     }
 
     public String getKey() {
-        return key;
+        return this.key;
     }
 
     public T getDefaultValue() {
-        return defaultValue;
+        return this.defaultValue;
     }
 
     @SuppressWarnings("unchecked")
     public T get(final Map<String, Object> properties) throws KuraException {
         try {
-            return (T) properties.get(key);
+            return (T) properties.get(this.key);
         } catch (final Exception e) {
             throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID, null, null,
-                    "invalid property value for " + key, e);
+                    "invalid property value for " + this.key, e);
         }
     }
 
     @SuppressWarnings("unchecked")
     public T getOrDefault(final Map<String, Object> properties) throws KuraException {
-        final Object value = properties.get(key);
+        final Object value = properties.get(this.key);
 
-        if (valueType.isInstance(value)) {
+        if (this.valueType.isInstance(value)) {
             return (T) value;
         }
-        return defaultValue;
+        return this.defaultValue;
     }
 
     public <U> Property<U> map(final Class<U> valueType, final Function<T, U> mapper) {
 
         final Property<T> orig = this;
 
-        return new Property<U>(this.key, defaultValue != null ? mapper.apply(defaultValue) : null, valueType) {
+        return new Property<U>(this.key, this.defaultValue != null ? mapper.apply(this.defaultValue) : null,
+                valueType) {
 
             @Override
             public U get(final Map<String, Object> properties) throws KuraException {
@@ -80,7 +81,7 @@ public class Property<T> {
                 try {
                     return mapper.apply(orig.getOrDefault(properties));
                 } catch (final Exception e) {
-                    return defaultValue;
+                    return this.defaultValue;
                 }
             }
         };
@@ -98,7 +99,7 @@ public class Property<T> {
 
                 if (!validator.test(value)) {
                     throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID, null, null,
-                            "Validation failed for property " + key);
+                            "Validation failed for property " + this.key);
                 }
 
                 return value;
@@ -109,7 +110,7 @@ public class Property<T> {
                 final T value = orig.getOrDefault(properties);
 
                 if (!validator.test(value)) {
-                    return defaultValue;
+                    return this.defaultValue;
                 }
 
                 return value;

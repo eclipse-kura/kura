@@ -24,7 +24,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * NetworkService extends what is offered by the standard Java APIs by offering information
  * like the NetworkInterface type - e.g. wired vs wireless vs modem - and additional information
  * regarding the address of a NetworkInterface - e.g. its getway address, DNS, and so on.
- * 
+ *
  * @noimplement This interface is not intended to be implemented by clients.
  */
 @ProviderType

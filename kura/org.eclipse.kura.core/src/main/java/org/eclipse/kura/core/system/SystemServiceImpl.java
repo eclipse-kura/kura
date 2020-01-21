@@ -107,18 +107,14 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
     protected void activate(ComponentContext componentContext) {
         this.componentContext = componentContext;
 
-        AccessController.doPrivileged(new PrivilegedAction() {
-
-            @Override
-            public Object run() {
-                try {
-                    // privileged code goes here, for example:
-                    onCloudbees = new File(CLOUDBEES_SECURITY_SETTINGS_PATH).exists();
-                    return null; // nothing to return
-                } catch (Exception e) {
-                    System.out.println("Unable to execute privileged in SystemService");
-                    return null;
-                }
+        AccessController.doPrivileged((PrivilegedAction) () -> {
+            try {
+                // privileged code goes here, for example:
+                onCloudbees = new File(CLOUDBEES_SECURITY_SETTINGS_PATH).exists();
+                return null; // nothing to return
+            } catch (Exception e) {
+                System.out.println("Unable to execute privileged in SystemService");
+                return null;
             }
         });
 

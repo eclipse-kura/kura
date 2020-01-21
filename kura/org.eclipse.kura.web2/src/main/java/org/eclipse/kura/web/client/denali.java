@@ -58,7 +58,7 @@ public class denali implements EntryPoint {
     public void onModuleLoad() {
         RootPanel.get().add(this.binder);
 
-        gwtExtensionService.getConsoleExtensions(new AsyncCallback<List<GwtClientExtensionBundle>>() {
+        this.gwtExtensionService.getConsoleExtensions(new AsyncCallback<List<GwtClientExtensionBundle>>() {
 
             @Override
             public void onFailure(Throwable caught) {

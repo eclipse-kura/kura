@@ -20,7 +20,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * In short it's an IP address, a subnet mask and a broadcast address when the address is an IPv4 one.
  * An IP address and a network prefix length in the case of IPv6 address.
  * Both IPv4 and IPv6 addresses will have a gateway and one or more DNS addresses.
- * 
+ *
  * @noimplement This interface is not intended to be implemented by clients.
  */
 @ProviderType

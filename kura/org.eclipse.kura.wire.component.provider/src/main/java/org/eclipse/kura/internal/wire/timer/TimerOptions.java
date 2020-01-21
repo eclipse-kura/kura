@@ -97,7 +97,7 @@ final class TimerOptions {
     }
 
     long getSimpleTimeUnitMultiplier() throws IllegalArgumentException {
-        String timeUnitString = (String) properties.getOrDefault(PROP_SIMPLE_TIME_UNIT, "SECONDS");
+        String timeUnitString = (String) this.properties.getOrDefault(PROP_SIMPLE_TIME_UNIT, "SECONDS");
         TimeUnit timeUnit = TimeUnit.SECONDS;
 
         if (TimeUnit.MILLISECONDS.name().equals(timeUnitString)) {

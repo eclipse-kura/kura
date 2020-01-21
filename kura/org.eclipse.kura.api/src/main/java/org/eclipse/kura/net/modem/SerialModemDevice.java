@@ -50,36 +50,45 @@ public class SerialModemDevice implements ModemDevice {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((manufacturerName == null) ? 0 : manufacturerName.hashCode());
-        result = prime * result + ((productName == null) ? 0 : productName.hashCode());
-        result = prime * result + ((serialPorts == null) ? 0 : serialPorts.hashCode());
+        result = prime * result + (this.manufacturerName == null ? 0 : this.manufacturerName.hashCode());
+        result = prime * result + (this.productName == null ? 0 : this.productName.hashCode());
+        result = prime * result + (this.serialPorts == null ? 0 : this.serialPorts.hashCode());
         return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         SerialModemDevice other = (SerialModemDevice) obj;
-        if (manufacturerName == null) {
-            if (other.manufacturerName != null)
+        if (this.manufacturerName == null) {
+            if (other.manufacturerName != null) {
                 return false;
-        } else if (!manufacturerName.equals(other.manufacturerName))
+            }
+        } else if (!this.manufacturerName.equals(other.manufacturerName)) {
             return false;
-        if (productName == null) {
-            if (other.productName != null)
+        }
+        if (this.productName == null) {
+            if (other.productName != null) {
                 return false;
-        } else if (!productName.equals(other.productName))
+            }
+        } else if (!this.productName.equals(other.productName)) {
             return false;
-        if (serialPorts == null) {
-            if (other.serialPorts != null)
+        }
+        if (this.serialPorts == null) {
+            if (other.serialPorts != null) {
                 return false;
-        } else if (!serialPorts.equals(other.serialPorts))
+            }
+        } else if (!this.serialPorts.equals(other.serialPorts)) {
             return false;
+        }
         return true;
     }
 }

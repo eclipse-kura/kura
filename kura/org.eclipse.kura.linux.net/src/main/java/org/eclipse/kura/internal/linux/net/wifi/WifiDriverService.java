@@ -16,17 +16,17 @@ import org.eclipse.kura.internal.board.BoardResourcePowerService;
 import org.eclipse.kura.net.wifi.WifiMode;
 
 /**
- * 
+ *
  *
  */
-public interface WifiDriverService extends BoardResourcePowerService{
+public interface WifiDriverService extends BoardResourcePowerService {
 
     public boolean isKernelModuleLoaded(String interfaceName) throws KuraException;
-    
+
     public boolean isKernelModuleLoadedForMode(String interfaceName, WifiMode wifiMode) throws KuraException;
-    
+
     public void unloadKernelModule(String interfaceName) throws KuraException;
-    
+
     public void loadKernelModule(String interfaceName, WifiMode wifiMode) throws KuraException;
-    
+
 }

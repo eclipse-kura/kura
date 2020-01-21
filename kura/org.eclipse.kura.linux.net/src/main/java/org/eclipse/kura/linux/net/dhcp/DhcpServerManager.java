@@ -34,7 +34,7 @@ public class DhcpServerManager {
     private static final String FILE_DIR = "/etc/";
     private static final String PID_FILE_DIR = "/var/run/";
     private static DhcpServerTool dhcpServerTool = DhcpServerTool.NONE;
-    private CommandExecutorService executorService;
+    private final CommandExecutorService executorService;
 
     static {
         dhcpServerTool = getTool();

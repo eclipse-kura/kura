@@ -33,14 +33,14 @@ public class GwtChannelOperationResult extends GwtBaseModel implements Serializa
     }
 
     public List<GwtChannelRecord> getRecords() {
-        return records;
+        return this.records;
     }
 
     public String getExceptionMessage() {
-        return exceptionMessage;
+        return this.exceptionMessage;
     }
 
     public StackTraceElement[] getStackTrace() {
-        return stackTrace;
+        return this.stackTrace;
     }
 }

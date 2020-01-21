@@ -36,13 +36,13 @@ import org.slf4j.LoggerFactory;
 
 public class EmulatedNetworkServiceImpl implements NetworkService {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(EmulatedNetworkServiceImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(EmulatedNetworkServiceImpl.class);
 
     @SuppressWarnings("unused")
-    private Emulator m_emulator;
+    private Emulator emulator;
 
     @SuppressWarnings("unused")
-    private ComponentContext m_ctx;
+    private ComponentContext ctx;
 
     // ----------------------------------------------------------------
     //
@@ -51,11 +51,11 @@ public class EmulatedNetworkServiceImpl implements NetworkService {
     // ----------------------------------------------------------------
 
     public void setEmulator(Emulator emulator) {
-        this.m_emulator = emulator;
+        this.emulator = emulator;
     }
 
     public void unsetEmulator(Emulator emulator) {
-        this.m_emulator = null;
+        this.emulator = null;
     }
 
     // ----------------------------------------------------------------
@@ -67,11 +67,11 @@ public class EmulatedNetworkServiceImpl implements NetworkService {
     protected void activate(ComponentContext componentContext) {
         //
         // save the bundle context
-        this.m_ctx = componentContext;
+        this.ctx = componentContext;
     }
 
     protected void deactivate(ComponentContext componentContext) {
-        this.m_ctx = null;
+        this.ctx = null;
     }
 
     // ----------------------------------------------------------------
@@ -155,7 +155,7 @@ public class EmulatedNetworkServiceImpl implements NetworkService {
                     isP2p = jnInterface.isPointToPoint();
                     multi = jnInterface.supportsMulticast();
                 } catch (Exception e) {
-                    s_logger.warn("Exception while getting information for interface " + jnInterface.getName() + ": "
+                    logger.warn("Exception while getting information for interface " + jnInterface.getName() + ": "
                             + e.getMessage());
                 }
                 ethInterface.setHardwareAddress(hwAddr);
@@ -241,7 +241,7 @@ public class EmulatedNetworkServiceImpl implements NetworkService {
                             isP2p = jnInterface.isPointToPoint();
                             multi = jnInterface.supportsMulticast();
                         } catch (Exception e) {
-                            s_logger.warn("Exception while getting information for interface " + jnInterface.getName(),
+                            logger.warn("Exception while getting information for interface " + jnInterface.getName(),
                                     e);
                         }
                         ethInterface.setHardwareAddress(hwAddr);
@@ -271,7 +271,7 @@ public class EmulatedNetworkServiceImpl implements NetworkService {
                         interfaces.add(ethInterface);
                     }
                 } catch (SocketException se) {
-                    s_logger.warn("Exception while getting information for interface " + jnInterface.getName(), se);
+                    logger.warn("Exception while getting information for interface " + jnInterface.getName(), se);
                 }
             }
         } catch (Exception e) {
@@ -336,7 +336,7 @@ public class EmulatedNetworkServiceImpl implements NetworkService {
                 }
             }
         } catch (SocketException e) {
-            s_logger.error("Error getting IP address", e);
+            logger.error("Error getting IP address", e);
         }
         return jnAddress;
     }

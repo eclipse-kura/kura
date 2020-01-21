@@ -13,21 +13,20 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.timer;
 
-import org.eclipse.kura.wire.WireRecord;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
 /**
- * The Class EmitJob is responsible for emitting {@link WireRecord} every specified
+ * The Class EmitJob is responsible for emitting {@link org.eclipse.kura.wire.WireRecord} every specified
  * interval (or specified CRON job interval)
  */
 @DisallowConcurrentExecution
 public final class EmitJob implements Job {
 
     /**
-     * Emits a {@link WireRecord} every specified interval.
+     * Emits a {@link org.eclipse.kura.wire.WireRecord} every specified interval.
      *
      * @param context
      *            the Job Execution context

@@ -24,7 +24,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * @noextend This class is not intended to be subclassed by clients.
  */
 @ProviderType
-public class DhcpServerConfigIP6 extends DhcpServerConfigIP<IP6Address>implements DhcpServerConfig6 {
+public class DhcpServerConfigIP6 extends DhcpServerConfigIP<IP6Address> implements DhcpServerConfig6 {
 
     /**
      * The basic Constructor for a DhcpServerConfigIP6
@@ -54,7 +54,7 @@ public class DhcpServerConfigIP6 extends DhcpServerConfigIP<IP6Address>implement
      * @param dnsServers
      *            the DNS servers that will get passed to DHCP clients if passDns is true
      */
-	@Deprecated
+    @Deprecated
     public DhcpServerConfigIP6(String interfaceName, boolean enabled, IP6Address subnet, IP6Address routerAddress,
             IP6Address subnetMask, int defaultLeaseTime, int maximumLeaseTime, short prefix, IP6Address rangeStart,
             IP6Address rangeEnd, boolean passDns, List<IP6Address> dnsServers) {
@@ -63,20 +63,22 @@ public class DhcpServerConfigIP6 extends DhcpServerConfigIP<IP6Address>implement
                 rangeStart, rangeEnd, passDns, dnsServers);
 
     }
-	
-	/**
-     * The basic Constructor for a DhcpServerConfigIP6
-     * 
-     * @param dhcpServerCfg DHCP server configuration
-     * @param dhcpServerCfgIP4 'network' configuration 
-     * @throws KuraException
-	 * @since 1.2
-     */
-	public DhcpServerConfigIP6(DhcpServerCfg dhcpServerCfg, DhcpServerCfgIP6 dhcpServerCfgIP6) throws KuraException {
 
-		super (dhcpServerCfg, dhcpServerCfgIP6);
-		if (!isValid() || !dhcpServerCfgIP6.isValid()) {
-			throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR);
-		}
+    /**
+     * The basic Constructor for a DhcpServerConfigIP6
+     *
+     * @param dhcpServerCfg
+     *            DHCP server configuration
+     * @param dhcpServerCfgIP4
+     *            'network' configuration
+     * @throws KuraException
+     * @since 1.2
+     */
+    public DhcpServerConfigIP6(DhcpServerCfg dhcpServerCfg, DhcpServerCfgIP6 dhcpServerCfgIP6) throws KuraException {
+
+        super(dhcpServerCfg, dhcpServerCfgIP6);
+        if (!isValid() || !dhcpServerCfgIP6.isValid()) {
+            throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR);
+        }
     }
 }

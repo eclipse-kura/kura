@@ -28,7 +28,6 @@ import org.gwtbootstrap3.client.ui.gwt.CellTable;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.cellview.client.RowStyles;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
@@ -56,13 +55,7 @@ public class ProfileTabUi extends Composite implements Tab {
     public ProfileTabUi() {
         initWidget(uiBinder.createAndBindUi(this));
 
-        this.profileGrid.setRowStyles(new RowStyles<GwtGroupedNVPair>() {
-
-            @Override
-            public String getStyleNames(GwtGroupedNVPair row, int rowIndex) {
-                return row.getValue().contains("  ") ? "rowHeader" : " ";
-            }
-        });
+        this.profileGrid.setRowStyles((row, rowIndex) -> row.getValue().contains("  ") ? "rowHeader" : " ");
 
         loadProfileTable(this.profileGrid, this.profileDataProvider);
     }
@@ -125,34 +118,34 @@ public class ProfileTabUi extends Composite implements Tab {
                 ProfileTabUi.this.gwtDeviceService.findDeviceConfiguration(token,
                         new AsyncCallback<ArrayList<GwtGroupedNVPair>>() {
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        EntryClassUi.hideWaitModal();
-                        ProfileTabUi.this.profileDataProvider.getList().clear();
-                        FailureHandler.handle(caught);
-                        ProfileTabUi.this.profileDataProvider.flush();
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                EntryClassUi.hideWaitModal();
+                                ProfileTabUi.this.profileDataProvider.getList().clear();
+                                FailureHandler.handle(caught);
+                                ProfileTabUi.this.profileDataProvider.flush();
 
-                    }
-
-                    @Override
-                    public void onSuccess(ArrayList<GwtGroupedNVPair> result) {
-                        String oldGroup = DEV_INFO;
-                        ProfileTabUi.this.profileDataProvider.getList()
-                                .add(new GwtGroupedNVPair(DEV_INFO, DEV_INFO, "  "));
-                        for (GwtGroupedNVPair resultPair : result) {
-                            if (!oldGroup.equals(resultPair.getGroup())) {
-                                ProfileTabUi.this.profileDataProvider.getList()
-                                        .add(new GwtGroupedNVPair(resultPair.getGroup(), resultPair.getGroup(), "  "));
-                                oldGroup = resultPair.getGroup();
                             }
-                            ProfileTabUi.this.profileDataProvider.getList().add(resultPair);
-                        }
-                        int size = ProfileTabUi.this.profileDataProvider.getList().size();
-                        ProfileTabUi.this.profileGrid.setVisibleRange(0, size);
-                        ProfileTabUi.this.profileDataProvider.flush();
-                        EntryClassUi.hideWaitModal();
-                    }
-                });
+
+                            @Override
+                            public void onSuccess(ArrayList<GwtGroupedNVPair> result) {
+                                String oldGroup = DEV_INFO;
+                                ProfileTabUi.this.profileDataProvider.getList()
+                                        .add(new GwtGroupedNVPair(DEV_INFO, DEV_INFO, "  "));
+                                for (GwtGroupedNVPair resultPair : result) {
+                                    if (!oldGroup.equals(resultPair.getGroup())) {
+                                        ProfileTabUi.this.profileDataProvider.getList().add(new GwtGroupedNVPair(
+                                                resultPair.getGroup(), resultPair.getGroup(), "  "));
+                                        oldGroup = resultPair.getGroup();
+                                    }
+                                    ProfileTabUi.this.profileDataProvider.getList().add(resultPair);
+                                }
+                                int size = ProfileTabUi.this.profileDataProvider.getList().size();
+                                ProfileTabUi.this.profileGrid.setVisibleRange(0, size);
+                                ProfileTabUi.this.profileDataProvider.flush();
+                                EntryClassUi.hideWaitModal();
+                            }
+                        });
             }
 
         });

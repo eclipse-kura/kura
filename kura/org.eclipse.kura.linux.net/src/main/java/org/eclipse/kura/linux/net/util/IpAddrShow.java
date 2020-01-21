@@ -32,7 +32,7 @@ public class IpAddrShow {
     private static final Logger logger = LoggerFactory.getLogger(IpAddrShow.class);
 
     private String ifaceName;
-    private CommandExecutorService executorService;
+    private final CommandExecutorService executorService;
     private final ArrayList<LinuxIfconfig> configs = new ArrayList<>();
 
     public IpAddrShow(CommandExecutorService executoService) {

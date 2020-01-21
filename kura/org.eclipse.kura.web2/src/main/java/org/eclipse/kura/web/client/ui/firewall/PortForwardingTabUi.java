@@ -29,7 +29,6 @@ import org.eclipse.kura.web.shared.service.GwtNetworkService;
 import org.eclipse.kura.web.shared.service.GwtNetworkServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
-import org.gwtbootstrap3.client.shared.event.ModalHideEvent;
 import org.gwtbootstrap3.client.shared.event.ModalHideHandler;
 import org.gwtbootstrap3.client.ui.Alert;
 import org.gwtbootstrap3.client.ui.Button;
@@ -43,10 +42,6 @@ import org.gwtbootstrap3.client.ui.constants.ValidationState;
 import org.gwtbootstrap3.client.ui.gwt.CellTable;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.BlurEvent;
-import com.google.gwt.event.dom.client.BlurHandler;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -459,18 +454,14 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
 
     @Override
     public void onCreate() {
-        replaceModalHideHandler(new ModalHideHandler() {
-
-            @Override
-            public void onHide(ModalHideEvent evt) {
-                if (PortForwardingTabUi.this.newPortForwardEntry != null
-                        && !duplicateEntry(PortForwardingTabUi.this.newPortForwardEntry)) {
-                    PortForwardingTabUi.this.portForwardDataProvider.getList()
-                            .add(PortForwardingTabUi.this.newPortForwardEntry);
-                    refreshTable();
-                    PortForwardingTabUi.this.buttonBar.setDirty(true);
-                    PortForwardingTabUi.this.newPortForwardEntry = null;
-                }
+        replaceModalHideHandler(evt -> {
+            if (PortForwardingTabUi.this.newPortForwardEntry != null
+                    && !duplicateEntry(PortForwardingTabUi.this.newPortForwardEntry)) {
+                PortForwardingTabUi.this.portForwardDataProvider.getList()
+                        .add(PortForwardingTabUi.this.newPortForwardEntry);
+                refreshTable();
+                PortForwardingTabUi.this.buttonBar.setDirty(true);
+                PortForwardingTabUi.this.newPortForwardEntry = null;
             }
         });
         showModal(null);
@@ -485,23 +476,19 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
             return;
         }
 
-        replaceModalHideHandler(new ModalHideHandler() {
-
-            @Override
-            public void onHide(ModalHideEvent evt) {
-                if (PortForwardingTabUi.this.editPortForwardEntry != null) {
-                    GwtFirewallPortForwardEntry oldEntry = PortForwardingTabUi.this.selectionModel.getSelectedObject();
-                    PortForwardingTabUi.this.portForwardDataProvider.getList().remove(oldEntry);
-                    if (!duplicateEntry(PortForwardingTabUi.this.editPortForwardEntry)) {
-                        PortForwardingTabUi.this.portForwardDataProvider.getList()
-                                .add(PortForwardingTabUi.this.editPortForwardEntry);
-                        PortForwardingTabUi.this.portForwardDataProvider.flush();
-                        PortForwardingTabUi.this.buttonBar.setDirty(true);
-                        PortForwardingTabUi.this.editPortForwardEntry = null;
-                    } else {    // end duplicate
-                        PortForwardingTabUi.this.portForwardDataProvider.getList().add(oldEntry);
-                        PortForwardingTabUi.this.portForwardDataProvider.flush();
-                    }
+        replaceModalHideHandler(evt -> {
+            if (PortForwardingTabUi.this.editPortForwardEntry != null) {
+                GwtFirewallPortForwardEntry oldEntry = PortForwardingTabUi.this.selectionModel.getSelectedObject();
+                PortForwardingTabUi.this.portForwardDataProvider.getList().remove(oldEntry);
+                if (!duplicateEntry(PortForwardingTabUi.this.editPortForwardEntry)) {
+                    PortForwardingTabUi.this.portForwardDataProvider.getList()
+                            .add(PortForwardingTabUi.this.editPortForwardEntry);
+                    PortForwardingTabUi.this.portForwardDataProvider.flush();
+                    PortForwardingTabUi.this.buttonBar.setDirty(true);
+                    PortForwardingTabUi.this.editPortForwardEntry = null;
+                } else {    // end duplicate
+                    PortForwardingTabUi.this.portForwardDataProvider.getList().add(oldEntry);
+                    PortForwardingTabUi.this.portForwardDataProvider.flush();
                 }
             }
         });
@@ -531,76 +518,66 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
 
         // handle buttons
         this.cancel.setText(MSGS.cancelButton());
-        this.cancel.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                PortForwardingTabUi.this.portForwardingForm.hide();
-            }
-        });
+        this.cancel.addClickHandler(event -> PortForwardingTabUi.this.portForwardingForm.hide());
 
         this.submit.setText(MSGS.submitButton());
-        this.submit.addClickHandler(new ClickHandler() {
+        this.submit.addClickHandler(event -> {
+            checkFieldsValues();
 
-            @Override
-            public void onClick(ClickEvent event) {
-                checkFieldsValues();
-
-                if (PortForwardingTabUi.this.groupInput.getValidationState().equals(ValidationState.ERROR)
-                        || PortForwardingTabUi.this.groupOutput.getValidationState().equals(ValidationState.ERROR)
-                        || PortForwardingTabUi.this.groupLan.getValidationState().equals(ValidationState.ERROR)
-                        || PortForwardingTabUi.this.groupInternal.getValidationState().equals(ValidationState.ERROR)
-                        || PortForwardingTabUi.this.groupExternal.getValidationState().equals(ValidationState.ERROR)
-                        || PortForwardingTabUi.this.groupPermittedNw.getValidationState().equals(ValidationState.ERROR)
-                        || PortForwardingTabUi.this.groupPermittedMac.getValidationState().equals(ValidationState.ERROR)
-                        || PortForwardingTabUi.this.groupSource.getValidationState().equals(ValidationState.ERROR)) {
-                    return;
-                }
-
-                final GwtFirewallPortForwardEntry portForwardEntry = new GwtFirewallPortForwardEntry();
-                portForwardEntry.setInboundInterface(PortForwardingTabUi.this.input.getText());
-                portForwardEntry.setOutboundInterface(PortForwardingTabUi.this.output.getText());
-                portForwardEntry.setAddress(PortForwardingTabUi.this.lan.getText());
-                portForwardEntry.setProtocol(PortForwardingTabUi.this.protocol.getSelectedItemText());
-                if (PortForwardingTabUi.this.internal.getText() != null
-                        && !"".equals(PortForwardingTabUi.this.internal.getText().trim())) {
-                    portForwardEntry.setOutPort(Integer.parseInt(PortForwardingTabUi.this.internal.getText()));
-                }
-                if (PortForwardingTabUi.this.external.getText() != null
-                        && !"".equals(PortForwardingTabUi.this.external.getText().trim())) {
-                    portForwardEntry.setInPort(Integer.parseInt(PortForwardingTabUi.this.external.getText()));
-                }
-                portForwardEntry.setMasquerade(PortForwardingTabUi.this.enable.getSelectedItemText());
-                if (PortForwardingTabUi.this.permittedNw.getText() != null
-                        && !"".equals(PortForwardingTabUi.this.permittedNw.getText().trim())) {
-                    portForwardEntry.setPermittedNetwork(PortForwardingTabUi.this.permittedNw.getText());
-                } else {
-                    portForwardEntry.setPermittedNetwork("0.0.0.0/0");
-                }
-                if (PortForwardingTabUi.this.permittedMac.getText() != null
-                        && !"".equals(PortForwardingTabUi.this.permittedMac.getText().trim())) {
-                    portForwardEntry.setPermittedMAC(PortForwardingTabUi.this.permittedMac.getText());
-                    PortForwardingTabUi.this.alertDialog.setTitle(MSGS.warning());
-                    PortForwardingTabUi.this.alertDialog.show(MSGS.firewallPortForwardFormNotificationMacFiltering(),
-                            (ConfirmListener) null);
-                }
-                if (PortForwardingTabUi.this.source.getText() != null
-                        && !"".equals(PortForwardingTabUi.this.source.getText().trim())) {
-                    portForwardEntry.setSourcePortRange(PortForwardingTabUi.this.source.getText());
-                }
-
-                if (PortForwardingTabUi.this.submit.getId().equals("new")) {
-                    PortForwardingTabUi.this.newPortForwardEntry = portForwardEntry;
-                    PortForwardingTabUi.this.editPortForwardEntry = null;
-                } else if (PortForwardingTabUi.this.submit.getId().equals("edit")) {
-                    PortForwardingTabUi.this.editPortForwardEntry = portForwardEntry;
-                    PortForwardingTabUi.this.newPortForwardEntry = null;
-                }
-
-                setDirty(true);
-
-                PortForwardingTabUi.this.portForwardingForm.hide();
+            if (PortForwardingTabUi.this.groupInput.getValidationState().equals(ValidationState.ERROR)
+                    || PortForwardingTabUi.this.groupOutput.getValidationState().equals(ValidationState.ERROR)
+                    || PortForwardingTabUi.this.groupLan.getValidationState().equals(ValidationState.ERROR)
+                    || PortForwardingTabUi.this.groupInternal.getValidationState().equals(ValidationState.ERROR)
+                    || PortForwardingTabUi.this.groupExternal.getValidationState().equals(ValidationState.ERROR)
+                    || PortForwardingTabUi.this.groupPermittedNw.getValidationState().equals(ValidationState.ERROR)
+                    || PortForwardingTabUi.this.groupPermittedMac.getValidationState().equals(ValidationState.ERROR)
+                    || PortForwardingTabUi.this.groupSource.getValidationState().equals(ValidationState.ERROR)) {
+                return;
             }
+
+            final GwtFirewallPortForwardEntry portForwardEntry = new GwtFirewallPortForwardEntry();
+            portForwardEntry.setInboundInterface(PortForwardingTabUi.this.input.getText());
+            portForwardEntry.setOutboundInterface(PortForwardingTabUi.this.output.getText());
+            portForwardEntry.setAddress(PortForwardingTabUi.this.lan.getText());
+            portForwardEntry.setProtocol(PortForwardingTabUi.this.protocol.getSelectedItemText());
+            if (PortForwardingTabUi.this.internal.getText() != null
+                    && !"".equals(PortForwardingTabUi.this.internal.getText().trim())) {
+                portForwardEntry.setOutPort(Integer.parseInt(PortForwardingTabUi.this.internal.getText()));
+            }
+            if (PortForwardingTabUi.this.external.getText() != null
+                    && !"".equals(PortForwardingTabUi.this.external.getText().trim())) {
+                portForwardEntry.setInPort(Integer.parseInt(PortForwardingTabUi.this.external.getText()));
+            }
+            portForwardEntry.setMasquerade(PortForwardingTabUi.this.enable.getSelectedItemText());
+            if (PortForwardingTabUi.this.permittedNw.getText() != null
+                    && !"".equals(PortForwardingTabUi.this.permittedNw.getText().trim())) {
+                portForwardEntry.setPermittedNetwork(PortForwardingTabUi.this.permittedNw.getText());
+            } else {
+                portForwardEntry.setPermittedNetwork("0.0.0.0/0");
+            }
+            if (PortForwardingTabUi.this.permittedMac.getText() != null
+                    && !"".equals(PortForwardingTabUi.this.permittedMac.getText().trim())) {
+                portForwardEntry.setPermittedMAC(PortForwardingTabUi.this.permittedMac.getText());
+                PortForwardingTabUi.this.alertDialog.setTitle(MSGS.warning());
+                PortForwardingTabUi.this.alertDialog.show(MSGS.firewallPortForwardFormNotificationMacFiltering(),
+                        (ConfirmListener) null);
+            }
+            if (PortForwardingTabUi.this.source.getText() != null
+                    && !"".equals(PortForwardingTabUi.this.source.getText().trim())) {
+                portForwardEntry.setSourcePortRange(PortForwardingTabUi.this.source.getText());
+            }
+
+            if (PortForwardingTabUi.this.submit.getId().equals("new")) {
+                PortForwardingTabUi.this.newPortForwardEntry = portForwardEntry;
+                PortForwardingTabUi.this.editPortForwardEntry = null;
+            } else if (PortForwardingTabUi.this.submit.getId().equals("edit")) {
+                PortForwardingTabUi.this.editPortForwardEntry = portForwardEntry;
+                PortForwardingTabUi.this.newPortForwardEntry = null;
+            }
+
+            setDirty(true);
+
+            PortForwardingTabUi.this.portForwardingForm.hide();
         });// end submit click handler
     }
 
@@ -633,102 +610,69 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
 
     private void setModalFieldsHandlers() {
         // Set validations
-        this.input.addBlurHandler(new BlurHandler() {
-
-            @Override
-            public void onBlur(BlurEvent event) {
-                if (PortForwardingTabUi.this.input.getText().trim().isEmpty() || !PortForwardingTabUi.this.input
-                        .getText().trim().matches(FieldType.ALPHANUMERIC.getRegex())) {
-                    PortForwardingTabUi.this.groupInput.setValidationState(ValidationState.ERROR);
-                } else {
-                    PortForwardingTabUi.this.groupInput.setValidationState(ValidationState.NONE);
-                }
+        this.input.addBlurHandler(event -> {
+            if (PortForwardingTabUi.this.input.getText().trim().isEmpty()
+                    || !PortForwardingTabUi.this.input.getText().trim().matches(FieldType.ALPHANUMERIC.getRegex())) {
+                PortForwardingTabUi.this.groupInput.setValidationState(ValidationState.ERROR);
+            } else {
+                PortForwardingTabUi.this.groupInput.setValidationState(ValidationState.NONE);
             }
         });
-        this.output.addBlurHandler(new BlurHandler() {
-
-            @Override
-            public void onBlur(BlurEvent event) {
-                if (PortForwardingTabUi.this.output.getText().trim().isEmpty() || !PortForwardingTabUi.this.output
-                        .getText().trim().matches(FieldType.ALPHANUMERIC.getRegex())) {
-                    PortForwardingTabUi.this.groupOutput.setValidationState(ValidationState.ERROR);
-                } else {
-                    PortForwardingTabUi.this.groupOutput.setValidationState(ValidationState.NONE);
-                }
+        this.output.addBlurHandler(event -> {
+            if (PortForwardingTabUi.this.output.getText().trim().isEmpty()
+                    || !PortForwardingTabUi.this.output.getText().trim().matches(FieldType.ALPHANUMERIC.getRegex())) {
+                PortForwardingTabUi.this.groupOutput.setValidationState(ValidationState.ERROR);
+            } else {
+                PortForwardingTabUi.this.groupOutput.setValidationState(ValidationState.NONE);
             }
         });
-        this.lan.addBlurHandler(new BlurHandler() {
-
-            @Override
-            public void onBlur(BlurEvent event) {
-                if (PortForwardingTabUi.this.lan.getText().trim().isEmpty()
-                        || !PortForwardingTabUi.this.lan.getText().trim().matches(FieldType.IPv4_ADDRESS.getRegex())) {
-                    PortForwardingTabUi.this.groupLan.setValidationState(ValidationState.ERROR);
-                } else {
-                    PortForwardingTabUi.this.groupLan.setValidationState(ValidationState.NONE);
-                }
+        this.lan.addBlurHandler(event -> {
+            if (PortForwardingTabUi.this.lan.getText().trim().isEmpty()
+                    || !PortForwardingTabUi.this.lan.getText().trim().matches(FieldType.IPv4_ADDRESS.getRegex())) {
+                PortForwardingTabUi.this.groupLan.setValidationState(ValidationState.ERROR);
+            } else {
+                PortForwardingTabUi.this.groupLan.setValidationState(ValidationState.NONE);
             }
         });
-        this.internal.addBlurHandler(new BlurHandler() {
-
-            @Override
-            public void onBlur(BlurEvent event) {
-                if (PortForwardingTabUi.this.internal.getText().trim().isEmpty()
-                        || !PortForwardingTabUi.this.internal.getText().trim().matches(FieldType.NUMERIC.getRegex())) {
-                    PortForwardingTabUi.this.groupInternal.setValidationState(ValidationState.ERROR);
-                } else {
-                    PortForwardingTabUi.this.groupInternal.setValidationState(ValidationState.NONE);
-                }
+        this.internal.addBlurHandler(event -> {
+            if (PortForwardingTabUi.this.internal.getText().trim().isEmpty()
+                    || !PortForwardingTabUi.this.internal.getText().trim().matches(FieldType.NUMERIC.getRegex())) {
+                PortForwardingTabUi.this.groupInternal.setValidationState(ValidationState.ERROR);
+            } else {
+                PortForwardingTabUi.this.groupInternal.setValidationState(ValidationState.NONE);
             }
         });
-        this.external.addBlurHandler(new BlurHandler() {
-
-            @Override
-            public void onBlur(BlurEvent event) {
-                if (PortForwardingTabUi.this.external.getText().trim().isEmpty()
-                        || !PortForwardingTabUi.this.external.getText().trim().matches(FieldType.NUMERIC.getRegex())) {
-                    PortForwardingTabUi.this.groupExternal.setValidationState(ValidationState.ERROR);
-                } else {
-                    PortForwardingTabUi.this.groupExternal.setValidationState(ValidationState.NONE);
-                }
+        this.external.addBlurHandler(event -> {
+            if (PortForwardingTabUi.this.external.getText().trim().isEmpty()
+                    || !PortForwardingTabUi.this.external.getText().trim().matches(FieldType.NUMERIC.getRegex())) {
+                PortForwardingTabUi.this.groupExternal.setValidationState(ValidationState.ERROR);
+            } else {
+                PortForwardingTabUi.this.groupExternal.setValidationState(ValidationState.NONE);
             }
         });
-        this.permittedNw.addBlurHandler(new BlurHandler() {
-
-            @Override
-            public void onBlur(BlurEvent event) {
-                if (!PortForwardingTabUi.this.permittedNw.getText().trim().isEmpty()
-                        && !PortForwardingTabUi.this.permittedNw.getText().trim()
-                                .matches(FieldType.NETWORK.getRegex())) {
-                    PortForwardingTabUi.this.groupPermittedNw.setValidationState(ValidationState.ERROR);
-                } else {
-                    PortForwardingTabUi.this.groupPermittedNw.setValidationState(ValidationState.NONE);
-                }
+        this.permittedNw.addBlurHandler(event -> {
+            if (!PortForwardingTabUi.this.permittedNw.getText().trim().isEmpty()
+                    && !PortForwardingTabUi.this.permittedNw.getText().trim().matches(FieldType.NETWORK.getRegex())) {
+                PortForwardingTabUi.this.groupPermittedNw.setValidationState(ValidationState.ERROR);
+            } else {
+                PortForwardingTabUi.this.groupPermittedNw.setValidationState(ValidationState.NONE);
             }
         });
-        this.permittedMac.addBlurHandler(new BlurHandler() {
-
-            @Override
-            public void onBlur(BlurEvent event) {
-                if (!PortForwardingTabUi.this.permittedMac.getText().trim().isEmpty()
-                        && !PortForwardingTabUi.this.permittedMac.getText().trim()
-                                .matches(FieldType.MAC_ADDRESS.getRegex())) {
-                    PortForwardingTabUi.this.groupPermittedMac.setValidationState(ValidationState.ERROR);
-                } else {
-                    PortForwardingTabUi.this.groupPermittedMac.setValidationState(ValidationState.NONE);
-                }
+        this.permittedMac.addBlurHandler(event -> {
+            if (!PortForwardingTabUi.this.permittedMac.getText().trim().isEmpty()
+                    && !PortForwardingTabUi.this.permittedMac.getText().trim()
+                            .matches(FieldType.MAC_ADDRESS.getRegex())) {
+                PortForwardingTabUi.this.groupPermittedMac.setValidationState(ValidationState.ERROR);
+            } else {
+                PortForwardingTabUi.this.groupPermittedMac.setValidationState(ValidationState.NONE);
             }
         });
-        this.source.addBlurHandler(new BlurHandler() {
-
-            @Override
-            public void onBlur(BlurEvent event) {
-                if (!PortForwardingTabUi.this.source.getText().trim().isEmpty()
-                        && !PortForwardingTabUi.this.source.getText().trim().matches(FieldType.PORT_RANGE.getRegex())) {
-                    PortForwardingTabUi.this.groupSource.setValidationState(ValidationState.ERROR);
-                } else {
-                    PortForwardingTabUi.this.groupSource.setValidationState(ValidationState.NONE);
-                }
+        this.source.addBlurHandler(event -> {
+            if (!PortForwardingTabUi.this.source.getText().trim().isEmpty()
+                    && !PortForwardingTabUi.this.source.getText().trim().matches(FieldType.PORT_RANGE.getRegex())) {
+                PortForwardingTabUi.this.groupSource.setValidationState(ValidationState.ERROR);
+            } else {
+                PortForwardingTabUi.this.groupSource.setValidationState(ValidationState.NONE);
             }
         });
     }

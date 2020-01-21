@@ -39,6 +39,6 @@ public class SimpleTimerExecutor implements TimerExecutor {
 
     @Override
     public void shutdown() {
-        executor.shutdownNow();
+        this.executor.shutdownNow();
     }
 }

@@ -27,7 +27,6 @@ import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.asset.Asset;
 import org.eclipse.kura.asset.AssetConfiguration;
 import org.eclipse.kura.asset.provider.BaseAsset;
 import org.eclipse.kura.channel.Channel;
@@ -92,7 +91,7 @@ import org.osgi.service.wireadmin.Wire;
  * @see Channel
  * @see ChannelRecord
  * @see WireRecord
- * @see Asset
+ * @see org.eclipse.kura.asset.Asset
  */
 public final class WireAsset extends BaseAsset implements WireEmitter, WireReceiver {
 
@@ -296,7 +295,7 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
         if (this.preparedEmit != null) {
             wireRecordProperties = this.preparedEmit.execute(channelRecords);
         } else {
-            wireRecordProperties = Utils.toWireRecordProperties(channelRecords, options);
+            wireRecordProperties = Utils.toWireRecordProperties(channelRecords, this.options);
         }
 
         try {
@@ -399,7 +398,7 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
 
         @Override
         public void onChannelEvent(ChannelEvent event) {
-            if (options.emitAllChannels()) {
+            if (WireAsset.this.options.emitAllChannels()) {
                 emitAllReadChannels();
             } else {
                 emitChannelRecords(Collections.singletonList(event.getChannelRecord()));
@@ -418,18 +417,18 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
 
         PreparedEmit(final List<ChannelRecord> records) {
             this.preparedRecords = records;
-            this.recordFillers = RecordFillers.create(preparedRecords, options);
+            this.recordFillers = RecordFillers.create(this.preparedRecords, WireAsset.this.options);
         }
 
         Map<String, TypedValue<?>> execute(final List<ChannelRecord> channelRecords) {
 
-            if (channelRecords != preparedRecords) {
+            if (channelRecords != this.preparedRecords) {
                 // driver changed the record list
                 // fallback to slow mode
-                return Utils.toWireRecordProperties(channelRecords, options);
+                return Utils.toWireRecordProperties(channelRecords, WireAsset.this.options);
             }
 
-            return Utils.toWireRecordProperties(channelRecords, options, recordFillers);
+            return Utils.toWireRecordProperties(channelRecords, WireAsset.this.options, this.recordFillers);
         }
 
     }

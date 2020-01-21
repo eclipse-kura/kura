@@ -21,7 +21,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * The base class for firewall port forward configurations
  *
  * @param <T>
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 @ProviderType

@@ -29,7 +29,7 @@ public class ModemGpsStatusTracker implements EventHandler {
     private GpsDeviceAvailabilityListener listener;
 
     public synchronized CommURI getGpsDeviceUri() {
-        return modemGpsPort;
+        return this.modemGpsPort;
     }
 
     public synchronized void reset() {
@@ -51,7 +51,7 @@ public class ModemGpsStatusTracker implements EventHandler {
     }
 
     private void handleModemGpsDisabledEvent() {
-        if (modemGpsPort == null) {
+        if (this.modemGpsPort == null) {
             return;
         }
 

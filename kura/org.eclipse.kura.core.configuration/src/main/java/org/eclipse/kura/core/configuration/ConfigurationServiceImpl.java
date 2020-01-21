@@ -311,7 +311,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         }
 
         try {
-            final ServiceReference<?>[] refs = bundleContext.getAllServiceReferences(null, null);
+            final ServiceReference<?>[] refs = this.bundleContext.getAllServiceReferences(null, null);
             final List<ComponentConfiguration> result = new ArrayList<>(refs.length);
 
             for (final ServiceReference<?> ref : refs) {

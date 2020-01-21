@@ -60,6 +60,7 @@ public class BlockTaskAggregator extends BlockAggregator<ToplevelBlockTask> {
         super(tasks, factory);
     }
 
+    @SuppressWarnings("checkstyle:innerAssignment")
     private void assignTasks(ToplevelBlockTask toplevelTask, ListIterator<Block> tasks) {
         Block next = null;
         while (tasks.hasNext() && (next = tasks.next()).getEnd() <= toplevelTask.getEnd()) {

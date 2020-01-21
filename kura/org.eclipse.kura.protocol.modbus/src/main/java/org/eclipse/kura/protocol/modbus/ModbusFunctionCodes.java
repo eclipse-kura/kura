@@ -23,7 +23,7 @@ public class ModbusFunctionCodes {
      *
      */
     private ModbusFunctionCodes() {
-    };
+    }
 
     public static final int READ_COIL_STATUS = 1;
     public static final int READ_INPUT_STATUS = 2;

@@ -40,7 +40,7 @@ public enum MessageType {
     public int getPriority() {
         return this.priority;
     }
-    
+
     public String getTopicPrefix() {
         return this.topicPrefix;
     }

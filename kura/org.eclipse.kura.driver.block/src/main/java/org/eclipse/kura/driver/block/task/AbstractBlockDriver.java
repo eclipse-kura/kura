@@ -16,7 +16,6 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -66,7 +65,7 @@ import org.slf4j.LoggerFactory;
  * </p>
  *
  * @param <T>
- *            the type of the domain, can be any type suitable for being used as an {@link HashMap} key
+ *            the type of the domain, can be any type suitable for being used as an {@link java.util.HashMap} key
  */
 public abstract class AbstractBlockDriver<T> implements Driver {
 

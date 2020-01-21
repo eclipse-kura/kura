@@ -73,9 +73,9 @@ public class DefaultServiceDependency<T, C> implements ServiceDependency<T, C> {
         }
 
         private void triggerUpdate() {
-            final Runnable runnable = this.runnable;
-            if (runnable != null) {
-                runnable.run();
+            final Runnable runnableTemp = this.runnable;
+            if (runnableTemp != null) {
+                runnableTemp.run();
             }
         }
 

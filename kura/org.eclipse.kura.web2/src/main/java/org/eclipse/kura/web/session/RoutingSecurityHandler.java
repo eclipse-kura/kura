@@ -41,7 +41,7 @@ public class RoutingSecurityHandler implements SecurityHandler {
             }
         }
 
-        return defaultHandler.handleSecurity(request, response);
+        return this.defaultHandler.handleSecurity(request, response);
     }
 
     private static class RouteHandler {

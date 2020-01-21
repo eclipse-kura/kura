@@ -50,7 +50,7 @@ public final class CollectionUtil {
      */
     public static <K, V> Map<K, V> dictionaryToMap(final Dictionary<K, V> dictionary) {
         requireNonNull(dictionary, "Dictionary cannot be null.");
-        final Map<K, V> map = new HashMap<K, V>(dictionary.size());
+        final Map<K, V> map = new HashMap<>(dictionary.size());
         final Enumeration<K> keys = dictionary.keys();
         while (keys.hasMoreElements()) {
             final K key = keys.nextElement();
@@ -67,7 +67,7 @@ public final class CollectionUtil {
      * @return empty ArrayList instance
      */
     public static <E> List<E> newArrayList() {
-        return new ArrayList<E>();
+        return new ArrayList<>();
     }
 
     /**
@@ -87,7 +87,7 @@ public final class CollectionUtil {
         if (initialArraySize < 0) {
             throw new IllegalArgumentException("Initial Array size must not be less than 0.");
         }
-        return new ArrayList<E>(initialArraySize);
+        return new ArrayList<>(initialArraySize);
     }
 
     /**
@@ -100,7 +100,7 @@ public final class CollectionUtil {
      * @return a new, empty {@code ConcurrentHashMap}
      */
     public static <K, V> ConcurrentMap<K, V> newConcurrentHashMap() {
-        return new ConcurrentHashMap<K, V>();
+        return new ConcurrentHashMap<>();
     }
 
     /**
@@ -118,7 +118,7 @@ public final class CollectionUtil {
      */
     public static <K, V> ConcurrentMap<K, V> newConcurrentHashMap(final Map<K, V> map) {
         requireNonNull(map, "Map cannot be null.");
-        return new ConcurrentHashMap<K, V>(map);
+        return new ConcurrentHashMap<>(map);
     }
 
     /**
@@ -129,7 +129,7 @@ public final class CollectionUtil {
      * @return a new, empty {@code CopyOnWriteArrayList}
      */
     public static <E> List<E> newCopyOnWriteArrayList() {
-        return new CopyOnWriteArrayList<E>();
+        return new CopyOnWriteArrayList<>();
     }
 
     /**
@@ -142,7 +142,7 @@ public final class CollectionUtil {
      * @return a new, empty {@code HashMap}
      */
     public static <K, V> Map<K, V> newHashMap() {
-        return new HashMap<K, V>();
+        return new HashMap<>();
     }
 
     /**
@@ -161,7 +161,7 @@ public final class CollectionUtil {
      */
     public static <K, V> Map<K, V> newHashMap(final Map<? extends K, ? extends V> map) {
         requireNonNull(map, "Map cannot be null.");
-        return new HashMap<K, V>(map);
+        return new HashMap<>(map);
     }
 
     /**
@@ -172,7 +172,7 @@ public final class CollectionUtil {
      * @return a new, empty {@code HashSet}
      */
     public static <E> Set<E> newHashSet() {
-        return new HashSet<E>();
+        return new HashSet<>();
     }
 
     /**
@@ -189,7 +189,7 @@ public final class CollectionUtil {
      */
     public static <E> Set<E> newHashSet(final Collection<? extends E> collection) {
         requireNonNull(collection, "Collection cannot be null.");
-        return new HashSet<E>(collection);
+        return new HashSet<>(collection);
     }
 
     /**
@@ -203,7 +203,7 @@ public final class CollectionUtil {
      * @return a new, empty {@code LinkedHashMap}
      */
     public static <K, V> Map<K, V> newLinkedHashMap() {
-        return new LinkedHashMap<K, V>();
+        return new LinkedHashMap<>();
     }
 
     /**
@@ -215,7 +215,7 @@ public final class CollectionUtil {
      * @return the Linked List
      */
     public static <E> List<E> newLinkedList() {
-        return new LinkedList<E>();
+        return new LinkedList<>();
     }
 
     /**
@@ -229,7 +229,7 @@ public final class CollectionUtil {
      * @return a new, empty {@code TreeMap}
      */
     public static <K extends Comparable<K>, V> Map<K, V> newTreeMap() {
-        return new TreeMap<K, V>();
+        return new TreeMap<>();
     }
 
 }

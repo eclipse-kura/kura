@@ -51,32 +51,32 @@ public class ButtonBar extends Composite {
         this.delete.setText(MSGS.deleteButton());
 
         this.apply.addClickHandler(event -> {
-            if (listener != null) {
-                listener.onApply();
+            if (this.listener != null) {
+                this.listener.onApply();
             }
         });
 
         this.reset.addClickHandler(event -> {
-            if (listener != null) {
-                listener.onCancel();
+            if (this.listener != null) {
+                this.listener.onCancel();
             }
         });
 
         this.create.addClickHandler(event -> {
-            if (listener != null) {
-                listener.onCreate();
+            if (this.listener != null) {
+                this.listener.onCreate();
             }
         });
 
         this.edit.addClickHandler(event -> {
-            if (listener != null) {
-                listener.onEdit();
+            if (this.listener != null) {
+                this.listener.onEdit();
             }
         });
 
         this.delete.addClickHandler(event -> {
-            if (listener != null) {
-                listener.onDelete();
+            if (this.listener != null) {
+                this.listener.onDelete();
             }
         });
     }

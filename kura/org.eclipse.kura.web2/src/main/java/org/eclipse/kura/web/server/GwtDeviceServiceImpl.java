@@ -325,10 +325,10 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
             } else {
                 gwtKuraException = new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
             }
-            
+
             auditLogger.warn("UI Device - Failure - Failed to execute command for user: {}, session: {}, command: {}",
                     session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId(), cmd);
-            
+
             throw gwtKuraException;
         }
     }

@@ -16,7 +16,9 @@ package org.eclipse.kura.net.wifi;
  */
 public enum WifiCiphers {
 
-    CCMP_TKIP(0x00), TKIP(0x01), CCMP(0x02);
+    CCMP_TKIP(0x00),
+    TKIP(0x01),
+    CCMP(0x02);
 
     private int m_code;
 

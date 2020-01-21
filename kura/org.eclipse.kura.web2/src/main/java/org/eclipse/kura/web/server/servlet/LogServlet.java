@@ -50,7 +50,7 @@ public class LogServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
         HttpSession session = httpServletRequest.getSession(false);
-        
+
         ServiceLocator locator = ServiceLocator.getInstance();
         SystemService ss = null;
         try {
@@ -82,8 +82,7 @@ public class LogServlet extends HttpServlet {
 
         createReply(httpServletResponse, fileList);
 
-        auditLogger.info(
-                "UI Log Download - Success - Successfully returned device logs for user: {}, session: {}",
+        auditLogger.info("UI Log Download - Success - Successfully returned device logs for user: {}, session: {}",
                 session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
     }
 

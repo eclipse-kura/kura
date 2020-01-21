@@ -20,7 +20,7 @@ class H2DbServiceOptions {
 
     private static final Property<String> CONNECTOR_URL_PROP = new Property<>("db.connector.url", "jdbc:h2:mem:kuradb");
     private static final Property<String> USER_PROP = new Property<>("db.user", "SA");
-    private static final Property<String> PASSWORD_PROP = new Property<String>("db.password", "");
+    private static final Property<String> PASSWORD_PROP = new Property<>("db.password", "");
     private static final Property<Integer> CHECKPOINT_INTERVAL_SECONDS_PROP = new Property<>(
             "db.checkpoint.interval.seconds", 900);
     private static final Property<Integer> DEFRAG_INTERVAL_MINUTES_PROP = new Property<>("db.defrag.interval.minutes",
@@ -201,7 +201,7 @@ class H2DbServiceOptions {
             if (this.defaultValue.getClass().isInstance(value)) {
                 return (T) value;
             }
-            return defaultValue;
+            return this.defaultValue;
         }
     }
 }

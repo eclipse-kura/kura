@@ -69,8 +69,8 @@ public class ConnectionManager {
         this.queue = new AsyncTaskQueue();
         this.failureHandler = failureHandler;
         this.queue.onFailure(ex -> failureHandler.accept(this, ex));
-        this.subscriptionManager = new SubscriptionManager(options, client, queue, registrations);
-        this.subtreeSubscriptionManager = new SubtreeSubscriptionManager(options, client, queue,
+        this.subscriptionManager = new SubscriptionManager(options, client, this.queue, registrations);
+        this.subtreeSubscriptionManager = new SubtreeSubscriptionManager(options, client, this.queue,
                 subtreeListenerRegistrations);
     }
 
@@ -129,7 +129,7 @@ public class ConnectionManager {
             tempList.add(request.getParameters().getReadValueId());
         }
 
-        final ReadResponse response = runSafe(client.read(0.0, TimestampsToReturn.Both, tempList),
+        final ReadResponse response = runSafe(this.client.read(0.0, TimestampsToReturn.Both, tempList),
                 this.options.getRequestTimeout(), ex -> this.failureHandler.accept(this, ex));
 
         final DataValue[] results = response.getResults();
@@ -147,7 +147,7 @@ public class ConnectionManager {
             tempList.add(request.getParameters().getWriteValue());
         }
 
-        final WriteResponse response = runSafe(client.write(tempList), this.options.getRequestTimeout(),
+        final WriteResponse response = runSafe(this.client.write(tempList), this.options.getRequestTimeout(),
                 ex -> this.failureHandler.accept(this, ex));
 
         final StatusCode[] results = response.getResults();
@@ -164,16 +164,17 @@ public class ConnectionManager {
 
         logger.info("Disconnecting from OPC-UA...");
 
-        queue.close(() -> CompletableFuture.allOf(subscriptionManager.close(), subtreeSubscriptionManager.close()) //
-                .whenComplete((ok, ex) -> client.disconnect() //
-                        .handle((o, e) -> {
-                            if (e == null) {
-                                logger.info("Disconnecting from OPC-UA...Done");
-                            } else {
-                                logger.warn("Failed to close client", e);
-                            }
-                            return (Void) null;
-                        })));
+        this.queue.close(
+                () -> CompletableFuture.allOf(this.subscriptionManager.close(), this.subtreeSubscriptionManager.close()) //
+                        .whenComplete((ok, ex) -> this.client.disconnect() //
+                                .handle((o, e) -> {
+                                    if (e == null) {
+                                        logger.info("Disconnecting from OPC-UA...Done");
+                                    } else {
+                                        logger.warn("Failed to close client", e);
+                                    }
+                                    return (Void) null;
+                                })));
     }
 
     private static String getEndpointString(final OpcUaOptions options) {
@@ -269,31 +270,31 @@ public class ConnectionManager {
 
         public CompletableFuture<UaClient> connect() {
             tryNextEndpoint();
-            return future;
+            return this.future;
         }
 
         private void tryNextEndpoint() {
-            if (!endpoints.hasNext()) {
-                future.completeExceptionally(
+            if (!this.endpoints.hasNext()) {
+                this.future.completeExceptionally(
                         new IllegalStateException("failed to connect to any of the matching endpoints"));
                 return;
             }
 
-            final EndpointDescription endpoint = endpoints.next();
+            final EndpointDescription endpoint = this.endpoints.next();
 
             logger.info("connecting to endpoint: {}", endpoint.getEndpointUrl());
 
             final OpcUaClientConfigBuilder clientConfigBuilder = OpcUaClientConfig.builder();
 
-            clientConfigBuilder.setEndpoint(endpoint).setCertificateValidator(certificateManager)
-                    .setApplicationName(LocalizedText.english(options.getApplicationName()))
-                    .setApplicationUri(options.getApplicationUri())
-                    .setRequestTimeout(UInteger.valueOf(options.getRequestTimeout()))
-                    .setAcknowledgeTimeout(UInteger.valueOf(options.getAcknowledgeTimeout()))
-                    .setSessionTimeout(UInteger.valueOf(options.getSessionTimeout()))
-                    .setIdentityProvider(options.getIdentityProvider())
-                    .setKeyPair(certificateManager.getClientKeyPair())
-                    .setCertificate(certificateManager.getClientCertificate()).build();
+            clientConfigBuilder.setEndpoint(endpoint).setCertificateValidator(this.certificateManager)
+                    .setApplicationName(LocalizedText.english(this.options.getApplicationName()))
+                    .setApplicationUri(this.options.getApplicationUri())
+                    .setRequestTimeout(UInteger.valueOf(this.options.getRequestTimeout()))
+                    .setAcknowledgeTimeout(UInteger.valueOf(this.options.getAcknowledgeTimeout()))
+                    .setSessionTimeout(UInteger.valueOf(this.options.getSessionTimeout()))
+                    .setIdentityProvider(this.options.getIdentityProvider())
+                    .setKeyPair(this.certificateManager.getClientKeyPair())
+                    .setCertificate(this.certificateManager.getClientCertificate()).build();
 
             final OpcUaClient cl = new OpcUaClient(clientConfigBuilder.build());
 
@@ -305,12 +306,12 @@ public class ConnectionManager {
                             return;
                         }
 
-                        if (!endpoints.hasNext() && !options.shouldForceEndpointUrl()) {
+                        if (!this.endpoints.hasNext() && !this.options.shouldForceEndpointUrl()) {
                             logger.info("Connection has been established by forcing endpoint URL from configuration, "
                                     + "setting \"Force endpoint URL\" to true in driver configuration might reduce connection time for this server.");
                         }
 
-                        future.complete(c);
+                        this.future.complete(c);
                     });
         }
 

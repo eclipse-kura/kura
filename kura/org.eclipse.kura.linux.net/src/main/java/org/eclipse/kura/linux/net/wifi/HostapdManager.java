@@ -83,11 +83,11 @@ public class HostapdManager {
     public int getPid(String ifaceName) throws KuraException {
         String[] command = formHostapdStartCommand(ifaceName);
         // Filter the pid whose command exactly matches the connectCommand
-        List<Pid> pids = executorService.getPids(command).entrySet().stream()
+        List<Pid> pids = this.executorService.getPids(command).entrySet().stream()
                 .filter(entry -> entry.getKey().equals(String.join(" ", command))).map(Map.Entry::getValue)
                 .collect(Collectors.toList());
         if (!pids.isEmpty()) {
-            return (Integer) pids.get(0).getPid();
+            return pids.get(0).getPid();
         } else {
             throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR,
                     "Failed to get hostapd pid for interface " + ifaceName);

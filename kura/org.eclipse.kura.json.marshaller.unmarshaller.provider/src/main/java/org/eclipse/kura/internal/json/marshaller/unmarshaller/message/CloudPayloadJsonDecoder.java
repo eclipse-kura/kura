@@ -132,7 +132,7 @@ public class CloudPayloadJsonDecoder {
         }
     }
 
-    // TODO: doesn't properly decode characters, ints, floats and byte arrays - the supported format has no metadata
+    // It doesn't properly decode characters, ints, floats and byte arrays - the supported format has no metadata
     private static void decodeMetric(KuraPayload payload, JsonObject metricsObject) {
         if (metricsObject == null) {
             throw new IllegalArgumentException("Cannot parse metric object!");

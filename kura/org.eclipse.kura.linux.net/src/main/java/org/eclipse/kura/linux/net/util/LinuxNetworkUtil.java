@@ -63,8 +63,8 @@ public class LinuxNetworkUtil {
 
     private static final String ERR_EXECUTING_CMD_MSG = "error executing command --- {} --- exit value={}";
 
-    private CommandExecutorService executorService;
-    private WifiOptions wifiOptions;
+    private final CommandExecutorService executorService;
+    private final WifiOptions wifiOptions;
 
     public LinuxNetworkUtil(CommandExecutorService executorService) {
         this.executorService = executorService;
@@ -87,7 +87,7 @@ public class LinuxNetworkUtil {
     }
 
     /**
-     * 
+     *
      * @deprecated
      */
     @Deprecated
@@ -109,7 +109,7 @@ public class LinuxNetworkUtil {
     }
 
     /**
-     * 
+     *
      * @deprecated
      */
     @Deprecated
@@ -180,7 +180,7 @@ public class LinuxNetworkUtil {
     }
 
     /**
-     * 
+     *
      * @deprecated
      */
     @Deprecated
@@ -377,7 +377,7 @@ public class LinuxNetworkUtil {
     }
 
     /**
-     * 
+     *
      * @deprecated
      */
     @Deprecated
@@ -418,7 +418,7 @@ public class LinuxNetworkUtil {
     }
 
     /**
-     * 
+     *
      * @deprecated
      */
     @Deprecated
@@ -512,7 +512,7 @@ public class LinuxNetworkUtil {
     }
 
     /**
-     * 
+     *
      * @deprecated
      */
     @Deprecated

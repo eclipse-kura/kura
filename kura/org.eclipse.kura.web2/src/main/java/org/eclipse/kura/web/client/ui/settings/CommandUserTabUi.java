@@ -83,15 +83,15 @@ public class CommandUserTabUi extends AbstractServicesUi {
         initWidget(uiBinder.createAndBindUi(this));
         this.initialized = false;
 
-        apply.setText(MSGS.apply());
-        apply.addClickHandler(event -> apply());
+        this.apply.setText(MSGS.apply());
+        this.apply.addClickHandler(event -> apply());
 
-        reset.setText(MSGS.reset());
-        reset.addClickHandler(event -> reset());
+        this.reset.setText(MSGS.reset());
+        this.reset.addClickHandler(event -> reset());
     }
 
     public void load() {
-        gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+        this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
             @Override
             public void onFailure(Throwable ex) {
@@ -101,7 +101,7 @@ public class CommandUserTabUi extends AbstractServicesUi {
 
             @Override
             public void onSuccess(GwtXSRFToken token) {
-                gwtComponentService.findFilteredComponentConfiguration(token,
+                CommandUserTabUi.this.gwtComponentService.findFilteredComponentConfiguration(token,
                         "org.eclipse.kura.executor.UnprivilegedExecutorService",
                         new AsyncCallback<List<GwtConfigComponent>>() {
 
@@ -114,17 +114,17 @@ public class CommandUserTabUi extends AbstractServicesUi {
                             @Override
                             public void onSuccess(List<GwtConfigComponent> result) {
                                 for (GwtConfigComponent config : result) {
-                                    originalConfig = config;
+                                    CommandUserTabUi.this.originalConfig = config;
 
-                                    restoreConfiguration(originalConfig);
-                                    fields.clear();
+                                    restoreConfiguration(CommandUserTabUi.this.originalConfig);
+                                    CommandUserTabUi.this.fields.clear();
 
                                     renderForm();
                                     initInvalidDataModal();
 
                                     setDirty(false);
-                                    apply.setEnabled(false);
-                                    reset.setEnabled(false);
+                                    CommandUserTabUi.this.apply.setEnabled(false);
+                                    CommandUserTabUi.this.reset.setEnabled(false);
                                 }
                             }
                         });

@@ -15,7 +15,7 @@ import org.eclipse.kura.executor.Pid;
 
 public class LinuxPid implements Pid {
 
-    private int pid;
+    private final int pid;
 
     public LinuxPid(int pid) {
         this.pid = pid;
@@ -35,18 +35,21 @@ public class LinuxPid implements Pid {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + pid;
+        result = prime * result + this.pid;
         return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         LinuxPid other = (LinuxPid) obj;
         return this.pid != other.pid;
     }

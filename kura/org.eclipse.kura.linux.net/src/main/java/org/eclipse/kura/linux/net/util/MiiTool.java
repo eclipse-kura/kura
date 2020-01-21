@@ -35,7 +35,7 @@ public class MiiTool implements LinkTool {
     private boolean linkDetected = false;
     private int speed = 0; // in b/s
 
-    private CommandExecutorService executorService;
+    private final CommandExecutorService executorService;
 
     /**
      * MiiTool constructor
@@ -71,7 +71,7 @@ public class MiiTool implements LinkTool {
         int spd = 0;
         String[] lines = commandOutput.split("\n");
         for (String line : lines) {
-            if (line.startsWith(this.ifaceName) && (line.indexOf("link ok") > -1)) {
+            if (line.startsWith(this.ifaceName) && line.indexOf("link ok") > -1) {
                 isLinkDetected = true;
                 spd = parseLine(line);
             }
@@ -90,9 +90,9 @@ public class MiiTool implements LinkTool {
                 tmp = line.substring(line.indexOf(',') + 2);
             }
             String speedTxt = tmp.substring(0, tmp.indexOf(','));
-            if ((speedTxt.compareTo("10baseT-HD") == 0) || (speedTxt.compareTo("10baseT-FD") == 0)) {
+            if (speedTxt.compareTo("10baseT-HD") == 0 || speedTxt.compareTo("10baseT-FD") == 0) {
                 spd = 10000000;
-            } else if ((speedTxt.compareTo("100baseTx-HD") == 0) || (speedTxt.compareTo("100baseTx-FD") == 0)) {
+            } else if (speedTxt.compareTo("100baseTx-HD") == 0 || speedTxt.compareTo("100baseTx-FD") == 0) {
                 spd = 100000000;
             } else {
                 spd = -2;

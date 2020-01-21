@@ -48,14 +48,14 @@ public interface UsbDeviceEvent {
 
     /**
      * Name of the property to access the USB device type
-     * 
+     *
      * @since 1.4
      **/
     public static final String USB_EVENT_DEVICE_TYPE_PROPERTY = "usb.device.type";
 
     /**
      * Name of the property to access the interface number of a USB device
-     * 
+     *
      * @since 1.4
      **/
     public static final String USB_EVENT_USB_INTERFACE_NUMBER = "usb.interface.number";

@@ -31,7 +31,7 @@ public class DhcpClientManager {
 
     private static DhcpClientTool dhcpClientTool = DhcpClientTool.NONE;
     private static final String PID_FILE_DIR = "/var/run";
-    private CommandExecutorService executorService;
+    private final CommandExecutorService executorService;
 
     static {
         dhcpClientTool = getTool();

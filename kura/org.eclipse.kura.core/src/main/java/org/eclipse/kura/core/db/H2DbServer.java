@@ -23,7 +23,7 @@ public class H2DbServer implements ConfigurableComponent {
         WEB,
         TCP,
         PG
-    };
+    }
 
     private static final Logger logger = LoggerFactory.getLogger(H2DbServer.class);
     private Server server;

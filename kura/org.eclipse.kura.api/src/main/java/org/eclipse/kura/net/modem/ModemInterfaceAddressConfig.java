@@ -19,7 +19,7 @@ import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Modem Interface Address Config represents the modem status and the modem configuration
- * 
+ *
  * @noimplement This interface is not intended to be implemented by clients.
  */
 @ProviderType

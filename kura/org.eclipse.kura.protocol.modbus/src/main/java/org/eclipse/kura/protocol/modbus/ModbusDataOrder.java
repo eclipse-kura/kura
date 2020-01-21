@@ -36,7 +36,7 @@ public class ModbusDataOrder {
      *
      */
     private ModbusDataOrder() {
-    };
+    }
 
     /**
      * booleans do not have a specified data order

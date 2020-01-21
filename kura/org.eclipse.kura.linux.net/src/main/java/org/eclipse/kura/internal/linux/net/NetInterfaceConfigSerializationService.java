@@ -35,7 +35,7 @@ public interface NetInterfaceConfigSerializationService {
     /**
      * Persists the network configuration received as argument. Throws a {@link KuraException} if the persist operation
      * fails.
-     * 
+     *
      * @param netConfig
      * @throws KuraException
      */

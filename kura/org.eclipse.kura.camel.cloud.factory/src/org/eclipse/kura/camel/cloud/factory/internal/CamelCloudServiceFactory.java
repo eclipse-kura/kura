@@ -140,7 +140,7 @@ public class CamelCloudServiceFactory implements CloudServiceFactory {
 
     @Override
     public void createConfiguration(final String pid) throws KuraException {
-        add(pid, Collections.<String, Object> emptyMap());
+        add(pid, Collections.<String, Object>emptyMap());
     }
 
     @Override

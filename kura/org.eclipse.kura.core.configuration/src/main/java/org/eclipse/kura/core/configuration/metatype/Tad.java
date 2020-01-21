@@ -76,7 +76,7 @@ public class Tad implements AD {
     protected String max;
     protected String _default;
     protected Boolean required;
-    private final Map<QName, String> otherAttributes = new HashMap<QName, String>();
+    private final Map<QName, String> otherAttributes = new HashMap<>();
 
     /**
      * Gets the value of the option property.
@@ -105,14 +105,14 @@ public class Tad implements AD {
     @SuppressWarnings("unchecked")
     public List<Option> getOption() {
         if (this.option == null) {
-            this.option = new ArrayList<Toption>();
+            this.option = new ArrayList<>();
         }
         return (List<Option>) (List<?>) this.option;
     }
 
     public void setOption(Toption o) {
         if (this.option == null) {
-            this.option = new ArrayList<Toption>();
+            this.option = new ArrayList<>();
         }
         this.option.add(o);
     }
@@ -143,7 +143,7 @@ public class Tad implements AD {
      */
     public List<Object> getAny() {
         if (this.any == null) {
-            this.any = new ArrayList<Object>();
+            this.any = new ArrayList<>();
         }
         return this.any;
     }

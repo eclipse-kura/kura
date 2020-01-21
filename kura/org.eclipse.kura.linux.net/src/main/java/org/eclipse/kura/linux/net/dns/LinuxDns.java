@@ -175,7 +175,7 @@ public class LinuxDns {
 
     public synchronized void setPppDns(CommandExecutorService executorService) throws KuraException {
         String sPppDnsFileName = getPppDnsFileName();
-        if ((sPppDnsFileName == null) || isPppDnsSet()) {
+        if (sPppDnsFileName == null || isPppDnsSet()) {
             return;
         }
         backupDnsFile(executorService);

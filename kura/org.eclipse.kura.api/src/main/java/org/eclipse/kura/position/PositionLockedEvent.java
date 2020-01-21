@@ -18,7 +18,7 @@ import org.osgi.service.event.Event;
 
 /**
  * PositionLockedEvent is raised when a valid GPS position has been acquired.
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 @ProviderType

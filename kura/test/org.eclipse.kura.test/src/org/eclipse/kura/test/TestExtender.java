@@ -36,43 +36,43 @@ import org.slf4j.LoggerFactory;
 
 public class TestExtender implements BundleTrackerCustomizer<Object> {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(TestExtender.class);
+    private static final Logger logger = LoggerFactory.getLogger(TestExtender.class);
 
     private static final String KURA_TEST_REPORT_FILENAME = "/tmp/kura_test_report.txt";
 
-    private final Map<Long, Bundle> m_bundles;
-    private final BundleContext m_bundleContext;
-    private BufferedWriter m_reportWriter;
-    private final String m_platform;
+    private final Map<Long, Bundle> bundles;
+    private final BundleContext bundleContext;
+    private BufferedWriter reportWriter;
+    private final String platform;
 
     public TestExtender(String platform, BundleContext bundleContext) {
-        this.m_bundles = new HashMap<Long, Bundle>();
-        this.m_bundleContext = bundleContext;
-        this.m_platform = platform;
+        this.bundles = new HashMap<Long, Bundle>();
+        this.bundleContext = bundleContext;
+        this.platform = platform;
 
         new File(KURA_TEST_REPORT_FILENAME).delete();
     }
 
     void addBundle(long bundleId, Bundle bundle) {
-        this.m_bundles.put(bundleId, bundle);
+        this.bundles.put(bundleId, bundle);
     }
 
     public void testAll() {
-        Set<Map.Entry<Long, Bundle>> entrySet = this.m_bundles.entrySet();
-        s_logger.debug("Testing all bundles");
+        Set<Map.Entry<Long, Bundle>> entrySet = this.bundles.entrySet();
+        logger.debug("Testing all bundles");
         for (Entry<Long, Bundle> entry : entrySet) {
             test(entry.getKey());
         }
     }
 
     public void test(long bundleId) {
-        s_logger.debug("Testing bundle: " + bundleId);
+        logger.debug("Testing bundle: " + bundleId);
 
-        List<Class<?>> testClazzs = getTestClass(this.m_bundles.get(bundleId));
+        List<Class<?>> testClazzs = getTestClass(this.bundles.get(bundleId));
         for (Class<?> clazz : testClazzs) {
             try {
                 if (!clazz.isInterface()) {
-                    s_logger.debug("Testing CLASS in bundle with ID: " + bundleId + "  : [" + clazz.getName() + "]");
+                    logger.debug("Testing CLASS in bundle with ID: " + bundleId + "  : [" + clazz.getName() + "]");
                     Test inspectClass = inspectClass(clazz);
                     testClass(clazz.getName(), inspectClass, clazz.newInstance());
                 }
@@ -85,7 +85,7 @@ public class TestExtender implements BundleTrackerCustomizer<Object> {
     public Class<?> loadClass(String clazz, Bundle bundleHost) {
         try {
             Class<?> loadClass = bundleHost.loadClass(clazz);
-            s_logger.debug("Loaded class: " + loadClass);
+            logger.debug("Loaded class: " + loadClass);
             return loadClass;
         } catch (Exception e) {
             e.printStackTrace();
@@ -95,10 +95,10 @@ public class TestExtender implements BundleTrackerCustomizer<Object> {
 
     public Bundle getHostBundle(Bundle bundle) {
         String fragment = bundle.getHeaders().get(org.osgi.framework.Constants.FRAGMENT_HOST) + "";
-        Bundle[] bundles = this.m_bundleContext.getBundles();
-        for (Bundle ibundle : bundles) {
+        Bundle[] contextBundles = this.bundleContext.getBundles();
+        for (Bundle ibundle : contextBundles) {
             if (ibundle.getSymbolicName().equals(fragment)) {
-                s_logger.debug("Host bundle is: " + ibundle.getSymbolicName());
+                logger.debug("Host bundle is: " + ibundle.getSymbolicName());
                 return ibundle;
             }
         }
@@ -123,9 +123,9 @@ public class TestExtender implements BundleTrackerCustomizer<Object> {
                 } else if (className.startsWith("targetes.")) {
                     className = className.substring(9);
                 }
-                s_logger.debug("Trying to load class: " + className);
+                logger.debug("Trying to load class: " + className);
                 Class<?> clazz = loadClass(className, hostBundle);
-                s_logger.debug("Adding test class: " + clazz);
+                logger.debug("Adding test class: " + clazz);
                 clazzs.add(clazz);
             }
             return clazzs;
@@ -141,19 +141,19 @@ public class TestExtender implements BundleTrackerCustomizer<Object> {
         for (Method method : declaredMethods) {
 
             if (method.isAnnotationPresent(org.junit.BeforeClass.class)) {
-                s_logger.debug("Adding before class: " + method);
+                logger.debug("Adding before class: " + method);
                 test.setBeforeClass(method);
             }
             if (method.isAnnotationPresent(org.junit.AfterClass.class)) {
-                s_logger.debug("Adding after class: " + method);
+                logger.debug("Adding after class: " + method);
                 test.setAfterClass(method);
             }
             if (method.isAnnotationPresent(org.junit.Before.class)) {
-                s_logger.debug("Adding before: " + method);
+                logger.debug("Adding before: " + method);
                 test.setBefore(method);
             }
             if (method.isAnnotationPresent(org.junit.After.class)) {
-                s_logger.debug("Adding after: " + method);
+                logger.debug("Adding after: " + method);
                 test.setAfter(method);
             }
             if (method.isAnnotationPresent(org.junit.Test.class)) {
@@ -163,14 +163,14 @@ public class TestExtender implements BundleTrackerCustomizer<Object> {
                     String[] potentialPlatforms = testTargetAnnotation.targetPlatforms();
                     for (String potentialPlatform : potentialPlatforms) {
                         if (potentialPlatform.equals(TestTarget.PLATFORM_ALL)
-                                || potentialPlatform.equals(this.m_platform)) {
-                            s_logger.debug("TestTarget found " + potentialPlatform + " - Adding test: " + method);
+                                || potentialPlatform.equals(this.platform)) {
+                            logger.debug("TestTarget found " + potentialPlatform + " - Adding test: " + method);
                             test.addTest(method);
                             break;
                         }
                     }
                 } else {
-                    s_logger.debug("No TestTarget Annotation present - Adding test: " + method);
+                    logger.debug("No TestTarget Annotation present - Adding test: " + method);
                     test.addTest(method);
                 }
             }
@@ -185,7 +185,7 @@ public class TestExtender implements BundleTrackerCustomizer<Object> {
                     testClass.getBeforeClass().invoke(object, new Object[0]);
                 }
 
-                this.m_reportWriter = new BufferedWriter(new FileWriter(new File(KURA_TEST_REPORT_FILENAME), true));
+                this.reportWriter = new BufferedWriter(new FileWriter(new File(KURA_TEST_REPORT_FILENAME), true));
 
                 List<Method> tests = testClass.getTests();
                 for (Method method : tests) {
@@ -196,16 +196,16 @@ public class TestExtender implements BundleTrackerCustomizer<Object> {
 
                         try {
                             method.invoke(object, new Object[0]);
-                            s_logger.info("Method : [ " + className + "." + method.getName() + " ] PASS");
+                            logger.info("Method : [ " + className + "." + method.getName() + " ] PASS");
 
-                            this.m_reportWriter.write("Method : [ " + className + "." + method.getName() + " ] PASS\n");
-                            this.m_reportWriter.flush();
+                            this.reportWriter.write("Method : [ " + className + "." + method.getName() + " ] PASS\n");
+                            this.reportWriter.flush();
                         } catch (Exception ex) {
-                            s_logger.error("Method : [ " + className + "." + method.getName() + " ] FAIL", ex);
-                            this.m_reportWriter = new BufferedWriter(
+                            logger.error("Method : [ " + className + "." + method.getName() + " ] FAIL", ex);
+                            this.reportWriter = new BufferedWriter(
                                     new FileWriter(new File(KURA_TEST_REPORT_FILENAME), true));
-                            this.m_reportWriter.write("Method : [ " + className + "." + method.getName() + " ] FAIL\n");
-                            this.m_reportWriter.flush();
+                            this.reportWriter.write("Method : [ " + className + "." + method.getName() + " ] FAIL\n");
+                            this.reportWriter.flush();
                         }
                     } finally {
                         if (testClass.getAfter() != null) {
@@ -218,7 +218,7 @@ public class TestExtender implements BundleTrackerCustomizer<Object> {
                     testClass.getAfterClass().invoke(object, new Object[0]);
                 }
 
-                this.m_reportWriter.close();
+                this.reportWriter.close();
             }
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -227,17 +227,17 @@ public class TestExtender implements BundleTrackerCustomizer<Object> {
 
     @Override
     public Object addingBundle(Bundle bundle, BundleEvent event) {
-        s_logger.debug("Tracker - Adding Bundle: " + bundle.getSymbolicName());
+        logger.debug("Tracker - Adding Bundle: " + bundle.getSymbolicName());
         return bundle;
     }
 
     @Override
     public void modifiedBundle(Bundle bundle, BundleEvent event, Object object) {
-        s_logger.debug("Tracker - Modified Bundle: " + bundle.getSymbolicName());
+        logger.debug("Tracker - Modified Bundle: " + bundle.getSymbolicName());
     }
 
     @Override
     public void removedBundle(Bundle bundle, BundleEvent event, Object object) {
-        s_logger.debug("Tracker - Removed Bundle: " + bundle.getSymbolicName());
+        logger.debug("Tracker - Removed Bundle: " + bundle.getSymbolicName());
     }
 }

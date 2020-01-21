@@ -8,7 +8,7 @@
  *
  * Contributors:
  *     Eurotech
- *     
+ *
  *******************************************************************************/
 package org.eclipse.kura.http.server.manager;
 

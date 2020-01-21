@@ -178,7 +178,7 @@ public interface ConfigurationService {
      * @param filter
      *            the filter to be applied
      * @return list of registered ConfigurableComponents
-     * 
+     *
      * @since 2.1
      */
     public List<ComponentConfiguration> getComponentConfigurations(Filter filter) throws KuraException;

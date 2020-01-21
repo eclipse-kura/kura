@@ -76,7 +76,7 @@ public class WpaSupplicantManager {
             Command command = new Command(wpaSupplicantCommand);
             command.setTimeout(60);
             CommandStatus status = this.executorService.execute(command);
-            int exitValue = (Integer) status.getExitStatus().getExitCode();
+            int exitValue = status.getExitStatus().getExitCode();
             if (exitValue != 0 && exitValue != 255) {
                 logger.error("failed to start wpa_supplicant for the {} interface for unknown reason - errorCode={}",
                         interfaceName, exitValue);
@@ -109,7 +109,7 @@ public class WpaSupplicantManager {
         List<Pid> pids = new ArrayList<>(
                 this.executorService.getPids(new String[] { WPA_SUPPLICANT, "-i", ifaceName }).values());
         if (!pids.isEmpty()) {
-            return (Integer) pids.get(0).getPid();
+            return pids.get(0).getPid();
         } else {
             throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR,
                     "Failed to get wpa_supplicant pid for interface " + ifaceName);

@@ -39,8 +39,8 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
     private Map<String, Object> properties;
     private ScheduledExecutorService executor;
     private ScheduledFuture<?> future;
-    private int pingInterval = 10000;	// milliseconds
-    private boolean configEnabled = false;	// initialized in properties, if false -> no watchdog
+    private int pingInterval = 10000; // milliseconds
+    private boolean configEnabled = false; // initialized in properties, if false -> no watchdog
     private boolean enabled;
 
     protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
@@ -50,7 +50,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
         } else {
             logger.debug("activating WatchdogService with {}", properties.toString());
         }
-        criticalServiceList = new ArrayList<CriticalServiceImpl>();
+        criticalServiceList = new ArrayList<>();
         this.enabled = false;
 
         // clean up if this is not our first run
@@ -96,9 +96,9 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
         this.properties = properties;
         if (this.properties != null) {
 
-            Object enabled = this.properties.get("enabled");
-            if (enabled != null) {
-                this.configEnabled = (Boolean) enabled;
+            Object enabledVal = this.properties.get("enabled");
+            if (enabledVal != null) {
+                this.configEnabled = (Boolean) enabledVal;
             }
             if (!this.configEnabled) {
                 return;

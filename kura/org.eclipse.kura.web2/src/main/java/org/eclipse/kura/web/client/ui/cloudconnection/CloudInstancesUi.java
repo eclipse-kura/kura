@@ -563,14 +563,14 @@ public class CloudInstancesUi extends Composite {
 
         RequestQueue.submit(context -> this.gwtXSRFService
                 .generateSecurityToken(context.callback(token -> CloudInstancesUi.this.gwtStatusService
-                        .connectDataService(token, connectionId, context.<Void> callback()))));
+                        .connectDataService(token, connectionId, context.<Void>callback()))));
     }
 
     private void disconnectDataService(final String connectionId) {
 
         RequestQueue.submit(context -> this.gwtXSRFService
                 .generateSecurityToken(context.callback(token -> CloudInstancesUi.this.gwtStatusService
-                        .disconnectDataService(token, connectionId, context.<Void> callback()))));
+                        .disconnectDataService(token, connectionId, context.<Void>callback()))));
 
     }
 

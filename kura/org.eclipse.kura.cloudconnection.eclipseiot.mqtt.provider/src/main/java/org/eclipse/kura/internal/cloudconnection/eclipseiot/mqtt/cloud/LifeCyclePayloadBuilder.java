@@ -71,7 +71,8 @@ public class LifeCyclePayloadBuilder {
                 .withFirmwareVersion(deviceProfile.getFirmwareVersion()).withBiosVersion(deviceProfile.getBiosVersion())
                 .withOs(deviceProfile.getOs()).withOsVersion(deviceProfile.getOsVersion())
                 .withJvmName(deviceProfile.getJvmName()).withJvmVersion(deviceProfile.getJvmVersion())
-                .withJvmProfile(deviceProfile.getJvmProfile()).withKuraVersion(deviceProfile.getApplicationFrameworkVersion())
+                .withJvmProfile(deviceProfile.getJvmProfile())
+                .withKuraVersion(deviceProfile.getApplicationFrameworkVersion())
                 .withConnectionInterface(deviceProfile.getConnectionInterface())
                 .withConnectionIp(deviceProfile.getConnectionIp()).withAcceptEncoding(acceptEncoding)
                 .withAvailableProcessors(deviceProfile.getAvailableProcessors())
@@ -173,8 +174,8 @@ public class LifeCyclePayloadBuilder {
             }
         }
 
-        return buildKuraDeviceProfile(systemService, sysAdminService, connectionIp,
-                connectionInterface, latitude, longitude, altitude);
+        return buildKuraDeviceProfile(systemService, sysAdminService, connectionIp, connectionInterface, latitude,
+                longitude, altitude);
     }
 
     private KuraDeviceProfile buildKuraDeviceProfile(SystemService systemService, SystemAdminService sysAdminService,

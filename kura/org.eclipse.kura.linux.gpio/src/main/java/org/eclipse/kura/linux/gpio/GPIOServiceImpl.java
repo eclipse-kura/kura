@@ -36,6 +36,7 @@ public class GPIOServiceImpl implements GPIOService {
 
     private static final Logger logger = LoggerFactory.getLogger(GPIOServiceImpl.class);
 
+    @SuppressWarnings("checkstyle:constantName")
     private static final HashSet<JdkDioPin> pins = new HashSet<JdkDioPin>();
 
     private SystemService systemService;

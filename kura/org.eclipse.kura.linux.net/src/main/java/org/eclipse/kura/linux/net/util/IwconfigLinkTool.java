@@ -30,7 +30,7 @@ public class IwconfigLinkTool extends LinkToolImpl implements LinkTool {
     private static final String SIGNAL_LEVEL = "Signal level=";
     private static final String BIT_RATE = "Bit Rate=";
 
-    private CommandExecutorService executorService;
+    private final CommandExecutorService executorService;
 
     /**
      * constructor

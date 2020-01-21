@@ -48,8 +48,10 @@ import com.google.gson.JsonSerializer;
 @Path("/assets")
 public class AssetRestService {
 
-    private static final String BAD_WRITE_REQUEST_ERROR_MESSAGE = "Bad request, expected request format: {\"channels\": [{\"name\": \"channel-1\", \"type\": \"INTEGER\", \"value\": 10 }]}";
-    private static final String BAD_READ_REQUEST_ERROR_MESSAGE = "Bad request, expected request format: { \"channels\": [ \"channel-1\", \"channel-2\"]}";
+    private static final String BAD_WRITE_REQUEST_ERROR_MESSAGE = "Bad request, "
+            + "expected request format: {\"channels\": [{\"name\": \"channel-1\", \"type\": \"INTEGER\", \"value\": 10 }]}";
+    private static final String BAD_READ_REQUEST_ERROR_MESSAGE = "Bad request, "
+            + "expected request format: { \"channels\": [ \"channel-1\", \"channel-2\"]}";
     private static final Encoder BASE64_ENCODER = Base64.getEncoder();
 
     private AssetService assetService;

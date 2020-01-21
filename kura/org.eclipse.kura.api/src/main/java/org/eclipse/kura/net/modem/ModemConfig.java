@@ -180,6 +180,7 @@ public class ModemConfig implements NetConfig {
      * @return password as {@link String}
      * @deprecated
      */
+    @Deprecated
     public String getPassword() {
         return this.password.toString();
     }
@@ -503,7 +504,7 @@ public class ModemConfig implements NetConfig {
      * @since 2.2
      */
     public boolean isDiversityEnabled() {
-        return diversityEnabled;
+        return this.diversityEnabled;
     }
 
     /**

@@ -51,7 +51,7 @@ public class BooleanValue implements TypedValue<Boolean> {
     @Override
     public int compareTo(final TypedValue<Boolean> otherTypedValue) {
         requireNonNull(otherTypedValue, "Typed Value cannot be null");
-        return (this.value == otherTypedValue.getValue()) ? 0 : (this.value ? 1 : -1);
+        return this.value == otherTypedValue.getValue() ? 0 : this.value ? 1 : -1;
     }
 
     /** {@inheritDoc} */
@@ -90,7 +90,7 @@ public class BooleanValue implements TypedValue<Boolean> {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = (prime * result) + (this.value ? 1231 : 1237);
+        result = prime * result + (this.value ? 1231 : 1237);
         return result;
     }
 

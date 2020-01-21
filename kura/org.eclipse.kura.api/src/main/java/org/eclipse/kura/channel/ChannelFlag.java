@@ -15,7 +15,7 @@ package org.eclipse.kura.channel;
 
 /**
  * This represents all the Channel specific flag codes
- * 
+ *
  * @since 1.2
  */
 public enum ChannelFlag {

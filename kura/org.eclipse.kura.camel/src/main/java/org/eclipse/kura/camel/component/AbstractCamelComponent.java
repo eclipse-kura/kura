@@ -156,8 +156,8 @@ public abstract class AbstractCamelComponent {
      * @return the camel context or {@code null} if the context is not started
      */
     public CamelContext getCamelContext() {
-        final CamelRunner runner = this.runner;
-        return runner != null ? runner.getCamelContext() : null;
+        final CamelRunner camelRunner = this.runner;
+        return camelRunner != null ? camelRunner.getCamelContext() : null;
     }
 
     /**

@@ -31,8 +31,6 @@ import org.gwtbootstrap3.client.ui.Modal;
 import org.gwtbootstrap3.client.ui.html.Text;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Timer;
@@ -40,7 +38,6 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.SelectionChangeEvent;
 
 public class NetworkButtonBarUi extends Composite {
 
@@ -87,13 +84,8 @@ public class NetworkButtonBarUi extends Composite {
         initApplyButton();
         initRefreshButton();
 
-        this.table.interfacesGrid.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-
-            @Override
-            public void onSelectionChange(SelectionChangeEvent event) {
-                NetworkButtonBarUi.this.apply.setEnabled(true);
-            }
-        });
+        this.table.interfacesGrid.getSelectionModel()
+                .addSelectionChangeHandler(event -> NetworkButtonBarUi.this.apply.setEnabled(true));
 
         // TODO ?? how to detect changes
     }
@@ -101,56 +93,48 @@ public class NetworkButtonBarUi extends Composite {
     protected void initRefreshButton() {
         // Refresh Button
         this.refresh.setText(MSGS.refresh());
-        this.refresh.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                NetworkButtonBarUi.this.table.refresh();
-                NetworkButtonBarUi.this.tabs.setDirty(false);
-                NetworkButtonBarUi.this.tabs.refresh();
-                NetworkButtonBarUi.this.tabs.adjustInterfaceTabs();
-            }
+        this.refresh.addClickHandler(event -> {
+            NetworkButtonBarUi.this.table.refresh();
+            NetworkButtonBarUi.this.tabs.setDirty(false);
+            NetworkButtonBarUi.this.tabs.refresh();
+            NetworkButtonBarUi.this.tabs.adjustInterfaceTabs();
         });
     }
 
     protected void initApplyButton() {
         // Apply Button
         this.apply.setText(MSGS.apply());
-        this.apply.addClickHandler(new ClickHandler() {
+        this.apply.addClickHandler(event -> {
+            if (!NetworkButtonBarUi.this.tabs.visibleTabs.isEmpty() && NetworkButtonBarUi.this.tabs.isValid()) {
+                GwtNetInterfaceConfig prevNetIf = NetworkButtonBarUi.this.table.selectionModel.getSelectedObject();
+                final GwtNetInterfaceConfig updatedNetIf = NetworkButtonBarUi.this.tabs.getUpdatedInterface();
 
-            @Override
-            public void onClick(ClickEvent event) {
-                if (!NetworkButtonBarUi.this.tabs.visibleTabs.isEmpty() && NetworkButtonBarUi.this.tabs.isValid()) {
-                    GwtNetInterfaceConfig prevNetIf = NetworkButtonBarUi.this.table.selectionModel.getSelectedObject();
-                    final GwtNetInterfaceConfig updatedNetIf = NetworkButtonBarUi.this.tabs.getUpdatedInterface();
-
-                    // submit updated netInterfaceConfig and priorities
-                    if (prevNetIf != null && prevNetIf.equals(updatedNetIf)) {
-                        NetworkButtonBarUi.this.table.refresh();
-                        NetworkButtonBarUi.this.apply.setEnabled(false);
-                    } else {
-                        String newNetwork = null;
-                        String prevNetwork = null;
-                        try {
-                            newNetwork = calculateNetwork(updatedNetIf.getIpAddress(), updatedNetIf.getSubnetMask());
-                            prevNetwork = calculateNetwork(Window.Location.getHost(), updatedNetIf.getSubnetMask());
-                        } catch (Exception e) {
-
-                        }
-
-                        scheduleRefresh(prevNetIf, updatedNetIf, newNetwork, prevNetwork);
-
-                        EntryClassUi.showWaitModal();
-                        updateNetConfiguration(updatedNetIf);
-                    }
+                // submit updated netInterfaceConfig and priorities
+                if (prevNetIf != null && prevNetIf.equals(updatedNetIf)) {
+                    NetworkButtonBarUi.this.table.refresh();
+                    NetworkButtonBarUi.this.apply.setEnabled(false);
                 } else {
-                    logger.log(Level.FINER, MSGS.information() + ": " + MSGS.deviceConfigError());
-                    NetworkButtonBarUi.this.incompleteFieldsModal.show();
+                    String newNetwork = null;
+                    String prevNetwork = null;
+                    try {
+                        newNetwork = calculateNetwork(updatedNetIf.getIpAddress(), updatedNetIf.getSubnetMask());
+                        prevNetwork = calculateNetwork(Window.Location.getHost(), updatedNetIf.getSubnetMask());
+                    } catch (Exception e) {
+
+                    }
+
+                    scheduleRefresh(prevNetIf, updatedNetIf, newNetwork, prevNetwork);
+
+                    EntryClassUi.showWaitModal();
+                    updateNetConfiguration(updatedNetIf);
                 }
+            } else {
+                logger.log(Level.FINER, MSGS.information() + ": " + MSGS.deviceConfigError());
+                NetworkButtonBarUi.this.incompleteFieldsModal.show();
             }
         });
     }
-    
+
     private void scheduleRefresh(GwtNetInterfaceConfig prevNetIf, final GwtNetInterfaceConfig updatedNetIf,
             String newNetwork, String prevNetwork) {
         if (isRefreshNeeded(prevNetIf, updatedNetIf, newNetwork, prevNetwork)) {
@@ -164,7 +148,7 @@ public class NetworkButtonBarUi extends Composite {
             t.schedule(500);
         }
     }
-    
+
     private void updateNetConfiguration(final GwtNetInterfaceConfig updatedNetIf) {
         NetworkButtonBarUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 

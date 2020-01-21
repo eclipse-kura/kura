@@ -38,7 +38,6 @@ import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.cellview.client.RowStyles;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
@@ -59,7 +58,7 @@ public class StatusPanelUi extends Composite {
     private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
 
     private GwtSession currentSession;
-    private final ListDataProvider<GwtGroupedNVPair> statusGridProvider = new ListDataProvider<GwtGroupedNVPair>();
+    private final ListDataProvider<GwtGroupedNVPair> statusGridProvider = new ListDataProvider<>();
     private EntryClassUi parent;
 
     @UiField
@@ -67,7 +66,7 @@ public class StatusPanelUi extends Composite {
     @UiField
     Button statusRefresh;
     @UiField
-    CellTable<GwtGroupedNVPair> statusGrid = new CellTable<GwtGroupedNVPair>();
+    CellTable<GwtGroupedNVPair> statusGrid = new CellTable<>();
 
     public StatusPanelUi() {
         logger.log(Level.FINER, "Initializing StatusPanelUi...");
@@ -75,17 +74,13 @@ public class StatusPanelUi extends Composite {
         // Set text for buttons
         this.statusRefresh.setText(MSG.refresh());
 
-        this.statusGrid.setRowStyles(new RowStyles<GwtGroupedNVPair>() {
-
-            @Override
-            public String getStyleNames(GwtGroupedNVPair row, int rowIndex) {
-                if ("Cloud Services".equals(row.getName()) || "Connection Name".equals(row.getName())
-                        || "Ethernet Settings".equals(row.getName()) || "Wireless Settings".equals(row.getName())
-                        || "Cellular Settings".equals(row.getName()) || "Position Status".equals(row.getName())) {
-                    return "rowHeader";
-                } else {
-                    return " ";
-                }
+        this.statusGrid.setRowStyles((row, rowIndex) -> {
+            if ("Cloud Services".equals(row.getName()) || "Connection Name".equals(row.getName())
+                    || "Ethernet Settings".equals(row.getName()) || "Wireless Settings".equals(row.getName())
+                    || "Cellular Settings".equals(row.getName()) || "Position Status".equals(row.getName())) {
+                return "rowHeader";
+            } else {
+                return " ";
             }
         });
 

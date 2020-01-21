@@ -33,14 +33,6 @@ import org.gwtbootstrap3.client.ui.constants.ValidationState;
 import org.gwtbootstrap3.client.ui.html.Span;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.event.dom.client.MouseOutEvent;
-import com.google.gwt.event.dom.client.MouseOutHandler;
-import com.google.gwt.event.dom.client.MouseOverEvent;
-import com.google.gwt.event.dom.client.MouseOverHandler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -150,21 +142,9 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
 
         initHelpButtons();
 
-        this.tcpTab.status.addChangeHandler(new ChangeHandler() {
+        this.tcpTab.status.addChangeHandler(event -> update());
 
-            @Override
-            public void onChange(ChangeEvent event) {
-                update();
-            }
-        });
-
-        this.wirelessTab.wireless.addChangeHandler(new ChangeHandler() {
-
-            @Override
-            public void onChange(ChangeEvent event) {
-                update();
-            }
-        });
+        this.wirelessTab.wireless.addChangeHandler(event -> update());
     }
 
     @Override
@@ -361,199 +341,115 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
             }
             i++;
         }
-        this.router.addMouseOverHandler(new MouseOverHandler() {
-
-            @Override
-            public void onMouseOver(MouseOverEvent event) {
-                if (TabDhcpNatUi.this.router.isEnabled()) {
-                    TabDhcpNatUi.this.helpText.clear();
-                    TabDhcpNatUi.this.helpText.add(new Span(MSGS.netRouterToolTipMode()));
-                }
+        this.router.addMouseOverHandler(event -> {
+            if (TabDhcpNatUi.this.router.isEnabled()) {
+                TabDhcpNatUi.this.helpText.clear();
+                TabDhcpNatUi.this.helpText.add(new Span(MSGS.netRouterToolTipMode()));
             }
         });
-        this.router.addMouseOutHandler(new MouseOutHandler() {
-
-            @Override
-            public void onMouseOut(MouseOutEvent event) {
-                resetHelp();
+        this.router.addMouseOutHandler(event -> resetHelp());
+        this.router.addChangeHandler(event -> {
+            setDirty(true);
+            ListBox box = (ListBox) event.getSource();
+            if (TabDhcpNatUi.this.tcpTab.isDhcp() && !box.getSelectedItemText().equals(ROUTER_OFF_MESSAGE)) { // MessageUtils.get(GwtNetRouterMode.netRouterOff.name())))
+                // { TODO:check
+                TabDhcpNatUi.this.groupRouter.setValidationState(ValidationState.ERROR);
+                TabDhcpNatUi.this.helpRouter.setText(MSGS.netRouterConfiguredForDhcpError());
+                TabDhcpNatUi.this.helpRouter.setColor("red");
+            } else {
+                TabDhcpNatUi.this.groupRouter.setValidationState(ValidationState.NONE);
+                TabDhcpNatUi.this.helpRouter.setText("");
             }
-        });
-        this.router.addChangeHandler(new ChangeHandler() {
-
-            @Override
-            public void onChange(ChangeEvent event) {
-                setDirty(true);
-                ListBox box = (ListBox) event.getSource();
-                if (TabDhcpNatUi.this.tcpTab.isDhcp() && !box.getSelectedItemText().equals(ROUTER_OFF_MESSAGE)) { // MessageUtils.get(GwtNetRouterMode.netRouterOff.name())))
-                    // { TODO:check
-                    TabDhcpNatUi.this.groupRouter.setValidationState(ValidationState.ERROR);
-                    TabDhcpNatUi.this.helpRouter.setText(MSGS.netRouterConfiguredForDhcpError());
-                    TabDhcpNatUi.this.helpRouter.setColor("red");
-                } else {
-                    TabDhcpNatUi.this.groupRouter.setValidationState(ValidationState.NONE);
-                    TabDhcpNatUi.this.helpRouter.setText("");
-                }
-                refreshForm();
-            }
+            refreshForm();
         });
 
         // DHCP Beginning Address
         this.labelBegin.setText(MSGS.netRouterDhcpBeginningAddress());
-        this.begin.addMouseOverHandler(new MouseOverHandler() {
-
-            @Override
-            public void onMouseOver(MouseOverEvent event) {
-                if (TabDhcpNatUi.this.router.isEnabled()) {
-                    TabDhcpNatUi.this.helpText.clear();
-                    TabDhcpNatUi.this.helpText.add(new Span(MSGS.netRouterToolTipDhcpBeginAddr()));
-                }
+        this.begin.addMouseOverHandler(event -> {
+            if (TabDhcpNatUi.this.router.isEnabled()) {
+                TabDhcpNatUi.this.helpText.clear();
+                TabDhcpNatUi.this.helpText.add(new Span(MSGS.netRouterToolTipDhcpBeginAddr()));
             }
         });
-        this.begin.addMouseOutHandler(new MouseOutHandler() {
-
-            @Override
-            public void onMouseOut(MouseOutEvent event) {
-                resetHelp();
-            }
-        });
-        this.begin.addValueChangeHandler(new ValueChangeHandler<String>() {
-
-            @Override
-            public void onValueChange(ValueChangeEvent<String> event) {
-                setDirty(true);
-                if (!TabDhcpNatUi.this.begin.getText().matches(REGEX_IPV4)) {
-                    TabDhcpNatUi.this.groupBegin.setValidationState(ValidationState.ERROR);
-                } else {
-                    TabDhcpNatUi.this.groupBegin.setValidationState(ValidationState.NONE);
-                }
+        this.begin.addMouseOutHandler(event -> resetHelp());
+        this.begin.addValueChangeHandler(event -> {
+            setDirty(true);
+            if (!TabDhcpNatUi.this.begin.getText().matches(REGEX_IPV4)) {
+                TabDhcpNatUi.this.groupBegin.setValidationState(ValidationState.ERROR);
+            } else {
+                TabDhcpNatUi.this.groupBegin.setValidationState(ValidationState.NONE);
             }
         });
 
         // DHCP Ending Address
         this.labelEnd.setText(MSGS.netRouterDhcpEndingAddress());
-        this.end.addMouseOverHandler(new MouseOverHandler() {
-
-            @Override
-            public void onMouseOver(MouseOverEvent event) {
-                if (TabDhcpNatUi.this.router.isEnabled()) {
-                    TabDhcpNatUi.this.helpText.clear();
-                    TabDhcpNatUi.this.helpText.add(new Span(MSGS.netRouterToolTipDhcpEndAddr()));
-                }
+        this.end.addMouseOverHandler(event -> {
+            if (TabDhcpNatUi.this.router.isEnabled()) {
+                TabDhcpNatUi.this.helpText.clear();
+                TabDhcpNatUi.this.helpText.add(new Span(MSGS.netRouterToolTipDhcpEndAddr()));
             }
         });
-        this.end.addMouseOutHandler(new MouseOutHandler() {
-
-            @Override
-            public void onMouseOut(MouseOutEvent event) {
-                resetHelp();
-            }
-        });
-        this.end.addValueChangeHandler(new ValueChangeHandler<String>() {
-
-            @Override
-            public void onValueChange(ValueChangeEvent<String> event) {
-                setDirty(true);
-                if (!TabDhcpNatUi.this.end.getText().matches(REGEX_IPV4)) {
-                    TabDhcpNatUi.this.groupEnd.setValidationState(ValidationState.ERROR);
-                } else {
-                    TabDhcpNatUi.this.groupEnd.setValidationState(ValidationState.NONE);
-                }
+        this.end.addMouseOutHandler(event -> resetHelp());
+        this.end.addValueChangeHandler(event -> {
+            setDirty(true);
+            if (!TabDhcpNatUi.this.end.getText().matches(REGEX_IPV4)) {
+                TabDhcpNatUi.this.groupEnd.setValidationState(ValidationState.ERROR);
+            } else {
+                TabDhcpNatUi.this.groupEnd.setValidationState(ValidationState.NONE);
             }
         });
 
         // DHCP Subnet Mask
         this.labelSubnet.setText(MSGS.netRouterDhcpSubnetMask());
-        this.subnet.addMouseOverHandler(new MouseOverHandler() {
-
-            @Override
-            public void onMouseOver(MouseOverEvent event) {
-                if (TabDhcpNatUi.this.router.isEnabled()) {
-                    TabDhcpNatUi.this.helpText.clear();
-                    TabDhcpNatUi.this.helpText.add(new Span(MSGS.netRouterToolTipDhcpSubnet()));
-                }
+        this.subnet.addMouseOverHandler(event -> {
+            if (TabDhcpNatUi.this.router.isEnabled()) {
+                TabDhcpNatUi.this.helpText.clear();
+                TabDhcpNatUi.this.helpText.add(new Span(MSGS.netRouterToolTipDhcpSubnet()));
             }
         });
-        this.subnet.addMouseOutHandler(new MouseOutHandler() {
-
-            @Override
-            public void onMouseOut(MouseOutEvent event) {
-                resetHelp();
-            }
-        });
-        this.subnet.addValueChangeHandler(new ValueChangeHandler<String>() {
-
-            @Override
-            public void onValueChange(ValueChangeEvent<String> event) {
-                setDirty(true);
-                if (!TabDhcpNatUi.this.subnet.getText().matches(REGEX_IPV4)) {
-                    TabDhcpNatUi.this.groupSubnet.setValidationState(ValidationState.ERROR);
-                } else {
-                    TabDhcpNatUi.this.groupSubnet.setValidationState(ValidationState.NONE);
-                }
+        this.subnet.addMouseOutHandler(event -> resetHelp());
+        this.subnet.addValueChangeHandler(event -> {
+            setDirty(true);
+            if (!TabDhcpNatUi.this.subnet.getText().matches(REGEX_IPV4)) {
+                TabDhcpNatUi.this.groupSubnet.setValidationState(ValidationState.ERROR);
+            } else {
+                TabDhcpNatUi.this.groupSubnet.setValidationState(ValidationState.NONE);
             }
         });
 
         // DHCP Default Lease
         this.labelDefaultL.setText(MSGS.netRouterDhcpDefaultLease());
-        this.defaultL.addMouseOverHandler(new MouseOverHandler() {
-
-            @Override
-            public void onMouseOver(MouseOverEvent event) {
-                if (TabDhcpNatUi.this.router.isEnabled()) {
-                    TabDhcpNatUi.this.helpText.clear();
-                    TabDhcpNatUi.this.helpText.add(new Span(MSGS.netRouterToolTipDhcpDefaultLeaseTime()));
-                }
+        this.defaultL.addMouseOverHandler(event -> {
+            if (TabDhcpNatUi.this.router.isEnabled()) {
+                TabDhcpNatUi.this.helpText.clear();
+                TabDhcpNatUi.this.helpText.add(new Span(MSGS.netRouterToolTipDhcpDefaultLeaseTime()));
             }
         });
-        this.defaultL.addMouseOutHandler(new MouseOutHandler() {
-
-            @Override
-            public void onMouseOut(MouseOutEvent event) {
-                resetHelp();
-            }
-        });
-        this.defaultL.addValueChangeHandler(new ValueChangeHandler<String>() {
-
-            @Override
-            public void onValueChange(ValueChangeEvent<String> event) {
-                setDirty(true);
-                if (!TabDhcpNatUi.this.defaultL.getText().trim().matches(FieldType.NUMERIC.getRegex())) {
-                    TabDhcpNatUi.this.groupDefaultL.setValidationState(ValidationState.ERROR);
-                } else {
-                    TabDhcpNatUi.this.groupDefaultL.setValidationState(ValidationState.NONE);
-                }
+        this.defaultL.addMouseOutHandler(event -> resetHelp());
+        this.defaultL.addValueChangeHandler(event -> {
+            setDirty(true);
+            if (!TabDhcpNatUi.this.defaultL.getText().trim().matches(FieldType.NUMERIC.getRegex())) {
+                TabDhcpNatUi.this.groupDefaultL.setValidationState(ValidationState.ERROR);
+            } else {
+                TabDhcpNatUi.this.groupDefaultL.setValidationState(ValidationState.NONE);
             }
         });
 
         // DHCP Max Lease
         this.labelMax.setText(MSGS.netRouterDhcpMaxLease());
-        this.max.addMouseOverHandler(new MouseOverHandler() {
-
-            @Override
-            public void onMouseOver(MouseOverEvent event) {
-                if (TabDhcpNatUi.this.router.isEnabled()) {
-                    TabDhcpNatUi.this.helpText.clear();
-                    TabDhcpNatUi.this.helpText.add(new Span(MSGS.netRouterToolTipDhcpMaxLeaseTime()));
-                }
+        this.max.addMouseOverHandler(event -> {
+            if (TabDhcpNatUi.this.router.isEnabled()) {
+                TabDhcpNatUi.this.helpText.clear();
+                TabDhcpNatUi.this.helpText.add(new Span(MSGS.netRouterToolTipDhcpMaxLeaseTime()));
             }
         });
-        this.max.addMouseOutHandler(new MouseOutHandler() {
-
-            @Override
-            public void onMouseOut(MouseOutEvent event) {
-                resetHelp();
-            }
-        });
-        this.max.addValueChangeHandler(new ValueChangeHandler<String>() {
-
-            @Override
-            public void onValueChange(ValueChangeEvent<String> event) {
-                setDirty(true);
-                if (!TabDhcpNatUi.this.max.getText().trim().matches(FieldType.NUMERIC.getRegex())) {
-                    TabDhcpNatUi.this.groupMax.setValidationState(ValidationState.ERROR);
-                } else {
-                    TabDhcpNatUi.this.groupMax.setValidationState(ValidationState.NONE);
-                }
+        this.max.addMouseOutHandler(event -> resetHelp());
+        this.max.addValueChangeHandler(event -> {
+            setDirty(true);
+            if (!TabDhcpNatUi.this.max.getText().trim().matches(FieldType.NUMERIC.getRegex())) {
+                TabDhcpNatUi.this.groupMax.setValidationState(ValidationState.ERROR);
+            } else {
+                TabDhcpNatUi.this.groupMax.setValidationState(ValidationState.NONE);
             }
         });
 
@@ -561,55 +457,23 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
         this.labelPass.setText(MSGS.netRouterPassDns());
         this.radio1.setText(MSGS.trueLabel());
         this.radio2.setText(MSGS.falseLabel());
-        this.radio1.addMouseOverHandler(new MouseOverHandler() {
-
-            @Override
-            public void onMouseOver(MouseOverEvent event) {
-                if (TabDhcpNatUi.this.router.isEnabled()) {
-                    TabDhcpNatUi.this.helpText.clear();
-                    TabDhcpNatUi.this.helpText.add(new Span(MSGS.netRouterToolTipPassDns()));
-                }
+        this.radio1.addMouseOverHandler(event -> {
+            if (TabDhcpNatUi.this.router.isEnabled()) {
+                TabDhcpNatUi.this.helpText.clear();
+                TabDhcpNatUi.this.helpText.add(new Span(MSGS.netRouterToolTipPassDns()));
             }
         });
-        this.radio1.addMouseOutHandler(new MouseOutHandler() {
-
-            @Override
-            public void onMouseOut(MouseOutEvent event) {
-                resetHelp();
+        this.radio1.addMouseOutHandler(event -> resetHelp());
+        this.radio2.addMouseOverHandler(event -> {
+            if (TabDhcpNatUi.this.router.isEnabled()) {
+                TabDhcpNatUi.this.helpText.clear();
+                TabDhcpNatUi.this.helpText.add(new Span(MSGS.netRouterToolTipPassDns()));
             }
         });
-        this.radio2.addMouseOverHandler(new MouseOverHandler() {
+        this.radio2.addMouseOutHandler(event -> resetHelp());
 
-            @Override
-            public void onMouseOver(MouseOverEvent event) {
-                if (TabDhcpNatUi.this.router.isEnabled()) {
-                    TabDhcpNatUi.this.helpText.clear();
-                    TabDhcpNatUi.this.helpText.add(new Span(MSGS.netRouterToolTipPassDns()));
-                }
-            }
-        });
-        this.radio2.addMouseOutHandler(new MouseOutHandler() {
-
-            @Override
-            public void onMouseOut(MouseOutEvent event) {
-                resetHelp();
-            }
-        });
-
-        this.radio1.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-
-            @Override
-            public void onValueChange(ValueChangeEvent<Boolean> event) {
-                setDirty(true);
-            }
-        });
-        this.radio2.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-
-            @Override
-            public void onValueChange(ValueChangeEvent<Boolean> event) {
-                setDirty(true);
-            }
-        });
+        this.radio1.addValueChangeHandler(event -> setDirty(true));
+        this.radio2.addValueChangeHandler(event -> setDirty(true));
         this.helpTitle.setText(MSGS.netHelpTitle());
     }
 

@@ -140,7 +140,7 @@ public class CommURI {
 
     /**
      * The open timeout associated with the port
-     * 
+     *
      * @return an int representing the open timeout in milliseconds
      * @since 1.2
      */
@@ -150,7 +150,7 @@ public class CommURI {
 
     /**
      * The receive timeout associated with the port
-     * 
+     *
      * @return an int representing the receive timeout in milliseconds
      * @since 1.2
      */
@@ -222,7 +222,7 @@ public class CommURI {
 
     /**
      * Builder class used as a helper in building the components of a CommURI.
-     * 
+     *
      * @noextend This class is not intended to be subclassed by clients.
      */
     @ProviderType
@@ -268,7 +268,7 @@ public class CommURI {
 
         /**
          * Sets the open timeout associated with the port, this method is identical to {@link #withOpenTimeout(int)}
-         * 
+         *
          * @deprecated use {@link #withOpenTimeout(int)} and {@link #withReceiveTimeout(int)} instead
          * @since 1.1.0
          * @param timeout
@@ -282,7 +282,7 @@ public class CommURI {
 
         /**
          * Sets the open timeout associated with the port
-         * 
+         *
          * @param timeout
          *            The open timeout in milliseconds.
          * @return
@@ -296,7 +296,7 @@ public class CommURI {
         /**
          * Sets the receive timeout associated with the port. Pass 0 to disable the receive timeout. The receive timeout
          * is disabled by default.
-         * 
+         *
          * @param timeout
          *            The receive timeout in milliseconds.
          * @return

@@ -49,21 +49,21 @@ public class ConfigurationUiButtons extends Composite implements HasConfiguratio
         target.setListener(this);
 
         this.btnApply.addClickHandler(event -> {
-            if (listener == null) {
+            if (this.listener == null) {
                 return;
             }
             if (!target.isValid()) {
-                confirmDialog.show(MSGS.formWithErrorsOrIncomplete(), AlertDialog.Severity.ALERT,
+                this.confirmDialog.show(MSGS.formWithErrorsOrIncomplete(), AlertDialog.Severity.ALERT,
                         (ConfirmListener) null);
                 return;
             }
-            confirmDialog.show(MSGS.deviceConfigConfirmationNoName(), () -> listener.onApply());
+            this.confirmDialog.show(MSGS.deviceConfigConfirmationNoName(), () -> this.listener.onApply());
         });
         this.btnReset.addClickHandler(event -> {
-            if (listener == null) {
+            if (this.listener == null) {
                 return;
             }
-            confirmDialog.show(MSGS.deviceConfigDirty(), () -> listener.onReset());
+            this.confirmDialog.show(MSGS.deviceConfigDirty(), () -> this.listener.onReset());
         });
     }
 
@@ -79,8 +79,8 @@ public class ConfigurationUiButtons extends Composite implements HasConfiguratio
     @Override
     public void onDirtyStateChanged(HasConfiguration hasConfiguration) {
         boolean isDirty = hasConfiguration.isDirty();
-        btnApply.setEnabled(isDirty);
-        btnReset.setEnabled(isDirty);
+        this.btnApply.setEnabled(isDirty);
+        this.btnReset.setEnabled(isDirty);
     }
 
     public interface Listener {

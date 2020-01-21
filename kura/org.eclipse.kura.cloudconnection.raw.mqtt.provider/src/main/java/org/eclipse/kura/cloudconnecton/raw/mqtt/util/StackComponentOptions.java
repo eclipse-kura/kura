@@ -42,11 +42,11 @@ public class StackComponentOptions<T> {
     }
 
     public Optional<String> getCloudEndpointPid() {
-        return cloudEndpointPid;
+        return this.cloudEndpointPid;
     }
 
     public Optional<T> getComponentOptions() {
-        return componentOptions;
+        return this.componentOptions;
     }
 
     public interface OptionsFactory<T> {

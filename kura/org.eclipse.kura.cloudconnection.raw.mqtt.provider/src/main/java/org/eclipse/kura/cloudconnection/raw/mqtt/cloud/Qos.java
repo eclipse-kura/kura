@@ -22,7 +22,7 @@ public enum Qos {
     }
 
     public int getValue() {
-        return value;
+        return this.value;
     }
 
     public static Qos valueOf(final int i) {

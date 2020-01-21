@@ -17,7 +17,7 @@ import java.io.OutputStream;
 import org.apache.commons.io.output.NullOutputStream;
 
 /**
- * 
+ *
  * The CommandStatus object is returned by the {@link CommandExecutorService} after the execution of a command.
  * It contains all the relevant informations about the result of the command execution.
  * <p>

@@ -28,7 +28,6 @@ import org.gwtbootstrap3.client.ui.gwt.CellTable;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.cellview.client.RowStyles;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -50,19 +49,13 @@ public class SystemPropertiesTabUi extends Composite implements Tab {
     private final GwtDeviceServiceAsync gwtDeviceService = GWT.create(GwtDeviceService.class);
 
     @UiField
-    CellTable<GwtGroupedNVPair> systemPropertiesGrid = new CellTable<GwtGroupedNVPair>();
-    private final ListDataProvider<GwtGroupedNVPair> systemPropertiesDataProvider = new ListDataProvider<GwtGroupedNVPair>();
+    CellTable<GwtGroupedNVPair> systemPropertiesGrid = new CellTable<>();
+    private final ListDataProvider<GwtGroupedNVPair> systemPropertiesDataProvider = new ListDataProvider<>();
 
     public SystemPropertiesTabUi() {
         initWidget(uiBinder.createAndBindUi(this));
 
-        this.systemPropertiesGrid.setRowStyles(new RowStyles<GwtGroupedNVPair>() {
-
-            @Override
-            public String getStyleNames(GwtGroupedNVPair row, int rowIndex) {
-                return row.getValue().contains("  ") ? "rowHeader" : " ";
-            }
-        });
+        this.systemPropertiesGrid.setRowStyles((row, rowIndex) -> row.getValue().contains("  ") ? "rowHeader" : " ");
 
         loadSystemPropertiesTable(this.systemPropertiesGrid, this.systemPropertiesDataProvider);
     }
@@ -128,26 +121,26 @@ public class SystemPropertiesTabUi extends Composite implements Tab {
                 SystemPropertiesTabUi.this.gwtDeviceService.findSystemProperties(token,
                         new AsyncCallback<ArrayList<GwtGroupedNVPair>>() {
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        EntryClassUi.hideWaitModal();
-                        SystemPropertiesTabUi.this.systemPropertiesDataProvider.getList().clear();
-                        FailureHandler.handle(caught);
-                        SystemPropertiesTabUi.this.systemPropertiesDataProvider.flush();
-                    }
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                EntryClassUi.hideWaitModal();
+                                SystemPropertiesTabUi.this.systemPropertiesDataProvider.getList().clear();
+                                FailureHandler.handle(caught);
+                                SystemPropertiesTabUi.this.systemPropertiesDataProvider.flush();
+                            }
 
-                    @Override
-                    public void onSuccess(ArrayList<GwtGroupedNVPair> result) {
-                        for (GwtGroupedNVPair resultPair : result) {
-                            SystemPropertiesTabUi.this.systemPropertiesDataProvider.getList().add(resultPair);
-                        }
-                        int size = SystemPropertiesTabUi.this.systemPropertiesDataProvider.getList().size();
-                        SystemPropertiesTabUi.this.systemPropertiesGrid.setVisibleRange(0, size);
-                        SystemPropertiesTabUi.this.systemPropertiesDataProvider.flush();
-                        EntryClassUi.hideWaitModal();
-                    }
+                            @Override
+                            public void onSuccess(ArrayList<GwtGroupedNVPair> result) {
+                                for (GwtGroupedNVPair resultPair : result) {
+                                    SystemPropertiesTabUi.this.systemPropertiesDataProvider.getList().add(resultPair);
+                                }
+                                int size = SystemPropertiesTabUi.this.systemPropertiesDataProvider.getList().size();
+                                SystemPropertiesTabUi.this.systemPropertiesGrid.setVisibleRange(0, size);
+                                SystemPropertiesTabUi.this.systemPropertiesDataProvider.flush();
+                                EntryClassUi.hideWaitModal();
+                            }
 
-                });
+                        });
             }
 
         });

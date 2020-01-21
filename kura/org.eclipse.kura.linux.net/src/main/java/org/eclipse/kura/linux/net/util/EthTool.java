@@ -40,7 +40,7 @@ public class EthTool implements LinkTool {
     private int speed = 0; // in b/s
     private String duplex = null;
 
-    private CommandExecutorService executorService;
+    private final CommandExecutorService executorService;
 
     /**
      * ethtool constructor

@@ -66,17 +66,17 @@ public class RawMqttPublisher extends AbstractStackComponent<PublishOptions>
 
     @Override
     public void registerCloudDeliveryListener(CloudDeliveryListener cloudDeliveryListener) {
-        cloudDeliveryListeners.add(cloudDeliveryListener);
+        this.cloudDeliveryListeners.add(cloudDeliveryListener);
     }
 
     @Override
     public void unregisterCloudDeliveryListener(CloudDeliveryListener cloudDeliveryListener) {
-        cloudDeliveryListeners.remove(cloudDeliveryListener);
+        this.cloudDeliveryListeners.remove(cloudDeliveryListener);
     }
 
     @Override
     public void onMessageConfirmed(String messageId) {
-        cloudDeliveryListeners.forEach(Utils.catchAll(l -> l.onMessageConfirmed(messageId)));
+        this.cloudDeliveryListeners.forEach(Utils.catchAll(l -> l.onMessageConfirmed(messageId)));
     }
 
     @Override

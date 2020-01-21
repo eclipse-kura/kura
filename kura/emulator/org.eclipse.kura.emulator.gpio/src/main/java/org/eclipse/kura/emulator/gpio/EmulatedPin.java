@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 
 public class EmulatedPin implements KuraGPIOPin {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(EmulatedPin.class);
+    private static final Logger logger = LoggerFactory.getLogger(EmulatedPin.class);
 
     private boolean internalValue = false;
     String pinName = null;
@@ -66,8 +66,8 @@ public class EmulatedPin implements KuraGPIOPin {
     public void setValue(boolean active) throws KuraUnavailableDeviceException, KuraClosedDeviceException, IOException {
         this.internalValue = active;
 
-        s_logger.debug("Emulated GPIO Pin {} changed to {}", this.pinName != null ? this.pinName : this.pinIndex,
-                active == true ? "on" : "off");
+        logger.debug("Emulated GPIO Pin {} changed to {}", this.pinName != null ? this.pinName : this.pinIndex,
+                active ? "on" : "off");
     }
 
     @Override
@@ -85,12 +85,12 @@ public class EmulatedPin implements KuraGPIOPin {
 
     @Override
     public void open() throws KuraGPIODeviceException, KuraUnavailableDeviceException, IOException {
-        s_logger.info("Emulated GPIO Pin {} open.", this.pinName != null ? this.pinName : this.pinIndex);
+        logger.info("Emulated GPIO Pin {} open.", this.pinName != null ? this.pinName : this.pinIndex);
     }
 
     @Override
     public void close() throws IOException {
-        s_logger.info("Emulated GPIO Pin {} closed.", this.pinName != null ? this.pinName : this.pinIndex);
+        logger.info("Emulated GPIO Pin {} closed.", this.pinName != null ? this.pinName : this.pinIndex);
     }
 
     @Override

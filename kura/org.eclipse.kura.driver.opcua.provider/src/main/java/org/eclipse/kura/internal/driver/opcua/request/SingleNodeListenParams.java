@@ -43,17 +43,17 @@ public class SingleNodeListenParams extends ListenParams {
 
     @Override
     public double getSamplingInterval() {
-        return samplingInterval;
+        return this.samplingInterval;
     }
 
     @Override
     public long getQueueSize() {
-        return queueSize;
+        return this.queueSize;
     }
 
     @Override
     public boolean getDiscardOldest() {
-        return discardOldest;
+        return this.discardOldest;
     }
 
 }

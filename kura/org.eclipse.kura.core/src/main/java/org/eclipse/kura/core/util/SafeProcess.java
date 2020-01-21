@@ -17,7 +17,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -71,23 +70,15 @@ public class SafeProcess {
         this.process = pb.start();
 
         // process the input stream
-        this.futureInputGobbler = s_streamGobblers.submit(new Callable<byte[]>() {
-
-            @Override
-            public byte[] call() throws Exception {
-                Thread.currentThread().setName("SafeProcess InputStream Gobbler");
-                return readStreamFully(SafeProcess.this.process.getInputStream());
-            }
+        this.futureInputGobbler = s_streamGobblers.submit(() -> {
+            Thread.currentThread().setName("SafeProcess InputStream Gobbler");
+            return readStreamFully(SafeProcess.this.process.getInputStream());
         });
 
         // process the error stream
-        this.futureErrorGobbler = s_streamGobblers.submit(new Callable<byte[]>() {
-
-            @Override
-            public byte[] call() throws Exception {
-                Thread.currentThread().setName("SafeProcess ErrorStream Gobbler");
-                return readStreamFully(SafeProcess.this.process.getErrorStream());
-            }
+        this.futureErrorGobbler = s_streamGobblers.submit(() -> {
+            Thread.currentThread().setName("SafeProcess ErrorStream Gobbler");
+            return readStreamFully(SafeProcess.this.process.getErrorStream());
         });
 
         // wait for the process execution

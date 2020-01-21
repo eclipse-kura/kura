@@ -23,14 +23,14 @@ public interface ExitStatus {
 
     /**
      * Returns a value representing the exit status of a command or process
-     * 
+     *
      * @return an integer that represents the exit code
      */
     public int getExitCode();
 
     /**
      * Returns if a command or process is successful
-     * 
+     *
      * @return a boolean that is true if the command is successful, false otherwise
      */
     public boolean isSuccessful();

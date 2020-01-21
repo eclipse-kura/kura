@@ -313,7 +313,9 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
                 records = preparedRead.execute();
             } else {
                 records = conf.getAllReadRecords();
-                state.getDriver().read(records);
+                if (!records.isEmpty()) {
+                    state.getDriver().read(records);
+                }
             }
             return records;
         }));

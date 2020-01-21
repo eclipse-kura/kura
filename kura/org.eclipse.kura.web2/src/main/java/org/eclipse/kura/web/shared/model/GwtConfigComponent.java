@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.kura.web.shared.IdHelper;
-import org.slf4j.LoggerFactory;
 
 public class GwtConfigComponent extends KuraBaseModel implements Serializable {
 
@@ -22,8 +21,6 @@ public class GwtConfigComponent extends KuraBaseModel implements Serializable {
 
     private List<GwtConfigParameter> m_parameters;
     
-    private static final java.util.logging.Logger logger = LoggerFactory.getLogger(GwtConfigComponent.class);
-
     public GwtConfigComponent() {
         this.m_parameters = new ArrayList<GwtConfigParameter>();
     }
@@ -140,6 +137,15 @@ public class GwtConfigComponent extends KuraBaseModel implements Serializable {
     }
 
     public String getOCDComponentHeader() {
-    	return IdHelper.getLastIdComponent(this.get("factoryPid")) + " - " + this.get("componentName");
+    	
+    	if (this.get("factoryPid") != null) {
+    		return IdHelper.getLastIdComponent(this.get("factoryPid") 
+    				+ " - " + this.get("componentName"));
+    	} else if (this.get("componentId") != null) {
+    		return IdHelper.getLastIdComponent(this.get("componentId")) 
+    				+ " - " + this.get("componentName");
+    	}
+    	
+    	return this.get("componentName");
     }
 }

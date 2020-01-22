@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -22,14 +22,6 @@ public class StringUtil {
     private static final char ESCAPE = '\\';
 
     public static String[] splitValues(String strValues) {
-        // List<String> defaultValues = new ArrayList<String>();
-        // String[] stringValues = defaultValue.split("(?<!\\\\)(?>\\\\\\\\)*,");
-        // for (int i=0; i<stringValues.length; i++) {
-        // if (stringValues[i] != null && stringValues[i].trim().length() > 0) {
-        // defaultValues.add(unescapeString(stringValues[i]));
-        // }
-        // }
-        // return defaultValues.toArray( new String[]{});
         if (strValues == null) {
             return null;
         }

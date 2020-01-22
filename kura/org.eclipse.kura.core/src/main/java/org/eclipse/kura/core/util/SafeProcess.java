@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 
 public class SafeProcess {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(SafeProcess.class);
+    private static final Logger logger = LoggerFactory.getLogger(SafeProcess.class);
 
     private static final ExecutorService s_streamGobblers = Executors.newFixedThreadPool(2);
 
@@ -44,13 +44,13 @@ public class SafeProcess {
     }
 
     public OutputStream getOutputStream() {
-        s_logger.warn("getOutputStream() is unsupported");
+        logger.warn("getOutputStream() is unsupported");
         return null;
     }
 
     public InputStream getInputStream() {
         if (!this.waited) {
-            s_logger.warn("getInputStream() must be called after waitFor()");
+            logger.warn("getInputStream() must be called after waitFor()");
             // Thread.dumpStack();
         }
         return new ByteArrayInputStream(this.inBytes);
@@ -58,14 +58,14 @@ public class SafeProcess {
 
     public InputStream getErrorStream() {
         if (!this.waited) {
-            s_logger.warn("getErrorStream() must be called after waitFor()");
+            logger.warn("getErrorStream() must be called after waitFor()");
             // Thread.dumpStack();
         }
         return new ByteArrayInputStream(this.errBytes);
     }
 
     void exec(String[] cmdarray) throws IOException {
-        s_logger.debug("Executing: {}", Arrays.toString(cmdarray));
+        logger.debug("Executing: {}", Arrays.toString(cmdarray));
         ProcessBuilder pb = new ProcessBuilder(cmdarray);
         this.process = pb.start();
 
@@ -111,7 +111,7 @@ public class SafeProcess {
 
     public void destroy() {
         if (!this.waited) {
-            s_logger.warn("Calling destroy() before waitFor() might lead to resource leaks");
+            logger.warn("Calling destroy() before waitFor() might lead to resource leaks");
             Thread.dumpStack();
             if (this.process != null) {
                 this.process.destroy();
@@ -138,7 +138,7 @@ public class SafeProcess {
                 is.close();
                 is = null;
             } catch (IOException e) {
-                s_logger.warn("Failed to close process input stream", e);
+                logger.warn("Failed to close process input stream", e);
             }
         }
     }
@@ -149,7 +149,7 @@ public class SafeProcess {
                 os.close();
                 os = null;
             } catch (IOException e) {
-                s_logger.warn("Failed to close process output stream", e);
+                logger.warn("Failed to close process output stream", e);
             }
         }
     }

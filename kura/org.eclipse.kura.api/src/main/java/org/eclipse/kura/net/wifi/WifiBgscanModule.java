@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -20,15 +20,15 @@ public enum WifiBgscanModule {
     SIMPLE(0x01),
     LEARN(0x02);
 
-    private int m_code;
+    private int code;
 
     private WifiBgscanModule(int code) {
-        this.m_code = code;
+        this.code = code;
     }
 
     public static WifiBgscanModule parseCode(int code) {
         for (WifiBgscanModule module : WifiBgscanModule.values()) {
-            if (module.m_code == code) {
+            if (module.code == code) {
                 return module;
             }
         }
@@ -38,7 +38,7 @@ public enum WifiBgscanModule {
     public static int getCode(WifiBgscanModule modules) {
         for (WifiBgscanModule module : WifiBgscanModule.values()) {
             if (module == modules) {
-                return module.m_code;
+                return module.code;
             }
         }
         return -1;

@@ -8,7 +8,6 @@
  * Contributors:
  *     Red Hat Inc
  *     Eurotech
- *     
  *******************************************************************************/
 package org.eclipse.kura.example.camel.publisher;
 

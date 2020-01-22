@@ -98,6 +98,14 @@
             required="true"
             default="3600" 
             description="Whether or not to sync the clock and if so, the frequency in seconds.  If less than zero - no update, if equal to zero - sync once at startup, if greater than zero - the frequency in seconds to perform a new clock sync"/>
+        
+        <AD id="rtc.filename"  
+            name="RTC File Name"
+            type="String"
+            cardinality="0" 
+            required="true"
+            default="/dev/rtc0" 
+            description="The RTC File Name. It defaults to /dev/rtc0."/>
 
     </OCD>
     <Designate pid="org.eclipse.kura.clock.ClockService">

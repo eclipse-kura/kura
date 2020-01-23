@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+# Copyright (c) 2011, 2020 Eurotech and/or its affiliates
 #
 #  All rights reserved. This program and the accompanying materials
 #  are made available under the terms of the Eclipse Public License v1.0
@@ -18,14 +18,12 @@ INSTALL_DIR=/opt/eclipse
 ln -sf ${INSTALL_DIR}/kura_* ${INSTALL_DIR}/kura
 
 #set up Kura init
-cp ${INSTALL_DIR}/kura/install/kura.init.raspbian /etc/init.d/kura
-chmod +x /etc/init.d/kura
+sed "s|INSTALL_DIR|${INSTALL_DIR}|" ${INSTALL_DIR}/kura/install/kura.service > /lib/systemd/system/kura.service
+systemctl daemon-reload
+systemctl enable kura
 chmod +x ${INSTALL_DIR}/kura/bin/*.sh
 
 mkdir -p ${INSTALL_DIR}/kura/data
-
-#set up runlevels to start/stop Kura by default
-update-rc.d kura defaults
 
 #set up logrotate - no need to restart as it is a cronjob
 cp ${INSTALL_DIR}/kura/install/logrotate.conf /etc/logrotate.conf

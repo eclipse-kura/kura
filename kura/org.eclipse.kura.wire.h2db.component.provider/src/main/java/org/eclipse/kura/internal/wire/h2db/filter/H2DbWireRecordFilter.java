@@ -214,7 +214,6 @@ public class H2DbWireRecordFilter implements WireEmitter, WireReceiver, Configur
                 continue;
             }
 
-            // TODO: Consider if moving to TypeValues
             if (dbExtractedData instanceof Blob) {
                 final Blob dbExtractedBlob = (Blob) dbExtractedData;
                 final int dbExtractedBlobLength = (int) dbExtractedBlob.length();
@@ -255,7 +254,7 @@ public class H2DbWireRecordFilter implements WireEmitter, WireReceiver, Configur
             result = Collections.unmodifiableList(new ArrayList<WireRecord>());
         }
 
-        if (!result.isEmpty() || options.emitOnEmptyResult()) {
+        if (!result.isEmpty() || this.options.emitOnEmptyResult()) {
             this.wireSupport.emit(result);
         }
     }

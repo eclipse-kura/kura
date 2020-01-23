@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and others
+ * Copyright (c) 2011, 2020 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,7 +8,7 @@
  *
  * Contributors:
  *     Eurotech
- *     Red Hat Inc - Fix build warnings
+ *     Red Hat Inc
  *******************************************************************************/
 package org.eclipse.kura.linux.net.iptables;
 
@@ -425,7 +425,8 @@ public class LocalRule {
                 int portStart = Integer.parseInt(rangeParts[0]);
                 int portEnd = Integer.parseInt(rangeParts[1]);
                 return portStart > 0 && portStart < 65535 && portEnd > 0 && portEnd < 65535 && portStart < portEnd
-                        ? true : false;
+                        ? true
+                        : false;
             } else {
                 return false;
             }

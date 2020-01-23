@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -58,7 +58,7 @@ public class Toption implements Option {
     protected List<Object> any;
     protected String label;
     protected String value;
-    private final Map<QName, String> otherAttributes = new HashMap<QName, String>();
+    private final Map<QName, String> otherAttributes = new HashMap<>();
 
     /**
      * Gets the value of the any property.
@@ -86,14 +86,14 @@ public class Toption implements Option {
      */
     public List<Object> getAny() {
         if (this.any == null) {
-            this.any = new ArrayList<Object>();
+            this.any = new ArrayList<>();
         }
         return this.any;
     }
 
     public void setAny(Object o) {
         if (this.any == null) {
-            this.any = new ArrayList<Object>();
+            this.any = new ArrayList<>();
         }
         this.any.add(o);
     }

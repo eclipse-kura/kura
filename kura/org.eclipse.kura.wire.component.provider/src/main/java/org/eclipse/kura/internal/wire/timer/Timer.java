@@ -81,9 +81,9 @@ public class Timer implements WireEmitter, ConfigurableComponent {
 
         try {
             if ("SIMPLE".equalsIgnoreCase(options.getType())) {
-                this.timerExecutor = Optional.of(new SimpleTimerExecutor(options, wireSupport));
+                this.timerExecutor = Optional.of(new SimpleTimerExecutor(options, this.wireSupport));
             } else {
-                this.timerExecutor = Optional.of(new CronTimerExecutor(options, wireSupport));
+                this.timerExecutor = Optional.of(new CronTimerExecutor(options, this.wireSupport));
             }
         } catch (final Exception e) {
             logger.warn("failed to start timer", e);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -25,16 +25,16 @@ import org.slf4j.LoggerFactory;
 
 public class GpioServiceImpl implements GPIOService {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(GpioServiceImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(GpioServiceImpl.class);
 
-    private static final HashMap<Integer, String> pins = new HashMap<Integer, String>();
+    private final HashMap<Integer, String> pins = new HashMap<Integer, String>();
 
     protected void activate(ComponentContext componentContext) {
-        s_logger.debug("activating emulated GPIOService");
+        logger.debug("activating emulated GPIOService");
     }
 
     protected void deactivate(ComponentContext componentContext) {
-        s_logger.debug("deactivating emulated GPIOService");
+        logger.debug("deactivating emulated GPIOService");
     }
 
     @Override

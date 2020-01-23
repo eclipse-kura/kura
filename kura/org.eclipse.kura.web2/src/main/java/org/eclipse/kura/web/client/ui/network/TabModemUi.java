@@ -57,7 +57,6 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
-import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 
 public class TabModemUi extends Composite implements NetworkTab {
@@ -930,20 +929,16 @@ public class TabModemUi extends Composite implements NetworkTab {
         this.pdpDataProvider.addDataDisplay(this.pdpGrid);
         this.pdpGrid.setSelectionModel(this.pdpSelectionModel);
 
-        this.pdpSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-
-            @Override
-            public void onSelectionChange(SelectionChangeEvent event) {
-                GwtModemPdpEntry modemPdpEntry = TabModemUi.this.pdpSelectionModel.getSelectedObject();
-                if (modemPdpEntry != null) {
-                    TabModemUi.this.dial.setValue(formDialString(modemPdpEntry.getContextNumber()));
-                    if (!modemPdpEntry.getApn().contains("new PDP context")) {
-                        TabModemUi.this.apn.setValue(modemPdpEntry.getApn());
-                    } else {
-                        TabModemUi.this.apn.setValue("");
-                    }
-                    TabModemUi.this.pdpModal.hide();
+        this.pdpSelectionModel.addSelectionChangeHandler(event -> {
+            GwtModemPdpEntry modemPdpEntry = TabModemUi.this.pdpSelectionModel.getSelectedObject();
+            if (modemPdpEntry != null) {
+                TabModemUi.this.dial.setValue(formDialString(modemPdpEntry.getContextNumber()));
+                if (!modemPdpEntry.getApn().contains("new PDP context")) {
+                    TabModemUi.this.apn.setValue(modemPdpEntry.getApn());
+                } else {
+                    TabModemUi.this.apn.setValue("");
                 }
+                TabModemUi.this.pdpModal.hide();
             }
         });
     }

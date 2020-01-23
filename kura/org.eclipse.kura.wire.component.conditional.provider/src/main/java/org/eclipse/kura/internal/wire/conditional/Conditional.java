@@ -164,36 +164,36 @@ public final class Conditional implements WireReceiver, WireEmitter, Configurabl
 
     private ScriptEngine createEngine() {
         NashornScriptEngineFactory factory = new NashornScriptEngineFactory();
-        ScriptEngine scriptEngine = factory.getScriptEngine(className -> false);
+        ScriptEngine scriptEngineInstance = factory.getScriptEngine(className -> false);
 
-        if (scriptEngine == null) {
+        if (scriptEngineInstance == null) {
             throw new IllegalStateException("Failed to create script engine");
         }
 
-        final Bindings engineScopeBindings = scriptEngine.getBindings(ScriptContext.ENGINE_SCOPE);
+        final Bindings engineScopeBindings = scriptEngineInstance.getBindings(ScriptContext.ENGINE_SCOPE);
         if (engineScopeBindings != null) {
             engineScopeBindings.remove("exit");
             engineScopeBindings.remove("quit");
         }
 
-        final Bindings globalScopeBindings = scriptEngine.getBindings(ScriptContext.GLOBAL_SCOPE);
+        final Bindings globalScopeBindings = scriptEngineInstance.getBindings(ScriptContext.GLOBAL_SCOPE);
         if (globalScopeBindings != null) {
             globalScopeBindings.remove("exit");
             globalScopeBindings.remove("quit");
         }
 
-        return scriptEngine;
+        return scriptEngineInstance;
     }
 
     private Bindings createBindings() {
-        Bindings bindings = this.scriptEngine.createBindings();
+        Bindings newBindings = this.scriptEngine.createBindings();
 
-        bindings.put("logger", logger);
+        newBindings.put("logger", logger);
 
-        bindings.remove("exit");
-        bindings.remove("quit");
+        newBindings.remove("exit");
+        newBindings.remove("quit");
 
-        return bindings;
+        return newBindings;
     }
 
     /** {@inheritDoc} */

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -234,7 +234,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
             }
         }
 
-        if (this.timedOutOn == null || (System.nanoTime()) - this.timedOutOn < GRACE_PERIOD) {
+        if (this.timedOutOn == null || System.nanoTime() - this.timedOutOn < GRACE_PERIOD) {
             logger.debug("Refreshing watchdog.");
             refreshWatchdog();
         }

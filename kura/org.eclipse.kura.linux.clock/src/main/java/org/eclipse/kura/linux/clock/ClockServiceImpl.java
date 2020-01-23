@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 
 public class ClockServiceImpl implements ConfigurableComponent, ClockService, ClockSyncListener {
 
-    private static final ClockEvent EMPTY_EVENT = new ClockEvent(Collections.<String, Object> emptyMap());
+    private static final ClockEvent EMPTY_EVENT = new ClockEvent(Collections.<String, Object>emptyMap());
 
     private static final String PROP_CLOCK_PROVIDER = "clock.provider";
     private static final String PROP_CLOCK_SET_HWCLOCK = "clock.set.hwclock";

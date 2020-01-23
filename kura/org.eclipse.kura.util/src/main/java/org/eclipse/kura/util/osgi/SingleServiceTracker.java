@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Red Hat Inc.
+ * Copyright (c) 2018, 2020 Red Hat Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     Red Hat Inc
+ *     Eurotech
  *******************************************************************************/
 package org.eclipse.kura.util.osgi;
 
@@ -26,7 +27,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Track the highest ranking service instance.
- * 
+ *
  * @param <T>
  *            The service type to track
  */
@@ -73,7 +74,7 @@ public class SingleServiceTracker<T> {
     private final Consumer<T> consumer;
     private final ServiceTracker<T, T> tracker;
 
-    private LinkedList<Entry<T>> entries = new LinkedList<>();
+    private final LinkedList<Entry<T>> entries = new LinkedList<>();
     private Entry<T> currentEntry;
 
     public SingleServiceTracker(final BundleContext context, final Class<T> clazz, final Consumer<T> consumer) {

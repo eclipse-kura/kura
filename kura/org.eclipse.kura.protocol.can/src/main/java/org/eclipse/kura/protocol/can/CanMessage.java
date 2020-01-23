@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -13,23 +13,23 @@ package org.eclipse.kura.protocol.can;
 
 public class CanMessage {
 
-    private int m_canId;
-    private byte[] m_data;
+    private int canId;
+    private byte[] data;
 
     public byte[] getData() {
-        return this.m_data;
+        return this.data;
     }
 
     public void setData(byte[] data) {
-        this.m_data = data;
+        this.data = data;
     }
 
     public int getCanId() {
-        return this.m_canId;
+        return this.canId;
     }
 
     public void setCanId(int canId) {
-        this.m_canId = canId;
+        this.canId = canId;
     }
 
 }

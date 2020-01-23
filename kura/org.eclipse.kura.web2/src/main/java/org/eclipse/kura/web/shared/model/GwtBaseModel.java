@@ -31,7 +31,7 @@ public class GwtBaseModel implements IsSerializable, Serializable {
     protected HashMap<String, Object> data;
 
     public GwtBaseModel() {
-        this.data = new HashMap<String, Object>();
+        this.data = new HashMap<>();
     }
 
     @SuppressWarnings("unchecked")

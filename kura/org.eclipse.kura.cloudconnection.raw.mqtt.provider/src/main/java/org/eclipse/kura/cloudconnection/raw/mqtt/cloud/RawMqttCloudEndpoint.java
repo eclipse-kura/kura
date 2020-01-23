@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2019, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -99,7 +99,7 @@ public class RawMqttCloudEndpoint
         this.dataService.removeDataServiceListener(this);
 
         synchronized (this) {
-            subscribers.keySet().forEach(this::unsubscribe);
+            this.subscribers.keySet().forEach(this::unsubscribe);
         }
 
         logger.info("deactivating...done");
@@ -117,17 +117,17 @@ public class RawMqttCloudEndpoint
 
     @Override
     public boolean isConnected() {
-        return dataService.isConnected();
+        return this.dataService.isConnected();
     }
 
     @Override
     public void registerCloudConnectionListener(CloudConnectionListener cloudConnectionListener) {
-        cloudConnectionListeners.add(cloudConnectionListener);
+        this.cloudConnectionListeners.add(cloudConnectionListener);
     }
 
     @Override
     public void unregisterCloudConnectionListener(CloudConnectionListener cloudConnectionListener) {
-        cloudConnectionListeners.remove(cloudConnectionListener);
+        this.cloudConnectionListeners.remove(cloudConnectionListener);
     }
 
     @Override
@@ -174,7 +174,7 @@ public class RawMqttCloudEndpoint
     public synchronized void registerSubscriber(final SubscribeOptions subscribeOptions,
             final CloudSubscriberListener cloudSubscriberListener) {
 
-        final Set<CloudSubscriberListener> listeners = subscribers.computeIfAbsent(subscribeOptions,
+        final Set<CloudSubscriberListener> listeners = this.subscribers.computeIfAbsent(subscribeOptions,
                 e -> new CopyOnWriteArraySet<>());
 
         listeners.add(cloudSubscriberListener);
@@ -206,20 +206,20 @@ public class RawMqttCloudEndpoint
 
     @Override
     public void registerCloudDeliveryListener(CloudDeliveryListener cloudDeliveryListener) {
-        cloudDeliveryListeners.add(cloudDeliveryListener);
+        this.cloudDeliveryListeners.add(cloudDeliveryListener);
     }
 
     @Override
     public void unregisterCloudDeliveryListener(CloudDeliveryListener cloudDeliveryListener) {
-        cloudDeliveryListeners.remove(cloudDeliveryListener);
+        this.cloudDeliveryListeners.remove(cloudDeliveryListener);
     }
 
     @Override
     public void onConnectionEstablished() {
-        cloudConnectionListeners.forEach(catchAll(CloudConnectionListener::onConnectionEstablished));
+        this.cloudConnectionListeners.forEach(catchAll(CloudConnectionListener::onConnectionEstablished));
 
         synchronized (this) {
-            subscribers.keySet().forEach(this::subscribe);
+            this.subscribers.keySet().forEach(this::subscribe);
         }
 
         postConnectionStateChangeEvent(true);
@@ -232,14 +232,14 @@ public class RawMqttCloudEndpoint
 
     @Override
     public void onDisconnected() {
-        cloudConnectionListeners.forEach(catchAll(CloudConnectionListener::onDisconnected));
+        this.cloudConnectionListeners.forEach(catchAll(CloudConnectionListener::onDisconnected));
 
         postConnectionStateChangeEvent(false);
     }
 
     @Override
     public void onConnectionLost(Throwable cause) {
-        cloudConnectionListeners.forEach(catchAll(CloudConnectionListener::onConnectionLost));
+        this.cloudConnectionListeners.forEach(catchAll(CloudConnectionListener::onConnectionLost));
 
         postConnectionStateChangeEvent(false);
     }
@@ -255,7 +255,7 @@ public class RawMqttCloudEndpoint
 
         final KuraMessage message = new KuraMessage(kuraPayload, messagePropertes);
 
-        for (final Entry<SubscribeOptions, Set<CloudSubscriberListener>> e : subscribers.entrySet()) {
+        for (final Entry<SubscribeOptions, Set<CloudSubscriberListener>> e : this.subscribers.entrySet()) {
             if (MqttTopicUtil.isMatched(e.getKey().getTopicFilter(), topic)) {
                 e.getValue().forEach(catchAll(l -> l.onMessageArrived(message)));
             }
@@ -269,7 +269,7 @@ public class RawMqttCloudEndpoint
 
     @Override
     public void onMessageConfirmed(int messageId, String topic) {
-        cloudDeliveryListeners.forEach(catchAll(l -> l.onMessageConfirmed(Integer.toString(messageId))));
+        this.cloudDeliveryListeners.forEach(catchAll(l -> l.onMessageConfirmed(Integer.toString(messageId))));
     }
 
     private void postConnectionStateChangeEvent(final boolean isConnected) {
@@ -288,7 +288,7 @@ public class RawMqttCloudEndpoint
             final int qos = options.getQos().getValue();
 
             logger.info("subscribing to {} with qos {}", topicFilter, qos);
-            dataService.subscribe(topicFilter, qos);
+            this.dataService.subscribe(topicFilter, qos);
         } catch (final KuraNotConnectedException e) {
             logger.debug("failed to subscribe, DataService not connected");
         } catch (final Exception e) {

@@ -325,6 +325,7 @@ public class XmlJavaMetadataMapper implements XmlJavaDataMapper {
         return tDesignate;
     }
 
+    @SuppressWarnings("checkstyle:emptyBlock")
     private Tobject parseObject(Element object) {
         String ocdref = object.getAttribute(METADATA_DESIGNATE_OBJECT_OCDREF);
 

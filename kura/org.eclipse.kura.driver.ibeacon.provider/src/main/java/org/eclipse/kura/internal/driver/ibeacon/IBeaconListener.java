@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2018, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -35,30 +35,37 @@ public class IBeaconListener {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((channelName == null) ? 0 : channelName.hashCode());
-        result = prime * result + ((listener == null) ? 0 : listener.hashCode());
+        result = prime * result + (this.channelName == null ? 0 : this.channelName.hashCode());
+        result = prime * result + (this.listener == null ? 0 : this.listener.hashCode());
         return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         IBeaconListener other = (IBeaconListener) obj;
-        if (channelName == null) {
-            if (other.channelName != null)
+        if (this.channelName == null) {
+            if (other.channelName != null) {
                 return false;
-        } else if (!channelName.equals(other.channelName))
+            }
+        } else if (!this.channelName.equals(other.channelName)) {
             return false;
-        if (listener == null) {
-            if (other.listener != null)
+        }
+        if (this.listener == null) {
+            if (other.listener != null) {
                 return false;
-        } else if (!listener.equals(other.listener))
+            }
+        } else if (!this.listener.equals(other.listener)) {
             return false;
+        }
         return true;
     }
 

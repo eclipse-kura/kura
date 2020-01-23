@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2018, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -20,11 +20,11 @@ import org.osgi.annotation.versioning.ProviderType;
 /**
  * A {@link CloudEndpoint} can implement CloudConnectionManager to support the management of
  * long-lived/always on connections.
- *  
+ *
  * This interface provides methods to connect, disconnect and get the connection state of the associated CloudEndpoint.
  * It also provides methods to register {@link CloudConnectionListener}s that will be notified of connection-related
  * events.
- * 
+ *
  * The implementor must register itself as a CloudConnectionManager OSGi service provider.
  *
  * @noimplement This interface is not intended to be implemented by clients.

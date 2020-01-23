@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2018, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -76,17 +76,17 @@ public class GpsDeviceTracker implements EventHandler {
     }
 
     public synchronized CommURI getGpsDeviceUri() {
-        if (trackedUri == null) {
+        if (this.trackedUri == null) {
             return null;
         }
 
-        final CommURI uri = resolve(trackedUri);
+        final CommURI uri = resolve(this.trackedUri);
         if (!serialPortExists(uri)) {
-            isTrackedDeviceValid = false;
+            this.isTrackedDeviceValid = false;
             return null;
         }
 
-        isTrackedDeviceValid = true;
+        this.isTrackedDeviceValid = true;
         return uri;
     }
 
@@ -99,7 +99,7 @@ public class GpsDeviceTracker implements EventHandler {
         String actualPort = port;
 
         if (!port.contains("/dev/") && !port.contains("COM")) {
-            final Optional<UsbTtyDevice> portDevice = usbService.getUsbTtyDevices().stream()
+            final Optional<UsbTtyDevice> portDevice = this.usbService.getUsbTtyDevices().stream()
                     .filter(ttyDev -> ttyDev.getUsbPort().equals(port)).findAny();
             if (portDevice.isPresent()) {
                 actualPort = portDevice.get().getDeviceNode();

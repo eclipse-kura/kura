@@ -22,8 +22,6 @@ import org.gwtbootstrap3.client.ui.ModalHeader;
 import org.gwtbootstrap3.client.ui.TextBox;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -110,8 +108,8 @@ public class WiresDialogs extends Composite {
             this.driverInstance.addItem(driverPid);
         }
 
-        driverInstance.setEnabled(!driverPids.isEmpty());
-        buttonSelectDriverOk.setEnabled(!driverPids.isEmpty());
+        this.driverInstance.setEnabled(!driverPids.isEmpty());
+        this.buttonSelectDriverOk.setEnabled(!driverPids.isEmpty());
     }
 
     public void setDriverFactoryPids(List<String> driverFactoryPids) {
@@ -120,8 +118,8 @@ public class WiresDialogs extends Composite {
             this.newDriverFactory.addItem(driverPid);
         }
 
-        newDriverFactory.setEnabled(!driverFactoryPids.isEmpty());
-        newDriverOk.setEnabled(!driverFactoryPids.isEmpty());
+        this.newDriverFactory.setEnabled(!driverFactoryPids.isEmpty());
+        this.newDriverOk.setEnabled(!driverFactoryPids.isEmpty());
     }
 
     public void setAssetPids(List<String> assetPids) {
@@ -130,68 +128,43 @@ public class WiresDialogs extends Composite {
             this.assetInstance.addItem(assetPid);
         }
 
-        buttonSelectAssetOk.setEnabled(!assetPids.isEmpty());
+        this.buttonSelectAssetOk.setEnabled(!assetPids.isEmpty());
     }
 
     private void initSelectAssetModal() {
 
-        this.buttonNewAsset.addClickHandler(new ClickHandler() {
+        this.buttonNewAsset.addClickHandler(event -> WiresDialogs.this.selectDriverModal.show());
 
-            @Override
-            public void onClick(ClickEvent event) {
-                WiresDialogs.this.selectDriverModal.show();
+        this.buttonSelectAssetOk.addClickHandler(event -> {
+            if (WiresDialogs.this.pickCallback != null) {
+                WiresDialogs.this.pickCallback
+                        .onNewComponentCreated(WiresDialogs.this.assetInstance.getSelectedValue());
             }
+            WiresDialogs.this.selectAssetModal.hide();
         });
-
-        this.buttonSelectAssetOk.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                if (pickCallback != null) {
-                    pickCallback.onNewComponentCreated(WiresDialogs.this.assetInstance.getSelectedValue());
-                }
-                selectAssetModal.hide();
-            }
-        });
-        this.buttonSelectAssetCancel.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                if (pickCallback != null) {
-                    pickCallback.onCancel();
-                }
+        this.buttonSelectAssetCancel.addClickHandler(event -> {
+            if (WiresDialogs.this.pickCallback != null) {
+                WiresDialogs.this.pickCallback.onCancel();
             }
         });
     }
 
     private void initSelectDriverModal() {
-        this.buttonNewDriver.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                WiresDialogs.this.newDriverName.setValue("");
-                WiresDialogs.this.newDriverName.setText("");
-                WiresDialogs.this.newDriverModal.show();
-            }
+        this.buttonNewDriver.addClickHandler(event -> {
+            WiresDialogs.this.newDriverName.setValue("");
+            WiresDialogs.this.newDriverName.setText("");
+            WiresDialogs.this.newDriverModal.show();
         });
 
-        this.buttonSelectDriverOk.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                String driverPid = WiresDialogs.this.driverInstance.getSelectedValue();
-                WiresDialogs.this.newAssetDriverInstance.setText(driverPid);
-                WiresDialogs.this.newAssetName.setText("");
-                WiresDialogs.this.newAssetModal.show();
-            }
+        this.buttonSelectDriverOk.addClickHandler(event -> {
+            String driverPid = WiresDialogs.this.driverInstance.getSelectedValue();
+            WiresDialogs.this.newAssetDriverInstance.setText(driverPid);
+            WiresDialogs.this.newAssetName.setText("");
+            WiresDialogs.this.newAssetModal.show();
         });
-        this.buttonSelectDriverCancel.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                if (pickCallback != null) {
-                    pickCallback.onCancel();
-                }
+        this.buttonSelectDriverCancel.addClickHandler(event -> {
+            if (WiresDialogs.this.pickCallback != null) {
+                WiresDialogs.this.pickCallback.onCancel();
             }
         });
     }
@@ -199,101 +172,72 @@ public class WiresDialogs extends Composite {
     private void initNewAssetModal() {
         this.newAssetDriverInstance.setReadOnly(true);
 
-        this.newAssetOk.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                String wireAssetPid = WiresDialogs.this.newAssetName.getPid();
-                if (wireAssetPid == null || !listener.onNewPidInserted(wireAssetPid)) {
-                    return;
-                }
-                String driverPid = WiresDialogs.this.newAssetDriverInstance.getText();
-                WiresDialogs.this.newAssetModal.hide();
-                if (pickCallback != null) {
-                    pickCallback.onNewAssetCreated(wireAssetPid, driverPid);
-                }
+        this.newAssetOk.addClickHandler(event -> {
+            String wireAssetPid = WiresDialogs.this.newAssetName.getPid();
+            if (wireAssetPid == null || !WiresDialogs.this.listener.onNewPidInserted(wireAssetPid)) {
+                return;
+            }
+            String driverPid = WiresDialogs.this.newAssetDriverInstance.getText();
+            WiresDialogs.this.newAssetModal.hide();
+            if (WiresDialogs.this.pickCallback != null) {
+                WiresDialogs.this.pickCallback.onNewAssetCreated(wireAssetPid, driverPid);
             }
         });
 
-        this.newAssetCancel.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                if (pickCallback != null) {
-                    pickCallback.onCancel();
-                }
+        this.newAssetCancel.addClickHandler(event -> {
+            if (WiresDialogs.this.pickCallback != null) {
+                WiresDialogs.this.pickCallback.onCancel();
             }
         });
     }
 
     private void initNewDriverModal() {
 
-        this.newDriverOk.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                final String pid = WiresDialogs.this.newDriverName.getPid();
-                if (pid == null) {
-                    return;
-                }
-                if (listener == null || !listener.onNewPidInserted(pid)) {
-                    return;
-                }
-                final String factoryPid = WiresDialogs.this.newDriverFactory.getSelectedValue();
-                WiresRPC.createNewDriver(factoryPid, pid, new WiresRPC.Callback<GwtConfigComponent>() {
-
-                    @Override
-                    public void onSuccess(GwtConfigComponent result) {
-                        newDriverModal.hide();
-                        newAssetDriverInstance.setText(pid);
-                        newAssetName.setText("");
-                        newAssetModal.show();
-                        if (listener != null) {
-                            listener.onNewDriverCreated(pid, factoryPid, result);
-                        }
-                    }
-                });
+        this.newDriverOk.addClickHandler(event -> {
+            final String pid = WiresDialogs.this.newDriverName.getPid();
+            if (pid == null) {
+                return;
             }
+            if (WiresDialogs.this.listener == null || !WiresDialogs.this.listener.onNewPidInserted(pid)) {
+                return;
+            }
+            final String factoryPid = WiresDialogs.this.newDriverFactory.getSelectedValue();
+            WiresRPC.createNewDriver(factoryPid, pid, result -> {
+                WiresDialogs.this.newDriverModal.hide();
+                WiresDialogs.this.newAssetDriverInstance.setText(pid);
+                WiresDialogs.this.newAssetName.setText("");
+                WiresDialogs.this.newAssetModal.show();
+                if (WiresDialogs.this.listener != null) {
+                    WiresDialogs.this.listener.onNewDriverCreated(pid, factoryPid, result);
+                }
+            });
         });
 
-        this.newDriverCancel.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                if (pickCallback != null) {
-                    pickCallback.onCancel();
-                }
+        this.newDriverCancel.addClickHandler(event -> {
+            if (WiresDialogs.this.pickCallback != null) {
+                WiresDialogs.this.pickCallback.onCancel();
             }
-
         });
     }
 
     private void initAssetModal() {
         this.componentNameLabel.setText(MSGS.wiresComponentName());
-        this.btnComponentModalYes.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                String value = WiresDialogs.this.componentName.getPid();
-                if (value != null) {
-                    if (listener == null || !listener.onNewPidInserted(value)) {
-                        return;
-                    }
-                    if (pickCallback != null) {
-                        pickCallback.onNewComponentCreated(value);
-                    }
-                    genericCompModal.hide();
-                    componentName.clear();
+        this.btnComponentModalYes.addClickHandler(event -> {
+            String value = WiresDialogs.this.componentName.getPid();
+            if (value != null) {
+                if (WiresDialogs.this.listener == null || !WiresDialogs.this.listener.onNewPidInserted(value)) {
+                    return;
                 }
+                if (WiresDialogs.this.pickCallback != null) {
+                    WiresDialogs.this.pickCallback.onNewComponentCreated(value);
+                }
+                WiresDialogs.this.genericCompModal.hide();
+                WiresDialogs.this.componentName.clear();
             }
         });
-        this.btnComponentModalNo.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                if (pickCallback != null) {
-                    pickCallback.onCancel();
-                }
+        this.btnComponentModalNo.addClickHandler(event -> {
+            if (WiresDialogs.this.pickCallback != null) {
+                WiresDialogs.this.pickCallback.onCancel();
             }
         });
     }

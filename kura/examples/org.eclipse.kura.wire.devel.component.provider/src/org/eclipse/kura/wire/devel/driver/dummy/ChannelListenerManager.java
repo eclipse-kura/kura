@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -96,30 +96,37 @@ public class ChannelListenerManager {
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + ((request.channelName == null) ? 0 : request.channelName.hashCode());
-            result = prime * result + ((listener == null) ? 0 : listener.hashCode());
+            result = prime * result + (this.request.channelName == null ? 0 : this.request.channelName.hashCode());
+            result = prime * result + (this.listener == null ? 0 : this.listener.hashCode());
             return result;
         }
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj)
+            if (this == obj) {
                 return true;
-            if (obj == null)
+            }
+            if (obj == null) {
                 return false;
-            if (getClass() != obj.getClass())
+            }
+            if (getClass() != obj.getClass()) {
                 return false;
+            }
             ChannelListenerRegistration other = (ChannelListenerRegistration) obj;
-            if (request.channelName == null) {
-                if (other.request.channelName != null)
+            if (this.request.channelName == null) {
+                if (other.request.channelName != null) {
                     return false;
-            } else if (!request.channelName.equals(other.request.channelName))
+                }
+            } else if (!this.request.channelName.equals(other.request.channelName)) {
                 return false;
-            if (listener == null) {
-                if (other.listener != null)
+            }
+            if (this.listener == null) {
+                if (other.listener != null) {
                     return false;
-            } else if (!listener.equals(other.listener))
+                }
+            } else if (!this.listener.equals(other.listener)) {
                 return false;
+            }
             return true;
         }
     }

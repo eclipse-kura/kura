@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -16,17 +16,19 @@ package org.eclipse.kura.net.wifi;
  */
 public enum WifiCiphers {
 
-    CCMP_TKIP(0x00), TKIP(0x01), CCMP(0x02);
+    CCMP_TKIP(0x00),
+    TKIP(0x01),
+    CCMP(0x02);
 
-    private int m_code;
+    private int code;
 
     private WifiCiphers(int code) {
-        this.m_code = code;
+        this.code = code;
     }
 
     public static WifiCiphers parseCode(int code) {
         for (WifiCiphers cipher : WifiCiphers.values()) {
-            if (cipher.m_code == code) {
+            if (cipher.code == code) {
                 return cipher;
             }
         }
@@ -37,7 +39,7 @@ public enum WifiCiphers {
     public static int getCode(WifiCiphers ciphers) {
         for (WifiCiphers cipher : WifiCiphers.values()) {
             if (cipher == ciphers) {
-                return cipher.m_code;
+                return cipher.code;
             }
         }
 

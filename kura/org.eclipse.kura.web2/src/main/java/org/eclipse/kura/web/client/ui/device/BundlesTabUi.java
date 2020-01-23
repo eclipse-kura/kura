@@ -130,18 +130,18 @@ public class BundlesTabUi extends Composite implements Tab {
                 BundlesTabUi.this.deviceService.startBundle(token,
                         BundlesTabUi.this.selectionModel.getSelectedObject().getId(), new AsyncCallback<Void>() {
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        EntryClassUi.hideWaitModal();
-                        FailureHandler.handle(caught);
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                EntryClassUi.hideWaitModal();
+                                FailureHandler.handle(caught);
 
-                    }
+                            }
 
-                    @Override
-                    public void onSuccess(Void result) {
-                        EntryClassUi.hideWaitModal();
-                    }
-                });
+                            @Override
+                            public void onSuccess(Void result) {
+                                EntryClassUi.hideWaitModal();
+                            }
+                        });
 
             }
 
@@ -168,18 +168,18 @@ public class BundlesTabUi extends Composite implements Tab {
                 BundlesTabUi.this.deviceService.stopBundle(token,
                         BundlesTabUi.this.selectionModel.getSelectedObject().getId(), new AsyncCallback<Void>() {
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        EntryClassUi.hideWaitModal();
-                        FailureHandler.handle(caught);
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                EntryClassUi.hideWaitModal();
+                                FailureHandler.handle(caught);
 
-                    }
+                            }
 
-                    @Override
-                    public void onSuccess(Void result) {
-                        EntryClassUi.hideWaitModal();
-                    }
-                });
+                            @Override
+                            public void onSuccess(Void result) {
+                                EntryClassUi.hideWaitModal();
+                            }
+                        });
             }
         });
     }

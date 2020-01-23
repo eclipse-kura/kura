@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -14,18 +14,18 @@ import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * This class provides some context information describing a DEPLOY-V2 request.
- * 
+ *
  * @since 1.3
  */
 @ProviderType
 public class RequestContext {
 
-    private String downloadFilePath;
-    private String requestType;
+    private final String downloadFilePath;
+    private final String requestType;
 
     /**
      * Creates a new {@link RequestContext} instance.
-     * 
+     *
      * @param downloadFilePath
      *            the path of the downloaded file
      * @param requestType
@@ -38,19 +38,19 @@ public class RequestContext {
 
     /**
      * Returns the path of the downloaded file.
-     * 
+     *
      * @return the path of the downloaded file
      */
     public String getDownloadFilePath() {
-        return downloadFilePath;
+        return this.downloadFilePath;
     }
 
     /**
      * Returns the value of the {@code request.type} metric of the request.
-     * 
+     *
      * @return the value of the {@code request.type} metric
      */
     public String getRequestType() {
-        return requestType;
+        return this.requestType;
     }
 }

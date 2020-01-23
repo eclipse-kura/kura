@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -28,6 +28,8 @@ import org.eclipse.kura.executor.CommandExecutorService;
 public class BluetoothLeUtil {
 
     private static final Logger logger = LogManager.getLogger(BluetoothLeUtil.class);
+    
+    @SuppressWarnings("checkstyle:constantName")
     private static final ExecutorService processExecutor = Executors.newSingleThreadExecutor();
 
     public static final String HCITOOL = "hcitool";

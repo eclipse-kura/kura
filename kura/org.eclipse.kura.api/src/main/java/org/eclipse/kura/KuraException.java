@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -14,9 +14,9 @@ import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-import org.osgi.annotation.versioning.ProviderType;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * The {@link KuraException} class is the superclass of all errors and exceptions in the Kura project. It extends the
@@ -26,7 +26,7 @@ import org.apache.logging.log4j.LogManager;
  * the {@code KuraExceptionMessagesBundle} Properties Bundle and they are keyed on the exception code.
  *
  * @see KuraErrorCode
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 @ProviderType
@@ -161,8 +161,8 @@ public class KuraException extends Exception {
      */
     private String getLocalizedMessage(final Locale locale) {
         final String pattern = getMessagePattern(locale, this.code);
-        if ((this.code == null) || KuraErrorCode.INTERNAL_ERROR.equals(this.code)) {
-            if ((this.arguments != null) && (this.arguments.length > 1)) {
+        if (this.code == null || KuraErrorCode.INTERNAL_ERROR.equals(this.code)) {
+            if (this.arguments != null && this.arguments.length > 1) {
                 // append all arguments into a single one
                 final StringBuilder sbAllArgs = new StringBuilder();
                 for (final Object arg : this.arguments) {
@@ -196,7 +196,7 @@ public class KuraException extends Exception {
         ResourceBundle resourceBundle = null;
         try {
             resourceBundle = ResourceBundle.getBundle(KURA_EXCEPTION_MESSAGES_BUNDLE, locale);
-            if ((resourceBundle != null) && (code != null)) {
+            if (resourceBundle != null && code != null) {
                 messagePattern = resourceBundle.getString(code.name());
                 if (messagePattern == null) {
                     logger.warn("Could not find Exception Messages for Locale {} and code {}", locale, code);

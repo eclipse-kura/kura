@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -25,7 +25,7 @@ public interface BluetoothLeBeaconManager<T extends BluetoothLeBeacon> {
 
     /**
      * Instantiate a new scanner for beacons.
-     * 
+     *
      * @param adapter
      *            the bluetooth adapter used by the scanner
      * @param decoder
@@ -37,7 +37,7 @@ public interface BluetoothLeBeaconManager<T extends BluetoothLeBeacon> {
 
     /**
      * Instantiate a new advertiser for beacons.
-     * 
+     *
      * @param adapter
      *            the bluetooth adapter used by the advertiser
      * @param encoder
@@ -50,7 +50,7 @@ public interface BluetoothLeBeaconManager<T extends BluetoothLeBeacon> {
 
     /**
      * Delete the given scanner.
-     * 
+     *
      * @param scanner
      *            The scanner to be deleted
      */
@@ -58,7 +58,7 @@ public interface BluetoothLeBeaconManager<T extends BluetoothLeBeacon> {
 
     /**
      * Delete the given advertiser.
-     * 
+     *
      * @param advertiser
      *            The advertiser to be deleted
      */

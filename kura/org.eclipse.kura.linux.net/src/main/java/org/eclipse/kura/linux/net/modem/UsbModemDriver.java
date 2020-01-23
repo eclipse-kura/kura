@@ -101,7 +101,6 @@ public class UsbModemDriver {
     }
 
     private Integer manageDriver(CommandExecutorService executorService, String command) {
-        return (Integer) executorService.execute(new Command(new String[] { command, this.name })).getExitStatus()
-                .getExitCode();
+        return executorService.execute(new Command(new String[] { command, this.name })).getExitStatus().getExitCode();
     }
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -16,11 +16,11 @@ import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Implementation of IPv6 route configurations
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 @ProviderType
-public class RouteConfigIP6 extends RouteConfigIP<IP6Address>implements RouteConfig6 {
+public class RouteConfigIP6 extends RouteConfigIP<IP6Address> implements RouteConfig6 {
 
     public RouteConfigIP6(IP6Address destination, IP6Address gateway, IP6Address netmask, String interfaceName,
             int metric) {

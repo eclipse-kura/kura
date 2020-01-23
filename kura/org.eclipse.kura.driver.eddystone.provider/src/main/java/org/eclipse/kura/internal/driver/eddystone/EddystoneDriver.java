@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
  *
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
@@ -152,11 +152,12 @@ public final class EddystoneDriver
         extractProperties(properties);
 
         this.bluetoothLeAdapter = this.bluetoothLeService.getAdapter(this.options.getBluetoothInterfaceName());
-        if (bluetoothLeAdapter != null) {
-            if (!bluetoothLeAdapter.isPowered()) {
-                bluetoothLeAdapter.setPowered(true);
+        if (this.bluetoothLeAdapter != null) {
+            if (!this.bluetoothLeAdapter.isPowered()) {
+                this.bluetoothLeAdapter.setPowered(true);
             }
-            this.bluetoothLeEddystoneScanner = this.bluetoothLeEddystoneService.newBeaconScanner(bluetoothLeAdapter);
+            this.bluetoothLeEddystoneScanner = this.bluetoothLeEddystoneService
+                    .newBeaconScanner(this.bluetoothLeAdapter);
             this.bluetoothLeEddystoneScanner.addBeaconListener(this);
             this.worker = Executors.newSingleThreadScheduledExecutor();
             // Setup a task that monitor the scan every 30 seconds
@@ -281,7 +282,7 @@ public final class EddystoneDriver
             sb.append(eddystone.getUrl());
             sb.append(";");
         }
-        sb.append((int) eddystone.getTxPower());
+        sb.append(eddystone.getTxPower());
         sb.append(";");
         sb.append(eddystone.getRssi());
         sb.append(";");

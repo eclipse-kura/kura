@@ -459,7 +459,7 @@ public class BluetoothUtil {
      */
     public static List<BluetoothBeaconData> parseLEAdvertisingReport(byte[] b, String companyName) {
 
-        List<BluetoothBeaconData> results = new LinkedList<BluetoothBeaconData>();
+        List<BluetoothBeaconData> results = new LinkedList<>();
 
         // Packet Type: Event OR Event Type: LE Advertisement Report
         if (b[0] != 0x04 || b[1] != 0x3E) {

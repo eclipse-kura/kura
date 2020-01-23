@@ -75,7 +75,7 @@ public class CronTimerExecutor implements TimerExecutor {
     @Override
     public void shutdown() {
         try {
-            schedulerManager.deleteJob(jobKey);
+            schedulerManager.deleteJob(this.jobKey);
         } catch (final Exception e) {
             logger.warn("failed to delete job", e);
         }
@@ -102,38 +102,38 @@ public class CronTimerExecutor implements TimerExecutor {
         }
 
         synchronized void onInstanceCreated() {
-            instanceCount++;
+            this.instanceCount++;
 
-            if (!clockChangeEventHandler.isPresent()) {
+            if (!this.clockChangeEventHandler.isPresent()) {
                 final Dictionary<String, Object> eventHandlerProperties = new Hashtable<>();
                 eventHandlerProperties.put(EventConstants.EVENT_TOPIC, ClockEvent.CLOCK_EVENT_TOPIC);
 
                 final BundleContext bundleContext = FrameworkUtil.getBundle(CronTimerExecutor.class).getBundleContext();
 
-                clockChangeEventHandler = Optional.of(bundleContext.registerService(EventHandler.class,
+                this.clockChangeEventHandler = Optional.of(bundleContext.registerService(EventHandler.class,
                         e -> rescheduleTriggers(), eventHandlerProperties));
             }
         }
 
         synchronized void onInstanceDestroyed() {
-            instanceCount--;
+            this.instanceCount--;
 
-            if (instanceCount > 0) {
+            if (this.instanceCount > 0) {
                 return;
             }
 
-            if (clockChangeEventHandler.isPresent()) {
-                clockChangeEventHandler.get().unregister();
-                clockChangeEventHandler = Optional.empty();
+            if (this.clockChangeEventHandler.isPresent()) {
+                this.clockChangeEventHandler.get().unregister();
+                this.clockChangeEventHandler = Optional.empty();
             }
 
-            if (scheduler.isPresent()) {
+            if (this.scheduler.isPresent()) {
                 try {
-                    scheduler.get().shutdown();
+                    this.scheduler.get().shutdown();
                 } catch (final Exception e) {
                     logger.warn("failed to shutdown scheduler", e);
                 }
-                scheduler = Optional.empty();
+                this.scheduler = Optional.empty();
             }
         }
 

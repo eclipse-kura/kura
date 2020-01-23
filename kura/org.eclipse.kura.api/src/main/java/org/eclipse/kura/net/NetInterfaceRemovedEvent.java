@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -18,7 +18,7 @@ import org.osgi.service.event.Event;
 
 /**
  * An event raised when a network interface has been removed from the system.
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 @ProviderType

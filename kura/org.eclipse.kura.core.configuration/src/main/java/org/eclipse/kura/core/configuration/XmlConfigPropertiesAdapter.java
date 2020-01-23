@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -31,7 +31,7 @@ import org.osgi.framework.ServiceReference;
 public class XmlConfigPropertiesAdapter {
 
     public XmlConfigPropertiesAdapted marshal(Map<String, Object> props) throws Exception {
-        List<XmlConfigPropertyAdapted> adaptedValues = new ArrayList<XmlConfigPropertyAdapted>();
+        List<XmlConfigPropertyAdapted> adaptedValues = new ArrayList<>();
         if (props != null) {
 
             for (Entry<String, Object> prop : props.entrySet()) {
@@ -211,7 +211,7 @@ public class XmlConfigPropertiesAdapter {
     }
 
     public Map<String, Object> unmarshal(XmlConfigPropertiesAdapted adaptedPropsAdapted) throws Exception {
-        Map<String, Object> properties = new HashMap<String, Object>();
+        Map<String, Object> properties = new HashMap<>();
         XmlConfigPropertyAdapted[] adaptedProps = adaptedPropsAdapted.getProperties();
         if (adaptedProps == null) {
             return properties;

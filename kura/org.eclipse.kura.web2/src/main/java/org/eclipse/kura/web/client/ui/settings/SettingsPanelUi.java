@@ -161,8 +161,8 @@ public class SettingsPanelUi extends Composite {
             tabPane.add(widgetFactory.buildWidget());
         });
 
-        navTabs.add(item);
-        tabContent.add(tabPane);
+        this.navTabs.add(item);
+        this.tabContent.add(tabPane);
     }
 
     public void setDirty(boolean b) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -30,13 +30,13 @@ public class CollectionsUtil {
             return null;
         }
 
-        Map<String, AD> ads = new HashMap<String, AD>();
+        Map<String, AD> ads = new HashMap<>();
         if (ocd != null) {
             for (AD ad : ocd.getAD()) {
                 ads.put(ad.getId(), ad);
             }
         }
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         Enumeration<String> keys = dictionary.keys();
         while (keys.hasMoreElements()) {
 
@@ -72,7 +72,7 @@ public class CollectionsUtil {
             return null;
         }
 
-        Dictionary<String, Object> dictionary = new Hashtable<String, Object>();
+        Dictionary<String, Object> dictionary = new Hashtable<>();
         Iterator<String> keys = map.keySet().iterator();
         while (keys.hasNext()) {
             String key = keys.next();

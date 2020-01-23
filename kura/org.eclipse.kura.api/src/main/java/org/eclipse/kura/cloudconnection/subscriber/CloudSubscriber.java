@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -25,7 +25,8 @@ import org.osgi.annotation.versioning.ProviderType;
  * register itself as a {@link CloudSubscriberListener}, in order to be notified when a message is received from the
  * associated cloud stack.
  *
- * In most cases, the consumers are not interested in the header of the received message and assume to always receive the
+ * In most cases, the consumers are not interested in the header of the received message and assume to always receive
+ * the
  * same kind of message. In order to receive different kinds of messages, the consumer should register to multiple
  * subscribers.
  *

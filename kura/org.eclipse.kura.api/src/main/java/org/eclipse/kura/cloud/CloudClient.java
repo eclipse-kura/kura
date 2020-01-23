@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -77,7 +77,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * Note that the default subscription of a CloudClient allows remote servers
  * or applications running on other devices to publish messages addressed
  * to specific applications running on specific devices.
- * 
+ *
  * @noimplement This interface is not intended to be implemented by clients.
  * @deprecated Please consider using {@link CloudPublisher} and {@link CloudSubscriber}
  */

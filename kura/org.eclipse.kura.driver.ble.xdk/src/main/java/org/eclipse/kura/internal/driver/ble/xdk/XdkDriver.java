@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2019 Eurotech and/or its affiliates and others
+ * Copyright (c) 2019, 2020 Eurotech and/or its affiliates and others
  *
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
@@ -122,9 +122,9 @@ public class XdkDriver implements Driver, ConfigurableComponent {
 
         extractProperties(properties);
 
-        enableQuaternion = this.options.isEnableRotationQuaternion();
+        this.enableQuaternion = this.options.isEnableRotationQuaternion();
 
-        configSampleRate = 1000 / this.options.isConfigSampleRate();
+        this.configSampleRate = 1000 / this.options.isConfigSampleRate();
 
         this.bluetoothLeAdapter = this.bluetoothLeService.getAdapter(this.options.getBluetoothInterfaceName());
         if (this.bluetoothLeAdapter != null) {
@@ -156,7 +156,7 @@ public class XdkDriver implements Driver, ConfigurableComponent {
 
             xdk.init();
 
-            xdk.startSensor(enableQuaternion, configSampleRate);
+            xdk.startSensor(this.enableQuaternion, this.configSampleRate);
 
         }
     }

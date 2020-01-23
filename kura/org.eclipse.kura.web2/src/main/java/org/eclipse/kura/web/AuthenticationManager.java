@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -45,7 +45,7 @@ public class AuthenticationManager {
     public boolean authenticate(String username, String password) throws KuraException {
         requireNonNull(this.username);
         requireNonNull(this.password);
-        
+
         try {
             CryptoService cryptoService = ServiceLocator.getInstance().getService(CryptoService.class);
             String sha1Password = cryptoService.sha1Hash(password);

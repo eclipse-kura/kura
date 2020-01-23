@@ -1,15 +1,15 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2019 Red Hat Inc and Others
+ * Copyright (c) 2017, 2020 Red Hat Inc and Others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *  Red Hat Inc
  *  Eurotech
- *  
+ *
  *******************************************************************************/
 package org.eclipse.kura.broker.artemis.core;
 
@@ -120,7 +120,7 @@ public class ServerManager {
             logger.debug("Not running anyway");
             return;
         }
-        
+
         this.runner.stop();
         this.runner = null;
     }

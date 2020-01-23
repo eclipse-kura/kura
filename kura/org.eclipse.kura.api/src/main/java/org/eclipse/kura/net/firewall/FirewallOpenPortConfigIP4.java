@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -18,11 +18,11 @@ import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * The implementation of IPv4 firewall open port configurations
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 @ProviderType
-public class FirewallOpenPortConfigIP4 extends FirewallOpenPortConfigIP<IP4Address>implements FirewallOpenPortConfig4 {
+public class FirewallOpenPortConfigIP4 extends FirewallOpenPortConfigIP<IP4Address> implements FirewallOpenPortConfig4 {
 
     public FirewallOpenPortConfigIP4() {
         super();

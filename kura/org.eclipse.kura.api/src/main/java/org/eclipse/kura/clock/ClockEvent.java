@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and others
+ * Copyright (c) 2011, 2020 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -19,7 +19,7 @@ import org.osgi.service.event.Event;
 
 /**
  * ClockEvent is raised when a clock synchronization has been performed.
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 @ProviderType

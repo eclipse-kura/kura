@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -19,7 +19,7 @@ import org.osgi.service.wireadmin.Wire;
 
 /**
  * This interface represents the port(s) associated to a Wire Component.
- * 
+ *
  * @since 1.4
  */
 @ProviderType
@@ -27,7 +27,7 @@ public interface Port {
 
     /**
      * This method returns the list of {@link Wire}s connected to this {@link Port}
-     * 
+     *
      * @return the list of {@link Wire} connected to this {@link Port}
      */
     public List<Wire> listConnectedWires();

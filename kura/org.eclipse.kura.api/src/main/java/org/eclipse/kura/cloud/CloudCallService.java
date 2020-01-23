@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -27,7 +27,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * All call methods are synchronous; after a request is issued, the implementation will wait for the response
  * to arrive or a timeout occurs. The timeout interval used by the service is configurable as a property
  * of the {@link DataTransportService}.
- * 
+ *
  * @noimplement This interface is not intended to be implemented by clients.
  * @deprecated
  */

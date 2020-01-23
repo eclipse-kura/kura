@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2018, 2019 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
  *
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
@@ -31,7 +31,7 @@ import org.eclipse.kura.internal.driver.opcua.request.SingleNodeListenParams;
 public class ListenerRegistrationRegistry {
 
     private final Map<ListenParams, Collection<ListenRequest>> registeredListeners = new HashMap<>();
-    private List<Listener> itemListeners = new CopyOnWriteArrayList<>();
+    private final List<Listener> itemListeners = new CopyOnWriteArrayList<>();
     private long state;
 
     public synchronized void registerListeners(final Collection<ListenRequest> requests) {
@@ -67,21 +67,21 @@ public class ListenerRegistrationRegistry {
     }
 
     public Collection<ListenRequest> getRequests(final SingleNodeListenParams params) {
-        return registeredListeners.get(params);
+        return this.registeredListeners.get(params);
     }
 
     public Map<ListenParams, Collection<ListenRequest>> getRegisteredListeners() {
-        return registeredListeners;
+        return this.registeredListeners;
     }
 
     private boolean registerListenerInternal(final ListenRequest request) {
         final ListenParams params = request.getParameters();
-        Collection<ListenRequest> listeners = registeredListeners.get(params);
+        Collection<ListenRequest> listeners = this.registeredListeners.get(params);
         if (listeners == null) {
             listeners = new CopyOnWriteArrayList<>();
             listeners.add(request);
-            registeredListeners.put(params, listeners);
-            itemListeners.forEach(l -> l.onListenerRegistered(request));
+            this.registeredListeners.put(params, listeners);
+            this.itemListeners.forEach(l -> l.onListenerRegistered(request));
             return true;
         } else {
             if (listeners.stream().anyMatch(req -> req.getChannelListener() == request.getChannelListener()
@@ -89,29 +89,29 @@ public class ListenerRegistrationRegistry {
                 return false;
             }
             listeners.add(request);
-            itemListeners.forEach(l -> l.onListenerRegistered(request));
+            this.itemListeners.forEach(l -> l.onListenerRegistered(request));
             return false;
         }
     }
 
     private boolean unregisterListenerInternal(final ChannelListener listener) {
-        final boolean removed = registeredListeners.entrySet().removeIf(e -> {
+        final boolean removed = this.registeredListeners.entrySet().removeIf(e -> {
             final Collection<ListenRequest> listeners = e.getValue();
             listeners.removeIf(req -> req.getChannelListener() == listener);
             return listeners.isEmpty();
         });
-        itemListeners.forEach(l -> l.onListenerUnregistered(listener));
+        this.itemListeners.forEach(l -> l.onListenerUnregistered(listener));
         return removed;
     }
 
     private void notifyChanged() {
-        state = Math.max(0, state + 1);
-        itemListeners.forEach(Listener::onRegistrationsChanged);
+        this.state = Math.max(0, this.state + 1);
+        this.itemListeners.forEach(Listener::onRegistrationsChanged);
     }
 
     public synchronized void computeDifferences(final Set<ListenParams> other, final Consumer<ListenParams> toBeCreated,
             final Consumer<ListenParams> toBeDeleted) {
-        final Set<ListenParams> currentItems = registeredListeners.keySet();
+        final Set<ListenParams> currentItems = this.registeredListeners.keySet();
         for (final ListenParams params : currentItems) {
             if (!other.contains(params)) {
                 toBeCreated.accept(params);
@@ -166,21 +166,22 @@ public class ListenerRegistrationRegistry {
 
         private void sync() {
             synchronized (ListenerRegistrationRegistry.this) {
-                if (state != currentState) {
-                    currentState = state;
-                    channelListeners = Optional.ofNullable(registeredListeners.get(params));
+                if (ListenerRegistrationRegistry.this.state != this.currentState) {
+                    this.currentState = ListenerRegistrationRegistry.this.state;
+                    this.channelListeners = Optional
+                            .ofNullable(ListenerRegistrationRegistry.this.registeredListeners.get(this.params));
                 }
             }
         }
 
         public ListenParams getParams() {
-            return params;
+            return this.params;
         }
 
         public void dispatch(final Consumer<ChannelRecord> filler) {
             sync();
-            if (channelListeners.isPresent()) {
-                final Collection<ListenRequest> requests = channelListeners.get();
+            if (this.channelListeners.isPresent()) {
+                final Collection<ListenRequest> requests = this.channelListeners.get();
                 for (final ListenRequest request : requests) {
                     final ChannelRecord record = request.getRecord();
                     filler.accept(record);

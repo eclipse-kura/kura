@@ -40,7 +40,7 @@ public class RouteServiceImpl implements RouteService {
     private static final String INADDR_ANY = "0.0.0.0";
     private static final String LOCALHOST = "127.0.0.1";
 
-    private CommandExecutorService executorService;
+    private final CommandExecutorService executorService;
 
     public RouteServiceImpl(CommandExecutorService executorService) {
         this.executorService = executorService;
@@ -87,8 +87,8 @@ public class RouteServiceImpl implements RouteService {
             command.add("netmask");
             command.add(netmask.getHostAddress());
         }
-        if ((gateway != null) && (gateway.getHostAddress().compareTo(INADDR_ANY) != 0)
-                && (gateway.getHostAddress().compareTo(LOCALHOST) != 0)) {
+        if (gateway != null && gateway.getHostAddress().compareTo(INADDR_ANY) != 0
+                && gateway.getHostAddress().compareTo(LOCALHOST) != 0) {
             command.add("gw");
             command.add(gateway.getHostAddress());
         }
@@ -213,7 +213,7 @@ public class RouteServiceImpl implements RouteService {
             command.add("netmask");
             command.add(netmask.getHostAddress());
         }
-        if ((gateway != null) && (gateway.getHostAddress().compareTo(LOCALHOST) != 0)) {
+        if (gateway != null && gateway.getHostAddress().compareTo(LOCALHOST) != 0) {
             command.add("gw");
             command.add(gateway.getHostAddress());
         }

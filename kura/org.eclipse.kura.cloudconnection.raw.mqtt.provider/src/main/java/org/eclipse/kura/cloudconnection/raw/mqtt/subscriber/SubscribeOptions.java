@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2019, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -24,7 +24,7 @@ public class SubscribeOptions {
 
     public static final Property<String> TOPIC_FILTER_PROP = new Property<>("topic.filter", String.class)
             .validate(SubscribeOptions::validateTopicFilter);
-    public static final Property<Qos> QOS_PROP = new Property<Integer>("qos", 0).map(Qos.class, Qos::valueOf);
+    public static final Property<Qos> QOS_PROP = new Property<>("qos", 0).map(Qos.class, Qos::valueOf);
 
     private final String topicFilter;
     private final Qos qos;
@@ -35,11 +35,11 @@ public class SubscribeOptions {
     }
 
     public String getTopicFilter() {
-        return topicFilter;
+        return this.topicFilter;
     }
 
     public Qos getQos() {
-        return qos;
+        return this.qos;
     }
 
     private static boolean validateTopicFilter(final String filter) {
@@ -56,27 +56,33 @@ public class SubscribeOptions {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((qos == null) ? 0 : qos.hashCode());
-        result = prime * result + ((topicFilter == null) ? 0 : topicFilter.hashCode());
+        result = prime * result + (this.qos == null ? 0 : this.qos.hashCode());
+        result = prime * result + (this.topicFilter == null ? 0 : this.topicFilter.hashCode());
         return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         SubscribeOptions other = (SubscribeOptions) obj;
-        if (qos != other.qos)
+        if (this.qos != other.qos) {
             return false;
-        if (topicFilter == null) {
-            if (other.topicFilter != null)
+        }
+        if (this.topicFilter == null) {
+            if (other.topicFilter != null) {
                 return false;
-        } else if (!topicFilter.equals(other.topicFilter))
+            }
+        } else if (!this.topicFilter.equals(other.topicFilter)) {
             return false;
+        }
         return true;
     }
 

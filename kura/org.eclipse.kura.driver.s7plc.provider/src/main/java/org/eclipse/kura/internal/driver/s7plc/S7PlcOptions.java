@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017, 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2020 Eurotech and/or its affiliates
  *
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
@@ -41,27 +41,27 @@ final class S7PlcOptions {
     }
 
     String getIp() {
-        return ip;
+        return this.ip;
     }
 
     boolean shouldAuthenticate() {
-        return authenticate;
+        return this.authenticate;
     }
 
     String getPassword() {
-        return password;
+        return this.password;
     }
 
     int getRack() {
-        return rack;
+        return this.rack;
     }
 
     int getSlot() {
-        return slot;
+        return this.slot;
     }
 
     int getMinimumGapSize() {
-        return minimumGapSize;
+        return this.minimumGapSize;
     }
 
     private static class Property<T> {
@@ -80,7 +80,7 @@ final class S7PlcOptions {
             if (this.defaultValue.getClass().isInstance(value)) {
                 return (T) value;
             }
-            return defaultValue;
+            return this.defaultValue;
         }
     }
 

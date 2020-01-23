@@ -97,8 +97,9 @@ public class LoginUi extends Composite implements Context {
 
         addAuthenticationHandler(new PasswordAuthenticationHandler());
 
-        authenticationMethod.setSelectedIndex(0);
-        authenticationMethod.addChangeHandler(e -> setAuthenticationMethod(authenticationMethod.getSelectedItemText()));
+        this.authenticationMethod.setSelectedIndex(0);
+        this.authenticationMethod
+                .addChangeHandler(e -> setAuthenticationMethod(this.authenticationMethod.getSelectedItemText()));
 
         setAuthenticationMethod("Password");
 
@@ -133,7 +134,7 @@ public class LoginUi extends Composite implements Context {
 
         this.loginForm.addSubmitHandler(e -> {
             e.cancel();
-            waitModal.show();
+            this.waitModal.show();
             this.authenticationHandler.authenticate(this.usernameInput.getValue(), new Callback<String, String>() {
 
                 @Override
@@ -143,8 +144,8 @@ public class LoginUi extends Composite implements Context {
 
                 @Override
                 public void onFailure(String reason) {
-                    waitModal.hide();
-                    alertDialog.show(reason, AlertDialog.Severity.ALERT, (ConfirmListener) null);
+                    LoginUi.this.waitModal.hide();
+                    LoginUi.this.alertDialog.show(reason, AlertDialog.Severity.ALERT, (ConfirmListener) null);
                 }
             });
         });
@@ -177,16 +178,16 @@ public class LoginUi extends Composite implements Context {
     }
 
     private void initWaitModal() {
-        waitModal = new PopupPanel(false, true);
+        this.waitModal = new PopupPanel(false, true);
         Icon icon = new Icon();
         icon.setId("cog");
         icon.setType(IconType.COG);
         icon.setSize(IconSize.TIMES4);
         icon.setSpin(true);
-        waitModal.setWidget(icon);
-        waitModal.setGlassEnabled(true);
-        waitModal.center();
-        waitModal.hide();
+        this.waitModal.setWidget(icon);
+        this.waitModal.setGlassEnabled(true);
+        this.waitModal.center();
+        this.waitModal.hide();
     }
 
     @Override
@@ -216,25 +217,25 @@ public class LoginUi extends Composite implements Context {
 
     @Override
     public Callback<Void, String> startLongRunningOperation() {
-        waitModal.show();
+        this.waitModal.show();
         return new Callback<Void, String>() {
 
             @Override
             public void onFailure(String reason) {
-                waitModal.hide();
-                alertDialog.show(reason, AlertDialog.Severity.ALERT, (ConfirmListener) null);
+                LoginUi.this.waitModal.hide();
+                LoginUi.this.alertDialog.show(reason, AlertDialog.Severity.ALERT, (ConfirmListener) null);
             }
 
             @Override
             public void onSuccess(Void result) {
-                waitModal.hide();
+                LoginUi.this.waitModal.hide();
             }
         };
     }
 
     @Override
     public void showAlertDialog(String message, AlertSeverity severity, Consumer<Boolean> callback) {
-        alertDialog.show(message,
+        this.alertDialog.show(message,
                 severity == AlertSeverity.INFO ? AlertDialog.Severity.INFO : AlertDialog.Severity.ALERT,
                 callback::accept);
     }
@@ -269,30 +270,31 @@ public class LoginUi extends Composite implements Context {
         @Override
         public WidgetFactory getLoginDialogElement() {
             return () -> {
-                passwordInput.setValue("");
-                return passwordGroup;
+                this.passwordInput.setValue("");
+                return this.passwordGroup;
             };
         }
 
         @Override
         public void authenticate(final String userName, final Callback<String, String> callback) {
-            pwdAutenticationService.authenticate(userName, this.passwordInput.getValue(), new AsyncCallback<String>() {
+            LoginUi.this.pwdAutenticationService.authenticate(userName, this.passwordInput.getValue(),
+                    new AsyncCallback<String>() {
 
-                @Override
-                public void onSuccess(final String redirectPath) {
-                    callback.onSuccess(redirectPath);
-                }
+                        @Override
+                        public void onSuccess(final String redirectPath) {
+                            callback.onSuccess(redirectPath);
+                        }
 
-                @Override
-                public void onFailure(final Throwable caught) {
+                        @Override
+                        public void onFailure(final Throwable caught) {
 
-                    if (caught instanceof GwtKuraException) {
-                        callback.onFailure("Login failed: The provided credentials are not valid.");
-                    } else {
-                        callback.onFailure("Login failed: The device is unreachable.");
-                    }
-                }
-            });
+                            if (caught instanceof GwtKuraException) {
+                                callback.onFailure("Login failed: The provided credentials are not valid.");
+                            } else {
+                                callback.onFailure("Login failed: The device is unreachable.");
+                            }
+                        }
+                    });
 
         }
 

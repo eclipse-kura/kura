@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2019, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -33,37 +33,37 @@ public class SSLContextSPIWrapper extends SSLContextSpi {
 
     @Override
     protected SSLEngine engineCreateSSLEngine() {
-        return wrapped.createSSLEngine();
+        return this.wrapped.createSSLEngine();
     }
 
     @Override
     protected SSLEngine engineCreateSSLEngine(final String arg0, final int arg1) {
-        return wrapped.createSSLEngine(arg0, arg1);
+        return this.wrapped.createSSLEngine(arg0, arg1);
     }
 
     @Override
     protected SSLSessionContext engineGetClientSessionContext() {
-        return wrapped.getClientSessionContext();
+        return this.wrapped.getClientSessionContext();
     }
 
     @Override
     protected SSLSessionContext engineGetServerSessionContext() {
-        return wrapped.getServerSessionContext();
+        return this.wrapped.getServerSessionContext();
     }
 
     @Override
     protected SSLServerSocketFactory engineGetServerSocketFactory() {
-        return wrapped.getServerSocketFactory();
+        return this.wrapped.getServerSocketFactory();
     }
 
     @Override
     protected SSLSocketFactory engineGetSocketFactory() {
-        return factory;
+        return this.factory;
     }
 
     @Override
     protected void engineInit(KeyManager[] arg0, TrustManager[] arg1, SecureRandom arg2) throws KeyManagementException {
-        wrapped.init(arg0, arg1, arg2);
+        this.wrapped.init(arg0, arg1, arg2);
     }
 
 }

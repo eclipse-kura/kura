@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
  *
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
@@ -18,7 +18,7 @@ import java.util.function.Supplier;
 
 public class AsyncTaskQueue {
 
-    private final ArrayDeque<Supplier<CompletableFuture<Void>>> pending = new ArrayDeque<Supplier<CompletableFuture<Void>>>();
+    private final ArrayDeque<Supplier<CompletableFuture<Void>>> pending = new ArrayDeque<>();
     private final AtomicBoolean enabled = new AtomicBoolean(true);
 
     private CompletableFuture<Void> inProgress = null;
@@ -27,14 +27,14 @@ public class AsyncTaskQueue {
 
     private synchronized void runNext() {
         this.inProgress = null;
-        if (!pending.isEmpty()) {
-            this.inProgress = pending.pop().get();
+        if (!this.pending.isEmpty()) {
+            this.inProgress = this.pending.pop().get();
         }
     }
 
     private CompletableFuture<Void> addCompletionHandler(CompletableFuture<Void> task) {
         return task.handle((ok, err) -> {
-            if (err != null && enabled.get()) {
+            if (err != null && this.enabled.get()) {
                 this.failureHandler.accept(err);
             }
             runNext();
@@ -43,11 +43,11 @@ public class AsyncTaskQueue {
     }
 
     public synchronized void push(final Supplier<CompletableFuture<Void>> next) {
-        if (!enabled.get()) {
+        if (!this.enabled.get()) {
             return;
         }
-        pending.push(() -> addCompletionHandler(next.get()));
-        if (inProgress == null || inProgress.isDone()) {
+        this.pending.push(() -> addCompletionHandler(next.get()));
+        if (this.inProgress == null || this.inProgress.isDone()) {
             runNext();
         }
     }

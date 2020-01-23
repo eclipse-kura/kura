@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -391,21 +391,17 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
         Map<String, Object> props = new HashMap<>(this.properties);
         props.put(SslManagerServiceOptions.PROP_TRUST_PASSWORD, new Password(newPassword));
 
-        this.selfUpdaterFuture = this.selfUpdaterExecutor.scheduleAtFixedRate(new Runnable() {
-
-            @Override
-            public void run() {
-                try {
-                    if (SslManagerServiceImpl.this.ctx.getServiceReference() != null
-                            && SslManagerServiceImpl.this.configurationService.getComponentConfiguration(pid) != null) {
-                        SslManagerServiceImpl.this.configurationService.updateConfiguration(pid, props);
-                        throw new RuntimeException("Updated. The task will be terminated.");
-                    } else {
-                        logger.info("No service or configuration available yet.");
-                    }
-                } catch (KuraException e) {
-                    logger.warn("Cannot get/update configuration for pid: {}", pid, e);
+        this.selfUpdaterFuture = this.selfUpdaterExecutor.scheduleAtFixedRate(() -> {
+            try {
+                if (SslManagerServiceImpl.this.ctx.getServiceReference() != null
+                        && SslManagerServiceImpl.this.configurationService.getComponentConfiguration(pid) != null) {
+                    SslManagerServiceImpl.this.configurationService.updateConfiguration(pid, props);
+                    throw new RuntimeException("Updated. The task will be terminated.");
+                } else {
+                    logger.info("No service or configuration available yet.");
                 }
+            } catch (KuraException e) {
+                logger.warn("Cannot get/update configuration for pid: {}", pid, e);
             }
         }, 1000, 1000, TimeUnit.MILLISECONDS);
     }

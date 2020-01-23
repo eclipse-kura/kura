@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -58,7 +58,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * <b>ccs.status.notification.url.foo=ccs:led:25</b><br>
  * Same configuration, but linking the status to the system log, would be:<br>
  * <b>ccs.status.notification.url.foo=ccs:log</b>
- * 
+ *
  * @noimplement This interface is not intended to be implemented by clients.
  */
 @ProviderType

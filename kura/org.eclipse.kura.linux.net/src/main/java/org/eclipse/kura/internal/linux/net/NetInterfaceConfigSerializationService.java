@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2018, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -35,7 +35,7 @@ public interface NetInterfaceConfigSerializationService {
     /**
      * Persists the network configuration received as argument. Throws a {@link KuraException} if the persist operation
      * fails.
-     * 
+     *
      * @param netConfig
      * @throws KuraException
      */

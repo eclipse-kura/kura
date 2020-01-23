@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -45,13 +45,13 @@ public class TokenBucket {
             this.remainingTokens = (int) Math.min(this.capacity,
                     this.remainingTokens + (now - this.lastRefillTime) / this.refillPeriod);
             this.remainingTokens = Math.max(1, this.remainingTokens);
-            this.lastRefillTime += ((now - lastRefillTime) / refillPeriod) * refillPeriod;
+            this.lastRefillTime += (now - this.lastRefillTime) / this.refillPeriod * this.refillPeriod;
         }
     }
 
     public long getTokenWaitTime() {
         long now = System.nanoTime();
-        long timeToRefill = (this.lastRefillTime + this.refillPeriod) - now;
+        long timeToRefill = this.lastRefillTime + this.refillPeriod - now;
         return Math.max(0, timeToRefill);
     }
 }

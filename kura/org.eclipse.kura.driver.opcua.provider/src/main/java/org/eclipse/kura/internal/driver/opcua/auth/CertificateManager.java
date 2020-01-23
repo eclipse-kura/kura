@@ -1,11 +1,11 @@
 /**
- * Copyright (c) 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
  *
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
- *  
+ *
  */
 
 package org.eclipse.kura.internal.driver.opcua.auth;
@@ -43,16 +43,16 @@ public abstract class CertificateManager implements CertificateValidator {
     public abstract void load() throws Exception;
 
     public KeyPair getClientKeyPair() {
-        return clientKeyPair;
+        return this.clientKeyPair;
     }
 
     public X509Certificate getClientCertificate() {
-        return clientCertificate;
+        return this.clientCertificate;
     }
 
     @Override
     public void validate(X509Certificate certificate) throws UaException {
-        if (!enabled) {
+        if (!this.enabled) {
             logger.debug("skipping certificate validation");
             return;
         }
@@ -66,14 +66,14 @@ public abstract class CertificateManager implements CertificateValidator {
 
     @Override
     public void verifyTrustChain(List<X509Certificate> certificateChain) throws UaException {
-        if (!enabled) {
+        if (!this.enabled) {
             logger.debug("skipping certificate chain verification");
             return;
         }
 
         logger.debug("verifiyng certificate chain: {}", certificateChain);
 
-        CertificateValidationUtil.verifyTrustChain(certificateChain, trustedCertificates, issuerCertificates);
+        CertificateValidationUtil.verifyTrustChain(certificateChain, this.trustedCertificates, this.issuerCertificates);
 
         logger.debug("certificate chain verification successful");
     }

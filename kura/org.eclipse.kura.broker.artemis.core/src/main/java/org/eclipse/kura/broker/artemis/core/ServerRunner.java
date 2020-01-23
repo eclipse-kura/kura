@@ -1,11 +1,11 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2019 Red Hat Inc
+ * Copyright (c) 2017, 2020 Red Hat Inc
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *  Red Hat
  *  Eurotech
@@ -73,12 +73,12 @@ public class ServerRunner {
 
         final ActiveMQSecurityManager security = createSecurityManager();
 
-        final FileConfiguration configuration = new FileConfiguration();
+        final FileConfiguration configurationFile = new FileConfiguration();
 
         final FileJMSConfiguration jmsConfiguration = new FileJMSConfiguration();
 
         final FileDeploymentManager fileDeploymentManager = new FileDeploymentManager(brokerXmlFile.toUri().toString());
-        fileDeploymentManager.addDeployable(configuration);
+        fileDeploymentManager.addDeployable(configurationFile);
         fileDeploymentManager.addDeployable(jmsConfiguration);
         fileDeploymentManager.readConfiguration();
 

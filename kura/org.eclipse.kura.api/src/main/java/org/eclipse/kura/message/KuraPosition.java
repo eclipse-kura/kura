@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -20,7 +20,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * associated to a KuraPayload to geotag a KuraMessage before sending to a
  * remote cloud platform. Refer to the description of each of the fields for more
  * information on the model of KuraPosition.
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 @ProviderType

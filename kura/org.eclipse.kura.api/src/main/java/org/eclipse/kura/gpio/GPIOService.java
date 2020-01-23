@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -20,7 +20,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * {@link KuraGPIOPin}s can be accessed by name or by terminal index.<br>
  * <br>
  * Operations on the pins can be done using the acquired {@link KuraGPIOPin} class.
- * 
+ *
  * @noimplement This interface is not intended to be implemented by clients.
  */
 @ProviderType

@@ -15,9 +15,7 @@ import static java.util.Arrays.asList;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Consumer;
 import org.apache.camel.Endpoint;
-import org.apache.camel.Exchange;
 import org.apache.camel.Message;
-import org.apache.camel.Processor;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireRecord;
 import org.slf4j.Logger;
@@ -47,7 +45,7 @@ public class CamelConsume extends AbstractEndpointWireComponent implements WireE
 
     @Override
     public void setEndpointUri(final String endpointUri) {
-        if (this.endpointUri == null || !this.endpointUri.equals(endpointUri))
+        if (this.endpointUri == null || !this.endpointUri.equals(endpointUri)) {
             try {
                 stopConsumer();
                 super.setEndpointUri(endpointUri);
@@ -55,6 +53,7 @@ public class CamelConsume extends AbstractEndpointWireComponent implements WireE
             } catch (final Exception e) {
                 logger.warn("Failed to set endpoint URI", e);
             }
+        }
     }
 
     private void startConsumer() throws Exception {
@@ -70,13 +69,7 @@ public class CamelConsume extends AbstractEndpointWireComponent implements WireE
 
         if (this.consumer == null) {
             logger.info("Starting consumer");
-            this.consumer = this.endpoint.createConsumer(new Processor() {
-
-                @Override
-                public void process(final Exchange exchange) throws Exception {
-                    processMessage(exchange.getIn());
-                }
-            });
+            this.consumer = this.endpoint.createConsumer(exchange -> processMessage(exchange.getIn()));
             this.consumer.start();
         }
 
@@ -105,7 +98,7 @@ public class CamelConsume extends AbstractEndpointWireComponent implements WireE
         logger.debug("Consumed: {}", (Object) records);
 
         if (records != null) {
-            wireSupport.emit(asList(records));
+            this.wireSupport.emit(asList(records));
         }
     }
 }

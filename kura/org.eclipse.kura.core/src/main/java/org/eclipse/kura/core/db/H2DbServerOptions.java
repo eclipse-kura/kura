@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -41,23 +41,23 @@ class H2DbServerOptions {
         final String serverTypeString = (String) properties.getOrDefault(DB_SERVER_TYPE_PROP_NAME, "TCP");
 
         if (ServerType.WEB.name().equals(serverTypeString)) {
-            serverType = ServerType.WEB;
+            this.serverType = ServerType.WEB;
         } else if (ServerType.PG.name().equals(serverTypeString)) {
-            serverType = ServerType.PG;
+            this.serverType = ServerType.PG;
         } else {
-            serverType = ServerType.TCP;
+            this.serverType = ServerType.TCP;
         }
     }
 
     public Boolean isServerEnabled() {
-        return isServerEnabled;
+        return this.isServerEnabled;
     }
 
     public ServerType getServerType() {
-        return serverType;
+        return this.serverType;
     }
 
     public String getServerCommandLine() {
-        return serverCommandLine;
+        return this.serverCommandLine;
     }
 }

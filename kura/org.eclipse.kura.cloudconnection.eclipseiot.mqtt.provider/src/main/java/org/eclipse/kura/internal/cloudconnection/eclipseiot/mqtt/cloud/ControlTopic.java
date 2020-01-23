@@ -1,3 +1,14 @@
+/*******************************************************************************
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.cloud;
 
 import org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.MessageType;
@@ -16,7 +27,7 @@ public class ControlTopic extends KuraApplicationTopic {
     public ControlTopic(String fullTopic) {
         this(fullTopic, MessageType.CONTROL.getTopicPrefix());
     }
-    
+
     public ControlTopic(String fullTopic, String controlPrefix) {
         this.fullTopic = fullTopic;
         if (fullTopic.compareTo("#") == 0) {
@@ -59,13 +70,13 @@ public class ControlTopic extends KuraApplicationTopic {
             index++;
         }
 
-        //reqId
+        // reqId
         if (index < this.topicParts.length) {
             this.reqId = this.topicParts[index];
             offset += this.reqId.length() + 1;
             index++;
         }
-        
+
         // applicationId
         if (index < this.topicParts.length) {
             this.applicationId = this.topicParts[index];

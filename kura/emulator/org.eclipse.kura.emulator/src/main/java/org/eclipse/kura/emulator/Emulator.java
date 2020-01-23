@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0 which
@@ -30,10 +30,10 @@ public class Emulator {
 
     private static final String SNAPSHOT_0_NAME = "snapshot_0.xml";
 
-    private ComponentContext m_componentContext;
+    private ComponentContext componentContext;
 
     protected void activate(ComponentContext componentContext) {
-        this.m_componentContext = componentContext;
+        this.componentContext = componentContext;
 
         try {
             // Properties props = System.getProperties();
@@ -60,14 +60,14 @@ public class Emulator {
     }
 
     protected void deactivate(ComponentContext componentContext) {
-        this.m_componentContext = null;
+        this.componentContext = null;
     }
 
     private void copySnapshot(String snapshotFolderPath) throws IOException {
         InputStream fileInput = null;
         OutputStream fileOutput = null;
         try {
-            URL internalSnapshotURL = this.m_componentContext.getBundleContext().getBundle()
+            URL internalSnapshotURL = this.componentContext.getBundleContext().getBundle()
                     .getResource(SNAPSHOT_0_NAME);
             fileInput = internalSnapshotURL.openStream();
             fileOutput = new FileOutputStream(snapshotFolderPath + File.separator + SNAPSHOT_0_NAME);

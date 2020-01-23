@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -77,7 +77,7 @@ public interface Asset {
     /**
      * Performs a read on all READ or READ_WRITE channels that are defined on this asset and returns
      * the result as a list of {@link ChannelRecord} instances.
-     * 
+     *
      * @see Asset#read(List)
      *
      * @throws KuraRuntimeException

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -16,7 +16,7 @@ import org.osgi.annotation.versioning.ProviderType;
 /**
  * DataTransportToken is an receipt returned by the {@link DataTransportService} after the publishing of a message.
  * Such receipt can be used to track and compare subsequence message confirmation callbacks.
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 @ProviderType

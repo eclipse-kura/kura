@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -27,9 +27,9 @@ public class BluetoothAdvertisingData {
     private static final short TX_POWER_MAX = 126;
     private static final short TX_POWER_MIN = -127;
     private static final String UUID_DEFAULT = "aaaaaaaabbbbccccddddeeeeeeeeeeee";
-    
+
     private BluetoothAdvertisingData() {
-        
+
     }
 
     public static String getData(String uuid, Integer major, Integer minor, String companyCode, Integer txPower,
@@ -91,7 +91,7 @@ public class BluetoothAdvertisingData {
         if (value <= max && value >= min) {
             return value;
         } else {
-            return (value > max) ? max : min;
+            return value > max ? max : min;
         }
     }
 

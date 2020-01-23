@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2018, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -138,6 +138,7 @@ public class NetInterfaceConfigSerializationServiceImpl implements NetInterfaceC
         return val1 != null ? val1.equals(val2) : val2 == null;
     }
 
+    @SuppressWarnings("checkstyle:todoComment")
     private Properties parseNetInterfaceAddressConfig(NetInterfaceAddressConfig netInterfaceAddressConfig) {
         Properties props = new Properties();
 
@@ -221,10 +222,12 @@ public class NetInterfaceConfigSerializationServiceImpl implements NetInterfaceC
                             if ("auto".equals(args[0]) && args[1].equals(interfaceName)) {
                                 logger.debug("Setting ONBOOT to yes for {}", interfaceName);
                                 kuraProps.setProperty(ONBOOT_PROP_NAME, "yes");
-                            }
-                            // once the correct interface is found, read all
-                            // configuration information
-                            else if ("iface".equals(args[0]) && args[1].equals(interfaceName)) {
+                            } else if ("iface".equals(args[0]) && args[1].equals(interfaceName)) { // once the correct
+                                                                                                   // interface is
+                                                                                                   // found,
+                                                                                                   // read all
+                                                                                                   // configuration
+                                                                                                   // information
                                 kuraProps.setProperty(BOOTPROTO_PROP_NAME, args[3]);
                                 if ("dhcp".equals(args[3])) {
                                     kuraProps.setProperty(DEFROUTE_PROP_NAME, "yes");
@@ -312,6 +315,7 @@ public class NetInterfaceConfigSerializationServiceImpl implements NetInterfaceC
         }
     }
 
+    @SuppressWarnings("checkstyle:innerAssignment")
     private void writeDebianConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig)
             throws KuraException {
         StringBuilder sb = new StringBuilder();
@@ -419,6 +423,7 @@ public class NetInterfaceConfigSerializationServiceImpl implements NetInterfaceC
         }
     }
 
+    @SuppressWarnings("checkstyle:todoComment")
     private String debianWriteUtility(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig,
             String interfaceName) {
         StringBuilder sb = new StringBuilder();

@@ -30,7 +30,7 @@ public class ServiceLocator {
     private final BundleContext bundleContext;
 
     private ServiceLocator() {
-        bundleContext = FrameworkUtil.getBundle(ServiceLocator.class).getBundleContext();
+        this.bundleContext = FrameworkUtil.getBundle(ServiceLocator.class).getBundleContext();
     }
 
     public static ServiceLocator getInstance() {
@@ -39,7 +39,7 @@ public class ServiceLocator {
 
     public <T> ServiceReference<T> getServiceReference(Class<T> serviceClass) throws GwtKuraException {
 
-        ServiceReference<T> sr = bundleContext.getServiceReference(serviceClass);
+        ServiceReference<T> sr = this.bundleContext.getServiceReference(serviceClass);
 
         if (sr == null) {
             throw GwtKuraException.internalError(serviceClass.toString() + " not found.");
@@ -51,7 +51,7 @@ public class ServiceLocator {
             throws GwtKuraException {
 
         try {
-            final Collection<ServiceReference<T>> sr = bundleContext.getServiceReferences(serviceClass, filter);
+            final Collection<ServiceReference<T>> sr = this.bundleContext.getServiceReferences(serviceClass, filter);
 
             if (sr == null) {
                 throw GwtKuraException.internalError(serviceClass.toString() + " not found.");
@@ -237,7 +237,7 @@ public class ServiceLocator {
         T service = null;
 
         if (serviceReference != null) {
-            service = bundleContext.getService(serviceReference);
+            service = this.bundleContext.getService(serviceReference);
         }
         if (service == null) {
             throw GwtKuraException.internalError("Service not found.");
@@ -255,7 +255,7 @@ public class ServiceLocator {
         Collection<ServiceReference<T>> serviceReferences = getServiceReferences(serviceClass, filter);
 
         if (serviceReferences != null) {
-            services = new ArrayList<T>(serviceReferences.size());
+            services = new ArrayList<>(serviceReferences.size());
             for (ServiceReference<T> sr : serviceReferences) {
                 services.add(getService(sr));
             }
@@ -267,7 +267,7 @@ public class ServiceLocator {
     public boolean ungetService(ServiceReference<?> serviceReference) {
 
         if (serviceReference != null) {
-            return bundleContext.ungetService(serviceReference);
+            return this.bundleContext.ungetService(serviceReference);
         }
 
         return false;

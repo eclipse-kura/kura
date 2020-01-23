@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2019 Eurotech and/or its affiliates and others
+ * Copyright (c) 2019, 2020 Eurotech and/or its affiliates and others
  *
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
@@ -77,7 +77,7 @@ class TreeVisit {
 
             final String path = rootPath + '/' + ref.getBrowseName().getName();
 
-            visitor.accept(path, ref);
+            this.visitor.accept(path, ref);
 
             final Optional<NodeId> nodeId = ref.getNodeId().local();
 
@@ -90,7 +90,7 @@ class TreeVisit {
             if (logger.isDebugEnabled()) {
                 logger.debug("continuing to visit {}", rootPath);
             }
-            return client.browseNext(false, continuationPoint) //
+            return this.client.browseNext(false, continuationPoint) //
                     .thenCompose(r -> visitRefs(rootPath, r.getReferences(), r.getContinuationPoint(), childrenVisits));
         } else {
             if (logger.isDebugEnabled()) {
@@ -116,7 +116,7 @@ class TreeVisit {
 
         final List<CompletableFuture<Void>> childrenVisits = new ArrayList<>();
 
-        return client
+        return this.client
                 .browse(new ViewDescription(NodeId.NULL_VALUE, DateTime.MIN_VALUE, UInteger.valueOf(0)),
                         UInteger.valueOf(50), Collections.singletonList(browse)) //
                 .thenApply(r -> r.getResults()[0]) //
@@ -124,16 +124,16 @@ class TreeVisit {
     }
 
     public CompletableFuture<Void> run() {
-        logger.info("browsing {}...", rootId);
+        logger.info("browsing {}...", this.rootId);
 
-        this.future = visitSubtree(rootId, "") //
-                .whenComplete((ok, err) -> logger.info("browsing {}...done", rootId));
+        this.future = visitSubtree(this.rootId, "") //
+                .whenComplete((ok, err) -> logger.info("browsing {}...done", this.rootId));
 
         return this.future;
     }
 
     public CompletableFuture<Void> getFuture() {
-        return future;
+        return this.future;
     }
 
     public void stop() {
@@ -141,6 +141,6 @@ class TreeVisit {
     }
 
     public State getState() {
-        return state;
+        return this.state;
     }
 }

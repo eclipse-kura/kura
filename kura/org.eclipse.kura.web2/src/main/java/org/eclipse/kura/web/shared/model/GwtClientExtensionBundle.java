@@ -16,7 +16,7 @@ import java.util.Map;
 public class GwtClientExtensionBundle extends KuraBaseModel implements Serializable {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 7106592629491998207L;
 

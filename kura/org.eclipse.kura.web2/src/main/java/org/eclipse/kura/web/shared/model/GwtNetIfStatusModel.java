@@ -17,7 +17,7 @@ import java.util.logging.Logger;
 public class GwtNetIfStatusModel extends KuraBaseModel {
 
     private static final long serialVersionUID = 2779596516813518500L;
-    
+
     private static final Logger logger = Logger.getLogger(GwtNetIfStatusModel.class.getSimpleName());
 
     public static final String NAME = "name";

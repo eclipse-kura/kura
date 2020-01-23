@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -30,7 +30,7 @@ public interface BluetoothLeService {
     /**
      * Search for a Bluetooth adapter with the specified interface name (i.e. hci0).
      * If the adapter is not available, it returns null.
-     * 
+     *
      * @param interfaceName
      *            the name of the adapter (i.e. hci0)
      */

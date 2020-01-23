@@ -62,7 +62,7 @@ public class BluetoothProcess {
             this.outputStream.connect(this.readOutputStream);
             this.errorStream.connect(this.readErrorStream);
             this.inputStream.connect(this.writeInputStream);
-            this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(writeInputStream));
+            this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(this.writeInputStream));
         } catch (IOException e) {
             logger.error("Failed to connect streams", e);
         }

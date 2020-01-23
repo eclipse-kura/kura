@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2019 Eurotech and others
+ * Copyright (c) 2011, 2020 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -311,7 +311,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         }
 
         try {
-            final ServiceReference<?>[] refs = bundleContext.getAllServiceReferences(null, null);
+            final ServiceReference<?>[] refs = this.bundleContext.getAllServiceReferences(null, null);
             final List<ComponentConfiguration> result = new ArrayList<>(refs.length);
 
             for (final ServiceReference<?> ref : refs) {

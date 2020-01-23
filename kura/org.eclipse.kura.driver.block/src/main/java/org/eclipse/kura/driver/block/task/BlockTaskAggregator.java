@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -60,6 +60,7 @@ public class BlockTaskAggregator extends BlockAggregator<ToplevelBlockTask> {
         super(tasks, factory);
     }
 
+    @SuppressWarnings("checkstyle:innerAssignment")
     private void assignTasks(ToplevelBlockTask toplevelTask, ListIterator<Block> tasks) {
         Block next = null;
         while (tasks.hasNext() && (next = tasks.next()).getEnd() <= toplevelTask.getEnd()) {

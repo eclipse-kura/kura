@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2019, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -357,7 +357,7 @@ public class HttpService implements ConfigurableComponent {
         Enumeration<String> aliases = keystore.aliases();
         while (aliases.hasMoreElements()) {
             String alias = aliases.nextElement();
-            if (keystore.isKeyEntry(alias)) { // TODO: not sure why this check
+            if (keystore.isKeyEntry(alias)) {
                 PasswordProtection oldPP = new PasswordProtection(oldPassword);
                 Entry entry = keystore.getEntry(alias, oldPP);
                 PasswordProtection newPP = new PasswordProtection(newPassword);

@@ -200,7 +200,7 @@ public class ExecutorUtil {
             }
         }
         // Sort pids in reverse order (useful when stop processes...)
-        return pids.entrySet().stream().sorted(Map.Entry.<String, Integer> comparingByValue().reversed())
+        return pids.entrySet().stream().sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
                 .collect(Collectors.toMap(Map.Entry::getKey, e -> new LinuxPid(e.getValue()), (e1, e2) -> e1,
                         LinkedHashMap::new));
     }
@@ -298,7 +298,7 @@ public class ExecutorUtil {
     }
 
     private static String[] buildKillCommand(Pid pid, Signal signal) {
-        Integer pidNumber = (Integer) pid.getPid();
+        Integer pidNumber = pid.getPid();
         if (logger.isInfoEnabled()) {
             logger.info("Attempting to send {} to process with pid {}", ((LinuxSignal) signal).name(), pidNumber);
         }

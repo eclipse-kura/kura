@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -20,14 +20,14 @@ public enum NetInterfaceStatus {
 
     /**
      * IPv4 configuration is not managed by Kura
-     * 
+     *
      * @since 1.4
      **/
     netIPv4StatusUnmanaged,
 
     /**
      * IPv4 configuration only at Layer 2 of the OSI model
-     * 
+     *
      * @since 1.4
      **/
     netIPv4StatusL2Only,
@@ -46,14 +46,14 @@ public enum NetInterfaceStatus {
 
     /**
      * IPv6 configuration is not managed by Kura
-     * 
+     *
      * @since 1.4
      **/
     netIPv6StatusUnmanaged,
 
     /**
      * IPv6 configuration only at Layer 2 of the OSI model
-     * 
+     *
      * @since 1.4
      **/
     netIPv6StatusL2Only,

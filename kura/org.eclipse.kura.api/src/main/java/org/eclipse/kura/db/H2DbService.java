@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -19,19 +19,19 @@ import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * A {@link H2DbService} instance provides an implementation of {@link BaseDbService} using the H2 database engine.
- * 
+ *
  * The Kura core implementation of {@link H2DbService} provides the capability to perform periodic database
  * defragmentation.
  * Since H2 currently does not support online defragmentation, the database needs to be shut down to perform the
  * operation.
- * 
+ *
  * Running the defragmentation will cause the existing connections obtained using the
  * {@link H2DbService#getConnection()} method to be closed, so applications must be prepared to reopen connections if
  * necessary.
- * 
+ *
  * As an alternative, it is possible to use the {@link H2DbService#withConnection(ConnectionCallable)} method.
- * 
- * 
+ *
+ *
  * @since 1.3
  * @noimplement This interface is not intended to be implemented by clients.
  */
@@ -44,12 +44,12 @@ public interface H2DbService extends BaseDbService {
      * Executes the provided {@link ConnectionCallable} task on the current thread, and returns the result.
      * It is not necessary to close the {@link Connection} received as argument. If an exception is thrown by the task,
      * the connection will be rolled back automatically.
-     * 
+     *
      * This method guarantees that the execution of the provided task will not be affected by the defragmentation
      * process.
      * Performing long running operations in the provided tasks might delay the defragmentation
      * process.
-     * 
+     *
      * @param task
      *            the task to be executed.
      * @return the result of the executed task.

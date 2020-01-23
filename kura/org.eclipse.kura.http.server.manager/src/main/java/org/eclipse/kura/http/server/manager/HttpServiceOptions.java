@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2019, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -43,8 +43,7 @@ public class HttpServiceOptions {
     public HttpServiceOptions(final Map<String, Object> properties, final String kuraHome) {
         Property<String> httpsKeystorePathProp = new Property<>(PROP_HTTPS_KEYSTORE_PATH,
                 kuraHome + "/user/security/httpskeystore.ks");
-        
-        
+
         this.httpEnabled = HTTP_ENABLED.get(properties);
         this.httpPort = HTTP_PORT.get(properties);
         this.httpsEnabled = HTTPS_ENABLED.get(properties);
@@ -121,7 +120,7 @@ public class HttpServiceOptions {
         } else if (!this.httpsKeystorePath.equals(other.httpsKeystorePath)) {
             return false;
         }
-        
+
         boolean result = true;
         if (this.httpsPort != other.httpsPort) {
             result = false;

@@ -37,8 +37,8 @@ public class IwScanTool extends ScanTool implements IScanTool {
     private static final Object lock = new Object();
     private String ifaceName;
     private int timeout;
-    private LinuxNetworkUtil linuxNetworkUtil;
-    private CommandExecutorService executorService;
+    private final LinuxNetworkUtil linuxNetworkUtil;
+    private final CommandExecutorService executorService;
 
     private InputStream scanOutput;
     private boolean status;
@@ -78,8 +78,8 @@ public class IwScanTool extends ScanTool implements IScanTool {
             iwScanCommand.setTimeout(IwScanTool.this.timeout);
             iwScanCommand.setOutputStream(new ByteArrayOutputStream());
             iwScanCommand.setErrorStream(new ByteArrayOutputStream());
-            CommandStatus iwCommandStatus = executorService.execute(iwScanCommand);
-            int exitValue = (Integer) iwCommandStatus.getExitStatus().getExitCode();
+            CommandStatus iwCommandStatus = this.executorService.execute(iwScanCommand);
+            int exitValue = iwCommandStatus.getExitStatus().getExitCode();
             if (logger.isInfoEnabled()) {
                 logger.info("scan() :: {} command returns status = {}", String.join(" ", cmd), exitValue);
             }

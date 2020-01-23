@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -23,8 +23,8 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.certificate.CertificatesService;
 import org.eclipse.kura.crypto.CryptoService;
-import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraApplicationTopic;
+import org.eclipse.kura.message.KuraPayload;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
  */
 public class CertificatesManager implements CertificatesService {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(CertificatesManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(CertificatesManager.class);
 
     private static final String DEFAULT_KEYSTORE = System.getProperty("org.osgi.framework.trust.repositories");
 
@@ -63,11 +63,11 @@ public class CertificatesManager implements CertificatesService {
     // ----------------------------------------------------------------
 
     protected void activate(ComponentContext componentContext) {
-        s_logger.info("Bundle " + APP_ID + " has started!");
+        logger.info("Bundle " + APP_ID + " has started!");
     }
 
     protected void deactivate(ComponentContext componentContext) {
-        s_logger.info("Bundle " + APP_ID + " is deactivating!");
+        logger.info("Bundle " + APP_ID + " is deactivating!");
     }
 
     @Override
@@ -115,17 +115,17 @@ public class CertificatesManager implements CertificatesService {
         return true;
     }
 
-	protected Certificate getCertificateFromKeyStore(char[] keyStorePassword, String alias)
-			throws NoSuchAlgorithmException, CertificateException, KeyStoreException, IOException {
-		KeyStore ks = KeyStoreManagement.loadKeyStore(keyStorePassword);
-		return ks.getCertificate(alias);
-	}
+    protected Certificate getCertificateFromKeyStore(char[] keyStorePassword, String alias)
+            throws NoSuchAlgorithmException, CertificateException, KeyStoreException, IOException {
+        KeyStore ks = KeyStoreManagement.loadKeyStore(keyStorePassword);
+        return ks.getCertificate(alias);
+    }
 
-	protected Enumeration<String> getAliasesFromKeyStore(char[] keyStorePassword)
-			throws NoSuchAlgorithmException, CertificateException, KeyStoreException, IOException {
-		KeyStore ks = KeyStoreManagement.loadKeyStore(keyStorePassword);
-		return ks.aliases();
-	}
+    protected Enumeration<String> getAliasesFromKeyStore(char[] keyStorePassword)
+            throws NoSuchAlgorithmException, CertificateException, KeyStoreException, IOException {
+        KeyStore ks = KeyStoreManagement.loadKeyStore(keyStorePassword);
+        return ks.aliases();
+    }
 
     private Enumeration<String> listStoredCertificatesAliases() {
         try {

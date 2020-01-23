@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Eurotech and/or its affiliates and others
+ * Copyright (c) 2019, 2020 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -168,7 +168,7 @@ public class RawMqttCloudConnectionFactory implements CloudConnectionFactory {
                 }
 
                 return MANAGED_CLOUD_SERVICE_PID_PATTERN.matcher((String) kuraServicePid).matches()
-                        && (FACTORY_PID.equals(ref.getProperty(KURA_CLOUD_CONNECTION_FACTORY_PID)));
+                        && FACTORY_PID.equals(ref.getProperty(KURA_CLOUD_CONNECTION_FACTORY_PID));
             }).map(ref -> (String) ref.getProperty(ConfigurationService.KURA_SERVICE_PID)).collect(Collectors.toSet());
         } catch (InvalidSyntaxException e) {
             throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID, e);

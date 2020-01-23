@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2018, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -13,7 +13,7 @@ import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * KuraBluetoothRemoveException is raised when an error is detected during removing a device from the system.
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  * @since 2.0
  */

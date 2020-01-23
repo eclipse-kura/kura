@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -305,7 +305,7 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
 
             double tdie = ambT / 128.0 + 273.15;
 
-            double s0 = 5.593E-14;	// Calibration factor
+            double s0 = 5.593E-14; // Calibration factor
             double a1 = 1.75E-3;
             double a2 = -1.678E-5;
             double b0 = -2.94E-5;

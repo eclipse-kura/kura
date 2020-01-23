@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -9,7 +9,7 @@
  * Contributors:
  *     Eurotech
  *     Amit Kumar Mondal
- *     
+ *
  *******************************************************************************/
 package org.eclipse.kura.asset.provider;
 
@@ -19,7 +19,6 @@ import static org.eclipse.kura.asset.provider.AssetConstants.VALUE_TYPE;
 
 import java.util.List;
 
-import org.eclipse.kura.asset.AssetConfiguration;
 import org.eclipse.kura.channel.ChannelType;
 import org.eclipse.kura.configuration.metatype.Option;
 import org.eclipse.kura.core.configuration.metatype.Tad;
@@ -59,11 +58,11 @@ import org.eclipse.kura.util.collection.CollectionUtil;
  * <li>BYTE_ARRAY</li>
  * </ul>
  *
- * @see AssetConfiguration
+ * @see org.eclipse.kura.asset.AssetConfiguration
  */
 public class BaseChannelDescriptor implements ChannelDescriptor {
 
-    private static final BaseChannelDescriptor instance = new BaseChannelDescriptor();
+    private static final BaseChannelDescriptor INSTANCE = new BaseChannelDescriptor();
 
     protected final List<Tad> defaultElements;
 
@@ -138,6 +137,6 @@ public class BaseChannelDescriptor implements ChannelDescriptor {
     }
 
     public static BaseChannelDescriptor get() {
-        return instance;
+        return INSTANCE;
     }
 }

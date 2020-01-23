@@ -33,6 +33,8 @@ import org.eclipse.kura.executor.CommandStatus;
 public class BluetoothProcess {
 
     private static final Logger logger = LogManager.getLogger(BluetoothProcess.class);
+    
+    @SuppressWarnings("checkstyle:constantName")
     private static final ExecutorService streamGobblers = Executors.newCachedThreadPool();
 
     private Future<?> futureInputGobbler;

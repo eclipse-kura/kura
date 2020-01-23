@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Eurotech and/or its affiliates and others
+ * Copyright (c) 2019, 2020 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -37,8 +37,8 @@ public class PredicateValidator implements Validator<String> {
     @Override
     public List<EditorError> validate(final Editor<String> editor, final String value) {
 
-        return predicate.test(value) ? Collections.emptyList()
-                : Collections.singletonList(new BasicEditorError(editor, value, message));
+        return this.predicate.test(value) ? Collections.emptyList()
+                : Collections.singletonList(new BasicEditorError(editor, value, this.message));
     }
 
 }

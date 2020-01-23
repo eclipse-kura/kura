@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2019, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -42,11 +42,11 @@ public class StackComponentOptions<T> {
     }
 
     public Optional<String> getCloudEndpointPid() {
-        return cloudEndpointPid;
+        return this.cloudEndpointPid;
     }
 
     public Optional<T> getComponentOptions() {
-        return componentOptions;
+        return this.componentOptions;
     }
 
     public interface OptionsFactory<T> {

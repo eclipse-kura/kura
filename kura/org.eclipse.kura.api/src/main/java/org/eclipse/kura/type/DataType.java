@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -16,6 +16,7 @@ package org.eclipse.kura.type;
 /**
  * This contains all the required data type constants required for representing
  * Java data types as {@link TypedValue}
+ *
  * @since 1.2
  */
 public enum DataType {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2016, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -97,7 +97,7 @@ public class CloudConnectionConfigurationUi extends AbstractServicesUi {
     @Override
     protected void reset() {
         if (isDirty()) {
-            alertDialog.show(MSGS.deviceConfigDirty(), this::resetVisualization);
+            this.alertDialog.show(MSGS.deviceConfigDirty(), this::resetVisualization);
         }
     }
 
@@ -142,38 +142,41 @@ public class CloudConnectionConfigurationUi extends AbstractServicesUi {
     private void apply() {
         if (isValid()) {
             if (isDirty()) {
-                alertDialog.show(MSGS.deviceConfigConfirmation(this.configurableComponent.getComponentName()), () -> {
-                    try {
-                        getUpdatedConfiguration();
-                    } catch (Exception ex) {
-                        EntryClassUi.hideWaitModal();
-                        FailureHandler.handle(ex);
-                        return;
-                    }
-                    RequestQueue
-                            .submit(context -> CloudConnectionConfigurationUi.this.gwtXSRFService.generateSecurityToken(
-                                    context.callback(token -> CloudConnectionConfigurationUi.this.gwtComponentService
-                                            .updateComponentConfiguration(token,
-                                                    CloudConnectionConfigurationUi.this.configurableComponent,
-                                                    context.callback(result -> {
-                                                        logger.info(MSGS.info() + ": " + MSGS.deviceConfigApplied());
-                                                        CloudConnectionConfigurationUi.this.applyConnectionEdit
-                                                                .setEnabled(false);
-                                                        CloudConnectionConfigurationUi.this.resetConnectionEdit
-                                                                .setEnabled(false);
-                                                        setDirty(false);
-                                                        originalConfig = CloudConnectionConfigurationUi.this.configurableComponent;
-                                                        EntryClassUi.hideWaitModal();
-                                                    }))
+                this.alertDialog.show(MSGS.deviceConfigConfirmation(this.configurableComponent.getComponentName()),
+                        () -> {
+                            try {
+                                getUpdatedConfiguration();
+                            } catch (Exception ex) {
+                                EntryClassUi.hideWaitModal();
+                                FailureHandler.handle(ex);
+                                return;
+                            }
+                            RequestQueue.submit(context -> CloudConnectionConfigurationUi.this.gwtXSRFService
+                                    .generateSecurityToken(context
+                                            .callback(token -> CloudConnectionConfigurationUi.this.gwtComponentService
+                                                    .updateComponentConfiguration(token,
+                                                            CloudConnectionConfigurationUi.this.configurableComponent,
+                                                            context.callback(result -> {
+                                                                logger.info(MSGS.info() + ": "
+                                                                        + MSGS.deviceConfigApplied());
+                                                                CloudConnectionConfigurationUi.this.applyConnectionEdit
+                                                                        .setEnabled(false);
+                                                                CloudConnectionConfigurationUi.this.resetConnectionEdit
+                                                                        .setEnabled(false);
+                                                                setDirty(false);
+                                                                this.originalConfig = CloudConnectionConfigurationUi.this.configurableComponent;
+                                                                EntryClassUi.hideWaitModal();
+                                                            }))
 
-                                    )));
-                }
+                                            )));
+                        }
 
                 );
             }
         } else {
             errorLogger.log(Level.SEVERE, "Device configuration error!");
-            alertDialog.show(MSGS.formWithErrorsOrIncomplete(), AlertDialog.Severity.ALERT, (ConfirmListener) null);
+            this.alertDialog.show(MSGS.formWithErrorsOrIncomplete(), AlertDialog.Severity.ALERT,
+                    (ConfirmListener) null);
         }
     }
 

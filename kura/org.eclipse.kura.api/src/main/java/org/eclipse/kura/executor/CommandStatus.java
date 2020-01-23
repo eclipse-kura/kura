@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2019, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -17,7 +17,7 @@ import java.io.OutputStream;
 import org.apache.commons.io.output.NullOutputStream;
 
 /**
- * 
+ *
  * The CommandStatus object is returned by the {@link CommandExecutorService} after the execution of a command.
  * It contains all the relevant informations about the result of the command execution.
  * <p>

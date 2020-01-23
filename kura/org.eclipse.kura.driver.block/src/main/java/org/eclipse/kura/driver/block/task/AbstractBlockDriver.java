@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -16,7 +16,6 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -66,7 +65,7 @@ import org.slf4j.LoggerFactory;
  * </p>
  *
  * @param <T>
- *            the type of the domain, can be any type suitable for being used as an {@link HashMap} key
+ *            the type of the domain, can be any type suitable for being used as an {@link java.util.HashMap} key
  */
 public abstract class AbstractBlockDriver<T> implements Driver {
 

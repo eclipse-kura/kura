@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2019 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -43,7 +43,7 @@ public class ServicesAnchorListItem extends AnchorListItem {
         this.item = service;
         this.instance = this;
 
-        IconType icon = getIcon(item);
+        IconType icon = getIcon(this.item);
         if (icon == null) {
             String imageURL = getImagePath();
             if (imageURL != null) {
@@ -182,13 +182,13 @@ public class ServicesAnchorListItem extends AnchorListItem {
             return null;
         }
 
-        if ((icon.toLowerCase().startsWith("http://") || icon.toLowerCase().startsWith("https://"))) {
+        if (icon.toLowerCase().startsWith("http://") || icon.toLowerCase().startsWith("https://")) {
 
             return icon;
 
         } else {
 
-            final String factoryId = item.getFactoryId();
+            final String factoryId = this.item.getFactoryId();
             if (factoryId != null) {
                 return SERVLET_URL + "factoryId=" + URL.encodeQueryString(factoryId);
             }

@@ -14,7 +14,7 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
 @RemoteServiceRelativePath("banner")
 public interface GwtBannerService extends RemoteService {
-    
+
     public String getLoginBanner();
 
 }

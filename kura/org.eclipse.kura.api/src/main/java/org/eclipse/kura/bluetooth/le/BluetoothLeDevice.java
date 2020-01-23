@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -254,7 +254,7 @@ public interface BluetoothLeDevice {
 
     /**
      * Returns if the service discovery is ended.
-     * 
+     *
      * @since 2.0
      */
     public boolean isServicesResolved();
@@ -262,10 +262,10 @@ public interface BluetoothLeDevice {
     /**
      * Remove this device from the system. Be aware that after the removing the object representing the device
      * will not be valid anymore and any operation on it will have no effect.
-     * 
+     *
      * @return TRUE if the device has been removed
      * @throws BluetKuraBluetoothRemoveExceptionoothException
-     * 
+     *
      * @since 2.0
      */
     public boolean remove() throws KuraBluetoothRemoveException;

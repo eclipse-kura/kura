@@ -1,14 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 Red Hat Inc and others.
+ * Copyright (c) 2016, 2020 Red Hat Inc and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *     Red Hat Inc - initial API and implementation
+ *     Red Hat Inc
+ *     Eurotech
  *******************************************************************************/
-
 package org.eclipse.kura.example.camel.publisher;
 
 import static java.lang.Math.round;
@@ -34,13 +34,11 @@ public class ExamplePublisher extends AbstractSimplePeriodicPublisher<ExamplePub
         private final int periodInt;
 
         private final double ampDouble;
-        private double offsetDouble;
-        private int periodDouble;
+        private final double offsetDouble;
+        private final int periodDouble;
 
-        private PublisherConfiguration( //
-                final int ampInt, final int offsetInt, final int periodInt, //
-                final double ampDouble, final double offsetDouble, final int periodDouble //
-        ) {
+        private PublisherConfiguration(final int ampInt, final int offsetInt, final int periodInt,
+                final double ampDouble, final double offsetDouble, final int periodDouble) {
 
             this.ampInt = ampInt;
             this.offsetInt = offsetInt;
@@ -52,27 +50,27 @@ public class ExamplePublisher extends AbstractSimplePeriodicPublisher<ExamplePub
         }
 
         public int getAmpInt() {
-            return ampInt;
+            return this.ampInt;
         }
 
         public int getOffsetInt() {
-            return offsetInt;
+            return this.offsetInt;
         }
 
         public int getPeriodInt() {
-            return periodInt;
+            return this.periodInt;
         }
 
         public double getAmpDouble() {
-            return ampDouble;
+            return this.ampDouble;
         }
 
         public double getOffsetDouble() {
-            return offsetDouble;
+            return this.offsetDouble;
         }
 
         public int getPeriodDouble() {
-            return periodDouble;
+            return this.periodDouble;
         }
 
         /**

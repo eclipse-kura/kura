@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 Red Hat Inc and others
+ * Copyright (c) 2016, 2020 Red Hat Inc and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -156,8 +156,8 @@ public abstract class AbstractCamelComponent {
      * @return the camel context or {@code null} if the context is not started
      */
     public CamelContext getCamelContext() {
-        final CamelRunner runner = this.runner;
-        return runner != null ? runner.getCamelContext() : null;
+        final CamelRunner camelRunner = this.runner;
+        return camelRunner != null ? camelRunner.getCamelContext() : null;
     }
 
     /**

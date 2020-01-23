@@ -1,11 +1,11 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *******************************************************************************/
 package org.eclipse.kura.annotation;
 
@@ -32,6 +32,7 @@ import java.lang.annotation.Target;
  * In addition, the immutable objects are inherently thread-safe and that is the
  * reason, they can be passed between threads or published without explicit
  * synchronization or locks.
+ *
  * @since 1.2
  */
 @Documented

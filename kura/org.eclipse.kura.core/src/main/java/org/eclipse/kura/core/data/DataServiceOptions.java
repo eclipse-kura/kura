@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -117,7 +117,7 @@ public class DataServiceOptions {
     }
 
     long getRateLimitTimeUnit() {
-        String timeUnitString = (String) properties.getOrDefault(RATE_LIMIT_TIME_UNIT_PROP_NAME,
+        String timeUnitString = (String) this.properties.getOrDefault(RATE_LIMIT_TIME_UNIT_PROP_NAME,
                 RATE_LIMIT_TIME_UNIT_DEFAULT);
         TimeUnit timeUnit;
 

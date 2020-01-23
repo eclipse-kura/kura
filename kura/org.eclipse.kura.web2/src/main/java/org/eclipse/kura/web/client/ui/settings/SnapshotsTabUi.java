@@ -39,8 +39,6 @@ import org.gwtbootstrap3.client.ui.gwt.CellTable;
 import org.gwtbootstrap3.client.ui.html.Span;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -49,8 +47,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FormPanel;
-import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
-import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteHandler;
 import com.google.gwt.user.client.ui.Hidden;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
@@ -119,19 +115,15 @@ public class SnapshotsTabUi extends Composite implements Tab {
 
         initUploadModalHandlers();
 
-        this.snapshotsForm.addSubmitCompleteHandler(new SubmitCompleteHandler() {
-
-            @Override
-            public void onSubmitComplete(SubmitCompleteEvent event) {
-                String htmlResponse = event.getResults();
-                EntryClassUi.hideWaitModal();
-                if (htmlResponse == null || htmlResponse.isEmpty()) {
-                    logger.log(Level.FINER, MSGS.information() + ": " + MSGS.fileUploadSuccess());
-                    Window.Location.reload();
-                } else {
-                    logger.log(Level.SEVERE, MSGS.information() + ": " + MSGS.fileUploadFailure());
-                    FailureHandler.handle(new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR));
-                }
+        this.snapshotsForm.addSubmitCompleteHandler(event -> {
+            String htmlResponse = event.getResults();
+            EntryClassUi.hideWaitModal();
+            if (htmlResponse == null || htmlResponse.isEmpty()) {
+                logger.log(Level.FINER, MSGS.information() + ": " + MSGS.fileUploadSuccess());
+                Window.Location.reload();
+            } else {
+                logger.log(Level.SEVERE, MSGS.information() + ": " + MSGS.fileUploadFailure());
+                FailureHandler.handle(new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR));
             }
         });
     }
@@ -228,19 +220,10 @@ public class SnapshotsTabUi extends Composite implements Tab {
     }
 
     private void initUploadModalHandlers() {
-        this.uploadCancel.addClickHandler(new ClickHandler() {
+        this.uploadCancel.addClickHandler(event -> SnapshotsTabUi.this.uploadModal.hide());
 
-            @Override
-            public void onClick(ClickEvent event) {
-                SnapshotsTabUi.this.uploadModal.hide();
-            }
-        });
-
-        this.uploadUpload.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                SnapshotsTabUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+        this.uploadUpload.addClickHandler(
+                event -> SnapshotsTabUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
                     @Override
                     public void onFailure(Throwable ex) {
@@ -254,63 +237,39 @@ public class SnapshotsTabUi extends Composite implements Tab {
                         SnapshotsTabUi.this.uploadModal.hide();
                         EntryClassUi.showWaitModal();
                     }
-                });
-            }
-        });
+                }));
     }
 
     private void initInterfaceButtons() {
         this.refresh.setText(MSGS.refresh());
-        this.refresh.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                refresh();
-            }
-        });
+        this.refresh.addClickHandler(event -> refresh());
 
         this.download.setText(MSGS.download());
-        this.download.addClickHandler(new ClickHandler() {
+        this.download.addClickHandler(event -> {
+            SnapshotsTabUi.this.selected = SnapshotsTabUi.this.selectionModel.getSelectedObject();
+            if (SnapshotsTabUi.this.selected != null) {
+                // please see
+                // http://stackoverflow.com/questions/13277752/gwt-open-window-after-rpc-is-prevented-by-popup-blocker
+                SnapshotsTabUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
-            @Override
-            public void onClick(ClickEvent event) {
-                SnapshotsTabUi.this.selected = SnapshotsTabUi.this.selectionModel.getSelectedObject();
-                if (SnapshotsTabUi.this.selected != null) {
-                    // please see
-                    // http://stackoverflow.com/questions/13277752/gwt-open-window-after-rpc-is-prevented-by-popup-blocker
-                    SnapshotsTabUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+                    @Override
+                    public void onFailure(Throwable ex) {
+                        FailureHandler.handle(ex);
+                    }
 
-                        @Override
-                        public void onFailure(Throwable ex) {
-                            FailureHandler.handle(ex);
-                        }
-
-                        @Override
-                        public void onSuccess(GwtXSRFToken token) {
-                            downloadSnapshot(token);
-                        }
-                    });
-                }
+                    @Override
+                    public void onSuccess(GwtXSRFToken token) {
+                        downloadSnapshot(token);
+                    }
+                });
             }
         });
 
         this.rollback.setText(MSGS.rollback());
-        this.rollback.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                rollback();
-            }
-        });
+        this.rollback.addClickHandler(event -> rollback());
 
         this.upload.setText(MSGS.upload());
-        this.upload.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                uploadAndApply();
-            }
-        });
+        this.upload.addClickHandler(event -> uploadAndApply());
     }
 
     private void rollback() {
@@ -323,50 +282,40 @@ public class SnapshotsTabUi extends Composite implements Tab {
             rollbackModal.setClosable(true);
             rollbackModalBody.add(new Span(MSGS.deviceSnapshotRollbackConfirm()));
 
-            rollbackModalFooter.add(new Button("Yes", new ClickHandler() {
+            rollbackModalFooter.add(new Button("Yes", event -> {
+                EntryClassUi.showWaitModal();
+                SnapshotsTabUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
-                @Override
-                public void onClick(ClickEvent event) {
-                    EntryClassUi.showWaitModal();
-                    SnapshotsTabUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+                    @Override
+                    public void onFailure(Throwable ex) {
+                        EntryClassUi.hideWaitModal();
+                        FailureHandler.handle(ex);
+                    }
 
-                        @Override
-                        public void onFailure(Throwable ex) {
-                            EntryClassUi.hideWaitModal();
-                            FailureHandler.handle(ex);
-                        }
+                    @Override
+                    public void onSuccess(GwtXSRFToken token) {
+                        SnapshotsTabUi.this.gwtSnapshotService.rollbackDeviceSnapshot(token, snapshot,
+                                new AsyncCallback<Void>() {
 
-                        @Override
-                        public void onSuccess(GwtXSRFToken token) {
-                            SnapshotsTabUi.this.gwtSnapshotService.rollbackDeviceSnapshot(token, snapshot,
-                                    new AsyncCallback<Void>() {
+                                    @Override
+                                    public void onFailure(Throwable ex) {
+                                        EntryClassUi.hideWaitModal();
+                                        FailureHandler.handle(ex);
+                                    }
 
-                                        @Override
-                                        public void onFailure(Throwable ex) {
-                                            EntryClassUi.hideWaitModal();
-                                            FailureHandler.handle(ex);
-                                        }
+                                    @Override
+                                    public void onSuccess(Void result) {
+                                        Window.Location.reload();
+                                    }
+                                });
+                    }
 
-                                        @Override
-                                        public void onSuccess(Void result) {
-                                            Window.Location.reload();
-                                        }
-                                    });
-                        }
+                });
 
-                    });
-
-                    rollbackModal.hide();
-                }
+                rollbackModal.hide();
             }));
 
-            rollbackModalFooter.add(new Button("No", new ClickHandler() {
-
-                @Override
-                public void onClick(ClickEvent event) {
-                    rollbackModal.hide();
-                }
-            }));
+            rollbackModalFooter.add(new Button("No", event -> rollbackModal.hide()));
 
             rollbackModal.add(rollbackModalBody);
             rollbackModal.add(rollbackModalFooter);

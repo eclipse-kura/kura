@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -94,7 +94,7 @@ public class CanSocketExample implements ConfigurableComponent {
             while (!Thread.interrupted()) {
                 int id = 0x500 + (canId << 4) + dest;
                 StringBuilder sb = new StringBuilder("Try to send can frame with message = ");
-                byte btest[] = new byte[8];
+                byte[] btest = new byte[8];
                 for (int i = 0; i < 8; i++) {
                     btest[i] = (byte) (this.index + i);
                     sb.append(btest[i]);

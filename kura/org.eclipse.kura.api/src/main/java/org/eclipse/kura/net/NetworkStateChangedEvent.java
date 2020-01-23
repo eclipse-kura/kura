@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -18,7 +18,7 @@ import org.osgi.service.event.Event;
 
 /**
  * Event raised when the state of the network has changed.
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 @ProviderType

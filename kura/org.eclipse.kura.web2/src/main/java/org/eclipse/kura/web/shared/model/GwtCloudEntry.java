@@ -33,7 +33,7 @@ public class GwtCloudEntry extends KuraBaseModel implements Serializable {
     public void setFactoryPid(final String factoryPid) {
         set("factoryPid", factoryPid);
     }
-    
+
     public String getDefaultFactoryPid() {
         return get("defaultFactoryPid");
     }
@@ -41,7 +41,7 @@ public class GwtCloudEntry extends KuraBaseModel implements Serializable {
     public void setDefaultFactoryPid(final String defaultFactoryPid) {
         set("defaultFactoryPid", defaultFactoryPid);
     }
-    
+
     public String getDefaultFactoryPidRegex() {
         return get("defaultFactoryPidRegex");
     }

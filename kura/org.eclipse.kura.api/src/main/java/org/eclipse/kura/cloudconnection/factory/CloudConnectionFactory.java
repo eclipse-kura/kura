@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2018, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -94,7 +94,8 @@ public interface CloudConnectionFactory {
     public void deleteConfiguration(String pid) throws KuraException;
 
     /**
-     * Returns a set of {@code kura.service.pid} that corresponds to the Cloud Endpoint services managed by this factory.
+     * Returns a set of {@code kura.service.pid} that corresponds to the Cloud Endpoint services managed by this
+     * factory.
      *
      * @return the set of services or an empty set.
      * @throws KuraException

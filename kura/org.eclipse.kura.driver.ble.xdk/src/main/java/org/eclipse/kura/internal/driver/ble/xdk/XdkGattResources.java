@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2019, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -16,9 +16,9 @@ import org.eclipse.kura.bluetooth.le.BluetoothLeGattService;
 
 public class XdkGattResources {
 
-    private String name;
-    private BluetoothLeGattService gattService;
-    private BluetoothLeGattCharacteristic gattValueCharacteristic;
+    private final String name;
+    private final BluetoothLeGattService gattService;
+    private final BluetoothLeGattCharacteristic gattValueCharacteristic;
 
     public XdkGattResources(String name, BluetoothLeGattService gattService,
             BluetoothLeGattCharacteristic gattValueChar) {
@@ -28,14 +28,14 @@ public class XdkGattResources {
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public BluetoothLeGattService getGattService() {
-        return gattService;
+        return this.gattService;
     }
 
     public BluetoothLeGattCharacteristic getGattValueCharacteristic() {
-        return gattValueCharacteristic;
+        return this.gattValueCharacteristic;
     }
 }

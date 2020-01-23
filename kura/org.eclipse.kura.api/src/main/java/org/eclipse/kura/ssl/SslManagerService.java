@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -30,7 +30,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * and disable the Nagle algorithm.
  * Its implementation is configurable exposing the possibility to express the allowed SSL protocols,
  * the allowed cipher suites, and the location of the Trust Store and the Key Store files.
- * 
+ *
  * @noimplement This interface is not intended to be implemented by clients.
  */
 @ProviderType

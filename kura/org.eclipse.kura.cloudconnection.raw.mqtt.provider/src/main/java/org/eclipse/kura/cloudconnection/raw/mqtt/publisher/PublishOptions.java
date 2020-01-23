@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2019, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -18,7 +18,7 @@ import org.eclipse.kura.cloudconnecton.raw.mqtt.util.Property;
 public class PublishOptions {
 
     public static final Property<String> TOPIC_PROP = new Property<>("topic", String.class);
-    public static final Property<Qos> QOS_PROP = new Property<Integer>("qos", 0).map(Qos.class, Qos::valueOf);
+    public static final Property<Qos> QOS_PROP = new Property<>("qos", 0).map(Qos.class, Qos::valueOf);
     public static final Property<Boolean> RETAIN_PROP = new Property<>("retain", false);
     public static final Property<Integer> PRIORITY_PROP = new Property<>("priority", 4);
 
@@ -35,19 +35,19 @@ public class PublishOptions {
     }
 
     public String getTopic() {
-        return topic;
+        return this.topic;
     }
 
     public Qos getQos() {
-        return qos;
+        return this.qos;
     }
 
     public boolean getRetain() {
-        return retain;
+        return this.retain;
     }
 
     public int getPriority() {
-        return priority;
+        return this.priority;
     }
 
 }

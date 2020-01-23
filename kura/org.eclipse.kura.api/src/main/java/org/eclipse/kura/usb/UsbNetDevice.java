@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -15,30 +15,30 @@ import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Representation of USB network devices
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 @ProviderType
 public class UsbNetDevice extends AbstractUsbDevice {
 
     /** The interface name associated with this device **/
-    private final String m_interfaceName;
+    private final String interfaceName;
 
     public UsbNetDevice(String vendorId, String productId, String manufacturerName, String productName,
             String usbBusNumber, String usbDevicePath, String interfaceName) {
         super(vendorId, productId, manufacturerName, productName, usbBusNumber, usbDevicePath);
-        this.m_interfaceName = interfaceName;
+        this.interfaceName = interfaceName;
     }
 
     public String getInterfaceName() {
-        return this.m_interfaceName;
+        return this.interfaceName;
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + (this.m_interfaceName == null ? 0 : this.m_interfaceName.hashCode());
+        result = prime * result + (this.interfaceName == null ? 0 : this.interfaceName.hashCode());
         return result;
     }
 
@@ -54,11 +54,11 @@ public class UsbNetDevice extends AbstractUsbDevice {
             return false;
         }
         UsbNetDevice other = (UsbNetDevice) obj;
-        if (this.m_interfaceName == null) {
-            if (other.m_interfaceName != null) {
+        if (this.interfaceName == null) {
+            if (other.interfaceName != null) {
                 return false;
             }
-        } else if (!this.m_interfaceName.equals(other.m_interfaceName)) {
+        } else if (!this.interfaceName.equals(other.interfaceName)) {
             return false;
         }
         return true;

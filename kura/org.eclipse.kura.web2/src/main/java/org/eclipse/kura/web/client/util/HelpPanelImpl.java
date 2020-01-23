@@ -15,8 +15,6 @@ import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.html.Span;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -43,25 +41,19 @@ class HelpPanelImpl extends Composite {
 
     public HelpPanelImpl() {
         initWidget(uiBinder.createAndBindUi(this));
-        hideButton.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                hide();
-            }
-        });
+        this.hideButton.addClickHandler(event -> hide());
     }
 
     public void setContent(String content) {
-        helpContent.clear();
-        helpContent.add(new Span(content));
+        this.helpContent.clear();
+        this.helpContent.add(new Span(content));
     }
 
     public void show() {
-        helpPanel.addStyleName(HELP_PANEL_VISIBLE_CLASS_NAME);
+        this.helpPanel.addStyleName(HELP_PANEL_VISIBLE_CLASS_NAME);
     }
 
     public void hide() {
-        helpPanel.removeStyleName(HELP_PANEL_VISIBLE_CLASS_NAME);
+        this.helpPanel.removeStyleName(HELP_PANEL_VISIBLE_CLASS_NAME);
     }
 }

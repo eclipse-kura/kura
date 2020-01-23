@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2019, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -77,17 +77,17 @@ public abstract class AbstractStackComponent<T> implements ConfigurableComponent
     }
 
     protected StackComponentOptions<T> getOptions() {
-        return options.get();
+        return this.options.get();
     }
 
     protected Optional<RawMqttCloudEndpoint> getEndpoint() {
-        return endpoint.get();
+        return this.endpoint.get();
     }
 
     private void shutdownTracker() {
-        if (tracker != null) {
-            tracker.close();
-            tracker = null;
+        if (this.tracker != null) {
+            this.tracker.close();
+            this.tracker = null;
         }
     }
 
@@ -110,7 +110,7 @@ public abstract class AbstractStackComponent<T> implements ConfigurableComponent
             return;
         }
 
-        this.tracker = new ServiceTracker<>(context, filter, new Customizer());
+        this.tracker = new ServiceTracker<>(this.context, filter, new Customizer());
         this.tracker.open();
     }
 
@@ -118,14 +118,14 @@ public abstract class AbstractStackComponent<T> implements ConfigurableComponent
 
         @Override
         public RawMqttCloudEndpoint addingService(final ServiceReference<CloudEndpoint> reference) {
-            final CloudEndpoint service = context.getService(reference);
+            final CloudEndpoint service = AbstractStackComponent.this.context.getService(reference);
 
             if (service == null) {
                 return null;
             }
 
             if (!(service instanceof RawMqttCloudEndpoint)) {
-                context.ungetService(reference);
+                AbstractStackComponent.this.context.ungetService(reference);
                 return null;
             }
 
@@ -147,31 +147,31 @@ public abstract class AbstractStackComponent<T> implements ConfigurableComponent
                 final RawMqttCloudEndpoint service) {
 
             unsetCloudEndpoint(service);
-            context.ungetService(reference);
+            AbstractStackComponent.this.context.ungetService(reference);
         }
 
     }
 
     public void registerCloudConnectionListener(CloudConnectionListener cloudConnectionListener) {
-        cloudConnectionListeners.add(cloudConnectionListener);
+        this.cloudConnectionListeners.add(cloudConnectionListener);
     }
 
     public void unregisterCloudConnectionListener(CloudConnectionListener cloudConnectionListener) {
-        cloudConnectionListeners.remove(cloudConnectionListener);
+        this.cloudConnectionListeners.remove(cloudConnectionListener);
     }
 
     @Override
     public void onDisconnected() {
-        cloudConnectionListeners.forEach(Utils.catchAll(CloudConnectionListener::onDisconnected));
+        this.cloudConnectionListeners.forEach(Utils.catchAll(CloudConnectionListener::onDisconnected));
     }
 
     @Override
     public void onConnectionLost() {
-        cloudConnectionListeners.forEach(Utils.catchAll(CloudConnectionListener::onConnectionLost));
+        this.cloudConnectionListeners.forEach(Utils.catchAll(CloudConnectionListener::onConnectionLost));
     }
 
     @Override
     public void onConnectionEstablished() {
-        cloudConnectionListeners.forEach(Utils.catchAll(CloudConnectionListener::onConnectionEstablished));
+        this.cloudConnectionListeners.forEach(Utils.catchAll(CloudConnectionListener::onConnectionEstablished));
     }
 }

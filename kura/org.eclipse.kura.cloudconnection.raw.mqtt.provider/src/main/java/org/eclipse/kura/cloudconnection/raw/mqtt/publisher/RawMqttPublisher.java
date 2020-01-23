@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2019, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -66,17 +66,17 @@ public class RawMqttPublisher extends AbstractStackComponent<PublishOptions>
 
     @Override
     public void registerCloudDeliveryListener(CloudDeliveryListener cloudDeliveryListener) {
-        cloudDeliveryListeners.add(cloudDeliveryListener);
+        this.cloudDeliveryListeners.add(cloudDeliveryListener);
     }
 
     @Override
     public void unregisterCloudDeliveryListener(CloudDeliveryListener cloudDeliveryListener) {
-        cloudDeliveryListeners.remove(cloudDeliveryListener);
+        this.cloudDeliveryListeners.remove(cloudDeliveryListener);
     }
 
     @Override
     public void onMessageConfirmed(String messageId) {
-        cloudDeliveryListeners.forEach(Utils.catchAll(l -> l.onMessageConfirmed(messageId)));
+        this.cloudDeliveryListeners.forEach(Utils.catchAll(l -> l.onMessageConfirmed(messageId)));
     }
 
     @Override

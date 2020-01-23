@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2019 Eurotech and others
+ * Copyright (c) 2011, 2020 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,7 +8,7 @@
  *
  * Contributors:
  *     Eurotech
- *     Red Hat Inc - minor clean ups
+ *     Red Hat Inc
  *******************************************************************************/
 package org.eclipse.kura.linux.bluetooth;
 
@@ -44,7 +44,7 @@ public class BluetoothAdapterImpl implements BluetoothAdapter {
     private boolean leReady;
     private BluetoothLeScanner bls = null;
     private BluetoothBeaconCommandListener bbcl;
-    private CommandExecutorService executorService;
+    private final CommandExecutorService executorService;
 
     // See Bluetooth 4.0 Core specifications (https://www.bluetooth.org/docman/handlers/downloaddoc.ashx?doc_id=229737)
     private static final String OGF_CONTROLLER_CMD = "0x08";
@@ -97,7 +97,7 @@ public class BluetoothAdapterImpl implements BluetoothAdapter {
     // --------------------------------------------------------------------
     public static void addConnectedDevice(BluetoothDevice bd) {
         if (connectedDevices == null) {
-            connectedDevices = new ArrayList<BluetoothDevice>();
+            connectedDevices = new ArrayList<>();
         }
         connectedDevices.add(bd);
     }

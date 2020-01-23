@@ -1,11 +1,11 @@
 /**
- * Copyright (c) 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
  *
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
- *  
+ *
  */
 
 package org.eclipse.kura.internal.driver.opcua.auth;
@@ -46,7 +46,7 @@ public class ExternalKeystoreCertificateManager extends CertificateManager {
     @Override
     public synchronized void load() throws Exception {
 
-        if (loaded) {
+        if (this.loaded) {
             return;
         }
 
@@ -66,7 +66,7 @@ public class ExternalKeystoreCertificateManager extends CertificateManager {
 
         super.load(getTrustedCertificates(keyStore), clientKeyPair, clientCertificate);
 
-        loaded = true;
+        this.loaded = true;
     }
 
     private static X509Certificate[] getTrustedCertificates(final KeyStore keyStore)

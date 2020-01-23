@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2020 Eurotech and/or its affiliates
  *
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
@@ -21,23 +21,26 @@ public class S7PlcDomain {
     }
 
     public int getDB() {
-        return db;
+        return this.db;
     }
 
     @Override
     public int hashCode() {
-        return db;
+        return this.db;
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == null)
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         S7PlcDomain other = (S7PlcDomain) obj;
-        if (db != other.db)
+        if (this.db != other.db) {
             return false;
+        }
         return true;
     }
 }

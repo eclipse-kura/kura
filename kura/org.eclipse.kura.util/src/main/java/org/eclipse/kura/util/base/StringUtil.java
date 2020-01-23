@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -34,7 +34,7 @@ public final class StringUtil {
      * @return {@code true} if the string is null or is the empty string
      */
     public static boolean isNullOrEmpty(@Nullable final String string) {
-        return (string == null) || string.isEmpty();
+        return string == null || string.isEmpty();
     }
 
     /**

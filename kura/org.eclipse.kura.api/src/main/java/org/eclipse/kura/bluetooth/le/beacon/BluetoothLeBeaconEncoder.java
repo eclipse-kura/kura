@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -21,7 +21,7 @@ public interface BluetoothLeBeaconEncoder<T extends BluetoothLeBeacon> {
 
     /**
      * Encodes a BluetoothLeBeacon into a byte array
-     * 
+     *
      * @param beacon
      *            the BluetoothLeBeacon to be broadcast by an advertiser
      * @return byte[]
@@ -30,9 +30,9 @@ public interface BluetoothLeBeaconEncoder<T extends BluetoothLeBeacon> {
 
     /**
      * Get the type of beacon this encoder can manage
-     * 
+     *
      * @return Class<T> the type of beacon (i.e. BlueoothLeIBeacon)
-     * 
+     *
      */
     public Class<T> getBeaconType();
 }

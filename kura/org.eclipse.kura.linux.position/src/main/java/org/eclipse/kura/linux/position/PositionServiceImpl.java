@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -265,7 +265,8 @@ public class PositionServiceImpl
         final Measurement track = new Measurement(java.lang.Math.toRadians(0), Unit.rad);
 
         this.staticPosition = new Position(latitude, longitude, altitude, speed, track);
-        this.staticNmeaPosition = new NmeaPosition(latitudeDeg, longitudeDeg, altitudeNmea, 0, 0, 0, 0, 0, 0, 0, 0, 0, (char)0, (char)0, (char)0);
+        this.staticNmeaPosition = new NmeaPosition(latitudeDeg, longitudeDeg, altitudeNmea, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                (char) 0, (char) 0, (char) 0);
     }
 
     private GpsDevice openGpsDevice(CommURI uri) {

@@ -15,7 +15,7 @@ import org.eclipse.kura.executor.ExitStatus;
 
 public class LinuxExitStatus implements ExitStatus {
 
-    private int exitValue;
+    private final int exitValue;
 
     public LinuxExitStatus(int exitStatus) {
         this.exitValue = exitStatus;
@@ -40,18 +40,21 @@ public class LinuxExitStatus implements ExitStatus {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + exitValue;
+        result = prime * result + this.exitValue;
         return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         LinuxExitStatus other = (LinuxExitStatus) obj;
         return this.exitValue == other.exitValue;
     }

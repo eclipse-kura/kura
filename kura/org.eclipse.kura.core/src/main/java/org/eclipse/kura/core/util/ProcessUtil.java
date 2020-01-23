@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -13,7 +13,6 @@ package org.eclipse.kura.core.util;
 
 import java.io.IOException;
 import java.util.StringTokenizer;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -42,15 +41,11 @@ public class ProcessUtil {
 
     public static SafeProcess exec(final String[] cmdarray) throws IOException {
         // Serialize process executions. One at a time so we can consume all streams.
-        Future<SafeProcess> futureSafeProcess = s_processExecutor.submit(new Callable<SafeProcess>() {
-
-            @Override
-            public SafeProcess call() throws Exception {
-                Thread.currentThread().setName("SafeProcessExecutor");
-                SafeProcess safeProcess = new SafeProcess();
-                safeProcess.exec(cmdarray);
-                return safeProcess;
-            }
+        Future<SafeProcess> futureSafeProcess = s_processExecutor.submit(() -> {
+            Thread.currentThread().setName("SafeProcessExecutor");
+            SafeProcess safeProcess = new SafeProcess();
+            safeProcess.exec(cmdarray);
+            return safeProcess;
         });
 
         try {

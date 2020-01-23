@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2019 Eurotech and others
+ * Copyright (c) 2011, 2020 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -112,7 +112,7 @@ public class BluetoothLeScanner implements BluetoothProcessListener, BTSnoopList
         // Shut down hcitool process
         if (this.proc != null) {
             logger.info("Killing hcitool...");
-            if (!BluetoothUtil.stopHcitool(name, executorService, "")) {
+            if (!BluetoothUtil.stopHcitool(name, this.executorService, "")) {
                 logger.info("Cannot kill hcitool process...");
             }
             this.proc.destroy();
@@ -124,7 +124,7 @@ public class BluetoothLeScanner implements BluetoothProcessListener, BTSnoopList
         if (this.dumpProc != null) {
             logger.info("Killing btdump...");
             BluetoothUtil.stopBtdump(name, this.executorService);
-            BluetoothUtil.killCmd(new String[] { "hcidump", "-i", name }, LinuxSignal.SIGINT, executorService);
+            BluetoothUtil.killCmd(new String[] { "hcidump", "-i", name }, LinuxSignal.SIGINT, this.executorService);
             this.dumpProc.destroyBTSnoop();
         } else {
             logger.info("Cannot destroy btdump process...");

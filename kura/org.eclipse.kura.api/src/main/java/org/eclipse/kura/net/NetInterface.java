@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -22,7 +22,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * Compared to the standard Java API, this class provides additional information
  * such as the NetworkInterfaceType, whether the interface is provided to the system
  * through a USB Adapter, and additional low-level characteristics of the interface.
- * 
+ *
  * @noimplement This interface is not intended to be implemented by clients.
  */
 @ProviderType

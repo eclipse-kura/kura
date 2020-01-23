@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,19 +7,18 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  *******************************************************************************/
- 
+
 package org.eclipse.kura.internal.rest.provider;
 
 import java.util.Map;
 
 public class RestServiceOptions {
 
-    private ConfigurationProperty<String[]> PROPERTY_USER_NAMES = new ConfigurationProperty<>("user.name",
+    private final ConfigurationProperty<String[]> propertyUserNames = new ConfigurationProperty<>("user.name",
             new String[] {});
-    private ConfigurationProperty<String[]> PROPERTY_PASSWORDS = new ConfigurationProperty<>("password",
+    private final ConfigurationProperty<String[]> propertyPasswords = new ConfigurationProperty<>("password",
             new String[] {});
-    private ConfigurationProperty<String[]> PROPERTY_ROLES = new ConfigurationProperty<String[]>("roles",
-            new String[] {});
+    private final ConfigurationProperty<String[]> propertyRoles = new ConfigurationProperty<>("roles", new String[] {});
 
     private final Map<String, Object> properties;
 
@@ -28,15 +27,15 @@ public class RestServiceOptions {
     }
 
     public String[] getUserNames() {
-        return PROPERTY_USER_NAMES.get(properties);
+        return this.propertyUserNames.get(this.properties);
     }
 
     public String[] getPasswords() {
-        return PROPERTY_PASSWORDS.get(properties);
+        return this.propertyPasswords.get(this.properties);
     }
 
     public String[] getRoles() {
-        return PROPERTY_ROLES.get(properties);
+        return this.propertyRoles.get(this.properties);
     }
 
     private static class ConfigurationProperty<T> {
@@ -55,7 +54,7 @@ public class RestServiceOptions {
             if (this.defaultValue.getClass().isInstance(value)) {
                 return (T) value;
             }
-            return defaultValue;
+            return this.defaultValue;
         }
     }
 }

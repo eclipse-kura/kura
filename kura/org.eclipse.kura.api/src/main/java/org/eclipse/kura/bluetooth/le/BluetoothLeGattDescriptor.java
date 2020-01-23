@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -25,7 +25,7 @@ public interface BluetoothLeGattDescriptor {
 
     /**
      * Reads the value of this descriptor
-     * 
+     *
      * @return A byte[] containing data from this descriptor
      * @throws KuraBluetoothIOException
      */
@@ -33,7 +33,7 @@ public interface BluetoothLeGattDescriptor {
 
     /**
      * Writes the value of this descriptor.
-     * 
+     *
      * @param value
      *            The data as byte[] to be written
      * @throws KuraBluetoothIOException
@@ -42,21 +42,21 @@ public interface BluetoothLeGattDescriptor {
 
     /**
      * Get the UUID of this descriptor.
-     * 
+     *
      * @return The 128 byte UUID of this descriptor, NULL if an error occurred
      */
     public UUID getUUID();
 
     /**
      * Returns the characteristic to which this descriptor belongs to.
-     * 
+     *
      * @return The characteristic.
      */
     public BluetoothLeGattCharacteristic getCharacteristic();
 
     /**
      * Returns the cached value of this descriptor, if any.
-     * 
+     *
      * @return The cached value of this descriptor.
      */
     public byte[] getValue();

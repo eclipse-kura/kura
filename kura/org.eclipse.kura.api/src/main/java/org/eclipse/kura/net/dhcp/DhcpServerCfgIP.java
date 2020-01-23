@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -35,7 +35,7 @@ public abstract class DhcpServerCfgIP<T extends IPAddress> {
     private T rangeStart;
     private T rangeEnd;
     private List<T> dnsServers;
-    
+
     /**
      * The basic Constructor for a DhcpServerConfigIP
      *
@@ -46,7 +46,7 @@ public abstract class DhcpServerCfgIP<T extends IPAddress> {
      * @param prefix
      *            the network prefix associated with the DhcpServerConfig
      * @param routerAddress
-     *            the router IPAddress           
+     *            the router IPAddress
      * @param rangeStart
      *            the network starting address to issue to DHCP clients
      * @param rangeEnd
@@ -54,71 +54,71 @@ public abstract class DhcpServerCfgIP<T extends IPAddress> {
      * @param dnsServers
      *            the DNS servers that will get passed to DHCP clients if passDns is true
      */
-	public DhcpServerCfgIP(T subnet, T subnetMask, short prefix, T routerAddress, T rangeStart, T rangeEnd,
-			List<T> dnsServers) {
-		super();
-		this.subnet = subnet;
-		this.subnetMask = subnetMask;
-		this.prefix = prefix;
-		this.routerAddress = routerAddress;
-		this.rangeStart = rangeStart;
-		this.rangeEnd = rangeEnd;
-		this.dnsServers = dnsServers;
-	}
+    public DhcpServerCfgIP(T subnet, T subnetMask, short prefix, T routerAddress, T rangeStart, T rangeEnd,
+            List<T> dnsServers) {
+        super();
+        this.subnet = subnet;
+        this.subnetMask = subnetMask;
+        this.prefix = prefix;
+        this.routerAddress = routerAddress;
+        this.rangeStart = rangeStart;
+        this.rangeEnd = rangeEnd;
+        this.dnsServers = dnsServers;
+    }
 
-	public T getSubnet() {
-		return subnet;
-	}
+    public T getSubnet() {
+        return this.subnet;
+    }
 
-	public void setSubnet(T subnet) {
-		this.subnet = subnet;
-	}
-	
-	public T getSubnetMask() {
-		return subnetMask;
-	}
+    public void setSubnet(T subnet) {
+        this.subnet = subnet;
+    }
 
-	public void setSubnetMask(T subnetMask) {
-		this.subnetMask = subnetMask;
-	}
+    public T getSubnetMask() {
+        return this.subnetMask;
+    }
 
-	public short getPrefix() {
-		return prefix;
-	}
+    public void setSubnetMask(T subnetMask) {
+        this.subnetMask = subnetMask;
+    }
 
-	public void setPrefix(short prefix) {
-		this.prefix = prefix;
-	}
-	
-	public T getRouterAddress() {
-		return routerAddress;
-	}
+    public short getPrefix() {
+        return this.prefix;
+    }
 
-	public void setRouterAddress(T routerAddress) {
-		this.routerAddress = routerAddress;
-	}
+    public void setPrefix(short prefix) {
+        this.prefix = prefix;
+    }
 
-	public T getRangeStart() {
-		return rangeStart;
-	}
+    public T getRouterAddress() {
+        return this.routerAddress;
+    }
 
-	public void setRangeStart(T rangeStart) {
-		this.rangeStart = rangeStart;
-	}
+    public void setRouterAddress(T routerAddress) {
+        this.routerAddress = routerAddress;
+    }
 
-	public T getRangeEnd() {
-		return rangeEnd;
-	}
+    public T getRangeStart() {
+        return this.rangeStart;
+    }
 
-	public void setRangeEnd(T rangeEnd) {
-		this.rangeEnd = rangeEnd;
-	}
+    public void setRangeStart(T rangeStart) {
+        this.rangeStart = rangeStart;
+    }
 
-	public List<T> getDnsServers() {
-		return dnsServers;
-	}
+    public T getRangeEnd() {
+        return this.rangeEnd;
+    }
 
-	public void setDnsServers(List<T> dnsServers) {
-		this.dnsServers = dnsServers;
-	}
+    public void setRangeEnd(T rangeEnd) {
+        this.rangeEnd = rangeEnd;
+    }
+
+    public List<T> getDnsServers() {
+        return this.dnsServers;
+    }
+
+    public void setDnsServers(List<T> dnsServers) {
+        this.dnsServers = dnsServers;
+    }
 }

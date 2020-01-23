@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -23,17 +23,17 @@ public class RebootCauseFileWriter {
 
     private static final Logger logger = LoggerFactory.getLogger(RebootCauseFileWriter.class);
 
-    private File rebootCauseFile;
+    private final File rebootCauseFile;
 
     public RebootCauseFileWriter(String rebootCauseFilePath) {
         this.rebootCauseFile = new File(rebootCauseFilePath).getAbsoluteFile();
     }
 
     public void writeRebootCause(String cause) {
-        final File rebootCauseFileDir = rebootCauseFile.getParentFile();
+        final File rebootCauseFileDir = this.rebootCauseFile.getParentFile();
 
-        if (rebootCauseFile.exists()) {
-            logger.info("Reboot cause file {} already exists, not updating..", rebootCauseFile);
+        if (this.rebootCauseFile.exists()) {
+            logger.info("Reboot cause file {} already exists, not updating..", this.rebootCauseFile);
             return;
         }
         if (rebootCauseFileDir == null) {
@@ -47,12 +47,12 @@ public class RebootCauseFileWriter {
         }
 
         final long timestamp = System.currentTimeMillis();
-        final File tmpFile = new File(rebootCauseFile.getPath() + '.' + timestamp);
+        final File tmpFile = new File(this.rebootCauseFile.getPath() + '.' + timestamp);
 
         try {
             logger.info("Writing reboot cause file...");
             writeFile(tmpFile, timestamp, cause);
-            Files.move(tmpFile.toPath(), rebootCauseFile.toPath(), StandardCopyOption.ATOMIC_MOVE);
+            Files.move(tmpFile.toPath(), this.rebootCauseFile.toPath(), StandardCopyOption.ATOMIC_MOVE);
             logger.info("Writing reboot cause file...done");
         } catch (Exception e) {
             logger.warn("failed to write reboot cause file", e);

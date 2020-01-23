@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2018, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -56,15 +56,15 @@ public class SensorListener {
     }
 
     public List<ChannelListener> getListeners() {
-        return listeners;
+        return this.listeners;
     }
 
     public List<String> getChannelNames() {
-        return channelNames;
+        return this.channelNames;
     }
 
     public List<SensorName> getSensorNames() {
-        return sensorNames;
+        return this.sensorNames;
     }
 
     public void addListener(ChannelListener listener) {
@@ -88,7 +88,7 @@ public class SensorListener {
     }
 
     public int getPeriod() {
-        return period;
+        return this.period;
     }
 
     public void removeAll(int index) {

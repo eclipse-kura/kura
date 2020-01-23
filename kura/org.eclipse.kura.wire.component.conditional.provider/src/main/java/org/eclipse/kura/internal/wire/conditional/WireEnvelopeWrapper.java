@@ -12,7 +12,10 @@ package org.eclipse.kura.internal.wire.conditional;
 
 public class WireEnvelopeWrapper {
 
+    @SuppressWarnings("checkstyle:visibilityModifier")
     public final String emitterPid;
+    
+    @SuppressWarnings("checkstyle:visibilityModifier")
     public final WireRecordListWrapper records;
 
     WireEnvelopeWrapper(WireRecordListWrapper records, String emitterPid) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2019 Eurotech and others
+ * Copyright (c) 2011, 2020 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -284,7 +284,7 @@ public class LinuxProcessUtil {
     /**
      * This method takes a pid and returns a boolean that defines if the corresponding process is running or not in the
      * host system.
-     * 
+     *
      * @param pid
      *            integer representing the process id that has to be verified.
      * @return true if the process in running in the system, false otherwise.

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -9,7 +9,7 @@
  * Contributors:
  *     Eurotech and/or its affiliates
  *     Red Hat Inc
- *     
+ *
  *******************************************************************************/
 package org.eclipse.kura;
 
@@ -17,9 +17,9 @@ package org.eclipse.kura;
  * KuraErrorCode holds the enumeration of valid error codes for the exception message. For each defined enum value, a
  * corresponding message should be defined in the properties bundle named:
  * KuraExceptionMessagesBundle.properties.
- * 
+ *
  * @since 1.3
- * 
+ *
  */
 public enum KuraErrorCode {
     CONFIGURATION_ERROR,
@@ -56,7 +56,7 @@ public enum KuraErrorCode {
     GPIO_EXCEPTION,
     /**
      * Error executing an OS command.
-     * 
+     *
      * @since 1.0.8
      */
     OS_COMMAND_ERROR,
@@ -66,19 +66,19 @@ public enum KuraErrorCode {
     INVALID_PARAMETER,
     /**
      * Error executing process
-     * 
+     *
      * @since 1.2
      */
     PROCESS_EXECUTION_ERROR,
     /**
      * Error processing a subscribe/unsubscribe operation
-     * 
+     *
      * @since 1.2
      */
     SUBSCRIPTION_ERROR,
     /**
      * Error for Bluetooth operations
-     * 
+     *
      * @since 1.3
      */
     BLE_NOTIFICATION_ERROR,

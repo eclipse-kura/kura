@@ -140,57 +140,57 @@ public class ScriptFilter implements WireEmitter, WireReceiver, ConfigurableComp
 
     private ScriptEngine createEngine() {
         NashornScriptEngineFactory factory = new NashornScriptEngineFactory();
-        ScriptEngine scriptEngine = factory.getScriptEngine(className -> false);
+        ScriptEngine scriptEngineTemp = factory.getScriptEngine(className -> false);
 
-        if (scriptEngine == null) {
+        if (scriptEngineTemp == null) {
             throw new IllegalStateException("Failed to get script engine");
         }
 
-        final Bindings engineScopeBindings = scriptEngine.getBindings(ScriptContext.ENGINE_SCOPE);
+        final Bindings engineScopeBindings = scriptEngineTemp.getBindings(ScriptContext.ENGINE_SCOPE);
         if (engineScopeBindings != null) {
             engineScopeBindings.remove("exit");
             engineScopeBindings.remove("quit");
         }
 
-        final Bindings globalScopeBindings = scriptEngine.getBindings(ScriptContext.GLOBAL_SCOPE);
+        final Bindings globalScopeBindings = scriptEngineTemp.getBindings(ScriptContext.GLOBAL_SCOPE);
         if (globalScopeBindings != null) {
             globalScopeBindings.remove("exit");
             globalScopeBindings.remove("quit");
         }
 
-        return scriptEngine;
+        return scriptEngineTemp;
     }
 
     private Bindings createBindings() {
-        Bindings bindings = this.scriptEngine.createBindings();
+        Bindings localBindings = this.scriptEngine.createBindings();
 
-        bindings.put("logger", logger);
+        localBindings.put("logger", logger);
 
-        bindings.put("newWireRecord", (Supplier<WireRecordWrapper>) WireRecordWrapper::new);
+        localBindings.put("newWireRecord", (Supplier<WireRecordWrapper>) WireRecordWrapper::new);
 
-        bindings.put("newBooleanValue", (Function<Boolean, TypedValue<?>>) TypedValues::newBooleanValue);
-        bindings.put("newByteArrayValue", (Function<byte[], TypedValue<?>>) TypedValues::newByteArrayValue);
-        bindings.put("newDoubleValue",
+        localBindings.put("newBooleanValue", (Function<Boolean, TypedValue<?>>) TypedValues::newBooleanValue);
+        localBindings.put("newByteArrayValue", (Function<byte[], TypedValue<?>>) TypedValues::newByteArrayValue);
+        localBindings.put("newDoubleValue",
                 (Function<Number, TypedValue<?>>) num -> TypedValues.newDoubleValue(num.doubleValue()));
-        bindings.put("newFloatValue",
+        localBindings.put("newFloatValue",
                 (Function<Number, TypedValue<?>>) num -> TypedValues.newFloatValue(num.floatValue()));
-        bindings.put("newIntegerValue",
+        localBindings.put("newIntegerValue",
                 (Function<Number, TypedValue<?>>) num -> TypedValues.newIntegerValue(num.intValue()));
-        bindings.put("newLongValue",
+        localBindings.put("newLongValue",
                 (Function<Number, TypedValue<?>>) num -> TypedValues.newLongValue(num.longValue()));
-        bindings.put("newStringValue",
+        localBindings.put("newStringValue",
                 (Function<Object, TypedValue<?>>) obj -> TypedValues.newStringValue(obj.toString()));
 
-        bindings.put("newByteArray", (Function<Integer, byte[]>) size -> new byte[size]);
+        localBindings.put("newByteArray", (Function<Integer, byte[]>) size -> new byte[size]);
 
         for (DataType type : DataType.values()) {
-            bindings.put(type.name(), type);
+            localBindings.put(type.name(), type);
         }
 
-        bindings.remove("exit");
-        bindings.remove("quit");
+        localBindings.remove("exit");
+        localBindings.remove("quit");
 
-        return bindings;
+        return localBindings;
     }
 
     @Override

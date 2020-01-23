@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -24,14 +24,14 @@ import org.slf4j.LoggerFactory;
 
 public class ClockServiceImpl implements ConfigurableComponent, ClockService {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(ClockServiceImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(ClockServiceImpl.class);
 
     @SuppressWarnings("unused")
-    private ComponentContext m_ctx;
+    private ComponentContext ctx;
     @SuppressWarnings("unused")
-    private EventAdmin m_eventAdmin;
+    private EventAdmin eventAdmin;
     @SuppressWarnings("unused")
-    private Map<String, Object> m_properties;
+    private Map<String, Object> properties;
 
     // ----------------------------------------------------------------
     //
@@ -40,11 +40,11 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService {
     // ----------------------------------------------------------------
 
     public void setEventAdmin(EventAdmin eventAdmin) {
-        this.m_eventAdmin = eventAdmin;
+        this.eventAdmin = eventAdmin;
     }
 
     public void unsetEventAdmin(EventAdmin eventAdmin) {
-        this.m_eventAdmin = null;
+        this.eventAdmin = null;
     }
 
     // ----------------------------------------------------------------
@@ -54,24 +54,24 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService {
     // ----------------------------------------------------------------
 
     protected void activate(ComponentContext componentContext) {
-        s_logger.info("Activate. Current Time: {}", new Date());
+        logger.info("Activate. Current Time: {}", new Date());
 
         // save the bundle context
-        this.m_ctx = componentContext;
+        this.ctx = componentContext;
     }
 
     protected void deactivate(ComponentContext componentContext) {
-        s_logger.info("Deactivate...");
+        logger.info("Deactivate...");
     }
 
     public void updated(Map<String, Object> properties) {
-        s_logger.info("Updated...");
+        logger.info("Updated...");
         try {
 
             // save the properties
-            this.m_properties = properties;
+            this.properties = properties;
         } catch (Throwable t) {
-            s_logger.error("Error updating ClockService Configuration", t);
+            logger.error("Error updating ClockService Configuration", t);
         }
     }
 

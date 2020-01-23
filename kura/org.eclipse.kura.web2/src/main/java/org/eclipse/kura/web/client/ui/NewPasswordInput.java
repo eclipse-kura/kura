@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Eurotech and/or its affiliates and others
+ * Copyright (c) 2019, 2020 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -34,24 +34,24 @@ public class NewPasswordInput extends Input {
 
     @SuppressWarnings("unchecked")
     public void setValidatorsFrom(final GwtConsoleUserOptions userOptions) {
-        this.setValidators();
+        setValidators();
 
         final int minPasswordLength = userOptions.getPasswordMinimumLength();
 
         if (minPasswordLength > 0) {
-            this.addValidator(passwordLengthValidator(minPasswordLength));
+            addValidator(passwordLengthValidator(minPasswordLength));
         }
 
         if (userOptions.getPasswordRequireDigits()) {
-            this.addValidator(containsDigitsValidator());
+            addValidator(containsDigitsValidator());
         }
 
         if (userOptions.getPasswordRequireBothCases()) {
-            this.addValidator(containsBothCases());
+            addValidator(containsBothCases());
         }
 
         if (userOptions.getPasswordRequireSpecialChars()) {
-            this.addValidator(containsSpecialChars());
+            addValidator(containsSpecialChars());
         }
     }
 

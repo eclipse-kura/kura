@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Red Hat and others
+ * Copyright (c) 2011, 2020 Red Hat and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -47,14 +47,14 @@ public class KuraCloudComponent extends DefaultComponent {
 
     @Override
     protected void doStart() throws Exception {
-        final CloudService cloudService = lookupCloudService();
+        final CloudService cloudServiceInstance = lookupCloudService();
 
-        if (cloudService == null) {
+        if (cloudServiceInstance == null) {
             throw new IllegalStateException(
                     "'cloudService' is not set and not found in Camel context service registry");
         }
 
-        this.cache = new CloudClientCacheImpl(cloudService);
+        this.cache = new CloudClientCacheImpl(cloudServiceInstance);
 
         super.doStart();
     }

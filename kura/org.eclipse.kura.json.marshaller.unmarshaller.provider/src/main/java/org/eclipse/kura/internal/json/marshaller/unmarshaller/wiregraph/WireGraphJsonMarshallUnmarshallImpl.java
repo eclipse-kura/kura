@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Eurotech and/or its affiliates and others
+ * Copyright (c) 2019, 2020 Eurotech and/or its affiliates and others
  *
  *   All rights reserved. This program and the accompanying materials
  *   are made available under the terms of the Eclipse Public License v1.0
@@ -26,6 +26,7 @@ import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 
+@SuppressWarnings("checkstyle:hideUtilityClassConstructor")
 public class WireGraphJsonMarshallUnmarshallImpl {
     
     private static final String RENDERING_PROPERTIES_KEY = "renderingProperties";

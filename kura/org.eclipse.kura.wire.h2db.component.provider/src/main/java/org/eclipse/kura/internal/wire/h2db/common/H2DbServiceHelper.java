@@ -17,7 +17,6 @@ import java.sql.SQLException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.db.H2DbService;
 
 /**
@@ -49,7 +48,7 @@ public final class H2DbServiceHelper {
      * @param dbService
      *            the {@link H2DbService}
      * @return the instance of {@link H2DbServiceHelper}
-     * @throws KuraRuntimeException
+     * @throws org.eclipse.kura.KuraRuntimeException
      *             if argument is null
      */
     public static H2DbServiceHelper of(final H2DbService dbService) {
@@ -85,7 +84,7 @@ public final class H2DbServiceHelper {
     }
 
     public <T> T withConnection(final H2DbService.ConnectionCallable<T> callable) throws SQLException {
-        return dbService.withConnection(callable);
+        return this.dbService.withConnection(callable);
     }
 
     /**

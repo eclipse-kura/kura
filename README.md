@@ -25,12 +25,12 @@ For more information, see the [Eclipse project proposal](http://www.eclipse.org/
 System Requirements
 -------------------
 
-Eclipse Kura is compatible with Java 8 (`Bundle-RequiredExecutionEnåvironment: JavaSE-1.8`) and OSGi R6.
+Eclipse Kura requires at least Java 8 and OSGi R6. All bundles can make use of a Java 8 as execution environment. All bundles must be limited to the "compact2" profile of Java.
 
 
 Development Model
 -----------------
-Development on Kura follows a [variant of the gitflow model](https://github.com/eclipse/kura/wiki/New-Kura-Git-Workflow).  Development is made on the [develop branch](/eclipse/kura/tree/develop). The master branch is not used anymore.
+Development on Kura follows the [gitflow model](http://nvie.com/posts/a-successful-git-branching-model/).  Thus, the working copy is in the develop branch, and the master branch is used for releases.
 
 
 Getting Started
@@ -39,50 +39,6 @@ Getting Started
 Development for Kura can be done in Eclipse IDE using the Kura Development Environment, in a gateway or in a Docker container.
 
 ## Development Environment
-
-### Supported Development Platforms
-The Eclipse Installer based setup works for the main used platforms like Linux, Mac Os and Windows.
-
-### Prerequisites
-Before installing Kura, you need to have the following programs installed in your OS
-* JDK 1.8
-* Maven 3.5.x
-
-#### Installing Prerequisites in Mac OS 
-Using [Brew](https://brew.sh/) you can easily install both Java and Maven from the command line.
-
-Use the following commands in a terminal
-
-For Java  
-```
-brew tap adoptopenjdk/openjdk 
-brew cask install adoptopenjdk8   
-```
-Run `java -version` to make sure it is installed correctly.  
-
-For Maven
-```
-brew install maven@3.5
-```
-Run `mvn -version`to ensure that Maven has been added to the PATH.
-If Maven cannot be found, try running `brew link maven@3.5 --force`.  
-
-#### Installing Prerequisites in Linux
-For Java
-```
-sudo apt install openjdk-8-jdk
-```
-For Maven
-Download the Maven X version from the [Apache Archives](https://archive.apache.org/dist/maven/maven-3/)
-
-Move the tarball to the X folder and run this command 
-
-```
-tar xzvf apache-maven-3.X.X-bin.tar.gz
-```
-Then add the bin folder to the PATH in .....
-
-### Eclipse IDE
 The simplest way to start developing on Eclipse Kura is to use an Eclipse Installer based setup.
 To correctly setup the environment, proceed as follows:
 - Start the Eclipse Installer
@@ -98,8 +54,12 @@ To correctly setup the environment, proceed as follows:
 
 At first startup Eclipse IDE will checkout the code, perform a full build and configure a few Working Sets. Now you are ready to develop on Eclipse Kura.
 
+For further information, building and deployment instructions, please visit the [getting started page](https://wiki.eclipse.org/Kura/Getting_Started).
+
 To raise an issue, please report a bug on [GitHub issues](https://github.com/eclipse/kura/issues/new).
 
+### Supported Development Platforms
+The Eclipse Installer based setup works for the main used platforms like Linux, Mac Os and Windows.
 
 
 ### Known Issues

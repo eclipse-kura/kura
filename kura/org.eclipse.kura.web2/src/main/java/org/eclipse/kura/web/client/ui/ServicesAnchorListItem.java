@@ -37,7 +37,7 @@ public class ServicesAnchorListItem extends AnchorListItem {
     ServicesAnchorListItem instance;
     private static final Messages MSGS = GWT.create(Messages.class);
 
-    public ServicesAnchorListItem(GwtConfigComponent service, EntryClassUi mainUi) {
+    public ServicesAnchorListItem (GwtConfigComponent service, EntryClassUi mainUi) {
         super();
         this.ui = mainUi;
         this.item = service;
@@ -47,13 +47,13 @@ public class ServicesAnchorListItem extends AnchorListItem {
         if (icon == null) {
             String imageURL = getImagePath();
             if (imageURL != null) {
-                StringBuilder imageTag = new StringBuilder();
-                imageTag.append("<img src='");
-                imageTag.append(imageURL);
-                imageTag.append("' height='14' width='14'/>");
-                imageTag.append(" ");
-                imageTag.append(this.item.getComponentName());
-                super.anchor.setHTML(imageTag.toString());
+	            StringBuilder imageTag = new StringBuilder();
+	            imageTag.append("<img src='");
+	            imageTag.append(imageURL);
+	            imageTag.append("' height='14' width='14'/>");
+	            imageTag.append(" ");
+	            imageTag.append(this.item.getComponentName());
+	            super.anchor.setHTML(imageTag.toString());
             } else {
                 super.setIcon(IconType.CHEVRON_CIRCLE_RIGHT);
                 super.setText(this.item.getComponentName());

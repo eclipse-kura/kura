@@ -529,6 +529,7 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
             }
         });
         this.configure.addMouseOutHandler(event -> resetHelp());
+
         this.configure.addChangeHandler(event -> {
             setDirty(true);
             TabTcpIpUi.this.tabs.adjustInterfaceTabs();
@@ -567,6 +568,7 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
             }
         });
         this.status.addMouseOutHandler(event -> resetHelp());
+
         this.status.addChangeHandler(event -> {
             setDirty(true);
             TabTcpIpUi.this.tabs.adjustInterfaceTabs();
@@ -599,7 +601,6 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
                                     }
                                 }
                             }
-
                         });
             }
         });

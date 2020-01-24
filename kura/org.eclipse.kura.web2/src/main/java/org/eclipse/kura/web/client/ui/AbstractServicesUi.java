@@ -235,9 +235,13 @@ public abstract class AbstractServicesUi extends Composite {
                 return 0;
             }
         });
+        
         textBox.addKeyUpHandler(event -> {
             textBox.validate(true);
-            setDirty(true);
+        });
+        
+        textBox.addValueChangeHandler(event -> {
+        	setDirty(true);
         });
 
         if (param.getId().endsWith(TARGET_SUFFIX)) {

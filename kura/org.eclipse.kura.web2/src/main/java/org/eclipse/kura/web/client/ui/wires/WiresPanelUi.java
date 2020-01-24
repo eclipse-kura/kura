@@ -47,6 +47,8 @@ import org.gwtbootstrap3.client.ui.PanelBody;
 import org.gwtbootstrap3.client.ui.PanelHeader;
 import org.gwtbootstrap3.client.ui.Row;
 import org.gwtbootstrap3.client.ui.constants.AlertType;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -66,6 +68,8 @@ public class WiresPanelUi extends Composite
     static final String FACTORY_PID_DROP_PREFIX = "factory://";
     private static final String WIRE_ASSET_PID = "org.eclipse.kura.wire.WireAsset";
     private static final String DRIVER_PID = "driver.pid";
+    
+    //private static final Logger logger = LoggerFactory.getLogger(WiresPanelUi.class);
 
     @UiField
     Button btnSave;
@@ -197,15 +201,51 @@ public class WiresPanelUi extends Composite
         }
 
         Collections.sort(sortedDescriptors,
-                (o1, o2) -> Integer.compare(o1.getMinInputPorts() * 2 + o1.getMinOutputPorts(),
-                        o2.getMinInputPorts() * 2 + o2.getMinOutputPorts()));
-
-        for (GwtWireComponentDescriptor descriptor : sortedDescriptors) {
-            final WireComponentsAnchorListItem item = new WireComponentsAnchorListItem(getComponentLabel(descriptor),
-                    descriptor.getFactoryPid(), descriptor.getMinInputPorts() > 0, descriptor.getMinOutputPorts() > 0);
-            item.setListener(listener);
-            this.wireComponentsMenu.add(item);
+                (o1, o2) -> o1.getName().compareToIgnoreCase(o2.getName()));
+        
+        for (int i = 0; i < sortedDescriptors.size() - 1; i++) {
+        	GwtWireComponentDescriptor descriptor = sortedDescriptors.get(i);
+        	
+        	final WireComponentsAnchorListItem item = new WireComponentsAnchorListItem(getComponentLabel(descriptor), 
+        			descriptor.getFactoryPid(), descriptor.getMinInputPorts() > 0, descriptor.getMinOutputPorts() > 0);
+        	
+        	for (int j = i + 1; j < sortedDescriptors.size(); j++) {
+        		GwtWireComponentDescriptor nextDescriptor = sortedDescriptors.get(j);
+        		String nextItemLabel = getComponentLabel(nextDescriptor);
+        		
+        		if (compareAndStackWireComponents(item, nextItemLabel)) {
+        			//logger.log("...setting {} and {} stacked", getComponentLabel(descriptor), getComponentLabel(nextDescriptor));
+        			descriptor.setStacked(true);
+        			nextDescriptor.setStacked(true);
+        		} else {
+        			break;
+        		}
+        	}
+        	
+        	if (descriptor.isStacked()) {
+        		//logger.log("... Is stacked! padding {} left 10 pixels", getComponentLabel(descriptor));
+        		item.setPaddingLeft(10);
+        	} else {
+        		//logger.log("... Is NOT stacked??? {}", getComponentLabel(descriptor));
+        		item.setPaddingLeft(0);
+        	}
+        	
+        	item.setListener(listener);
+        	this.wireComponentsMenu.add(item);
         }
+    }
+    
+    private boolean compareAndStackWireComponents(WireComponentsAnchorListItem item, String nextItemLabel) {
+    	String wireLabel = item.getComponentName();
+		
+		if (wireLabel.contains(" ") && nextItemLabel.contains(" ")) {
+			String wireLabel1ss = wireLabel.substring(0, wireLabel.indexOf(' '));
+			String wireLabel2ss = nextItemLabel.substring(0, nextItemLabel.indexOf(' '));
+			
+			return wireLabel1ss.compareTo(wireLabel2ss) == 0;
+		} else {
+			return wireLabel.compareTo(nextItemLabel) == 0;
+		}
     }
 
     private void loadStaticInformation(GwtWireComposerStaticInfo staticInfo) {

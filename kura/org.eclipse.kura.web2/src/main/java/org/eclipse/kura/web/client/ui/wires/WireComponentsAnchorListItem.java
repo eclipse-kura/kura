@@ -21,6 +21,7 @@ public class WireComponentsAnchorListItem extends AnchorListItem {
 
     private final boolean isEmitter;
     private final boolean isReceiver;
+    private final String componentName;
     private Listener listener;
 
     public WireComponentsAnchorListItem(final String label, final String factoryPid, final boolean isEmitter,
@@ -28,6 +29,7 @@ public class WireComponentsAnchorListItem extends AnchorListItem {
         super();
         this.isEmitter = isEmitter;
         this.isReceiver = isReceiver;
+        this.componentName = label;
         super.setIcon(getFactoryIcon());
         super.setText(label);
 
@@ -52,6 +54,10 @@ public class WireComponentsAnchorListItem extends AnchorListItem {
             return IconType.LONG_ARROW_LEFT;
         }
         return IconType.LONG_ARROW_RIGHT;
+    }
+    
+    public String getComponentName() {
+    	return this.componentName;
     }
 
     public void setListener(Listener listener) {

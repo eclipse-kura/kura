@@ -28,6 +28,7 @@ public final class GwtWireComponentDescriptor extends GwtBaseModel implements Se
     private int defaultOutputPorts;
     private Map<Integer, String> inputPortNames;
     private Map<Integer, String> outputPortNames;
+    private boolean stacked;
 
     public GwtWireComponentDescriptor() {
     }
@@ -45,6 +46,7 @@ public final class GwtWireComponentDescriptor extends GwtBaseModel implements Se
         this.defaultOutputPorts = defaultOutputPorts;
         this.inputPortNames = inputPortNames;
         this.outputPortNames = outputPortNames;
+        this.stacked = false;
     }
 
     public String getName() {
@@ -121,5 +123,13 @@ public final class GwtWireComponentDescriptor extends GwtBaseModel implements Se
 
     public void setOutputPortNames(Map<Integer, String> outputPortNames) {
         this.outputPortNames = outputPortNames;
+    }
+    
+    public boolean isStacked() {
+    	return this.stacked;
+    }
+    
+    public void setStacked (boolean stacked) {
+    	this.stacked = stacked;
     }
 }

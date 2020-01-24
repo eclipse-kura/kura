@@ -47,8 +47,6 @@ import org.gwtbootstrap3.client.ui.PanelBody;
 import org.gwtbootstrap3.client.ui.PanelHeader;
 import org.gwtbootstrap3.client.ui.Row;
 import org.gwtbootstrap3.client.ui.constants.AlertType;
-//import org.slf4j.Logger;
-//import org.slf4j.LoggerFactory;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -68,8 +66,6 @@ public class WiresPanelUi extends Composite
     static final String FACTORY_PID_DROP_PREFIX = "factory://";
     private static final String WIRE_ASSET_PID = "org.eclipse.kura.wire.WireAsset";
     private static final String DRIVER_PID = "driver.pid";
-    
-    //private static final Logger logger = LoggerFactory.getLogger(WiresPanelUi.class);
 
     @UiField
     Button btnSave;
@@ -214,7 +210,6 @@ public class WiresPanelUi extends Composite
         		String nextItemLabel = getComponentLabel(nextDescriptor);
         		
         		if (compareAndStackWireComponents(item, nextItemLabel)) {
-        			//logger.log("...setting {} and {} stacked", getComponentLabel(descriptor), getComponentLabel(nextDescriptor));
         			descriptor.setStacked(true);
         			nextDescriptor.setStacked(true);
         		} else {
@@ -223,10 +218,8 @@ public class WiresPanelUi extends Composite
         	}
         	
         	if (descriptor.isStacked()) {
-        		//logger.log("... Is stacked! padding {} left 10 pixels", getComponentLabel(descriptor));
         		item.setPaddingLeft(10);
         	} else {
-        		//logger.log("... Is NOT stacked??? {}", getComponentLabel(descriptor));
         		item.setPaddingLeft(0);
         	}
         	

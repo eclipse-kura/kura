@@ -39,6 +39,8 @@ import org.eclipse.kura.web.shared.model.GwtWireComponentDescriptor;
 import org.eclipse.kura.web.shared.model.GwtWireComposerStaticInfo;
 import org.eclipse.kura.web.shared.model.GwtWireConfiguration;
 import org.eclipse.kura.web.shared.model.GwtWireGraphConfiguration;
+import org.gwtbootstrap3.client.shared.event.HideHandler;
+import org.gwtbootstrap3.client.shared.event.ShowHandler;
 import org.gwtbootstrap3.client.ui.Alert;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.NavPills;
@@ -67,6 +69,14 @@ public class WiresPanelUi extends Composite
     static final String FACTORY_PID_DROP_PREFIX = "factory://";
     private static final String WIRE_ASSET_PID = "org.eclipse.kura.wire.WireAsset";
     private static final String DRIVER_PID = "driver.pid";
+    
+    private ShowHandler producerShowHandler;
+    private ShowHandler consumerShowHandler;
+    private ShowHandler producerConsumerShowHandler;
+    
+    private HideHandler producerHideHandler;
+    private HideHandler consumerHideHandler;
+    private HideHandler producerConsumerHideHandler;
 
     @UiField
     Button btnSave;
@@ -235,6 +245,14 @@ public class WiresPanelUi extends Composite
         	} else {
         		item.setPaddingLeft(0);
         	}
+        	
+        	this.producerCollapse.addShowHandler(producerShowHandler);
+        	this.consumerCollapse.addShowHandler(consumerShowHandler);
+        	this.producerConsumerCollapse.addShowHandler(producerConsumerShowHandler);
+        	
+        	this.producerCollapse.addHideHandler(producerHideHandler);
+        	this.consumerCollapse.addHideHandler(consumerHideHandler);
+        	this.producerConsumerCollapse.addHideHandler(producerConsumerHideHandler);
         	
         	item.setListener(listener);
         	//this.wireComponentsMenu.add(item);

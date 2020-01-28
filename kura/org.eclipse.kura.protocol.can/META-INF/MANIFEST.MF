@@ -4,7 +4,7 @@ Bundle-Name: org.eclipse.kura.protocol.can
 Bundle-SymbolicName: org.eclipse.kura.protocol.can;singleton:=true
 Bundle-Version: 2.0.500.qualifier
 Bundle-Vendor: Eclipse Kura
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: org.eclipse.kura;version="[1.0,2.0)",
  org.osgi.framework;version="1.5.0",
  org.osgi.service.cm;version="1.4.0",

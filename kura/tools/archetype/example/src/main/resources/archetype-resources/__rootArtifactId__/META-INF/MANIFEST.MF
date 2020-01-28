@@ -8,7 +8,7 @@ Bundle-Name: ${package}
 Bundle-SymbolicName: ${package};singleton:=true
 Bundle-Version: ${manifestVersion}
 Bundle-Vendor: Eclipse Kura
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Service-Component: OSGI-INF/*.xml
 Bundle-ActivationPolicy: lazy
 Import-Package: org.eclipse.kura.cloud; version="[1.0,2.0)",

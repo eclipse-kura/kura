@@ -44,6 +44,7 @@ import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.NavPills;
 import org.gwtbootstrap3.client.ui.Panel;
 import org.gwtbootstrap3.client.ui.PanelBody;
+import org.gwtbootstrap3.client.ui.PanelCollapse;
 import org.gwtbootstrap3.client.ui.PanelHeader;
 import org.gwtbootstrap3.client.ui.Row;
 import org.gwtbootstrap3.client.ui.constants.AlertType;
@@ -94,8 +95,8 @@ public class WiresPanelUi extends Composite
     @UiField
     Row configurationRow;
 
-    @UiField
-    NavPills wireComponentsMenu;
+    //@UiField
+    //NavPills wireComponentsMenu;
 
     @UiField
     Widget composer;
@@ -105,6 +106,15 @@ public class WiresPanelUi extends Composite
 
     @UiField
     AlertDialog confirmDialog;
+    
+    @UiField
+    PanelCollapse producerCollapse;
+    
+    @UiField
+    PanelCollapse consumerCollapse;
+    
+    @UiField
+    PanelCollapse producerConsumerCollapse;
 
     interface WiresPanelUiUiBinder extends UiBinder<Widget, WiresPanelUi> {
     }
@@ -186,7 +196,10 @@ public class WiresPanelUi extends Composite
     }
 
     private void populateComponentsPanel() {
-        this.wireComponentsMenu.clear();
+        //this.wireComponentsMenu.clear();
+        this.producerCollapse.clear();
+        this.consumerCollapse.clear();
+        this.producerConsumerCollapse.clear();
 
         final WireComponentsAnchorListItem.Listener listener = WiresPanelUi.this::showComponentCreationDialog;
 
@@ -224,7 +237,8 @@ public class WiresPanelUi extends Composite
         	}
         	
         	item.setListener(listener);
-        	this.wireComponentsMenu.add(item);
+        	//this.wireComponentsMenu.add(item);
+        	//this.producerCollapse.add(item);
         }
     }
     

@@ -200,7 +200,7 @@ public class ExecutorUtil {
             }
         }
         // Sort pids in reverse order (useful when stop processes...)
-        return pids.entrySet().stream().sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
+        return pids.entrySet().stream().sorted(Map.Entry.<String, Integer> comparingByValue().reversed())
                 .collect(Collectors.toMap(Map.Entry::getKey, e -> new LinuxPid(e.getValue()), (e1, e2) -> e1,
                         LinkedHashMap::new));
     }
@@ -245,7 +245,7 @@ public class ExecutorUtil {
     private static DefaultExecutor configureExecutor(Command command) {
         DefaultExecutor executor = new DefaultExecutor();
         int timeout = command.getTimeout();
-        ExecuteWatchdog watchdog = timeout == -1 ? new ExecuteWatchdog(ExecuteWatchdog.INFINITE_TIMEOUT)
+        ExecuteWatchdog watchdog = timeout <= 0 ? new ExecuteWatchdog(ExecuteWatchdog.INFINITE_TIMEOUT)
                 : new ExecuteWatchdog(timeout * 1000L);
         executor.setWatchdog(watchdog);
 

@@ -94,7 +94,6 @@ public class WiresPanelUi extends Composite
 
     @UiField
     Row configurationRow;
-
     @UiField
     Widget composer;
 

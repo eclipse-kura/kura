@@ -24,7 +24,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <tycho-version>0.26.0</tycho-version>
+        <tycho-version>1.6.0</tycho-version>
 
         <!-- SCM: Note that we are in the "kura" sub-dir here already -->
         <tycho.scmUrl>scm:git:ssh://github.com/eclipse/kura/kura</tycho.scmUrl>

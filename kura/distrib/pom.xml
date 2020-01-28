@@ -30,7 +30,7 @@
     <name>distrib</name>
     <url>http://maven.apache.org</url>
     <properties>
-        <tycho-version>0.26.0</tycho-version>
+        <tycho-version>1.6.0</tycho-version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <zip_workspace.prefix>user_workspace_archive_${project.version}</zip_workspace.prefix>
 

@@ -23,7 +23,7 @@
 
 	<properties>
 		<kura.basedir>${project.basedir}/..</kura.basedir>
-		<tycho.extras.version>0.26.0</tycho.extras.version>
+		<tycho.extras.version>1.6.0</tycho.extras.version>
 	</properties>
 	
 	<build>

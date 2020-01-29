@@ -461,7 +461,7 @@ public class TabModemUi extends Composite implements NetworkTab {
 
         // INTERFACE NUMBER
         this.labelNumber.setText(MSGS.netModemInterfaceNum() + "*");
-        this.number.addBlurHandler(event -> {
+        this.number.addValueChangeHandler(event -> {
             setDirty(true);
             if (TabModemUi.this.number.getText().trim() != null
                     && (!TabModemUi.this.number.getText().trim().matches(REGEX_NUM)
@@ -512,7 +512,7 @@ public class TabModemUi extends Composite implements NetworkTab {
                 }
             }
         });
-        this.dial.addBlurHandler(event -> {
+        this.dial.addValueChangeHandler(event -> {
             setDirty(true);
             if (TabModemUi.this.dial.getText() == null || "".equals(TabModemUi.this.dial.getText().trim())) {
                 TabModemUi.this.groupDial.setValidationState(ValidationState.ERROR);
@@ -543,7 +543,7 @@ public class TabModemUi extends Composite implements NetworkTab {
             }
         });
         this.apn.addMouseOutHandler(event -> resetHelp());
-        this.apn.addBlurHandler(event -> {
+        this.apn.addValueChangeHandler(event -> {
             setDirty(true);
             if (TabModemUi.this.apn.getText() == null || "".equals(TabModemUi.this.apn.getText().trim())) {
                 if (TabModemUi.this.apn.isEnabled()) {
@@ -604,7 +604,7 @@ public class TabModemUi extends Composite implements NetworkTab {
             }
         });
         this.reset.addMouseOutHandler(event -> resetHelp());
-        this.reset.addBlurHandler(event -> {
+        this.reset.addValueChangeHandler(event -> {
             setDirty(true);
             if (TabModemUi.this.reset.getText().trim() != null
                     && (!TabModemUi.this.reset.getText().trim().matches(REGEX_NUM)
@@ -647,7 +647,7 @@ public class TabModemUi extends Composite implements NetworkTab {
             }
         });
         this.maxfail.addMouseOutHandler(event -> resetHelp());
-        this.maxfail.addBlurHandler(event -> {
+        this.maxfail.addValueChangeHandler(event -> {
             setDirty(true);
             if (TabModemUi.this.maxfail.getText().trim() != null
                     && (!TabModemUi.this.maxfail.getText().trim().matches(REGEX_NUM)
@@ -670,7 +670,7 @@ public class TabModemUi extends Composite implements NetworkTab {
             }
         });
         this.idle.addMouseOutHandler(event -> resetHelp());
-        this.idle.addBlurHandler(event -> {
+        this.idle.addValueChangeHandler(event -> {
             setDirty(true);
             if (TabModemUi.this.idle.getText().trim() != null
                     && (!TabModemUi.this.idle.getText().trim().matches(REGEX_NUM)
@@ -703,7 +703,7 @@ public class TabModemUi extends Composite implements NetworkTab {
             }
         });
         this.interval.addMouseOutHandler(event -> resetHelp());
-        this.interval.addBlurHandler(event -> {
+        this.interval.addValueChangeHandler(event -> {
             setDirty(true);
             if (TabModemUi.this.interval.getText().trim() != null
                     && (!TabModemUi.this.interval.getText().trim().matches(REGEX_NUM)
@@ -724,7 +724,7 @@ public class TabModemUi extends Composite implements NetworkTab {
             }
         });
         this.failure.addMouseOutHandler(event -> resetHelp());
-        this.failure.addBlurHandler(event -> {
+        this.failure.addValueChangeHandler(event -> {
             setDirty(true);
             if (TabModemUi.this.failure.getText().trim() != null
                     && (!TabModemUi.this.failure.getText().trim().matches(REGEX_NUM)

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -33,7 +33,7 @@ public class ModemInterfaceConfigImpl extends ModemInterfaceImpl<ModemInterfaceA
 
         // Copy the NetInterfaceAddresses
         List<? extends ModemInterfaceAddress> otherNetInterfaceAddresses = other.getNetInterfaceAddresses();
-        ArrayList<ModemInterfaceAddressConfig> interfaceAddresses = new ArrayList<ModemInterfaceAddressConfig>();
+        ArrayList<ModemInterfaceAddressConfig> interfaceAddresses = new ArrayList<>();
         if (otherNetInterfaceAddresses != null) {
             for (ModemInterfaceAddress modemInterfaceAddress : otherNetInterfaceAddresses) {
                 ModemInterfaceAddressConfigImpl copiedInterfaceAddressImpl = new ModemInterfaceAddressConfigImpl(
@@ -47,7 +47,7 @@ public class ModemInterfaceConfigImpl extends ModemInterfaceImpl<ModemInterfaceA
                 interfaceAddresses.add(copiedInterfaceAddressImpl);
             }
         }
-        if (interfaceAddresses.size() == 0) {
+        if (interfaceAddresses.isEmpty()) {
             // add at least one empty interface implementation.
             // It is needed as a container for the NetConfig objects
             interfaceAddresses.add(new ModemInterfaceAddressConfigImpl());

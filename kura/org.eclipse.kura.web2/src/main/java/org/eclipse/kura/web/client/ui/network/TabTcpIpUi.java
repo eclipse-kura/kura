@@ -431,7 +431,7 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
             }
         });
         this.dns.addMouseOutHandler(event -> resetHelp());
-        this.dns.addChangeHandler(event -> {
+        this.dns.addValueChangeHandler(event -> {
             setDirty(true);
 
             if (TabTcpIpUi.this.dns.getText().trim().length() == 0) {
@@ -466,7 +466,7 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
             }
         });
         this.gateway.addMouseOutHandler(event -> resetHelp());
-        this.gateway.addChangeHandler(event -> {
+        this.gateway.addValueChangeHandler(event -> {
             setDirty(true);
             if (!TabTcpIpUi.this.gateway.getText().trim().matches(FieldType.IPv4_ADDRESS.getRegex())
                     && TabTcpIpUi.this.gateway.getText().trim().length() > 0) {
@@ -487,7 +487,7 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
             }
         });
         this.subnet.addMouseOutHandler(event -> resetHelp());
-        this.subnet.addChangeHandler(event -> {
+        this.subnet.addValueChangeHandler(event -> {
             setDirty(true);
             if (!TabTcpIpUi.this.subnet.getText().trim().matches(FieldType.IPv4_ADDRESS.getRegex())
                     && TabTcpIpUi.this.subnet.getText().trim().length() > 0) {
@@ -508,7 +508,7 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
             }
         });
         this.ip.addMouseOutHandler(event -> resetHelp());
-        this.ip.addBlurHandler(event -> {
+        this.ip.addValueChangeHandler(event -> {
             setDirty(true);
             if (!TabTcpIpUi.this.ip.getText().trim().matches(FieldType.IPv4_ADDRESS.getRegex())
                     || TabTcpIpUi.this.ip.getText().trim().length() <= 0) {

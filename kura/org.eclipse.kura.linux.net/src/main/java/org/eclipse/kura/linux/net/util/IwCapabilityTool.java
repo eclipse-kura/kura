@@ -149,7 +149,7 @@ public class IwCapabilityTool {
             final int phy = parseWiphyIndex(exec(new String[] { "iw", interfaceName, "info" }, executorService))
                     .orElseThrow(() -> new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR,
                             "failed to get phy index for " + interfaceName));
-            return parseCapabilities(exec(new String[] { "iw", "phy", String.valueOf(phy), "info" }, executorService));
+            return parseCapabilities(exec(new String[] { "iw", "phy" + String.valueOf(phy), "info" }, executorService));
 
         } catch (final KuraException e) {
             throw e;

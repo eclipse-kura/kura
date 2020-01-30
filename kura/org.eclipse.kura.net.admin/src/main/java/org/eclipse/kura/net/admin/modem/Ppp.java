@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -23,9 +23,9 @@ import org.slf4j.LoggerFactory;
 
 public class Ppp implements IModemLinkService {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(Ppp.class);
+    private static final Logger logger = LoggerFactory.getLogger(Ppp.class);
 
-    private static final Object lock = new Object();
+    private static final Object LOCK = new Object();
     private final String iface;
     private final String port;
     private final CommandExecutorService executorService;
@@ -48,7 +48,7 @@ public class Ppp implements IModemLinkService {
     @Override
     public void disconnect() throws KuraException {
 
-        s_logger.info("disconnecting :: stopping PPP monitor ...");
+        logger.info("disconnecting :: stopping PPP monitor ...");
         this.pppLinux.disconnect(this.iface, this.port);
 
         try {
@@ -78,7 +78,7 @@ public class Ppp implements IModemLinkService {
 
     @Override
     public PppState getPppState() throws KuraException {
-        synchronized (lock) {
+        synchronized (LOCK) {
             final PppState pppState;
             final boolean pppdRunning = this.pppLinux.isPppProcessRunning(this.iface, this.port);
             final String ip = getIPaddress();

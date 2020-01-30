@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -36,7 +36,7 @@ public class WpaSupplicantConfigReader extends WifiConfigReaderHelper implements
 
     private static final Logger logger = LoggerFactory.getLogger(WpaSupplicantConfigReader.class);
     private static final String NET_INTERFACE = "net.interface.";
-    private static final int[] defaultChannels = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 };
+    private static final int[] DEFAULT_CHANNELS = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 };
 
     private static WpaSupplicantConfigReader instance;
 
@@ -132,7 +132,7 @@ public class WpaSupplicantConfigReader extends WifiConfigReaderHelper implements
     }
 
     protected int[] getChannels(Properties props) {
-        int[] channels = defaultChannels;
+        int[] channels = DEFAULT_CHANNELS;
 
         String scanFreq = props.getProperty("scan_freq");
         if (scanFreq != null) {
@@ -216,7 +216,7 @@ public class WpaSupplicantConfigReader extends WifiConfigReaderHelper implements
         wifiConfig.setHardwareMode("");
         wifiConfig.setPairwiseCiphers(null);
         wifiConfig.setGroupCiphers(null);
-        wifiConfig.setChannels(defaultChannels);
+        wifiConfig.setChannels(DEFAULT_CHANNELS);
         wifiConfig.setBgscan(new WifiBgscan(""));
 
         return wifiConfig;

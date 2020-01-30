@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and others
+ * Copyright (c) 2011, 2020 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,7 +8,7 @@
  *
  * Contributors:
  *     Eurotech
- *     Red Hat Inc - Re-use SystemService for configuration
+ *     Red Hat Inc
  *******************************************************************************/
 package org.eclipse.kura.net.admin.visitor.linux.util;
 
@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 
 public class KuranetConfig {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(KuranetConfig.class);
+    private static final Logger logger = LoggerFactory.getLogger(KuranetConfig.class);
 
     private static final String KURA_USER_CONFIG_DIR;
     private static final String KURANET_FILENAME;
@@ -57,11 +57,15 @@ public class KuranetConfig {
             ctx.ungetService(systemServiceRef);
         }
     }
+    
+    private KuranetConfig() {
+        
+    }
 
     public static Properties getProperties() {
         Properties kuraExtendedProps = new Properties();
 
-        s_logger.debug("Getting {}", KURANET_FILENAME);
+        logger.debug("Getting {}", KURANET_FILENAME);
 
         File kuranetFile = new File(KURANET_FILENAME);
 
@@ -72,18 +76,18 @@ public class KuranetConfig {
                 fis = new FileInputStream(kuranetFile);
                 kuraExtendedProps.load(fis);
             } catch (Exception e) {
-                s_logger.error("Could not load {}", KURANET_FILENAME, e);
+                logger.error("Could not load {}", KURANET_FILENAME, e);
             } finally {
                 if (null != fis) {
                     try {
                         fis.close();
                     } catch (IOException e) {
-                        s_logger.error("Could not load {}", KURANET_FILENAME, e);
+                        logger.error("Could not load {}", KURANET_FILENAME, e);
                     }
                 }
             }
         } else {
-            s_logger.debug("File does not exist: {}", KURANET_FILENAME);
+            logger.debug("File does not exist: {}", KURANET_FILENAME);
         }
 
         return kuraExtendedProps;
@@ -92,7 +96,7 @@ public class KuranetConfig {
     public static String getProperty(String key) {
         Properties props = KuranetConfig.getProperties();
         String value = props.getProperty(key);
-        s_logger.debug("Got property {} :: {}", key, value);
+        logger.debug("Got property {} :: {}", key, value);
         return value;
     }
 
@@ -112,14 +116,14 @@ public class KuranetConfig {
                 File file = new File(KURANET_FILENAME);
                 if (!FileUtils.contentEquals(tmpFile, file)) {
                     if (tmpFile.renameTo(file)) {
-                        s_logger.trace("Successfully wrote kuranet props file");
+                        logger.trace("Successfully wrote kuranet props file");
                     } else {
-                        s_logger.error("Failed to write kuranet props file");
+                        logger.error("Failed to write kuranet props file");
                         throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR,
                                 "error while building up new configuration file for kuranet props");
                     }
                 } else {
-                    s_logger.info("Not rewriting kuranet props file because it is the same");
+                    logger.info("Not rewriting kuranet props file because it is the same");
                 }
             } finally {
                 if (fos != null) {
@@ -130,7 +134,7 @@ public class KuranetConfig {
     }
 
     public static void setProperty(String key, String value) throws IOException, KuraException {
-        s_logger.debug("Setting property " + key + " :: " + value);
+        logger.debug("Setting property " + key + " :: " + value);
         Properties properties = KuranetConfig.getProperties();
 
         properties.setProperty(key, value);
@@ -140,11 +144,11 @@ public class KuranetConfig {
     public static void deleteProperty(String key) throws IOException, KuraException {
         Properties properties = KuranetConfig.getProperties();
         if (properties.containsKey(key)) {
-            s_logger.debug("Deleting property {}", key);
+            logger.debug("Deleting property {}", key);
             properties.remove(key);
             KuranetConfig.storeProperties(properties);
         } else {
-            s_logger.debug("Property does not exist {}", key);
+            logger.debug("Property does not exist {}", key);
         }
     }
 }

@@ -53,28 +53,32 @@ public class SupportedUsbModemsFactoryInfo {
         Zte_ME3630(SupportedUsbModemInfo.Zte_ME3630, ZteMe3630ModemFactory.class, ZteMe3630ConfigGenerator.class),
         SimTech_SIM7000(SupportedUsbModemInfo.SimTech_SIM7000, SimTechSim7000ModemFactory.class, SimTechSim7000ConfigGenerator.class);
 
-        private final SupportedUsbModemInfo m_usbModemInfo;
-        private final Class<? extends CellularModemFactory> m_factoryClass;
-        private final Class<? extends ModemPppConfigGenerator> m_configClass;
+        private final SupportedUsbModemInfo usbModemInfo;
+        private final Class<? extends CellularModemFactory> factoryClass;
+        private final Class<? extends ModemPppConfigGenerator> configClass;
 
         private UsbModemFactoryInfo(SupportedUsbModemInfo modemInfo, Class<? extends CellularModemFactory> factoryClass,
                 Class<? extends ModemPppConfigGenerator> configClass) {
-            this.m_usbModemInfo = modemInfo;
-            this.m_factoryClass = factoryClass;
-            this.m_configClass = configClass;
+            this.usbModemInfo = modemInfo;
+            this.factoryClass = factoryClass;
+            this.configClass = configClass;
         }
 
         public SupportedUsbModemInfo getUsbModemInfo() {
-            return this.m_usbModemInfo;
+            return this.usbModemInfo;
         }
 
         public Class<? extends CellularModemFactory> getModemFactoryClass() {
-            return this.m_factoryClass;
+            return this.factoryClass;
         }
 
         public Class<? extends ModemPppConfigGenerator> getConfigGeneratorClass() {
-            return this.m_configClass;
+            return this.configClass;
         }
+    }
+    
+    private SupportedUsbModemsFactoryInfo() {
+        
     }
 
     public static UsbModemFactoryInfo getModem(SupportedUsbModemInfo modemInfo) {

@@ -24,13 +24,13 @@ public class InterfaceState {
     /**
      *
      * @param interfaceName
-     *                          interface name as {@link String}
+     *            interface name as {@link String}
      * @param up
-     *                          if true the interface is up
+     *            if true the interface is up
      * @param link
-     *                          if true the interface has link
+     *            if true the interface has link
      * @param ipAddress
-     *                          the {@link IPAddress} assigned to the interface
+     *            the {@link IPAddress} assigned to the interface
      */
     public InterfaceState(String interfaceName, boolean up, boolean link, IPAddress ipAddress, int carrierChanges) {
         this.name = interfaceName;
@@ -83,7 +83,7 @@ public class InterfaceState {
         result = prime * result + (this.link ? 1231 : 1237);
         result = prime * result + (this.name == null ? 0 : this.name.hashCode());
         result = prime * result + (this.up ? 1231 : 1237);
-        result = prime * result + (this.carrierChanges);
+        result = prime * result + this.carrierChanges;
         return result;
     }
 

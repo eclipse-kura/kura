@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -63,13 +63,13 @@ public enum CnsOpTypes {
      */
     OPTYPE_ERROR((byte) 0x80);
 
-    private byte m_opType = 0;
+    private byte opType = 0;
 
     private CnsOpTypes(byte opType) {
-        this.m_opType = opType;
+        this.opType = opType;
     }
 
     public byte getOpType() {
-        return this.m_opType;
+        return this.opType;
     }
 }

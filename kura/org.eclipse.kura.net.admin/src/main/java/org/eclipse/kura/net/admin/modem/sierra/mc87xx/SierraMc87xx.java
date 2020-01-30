@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -277,20 +277,12 @@ public class SierraMc87xx implements HspaCellularModem {
                     if (aSysInfo.length == 5) {
                         int srvStatus = Integer.parseInt(aSysInfo[0]);
                         int roamingStatus = Integer.parseInt(aSysInfo[2]);
-                        switch (srvStatus) {
-                        case 0:
+                        if (srvStatus == 0) {
                             modemRegistrationStatus = ModemRegistrationStatus.NOT_REGISTERED;
-                            break;
-                        case 2:
-                            switch (roamingStatus) {
-                            case 0:
-                                modemRegistrationStatus = ModemRegistrationStatus.REGISTERED_HOME;
-                                break;
-                            case 1:
-                                modemRegistrationStatus = ModemRegistrationStatus.REGISTERED_ROAMING;
-                                break;
-                            }
-                            break;
+                        } else if (srvStatus == 2 && roamingStatus == 0) {
+                            modemRegistrationStatus = ModemRegistrationStatus.REGISTERED_HOME;
+                        } else if (srvStatus == 2 && roamingStatus == 1) {
+                            modemRegistrationStatus = ModemRegistrationStatus.REGISTERED_ROAMING;
                         }
                     }
                 }

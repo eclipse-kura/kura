@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -264,6 +264,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         return netConfigs;
     }
 
+    @SuppressWarnings("checkstyle:methodLength")
     @Override
     public void updateEthernetInterfaceConfig(String interfaceName, boolean autoConnect, int mtu,
             List<NetConfig> netConfigs) throws KuraException {
@@ -490,6 +491,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         }
     }
 
+    @SuppressWarnings("checkstyle:methodLength")
     @Override
     public void updateWifiInterfaceConfig(String interfaceName, boolean autoConnect, WifiAccessPoint accessPoint,
             List<NetConfig> netConfigs) throws KuraException {
@@ -749,6 +751,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         }
     }
 
+    @SuppressWarnings("checkstyle:methodLength")
     @Override
     public void updateModemInterfaceConfig(String interfaceName, String serialNum, String modemId, int pppNumber,
             boolean autoConnect, int mtu, List<NetConfig> netConfigs) throws KuraException {
@@ -1311,7 +1314,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
     //
     // ----------------------------------------------------------------
 
-    // TODO: simplify method signature. Probably we could take the mode from the wifiConfig.
+    // FIXME: simplify method signature. Probably we could take the mode from the wifiConfig.
     private void enableWifiInterface(String ifaceName, NetInterfaceStatus status, WifiMode wifiMode,
             WifiConfig wifiConfig) throws KuraException {
         // ignore mon.* interface
@@ -1345,7 +1348,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
                     logger.warn("Failed to complete WiFi Connection on {}", ifaceName);
                 }
             } else {
-                logger.warn("No WifiConfig configured for mode " + wifiMode);
+                logger.warn("No WifiConfig configured for mode {}", wifiMode);
             }
         } else {
             logger.debug("Invalid wifi configuration - NetInterfaceStatus: {}, WifiMode:{}", status, wifiMode);
@@ -1361,7 +1364,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
     // Submit new configuration, waiting for network configuration change event before returning
     private void submitNetworkConfiguration(List<String> modifiedInterfaceNames,
             NetworkConfiguration networkConfiguration) throws KuraException {
-        short timeout = 30000;		// in milliseconds
+        short timeout = 30000; // in milliseconds
         final short sleep = 500;
 
         this.pendingNetworkConfigurationChange = true;

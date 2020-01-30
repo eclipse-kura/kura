@@ -157,6 +157,7 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
         return LinuxDns.getInstance().getPppDnServers();
     }
 
+    @SuppressWarnings("checkstyle:methodLength")
     private ModemConfig getModemConfig(String ifaceName, UsbDevice usbDevice) throws KuraException {
         logger.debug("parsePppPeerConfig()");
 
@@ -303,7 +304,7 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
         modemConfig.setActiveFilter(activeFilter);
         modemConfig.setLcpEchoInterval(lcpEchoInterval);
         modemConfig.setLcpEchoFailure(lcpEchoFailure);
-        modemConfig.setEnabled(enabled); // TODO - from self configuring properties
+        modemConfig.setEnabled(enabled); // FIXME - from self configuring properties
         modemConfig.setDataCompression(0); // FIXME
         modemConfig.setDialString(dialString);
         modemConfig.setHeaderCompression(0); // FIXME

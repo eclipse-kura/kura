@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -44,27 +44,27 @@ public enum CnsObjectIDs {
     OBJID_MIN(0x1039),
 
     // Call status
-    OBJID_CALL_NOTIFICATION(0x3000),    // Call Notification Status (Get)
-    OBJID_CALL_DISCONNECTED(0x300C),   	// call disconnected
-    OBJID_CALL_CONNECTING(0x3011),   	// connecting
-    OBJID_CALL_CONNECTED(0x300A),   	// call connected
-    OBJID_CALL_DORMANT(0x3012),    // call dormant
-    OBJID_CALL_ERROR(0x300E),   	// call error
+    OBJID_CALL_NOTIFICATION(0x3000), // Call Notification Status (Get)
+    OBJID_CALL_DISCONNECTED(0x300C), // call disconnected
+    OBJID_CALL_CONNECTING(0x3011), // connecting
+    OBJID_CALL_CONNECTED(0x300A), // call connected
+    OBJID_CALL_DORMANT(0x3012), // call dormant
+    OBJID_CALL_ERROR(0x300E), // call error
 
     // OMA-DM
-    OBJID_DMCONFIG(0x0E00),    // DM Configuration
-    OBJID_DMSTART(0x0E01),    // Start DM Session
-    OBJID_DMSTATE(0x0E03),    // DM session state
+    OBJID_DMCONFIG(0x0E00), // DM Configuration
+    OBJID_DMSTART(0x0E01), // Start DM Session
+    OBJID_DMSTATE(0x0E03), // DM session state
 
     OBJID_RADIO_PWR(0x0007); // Radio Power (Set|Get|Notify)
 
-    private int m_objID = 0;
+    private int objID = 0;
 
     private CnsObjectIDs(int objID) {
-        this.m_objID = objID;
+        this.objID = objID;
     }
 
     public int getObjectID() {
-        return this.m_objID;
+        return this.objID;
     }
 }

@@ -71,11 +71,50 @@
                                 <b:Heading size="H3" text="{msgs.wiresComposerTitle}"/>
                             </b:PanelHeader>
                             <b:PanelBody>
-                                <g:ScrollPanel>
-                                    <b:Panel addStyleNames="{style.wire-components-list-elems}">
-                                        <b:NavPills stacked="true" ui:field="wireComponentsMenu" />
+                                <b:PanelGroup b:id="accordion">
+                                    <b:Panel>
+                                        <b:PanelHeader>
+                                            <b:Heading size="H2">
+                                                <b:Anchor dataToggle="COLLAPSE" dataParent="#accordion" dataTarget="#consumerCollapse" text="Consumers"/>
+                                            </b:Heading>
+                                        </b:PanelHeader>
+                                        <b:PanelCollapse b:id="consumerCollapse" ui:field="consumerCollapse">
+                                            <b:PanelBody>
+                                                <b:Panel>
+                                                    <b:NavPills stacked="true" ui:field="wireConsumersMenu" />
+                                                </b:Panel>
+                                            </b:PanelBody>
+                                        </b:PanelCollapse>
                                     </b:Panel>
-                                </g:ScrollPanel>
+                                    <b:Panel>
+                                        <b:PanelHeader>
+                                            <b:Heading size="H2">
+                                                <b:Anchor dataToggle="COLLAPSE" dataParent="#accordion" dataTarget="#producerCollapse" text="Producers"/>
+                                            </b:Heading>
+                                        </b:PanelHeader>
+                                        <b:PanelCollapse b:id="producerCollapse" ui:field="producerCollapse">
+                                            <b:PanelBody>
+                                                <b:Panel>
+                                                    <b:NavPills stacked="true" ui:field="wireProducersMenu" />
+                                                </b:Panel>
+                                            </b:PanelBody>
+                                        </b:PanelCollapse>
+                                    </b:Panel>
+                                    <b:Panel>
+                                        <b:PanelHeader>
+                                            <b:Heading size="H2">
+                                                <b:Anchor dataToggle="COLLAPSE" dataParent="#accordion" dataTarget="#producerConsumerCollapse" text="Consumer/Producers"/>
+                                            </b:Heading>
+                                        </b:PanelHeader>
+                                        <b:PanelCollapse b:id="producerConsumerCollapse" ui:field="producerConsumerCollapse">
+                                            <b:PanelBody>
+                                                <b:Panel>
+                                                    <b:NavPills stacked="true" ui:field="wireConsumerProducersMenu" />
+                                                </b:Panel>
+                                            </b:PanelBody>
+                                        </b:PanelCollapse>
+                                    </b:Panel>
+                                </b:PanelGroup>
                             </b:PanelBody>
                         </b:Panel>
                     </b:Column>

@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (c) 2011, 2019 Eurotech and/or its affiliates
+# Copyright (c) 2011, 2020 Eurotech and/or its affiliates
 #
 #  All rights reserved. This program and the accompanying materials
 #  are made available under the terms of the Eclipse Public License v1.0
@@ -17,14 +17,17 @@ INSTALL_DIR=/opt/eclipse
 ln -sf ${INSTALL_DIR}/kura_* ${INSTALL_DIR}/kura
 
 #set up Kura init
-cp ${INSTALL_DIR}/kura/install/kura.init.raspbian /etc/init.d/kura
-chmod +x /etc/init.d/kura
+sed "s|INSTALL_DIR|${INSTALL_DIR}|" ${INSTALL_DIR}/kura/install/kura.service > /lib/systemd/system/kura.service
+systemctl daemon-reload
+systemctl enable kura
 chmod +x ${INSTALL_DIR}/kura/bin/*.sh
 
 # setup snapshot_0 recovery folder
 if [ ! -d ${INSTALL_DIR}/kura/.data ]; then
     mkdir ${INSTALL_DIR}/kura/.data
 fi
+
+mkdir -p ${INSTALL_DIR}/kura/data
 
 # setup /etc/sysconfig folder for iptables configuration file
 if [ ! -d /etc/sysconfig ]; then
@@ -46,10 +49,11 @@ cp ${INSTALL_DIR}/kura/install/recover_default_config.init ${INSTALL_DIR}/kura/b
 chmod +x ${INSTALL_DIR}/kura/bin/.recoverDefaultConfig.sh
 
 #set up default firewall configuration
-cp ${INSTALL_DIR}/kura/install/firewall.init /etc/init.d/firewall
-chmod +x /etc/init.d/firewall
-cp ${INSTALL_DIR}/kura/install/iptables.init /etc/sysconfig/iptables
-cp /etc/sysconfig/iptables ${INSTALL_DIR}/kura/.data/iptables
+cp /etc/sysconfig/iptables /etc/sysconfig/iptables.esfsave
+cp ${BASE_DIR}/${KURA_SYMLINK}/.data/iptables /etc/sysconfig/iptables
+sed -i "s|/bin/sh KURA_DIR|/bin/bash ${BASE_DIR}/${KURA_SYMLINK}|" /lib/systemd/system/firewall.service
+systemctl daemon-reload
+systemctl enable firewall
 
 #copy snapshot_0.xml
 cp ${INSTALL_DIR}/kura/user/snapshots/snapshot_0.xml ${INSTALL_DIR}/kura/.data/snapshot_0.xml
@@ -66,7 +70,6 @@ cp ${INSTALL_DIR}/kura/install/dhcpd-wlan0.conf /etc/dhcpd-wlan0.conf
 cp ${INSTALL_DIR}/kura/install/dhcpd-wlan0.conf ${INSTALL_DIR}/kura/.data/dhcpd-wlan0.conf
 
 #set up kuranet.conf
-mkdir -p ${INSTALL_DIR}/kura/data
 cp ${INSTALL_DIR}/kura/install/kuranet.conf ${INSTALL_DIR}/kura/user/kuranet.conf
 cp ${INSTALL_DIR}/kura/install/kuranet.conf ${INSTALL_DIR}/kura/.data/kuranet.conf
 
@@ -80,16 +83,6 @@ cp ${INSTALL_DIR}/kura/install/usr.sbin.named /etc/apparmor.d/
 if [ ! -f "/etc/bind/rndc.key" ] ; then
 	rndc-confgen -r /dev/urandom -a
 fi
-
-#set up monit
-if [ -d "/etc/monit/conf.d" ] ; then
-    cp ${INSTALL_DIR}/kura/install/monitrc.raspbian /etc/monit/conf.d/
-fi
-
-#set up runlevels to start/stop Kura by default
-update-rc.d firewall defaults
-update-rc.d kura defaults
-#update-rc.d monit defaults
 
 #set up logrotate - no need to restart as it is a cronjob
 cp ${INSTALL_DIR}/kura/install/logrotate.conf /etc/logrotate.conf

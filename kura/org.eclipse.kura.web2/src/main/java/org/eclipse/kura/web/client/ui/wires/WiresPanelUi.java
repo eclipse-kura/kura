@@ -44,6 +44,7 @@ import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.NavPills;
 import org.gwtbootstrap3.client.ui.Panel;
 import org.gwtbootstrap3.client.ui.PanelBody;
+import org.gwtbootstrap3.client.ui.PanelCollapse;
 import org.gwtbootstrap3.client.ui.PanelHeader;
 import org.gwtbootstrap3.client.ui.Row;
 import org.gwtbootstrap3.client.ui.constants.AlertType;
@@ -95,9 +96,6 @@ public class WiresPanelUi extends Composite
     Row configurationRow;
 
     @UiField
-    NavPills wireComponentsMenu;
-
-    @UiField
     Widget composer;
 
     @UiField
@@ -105,6 +103,24 @@ public class WiresPanelUi extends Composite
 
     @UiField
     AlertDialog confirmDialog;
+    
+    @UiField
+    PanelCollapse producerCollapse;
+    
+    @UiField
+    PanelCollapse consumerCollapse;
+    
+    @UiField
+    PanelCollapse producerConsumerCollapse;
+    
+    @UiField
+    NavPills wireConsumersMenu;
+    
+    @UiField
+    NavPills wireProducersMenu;
+    
+    @UiField
+    NavPills wireConsumerProducersMenu;
 
     interface WiresPanelUiUiBinder extends UiBinder<Widget, WiresPanelUi> {
     }
@@ -186,8 +202,10 @@ public class WiresPanelUi extends Composite
     }
 
     private void populateComponentsPanel() {
-        this.wireComponentsMenu.clear();
-
+        this.wireConsumersMenu.clear();
+        this.wireProducersMenu.clear();
+        this.wireConsumerProducersMenu.clear();
+        
         final WireComponentsAnchorListItem.Listener listener = WiresPanelUi.this::showComponentCreationDialog;
 
         final List<GwtWireComponentDescriptor> sortedDescriptors = new ArrayList<>();
@@ -196,15 +214,24 @@ public class WiresPanelUi extends Composite
             sortedDescriptors.add(descriptor.getValue());
         }
 
-        Collections.sort(sortedDescriptors,
-                (o1, o2) -> Integer.compare(o1.getMinInputPorts() * 2 + o1.getMinOutputPorts(),
-                        o2.getMinInputPorts() * 2 + o2.getMinOutputPorts()));
+        Collections.sort(sortedDescriptors, 
+                (o1, o2) -> o1.getName().compareToIgnoreCase(o2.getName()));
 
         for (GwtWireComponentDescriptor descriptor : sortedDescriptors) {
             final WireComponentsAnchorListItem item = new WireComponentsAnchorListItem(getComponentLabel(descriptor),
                     descriptor.getFactoryPid(), descriptor.getMinInputPorts() > 0, descriptor.getMinOutputPorts() > 0);
             item.setListener(listener);
-            this.wireComponentsMenu.add(item);
+
+            if (descriptor.getMinInputPorts() > 0 
+                    && descriptor.getMinOutputPorts() > 0) {
+                this.wireConsumerProducersMenu.add(item);
+            }
+            else if (descriptor.getMinOutputPorts() > 0) {
+                this.wireConsumersMenu.add(item);
+            }
+            else if (descriptor.getMinInputPorts() > 0) {
+                this.wireProducersMenu.add(item);
+            }
         }
     }
 

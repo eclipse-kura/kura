@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -60,6 +60,7 @@ public class PortForwardRule {
      * @param sourcePortRange
      *            range of source ports allowed on IP connection (sourcePort1:sourcePort2)
      */
+    @SuppressWarnings("checkstyle:parameterNumber")
     public PortForwardRule(String inboundIface, String outboundIface, String address, String protocol, int inPort,
             int outPort, boolean masquerade, String permittedNetwork, int permittedNetworkMask, String permittedMAC,
             String sourcePortRange) {

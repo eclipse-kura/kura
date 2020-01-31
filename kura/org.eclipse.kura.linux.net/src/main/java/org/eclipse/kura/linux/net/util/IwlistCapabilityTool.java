@@ -72,7 +72,7 @@ public final class IwlistCapabilityTool {
                 capabilities.add(Capability.CIPHER_TKIP);
             } else if ("CIPHER-CCMP".equals(cleanLine)) {
                 capabilities.add(Capability.CIPHER_CCMP);
-                // TODO: WEP options don't always seem to be displayed?
+                // FIXME: WEP options don't always seem to be displayed?
             } else if ("WEP-104".equals(cleanLine)) {
                 capabilities.add(Capability.CIPHER_WEP104);
             } else if ("WEP-40".equals(cleanLine)) {

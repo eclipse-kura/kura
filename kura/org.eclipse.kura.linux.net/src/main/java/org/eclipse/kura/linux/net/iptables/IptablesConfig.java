@@ -197,7 +197,7 @@ public class IptablesConfig {
     }
 
     /*
-     * Saves current configurations from the m_localRules, m_portForwardRules, m_natRules, and m_autoNatRules
+     * Saves current configurations from the localRules, portForwardRules, natRules, and autoNatRules
      * into specified temporary file
      */
     public void save(String filename) throws KuraException {
@@ -293,6 +293,7 @@ public class IptablesConfig {
      * Populates the m_localRules, m_portForwardRules, m_natRules, and m_autoNatRules by parsing
      * the iptables configuration file.
      */
+    @SuppressWarnings("checkstyle:methodLength")
     public void restore() throws KuraException {
         try (FileReader fr = new FileReader(FIREWALL_CONFIG_FILE_NAME); BufferedReader br = new BufferedReader(fr)) {
             List<NatPreroutingChainRule> natPreroutingChain = new ArrayList<>();

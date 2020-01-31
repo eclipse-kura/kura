@@ -41,7 +41,7 @@ public class IwlistScanTool implements IScanTool {
 
     private static final Logger logger = LoggerFactory.getLogger(IwlistScanTool.class);
 
-    private static final Object lock = new Object();
+    private static final Object LOCK = new Object();
     private String ifaceName;
     private int timeout;
     private final CommandExecutorService executorService;
@@ -80,7 +80,7 @@ public class IwlistScanTool implements IScanTool {
         }
 
         List<WifiAccessPoint> wifiAccessPoints;
-        synchronized (lock) {
+        synchronized (LOCK) {
 
             String[] cmdIwList = formIwlistScanCommand(IwlistScanTool.this.ifaceName);
             if (logger.isInfoEnabled()) {

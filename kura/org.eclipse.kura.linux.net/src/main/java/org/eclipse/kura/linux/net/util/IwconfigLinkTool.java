@@ -70,7 +70,7 @@ public class IwconfigLinkTool extends LinkToolImpl implements LinkTool {
                 parseBitrate(line);
             } else if (line.contains(SIGNAL_LEVEL)) {
                 int sig = parseSignalLevel(line);
-                if (associated && sig > -100) { // TODO: adjust this threshold?
+                if (associated && sig > -100) {
                     logger.debug("get() :: !! Link Detected !!");
                     setSignal(sig);
                     setLinkDetected(true);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -25,9 +25,9 @@ public class NATRule {
 
     private static final Logger logger = LoggerFactory.getLogger(NATRule.class);
 
-    private String sourceInterface;						// i.e. eth0
-    private String destinationInterface;				// i.e. ppp0
-    private String protocol;	// protocol (i.e. all, tcp, udp)
+    private String sourceInterface; // i.e. eth0
+    private String destinationInterface; // i.e. ppp0
+    private String protocol; // protocol (i.e. all, tcp, udp)
     private String source; // source network/host (i.e. 192.168.1.0/24 or 192.168.1.1/32)
     private String destination; // destination network/host (i.e. 192.168.1.0/24 or 192.168.1.1/32)
     private boolean masquerade;

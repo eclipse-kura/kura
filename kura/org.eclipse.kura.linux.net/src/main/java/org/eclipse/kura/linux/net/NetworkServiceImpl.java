@@ -294,6 +294,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 
         // TODO - should be know if we are CONNECTED_SITE for wifi?
 
+        @SuppressWarnings("checkstyle:lineLength")
         LoopbackInterfaceImpl<? extends NetInterfaceAddress> netInterface = (LoopbackInterfaceImpl<? extends NetInterfaceAddress>) getNetworkInterface(
                 "lo");
         if (netInterface.isUp()) {

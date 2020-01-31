@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 public class IwScanTool extends ScanTool implements IScanTool {
 
     private static final Logger logger = LoggerFactory.getLogger(IwScanTool.class);
-    private static final Object lock = new Object();
+    private static final Object LOCK = new Object();
     private String ifaceName;
     private int timeout;
     private final LinuxNetworkUtil linuxNetworkUtil;
@@ -66,7 +66,7 @@ public class IwScanTool extends ScanTool implements IScanTool {
     public List<WifiAccessPoint> scan() throws KuraException {
 
         List<WifiAccessPoint> wifiAccessPoints;
-        synchronized (lock) {
+        synchronized (LOCK) {
             activateInterface();
 
             String[] cmd = formIwScanCommand(IwScanTool.this.ifaceName);

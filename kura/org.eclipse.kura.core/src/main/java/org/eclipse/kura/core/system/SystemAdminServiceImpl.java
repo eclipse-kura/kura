@@ -15,6 +15,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -128,44 +129,33 @@ public class SystemAdminServiceImpl extends SuperSystemService implements System
                 }
             }
         } else if (OS_MAC_OSX.equals(getOsName())) {
+            Process p = null;
+            BufferedReader br = null;
+
             try {
-                String systemUptime = runSystemCommand("uptime", false, this.executorService);
-                if (!systemUptime.isEmpty()) {
-                    String[] uptimeParts = systemUptime.split("up\\s+")[1].split("\\s*,\\s*");
-                    int days = 0;
-                    int hours = 0;
-                    int mins = 0;
+                p = Runtime.getRuntime().exec("sysctl -n kern.boottime");
+                br = new BufferedReader(new InputStreamReader(p.getInputStream()));
 
-                    String uptimePart = uptimeParts[0];
-
-                    // If up less than a day, it will only show the number of mins, hr, or HH:MM
-                    if (uptimePart.contains("days")) {
-                        days = Integer.parseInt(uptimePart.split("\\s+days")[0]);
-                        uptimePart = uptimeParts[1];
-                    } else if (uptimePart.contains("day")) {
-                        days = Integer.parseInt(uptimePart.split("\\s+day")[0]);
-                        uptimePart = uptimeParts[1];
-                    }
-
-                    if (uptimePart.contains(":")) {
-                        // Showing HH:MM
-                        hours = Integer.parseInt(uptimePart.split(":")[0]);
-                        mins = Integer.parseInt(uptimePart.split(":")[1]);
-                    } else if (uptimePart.contains("hr")) {
-                        // Only showing hr
-                        hours = Integer.parseInt(uptimePart.split("\\s*hr")[0]);
-                    } else if (uptimePart.contains("mins")) {
-                        // Only showing mins
-                        mins = Integer.parseInt(uptimePart.split("\\s*mins")[0]);
-                    } else {
-                        logger.error("uptime could not be parsed correctly: {}", uptimeParts[0]);
-                    }
-
-                    uptime = (long) ((days * 24 + hours) * 60 + mins) * 60;
-                    uptimeStr = Long.toString(uptime * 1000);
+                String line = br.readLine();
+                if (line != null) {
+                    String[] uptimePairs = line.substring(1, line.indexOf("}")).replace(" ", "").split(",");
+                    String[] uptimeSeconds = uptimePairs[0].split("=");
+                    uptime = System.currentTimeMillis() - (long) (Double.parseDouble(uptimeSeconds[1]));
+                    uptimeStr = Long.toString(uptime);
                 }
             } catch (Exception e) {
                 logger.error("Could not parse uptime", e);
+            } finally {
+                if (br != null) {
+                    try {
+                        br.close();
+                    } catch (IOException e) {
+                        logger.error("Failed closing BufferedReader with exception {}", e);
+                    }
+                }
+                if (p != null) {
+                    p.destroy();
+                }
             }
         }
         return uptimeStr;

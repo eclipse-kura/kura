@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -22,7 +22,7 @@ public interface NetworkConfigurationVisitor {
      * it needs a {@link CommandExecutorService}. It has to be set before the visit using the
      * {@link NetworkConfigurationVisitor#setExecutorService}
      * method.
-     * 
+     *
      * @param config
      *            the {@link NetworkConfiguration} used by the visitor
      * @throws KuraException
@@ -32,7 +32,7 @@ public interface NetworkConfigurationVisitor {
     /**
      * Sets the {@link CommandExecutorService} for the visitor. It has to be set before every call of the
      * {@link NetworkConfigurationVisitor#visit} method.
-     * 
+     *
      * @param executorService
      *            the {@link CommandExecutorService} used to perform operations on the system
      */

@@ -4,5 +4,6 @@
 
 <suppressions>
     <suppress checks=".*" files=".*generated-sources[\\/]"/>
+    <suppress checks="FileLength" files="NetworkConfiguration.java"/>
 </suppressions>
 

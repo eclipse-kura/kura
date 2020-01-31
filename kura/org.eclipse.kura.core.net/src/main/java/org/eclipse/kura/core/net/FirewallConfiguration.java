@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
  *
  *   All rights reserved. This program and the accompanying materials
  *   are made available under the terms of the Eclipse Public License v1.0
@@ -35,7 +35,12 @@ public class FirewallConfiguration {
     public static final String PORT_FORWARDING_PROP_NAME = "firewall.port.forwarding";
     public static final String NAT_PROP_NAME = "firewall.nat";
 
-    public static final String DFLT_OPEN_PORTS_VALUE = "22,tcp,,,,,,#;80,tcp,,eth0,,,,#;80,tcp,,eth1,,,,#;80,tcp,,wlan0,,,,#;80,tcp,10.234.0.0/16,,,,,#;1450,tcp,,eth0,,,,#;1450,tcp,,eth1,,,,#;1450,tcp,,wlan0,,,,#;502,tcp,127.0.0.1/32,,,,,#;53,udp,,eth0,,,,#;53,udp,,eth1,,,,#;53,udp,,wlan0,,,,#;67,udp,,eth0,,,,#;67,udp,,eth1,,,,#;67,udp,,wlan0,,,,#;8000,tcp,,eth0,,,,#;8000,tcp,,eth1,,,,#;8000,tcp,,wlan0,,,,#";
+    public static final String DFLT_OPEN_PORTS_VALUE = "22,tcp,,,,,,#;80,tcp,,eth0,,,,#;"
+            + "80,tcp,,eth1,,,,#;80,tcp,,wlan0,,,,#;80,tcp,10.234.0.0/16,,,,,#;1450,tcp,,eth0,,,,#;"
+            + "1450,tcp,,eth1,,,,#;1450,tcp,,wlan0,,,,#;502,tcp,127.0.0.1/32,,,,,#;53,udp,,eth0,,,,#;"
+            + "53,udp,,eth1,,,,#;53,udp,,wlan0,,,,#;67,udp,,eth0,,,,#;67,udp,,eth1,,,,#;67,udp,,wlan0,,,,#;"
+            + "8000,tcp,,eth0,,,,#;8000,tcp,,eth1,,,,#;8000,tcp,,wlan0,,,,#";
+    
     public static final String DFLT_PORT_FORWARDING_VALUE = "";
     public static final String DFLT_NAT_VALUE = "";
 
@@ -62,7 +67,7 @@ public class FirewallConfiguration {
                 for (String sop : astr) {
                     try {
                         String[] sa = sop.split(",");
-                        if ((sa.length == 8) && "#".equals(sa[7])) {
+                        if (sa.length == 8 && "#".equals(sa[7])) {
                             NetProtocol protocol = NetProtocol.valueOf(sa[1]);
                             String permittedNetwork = sa[2];
                             short permittedNetworkMask = 0;
@@ -92,14 +97,14 @@ public class FirewallConfiguration {
                             if (sa[0].indexOf(':') > 0) {
                                 portRange = sa[0];
                                 openPortEntry = new FirewallOpenPortConfigIP4(portRange, protocol,
-                                        new NetworkPair<IP4Address>(
+                                        new NetworkPair<>(
                                                 (IP4Address) IPAddress.parseHostAddress(permittedNetwork),
                                                 permittedNetworkMask),
                                         permittedIface, unpermittedIface, permittedMAC, sourcePortRange);
                             } else {
                                 port = Integer.parseInt(sa[0]);
                                 openPortEntry = new FirewallOpenPortConfigIP4(port, protocol,
-                                        new NetworkPair<IP4Address>(
+                                        new NetworkPair<>(
                                                 (IP4Address) IPAddress.parseHostAddress(permittedNetwork),
                                                 permittedNetworkMask),
                                         permittedIface, unpermittedIface, permittedMAC, sourcePortRange);
@@ -119,7 +124,7 @@ public class FirewallConfiguration {
                 for (String sop : astr) {
                     try {
                         String[] sa = sop.split(",");
-                        if ((sa.length == 11) && "#".equals(sa[10])) {
+                        if (sa.length == 11 && "#".equals(sa[10])) {
                             String inboundIface = null;
                             if (!sa[0].isEmpty()) {
                                 inboundIface = sa[0];
@@ -149,7 +154,7 @@ public class FirewallConfiguration {
                             }
                             FirewallPortForwardConfigIP<? extends IPAddress> portForwardEntry = new FirewallPortForwardConfigIP4(
                                     inboundIface, outboundIface, address, protocol, inPort, outPort, masquerade,
-                                    new NetworkPair<IP4Address>(
+                                    new NetworkPair<>(
                                             (IP4Address) IPAddress.parseHostAddress(permittedNetwork),
                                             permittedNetworkMask),
                                     permittedMAC, sourcePortRange);
@@ -167,7 +172,7 @@ public class FirewallConfiguration {
                 astr = str.split(";");
                 for (String sop : astr) {
                     String[] sa = sop.split(",");
-                    if ((sa.length == 7) && "#".equals(sa[6])) {
+                    if (sa.length == 7 && "#".equals(sa[6])) {
                         String srcIface = null;
                         if (!sa[0].isEmpty()) {
                             srcIface = sa[0];

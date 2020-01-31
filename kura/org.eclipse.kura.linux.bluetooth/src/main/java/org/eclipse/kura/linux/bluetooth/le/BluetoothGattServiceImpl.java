@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -19,14 +19,14 @@ import org.eclipse.kura.bluetooth.BluetoothGattService;
 
 public class BluetoothGattServiceImpl implements BluetoothGattService {
 
-    private final UUID m_uuid;
-    private final String m_startHandle;
-    private final String m_endHandle;
+    private final UUID uuid;
+    private final String startHandle;
+    private final String endHandle;
 
     public BluetoothGattServiceImpl(String uuid, String startHandle, String endHandle) {
-        this.m_uuid = UUID.fromString(uuid);
-        this.m_startHandle = startHandle;
-        this.m_endHandle = endHandle;
+        this.uuid = UUID.fromString(uuid);
+        this.startHandle = startHandle;
+        this.endHandle = endHandle;
     }
 
     // --------------------------------------------------------------------
@@ -47,16 +47,16 @@ public class BluetoothGattServiceImpl implements BluetoothGattService {
 
     @Override
     public UUID getUuid() {
-        return this.m_uuid;
+        return this.uuid;
     }
 
     @Override
     public String getStartHandle() {
-        return this.m_startHandle;
+        return this.startHandle;
     }
 
     @Override
     public String getEndHandle() {
-        return this.m_endHandle;
+        return this.endHandle;
     }
 }

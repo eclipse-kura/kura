@@ -40,7 +40,7 @@ public class BluetoothProcess {
     private static final String INPUT_STREAM_MESSAGE = "Error in processing the input stream : ";
     private static final String ERROR_STREAM_MESSAGE = "Error in processing the error stream : ";
     private static final Logger logger = LoggerFactory.getLogger(BluetoothProcess.class);
-    private static final ExecutorService streamGobblers = Executors.newCachedThreadPool();
+    private static final ExecutorService STREAM_GOBBLERS = Executors.newCachedThreadPool();
 
     private Future<?> futureInputGobbler;
     private Future<?> futureErrorGobbler;
@@ -85,7 +85,7 @@ public class BluetoothProcess {
         this.executorService.execute(command, callback);
 
         // process the input stream
-        this.futureInputGobbler = streamGobblers.submit(() -> {
+        this.futureInputGobbler = STREAM_GOBBLERS.submit(() -> {
             Thread.currentThread().setName("BluetoothProcess Input Stream Gobbler");
             try {
                 readInputStreamFully(this.readOutputStream, listener);
@@ -95,7 +95,7 @@ public class BluetoothProcess {
         });
 
         // process the error stream
-        this.futureErrorGobbler = streamGobblers.submit(() -> {
+        this.futureErrorGobbler = STREAM_GOBBLERS.submit(() -> {
             Thread.currentThread().setName("BluetoothProcess ErrorStream Gobbler");
             try {
                 readErrorStreamFully(this.readErrorStream, listener);
@@ -121,7 +121,7 @@ public class BluetoothProcess {
         command.setErrorStream(this.errorStream);
         this.executorService.execute(command, callback);
 
-        this.futureInputGobbler = streamGobblers.submit(() -> {
+        this.futureInputGobbler = STREAM_GOBBLERS.submit(() -> {
             Thread.currentThread().setName("BluetoothProcess BTSnoop Gobbler");
             try {
                 readBTSnoopStreamFully(this.readOutputStream, listener);
@@ -131,7 +131,7 @@ public class BluetoothProcess {
         });
 
         // process the error stream
-        this.futureErrorGobbler = streamGobblers.submit(() -> {
+        this.futureErrorGobbler = STREAM_GOBBLERS.submit(() -> {
             Thread.currentThread().setName("BluetoothProcess BTSnoop ErrorStream Gobbler");
             try {
                 readBTErrorStreamFully(this.readErrorStream, listener);

@@ -368,23 +368,17 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
         if (checkString(line.toLowerCase(), NOT_CONNECTED)) {
             this.isConnected = false;
             this.ready = false;
-        }
-        // gatttool prompt indicates connected
-        else if (checkString(line.toLowerCase(), CONNECTED)) {
+        } else if (checkString(line.toLowerCase(), CONNECTED)) { // gatttool prompt indicates connected
             this.isConnected = true;
             this.ready = true;
-        }
-        // characteristic read by UUID returned
-        else if (line.matches(REGEX_READ_CHAR_UUID)) {
+        } else if (line.matches(REGEX_READ_CHAR_UUID)) { // characteristic read by UUID returned
             logger.debug("Characteristic value by UUID received: {}", line);
             // Parse the characteristic line, line is expected to be:
             // handle: 0xmmmm value: <value>
             String[] attr = line.split(":");
             this.charValueUuid = attr[2].trim();
             logger.info("m_charValueUuid: {}", this.charValueUuid);
-        }
-        // services are being returned
-        else if (line.toLowerCase().startsWith(SERVICES)) {
+        } else if (line.toLowerCase().startsWith(SERVICES)) { // services are being returned
             logger.debug("Service : {}", line);
             // Parse the services line, line is expected to be:
             // attr handle: 0xnnnn, end grp handle: 0xmmmm uuid: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
@@ -397,9 +391,7 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
                 logger.debug("Adding new GATT service: {} : {} : {}", uuid, startHandle, endHandle);
                 this.bluetoothServices.add(new BluetoothGattServiceImpl(uuid, startHandle, endHandle));
             }
-        }
-        // characteristics are being returned
-        else if (line.toLowerCase().startsWith(CHARACTERISTICS)) {
+        } else if (line.toLowerCase().startsWith(CHARACTERISTICS)) { // characteristics are being returned
             logger.debug("Characteristic : {}", line);
             // Parse the characteristic line, line is expected to be:
             // handle: 0xnnnn, char properties: 0xmm, char value handle: 0xpppp, uuid:
@@ -415,18 +407,14 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
                 this.bluetoothGattCharacteristics
                         .add(new BluetoothGattCharacteristicImpl(uuid, handle, properties, valueHandle));
             }
-        }
-        // characteristic read by handle returned
-        else if (line.toLowerCase().contains(READ_CHAR)) {
+        } else if (line.toLowerCase().contains(READ_CHAR)) { // characteristic read by handle returned
             logger.debug("Characteristic value by handle received: {}", line);
             // Parse the characteristic line, line is expected to be:
             // Characteristic value/descriptor: <value>
             String[] attr = line.split(":");
             this.charValue = attr[1].trim();
 
-        }
-        // receiving notifications, need to notify listener
-        else if (line.toLowerCase().contains(NOTIFICATION)) {
+        } else if (line.toLowerCase().contains(NOTIFICATION)) { // receiving notifications, need to notify listener
             logger.debug("Receiving notification: {}", line);
             // Parse the characteristic line, line is expected to be:
             // Notification handle = 0xmmmm value: <value>
@@ -435,19 +423,13 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
             String handle = attr[0].split("\\s")[0];
             String value = attr[1].trim();
             this.listener.onDataReceived(handle, value);
-        }
-        // error reading handle
-        else if (line.toLowerCase().contains(ERROR_HANDLE)) {
+        } else if (line.toLowerCase().contains(ERROR_HANDLE)) { // error reading handle
             logger.info("ERROR_HANDLE");
             this.charValue = "ERROR: Invalid handle!";
-        }
-        // error reading UUID
-        else if (checkString(line.toLowerCase(), ERROR_UUID)) {
+        } else if (checkString(line.toLowerCase(), ERROR_UUID)) { // error reading UUID
             logger.info("ERROR_UUID");
             this.charValueUuid = "ERROR: Invalid UUID!";
-        }
-        // get security level
-        else if (line.toLowerCase().startsWith("sec-level:")) {
+        } else if (line.toLowerCase().startsWith("sec-level:")) { // get security level
             logger.debug("Received security level : {}",
                     line.toLowerCase().substring("sec-level: ".length(), line.toLowerCase().length()));
             this.securityLevel = line.toLowerCase().substring("sec-level: ".length(), line.toLowerCase().length())

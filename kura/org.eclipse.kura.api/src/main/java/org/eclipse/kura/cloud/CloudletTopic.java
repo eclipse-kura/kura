@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -11,12 +11,11 @@
  *******************************************************************************/
 package org.eclipse.kura.cloud;
 
-import org.eclipse.kura.cloudconnection.message.KuraMessage;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * @noextend This class is not intended to be subclassed by clients.
- * @deprecated Please consider using {@link KuraMessage} properties
+ * @deprecated Please consider using {@link org.eclipse.kura.cloudconnection.message.KuraMessage} properties
  */
 @ProviderType
 @Deprecated
@@ -64,9 +63,9 @@ public class CloudletTopic {
     public String toString() {
         StringBuilder sb = new StringBuilder(this.method.name());
         if (this.resources != null) {
-            for (String m_resource : this.resources) {
+            for (String resource : this.resources) {
                 sb.append("/");
-                sb.append(m_resource);
+                sb.append(resource);
             }
         }
         return sb.toString();

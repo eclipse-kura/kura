@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -24,13 +24,13 @@ import org.osgi.annotation.versioning.ProviderType;
 public class FirewallAutoNatConfig implements NetConfig {
 
     /** The source interface (LAN interface) for the NAT configuration **/
-    private String m_sourceInterface;
+    private String sourceInterface;
 
     /** The destination interface (WAN interface) for the NAT configuration **/
-    private String m_destinationInterface;
+    private String destinationInterface;
 
     /** Whether or not MASQUERADE should be enabled **/
-    private boolean m_masquerade;
+    private boolean masquerade;
 
     /**
      * Creates a null NAT configuration
@@ -51,42 +51,42 @@ public class FirewallAutoNatConfig implements NetConfig {
      */
     public FirewallAutoNatConfig(String sourceInterface, String destinationInterface, boolean masquerade) {
         super();
-        this.m_sourceInterface = sourceInterface;
-        this.m_destinationInterface = destinationInterface;
-        this.m_masquerade = masquerade;
+        this.sourceInterface = sourceInterface;
+        this.destinationInterface = destinationInterface;
+        this.masquerade = masquerade;
     }
 
     public String getSourceInterface() {
-        return this.m_sourceInterface;
+        return this.sourceInterface;
     }
 
     public void setSourceInterface(String sourceInterface) {
-        this.m_sourceInterface = sourceInterface;
+        this.sourceInterface = sourceInterface;
     }
 
     public String getDestinationInterface() {
-        return this.m_destinationInterface;
+        return this.destinationInterface;
     }
 
     public void setDestinationInterface(String destinationInterface) {
-        this.m_destinationInterface = destinationInterface;
+        this.destinationInterface = destinationInterface;
     }
 
     public boolean isMasquerade() {
-        return this.m_masquerade;
+        return this.masquerade;
     }
 
     public void setMasquerade(boolean masquerade) {
-        this.m_masquerade = masquerade;
+        this.masquerade = masquerade;
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + (this.m_destinationInterface == null ? 0 : this.m_destinationInterface.hashCode());
-        result = prime * result + (this.m_masquerade ? 1231 : 1237);
-        result = prime * result + (this.m_sourceInterface == null ? 0 : this.m_sourceInterface.hashCode());
+        result = prime * result + (this.destinationInterface == null ? 0 : this.destinationInterface.hashCode());
+        result = prime * result + (this.masquerade ? 1231 : 1237);
+        result = prime * result + (this.sourceInterface == null ? 0 : this.sourceInterface.hashCode());
         return result;
     }
 
@@ -102,21 +102,15 @@ public class FirewallAutoNatConfig implements NetConfig {
             return false;
         }
         FirewallAutoNatConfig other = (FirewallAutoNatConfig) obj;
-        /*
-         * if (m_destinationInterface == null) {
-         * if (other.m_destinationInterface != null)
-         * return false;
-         * } else if (!m_destinationInterface.equals(other.m_destinationInterface))
-         * return false;
-         */
-        if (this.m_masquerade != other.m_masquerade) {
+
+        if (this.masquerade != other.masquerade) {
             return false;
         }
-        if (this.m_sourceInterface == null) {
-            if (other.m_sourceInterface != null) {
+        if (this.sourceInterface == null) {
+            if (other.sourceInterface != null) {
                 return false;
             }
-        } else if (!this.m_sourceInterface.equals(other.m_sourceInterface)) {
+        } else if (!this.sourceInterface.equals(other.sourceInterface)) {
             return false;
         }
 
@@ -125,23 +119,23 @@ public class FirewallAutoNatConfig implements NetConfig {
 
     @Override
     public boolean isValid() {
-        if (this.m_destinationInterface != null && !this.m_destinationInterface.trim().isEmpty()
-                && this.m_sourceInterface != null && !this.m_sourceInterface.trim().isEmpty()) {
-            return true;
-        } else {
-            return false;
+        boolean result = false;
+        if (this.destinationInterface != null && !this.destinationInterface.trim().isEmpty()
+                && this.sourceInterface != null && !this.sourceInterface.trim().isEmpty()) {
+            result = true;
         }
+        return result;
     }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("FirewallNatConfig [m_sourceInterface=");
-        builder.append(this.m_sourceInterface);
+        builder.append(this.sourceInterface);
         builder.append(", m_destinationInterface=");
-        builder.append(this.m_destinationInterface);
+        builder.append(this.destinationInterface);
         builder.append(", m_masquerade=");
-        builder.append(this.m_masquerade);
+        builder.append(this.masquerade);
         builder.append("]");
         return builder.toString();
     }

@@ -28,8 +28,8 @@ import org.osgi.annotation.versioning.ProviderType;
 @ProviderType
 public abstract class DnsServerConfigIP<T extends IPAddress> implements DnsServerConfig {
 
-    private Set<T> m_forwarders;
-    private Set<NetworkPair<T>> m_allowedNetworks;
+    private Set<T> forwarders;
+    private Set<NetworkPair<T>> allowedNetworks;
 
     /**
      * Creates a DNS configuration with a default set of forwarders and a set of allowed networks
@@ -42,8 +42,8 @@ public abstract class DnsServerConfigIP<T extends IPAddress> implements DnsServe
     public DnsServerConfigIP(Set<T> forwarders, Set<NetworkPair<T>> allowedNetworks) {
         super();
 
-        this.m_forwarders = forwarders;
-        this.m_allowedNetworks = allowedNetworks;
+        this.forwarders = forwarders;
+        this.allowedNetworks = allowedNetworks;
     }
 
     /**
@@ -51,7 +51,7 @@ public abstract class DnsServerConfigIP<T extends IPAddress> implements DnsServe
      */
     @Override
     public Set<T> getForwarders() {
-        return this.m_forwarders;
+        return this.forwarders;
     }
 
     /**
@@ -61,7 +61,7 @@ public abstract class DnsServerConfigIP<T extends IPAddress> implements DnsServe
      *            The recursive DNS servers to use
      */
     public void setForwarders(Set<T> forwarders) {
-        this.m_forwarders = forwarders;
+        this.forwarders = forwarders;
     }
 
     /**
@@ -69,7 +69,7 @@ public abstract class DnsServerConfigIP<T extends IPAddress> implements DnsServe
      */
     @Override
     public Set<NetworkPair<T>> getAllowedNetworks() {
-        return this.m_allowedNetworks;
+        return this.allowedNetworks;
     }
 
     /**
@@ -79,12 +79,12 @@ public abstract class DnsServerConfigIP<T extends IPAddress> implements DnsServe
      *            The LAN networks that are allowed to make queries
      */
     public void setAllowedNetworks(Set<NetworkPair<T>> allowedNetworks) {
-        this.m_allowedNetworks = allowedNetworks;
+        this.allowedNetworks = allowedNetworks;
     }
 
     @Override
     public String toString() {
-        return "DnsServerConfigIP [m_forwarders=" + this.m_forwarders + ", m_allowedNetworks=" + this.m_allowedNetworks
+        return "DnsServerConfigIP [m_forwarders=" + this.forwarders + ", m_allowedNetworks=" + this.allowedNetworks
                 + "]";
     }
 
@@ -92,8 +92,8 @@ public abstract class DnsServerConfigIP<T extends IPAddress> implements DnsServe
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + (this.m_allowedNetworks == null ? 0 : this.m_allowedNetworks.hashCode());
-        result = prime * result + (this.m_forwarders == null ? 0 : this.m_forwarders.hashCode());
+        result = prime * result + (this.allowedNetworks == null ? 0 : this.allowedNetworks.hashCode());
+        result = prime * result + (this.forwarders == null ? 0 : this.forwarders.hashCode());
         return result;
     }
 
@@ -109,18 +109,18 @@ public abstract class DnsServerConfigIP<T extends IPAddress> implements DnsServe
             return false;
         }
         DnsServerConfigIP<?> other = (DnsServerConfigIP<?>) obj;
-        if (this.m_allowedNetworks == null) {
-            if (other.m_allowedNetworks != null) {
+        if (this.allowedNetworks == null) {
+            if (other.allowedNetworks != null) {
                 return false;
             }
-        } else if (!this.m_allowedNetworks.equals(other.m_allowedNetworks)) {
+        } else if (!this.allowedNetworks.equals(other.allowedNetworks)) {
             return false;
         }
-        if (this.m_forwarders == null) {
-            if (other.m_forwarders != null) {
+        if (this.forwarders == null) {
+            if (other.forwarders != null) {
                 return false;
             }
-        } else if (!this.m_forwarders.equals(other.m_forwarders)) {
+        } else if (!this.forwarders.equals(other.forwarders)) {
             return false;
         }
         return true;

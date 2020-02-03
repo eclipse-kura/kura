@@ -42,15 +42,15 @@ public enum NetInterfaceState {
     /** The device is in a failure state following an attempt to activate it. */
     FAILED(120);
 
-    private int m_code;
+    private int code;
 
     private NetInterfaceState(int code) {
-        this.m_code = code;
+        this.code = code;
     }
 
     public static NetInterfaceState parseCode(int code) {
         for (NetInterfaceState state : NetInterfaceState.values()) {
-            if (state.m_code == code) {
+            if (state.code == code) {
                 return state;
             }
         }

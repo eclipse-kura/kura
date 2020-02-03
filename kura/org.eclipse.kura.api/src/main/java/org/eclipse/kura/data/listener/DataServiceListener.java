@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -11,14 +11,14 @@
  *******************************************************************************/
 package org.eclipse.kura.data.listener;
 
-import org.eclipse.kura.data.DataService;
 import org.osgi.annotation.versioning.ConsumerType;
 
 /**
- * Implementors of this interface will be able to handle {@link DataService}
+ * Implementors of this interface will be able to handle {@link org.eclipse.kura.data.DataService}
  * events such as notifications of connection establishing, message arrival, etc.
  * <br>
- * All registered listeners are called synchronously by the {@link DataService} at the occurrence of the event.
+ * All registered listeners are called synchronously by the {@link org.eclipse.kura.data.DataService} at the occurrence
+ * of the event.
  * It expected that implementers of this interface do NOT perform long running tasks in the implementation of this
  * interface.
  *

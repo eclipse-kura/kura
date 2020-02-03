@@ -35,6 +35,7 @@ public class UsbTtyDevice extends AbstractUsbDevice {
     /**
      * @since 1.4
      */
+    @SuppressWarnings("checkstyle:parameterNumber")
     public UsbTtyDevice(String vendorId, String productId, String manufacturerName, String productName,
             String usbBusNumber, String usbDevicePath, String deviceNode, Integer interfaceNumber) {
         super(vendorId, productId, manufacturerName, productName, usbBusNumber, usbDevicePath);

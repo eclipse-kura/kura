@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -21,14 +21,13 @@ import org.eclipse.kura.annotation.Immutable;
 import org.eclipse.kura.annotation.ThreadSafe;
 import org.osgi.annotation.versioning.ProviderType;
 import org.osgi.service.wireadmin.BasicEnvelope;
-import org.osgi.service.wireadmin.Envelope;
 
 /**
  * The Class WireEnvelope represents a composite envelope to be used as an
  * abstract data to be transmitted between the wire emitter and the wire
  * receiver
  *
- * @see Envelope
+ * @see org.osgi.service.wireadmin.Envelope
  * @see BasicEnvelope
  *
  * @noextend This class is not intended to be extended by clients.

@@ -17,6 +17,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * @noimplement This interface is not intended to be implemented by clients.
  */
 @ProviderType
+@SuppressWarnings("checkstyle:interfaceIsType")
 public interface UsbDeviceEvent {
 
     /** Name of the property to access the USB port of this device **/

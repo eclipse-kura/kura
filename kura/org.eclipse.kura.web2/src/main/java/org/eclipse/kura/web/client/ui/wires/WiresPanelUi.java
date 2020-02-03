@@ -39,7 +39,10 @@ import org.eclipse.kura.web.shared.model.GwtWireComponentDescriptor;
 import org.eclipse.kura.web.shared.model.GwtWireComposerStaticInfo;
 import org.eclipse.kura.web.shared.model.GwtWireConfiguration;
 import org.eclipse.kura.web.shared.model.GwtWireGraphConfiguration;
+import org.gwtbootstrap3.client.shared.event.HideHandler;
+import org.gwtbootstrap3.client.shared.event.ShowHandler;
 import org.gwtbootstrap3.client.ui.Alert;
+import org.gwtbootstrap3.client.ui.Anchor;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.NavPills;
 import org.gwtbootstrap3.client.ui.Panel;
@@ -48,6 +51,7 @@ import org.gwtbootstrap3.client.ui.PanelCollapse;
 import org.gwtbootstrap3.client.ui.PanelHeader;
 import org.gwtbootstrap3.client.ui.Row;
 import org.gwtbootstrap3.client.ui.constants.AlertType;
+import org.gwtbootstrap3.client.ui.constants.IconType;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -106,21 +110,24 @@ public class WiresPanelUi extends Composite
     
     @UiField
     PanelCollapse producerCollapse;
-    
     @UiField
     PanelCollapse consumerCollapse;
-    
     @UiField
     PanelCollapse producerConsumerCollapse;
     
     @UiField
     NavPills wireConsumersMenu;
-    
     @UiField
     NavPills wireProducersMenu;
-    
     @UiField
     NavPills wireConsumerProducersMenu;
+    
+    @UiField
+    Anchor consumerAnchor;
+    @UiField
+    Anchor producerAnchor;
+    @UiField
+    Anchor producerConsumerAnchor;
 
     interface WiresPanelUiUiBinder extends UiBinder<Widget, WiresPanelUi> {
     }
@@ -221,6 +228,16 @@ public class WiresPanelUi extends Composite
             final WireComponentsAnchorListItem item = new WireComponentsAnchorListItem(getComponentLabel(descriptor),
                     descriptor.getFactoryPid(), descriptor.getMinInputPorts() > 0, descriptor.getMinOutputPorts() > 0);
             item.setListener(listener);
+            
+            // add handlers to set indicator for each PanelCollapse
+            this.consumerCollapse.addShowHandler(showEvent -> this.consumerAnchor.setIcon(IconType.ARROW_UP));
+            this.consumerCollapse.addHideHandler(hideEvent -> this.consumerAnchor.setIcon(IconType.ARROW_DOWN));
+
+            this.producerCollapse.addShowHandler(showEvent -> this.producerAnchor.setIcon(IconType.ARROW_UP));
+            this.consumerCollapse.addHideHandler(hideEvent -> this.producerAnchor.setIcon(IconType.ARROW_DOWN));
+            
+            this.producerConsumerCollapse.addShowHandler(showEvent -> this.producerConsumerAnchor.setIcon(IconType.ARROW_UP));
+            this.producerConsumerCollapse.addHideHandler(hideEvent -> this.producerConsumerAnchor.setIcon(IconType.ARROW_DOWN));
 
             if (descriptor.getMinInputPorts() > 0 
                     && descriptor.getMinOutputPorts() > 0) {

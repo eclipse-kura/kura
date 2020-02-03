@@ -16,6 +16,8 @@ import java.util.List;
 
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemInfo;
 import org.eclipse.kura.linux.net.modem.UsbModemDriver;
+import org.eclipse.kura.net.admin.modem.quectel.eg25.QuectelEG25ConfigGenerator;
+import org.eclipse.kura.net.admin.modem.quectel.eg25.QuectelEG25ModemFactory;
 import org.eclipse.kura.net.admin.modem.sierra.mc87xx.SierraMc87xxConfigGenerator;
 import org.eclipse.kura.net.admin.modem.sierra.mc87xx.SierraMc87xxModemFactory;
 import org.eclipse.kura.net.admin.modem.sierra.usb598.SierraUsb598ConfigGenerator;
@@ -51,7 +53,8 @@ public class SupportedUsbModemsFactoryInfo {
         Sierra_USB598(SupportedUsbModemInfo.Sierra_USB598, SierraUsb598ModemFactory.class, SierraUsb598ConfigGenerator.class),
         Ublox_SARA_U2(SupportedUsbModemInfo.Ublox_SARA_U2, UbloxModemFactory.class, UbloxModemConfigGenerator.class),
         Zte_ME3630(SupportedUsbModemInfo.Zte_ME3630, ZteMe3630ModemFactory.class, ZteMe3630ConfigGenerator.class),
-        SimTech_SIM7000(SupportedUsbModemInfo.SimTech_SIM7000, SimTechSim7000ModemFactory.class, SimTechSim7000ConfigGenerator.class);
+        SimTech_SIM7000(SupportedUsbModemInfo.SimTech_SIM7000, SimTechSim7000ModemFactory.class, SimTechSim7000ConfigGenerator.class),
+        Quectel_EG25(SupportedUsbModemInfo.Quectel_EG25, QuectelEG25ModemFactory.class, QuectelEG25ConfigGenerator.class);
 
         private final SupportedUsbModemInfo m_usbModemInfo;
         private final Class<? extends CellularModemFactory> m_factoryClass;

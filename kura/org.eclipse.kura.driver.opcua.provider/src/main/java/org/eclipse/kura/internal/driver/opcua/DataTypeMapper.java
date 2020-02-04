@@ -52,7 +52,7 @@ public final class DataTypeMapper {
     public static Variant map(final Object value, final VariableType targetType) {
 
         if (targetType == VariableType.DEFINED_BY_JAVA_TYPE
-                || (value instanceof Boolean && targetType == VariableType.BOOLEAN)) {
+                || value instanceof Boolean && targetType == VariableType.BOOLEAN) {
             return new Variant(value);
         }
         if (value instanceof byte[]) {
@@ -154,12 +154,11 @@ public final class DataTypeMapper {
                 final LocalizedText text = (LocalizedText) value;
                 return TypedValues.newStringValue(text.getText());
             } else {
-            	if (value.getClass().isArray()) {
-            		return TypedValues.newStringValue(Arrays.deepToString((Object[]) value));
-            	}else {
+                if (value.getClass().isArray()) {
+                    return TypedValues.newStringValue(Arrays.deepToString((Object[]) value));
+                } else {
                     return TypedValues.newStringValue(value.toString());
-
-            	}
+                }
             }
         case BYTE_ARRAY:
             return TypedValues.newByteArrayValue(toByteArray(value));

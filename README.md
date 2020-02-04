@@ -73,14 +73,7 @@ For Java
 sudo apt install openjdk-8-jdk
 ```
 For Maven
-Download the Maven X version from the [Apache Archives](https://archive.apache.org/dist/maven/maven-3/)
-
-Move the tarball to the X folder and run this command 
-
-```
-tar xzvf apache-maven-3.X.X-bin.tar.gz
-```
-Then add the bin folder to the PATH in .....
+You can follow the tutorial from the official [Maven](http://maven.apache.org/install.html) site. Remember that you need to install the 3.5.x version.
 
 ### Eclipse IDE
 The simplest way to start developing on Eclipse Kura is to use an Eclipse Installer based setup.

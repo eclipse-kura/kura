@@ -11,6 +11,8 @@
  */
 package org.eclipse.kura.internal.driver.opcua;
 
+import java.util.Arrays;
+
 import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
@@ -152,7 +154,12 @@ public final class DataTypeMapper {
                 final LocalizedText text = (LocalizedText) value;
                 return TypedValues.newStringValue(text.getText());
             } else {
-                return TypedValues.newStringValue(value.toString());
+            	if (value.getClass().isArray()) {
+            		return TypedValues.newStringValue(Arrays.deepToString((Object[]) value));
+            	}else {
+                    return TypedValues.newStringValue(value.toString());
+
+            	}
             }
         case BYTE_ARRAY:
             return TypedValues.newByteArrayValue(toByteArray(value));

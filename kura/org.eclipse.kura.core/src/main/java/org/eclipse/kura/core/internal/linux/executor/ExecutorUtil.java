@@ -200,7 +200,7 @@ public class ExecutorUtil {
             }
         }
         // Sort pids in reverse order (useful when stop processes...)
-        return pids.entrySet().stream().sorted(Map.Entry.<String, Integer> comparingByValue().reversed())
+        return pids.entrySet().stream().sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
                 .collect(Collectors.toMap(Map.Entry::getKey, e -> new LinuxPid(e.getValue()), (e1, e2) -> e1,
                         LinkedHashMap::new));
     }

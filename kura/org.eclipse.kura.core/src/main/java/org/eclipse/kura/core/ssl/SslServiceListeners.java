@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -18,40 +18,40 @@ import org.slf4j.LoggerFactory;
 
 class SslServiceListeners implements SslServiceListener {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(SslServiceListeners.class);
+    private static final Logger logger = LoggerFactory.getLogger(SslServiceListeners.class);
 
-    private final ServiceTracker<SslServiceListener, SslServiceListener> m_listenersTracker;
+    private final ServiceTracker<SslServiceListener, SslServiceListener> listenersTracker;
 
     public SslServiceListeners(ServiceTracker<SslServiceListener, SslServiceListener> listenersTracker) {
         super();
-        this.m_listenersTracker = listenersTracker;
+        this.listenersTracker = listenersTracker;
     }
 
     @Override
     public void onConfigurationUpdated() {
         openOnce();
 
-        Object[] listeners = this.m_listenersTracker.getServices();
+        Object[] listeners = this.listenersTracker.getServices();
         if (listeners != null && listeners.length != 0) {
             for (Object listener : listeners) {
                 try {
                     ((SslServiceListener) listener).onConfigurationUpdated();
                 } catch (Throwable t) {
-                    s_logger.error("Unexpected Throwable", t);
+                    logger.error("Unexpected Throwable", t);
                 }
             }
         }
     }
 
     public synchronized void close() {
-        if (this.m_listenersTracker.getTrackingCount() != -1) {
-            this.m_listenersTracker.close();
+        if (this.listenersTracker.getTrackingCount() != -1) {
+            this.listenersTracker.close();
         }
     }
 
     private synchronized void openOnce() {
-        if (this.m_listenersTracker.getTrackingCount() == -1) {
-            this.m_listenersTracker.open();
+        if (this.listenersTracker.getTrackingCount() == -1) {
+            this.listenersTracker.open();
         }
     }
 

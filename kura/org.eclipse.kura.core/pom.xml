@@ -29,16 +29,4 @@
 	<artifactId>org.eclipse.kura.core</artifactId>
 	<version>1.0.600-SNAPSHOT</version>
 	<packaging>eclipse-plugin</packaging>
-	
-	<build>
-		<plugins>
-        	<plugin>
-        		<groupId>org.apache.maven.plugins</groupId>
-        		<artifactId>maven-checkstyle-plugin</artifactId>
-        		<configuration>
-        			<skip>true</skip>
-        		</configuration>
-        	</plugin>
-        </plugins>
-	</build>
 </project>

@@ -27,248 +27,248 @@ import org.slf4j.LoggerFactory;
  */
 class DataTransportListenerS implements DataTransportListener {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(DataTransportListenerS.class);
+    private static final Logger logger = LoggerFactory.getLogger(DataTransportListenerS.class);
 
     private static final String DATA_TRANSPORT_LISTENER_REFERENCE = "DataTransportListener";
 
-    private final ComponentContext m_ctx;
-    private final List<DataTransportListener> m_listeners;
+    private final ComponentContext ctx;
+    private final List<DataTransportListener> listeners;
 
     public DataTransportListenerS(ComponentContext ctx) {
-        this.m_ctx = ctx;
-        this.m_listeners = new CopyOnWriteArrayList<>();
+        this.ctx = ctx;
+        this.listeners = new CopyOnWriteArrayList<>();
     }
 
     @Override
     public void onConnectionEstablished(boolean newSession) {
-        Object[] services = this.m_ctx.locateServices(DATA_TRANSPORT_LISTENER_REFERENCE);
+        Object[] services = this.ctx.locateServices(DATA_TRANSPORT_LISTENER_REFERENCE);
         if (services != null) {
             for (Object service : services) {
                 try {
                     ((org.eclipse.kura.data.DataTransportListener) service).onConnectionEstablished(newSession);
                 } catch (Throwable t) {
-                    s_logger.warn("Unexpected Throwable", t);
+                    logger.warn("Unexpected Throwable", t);
                 }
             }
         } else {
-            s_logger.debug("No registered listener services. Ignoring onConnectionEstablished");
+            logger.debug("No registered listener services. Ignoring onConnectionEstablished");
         }
 
-        if (!this.m_listeners.isEmpty()) {
-            for (DataTransportListener listener : this.m_listeners) {
+        if (!this.listeners.isEmpty()) {
+            for (DataTransportListener listener : this.listeners) {
                 try {
                     listener.onConnectionEstablished(newSession);
                 } catch (Throwable t) {
-                    s_logger.warn("Unexpected Throwable", t);
+                    logger.warn("Unexpected Throwable", t);
                 }
             }
         } else {
-            s_logger.warn("No registered listeners. Ignoring onConnectionEstablished");
+            logger.warn("No registered listeners. Ignoring onConnectionEstablished");
         }
     }
 
     @Override
     public void onDisconnecting() {
-        Object[] services = this.m_ctx.locateServices(DATA_TRANSPORT_LISTENER_REFERENCE);
+        Object[] services = this.ctx.locateServices(DATA_TRANSPORT_LISTENER_REFERENCE);
         if (services != null) {
             for (Object service : services) {
                 try {
                     ((org.eclipse.kura.data.DataTransportListener) service).onDisconnecting();
                 } catch (Throwable t) {
-                    s_logger.warn("Unexpected Throwable", t);
+                    logger.warn("Unexpected Throwable", t);
                 }
             }
         } else {
-            s_logger.debug("No registered listener services. Ignoring onDisconnecting");
+            logger.debug("No registered listener services. Ignoring onDisconnecting");
         }
 
-        if (!this.m_listeners.isEmpty()) {
-            for (DataTransportListener listener : this.m_listeners) {
+        if (!this.listeners.isEmpty()) {
+            for (DataTransportListener listener : this.listeners) {
                 try {
                     listener.onDisconnecting();
                 } catch (Throwable t) {
-                    s_logger.warn("Unexpected Throwable", t);
+                    logger.warn("Unexpected Throwable", t);
                 }
             }
         } else {
-            s_logger.warn("No registered listeners. Ignoring onDisconnecting");
+            logger.warn("No registered listeners. Ignoring onDisconnecting");
         }
     }
 
     @Override
     public void onDisconnected() {
-        Object[] services = this.m_ctx.locateServices(DATA_TRANSPORT_LISTENER_REFERENCE);
+        Object[] services = this.ctx.locateServices(DATA_TRANSPORT_LISTENER_REFERENCE);
         if (services != null) {
             for (Object service : services) {
                 try {
                     ((org.eclipse.kura.data.DataTransportListener) service).onDisconnected();
                 } catch (Throwable t) {
-                    s_logger.warn("Unexpected Throwable", t);
+                    logger.warn("Unexpected Throwable", t);
                 }
             }
         } else {
-            s_logger.debug("No registered listener services. Ignoring onDisconnected");
+            logger.debug("No registered listener services. Ignoring onDisconnected");
         }
 
-        if (!this.m_listeners.isEmpty()) {
-            for (DataTransportListener listener : this.m_listeners) {
+        if (!this.listeners.isEmpty()) {
+            for (DataTransportListener listener : this.listeners) {
                 try {
                     listener.onDisconnected();
                 } catch (Throwable t) {
-                    s_logger.warn("Unexpected Throwable", t);
+                    logger.warn("Unexpected Throwable", t);
                 }
             }
         } else {
-            s_logger.warn("No registered listeners. Ignoring onDisconnected");
+            logger.warn("No registered listeners. Ignoring onDisconnected");
         }
     }
 
     @Override
     public void onConfigurationUpdating(boolean wasConnected) {
-        Object[] services = this.m_ctx.locateServices(DATA_TRANSPORT_LISTENER_REFERENCE);
+        Object[] services = this.ctx.locateServices(DATA_TRANSPORT_LISTENER_REFERENCE);
         if (services != null) {
             for (Object service : services) {
                 try {
                     ((org.eclipse.kura.data.DataTransportListener) service).onConfigurationUpdating(wasConnected);
                 } catch (Throwable t) {
-                    s_logger.warn("Unexpected Throwable", t);
+                    logger.warn("Unexpected Throwable", t);
                 }
             }
         } else {
-            s_logger.debug("No registered listener services. Ignoring onConfigurationUpdating");
+            logger.debug("No registered listener services. Ignoring onConfigurationUpdating");
         }
 
-        if (!this.m_listeners.isEmpty()) {
-            for (DataTransportListener listener : this.m_listeners) {
+        if (!this.listeners.isEmpty()) {
+            for (DataTransportListener listener : this.listeners) {
                 try {
                     listener.onConfigurationUpdating(wasConnected);
                 } catch (Throwable t) {
-                    s_logger.warn("Unexpected Throwable", t);
+                    logger.warn("Unexpected Throwable", t);
                 }
             }
         } else {
-            s_logger.warn("No registered listeners. Ignoring onConfigurationUpdating");
+            logger.warn("No registered listeners. Ignoring onConfigurationUpdating");
         }
     }
 
     @Override
     public void onConfigurationUpdated(boolean wasConnected) {
-        Object[] services = this.m_ctx.locateServices(DATA_TRANSPORT_LISTENER_REFERENCE);
+        Object[] services = this.ctx.locateServices(DATA_TRANSPORT_LISTENER_REFERENCE);
         if (services != null) {
             for (Object service : services) {
                 try {
                     ((org.eclipse.kura.data.DataTransportListener) service).onConfigurationUpdated(wasConnected);
                 } catch (Throwable t) {
-                    s_logger.warn("Unexpected Throwable", t);
+                    logger.warn("Unexpected Throwable", t);
                 }
             }
         } else {
-            s_logger.debug("No registered listener services. Ignoring onConfigurationUpdated");
+            logger.debug("No registered listener services. Ignoring onConfigurationUpdated");
         }
 
-        if (!this.m_listeners.isEmpty()) {
-            for (DataTransportListener listener : this.m_listeners) {
+        if (!this.listeners.isEmpty()) {
+            for (DataTransportListener listener : this.listeners) {
                 try {
                     listener.onConfigurationUpdated(wasConnected);
                 } catch (Throwable t) {
-                    s_logger.warn("Unexpected Throwable", t);
+                    logger.warn("Unexpected Throwable", t);
                 }
             }
         } else {
-            s_logger.warn("No registered listeners. Ignoring onConfigurationUpdated");
+            logger.warn("No registered listeners. Ignoring onConfigurationUpdated");
         }
     }
 
     @Override
     public void onConnectionLost(Throwable cause) {
-        Object[] services = this.m_ctx.locateServices(DATA_TRANSPORT_LISTENER_REFERENCE);
+        Object[] services = this.ctx.locateServices(DATA_TRANSPORT_LISTENER_REFERENCE);
         if (services != null) {
             for (Object service : services) {
                 try {
                     ((org.eclipse.kura.data.DataTransportListener) service).onConnectionLost(cause);
                 } catch (Throwable t) {
-                    s_logger.warn("Unexpected Throwable", t);
+                    logger.warn("Unexpected Throwable", t);
                 }
             }
         } else {
-            s_logger.debug("No registered listener services. Ignoring onConnectionLost");
+            logger.debug("No registered listener services. Ignoring onConnectionLost");
         }
 
-        if (!this.m_listeners.isEmpty()) {
-            for (DataTransportListener listener : this.m_listeners) {
+        if (!this.listeners.isEmpty()) {
+            for (DataTransportListener listener : this.listeners) {
                 try {
                     listener.onConnectionLost(cause);
                 } catch (Throwable t) {
-                    s_logger.warn("Unexpected Throwable", t);
+                    logger.warn("Unexpected Throwable", t);
                 }
             }
         } else {
-            s_logger.warn("No registered listeners. Ignoring onConnectionLost");
+            logger.warn("No registered listeners. Ignoring onConnectionLost");
         }
     }
 
     @Override
     public void onMessageArrived(String topic, byte[] payload, int qos, boolean retained) {
-        Object[] services = this.m_ctx.locateServices(DATA_TRANSPORT_LISTENER_REFERENCE);
+        Object[] services = this.ctx.locateServices(DATA_TRANSPORT_LISTENER_REFERENCE);
         if (services != null) {
             for (Object service : services) {
                 try {
                     ((org.eclipse.kura.data.DataTransportListener) service).onMessageArrived(topic, payload, qos,
                             retained);
                 } catch (Throwable t) {
-                    s_logger.warn("Unexpected Throwable", t);
+                    logger.warn("Unexpected Throwable", t);
                 }
             }
         } else {
-            s_logger.debug("No registered listener services. Ignoring onMessageArrived");
+            logger.debug("No registered listener services. Ignoring onMessageArrived");
         }
 
-        if (!this.m_listeners.isEmpty()) {
-            for (DataTransportListener listener : this.m_listeners) {
+        if (!this.listeners.isEmpty()) {
+            for (DataTransportListener listener : this.listeners) {
                 try {
                     listener.onMessageArrived(topic, payload, qos, retained);
                 } catch (Throwable t) {
-                    s_logger.warn("Unexpected Throwable", t);
+                    logger.warn("Unexpected Throwable", t);
                 }
             }
         } else {
-            s_logger.warn("No registered listeners. Ignoring onMessageArrived");
+            logger.warn("No registered listeners. Ignoring onMessageArrived");
         }
     }
 
     @Override
     public void onMessageConfirmed(DataTransportToken token) {
-        Object[] services = this.m_ctx.locateServices(DATA_TRANSPORT_LISTENER_REFERENCE);
+        Object[] services = this.ctx.locateServices(DATA_TRANSPORT_LISTENER_REFERENCE);
         if (services != null) {
             for (Object service : services) {
                 try {
                     ((org.eclipse.kura.data.DataTransportListener) service).onMessageConfirmed(token);
                 } catch (Throwable t) {
-                    s_logger.warn("Unexpected Throwable", t);
+                    logger.warn("Unexpected Throwable", t);
                 }
             }
         } else {
-            s_logger.debug("No registered listener services. Ignoring onMessageConfirmed");
+            logger.debug("No registered listener services. Ignoring onMessageConfirmed");
         }
 
-        if (!this.m_listeners.isEmpty()) {
-            for (DataTransportListener listener : this.m_listeners) {
+        if (!this.listeners.isEmpty()) {
+            for (DataTransportListener listener : this.listeners) {
                 try {
                     listener.onMessageConfirmed(token);
                 } catch (Throwable t) {
-                    s_logger.warn("Unexpected Throwable", t);
+                    logger.warn("Unexpected Throwable", t);
                 }
             }
         } else {
-            s_logger.warn("No registered listeners. Ignoring onMessageConfirmed");
+            logger.warn("No registered listeners. Ignoring onMessageConfirmed");
         }
     }
 
     public void add(DataTransportListener listener) {
-        this.m_listeners.add(listener);
+        this.listeners.add(listener);
     }
 
     public void remove(DataTransportListener listener) {
-        this.m_listeners.remove(listener);
+        this.listeners.remove(listener);
     }
 }

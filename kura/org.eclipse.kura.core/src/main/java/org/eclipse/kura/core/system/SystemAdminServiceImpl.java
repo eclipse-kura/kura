@@ -132,7 +132,9 @@ public class SystemAdminServiceImpl extends SuperSystemService implements System
                 String systemUptime = runSystemCommand("uptime", false, this.executorService);
                 if (!systemUptime.isEmpty()) {
                     String[] uptimeParts = systemUptime.split("up\\s+")[1].split("\\s*,\\s*");
-                    int days = 0, hours = 0, mins = 0;
+                    int days = 0;
+                    int hours = 0;
+                    int mins = 0;
 
                     String uptimePart = uptimeParts[0];
 

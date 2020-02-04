@@ -131,7 +131,7 @@ public class SystemAdminServiceImpl extends SuperSystemService implements System
             try {
                 String lastBootupSysCmd = runSystemCommand("sysctl -n kern.boottime", false, this.executorService);
 
-                if (!lastBootupSysCmd.equals("")) {
+                if (!lastBootupSysCmd.isEmpty()) {
                     String[] uptimePairs = lastBootupSysCmd.substring(1, lastBootupSysCmd.indexOf("}")).replace(" ", "")
                             .split(",");
                     String[] uptimeSeconds = uptimePairs[0].split("=");

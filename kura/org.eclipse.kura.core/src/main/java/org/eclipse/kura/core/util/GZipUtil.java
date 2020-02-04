@@ -34,9 +34,10 @@ public class GZipUtil {
 
     public static byte[] compress(byte[] source) throws IOException {
 
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                GZIPOutputStream gzipos = new GZIPOutputStream(baos);) {
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            GZIPOutputStream gzipos = new GZIPOutputStream(baos);
             gzipos.write(source);
+            gzipos.close();
             return baos.toByteArray();
         }
     }

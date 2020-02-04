@@ -45,7 +45,7 @@ public class BluetoothUtil {
 
     private static final String ERROR_EXECUTING_COMMAND_MESSAGE = "Error executing command: {}";
     private static final Logger logger = LoggerFactory.getLogger(BluetoothUtil.class);
-    private static final ExecutorService processExecutor = Executors.newSingleThreadExecutor();
+    private static final ExecutorService PROCESS_EXECUTOR = Executors.newSingleThreadExecutor();
 
     public static final String HCITOOL = "hcitool";
     public static final String BTDUMP = "/tmp/BluetoothUtil.btsnoopdump.sh";
@@ -93,7 +93,6 @@ public class BluetoothUtil {
         if (status.getExitStatus().isSuccessful()) {
             // Check Input stream
             String[] outputLines = new String(outputStream.toByteArray(), Charsets.UTF_8).split("\n");
-            // TODO: Pull more parameters from hciconfig?
             props.put("leReady", "false");
             for (String result : outputLines) {
                 parseCommandResult(props, result);
@@ -266,7 +265,7 @@ public class BluetoothUtil {
             CommandExecutorService executorService) throws IOException {
 
         // Serialize process executions. One at a time so we can consume all streams.
-        Future<BluetoothProcess> futureSafeProcess = processExecutor.submit(() -> {
+        Future<BluetoothProcess> futureSafeProcess = PROCESS_EXECUTOR.submit(() -> {
             Thread.currentThread().setName("BluetoothProcessExecutor");
             BluetoothProcess bluetoothProcess = new BluetoothProcess(executorService);
             bluetoothProcess.exec(cmdArray, listener);
@@ -288,7 +287,7 @@ public class BluetoothUtil {
             CommandExecutorService executorService) throws IOException {
 
         // Serialize process executions. One at a time so we can consume all streams.
-        Future<BluetoothProcess> futureSafeProcess = processExecutor.submit(() -> {
+        Future<BluetoothProcess> futureSafeProcess = PROCESS_EXECUTOR.submit(() -> {
             Thread.currentThread().setName("BTSnoopProcessExecutor");
             BluetoothProcess bluetoothProcess = new BluetoothProcess(executorService);
             bluetoothProcess.execSnoop(cmdArray, listener);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -10,15 +10,14 @@
 package org.eclipse.kura.cloudconnection.publisher;
 
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.cloudconnection.CloudEndpoint;
 import org.eclipse.kura.cloudconnection.listener.CloudConnectionListener;
 import org.eclipse.kura.cloudconnection.listener.CloudDeliveryListener;
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
- * The CloudPublisher interface is an abstraction on top of the {@link CloudEndpoint} to simplify the
- * publishing process for each application running in the framework.
+ * The CloudPublisher interface is an abstraction on top of the {@link org.eclipse.kura.cloudconnection.CloudEndpoint}
+ * to simplify the publishing process for each application running in the framework.
  * A CloudPublisher is used to publish the specified {@link KuraMessage} to a cloud platform.
  * The CloudPublisher and the associated CloudEndpoint implementations abstract, to the user applications, all the low
  * level specificities like the message destination address, quality of service or properties because those are added by

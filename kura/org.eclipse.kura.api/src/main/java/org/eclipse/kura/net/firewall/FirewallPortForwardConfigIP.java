@@ -88,6 +88,7 @@ public abstract class FirewallPortForwardConfigIP<T extends IPAddress> implement
      * @param sourcePortRange
      *            The (options) permitted source port range for inbound connections
      */
+    @SuppressWarnings("checkstyle:parameterNumber")
     public FirewallPortForwardConfigIP(String inboundIface, String outboundIface, IP4Address address,
             NetProtocol protocol, int inPort, int outPort, boolean masquerade, NetworkPair<T> permittedNetwork,
             String permittedMac, String sourcePortRange) {

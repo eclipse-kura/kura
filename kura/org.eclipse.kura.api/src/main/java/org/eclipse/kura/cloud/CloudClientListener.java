@@ -11,10 +11,6 @@
  *******************************************************************************/
 package org.eclipse.kura.cloud;
 
-import org.eclipse.kura.cloudconnection.listener.CloudConnectionListener;
-import org.eclipse.kura.cloudconnection.subscriber.listener.CloudSubscriberListener;
-import org.eclipse.kura.data.DataService;
-import org.eclipse.kura.data.DataTransportService;
 import org.eclipse.kura.message.KuraPayload;
 import org.osgi.annotation.versioning.ConsumerType;
 
@@ -25,7 +21,8 @@ import org.osgi.annotation.versioning.ConsumerType;
  * The Arrived method signatures are differentiated based on whether the incoming messages have been
  * published to a data topic (by default accountName/#) or a control topic (by default $EDC/accountName/#).
  *
- * @deprecated Please consider using {@link CloudConnectionListener} and {@link CloudSubscriberListener} instead
+ * @deprecated Please consider using {@link org.eclipse.kura.cloudconnection.listener.CloudConnectionListener} and 
+ * {@link org.eclipse.kura.cloudconnection.subscriber.listener.CloudSubscriberListener} instead
  */
 @ConsumerType
 @Deprecated
@@ -70,7 +67,7 @@ public interface CloudClientListener {
     void onMessageArrived(String deviceId, String appTopic, KuraPayload msg, int qos, boolean retain);
 
     /**
-     * Called when the client has lost its connection with the broker. Depending on the {@link DataService}
+     * Called when the client has lost its connection with the broker. Depending on the {@link org.eclipse.kura.data.DataService}
      * configuration, the client will attempt to reconnect and call the
      * {@link CloudClientListener#onConnectionEstablished}
      * method upon a successful reconnect. This is only a notification, the callback handler should
@@ -102,7 +99,7 @@ public interface CloudClientListener {
 
     /**
      * Called by the CloudClient when a message has been transfered from the publishing queue
-     * to the underlying {@link DataTransportService} for publishing on the wire.
+     * to the underlying {@link org.eclipse.kura.data.DataTransportService} for publishing on the wire.
      */
     void onMessagePublished(int messageId, String appTopic);
 }

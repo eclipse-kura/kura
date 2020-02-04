@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2018, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -14,14 +14,13 @@ package org.eclipse.kura.cloudconnection.message;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.kura.cloudconnection.publisher.CloudPublisher;
-import org.eclipse.kura.cloudconnection.subscriber.CloudSubscriber;
 import org.eclipse.kura.message.KuraPayload;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * The class KuraMessage represents a message that is shared between an application running in the framework and, for
- * example, a {@link CloudPublisher} or {@link CloudSubscriber}.
+ * example, a {@link org.eclipse.kura.cloudconnection.publisher.CloudPublisher} or
+ * {@link org.eclipse.kura.cloudconnection.subscriber.CloudSubscriber}.
  * It is composed by a {@link KuraPayload} and properties that enrich the context of the message.
  * The content of the {@code properties} field is not fixed or mandatory and represent message-related options.
  * Depending on the application, the value in the {@code properties} field can be used or not.

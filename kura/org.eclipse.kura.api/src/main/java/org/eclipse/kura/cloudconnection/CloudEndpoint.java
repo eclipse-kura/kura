@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2018, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -17,8 +17,6 @@ import java.util.Map;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.listener.CloudDeliveryListener;
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
-import org.eclipse.kura.cloudconnection.publisher.CloudPublisher;
-import org.eclipse.kura.cloudconnection.subscriber.CloudSubscriber;
 import org.eclipse.kura.cloudconnection.subscriber.listener.CloudSubscriberListener;
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -27,10 +25,13 @@ import org.osgi.annotation.versioning.ProviderType;
  * subscribers, subscribe to message delivery notification or get information about the specific cloud endpoint
  * configuration.
  *
- * Each CloudEndpoint is referenced by zero or more {@link CloudPublisher} and {@link CloudSubscriber} instances.
+ * Each CloudEndpoint is referenced by zero or more {@link org.eclipse.kura.cloudconnection.publisher.CloudPublisher}
+ * and {@link org.eclipse.kura.cloudconnection.subscriber.CloudSubscriber} instances.
  *
- * Applications should not use directly this API but, instead, use the {@link CloudPublisher} and the
- * {@link CloudSubscriber} interfaces to give applications the capabilities to publish and receive messages.
+ * Applications should not use directly this API but, instead, use the
+ * {@link org.eclipse.kura.cloudconnection.publisher.CloudPublisher} and the
+ * {@link org.eclipse.kura.cloudconnection.subscriber.CloudSubscriber} interfaces to give applications the capabilities
+ * to publish and receive messages.
  *
  * The implementor must register itself as a CloudEndpoint OSGi service provider.
  *

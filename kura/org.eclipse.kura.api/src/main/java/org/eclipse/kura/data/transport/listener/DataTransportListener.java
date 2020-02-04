@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -11,14 +11,14 @@
  *******************************************************************************/
 package org.eclipse.kura.data.transport.listener;
 
-import org.eclipse.kura.data.DataTransportService;
 import org.eclipse.kura.data.DataTransportToken;
 import org.osgi.annotation.versioning.ConsumerType;
 
 /**
  * Listener interface to be implemented by applications that needs to be notified of events in the
- * {@link DataTransportService}.
- * All registered listeners are called synchronously by the {@link DataTransportService} at the occurrence of the event.
+ * {@link org.eclipse.kura.data.DataTransportService}.
+ * All registered listeners are called synchronously by the {@link org.eclipse.kura.data.DataTransportService} at the
+ * occurrence of the event.
  * It expected that implementers of this interface do NOT perform long running tasks in the implementation of this
  * interface.
  *
@@ -46,12 +46,13 @@ public interface DataTransportListener {
     public void onDisconnected();
 
     /**
-     * Notifies the {@link DataTransportService} has received a configuration update.
+     * Notifies the {@link org.eclipse.kura.data.DataTransportService} has received a configuration update.
      */
     public void onConfigurationUpdating(boolean wasConnected);
 
     /**
-     * Notifies the {@link DataTransportService} has received a configuration update and it has applied the new
+     * Notifies the {@link org.eclipse.kura.data.DataTransportService} has received a configuration update and it has
+     * applied the new
      * configuration
      */
     public void onConfigurationUpdated(boolean wasConnected);

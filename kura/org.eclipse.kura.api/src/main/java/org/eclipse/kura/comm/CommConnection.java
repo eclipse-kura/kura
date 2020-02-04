@@ -30,69 +30,69 @@ import org.osgi.annotation.versioning.ProviderType;
  *
  * <pre>
  * Example Code:
- * 		try {
- *			String uri = new CommURI.Builder("/dev/tty.PL2303-00001004")
- *										.withBaudRate(19200)
- *										.withDataBits(8)
- *										.withStopBits(1)
- *										.withParity(0)
- *										.withTimeout(2000)
- *										.build().toString();
- *			CommConnection connOne = (CommConnection) CommTest.connectionFactory.createConnection(uri, 1, false);
- *			assertNotNull(connOne);
- *			uri = new CommURI.Builder("/dev/tty.PL2303-00002006")
- *										.withBaudRate(19200)
- *										.withDataBits(8)
- *										.withStopBits(1)
- *										.withParity(0)
- *										.withTimeout(2000)
- *										.build().toString();
- *			CommConnection connTwo = (CommConnection) CommTest.connectionFactory.createConnection(uri, 1, false);
- *			assertNotNull(connTwo);
+ *         try {
+ *            String uri = new CommURI.Builder("/dev/tty.PL2303-00001004")
+ *                                        .withBaudRate(19200)
+ *                                        .withDataBits(8)
+ *                                        .withStopBits(1)
+ *                                        .withParity(0)
+ *                                        .withTimeout(2000)
+ *                                        .build().toString();
+ *            CommConnection connOne = (CommConnection) CommTest.connectionFactory.createConnection(uri, 1, false);
+ *            assertNotNull(connOne);
+ *            uri = new CommURI.Builder("/dev/tty.PL2303-00002006")
+ *                                        .withBaudRate(19200)
+ *                                        .withDataBits(8)
+ *                                        .withStopBits(1)
+ *                                        .withParity(0)
+ *                                        .withTimeout(2000)
+ *                                        .build().toString();
+ *            CommConnection connTwo = (CommConnection) CommTest.connectionFactory.createConnection(uri, 1, false);
+ *            assertNotNull(connTwo);
  *
- *			InputStream isOne = connOne.openInputStream();
- *			OutputStream osOne = connOne.openOutputStream();
- *			InputStream isTwo = connTwo.openInputStream();
- *			OutputStream osTwo = connTwo.openOutputStream();
+ *            InputStream isOne = connOne.openInputStream();
+ *            OutputStream osOne = connOne.openOutputStream();
+ *            InputStream isTwo = connTwo.openInputStream();
+ *            OutputStream osTwo = connTwo.openOutputStream();
  *
- *			assertNotNull(isOne);
- *			assertNotNull(osOne);
- *			assertNotNull(isTwo);
- *			assertNotNull(osTwo);
+ *            assertNotNull(isOne);
+ *            assertNotNull(osOne);
+ *            assertNotNull(isTwo);
+ *            assertNotNull(osTwo);
  *
- *			//write from one to two
- *			byte[] array = "this is a message from one to two\n".getBytes();
- *			osOne.write(array);
- *			StringBuffer sb = new StringBuffer();
- *			int c;
- *			while((c = isTwo.read()) != 0xa) {
- *				sb.append((char)c);
- *			}
- *			System.out.println("Port 2: Read from serial port two: " + sb.toString());
+ *            //write from one to two
+ *            byte[] array = "this is a message from one to two\n".getBytes();
+ *            osOne.write(array);
+ *            StringBuffer sb = new StringBuffer();
+ *            int c;
+ *            while((c = isTwo.read()) != 0xa) {
+ *                sb.append((char)c);
+ *            }
+ *            System.out.println("Port 2: Read from serial port two: " + sb.toString());
  *
- *			array = "this is a message from two to one\n".getBytes();
- *			osTwo.write(array);
- *			sb = new StringBuffer();
- *			while((c = isOne.read()) != 0xa) {
- *				sb.append((char)c);
- *			}
- *			System.out.println("Port 1: Read from serial port: " + sb.toString());
+ *            array = "this is a message from two to one\n".getBytes();
+ *            osTwo.write(array);
+ *            sb = new StringBuffer();
+ *            while((c = isOne.read()) != 0xa) {
+ *                sb.append((char)c);
+ *            }
+ *            System.out.println("Port 1: Read from serial port: " + sb.toString());
  *
- *			isOne.close();
- *			osOne.close();
- *			isOne = null;
- *	 		osOne = null;
- *			isTwo.close();
- *			osTwo.close();
- *			isTwo = null;
- *			osTwo = null;
- *			connOne.close();
- *			connOne = null;
- *			connTwo.close();
- *			connTwo = null;
- *		} catch (Exception e) {
- *			e.printStackTrace();
- *		}
+ *            isOne.close();
+ *            osOne.close();
+ *            isOne = null;
+ *             osOne = null;
+ *            isTwo.close();
+ *            osTwo.close();
+ *            isTwo = null;
+ *            osTwo = null;
+ *            connOne.close();
+ *            connOne = null;
+ *            connTwo.close();
+ *            connTwo = null;
+ *        } catch (Exception e) {
+ *            e.printStackTrace();
+ *        }
  * </pre>
  *
  * Note: avoid blocking read (InputStream.read()) if the InputStream can be closed on a different thread,
@@ -101,15 +101,15 @@ import org.osgi.annotation.versioning.ProviderType;
  * It is preferable to test InputStream.available before InputStream.read():
  *
  * <pre>
- *		if (isOne.available() != 0) {
- *			c = isOne.read();
- *		} else {
- *		try {
- *			Thread.sleep(100);
- *			continue;
- *		} catch (InterruptedException e) {
- *			return;
- *		}
+ *        if (isOne.available() != 0) {
+ *            c = isOne.read();
+ *        } else {
+ *        try {
+ *            Thread.sleep(100);
+ *            continue;
+ *        } catch (InterruptedException e) {
+ *            return;
+ *        }
  * </pre>
  *
  * @noimplement This interface is not intended to be implemented by clients.

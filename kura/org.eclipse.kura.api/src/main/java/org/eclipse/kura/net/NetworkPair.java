@@ -27,9 +27,11 @@ import org.osgi.annotation.versioning.ProviderType;
 public class NetworkPair<T extends IPAddress> {
 
     /** The IP Address portion of the NetworkPair **/
+    @SuppressWarnings({"checkstyle:memberName", "checkstyle:visibilityModifier"})
     public T m_ipAddress;
 
     /** The prefix portion of the NetworkPair **/
+    @SuppressWarnings({"checkstyle:memberName", "checkstyle:visibilityModifier"})
     public short m_prefix;
 
     public NetworkPair(T ipAddress, short prefix) {

@@ -76,36 +76,41 @@ public class WifiBgscan {
         return this.rssiThreshold;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + this.longInterval;
+        result = prime * result + (this.module == null ? 0 : this.module.hashCode());
+        result = prime * result + this.rssiThreshold;
+        result = prime * result + this.shortInterval;
+        return result;
+    }
+
     @Override
     public boolean equals(Object obj) {
-
-        if (!(obj instanceof WifiBgscan)) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
             return false;
         }
-
-        WifiBgscan bgscan = (WifiBgscan) obj;
-
-        if (this.module != bgscan.module) {
+        if (getClass() != obj.getClass()) {
             return false;
         }
-
-        if (this.rssiThreshold != bgscan.rssiThreshold) {
+        WifiBgscan other = (WifiBgscan) obj;
+        if (this.longInterval != other.longInterval) {
             return false;
         }
-
-        if (this.shortInterval != bgscan.shortInterval) {
+        if (this.module != other.module) {
             return false;
         }
-
-        if (this.longInterval != bgscan.longInterval) {
+        if (this.rssiThreshold != other.rssiThreshold) {
             return false;
         }
-
+        if (this.shortInterval != other.shortInterval) {
+            return false;
+        }
         return true;
     }
 
@@ -135,4 +140,5 @@ public class WifiBgscan {
 
         return sb.toString();
     }
+
 }

@@ -15,21 +15,19 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.cloudconnection.CloudConnectionManager;
-import org.eclipse.kura.cloudconnection.CloudEndpoint;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
- * A {@link CloudConnectionFactory} is responsible to register {@link CloudEndpoint} instances in the
- * framework.
+ * A {@link CloudConnectionFactory} is responsible to register {@link org.eclipse.kura.cloudconnection.CloudEndpoint}
+ * instances in the framework.
  * The Component creates multiple component instances upon reception of a configuration
  * created through the Configuration Service.
  *
  * It provides all the implementations that can be used to connect to a specific Cloud platform.
  *
- * A {@link CloudConnectionFactory} must create a {@link CloudEndpoint} and, eventually, a
- * {@link CloudConnectionManager} that are used to establish and manage the connection to a cloud platform, for example
- * an Mqtt connection.
+ * A {@link CloudConnectionFactory} must create a {@link org.eclipse.kura.cloudconnection.CloudEndpoint} and,
+ * eventually, a {@link org.eclipse.kura.cloudconnection.CloudConnectionManager} that are used to establish and manage
+ * the connection to a cloud platform, for example an Mqtt connection.
  *
  * Multiple {@link CloudConnectionFactory} services can be registered in the framework to support multiple simultaneous
  * connections to different Cloud platforms.

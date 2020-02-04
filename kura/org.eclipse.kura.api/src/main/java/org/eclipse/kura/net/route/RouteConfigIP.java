@@ -24,91 +24,91 @@ import org.osgi.annotation.versioning.ProviderType;
 @ProviderType
 public abstract class RouteConfigIP<T extends IPAddress> implements RouteConfig {
 
-    private T m_destination;
-    private T m_gateway;
-    private T m_netmask;
-    private String m_interfaceName;
-    private int m_metric;
+    private T destination;
+    private T gateway;
+    private T netmask;
+    private String interfaceName;
+    private int metric;
 
     public RouteConfigIP(T destination, T gateway, T netmask, String interfaceName, int metric) {
         super();
 
-        this.m_destination = destination;
-        this.m_gateway = gateway;
-        this.m_netmask = netmask;
-        this.m_interfaceName = interfaceName;
-        this.m_metric = metric;
+        this.destination = destination;
+        this.gateway = gateway;
+        this.netmask = netmask;
+        this.interfaceName = interfaceName;
+        this.metric = metric;
     }
 
     @Override
     public String getDescription() {
         StringBuffer desc = new StringBuffer();
         String gw;
-        if (this.m_gateway == null) {
+        if (this.gateway == null) {
             gw = "default";
         } else {
-            gw = this.m_gateway.getHostAddress();
+            gw = this.gateway.getHostAddress();
         }
-        desc.append("Destination: " + this.m_destination.getHostAddress() + ", " + "Gateway: " + gw + ", " + "Netmask: "
-                + this.m_netmask.getHostAddress() + ", " + "Interface: " + this.m_interfaceName + ", " + "Metric: "
-                + this.m_metric);
+        desc.append("Destination: " + this.destination.getHostAddress() + ", " + "Gateway: " + gw + ", " + "Netmask: "
+                + this.netmask.getHostAddress() + ", " + "Interface: " + this.interfaceName + ", " + "Metric: "
+                + this.metric);
         return desc.toString();
     }
 
     @Override
     public T getDestination() {
-        return this.m_destination;
+        return this.destination;
     }
 
     public void setDestination(T destination) {
-        this.m_destination = destination;
+        this.destination = destination;
     }
 
     @Override
     public T getGateway() {
-        return this.m_gateway;
+        return this.gateway;
     }
 
     public void setGateway(T gateway) {
-        this.m_gateway = gateway;
+        this.gateway = gateway;
     }
 
     @Override
     public T getNetmask() {
-        return this.m_netmask;
+        return this.netmask;
     }
 
     public void setNetmask(T netmask) {
-        this.m_netmask = netmask;
+        this.netmask = netmask;
     }
 
     @Override
     public String getInterfaceName() {
-        return this.m_interfaceName;
+        return this.interfaceName;
     }
 
     public void setInterfaceName(String interfaceName) {
-        this.m_interfaceName = interfaceName;
+        this.interfaceName = interfaceName;
     }
 
     @Override
     public int getMetric() {
-        return this.m_metric;
+        return this.metric;
     }
 
     public void setMetric(int metric) {
-        this.m_metric = metric;
+        this.metric = metric;
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + (this.m_destination == null ? 0 : this.m_destination.hashCode());
-        result = prime * result + (this.m_gateway == null ? 0 : this.m_gateway.hashCode());
-        result = prime * result + (this.m_interfaceName == null ? 0 : this.m_interfaceName.hashCode());
-        result = prime * result + this.m_metric;
-        result = prime * result + (this.m_netmask == null ? 0 : this.m_netmask.hashCode());
+        result = prime * result + (this.destination == null ? 0 : this.destination.hashCode());
+        result = prime * result + (this.gateway == null ? 0 : this.gateway.hashCode());
+        result = prime * result + (this.interfaceName == null ? 0 : this.interfaceName.hashCode());
+        result = prime * result + this.metric;
+        result = prime * result + (this.netmask == null ? 0 : this.netmask.hashCode());
         return result;
     }
 
@@ -125,35 +125,35 @@ public abstract class RouteConfigIP<T extends IPAddress> implements RouteConfig 
         }
         @SuppressWarnings("rawtypes")
         RouteConfigIP other = (RouteConfigIP) obj;
-        if (this.m_destination == null) {
-            if (other.m_destination != null) {
+        if (this.destination == null) {
+            if (other.destination != null) {
                 return false;
             }
-        } else if (!this.m_destination.equals(other.m_destination)) {
+        } else if (!this.destination.equals(other.destination)) {
             return false;
         }
-        if (this.m_gateway == null) {
-            if (other.m_gateway != null) {
+        if (this.gateway == null) {
+            if (other.gateway != null) {
                 return false;
             }
-        } else if (!this.m_gateway.equals(other.m_gateway)) {
+        } else if (!this.gateway.equals(other.gateway)) {
             return false;
         }
-        if (this.m_interfaceName == null) {
-            if (other.m_interfaceName != null) {
+        if (this.interfaceName == null) {
+            if (other.interfaceName != null) {
                 return false;
             }
-        } else if (!this.m_interfaceName.equals(other.m_interfaceName)) {
+        } else if (!this.interfaceName.equals(other.interfaceName)) {
             return false;
         }
-        if (this.m_metric != other.m_metric) {
+        if (this.metric != other.metric) {
             return false;
         }
-        if (this.m_netmask == null) {
-            if (other.m_netmask != null) {
+        if (this.netmask == null) {
+            if (other.netmask != null) {
                 return false;
             }
-        } else if (!this.m_netmask.equals(other.m_netmask)) {
+        } else if (!this.netmask.equals(other.netmask)) {
             return false;
         }
         return true;
@@ -161,8 +161,8 @@ public abstract class RouteConfigIP<T extends IPAddress> implements RouteConfig 
 
     @Override
     public boolean isValid() {
-        if (this.m_destination == null || this.m_gateway == null || this.m_netmask == null
-                || this.m_interfaceName == null) {
+        if (this.destination == null || this.gateway == null || this.netmask == null
+                || this.interfaceName == null) {
             return false;
         }
 
@@ -173,15 +173,15 @@ public abstract class RouteConfigIP<T extends IPAddress> implements RouteConfig 
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("RouteConfigIP [m_destination=");
-        builder.append(this.m_destination);
+        builder.append(this.destination);
         builder.append(", m_gateway=");
-        builder.append(this.m_gateway);
+        builder.append(this.gateway);
         builder.append(", m_netmask=");
-        builder.append(this.m_netmask);
+        builder.append(this.netmask);
         builder.append(", m_interfaceName=");
-        builder.append(this.m_interfaceName);
+        builder.append(this.interfaceName);
         builder.append(", m_metric=");
-        builder.append(this.m_metric);
+        builder.append(this.metric);
         builder.append("]");
         return builder.toString();
     }

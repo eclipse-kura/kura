@@ -11,8 +11,6 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.linux.net.modem;
 
-import java.io.IOException;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.internal.board.BoardPowerState;
 
@@ -56,7 +54,7 @@ public interface GatewayModemDriver {
      * @param vendor
      * @param product
      * @return a {@link BoardPowerState} representing the current status
-     * @throws IOException
+     * @throws KuraException
      */
     public BoardPowerState getState(String vendor, String product) throws KuraException;
 }

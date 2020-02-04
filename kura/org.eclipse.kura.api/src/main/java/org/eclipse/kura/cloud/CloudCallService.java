@@ -15,8 +15,6 @@ import org.eclipse.kura.KuraConnectException;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraStoreException;
 import org.eclipse.kura.KuraTimeoutException;
-import org.eclipse.kura.data.DataService;
-import org.eclipse.kura.data.DataTransportService;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.osgi.annotation.versioning.ProviderType;
@@ -26,7 +24,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * The call methods deal with the logic required to build request messages and track the corresponding responses.
  * All call methods are synchronous; after a request is issued, the implementation will wait for the response
  * to arrive or a timeout occurs. The timeout interval used by the service is configurable as a property
- * of the {@link DataTransportService}.
+ * of the {@link org.eclipse.kura.data.DataTransportService}.
  *
  * @noimplement This interface is not intended to be implemented by clients.
  * @deprecated
@@ -72,7 +70,7 @@ public interface CloudCallService {
             throws KuraConnectException, KuraTimeoutException, KuraStoreException, KuraException;
 
     /**
-     * Returns true if the underlying {@link DataService} is currently connected to the remote server.
+     * Returns true if the underlying {@link org.eclipse.kura.data.DataService} is currently connected to the remote server.
      *
      * @return
      */

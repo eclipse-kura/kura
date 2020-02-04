@@ -228,6 +228,7 @@ public class BluetoothAdapterImpl implements BluetoothAdapter {
 
     }
 
+    @SuppressWarnings({ "checkstyle:parameterNumber", "checkstyle:parameterName" })
     @Override
     public void setBeaconAdvertisingData(String uuid, Integer major, Integer minor, String companyCode, Integer txPower,
             boolean LELimited, boolean LEGeneral, boolean BR_EDRSupported, boolean LE_BRController, boolean LE_BRHost) {

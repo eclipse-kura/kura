@@ -41,6 +41,7 @@ public class WifiHotspotInfo {
         this.security = security;
     }
 
+    @SuppressWarnings("checkstyle:parameterNumber")
     public WifiHotspotInfo(String ssid, String macAddress, int signalLevel, int channel, int frequency,
             WifiSecurity security, EnumSet<WifiSecurity> pairCiphers, EnumSet<WifiSecurity> groupCiphers) {
         this(ssid, macAddress, signalLevel, channel, frequency, security);

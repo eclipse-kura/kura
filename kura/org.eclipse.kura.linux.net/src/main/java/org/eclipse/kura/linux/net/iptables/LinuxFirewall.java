@@ -65,7 +65,7 @@ public class LinuxFirewall {
                 logger.debug("{} file already exists", cfgFile);
             }
         } catch (Exception e) {
-            logger.error("cannot create or read file", e);// File did not exist and was created
+            logger.error("cannot create or read file", e); // File did not exist and was created
         }
         try {
             initialize();
@@ -86,6 +86,7 @@ public class LinuxFirewall {
         logger.debug("initialize() :: Parsing current firewall configuraion");
     }
 
+    @SuppressWarnings("checkstyle:parameterNumber")
     public void addLocalRule(int port, String protocol, String permittedNetwork, String permittedNetworkPrefix,
             String permittedInterfaceName, String unpermittedInterfaceName, String permittedMAC, String sourcePortRange)
             throws KuraException {
@@ -141,6 +142,7 @@ public class LinuxFirewall {
         }
     }
 
+    @SuppressWarnings("checkstyle:parameterNumber")
     public void addPortForwardRule(String inboundIface, String outboundIface, String address, String protocol,
             int inPort, int outPort, boolean masquerade, String permittedNetwork, String permittedNetworkPrefix,
             String permittedMAC, String sourcePortRange) throws KuraException {

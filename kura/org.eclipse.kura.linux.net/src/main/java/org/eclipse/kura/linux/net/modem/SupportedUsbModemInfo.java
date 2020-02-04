@@ -67,6 +67,7 @@ public enum SupportedUsbModemInfo {
 
     private String productName;
 
+    @SuppressWarnings("checkstyle:parameterNumber")
     private SupportedUsbModemInfo(String deviceName, String vendorId, String productId, int numTtyDevs,
             int numBlockDevs, int atPort, int dataPort, int gpsPort, long turnOffDelay, long turnOnDelay,
             List<ModemTechnologyType> modemTechnology, List<? extends UsbModemDriver> drivers, String prodName) {

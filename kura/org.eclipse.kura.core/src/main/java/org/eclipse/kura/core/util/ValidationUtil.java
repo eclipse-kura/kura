@@ -16,6 +16,10 @@ import org.eclipse.kura.KuraException;
 
 public class ValidationUtil {
 
+    private ValidationUtil() {
+
+    }
+
     public static void notNull(Object value, String argumentName) throws KuraException {
         if (value == null) {
             throw new KuraException(KuraErrorCode.CONFIGURATION_REQUIRED_ATTRIBUTE_MISSING, argumentName);

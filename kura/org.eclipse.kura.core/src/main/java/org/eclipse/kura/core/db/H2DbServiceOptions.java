@@ -57,12 +57,12 @@ class H2DbServiceOptions {
         this.defragIntervalMinutes = DEFRAG_INTERVAL_MINUTES_PROP.get(properties);
         this.maxConnectionPoolSize = CONNECTION_POOL_MAX_SIZE.get(properties);
 
-        String dbUrl = CONNECTOR_URL_PROP.get(properties);
+        String dbUrlProp = CONNECTOR_URL_PROP.get(properties);
 
-        dbUrl = USER_PATTERN.matcher(dbUrl).replaceAll("");
-        dbUrl = PASSWORD_PATTERN.matcher(dbUrl).replaceAll("");
+        dbUrlProp = USER_PATTERN.matcher(dbUrlProp).replaceAll("");
+        dbUrlProp = PASSWORD_PATTERN.matcher(dbUrlProp).replaceAll("");
 
-        this.dbUrl = dbUrl;
+        this.dbUrl = dbUrlProp;
         computeUrlParts();
     }
 

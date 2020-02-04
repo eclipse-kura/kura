@@ -27,15 +27,15 @@ public class ModemAddedEvent extends Event {
     /** Topic of the ModemAddedEvent */
     public static final String MODEM_EVENT_ADDED_TOPIC = "org/eclipse/kura/net/modem/ADDED";
 
-    ModemDevice m_modemDevice;
+    ModemDevice modemDevice;
 
     public ModemAddedEvent(ModemDevice modemDevice) {
         super(MODEM_EVENT_ADDED_TOPIC, (Map<String, ?>) null);
 
-        this.m_modemDevice = modemDevice;
+        this.modemDevice = modemDevice;
     }
 
     public ModemDevice getModemDevice() {
-        return this.m_modemDevice;
+        return this.modemDevice;
     }
 }

@@ -21,23 +21,23 @@ import org.osgi.annotation.versioning.ProviderType;
 @ProviderType
 public class UsbBlockDevice extends AbstractUsbDevice {
 
-    private final String m_deviceNode;
+    private final String deviceNode;
 
     public UsbBlockDevice(String vendorId, String productId, String manufacturerName, String productName,
             String usbBusNumber, String usbDevicePath, String deviceNode) {
         super(vendorId, productId, manufacturerName, productName, usbBusNumber, usbDevicePath);
-        this.m_deviceNode = deviceNode;
+        this.deviceNode = deviceNode;
     }
 
     public String getDeviceNode() {
-        return this.m_deviceNode;
+        return this.deviceNode;
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + (this.m_deviceNode == null ? 0 : this.m_deviceNode.hashCode());
+        result = prime * result + (this.deviceNode == null ? 0 : this.deviceNode.hashCode());
         return result;
     }
 
@@ -53,11 +53,11 @@ public class UsbBlockDevice extends AbstractUsbDevice {
             return false;
         }
         UsbBlockDevice other = (UsbBlockDevice) obj;
-        if (this.m_deviceNode == null) {
-            if (other.m_deviceNode != null) {
+        if (this.deviceNode == null) {
+            if (other.deviceNode != null) {
                 return false;
             }
-        } else if (!this.m_deviceNode.equals(other.m_deviceNode)) {
+        } else if (!this.deviceNode.equals(other.deviceNode)) {
             return false;
         }
         return true;

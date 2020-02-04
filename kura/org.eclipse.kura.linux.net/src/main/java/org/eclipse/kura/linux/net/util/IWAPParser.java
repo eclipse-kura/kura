@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -54,7 +54,7 @@ class IWAPParser {
         wifiAccessPoint.setBitrate(this.bitrate);
         wifiAccessPoint.setFrequency(this.frequency);
         wifiAccessPoint.setHardwareAddress(this.hardwareAddress);
-        wifiAccessPoint.setMode(WifiMode.MASTER);				// FIME - is this right? - always MASTER - or maybe
+        wifiAccessPoint.setMode(WifiMode.MASTER); // FIME - is this right? - always MASTER - or maybe
         // AD-HOC too?
         wifiAccessPoint.setRsnSecurity(this.rsn.getWifiSecurityFlags());
         wifiAccessPoint.setStrength(this.strength);
@@ -83,12 +83,10 @@ class IWAPParser {
 
         } else if (propLine.startsWith("freq:")) {
             StringTokenizer st = new StringTokenizer(propLine, " ");
-            st.nextToken();	// eat freq:
+            st.nextToken(); // eat freq:
             this.frequency = Long.parseLong(st.nextToken());
-
         } else if (propLine.startsWith("SSID: ")) {
             this.ssid = propLine.substring(5).trim();
-
         } else if (propLine.startsWith("RSN:")) {
             this.securityParser = this.rsn;
             parsePropLine(propLine);

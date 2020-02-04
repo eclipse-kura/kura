@@ -45,8 +45,8 @@ public class LinuxNetworkUtil {
     private static final Logger logger = LoggerFactory.getLogger(LinuxNetworkUtil.class);
 
     private static Map<String, LinuxIfconfig> ifconfigs = new HashMap<>();
-    private static final String[] ignoreIfaces = { "can", "sit", "mon.wlan" };
-    private static final ArrayList<String> tools = new ArrayList<>();
+    private static final String[] IGNORE_IFACES = { "can", "sit", "mon.wlan" };
+    private static final ArrayList<String> TOOLS = new ArrayList<>();
     private static final String PPP_IFACE_REGEX = "^ppp\\d+$";
     private static final String MODEM = "MODEM";
     private static final String ETHERNET = "ETHERNET";
@@ -247,13 +247,13 @@ public class LinuxNetworkUtil {
         boolean ret = false;
         final String[] searchFolders = new String[] { "/sbin/", "/usr/sbin/", "/bin/" };
 
-        if (tools.contains(tool)) {
+        if (TOOLS.contains(tool)) {
             ret = true;
         } else {
             for (String folder : searchFolders) {
                 File fTool = new File(folder + tool);
                 if (fTool.exists()) {
-                    tools.add(tool);
+                    TOOLS.add(tool);
                     ret = true;
                     break;
                 }
@@ -386,7 +386,7 @@ public class LinuxNetworkUtil {
         if (Character.isDigit(ifaceName.charAt(0))) {
             return null;
         }
-        for (String ignoreIface : ignoreIfaces) {
+        for (String ignoreIface : IGNORE_IFACES) {
             if (ifaceName.startsWith(ignoreIface)) {
                 return null;
             }
@@ -490,7 +490,7 @@ public class LinuxNetworkUtil {
         if (Character.isDigit(ifaceName.charAt(0))) {
             return NetInterfaceType.UNKNOWN;
         }
-        for (String ignoreIface : ignoreIfaces) {
+        for (String ignoreIface : IGNORE_IFACES) {
             if (ifaceName.startsWith(ignoreIface)) {
                 return NetInterfaceType.UNKNOWN;
             }

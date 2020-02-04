@@ -80,7 +80,7 @@ public class IwLinkTool extends LinkToolImpl implements LinkTool {
             String[] parts = line.split("\\s");
             try {
                 int sig = Integer.parseInt(parts[1]);
-                if (sig > -100) {     // TODO: adjust this threshold?
+                if (sig > -100) {
                     setSignal(sig);
                     setLinkDetected(true);
                 }

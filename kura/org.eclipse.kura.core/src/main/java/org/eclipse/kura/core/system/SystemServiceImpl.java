@@ -103,7 +103,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
     //
     // ----------------------------------------------------------------
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({ "rawtypes", "unchecked", "checkstyle:methodLength" })
     protected void activate(ComponentContext componentContext) {
         this.componentContext = componentContext;
 
@@ -113,7 +113,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
                 onCloudbees = new File(CLOUDBEES_SECURITY_SETTINGS_PATH).exists();
                 return null; // nothing to return
             } catch (Exception e) {
-                System.out.println("Unable to execute privileged in SystemService");
+                logger.warn("Unable to execute privileged in SystemService");
                 return null;
             }
         });

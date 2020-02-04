@@ -150,7 +150,7 @@ public class BluetoothLeScanner implements BluetoothProcessListener, BTSnoopList
             this.scanResult = new ArrayList<>();
             for (Entry<String, String> device : this.devices.entrySet()) {
                 this.scanResult.add(new BluetoothDeviceImpl(device.getKey(), device.getValue(), this.executorService));
-                logger.info("m_scanResult.add {} - {}", device.getKey(), device.getValue());
+                logger.info("scanResult.add {} - {}", device.getKey(), device.getValue());
             }
 
             // Alert listener that scan is complete
@@ -249,14 +249,16 @@ public class BluetoothLeScanner implements BluetoothProcessListener, BTSnoopList
         this.scanRunning = scanRunning;
     }
 
+    @SuppressWarnings("checkstyle:methodName")
     @Deprecated
     public boolean is_scanRunning() {
         return this.scanRunning;
     }
 
+    @SuppressWarnings("checkstyle:methodName")
     @Deprecated
-    public void set_scanRunning(boolean m_scanRunning) {
-        this.scanRunning = m_scanRunning;
+    public void set_scanRunning(boolean scanRunning) {
+        this.scanRunning = scanRunning;
     }
 
 }

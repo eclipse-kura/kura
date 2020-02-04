@@ -17,7 +17,6 @@ import java.util.Base64;
 import java.util.Base64.Decoder;
 import java.util.Objects;
 
-import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.annotation.Nullable;
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -53,7 +52,7 @@ public final class TypedValues {
      * @param value
      *            the primitive byte array value
      * @return the byte array value represented as {@link TypedValue}
-     * @throws KuraRuntimeException
+     * @throws org.eclipse.kura.KuraRuntimeException
      *             if the argument is null
      */
     public static ByteArrayValue newByteArrayValue(final byte[] value) {
@@ -173,6 +172,7 @@ public final class TypedValues {
                 return newLongValue(Long.parseLong(value));
             case STRING:
                 return newStringValue(value);
+            default:
             }
         } catch (Exception e) {
         }

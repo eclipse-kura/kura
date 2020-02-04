@@ -20,7 +20,6 @@ import org.eclipse.kura.annotation.NotThreadSafe;
 import org.eclipse.kura.annotation.Nullable;
 import org.osgi.annotation.versioning.ProviderType;
 import org.osgi.service.wireadmin.Wire;
-import org.osgi.service.wireadmin.WireAdmin;
 
 /**
  * The Class {@link WireConfiguration} represents a wiring configuration between a Wire
@@ -98,7 +97,7 @@ public class WireConfiguration {
     }
 
     /**
-     * Gets the associated {@link WireAdmin}' {@link Wire} instance.
+     * Gets the associated {@link org.osgi.service.wireadmin.WireAdmin}' {@link Wire} instance.
      *
      * @return the {@link Wire} instance
      */

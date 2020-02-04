@@ -22,9 +22,13 @@ import org.slf4j.LoggerFactory;
 
 public class ProcessUtil {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(ProcessUtil.class);
+    private static final Logger logger = LoggerFactory.getLogger(ProcessUtil.class);
 
-    private static final ExecutorService s_processExecutor = Executors.newSingleThreadExecutor();
+    private static ExecutorService processExecutor = Executors.newSingleThreadExecutor();
+
+    private ProcessUtil() {
+
+    }
 
     public static SafeProcess exec(String command) throws IOException {
         // Use StringTokenizer since this is the method documented by Runtime
@@ -41,7 +45,7 @@ public class ProcessUtil {
 
     public static SafeProcess exec(final String[] cmdarray) throws IOException {
         // Serialize process executions. One at a time so we can consume all streams.
-        Future<SafeProcess> futureSafeProcess = s_processExecutor.submit(() -> {
+        Future<SafeProcess> futureSafeProcess = processExecutor.submit(() -> {
             Thread.currentThread().setName("SafeProcessExecutor");
             SafeProcess safeProcess = new SafeProcess();
             safeProcess.exec(cmdarray);
@@ -51,7 +55,7 @@ public class ProcessUtil {
         try {
             return futureSafeProcess.get();
         } catch (Exception e) {
-            s_logger.error("Error waiting from SafeProcess output", e);
+            logger.error("Error waiting from SafeProcess output");
             throw new IOException(e);
         }
     }

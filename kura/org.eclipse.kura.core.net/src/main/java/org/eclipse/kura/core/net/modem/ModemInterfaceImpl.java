@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and others
+ * Copyright (c) 2011, 2020 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,7 +8,7 @@
  *
  * Contributors:
  *     Eurotech
- *     Red Hat Inc - Fix build warnings
+ *     Red Hat Inc
  *******************************************************************************/
 package org.eclipse.kura.core.net.modem;
 
@@ -30,17 +30,17 @@ public class ModemInterfaceImpl<T extends ModemInterfaceAddress> extends Abstrac
 
     private static final Logger s_logger = LoggerFactory.getLogger(ModemInterfaceImpl.class);
 
-    private String m_modemId;
-    private int m_pppNum;
-    private String m_model;
-    private String m_manufacturer;
-    private String m_serialNumber;
-    private String[] m_revisionId;
-    private List<ModemTechnologyType> m_technologyTypes;
-    private boolean m_poweredOn;
-    private ModemPowerMode m_powerMode;
-    private ModemDevice m_modemDevice;
-    private boolean m_gpsSupported;
+    private String modemId;
+    private int pppNum;
+    private String model;
+    private String manufacturer;
+    private String serialNumber;
+    private String[] revisionId;
+    private List<ModemTechnologyType> technologyTypes;
+    private boolean poweredOn;
+    private ModemPowerMode powerMode;
+    private ModemDevice modemDevice;
+    private boolean gpsSupported;
 
     public ModemInterfaceImpl(String name) {
         super(name);
@@ -49,20 +49,20 @@ public class ModemInterfaceImpl<T extends ModemInterfaceAddress> extends Abstrac
     public ModemInterfaceImpl(Class<T> modemInterfaceAddressClass,
             ModemInterface<? extends ModemInterfaceAddress> other) {
         super(other);
-        this.m_modemId = other.getModemIdentifier();
-        this.m_pppNum = other.getPppNum();
-        this.m_model = other.getModel();
-        this.m_manufacturer = other.getManufacturer();
-        this.m_serialNumber = other.getSerialNumber();
-        this.m_revisionId = other.getRevisionId();
-        this.m_technologyTypes = other.getTechnologyTypes();
-        this.m_poweredOn = other.isPoweredOn();
-        this.m_powerMode = other.getPowerMode();
-        this.m_modemDevice = other.getModemDevice();
+        this.modemId = other.getModemIdentifier();
+        this.pppNum = other.getPppNum();
+        this.model = other.getModel();
+        this.manufacturer = other.getManufacturer();
+        this.serialNumber = other.getSerialNumber();
+        this.revisionId = other.getRevisionId();
+        this.technologyTypes = other.getTechnologyTypes();
+        this.poweredOn = other.isPoweredOn();
+        this.powerMode = other.getPowerMode();
+        this.modemDevice = other.getModemDevice();
 
         // Copy the NetInterfaceAddresses
         List<? extends ModemInterfaceAddress> otherNetInterfaceAddresses = other.getNetInterfaceAddresses();
-        ArrayList<T> interfaceAddresses = new ArrayList<T>();
+        ArrayList<T> interfaceAddresses = new ArrayList<>();
 
         if (otherNetInterfaceAddresses != null) {
             for (ModemInterfaceAddress modemInterfaceAddress : otherNetInterfaceAddresses) {
@@ -85,100 +85,100 @@ public class ModemInterfaceImpl<T extends ModemInterfaceAddress> extends Abstrac
 
     @Override
     public int getPppNum() {
-        return this.m_pppNum;
+        return this.pppNum;
     }
 
     public void setPppNum(int pppNum) {
-        this.m_pppNum = pppNum;
+        this.pppNum = pppNum;
     }
 
     @Override
     public String getModemIdentifier() {
-        return this.m_modemId;
+        return this.modemId;
     }
 
     public void setModemIdentifier(String modemId) {
-        this.m_modemId = modemId;
+        this.modemId = modemId;
     }
 
     @Override
     public String getModel() {
-        return this.m_model;
+        return this.model;
     }
 
     public void setModel(String model) {
-        this.m_model = model;
+        this.model = model;
     }
 
     @Override
     public String getManufacturer() {
-        return this.m_manufacturer;
+        return this.manufacturer;
     }
 
     public void setManufacturer(String manufacturer) {
-        this.m_manufacturer = manufacturer;
+        this.manufacturer = manufacturer;
     }
 
     @Override
     public String getSerialNumber() {
-        return this.m_serialNumber;
+        return this.serialNumber;
     }
 
     public void setSerialNumber(String serialNumber) {
-        this.m_serialNumber = serialNumber;
+        this.serialNumber = serialNumber;
     }
 
     @Override
     public String[] getRevisionId() {
-        return this.m_revisionId;
+        return this.revisionId;
     }
 
     public void setRevisionId(String[] revisionId) {
-        this.m_revisionId = revisionId;
+        this.revisionId = revisionId;
     }
 
     @Override
     public List<ModemTechnologyType> getTechnologyTypes() {
-        return this.m_technologyTypes;
+        return this.technologyTypes;
     }
 
     public void setTechnologyTypes(List<ModemTechnologyType> technologyTypes) {
-        this.m_technologyTypes = technologyTypes;
+        this.technologyTypes = technologyTypes;
     }
 
     @Override
     public boolean isPoweredOn() {
-        return this.m_poweredOn;
+        return this.poweredOn;
     }
 
     public void setPoweredOn(boolean poweredOn) {
-        this.m_poweredOn = poweredOn;
+        this.poweredOn = poweredOn;
     }
 
     @Override
     public ModemPowerMode getPowerMode() {
-        return this.m_powerMode;
+        return this.powerMode;
     }
 
     public void setPowerMode(ModemPowerMode powerMode) {
-        this.m_powerMode = powerMode;
+        this.powerMode = powerMode;
     }
 
     @Override
     public ModemDevice getModemDevice() {
-        return this.m_modemDevice;
+        return this.modemDevice;
     }
 
     public void setModemDevice(ModemDevice modemDevice) {
-        this.m_modemDevice = modemDevice;
+        this.modemDevice = modemDevice;
     }
 
     @Override
     public boolean isGpsSupported() {
-        return this.m_gpsSupported;
+        return this.gpsSupported;
     }
 
-    public void setGpsSupported(boolean m_gpsSupported) {
-        this.m_gpsSupported = m_gpsSupported;
+    public void setGpsSupported(boolean gpsSupported) {
+        this.gpsSupported = gpsSupported;
     }
 }

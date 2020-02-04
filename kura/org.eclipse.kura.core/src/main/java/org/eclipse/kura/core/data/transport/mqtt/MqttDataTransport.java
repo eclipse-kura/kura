@@ -69,7 +69,6 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 
     private static final String MQTT_SCHEME = "mqtt://";
     private static final String MQTTS_SCHEME = "mqtts://";
-    // TODO: add mqtt+ssl for secure mqtt
 
     // '#' followed by one or more non-whitespace but not the '/'
     private static final String TOPIC_PATTERN_STRING = "#([^\\s/]+)";
@@ -395,9 +394,6 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
         }
         return "";
     }
-
-    // TODO: java.lang.reflect.Proxy for every listener in order to catch
-    // runtime exceptions thrown by listener implementor and log them.
 
     @Override
     public synchronized void disconnect(long quiesceTimeout) {
@@ -820,16 +816,17 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
         }
 
         String sType = (String) properties.get(PERSISTENCE_TYPE_PROP_NAME);
-        PersistenceType persistenceType = null;
+        PersistenceType localPersistenceType = null;
         if ("file".equals(sType)) {
-            persistenceType = PersistenceType.FILE;
+            localPersistenceType = PersistenceType.FILE;
         } else if ("memory".equals(sType)) {
-            persistenceType = PersistenceType.MEMORY;
+            localPersistenceType = PersistenceType.MEMORY;
         } else {
-            throw new IllegalStateException("Invalid MQTT client configuration: persistenceType: " + persistenceType);
+            throw new IllegalStateException(
+                    "Invalid MQTT client configuration: persistenceType: " + localPersistenceType);
         }
 
-        clientConfiguration = new MqttClientConfiguration(brokerUrl, clientId, persistenceType, conOpt);
+        clientConfiguration = new MqttClientConfiguration(brokerUrl, clientId, localPersistenceType, conOpt);
 
         return clientConfiguration;
     }
@@ -845,7 +842,6 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
                 // By default replace #variable-name (group 0) with itself
                 String replacement = topicMatcher.group(0);
 
-                // TODO: Try to get variable-name (group 1) from the context
                 String variableName = topicMatcher.group(1);
                 synchronized (this.topicContext) {
                     String value = this.topicContext.get(variableName);
@@ -895,7 +891,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 
         // Connecting with Clean Session flag set to true always starts
         // a new session.
-        boolean newSession = this.clientConf.getConnectOptions().isCleanSession();
+        boolean newSessionTemp = this.clientConf.getConnectOptions().isCleanSession();
 
         if (this.mqttClient == null) {
 
@@ -944,8 +940,8 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
             // in-flight messages because
             // Paho won't do that.
 
-            PersistenceType persistenceType = this.clientConf.getPersistenceType();
-            if (persistenceType == PersistenceType.MEMORY) {
+            PersistenceType newPersistenceType = this.clientConf.getPersistenceType();
+            if (newPersistenceType == PersistenceType.MEMORY) {
                 logger.info("Using memory persistence for in-flight messages");
                 this.persistence = new MemoryPersistence();
             } else {
@@ -984,7 +980,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
                 throw new IllegalStateException("Client instantiation failed");
             }
 
-            this.persistenceType = persistenceType;
+            this.persistenceType = newPersistenceType;
 
             if (!this.clientConf.getConnectOptions().isCleanSession()) {
                 // This is tricky.
@@ -1003,12 +999,12 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
                 // drop them.
                 IMqttDeliveryToken[] pendingDeliveryTokens = this.mqttClient.getPendingDeliveryTokens();
                 if (pendingDeliveryTokens != null && pendingDeliveryTokens.length != 0) {
-                    newSession = false;
+                    newSessionTemp = false;
                 }
             }
         }
 
-        this.newSession = newSession;
+        this.newSession = newSessionTemp;
         this.sessionId = generateSessionId();
     }
 

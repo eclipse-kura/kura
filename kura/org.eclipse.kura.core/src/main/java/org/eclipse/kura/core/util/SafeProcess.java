@@ -29,11 +29,9 @@ public class SafeProcess {
 
     private static final Logger logger = LoggerFactory.getLogger(SafeProcess.class);
 
-    private static final ExecutorService s_streamGobblers = Executors.newFixedThreadPool(2);
+    private static ExecutorService streamGobblers = Executors.newFixedThreadPool(2);
 
     private Process process;
-    private Future<byte[]> futureInputGobbler;
-    private Future<byte[]> futureErrorGobbler;
     private byte[] inBytes;
     private byte[] errBytes;
     private boolean waited;
@@ -51,7 +49,6 @@ public class SafeProcess {
     public InputStream getInputStream() {
         if (!this.waited) {
             logger.warn("getInputStream() must be called after waitFor()");
-            // Thread.dumpStack();
         }
         return new ByteArrayInputStream(this.inBytes);
     }
@@ -59,7 +56,6 @@ public class SafeProcess {
     public InputStream getErrorStream() {
         if (!this.waited) {
             logger.warn("getErrorStream() must be called after waitFor()");
-            // Thread.dumpStack();
         }
         return new ByteArrayInputStream(this.errBytes);
     }
@@ -70,21 +66,21 @@ public class SafeProcess {
         this.process = pb.start();
 
         // process the input stream
-        this.futureInputGobbler = s_streamGobblers.submit(() -> {
+        Future<byte[]> futureInputGobbler = streamGobblers.submit(() -> {
             Thread.currentThread().setName("SafeProcess InputStream Gobbler");
             return readStreamFully(SafeProcess.this.process.getInputStream());
         });
 
         // process the error stream
-        this.futureErrorGobbler = s_streamGobblers.submit(() -> {
+        Future<byte[]> futureErrorGobbler = streamGobblers.submit(() -> {
             Thread.currentThread().setName("SafeProcess ErrorStream Gobbler");
             return readStreamFully(SafeProcess.this.process.getErrorStream());
         });
 
         // wait for the process execution
         try {
-            this.inBytes = this.futureInputGobbler.get();
-            this.errBytes = this.futureErrorGobbler.get();
+            this.inBytes = futureInputGobbler.get();
+            this.errBytes = futureErrorGobbler.get();
             this.exitValue = this.process.waitFor();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

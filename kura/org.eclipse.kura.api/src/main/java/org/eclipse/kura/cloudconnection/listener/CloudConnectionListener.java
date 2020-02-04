@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -9,13 +9,12 @@
  *******************************************************************************/
 package org.eclipse.kura.cloudconnection.listener;
 
-import org.eclipse.kura.cloudconnection.CloudConnectionManager;
 import org.osgi.annotation.versioning.ConsumerType;
 
 /**
  * The CloudConnectionListener interface is implemented by applications that want to be notified on connection
  * status changes.
- * To be notified, the implementor needs to register itself to a specific {@link CloudConnectionManager}.
+ * To be notified, the implementor needs to register itself to a specific {@link org.eclipse.kura.cloudconnection.CloudConnectionManager}.
  *
  * @since 2.0
  */

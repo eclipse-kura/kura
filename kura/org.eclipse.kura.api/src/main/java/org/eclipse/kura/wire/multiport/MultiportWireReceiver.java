@@ -14,14 +14,13 @@
 package org.eclipse.kura.wire.multiport;
 
 import org.eclipse.kura.wire.WireComponent;
-import org.eclipse.kura.wire.WireEmitter;
 import org.osgi.annotation.versioning.ConsumerType;
 import org.osgi.service.wireadmin.Consumer;
 
 /**
  * The MultiportWireReceiver interface Represents a wire component which is a data
  * consumer that can receive produced or emitted values from upstream
- * {@link WireEmitter}.
+ * {@link org.eclipse.kura.wire.WireEmitter}.
  *
  * @since 1.4
  */

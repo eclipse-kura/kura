@@ -129,41 +129,18 @@ public class SystemAdminServiceImpl extends SuperSystemService implements System
             }
         } else if (OS_MAC_OSX.equals(getOsName())) {
             try {
-                String systemUptime = runSystemCommand("uptime", false, this.executorService);
-                if (!systemUptime.isEmpty()) {
-                    String[] uptimeParts = systemUptime.split("up\\s+")[1].split("\\s*,\\s*");
-                    int days = 0, hours = 0, mins = 0;
+                String lastBootupSysCmd = runSystemCommand("sysctl -n kern.boottime", false, this.executorService);
 
-                    String uptimePart = uptimeParts[0];
-
-                    // If up less than a day, it will only show the number of mins, hr, or HH:MM
-                    if (uptimePart.contains("days")) {
-                        days = Integer.parseInt(uptimePart.split("\\s+days")[0]);
-                        uptimePart = uptimeParts[1];
-                    } else if (uptimePart.contains("day")) {
-                        days = Integer.parseInt(uptimePart.split("\\s+day")[0]);
-                        uptimePart = uptimeParts[1];
-                    }
-
-                    if (uptimePart.contains(":")) {
-                        // Showing HH:MM
-                        hours = Integer.parseInt(uptimePart.split(":")[0]);
-                        mins = Integer.parseInt(uptimePart.split(":")[1]);
-                    } else if (uptimePart.contains("hr")) {
-                        // Only showing hr
-                        hours = Integer.parseInt(uptimePart.split("\\s*hr")[0]);
-                    } else if (uptimePart.contains("mins")) {
-                        // Only showing mins
-                        mins = Integer.parseInt(uptimePart.split("\\s*mins")[0]);
-                    } else {
-                        logger.error("uptime could not be parsed correctly: {}", uptimeParts[0]);
-                    }
-
-                    uptime = (long) ((days * 24 + hours) * 60 + mins) * 60;
-                    uptimeStr = Long.toString(uptime * 1000);
+                if (!lastBootupSysCmd.isEmpty()) {
+                    String[] uptimePairs = lastBootupSysCmd.substring(1, lastBootupSysCmd.indexOf("}")).replace(" ", "")
+                            .split(",");
+                    String[] uptimeSeconds = uptimePairs[0].split("=");
+                    uptime = System.currentTimeMillis() - (long) (Double.parseDouble(uptimeSeconds[1]));
+                    uptimeStr = Long.toString(uptime);
                 }
             } catch (Exception e) {
-                logger.error("Could not parse uptime", e);
+                uptimeStr = "0";
+                logger.error("Could not read uptime", e);
             }
         }
         return uptimeStr;

@@ -66,6 +66,7 @@ public class NmeaPosition {
         this(lat, lon, alt, speed, track, 0, 0, 0.0, 0.0, 0.0, 0.0, 0, '0', '0', '0');
     }
 
+    @SuppressWarnings("checkstyle:parameterNumber")
     public NmeaPosition(double lat, double lon, double alt, double speed, double track, int fixQuality,
             int nrSatellites, double dop, double pdop, double hdop, double vdop, int fix3D) {
         this(lat, lon, alt, speed, track, fixQuality, nrSatellites, dop, pdop, hdop, vdop, fix3D, '0', '0', '0');
@@ -74,6 +75,7 @@ public class NmeaPosition {
     /**
      * @since 2.0
      */
+    @SuppressWarnings("checkstyle:parameterNumber")
     public NmeaPosition(double lat, double lon, double alt, double speed, double track, int fixQuality,
             int nrSatellites, double dop, double pdop, double hdop, double vdop, int fix3D, char validF, char hemiLat,
             char hemiLon) {

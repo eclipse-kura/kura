@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -58,10 +58,10 @@ public class NetInterfaceAddressConfigImpl extends NetInterfaceAddressImpl imple
         List<NetConfig> thisNetConfigs = getConfigs();
         List<NetConfig> otherNetConfigs = other.getConfigs();
 
-        if ((thisNetConfigs == null) && (otherNetConfigs == null)) {
+        if (thisNetConfigs == null && otherNetConfigs == null) {
             // Both configurations are null
             return true;
-        } else if ((thisNetConfigs == null) || (otherNetConfigs == null)) {
+        } else if (thisNetConfigs == null || otherNetConfigs == null) {
             // One configuration is null but the other one is not, so a null pointer exception would be thrown below!
             return false;
         }
@@ -74,7 +74,7 @@ public class NetInterfaceAddressConfigImpl extends NetInterfaceAddressImpl imple
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((configs == null) ? 0 : configs.hashCode());
+        result = prime * result + (this.configs == null ? 0 : this.configs.hashCode());
         return result;
     }
 

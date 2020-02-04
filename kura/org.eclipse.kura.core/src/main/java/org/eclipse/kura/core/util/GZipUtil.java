@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -19,7 +19,11 @@ import java.util.zip.GZIPOutputStream;
 
 public class GZipUtil {
 
-    public static boolean isCompressed(byte[] bytes) throws IOException {
+    private GZipUtil() {
+
+    }
+
+    public static boolean isCompressed(byte[] bytes) {
         if (bytes == null || bytes.length < 2) {
             return false;
         } else {
@@ -30,57 +34,25 @@ public class GZipUtil {
 
     public static byte[] compress(byte[] source) throws IOException {
 
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        GZIPOutputStream gzipos = null;
-        try {
-            gzipos = new GZIPOutputStream(baos);
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            GZIPOutputStream gzipos = new GZIPOutputStream(baos);
             gzipos.write(source);
-        } catch (IOException e) {
-            throw e;
-        } finally {
-            if (gzipos != null) {
-                try {
-                    gzipos.close();
-                } catch (IOException e) {
-                    // Ignore
-                }
-            }
+            gzipos.close();
+            return baos.toByteArray();
         }
-        return baos.toByteArray();
     }
 
     public static byte[] decompress(byte[] source) throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ByteArrayInputStream bais = new ByteArrayInputStream(source);
-        GZIPInputStream gzipis = null;
-
-        try {
-            gzipis = new GZIPInputStream(bais);
-
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                ByteArrayInputStream bais = new ByteArrayInputStream(source);
+                GZIPInputStream gzipis = new GZIPInputStream(bais);) {
             int n;
-            final int MAX_BUF = 1024;
-            byte[] buf = new byte[MAX_BUF];
-            while ((n = gzipis.read(buf, 0, MAX_BUF)) != -1) {
+            final int maxBuf = 1024;
+            byte[] buf = new byte[maxBuf];
+            while ((n = gzipis.read(buf, 0, maxBuf)) != -1) {
                 baos.write(buf, 0, n);
             }
-        } catch (IOException e) {
-            throw e;
-        } finally {
-            if (gzipis != null) {
-                try {
-                    gzipis.close();
-                } catch (IOException e) {
-                    // Ignore
-                }
-            }
-
-            try {
-                baos.close();
-            } catch (IOException e) {
-                // Ignore
-            }
+            return baos.toByteArray();
         }
-
-        return baos.toByteArray();
     }
 }

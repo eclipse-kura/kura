@@ -291,12 +291,12 @@ public class QuectelEG25 extends HspaModem implements HspaCellularModem {
 
     @Override
     public void enableGps() throws KuraException {
-        logger.warn("Modem GPS not supported");
+        throw new UnsupportedOperationException("Modem GPS not supported");
     }
 
     @Override
     public void disableGps() throws KuraException {
-        logger.warn("Modem GPS not supported");
+        throw new UnsupportedOperationException("Modem GPS not supported");
     }
 
     @Override

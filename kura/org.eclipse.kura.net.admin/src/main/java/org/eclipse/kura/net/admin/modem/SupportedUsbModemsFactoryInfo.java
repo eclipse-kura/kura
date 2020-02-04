@@ -54,7 +54,7 @@ public class SupportedUsbModemsFactoryInfo {
         Ublox_SARA_U2(SupportedUsbModemInfo.Ublox_SARA_U2, UbloxModemFactory.class, UbloxModemConfigGenerator.class),
         Zte_ME3630(SupportedUsbModemInfo.Zte_ME3630, ZteMe3630ModemFactory.class, ZteMe3630ConfigGenerator.class),
         SimTech_SIM7000(SupportedUsbModemInfo.SimTech_SIM7000, SimTechSim7000ModemFactory.class, SimTechSim7000ConfigGenerator.class),
-        Quectel_EG25(SupportedUsbModemInfo.Quectel_EG25, QuectelEG25ModemFactory.class, QuectelEG25ConfigGenerator.class);
+        QUECTEL_EG25(SupportedUsbModemInfo.QUECTEL_EG25, QuectelEG25ModemFactory.class, QuectelEG25ConfigGenerator.class);
 
         private final SupportedUsbModemInfo m_usbModemInfo;
         private final Class<? extends CellularModemFactory> m_factoryClass;

@@ -276,7 +276,7 @@ if [ -z "$KURA_RUNNING" ] ; then
         -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/kura-heapdump.hprof \
         -XX:ErrorFile=/var/log/kura-error.log \
         -XX:+IgnoreUnrecognizedVMOptions \
-        --add-modules=java.sql,java.xml,java.xml.bind \
+        --add-modules=ALL-SYSTEM \
         -Dkura.os.version=${kura.os.version} \
         -Dkura.arch=${kura.arch} \
         -Dtarget.device=${target.device} \
@@ -320,7 +320,7 @@ if [ -z "$KURA_RUNNING" ] ; then
         -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/kura-heapdump.hprof \
         -XX:ErrorFile=/var/log/kura-error.log \
         -XX:+IgnoreUnrecognizedVMOptions \
-        --add-modules=java.sql,java.xml,java.xml.bind \
+        --add-modules=ALL-SYSTEM \
         -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000,suspend=n \
         -Dkura.os.version=${kura.os.version} \
         -Dkura.arch=${kura.arch} \
@@ -364,7 +364,7 @@ if [ -z "$KURA_RUNNING" ] ; then
         -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/kura-heapdump.hprof \
         -XX:ErrorFile=/var/log/kura-error.log \
         -XX:+IgnoreUnrecognizedVMOptions \
-        --add-modules=java.sql,java.xml,java.xml.bind \
+        --add-modules=ALL-SYSTEM \
         -Dkura.os.version=${kura.os.version} \
         -Dkura.arch=${kura.arch} \
         -Dtarget.device=${target.device} \

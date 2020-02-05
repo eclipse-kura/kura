@@ -25,7 +25,7 @@ For more information, see the [Eclipse project proposal](http://www.eclipse.org/
 System Requirements
 -------------------
 
-Eclipse Kura is compatible with Java 8 (`Bundle-RequiredExecutionEnåvironment: JavaSE-1.8`) and OSGi R6.
+Eclipse Kura is compatible with Java 8 (`Bundle-RequiredExecutionEnvironment: JavaSE-1.8`) and OSGi R6.
 
 
 Development Model
@@ -72,7 +72,8 @@ For Java
 ```
 sudo apt install openjdk-8-jdk
 ```
-For Maven
+For Maven   
+
 You can follow the tutorial from the official [Maven](http://maven.apache.org/install.html) site. Remember that you need to install the 3.5.x version.
 
 ### Eclipse IDE

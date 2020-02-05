@@ -616,19 +616,14 @@ public class HspaModem implements HspaCellularModem {
                 String[] regStatusSplit = sRegStatus.split(",");
                 if (regStatusSplit.length >= 2) {
                     int status = Integer.parseInt(regStatusSplit[1]);
-                    switch (status) {
-                    case 0:
+                    if (status == 0) {
                         modemRegistrationStatus = ModemRegistrationStatus.NOT_REGISTERED;
-                        break;
-                    case 1:
+                    } else if (status == 1) {
                         modemRegistrationStatus = ModemRegistrationStatus.REGISTERED_HOME;
-                        break;
-                    case 3:
+                    } else if (status == 3) {
                         modemRegistrationStatus = ModemRegistrationStatus.REGISTRATION_DENIED;
-                        break;
-                    case 5:
+                    } else if (status == 5) {
                         modemRegistrationStatus = ModemRegistrationStatus.REGISTERED_ROAMING;
-                        break;
                     }
                 }
             }

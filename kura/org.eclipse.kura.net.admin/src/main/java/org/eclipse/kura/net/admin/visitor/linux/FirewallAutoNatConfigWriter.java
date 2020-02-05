@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -18,7 +18,6 @@ import java.util.Properties;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.KuraProcessExecutionErrorException;
 import org.eclipse.kura.core.net.AbstractNetInterface;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
@@ -54,6 +53,7 @@ public class FirewallAutoNatConfigWriter implements NetworkConfigurationVisitor 
         return instance;
     }
 
+    @Override
     public void setExecutorService(CommandExecutorService executorService) {
         this.executorService = executorService;
     }
@@ -167,12 +167,11 @@ public class FirewallAutoNatConfigWriter implements NetworkConfigurationVisitor 
                         status = ((NetConfigIP4) netConfig).getStatus();
                     } else if (netConfig instanceof FirewallAutoNatConfig) {
                         if (logger.isDebugEnabled()) {
-                            logger.debug("getNatConfigs() :: FirewallAutoNatConfig: {}",
-                                    ((FirewallAutoNatConfig) netConfig));
+                            logger.debug("getNatConfigs() :: FirewallAutoNatConfig: {}", netConfig);
                         }
                         isNat = true;
                     } else if (netConfig instanceof FirewallNatConfig && logger.isDebugEnabled()) {
-                        logger.debug("getNatConfigs() ::  FirewallNatConfig: {}", ((FirewallNatConfig) netConfig));
+                        logger.debug("getNatConfigs() ::  FirewallNatConfig: {}", netConfig);
                     }
                 }
 

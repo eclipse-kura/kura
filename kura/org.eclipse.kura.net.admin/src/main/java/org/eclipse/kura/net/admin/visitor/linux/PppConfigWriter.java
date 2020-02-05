@@ -110,6 +110,7 @@ public class PppConfigWriter implements NetworkConfigurationVisitor {
         removeKuraExtendedCellularConfig(modemNetInterfaceNames);
     }
 
+    @SuppressWarnings("checkstyle:methodLength")
     private void writeConfig(ModemInterfaceConfigImpl modemInterfaceConfig) throws KuraException {
         String oldInterfaceName = modemInterfaceConfig.getName();
         String newInterfaceName = modemInterfaceConfig.getName();

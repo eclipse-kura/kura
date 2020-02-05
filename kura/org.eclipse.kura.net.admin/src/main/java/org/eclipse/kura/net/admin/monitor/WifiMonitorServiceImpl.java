@@ -289,197 +289,10 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                 checkStatusChange(this.interfaceStatuses, newStatuses);
                 this.interfaceStatuses = newStatuses;
 
-                for (String interfaceName : this.enabledInterfaces) {
-                    // Get current configuration
-                    WifiInterfaceConfigImpl wifiInterfaceConfig = (WifiInterfaceConfigImpl) this.currentNetworkConfiguration
-                            .getNetInterfaceConfig(interfaceName);
-                    WifiConfig wifiConfig = getWifiConfig(wifiInterfaceConfig);
-
-                    // Make sure we have enough information
-                    if (wifiInterfaceConfig == null) {
-                        logger.warn("monitor() :: missing WifiInterfaceConfigImpl for {}", interfaceName);
-                        continue;
-                    }
-                    if (wifiConfig == null) {
-                        logger.warn("monitor() :: missing WifiConfig for {}", interfaceName);
-                        continue;
-                    }
-
-                    // There are interfaces for which we need to initially check if
-                    // the right kernel module is loaded for the desired mode.
-                    // If not we treat the interface as if needing to be reconfigured.
-                    if (this.first && this.wifiDriverService != null && !this.wifiDriverService
-                            .isKernelModuleLoadedForMode(interfaceName, wifiConfig.getMode())) {
-                        logger.info("monitor() :: {} kernel module not suitable for WiFi mode {}", interfaceName,
-                                wifiConfig.getMode());
-                        this.first = false;
-                        interfacesToReconfigure.add(interfaceName);
-                        disableInterface(interfaceName);
-                        // Update the current wifi state
-                        this.interfaceStatuses.remove(interfaceName);
-                        NetConfigIP4 netConfig = ((AbstractNetInterface<?>) wifiInterfaceConfig).getIP4config();
-                        boolean isL2Only = netConfig.getStatus() == NetInterfaceStatus.netIPv4StatusL2Only;
-                        InterfaceStateBuilder builder = new InterfaceStateBuilder(this.executorService);
-                        builder.setInterfaceName(interfaceName);
-                        builder.setType(NetInterfaceType.WIFI);
-                        builder.setL2OnlyInterface(isL2Only);
-                        this.interfaceStatuses.put(interfaceName, builder.buildInterfaceState());
-                    }
-
-                    // Get current state
-                    InterfaceState wifiState = this.interfaceStatuses.get(interfaceName);
-                    if (wifiState == null) {
-                        logger.warn("monitor() :: missing InterfaceState for {}", interfaceName);
-                        continue;
-                    }
-
-                    // This flag is changed if the interface is disabled intentionally by the code below
-                    boolean up = wifiState.isUp();
-                    boolean linkUp = wifiState.isLinkUp();
-                    logger.debug("monitor() :: interfaceName={}, wifiState.isLinkUp()={}", interfaceName,
-                            wifiState.isLinkUp());
-                    logger.debug("monitor() :: interfaceName={}, wifiState.isUp()={}", interfaceName, wifiState.isUp());
-                    if (!up || !linkUp) {
-                        // Either initially down or initially up and we disabled it explicitly
-                        // * Check if the interface is being reconfigured and
-                        // reload the kernel module (this may be ignored by the platform)
-                        // * Infrastructure (Station) mode:
-                        // * Configured to ignore SSID: just enable interface. Otherwise:
-                        // * enable interface only if Access Point is available
-                        //
-                        // * Master (Access Point) mode:
-                        // * just enable interface
-                        // Some interfaces may require reloading the kernel module
-                        // accordingly to the desired WifiMode.
-                        // FIXME ideally we only need to this if the WifiMode changes.
-                        // FIXME if reloading fails it won't be retried.
-                        if (interfacesToReconfigure.contains(interfaceName)) {
-                            try {
-                                logger.info("monitor() :: reload {} kernel module for WiFi mode {}", interfaceName,
-                                        wifiConfig.getMode());
-                                reloadKernelModule(interfaceName, wifiConfig.getMode());
-                            } catch (KuraException e) {
-                                logger.warn("monitor() :: failed to reload {} kernel module.", interfaceName, e);
-                                continue;
-                            }
-                        }
-                        try {
-                            if (WifiMode.MASTER.equals(wifiConfig.getMode())) {
-                                logger.debug("monitor() :: enable {} in master mode", interfaceName);
-                                enableInterface(wifiInterfaceConfig);
-                            } else if (WifiMode.INFRA.equals(wifiConfig.getMode())) {
-                                if (wifiConfig.ignoreSSID()) {
-                                    logger.info("monitor() :: enable {} in infra mode", interfaceName);
-                                    enableInterface(wifiInterfaceConfig);
-                                } else {
-                                    if (isAccessPointAvailable(interfaceName, wifiConfig.getSSID())) {
-                                        logger.info("monitor() :: found access point - enable {} in infra mode",
-                                                interfaceName);
-                                        enableInterface(wifiInterfaceConfig);
-                                    } else {
-                                        logger.warn("monitor() :: {} - access point is not available",
-                                                wifiConfig.getSSID());
-                                    }
-                                }
-                            }
-                        } catch (KuraException e) {
-                            logger.error("monitor() :: Error enabling {} interface, will try to reset wifi",
-                                    interfaceName, e);
-                            resetWifiDevice(interfaceName);
-                        }
-                    } else {
-                        // Infrastructure (Station) mode:
-                        // * Notify RSSI to listeners
-                        // * Detect interface link down: disable the interface
-                        // * Cannot ping Access Point: renew DHCP lease
-                        // * Check if enabled for LAN in DHCP mode: remove default gateway from route table
-                        //
-                        // Master (Access Point) mode:
-                        // * Detect interface link down: enable interface.
-                        // FIXME should we just disable it like in the Infrastructure case above?
-                        if (WifiMode.INFRA.equals(wifiConfig.getMode())) {
-                            // get signal strength only if somebody needs it
-                            if (this.listeners != null && !this.listeners.isEmpty()) {
-                                int rssi = 0;
-                                try {
-                                    logger.debug("monitor() :: Getting Signal Level for {} -> {}", interfaceName,
-                                            wifiConfig.getSSID());
-                                    rssi = getSignalLevel(interfaceName, wifiConfig.getSSID());
-                                    logger.debug("monitor() :: Wifi RSSI is {}", rssi);
-                                } catch (KuraException e) {
-                                    logger.error("monitor() :: Failed to get Signal Level for {} -> {}", interfaceName,
-                                            wifiConfig.getSSID());
-                                    logger.error("monitor() :: Failed to get Signal Level ", e);
-                                    rssi = 0;
-                                }
-                                for (WifiClientMonitorListener listener : this.listeners) {
-                                    listener.setWifiSignalLevel(interfaceName, rssi);
-                                }
-                            }
-
-                            if (!wifiState.isLinkUp()) {
-                                logger.debug("monitor() :: link is down - disabling {}", interfaceName);
-                                disableInterface(interfaceName);
-                                up = false;
-                            }
-
-                            NetConfigIP4 netConfigIP4 = ((AbstractNetInterface<?>) wifiInterfaceConfig).getIP4config();
-                            boolean isDhcpClient = netConfigIP4 != null && netConfigIP4.isDhcp();
-                            boolean dhcpLeaseRenewed = false;
-                            logger.debug("monitor() :: pingAccessPoint()? {}", wifiConfig.pingAccessPoint());
-                            if (isDhcpClient && wifiConfig.pingAccessPoint()) {
-                                boolean isApReachable = false;
-                                for (int i = 0; i < 3; i++) {
-                                    isApReachable = isAccessPointReachable(interfaceName, 1000);
-                                    if (isApReachable) {
-                                        break;
-                                    }
-                                    sleep(1000);
-                                }
-                                if (!isApReachable) {
-                                    this.netAdminService.renewDhcpLease(interfaceName);
-                                    dhcpLeaseRenewed = true;
-                                }
-                            }
-
-                            // Check if wifi network reconnected between monitor executions
-                            InterfaceState oldState = oldStatuses.get(interfaceName);
-                            if (!dhcpLeaseRenewed && isDhcpClient && (oldState == null
-                                    || oldState.getCarrierChanges() != wifiState.getCarrierChanges())) {
-                                logger.debug("monitor() :: carrier changes - renewing DHCP lease {}", interfaceName);
-                                this.netAdminService.renewDhcpLease(interfaceName);
-                            }
-
-                            if (isDhcpClient
-                                    && netConfigIP4.getStatus().equals(NetInterfaceStatus.netIPv4StatusEnabledLAN)) {
-                                RouteConfig rconf = this.routeService.getDefaultRoute(interfaceName);
-                                if (rconf != null) {
-                                    logger.debug(
-                                            "monitor() :: {} is configured for LAN/DHCP - removing GATEWAY route ...",
-                                            rconf.getInterfaceName());
-                                    this.routeService.removeStaticRoute(rconf.getDestination(), rconf.getGateway(),
-                                            rconf.getNetmask(), rconf.getInterfaceName());
-                                }
-                            }
-                        } else if (WifiMode.MASTER.equals(wifiConfig.getMode()) && !wifiState.isLinkUp()) {
-                            // disabling interface is probably needed to handle potential driver issues.
-                            logger.warn(
-                                    "monitor() :: !! Link is down for the {} in AP mode, while IP address is assigned. Will disable and reenable interface ...",
-                                    interfaceName);
-                            disableInterface(interfaceName);
-                            enableInterface(wifiInterfaceConfig);
-                        }
-                    }
-                }
+                monitorEnabledInterfaces(interfacesToReconfigure, oldStatuses);
 
                 // Check all interfaces configured to be disabled
-                for (String interfaceName : this.disabledInterfaces) {
-                    InterfaceState wifiState = this.interfaceStatuses.get(interfaceName);
-                    if (wifiState != null && wifiState.isUp()) {
-                        logger.debug("monitor() :: {} is currently up - disable interface", interfaceName);
-                        disableInterface(interfaceName);
-                    }
-                }
+                monitorDisabledInterfaces();
 
                 // Shut down the monitor if no interface is configured to be enabled
                 if (this.enabledInterfaces.isEmpty() && monitorTask != null) {
@@ -493,6 +306,204 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
             }
         }
 
+    }
+
+    @SuppressWarnings("checkstyle:methodLength")
+    private void monitorEnabledInterfaces(List<String> interfacesToReconfigure, Map<String, InterfaceState> oldStatuses)
+            throws Exception {
+        for (String interfaceName : this.enabledInterfaces) {
+            // Get current configuration
+            WifiInterfaceConfigImpl wifiInterfaceConfig = (WifiInterfaceConfigImpl) this.currentNetworkConfiguration
+                    .getNetInterfaceConfig(interfaceName);
+            WifiConfig wifiConfig = getWifiConfig(wifiInterfaceConfig);
+
+            // Make sure we have enough information
+            if (wifiInterfaceConfig == null) {
+                logger.warn("monitor() :: missing WifiInterfaceConfigImpl for {}", interfaceName);
+                continue;
+            }
+            if (wifiConfig == null) {
+                logger.warn("monitor() :: missing WifiConfig for {}", interfaceName);
+                continue;
+            }
+
+            // There are interfaces for which we need to initially check if
+            // the right kernel module is loaded for the desired mode.
+            // If not we treat the interface as if needing to be reconfigured.
+            if (this.first && this.wifiDriverService != null && !this.wifiDriverService
+                    .isKernelModuleLoadedForMode(interfaceName, wifiConfig.getMode())) {
+                logger.info("monitor() :: {} kernel module not suitable for WiFi mode {}", interfaceName,
+                        wifiConfig.getMode());
+                this.first = false;
+                interfacesToReconfigure.add(interfaceName);
+                disableInterface(interfaceName);
+                // Update the current wifi state
+                this.interfaceStatuses.remove(interfaceName);
+                NetConfigIP4 netConfig = ((AbstractNetInterface<?>) wifiInterfaceConfig).getIP4config();
+                boolean isL2Only = netConfig.getStatus() == NetInterfaceStatus.netIPv4StatusL2Only;
+                InterfaceStateBuilder builder = new InterfaceStateBuilder(this.executorService);
+                builder.setInterfaceName(interfaceName);
+                builder.setType(NetInterfaceType.WIFI);
+                builder.setL2OnlyInterface(isL2Only);
+                this.interfaceStatuses.put(interfaceName, builder.buildInterfaceState());
+            }
+
+            // Get current state
+            InterfaceState wifiState = this.interfaceStatuses.get(interfaceName);
+            if (wifiState == null) {
+                logger.warn("monitor() :: missing InterfaceState for {}", interfaceName);
+                continue;
+            }
+
+            // This flag is changed if the interface is disabled intentionally by the code below
+            boolean up = wifiState.isUp();
+            boolean linkUp = wifiState.isLinkUp();
+            logger.debug("monitor() :: interfaceName={}, wifiState.isLinkUp()={}", interfaceName,
+                    wifiState.isLinkUp());
+            logger.debug("monitor() :: interfaceName={}, wifiState.isUp()={}", interfaceName, wifiState.isUp());
+            if (!up || !linkUp) {
+                // Either initially down or initially up and we disabled it explicitly
+                // * Check if the interface is being reconfigured and
+                // reload the kernel module (this may be ignored by the platform)
+                // * Infrastructure (Station) mode:
+                // * Configured to ignore SSID: just enable interface. Otherwise:
+                // * enable interface only if Access Point is available
+                //
+                // * Master (Access Point) mode:
+                // * just enable interface
+                // Some interfaces may require reloading the kernel module
+                // accordingly to the desired WifiMode.
+                // FIXME ideally we only need to this if the WifiMode changes.
+                // FIXME if reloading fails it won't be retried.
+                if (interfacesToReconfigure.contains(interfaceName)) {
+                    try {
+                        logger.info("monitor() :: reload {} kernel module for WiFi mode {}", interfaceName,
+                                wifiConfig.getMode());
+                        reloadKernelModule(interfaceName, wifiConfig.getMode());
+                    } catch (KuraException e) {
+                        logger.warn("monitor() :: failed to reload {} kernel module.", interfaceName, e);
+                        continue;
+                    }
+                }
+                try {
+                    if (WifiMode.MASTER.equals(wifiConfig.getMode())) {
+                        logger.debug("monitor() :: enable {} in master mode", interfaceName);
+                        enableInterface(wifiInterfaceConfig);
+                    } else if (WifiMode.INFRA.equals(wifiConfig.getMode())) {
+                        if (wifiConfig.ignoreSSID()) {
+                            logger.info("monitor() :: enable {} in infra mode", interfaceName);
+                            enableInterface(wifiInterfaceConfig);
+                        } else {
+                            if (isAccessPointAvailable(interfaceName, wifiConfig.getSSID())) {
+                                logger.info("monitor() :: found access point - enable {} in infra mode",
+                                        interfaceName);
+                                enableInterface(wifiInterfaceConfig);
+                            } else {
+                                logger.warn("monitor() :: {} - access point is not available",
+                                        wifiConfig.getSSID());
+                            }
+                        }
+                    }
+                } catch (KuraException e) {
+                    logger.error("monitor() :: Error enabling {} interface, will try to reset wifi",
+                            interfaceName, e);
+                    resetWifiDevice(interfaceName);
+                }
+            } else {
+                // Infrastructure (Station) mode:
+                // * Notify RSSI to listeners
+                // * Detect interface link down: disable the interface
+                // * Cannot ping Access Point: renew DHCP lease
+                // * Check if enabled for LAN in DHCP mode: remove default gateway from route table
+                //
+                // Master (Access Point) mode:
+                // * Detect interface link down: enable interface.
+                // FIXME should we just disable it like in the Infrastructure case above?
+                if (WifiMode.INFRA.equals(wifiConfig.getMode())) {
+                    // get signal strength only if somebody needs it
+                    if (this.listeners != null && !this.listeners.isEmpty()) {
+                        int rssi = 0;
+                        try {
+                            logger.debug("monitor() :: Getting Signal Level for {} -> {}", interfaceName,
+                                    wifiConfig.getSSID());
+                            rssi = getSignalLevel(interfaceName, wifiConfig.getSSID());
+                            logger.debug("monitor() :: Wifi RSSI is {}", rssi);
+                        } catch (KuraException e) {
+                            logger.error("monitor() :: Failed to get Signal Level for {} -> {}", interfaceName,
+                                    wifiConfig.getSSID());
+                            logger.error("monitor() :: Failed to get Signal Level ", e);
+                            rssi = 0;
+                        }
+                        for (WifiClientMonitorListener listener : this.listeners) {
+                            listener.setWifiSignalLevel(interfaceName, rssi);
+                        }
+                    }
+
+                    if (!wifiState.isLinkUp()) {
+                        logger.debug("monitor() :: link is down - disabling {}", interfaceName);
+                        disableInterface(interfaceName);
+                        up = false;
+                    }
+
+                    NetConfigIP4 netConfigIP4 = ((AbstractNetInterface<?>) wifiInterfaceConfig).getIP4config();
+                    boolean isDhcpClient = netConfigIP4 != null && netConfigIP4.isDhcp();
+                    boolean dhcpLeaseRenewed = false;
+                    logger.debug("monitor() :: pingAccessPoint()? {}", wifiConfig.pingAccessPoint());
+                    if (isDhcpClient && wifiConfig.pingAccessPoint()) {
+                        boolean isApReachable = false;
+                        for (int i = 0; i < 3; i++) {
+                            isApReachable = isAccessPointReachable(interfaceName, 1000);
+                            if (isApReachable) {
+                                break;
+                            }
+                            sleep(1000);
+                        }
+                        if (!isApReachable) {
+                            this.netAdminService.renewDhcpLease(interfaceName);
+                            dhcpLeaseRenewed = true;
+                        }
+                    }
+
+                    // Check if wifi network reconnected between monitor executions
+                    InterfaceState oldState = oldStatuses.get(interfaceName);
+                    if (!dhcpLeaseRenewed && isDhcpClient && (oldState == null
+                            || oldState.getCarrierChanges() != wifiState.getCarrierChanges())) {
+                        logger.debug("monitor() :: carrier changes - renewing DHCP lease {}", interfaceName);
+                        this.netAdminService.renewDhcpLease(interfaceName);
+                    }
+
+                    if (isDhcpClient
+                            && netConfigIP4.getStatus().equals(NetInterfaceStatus.netIPv4StatusEnabledLAN)) {
+                        RouteConfig rconf = this.routeService.getDefaultRoute(interfaceName);
+                        if (rconf != null) {
+                            logger.debug(
+                                    "monitor() :: {} is configured for LAN/DHCP - removing GATEWAY route ...",
+                                    rconf.getInterfaceName());
+                            this.routeService.removeStaticRoute(rconf.getDestination(), rconf.getGateway(),
+                                    rconf.getNetmask(), rconf.getInterfaceName());
+                        }
+                    }
+                } else if (WifiMode.MASTER.equals(wifiConfig.getMode()) && !wifiState.isLinkUp()) {
+                    // disabling interface is probably needed to handle potential driver issues.
+                    logger.warn(
+                            "monitor() :: !! Link is down for the {} in AP mode, while IP address is assigned. "
+                            + "Will disable and reenable interface ...",
+                            interfaceName);
+                    disableInterface(interfaceName);
+                    enableInterface(wifiInterfaceConfig);
+                }
+            }
+        }
+    }
+
+    private void monitorDisabledInterfaces() throws KuraException {
+        for (String interfaceName : this.disabledInterfaces) {
+            InterfaceState wifiState = this.interfaceStatuses.get(interfaceName);
+            if (wifiState != null && wifiState.isUp()) {
+                logger.debug("monitor() :: {} is currently up - disable interface", interfaceName);
+                disableInterface(interfaceName);
+            }
+        }
     }
 
     private void checkStatusChange(Map<String, InterfaceState> oldStatuses, Map<String, InterfaceState> newStatuses) {
@@ -812,7 +823,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                     reconfiguredInterfaces.add(interfaceName);
                     continue;
                 }
-                // TODO: compare interfaceAddressConfigs
+                // FIXME: compare interfaceAddressConfigs
                 // FIXME - assuming one InterfaceAddressConfig for now
                 WifiInterfaceAddressConfig currentInterfaceAddressConfig = currentInterfaceAddressConfigs.get(0);
                 WifiInterfaceAddressConfig newInterfaceAddressConfig = newInterfaceAddressConfigs.get(0);
@@ -958,7 +969,8 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
             logger.info("getSignalLevel() :: reload {} kernel module for WiFi mode {}", interfaceName, WifiMode.INFRA);
             reloadKernelModule(interfaceName, WifiMode.INFRA);
         }
-        if ((rssi = getSignalLevelWithLinkTool(interfaceName, ssid)) != 0) {
+        rssi = getSignalLevelWithLinkTool(interfaceName, ssid);
+        if (rssi != 0) {
             return rssi;
         }
         return getSignalLevelWithScanTool(interfaceName, ssid);

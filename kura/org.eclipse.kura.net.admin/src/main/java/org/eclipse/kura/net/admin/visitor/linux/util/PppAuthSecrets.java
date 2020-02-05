@@ -169,6 +169,7 @@ public class PppAuthSecrets {
      * @throws Exception
      *             for file IO errors
      */
+    @SuppressWarnings("checkstyle:fileTabCharacter")
     private void writeToFile() throws Exception {
         String authType = "";
         if (this.secretsFilename.indexOf("chap") >= 0) {
@@ -239,8 +240,6 @@ public class PppAuthSecrets {
             checkAndRemove(this.secrets, value);
         } else if ("ipAddress".equals(type)) {
             checkAndRemove(this.ipAddresses, value);
-        } else {
-            // unaccepted type
         }
 
         writeToFile();

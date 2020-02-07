@@ -23,7 +23,7 @@
     }
 
     .wire-components-list-elems {
-    	height: 15vh;
+    	height: 70vh;
     }
 
     .composer-body {
@@ -31,7 +31,24 @@
 	}
 
     .drivers-list {
-    	padding-bottom: 30px;
+    	padding-top: 1px;
+    }
+    
+    .wire-components-heading {
+    	padding-top: 5px;
+    	padding-bottom: 5px;
+    	padding-left: 5px;
+    	display: block;
+    	color: #ffffff;
+    	background-color: #2860A6;
+    }
+    
+    .wire-components-heading:hover {
+    	background-color: #24508F;
+    }
+    
+    .margin {
+    	margin: 2px;
     }
     </ui:style>
 
@@ -66,63 +83,59 @@
             <b:Column size="MD_2">
                 <b:Row>
                     <b:Column size="MD_12,XS_12" addStyleNames="{style.wire-components-list}">
-                        <b:Panel>
+                    	<g:ScrollPanel>
+                        <b:Panel addStyleNames="{style.wire-components-list-elems}">
                             <b:PanelHeader>
                                 <b:Heading size="H3" text="{msgs.wiresComposerTitle}"/>
                             </b:PanelHeader>
-                            <b:PanelBody>
-                                <b:PanelGroup b:id="accordion">
-                                    <b:Panel>
+                            <b:PanelBody addStyleNames="{style.drivers-list}">
+                            	<b:PanelGroup b:id="accordion">
+                                	<b:Panel>
                                         <b:PanelHeader>
-                                            <b:Heading size="H2">
-                                                <b:Anchor icon="ARROW_UP" dataToggle="COLLAPSE" dataParent="#accordion" dataTarget="#consumerCollapse" text="Consumers" ui:field="consumerAnchor"/>
+                                            <b:Heading size="H3" addStyleNames="{style.wire-components-heading}">
+                                                <b:Anchor icon="CARET_RIGHT" dataToggle="COLLAPSE" dataParent="#accordion" dataTarget="#emitterCollapse" text="Emitters" ui:field="emitterAnchor"/>
                                             </b:Heading>
                                         </b:PanelHeader>
-                                        <b:PanelCollapse b:id="consumerCollapse" in="true" ui:field="consumerCollapse">
+                                        <b:PanelCollapse b:id="emitterCollapse" in="true" ui:field="emitterCollapse">
                                             <b:PanelBody>
-                                            	<g:ScrollPanel>
-                                                	<b:Panel addStyleNames="{style.wire-components-list-elems}">
-                                                    	<b:NavPills stacked="true" ui:field="wireConsumersMenu" />
+                                                	<b:Panel>
+                                                    	<b:NavPills stacked="true" ui:field="wireEmittersMenu" />
                                                 	</b:Panel>
-                                              	</g:ScrollPanel>
                                             </b:PanelBody>
                                         </b:PanelCollapse>
                                     </b:Panel>
                                     <b:Panel>
                                         <b:PanelHeader>
-                                            <b:Heading size="H2">
-                                                <b:Anchor icon="ARROW_DOWN" dataToggle="COLLAPSE" dataParent="#accordion" dataTarget="#producerCollapse" text="Producers" ui:field="producerAnchor"/>
+                                            <b:Heading size="H3" addStyleNames="{style.wire-components-heading}">
+                                                <b:Anchor icon="CARET_RIGHT" dataToggle="COLLAPSE" dataParent="#accordion" dataTarget="#receiverCollapse" text="Receivers" ui:field="receiverAnchor"/>
                                             </b:Heading>
                                         </b:PanelHeader>
-                                        <b:PanelCollapse b:id="producerCollapse" ui:field="producerCollapse">
+                                        <b:PanelCollapse b:id="receiverCollapse" ui:field="receiverCollapse">
                                             <b:PanelBody>
-                                            	<g:ScrollPanel>
-                                                	<b:Panel addStyleNames="{style.wire-components-list-elems}">
-                                                    	<b:NavPills stacked="true" ui:field="wireProducersMenu" />
+                                                	<b:Panel>
+                                                    	<b:NavPills stacked="true" ui:field="wireReceiversMenu" />
                                                 	</b:Panel>
-                                                </g:ScrollPanel>
                                             </b:PanelBody>
                                         </b:PanelCollapse>
                                     </b:Panel>
                                     <b:Panel>
                                         <b:PanelHeader>
-                                            <b:Heading size="H2">
-                                                <b:Anchor icon="ARROW_DOWN" dataToggle="COLLAPSE" dataParent="#accordion" dataTarget="#producerConsumerCollapse" text="Consumer/Producers" ui:field="producerConsumerAnchor"/>
+                                            <b:Heading size="H3" addStyleNames="{style.wire-components-heading}">
+                                                <b:Anchor icon="CARET_RIGHT" dataToggle="COLLAPSE" dataParent="#accordion" dataTarget="#emitterReceiverCollapse" text="Emitter/Receivers" ui:field="emitterReceiverAnchor"/>
                                             </b:Heading>
                                         </b:PanelHeader>
-                                        <b:PanelCollapse b:id="producerConsumerCollapse" ui:field="producerConsumerCollapse">
+                                        <b:PanelCollapse b:id="emitterReceiverCollapse" ui:field="emitterReceiverCollapse">
                                             <b:PanelBody>
-                                            	<g:ScrollPanel>
-                                                	<b:Panel addStyleNames="{style.wire-components-list-elems}">
-                                                    	<b:NavPills stacked="true" ui:field="wireConsumerProducersMenu" />
+                                                	<b:Panel>
+                                                    	<b:NavPills stacked="true" ui:field="wireEmitterReceiverMenu" />
                                                 	</b:Panel>
-                                                </g:ScrollPanel>
                                             </b:PanelBody>
                                         </b:PanelCollapse>
                                     </b:Panel>
                                 </b:PanelGroup>
                             </b:PanelBody>
                         </b:Panel>
+                        </g:ScrollPanel>
                     </b:Column>
                 </b:Row>
             </b:Column>

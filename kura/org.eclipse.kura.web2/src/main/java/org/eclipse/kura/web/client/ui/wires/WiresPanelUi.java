@@ -42,6 +42,7 @@ import org.eclipse.kura.web.shared.model.GwtWireGraphConfiguration;
 import org.gwtbootstrap3.client.ui.Alert;
 import org.gwtbootstrap3.client.ui.Anchor;
 import org.gwtbootstrap3.client.ui.Button;
+import org.gwtbootstrap3.client.ui.Collapse;
 import org.gwtbootstrap3.client.ui.NavPills;
 import org.gwtbootstrap3.client.ui.Panel;
 import org.gwtbootstrap3.client.ui.PanelBody;
@@ -107,28 +108,31 @@ public class WiresPanelUi extends Composite
     AlertDialog confirmDialog;
     
     @UiField
-    PanelCollapse producerCollapse;
+    PanelCollapse emitterCollapse;
     @UiField
-    PanelCollapse consumerCollapse;
+    PanelCollapse receiverCollapse;
     @UiField
-    PanelCollapse producerConsumerCollapse;
+    PanelCollapse emitterReceiverCollapse;
     
     @UiField
-    NavPills wireConsumersMenu;
+    Anchor receiverAnchor;
     @UiField
-    NavPills wireProducersMenu;
+    Anchor emitterAnchor;
     @UiField
-    NavPills wireConsumerProducersMenu;
+    Anchor emitterReceiverAnchor;
     
     @UiField
-    Anchor consumerAnchor;
+    NavPills wireReceiversMenu;
     @UiField
-    Anchor producerAnchor;
+    NavPills wireEmittersMenu;
     @UiField
-    Anchor producerConsumerAnchor;
+    NavPills wireEmitterReceiverMenu;
 
     interface WiresPanelUiUiBinder extends UiBinder<Widget, WiresPanelUi> {
     }
+    
+    private IconType caretDown = IconType.CARET_DOWN;
+    private IconType caretRight = IconType.CARET_RIGHT;
 
     private final WireComposer wireComposer;
     private final BlinkEffect blinkEffect;
@@ -207,9 +211,9 @@ public class WiresPanelUi extends Composite
     }
 
     private void populateComponentsPanel() {
-        this.wireConsumersMenu.clear();
-        this.wireProducersMenu.clear();
-        this.wireConsumerProducersMenu.clear();
+        this.wireReceiversMenu.clear();
+        this.wireEmittersMenu.clear();
+        this.wireEmitterReceiverMenu.clear();
         
         final WireComponentsAnchorListItem.Listener listener = WiresPanelUi.this::showComponentCreationDialog;
 
@@ -228,24 +232,24 @@ public class WiresPanelUi extends Composite
             item.setListener(listener);
             
             // add handlers to set indicator for each PanelCollapse
-            this.consumerCollapse.addShowHandler(showEvent -> this.consumerAnchor.setIcon(IconType.ARROW_UP));
-            this.consumerCollapse.addHideHandler(hideEvent -> this.consumerAnchor.setIcon(IconType.ARROW_DOWN));
+            this.receiverCollapse.addShowHandler(showEvent -> this.receiverAnchor.setIcon(IconType.CARET_DOWN));
+            this.receiverCollapse.addHideHandler(hideEvent -> this.receiverAnchor.setIcon(IconType.CARET_RIGHT));
 
-            this.producerCollapse.addShowHandler(showEvent -> this.producerAnchor.setIcon(IconType.ARROW_UP));
-            this.consumerCollapse.addHideHandler(hideEvent -> this.producerAnchor.setIcon(IconType.ARROW_DOWN));
-            
-            this.producerConsumerCollapse.addShowHandler(showEvent -> this.producerConsumerAnchor.setIcon(IconType.ARROW_UP));
-            this.producerConsumerCollapse.addHideHandler(hideEvent -> this.producerConsumerAnchor.setIcon(IconType.ARROW_DOWN));
+            this.emitterCollapse.addShowHandler(showEvent -> this.emitterAnchor.setIcon(IconType.CARET_DOWN));
+            this.emitterCollapse.addHideHandler(hideEvent -> this.emitterAnchor.setIcon(IconType.CARET_RIGHT));
+
+            this.emitterReceiverCollapse.addShowHandler(showEvent -> this.emitterReceiverAnchor.setIcon(IconType.CARET_DOWN));
+            this.emitterReceiverCollapse.addHideHandler(hideEvent -> this.emitterReceiverAnchor.setIcon(IconType.CARET_RIGHT));
 
             if (descriptor.getMinInputPorts() > 0 
                     && descriptor.getMinOutputPorts() > 0) {
-                this.wireConsumerProducersMenu.add(item);
+                this.wireEmitterReceiverMenu.add(item);
             }
             else if (descriptor.getMinOutputPorts() > 0) {
-                this.wireConsumersMenu.add(item);
+                this.wireEmittersMenu.add(item);
             }
             else if (descriptor.getMinInputPorts() > 0) {
-                this.wireProducersMenu.add(item);
+                this.wireReceiversMenu.add(item);
             }
         }
     }

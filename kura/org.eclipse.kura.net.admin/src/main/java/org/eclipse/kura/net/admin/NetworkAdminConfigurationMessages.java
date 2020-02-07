@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -20,9 +20,14 @@ import org.slf4j.LoggerFactory;
 
 public class NetworkAdminConfigurationMessages {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(NetworkAdminConfigurationMessages.class);
+    private static final Logger logger = LoggerFactory.getLogger(NetworkAdminConfigurationMessages.class);
 
+    @SuppressWarnings("checkstyle:lineLength")
     private static final String NETWORK_ADMIN_CONFIGURATION_MESSAGES_BUNDLE = "org.eclipse.kura.net.admin.messages.NetworkAdminConfigurationMessagesBundle";
+
+    private NetworkAdminConfigurationMessages() {
+
+    }
 
     public static String getMessage(NetworkAdminConfiguration code) {
         return getLocalizedMessage(Locale.getDefault(), code);
@@ -38,11 +43,11 @@ public class NetworkAdminConfigurationMessages {
             resourceBundle = ResourceBundle.getBundle(NETWORK_ADMIN_CONFIGURATION_MESSAGES_BUNDLE, locale);
             message = resourceBundle.getString(code.name());
             if (message == null) {
-                s_logger.warn("Could not find Configuration Message for Locale {} and code {}", locale, code);
+                logger.warn("Could not find Configuration Message for Locale {} and code {}", locale, code);
             }
         } catch (MissingResourceException mre) {
             // log the failure to load a message bundle
-            s_logger.warn("Could not find Messages Bundle for Locale {}", locale);
+            logger.warn("Could not find Messages Bundle for Locale {}", locale);
             mre.printStackTrace();
         }
 

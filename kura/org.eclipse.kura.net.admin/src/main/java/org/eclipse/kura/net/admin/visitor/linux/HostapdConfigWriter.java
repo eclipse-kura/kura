@@ -22,7 +22,6 @@ import java.util.regex.Matcher;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.KuraProcessExecutionErrorException;
 import org.eclipse.kura.core.net.AbstractNetInterface;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
@@ -181,7 +180,8 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
             fileAsString = updateWPA(wifiConfig, fileAsString);
         } else {
             logger.error(
-                    "Unsupported security type: {}. It must be WifiSecurity.NONE, WifiSecurity.SECURITY_NONE, WifiSecurity.SECURITY_WEP, WifiSecurity.SECURITY_WPA, or WifiSecurity.SECURITY_WPA2",
+                    "Unsupported security type: {}. It must be WifiSecurity.NONE, WifiSecurity.SECURITY_NONE, "
+                    + "WifiSecurity.SECURITY_WEP, WifiSecurity.SECURITY_WPA, or WifiSecurity.SECURITY_WPA2",
                     wifiConfig.getSecurity());
             throw KuraException.internalError("unsupported security type: " + wifiConfig.getSecurity());
         }

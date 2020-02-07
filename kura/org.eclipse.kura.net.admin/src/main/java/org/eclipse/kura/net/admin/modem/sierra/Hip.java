@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -105,7 +105,7 @@ public class Hip {
     private byte[] hipmsg = null;
     private byte[] payload = null;
 
-    private boolean is_error = false;
+    private boolean errorState = false;
 
     /**
      * HIP request constructor
@@ -198,7 +198,7 @@ public class Hip {
                 this.payload[i] = alMsg.get(PAYLOAD_OFFSET + i).byteValue();
             }
         } catch (Exception e) {
-            this.is_error = true;
+            this.errorState = true;
         }
     }
 
@@ -237,6 +237,6 @@ public class Hip {
      *         false - no error
      */
     public boolean isError() {
-        return this.is_error;
+        return this.errorState;
     }
 }

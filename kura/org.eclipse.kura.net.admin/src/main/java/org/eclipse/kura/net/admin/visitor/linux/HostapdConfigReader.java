@@ -131,7 +131,6 @@ public class HostapdConfigReader extends WifiConfigReaderHelper implements Netwo
                 || wifiRadioMode == WifiRadioMode.RADIO_MODE_80211nHT40above
                 || wifiRadioMode == WifiRadioMode.RADIO_MODE_80211nHT40below) {
 
-            // TODO: specify these 'n' modes separately?
             wifiConfig.setHardwareMode("n");
         }
     }

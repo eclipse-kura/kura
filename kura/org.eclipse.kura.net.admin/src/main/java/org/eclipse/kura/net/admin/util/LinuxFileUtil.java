@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -20,7 +20,11 @@ import org.slf4j.LoggerFactory;
 
 public class LinuxFileUtil {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(LinuxFileUtil.class);
+    private static final Logger logger = LoggerFactory.getLogger(LinuxFileUtil.class);
+    
+    private LinuxFileUtil() {
+        
+    }
 
     /*
      * This method creates symbolic link, deleting existing link by default
@@ -35,11 +39,11 @@ public class LinuxFileUtil {
     public static void createSymbolicLink(String sourceFile, String targetFile, boolean deleteOldLink)
             throws Exception {
 
-        s_logger.debug("Creating symbolic link from " + targetFile + " to " + sourceFile);
+        logger.debug("Creating symbolic link from {} to {}", targetFile, sourceFile);
 
         File f = new File(targetFile);
         if (f.exists() && deleteOldLink) {
-            s_logger.debug("Deleting existing link");
+            logger.debug("Deleting existing link");
             f.delete();
         }
 

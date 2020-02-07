@@ -110,22 +110,26 @@ public class FirewallAutoNatConfigReader implements NetworkConfigurationVisitor 
         String prop;
         StringBuilder sb = new StringBuilder().append(NET_INTERFACE).append(interfaceName)
                 .append(".config.nat.enabled");
-        if ((prop = kuraProps.getProperty(sb.toString())) != null) {
+        prop = kuraProps.getProperty(sb.toString());
+        if (prop != null) {
             natEnabled = Boolean.parseBoolean(prop);
         }
 
         sb = new StringBuilder().append(NET_INTERFACE).append(interfaceName).append(".config.nat.masquerade");
-        if ((prop = kuraProps.getProperty(sb.toString())) != null) {
+        prop = kuraProps.getProperty(sb.toString());
+        if (prop != null) {
             useMasquerade = Boolean.parseBoolean(prop);
         }
 
         sb = new StringBuilder().append(NET_INTERFACE).append(interfaceName).append(".config.nat.src.interface");
-        if ((prop = kuraProps.getProperty(sb.toString())) != null) {
+        prop = kuraProps.getProperty(sb.toString());
+        if (prop != null) {
             srcIface = prop;
         }
 
         sb = new StringBuilder().append(NET_INTERFACE).append(interfaceName).append(".config.nat.dst.interface");
-        if ((prop = kuraProps.getProperty(sb.toString())) != null) {
+        prop = kuraProps.getProperty(sb.toString());
+        if (prop != null) {
             dstIface = prop;
         }
 

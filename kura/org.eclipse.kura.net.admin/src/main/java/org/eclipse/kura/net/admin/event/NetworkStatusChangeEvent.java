@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -21,12 +21,12 @@ public class NetworkStatusChangeEvent extends Event {
     /** Topic of the NetworkStatusChangeEvent */
     public static final String NETWORK_EVENT_STATUS_CHANGE_TOPIC = "org/eclipse/kura/net/admin/event/NETWORK_EVENT_STATUS_CHANGE_TOPIC";
 
-    InterfaceState m_interfaceState;
+    InterfaceState interfaceState;
 
     public NetworkStatusChangeEvent(String interfaceName, InterfaceState ifaceState, Map<String, ?> properties) {
         super(NETWORK_EVENT_STATUS_CHANGE_TOPIC, properties);
 
-        this.m_interfaceState = ifaceState;
+        this.interfaceState = ifaceState;
     }
 
     /**
@@ -35,6 +35,6 @@ public class NetworkStatusChangeEvent extends Event {
      * @return
      */
     public InterfaceState getInterfaceState() {
-        return this.m_interfaceState;
+        return this.interfaceState;
     }
 }

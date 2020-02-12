@@ -43,6 +43,9 @@ public enum SupportedUsbModemInfo {
             .asList(new UsbModemDriver("sierra", "1199", "0025")), ""),
     Ublox_SARA_U2("SARA-U2", "1546", "1102", 7, 0, 1, 0, -1, 5000, 10000, Arrays
             .asList(ModemTechnologyType.HSPA), Arrays.asList(new UsbModemDriver("cdc_acm", "1546", "1102")), ""),
+    QUECTEL_EG25("EG25", "2c7c", "0125", 4, 0, 2, 3, -1, 5000, 10000, Arrays.asList(ModemTechnologyType.LTE,
+            ModemTechnologyType.HSPA,
+            ModemTechnologyType.UMTS), Arrays.asList(new UsbModemDriver("cdc_acm", "2c7c", "0125")), ""),
     HUAWEI_MS2372("MS2372", "12d1", "1506", 3, 0, 2, 0, -1, 5000, 15000, Arrays.asList(ModemTechnologyType.LTE,
             ModemTechnologyType.HSPA, ModemTechnologyType.HSDPA, ModemTechnologyType.UMTS,
             ModemTechnologyType.GSM_GPRS), Arrays.asList(new UsbModemDriver("option", "12d1", "1506")), "");

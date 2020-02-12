@@ -62,7 +62,7 @@ public class UnprivilegedExecutorServiceImpl implements UnprivilegedExecutorServ
     @Override
     public CommandStatus execute(Command command) {
         if (command.getCommandLine() == null || command.getCommandLine().length == 0) {
-            return buildErrorStatus();
+            return buildErrorStatus(command);
         }
         if (command.getSignal() == null) {
             command.setSignal(DEFAULT_SIGNAL);
@@ -73,7 +73,7 @@ public class UnprivilegedExecutorServiceImpl implements UnprivilegedExecutorServ
     @Override
     public void execute(Command command, Consumer<CommandStatus> callback) {
         if (command.getCommandLine() == null || command.getCommandLine().length == 0) {
-            callback.accept(buildErrorStatus());
+            callback.accept(buildErrorStatus(command));
         }
         if (command.getSignal() == null) {
             command.setSignal(DEFAULT_SIGNAL);
@@ -118,8 +118,8 @@ public class UnprivilegedExecutorServiceImpl implements UnprivilegedExecutorServ
         return ExecutorUtil.getPids(commandLine);
     }
 
-    private CommandStatus buildErrorStatus() {
-        CommandStatus status = new CommandStatus(new LinuxExitStatus(1));
+    private CommandStatus buildErrorStatus(Command command) {
+        CommandStatus status = new CommandStatus(command, new LinuxExitStatus(1));
         ByteArrayOutputStream err = new ByteArrayOutputStream();
         try {
             err.write("The commandLine cannot be empty or not defined".getBytes(Charsets.UTF_8));

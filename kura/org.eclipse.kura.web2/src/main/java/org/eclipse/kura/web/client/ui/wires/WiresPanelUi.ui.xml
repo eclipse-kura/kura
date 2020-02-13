@@ -18,12 +18,12 @@
 
     <ui:style>
     .wire-components-list {
-    	padding-left: 10px;
+    	padding-left: 5px;
     	padding-right: 0px;
     }
 
     .wire-components-list-elems {
-    	height: 70vh;
+    	height: 67vh;
     }
 
     .composer-body {
@@ -38,6 +38,8 @@
     	padding-top: 5px;
     	padding-bottom: 5px;
     	padding-left: 5px;
+    	padding-right: 5px;
+    	font-size: 10.2pt;
     	display: block;
     	color: #ffffff;
     	background-color: #2860A6;
@@ -92,8 +94,8 @@
                             	<b:PanelGroup b:id="accordion">
                                 	<b:Panel>
                                         <b:PanelHeader>
-                                            <b:Heading size="H3" addStyleNames="{style.wire-components-heading}">
-                                                <b:Anchor icon="CARET_RIGHT" dataToggle="COLLAPSE" dataParent="#accordion" dataTarget="#emitterCollapse" text="Emitters" ui:field="emitterAnchor"/>
+                                            <b:Heading size="H4" addStyleNames="{style.wire-components-heading}">
+                                                <b:Anchor icon="CARET_DOWN" dataToggle="COLLAPSE" dataParent="#accordion" dataTarget="#emitterCollapse" text="Consumers" ui:field="emitterAnchor"/>
                                             </b:Heading>
                                         </b:PanelHeader>
                                         <b:PanelCollapse b:id="emitterCollapse" in="true" ui:field="emitterCollapse">
@@ -106,8 +108,8 @@
                                     </b:Panel>
                                     <b:Panel>
                                         <b:PanelHeader>
-                                            <b:Heading size="H3" addStyleNames="{style.wire-components-heading}">
-                                                <b:Anchor icon="CARET_RIGHT" dataToggle="COLLAPSE" dataParent="#accordion" dataTarget="#receiverCollapse" text="Receivers" ui:field="receiverAnchor"/>
+                                            <b:Heading size="H4" addStyleNames="{style.wire-components-heading}">
+                                                <b:Anchor icon="CARET_RIGHT" dataToggle="COLLAPSE" dataParent="#accordion" dataTarget="#receiverCollapse" text="Producers" ui:field="receiverAnchor"/>
                                             </b:Heading>
                                         </b:PanelHeader>
                                         <b:PanelCollapse b:id="receiverCollapse" ui:field="receiverCollapse">
@@ -120,8 +122,8 @@
                                     </b:Panel>
                                     <b:Panel>
                                         <b:PanelHeader>
-                                            <b:Heading size="H3" addStyleNames="{style.wire-components-heading}">
-                                                <b:Anchor icon="CARET_RIGHT" dataToggle="COLLAPSE" dataParent="#accordion" dataTarget="#emitterReceiverCollapse" text="Emitter/Receivers" ui:field="emitterReceiverAnchor"/>
+                                            <b:Heading size="H4" addStyleNames="{style.wire-components-heading}">
+                                                <b:Anchor icon="CARET_RIGHT" dataToggle="COLLAPSE" dataParent="#accordion" dataTarget="#emitterReceiverCollapse" text="Producer/Consumers" ui:field="emitterReceiverAnchor"/>
                                             </b:Heading>
                                         </b:PanelHeader>
                                         <b:PanelCollapse b:id="emitterReceiverCollapse" ui:field="emitterReceiverCollapse">

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2019 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
  *
  *   All rights reserved. This program and the accompanying materials
  *   are made available under the terms of the Eclipse Public License v1.0
@@ -20,8 +20,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.linux.executor.LinuxExitStatus;
 import org.eclipse.kura.core.testutil.TestUtil;
-import org.eclipse.kura.executor.CommandStatus;
+import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
 import org.junit.Test;
 
 public class NtpdClockSyncProviderTest {
@@ -29,7 +30,7 @@ public class NtpdClockSyncProviderTest {
     @Test
     public void testSynch() throws KuraException, NoSuchFieldException {
 
-        CommandStatus status = new CommandStatus(new LinuxExitStatus(0));
+        CommandStatus status = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
         CommandExecutorService serviceMock = mock(CommandExecutorService.class);
         when(serviceMock.execute(anyObject())).thenReturn(status);
         NtpdClockSyncProvider provider = new NtpdClockSyncProvider(serviceMock);
@@ -55,7 +56,7 @@ public class NtpdClockSyncProviderTest {
     @Test
     public void testSynchError() throws KuraException, NoSuchFieldException {
 
-        CommandStatus status = new CommandStatus(new LinuxExitStatus(1));
+        CommandStatus status = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(1));
         CommandExecutorService serviceMock = mock(CommandExecutorService.class);
         when(serviceMock.execute(anyObject())).thenReturn(status);
         NtpdClockSyncProvider provider = new NtpdClockSyncProvider(serviceMock);

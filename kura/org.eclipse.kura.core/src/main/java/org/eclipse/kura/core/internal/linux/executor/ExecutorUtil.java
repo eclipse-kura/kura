@@ -210,7 +210,7 @@ public class ExecutorUtil {
     }
 
     private static CommandStatus executeSync(Command command, CommandLine commandLine) {
-        CommandStatus commandStatus = new CommandStatus(new LinuxExitStatus(0));
+        CommandStatus commandStatus = new CommandStatus(command, new LinuxExitStatus(0));
         commandStatus.setOutputStream(command.getOutputStream());
         commandStatus.setErrorStream(command.getErrorStream());
         commandStatus.setInputStream(command.getInputStream());
@@ -271,7 +271,7 @@ public class ExecutorUtil {
     }
 
     private static void executeAsync(Command command, CommandLine commandLine, Consumer<CommandStatus> callback) {
-        CommandStatus commandStatus = new CommandStatus(new LinuxExitStatus(0));
+        CommandStatus commandStatus = new CommandStatus(command, new LinuxExitStatus(0));
         commandStatus.setOutputStream(command.getOutputStream());
         commandStatus.setErrorStream(command.getErrorStream());
         commandStatus.setInputStream(command.getInputStream());

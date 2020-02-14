@@ -1,7 +1,7 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <!--
 
-    Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
+    Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -95,7 +95,7 @@
                                 	<b:Panel>
                                         <b:PanelHeader>
                                             <b:Heading size="H4" addStyleNames="{style.wire-components-heading}">
-                                                <b:Anchor icon="CARET_DOWN" dataToggle="COLLAPSE" dataParent="#accordion" dataTarget="#emitterCollapse" text="Consumers" ui:field="emitterAnchor"/>
+                                                <b:Anchor icon="CARET_DOWN" dataToggle="COLLAPSE" dataParent="#accordion" dataTarget="#emitterCollapse" text="{msgs.wiresEmitters}" ui:field="emitterAnchor"/>
                                             </b:Heading>
                                         </b:PanelHeader>
                                         <b:PanelCollapse b:id="emitterCollapse" in="true" ui:field="emitterCollapse">
@@ -109,7 +109,7 @@
                                     <b:Panel>
                                         <b:PanelHeader>
                                             <b:Heading size="H4" addStyleNames="{style.wire-components-heading}">
-                                                <b:Anchor icon="CARET_RIGHT" dataToggle="COLLAPSE" dataParent="#accordion" dataTarget="#receiverCollapse" text="Producers" ui:field="receiverAnchor"/>
+                                                <b:Anchor icon="CARET_RIGHT" dataToggle="COLLAPSE" dataParent="#accordion" dataTarget="#receiverCollapse" text="{msgs.wiresReceivers}" ui:field="receiverAnchor"/>
                                             </b:Heading>
                                         </b:PanelHeader>
                                         <b:PanelCollapse b:id="receiverCollapse" ui:field="receiverCollapse">
@@ -123,7 +123,7 @@
                                     <b:Panel>
                                         <b:PanelHeader>
                                             <b:Heading size="H4" addStyleNames="{style.wire-components-heading}">
-                                                <b:Anchor icon="CARET_RIGHT" dataToggle="COLLAPSE" dataParent="#accordion" dataTarget="#emitterReceiverCollapse" text="Producer/Consumers" ui:field="emitterReceiverAnchor"/>
+                                                <b:Anchor icon="CARET_RIGHT" dataToggle="COLLAPSE" dataParent="#accordion" dataTarget="#emitterReceiverCollapse" text="{msgs.wiresEmittersReceivers}" ui:field="emitterReceiverAnchor"/>
                                             </b:Heading>
                                         </b:PanelHeader>
                                         <b:PanelCollapse b:id="emitterReceiverCollapse" ui:field="emitterReceiverCollapse">

@@ -41,10 +41,10 @@ Development for Kura can be done in Eclipse IDE using the Kura Development Envir
 ## Development Environment
 
 ### Supported Development Platforms
-The Eclipse Installer based setup works for the main used platforms like Linux, Mac Os and Windows.
+The Eclipse Installer based setup works for the main used platforms like Linux, Mac OS and Windows.
 
 ### Prerequisites
-Before installing Kura, you need to have the following programs installed in your OS
+Before installing Kura, you need to have the following programs installed in your system
 * JDK 1.8
 * Maven 3.5.x
 
@@ -80,13 +80,12 @@ You can follow the tutorial from the official [Maven](http://maven.apache.org/in
 The simplest way to start developing on Eclipse Kura is to use an Eclipse Installer based setup.
 To correctly setup the environment, proceed as follows:
 - Start the Eclipse Installer
-- Switch to advanced mode
 - Select "Eclipse for Committers" and configure the "Product Version", then select a JRE 1.8+ and press the Next button
 - Select the Eclipse Kura installer from the list. If this is not available, add a new installer from https://raw.githubusercontent.com/eclipse/kura/develop/kura/setups/kura.setup, then check and press the Next button
 - Select the "Developer Type":
   - "User": if you want to develop applications or bundles running on Kura, select this option. It will install only the APIs and the examples.
   - "Developer" : if you are a framework developer, select this option. It will download and configure the Eclipse Kura framework.
-- Update Eclipse Kura Git repository username and customize further settings if you like (e.g. Root install folder, Installation folder name)
+- Update Eclipse Kura Git repository username and customize further settings if you like (e.g. Root install folder, Installation folder name). To show these options, make sure that the "Show all variables" checkbox is enabled
 - Leave all Bootstrap Tasks selected and press the Finish button
 - Accept all the licenses and wait for the installation to finish
 

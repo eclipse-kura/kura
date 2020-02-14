@@ -25,12 +25,12 @@ For more information, see the [Eclipse project proposal](http://www.eclipse.org/
 System Requirements
 -------------------
 
-Eclipse Kura requires at least Java 8 and OSGi R6. All bundles can make use of a Java 8 as execution environment. All bundles must be limited to the "compact2" profile of Java.
+Eclipse Kura is compatible with Java 8 (`Bundle-RequiredExecutionEnvironment: JavaSE-1.8`) and OSGi R6.
 
 
 Development Model
 -----------------
-Development on Kura follows the [gitflow model](http://nvie.com/posts/a-successful-git-branching-model/).  Thus, the working copy is in the develop branch, and the master branch is used for releases.
+Development on Kura follows a [variant of the gitflow model](https://github.com/eclipse/kura/wiki/New-Kura-Git-Workflow).  Development is made on the [develop branch](/eclipse/kura/tree/develop). The master branch is not used anymore.
 
 
 Getting Started
@@ -39,27 +39,60 @@ Getting Started
 Development for Kura can be done in Eclipse IDE using the Kura Development Environment, in a gateway or in a Docker container.
 
 ## Development Environment
+
+### Supported Development Platforms
+The Eclipse Installer based setup works for the main used platforms like Linux, Mac OS and Windows.
+
+### Prerequisites
+Before installing Kura, you need to have the following programs installed in your system
+* JDK 1.8
+* Maven 3.5.x
+
+#### Installing Prerequisites in Mac OS 
+Using [Brew](https://brew.sh/) you can easily install both Java and Maven from the command line.
+
+Use the following commands in a terminal
+
+For Java  
+```
+brew tap adoptopenjdk/openjdk 
+brew cask install adoptopenjdk8   
+```
+Run `java -version` to make sure it is installed correctly.  
+
+For Maven
+```
+brew install maven@3.5
+```
+Run `mvn -version`to ensure that Maven has been added to the PATH.
+If Maven cannot be found, try running `brew link maven@3.5 --force`.  
+
+#### Installing Prerequisites in Linux
+For Java
+```
+sudo apt install openjdk-8-jdk
+```
+For Maven   
+
+You can follow the tutorial from the official [Maven](http://maven.apache.org/install.html) site. Remember that you need to install the 3.5.x version.
+
+### Eclipse IDE
 The simplest way to start developing on Eclipse Kura is to use an Eclipse Installer based setup.
 To correctly setup the environment, proceed as follows:
 - Start the Eclipse Installer
-- Switch to advanced mode
 - Select "Eclipse for Committers" and configure the "Product Version", then select a JRE 1.8+ and press the Next button
 - Select the Eclipse Kura installer from the list. If this is not available, add a new installer from https://raw.githubusercontent.com/eclipse/kura/develop/kura/setups/kura.setup, then check and press the Next button
 - Select the "Developer Type":
   - "User": if you want to develop applications or bundles running on Kura, select this option. It will install only the APIs and the examples.
   - "Developer" : if you are a framework developer, select this option. It will download and configure the Eclipse Kura framework.
-- Update Eclipse Kura Git repository username and customize further settings if you like (e.g. Root install folder, Installation folder name)
+- Update Eclipse Kura Git repository username and customize further settings if you like (e.g. Root install folder, Installation folder name). To show these options, make sure that the "Show all variables" checkbox is enabled
 - Leave all Bootstrap Tasks selected and press the Finish button
 - Accept all the licenses and wait for the installation to finish
 
 At first startup Eclipse IDE will checkout the code, perform a full build and configure a few Working Sets. Now you are ready to develop on Eclipse Kura.
 
-For further information, building and deployment instructions, please visit the [getting started page](https://wiki.eclipse.org/Kura/Getting_Started).
-
 To raise an issue, please report a bug on [GitHub issues](https://github.com/eclipse/kura/issues/new).
 
-### Supported Development Platforms
-The Eclipse Installer based setup works for the main used platforms like Linux, Mac Os and Windows.
 
 
 ### Known Issues

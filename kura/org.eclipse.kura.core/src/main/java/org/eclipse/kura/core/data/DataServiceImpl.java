@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -589,8 +589,8 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 
                 @Override
                 public void run() {
-                    String originalName = Thread.currentThread().getName();
-                    Thread.currentThread().setName("DataServiceImpl:ReconnectTask");
+                    Thread.currentThread().setName("DataServiceImpl:ReconnectTask:"
+                            + DataServiceImpl.this.dataServiceOptions.getKuraServicePid());
                     boolean connected = false;
                     try {
                         if (DataServiceImpl.this.dbService == null) {
@@ -623,8 +623,9 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
                         // There's nothing we can do here but log an exception.
                         logger.error("Unexpected Error. Task will be terminated", e);
                         throw e;
+                    } catch (Exception e) {
+                        logger.info("Unexpected Exception. Task will not be terminated", e);
                     } finally {
-                        Thread.currentThread().setName(originalName);
                         if (connected) {
                             unregisterAsCriticalComponent();
                             // Throwing an exception will suppress subsequent executions of this periodic task.

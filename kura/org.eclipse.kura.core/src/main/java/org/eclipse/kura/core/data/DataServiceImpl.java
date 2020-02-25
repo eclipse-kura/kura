@@ -623,8 +623,6 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
                         // There's nothing we can do here but log an exception.
                         logger.error("Unexpected Error. Task will be terminated", e);
                         throw e;
-                    } catch (Exception e) {
-                        logger.info("Unexpected Exception. Task will not be terminated", e);
                     } finally {
                         if (connected) {
                             unregisterAsCriticalComponent();

@@ -7,12 +7,12 @@
 	<parent>
 		<groupId>org.eclipse.kura.feature</groupId>
 		<artifactId>features</artifactId>
-		<version>4.1.0</version>
+		<version>4.1.1</version>
 		<relativePath>..</relativePath>
 	</parent>
 
 	<artifactId>org.eclipse.kura.driver.gpio</artifactId>
-	<version>1.0.200</version>
+	<version>1.0.201-SNAPSHOT</version>
 	<packaging>eclipse-feature</packaging>
 
 	<build>

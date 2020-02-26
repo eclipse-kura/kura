@@ -19,11 +19,11 @@
 	<parent>
 		<groupId>org.eclipse.kura</groupId>
 		<artifactId>kura</artifactId>
-		<version>4.1.0</version>
+		<version>4.1.1</version>
 	</parent>
 
 	<artifactId>org.eclipse.kura.core.crypto</artifactId>
-	<version>1.0.500</version>
+	<version>1.0.501-SNAPSHOT</version>
 	<packaging>eclipse-plugin</packaging>
 
 	<properties>

@@ -16,7 +16,7 @@ Copyright (c) 2018 Red Hat Inc and others.
     <parent>
         <groupId>org.eclipse.kura</groupId>
         <artifactId>test</artifactId>
-        <version>4.1.0</version>
+        <version>4.1.1</version>
     </parent>
 
     <artifactId>org.eclipse.kura.util.test</artifactId>

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.example.eddystone.scanner
 Bundle-SymbolicName: org.eclipse.kura.example.eddystone.scanner;singleton:=true
-Bundle-Version: 1.0.300
+Bundle-Version: 1.0.301.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Service-Component: OSGI-INF/*.xml
 Bundle-ActivationPolicy: lazy

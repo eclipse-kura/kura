@@ -20,12 +20,12 @@
     <parent>
     	<groupId>org.eclipse.kura</groupId>
     	<artifactId>target-platform</artifactId>
-    	<version>4.1.0</version>
+    	<version>4.1.1</version>
         <relativePath>..</relativePath>
     </parent>
     
 	<artifactId>jdk.dio-parent</artifactId>
-	<version>1.0.500</version>
+	<version>1.0.501-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
     <modules>

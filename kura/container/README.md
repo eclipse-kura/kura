@@ -54,14 +54,21 @@ The JMX port defined is 9010 and the Remote debug port is 9011. Both ports are n
 ## Re-Building
 
 This docker container is being built by re-using the Intel UP² CentOS 7 image of Kura. It makes a few adjustments to the Kura sources and performs a full build from either a specified Git commit, or from the Git repository which has to be in the context root of the build.
+There is also the possibility to build the docker container starting from a lightweight Alpine Linux base image, in order to shrink the image to a little more than 200MB.
 
-If you want to re-build this image, check out this repository and simply run `docker build -f kura/container/kura/Dockerfile .` on the command line from the root of this repository.
+If you want to re-build this image, check out this repository and simply issue a:
+`sudo docker build -t "kura_centos" -f Dockerfile-centos  .` if you intend to re-build the CentOS docker image.
+`sudo docker build -t "kura_alpine" -f Dockerfile-alpine  .` if you intend to re-build the Alpine Linux docker image.
+
+Usage of tags (-t argument) is not necessary for the build, but is required if you intend to build both the images on the same system.
+
+It is also possible to build directly from the root of this repo, by specifying the Dockerfile position with the -f command; this however would cause an increase of approx. 200MB in the final image size, due to the copy of the context directory in a previous layer during the boot process, and it will not be possible to remove it, due to docker's UnionFS limitations.
 
 You can re-build the image from a specific Git commit. For this you need to pass in the build argument `KURA_COMMIT`.
  
 ## Running in OpenShift
 
-There also is an [OpenShift template](openshift/README.md), which can be used to deploy this image into [OpenShift](https://www.openshift.org/).
+There also is an [OpenShift template](openshift/README.md) in both directories, which can be used to deploy this image into [OpenShift](https://www.openshift.org/).
 
 ## Building extended images
 

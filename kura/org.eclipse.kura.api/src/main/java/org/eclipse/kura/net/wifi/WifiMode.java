@@ -24,15 +24,15 @@ public enum WifiMode {
     /** Access Point Mode - Coordinated network with one or more central controllers. */
     MASTER(0x03);
 
-    private int m_code;
+    private int code;
 
     private WifiMode(int code) {
-        this.m_code = code;
+        this.code = code;
     }
 
     public static WifiMode parseCode(int code) {
         for (WifiMode mode : WifiMode.values()) {
-            if (mode.m_code == code) {
+            if (mode.code == code) {
                 return mode;
             }
         }
@@ -43,7 +43,7 @@ public enum WifiMode {
     public static int getCode(WifiMode wifiMode) {
         for (WifiMode mode : WifiMode.values()) {
             if (mode == wifiMode) {
-                return mode.m_code;
+                return mode.code;
             }
         }
         return -1;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -151,10 +151,10 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
                         @Override
                         public H2DbService addingService(ServiceReference<H2DbService> reference) {
                             logger.info("H2DbService instance found");
-                            H2DbService dbService = DataServiceImpl.this.componentContext.getBundleContext()
+                            H2DbService contextDbService = DataServiceImpl.this.componentContext.getBundleContext()
                                     .getService(reference);
-                            setH2DbService(dbService);
-                            return dbService;
+                            setH2DbService(contextDbService);
+                            return contextDbService;
                         }
 
                         @Override
@@ -355,8 +355,8 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 
         if (newSession) {
             if (this.dataServiceOptions.isPublishInFlightMessages()) {
-                logger.info(
-                        "New session established. Unpublishing all in-flight messages. Disregarding the QoS level, this may cause duplicate messages.");
+                logger.info("New session established. Unpublishing all in-flight messages. Disregarding the QoS level, "
+                        + "this may cause duplicate messages.");
                 try {
                     this.store.unpublishAllInFlighMessages();
                     this.inFlightMsgIds.clear();
@@ -589,8 +589,8 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 
                 @Override
                 public void run() {
-                    String originalName = Thread.currentThread().getName();
-                    Thread.currentThread().setName("DataServiceImpl:ReconnectTask");
+                    Thread.currentThread().setName("DataServiceImpl:ReconnectTask:"
+                            + DataServiceImpl.this.dataServiceOptions.getKuraServicePid());
                     boolean connected = false;
                     try {
                         if (DataServiceImpl.this.dbService == null) {
@@ -624,7 +624,6 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
                         logger.error("Unexpected Error. Task will be terminated", e);
                         throw e;
                     } finally {
-                        Thread.currentThread().setName(originalName);
                         if (connected) {
                             unregisterAsCriticalComponent();
                             // Throwing an exception will suppress subsequent executions of this periodic task.

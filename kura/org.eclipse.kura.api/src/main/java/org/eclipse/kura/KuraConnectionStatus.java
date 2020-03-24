@@ -17,6 +17,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * @noextend This class is not intended to be subclassed by clients.
  */
 @ProviderType
+@SuppressWarnings("checkstyle:hideUtilityClassConstructor")
 public class KuraConnectionStatus {
 
     /**

@@ -18,13 +18,13 @@ public enum ModemCdmaServiceProvider {
     AERIS(2),
     VERIZON(3);
 
-    private int m_provider;
+    private int provider;
 
     private ModemCdmaServiceProvider(int provider) {
-        this.m_provider = provider;
+        this.provider = provider;
     }
 
     public int getProvider() {
-        return this.m_provider;
+        return this.provider;
     }
 }

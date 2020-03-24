@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2018, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -77,13 +77,13 @@ public abstract class AbstractCellularModemFactory<T extends CellularModem> impl
 
     @Override
     public Hashtable<String, ? extends CellularModem> getModemServices() {
-        final Map<ModemDevice, T> cellularModems;
+        final Map<ModemDevice, T> newCellularModems;
 
         synchronized (this) {
-            cellularModems = new HashMap<>(this.cellularModems);
+            newCellularModems = new HashMap<>(this.cellularModems);
         }
 
-        return cellularModems.entrySet().stream().collect(
+        return newCellularModems.entrySet().stream().collect(
                 Collectors.toMap(e -> e.getKey().getProductName(), Entry::getValue, (a, b) -> b, Hashtable::new));
     }
 }

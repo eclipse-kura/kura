@@ -32,6 +32,7 @@ import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.WifiInterfaceConfigImpl;
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.core.util.IOUtil;
+import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.net.NetConfig;
@@ -93,7 +94,7 @@ public class HostapdConfigTest {
         netInterfaceConfig.setNetInterfaceAddresses(interfaceAddressConfigs);
 
         CommandExecutorService esMock = mock(CommandExecutorService.class);
-        CommandStatus status = new CommandStatus(new LinuxExitStatus(0));
+        CommandStatus status = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
         when(esMock.execute(anyObject())).thenReturn(status);
 
         writer.setExecutorService(esMock);
@@ -144,7 +145,7 @@ public class HostapdConfigTest {
 
         try {
             CommandExecutorService esMock = mock(CommandExecutorService.class);
-            CommandStatus status = new CommandStatus(new LinuxExitStatus(0));
+            CommandStatus status = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
             when(esMock.execute(anyObject())).thenReturn(status);
 
             writer.setExecutorService(esMock);
@@ -224,7 +225,7 @@ public class HostapdConfigTest {
         netInterfaceConfig.setNetInterfaceAddresses(interfaceAddressConfigs);
 
         CommandExecutorService esMock = mock(CommandExecutorService.class);
-        CommandStatus status = new CommandStatus(new LinuxExitStatus(0));
+        CommandStatus status = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
         when(esMock.execute(anyObject())).thenReturn(status);
 
         writer.setExecutorService(esMock);
@@ -341,7 +342,7 @@ public class HostapdConfigTest {
         netInterfaceConfig.setNetInterfaceAddresses(interfaceAddressConfigs);
 
         CommandExecutorService esMock = mock(CommandExecutorService.class);
-        CommandStatus status = new CommandStatus(new LinuxExitStatus(0));
+        CommandStatus status = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
         when(esMock.execute(anyObject())).thenReturn(status);
 
         writer.setExecutorService(esMock);
@@ -569,7 +570,7 @@ public class HostapdConfigTest {
         netInterfaceConfig.setNetInterfaceAddresses(interfaceAddressConfigs);
 
         CommandExecutorService esMock = mock(CommandExecutorService.class);
-        CommandStatus status = new CommandStatus(new LinuxExitStatus(0));
+        CommandStatus status = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
         when(esMock.execute(anyObject())).thenReturn(status);
 
         writer.setExecutorService(esMock);

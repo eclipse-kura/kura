@@ -55,6 +55,7 @@ public class DhcpServerConfigIP6 extends DhcpServerConfigIP<IP6Address> implemen
      *            the DNS servers that will get passed to DHCP clients if passDns is true
      */
     @Deprecated
+    @SuppressWarnings("checkstyle:parameterNumber")
     public DhcpServerConfigIP6(String interfaceName, boolean enabled, IP6Address subnet, IP6Address routerAddress,
             IP6Address subnetMask, int defaultLeaseTime, int maximumLeaseTime, short prefix, IP6Address rangeStart,
             IP6Address rangeEnd, boolean passDns, List<IP6Address> dnsServers) {

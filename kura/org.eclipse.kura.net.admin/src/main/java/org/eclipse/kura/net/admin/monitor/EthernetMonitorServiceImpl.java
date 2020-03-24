@@ -201,6 +201,7 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
         }
     }
 
+    @SuppressWarnings("checkstyle:methodLength")
     private void monitor(String interfaceName) {
         synchronized (lock) {
             try {

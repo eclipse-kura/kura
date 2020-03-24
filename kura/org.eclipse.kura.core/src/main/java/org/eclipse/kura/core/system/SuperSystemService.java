@@ -18,8 +18,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Superclass of System*Service.
+ * Superclass of SystemService.
  */
+@SuppressWarnings("checkstyle:hideUtilityClassConstructor")
 public class SuperSystemService {
 
     private static final Logger logger = LoggerFactory.getLogger(SuperSystemService.class);

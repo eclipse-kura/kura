@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -18,126 +18,126 @@ import org.eclipse.kura.net.modem.ModemInterfaceAddress;
 
 public class ModemInterfaceAddressImpl extends NetInterfaceAddressImpl implements ModemInterfaceAddress {
 
-    private int m_signalStrength;
-    private boolean m_isRoaming;
-    private ModemConnectionStatus m_connectionStatus;
-    private long m_bytesTransmitted;
-    private long m_bytesReceived;
-    private ModemConnectionType m_connectionType;
+    private int signalStrength;
+    private boolean isRoaming;
+    private ModemConnectionStatus connectionStatus;
+    private long bytesTransmitted;
+    private long bytesReceived;
+    private ModemConnectionType connectionType;
 
     public ModemInterfaceAddressImpl() {
         super();
-        this.m_connectionType = ModemConnectionType.PPP; // FIXME - hardcoded
+        this.connectionType = ModemConnectionType.PPP; // FIXME - hardcoded
     }
 
     public ModemInterfaceAddressImpl(ModemInterfaceAddress other) {
         super(other);
-        this.m_signalStrength = other.getSignalStrength();
-        this.m_isRoaming = other.isRoaming();
-        this.m_connectionStatus = other.getConnectionStatus();
-        this.m_bytesTransmitted = other.getBytesTransmitted();
-        this.m_bytesReceived = other.getBytesReceived();
-        this.m_connectionType = other.getConnectionType();
+        this.signalStrength = other.getSignalStrength();
+        this.isRoaming = other.isRoaming();
+        this.connectionStatus = other.getConnectionStatus();
+        this.bytesTransmitted = other.getBytesTransmitted();
+        this.bytesReceived = other.getBytesReceived();
+        this.connectionType = other.getConnectionType();
     }
 
     @Override
     public int getSignalStrength() {
-        return this.m_signalStrength;
+        return this.signalStrength;
     }
 
     public void setSignalStrength(int signalStrength) {
-        this.m_signalStrength = signalStrength;
+        this.signalStrength = signalStrength;
     }
 
     @Override
     public boolean isRoaming() {
-        return this.m_isRoaming;
+        return this.isRoaming;
     }
 
     public void setIsRoaming(boolean isRoaming) {
-        this.m_isRoaming = isRoaming;
+        this.isRoaming = isRoaming;
     }
 
     @Override
     public ModemConnectionStatus getConnectionStatus() {
-        return this.m_connectionStatus;
+        return this.connectionStatus;
     }
 
     public void setConnectionStatus(ModemConnectionStatus connectionStatus) {
-        this.m_connectionStatus = connectionStatus;
+        this.connectionStatus = connectionStatus;
     }
 
     @Override
     public long getBytesTransmitted() {
-        return this.m_bytesTransmitted;
+        return this.bytesTransmitted;
     }
 
     public void setBytesTransmitted(long bytesTransmitted) {
-        this.m_bytesTransmitted = bytesTransmitted;
+        this.bytesTransmitted = bytesTransmitted;
     }
 
     @Override
     public long getBytesReceived() {
-        return this.m_bytesReceived;
+        return this.bytesReceived;
     }
 
     public void setBytesReceived(long bytesReceived) {
-        this.m_bytesReceived = bytesReceived;
+        this.bytesReceived = bytesReceived;
     }
 
     @Override
     public ModemConnectionType getConnectionType() {
-        return this.m_connectionType;
+        return this.connectionType;
     }
 
     public void setConnectionType(ModemConnectionType connectionType) {
-        this.m_connectionType = connectionType;
+        this.connectionType = connectionType;
     }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + (int) (m_bytesReceived ^ (m_bytesReceived >>> 32));
-		result = prime * result + (int) (m_bytesTransmitted ^ (m_bytesTransmitted >>> 32));
-		result = prime * result + ((m_connectionStatus == null) ? 0 : m_connectionStatus.hashCode());
-		result = prime * result + ((m_connectionType == null) ? 0 : m_connectionType.hashCode());
-		result = prime * result + (m_isRoaming ? 1231 : 1237);
-		result = prime * result + m_signalStrength;
-		return result;
-	}
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + (int) (this.bytesReceived ^ this.bytesReceived >>> 32);
+        result = prime * result + (int) (this.bytesTransmitted ^ this.bytesTransmitted >>> 32);
+        result = prime * result + (this.connectionStatus == null ? 0 : this.connectionStatus.hashCode());
+        result = prime * result + (this.connectionType == null ? 0 : this.connectionType.hashCode());
+        result = prime * result + (this.isRoaming ? 1231 : 1237);
+        result = prime * result + this.signalStrength;
+        return result;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (!(obj instanceof ModemInterfaceAddressImpl)) {
-			return false;
-		}
-		if (!super.equals(obj)) {
-			return false;
-		}
-		ModemInterfaceAddressImpl other = (ModemInterfaceAddressImpl) obj;
-		if (m_bytesReceived != other.m_bytesReceived) {
-			return false;
-		}
-		if (m_bytesTransmitted != other.m_bytesTransmitted) {
-			return false;
-		}
-		if (m_connectionStatus != other.m_connectionStatus) {
-			return false;
-		}
-		if (m_connectionType != other.m_connectionType) {
-			return false;
-		}
-		if (m_isRoaming != other.m_isRoaming) {
-			return false;
-		}
-		if (m_signalStrength != other.m_signalStrength) {
-			return false;
-		}
-		return true;
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof ModemInterfaceAddressImpl)) {
+            return false;
+        }
+        if (!super.equals(obj)) {
+            return false;
+        }
+        ModemInterfaceAddressImpl other = (ModemInterfaceAddressImpl) obj;
+        if (this.bytesReceived != other.bytesReceived) {
+            return false;
+        }
+        if (this.bytesTransmitted != other.bytesTransmitted) {
+            return false;
+        }
+        if (this.connectionStatus != other.connectionStatus) {
+            return false;
+        }
+        if (this.connectionType != other.connectionType) {
+            return false;
+        }
+        if (this.isRoaming != other.isRoaming) {
+            return false;
+        }
+        if (this.signalStrength != other.signalStrength) {
+            return false;
+        }
+        return true;
+    }
 
 }

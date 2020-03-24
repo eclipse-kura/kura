@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -30,24 +30,24 @@ import org.slf4j.LoggerFactory;
 
 public class WifiConfigReader implements NetworkConfigurationVisitor {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(WifiConfigReader.class);
+    private static final Logger logger = LoggerFactory.getLogger(WifiConfigReader.class);
 
-    private static WifiConfigReader s_instance;
+    private static WifiConfigReader instance;
 
-    private final List<NetworkConfigurationVisitor> m_visitors;
+    private final List<NetworkConfigurationVisitor> visitors;
 
     private WifiConfigReader() {
-        this.m_visitors = new ArrayList<NetworkConfigurationVisitor>();
-        this.m_visitors.add(WpaSupplicantConfigReader.getInstance());
-        this.m_visitors.add(HostapdConfigReader.getInstance());
+        this.visitors = new ArrayList<>();
+        this.visitors.add(WpaSupplicantConfigReader.getInstance());
+        this.visitors.add(HostapdConfigReader.getInstance());
     }
 
     public static WifiConfigReader getInstance() {
-        if (s_instance == null) {
-            s_instance = new WifiConfigReader();
+        if (instance == null) {
+            instance = new WifiConfigReader();
         }
 
-        return s_instance;
+        return instance;
     }
 
     @Override
@@ -67,7 +67,7 @@ public class WifiConfigReader implements NetworkConfigurationVisitor {
         }
 
         // Get wpa_supplicant and hostapd configs
-        for (NetworkConfigurationVisitor visitor : this.m_visitors) {
+        for (NetworkConfigurationVisitor visitor : this.visitors) {
             visitor.visit(config);
         }
     }
@@ -75,12 +75,12 @@ public class WifiConfigReader implements NetworkConfigurationVisitor {
     // Get common wifi config
     private void getConfig(WifiInterfaceConfigImpl wifiInterfaceConfig) throws KuraException {
         String interfaceName = wifiInterfaceConfig.getName();
-        s_logger.debug("Getting wifi config for {}", interfaceName);
+        logger.debug("Getting wifi config for {}", interfaceName);
 
         List<WifiInterfaceAddressConfig> wifiInterfaceAddressConfigs = wifiInterfaceConfig.getNetInterfaceAddresses();
 
         if (wifiInterfaceAddressConfigs == null || wifiInterfaceAddressConfigs.isEmpty()) {
-            wifiInterfaceAddressConfigs = new ArrayList<WifiInterfaceAddressConfig>();
+            wifiInterfaceAddressConfigs = new ArrayList<>();
             wifiInterfaceAddressConfigs.add(new WifiInterfaceAddressConfigImpl());
             wifiInterfaceConfig.setNetInterfaceAddresses(wifiInterfaceAddressConfigs);
         }
@@ -97,7 +97,7 @@ public class WifiConfigReader implements NetworkConfigurationVisitor {
                 wifiMode = WifiMode.valueOf(wifiModeString);
             }
 
-            s_logger.debug("Got wifiMode: {}", wifiMode);
+            logger.debug("Got wifiMode: {}", wifiMode);
             ((WifiInterfaceAddressConfigImpl) wifiInterfaceAddressConfig).setMode(wifiMode);
         }
     }

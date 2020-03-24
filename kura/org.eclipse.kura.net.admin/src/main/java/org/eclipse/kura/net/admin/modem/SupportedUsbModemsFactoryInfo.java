@@ -16,6 +16,8 @@ import java.util.List;
 
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemInfo;
 import org.eclipse.kura.linux.net.modem.UsbModemDriver;
+import org.eclipse.kura.net.admin.modem.quectel.eg25.QuectelEG25ConfigGenerator;
+import org.eclipse.kura.net.admin.modem.quectel.eg25.QuectelEG25ModemFactory;
 import org.eclipse.kura.net.admin.modem.sierra.mc87xx.SierraMc87xxConfigGenerator;
 import org.eclipse.kura.net.admin.modem.sierra.mc87xx.SierraMc87xxModemFactory;
 import org.eclipse.kura.net.admin.modem.sierra.usb598.SierraUsb598ConfigGenerator;
@@ -51,30 +53,35 @@ public class SupportedUsbModemsFactoryInfo {
         Sierra_USB598(SupportedUsbModemInfo.Sierra_USB598, SierraUsb598ModemFactory.class, SierraUsb598ConfigGenerator.class),
         Ublox_SARA_U2(SupportedUsbModemInfo.Ublox_SARA_U2, UbloxModemFactory.class, UbloxModemConfigGenerator.class),
         Zte_ME3630(SupportedUsbModemInfo.Zte_ME3630, ZteMe3630ModemFactory.class, ZteMe3630ConfigGenerator.class),
-        SimTech_SIM7000(SupportedUsbModemInfo.SimTech_SIM7000, SimTechSim7000ModemFactory.class, SimTechSim7000ConfigGenerator.class);
+        SimTech_SIM7000(SupportedUsbModemInfo.SimTech_SIM7000, SimTechSim7000ModemFactory.class, SimTechSim7000ConfigGenerator.class),
+        QUECTEL_EG25(SupportedUsbModemInfo.QUECTEL_EG25, QuectelEG25ModemFactory.class, QuectelEG25ConfigGenerator.class);
 
-        private final SupportedUsbModemInfo m_usbModemInfo;
-        private final Class<? extends CellularModemFactory> m_factoryClass;
-        private final Class<? extends ModemPppConfigGenerator> m_configClass;
+        private final SupportedUsbModemInfo usbModemInfo;
+        private final Class<? extends CellularModemFactory> factoryClass;
+        private final Class<? extends ModemPppConfigGenerator> configClass;
 
         private UsbModemFactoryInfo(SupportedUsbModemInfo modemInfo, Class<? extends CellularModemFactory> factoryClass,
                 Class<? extends ModemPppConfigGenerator> configClass) {
-            this.m_usbModemInfo = modemInfo;
-            this.m_factoryClass = factoryClass;
-            this.m_configClass = configClass;
+            this.usbModemInfo = modemInfo;
+            this.factoryClass = factoryClass;
+            this.configClass = configClass;
         }
 
         public SupportedUsbModemInfo getUsbModemInfo() {
-            return this.m_usbModemInfo;
+            return this.usbModemInfo;
         }
 
         public Class<? extends CellularModemFactory> getModemFactoryClass() {
-            return this.m_factoryClass;
+            return this.factoryClass;
         }
 
         public Class<? extends ModemPppConfigGenerator> getConfigGeneratorClass() {
-            return this.m_configClass;
+            return this.configClass;
         }
+    }
+    
+    private SupportedUsbModemsFactoryInfo() {
+        
     }
 
     public static UsbModemFactoryInfo getModem(SupportedUsbModemInfo modemInfo) {

@@ -21,11 +21,13 @@ import org.osgi.annotation.versioning.ProviderType;
  */
 @ProviderType
 @Deprecated
+@SuppressWarnings("checkstyle:visibilityModifier")
 public class BluetoothBeaconData {
 
     public String uuid;
     public String address;
-    public int major, minor;
+    public int major;
+    public int minor;
     public int rssi;
     public int txpower;
 

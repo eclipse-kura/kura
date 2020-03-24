@@ -32,6 +32,7 @@ public class BluetoothAdvertisingData {
 
     }
 
+    @SuppressWarnings("checkstyle:parameterNumber")
     public static String getData(String uuid, Integer major, Integer minor, String companyCode, Integer txPower,
             boolean leLimited, boolean leGeneral, boolean brEDRSupported, boolean leBRController, boolean leBRHost) {
 

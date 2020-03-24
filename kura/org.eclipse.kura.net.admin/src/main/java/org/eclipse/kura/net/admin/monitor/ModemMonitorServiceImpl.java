@@ -441,8 +441,9 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
         }
         logger.info("old diversity = {},  new diversity = {}", oldModemConfig.isDiversityEnabled(),
                 newModemConfig.isDiversityEnabled());
-        if (oldModemConfig.isDiversityEnabled() != newModemConfig.isDiversityEnabled())
+        if (oldModemConfig.isDiversityEnabled() != newModemConfig.isDiversityEnabled()) {
             ret = false;
+        }
         return ret;
     }
 
@@ -729,11 +730,11 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
                 logger.trace("postModemGpsEvent() :: Modem SeralConnectionProperties: {}", commUri.toString());
 
                 HashMap<String, Object> modemInfoMap = new HashMap<>();
-                modemInfoMap.put(ModemGpsEnabledEvent.Port, modem.getGpsPort());
-                modemInfoMap.put(ModemGpsEnabledEvent.BaudRate, Integer.valueOf(commUri.getBaudRate()));
-                modemInfoMap.put(ModemGpsEnabledEvent.DataBits, Integer.valueOf(commUri.getDataBits()));
-                modemInfoMap.put(ModemGpsEnabledEvent.StopBits, Integer.valueOf(commUri.getStopBits()));
-                modemInfoMap.put(ModemGpsEnabledEvent.Parity, Integer.valueOf(commUri.getParity()));
+                modemInfoMap.put(ModemGpsEnabledEvent.PORT, modem.getGpsPort());
+                modemInfoMap.put(ModemGpsEnabledEvent.BAUD_RATE, Integer.valueOf(commUri.getBaudRate()));
+                modemInfoMap.put(ModemGpsEnabledEvent.DATA_BITS, Integer.valueOf(commUri.getDataBits()));
+                modemInfoMap.put(ModemGpsEnabledEvent.STOP_BITS, Integer.valueOf(commUri.getStopBits()));
+                modemInfoMap.put(ModemGpsEnabledEvent.PARITY, Integer.valueOf(commUri.getParity()));
 
                 logger.debug("postModemGpsEvent() :: posting ModemGpsEnabledEvent on topic {}",
                         ModemGpsEnabledEvent.MODEM_EVENT_GPS_ENABLED_TOPIC);
@@ -756,7 +757,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
         }
 
         boolean shouldResetModem(final long modemResetTimeout) {
-            
+
             if (modemResetTimeout == 0) {
                 return false;
             }

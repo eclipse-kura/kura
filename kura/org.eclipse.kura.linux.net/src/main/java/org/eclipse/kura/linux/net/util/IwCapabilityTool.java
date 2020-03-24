@@ -46,6 +46,10 @@ public class IwCapabilityTool {
     }
 
     private static final EnumSet<ParseState> DONE = EnumSet.of(ParseState.HAS_RSN, ParseState.HAS_CHIPHERS);
+    
+    private IwCapabilityTool() {
+        
+    }
 
     private static Optional<Matcher> skipTo(final BufferedReader reader, final Pattern pattern) throws IOException {
         String line;
@@ -81,6 +85,7 @@ public class IwCapabilityTool {
         return Optional.empty();
     }
 
+    @SuppressWarnings("checkstyle:innerAssignment")
     private static Set<Capability> parseCapabilities(final InputStream in) throws IOException {
 
         final EnumSet<Capability> capabilities = EnumSet.noneOf(Capability.class);

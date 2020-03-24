@@ -287,6 +287,7 @@ public class NetworkConfigurationServiceImpl
 
     // @Override
     // FIXME:MC Introducing a short lived cache will make startup much faster.
+    @SuppressWarnings("checkstyle:lineLength")
     @Override
     public synchronized NetworkConfiguration getNetworkConfiguration() throws KuraException {
         NetworkConfiguration networkConfiguration = new NetworkConfiguration();
@@ -413,6 +414,7 @@ public class NetworkConfigurationServiceImpl
         }
     }
 
+    @SuppressWarnings("checkstyle:methodLength")
     private Tocd getDefinition() throws KuraException {
         ObjectFactory objectFactory = new ObjectFactory();
         Tocd tocd = objectFactory.createTocd();

@@ -69,6 +69,7 @@ public abstract class DhcpServerConfigIP<T extends IPAddress> implements DhcpSer
      *            the DNS servers that will get passed to DHCP clients if passDns is true
      */
     @Deprecated
+    @SuppressWarnings("checkstyle:parameterNumber")
     public DhcpServerConfigIP(String interfaceName, boolean enabled, T subnet, T routerAddress, T subnetMask,
             int defaultLeaseTime, int maximumLeaseTime, short prefix, T rangeStart, T rangeEnd, boolean passDns,
             List<T> dnsServers) {

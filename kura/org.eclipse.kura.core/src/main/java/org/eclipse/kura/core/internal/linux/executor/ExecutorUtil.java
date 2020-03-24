@@ -200,7 +200,7 @@ public class ExecutorUtil {
             }
         }
         // Sort pids in reverse order (useful when stop processes...)
-        return pids.entrySet().stream().sorted(Map.Entry.<String, Integer> comparingByValue().reversed())
+        return pids.entrySet().stream().sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
                 .collect(Collectors.toMap(Map.Entry::getKey, e -> new LinuxPid(e.getValue()), (e1, e2) -> e1,
                         LinkedHashMap::new));
     }
@@ -210,7 +210,7 @@ public class ExecutorUtil {
     }
 
     private static CommandStatus executeSync(Command command, CommandLine commandLine) {
-        CommandStatus commandStatus = new CommandStatus(new LinuxExitStatus(0));
+        CommandStatus commandStatus = new CommandStatus(command, new LinuxExitStatus(0));
         commandStatus.setOutputStream(command.getOutputStream());
         commandStatus.setErrorStream(command.getErrorStream());
         commandStatus.setInputStream(command.getInputStream());
@@ -271,7 +271,7 @@ public class ExecutorUtil {
     }
 
     private static void executeAsync(Command command, CommandLine commandLine, Consumer<CommandStatus> callback) {
-        CommandStatus commandStatus = new CommandStatus(new LinuxExitStatus(0));
+        CommandStatus commandStatus = new CommandStatus(command, new LinuxExitStatus(0));
         commandStatus.setOutputStream(command.getOutputStream());
         commandStatus.setErrorStream(command.getErrorStream());
         commandStatus.setInputStream(command.getInputStream());

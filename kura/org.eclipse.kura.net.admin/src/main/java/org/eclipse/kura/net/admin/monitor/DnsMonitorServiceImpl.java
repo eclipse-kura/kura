@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2019 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -141,9 +141,9 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
 
                 Set<IP4Address> fwds = new HashSet<>();
                 if (dnsServers != null && !dnsServers.isEmpty()) {
-                    for (IPAddress dnsServer : dnsServers) {
-                        logger.debug("Found DNS Server: {}", dnsServer.getHostAddress());
-                        fwds.add((IP4Address) dnsServer);
+                    for (IPAddress dnsServerTmp : dnsServers) {
+                        logger.debug("Found DNS Server: {}", dnsServerTmp.getHostAddress());
+                        fwds.add((IP4Address) dnsServerTmp);
                     }
                 }
 
@@ -286,9 +286,9 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
 
         Set<IPAddress> dnsServers = this.dnsUtil.getDnServers();
         if (dnsServers != null && !dnsServers.isEmpty()) {
-            for (IPAddress dnsServer : dnsServers) {
-                logger.debug("Found DNS Server: {}", dnsServer.getHostAddress());
-                this.forwarders.add((IP4Address) dnsServer);
+            for (IPAddress dnsServerTmp : dnsServers) {
+                logger.debug("Found DNS Server: {}", dnsServerTmp.getHostAddress());
+                this.forwarders.add((IP4Address) dnsServerTmp);
             }
         }
 

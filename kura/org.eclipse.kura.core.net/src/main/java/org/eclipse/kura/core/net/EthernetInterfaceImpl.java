@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -34,7 +34,7 @@ public class EthernetInterfaceImpl<T extends NetInterfaceAddress> extends Abstra
 
         // Copy the NetInterfaceAddresses
         List<? extends NetInterfaceAddress> otherNetInterfaceAddresses = other.getNetInterfaceAddresses();
-        ArrayList<T> interfaceAddresses = new ArrayList<T>();
+        ArrayList<T> interfaceAddresses = new ArrayList<>();
 
         if (otherNetInterfaceAddresses != null) {
             for (NetInterfaceAddress netInterfaceAddress : otherNetInterfaceAddresses) {
@@ -66,29 +66,29 @@ public class EthernetInterfaceImpl<T extends NetInterfaceAddress> extends Abstra
         return sb.toString();
     }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + (linkUp ? 1231 : 1237);
-		return result;
-	}
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + (this.linkUp ? 1231 : 1237);
+        return result;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (!super.equals(obj)) {
-			return false;
-		}
-		if (!(obj instanceof EthernetInterfaceImpl)) {
-			return false;
-		}
-		EthernetInterfaceImpl other = (EthernetInterfaceImpl) obj;
-		if (linkUp != other.linkUp) {
-			return false;
-		}
-		return true;
-	}    
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!super.equals(obj)) {
+            return false;
+        }
+        if (!(obj instanceof EthernetInterfaceImpl)) {
+            return false;
+        }
+        EthernetInterfaceImpl other = (EthernetInterfaceImpl) obj;
+        if (this.linkUp != other.linkUp) {
+            return false;
+        }
+        return true;
+    }
 }

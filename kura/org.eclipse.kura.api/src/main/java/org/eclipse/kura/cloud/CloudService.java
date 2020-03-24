@@ -12,7 +12,6 @@
 package org.eclipse.kura.cloud;
 
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.cloudconnection.CloudConnectionManager;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -36,7 +35,7 @@ import org.osgi.annotation.versioning.ProviderType;
  *
  * @noimplement This interface is not intended to be implemented by clients.
  *
- * @deprecated Please consider using {@link CloudConnectionManager}
+ * @deprecated Please consider using {@link org.eclipse.kura.cloudconnection.CloudConnectionManager}
  */
 @ProviderType
 @Deprecated

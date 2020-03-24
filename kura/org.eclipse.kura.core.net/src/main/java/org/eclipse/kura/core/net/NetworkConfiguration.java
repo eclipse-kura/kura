@@ -72,6 +72,7 @@ import org.eclipse.kura.usb.UsbNetDevice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings("checkstyle:methodLength")
 public class NetworkConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(NetworkConfiguration.class);
@@ -377,30 +378,30 @@ public class NetworkConfiguration {
     // Returns a List of all modified NetInterfaceConfigs, or if none are specified,
     // all NetInterfaceConfigs
     public List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> getModifiedNetInterfaceConfigs() {
-        List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = null;
+        List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> newNetInterfaceConfigs = null;
         if (this.modifiedInterfaceNames != null && !this.modifiedInterfaceNames.isEmpty()) {
-            netInterfaceConfigs = new ArrayList<>();
+            newNetInterfaceConfigs = new ArrayList<>();
             for (String interfaceName : this.modifiedInterfaceNames) {
                 NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig = this.netInterfaceConfigs
                         .get(interfaceName);
                 if (netInterfaceConfig != null) {
-                    netInterfaceConfigs.add(this.netInterfaceConfigs.get(interfaceName));
+                    newNetInterfaceConfigs.add(this.netInterfaceConfigs.get(interfaceName));
                 }
             }
         } else {
-            netInterfaceConfigs = getNetInterfaceConfigs();
+            newNetInterfaceConfigs = getNetInterfaceConfigs();
         }
 
-        return netInterfaceConfigs;
+        return newNetInterfaceConfigs;
     }
 
     public List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> getNetInterfaceConfigs() {
-        List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = new ArrayList<>();
+        List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> newNetInterfaceConfigs = new ArrayList<>();
         Iterator<String> it = this.netInterfaceConfigs.keySet().iterator();
         while (it.hasNext()) {
-            netInterfaceConfigs.add(this.netInterfaceConfigs.get(it.next()));
+            newNetInterfaceConfigs.add(this.netInterfaceConfigs.get(it.next()));
         }
-        return netInterfaceConfigs;
+        return newNetInterfaceConfigs;
     }
 
     public NetInterfaceConfig<? extends NetInterfaceAddressConfig> getNetInterfaceConfig(String interfaceName) {
@@ -460,7 +461,7 @@ public class NetworkConfiguration {
     // ---------------------------------------------------------------
 
     private void recomputeNetworkProperties() {
-        Map<String, Object> properties = new HashMap<>();
+        Map<String, Object> newNetworkProperties = new HashMap<>();
 
         String netIfPrefix = null;
         String netIfReadOnlyPrefix = null;
@@ -479,7 +480,7 @@ public class NetworkConfiguration {
             }
             String result = sb.toString();
             logger.debug("Set modified interface names: {}", result);
-            properties.put("modified.interface.names", result);
+            newNetworkProperties.put("modified.interface.names", result);
         }
 
         Iterator<String> it = this.netInterfaceConfigs.keySet().iterator();
@@ -500,37 +501,37 @@ public class NetworkConfiguration {
             netIfConfigPrefix = sbPrefix.toString();
 
             // add the properties of the interface
-            properties.put(netIfReadOnlyPrefix + "type", netInterfaceConfig.getType().toString());
-            properties.put(netIfPrefix + "name", netInterfaceConfig.getName());
+            newNetworkProperties.put(netIfReadOnlyPrefix + "type", netInterfaceConfig.getType().toString());
+            newNetworkProperties.put(netIfPrefix + "name", netInterfaceConfig.getName());
             if (netInterfaceConfig.getState() != null) {
-                properties.put(netIfPrefix + "state", netInterfaceConfig.getState().toString());
+                newNetworkProperties.put(netIfPrefix + "state", netInterfaceConfig.getState().toString());
             }
-            properties.put(netIfPrefix + "autoconnect", netInterfaceConfig.isAutoConnect());
-            properties.put(netIfPrefix + "mtu", netInterfaceConfig.getMTU());
-            properties.put(netIfReadOnlyPrefix + "driver", netInterfaceConfig.getDriver());
-            properties.put(netIfReadOnlyPrefix + "driver.version", netInterfaceConfig.getDriverVersion());
-            properties.put(netIfReadOnlyPrefix + "firmware.version", netInterfaceConfig.getFirmwareVersion());
-            properties.put(netIfReadOnlyPrefix + "mac",
+            newNetworkProperties.put(netIfPrefix + "autoconnect", netInterfaceConfig.isAutoConnect());
+            newNetworkProperties.put(netIfPrefix + "mtu", netInterfaceConfig.getMTU());
+            newNetworkProperties.put(netIfReadOnlyPrefix + "driver", netInterfaceConfig.getDriver());
+            newNetworkProperties.put(netIfReadOnlyPrefix + "driver.version", netInterfaceConfig.getDriverVersion());
+            newNetworkProperties.put(netIfReadOnlyPrefix + "firmware.version", netInterfaceConfig.getFirmwareVersion());
+            newNetworkProperties.put(netIfReadOnlyPrefix + "mac",
                     NetUtil.hardwareAddressToString(netInterfaceConfig.getHardwareAddress()));
-            properties.put(netIfReadOnlyPrefix + "loopback", netInterfaceConfig.isLoopback());
-            properties.put(netIfReadOnlyPrefix + "ptp", netInterfaceConfig.isPointToPoint());
-            properties.put(netIfReadOnlyPrefix + "up", netInterfaceConfig.isUp());
-            properties.put(netIfReadOnlyPrefix + "virtual", netInterfaceConfig.isVirtual());
+            newNetworkProperties.put(netIfReadOnlyPrefix + "loopback", netInterfaceConfig.isLoopback());
+            newNetworkProperties.put(netIfReadOnlyPrefix + "ptp", netInterfaceConfig.isPointToPoint());
+            newNetworkProperties.put(netIfReadOnlyPrefix + "up", netInterfaceConfig.isUp());
+            newNetworkProperties.put(netIfReadOnlyPrefix + "virtual", netInterfaceConfig.isVirtual());
 
             // usb
             if (netInterfaceConfig.getUsbDevice() != null) {
                 UsbDevice usbDev = netInterfaceConfig.getUsbDevice();
-                properties.put(netIfReadOnlyPrefix + "usb.vendor.id", usbDev.getVendorId());
-                properties.put(netIfReadOnlyPrefix + "usb.vendor.name", usbDev.getManufacturerName());
-                properties.put(netIfReadOnlyPrefix + "usb.product.id", usbDev.getProductId());
-                properties.put(netIfReadOnlyPrefix + "usb.product.name", usbDev.getProductName());
-                properties.put(netIfReadOnlyPrefix + "usb.busNumber", usbDev.getUsbBusNumber());
-                properties.put(netIfReadOnlyPrefix + "usb.devicePath", usbDev.getUsbDevicePath());
+                newNetworkProperties.put(netIfReadOnlyPrefix + "usb.vendor.id", usbDev.getVendorId());
+                newNetworkProperties.put(netIfReadOnlyPrefix + "usb.vendor.name", usbDev.getManufacturerName());
+                newNetworkProperties.put(netIfReadOnlyPrefix + "usb.product.id", usbDev.getProductId());
+                newNetworkProperties.put(netIfReadOnlyPrefix + "usb.product.name", usbDev.getProductName());
+                newNetworkProperties.put(netIfReadOnlyPrefix + "usb.busNumber", usbDev.getUsbBusNumber());
+                newNetworkProperties.put(netIfReadOnlyPrefix + "usb.devicePath", usbDev.getUsbDevicePath());
             }
 
             // custom readonly props for Ethernet and Wifi
             if (netInterfaceConfig instanceof EthernetInterfaceConfigImpl) {
-                properties.put(netIfReadOnlyPrefix + "eth.link.up",
+                newNetworkProperties.put(netIfReadOnlyPrefix + "eth.link.up",
                         ((EthernetInterfaceConfigImpl) netInterfaceConfig).isLinkUp());
             } else if (netInterfaceConfig instanceof WifiInterfaceConfigImpl) {
                 Set<Capability> capabilities = ((WifiInterfaceConfigImpl) netInterfaceConfig).getCapabilities();
@@ -542,7 +543,7 @@ public class NetworkConfiguration {
                     }
                     String capabilitiesString = sb.toString();
                     capabilitiesString = capabilitiesString.substring(0, capabilitiesString.length() - 1);
-                    properties.put(netIfReadOnlyPrefix + "wifi.capabilities", capabilitiesString);
+                    newNetworkProperties.put(netIfReadOnlyPrefix + "wifi.capabilities", capabilitiesString);
                 }
             }
 
@@ -557,7 +558,7 @@ public class NetworkConfiguration {
                     while (it2.hasNext()) {
                         sbCapabilities.append(it2.next().name()).append(" ");
                     }
-                    properties.put(netIfReadOnlyPrefix + "wifi.capabilities", sbCapabilities.toString());
+                    newNetworkProperties.put(netIfReadOnlyPrefix + "wifi.capabilities", sbCapabilities.toString());
                 }
             }
 
@@ -598,39 +599,45 @@ public class NetworkConfiguration {
                     powerMode = ((ModemInterface<?>) netInterfaceConfig).getPowerMode();
                 }
 
-                properties.put(netIfReadOnlyPrefix + "manufacturer",
+                newNetworkProperties.put(netIfReadOnlyPrefix + "manufacturer",
                         ((ModemInterface<?>) netInterfaceConfig).getManufacturer());
-                properties.put(netIfReadOnlyPrefix + "model", ((ModemInterface<?>) netInterfaceConfig).getModel());
-                properties.put(netIfReadOnlyPrefix + "revisionId", revisionIdBuf.toString());
-                properties.put(netIfReadOnlyPrefix + "serialNum",
+                newNetworkProperties.put(netIfReadOnlyPrefix + "model",
+                        ((ModemInterface<?>) netInterfaceConfig).getModel());
+                newNetworkProperties.put(netIfReadOnlyPrefix + "revisionId", revisionIdBuf.toString());
+                newNetworkProperties.put(netIfReadOnlyPrefix + "serialNum",
                         ((ModemInterface<?>) netInterfaceConfig).getSerialNumber());
-                properties.put(netIfReadOnlyPrefix + "technologyTypes", techTypesBuf.toString());
+                newNetworkProperties.put(netIfReadOnlyPrefix + "technologyTypes", techTypesBuf.toString());
 
-                properties.put(netIfConfigPrefix + "identifier",
+                newNetworkProperties.put(netIfConfigPrefix + "identifier",
                         ((ModemInterface<?>) netInterfaceConfig).getModemIdentifier());
-                properties.put(netIfConfigPrefix + "powerMode", powerMode.toString());
-                properties.put(netIfConfigPrefix + "pppNum", ((ModemInterface<?>) netInterfaceConfig).getPppNum());
-                properties.put(netIfConfigPrefix + "poweredOn", ((ModemInterface<?>) netInterfaceConfig).isPoweredOn());
+                newNetworkProperties.put(netIfConfigPrefix + "powerMode", powerMode.toString());
+                newNetworkProperties.put(netIfConfigPrefix + "pppNum",
+                        ((ModemInterface<?>) netInterfaceConfig).getPppNum());
+                newNetworkProperties.put(netIfConfigPrefix + "poweredOn",
+                        ((ModemInterface<?>) netInterfaceConfig).isPoweredOn());
             }
 
             for (NetInterfaceAddress nia : netInterfaceConfig.getNetInterfaceAddresses()) {
                 String typePrefix = "ip4.";
                 if (nia != null) {
                     if (nia.getAddress() != null) {
-                        properties.put(netIfReadOnlyPrefix + typePrefix + "address", nia.getAddress().getHostAddress());
+                        newNetworkProperties.put(netIfReadOnlyPrefix + typePrefix + "address",
+                                nia.getAddress().getHostAddress());
                     }
                     if (nia.getBroadcast() != null) {
-                        properties.put(netIfReadOnlyPrefix + typePrefix + "broadcast",
+                        newNetworkProperties.put(netIfReadOnlyPrefix + typePrefix + "broadcast",
                                 nia.getBroadcast().getHostAddress());
                     }
                     if (nia.getGateway() != null) {
-                        properties.put(netIfReadOnlyPrefix + typePrefix + "gateway", nia.getGateway().getHostAddress());
+                        newNetworkProperties.put(netIfReadOnlyPrefix + typePrefix + "gateway",
+                                nia.getGateway().getHostAddress());
                     }
                     if (nia.getNetmask() != null) {
-                        properties.put(netIfReadOnlyPrefix + typePrefix + "netmask", nia.getNetmask().getHostAddress());
+                        newNetworkProperties.put(netIfReadOnlyPrefix + typePrefix + "netmask",
+                                nia.getNetmask().getHostAddress());
                     }
                     if (nia.getNetmask() != null) {
-                        properties.put(netIfReadOnlyPrefix + typePrefix + "prefix",
+                        newNetworkProperties.put(netIfReadOnlyPrefix + typePrefix + "prefix",
                                 Short.valueOf(nia.getNetworkPrefixLength()));
                     }
                     if (nia.getDnsServers() != null) {
@@ -641,13 +648,14 @@ public class NetworkConfiguration {
                             }
                             dnsServers.append(dnsServer);
                         }
-                        properties.put(netIfReadOnlyPrefix + typePrefix + "dnsServers", dnsServers.toString());
+                        newNetworkProperties.put(netIfReadOnlyPrefix + typePrefix + "dnsServers",
+                                dnsServers.toString());
                     }
 
                     // Wifi interface address
                     if (nia instanceof WifiInterfaceAddress) {
                         long bitrate = ((WifiInterfaceAddress) nia).getBitrate();
-                        properties.put(netIfReadOnlyPrefix + "wifi.bitrate", Long.valueOf(bitrate));
+                        newNetworkProperties.put(netIfReadOnlyPrefix + "wifi.bitrate", Long.valueOf(bitrate));
 
                         WifiMode wifiMode;
                         if (((WifiInterfaceAddress) nia).getMode() != null) {
@@ -655,17 +663,17 @@ public class NetworkConfiguration {
                         } else {
                             wifiMode = WifiMode.UNKNOWN;
                         }
-                        properties.put(netIfPrefix + "wifi.mode", wifiMode.toString());
+                        newNetworkProperties.put(netIfPrefix + "wifi.mode", wifiMode.toString());
                     }
 
                     // Modem interface address
                     if (nia instanceof ModemInterfaceAddress) {
                         if (((ModemInterfaceAddress) nia).getConnectionType() != null) {
-                            properties.put(netIfConfigPrefix + "connection.type",
+                            newNetworkProperties.put(netIfConfigPrefix + "connection.type",
                                     ((ModemInterfaceAddress) nia).getConnectionType().toString());
                         }
                         if (((ModemInterfaceAddress) nia).getConnectionStatus() != null) {
-                            properties.put(netIfConfigPrefix + "connection.status",
+                            newNetworkProperties.put(netIfConfigPrefix + "connection.status",
                                     ((ModemInterfaceAddress) nia).getConnectionStatus().toString());
                         }
                     }
@@ -688,30 +696,33 @@ public class NetworkConfiguration {
                     for (NetConfig netConfig : netConfigs) {
                         if (netConfig instanceof WifiConfig) {
                             logger.trace("adding netconfig WifiConfigIP4 for {}", netInterfaceConfig.getName());
-                            addWifiConfigIP4Properties((WifiConfig) netConfig, netIfConfigPrefix, properties);
+                            addWifiConfigIP4Properties((WifiConfig) netConfig, netIfConfigPrefix, newNetworkProperties);
                         } else if (netConfig instanceof ModemConfig) {
                             logger.trace("adding netconfig ModemConfig for {}", netInterfaceConfig.getName());
-                            addModemConfigProperties((ModemConfig) netConfig, netIfConfigPrefix, properties);
+                            addModemConfigProperties((ModemConfig) netConfig, netIfConfigPrefix, newNetworkProperties);
                         } else if (netConfig instanceof NetConfigIP4) {
                             logger.trace("adding netconfig NetConfigIP4 for {}", netInterfaceConfig.getName());
-                            addNetConfigIP4Properties((NetConfigIP4) netConfig, netIfConfigPrefix, properties);
+                            addNetConfigIP4Properties((NetConfigIP4) netConfig, netIfConfigPrefix,
+                                    newNetworkProperties);
                         } else if (netConfig instanceof NetConfigIP6) {
                             logger.trace("adding netconfig NetConfigIP6 for {}", netInterfaceConfig.getName());
-                            addNetConfigIP6Properties((NetConfigIP6) netConfig, netIfConfigPrefix, properties);
+                            addNetConfigIP6Properties((NetConfigIP6) netConfig, netIfConfigPrefix,
+                                    newNetworkProperties);
                         } else if (netConfig instanceof DhcpServerConfig4) {
                             logger.trace("adding netconfig DhcpServerConfig4 for {}", netInterfaceConfig.getName());
-                            addDhcpServerConfig4((DhcpServerConfig4) netConfig, netIfConfigPrefix, properties);
+                            addDhcpServerConfig4((DhcpServerConfig4) netConfig, netIfConfigPrefix,
+                                    newNetworkProperties);
                         } else if (netConfig instanceof FirewallAutoNatConfig) {
                             logger.trace("adding netconfig FirewallNatConfig for {}", netInterfaceConfig.getName());
-                            addFirewallNatConfig(netIfConfigPrefix, properties);
+                            addFirewallNatConfig(netIfConfigPrefix, newNetworkProperties);
                         }
                     }
                 }
             }
         }
-        properties.put("net.interfaces", sbInterfaces.toString());
+        newNetworkProperties.put("net.interfaces", sbInterfaces.toString());
 
-        this.properties = properties;
+        this.properties = newNetworkProperties;
     }
 
     private static void addWifiConfigIP4Properties(WifiConfig wifiConfig, String netIfConfigPrefix,
@@ -1809,7 +1820,7 @@ public class NetworkConfiguration {
                 logger.trace("netInterfaceAddress is instanceof NetInterfaceAddressImpl");
                 NetInterfaceAddressImpl netInterfaceAddressImpl = (NetInterfaceAddressImpl) netInterfaceAddress;
 
-                String addressType = ".ip4"; // TODO: determine dynamically
+                String addressType = ".ip4"; // FIXME: determine dynamically
 
                 // populate current address status
                 String key = "net.interface." + interfaceName + addressType + ".address";

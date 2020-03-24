@@ -583,7 +583,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
         Enumeration<String> aliases = keystore.aliases();
         while (aliases.hasMoreElements()) {
             String alias = aliases.nextElement();
-            if (keystore.isKeyEntry(alias)) { // TODO: not sure why this check
+            if (keystore.isKeyEntry(alias)) {
                 PasswordProtection oldPP = new PasswordProtection(oldPassword);
                 Entry entry = keystore.getEntry(alias, oldPP);
                 PasswordProtection newPP = new PasswordProtection(newPassword);

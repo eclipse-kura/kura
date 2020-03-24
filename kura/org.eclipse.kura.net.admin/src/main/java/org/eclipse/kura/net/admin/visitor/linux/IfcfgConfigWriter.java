@@ -38,7 +38,7 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
 
     private static IfcfgConfigWriter instance;
 
-    private static NetInterfaceConfigSerializationService netConfigManager; // TODO: can be null
+    private static NetInterfaceConfigSerializationService netConfigManager; // can be null
 
     public static synchronized IfcfgConfigWriter getInstance() {
         if (instance == null) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2019 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
  *
  *   All rights reserved. This program and the accompanying materials
  *   are made available under the terms of the Eclipse Public License v1.0
@@ -35,8 +35,9 @@ import org.eclipse.kura.core.deployment.InstallStatus;
 import org.eclipse.kura.core.deployment.download.DeploymentPackageDownloadOptions;
 import org.eclipse.kura.core.linux.executor.LinuxExitStatus;
 import org.eclipse.kura.core.testutil.TestUtil;
-import org.eclipse.kura.executor.CommandStatus;
+import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -307,7 +308,7 @@ public class InstallImplTest {
     @Test
     public void testSendInstallConfirmations() throws IOException, KuraException {
         CloudDeploymentHandlerV2 callbackMock = mock(CloudDeploymentHandlerV2.class);
-        CommandStatus status = new CommandStatus(new LinuxExitStatus(0));
+        CommandStatus status = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
         CommandExecutorService serviceMock = mock(CommandExecutorService.class);
         when(serviceMock.execute(anyObject())).thenReturn(status);
         String kuraDataDir = "/tmp";
@@ -387,7 +388,7 @@ public class InstallImplTest {
     @Test
     public void testSendInstallConfirmationsError() throws IOException, KuraException {
         CloudDeploymentHandlerV2 callbackMock = mock(CloudDeploymentHandlerV2.class);
-        CommandStatus status = new CommandStatus(new LinuxExitStatus(1));
+        CommandStatus status = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(1));
         CommandExecutorService serviceMock = mock(CommandExecutorService.class);
         when(serviceMock.execute(anyObject())).thenReturn(status);
         String kuraDataDir = "/tmp";

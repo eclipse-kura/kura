@@ -13,7 +13,6 @@ package org.eclipse.kura.cloudconnection;
 
 import org.eclipse.kura.KuraConnectException;
 import org.eclipse.kura.KuraDisconnectException;
-import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.listener.CloudConnectionListener;
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -36,7 +35,7 @@ public interface CloudConnectionManager {
     /**
      * Establishes a connection to the configured cloud platform.
      *
-     * @throws KuraException
+     * @throws org.eclipse.kura.KuraException
      *             if the operation fails
      */
     public void connect() throws KuraConnectException;
@@ -44,7 +43,7 @@ public interface CloudConnectionManager {
     /**
      * Performs a clean disconnection from the cloud platform.
      *
-     * @throws KuraException
+     * @throws org.eclipse.kura.KuraException
      *             if the operation fails
      */
     public void disconnect() throws KuraDisconnectException;

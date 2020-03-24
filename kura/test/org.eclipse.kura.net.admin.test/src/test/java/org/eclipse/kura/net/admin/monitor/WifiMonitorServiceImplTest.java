@@ -651,8 +651,10 @@ public class WifiMonitorServiceImplTest {
         String wlan2 = "wlan2";
         String wlan3 = "wlan3";
 
-        InterfaceState wlan3OldState = new InterfaceState(wlan3, true, true, IPAddress.parseHostAddress("10.10.0.3"), 2);
-        InterfaceState wlan3NewState = new InterfaceState(wlan3, true, true, IPAddress.parseHostAddress("10.10.0.4"), 2);
+        InterfaceState wlan3OldState = new InterfaceState(wlan3, true, true, IPAddress.parseHostAddress("10.10.0.3"),
+                2);
+        InterfaceState wlan3NewState = new InterfaceState(wlan3, true, true, IPAddress.parseHostAddress("10.10.0.4"),
+                2);
 
         EventAdmin eaMock = mock(EventAdmin.class);
         svc.setEventAdmin(eaMock);
@@ -805,7 +807,7 @@ public class WifiMonitorServiceImplTest {
         String ssid = "mySSID";
 
         CommandExecutorService esMock = mock(CommandExecutorService.class);
-        CommandStatus status = new CommandStatus(new LinuxExitStatus(0));
+        CommandStatus status = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         DataOutputStream out = new DataOutputStream(outputStream);
         out.write(
@@ -962,7 +964,7 @@ public class WifiMonitorServiceImplTest {
 
         CommandExecutorService esMock = mock(CommandExecutorService.class);
 
-        CommandStatus linkStatus = new CommandStatus(new LinuxExitStatus(0));
+        CommandStatus linkStatus = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         DataOutputStream out = new DataOutputStream(outputStream);
         out.write(
@@ -976,7 +978,7 @@ public class WifiMonitorServiceImplTest {
         linkStatusCommand.setTimeout(60);
         when(esMock.execute(linkStatusCommand)).thenReturn(linkStatus);
 
-        CommandStatus addrStatus = new CommandStatus(new LinuxExitStatus(0));
+        CommandStatus addrStatus = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
         outputStream = new ByteArrayOutputStream();
         out = new DataOutputStream(outputStream);
         out.write(
@@ -990,13 +992,13 @@ public class WifiMonitorServiceImplTest {
         addrStatusCommand.setTimeout(60);
         when(esMock.execute(addrStatusCommand)).thenReturn(addrStatus);
 
-        CommandStatus infoStatus = new CommandStatus(new LinuxExitStatus(0));
+        CommandStatus infoStatus = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
         cmd = new String[] { "iw", "dev", "wlan3", "info" };
         Command infoCommand = new Command(cmd);
         infoCommand.setTimeout(60);
         when(esMock.execute(infoCommand)).thenReturn(infoStatus);
 
-        CommandStatus iwconfigStatus = new CommandStatus(new LinuxExitStatus(0));
+        CommandStatus iwconfigStatus = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
         cmd = new String[] { "iwconfig", "wlan3" };
         Command iwconfigCommand = new Command(cmd);
         iwconfigCommand.setTimeout(60);
@@ -1010,7 +1012,7 @@ public class WifiMonitorServiceImplTest {
         iwconfigStatus.setOutputStream(outputStream);
         when(esMock.execute(iwconfigCommand)).thenReturn(iwconfigStatus);
 
-        CommandStatus ethtoolStatus = new CommandStatus(new LinuxExitStatus(0));
+        CommandStatus ethtoolStatus = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
         cmd = new String[] { "ethtool", "-i", "wlan3" };
         Command ethtoolCommand = new Command(cmd);
         ethtoolCommand.setTimeout(60);

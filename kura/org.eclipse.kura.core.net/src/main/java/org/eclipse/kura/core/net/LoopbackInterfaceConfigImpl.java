@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -31,7 +31,7 @@ public class LoopbackInterfaceConfigImpl extends LoopbackInterfaceImpl<NetInterf
 
         // Copy the NetInterfaceAddresses
         List<? extends NetInterfaceAddress> otherNetInterfaceAddresses = other.getNetInterfaceAddresses();
-        ArrayList<NetInterfaceAddressConfig> interfaceAddresses = new ArrayList<NetInterfaceAddressConfig>();
+        ArrayList<NetInterfaceAddressConfig> interfaceAddresses = new ArrayList<>();
 
         if (otherNetInterfaceAddresses != null) {
             for (NetInterfaceAddress netInterfaceAddress : otherNetInterfaceAddresses) {
@@ -40,7 +40,7 @@ public class LoopbackInterfaceConfigImpl extends LoopbackInterfaceImpl<NetInterf
                 interfaceAddresses.add(copiedInterfaceAddressImpl);
             }
         }
-        if (interfaceAddresses.size() == 0) {
+        if (interfaceAddresses.isEmpty()) {
             // add at least one empty interface implementation.
             // It is needed as a container for the NetConfig objects
             interfaceAddresses.add(new NetInterfaceAddressConfigImpl());

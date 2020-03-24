@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2019 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,7 +8,7 @@
  *
  * Contributors:
  *     Eurotech
- *     Benjamin Cabé - fix for GH issue #299
+ *     Benjamin Cabé 
  *******************************************************************************/
 package org.eclipse.kura.net.admin.visitor.linux;
 
@@ -57,7 +57,7 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
 
     private static IfcfgConfigReader instance;
 
-    private static NetInterfaceConfigSerializationService netConfigManager; // TODO: can be null
+    private static NetInterfaceConfigSerializationService netConfigManager; // can be null
 
     public static IfcfgConfigReader getInstance() {
         if (instance == null) {
@@ -312,8 +312,8 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
         List<IP4Address> dnsServers = new ArrayList<>();
         int count = 1;
         while (true) {
-            String dns;
-            if ((dns = kuraProps.getProperty("DNS" + count)) != null) {
+            String dns = kuraProps.getProperty("DNS" + count);
+            if (dns != null) {
                 try {
                     dnsServers.add((IP4Address) IPAddress.parseHostAddress(dns));
                 } catch (UnknownHostException e) {

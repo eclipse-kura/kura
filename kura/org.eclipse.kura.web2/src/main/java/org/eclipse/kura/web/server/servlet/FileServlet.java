@@ -485,12 +485,12 @@ public class FileServlet extends HttpServlet {
             if (doReplace) {
                 Map<String, Object> oldConfigProps = cs.getComponentConfiguration(assetPid)
                         .getConfigurationProperties();
-                Map<String, Object> filteredConfigProps = oldConfigProps.entrySet().stream()
-                        .filter(entry -> !entry.getKey().contains("#+"))
+                Map<String, Object> oldNonChannelProps = oldConfigProps.entrySet().stream()
+                        .filter(entry -> !entry.getKey().contains("#"))
                         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
                 String fp = oldConfigProps.get("service.factoryPid").toString();
                 cs.deleteFactoryConfiguration(assetPid, false);
-                newProps.putAll(filteredConfigProps);
+                newProps.putAll(oldNonChannelProps);
                 cs.createFactoryConfiguration(fp, assetPid, newProps, true);
             } else {
                 cs.updateConfiguration(assetPid, newProps);

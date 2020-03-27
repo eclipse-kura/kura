@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -426,7 +427,7 @@ public class FileServlet extends HttpServlet {
             String csvString = new String(data, "UTF-8");
             String assetPid = formFields.get("assetPid");
             String driverPid = formFields.get("driverPid");
-            Boolean doReplace = formFields.get("doReplace").trim().equalsIgnoreCase("true");
+            boolean doReplace = formFields.get("doReplace").trim().equalsIgnoreCase("true");
 
             Map<String, Object> newProps = AssetConfigValidator.get().validateCsv(csvString, driverPid, errors);
 
@@ -435,11 +436,16 @@ public class FileServlet extends HttpServlet {
             ConfigurationService cs = locator.getService(ConfigurationService.class);
 
             if (doReplace) {
-                String fp = cs.getComponentConfiguration(assetPid).getConfigurationProperties().get("service.factoryPid").toString();
+                Map<String, Object> oldConfigProps = cs.getComponentConfiguration(assetPid)
+                        .getConfigurationProperties();
+                Map<String, Object> oldNonChannelProps = oldConfigProps.entrySet().stream()
+                        .filter(entry -> !entry.getKey().contains("#"))
+                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                String fp = oldConfigProps.get("service.factoryPid").toString();
                 cs.deleteFactoryConfiguration(assetPid, false);
-                newProps.put("driver.pid", driverPid);
+                newProps.putAll(oldNonChannelProps);
                 cs.createFactoryConfiguration(fp, assetPid, newProps, true);
-            }else{
+            } else {
                 cs.updateConfiguration(assetPid, newProps);
             }
 
@@ -537,8 +543,7 @@ public class FileServlet extends HttpServlet {
         }
     }
 
-    private void doPostDeployUpload(HttpServletRequest req)
-            throws ServletException, IOException {
+    private void doPostDeployUpload(HttpServletRequest req) throws ServletException, IOException {
         ServiceLocator locator = ServiceLocator.getInstance();
         DeploymentAgentService deploymentAgentService;
         try {

@@ -34,6 +34,8 @@ final class TimerOptions {
     private static final String PROP_SIMPLE_INTERVAL = "simple.interval";
 
     private static final String PROP_SIMPLE_TIME_UNIT = "simple.time.unit";
+    
+    private static final String PROP_SIMPLE_TICK_IMMEDIATE = "simple.tick.immediate";
 
     private static final String PROP_INTERVAL_TYPE = "type";
 
@@ -77,6 +79,15 @@ final class TimerOptions {
         }
         return interval;
     }
+    
+    boolean isTickImmediate() {
+        boolean tickImmediate = false;
+        final Object simpleTickImmediate = this.properties.get(PROP_SIMPLE_TICK_IMMEDIATE);
+        if (nonNull(simpleTickImmediate) && simpleTickImmediate instanceof Boolean) {
+            tickImmediate = (boolean) simpleTickImmediate;
+        }
+        return tickImmediate;
+    }
 
     /**
      * Returns type as configured.
@@ -96,9 +107,9 @@ final class TimerOptions {
         return (String) this.properties.get(ConfigurationService.KURA_SERVICE_PID);
     }
 
-    long getSimpleTimeUnitMultiplier() throws IllegalArgumentException {
+    long getSimpleTimeUnitMultiplier() {
         String timeUnitString = (String) this.properties.getOrDefault(PROP_SIMPLE_TIME_UNIT, "SECONDS");
-        TimeUnit timeUnit = TimeUnit.SECONDS;
+        TimeUnit timeUnit;
 
         if (TimeUnit.MILLISECONDS.name().equals(timeUnitString)) {
             timeUnit = TimeUnit.MILLISECONDS;

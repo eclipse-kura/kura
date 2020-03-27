@@ -44,7 +44,16 @@
             <Option label="MINUTES" value="MINUTES" />
             <Option label="HOURS" value="HOURS" />
             <Option label="DAYS" value="DAYS" />
-        </AD>    
+        </AD> 
+        
+        <AD id="simple.tick.immediate"
+            name="simple.tick.immediate"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Specifies the timer tick behavior at start. When set to false (default) the timer waits the time interval selected in simple.interval and simple.time.unit before executing the first time tick. If set to true, the first time tick will happen immediately after activation and then the timer will wait for the selected amount of time before ticking again."
+            />   
         
         <AD id="cron.interval"
             name="cron.interval"

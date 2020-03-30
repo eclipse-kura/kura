@@ -27,7 +27,7 @@ RUN echo "$GIT_REPO / $GIT_BRANCH / $KURA_COMMIT" && \
     apk --no-cache add bash zip curl && \
     if [ -d /context/.git ]; then \
       mv /context /kura; \
-      mv /kura/kura/container/kura_alpine /context; \
+      mv /kura/kura/container/resources /context; \
     else \
       git clone "$GIT_REPO" -b "$GIT_BRANCH"; \
     fi && \

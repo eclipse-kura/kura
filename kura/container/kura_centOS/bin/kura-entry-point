@@ -1,0 +1,39 @@
+#!/usr/bin/bash
+
+set -e
+
+if [ ! -x "${KURA_DIR}/bin/start_kura.sh" ]; then
+	echo "Kura is still boxed, unpacking ..."
+	unpack-kura
+	echo "Initial Kura instance unpacked, commencing start"
+fi
+
+if [ -n "${PERSISTENT_DIR}" ]; then
+	
+	echo "Using persistent directory: ${PERSISTENT_DIR}"
+	
+	if [ ! -d "${PERSISTENT_DIR}/user" ]; then
+		
+		echo "Initializing data directory: ${PERSISTENT_DIR}/user"
+		
+		# initial user data directory
+		
+		mkdir -p "${PERSISTENT_DIR}/user"
+		cp -r "${KURA_DIR}/user/snapshots" "${PERSISTENT_DIR}/user"
+	fi
+	
+	if [ ! -f "${PERSISTENT_DIR}/data/dpa.properties" ]; then
+		
+		echo "Re-registering packages:"
+		
+		# re-register packages with new properties file
+		
+		for i in $(ls "${KURA_DIR}/kura/data/packages/"*.dp); do
+			DPA_PROPERTIES="${PERSISTENT_DIR}/data/dpa.properties" dp-register "$i"
+		done 
+	fi
+fi
+
+echo "Starting Kura..."
+
+exec /usr/local/bin/start-kura "$@"

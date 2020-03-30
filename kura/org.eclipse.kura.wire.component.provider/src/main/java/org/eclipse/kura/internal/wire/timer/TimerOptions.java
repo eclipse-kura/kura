@@ -34,8 +34,11 @@ final class TimerOptions {
     private static final String PROP_SIMPLE_INTERVAL = "simple.interval";
 
     private static final String PROP_SIMPLE_TIME_UNIT = "simple.time.unit";
-    
-    private static final String PROP_SIMPLE_TICK_IMMEDIATE = "simple.tick.immediate";
+
+    private static final String PROP_SIMPLE_TICK_POLICY = "simple.first.tick.policy";
+    private static final String PROP_SIMPLE_TICK_POLICY_DEFAULT_VALUE = "DEFAULT";
+
+    private static final String PROP_SIMPLE_TICK_CUSTOM_INTERVAL = "simple.custom.first.tick.interval";
 
     private static final String PROP_INTERVAL_TYPE = "type";
 
@@ -79,14 +82,28 @@ final class TimerOptions {
         }
         return interval;
     }
-    
-    boolean isTickImmediate() {
-        boolean tickImmediate = false;
-        final Object simpleTickImmediate = this.properties.get(PROP_SIMPLE_TICK_IMMEDIATE);
-        if (nonNull(simpleTickImmediate) && simpleTickImmediate instanceof Boolean) {
-            tickImmediate = (boolean) simpleTickImmediate;
+
+    boolean isDefaultFirstTickBehavior() {
+        String behavior = PROP_SIMPLE_TICK_POLICY_DEFAULT_VALUE;
+        final Object selectedBehavior = this.properties.get(PROP_SIMPLE_TICK_POLICY);
+        if (nonNull(selectedBehavior) && selectedBehavior instanceof String) {
+            behavior = (String) selectedBehavior;
         }
-        return tickImmediate;
+
+        boolean result = false;
+        if (PROP_SIMPLE_TICK_POLICY_DEFAULT_VALUE.equalsIgnoreCase(behavior)) {
+            result = true;
+        }
+        return result;
+    }
+
+    int firstTickInterval() {
+        int interval = 0;
+        final Object firstTickInterval = this.properties.get(PROP_SIMPLE_TICK_CUSTOM_INTERVAL);
+        if (nonNull(firstTickInterval) && firstTickInterval instanceof Integer) {
+            interval = (Integer) firstTickInterval;
+        }
+        return interval;
     }
 
     /**

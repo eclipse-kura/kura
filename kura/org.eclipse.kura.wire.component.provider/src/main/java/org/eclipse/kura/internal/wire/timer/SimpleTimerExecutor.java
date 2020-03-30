@@ -24,10 +24,10 @@ public class SimpleTimerExecutor implements TimerExecutor {
         this.executor = Executors.newSingleThreadScheduledExecutor(getThreadFactory(options.getOwnPid()));
 
         long firstTickInterval = options.getSimpleInterval() * options.getSimpleTimeUnitMultiplier();
-        if (options.isTickImmediate()) {
-            firstTickInterval = 0L;
+        if (!options.isDefaultFirstTickBehavior()) {
+            firstTickInterval = options.firstTickInterval() * options.getSimpleTimeUnitMultiplier();
         }
-        
+
         this.executor.scheduleAtFixedRate(() -> Timer.emit(wireSupport), firstTickInterval,
                 options.getSimpleInterval() * options.getSimpleTimeUnitMultiplier(), TimeUnit.MILLISECONDS);
     }

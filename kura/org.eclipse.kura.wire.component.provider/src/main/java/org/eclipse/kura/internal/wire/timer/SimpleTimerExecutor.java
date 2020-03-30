@@ -23,8 +23,10 @@ public class SimpleTimerExecutor implements TimerExecutor {
     public SimpleTimerExecutor(final TimerOptions options, final WireSupport wireSupport) {
         this.executor = Executors.newSingleThreadScheduledExecutor(getThreadFactory(options.getOwnPid()));
 
-        this.executor.scheduleAtFixedRate(() -> Timer.emit(wireSupport), 0,
-                options.getSimpleInterval() * options.getSimpleTimeUnitMultiplier(), TimeUnit.MILLISECONDS);
+        long tickInterval = options.getSimpleInterval() * options.getSimpleTimeUnitMultiplier();
+
+        this.executor.scheduleAtFixedRate(() -> Timer.emit(wireSupport), tickInterval, tickInterval,
+                TimeUnit.MILLISECONDS);
     }
 
     private static ThreadFactory getThreadFactory(final String pid) {
@@ -39,6 +41,6 @@ public class SimpleTimerExecutor implements TimerExecutor {
 
     @Override
     public void shutdown() {
-        executor.shutdownNow();
+        this.executor.shutdownNow();
     }
 }

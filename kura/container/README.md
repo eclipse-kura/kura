@@ -1,6 +1,6 @@
 # Eclipse Kura™ emulator Docker image
 
-This is a docker image running Eclipse Kura™.
+This is a Docker image running Eclipse Kura™.
 
 Use the following command to run it:
 
@@ -15,13 +15,13 @@ This image includes [Apache Felix FileInstall](https://felix.apache.org/document
 **Note:** The location of the directory changed from `/opt/eclipse/kura/load` to `/load`. The old path is
           deprecated. It might still work for a while, but it might break at any time.
 
-File Install loads bundles from `/load` which is also defined as a docker volume,
+File Install loads bundles from `/load` which is also defined as a Docker volume,
 so that you can link this up with your container host:
 
     docker run -ti -p 8080:8080 -v /home/user/path/to/bundles:/load:z eclipse/kura
 
 Now you can access `/home/user/path/to/bundles` on your host machine and bundles will be loaded
-by Kura inside the docker container.
+by Kura inside the Docker container.
 
 **Note:** It may be that a bundle, which is first installed, needs to be manually started using the Kura Web UI.
 
@@ -53,16 +53,16 @@ The JMX port defined is 9010 and the Remote debug port is 9011. Both ports are n
 
 ## Re-Building
 
-This docker container is being built by re-using the Intel UP² CentOS 7 image of Kura. It makes a few adjustments to the Kura sources and performs a full build from either a specified Git commit, or from the Git repository which has to be in the context root of the build.
-There is also the possibility to build the docker container starting from a lightweight Alpine Linux base image, in order to shrink the image to a little more than 200MB.
+This Docker container is being built by re-using the Intel UP² CentOS 7 image of Kura. It makes a few adjustments to the Kura sources and performs a full build from either a specified Git commit, or from the Git repository which has to be in the context root of the build.
+There is also the possibility to build the Docker container starting from a lightweight Alpine Linux base image, in order to shrink the image to a little more than 200MB.
 
-If you want to re-build this image, check out this repository and simply issue a:
-`sudo docker build -t "kura_centos" -f Dockerfile-centos  .` if you intend to re-build the CentOS docker image.
-`sudo docker build -t "kura_alpine" -f Dockerfile-alpine  .` if you intend to re-build the Alpine Linux docker image.
+If you want to re-build this image, check out this repository, move to one of the child directories "kura_alpine" or "kura_centOS" and simply issue a:
+`docker build -t kura_centos .` if you intend to re-build the CentOS Docker image.
+`docker build -t kura_alpine .` if you intend to re-build the Alpine Linux Docker image.
 
 Usage of tags (-t argument) is not necessary for the build, but is required if you intend to build both the images on the same system.
 
-It is also possible to build directly from the root of this repo, by specifying the Dockerfile position with the -f command; this however would cause an increase of approx. 200MB in the final image size, due to the copy of the context directory in a previous layer during the boot process, and it will not be possible to remove it, due to docker's UnionFS limitations.
+It is also possible to build directly from the root of this repo, by specifying the Dockerfile position with the -f command; this however would cause an increase of approx. 200MB in the final image size, due to the copy of the context directory in a previous layer during the boot process, and it will not be possible to remove it, due to Docker's UnionFS limitations.
 
 You can re-build the image from a specific Git commit. For this you need to pass in the build argument `KURA_COMMIT`.
  
@@ -72,7 +72,7 @@ There also is an [OpenShift template](openshift/README.md) in both directories, 
 
 ## Building extended images
 
-If you want to add additional content to the Kura installation inside the docker image,
+If you want to add additional content to the Kura installation inside the Docker image,
 it is possible to extend the installation.
 
 Also see: [extensions/artemis/README.md](extensions/artemis/README.md)

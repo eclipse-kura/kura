@@ -23,7 +23,12 @@ public class SimpleTimerExecutor implements TimerExecutor {
     public SimpleTimerExecutor(final TimerOptions options, final WireSupport wireSupport) {
         this.executor = Executors.newSingleThreadScheduledExecutor(getThreadFactory(options.getOwnPid()));
 
-        this.executor.scheduleAtFixedRate(() -> Timer.emit(wireSupport), 0,
+        long firstTickInterval = options.getSimpleInterval() * options.getSimpleTimeUnitMultiplier();
+        if (!options.isDefaultFirstTickBehavior()) {
+            firstTickInterval = options.firstTickInterval() * options.getSimpleTimeUnitMultiplier();
+        }
+
+        this.executor.scheduleAtFixedRate(() -> Timer.emit(wireSupport), firstTickInterval,
                 options.getSimpleInterval() * options.getSimpleTimeUnitMultiplier(), TimeUnit.MILLISECONDS);
     }
 

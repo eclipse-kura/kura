@@ -44,7 +44,27 @@
             <Option label="MINUTES" value="MINUTES" />
             <Option label="HOURS" value="HOURS" />
             <Option label="DAYS" value="DAYS" />
-        </AD>    
+        </AD> 
+        
+        <AD id="simple.first.tick.policy"
+            name="simple.first.tick.policy"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="DEFAULT"
+            description="Specifies the timer starting tick behavior. When set to DEFAULT the timer waits the time interval specified in simple.interval and simple.time.unit before executing the first time tick. When set to custom, the user can specify in simple.custom.first.tick.interval an interval before the first tick.">
+            <Option label="DEFAULT" value="DEFAULT" />
+            <Option label="CUSTOM" value="CUSTOM" />
+        </AD>
+        
+        <AD id="simple.custom.first.tick.interval"
+            name="simple.custom.first.tick.interval"
+            type="Integer"
+            cardinality="0"
+            required="false"
+            default="0"
+            description="Custom time before first tick. Effective only when simple.first.tick.policy is set to CUSTOM. This field uses the time unit specified in simple.time.unit.">
+        </AD>
         
         <AD id="cron.interval"
             name="cron.interval"

@@ -35,6 +35,11 @@ final class TimerOptions {
 
     private static final String PROP_SIMPLE_TIME_UNIT = "simple.time.unit";
 
+    private static final String PROP_SIMPLE_TICK_POLICY = "simple.first.tick.policy";
+    private static final String PROP_SIMPLE_TICK_POLICY_DEFAULT_VALUE = "DEFAULT";
+
+    private static final String PROP_SIMPLE_TICK_CUSTOM_INTERVAL = "simple.custom.first.tick.interval";
+
     private static final String PROP_INTERVAL_TYPE = "type";
 
     private final Map<String, Object> properties;
@@ -78,6 +83,29 @@ final class TimerOptions {
         return interval;
     }
 
+    boolean isDefaultFirstTickBehavior() {
+        String behavior = PROP_SIMPLE_TICK_POLICY_DEFAULT_VALUE;
+        final Object selectedBehavior = this.properties.get(PROP_SIMPLE_TICK_POLICY);
+        if (nonNull(selectedBehavior) && selectedBehavior instanceof String) {
+            behavior = (String) selectedBehavior;
+        }
+
+        boolean result = false;
+        if (PROP_SIMPLE_TICK_POLICY_DEFAULT_VALUE.equalsIgnoreCase(behavior)) {
+            result = true;
+        }
+        return result;
+    }
+
+    int firstTickInterval() {
+        int interval = 0;
+        final Object firstTickInterval = this.properties.get(PROP_SIMPLE_TICK_CUSTOM_INTERVAL);
+        if (nonNull(firstTickInterval) && firstTickInterval instanceof Integer) {
+            interval = (Integer) firstTickInterval;
+        }
+        return interval;
+    }
+
     /**
      * Returns type as configured.
      *
@@ -96,9 +124,9 @@ final class TimerOptions {
         return (String) this.properties.get(ConfigurationService.KURA_SERVICE_PID);
     }
 
-    long getSimpleTimeUnitMultiplier() throws IllegalArgumentException {
+    long getSimpleTimeUnitMultiplier() {
         String timeUnitString = (String) this.properties.getOrDefault(PROP_SIMPLE_TIME_UNIT, "SECONDS");
-        TimeUnit timeUnit = TimeUnit.SECONDS;
+        TimeUnit timeUnit;
 
         if (TimeUnit.MILLISECONDS.name().equals(timeUnitString)) {
             timeUnit = TimeUnit.MILLISECONDS;

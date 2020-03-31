@@ -11,10 +11,12 @@ package org.eclipse.kura.internal.wire.timer.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -40,7 +42,11 @@ public class TimerTest {
     private static final String TEST_TIMER_PID = "testTimer";
     private static final String TEST_EMITTER_RECEIVER_PID = "testEmitterReceiver";
 
+    private static final String TEST_TIMER_PID2 = "testTimer2";
+    private static final String TEST_EMITTER_RECEIVER_PID2 = "testEmitterReceiver2";
+
     private TestEmitterReceiver testEmitterReceiver;
+    private TestEmitterReceiver testEmitterReceiver2;
 
     private static WireGraphService wireGraphService;
     private static ConfigurationService configurationService;
@@ -73,12 +79,16 @@ public class TimerTest {
         final GraphBuilder builder = new GraphBuilder();
 
         builder.addWireComponent(TEST_TIMER_PID, TIMER_FACTORY_PID) //
+                .addWireComponent(TEST_TIMER_PID2, TIMER_FACTORY_PID) //
                 .addTestEmitterReceiver(TEST_EMITTER_RECEIVER_PID) //
+                .addTestEmitterReceiver(TEST_EMITTER_RECEIVER_PID2) //
                 .addWire(TEST_TIMER_PID, TEST_EMITTER_RECEIVER_PID) //
+                .addWire(TEST_TIMER_PID2, TEST_EMITTER_RECEIVER_PID2) //
                 .replaceExistingGraph(context, wireGraphService) //
                 .get(60, TimeUnit.SECONDS);
 
         this.testEmitterReceiver = builder.getTrackedWireComponent(TEST_EMITTER_RECEIVER_PID);
+        this.testEmitterReceiver2 = builder.getTrackedWireComponent(TEST_EMITTER_RECEIVER_PID2);
     }
 
     @Test
@@ -245,6 +255,56 @@ public class TimerTest {
     }
 
     @Test
+    public void shouldNotTickOnUpdateWithDefaultConfig()
+            throws InterruptedException, ExecutionException, TimeoutException {
+
+        WireTestUtil.updateWireComponentConfiguration(configurationService, TEST_TIMER_PID2, TimerConfig.defaultConfig() //
+                .withInterval(10) //
+                .withTimeUnit(TimeUnit.SECONDS) //
+                .toProperties() //
+        ).get(60, TimeUnit.SECONDS);
+
+        final CompletableFuture<?> nextEnvelope = testEmitterReceiver2.nextEnvelope();
+
+        for (int i = 0; i < 10; i++) {
+            WireTestUtil.updateWireComponentConfiguration(configurationService, TEST_TIMER_PID2,
+                    TimerConfig.defaultConfig() //
+                            .withInterval(10000) //
+                            .withTimeUnit(TimeUnit.MILLISECONDS) //
+                            .toProperties() //
+            ).get(60, TimeUnit.SECONDS);
+
+            try {
+                nextEnvelope.get(1, TimeUnit.SECONDS);
+                fail("shouldn't have ticked");
+            } catch (TimeoutException e) {
+                // ok
+            }
+        }
+    }
+
+    @Test
+    public void shouldSupportCustomFirstTickInterval()
+            throws InterruptedException, ExecutionException, TimeoutException {
+        for (int i = 0; i < 10; i++) {
+            final CompletableFuture<?> nextEnvelope = testEmitterReceiver2.nextEnvelope();
+
+            WireTestUtil.updateWireComponentConfiguration(configurationService, TEST_TIMER_PID2,
+                    TimerConfig.defaultConfig() //
+                            .withInterval(60) //
+                            .withFirstTickPolicy(TimerConfig.FirstTickPolicy.CUSTOM) //
+                            .withFirstTickInterval(2) //
+                            .withTimeUnit(TimeUnit.SECONDS) //
+                            .toProperties() //
+            ).get(60, TimeUnit.SECONDS);
+
+            nextEnvelope.get(5, TimeUnit.SECONDS);
+
+            assertTrue(nextEnvelope.isDone());
+        }
+    }
+
+    @Test
     public void shouldContinueToTickIfReceiverThrows()
             throws InterruptedException, ExecutionException, TimeoutException {
         WireTestUtil.updateWireComponentConfiguration(configurationService, TEST_TIMER_PID, TimerConfig.defaultConfig() //
@@ -284,15 +344,24 @@ public class TimerTest {
 
     private static final class TimerConfig {
 
+        enum FirstTickPolicy {
+            DEFAULT,
+            CUSTOM
+        }
+
         private static final String INTERVAL_PROP = "simple.interval";
         private static final String TIME_UNIT_PROP = "simple.time.unit";
         private static final String TYPE_PROP = "type";
         private static final String CRON_EXPRESSION_PROP = "cron.interval";
+        private static final String SIMPLE_FIRST_TICK_POLICY_PROP = "simple.first.tick.policy";
+        private static final String SIMPLE_CUSTOM_FIRST_TICK_INTERVAL = "simple.custom.first.tick.interval";
 
+        private FirstTickPolicy firstTickPolicy = FirstTickPolicy.DEFAULT;
         private Optional<Integer> interval = Optional.empty();
         private Optional<TimeUnit> timeUnit = Optional.empty();
         private Optional<String> cronExpression = Optional.empty();
         private Optional<String> type = Optional.empty();
+        private Optional<Integer> firstTickInterval = Optional.empty();
 
         public static TimerConfig defaultConfig() {
             return new TimerConfig();
@@ -318,6 +387,16 @@ public class TimerTest {
             return this;
         }
 
+        public TimerConfig withFirstTickPolicy(final FirstTickPolicy firstTickPolicy) {
+            this.firstTickPolicy = firstTickPolicy;
+            return this;
+        }
+
+        public TimerConfig withFirstTickInterval(final int firstTickInterval) {
+            this.firstTickInterval = Optional.of(firstTickInterval);
+            return this;
+        }
+
         public Map<String, Object> toProperties() {
             final Map<String, Object> result = new HashMap<>();
             if (this.interval.isPresent()) {
@@ -332,6 +411,11 @@ public class TimerTest {
             if (this.type.isPresent()) {
                 result.put(TYPE_PROP, this.type.get());
             }
+            if (this.firstTickInterval.isPresent()) {
+                result.put(SIMPLE_CUSTOM_FIRST_TICK_INTERVAL, this.firstTickInterval.get());
+            }
+            result.put(SIMPLE_FIRST_TICK_POLICY_PROP, this.firstTickPolicy.name());
+
             return result;
         }
     }

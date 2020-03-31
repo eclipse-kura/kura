@@ -19,7 +19,7 @@ import org.eclipse.kura.net.modem.ModemTechnologyType;
 
 public enum SupportedUsbModemInfo {
 
-    // device name, vendor, product, ttyDevs, blockDevs, AT Port, Data Port, GPS Port, Turn off delay, technology types,
+    // device name, vendor, product, ttyDevs, blockDevs, AT Port, Data Port, GPS Port, turn off delay, turn on delay, technology types,
     // device driver
     Telit_HE910_DG("HE910-DG", "1bc7", "0021", 6, 0, 3, 0, 3, 5000, 10000, Arrays.asList(ModemTechnologyType.HSPA,
             ModemTechnologyType.UMTS), Arrays.asList(new UsbModemDriver("cdc_acm", "1bc7", "0021")), "6 CDC-ACM"),
@@ -51,7 +51,10 @@ public enum SupportedUsbModemInfo {
             ModemTechnologyType.GSM_GPRS), Arrays.asList(new OptionModemDriver("1e0e", "9001")), ""),
     QUECTEL_EG25("EG25", "2c7c", "0125", 4, 0, 2, 3, -1, 5000, 10000, Arrays.asList(ModemTechnologyType.LTE,
             ModemTechnologyType.HSPA,
-            ModemTechnologyType.UMTS), Arrays.asList(new UsbModemDriver("cdc_acm", "2c7c", "0125")), "");
+            ModemTechnologyType.UMTS), Arrays.asList(new UsbModemDriver("cdc_acm", "2c7c", "0125")), ""),
+    Huawei_MS2372("MS2372", "12d1", "1506", 3, 0, 2, 0, -1, 5000, 15000, Arrays.asList(ModemTechnologyType.LTE,
+            ModemTechnologyType.HSPA, ModemTechnologyType.HSDPA, ModemTechnologyType.UMTS,
+            ModemTechnologyType.GSM_GPRS), Arrays.asList(new UsbModemDriver("option", "12d1", "1506")), "");
 
     private String deviceName;
     private String vendorId;

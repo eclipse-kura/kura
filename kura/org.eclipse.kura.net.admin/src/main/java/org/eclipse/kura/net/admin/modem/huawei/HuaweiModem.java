@@ -37,7 +37,7 @@ public class HuaweiModem extends HspaModem {
     public String getIntegratedCirquitCardId() throws KuraException {
         synchronized (this.atLock) {
             if (this.iccid == null && isSimCardReady()) {
-                logger.debug("sendCommand getICCID :: {}", HuaweiModemAtCommands.getICCID.getCommand());
+                logger.debug("sendCommand getICCID :: {}", HuaweiModemAtCommands.GET_ICCID.getCommand());
 
                 final byte[] reply;
                 CommConnection commAtConnection = openSerialPort(getAtPort());
@@ -47,7 +47,7 @@ public class HuaweiModem extends HspaModem {
                 }
 
                 try {
-                    reply = commAtConnection.sendCommand(HuaweiModemAtCommands.getICCID.getCommand().getBytes(), 1000,
+                    reply = commAtConnection.sendCommand(HuaweiModemAtCommands.GET_ICCID.getCommand().getBytes(), 1000,
                             100);
                 } catch (IOException e) {
                     closeSerialPort(commAtConnection);
@@ -57,7 +57,7 @@ public class HuaweiModem extends HspaModem {
                 }
 
                 if (reply == null) {
-                    throw new KuraException(KuraErrorCode.TIMED_OUT, HuaweiModemAtCommands.getICCID.getCommand());
+                    throw new KuraException(KuraErrorCode.TIMED_OUT, HuaweiModemAtCommands.GET_ICCID.getCommand());
                 }
                 final String response = getResponseString(reply);
                 if (response.startsWith("^ICCID:")) {
@@ -78,7 +78,7 @@ public class HuaweiModem extends HspaModem {
         }
 
         synchronized (this.atLock) {
-            logger.debug("sendCommand getSimType :: {}", HuaweiModemAtCommands.getSimType.getCommand());
+            logger.debug("sendCommand getSimType :: {}", HuaweiModemAtCommands.GET_SIM_TYPE.getCommand());
 
             final byte[] reply;
             CommConnection commAtConnection = openSerialPort(getAtPort());
@@ -88,7 +88,7 @@ public class HuaweiModem extends HspaModem {
             }
 
             try {
-                reply = commAtConnection.sendCommand(HuaweiModemAtCommands.getSimType.getCommand().getBytes(), 1000,
+                reply = commAtConnection.sendCommand(HuaweiModemAtCommands.GET_SIM_TYPE.getCommand().getBytes(), 1000,
                         100);
             } catch (IOException e) {
                 closeSerialPort(commAtConnection);
@@ -98,7 +98,7 @@ public class HuaweiModem extends HspaModem {
             }
 
             if (reply == null) {
-                throw new KuraException(KuraErrorCode.TIMED_OUT, HuaweiModemAtCommands.getSimType.getCommand());
+                throw new KuraException(KuraErrorCode.TIMED_OUT, HuaweiModemAtCommands.GET_SIM_TYPE.getCommand());
             }
             final String response = this.getResponseString(reply);
             if (response.startsWith("^CARDMODE:")) {
@@ -118,12 +118,12 @@ public class HuaweiModem extends HspaModem {
 
     private void disableURC() throws KuraException {
         synchronized (this.atLock) {
-            logger.debug("sendCommand disableURC :: {}", HuaweiModemAtCommands.disableURC.getCommand());
+            logger.debug("sendCommand disableURC :: {}", HuaweiModemAtCommands.DISABLE_URC.getCommand());
 
             final byte[] reply;
             CommConnection commAtConnection = openSerialPort(getAtPort());
             try {
-                reply = commAtConnection.sendCommand(HuaweiModemAtCommands.disableURC.getCommand().getBytes(), 1000,
+                reply = commAtConnection.sendCommand(HuaweiModemAtCommands.DISABLE_URC.getCommand().getBytes(), 1000,
                         100);
             } catch (IOException e) {
                 closeSerialPort(commAtConnection);
@@ -133,7 +133,7 @@ public class HuaweiModem extends HspaModem {
             }
 
             if (reply == null) {
-                throw new KuraException(KuraErrorCode.TIMED_OUT, HuaweiModemAtCommands.disableURC.getCommand());
+                throw new KuraException(KuraErrorCode.TIMED_OUT, HuaweiModemAtCommands.DISABLE_URC.getCommand());
             }
             final String response = new String(reply, StandardCharsets.US_ASCII);
             if (!response.contains("OK")) {

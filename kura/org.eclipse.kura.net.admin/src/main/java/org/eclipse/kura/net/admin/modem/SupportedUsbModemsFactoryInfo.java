@@ -57,7 +57,7 @@ public class SupportedUsbModemsFactoryInfo {
         Zte_ME3630(SupportedUsbModemInfo.Zte_ME3630, ZteMe3630ModemFactory.class, ZteMe3630ConfigGenerator.class),
         SimTech_SIM7000(SupportedUsbModemInfo.SimTech_SIM7000, SimTechSim7000ModemFactory.class, SimTechSim7000ConfigGenerator.class),
         QUECTEL_EG25(SupportedUsbModemInfo.QUECTEL_EG25, QuectelEG25ModemFactory.class, QuectelEG25ConfigGenerator.class),
-        Huawei_MS2372(SupportedUsbModemInfo.Huawei_MS2372, HuaweiModemFactory.class, HspaModemConfigGenerator.class);
+        HUAWEI_MS2372(SupportedUsbModemInfo.HUAWEI_MS2372, HuaweiModemFactory.class, HspaModemConfigGenerator.class);
 
         private final SupportedUsbModemInfo usbModemInfo;
         private final Class<? extends CellularModemFactory> factoryClass;

@@ -15,6 +15,8 @@ import java.util.List;
 
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemInfo;
 import org.eclipse.kura.linux.net.modem.UsbModemDriver;
+import org.eclipse.kura.net.admin.modem.hspa.HspaModemConfigGenerator;
+import org.eclipse.kura.net.admin.modem.huawei.HuaweiModemFactory;
 import org.eclipse.kura.net.admin.modem.sierra.mc87xx.SierraMc87xxConfigGenerator;
 import org.eclipse.kura.net.admin.modem.sierra.mc87xx.SierraMc87xxModemFactory;
 import org.eclipse.kura.net.admin.modem.sierra.usb598.SierraUsb598ConfigGenerator;
@@ -44,7 +46,8 @@ public class SupportedUsbModemsFactoryInfo {
         Sierra_MC8775(SupportedUsbModemInfo.Sierra_MC8775, SierraMc87xxModemFactory.class, SierraMc87xxConfigGenerator.class),
         Sierra_MC8790(SupportedUsbModemInfo.Sierra_MC8790, SierraMc87xxModemFactory.class, SierraMc87xxConfigGenerator.class),
         Sierra_USB598(SupportedUsbModemInfo.Sierra_USB598, SierraUsb598ModemFactory.class, SierraUsb598ConfigGenerator.class),
-        Ublox_SARA_U2(SupportedUsbModemInfo.Ublox_SARA_U2, UbloxModemFactory.class, UbloxModemConfigGenerator.class);
+        Ublox_SARA_U2(SupportedUsbModemInfo.Ublox_SARA_U2, UbloxModemFactory.class, UbloxModemConfigGenerator.class),
+        HUAWEI_MS2372(SupportedUsbModemInfo.HUAWEI_MS2372, HuaweiModemFactory.class, HspaModemConfigGenerator.class);
 
         private final SupportedUsbModemInfo m_usbModemInfo;
         private final Class<? extends CellularModemFactory> m_factoryClass;

@@ -451,6 +451,9 @@ public class InstallImplTest {
                 notificationPublisher);
 
         assertFalse("File should have been deleted.", f.exists());
+        assertFalse("File should have been deleted.", fperf.exists());
+
+        verify(callbackMock, times(1)).publishMessage(Mockito.anyObject(), Mockito.anyObject(), Mockito.anyObject());
 
         veriDir.delete();
         persDir.delete();

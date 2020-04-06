@@ -13,6 +13,7 @@ package org.eclipse.kura.core.deployment.install;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -181,7 +182,7 @@ public class InstallImpl {
         respPayload.addMetric(KuraInstallPayload.METRIC_INSTALL_STATUS, InstallStatus.IDLE.getStatusString());
     }
 
-    public void installCompleteAsync(DeploymentPackageOptions options, String dpName) throws KuraException {
+    public void installCompleteAsync(DeploymentPackageOptions options, String dpName) {
         KuraInstallPayload notify = new KuraInstallPayload(options.getClientId());
         notify.setTimestamp(new Date());
         notify.setInstallStatus(InstallStatus.COMPLETED.getStatusString());
@@ -192,8 +193,7 @@ public class InstallImpl {
         this.callback.publishMessage(options, notify, RESOURCE_INSTALL);
     }
 
-    public void installFailedAsync(DeploymentPackageInstallOptions options, String dpName, Exception e)
-            throws KuraException {
+    public void installFailedAsync(DeploymentPackageInstallOptions options, String dpName, Exception e) {
         KuraInstallPayload notify = new KuraInstallPayload(options.getClientId());
         notify.setTimestamp(new Date());
         notify.setInstallStatus(InstallStatus.FAILED.getStatusString());
@@ -207,7 +207,8 @@ public class InstallImpl {
         this.callback.publishMessage(options, notify, RESOURCE_INSTALL);
     }
 
-    public void sendInstallConfirmations(String notificationPublisherPid, CloudNotificationPublisher notificationPublisher) {
+    public void sendInstallConfirmations(String notificationPublisherPid,
+            CloudNotificationPublisher notificationPublisher) {
         s_logger.info("Ready to send Confirmations");
 
         File verificationDir = new File(this.m_installVerifDir);
@@ -237,14 +238,13 @@ public class InstallImpl {
                             sendSysUpdateFailure(fileEntry.getName(), notificationPublisher);
                         }
                     } catch (Exception e) {
-
+                        s_logger.warn("failed to publish completion status", e);
                     } finally {
                         fileEntry.delete();
                         if (proc2 != null) {
                             ProcessUtil.destroy(proc2);
                         }
                     }
-
                 }
             }
         }
@@ -370,87 +370,84 @@ public class InstallImpl {
         }
     }
 
-    private void sendSysUpdateSuccess(String verificationFileName, CloudNotificationPublisher notificationPublisher) throws KuraException {
-        s_logger.info("Ready to send success after install");
+    private void sendSysUpdateSuccess(String verificationFileName, CloudNotificationPublisher notificationPublisher)
+            throws IOException {
+        s_logger.info("Publishing success notification for verifier {}...", verificationFileName);
+
+        final File fileEntry = findPersistenceFileFromVerificationFile(verificationFileName);
+
+        Properties downloadProperties = loadInstallPersistance(fileEntry);
+        String deployUrl = downloadProperties.getProperty(DeploymentPackageDownloadOptions.METRIC_DP_DOWNLOAD_URI);
+        String dpName = downloadProperties.getProperty(DeploymentPackageOptions.METRIC_DP_NAME);
+        String dpVersion = downloadProperties.getProperty(DeploymentPackageOptions.METRIC_DP_VERSION);
+        String clientId = downloadProperties.getProperty(DeploymentPackageOptions.METRIC_DP_CLIENT_ID);
+        Long jobId = Long.valueOf(downloadProperties.getProperty(DeploymentPackageOptions.METRIC_JOB_ID));
+        String fileSystemFileName = downloadProperties.getProperty(PERSISTANCE_FILE_NAME);
+        String requestClientId = downloadProperties.getProperty(CloudDeploymentHandlerV2.METRIC_REQUESTER_CLIENT_ID);
+
+        String notificationPid = downloadProperties
+                .getProperty(DeploymentPackageOptions.NOTIFICATION_PUBLISHER_PID_KEY);
+
+        DeploymentPackageDownloadOptions deployOptions = new DeploymentPackageDownloadOptions(deployUrl, dpName,
+                dpVersion);
+        deployOptions.setClientId(clientId);
+        deployOptions.setJobId(jobId);
+        deployOptions.setRequestClientId(requestClientId);
+        deployOptions.setNotificationPublisherPid(notificationPid);
+        deployOptions.setNotificationPublisher(notificationPublisher);
+
+        installCompleteAsync(deployOptions, fileSystemFileName);
+        Files.delete(fileEntry.toPath());
+
+        s_logger.info("Publishing success notification for verifier {}...done", verificationFileName);
+    }
+
+    private void sendSysUpdateFailure(String verificationFileName, CloudNotificationPublisher notificationPublisher)
+            throws IOException {
+        s_logger.info("Publishing failure notification for verifier {}...", verificationFileName);
+
+        final File fileEntry = findPersistenceFileFromVerificationFile(verificationFileName);
+
+        Properties downloadProperties = loadInstallPersistance(fileEntry);
+        String deployUrl = downloadProperties.getProperty(DeploymentPackageDownloadOptions.METRIC_DP_DOWNLOAD_URI);
+        String dpName = downloadProperties.getProperty(DeploymentPackageOptions.METRIC_DP_NAME);
+        String dpVersion = downloadProperties.getProperty(DeploymentPackageOptions.METRIC_DP_VERSION);
+        String clientId = downloadProperties.getProperty(DeploymentPackageOptions.METRIC_DP_CLIENT_ID);
+        Long jobId = Long.valueOf(downloadProperties.getProperty(DeploymentPackageOptions.METRIC_JOB_ID));
+        String fileSystemFileName = downloadProperties.getProperty(PERSISTANCE_FILE_NAME);
+        String requestClientId = downloadProperties.getProperty(CloudDeploymentHandlerV2.METRIC_REQUESTER_CLIENT_ID);
+
+        String notificationPid = downloadProperties
+                .getProperty(DeploymentPackageOptions.NOTIFICATION_PUBLISHER_PID_KEY);
+
+        DeploymentPackageDownloadOptions deployOptions = new DeploymentPackageDownloadOptions(deployUrl, dpName,
+                dpVersion);
+        deployOptions.setClientId(clientId);
+        deployOptions.setJobId(jobId);
+        deployOptions.setRequestClientId(requestClientId);
+        deployOptions.setNotificationPublisherPid(notificationPid);
+        deployOptions.setNotificationPublisher(notificationPublisher);
+
+        installFailedAsync(deployOptions, fileSystemFileName, new KuraException(KuraErrorCode.INTERNAL_ERROR));
+        Files.delete(fileEntry.toPath());
+
+        s_logger.info("Publishing failure notification for verifier {}...done", verificationFileName);
+    }
+
+    private File findPersistenceFileFromVerificationFile(final String verificationFileName)
+            throws FileNotFoundException {
         String executableName = verificationFileName.split("_verifier")[0];
         File installDir = new File(this.m_installPersistanceDir);
+
         for (File fileEntry : installDir.listFiles()) {
 
             if (fileEntry.isFile() && fileEntry.getName().endsWith(PERSISTANCE_SUFFIX)
                     && fileEntry.getName().contains(executableName)) {
-                Properties downloadProperties = loadInstallPersistance(fileEntry);
-                String deployUrl = downloadProperties
-                        .getProperty(DeploymentPackageDownloadOptions.METRIC_DP_DOWNLOAD_URI);
-                String dpName = downloadProperties.getProperty(DeploymentPackageOptions.METRIC_DP_NAME);
-                String dpVersion = downloadProperties.getProperty(DeploymentPackageOptions.METRIC_DP_VERSION);
-                String clientId = downloadProperties.getProperty(DeploymentPackageOptions.METRIC_DP_CLIENT_ID);
-                Long jobId = Long.valueOf(downloadProperties.getProperty(DeploymentPackageOptions.METRIC_JOB_ID));
-                String fileSystemFileName = downloadProperties.getProperty(PERSISTANCE_FILE_NAME);
-                String requestClientId = downloadProperties
-                        .getProperty(CloudDeploymentHandlerV2.METRIC_REQUESTER_CLIENT_ID);
-
-                String notificationPid = downloadProperties
-                        .getProperty(DeploymentPackageOptions.NOTIFICATION_PUBLISHER_PID_KEY);
-
-                DeploymentPackageDownloadOptions deployOptions = new DeploymentPackageDownloadOptions(deployUrl, dpName,
-                        dpVersion);
-                deployOptions.setClientId(clientId);
-                deployOptions.setJobId(jobId);
-                deployOptions.setRequestClientId(requestClientId);
-                deployOptions.setNotificationPublisherPid(notificationPid);
-                deployOptions.setNotificationPublisher(notificationPublisher);
-
-                try {
-                    installCompleteAsync(deployOptions, fileSystemFileName);
-                    s_logger.info("Sent install complete");
-                    fileEntry.delete();
-                    break;
-                } catch (KuraException e) {
-                    throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
-                }
-            }
-
-        }
-    }
-
-    private void sendSysUpdateFailure(String verificationFileName, CloudNotificationPublisher notificationPublisher) throws KuraException {
-        File installDir = new File(this.m_installPersistanceDir);
-        for (final File fileEntry : installDir.listFiles()) {
-            if (fileEntry.isFile() && fileEntry.getName().endsWith(PERSISTANCE_SUFFIX)
-                    && fileEntry.getName().contains(verificationFileName)) {
-                Properties downloadProperties = loadInstallPersistance(fileEntry);
-                String deployUrl = downloadProperties
-                        .getProperty(DeploymentPackageDownloadOptions.METRIC_DP_DOWNLOAD_URI);
-                String dpName = downloadProperties.getProperty(DeploymentPackageOptions.METRIC_DP_NAME);
-                String dpVersion = downloadProperties.getProperty(DeploymentPackageOptions.METRIC_DP_VERSION);
-                String clientId = downloadProperties.getProperty(DeploymentPackageOptions.METRIC_DP_CLIENT_ID);
-                Long jobId = Long.valueOf(downloadProperties.getProperty(DeploymentPackageOptions.METRIC_JOB_ID));
-                String fileSystemFileName = downloadProperties.getProperty(PERSISTANCE_FILE_NAME);
-                String requestClientId = downloadProperties
-                        .getProperty(CloudDeploymentHandlerV2.METRIC_REQUESTER_CLIENT_ID);
-                
-                String notificationPid = downloadProperties
-                        .getProperty(DeploymentPackageOptions.NOTIFICATION_PUBLISHER_PID_KEY);
-
-                DeploymentPackageDownloadOptions deployOptions = new DeploymentPackageDownloadOptions(deployUrl, dpName,
-                        dpVersion);
-                deployOptions.setClientId(clientId);
-                deployOptions.setJobId(jobId);
-                deployOptions.setRequestClientId(requestClientId);
-                deployOptions.setNotificationPublisherPid(notificationPid);
-                deployOptions.setNotificationPublisher(notificationPublisher);
-
-                try {
-                    installFailedAsync(deployOptions, fileSystemFileName,
-                            new KuraException(KuraErrorCode.INTERNAL_ERROR));
-                    s_logger.info("Sent install failed");
-                    fileEntry.delete();
-                    break;
-                } catch (KuraException e) {
-                    throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
-                }
+                return fileEntry;
             }
         }
+
+        throw new FileNotFoundException("Cannot find persistance file for verification file " + verificationFileName);
     }
 
     private Properties loadInstallPersistance(File installedDpPersistance) {

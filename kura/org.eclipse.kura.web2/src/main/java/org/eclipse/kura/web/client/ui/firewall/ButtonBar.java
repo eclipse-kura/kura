@@ -90,6 +90,11 @@ public class ButtonBar extends Composite {
         this.reset.setEnabled(dirty);
     }
 
+    public void setSelectionDirty(boolean dirty) {
+        this.edit.setEnabled(dirty);
+        this.delete.setEnabled(dirty);
+    }
+
     public interface Listener {
 
         public void onApply();

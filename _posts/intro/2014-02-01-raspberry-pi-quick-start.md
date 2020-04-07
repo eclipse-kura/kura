@@ -75,30 +75,38 @@ following steps:
 
     <pre>sudo gdebi kura_&lt;version&gt;_raspberry-pi-2-3_installer.deb</pre>
 
-8. Reboot the Raspberry Pi with:
+8. It could happen that 'wlan' interface is "soft blocked" by default and needs to be enabled. To see if it is blocked run:
+
+    <pre>rfkill list</pre>
+
+    and unblock it with:
+
+    <pre>sudo rfkill unblock wlan</pre>
+
+9. Reboot the Raspberry Pi with:
 
     <pre>sudo reboot</pre>
 
     Kura starts on the target platform after reboot.
 
-9. Kura setups a local web ui that is available using a browser via:
+10. Kura setups a local web ui that is available using a browser via:
 
-    <pre>https://&lt;device-ip&gt;</pre>
-    
-    The browser will prompt the user to accept the connection to an endpoint with an untrusted certificate:
-    ![Untrusted certificate page]({{ site.baseurl }}/assets/images/admin/untrusted_cert1.png)
-    
-    ![Untrusted certificate details]({{ site.baseurl }}/assets/images/admin/untrusted_cert2.png)
-    
-    ![Proceed trusting the source]({{ site.baseurl }}/assets/images/admin/untrusted_cert3.png)
-    
-    Once trusted the source, the user will be redirected to a login page where the default **username** is:
+     <pre>https://&lt;device-ip&gt;</pre>
 
-    <pre>admin</pre>
+     The browser will prompt the user to accept the connection to an endpoint with an untrusted certificate:
+     ![Untrusted certificate page]({{ site.baseurl }}/assets/images/admin/untrusted_cert1.png)
 
-    and the default **password** is:
+     ![Untrusted certificate details]({{ site.baseurl }}/assets/images/admin/untrusted_cert2.png)
 
-    <pre>admin</pre>
+     ![Proceed trusting the source]({{ site.baseurl }}/assets/images/admin/untrusted_cert3.png)
+
+     Once trusted the source, the user will be redirected to a login page where the default **username** is:
+
+     <pre>admin</pre>
+
+     and the default **password** is:
+
+     <pre>admin</pre>
 
 ## Development Environment Installation
 

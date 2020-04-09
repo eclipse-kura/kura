@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -66,7 +66,7 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
     }
 
     private final ListDataProvider<GwtFirewallOpenPortEntry> openPortsDataProvider = new ListDataProvider<>();
-    final SingleSelectionModel<GwtFirewallOpenPortEntry> selectionModel = new SingleSelectionModel<>();
+    private final SingleSelectionModel<GwtFirewallOpenPortEntry> selectionModel = new SingleSelectionModel<>();
 
     private boolean dirty;
 
@@ -151,8 +151,12 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
 
     public OpenPortsTabUi() {
         initWidget(uiBinder.createAndBindUi(this));
+        this.selectionModel.addSelectionChangeHandler(event -> {
+            if (OpenPortsTabUi.this.selectionModel.getSelectedObject() != null) {
+                OpenPortsTabUi.this.buttonBar.setEditDeleteButtonsDirty(true);
+            }
+        });
         this.openPortsGrid.setSelectionModel(this.selectionModel);
-        this.selectionModel.addSelectionChangeHandler(event -> OpenPortsTabUi.this.buttonBar.setSelectionDirty(true));
 
         initTable();
         initNewRuleModal();
@@ -195,18 +199,20 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
                             @Override
                             public void onSuccess(List<GwtFirewallOpenPortEntry> result) {
                                 for (GwtFirewallOpenPortEntry pair : result) {
+                                    OpenPortsTabUi.this.openPortsDataProvider.getList().remove(pair);
                                     OpenPortsTabUi.this.openPortsDataProvider.getList().add(pair);
                                 }
                                 refreshTable();
                                 setVisibility();
-                                OpenPortsTabUi.this.buttonBar.setDirty(false);
-                                OpenPortsTabUi.this.buttonBar.setSelectionDirty(false);
+                                OpenPortsTabUi.this.buttonBar.setApplyResetButtonsDirty(false);
+                                OpenPortsTabUi.this.buttonBar.setEditDeleteButtonsDirty(false);
                                 EntryClassUi.hideWaitModal();
                             }
                         });
             }
 
         });
+
     }
 
     @Override
@@ -368,7 +374,7 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
 
                             @Override
                             public void onSuccess(Void result) {
-                                OpenPortsTabUi.this.buttonBar.setDirty(false);
+                                OpenPortsTabUi.this.buttonBar.setApplyResetButtonsDirty(false);
                                 EntryClassUi.hideWaitModal();
                                 setDirty(false);
                             }
@@ -386,13 +392,13 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
     @Override
     public void onCreate() {
         replaceModalHideHandler(evt -> {
-
             if (OpenPortsTabUi.this.newOpenPortEntry != null) {
+                OpenPortsTabUi.this.openPortsDataProvider.getList().remove(OpenPortsTabUi.this.newOpenPortEntry);
                 if (!duplicateEntry(OpenPortsTabUi.this.newOpenPortEntry)) {
                     OpenPortsTabUi.this.openPortsDataProvider.getList().add(OpenPortsTabUi.this.newOpenPortEntry);
                     refreshTable();
                     setVisibility();
-                    OpenPortsTabUi.this.buttonBar.setDirty(true);
+                    OpenPortsTabUi.this.buttonBar.setApplyResetButtonsDirty(true);
                 } else {
                     this.existingRule.show();
                 }
@@ -420,7 +426,7 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
                 if (!duplicateEntry(OpenPortsTabUi.this.editOpenPortEntry)) {
                     OpenPortsTabUi.this.openPortsDataProvider.getList().add(OpenPortsTabUi.this.editOpenPortEntry);
                     OpenPortsTabUi.this.openPortsDataProvider.flush();
-                    OpenPortsTabUi.this.buttonBar.setDirty(true);
+                    OpenPortsTabUi.this.buttonBar.setApplyResetButtonsDirty(true);
                     OpenPortsTabUi.this.editOpenPortEntry = null;
                     setVisibility();
                 } else {
@@ -429,6 +435,8 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
                     OpenPortsTabUi.this.openPortsDataProvider.flush();
                 }
                 refreshTable();
+                OpenPortsTabUi.this.buttonBar.setEditDeleteButtonsDirty(false);
+                OpenPortsTabUi.this.selectionModel.setSelected(selection, false);
             }
         });
         final AlertDialog.ConfirmListener listener = () -> showModal(
@@ -454,7 +462,9 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
                         OpenPortsTabUi.this.openPortsDataProvider.getList()
                                 .remove(OpenPortsTabUi.this.selectionModel.getSelectedObject());
                         refreshTable();
-                        OpenPortsTabUi.this.buttonBar.setDirty(true);
+                        OpenPortsTabUi.this.buttonBar.setApplyResetButtonsDirty(true);
+                        OpenPortsTabUi.this.buttonBar.setEditDeleteButtonsDirty(false);
+                        OpenPortsTabUi.this.selectionModel.setSelected(selection, false);
                         setVisibility();
 
                         setDirty(true);

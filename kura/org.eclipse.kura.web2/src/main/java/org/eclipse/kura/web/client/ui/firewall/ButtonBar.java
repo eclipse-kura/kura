@@ -85,12 +85,12 @@ public class ButtonBar extends Composite {
         this.listener = listener;
     }
 
-    public void setDirty(boolean dirty) {
+    public void setApplyResetButtonsDirty(boolean dirty) {
         this.apply.setEnabled(dirty);
         this.reset.setEnabled(dirty);
     }
 
-    public void setSelectionDirty(boolean dirty) {
+    public void setEditDeleteButtonsDirty(boolean dirty) {
         this.edit.setEnabled(dirty);
         this.delete.setEnabled(dirty);
     }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -186,7 +186,7 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
                                 }
                                 refreshTable();
 
-                                NatTabUi.this.buttonBar.setDirty(false);
+                                NatTabUi.this.buttonBar.setApplyResetButtonsDirty(false);
                                 EntryClassUi.hideWaitModal();
                             }
                         });
@@ -350,7 +350,7 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
                             @Override
                             public void onSuccess(Void result) {
                                 setDirty(false);
-                                NatTabUi.this.buttonBar.setDirty(false);
+                                NatTabUi.this.buttonBar.setApplyResetButtonsDirty(false);
                                 EntryClassUi.hideWaitModal();
                             }
                         });
@@ -371,7 +371,7 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
             if (NatTabUi.this.newNatEntry != null && !duplicateEntry(NatTabUi.this.newNatEntry)) {
                 NatTabUi.this.natDataProvider.getList().add(NatTabUi.this.newNatEntry);
                 refreshTable();
-                NatTabUi.this.buttonBar.setDirty(true);
+                NatTabUi.this.buttonBar.setApplyResetButtonsDirty(true);
                 NatTabUi.this.newNatEntry = null;
             }
         });
@@ -395,7 +395,7 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
                 if (!duplicateEntry(NatTabUi.this.editNatEntry)) {
                     NatTabUi.this.natDataProvider.getList().add(NatTabUi.this.editNatEntry);
                     NatTabUi.this.natDataProvider.flush();
-                    NatTabUi.this.buttonBar.setDirty(true);
+                    NatTabUi.this.buttonBar.setApplyResetButtonsDirty(true);
                     NatTabUi.this.editNatEntry = null;
                 } else {    // end duplicate
                     NatTabUi.this.natDataProvider.getList().add(oldEntry);
@@ -417,7 +417,7 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
         this.alertDialog.show(MSGS.firewallNatDeleteConfirmation(selection.getInInterface()), () -> {
             NatTabUi.this.natDataProvider.getList().remove(selection);
             refreshTable();
-            NatTabUi.this.buttonBar.setDirty(true);
+            NatTabUi.this.buttonBar.setApplyResetButtonsDirty(true);
             setDirty(true);
         });
 

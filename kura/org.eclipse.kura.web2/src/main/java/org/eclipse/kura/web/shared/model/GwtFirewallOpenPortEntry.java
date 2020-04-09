@@ -78,4 +78,23 @@ public class GwtFirewallOpenPortEntry extends KuraBaseModel implements Serializa
     public void setSourcePortRange(String sourcePortRange) {
         set("sourcePortRange", sourcePortRange);
     }
+
+    public String toString() {
+        StringBuilder output = new StringBuilder();
+        output.append("portRange : ").append(getPortRange());
+        output.append(" ");
+        output.append("protocol : ").append(getProtocol());
+        output.append(" ");
+        output.append("permittedNetwork : ").append(getPermittedNetwork());
+        output.append(" ");
+        output.append("permittedInterfaceName : ").append(getPermittedInterfaceName());
+        output.append(" ");
+        output.append("unpermittedInterfaceName : ").append(getUnpermittedInterfaceName());
+        output.append(" ");
+        output.append("permittedMAC : ").append(getPermittedMAC());
+        output.append(" ");
+        output.append("sourcePortRange : ").append(getSourcePortRange());
+
+        return output.toString();
+    }
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -216,7 +216,7 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
                                 }
                                 refreshTable();
 
-                                PortForwardingTabUi.this.buttonBar.setDirty(false);
+                                PortForwardingTabUi.this.buttonBar.setApplyResetButtonsDirty(false);
                                 EntryClassUi.hideWaitModal();
                             }
                         });
@@ -436,7 +436,7 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
 
                             @Override
                             public void onSuccess(Void result) {
-                                PortForwardingTabUi.this.buttonBar.setDirty(false);
+                                PortForwardingTabUi.this.buttonBar.setApplyResetButtonsDirty(false);
                                 EntryClassUi.hideWaitModal();
 
                                 setDirty(false);
@@ -460,7 +460,7 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
                 PortForwardingTabUi.this.portForwardDataProvider.getList()
                         .add(PortForwardingTabUi.this.newPortForwardEntry);
                 refreshTable();
-                PortForwardingTabUi.this.buttonBar.setDirty(true);
+                PortForwardingTabUi.this.buttonBar.setApplyResetButtonsDirty(true);
                 PortForwardingTabUi.this.newPortForwardEntry = null;
             }
         });
@@ -484,7 +484,7 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
                     PortForwardingTabUi.this.portForwardDataProvider.getList()
                             .add(PortForwardingTabUi.this.editPortForwardEntry);
                     PortForwardingTabUi.this.portForwardDataProvider.flush();
-                    PortForwardingTabUi.this.buttonBar.setDirty(true);
+                    PortForwardingTabUi.this.buttonBar.setApplyResetButtonsDirty(true);
                     PortForwardingTabUi.this.editPortForwardEntry = null;
                 } else {    // end duplicate
                     PortForwardingTabUi.this.portForwardDataProvider.getList().add(oldEntry);
@@ -509,7 +509,7 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
                     PortForwardingTabUi.this.portForwardDataProvider.getList()
                             .remove(PortForwardingTabUi.this.selectionModel.getSelectedObject());
                     refreshTable();
-                    PortForwardingTabUi.this.buttonBar.setDirty(true);
+                    PortForwardingTabUi.this.buttonBar.setApplyResetButtonsDirty(true);
                     setDirty(true);
                 });
     }

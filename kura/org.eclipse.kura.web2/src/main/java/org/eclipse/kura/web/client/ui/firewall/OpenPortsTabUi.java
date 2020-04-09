@@ -12,6 +12,8 @@
 package org.eclipse.kura.web.client.ui.firewall;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -199,6 +201,7 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
                             @Override
                             public void onSuccess(List<GwtFirewallOpenPortEntry> result) {
                                 for (GwtFirewallOpenPortEntry pair : result) {
+                                    // Avoid duplicates
                                     OpenPortsTabUi.this.openPortsDataProvider.getList().remove(pair);
                                     OpenPortsTabUi.this.openPortsDataProvider.getList().add(pair);
                                 }
@@ -337,6 +340,7 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
     }
 
     private void refreshTable() {
+        Collections.sort(OpenPortsTabUi.this.openPortsDataProvider.getList(), new PortSorting());
         int size = this.openPortsDataProvider.getList().size();
         this.openPortsGrid.setVisibleRange(0, size);
         this.openPortsDataProvider.flush();
@@ -393,6 +397,7 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
     public void onCreate() {
         replaceModalHideHandler(evt -> {
             if (OpenPortsTabUi.this.newOpenPortEntry != null) {
+                // Avoid duplicates
                 OpenPortsTabUi.this.openPortsDataProvider.getList().remove(OpenPortsTabUi.this.newOpenPortEntry);
                 if (!duplicateEntry(OpenPortsTabUi.this.newOpenPortEntry)) {
                     OpenPortsTabUi.this.openPortsDataProvider.getList().add(OpenPortsTabUi.this.newOpenPortEntry);
@@ -714,5 +719,21 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
             this.modalHideHandlerRegistration.removeHandler();
         }
         this.modalHideHandlerRegistration = this.openPortsForm.addHideHandler(hideHandler);
+    }
+
+    private class PortSorting implements Comparator<GwtFirewallOpenPortEntry> {
+
+        @Override
+        public int compare(GwtFirewallOpenPortEntry o1, GwtFirewallOpenPortEntry o2) {
+            if (o1 == o2) {
+                return 0;
+            }
+            if (o1 != null) {
+                Integer o1Port = Integer.parseInt(o1.getPortRange().split(":")[0]);
+                Integer o2Port = Integer.parseInt(o2.getPortRange().split(":")[0]);
+                return (o2 != null) ? o1Port.compareTo(o2Port) : 1;
+            }
+            return -1;
+        }
     }
 }

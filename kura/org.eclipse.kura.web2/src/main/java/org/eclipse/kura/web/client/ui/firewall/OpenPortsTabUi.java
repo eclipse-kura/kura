@@ -579,10 +579,9 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
 
         // set up validation
         this.port.addBlurHandler(event -> {
-            if (!OpenPortsTabUi.this.port.getText().trim().matches(FieldType.PORT_RANGE.getRegex())
-                    && OpenPortsTabUi.this.port.getText().trim().length() != 0
-                    || OpenPortsTabUi.this.port.getText() == null
-                    || "".equals(OpenPortsTabUi.this.port.getText().trim())) {
+            if (OpenPortsTabUi.this.port.getText() == null || "".equals(OpenPortsTabUi.this.port.getText().trim())
+                    || OpenPortsTabUi.this.port.getText().trim().length() == 0 || !checkPortRegex()
+                    || !isPortInRange()) {
                 OpenPortsTabUi.this.groupPort.setValidationState(ValidationState.ERROR);
             } else {
                 OpenPortsTabUi.this.groupPort.setValidationState(ValidationState.NONE);
@@ -719,6 +718,33 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
             this.modalHideHandlerRegistration.removeHandler();
         }
         this.modalHideHandlerRegistration = this.openPortsForm.addHideHandler(hideHandler);
+    }
+
+    private boolean isPortInRange() {
+        String[] portRange = OpenPortsTabUi.this.port.getText().trim().split(":");
+        if (portRange.length == 2) {
+            return checkPort(portRange[0]) && checkPort(portRange[1]);
+        } else {
+            return checkPort(portRange[0]);
+        }
+    }
+
+    private boolean checkPort(String port) {
+        boolean isInRange = false;
+        Integer portInt = Integer.parseInt(port);
+        if (portInt > 0 && portInt <= 65535) {
+            isInRange = true;
+        }
+        return isInRange;
+    }
+
+    private boolean checkPortRegex() {
+        boolean isPortRegex = false;
+        if (OpenPortsTabUi.this.port.getText().trim().matches(FieldType.PORT_RANGE.getRegex())
+                || OpenPortsTabUi.this.port.getText().trim().matches(FieldType.PORT.getRegex())) {
+            isPortRegex = true;
+        }
+        return isPortRegex;
     }
 
     private class PortSorting implements Comparator<GwtFirewallOpenPortEntry> {

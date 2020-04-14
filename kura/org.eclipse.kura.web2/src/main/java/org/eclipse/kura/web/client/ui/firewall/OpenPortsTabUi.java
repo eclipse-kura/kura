@@ -732,7 +732,7 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
     private boolean checkPort(String port) {
         boolean isInRange = false;
         Integer portInt = Integer.parseInt(port);
-        if (portInt > 0 && portInt <= 65535) {
+        if (!port.startsWith("0") && portInt > 0 && portInt <= 65535) {
             isInRange = true;
         }
         return isInRange;

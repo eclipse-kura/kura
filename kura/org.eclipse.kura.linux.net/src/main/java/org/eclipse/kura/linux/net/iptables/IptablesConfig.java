@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -38,6 +38,10 @@ public class IptablesConfig {
     public static final String FIREWALL_CONFIG_FILE_NAME = "/etc/sysconfig/iptables";
     public static final String FIREWALL_TMP_CONFIG_FILE_NAME = "/tmp/iptables";
 
+    private static final String INPUT_POLICY = ":INPUT DROP [0:0]";
+    private static final String OUTPUT_POLICY = ":OUTPUT ACCEPT [0:0]";
+    private static final String FORWARD_POLICY = ":FORWARD DROP [0:0]";
+    
     private static final String ALLOW_ALL_TRAFFIC_TO_LOOPBACK = "-A INPUT -i lo -j ACCEPT";
     private static final String ALLOW_ONLY_INCOMING_TO_OUTGOING = "-A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT";
 
@@ -202,6 +206,9 @@ public class IptablesConfig {
         try (FileOutputStream fos = new FileOutputStream(FIREWALL_TMP_CONFIG_FILE_NAME);
                 PrintWriter writer = new PrintWriter(fos)) {
             writer.println("*filter");
+            writer.println(INPUT_POLICY);
+            writer.println(FORWARD_POLICY);
+            writer.println(OUTPUT_POLICY);
             writer.println(ALLOW_ALL_TRAFFIC_TO_LOOPBACK);
             writer.println(ALLOW_ONLY_INCOMING_TO_OUTGOING);
             if (this.allowIcmp) {

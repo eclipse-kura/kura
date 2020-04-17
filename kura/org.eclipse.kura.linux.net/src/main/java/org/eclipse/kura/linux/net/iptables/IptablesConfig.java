@@ -43,6 +43,9 @@ public class IptablesConfig {
     public static final String FIREWALL_TMP_CONFIG_FILE_NAME = "/tmp/iptables";
     private static final String FILTER = "*filter";
     private static final String COMMIT = "COMMIT";
+    private static final String INPUT_POLICY = ":INPUT DROP [0:0]";
+    private static final String OUTPUT_POLICY = ":OUTPUT ACCEPT [0:0]";
+    private static final String FORWARD_POLICY = ":FORWARD DROP [0:0]";
     private static final String ALLOW_ALL_TRAFFIC_TO_LOOPBACK = "-A INPUT -i lo -j ACCEPT";
     private static final String ALLOW_ONLY_INCOMING_TO_OUTGOING = "-A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT";
 
@@ -204,6 +207,9 @@ public class IptablesConfig {
         try (FileOutputStream fos = new FileOutputStream(FIREWALL_TMP_CONFIG_FILE_NAME);
                 PrintWriter writer = new PrintWriter(fos)) {
             writer.println(FILTER);
+            writer.println(INPUT_POLICY);
+            writer.println(FORWARD_POLICY);
+            writer.println(OUTPUT_POLICY);
             writer.println(ALLOW_ALL_TRAFFIC_TO_LOOPBACK);
             writer.println(ALLOW_ONLY_INCOMING_TO_OUTGOING);
             if (this.allowIcmp) {

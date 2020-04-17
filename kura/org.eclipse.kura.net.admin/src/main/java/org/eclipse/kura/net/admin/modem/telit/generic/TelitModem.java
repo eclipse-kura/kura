@@ -65,20 +65,23 @@ public abstract class TelitModem {
 
     public void reset() {
         int offOnDelay = 1000;
+        int resetRetries = 10;
 
-        sleep(5000);
+        while (resetRetries > 0) {
+            sleep(5000);
+            try {
+                turnOff();
 
-        try {
-            turnOff();
-
-            this.gpsEnabled = false;
-            sleep(offOnDelay);
-            turnOn();
-            logger.info("reset() :: modem reset successful");
-        } catch (Exception e) {
-            logger.error("Failed to reset the modem", e);
+                this.gpsEnabled = false;
+                sleep(offOnDelay);
+                turnOn();
+                logger.info("reset() :: modem reset successful");
+                break;
+            } catch (Exception e) {
+                logger.error("Failed to reset the modem", e);
+                resetRetries--;
+            }
         }
-
     }
 
     public String getModel() throws KuraException {

@@ -301,16 +301,20 @@ public class QuectelEG25 extends HspaModem implements HspaCellularModem {
 
     @Override
     public void reset() throws KuraException {
-        sleep(5000);
-        while (true) {
+        int offOnDelay = 1000;
+        int resetRetries = 10;
+
+        while (resetRetries > 0) {
+            sleep(5000);
             try {
                 turnOff();
-                sleep(1000);
+                sleep(offOnDelay);
                 turnOn();
                 logger.info("reset() :: modem reset successful");
                 break;
             } catch (Exception e) {
                 logger.error("Failed to reset the modem", e);
+                resetRetries--;
             }
         }
     }

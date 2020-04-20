@@ -166,4 +166,45 @@
             </esf:property>
         </esf:properties>
     </esf:configuration>
+    <esf:configuration pid="heaterPublisher">
+        <esf:properties>
+            <esf:property array="false" encrypted="false" name="app.topic" type="String">
+                <esf:value>data</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="message.type" type="String">
+                <esf:value>data</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="qos" type="Integer">
+                <esf:value>0</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="appId" type="String">
+                <esf:value>HEATER</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="retain" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="priority" type="Integer">
+                <esf:value>7</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="service.factoryPid" type="String">
+                <esf:value>org.eclipse.kura.cloud.publisher.CloudPublisher</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="cloud.endpoint.service.pid" type="String">
+                <esf:value>org.eclipse.kura.cloud.CloudService</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="kura.service.pid" type="String">
+                <esf:value>heaterPublisher</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="service.pid" type="String">
+                <esf:value>org.eclipse.kura.cloud.publisher.CloudPublisher-1587372517474-4</esf:value>
+            </esf:property>
+        </esf:properties>
+    </esf:configuration>
+    <esf:configuration pid="org.eclipse.kura.demo.heater.Heater">
+        <esf:properties>
+          <esf:property array="false" encrypted="false" name="CloudPublisher.target" type="String">
+              <esf:value>(kura.service.pid=heaterPublisher)</esf:value>
+          </esf:property>
+        </esf:properties>
+    </esf:configuration>
 </esf:configurations>

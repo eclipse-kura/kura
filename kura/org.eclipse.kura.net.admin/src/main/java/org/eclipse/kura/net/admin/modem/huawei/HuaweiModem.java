@@ -111,9 +111,19 @@ public class HuaweiModem extends HspaModem {
 
     @Override
     public void reset() throws KuraException {
-        UsbModemDriver modemDriver = getModemDriver();
-        modemDriver.disable();
-        modemDriver.enable();
+        while (true) {
+            sleep(5000);
+            try {
+                UsbModemDriver modemDriver = getModemDriver();
+                modemDriver.disable();
+                sleep(1000);
+                modemDriver.enable();
+                logger.info("reset() :: modem reset successful");
+                break;
+            } catch (Exception e) {
+                logger.error("Failed to reset the modem", e);
+            }
+        }
     }
 
     private void disableURC() throws KuraException {

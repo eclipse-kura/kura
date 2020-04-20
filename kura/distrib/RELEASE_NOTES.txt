@@ -31,7 +31,7 @@ Compatibility:
 Target Environments:
   * Kura is released as pre-compiled binary installers for the following platforms:
     * Raspberry Pi 2/3 based on Raspbian
-    * Intel Up Squared board running Ubuntu 16  
+    * Intel Up Squared board running Ubuntu 18  
     * Intel Up Squared board running Centos 7 (Experimental)
     * Rock960 ARM_64 running Ubuntu 16 (NN version only)
   * Kura is also available as a pre-built Docker container 
@@ -52,6 +52,7 @@ Bug Fixes :
 
   * Merged no issue-related Pull Requests:
     * #2805: Added policies to iptables
+    * #2804: Fixed DB bundle reference in dev-env.
     * #2665: Added support for Quectel EG25
     * #2622: Support for SimTech SIM7000 LTE NB-IOT modem
     * #2611: Zte ME3630 LTE modem support 

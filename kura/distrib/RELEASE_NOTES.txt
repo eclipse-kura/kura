@@ -51,6 +51,7 @@ Bug Fixes :
     * #2437: Add support for Huawei modem MS2372
 
   * Merged no issue-related Pull Requests:
+    * #2805: Added policies to iptables
     * #2665: Added support for Quectel EG25
     * #2622: Support for SimTech SIM7000 LTE NB-IOT modem
     * #2611: Zte ME3630 LTE modem support 

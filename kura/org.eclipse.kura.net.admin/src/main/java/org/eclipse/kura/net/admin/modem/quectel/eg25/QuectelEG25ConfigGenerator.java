@@ -87,8 +87,10 @@ public class QuectelEG25ConfigGenerator implements ModemPppConfigGenerator {
         modemXchange.addmodemXchangePair(new ModemXchangePair("\"NO DIALTONE\"", ABORT));
         modemXchange.addmodemXchangePair(new ModemXchangePair("\"NO DIAL TONE\"", ABORT));
         modemXchange.addmodemXchangePair(new ModemXchangePair("\"ERROR\"", ABORT));
-        modemXchange.addmodemXchangePair(new ModemXchangePair("\"+++ath\"", "\"\""));
-        modemXchange.addmodemXchangePair(new ModemXchangePair("\"AT\"", "OK"));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("\\rAT", "\"\""));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("1", "TIMEOUT"));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("ATH0", "\"OK-+++\\c-OK\""));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("45", "TIMEOUT"));
         modemXchange.addmodemXchangePair(new ModemXchangePair(formPDPcontext(pdpPid, PdpType.IP, apn), "OK"));
         modemXchange.addmodemXchangePair(new ModemXchangePair("\"\\d\\d\\d\"", "OK"));
         modemXchange.addmodemXchangePair(new ModemXchangePair(formDialString(dialString), "\"\""));

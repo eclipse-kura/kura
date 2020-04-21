@@ -19,6 +19,8 @@ import org.eclipse.kura.net.modem.ModemConfig;
 
 public class TelitDe910ConfigGenerator implements ModemPppConfigGenerator {
 
+    private static final String ABORT = "ABORT";
+
     @Override
     public PppPeer getPppPeer(String deviceId, ModemConfig modemConfig, String logFile, String connectScript,
             String disconnectScript) {
@@ -68,14 +70,16 @@ public class TelitDe910ConfigGenerator implements ModemPppConfigGenerator {
         }
 
         ModemXchangeScript modemXchange = new ModemXchangeScript();
-        modemXchange.addmodemXchangePair(new ModemXchangePair("\"BUSY\"", "ABORT"));
-        modemXchange.addmodemXchangePair(new ModemXchangePair("\"VOICE\"", "ABORT"));
-        modemXchange.addmodemXchangePair(new ModemXchangePair("\"NO CARRIER\"", "ABORT"));
-        modemXchange.addmodemXchangePair(new ModemXchangePair("\"NO DIALTONE\"", "ABORT"));
-        modemXchange.addmodemXchangePair(new ModemXchangePair("\"NO DIAL TONE\"", "ABORT"));
-        modemXchange.addmodemXchangePair(new ModemXchangePair("\"ERROR\"", "ABORT"));
-        modemXchange.addmodemXchangePair(new ModemXchangePair("\"+++ath\"", "\"\""));
-        modemXchange.addmodemXchangePair(new ModemXchangePair("\"AT\"", "OK"));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("\"BUSY\"", ABORT));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("\"VOICE\"", ABORT));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("\"NO CARRIER\"", ABORT));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("\"NO DIALTONE\"", ABORT));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("\"NO DIAL TONE\"", ABORT));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("\"ERROR\"", ABORT));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("\\rAT", "\"\""));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("1", "TIMEOUT"));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("ATH0", "\"OK-+++\\c-OK\""));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("45", "TIMEOUT"));
         modemXchange.addmodemXchangePair(new ModemXchangePair("\"ATE1V1&F&D2&C1&C2S0=0\"", "OK"));
         modemXchange.addmodemXchangePair(new ModemXchangePair("\"ATE1V1\"", "OK"));
         modemXchange.addmodemXchangePair(new ModemXchangePair("\"ATS7=60\"", "OK"));
@@ -90,11 +94,11 @@ public class TelitDe910ConfigGenerator implements ModemPppConfigGenerator {
     public ModemXchangeScript getDisconnectScript(ModemConfig modemConfig) {
 
         ModemXchangeScript modemXchange = new ModemXchangeScript();
-        modemXchange.addmodemXchangePair(new ModemXchangePair("\"BUSY\"", "ABORT"));
-        modemXchange.addmodemXchangePair(new ModemXchangePair("\"VOICE\"", "ABORT"));
-        modemXchange.addmodemXchangePair(new ModemXchangePair("\"NO CARRIER\"", "ABORT"));
-        modemXchange.addmodemXchangePair(new ModemXchangePair("\"NO DIALTONE\"", "ABORT"));
-        modemXchange.addmodemXchangePair(new ModemXchangePair("\"NO DIAL TONE\"", "ABORT"));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("\"BUSY\"", ABORT));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("\"VOICE\"", ABORT));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("\"NO CARRIER\"", ABORT));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("\"NO DIALTONE\"", ABORT));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("\"NO DIAL TONE\"", ABORT));
         modemXchange.addmodemXchangePair(new ModemXchangePair("BREAK", "\"\""));
         modemXchange.addmodemXchangePair(new ModemXchangePair("\"+++ATH\"", "\"\""));
 

@@ -20,6 +20,8 @@ import org.eclipse.kura.net.modem.ModemConfig.PdpType;
 
 public class HspaModemConfigGenerator implements ModemPppConfigGenerator {
 
+    private static final String ABORT = "ABORT";
+
     @Override
     public PppPeer getPppPeer(String deviceId, ModemConfig modemConfig, String logFile, String connectScript,
             String disconnectScript) {
@@ -79,14 +81,16 @@ public class HspaModemConfigGenerator implements ModemPppConfigGenerator {
         }
 
         ModemXchangeScript modemXchange = new ModemXchangeScript();
-        modemXchange.addmodemXchangePair(new ModemXchangePair("\"BUSY\"", "ABORT"));
-        modemXchange.addmodemXchangePair(new ModemXchangePair("\"VOICE\"", "ABORT"));
-        modemXchange.addmodemXchangePair(new ModemXchangePair("\"NO CARRIER\"", "ABORT"));
-        modemXchange.addmodemXchangePair(new ModemXchangePair("\"NO DIALTONE\"", "ABORT"));
-        modemXchange.addmodemXchangePair(new ModemXchangePair("\"NO DIAL TONE\"", "ABORT"));
-        modemXchange.addmodemXchangePair(new ModemXchangePair("\"ERROR\"", "ABORT"));
-        modemXchange.addmodemXchangePair(new ModemXchangePair("\"+++ath\"", "\"\""));
-        modemXchange.addmodemXchangePair(new ModemXchangePair("\"AT\"", "OK"));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("\"BUSY\"", ABORT));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("\"VOICE\"", ABORT));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("\"NO CARRIER\"", ABORT));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("\"NO DIALTONE\"", ABORT));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("\"NO DIAL TONE\"", ABORT));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("\"ERROR\"", ABORT));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("\\rAT", "\"\""));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("1", "TIMEOUT"));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("ATH0", "\"OK-+++\\c-OK\""));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("45", "TIMEOUT"));
         modemXchange.addmodemXchangePair(new ModemXchangePair(formPDPcontext(pdpPid, PdpType.IP, apn), "OK"));
         modemXchange.addmodemXchangePair(new ModemXchangePair("\"\\d\\d\\d\"", "OK"));
         modemXchange.addmodemXchangePair(new ModemXchangePair(formDialString(dialString), "\"\""));
@@ -99,11 +103,11 @@ public class HspaModemConfigGenerator implements ModemPppConfigGenerator {
     public ModemXchangeScript getDisconnectScript(ModemConfig modemConfig) {
 
         ModemXchangeScript modemXchange = new ModemXchangeScript();
-        modemXchange.addmodemXchangePair(new ModemXchangePair("\"BUSY\"", "ABORT"));
-        modemXchange.addmodemXchangePair(new ModemXchangePair("\"VOICE\"", "ABORT"));
-        modemXchange.addmodemXchangePair(new ModemXchangePair("\"NO CARRIER\"", "ABORT"));
-        modemXchange.addmodemXchangePair(new ModemXchangePair("\"NO DIALTONE\"", "ABORT"));
-        modemXchange.addmodemXchangePair(new ModemXchangePair("\"NO DIAL TONE\"", "ABORT"));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("\"BUSY\"", ABORT));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("\"VOICE\"", ABORT));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("\"NO CARRIER\"", ABORT));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("\"NO DIALTONE\"", ABORT));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("\"NO DIAL TONE\"", ABORT));
         modemXchange.addmodemXchangePair(new ModemXchangePair("BREAK", "\"\""));
         modemXchange.addmodemXchangePair(new ModemXchangePair("\"+++ATH\"", "\"\""));
 

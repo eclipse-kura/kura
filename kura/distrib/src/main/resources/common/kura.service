@@ -1,5 +1,7 @@
 [Unit]
 Description=Kura
+Wants=networking.service
+After=networking.service
 
 [Service]
 Type=forking

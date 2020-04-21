@@ -460,6 +460,8 @@ fi]]>
 			<zipfileset
 				file="src/main/resources/${build.name}/recover_default_config.init"
 				prefix="${build.output.name}/${install.folder}" filemode="700" />
+			<zipfileset file="src/main/resources/${build.name}/firewall.service"
+				prefix="${build.output.name}/${install.folder}" filemode="700" />
 			<zipfileset file="src/main/resources/${build.name}/firewall.init"
 				prefix="${build.output.name}/${install.folder}" filemode="700" />
 			<zipfileset file="src/main/resources/${build.name}/iptables.init"

@@ -49,9 +49,14 @@ cp ${INSTALL_DIR}/kura/install/recover_default_config.init ${INSTALL_DIR}/kura/b
 chmod +x ${INSTALL_DIR}/kura/bin/.recoverDefaultConfig.sh
 
 #set up default firewall configuration
-cp /etc/sysconfig/iptables /etc/sysconfig/iptables.esfsave
-cp ${BASE_DIR}/${KURA_SYMLINK}/.data/iptables /etc/sysconfig/iptables
-sed -i "s|/bin/sh KURA_DIR|/bin/bash ${BASE_DIR}/${KURA_SYMLINK}|" /lib/systemd/system/firewall.service
+cp ${INSTALL_DIR}/kura/install/iptables.init ${INSTALL_DIR}/kura/.data/iptables
+chmod 644 ${INSTALL_DIR}/kura/.data/iptables
+cp ${INSTALL_DIR}/kura/.data/iptables /etc/sysconfig/iptables
+cp ${INSTALL_DIR}/kura/install/firewall.init ${INSTALL_DIR}/kura/bin/firewall
+chmod 755 ${INSTALL_DIR}/kura/bin/firewall
+cp ${INSTALL_DIR}/kura/install/firewall.service /lib/systemd/system/firewall.service
+chmod 644 /lib/systemd/system/firewall.service
+sed -i "s|/bin/sh KURA_DIR|/bin/bash ${INSTALL_DIR}/kura|" /lib/systemd/system/firewall.service
 systemctl daemon-reload
 systemctl enable firewall
 
@@ -94,14 +99,14 @@ ${INSTALL_DIR}/kura/install/patch_sysctl.sh ${INSTALL_DIR}/kura/install/sysctl.k
 
 if ! [ -d /sys/class/net ]
 then
- sysctl -p || true
+    sysctl -p || true
 else
- sysctl -w net.ipv6.conf.all.disable_ipv6=1
- sysctl -w net.ipv6.conf.default.disable_ipv6=1
- for INTERFACE in $(ls /sys/class/net)
- do
- 	sysctl -w net.ipv6.conf.${INTERFACE}.disable_ipv6=1
- done
+    sysctl -w net.ipv6.conf.all.disable_ipv6=1
+    sysctl -w net.ipv6.conf.default.disable_ipv6=1
+    for INTERFACE in $(ls /sys/class/net)
+    do
+ 	    sysctl -w net.ipv6.conf.${INTERFACE}.disable_ipv6=1
+    done
 fi
 
 keytool -genkey -alias localhost -keyalg RSA -keysize 2048 -keystore /opt/eclipse/kura/user/security/httpskeystore.ks -deststoretype pkcs12 -dname "CN=Kura, OU=Kura, O=Eclipse Foundation, L=Ottawa, S=Ontario, C=CA" -validity 1000 -storepass changeit -keypass changeit  

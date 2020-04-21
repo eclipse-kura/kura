@@ -1,0 +1,11 @@
+[Unit]
+Description=Firewall configuration
+Before=network-pre.target
+Wants=network-pre.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh KURA_DIR/bin/firewall
+
+[Install]
+WantedBy=multi-user.target

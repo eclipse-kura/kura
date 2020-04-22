@@ -484,6 +484,12 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
             this.openPortEntry = null;
             this.editOpenPortEntry = null;
             this.newOpenPortEntry = null;
+            this.port.clear();
+            this.permittedNw.clear();
+            this.permittedI.clear();
+            this.unpermittedI.clear();
+            this.permittedMac.clear();
+            this.source.clear();
         });
 
         this.submit.setText(MSGS.submitButton());

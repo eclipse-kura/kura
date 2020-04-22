@@ -198,6 +198,7 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
 
             @Override
             public void onSuccess(GwtXSRFToken token) {
+                OpenPortsTabUi.this.setDirty(false);
                 OpenPortsTabUi.this.gwtNetworkService.findDeviceFirewallOpenPorts(token,
                         new AsyncCallback<List<GwtFirewallOpenPortEntry>>() {
 

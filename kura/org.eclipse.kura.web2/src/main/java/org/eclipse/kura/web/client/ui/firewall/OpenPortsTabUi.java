@@ -174,6 +174,11 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
         initNewRuleModal();
         initDuplicateRuleModal();
         this.buttonBar.setListener(this);
+
+        // Initialize fixed items for modal
+        setModalFieldsLabels();
+        setModalFieldsTooltips();
+        setModalFieldsHandlers();
     }
 
     private void initDuplicateRuleModal() {
@@ -558,13 +563,7 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
             this.openPortsForm.setTitle(MSGS.firewallOpenPortFormUpdate(String.valueOf(existingEntry.getPortRange())));
         }
 
-        setModalFieldsLabels();
-
         setModalFieldsValues(existingEntry);
-
-        setModalFieldsTooltips();
-
-        setModalFieldsHandlers();
 
         if (existingEntry == null) {
             this.submit.setId("new");

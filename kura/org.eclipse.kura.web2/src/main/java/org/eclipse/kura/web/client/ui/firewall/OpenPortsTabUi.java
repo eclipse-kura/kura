@@ -129,9 +129,19 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
     TextBox source;
 
     @UiField
+    Tooltip tooltipPort;
+    @UiField
+    Tooltip tooltipProtocol;
+    @UiField
+    Tooltip tooltipPermittedNw;
+    @UiField
     Tooltip tooltipPermittedI;
     @UiField
     Tooltip tooltipUnpermittedI;
+    @UiField
+    Tooltip tooltipPermittedMac;
+    @UiField
+    Tooltip tooltipSource;
 
     @UiField
     Button submit;
@@ -639,6 +649,18 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
     }
 
     private void setModalFieldsTooltips() {
+        // Port config
+        this.tooltipPort.setTitle(MSGS.firewallOpenPortFormPortToolTip());
+        this.tooltipPort.reconfigure();
+
+        // Protocol config
+        this.tooltipProtocol.setTitle(MSGS.firewallOpenPortFormProtocolToolTip());
+        this.tooltipProtocol.reconfigure();
+
+        // Permitted Network config
+        this.tooltipPermittedNw.setTitle(MSGS.firewallOpenPortFormPermittedNetworkToolTip());
+        this.tooltipPermittedNw.reconfigure();
+
         // Permitted Interface config
         this.tooltipPermittedI.setTitle(MSGS.firewallOpenPortFormPermittedInterfaceToolTip());
         this.tooltipPermittedI.reconfigure();
@@ -646,6 +668,14 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
         // UnPermitted Interface config
         this.tooltipUnpermittedI.setTitle(MSGS.firewallOpenPortFormUnpermittedInterfaceToolTip());
         this.tooltipUnpermittedI.reconfigure();
+
+        // Permitted Mac Address config
+        this.tooltipPermittedMac.setTitle(MSGS.firewallOpenPortFormPermittedMacAddressToolTip());
+        this.tooltipPermittedMac.reconfigure();
+
+        // Source config
+        this.tooltipSource.setTitle(MSGS.firewallOpenPortFormSourcePortRangeToolTip());
+        this.tooltipSource.reconfigure();
     }
 
     private void setModalFieldsValues(final GwtFirewallOpenPortEntry existingEntry) {

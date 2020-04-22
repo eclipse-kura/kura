@@ -43,21 +43,27 @@
                         <b:FormGroup ui:field="groupPort">
                             <b:FormLabel for="port"
                                 ui:field="labelPort"></b:FormLabel>
-                            <b:TextBox b:id="port" ui:field="port" />
+                            <b:Tooltip ui:field="tooltipPort">
+                                <b:TextBox b:id="port" ui:field="port" />
+                            </b:Tooltip>
                         </b:FormGroup>
                         <b:FormGroup>
                             <b:FormLabel for="protocol"
                                 ui:field="labelProtocol"></b:FormLabel>
-                            <g:FlowPanel>
-                                <b:ListBox b:id="protocol"
-                                    ui:field="protocol" />
-                            </g:FlowPanel>
+                            <b:Tooltip ui:field="tooltipProtocol">
+	                            <g:FlowPanel>
+	                                <b:ListBox b:id="protocol"
+	                                    ui:field="protocol" />
+	                            </g:FlowPanel>
+	                        </b:Tooltip>
                         </b:FormGroup>
                         <b:FormGroup ui:field="groupPermittedNw">
                             <b:FormLabel for="permittedNw"
                                 ui:field="labelPermitttedNw"></b:FormLabel>
-                            <b:TextBox b:id="permittedNw"
-                                ui:field="permittedNw" />
+                            <b:Tooltip ui:field="tooltipPermittedNw">
+	                            <b:TextBox b:id="permittedNw"
+	                                ui:field="permittedNw" />
+	                        </b:Tooltip>
                         </b:FormGroup>
                         <b:FormGroup ui:field="groupPermittedI">
                             <b:FormLabel for="permittedI"
@@ -78,13 +84,17 @@
                         <b:FormGroup ui:field="groupPermittedMac">
                             <b:FormLabel for="permittedMac"
                                 ui:field="labelPermitttedMac"></b:FormLabel>
-                            <b:TextBox b:id="permittedMac"
-                                ui:field="permittedMac" />
+                            <b:Tooltip ui:field="tooltipPermittedMac">
+	                            <b:TextBox b:id="permittedMac"
+	                                ui:field="permittedMac" />
+	                        </b:Tooltip>
                         </b:FormGroup>
                         <b:FormGroup ui:field="groupSource">
                             <b:FormLabel for="source"
                                 ui:field="labelsource"></b:FormLabel>
-                            <b:TextBox b:id="source" ui:field="source" />
+                            <b:Tooltip ui:field="tooltipSource">
+                                <b:TextBox b:id="source" ui:field="source" />
+                            </b:Tooltip>
                         </b:FormGroup>
                     </b:FieldSet>
                 </b:Form>

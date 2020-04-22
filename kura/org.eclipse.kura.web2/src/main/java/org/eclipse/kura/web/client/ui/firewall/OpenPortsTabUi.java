@@ -511,8 +511,6 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
         this.submit.setText(MSGS.submitButton());
         this.submit.addClickHandler(event -> {
 
-            checkFieldsValues();
-
             if (this.groupPort.getValidationState() == ValidationState.ERROR
                     || this.groupPermittedNw.getValidationState() == ValidationState.ERROR
                     || this.groupPermittedI.getValidationState() == ValidationState.ERROR
@@ -596,8 +594,9 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
         // set up validation
         this.port.addBlurHandler(event -> {
             if (OpenPortsTabUi.this.port.getText() == null || "".equals(OpenPortsTabUi.this.port.getText().trim())
-                    || OpenPortsTabUi.this.port.getText().trim().length() == 0 || !checkPortRegex()
-                    || !isPortInRange()) {
+                    || OpenPortsTabUi.this.port.getText().trim().length() == 0
+                    || !checkPortRegex(OpenPortsTabUi.this.port.getText())
+                    || !isPortInRange(OpenPortsTabUi.this.port.getText())) {
                 OpenPortsTabUi.this.groupPort.setValidationState(ValidationState.ERROR);
             } else {
                 OpenPortsTabUi.this.groupPort.setValidationState(ValidationState.NONE);
@@ -639,8 +638,9 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
             }
         });
         this.source.addBlurHandler(event -> {
-            if (!OpenPortsTabUi.this.source.getText().trim().matches(FieldType.PORT_RANGE.getRegex())
-                    && OpenPortsTabUi.this.source.getText().trim().length() > 0) {
+            if (OpenPortsTabUi.this.source.getText().trim().length() > 0
+                    && (!checkPortRegex(OpenPortsTabUi.this.source.getText())
+                            || !isPortInRange(OpenPortsTabUi.this.source.getText()))) {
                 OpenPortsTabUi.this.groupSource.setValidationState(ValidationState.ERROR);
             } else {
                 OpenPortsTabUi.this.groupSource.setValidationState(ValidationState.NONE);
@@ -717,14 +717,6 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
         this.labelSource.setText(MSGS.firewallOpenPortFormSourcePortRange());
     }
 
-    private void checkFieldsValues() {
-        String[] parts = this.port.getText().trim().split(":");
-        if (parts.length == 1 && parts[0].trim().isEmpty()
-                || parts.length == 2 && Integer.valueOf(parts[0].trim()) >= Integer.valueOf(parts[1].trim())) {
-            this.groupPort.setValidationState(ValidationState.ERROR);
-        }
-    }
-
     private boolean duplicateEntry(GwtFirewallOpenPortEntry openPortEntry) {
         List<GwtFirewallOpenPortEntry> entries = this.openPortsDataProvider.getList();
         if (entries != null && openPortEntry != null) {
@@ -758,10 +750,11 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
         this.modalHideHandlerRegistration = this.openPortsForm.addHideHandler(hideHandler);
     }
 
-    private boolean isPortInRange() {
-        String[] portRange = OpenPortsTabUi.this.port.getText().trim().split(":");
+    private boolean isPortInRange(String ports) {
+        String[] portRange = ports.trim().split(":");
         if (portRange.length == 2) {
-            return checkPort(portRange[0]) && checkPort(portRange[1]);
+            return checkPort(portRange[0]) && checkPort(portRange[1])
+                    && Integer.parseInt(portRange[0]) < Integer.parseInt(portRange[1]);
         } else {
             return checkPort(portRange[0]);
         }
@@ -776,10 +769,9 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
         return isInRange;
     }
 
-    private boolean checkPortRegex() {
+    private boolean checkPortRegex(String ports) {
         boolean isPortRegex = false;
-        if (OpenPortsTabUi.this.port.getText().trim().matches(FieldType.PORT_RANGE.getRegex())
-                || OpenPortsTabUi.this.port.getText().trim().matches(FieldType.PORT.getRegex())) {
+        if (ports.trim().matches(FieldType.PORT_RANGE.getRegex()) || ports.trim().matches(FieldType.PORT.getRegex())) {
             isPortRegex = true;
         }
         return isPortRegex;

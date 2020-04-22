@@ -66,8 +66,8 @@ public abstract class TelitModem {
     public void reset() {
         int offOnDelay = 1000;
 
-        sleep(5000);
         while (true) {
+            sleep(5000);
             try {
                 turnOff();
 
@@ -416,8 +416,8 @@ public abstract class TelitModem {
                                 }
                             } else {
                                 if (isAtReachable(commAtConnection)) {
-                                    logger.warn(
-                                            "disableGps() :: Modem didn't reply with 'NO CARRIER' to the +++ escape sequence but port is AT reachable");
+                                    logger.warn("disableGps() :: Modem didn't reply with 'NO CARRIER' "
+                                            + "to the +++ escape sequence but port is AT reachable");
                                     logger.info("disableGps() :: Will assume that GPS is disabled");
                                     this.gpsEnabled = false;
                                     break;

@@ -78,7 +78,7 @@ public class QuectelEG25 extends HspaModem implements HspaCellularModem {
             port = getAtPort();
         }
 
-        synchronized (atLock) {
+        synchronized (this.atLock) {
             logger.debug("sendCommand getSimStatus :: {} command to port {}",
                     QuectelEG25AtCommands.GET_SIM_STATUS.getCommand(), port);
             byte[] reply = null;
@@ -116,7 +116,7 @@ public class QuectelEG25 extends HspaModem implements HspaCellularModem {
     public ModemRegistrationStatus getRegistrationStatus() throws KuraException {
 
         ModemRegistrationStatus modemRegistrationStatus = ModemRegistrationStatus.UNKNOWN;
-        synchronized (atLock) {
+        synchronized (this.atLock) {
             logger.debug("sendCommand getRegistrationStatus :: {}",
                     QuectelEG25AtCommands.GET_REGISTRATION_STATUS.getCommand());
             byte[] reply = null;
@@ -166,7 +166,7 @@ public class QuectelEG25 extends HspaModem implements HspaCellularModem {
     public long getCallTxCounter() throws KuraException {
 
         long txCnt = 0;
-        synchronized (atLock) {
+        synchronized (this.atLock) {
             logger.debug("sendCommand getGprsSessionDataVolume :: {}",
                     QuectelEG25AtCommands.GET_GPRS_SESSION_DATA_VOLUME.getCommand());
             byte[] reply = null;
@@ -196,7 +196,7 @@ public class QuectelEG25 extends HspaModem implements HspaCellularModem {
     @Override
     public long getCallRxCounter() throws KuraException {
         long rxCnt = 0;
-        synchronized (atLock) {
+        synchronized (this.atLock) {
             logger.debug("sendCommand getGprsSessionDataVolume :: {}",
                     QuectelEG25AtCommands.GET_GPRS_SESSION_DATA_VOLUME.getCommand());
             byte[] reply = null;
@@ -226,7 +226,7 @@ public class QuectelEG25 extends HspaModem implements HspaCellularModem {
     @Override
     public String getServiceType() throws KuraException {
         String serviceType = null;
-        synchronized (atLock) {
+        synchronized (this.atLock) {
             logger.debug("sendCommand getMobileStationClass :: {}",
                     QuectelEG25AtCommands.GET_MOBILESTATION_CLASS.getCommand());
             byte[] reply = null;
@@ -301,8 +301,8 @@ public class QuectelEG25 extends HspaModem implements HspaCellularModem {
 
     @Override
     public void reset() throws KuraException {
-        sleep(5000);
         while (true) {
+            sleep(5000);
             try {
                 turnOff();
                 sleep(1000);

@@ -113,7 +113,7 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
     @UiField
     FormLabel labelPermitttedMac;
     @UiField
-    FormLabel labelsource;
+    FormLabel labelSource;
 
     @UiField
     TextBox port;
@@ -175,7 +175,7 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
         initDuplicateRuleModal();
         this.buttonBar.setListener(this);
 
-        // Initialize fixed items for modal
+        // Initialize fixed fields for modal
         setModalFieldsLabels();
         setModalFieldsTooltips();
         setModalFieldsHandlers();
@@ -714,7 +714,7 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
         this.labelPermitttedI.setText(MSGS.firewallOpenPortFormPermittedInterfaceName());
         this.labelUnPermitttedI.setText(MSGS.firewallOpenPortFormUnpermittedInterfaceName());
         this.labelPermitttedMac.setText(MSGS.firewallOpenPortFormPermittedMac());
-        this.labelsource.setText(MSGS.firewallOpenPortFormSourcePortRange());
+        this.labelSource.setText(MSGS.firewallOpenPortFormSourcePortRange());
     }
 
     private void checkFieldsValues() {

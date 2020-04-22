@@ -91,7 +91,7 @@
                         </b:FormGroup>
                         <b:FormGroup ui:field="groupSource">
                             <b:FormLabel for="source"
-                                ui:field="labelsource"></b:FormLabel>
+                                ui:field="labelSource"></b:FormLabel>
                             <b:Tooltip ui:field="tooltipSource">
                                 <b:TextBox b:id="source" ui:field="source" />
                             </b:Tooltip>

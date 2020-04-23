@@ -188,9 +188,16 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
         this.portForwardGrid.setSelectionModel(this.selectionModel);
 
         this.buttonBar.setListener(this);
+
+        // Initialize fixed fields for modal
+        setModalFieldsLabels();
+        setModalFieldsTooltips();
+        setModalFieldsHandlers();
+
         initTable();
         initModal();
         initDuplicateRuleModal();
+
     }
 
     private void initDuplicateRuleModal() {
@@ -216,6 +223,7 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
 
             @Override
             public void onSuccess(GwtXSRFToken token) {
+                PortForwardingTabUi.this.setDirty(false);
                 PortForwardingTabUi.this.gwtNetworkService.findDeviceFirewallPortForwards(token,
                         new AsyncCallback<List<GwtFirewallPortForwardEntry>>() {
 
@@ -228,6 +236,7 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
                             @Override
                             public void onSuccess(List<GwtFirewallPortForwardEntry> result) {
                                 for (GwtFirewallPortForwardEntry pair : result) {
+                                    PortForwardingTabUi.this.portForwardDataProvider.getList().remove(pair);
                                     PortForwardingTabUi.this.portForwardDataProvider.getList().add(pair);
                                 }
                                 refreshTable();
@@ -473,6 +482,9 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
     public void onCreate() {
         replaceModalHideHandler(evt -> {
             if (PortForwardingTabUi.this.newPortForwardEntry != null) {
+                // Avoid duplicates
+                PortForwardingTabUi.this.portForwardDataProvider.getList()
+                        .remove(PortForwardingTabUi.this.newPortForwardEntry);
                 if (!duplicateEntry(PortForwardingTabUi.this.newPortForwardEntry)) {
                     PortForwardingTabUi.this.portForwardDataProvider.getList()
                             .add(PortForwardingTabUi.this.newPortForwardEntry);
@@ -542,11 +554,22 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
 
         // handle buttons
         this.cancel.setText(MSGS.cancelButton());
-        this.cancel.addClickHandler(event -> PortForwardingTabUi.this.portForwardingForm.hide());
+        this.cancel.addClickHandler(event -> {
+            PortForwardingTabUi.this.portForwardingForm.hide();
+            PortForwardingTabUi.this.newPortForwardEntry = null;
+            PortForwardingTabUi.this.editPortForwardEntry = null;
+            PortForwardingTabUi.this.input.clear();
+            PortForwardingTabUi.this.output.clear();
+            PortForwardingTabUi.this.lan.clear();
+            PortForwardingTabUi.this.external.clear();
+            PortForwardingTabUi.this.internal.clear();
+            PortForwardingTabUi.this.permittedNw.clear();
+            PortForwardingTabUi.this.permittedMac.clear();
+            PortForwardingTabUi.this.source.clear();
+        });
 
         this.submit.setText(MSGS.submitButton());
         this.submit.addClickHandler(event -> {
-            checkFieldsValues();
 
             if (PortForwardingTabUi.this.groupInput.getValidationState().equals(ValidationState.ERROR)
                     || PortForwardingTabUi.this.groupOutput.getValidationState().equals(ValidationState.ERROR)
@@ -615,13 +638,7 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
                     .setTitle(MSGS.firewallPortForwardFormUpdate(String.valueOf(existingEntry.getInPort())));
         }
 
-        setModalFieldsLabels();
-
-        setModalFieldsTooltips();
-
         setModalFieldsValues(existingEntry);
-
-        setModalFieldsHandlers();
 
         if (existingEntry == null) {
             this.submit.setId("new");
@@ -636,7 +653,8 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
         // Set validations
         this.input.addBlurHandler(event -> {
             if (PortForwardingTabUi.this.input.getText().trim().isEmpty()
-                    || !PortForwardingTabUi.this.input.getText().trim().matches(FieldType.ALPHANUMERIC.getRegex())) {
+                    || !PortForwardingTabUi.this.input.getText().trim().matches(FieldType.ALPHANUMERIC.getRegex())
+                    || PortForwardingTabUi.this.input.getText().trim().length() > 15) {
                 PortForwardingTabUi.this.groupInput.setValidationState(ValidationState.ERROR);
             } else {
                 PortForwardingTabUi.this.groupInput.setValidationState(ValidationState.NONE);
@@ -644,7 +662,8 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
         });
         this.output.addBlurHandler(event -> {
             if (PortForwardingTabUi.this.output.getText().trim().isEmpty()
-                    || !PortForwardingTabUi.this.output.getText().trim().matches(FieldType.ALPHANUMERIC.getRegex())) {
+                    || !PortForwardingTabUi.this.output.getText().trim().matches(FieldType.ALPHANUMERIC.getRegex())
+                    || PortForwardingTabUi.this.output.getText().trim().length() > 15) {
                 PortForwardingTabUi.this.groupOutput.setValidationState(ValidationState.ERROR);
             } else {
                 PortForwardingTabUi.this.groupOutput.setValidationState(ValidationState.NONE);
@@ -660,7 +679,8 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
         });
         this.internal.addBlurHandler(event -> {
             if (PortForwardingTabUi.this.internal.getText().trim().isEmpty()
-                    || !PortForwardingTabUi.this.internal.getText().trim().matches(FieldType.PORT.getRegex())) {
+                    || !checkPortRegex(PortForwardingTabUi.this.internal.getText())
+                    || !isPortInRange(PortForwardingTabUi.this.internal.getText())) {
                 PortForwardingTabUi.this.groupInternal.setValidationState(ValidationState.ERROR);
             } else {
                 PortForwardingTabUi.this.groupInternal.setValidationState(ValidationState.NONE);
@@ -668,7 +688,8 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
         });
         this.external.addBlurHandler(event -> {
             if (PortForwardingTabUi.this.external.getText().trim().isEmpty()
-                    || !PortForwardingTabUi.this.external.getText().trim().matches(FieldType.PORT.getRegex())) {
+                    || !checkPortRegex(PortForwardingTabUi.this.external.getText())
+                    || !isPortInRange(PortForwardingTabUi.this.external.getText())) {
                 PortForwardingTabUi.this.groupExternal.setValidationState(ValidationState.ERROR);
             } else {
                 PortForwardingTabUi.this.groupExternal.setValidationState(ValidationState.NONE);
@@ -693,7 +714,8 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
         });
         this.source.addBlurHandler(event -> {
             if (!PortForwardingTabUi.this.source.getText().trim().isEmpty()
-                    && !PortForwardingTabUi.this.source.getText().trim().matches(FieldType.PORT_RANGE.getRegex())) {
+                    && (!checkPortRegex(PortForwardingTabUi.this.source.getText())
+                            || !isPortInRange(PortForwardingTabUi.this.source.getText()))) {
                 PortForwardingTabUi.this.groupSource.setValidationState(ValidationState.ERROR);
             } else {
                 PortForwardingTabUi.this.groupSource.setValidationState(ValidationState.NONE);
@@ -826,29 +848,37 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
         return isDuplicateEntry;
     }
 
-    private void checkFieldsValues() {
-        // set required fields in error state by default if empty
-        if (this.input.getText() == null || "".equals(this.input.getText().trim())) {
-            this.groupInput.setValidationState(ValidationState.ERROR);
-        }
-        if (this.output.getText() == null || "".equals(this.output.getText().trim())) {
-            this.groupOutput.setValidationState(ValidationState.ERROR);
-        }
-        if (this.lan.getText() == null || "".equals(this.lan.getText().trim())) {
-            this.groupLan.setValidationState(ValidationState.ERROR);
-        }
-        if (this.internal.getText() == null || "".equals(this.internal.getText().trim())) {
-            this.groupInternal.setValidationState(ValidationState.ERROR);
-        }
-        if (this.external.getText() == null || "".equals(this.external.getText().trim())) {
-            this.groupExternal.setValidationState(ValidationState.ERROR);
-        }
-    }
-
     private void replaceModalHideHandler(ModalHideHandler hideHandler) {
         if (this.modalHideHandlerRegistration != null) {
             this.modalHideHandlerRegistration.removeHandler();
         }
         this.modalHideHandlerRegistration = this.portForwardingForm.addHideHandler(hideHandler);
+    }
+
+    private boolean isPortInRange(String ports) {
+        String[] portRange = ports.trim().split(":");
+        if (portRange.length == 2) {
+            return checkPort(portRange[0]) && checkPort(portRange[1])
+                    && Integer.parseInt(portRange[0]) < Integer.parseInt(portRange[1]);
+        } else {
+            return checkPort(portRange[0]);
+        }
+    }
+
+    private boolean checkPort(String port) {
+        boolean isInRange = false;
+        Integer portInt = Integer.parseInt(port);
+        if (!port.startsWith("0") && portInt > 0 && portInt <= 65535) {
+            isInRange = true;
+        }
+        return isInRange;
+    }
+
+    private boolean checkPortRegex(String ports) {
+        boolean isPortRegex = false;
+        if (ports.trim().matches(FieldType.PORT_RANGE.getRegex()) || ports.trim().matches(FieldType.PORT.getRegex())) {
+            isPortRegex = true;
+        }
+        return isPortRegex;
     }
 }

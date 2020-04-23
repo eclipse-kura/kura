@@ -11,6 +11,7 @@ Changes:
   * Target Platform Updates
     * Jetty 9.4.19.v20190610
     * H2DB 1.4.199
+    * Paho 1.2.1.k2
 
   * Bug fixes and cleanups
     * Fixed modem reset issue when the value is configured to 0 (no reset)
@@ -22,6 +23,9 @@ Changes:
     * Fixed issue with Asset channel restore functionality
     * Fixed issue with DEPLOY-V2 failure message publishing
     * Fixed issue with Paho overriding SSL settings
+    * Fixed issue in CanConnection service with multiple can interfaces
+    * Fixed issue with modem switching from data mode to command mode
+    * Fixed issue with modem reset
 
 
 Compatibility:
@@ -39,6 +43,9 @@ Target Environments:
 
 Bug Fixes :
   * Fixed github issues:
+    * #2811: CanConnection service with multiple can interfaces
+    * #2809: Unescaped loop on modem reset failure
+    * #2800: Switching from data mode to command mode does not work in pppd chat script
     * #2793: Paho 1.2.1 overrides Kura SSL configuration
     * #2759: [DEPLOY-V2] Failure status reported by a verifier script is not published
     * #2679: One of two CloudConnections sometimes fails to connect and never tries to reconnect

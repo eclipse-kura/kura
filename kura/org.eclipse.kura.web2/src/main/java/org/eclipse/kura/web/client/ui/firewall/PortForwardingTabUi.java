@@ -757,8 +757,8 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
         this.labelOutput.setText(MSGS.firewallPortForwardFormOutboundInterface() + "*");
         this.labelLan.setText(MSGS.firewallPortForwardFormAddress() + "*");
         this.labelProtocol.setText(MSGS.firewallPortForwardFormProtocol());
-        this.labelExternal.setText(MSGS.firewallPortForwardFormInPort());
-        this.labelInternal.setText(MSGS.firewallPortForwardFormOutPort());
+        this.labelExternal.setText(MSGS.firewallPortForwardFormInPort() + "*");
+        this.labelInternal.setText(MSGS.firewallPortForwardFormOutPort() + "*");
         this.labelEnable.setText(MSGS.firewallNatFormMasquerade());
         this.labelPermitttedNw.setText(MSGS.firewallPortForwardFormPermittedNetwork());
         this.labelPermitttedMac.setText(MSGS.firewallPortForwardFormPermittedMac());

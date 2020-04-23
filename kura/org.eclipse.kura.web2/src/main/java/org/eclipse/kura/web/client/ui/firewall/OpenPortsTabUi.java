@@ -13,7 +13,6 @@ package org.eclipse.kura.web.client.ui.firewall;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -356,7 +355,7 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
     }
 
     private void refreshTable() {
-        Collections.sort(OpenPortsTabUi.this.openPortsDataProvider.getList(), new PortSorting());
+        Collections.sort(OpenPortsTabUi.this.openPortsDataProvider.getList(), new FirewallPanelUtils.PortSorting());
         int size = this.openPortsDataProvider.getList().size();
         this.openPortsGrid.setVisibleRange(0, size);
         this.openPortsDataProvider.flush();
@@ -437,7 +436,6 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
         }
 
         replaceModalHideHandler(evt -> {
-
             if (OpenPortsTabUi.this.editOpenPortEntry != null) {
                 GwtFirewallOpenPortEntry oldEntry = OpenPortsTabUi.this.selectionModel.getSelectedObject();
                 OpenPortsTabUi.this.openPortsDataProvider.getList().remove(oldEntry);
@@ -478,8 +476,7 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
         if (selection != null) {
             OpenPortsTabUi.this.alertDialog
                     .show(MSGS.firewallOpenPortDeleteConfirmation(String.valueOf(selection.getPortRange())), () -> {
-                        OpenPortsTabUi.this.openPortsDataProvider.getList()
-                                .remove(OpenPortsTabUi.this.selectionModel.getSelectedObject());
+                        OpenPortsTabUi.this.openPortsDataProvider.getList().remove(selection);
                         refreshTable();
                         OpenPortsTabUi.this.buttonBar.setApplyResetButtonsDirty(true);
                         OpenPortsTabUi.this.buttonBar.setEditDeleteButtonsDirty(false);
@@ -593,8 +590,8 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
         this.port.addBlurHandler(event -> {
             if (OpenPortsTabUi.this.port.getText() == null || "".equals(OpenPortsTabUi.this.port.getText().trim())
                     || OpenPortsTabUi.this.port.getText().trim().length() == 0
-                    || !checkPortRegex(OpenPortsTabUi.this.port.getText())
-                    || !isPortInRange(OpenPortsTabUi.this.port.getText())) {
+                    || !FirewallPanelUtils.checkPortRegex(OpenPortsTabUi.this.port.getText())
+                    || !FirewallPanelUtils.isPortInRange(OpenPortsTabUi.this.port.getText())) {
                 OpenPortsTabUi.this.groupPort.setValidationState(ValidationState.ERROR);
             } else {
                 OpenPortsTabUi.this.groupPort.setValidationState(ValidationState.NONE);
@@ -637,8 +634,8 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
         });
         this.source.addBlurHandler(event -> {
             if (OpenPortsTabUi.this.source.getText().trim().length() > 0
-                    && (!checkPortRegex(OpenPortsTabUi.this.source.getText())
-                            || !isPortInRange(OpenPortsTabUi.this.source.getText()))) {
+                    && (!FirewallPanelUtils.checkPortRegex(OpenPortsTabUi.this.source.getText())
+                            || !FirewallPanelUtils.isPortInRange(OpenPortsTabUi.this.source.getText()))) {
                 OpenPortsTabUi.this.groupSource.setValidationState(ValidationState.ERROR);
             } else {
                 OpenPortsTabUi.this.groupSource.setValidationState(ValidationState.NONE);
@@ -748,46 +745,4 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
         this.modalHideHandlerRegistration = this.openPortsForm.addHideHandler(hideHandler);
     }
 
-    private boolean isPortInRange(String ports) {
-        String[] portRange = ports.trim().split(":");
-        if (portRange.length == 2) {
-            return checkPort(portRange[0]) && checkPort(portRange[1])
-                    && Integer.parseInt(portRange[0]) < Integer.parseInt(portRange[1]);
-        } else {
-            return checkPort(portRange[0]);
-        }
-    }
-
-    private boolean checkPort(String port) {
-        boolean isInRange = false;
-        Integer portInt = Integer.parseInt(port);
-        if (!port.startsWith("0") && portInt > 0 && portInt <= 65535) {
-            isInRange = true;
-        }
-        return isInRange;
-    }
-
-    private boolean checkPortRegex(String ports) {
-        boolean isPortRegex = false;
-        if (ports.trim().matches(FieldType.PORT_RANGE.getRegex()) || ports.trim().matches(FieldType.PORT.getRegex())) {
-            isPortRegex = true;
-        }
-        return isPortRegex;
-    }
-
-    private class PortSorting implements Comparator<GwtFirewallOpenPortEntry> {
-
-        @Override
-        public int compare(GwtFirewallOpenPortEntry o1, GwtFirewallOpenPortEntry o2) {
-            if (o1 == o2) {
-                return 0;
-            }
-            if (o1 != null) {
-                Integer o1Port = Integer.parseInt(o1.getPortRange().split(":")[0]);
-                Integer o2Port = Integer.parseInt(o2.getPortRange().split(":")[0]);
-                return (o2 != null) ? o1Port.compareTo(o2Port) : 1;
-            }
-            return -1;
-        }
-    }
 }

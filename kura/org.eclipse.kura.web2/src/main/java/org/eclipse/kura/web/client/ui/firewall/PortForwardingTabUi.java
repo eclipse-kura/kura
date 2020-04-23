@@ -65,7 +65,7 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
     private final GwtNetworkServiceAsync gwtNetworkService = GWT.create(GwtNetworkService.class);
 
     private final ListDataProvider<GwtFirewallPortForwardEntry> portForwardDataProvider = new ListDataProvider<>();
-    final SingleSelectionModel<GwtFirewallPortForwardEntry> selectionModel = new SingleSelectionModel<>();
+    private final SingleSelectionModel<GwtFirewallPortForwardEntry> selectionModel = new SingleSelectionModel<>();
 
     private GwtFirewallPortForwardEntry newPortForwardEntry;
     private GwtFirewallPortForwardEntry editPortForwardEntry;
@@ -679,8 +679,8 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
         });
         this.internal.addBlurHandler(event -> {
             if (PortForwardingTabUi.this.internal.getText().trim().isEmpty()
-                    || !checkPortRegex(PortForwardingTabUi.this.internal.getText())
-                    || !isPortInRange(PortForwardingTabUi.this.internal.getText())) {
+                    || !FirewallPanelUtils.checkPortRegex(PortForwardingTabUi.this.internal.getText())
+                    || !FirewallPanelUtils.isPortInRange(PortForwardingTabUi.this.internal.getText())) {
                 PortForwardingTabUi.this.groupInternal.setValidationState(ValidationState.ERROR);
             } else {
                 PortForwardingTabUi.this.groupInternal.setValidationState(ValidationState.NONE);
@@ -688,8 +688,8 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
         });
         this.external.addBlurHandler(event -> {
             if (PortForwardingTabUi.this.external.getText().trim().isEmpty()
-                    || !checkPortRegex(PortForwardingTabUi.this.external.getText())
-                    || !isPortInRange(PortForwardingTabUi.this.external.getText())) {
+                    || !FirewallPanelUtils.checkPortRegex(PortForwardingTabUi.this.external.getText())
+                    || !FirewallPanelUtils.isPortInRange(PortForwardingTabUi.this.external.getText())) {
                 PortForwardingTabUi.this.groupExternal.setValidationState(ValidationState.ERROR);
             } else {
                 PortForwardingTabUi.this.groupExternal.setValidationState(ValidationState.NONE);
@@ -714,8 +714,8 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
         });
         this.source.addBlurHandler(event -> {
             if (!PortForwardingTabUi.this.source.getText().trim().isEmpty()
-                    && (!checkPortRegex(PortForwardingTabUi.this.source.getText())
-                            || !isPortInRange(PortForwardingTabUi.this.source.getText()))) {
+                    && (!FirewallPanelUtils.checkPortRegex(PortForwardingTabUi.this.source.getText())
+                            || !FirewallPanelUtils.isPortInRange(PortForwardingTabUi.this.source.getText()))) {
                 PortForwardingTabUi.this.groupSource.setValidationState(ValidationState.ERROR);
             } else {
                 PortForwardingTabUi.this.groupSource.setValidationState(ValidationState.NONE);
@@ -855,30 +855,4 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
         this.modalHideHandlerRegistration = this.portForwardingForm.addHideHandler(hideHandler);
     }
 
-    private boolean isPortInRange(String ports) {
-        String[] portRange = ports.trim().split(":");
-        if (portRange.length == 2) {
-            return checkPort(portRange[0]) && checkPort(portRange[1])
-                    && Integer.parseInt(portRange[0]) < Integer.parseInt(portRange[1]);
-        } else {
-            return checkPort(portRange[0]);
-        }
-    }
-
-    private boolean checkPort(String port) {
-        boolean isInRange = false;
-        Integer portInt = Integer.parseInt(port);
-        if (!port.startsWith("0") && portInt > 0 && portInt <= 65535) {
-            isInRange = true;
-        }
-        return isInRange;
-    }
-
-    private boolean checkPortRegex(String ports) {
-        boolean isPortRegex = false;
-        if (ports.trim().matches(FieldType.PORT_RANGE.getRegex()) || ports.trim().matches(FieldType.PORT.getRegex())) {
-            isPortRegex = true;
-        }
-        return isPortRegex;
-    }
 }

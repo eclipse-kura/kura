@@ -636,7 +636,7 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
         });
         this.internal.addBlurHandler(event -> {
             if (PortForwardingTabUi.this.internal.getText().trim().isEmpty()
-                    || !PortForwardingTabUi.this.internal.getText().trim().matches(FieldType.NUMERIC.getRegex())) {
+                    || !PortForwardingTabUi.this.internal.getText().trim().matches(FieldType.PORT.getRegex())) {
                 PortForwardingTabUi.this.groupInternal.setValidationState(ValidationState.ERROR);
             } else {
                 PortForwardingTabUi.this.groupInternal.setValidationState(ValidationState.NONE);
@@ -644,7 +644,7 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
         });
         this.external.addBlurHandler(event -> {
             if (PortForwardingTabUi.this.external.getText().trim().isEmpty()
-                    || !PortForwardingTabUi.this.external.getText().trim().matches(FieldType.NUMERIC.getRegex())) {
+                    || !PortForwardingTabUi.this.external.getText().trim().matches(FieldType.PORT.getRegex())) {
                 PortForwardingTabUi.this.groupExternal.setValidationState(ValidationState.ERROR);
             } else {
                 PortForwardingTabUi.this.groupExternal.setValidationState(ValidationState.NONE);

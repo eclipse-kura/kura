@@ -171,14 +171,30 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
     @UiField
     Button cancel;
 
+    @UiField
+    Modal existingRule;
+    @UiField
+    Button close;
+
     private HandlerRegistration modalHideHandlerRegistration;
 
     public PortForwardingTabUi() {
         initWidget(uiBinder.createAndBindUi(this));
+        this.selectionModel.addSelectionChangeHandler(event -> {
+            if (PortForwardingTabUi.this.selectionModel.getSelectedObject() != null) {
+                PortForwardingTabUi.this.buttonBar.setEditDeleteButtonsDirty(true);
+            }
+        });
+        this.portForwardGrid.setSelectionModel(this.selectionModel);
 
         this.buttonBar.setListener(this);
         initTable();
         initModal();
+        initDuplicateRuleModal();
+    }
+
+    private void initDuplicateRuleModal() {
+        this.close.addClickHandler(event -> this.existingRule.hide());
     }
 
     //
@@ -217,6 +233,7 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
                                 refreshTable();
 
                                 PortForwardingTabUi.this.buttonBar.setApplyResetButtonsDirty(false);
+                                PortForwardingTabUi.this.buttonBar.setEditDeleteButtonsDirty(false);
                                 EntryClassUi.hideWaitModal();
                             }
                         });
@@ -455,13 +472,16 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
     @Override
     public void onCreate() {
         replaceModalHideHandler(evt -> {
-            if (PortForwardingTabUi.this.newPortForwardEntry != null
-                    && !duplicateEntry(PortForwardingTabUi.this.newPortForwardEntry)) {
-                PortForwardingTabUi.this.portForwardDataProvider.getList()
-                        .add(PortForwardingTabUi.this.newPortForwardEntry);
-                refreshTable();
-                PortForwardingTabUi.this.buttonBar.setApplyResetButtonsDirty(true);
-                PortForwardingTabUi.this.newPortForwardEntry = null;
+            if (PortForwardingTabUi.this.newPortForwardEntry != null) {
+                if (!duplicateEntry(PortForwardingTabUi.this.newPortForwardEntry)) {
+                    PortForwardingTabUi.this.portForwardDataProvider.getList()
+                            .add(PortForwardingTabUi.this.newPortForwardEntry);
+                    refreshTable();
+                    PortForwardingTabUi.this.buttonBar.setApplyResetButtonsDirty(true);
+                    PortForwardingTabUi.this.newPortForwardEntry = null;
+                } else {
+                    this.existingRule.show();
+                }
             }
         });
         showModal(null);
@@ -480,6 +500,7 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
             if (PortForwardingTabUi.this.editPortForwardEntry != null) {
                 GwtFirewallPortForwardEntry oldEntry = PortForwardingTabUi.this.selectionModel.getSelectedObject();
                 PortForwardingTabUi.this.portForwardDataProvider.getList().remove(oldEntry);
+                refreshTable();
                 if (!duplicateEntry(PortForwardingTabUi.this.editPortForwardEntry)) {
                     PortForwardingTabUi.this.portForwardDataProvider.getList()
                             .add(PortForwardingTabUi.this.editPortForwardEntry);
@@ -487,9 +508,13 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
                     PortForwardingTabUi.this.buttonBar.setApplyResetButtonsDirty(true);
                     PortForwardingTabUi.this.editPortForwardEntry = null;
                 } else {    // end duplicate
+                    this.existingRule.show();
                     PortForwardingTabUi.this.portForwardDataProvider.getList().add(oldEntry);
                     PortForwardingTabUi.this.portForwardDataProvider.flush();
                 }
+                refreshTable();
+                PortForwardingTabUi.this.buttonBar.setEditDeleteButtonsDirty(false);
+                PortForwardingTabUi.this.selectionModel.setSelected(selection, false);
             }
         });
 
@@ -499,19 +524,18 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
     @Override
     public void onDelete() {
         GwtFirewallPortForwardEntry selection = PortForwardingTabUi.this.selectionModel.getSelectedObject();
-
-        if (selection == null) {
-            return;
+        if (selection != null) {
+            PortForwardingTabUi.this.alertDialog
+                    .show(MSGS.firewallOpenPortDeleteConfirmation(String.valueOf(selection.getInPort())), () -> {
+                        PortForwardingTabUi.this.portForwardDataProvider.getList()
+                                .remove(PortForwardingTabUi.this.selectionModel.getSelectedObject());
+                        refreshTable();
+                        PortForwardingTabUi.this.buttonBar.setApplyResetButtonsDirty(true);
+                        PortForwardingTabUi.this.buttonBar.setEditDeleteButtonsDirty(false);
+                        PortForwardingTabUi.this.selectionModel.setSelected(selection, false);
+                        setDirty(true);
+                    });
         }
-
-        PortForwardingTabUi.this.alertDialog
-                .show(MSGS.firewallOpenPortDeleteConfirmation(String.valueOf(selection.getInPort())), () -> {
-                    PortForwardingTabUi.this.portForwardDataProvider.getList()
-                            .remove(PortForwardingTabUi.this.selectionModel.getSelectedObject());
-                    refreshTable();
-                    PortForwardingTabUi.this.buttonBar.setApplyResetButtonsDirty(true);
-                    setDirty(true);
-                });
     }
 
     private void initModal() {

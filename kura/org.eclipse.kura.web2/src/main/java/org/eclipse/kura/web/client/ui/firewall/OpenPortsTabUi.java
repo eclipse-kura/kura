@@ -440,9 +440,7 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
 
             if (OpenPortsTabUi.this.editOpenPortEntry != null) {
                 GwtFirewallOpenPortEntry oldEntry = OpenPortsTabUi.this.selectionModel.getSelectedObject();
-
-                OpenPortsTabUi.this.openPortsDataProvider.getList()
-                        .remove(OpenPortsTabUi.this.selectionModel.getSelectedObject());
+                OpenPortsTabUi.this.openPortsDataProvider.getList().remove(oldEntry);
                 refreshTable();
                 if (!duplicateEntry(OpenPortsTabUi.this.editOpenPortEntry)) {
                     OpenPortsTabUi.this.openPortsDataProvider.getList().add(OpenPortsTabUi.this.editOpenPortEntry);

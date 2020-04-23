@@ -1,0 +1,7 @@
+#!/bin/bash
+
+set -e
+
+for i in $*; do
+	echo "$i" >> "${KURA_DIR}/framework/config.ini"
+done

@@ -495,6 +495,7 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
                     this.existingRule.show();
                 }
             }
+            resetFields();
         });
         showModal(null);
     }
@@ -528,6 +529,7 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
                 PortForwardingTabUi.this.buttonBar.setEditDeleteButtonsDirty(false);
                 PortForwardingTabUi.this.selectionModel.setSelected(selection, false);
             }
+            resetFields();
         });
 
         showModal(selection);
@@ -556,16 +558,7 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
         this.cancel.setText(MSGS.cancelButton());
         this.cancel.addClickHandler(event -> {
             PortForwardingTabUi.this.portForwardingForm.hide();
-            PortForwardingTabUi.this.newPortForwardEntry = null;
-            PortForwardingTabUi.this.editPortForwardEntry = null;
-            PortForwardingTabUi.this.input.clear();
-            PortForwardingTabUi.this.output.clear();
-            PortForwardingTabUi.this.lan.clear();
-            PortForwardingTabUi.this.external.clear();
-            PortForwardingTabUi.this.internal.clear();
-            PortForwardingTabUi.this.permittedNw.clear();
-            PortForwardingTabUi.this.permittedMac.clear();
-            PortForwardingTabUi.this.source.clear();
+            resetFields();
         });
 
         this.submit.setText(MSGS.submitButton());
@@ -853,6 +846,19 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
             this.modalHideHandlerRegistration.removeHandler();
         }
         this.modalHideHandlerRegistration = this.portForwardingForm.addHideHandler(hideHandler);
+    }
+
+    private void resetFields() {
+        PortForwardingTabUi.this.newPortForwardEntry = null;
+        PortForwardingTabUi.this.editPortForwardEntry = null;
+        PortForwardingTabUi.this.input.clear();
+        PortForwardingTabUi.this.output.clear();
+        PortForwardingTabUi.this.lan.clear();
+        PortForwardingTabUi.this.external.clear();
+        PortForwardingTabUi.this.internal.clear();
+        PortForwardingTabUi.this.permittedNw.clear();
+        PortForwardingTabUi.this.permittedMac.clear();
+        PortForwardingTabUi.this.source.clear();
     }
 
 }

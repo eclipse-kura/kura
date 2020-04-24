@@ -402,6 +402,7 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
                     this.existingRule.show();
                 }
             }
+            resetFields();
         });
         showModal(null);
 
@@ -435,6 +436,7 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
                 NatTabUi.this.buttonBar.setEditDeleteButtonsDirty(false);
                 NatTabUi.this.selectionModel.setSelected(selection, false);
             }
+            resetFields();
         });
         showModal(selection);
 
@@ -459,12 +461,7 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
         // Handle Buttons
         this.cancel.addClickHandler(event -> {
             NatTabUi.this.natForm.hide();
-            this.newNatEntry = null;
-            this.editNatEntry = null;
-            this.input.clear();
-            this.output.clear();
-            this.source.clear();
-            this.destination.clear();
+            resetFields();
         });
 
         this.submit.addClickHandler(event -> {
@@ -495,6 +492,15 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
 
             setDirty(true);
         });
+    }
+
+    private void resetFields() {
+        this.newNatEntry = null;
+        this.editNatEntry = null;
+        this.input.clear();
+        this.output.clear();
+        this.source.clear();
+        this.destination.clear();
     }
 
     private void showModal(final GwtFirewallNatEntry existingEntry) {

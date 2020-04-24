@@ -52,12 +52,15 @@ public class FirewallPanelUtils {
             if (o1 == o2) {
                 return 0;
             }
-            if (o1 != null) {
-                Integer o1Port = Integer.parseInt(o1.getPortRange().split(":")[0]);
-                Integer o2Port = Integer.parseInt(o2.getPortRange().split(":")[0]);
-                return (o2 != null) ? o1Port.compareTo(o2Port) : 1;
+            if (o1 == null) {
+                return 1;
             }
-            return -1;
+            if (o2 == null) {
+                return -1;
+            }
+            Integer o1Port = Integer.parseInt(o1.getPortRange().split(":")[0]);
+            Integer o2Port = Integer.parseInt(o2.getPortRange().split(":")[0]);
+            return o1Port.compareTo(o2Port);
         }
     }
 

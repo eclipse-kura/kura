@@ -423,6 +423,7 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
                     this.existingRule.show();
                 }
             }
+            resetFields();
         });
         showModal(null);
     }
@@ -455,6 +456,7 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
                 OpenPortsTabUi.this.buttonBar.setEditDeleteButtonsDirty(false);
                 OpenPortsTabUi.this.selectionModel.setSelected(selection, false);
             }
+            resetFields();
         });
         final AlertDialog.ConfirmListener listener = () -> showModal(
                 OpenPortsTabUi.this.selectionModel.getSelectedObject());
@@ -492,15 +494,7 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
         this.cancel.setText(MSGS.cancelButton());
         this.cancel.addClickHandler(event -> {
             this.openPortsForm.hide();
-            this.openPortEntry = null;
-            this.editOpenPortEntry = null;
-            this.newOpenPortEntry = null;
-            this.port.clear();
-            this.permittedNw.clear();
-            this.permittedI.clear();
-            this.unpermittedI.clear();
-            this.permittedMac.clear();
-            this.source.clear();
+            resetFields();
         });
 
         this.submit.setText(MSGS.submitButton());
@@ -743,6 +737,18 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
             this.modalHideHandlerRegistration.removeHandler();
         }
         this.modalHideHandlerRegistration = this.openPortsForm.addHideHandler(hideHandler);
+    }
+
+    private void resetFields() {
+        this.openPortEntry = null;
+        this.editOpenPortEntry = null;
+        this.newOpenPortEntry = null;
+        this.port.clear();
+        this.permittedNw.clear();
+        this.permittedI.clear();
+        this.unpermittedI.clear();
+        this.permittedMac.clear();
+        this.source.clear();
     }
 
 }

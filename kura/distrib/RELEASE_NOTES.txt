@@ -30,6 +30,8 @@ Changes:
 
 Compatibility:
   * Eclipse Kura v4.1.1 does not introduce API breakage with previous releases.
+  * Kura 4.1.1 introduces H2DB v.1.4.199 that requires to delete/upgrade the existing persisted database to be 
+    compatible with this new version. Please refer to http://www.h2database.com/html/tutorial.html#upgrade_backup_restore
 
 
 Target Environments:

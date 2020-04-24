@@ -65,6 +65,9 @@ public class SkinServlet extends HttpServlet {
         } else if (resourceName.endsWith(".jpg") || resourceName.endsWith(".png")) {
             response.setContentType("image/png");
             streamBinary(fResourceFile, response);
+        } else if (resourceName.endsWith(".ico")) {
+            response.setContentType("image/x-icon");
+            streamBinary(fResourceFile, response);
         }
 
     }

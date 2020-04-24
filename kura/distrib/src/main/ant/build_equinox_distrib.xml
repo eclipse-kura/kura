@@ -440,6 +440,15 @@ fi]]>
 
 			<zipfileset file="src/main/resources/common/kura_custom.properties"
 				prefix="${build.output.name}/${user.config.folder}/" />
+			
+			<zipfileset file="src/main/resources/common/favicon/favicon-16x16.png"
+				prefix="${build.output.name}/${user.config.folder}/console/skin/" />
+			<zipfileset file="src/main/resources/common/favicon/favicon-32x32.png"
+				prefix="${build.output.name}/${user.config.folder}/console/skin/" />
+			<zipfileset file="src/main/resources/common/favicon/favicon-96x96.png"
+				prefix="${build.output.name}/${user.config.folder}/console/skin/" />
+			<zipfileset file="src/main/resources/common/favicon/favicon.ico"
+				prefix="${build.output.name}/${user.config.folder}/console/skin/" />
 
 			<zipfileset
 				file="${project.build.directory}/${build.output.name}/kura_install.sh"

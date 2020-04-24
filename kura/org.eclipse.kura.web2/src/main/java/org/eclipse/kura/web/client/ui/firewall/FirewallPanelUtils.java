@@ -18,6 +18,8 @@ import org.eclipse.kura.web.shared.model.GwtFirewallOpenPortEntry;
 
 public class FirewallPanelUtils {
 
+    public static final int INTERFACE_NAME_MAX_LENGTH = 15;
+
     public static boolean isPortInRange(String ports) {
         String[] portRange = ports.trim().split(":");
         if (portRange.length == 2) {

@@ -527,7 +527,7 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
             if (this.input.getText() == null || "".equals(this.input.getText().trim())
                     || NatTabUi.this.input.getText().trim().isEmpty()
                     || !NatTabUi.this.input.getText().trim().matches(FieldType.ALPHANUMERIC.getRegex())
-                    || NatTabUi.this.input.getText().trim().length() > 15) {
+                    || NatTabUi.this.input.getText().trim().length() > FirewallPanelUtils.INTERFACE_NAME_MAX_LENGTH) {
                 NatTabUi.this.groupInput.setValidationState(ValidationState.ERROR);
             } else {
                 NatTabUi.this.groupInput.setValidationState(ValidationState.NONE);
@@ -537,7 +537,7 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
             if (this.output.getText() == null || "".equals(this.output.getText().trim())
                     || NatTabUi.this.output.getText().trim().isEmpty()
                     || !NatTabUi.this.output.getText().trim().matches(FieldType.ALPHANUMERIC.getRegex())
-                    || NatTabUi.this.output.getText().trim().length() > 15) {
+                    || NatTabUi.this.output.getText().trim().length() > FirewallPanelUtils.INTERFACE_NAME_MAX_LENGTH) {
                 NatTabUi.this.groupOutput.setValidationState(ValidationState.ERROR);
             } else {
                 NatTabUi.this.groupOutput.setValidationState(ValidationState.NONE);

@@ -647,7 +647,8 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
         this.input.addBlurHandler(event -> {
             if (PortForwardingTabUi.this.input.getText().trim().isEmpty()
                     || !PortForwardingTabUi.this.input.getText().trim().matches(FieldType.ALPHANUMERIC.getRegex())
-                    || PortForwardingTabUi.this.input.getText().trim().length() > 15) {
+                    || PortForwardingTabUi.this.input.getText().trim()
+                            .length() > FirewallPanelUtils.INTERFACE_NAME_MAX_LENGTH) {
                 PortForwardingTabUi.this.groupInput.setValidationState(ValidationState.ERROR);
             } else {
                 PortForwardingTabUi.this.groupInput.setValidationState(ValidationState.NONE);
@@ -656,7 +657,8 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
         this.output.addBlurHandler(event -> {
             if (PortForwardingTabUi.this.output.getText().trim().isEmpty()
                     || !PortForwardingTabUi.this.output.getText().trim().matches(FieldType.ALPHANUMERIC.getRegex())
-                    || PortForwardingTabUi.this.output.getText().trim().length() > 15) {
+                    || PortForwardingTabUi.this.output.getText().trim()
+                            .length() > FirewallPanelUtils.INTERFACE_NAME_MAX_LENGTH) {
                 PortForwardingTabUi.this.groupOutput.setValidationState(ValidationState.ERROR);
             } else {
                 PortForwardingTabUi.this.groupOutput.setValidationState(ValidationState.NONE);

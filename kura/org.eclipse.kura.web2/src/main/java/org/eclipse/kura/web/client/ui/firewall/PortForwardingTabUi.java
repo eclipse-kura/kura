@@ -181,9 +181,8 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
     public PortForwardingTabUi() {
         initWidget(uiBinder.createAndBindUi(this));
         this.selectionModel.addSelectionChangeHandler(event -> {
-            if (PortForwardingTabUi.this.selectionModel.getSelectedObject() != null) {
-                PortForwardingTabUi.this.buttonBar.setEditDeleteButtonsDirty(true);
-            }
+            PortForwardingTabUi.this.buttonBar
+                    .setEditDeleteButtonsDirty(PortForwardingTabUi.this.selectionModel.getSelectedObject() != null);
         });
         this.portForwardGrid.setSelectionModel(this.selectionModel);
 

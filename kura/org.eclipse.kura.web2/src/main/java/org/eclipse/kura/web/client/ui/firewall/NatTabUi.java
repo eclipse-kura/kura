@@ -152,9 +152,7 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
     public NatTabUi() {
         initWidget(uiBinder.createAndBindUi(this));
         this.selectionModel.addSelectionChangeHandler(event -> {
-            if (NatTabUi.this.selectionModel.getSelectedObject() != null) {
-                NatTabUi.this.buttonBar.setEditDeleteButtonsDirty(true);
-            }
+            NatTabUi.this.buttonBar.setEditDeleteButtonsDirty(NatTabUi.this.selectionModel.getSelectedObject() != null);
         });
         this.natGrid.setSelectionModel(this.selectionModel);
 

@@ -163,9 +163,8 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
     public OpenPortsTabUi() {
         initWidget(uiBinder.createAndBindUi(this));
         this.selectionModel.addSelectionChangeHandler(event -> {
-            if (OpenPortsTabUi.this.selectionModel.getSelectedObject() != null) {
-                OpenPortsTabUi.this.buttonBar.setEditDeleteButtonsDirty(true);
-            }
+            OpenPortsTabUi.this.buttonBar
+                    .setEditDeleteButtonsDirty(OpenPortsTabUi.this.selectionModel.getSelectedObject() != null);
         });
         this.openPortsGrid.setSelectionModel(this.selectionModel);
 

@@ -64,7 +64,7 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
     private final GwtNetworkServiceAsync gwtNetworkService = GWT.create(GwtNetworkService.class);
 
     private final ListDataProvider<GwtFirewallNatEntry> natDataProvider = new ListDataProvider<>();
-    final SingleSelectionModel<GwtFirewallNatEntry> selectionModel = new SingleSelectionModel<>();
+    private final SingleSelectionModel<GwtFirewallNatEntry> selectionModel = new SingleSelectionModel<>();
 
     private boolean dirty;
 
@@ -140,17 +140,35 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
     Button cancel;
 
     @UiField
+    Modal existingRule;
+    @UiField
+    Button close;
+
+    @UiField
     AlertDialog alertDialog;
 
     private HandlerRegistration modalHideHandlerRegistration;
 
     public NatTabUi() {
         initWidget(uiBinder.createAndBindUi(this));
-
-        this.buttonBar.setListener(this);
+        this.selectionModel.addSelectionChangeHandler(event -> {
+            NatTabUi.this.buttonBar.setEditDeleteButtonsDirty(NatTabUi.this.selectionModel.getSelectedObject() != null);
+        });
+        this.natGrid.setSelectionModel(this.selectionModel);
 
         initTable();
         initModal();
+        initDuplicateRuleModal();
+        this.buttonBar.setListener(this);
+
+        // Initialize fixed fields for modal
+        setModalFieldsLabels();
+        setModalFieldsTooltips();
+        setModalFieldsHandlers();
+    }
+
+    private void initDuplicateRuleModal() {
+        this.close.addClickHandler(event -> this.existingRule.hide());
     }
 
     //
@@ -170,23 +188,27 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
 
             @Override
             public void onSuccess(GwtXSRFToken token) {
+                NatTabUi.this.setDirty(false);
                 NatTabUi.this.gwtNetworkService.findDeviceFirewallNATs(token,
                         new AsyncCallback<List<GwtFirewallNatEntry>>() {
 
                             @Override
                             public void onFailure(Throwable caught) {
                                 EntryClassUi.hideWaitModal();
-                                FailureHandler.handle(caught);
+                                FailureHandler.handle(caught,
+                                        NatTabUi.this.gwtNetworkService.getClass().getSimpleName());
                             }
 
                             @Override
                             public void onSuccess(List<GwtFirewallNatEntry> result) {
                                 for (GwtFirewallNatEntry pair : result) {
+                                    NatTabUi.this.natDataProvider.getList().remove(pair);
                                     NatTabUi.this.natDataProvider.getList().add(pair);
                                 }
                                 refreshTable();
 
                                 NatTabUi.this.buttonBar.setApplyResetButtonsDirty(false);
+                                NatTabUi.this.buttonBar.setEditDeleteButtonsDirty(false);
                                 EntryClassUi.hideWaitModal();
                             }
                         });
@@ -206,7 +228,7 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
 
     @Override
     public boolean isValid() {
-        return false;
+        return true;
     }
 
     //
@@ -321,7 +343,6 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
     @Override
     public void onApply() {
         List<GwtFirewallNatEntry> intermediateList = NatTabUi.this.natDataProvider.getList();
-
         final List<GwtFirewallNatEntry> updatedNatConf = new ArrayList<>();
         for (GwtFirewallNatEntry entry : intermediateList) {
             updatedNatConf.add(entry);
@@ -366,14 +387,20 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
 
     @Override
     public void onCreate() {
-
         replaceModalHideHandler(evt -> {
-            if (NatTabUi.this.newNatEntry != null && !duplicateEntry(NatTabUi.this.newNatEntry)) {
-                NatTabUi.this.natDataProvider.getList().add(NatTabUi.this.newNatEntry);
-                refreshTable();
-                NatTabUi.this.buttonBar.setApplyResetButtonsDirty(true);
-                NatTabUi.this.newNatEntry = null;
+            if (NatTabUi.this.newNatEntry != null) {
+                // Avoid duplicates
+                NatTabUi.this.natDataProvider.getList().remove(NatTabUi.this.newNatEntry);
+                if (!duplicateEntry(NatTabUi.this.newNatEntry)) {
+                    NatTabUi.this.natDataProvider.getList().add(NatTabUi.this.newNatEntry);
+                    refreshTable();
+                    NatTabUi.this.buttonBar.setApplyResetButtonsDirty(true);
+                    NatTabUi.this.newNatEntry = null;
+                } else {
+                    this.existingRule.show();
+                }
             }
+            resetFields();
         });
         showModal(null);
 
@@ -392,16 +419,22 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
             if (NatTabUi.this.editNatEntry != null) {
                 GwtFirewallNatEntry oldEntry = NatTabUi.this.selectionModel.getSelectedObject();
                 NatTabUi.this.natDataProvider.getList().remove(oldEntry);
+                refreshTable();
                 if (!duplicateEntry(NatTabUi.this.editNatEntry)) {
                     NatTabUi.this.natDataProvider.getList().add(NatTabUi.this.editNatEntry);
                     NatTabUi.this.natDataProvider.flush();
                     NatTabUi.this.buttonBar.setApplyResetButtonsDirty(true);
                     NatTabUi.this.editNatEntry = null;
                 } else {    // end duplicate
+                    this.existingRule.show();
                     NatTabUi.this.natDataProvider.getList().add(oldEntry);
                     NatTabUi.this.natDataProvider.flush();
                 }
+                refreshTable();
+                NatTabUi.this.buttonBar.setEditDeleteButtonsDirty(false);
+                NatTabUi.this.selectionModel.setSelected(selection, false);
             }
+            resetFields();
         });
         showModal(selection);
 
@@ -409,26 +442,27 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
 
     @Override
     public void onDelete() {
-
         final GwtFirewallNatEntry selection = NatTabUi.this.selectionModel.getSelectedObject();
-        if (selection == null) {
-            return;
+        if (selection != null) {
+            this.alertDialog.show(MSGS.firewallNatDeleteConfirmation(selection.getInInterface()), () -> {
+                NatTabUi.this.natDataProvider.getList().remove(selection);
+                refreshTable();
+                NatTabUi.this.buttonBar.setApplyResetButtonsDirty(true);
+                NatTabUi.this.buttonBar.setEditDeleteButtonsDirty(false);
+                NatTabUi.this.selectionModel.setSelected(selection, false);
+                setDirty(true);
+            });
         }
-        this.alertDialog.show(MSGS.firewallNatDeleteConfirmation(selection.getInInterface()), () -> {
-            NatTabUi.this.natDataProvider.getList().remove(selection);
-            refreshTable();
-            NatTabUi.this.buttonBar.setApplyResetButtonsDirty(true);
-            setDirty(true);
-        });
-
     }
 
     private void initModal() {
         // Handle Buttons
-        this.cancel.addClickHandler(event -> NatTabUi.this.natForm.hide());
+        this.cancel.addClickHandler(event -> {
+            NatTabUi.this.natForm.hide();
+            resetFields();
+        });
 
         this.submit.addClickHandler(event -> {
-            checkFieldsValues();
 
             if (NatTabUi.this.groupInput.getValidationState() == ValidationState.ERROR
                     || NatTabUi.this.groupOutput.getValidationState() == ValidationState.ERROR
@@ -458,6 +492,15 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
         });
     }
 
+    private void resetFields() {
+        this.newNatEntry = null;
+        this.editNatEntry = null;
+        this.input.clear();
+        this.output.clear();
+        this.source.clear();
+        this.destination.clear();
+    }
+
     private void showModal(final GwtFirewallNatEntry existingEntry) {
         if (existingEntry == null) {
             this.natForm.setTitle(MSGS.firewallNatFormInformation());
@@ -465,13 +508,7 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
             this.natForm.setTitle(MSGS.firewallNatFormUpdate(existingEntry.getOutInterface()));
         }
 
-        setModalFieldsLabels();
-
         setModalFieldsValues(existingEntry);
-
-        setModalFieldsTooltips();
-
-        setModalFieldsHandlers();
 
         if (existingEntry == null) {
             this.submit.setId("new");
@@ -485,16 +522,20 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
     private void setModalFieldsHandlers() {
         // Set up validation
         this.input.addBlurHandler(event -> {
-            if (!NatTabUi.this.input.getText().trim().matches(FieldType.ALPHANUMERIC.getRegex())
-                    || NatTabUi.this.input.getText().trim().isEmpty()) {
+            if (this.input.getText() == null || "".equals(this.input.getText().trim())
+                    || NatTabUi.this.input.getText().trim().isEmpty()
+                    || !NatTabUi.this.input.getText().trim().matches(FieldType.ALPHANUMERIC.getRegex())
+                    || NatTabUi.this.input.getText().trim().length() > FirewallPanelUtils.INTERFACE_NAME_MAX_LENGTH) {
                 NatTabUi.this.groupInput.setValidationState(ValidationState.ERROR);
             } else {
                 NatTabUi.this.groupInput.setValidationState(ValidationState.NONE);
             }
         });
         this.output.addBlurHandler(event -> {
-            if (!NatTabUi.this.output.getText().trim().matches(FieldType.ALPHANUMERIC.getRegex())
-                    || NatTabUi.this.output.getText().trim().isEmpty()) {
+            if (this.output.getText() == null || "".equals(this.output.getText().trim())
+                    || NatTabUi.this.output.getText().trim().isEmpty()
+                    || !NatTabUi.this.output.getText().trim().matches(FieldType.ALPHANUMERIC.getRegex())
+                    || NatTabUi.this.output.getText().trim().length() > FirewallPanelUtils.INTERFACE_NAME_MAX_LENGTH) {
                 NatTabUi.this.groupOutput.setValidationState(ValidationState.ERROR);
             } else {
                 NatTabUi.this.groupOutput.setValidationState(ValidationState.NONE);
@@ -613,16 +654,6 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
         }
 
         return isDuplicateEntry;
-    }
-
-    private void checkFieldsValues() {
-        // make the required fields in error state by default
-        if (this.input.getText() == null || "".equals(this.input.getText().trim())) {
-            this.groupInput.setValidationState(ValidationState.ERROR);
-        }
-        if (this.output.getText() == null || "".equals(this.output.getText().trim())) {
-            this.groupOutput.setValidationState(ValidationState.ERROR);
-        }
     }
 
     private void replaceModalHideHandler(ModalHideHandler hideHandler) {

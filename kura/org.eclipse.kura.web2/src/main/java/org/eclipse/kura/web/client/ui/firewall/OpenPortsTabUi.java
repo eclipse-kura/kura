@@ -616,7 +616,7 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
                             .length() > FirewallPanelUtils.INTERFACE_NAME_MAX_LENGTH) {
                 OpenPortsTabUi.this.groupUnpermittedI.setValidationState(ValidationState.ERROR);
             } else {
-                OpenPortsTabUi.this.groupPermittedI.setValidationState(ValidationState.NONE);
+                OpenPortsTabUi.this.groupUnpermittedI.setValidationState(ValidationState.NONE);
             }
         });
         this.permittedMac.addBlurHandler(event -> {

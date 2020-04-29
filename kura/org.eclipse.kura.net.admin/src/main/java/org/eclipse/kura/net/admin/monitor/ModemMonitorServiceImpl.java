@@ -983,7 +983,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 
                     if (pppSt == PppState.CONNECTED) {
                         resetTimer.restart();
-                    } else if (isSimCardReady) {
+                    } else {
                         final long modemResetTimeout = getModemResetTimeoutMsec(ifaceName, modem.getConfiguration());
 
                         if (resetTimer.shouldResetModem(modemResetTimeout)) {

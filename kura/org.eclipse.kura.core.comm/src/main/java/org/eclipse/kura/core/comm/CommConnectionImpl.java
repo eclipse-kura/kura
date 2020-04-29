@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -29,7 +29,6 @@ import javax.comm.CommPortIdentifier;
 import javax.comm.NoSuchPortException;
 import javax.comm.PortInUseException;
 import javax.comm.SerialPort;
-import javax.comm.UnsupportedCommOperationException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -88,9 +87,14 @@ public class CommConnectionImpl implements CommConnection, Closeable {
 
         final CommPort commPort = commPortIdentifier.open(this.getClass().getName(), openTimeout);
 
-        if (commPort instanceof SerialPort) {
-            this.serialPort = (SerialPort) commPort;
-            try {
+        if (commPort == null) {
+            throw new NoSuchPortException("CommPortIdentifier.open() returned a null port");
+        }
+
+        try {
+            if (commPort instanceof SerialPort) {
+                this.serialPort = (SerialPort) commPort;
+
                 this.serialPort.setSerialPortParams(baudRate, dataBits, stopBits, parity);
                 this.serialPort.setFlowControlMode(flowControl);
                 if (receiveTimeout > 0) {
@@ -99,12 +103,13 @@ public class CommConnectionImpl implements CommConnection, Closeable {
                         throw new IOException("Serial receive timeout not supported by driver");
                     }
                 }
-            } catch (UnsupportedCommOperationException e) {
-                logger.error("Failed to configure COM port", e);
-                throw new IOException(e);
+            } else {
+                throw new IOException("Unsupported Port Type");
             }
-        } else {
-            throw new IOException("Unsupported Port Type");
+        } catch (final Exception e) {
+            logger.error("Failed to configure COM port", e);
+            commPort.close();
+            throw new IOException(e);
         }
     }
 

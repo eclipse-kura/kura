@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and others
+ * Copyright (c) 2011, 2020 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,12 +8,13 @@
  *
  * Contributors:
  *     Eurotech
- *     Red Hat Inc - fix issue #640
+ *     Red Hat Inc
  *******************************************************************************/
 package org.eclipse.kura.linux.net.modem;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +30,8 @@ import org.slf4j.LoggerFactory;
 public class SupportedUsbModems {
 
     private static final Logger logger = LoggerFactory.getLogger(SupportedUsbModems.class);
+
+    private static final String TMP_PATH = System.getProperty("java.io.tmpdir");
 
     private static class LsusbEntry {
 
@@ -166,6 +169,7 @@ public class SupportedUsbModems {
      */
     private static List<String> execute(final String command) throws IOException {
         final DefaultExecutor executor = new DefaultExecutor();
+        executor.setWorkingDirectory(new File(TMP_PATH));
 
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
         executor.setStreamHandler(new PumpStreamHandler(out, NullOutputStream.NULL_OUTPUT_STREAM));

@@ -1055,9 +1055,9 @@ public class ModemMonitorServiceImplTest {
 
     @Test
     public void testModemResetNotConnectedNoSim() throws Throwable {
-        testModemReset(PppState.NOT_CONNECTED, false, false, false);
+        testModemReset(PppState.NOT_CONNECTED, true, false, false);
     }
-
+    
     @Test
     public void testModemResetInProgress() throws Throwable {
         testModemReset(PppState.IN_PROGRESS, true, false, true);

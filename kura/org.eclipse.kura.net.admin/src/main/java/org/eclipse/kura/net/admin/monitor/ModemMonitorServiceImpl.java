@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -89,6 +89,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 
     private static final long THREAD_INTERVAL = 30000;
     private static final long THREAD_TERMINATION_TOUT = 1; // in seconds
+    private static final int MONITOR_MAX_ATTEMPTS = 3;
 
     private Future<?> task;
 
@@ -714,7 +715,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
         }
 
         boolean shouldResetModem(final long modemResetTimeout) {
-            
+
             if (modemResetTimeout == 0) {
                 return false;
             }
@@ -742,6 +743,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
         private AtomicBoolean isValid = new AtomicBoolean(true);
         private boolean isInitialized;
         private PppState pppState = PppState.NOT_CONNECTED;
+        private int monitorAttempts = MONITOR_MAX_ATTEMPTS;
 
         public MonitoredModem(final CellularModem modem) {
             this.modem = modem;
@@ -970,9 +972,15 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
                     postModemGpsEvent(modem, true);
                 }
 
+                this.monitorAttempts = MONITOR_MAX_ATTEMPTS;
             } catch (Exception e) {
-                logger.error("monitor() :: Exception, resetting modem", e);
-                cleanupAndReset(pppService, pppSt);
+                this.monitorAttempts--;
+                logger.error("monitor() :: Exception, {} attempts left", this.monitorAttempts, e);
+                if (this.monitorAttempts <= 0) {
+                    logger.error("monitor() :: resetting modem");
+                    this.monitorAttempts = MONITOR_MAX_ATTEMPTS;
+                    cleanupAndReset(pppService, pppSt);
+                }
             }
         }
     }

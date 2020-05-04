@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -90,6 +90,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 
     private static final long THREAD_INTERVAL = 30000;
     private static final long THREAD_TERMINATION_TOUT = 1; // in seconds
+    private static final int MONITOR_MAX_ATTEMPTS = 3;
 
     private Future<?> task;
 
@@ -786,6 +787,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
         private boolean isInitialized;
         private PppState pppState = PppState.NOT_CONNECTED;
         private LinuxNetworkUtil linuxNetworkUtil;
+        private int monitorAttempts = MONITOR_MAX_ATTEMPTS;
 
         public MonitoredModem(final CellularModem modem, LinuxNetworkUtil linuxNetworkUtil) {
             this.modem = modem;
@@ -1028,9 +1030,15 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
                     }
                 }
 
+                this.monitorAttempts = MONITOR_MAX_ATTEMPTS;
             } catch (Exception e) {
-                logger.error("monitor() :: Exception, resetting modem", e);
-                cleanupAndReset(pppService, pppSt);
+                this.monitorAttempts--;
+                logger.error("monitor() :: Exception, {} attempts left", this.monitorAttempts, e);
+                if (this.monitorAttempts <= 0) {
+                    logger.error("monitor() :: resetting modem");
+                    this.monitorAttempts = MONITOR_MAX_ATTEMPTS;
+                    cleanupAndReset(pppService, pppSt);
+                }
             }
         }
     }

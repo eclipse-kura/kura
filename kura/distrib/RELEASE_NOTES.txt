@@ -1,4 +1,4 @@
-Eclipse Kura - 4.1.1   - April 2020
+Eclipse Kura - 4.1.1   - May 2020
 -------------------------------------------------------------------------
 Description:
 Eclipse Kura 4.1.1 is a service release to address various discovered bugs and functional issues.
@@ -25,7 +25,7 @@ Changes:
     * Fixed issue with Paho overriding SSL settings
     * Fixed issue in CanConnection service with multiple can interfaces
     * Fixed issue with modem switching from data mode to command mode
-    * Fixed issue with modem reset
+    * Fixed issues with modem reset
 
 
 Compatibility:
@@ -45,6 +45,10 @@ Target Environments:
 
 Bug Fixes :
   * Fixed github issues:
+    * #2827: Entering wrong dial string and APN can cause a reset loop
+    * #2825: Kura 4.1.x SupportedUsbModems isAttached method can fail
+    * #2822: CommConnectionImpl constructor does not close the serial port on failure
+    * #2820: Modem reset can lead to SIM card not ready
     * #2811: CanConnection service with multiple can interfaces
     * #2809: Unescaped loop on modem reset failure
     * #2800: Switching from data mode to command mode does not work in pppd chat script

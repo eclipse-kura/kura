@@ -469,18 +469,26 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
         }
     }
 
-    long getModemResetTimeoutMsec(String ifaceName, List<NetConfig> netConfigs) {
-        long resetToutMsec = 0L;
+    long getModemResetTimeoutNanos(String ifaceName, List<NetConfig> netConfigs) {
+        long resetToutNanos = 0L;
 
         if (ifaceName != null && netConfigs != null) {
             for (NetConfig netConfig : netConfigs) {
                 if (netConfig instanceof ModemConfig) {
-                    resetToutMsec = ((ModemConfig) netConfig).getResetTimeout() * 60000;
+                    resetToutNanos = secondsToNanos(60L * ((ModemConfig) netConfig).getResetTimeout());
                     break;
                 }
             }
         }
-        return resetToutMsec;
+        return resetToutNanos;
+    }
+
+    private static long secondsToNanos(final long seconds) {
+        return seconds * 1_000_000_000L;
+    }
+
+    private static long nanosToSeconds(final long nanos) {
+        return nanos / 1_000_000_000L;
     }
 
     private boolean isGpsEnabledInConfig(List<NetConfig> netConfigs) {
@@ -651,7 +659,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
         try {
             postModemGpsEvent(modem, false);
 
-            long startTimer = System.currentTimeMillis();
+            long startTimerNanos = System.nanoTime();
             do {
                 try {
                     Thread.sleep(3000);
@@ -669,7 +677,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
                 } catch (Exception e) {
                     logger.debug("disableModemGps() waiting for PositionService to release serial port ", e);
                 }
-            } while (System.currentTimeMillis() - startTimer < 20000L);
+            } while (System.nanoTime() - startTimerNanos < secondsToNanos(20));
 
             logger.error("disableModemGps() :: portIsReachable=false");
             return false;
@@ -714,21 +722,22 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
             startTime = -1;
         }
 
-        boolean shouldResetModem(final long modemResetTimeout) {
+        boolean shouldResetModem(final long modemResetTimeoutNanos) {
 
-            if (modemResetTimeout == 0) {
+            if (modemResetTimeoutNanos == 0) {
                 return false;
             }
 
             if (startTime == -1) {
-                startTime = System.currentTimeMillis();
+                startTime = System.nanoTime();
             }
 
-            final long timeTillReset = modemResetTimeout - (System.currentTimeMillis() - startTime);
-            final boolean shouldReset = timeTillReset <= 0;
+            final long timeTillResetNanos = modemResetTimeoutNanos - (System.nanoTime() - startTime);
+            final boolean shouldReset = timeTillResetNanos <= 0;
 
             if (!shouldReset) {
-                logger.info("monitor() :: Modem will be reset in {} sec if not connected", timeTillReset / 1000);
+                logger.info("monitor() :: Modem will be reset in {} sec if not connected",
+                        nanosToSeconds(timeTillResetNanos));
             }
 
             return shouldReset;
@@ -941,7 +950,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
                     if (pppSt == PppState.CONNECTED) {
                         resetTimer.restart();
                     } else {
-                        final long modemResetTimeout = getModemResetTimeoutMsec(ifaceName, modem.getConfiguration());
+                        final long modemResetTimeout = getModemResetTimeoutNanos(ifaceName, modem.getConfiguration());
 
                         if (resetTimer.shouldResetModem(modemResetTimeout)) {
                             logger.info("monitor() :: Modem Reset TIMEOUT !!!");

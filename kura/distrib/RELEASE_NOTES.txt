@@ -45,6 +45,8 @@ Target Environments:
 
 Bug Fixes :
   * Fixed github issues:
+    * #2831: ModemMonitorServiceImpl should use monotonic clock
+    * #2828: Improve modem help section
     * #2827: Entering wrong dial string and APN can cause a reset loop
     * #2825: Kura 4.1.x SupportedUsbModems isAttached method can fail
     * #2822: CommConnectionImpl constructor does not close the serial port on failure

@@ -34,7 +34,7 @@
     }
     
     .help {
-    	height: 310px;
+    	height: 400px;
     }
     
     .help-body {

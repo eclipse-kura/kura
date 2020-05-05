@@ -593,7 +593,7 @@ public class ModemMonitorServiceImplTest {
         nc.setResetTimeout(2);
         netConfigs.add(nc);
 
-        long result = (long) TestUtil.invokePrivate(svc, "getModemResetTimeoutMsec", (String) null, netConfigs);
+        long result = (long) TestUtil.invokePrivate(svc, "getModemResetTimeoutNanos", (String) null, netConfigs);
 
         assertEquals(0L, result);
     }
@@ -611,9 +611,9 @@ public class ModemMonitorServiceImplTest {
         nc.setResetTimeout(2);
         netConfigs.add(nc);
 
-        long result = (long) TestUtil.invokePrivate(svc, "getModemResetTimeoutMsec", "ppp0", netConfigs);
+        long result = (long) TestUtil.invokePrivate(svc, "getModemResetTimeoutNanos", "ppp0", netConfigs);
 
-        assertEquals(120000, result);
+        assertEquals(120 * 1_000_000_000L, result);
     }
 
     @Test
@@ -853,8 +853,8 @@ public class ModemMonitorServiceImplTest {
             }
 
             @Override
-            long getModemResetTimeoutMsec(String ifaceName, java.util.List<NetConfig> netConfigs) {
-                return 1000;
+            long getModemResetTimeoutNanos(String ifaceName, java.util.List<NetConfig> netConfigs) {
+                return 1_000_000_000;
             }
         };
 

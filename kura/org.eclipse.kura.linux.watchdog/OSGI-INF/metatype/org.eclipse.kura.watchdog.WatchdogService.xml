@@ -25,7 +25,7 @@
             cardinality="0" 
             required="true"
             default="false" 
-            description="The WatchdogService monitors CriticalComponentS and reboots the system if one of them hangs. Once enabled the WatchdogService starts refreshing the hardware watchdog which will reset the system if WatchdogService hangs."/>
+            description="The WatchdogService monitors CriticalComponents and reboots the system if one of them hangs. Once enabled the WatchdogService starts refreshing the watchdog device, which will reset the system if WatchdogService hangs."/>
         
         <AD id="pingInterval"
             name="Watchdog refresh interval"
@@ -34,7 +34,7 @@
             required="true"
             default="10000"
             max="60000"
-            description="Watchdog refresh interval in ms. The value can be set between 1 and 60 seconds."/>
+            description="WatchdogService\'s refresh interval in ms of the Watchdog device. The value can be set between 1 and 60 seconds and should not be set to a value more or equal to the Watchdog device\'s timeout value"/>
 
         <AD id="watchdogDevice"
             name="Watchdog device path"

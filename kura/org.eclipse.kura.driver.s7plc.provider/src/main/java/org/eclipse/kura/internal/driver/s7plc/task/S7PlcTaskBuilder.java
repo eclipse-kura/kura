@@ -49,15 +49,15 @@ public final class S7PlcTaskBuilder {
             throw e;
         }
     }
-    
+
     private static int getAreaNo(ChannelRecord record) throws KuraException {
-    	try {
-    		return getIntProperty(record, S7PlcChannelDescriptor.AREA_NO_ID, "Error while retrieving Area No");
-    	}catch(KuraException e) {
-    		record.setChannelStatus(new ChannelStatus(ChannelFlag.FAILURE, e.getMessage(), e));
-    		record.setTimestamp(System.currentTimeMillis());
-    		throw e;
-    	}
+        try {
+            return getIntProperty(record, S7PlcChannelDescriptor.AREA_NO_ID, "Error while retrieving Area No");
+        } catch (KuraException e) {
+            record.setChannelStatus(new ChannelStatus(ChannelFlag.FAILURE, e.getMessage(), e));
+            record.setTimestamp(System.currentTimeMillis());
+            throw e;
+        }
     }
 
     private static int getIntProperty(ChannelRecord record, String propertyName, String failureMessage)

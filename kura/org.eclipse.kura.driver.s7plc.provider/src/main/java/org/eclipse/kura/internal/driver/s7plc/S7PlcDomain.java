@@ -25,34 +25,39 @@ public class S7PlcDomain {
     public int getDB() {
         return this.db;
     }
-    
+
     public int getArea() {
-    	return this.area;
+        return this.area;
     }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + area;
-		result = prime * result + db;
-		return result;
-	}
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + this.area;
+        result = prime * result + this.db;
+        return result;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		S7PlcDomain other = (S7PlcDomain) obj;
-		if (area != other.area)
-			return false;
-		if (db != other.db)
-			return false;
-		return true;
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        S7PlcDomain other = (S7PlcDomain) obj;
+        if (this.area != other.area) {
+            return false;
+        }
+        if (this.db != other.db) {
+            return false;
+        }
+        return true;
+    }
 
 }

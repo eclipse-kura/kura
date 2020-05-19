@@ -45,8 +45,7 @@ public class S7PlcToplevelBlockTask extends ToplevelBlockTask {
                     getBuffer().getLength());
             this.driver.read(this.dbNo, getStart(), ((ByteArrayBuffer) getBuffer()).getBackingArray(), this.areaNo);
         } else {
-            logger.debug("Writing to PLC, DB{} offset: {} length: {}", this.dbNo, getStart(),
-                    getBuffer().getLength());
+            logger.debug("Writing to PLC, DB{} offset: {} length: {}", this.dbNo, getStart(), getBuffer().getLength());
             this.driver.write(this.dbNo, getStart(), ((ByteArrayBuffer) getBuffer()).getBackingArray(), this.areaNo);
         }
     }

@@ -157,7 +157,8 @@ public class S7PlcDriver extends AbstractBlockDriver<S7PlcDomain> implements Con
 
     @Override
     protected BlockFactory<ToplevelBlockTask> getTaskFactoryForDomain(final S7PlcDomain domain, final Mode mode) {
-        return (start, end) -> new S7PlcToplevelBlockTask(S7PlcDriver.this, mode, domain.getDB(), domain.getArea(), start, end);
+        return (start, end) -> new S7PlcToplevelBlockTask(S7PlcDriver.this, mode, domain.getDB(), domain.getArea(),
+                start, end);
     }
 
     @Override
@@ -206,19 +207,19 @@ public class S7PlcDriver extends AbstractBlockDriver<S7PlcDomain> implements Con
     }
 
     public void write(int db, int offset, byte[] data) throws IOException {
-    	write(db, offset, data, S7.S7AreaDB);
+        write(db, offset, data, S7.S7AreaDB);
     }
 
-    public synchronized void read (int db, int offset, byte[] data, int area) throws IOException {
+    public synchronized void read(int db, int offset, byte[] data, int area) throws IOException {
         int result = this.state.client.ReadArea(area, db, offset, data.length, data);
         if (result != 0) {
             throw new Moka7Exception("DB: " + db + " off: " + offset + " len: " + data.length + " status: " + result,
                     result);
-        }    	
+        }
     }
-    
+
     public void read(int db, int offset, byte[] data) throws IOException {
-    	read(db, offset, data, S7.S7AreaDB);
+        read(db, offset, data, S7.S7AreaDB);
     }
 
     @SuppressWarnings("serial")

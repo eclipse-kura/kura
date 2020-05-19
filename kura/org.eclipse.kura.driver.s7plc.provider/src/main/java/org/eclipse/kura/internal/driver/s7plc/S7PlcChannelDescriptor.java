@@ -47,12 +47,12 @@ public final class S7PlcChannelDescriptor implements ChannelDescriptor {
         option.setValue(type.name());
         return option;
     }
-    
+
     private Toption generateAreaOption(S7PlcArea area) {
-    	Toption option = new Toption();
-    	option.setLabel(area.toString());
-    	option.setValue(String.valueOf(area.getValue()));
-    	return option;
+        Toption option = new Toption();
+        option.setLabel(area.toString());
+        option.setValue(String.valueOf(area.getValue()));
+        return option;
     }
 
     /** {@inheritDoc} */
@@ -81,9 +81,9 @@ public final class S7PlcChannelDescriptor implements ChannelDescriptor {
         areaNo.setType(Tscalar.INTEGER);
         areaNo.setRequired(true);
         areaNo.setDefault(String.valueOf(S7.S7AreaDB));
-        
-        for(S7PlcArea a : S7PlcArea.values()) {
-        	areaNo.setOption(generateAreaOption(a));
+
+        for (S7PlcArea a : S7PlcArea.values()) {
+            areaNo.setOption(generateAreaOption(a));
         }
 
         elements.add(areaNo);

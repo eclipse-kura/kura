@@ -35,6 +35,8 @@ import org.eclipse.kura.internal.driver.s7plc.S7PlcDomain;
 import org.eclipse.kura.type.DataType;
 import org.junit.Test;
 
+import Moka7.S7;
+
 public class S7PlcTaskBuilderTest {
 
     @Test
@@ -126,6 +128,7 @@ public class S7PlcTaskBuilderTest {
 
         Map<String, Object> config = new HashMap<>();
         config.put("data.block.no", ord);
+        config.put("s7.area.type", S7.S7AreaDB);
         config.put("offset", ord);
         config.put("s7.data.type", type);
         config.put("bit.index", ord); // required for BOOL

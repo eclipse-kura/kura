@@ -563,14 +563,7 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
         this.submit.setText(MSGS.submitButton());
         this.submit.addClickHandler(event -> {
 
-            if (PortForwardingTabUi.this.groupInput.getValidationState().equals(ValidationState.ERROR)
-                    || PortForwardingTabUi.this.groupOutput.getValidationState().equals(ValidationState.ERROR)
-                    || PortForwardingTabUi.this.groupLan.getValidationState().equals(ValidationState.ERROR)
-                    || PortForwardingTabUi.this.groupInternal.getValidationState().equals(ValidationState.ERROR)
-                    || PortForwardingTabUi.this.groupExternal.getValidationState().equals(ValidationState.ERROR)
-                    || PortForwardingTabUi.this.groupPermittedNw.getValidationState().equals(ValidationState.ERROR)
-                    || PortForwardingTabUi.this.groupPermittedMac.getValidationState().equals(ValidationState.ERROR)
-                    || PortForwardingTabUi.this.groupSource.getValidationState().equals(ValidationState.ERROR)) {
+            if (!checkEntries()) {
                 return;
             }
 
@@ -579,14 +572,8 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
             portForwardEntry.setOutboundInterface(PortForwardingTabUi.this.output.getText());
             portForwardEntry.setAddress(PortForwardingTabUi.this.lan.getText());
             portForwardEntry.setProtocol(PortForwardingTabUi.this.protocol.getSelectedItemText());
-            if (PortForwardingTabUi.this.internal.getText() != null
-                    && !"".equals(PortForwardingTabUi.this.internal.getText().trim())) {
-                portForwardEntry.setOutPort(Integer.parseInt(PortForwardingTabUi.this.internal.getText()));
-            }
-            if (PortForwardingTabUi.this.external.getText() != null
-                    && !"".equals(PortForwardingTabUi.this.external.getText().trim())) {
-                portForwardEntry.setInPort(Integer.parseInt(PortForwardingTabUi.this.external.getText()));
-            }
+            portForwardEntry.setOutPort(Integer.parseInt(PortForwardingTabUi.this.internal.getText()));
+            portForwardEntry.setInPort(Integer.parseInt(PortForwardingTabUi.this.external.getText()));
             portForwardEntry.setMasquerade(PortForwardingTabUi.this.enable.getSelectedItemText());
             if (PortForwardingTabUi.this.permittedNw.getText() != null
                     && !"".equals(PortForwardingTabUi.this.permittedNw.getText().trim())) {
@@ -862,4 +849,50 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
         PortForwardingTabUi.this.source.clear();
     }
 
+    private boolean checkEntries() {
+        boolean valid = true;
+
+        if (PortForwardingTabUi.this.groupInput.getValidationState().equals(ValidationState.ERROR)
+                || PortForwardingTabUi.this.input.getText() == null
+                || "".equals(PortForwardingTabUi.this.input.getText().trim())) {
+            PortForwardingTabUi.this.groupInput.setValidationState(ValidationState.ERROR);
+            valid = false;
+        }
+
+        if (PortForwardingTabUi.this.groupOutput.getValidationState().equals(ValidationState.ERROR)
+                || PortForwardingTabUi.this.output.getText() == null
+                || "".equals(PortForwardingTabUi.this.output.getText().trim())) {
+            PortForwardingTabUi.this.groupOutput.setValidationState(ValidationState.ERROR);
+            valid = false;
+        }
+
+        if (PortForwardingTabUi.this.groupLan.getValidationState().equals(ValidationState.ERROR)
+                || PortForwardingTabUi.this.lan.getText() == null
+                || "".equals(PortForwardingTabUi.this.lan.getText().trim())) {
+            PortForwardingTabUi.this.groupLan.setValidationState(ValidationState.ERROR);
+            valid = false;
+        }
+
+        if (PortForwardingTabUi.this.groupInternal.getValidationState().equals(ValidationState.ERROR)
+                || PortForwardingTabUi.this.internal.getText() == null
+                || "".equals(PortForwardingTabUi.this.internal.getText().trim())) {
+            PortForwardingTabUi.this.groupInternal.setValidationState(ValidationState.ERROR);
+            valid = false;
+        }
+
+        if (PortForwardingTabUi.this.groupExternal.getValidationState().equals(ValidationState.ERROR)
+                || PortForwardingTabUi.this.external.getText() == null
+                || "".equals(PortForwardingTabUi.this.external.getText().trim())) {
+            PortForwardingTabUi.this.groupExternal.setValidationState(ValidationState.ERROR);
+            valid = false;
+        }
+
+        if (PortForwardingTabUi.this.groupPermittedNw.getValidationState().equals(ValidationState.ERROR)
+                || PortForwardingTabUi.this.groupPermittedMac.getValidationState().equals(ValidationState.ERROR)
+                || PortForwardingTabUi.this.groupSource.getValidationState().equals(ValidationState.ERROR)) {
+            valid = false;
+        }
+
+        return valid;
+    }
 }

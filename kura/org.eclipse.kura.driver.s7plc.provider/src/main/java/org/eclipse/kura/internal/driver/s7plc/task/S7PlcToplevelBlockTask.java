@@ -24,28 +24,30 @@ import org.slf4j.LoggerFactory;
 
 public class S7PlcToplevelBlockTask extends ToplevelBlockTask {
 
-    private static final Logger logger = LoggerFactory.getLogger(S7PlcDriver.class);
+    private static final Logger logger = LoggerFactory.getLogger(S7PlcToplevelBlockTask.class);
 
+    private final int dbNo;
     private final int areaNo;
     private ByteArrayBuffer data;
     private final S7PlcDriver driver;
 
-    public S7PlcToplevelBlockTask(S7PlcDriver driver, Mode mode, int dbNumber, int start, int end) {
+    public S7PlcToplevelBlockTask(S7PlcDriver driver, Mode mode, int dbNumber, int dbArea, int start, int end) {
         super(start, end, mode);
-        this.areaNo = dbNumber;
+        this.dbNo = dbNumber;
+        this.areaNo = dbArea;
         this.driver = driver;
     }
 
     @Override
     public void processBuffer() throws IOException {
         if (getMode() == Mode.READ) {
-            logger.debug("Reading from PLC, DB{} offset: {} length: {}", this.areaNo, getStart(),
+            logger.debug("Reading from PLC, DB{} offset: {} length: {}", this.dbNo, getStart(),
                     getBuffer().getLength());
-            this.driver.read(this.areaNo, getStart(), ((ByteArrayBuffer) getBuffer()).getBackingArray());
+            this.driver.read(this.dbNo, getStart(), ((ByteArrayBuffer) getBuffer()).getBackingArray(), this.areaNo);
         } else {
-            logger.debug("Writing to PLC, DB{} offset: {} length: {}", this.areaNo, getStart(),
+            logger.debug("Writing to PLC, DB{} offset: {} length: {}", this.dbNo, getStart(),
                     getBuffer().getLength());
-            this.driver.write(this.areaNo, getStart(), ((ByteArrayBuffer) getBuffer()).getBackingArray());
+            this.driver.write(this.dbNo, getStart(), ((ByteArrayBuffer) getBuffer()).getBackingArray(), this.areaNo);
         }
     }
 

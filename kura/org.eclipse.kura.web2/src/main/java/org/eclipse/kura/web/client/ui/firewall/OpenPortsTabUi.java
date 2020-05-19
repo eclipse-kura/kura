@@ -499,12 +499,7 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
         this.submit.setText(MSGS.submitButton());
         this.submit.addClickHandler(event -> {
 
-            if (this.groupPort.getValidationState() == ValidationState.ERROR
-                    || this.groupPermittedNw.getValidationState() == ValidationState.ERROR
-                    || this.groupPermittedI.getValidationState() == ValidationState.ERROR
-                    || this.groupUnpermittedI.getValidationState() == ValidationState.ERROR
-                    || this.groupPermittedMac.getValidationState() == ValidationState.ERROR
-                    || this.groupSource.getValidationState() == ValidationState.ERROR) {
+            if (!checkEntries()) {
                 return;
             }
 
@@ -752,4 +747,23 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
         this.source.clear();
     }
 
+    private boolean checkEntries() {
+        boolean valid = true;
+
+        if (this.groupPort.getValidationState() == ValidationState.ERROR || this.port.getText() == null
+                || "".equals(this.port.getText().trim())) {
+            this.groupPort.setValidationState(ValidationState.ERROR);
+            valid = false;
+        }
+
+        if (this.groupPermittedNw.getValidationState() == ValidationState.ERROR
+                || this.groupPermittedI.getValidationState() == ValidationState.ERROR
+                || this.groupUnpermittedI.getValidationState() == ValidationState.ERROR
+                || this.groupPermittedMac.getValidationState() == ValidationState.ERROR
+                || this.groupSource.getValidationState() == ValidationState.ERROR) {
+            valid = false;
+        }
+
+        return valid;
+    }
 }

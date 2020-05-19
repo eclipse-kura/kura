@@ -464,10 +464,7 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
 
         this.submit.addClickHandler(event -> {
 
-            if (NatTabUi.this.groupInput.getValidationState() == ValidationState.ERROR
-                    || NatTabUi.this.groupOutput.getValidationState() == ValidationState.ERROR
-                    || NatTabUi.this.groupSource.getValidationState() == ValidationState.ERROR
-                    || NatTabUi.this.groupDestination.getValidationState() == ValidationState.ERROR) {
+            if (!checkEntries()) {
                 return;
             }
             // Fetch form data
@@ -661,5 +658,28 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
             this.modalHideHandlerRegistration.removeHandler();
         }
         this.modalHideHandlerRegistration = this.natForm.addHideHandler(hideHandler);
+    }
+
+    private boolean checkEntries() {
+        boolean valid = true;
+
+        if (NatTabUi.this.groupInput.getValidationState() == ValidationState.ERROR
+                || NatTabUi.this.input.getText() == null || "".equals(NatTabUi.this.input.getText().trim())) {
+            NatTabUi.this.groupInput.setValidationState(ValidationState.ERROR);
+            valid = false;
+        }
+
+        if (NatTabUi.this.groupOutput.getValidationState() == ValidationState.ERROR
+                || NatTabUi.this.output.getText() == null || "".equals(NatTabUi.this.output.getText().trim())) {
+            NatTabUi.this.groupOutput.setValidationState(ValidationState.ERROR);
+            valid = false;
+        }
+
+        if (NatTabUi.this.groupSource.getValidationState() == ValidationState.ERROR
+                || NatTabUi.this.groupDestination.getValidationState() == ValidationState.ERROR) {
+            valid = false;
+        }
+
+        return valid;
     }
 }

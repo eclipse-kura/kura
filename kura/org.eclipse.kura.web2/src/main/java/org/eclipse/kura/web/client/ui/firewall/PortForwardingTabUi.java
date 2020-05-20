@@ -54,6 +54,8 @@ import com.google.web.bindery.event.shared.HandlerRegistration;
 
 public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Listener {
 
+    private static final String STATUS_TABLE_ROW = "status-table-row";
+
     private static PortForwardingTabUiUiBinder uiBinder = GWT.create(PortForwardingTabUiUiBinder.class);
 
     interface PortForwardingTabUiUiBinder extends UiBinder<Widget, PortForwardingTabUi> {
@@ -229,17 +231,19 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
                             @Override
                             public void onFailure(Throwable caught) {
                                 EntryClassUi.hideWaitModal();
-                                FailureHandler.handle(caught);
+                                FailureHandler.handle(caught,
+                                        PortForwardingTabUi.this.gwtNetworkService.getClass().getSimpleName());
                             }
 
                             @Override
                             public void onSuccess(List<GwtFirewallPortForwardEntry> result) {
                                 for (GwtFirewallPortForwardEntry pair : result) {
+                                    // Avoid duplicates
                                     PortForwardingTabUi.this.portForwardDataProvider.getList().remove(pair);
                                     PortForwardingTabUi.this.portForwardDataProvider.getList().add(pair);
                                 }
+                                setVisibility();
                                 refreshTable();
-
                                 PortForwardingTabUi.this.buttonBar.setApplyResetButtonsDirty(false);
                                 PortForwardingTabUi.this.buttonBar.setEditDeleteButtonsDirty(false);
                                 EntryClassUi.hideWaitModal();
@@ -281,7 +285,7 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
                 }
             }
         };
-        col1.setCellStyleNames("status-table-row");
+        col1.setCellStyleNames(STATUS_TABLE_ROW);
         this.portForwardGrid.addColumn(col1, MSGS.firewallPortForwardInboundInterface());
 
         TextColumn<GwtFirewallPortForwardEntry> col2 = new TextColumn<GwtFirewallPortForwardEntry>() {
@@ -295,7 +299,7 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
                 }
             }
         };
-        col2.setCellStyleNames("status-table-row");
+        col2.setCellStyleNames(STATUS_TABLE_ROW);
         this.portForwardGrid.addColumn(col2, MSGS.firewallPortForwardOutboundInterface());
 
         TextColumn<GwtFirewallPortForwardEntry> col3 = new TextColumn<GwtFirewallPortForwardEntry>() {
@@ -309,7 +313,7 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
                 }
             }
         };
-        col3.setCellStyleNames("status-table-row");
+        col3.setCellStyleNames(STATUS_TABLE_ROW);
         this.portForwardGrid.addColumn(col3, MSGS.firewallPortForwardAddress());
 
         TextColumn<GwtFirewallPortForwardEntry> col4 = new TextColumn<GwtFirewallPortForwardEntry>() {
@@ -323,7 +327,7 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
                 }
             }
         };
-        col4.setCellStyleNames("status-table-row");
+        col4.setCellStyleNames(STATUS_TABLE_ROW);
         this.portForwardGrid.addColumn(col4, MSGS.firewallPortForwardProtocol());
 
         TextColumn<GwtFirewallPortForwardEntry> col5 = new TextColumn<GwtFirewallPortForwardEntry>() {
@@ -337,7 +341,7 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
                 }
             }
         };
-        col5.setCellStyleNames("status-table-row");
+        col5.setCellStyleNames(STATUS_TABLE_ROW);
         this.portForwardGrid.addColumn(col5, MSGS.firewallPortForwardOutPort());
 
         TextColumn<GwtFirewallPortForwardEntry> col6 = new TextColumn<GwtFirewallPortForwardEntry>() {
@@ -351,7 +355,7 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
                 }
             }
         };
-        col6.setCellStyleNames("status-table-row");
+        col6.setCellStyleNames(STATUS_TABLE_ROW);
         this.portForwardGrid.addColumn(col6, MSGS.firewallPortForwardInPort());
 
         TextColumn<GwtFirewallPortForwardEntry> col7 = new TextColumn<GwtFirewallPortForwardEntry>() {
@@ -365,7 +369,7 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
                 }
             }
         };
-        col7.setCellStyleNames("status-table-row");
+        col7.setCellStyleNames(STATUS_TABLE_ROW);
         this.portForwardGrid.addColumn(col7, MSGS.firewallPortForwardMasquerade());
 
         TextColumn<GwtFirewallPortForwardEntry> col8 = new TextColumn<GwtFirewallPortForwardEntry>() {
@@ -379,7 +383,7 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
                 }
             }
         };
-        col8.setCellStyleNames("status-table-row");
+        col8.setCellStyleNames(STATUS_TABLE_ROW);
         this.portForwardGrid.addColumn(col8, MSGS.firewallPortForwardPermittedNetwork());
 
         TextColumn<GwtFirewallPortForwardEntry> col9 = new TextColumn<GwtFirewallPortForwardEntry>() {
@@ -393,7 +397,7 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
                 }
             }
         };
-        col9.setCellStyleNames("status-table-row");
+        col9.setCellStyleNames(STATUS_TABLE_ROW);
         this.portForwardGrid.addColumn(col9, MSGS.firewallPortForwardPermittedMac());
 
         TextColumn<GwtFirewallPortForwardEntry> col10 = new TextColumn<GwtFirewallPortForwardEntry>() {
@@ -407,26 +411,16 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
                 }
             }
         };
-        col10.setCellStyleNames("status-table-row");
+        col10.setCellStyleNames(STATUS_TABLE_ROW);
         this.portForwardGrid.addColumn(col10, MSGS.firewallPortForwardSourcePortRange());
 
         this.portForwardDataProvider.addDataDisplay(this.portForwardGrid);
-        this.portForwardGrid.setSelectionModel(this.selectionModel);
     }
 
     private void refreshTable() {
         int size = this.portForwardDataProvider.getList().size();
         this.portForwardGrid.setVisibleRange(0, size);
         this.portForwardDataProvider.flush();
-
-        if (this.portForwardDataProvider.getList().isEmpty()) {
-            this.portForwardGrid.setVisible(false);
-            this.notification.setVisible(true);
-            this.notification.setText(MSGS.firewallPortForwardTableNoPorts());
-        } else {
-            this.portForwardGrid.setVisible(true);
-            this.notification.setVisible(false);
-        }
         this.portForwardGrid.redraw();
     }
 
@@ -487,6 +481,7 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
                 if (!duplicateEntry(PortForwardingTabUi.this.newPortForwardEntry)) {
                     PortForwardingTabUi.this.portForwardDataProvider.getList()
                             .add(PortForwardingTabUi.this.newPortForwardEntry);
+                    setVisibility();
                     refreshTable();
                     PortForwardingTabUi.this.buttonBar.setApplyResetButtonsDirty(true);
                     PortForwardingTabUi.this.newPortForwardEntry = null;
@@ -519,6 +514,7 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
                     PortForwardingTabUi.this.portForwardDataProvider.flush();
                     PortForwardingTabUi.this.buttonBar.setApplyResetButtonsDirty(true);
                     PortForwardingTabUi.this.editPortForwardEntry = null;
+                    setVisibility();
                 } else {    // end duplicate
                     this.existingRule.show();
                     PortForwardingTabUi.this.portForwardDataProvider.getList().add(oldEntry);
@@ -540,12 +536,13 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
         if (selection != null) {
             PortForwardingTabUi.this.alertDialog
                     .show(MSGS.firewallOpenPortDeleteConfirmation(String.valueOf(selection.getInPort())), () -> {
-                        PortForwardingTabUi.this.portForwardDataProvider.getList()
-                                .remove(PortForwardingTabUi.this.selectionModel.getSelectedObject());
-                        refreshTable();
+                        PortForwardingTabUi.this.portForwardDataProvider.getList().remove(selection);
                         PortForwardingTabUi.this.buttonBar.setApplyResetButtonsDirty(true);
                         PortForwardingTabUi.this.buttonBar.setEditDeleteButtonsDirty(false);
                         PortForwardingTabUi.this.selectionModel.setSelected(selection, false);
+                        setVisibility();
+                        refreshTable();
+
                         setDirty(true);
                     });
         }
@@ -829,6 +826,17 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
         return isDuplicateEntry;
     }
 
+    private void setVisibility() {
+        if (this.portForwardDataProvider.getList().isEmpty()) {
+            this.portForwardGrid.setVisible(false);
+            this.notification.setVisible(true);
+            this.notification.setText(MSGS.firewallPortForwardTableNoPorts());
+        } else {
+            this.portForwardGrid.setVisible(true);
+            this.notification.setVisible(false);
+        }
+    }
+
     private void replaceModalHideHandler(ModalHideHandler hideHandler) {
         if (this.modalHideHandlerRegistration != null) {
             this.modalHideHandlerRegistration.removeHandler();
@@ -895,4 +903,5 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
 
         return valid;
     }
+
 }

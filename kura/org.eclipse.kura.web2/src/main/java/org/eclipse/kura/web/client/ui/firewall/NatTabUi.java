@@ -205,8 +205,8 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
                                     NatTabUi.this.natDataProvider.getList().remove(pair);
                                     NatTabUi.this.natDataProvider.getList().add(pair);
                                 }
+                                setVisibility();
                                 refreshTable();
-
                                 NatTabUi.this.buttonBar.setApplyResetButtonsDirty(false);
                                 NatTabUi.this.buttonBar.setEditDeleteButtonsDirty(false);
                                 EntryClassUi.hideWaitModal();
@@ -328,15 +328,6 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
         int size = this.natDataProvider.getList().size();
         this.natGrid.setVisibleRange(0, size);
         this.natDataProvider.flush();
-
-        if (this.natDataProvider.getList().isEmpty()) {
-            this.natGrid.setVisible(false);
-            this.notification.setVisible(true);
-            this.notification.setText(MSGS.firewallPortForwardTableNoPorts());
-        } else {
-            this.natGrid.setVisible(true);
-            this.notification.setVisible(false);
-        }
         this.natGrid.redraw();
     }
 
@@ -393,6 +384,7 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
                 NatTabUi.this.natDataProvider.getList().remove(NatTabUi.this.newNatEntry);
                 if (!duplicateEntry(NatTabUi.this.newNatEntry)) {
                     NatTabUi.this.natDataProvider.getList().add(NatTabUi.this.newNatEntry);
+                    setVisibility();
                     refreshTable();
                     NatTabUi.this.buttonBar.setApplyResetButtonsDirty(true);
                     NatTabUi.this.newNatEntry = null;
@@ -446,10 +438,12 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
         if (selection != null) {
             this.alertDialog.show(MSGS.firewallNatDeleteConfirmation(selection.getInInterface()), () -> {
                 NatTabUi.this.natDataProvider.getList().remove(selection);
-                refreshTable();
                 NatTabUi.this.buttonBar.setApplyResetButtonsDirty(true);
                 NatTabUi.this.buttonBar.setEditDeleteButtonsDirty(false);
                 NatTabUi.this.selectionModel.setSelected(selection, false);
+                setVisibility();
+                refreshTable();
+
                 setDirty(true);
             });
         }
@@ -651,6 +645,17 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
         }
 
         return isDuplicateEntry;
+    }
+
+    private void setVisibility() {
+        if (this.natDataProvider.getList().isEmpty()) {
+            this.natGrid.setVisible(false);
+            this.notification.setVisible(true);
+            this.notification.setText(MSGS.firewallPortForwardTableNoPorts());
+        } else {
+            this.natGrid.setVisible(true);
+            this.notification.setVisible(false);
+        }
     }
 
     private void replaceModalHideHandler(ModalHideHandler hideHandler) {

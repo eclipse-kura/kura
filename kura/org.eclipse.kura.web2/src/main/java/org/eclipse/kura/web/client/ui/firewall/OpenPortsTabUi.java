@@ -415,8 +415,8 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
                 OpenPortsTabUi.this.openPortsDataProvider.getList().remove(OpenPortsTabUi.this.newOpenPortEntry);
                 if (!duplicateEntry(OpenPortsTabUi.this.newOpenPortEntry)) {
                     OpenPortsTabUi.this.openPortsDataProvider.getList().add(OpenPortsTabUi.this.newOpenPortEntry);
-                    refreshTable();
                     setVisibility();
+                    refreshTable();
                     OpenPortsTabUi.this.buttonBar.setApplyResetButtonsDirty(true);
                 } else {
                     this.existingRule.show();
@@ -478,11 +478,11 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
             OpenPortsTabUi.this.alertDialog
                     .show(MSGS.firewallOpenPortDeleteConfirmation(String.valueOf(selection.getPortRange())), () -> {
                         OpenPortsTabUi.this.openPortsDataProvider.getList().remove(selection);
-                        refreshTable();
                         OpenPortsTabUi.this.buttonBar.setApplyResetButtonsDirty(true);
                         OpenPortsTabUi.this.buttonBar.setEditDeleteButtonsDirty(false);
                         OpenPortsTabUi.this.selectionModel.setSelected(selection, false);
                         setVisibility();
+                        refreshTable();
 
                         setDirty(true);
                     });

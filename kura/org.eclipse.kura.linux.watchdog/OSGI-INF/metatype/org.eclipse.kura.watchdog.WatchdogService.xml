@@ -15,7 +15,7 @@
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
     <OCD id="org.eclipse.kura.watchdog.WatchdogService"
          name="WatchdogService" 
-         description="The WatchdogService handles the hardware watchdog of the platform.  The parameter define the ping periodicity of the hardware watchdog to ensure it doesn't reboot.">
+         description="The WatchdogService handles the hardware watchdog of the platform.  The parameter define the ping periodicity of the hardware watchdog to ensure it does not reboot. The WatchdogService will reset the watchdog timeout, can disable it (where supported) with the Magic Character, but cannot set the refresh rate of a watchdog device.">
         
         <Icon resource="WatchdogService" size="32"/>
         
@@ -34,7 +34,7 @@
             required="true"
             default="10000"
             max="60000"
-            description="WatchdogService\'s refresh interval in ms of the Watchdog device. The value can be set between 1 and 60 seconds and should not be set to a value more or equal to the Watchdog device\'s timeout value"/>
+            description="WatchdogService\'s refresh interval in ms of the Watchdog device. The value can be set between 1 and 60 seconds and should not be set to a value greater or equal to the Watchdog device\'s timeout value"/>
 
         <AD id="watchdogDevice"
             name="Watchdog device path"

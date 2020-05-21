@@ -269,6 +269,15 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
         return true;
     }
 
+    @Override
+    public void clear() {
+        this.portForwardDataProvider.getList().clear();
+        PortForwardingTabUi.this.buttonBar.setApplyResetButtonsDirty(false);
+        PortForwardingTabUi.this.buttonBar.setEditDeleteButtonsDirty(false);
+        setVisibility();
+        refreshTable();
+    }
+
     //
     // Private methods
     //

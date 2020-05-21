@@ -92,6 +92,11 @@ public class SecurityTabUi extends Composite implements Tab {
         }
     }
 
+    @Override
+    public void clear() {
+        // Not needed
+    }
+
     private void initTab() {
         StringBuilder title = new StringBuilder();
         title.append("<p>");

@@ -231,4 +231,9 @@ public class DeviceCertsTabUi extends Composite implements Tab {
             return true;
         }
     }
+
+    @Override
+    public void clear() {
+        // Not needed
+    }
 }

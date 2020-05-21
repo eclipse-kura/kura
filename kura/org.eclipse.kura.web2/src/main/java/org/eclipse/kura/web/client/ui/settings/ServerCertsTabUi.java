@@ -110,6 +110,11 @@ public class ServerCertsTabUi extends Composite implements Tab {
         }
     }
 
+    @Override
+    public void clear() {
+        // Not needed
+    }
+
     private void initForm() {
         StringBuilder title = new StringBuilder();
         title.append("<p>");

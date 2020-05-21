@@ -213,6 +213,11 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
         }
     }
 
+    @Override
+    public void clear() {
+        // Not needed
+    }
+
     // ----------PRIVATE METHODS-------------
 
     private void update() {

@@ -194,6 +194,11 @@ public class SnapshotsTabUi extends Composite implements Tab {
         });
     }
 
+    @Override
+    public void clear() {
+        // Not needed
+    }
+
     private void initTable() {
 
         TextColumn<GwtSnapshot> col1 = new TextColumn<GwtSnapshot>() {

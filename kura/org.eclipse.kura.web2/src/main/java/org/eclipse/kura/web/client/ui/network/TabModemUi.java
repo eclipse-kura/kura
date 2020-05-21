@@ -346,6 +346,11 @@ public class TabModemUi extends Composite implements NetworkTab {
     }
 
     @Override
+    public void clear() {
+        // Not needed
+    }
+
+    @Override
     public void getUpdatedNetInterface(GwtNetInterfaceConfig updatedNetIf) {
         GwtModemInterfaceConfig updatedModemNetIf = (GwtModemInterfaceConfig) updatedNetIf;
         updatedModemNetIf.setPdpType(GwtModemPdpType.netModemPdpIP);

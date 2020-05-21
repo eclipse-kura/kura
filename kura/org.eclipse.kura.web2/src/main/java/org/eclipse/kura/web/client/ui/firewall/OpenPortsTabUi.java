@@ -247,6 +247,15 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
         return true;
     }
 
+    @Override
+    public void clear() {
+        this.openPortsDataProvider.getList().clear();
+        OpenPortsTabUi.this.buttonBar.setApplyResetButtonsDirty(false);
+        OpenPortsTabUi.this.buttonBar.setEditDeleteButtonsDirty(false);
+        setVisibility();
+        refreshTable();
+    }
+
     //
     // Private methods
     //
@@ -766,4 +775,5 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
 
         return valid;
     }
+
 }

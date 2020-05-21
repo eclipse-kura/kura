@@ -116,6 +116,11 @@ public class TabModemAntennaUi extends Composite implements NetworkTab {
         }
     }
 
+    @Override
+    public void clear() {
+        // Not needed
+    }
+
     // ----Private Methods----
     private void initForm() {
         // ENABLE DIVERSITY ANTENNA

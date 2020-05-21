@@ -142,4 +142,9 @@ public class ThreadsTabUi extends Composite implements Tab {
             }
         });
     }
+
+    @Override
+    public void clear() {
+        // Not needed
+    }
 }

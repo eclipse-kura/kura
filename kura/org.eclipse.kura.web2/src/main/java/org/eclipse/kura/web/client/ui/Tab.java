@@ -22,6 +22,8 @@ public interface Tab {
 
     public void refresh();
 
+    public void clear();
+
     public class RefreshHandler implements ClickHandler {
 
         private final Tab target;

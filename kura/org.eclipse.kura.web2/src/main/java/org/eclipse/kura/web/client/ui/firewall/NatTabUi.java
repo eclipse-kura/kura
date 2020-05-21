@@ -231,6 +231,15 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
         return true;
     }
 
+    @Override
+    public void clear() {
+        this.natDataProvider.getList().clear();
+        NatTabUi.this.buttonBar.setApplyResetButtonsDirty(false);
+        NatTabUi.this.buttonBar.setEditDeleteButtonsDirty(false);
+        setVisibility();
+        refreshTable();
+    }
+
     //
     // Private methods
     //

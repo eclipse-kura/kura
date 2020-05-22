@@ -198,28 +198,28 @@ public class S7PlcDriver extends AbstractBlockDriver<S7PlcDomain> implements Con
         }
     }
 
-    public synchronized void write(int db, int offset, byte[] data, int area) throws IOException {
-        int result = this.state.client.WriteArea(area, db, offset, data.length, data);
+    public synchronized void write(int db, int offset, byte[] data, S7PlcArea area) throws IOException {
+        int result = this.state.client.WriteArea(area.getValue(), db, offset, data.length, data);
         if (result != 0) {
-            throw new Moka7Exception("DB: " + db + " off: " + offset + " len: " + data.length + " status: " + result,
-                    result);
+            throw new Moka7Exception(
+                    area + ":" + db + " off: " + offset + " len: " + data.length + " status: " + result, result);
         }
     }
 
     public void write(int db, int offset, byte[] data) throws IOException {
-        write(db, offset, data, S7.S7AreaDB);
+        write(db, offset, data, S7PlcArea.AREA_DB);
     }
 
-    public synchronized void read(int db, int offset, byte[] data, int area) throws IOException {
-        int result = this.state.client.ReadArea(area, db, offset, data.length, data);
+    public synchronized void read(int db, int offset, byte[] data, S7PlcArea area) throws IOException {
+        int result = this.state.client.ReadArea(area.getValue(), db, offset, data.length, data);
         if (result != 0) {
-            throw new Moka7Exception("DB: " + db + " off: " + offset + " len: " + data.length + " status: " + result,
-                    result);
+            throw new Moka7Exception(
+                    area + ":" + db + " off: " + offset + " len: " + data.length + " status: " + result, result);
         }
     }
 
     public void read(int db, int offset, byte[] data) throws IOException {
-        read(db, offset, data, S7.S7AreaDB);
+        read(db, offset, data, S7PlcArea.AREA_DB);
     }
 
     @SuppressWarnings("serial")

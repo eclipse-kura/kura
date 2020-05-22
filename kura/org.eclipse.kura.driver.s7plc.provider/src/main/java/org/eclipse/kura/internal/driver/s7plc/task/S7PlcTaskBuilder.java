@@ -30,6 +30,7 @@ import org.eclipse.kura.driver.block.task.BlockTask;
 import org.eclipse.kura.driver.block.task.ByteArrayTask;
 import org.eclipse.kura.driver.block.task.Mode;
 import org.eclipse.kura.driver.block.task.StringTask;
+import org.eclipse.kura.internal.driver.s7plc.S7PlcArea;
 import org.eclipse.kura.internal.driver.s7plc.S7PlcChannelDescriptor;
 import org.eclipse.kura.internal.driver.s7plc.S7PlcDataType;
 import org.eclipse.kura.internal.driver.s7plc.S7PlcDomain;
@@ -50,9 +51,10 @@ public final class S7PlcTaskBuilder {
         }
     }
 
-    private static int getAreaNo(ChannelRecord record) throws KuraException {
+    private static S7PlcArea getAreaNo(ChannelRecord record) throws KuraException {
         try {
-            return getIntProperty(record, S7PlcChannelDescriptor.AREA_NO_ID, "Error while retrieving Area No");
+            final int raw = getIntProperty(record, S7PlcChannelDescriptor.AREA_NO_ID, "Error while retrieving Area No");
+            return S7PlcArea.fromValue(raw);
         } catch (KuraException e) {
             record.setChannelStatus(new ChannelStatus(ChannelFlag.FAILURE, e.getMessage(), e));
             record.setTimestamp(System.currentTimeMillis());
@@ -138,7 +140,7 @@ public final class S7PlcTaskBuilder {
         return records.stream().map(record -> {
             try {
                 final int db = S7PlcTaskBuilder.getDbNo(record);
-                final int area = S7PlcTaskBuilder.getAreaNo(record);
+                final S7PlcArea area = S7PlcTaskBuilder.getAreaNo(record);
                 return new Pair<>(new S7PlcDomain(db, area), build(record, mode));
             } catch (Exception e) {
                 record.setTimestamp(System.currentTimeMillis());

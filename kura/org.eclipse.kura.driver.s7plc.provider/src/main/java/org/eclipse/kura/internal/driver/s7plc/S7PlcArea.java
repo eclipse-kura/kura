@@ -11,6 +11,9 @@
  */
 package org.eclipse.kura.internal.driver.s7plc;
 
+import org.eclipse.kura.KuraErrorCode;
+import org.eclipse.kura.KuraException;
+
 import Moka7.S7;
 
 public enum S7PlcArea {
@@ -66,5 +69,24 @@ public enum S7PlcArea {
 
     public int getValue() {
         return this.value;
+    }
+
+    public static S7PlcArea fromValue(final int value) throws KuraException {
+        switch (value) {
+        case S7.S7AreaCT:
+            return AREA_CT;
+        case S7.S7AreaPE:
+            return AREA_PE;
+        case S7.S7AreaPA:
+            return AREA_PA;
+        case S7.S7AreaMK:
+            return AREA_MK;
+        case S7.S7AreaTM:
+            return AREA_TM;
+        case S7.S7AreaDB:
+            return AREA_DB;
+        default:
+            throw new KuraException(KuraErrorCode.INVALID_PARAMETER, "Unsupported area: " + value);
+        }
     }
 }

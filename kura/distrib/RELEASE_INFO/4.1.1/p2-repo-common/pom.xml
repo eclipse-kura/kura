@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.eclipse.kura</groupId>
         <artifactId>target-platform-previous</artifactId>
-        <version>4.1.2-SNAPSHOT</version>
+        <version>4.1.1</version>
     </parent>
     <artifactId>p2-repo-common</artifactId>
     <packaging>pom</packaging>

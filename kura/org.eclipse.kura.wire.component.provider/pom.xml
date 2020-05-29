@@ -14,11 +14,11 @@
 	<parent>
 		<groupId>org.eclipse.kura</groupId>
 		<artifactId>kura</artifactId>
-		<version>4.1.1</version>
+		<version>4.1.2-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>org.eclipse.kura.wire.component.provider</artifactId>
-	<version>1.0.401</version>
+	<version>1.0.402-SNAPSHOT</version>
 	<packaging>eclipse-plugin</packaging>
 	
 	<properties>

@@ -102,7 +102,7 @@
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.core.comm</artifactId>
-                                    <version>1.0.500</version>
+                                    <version>1.0.501</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018,2020 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -10,11 +10,14 @@
 
 package org.eclipse.kura.web.client.ui.drivers.assets;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.ValueUpdater;
+import com.google.gwt.dom.client.BrowserEvents;
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -31,12 +34,22 @@ public class BooleanInputCell extends AbstractCell<String> {
     @Override
     public void onBrowserEvent(Context context, Element parent, String value, NativeEvent event,
             ValueUpdater<String> valueUpdater) {
-        this.inner.onBrowserEvent(context, parent, toBoolean(value), event, new ValueUpdaterWrapper(valueUpdater));
+        final NativeEvent forwarded;
+
+        if (BrowserEvents.CLICK.contentEquals(event.getType())) {
+            forwarded = Document.get().createChangeEvent();
+        } else {
+            forwarded = event;
+        }
+
+        this.inner.onBrowserEvent(context, parent, toBoolean(value), forwarded, new ValueUpdaterWrapper(valueUpdater));
     }
 
     @Override
     public Set<String> getConsumedEvents() {
-        return this.inner.getConsumedEvents();
+        final HashSet<String> events = new HashSet<>(this.inner.getConsumedEvents());
+        events.add(BrowserEvents.CLICK);
+        return events;
     }
 
     @Override

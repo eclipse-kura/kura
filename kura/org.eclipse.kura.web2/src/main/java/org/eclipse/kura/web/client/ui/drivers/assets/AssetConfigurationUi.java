@@ -232,6 +232,9 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
                 FailureHandler.handle(new Exception(htmlResponse));
             }
         });
+
+        this.filePath.getElement().setAttribute("accept", ".csv");
+
         setModel(assetModel);
         initNewChannelModal();
     }

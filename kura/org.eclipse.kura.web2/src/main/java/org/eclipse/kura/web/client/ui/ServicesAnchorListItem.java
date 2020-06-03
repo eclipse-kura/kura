@@ -14,16 +14,9 @@
 package org.eclipse.kura.web.client.ui;
 
 import org.eclipse.kura.web.Console;
-import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.gwtbootstrap3.client.ui.AnchorListItem;
-import org.gwtbootstrap3.client.ui.Button;
-import org.gwtbootstrap3.client.ui.Modal;
-import org.gwtbootstrap3.client.ui.ModalBody;
-import org.gwtbootstrap3.client.ui.ModalFooter;
-import org.gwtbootstrap3.client.ui.ModalHeader;
 import org.gwtbootstrap3.client.ui.constants.IconType;
-import org.gwtbootstrap3.client.ui.html.Span;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.URL;
@@ -32,14 +25,11 @@ public class ServicesAnchorListItem extends AnchorListItem {
 
     private static final String SERVLET_URL = Console.ADMIN_ROOT + '/' + GWT.getModuleName() + "/file/icon?";
 
-    EntryClassUi ui;
     GwtConfigComponent item;
     ServicesAnchorListItem instance;
-    private static final Messages MSGS = GWT.create(Messages.class);
 
-    public ServicesAnchorListItem (GwtConfigComponent service, EntryClassUi mainUi) {
+    public ServicesAnchorListItem(GwtConfigComponent service) {
         super();
-        this.ui = mainUi;
         this.item = service;
         this.instance = this;
 
@@ -47,13 +37,13 @@ public class ServicesAnchorListItem extends AnchorListItem {
         if (icon == null) {
             String imageURL = getImagePath();
             if (imageURL != null) {
-	            StringBuilder imageTag = new StringBuilder();
-	            imageTag.append("<img src='");
-	            imageTag.append(imageURL);
-	            imageTag.append("' height='14' width='14'/>");
-	            imageTag.append(" ");
-	            imageTag.append(this.item.getComponentName());
-	            super.anchor.setHTML(imageTag.toString());
+                StringBuilder imageTag = new StringBuilder();
+                imageTag.append("<img src='");
+                imageTag.append(imageURL);
+                imageTag.append("' height='14' width='14'/>");
+                imageTag.append(" ");
+                imageTag.append(this.item.getComponentName());
+                super.anchor.setHTML(imageTag.toString());
             } else {
                 super.setIcon(IconType.CHEVRON_CIRCLE_RIGHT);
                 super.setText(this.item.getComponentName());
@@ -67,46 +57,6 @@ public class ServicesAnchorListItem extends AnchorListItem {
         if (description != null && !description.isEmpty()) {
             super.setTitle(description);
         }
-
-        super.addClickHandler(event -> {
-            if (ServicesAnchorListItem.this.ui.getSelected() != null
-                    && ServicesAnchorListItem.this.ui.getSelected() != ServicesAnchorListItem.this.item
-                    && ServicesAnchorListItem.this.ui.isServicesUiDirty()
-                    || ServicesAnchorListItem.this.ui.isNetworkDirty()
-                    || ServicesAnchorListItem.this.ui.isFirewallDirty()
-                    || ServicesAnchorListItem.this.ui.isSettingsDirty()) {
-                final Modal modal = new Modal();
-
-                ModalHeader header = new ModalHeader();
-                header.setTitle(MSGS.warning());
-                modal.add(header);
-
-                ModalBody body = new ModalBody();
-                body.add(new Span(MSGS.deviceConfigDirty()));
-                modal.add(body);
-
-                ModalFooter footer = new ModalFooter();
-                Button yes = new Button(MSGS.yesButton(), event11 -> {
-                    ServicesAnchorListItem.this.ui.setDirty();
-                    ServicesAnchorListItem.this.ui.setSelected(ServicesAnchorListItem.this.item);
-                    modal.hide();
-                    ServicesAnchorListItem.this.ui.render(ServicesAnchorListItem.this.item);
-                });
-
-                Button no = new Button(MSGS.noButton(), event12 -> modal.hide());
-                footer.add(no);
-                footer.add(yes);
-                modal.add(footer);
-
-                modal.show();
-                no.setFocus(true);
-
-            } else {
-                ServicesAnchorListItem.this.ui.setSelected(ServicesAnchorListItem.this.item);
-                ServicesAnchorListItem.this.ui.setSelectedAnchorListItem(ServicesAnchorListItem.this);
-                ServicesAnchorListItem.this.ui.render(ServicesAnchorListItem.this.item);
-            }
-        });
 
     }
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -9,6 +9,8 @@
  *******************************************************************************/
 
 package org.eclipse.kura.web.client.ui;
+
+import java.util.Optional;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.gwtbootstrap3.client.ui.Alert;
@@ -34,7 +36,7 @@ public class AlertDialog extends Composite implements HasId {
 
     private static final Messages MSGS = GWT.create(Messages.class);
 
-    private DismissListener listener;
+    private Optional<DismissListener> listener = Optional.empty();
 
     @UiField
     Button yes;
@@ -62,22 +64,23 @@ public class AlertDialog extends Composite implements HasId {
         this.no.setText(MSGS.noButton());
 
         this.yes.addClickHandler(event -> {
-            if (AlertDialog.this.listener != null) {
-                AlertDialog.this.listener.onDismissed(true);
+            if (AlertDialog.this.listener.isPresent()) {
+                AlertDialog.this.listener.get().onDismissed(true);
+                AlertDialog.this.listener = Optional.empty();
             }
             AlertDialog.this.modal.hide();
         });
 
-        this.no.addClickHandler(event -> {
-            if (AlertDialog.this.listener != null) {
-                AlertDialog.this.listener.onDismissed(false);
+        this.modal.addHideHandler(event -> {
+            if (AlertDialog.this.listener.isPresent()) {
+                AlertDialog.this.listener.get().onDismissed(false);
+                AlertDialog.this.listener = Optional.empty();
             }
-            AlertDialog.this.modal.hide();
         });
     }
 
     public void setListener(DismissListener listener) {
-        this.listener = listener;
+        this.listener = Optional.ofNullable(listener);
         this.alertFooter.setVisible(listener != null);
     }
 

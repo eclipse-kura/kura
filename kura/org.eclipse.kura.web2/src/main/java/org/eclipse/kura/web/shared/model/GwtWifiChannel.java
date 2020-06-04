@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -26,7 +26,7 @@ public enum GwtWifiChannel {
     netWifiChannel11,
     netWifiChannel12,
     netWifiChannel13,
-    netWifiChannel14;
+    NET_WIFI_CHANNEL_14;
 
     public static GwtWifiChannel valueOf(short channel) {
         try {
@@ -65,7 +65,7 @@ public enum GwtWifiChannel {
             return 13;
         case netWifiChannel13:
             return 13;
-        case netWifiChannel14:
+        case NET_WIFI_CHANNEL_14:
             return 14;
         default:
         }

@@ -60,6 +60,7 @@ import org.gwtbootstrap3.client.ui.FormGroup;
 import org.gwtbootstrap3.client.ui.FormLabel;
 import org.gwtbootstrap3.client.ui.Modal;
 import org.gwtbootstrap3.client.ui.Panel;
+import org.gwtbootstrap3.client.ui.PanelFooter;
 import org.gwtbootstrap3.client.ui.TextBox;
 import org.gwtbootstrap3.client.ui.gwt.CellTable;
 import org.gwtbootstrap3.client.ui.html.Paragraph;
@@ -74,6 +75,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.SimplePager;
+import com.google.gwt.user.cellview.client.SimplePager.TextLocation;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
@@ -99,8 +101,6 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
     @UiField
     Button btnUpload;
 
-    @UiField
-    SimplePager channelPager;
     @UiField
     Panel channelPanel;
 
@@ -149,10 +149,12 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
     Hidden appendCheckField;
     @UiField
     Paragraph emptyTableLabel;
+    @UiField
+    PanelFooter tablePanelFooter;
 
     private static final String INVALID_CLASS_NAME = "error-text-box";
 
-    private static final int MAXIMUM_PAGE_SIZE = 5;
+    private static final int MAXIMUM_PAGE_SIZE = 15;
 
     private static AssetConfigurationUiBinder uiBinder = GWT.create(AssetConfigurationUiBinder.class);
 
@@ -170,6 +172,8 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
     private final Widget associatedView;
     private final Configurations configurations;
 
+    private final SimplePager channelPager;
+
     private HasConfiguration.Listener listener;
 
     public AssetConfigurationUi(final AssetModel assetModel, final Widget associatedView,
@@ -179,9 +183,11 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
         this.configurations = configurations;
         this.fields.clear();
 
+        this.channelPager = new SimplePager(TextLocation.CENTER, true, MAXIMUM_PAGE_SIZE * 6, true);
         this.channelPager.setPageSize(MAXIMUM_PAGE_SIZE);
         this.channelPager.setDisplay(this.channelTable);
         this.channelTable.setSelectionModel(this.selectionModel);
+        this.tablePanelFooter.add(this.channelPager);
         this.channelsDataProvider.addDataDisplay(this.channelTable);
         this.channelPanel.setVisible(false);
         this.btnRemove.setEnabled(false);

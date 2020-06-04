@@ -26,10 +26,16 @@ public class WpaSupplicantUtil {
         if (channel >= 1 && channel <= 13) {
             frequency = 2407 + channel * 5;
         }
+        if (channel == 14) {
+            frequency = 2484;
+        }
         return frequency;
     }
 
     public static int convFrequencyToChannel(int mhz) {
+        if (mhz == 2484) {
+            return 14;
+        }
         return (mhz - 2407) / 5;
     }
 

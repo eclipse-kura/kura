@@ -42,6 +42,7 @@ import org.eclipse.kura.web.client.ui.wires.ValidationInputCell;
 import org.eclipse.kura.web.client.util.DownloadHelper;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.util.ResizableTableHeader;
+import org.eclipse.kura.web.client.util.ValidationUtil;
 import org.eclipse.kura.web.client.util.request.RequestContext;
 import org.eclipse.kura.web.client.util.request.RequestQueue;
 import org.eclipse.kura.web.shared.AssetConstants;
@@ -404,7 +405,7 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
         if (!isReadOnly) {
             result.setFieldUpdater((index, object, value) -> {
                 ValidationData viewData;
-                if (!isValid(param, value)) {
+                if (!ValidationUtil.validateParameter(param, value)) {
                     viewData = ((ValidationInputCell) cell).getViewData(object);
                     viewData.setInvalid(true);
                     AssetConfigurationUi.this.nonValidatedCells.add(object.getChannelName());

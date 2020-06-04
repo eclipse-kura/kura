@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.eclipse.kura.web.client.util.ValidationUtil;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 
 public class Configurations {
@@ -228,7 +229,8 @@ public class Configurations {
 
         @Override
         public boolean isValid() {
-            return this.configuration != null && this.configuration.isValid();
+            return this.configuration != null && this.configuration.isValid()
+                    && ValidationUtil.validateParameters(configuration);
         }
 
         @Override

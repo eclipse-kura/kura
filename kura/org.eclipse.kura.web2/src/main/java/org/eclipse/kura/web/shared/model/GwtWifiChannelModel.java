@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -19,7 +19,7 @@ public class GwtWifiChannelModel extends GwtBaseModel {
     private static final long serialVersionUID = -1471520645150788770L;
     private static final String BAND2400MHZ = "2.4 GHz";
     private static final int FIRST_2400MHZ_CHANNEL = 1;
-    private static final int LAST_2400MHZ_CHANNEL = 13;
+    private static final int LAST_2400MHZ_CHANNEL = 14;
 
     public GwtWifiChannelModel() {
 
@@ -82,6 +82,9 @@ public class GwtWifiChannelModel extends GwtBaseModel {
         int frequency = -1;
         if (channel >= 1 && channel <= 13) {
             frequency = 2407 + channel * 5;
+        }
+        if (channel == 14) {
+            frequency = 2484;
         }
         return frequency;
     }

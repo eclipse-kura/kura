@@ -117,7 +117,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
     private static final String REGEX_PASSWORD_WPA = "^[ -~]{8,63}$";
     private static final String REGEX_PASSWORD_WEP = "^(?:[\\x00-\\x7F]{5}|[\\x00-\\x7F]{13}|[a-fA-F0-9]{10}|[a-fA-F0-9]{26})$";
-    private static final int MAX_WIFI_CHANNEL = 13;
+    private static final int MAX_WIFI_CHANNEL = 14;
     private static final int MAX_SSID_LENGTH = 32;
 
     private final GwtSession session;

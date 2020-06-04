@@ -316,11 +316,11 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
     }
 
     private String updateChannels(WifiConfig wifiConfig, String fileAsString) throws KuraException {
-        if (wifiConfig.getChannels()[0] > 0 && wifiConfig.getChannels()[0] < 14) {
+        if (wifiConfig.getChannels()[0] > 0 && wifiConfig.getChannels()[0] <= 14) {
             fileAsString = fileAsString.replaceFirst("KURA_CHANNEL", Integer.toString(wifiConfig.getChannels()[0]));
         } else {
             throw KuraException.internalError(String.format(
-                    "the channel (%s) must be between 1 (inclusive) and 11 (inclusive) or 1 (inclusive) and 13 (inclusive) depending on your locale",
+                    "the channel (%s) must be between 1 (inclusive) and 11 (inclusive) or 1 (inclusive) and 14 (inclusive) depending on your locale",
                     wifiConfig.getChannels()[0]));
         }
         return fileAsString;

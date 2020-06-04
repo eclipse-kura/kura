@@ -36,7 +36,7 @@ public class WpaSupplicantConfigReader extends WifiConfigReaderHelper implements
 
     private static final Logger logger = LoggerFactory.getLogger(WpaSupplicantConfigReader.class);
     private static final String NET_INTERFACE = "net.interface.";
-    private static final int[] DEFAULT_CHANNELS = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 };
+    private static final int[] DEFAULT_CHANNELS = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14 };
 
     private static WpaSupplicantConfigReader instance;
 

@@ -25,7 +25,8 @@ public enum GwtWifiChannel {
     netWifiChannel10,
     netWifiChannel11,
     netWifiChannel12,
-    netWifiChannel13;
+    netWifiChannel13,
+    netWifiChannel14;
 
     public static GwtWifiChannel valueOf(short channel) {
         try {
@@ -64,6 +65,8 @@ public enum GwtWifiChannel {
             return 13;
         case netWifiChannel13:
             return 13;
+        case netWifiChannel14:
+            return 14;
         default:
         }
 

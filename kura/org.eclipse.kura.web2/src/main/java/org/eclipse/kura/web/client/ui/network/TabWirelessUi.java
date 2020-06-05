@@ -884,8 +884,11 @@ public class TabWirelessUi extends Composite implements NetworkTab {
             }
         });
         this.pairwise.addMouseOutHandler(event -> resetHelp());
-        for (GwtWifiCiphers ciphers : GwtWifiCiphers.values()) {
-            this.pairwise.addItem(MessageUtils.get(ciphers.name()));
+        for (GwtWifiCiphers cipher : GwtWifiCiphers.values()) {
+            if (GwtWifiCiphers.netWifiCiphers_NONE == cipher) {
+                continue;
+            }
+            this.pairwise.addItem(MessageUtils.get(cipher.name()));
         }
         this.pairwise.addChangeHandler(event -> refreshForm());
 

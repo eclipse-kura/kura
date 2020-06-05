@@ -587,7 +587,8 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
         this.port.addBlurHandler(event -> {
             if (OpenPortsTabUi.this.port.getText() == null || "".equals(OpenPortsTabUi.this.port.getText().trim())
                     || OpenPortsTabUi.this.port.getText().trim().length() == 0
-                    || !FirewallPanelUtils.checkPortRegex(OpenPortsTabUi.this.port.getText())
+                    || !(FirewallPanelUtils.checkPortRegex(OpenPortsTabUi.this.port.getText())
+                            || FirewallPanelUtils.checkPortRangeRegex(OpenPortsTabUi.this.port.getText()))
                     || !FirewallPanelUtils.isPortInRange(OpenPortsTabUi.this.port.getText())) {
                 OpenPortsTabUi.this.groupPort.setValidationState(ValidationState.ERROR);
             } else {
@@ -633,7 +634,8 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
         });
         this.source.addBlurHandler(event -> {
             if (OpenPortsTabUi.this.source.getText().trim().length() > 0
-                    && (!FirewallPanelUtils.checkPortRegex(OpenPortsTabUi.this.source.getText())
+                    && (!(FirewallPanelUtils.checkPortRegex(OpenPortsTabUi.this.source.getText())
+                            || FirewallPanelUtils.checkPortRangeRegex(OpenPortsTabUi.this.source.getText()))
                             || !FirewallPanelUtils.isPortInRange(OpenPortsTabUi.this.source.getText()))) {
                 OpenPortsTabUi.this.groupSource.setValidationState(ValidationState.ERROR);
             } else {

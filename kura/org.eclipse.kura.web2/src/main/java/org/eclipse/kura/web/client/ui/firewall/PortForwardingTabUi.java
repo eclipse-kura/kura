@@ -701,7 +701,8 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
         });
         this.source.addBlurHandler(event -> {
             if (!PortForwardingTabUi.this.source.getText().trim().isEmpty()
-                    && (!FirewallPanelUtils.checkPortRegex(PortForwardingTabUi.this.source.getText())
+                    && (!(FirewallPanelUtils.checkPortRegex(PortForwardingTabUi.this.source.getText())
+                            || FirewallPanelUtils.checkPortRangeRegex(PortForwardingTabUi.this.source.getText()))
                             || !FirewallPanelUtils.isPortInRange(PortForwardingTabUi.this.source.getText()))) {
                 PortForwardingTabUi.this.groupSource.setValidationState(ValidationState.ERROR);
             } else {

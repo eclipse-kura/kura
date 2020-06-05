@@ -40,11 +40,11 @@ public class FirewallPanelUtils {
     }
 
     public static boolean checkPortRegex(String ports) {
-        boolean isPortRegex = false;
-        if (ports.trim().matches(FieldType.PORT_RANGE.getRegex()) || ports.trim().matches(FieldType.PORT.getRegex())) {
-            isPortRegex = true;
-        }
-        return isPortRegex;
+        return ports.trim().matches(FieldType.PORT.getRegex());
+    }
+
+    public static boolean checkPortRangeRegex(String ports) {
+        return ports.trim().matches(FieldType.PORT_RANGE.getRegex());
     }
 
     public static class PortSorting implements Comparator<GwtFirewallOpenPortEntry> {

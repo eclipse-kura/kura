@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -125,6 +125,9 @@ public class PackagesPanelUi extends Composite {
 
     @UiField
     TabListItem fileLabel;
+
+    @UiField
+    TabListItem urlLabel;
 
     @UiField
     Alert notification;
@@ -287,8 +290,6 @@ public class PackagesPanelUi extends Composite {
                             PackagesPanelUi.this.packagesFormFile.submit();
                         } else {
                             PackagesPanelUi.this.packagesGroupFile.setValidationState(ValidationState.ERROR);
-                            // PackagesPanelUi.this.uploadModal.hide();
-                            // PackagesPanelUi.this.uploadErrorModal.show();
                         }
                     }
                 }));
@@ -309,8 +310,6 @@ public class PackagesPanelUi extends Composite {
                             PackagesPanelUi.this.xsrfTokenFieldUrl.setValue(token.getToken());
                             PackagesPanelUi.this.packagesFormUrl.submit();
                         } else {
-                            // PackagesPanelUi.this.uploadModal.hide();
-                            // PackagesPanelUi.this.uploadErrorModal.show();
                             PackagesPanelUi.this.packagesGroupUrl.setValidationState(ValidationState.ERROR);
                         }
                     }
@@ -344,6 +343,8 @@ public class PackagesPanelUi extends Composite {
 
         // ******FILE TAB ****//
         this.fileLabel.setText(MSGS.fileLabel());
+        this.fileLabel.addClickHandler(
+                event -> PackagesPanelUi.this.packagesGroupFile.setValidationState(ValidationState.NONE));
 
         this.filePath.setName("uploadedFile");
 
@@ -364,6 +365,10 @@ public class PackagesPanelUi extends Composite {
         });
 
         // ******URL TAB ****//
+        this.urlLabel.setText(MSGS.urlLabel());
+        this.urlLabel.addClickHandler(
+                event -> PackagesPanelUi.this.packagesGroupUrl.setValidationState(ValidationState.NONE));
+
         this.formUrl.setName("packageUrl");
 
         this.xsrfTokenFieldUrl.setID(XSRF_TOKEN);

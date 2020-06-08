@@ -1041,13 +1041,6 @@ Packages panel dropzone START
     color:  white;
 }
 
-.packages-panel {
-    position: absolute;
-    height: 100vh;
-    width: 100%;
-    padding-right: 30px !important;
-}
-
 /**********************
 Packages panel dropzone END
 ***********************/

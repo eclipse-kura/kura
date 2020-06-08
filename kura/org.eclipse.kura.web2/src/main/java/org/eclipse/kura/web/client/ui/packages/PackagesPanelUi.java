@@ -519,7 +519,7 @@ public class PackagesPanelUi extends Composite {
     }
 
     private void initUploadErrorModal() {
-        this.uploadErrorModal.setTitle(MSGS.warning());
+        this.uploadErrorModal.setTitle(MSGS.error());
         this.uploadErrorText.setText(MSGS.missingFileUpload());
     }
 

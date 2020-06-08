@@ -129,7 +129,7 @@
             <b:ModalBody>
                 <b:Panel>
                     <b:PanelBody>
-                        <b:Alert type="WARNING">
+                        <b:Alert type="DANGER">
                             <b.html:Text ui:field="uploadErrorText" />
                         </b:Alert>
                     </b:PanelBody>

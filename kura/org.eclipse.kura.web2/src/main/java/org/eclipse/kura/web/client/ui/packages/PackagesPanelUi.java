@@ -239,6 +239,8 @@ public class PackagesPanelUi extends Composite {
 
     public void refresh() {
         refresh(100);
+        PackagesPanelUi.this.selectionModel.setSelected(PackagesPanelUi.this.selected, false);
+        PackagesPanelUi.this.packagesUninstall.setEnabled(false);
     }
 
     private void initTabButtons() {
@@ -265,6 +267,8 @@ public class PackagesPanelUi extends Composite {
                 modalFooter.add(new Button("Yes", event12 -> {
                     modal.hide();
                     uninstall(PackagesPanelUi.this.selected);
+                    PackagesPanelUi.this.selectionModel.setSelected(PackagesPanelUi.this.selected, false);
+                    PackagesPanelUi.this.packagesUninstall.setEnabled(false);
                 }));
 
                 modal.add(modalBody);
@@ -359,6 +363,8 @@ public class PackagesPanelUi extends Composite {
             String result = event.getResults();
             if (result == null || result.isEmpty()) {
                 PackagesPanelUi.this.uploadModal.hide();
+                PackagesPanelUi.this.selectionModel.setSelected(PackagesPanelUi.this.selected, false);
+                PackagesPanelUi.this.packagesUninstall.setEnabled(false);
             } else {
                 logger.log(Level.SEVERE, "Error uploading package!");
             }
@@ -381,6 +387,8 @@ public class PackagesPanelUi extends Composite {
             String result = event.getResults();
             if (result == null || result.isEmpty()) {
                 PackagesPanelUi.this.uploadModal.hide();
+                PackagesPanelUi.this.selectionModel.setSelected(PackagesPanelUi.this.selected, false);
+                PackagesPanelUi.this.packagesUninstall.setEnabled(false);
             } else {
                 String errMsg = result;
                 int startIdx = result.indexOf("<pre>");

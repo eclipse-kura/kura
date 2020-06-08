@@ -86,7 +86,10 @@ public class FirewallPanelUi extends Composite {
 
     public void initFirewallPanel() {
         FirewallPanelUi.this.currentlySelectedTab = openPorts;
+        this.portForwardingPanel.clear();
+        this.ipForwardingPanel.clear();
         this.openPortsPanel.refresh();
+        this.openPorts.showTab();
     }
 
     public boolean isDirty() {

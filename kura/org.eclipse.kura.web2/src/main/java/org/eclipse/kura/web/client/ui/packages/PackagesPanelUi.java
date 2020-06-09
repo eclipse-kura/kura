@@ -623,6 +623,9 @@ public class PackagesPanelUi extends Composite {
                     if (isEclipseMarketplaceUrl(url)) {
                         PackagesPanelUi.this.confirmDialog.show(MSGS.packagesMarketplaceInstallConfirmMessage(),
                                 () -> eclipseMarketplaceInstall(url));
+                    } else {
+                        PackagesPanelUi.this.uploadErrorText.setText(MSGS.packagesMarketplaceInstallDpNotValid());
+                        PackagesPanelUi.this.uploadErrorModal.show();
                     }
                     return true;
                 }

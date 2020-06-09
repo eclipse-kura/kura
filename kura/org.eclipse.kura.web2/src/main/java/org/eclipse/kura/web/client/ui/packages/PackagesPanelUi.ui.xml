@@ -58,7 +58,6 @@
                  <b:ButtonGroup size="SMALL">
                     <b:Button ui:field="packagesInstall" addStyleNames="fa fa-plus"></b:Button>
                     <b:Button ui:field="packagesUninstall" addStyleNames="fa fa-minus"></b:Button>
-                    <b:Button ui:field="packagesRefresh" addStyleNames="fa fa-refresh"></b:Button>
                 </b:ButtonGroup>
                 <gwt:CellTable bordered="true" condensed="true" striped="true" hover="true" width="100%"
                     height="100%" ui:field="packagesGrid" addStyleNames="{style.center-panel}" />

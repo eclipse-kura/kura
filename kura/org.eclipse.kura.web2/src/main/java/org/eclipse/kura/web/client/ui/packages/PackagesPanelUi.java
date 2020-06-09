@@ -117,8 +117,6 @@ public class PackagesPanelUi extends Composite {
     @UiField
     Button urlSubmit;
     @UiField
-    Button packagesRefresh;
-    @UiField
     Button packagesInstall;
     @UiField
     Button packagesUninstall;
@@ -244,9 +242,6 @@ public class PackagesPanelUi extends Composite {
     }
 
     private void initTabButtons() {
-        // Refresh Button
-        this.packagesRefresh.setText(MSGS.refreshButton());
-        this.packagesRefresh.addClickHandler(event -> refresh());
         // Install Button
         this.packagesInstall.setText(MSGS.packageAddButton());
         this.packagesInstall.addClickHandler(event -> upload());

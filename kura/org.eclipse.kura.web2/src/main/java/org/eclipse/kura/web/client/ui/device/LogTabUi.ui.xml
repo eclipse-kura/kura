@@ -2,7 +2,7 @@
 
 <!--
 
-    Copyright (c) 2019 Eurotech and/or its affiliates
+    Copyright (c) 2019, 2020 Eurotech and/or its affiliates
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -30,7 +30,7 @@
                         <b:FormLabel ui:field="logLabel" />
                     </b:Row>
                     <b:ButtonGroup pull="LEFT">
-                    	<b:Button ui:field="execute">Download</b:Button>
+                    	<b:Button ui:field="execute" addStyleNames="fa fa-download">Download</b:Button>
                     </b:ButtonGroup>
                 </b:FieldSet>
             </gwt:FormPanel>

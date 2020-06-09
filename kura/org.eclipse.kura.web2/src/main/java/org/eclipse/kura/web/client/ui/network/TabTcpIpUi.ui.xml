@@ -89,7 +89,7 @@
                             </b:FormGroup>
 
                             <b:FormGroup>
-                                <b:Button ui:field="renew" />
+                                <b:Button ui:field="renew" addStyleNames="fa fa-refresh"/>
                             </b:FormGroup>
 
                             <b:FormGroup ui:field="groupDns">

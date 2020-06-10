@@ -56,8 +56,10 @@ public class NewPasswordInput extends Input {
     }
 
     private Validator<String> passwordLengthValidator(final int minPasswordLength) {
-        return new PredicateValidator(v -> v.length() >= minPasswordLength,
-                MSGS.pwdStrengthMinLength(Integer.toString(minPasswordLength)));
+        return new PredicateValidator(v -> {
+            final int passwordLength = v == null ? 0 : v.length();
+            return passwordLength >= minPasswordLength;
+        }, MSGS.pwdStrengthMinLength(Integer.toString(minPasswordLength)));
     }
 
     private Validator<String> containsDigitsValidator() {

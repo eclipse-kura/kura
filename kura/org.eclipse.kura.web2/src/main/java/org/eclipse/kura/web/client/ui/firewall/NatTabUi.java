@@ -452,7 +452,6 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
                 NatTabUi.this.selectionModel.setSelected(selection, false);
                 setVisibility();
                 refreshTable();
-
                 setDirty(true);
             });
         }

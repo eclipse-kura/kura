@@ -20,13 +20,13 @@
 	<parent>
 		<groupId>org.eclipse.kura</groupId>
 		<artifactId>tools</artifactId>
-		<version>4.1.1</version>
+		<version>4.1.2-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<groupId>org.eclipse.kura.tools</groupId>
 	<artifactId>archetype</artifactId>
-	<version>4.1.1</version>
+	<version>4.1.2-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Eclipse Kura Archetypes</name>
 

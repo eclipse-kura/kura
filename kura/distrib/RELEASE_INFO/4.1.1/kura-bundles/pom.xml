@@ -102,7 +102,7 @@
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.core.comm</artifactId>
-                                    <version>1.0.500</version>
+                                    <version>1.0.501</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
@@ -368,51 +368,6 @@
                                     <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider</artifactId>
                                     <version>1.0.100</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
-                                    <artifactId></artifactId>
-                                    <version></version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>## features versions</artifactId>
-                                    <version></version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>org.eclipse.kura.driver.opcua</artifactId>
-                                    <version>1.0.400</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>org.eclipse.kura.driver.s7plc</artifactId>
-                                    <version>1.0.300</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>org.eclipse.kura.driver.ble.sensortag</artifactId>
-                                    <version>1.0.300</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>org.eclipse.kura.driver.eddystone</artifactId>
-                                    <version>1.0.100</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>org.eclipse.kura.driver.ibeacon</artifactId>
-                                    <version>1.0.100</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>org.eclipse.kura.driver.gpio</artifactId>
-                                    <version>1.0.200</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>org.eclipse.kura.wire.script.filter</artifactId>
-                                    <version>1.0.300</version>
                                 </artifactItem>
                           </artifactItems>
                             <stripVersion>true</stripVersion>

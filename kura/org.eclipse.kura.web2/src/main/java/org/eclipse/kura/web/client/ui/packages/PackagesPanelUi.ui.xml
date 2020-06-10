@@ -2,7 +2,7 @@
 
 <!--
 
-    Copyright (c) 2011, 2018 Eurotech and/or its affiliates
+    Copyright (c) 2011, 2020 Eurotech and/or its affiliates
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -74,22 +74,24 @@
 
                         <b:NavTabs>
                             <b:TabListItem active="true" dataTarget="#tab1" ui:field="fileLabel" />
-                            <b:TabListItem dataTarget="#tab2" text="URL" />
+                            <b:TabListItem dataTarget="#tab2" ui:field="urlLabel" />
                         </b:NavTabs>
                         <b:TabContent>
 
                             <b:TabPane fade="true" in="true" active="true" b:id="tab1">
                                 <g:FormPanel ui:field="packagesFormFile">
                                     <b:FieldSet>
-                                        <b:FormLabel addStyleNames="{style.upload-label}">Select the deployment package file:</b:FormLabel>
-                                        <b:Well>
-                                            <g:FileUpload ui:field="filePath"></g:FileUpload>
-                                        </b:Well>
-                                        <b:ButtonGroup pull="RIGHT">
-                                            <b:Button ui:field="fileCancel" b:id="btnCancel1">Cancel</b:Button>
-                                            <b:Button ui:field="fileSubmit" b:id="btnSubmit1">Submit</b:Button>
-                                        </b:ButtonGroup>
-                                        <g:Hidden ui:field="xsrfTokenFieldFile"></g:Hidden>
+                                        <b:FormGroup ui:field="packagesGroupFile">
+	                                        <b:FormLabel addStyleNames="{style.upload-label}">Select the deployment package file:</b:FormLabel>
+	                                        <b:Well>
+	                                            <g:FileUpload ui:field="filePath"></g:FileUpload>
+	                                        </b:Well>
+	                                        <b:ButtonGroup pull="RIGHT">
+	                                            <b:Button ui:field="fileCancel" b:id="btnCancel1">Cancel</b:Button>
+	                                            <b:Button ui:field="fileSubmit" b:id="btnSubmit1">Submit</b:Button>
+	                                        </b:ButtonGroup>
+	                                        <g:Hidden ui:field="xsrfTokenFieldFile"></g:Hidden>
+                                        </b:FormGroup>
                                     </b:FieldSet>
                                 </g:FormPanel>
                             </b:TabPane>
@@ -97,13 +99,15 @@
                             <b:TabPane fade="true" b:id="tab2">
                                 <g:FormPanel ui:field="packagesFormUrl">
                                     <b:FieldSet>
-                                        <b:FormLabel addStyleNames="{style.upload-label}" for="formUrl">Enter the URL of the deployment package:</b:FormLabel>
-                                        <b:TextBox b:id="formUrl" ui:field="formUrl" />
-                                        <b:ButtonGroup pull="RIGHT">
-                                            <b:Button ui:field="urlCancel" b:id="btnCancel2">Cancel</b:Button>
-                                            <b:Button ui:field="urlSubmit" b:id="btnSubmit2">Submit</b:Button>
-                                        </b:ButtonGroup>
-                                        <g:Hidden ui:field="xsrfTokenFieldUrl"></g:Hidden>
+                                        <b:FormGroup ui:field="packagesGroupUrl">
+	                                        <b:FormLabel addStyleNames="{style.upload-label}" for="formUrl">Enter the URL of the deployment package:</b:FormLabel>
+	                                        <b:TextBox b:id="formUrl" ui:field="formUrl" />
+	                                        <b:ButtonGroup pull="RIGHT">
+	                                            <b:Button ui:field="urlCancel" b:id="btnCancel2">Cancel</b:Button>
+	                                            <b:Button ui:field="urlSubmit" b:id="btnSubmit2">Submit</b:Button>
+	                                        </b:ButtonGroup>
+	                                        <g:Hidden ui:field="xsrfTokenFieldUrl"></g:Hidden>
+                                        </b:FormGroup>
                                     </b:FieldSet>
                                 </g:FormPanel>
                             </b:TabPane>
@@ -125,7 +129,7 @@
             <b:ModalBody>
                 <b:Panel>
                     <b:PanelBody>
-                        <b:Alert type="WARNING">
+                        <b:Alert type="DANGER">
                             <b.html:Text ui:field="uploadErrorText" />
                         </b:Alert>
                     </b:PanelBody>

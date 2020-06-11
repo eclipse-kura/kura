@@ -1,6 +1,6 @@
 /**
  *
- * Copyright (c) 2011, 2019 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
  *
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
@@ -1039,13 +1039,6 @@ Packages panel dropzone START
     padding: 0.5cm;
     border-radius: 0.4cm !important;
     color:  white;
-}
-
-.packages-panel {
-    position: absolute;
-    height: 100vh;
-    width: 100%;
-    padding-right: 30px !important;
 }
 
 /**********************

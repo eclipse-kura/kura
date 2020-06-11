@@ -37,7 +37,7 @@
     </ui:style>
 
 
-    <b:Container fluid="true" addStyleNames="packages-panel">
+    <b:Container fluid="true">
         <b:Row>
             <g:HTMLPanel ui:field="packagesIntro">
             </g:HTMLPanel>

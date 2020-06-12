@@ -864,15 +864,8 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         });
         this.verify.addMouseOutHandler(event -> resetHelp());
         this.verify.addChangeHandler(event -> {
-            if (TabWirelessUi.this.password != null
-                    && !TabWirelessUi.this.verify.getText().equals(TabWirelessUi.this.password.getText())) {
-                TabWirelessUi.this.helpVerify.setText(MSGS.netWifiWirelessPasswordDoesNotMatch());
-                TabWirelessUi.this.groupVerify.setValidationState(ValidationState.ERROR);
-
-            } else {
-                TabWirelessUi.this.helpVerify.setText("");
-                TabWirelessUi.this.groupVerify.setValidationState(ValidationState.NONE);
-            }
+            refreshForm();
+            checkPassword();
         });
 
         // Pairwise ciphers
@@ -1471,6 +1464,16 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
         if (!this.verify.isEnabled()) {
             this.groupVerify.setValidationState(ValidationState.NONE);
+        }
+        
+        if (TabWirelessUi.this.password != null
+                && !TabWirelessUi.this.verify.getText().equals(TabWirelessUi.this.password.getText())) {
+            TabWirelessUi.this.helpVerify.setText(MSGS.netWifiWirelessPasswordDoesNotMatch());
+            TabWirelessUi.this.groupVerify.setValidationState(ValidationState.ERROR);
+
+        } else {
+            TabWirelessUi.this.helpVerify.setText("");
+            TabWirelessUi.this.groupVerify.setValidationState(ValidationState.NONE);
         }
     }
 

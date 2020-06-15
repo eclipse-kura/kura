@@ -894,7 +894,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         this.group.addMouseOverHandler(event -> {
             if (TabWirelessUi.this.group.isEnabled()) {
                 TabWirelessUi.this.helpText.clear();
-                TabWirelessUi.this.helpText.add(new Span(MSGS.netWifiWirelessGroupCiphers()));
+                TabWirelessUi.this.helpText.add(new Span(MSGS.netWifiToolTipGroupCiphers()));
             }
         });
         this.group.addMouseOutHandler(event -> resetHelp());
@@ -922,6 +922,12 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
         // BgScan RSSI threshold
         this.labelRssi.setText(MSGS.netWifiWirelessBgscanSignalStrengthThreshold());
+        this.rssi.addMouseOverHandler(event -> {
+            if (this.rssi.isEnabled()) {
+                this.helpText.clear();
+                this.helpText.add(new Span(MSGS.netWifiToolTipBgScanStrength()));
+            }
+        });
 
         // Bgscan short Interval
         this.labelShortI.setText(MSGS.netWifiWirelessBgscanShortInterval());

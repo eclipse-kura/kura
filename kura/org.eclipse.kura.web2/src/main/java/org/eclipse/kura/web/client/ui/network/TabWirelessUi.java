@@ -1457,23 +1457,18 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     }
 
     private void checkPassword() {
-        logger.info("check password");
         if (!this.password.validate() && this.password.isEnabled()) {
-            logger.info("password invalid");
             this.groupPassword.setValidationState(ValidationState.ERROR);
         } else {
-            logger.info("password valid");
             this.groupPassword.setValidationState(ValidationState.NONE);
         }
 
         if (this.verify.isEnabled() && TabWirelessUi.this.password != null
                 && !TabWirelessUi.this.verify.getText().equals(TabWirelessUi.this.password.getText())) {
-            logger.info("verification enabled and not match");
             TabWirelessUi.this.helpVerify.setText(MSGS.netWifiWirelessPasswordDoesNotMatch());
             TabWirelessUi.this.groupVerify.setValidationState(ValidationState.ERROR);
 
         } else {
-            logger.info("verification not enabled or match");
             TabWirelessUi.this.helpVerify.setText("");
             TabWirelessUi.this.groupVerify.setValidationState(ValidationState.NONE);
         }

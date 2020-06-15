@@ -13,6 +13,7 @@
 package org.eclipse.kura.web.client.util;
 
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.dom.client.DataTransfer;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -71,6 +72,21 @@ public final class DropSupport extends JavaScriptObject {
         protected DropEvent() {
         }
 
+        public native DataTransfer getDataTransfer()
+        /*-{
+            return this.dataTransfer;
+        }-*/;
+
+        public native void preventDefault()
+        /*-{
+            this.preventDefault();
+        }-*/;
+
+        public native void stopPropagation()
+        /*-{
+            return this.stopPropagation();
+        }-*/;
+
         public native String getAsText()
         /*-{
             return this.dataTransfer.getData('Text')
@@ -83,7 +99,33 @@ public final class DropSupport extends JavaScriptObject {
 
         public native double getClientY()
         /*-{
-            return thist.clientY
+            return this.clientY
+        }-*/;
+
+        public native String getFileName()
+        /*-{
+            var files = this.dataTransfer.files;
+            return files[0].name;
+        }-*/;
+
+        public native boolean isFile()
+        /*-{
+            var files = this.dataTransfer.files;
+            var result = true;
+            if(files.length == 0) {
+                return false;
+            }
+            return result;
+        }-*/;
+
+        public native void handleFile(FileUploadHandler fileUploadHandler)
+        /*-{
+            var file = this.dataTransfer.files[0];
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                fileUploadHandler.@org.eclipse.kura.web.client.util.FileUploadHandler::handleFileContent(Ljava/lang/String;Ljava/lang/String;)(file.name, e.target.result);
+            }
+            reader.readAsBinaryString(file);
         }-*/;
 
     }

@@ -34,4 +34,8 @@ public interface GwtPackageService extends RemoteService {
     public void installPackageFromMarketplace(GwtXSRFToken xsrfToken, GwtMarketplacePackageDescriptor descriptor)
             throws GwtKuraException;
 
+    public void installPackage(GwtXSRFToken xsrfToken, String fileContent) throws GwtKuraException;
+
+    public void log(String message);
+
 }

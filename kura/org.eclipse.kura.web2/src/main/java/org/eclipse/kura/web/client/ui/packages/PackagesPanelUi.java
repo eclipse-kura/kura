@@ -24,6 +24,7 @@ import org.eclipse.kura.web.client.util.DropSupport;
 import org.eclipse.kura.web.client.util.DropSupport.DropEvent;
 import org.eclipse.kura.web.client.util.EventService;
 import org.eclipse.kura.web.client.util.FailureHandler;
+import org.eclipse.kura.web.client.util.FileUploadHandler;
 import org.eclipse.kura.web.shared.ForwardedEventTopic;
 import org.eclipse.kura.web.shared.model.GwtDeploymentPackage;
 import org.eclipse.kura.web.shared.model.GwtMarketplacePackageDescriptor;
@@ -91,6 +92,8 @@ public class PackagesPanelUi extends Composite {
 
     private GwtSession gwtSession;
     private GwtDeploymentPackage selected;
+
+    private FileUploadHandler fileUploadHandler;
 
     interface PackagesPanelUiUiBinder extends UiBinder<Widget, PackagesPanelUi> {
     }
@@ -606,22 +609,74 @@ public class PackagesPanelUi extends Composite {
         return url != null && !url.isEmpty() && marketplaceUrlRegexp.test(url);
     }
 
+    private void installDp(String fileName, String fileContent) {
+
+        this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+
+            @Override
+            public void onFailure(Throwable ex) {
+                EntryClassUi.hideWaitModal();
+                FailureHandler.handle(ex, EntryClassUi.class.getName());
+            }
+
+            @Override
+            public void onSuccess(GwtXSRFToken token) {
+                PackagesPanelUi.this.gwtPackageService.installPackage(token, fileContent, new AsyncCallback<Void>() {
+
+                    @Override
+                    public void onSuccess(Void result) {
+                        EntryClassUi.hideWaitModal();
+                    }
+
+                    @Override
+                    public void onFailure(Throwable ex) {
+                        EntryClassUi.hideWaitModal();
+                        FailureHandler.handle(ex, EntryClassUi.class.getName());
+                    }
+                });
+            }
+        });
+    }
+
     private void initDragDrop() {
         DropSupport drop = DropSupport.addIfSupported(this);
+        PackagesPanelUi.this.fileUploadHandler = new FileUploadHandler() {
+
+            @Override
+            public void handleFileContent(String fileName, String fileContent) {
+                byte[] converted = fileContent.getBytes();
+                installDp(fileName, new String(converted));
+            }
+
+        };
+
         if (drop != null) {
             drop.setListener(new DropSupport.Listener() {
 
                 @Override
                 public boolean onDrop(DropEvent event) {
-                    final String url = event.getAsText();
+                    event.preventDefault();
+                    event.stopPropagation();
                     PackagesPanelUi.this.packagesDropzone.removeStyleName(DROPZONE_ACTIVE_STYLE_NAME);
-                    if (isEclipseMarketplaceUrl(url)) {
-                        PackagesPanelUi.this.confirmDialog.show(MSGS.packagesMarketplaceInstallConfirmMessage(),
-                                () -> eclipseMarketplaceInstall(url));
+                    if (event.isFile()) {
+                        if (event.getFileName().endsWith(".dp")) {
+                            PackagesPanelUi.this.confirmDialog.show(MSGS.packagesConfirmMessage(),
+                                    () -> event.handleFile(fileUploadHandler));
+                        } else {
+                            PackagesPanelUi.this.uploadErrorText.setText(MSGS.packagesMarketplaceInstallDpNotValid());
+                            PackagesPanelUi.this.uploadErrorModal.show();
+                        }
                     } else {
-                        PackagesPanelUi.this.uploadErrorText.setText(MSGS.packagesMarketplaceInstallDpNotValid());
-                        PackagesPanelUi.this.uploadErrorModal.show();
+                        final String url = event.getAsText();
+                        if (isEclipseMarketplaceUrl(url)) {
+                            PackagesPanelUi.this.confirmDialog.show(MSGS.packagesMarketplaceInstallConfirmMessage(),
+                                    () -> eclipseMarketplaceInstall(url));
+                        } else {
+                            PackagesPanelUi.this.uploadErrorText.setText(MSGS.packagesMarketplaceInstallDpNotValid());
+                            PackagesPanelUi.this.uploadErrorModal.show();
+                        }
                     }
+
                     return true;
                 }
 
@@ -663,4 +718,16 @@ public class PackagesPanelUi extends Composite {
 
     }
 
+    private void log(String message) {
+        PackagesPanelUi.this.gwtPackageService.log(message, new AsyncCallback<Void>() {
+
+            @Override
+            public void onSuccess(Void result) {
+            }
+
+            @Override
+            public void onFailure(Throwable ex) {
+            }
+        });
+    }
 }

@@ -568,6 +568,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
             if (WIFI_MODE_STATION_MESSAGE.equals(this.wireless.getSelectedItemText())) {
                 this.ssid.setEnabled(true);
+                this.verify.setEnabled(false);
                 if (!this.security.getSelectedItemText().equals(WIFI_SECURITY_NONE_MESSAGE)) {
                     if (this.password.getValue() != null && this.password.getValue().length() > 0) {
                         this.password.setEnabled(true);
@@ -1462,11 +1463,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
             this.groupPassword.setValidationState(ValidationState.NONE);
         }
 
-        if (!this.verify.isEnabled()) {
-            this.groupVerify.setValidationState(ValidationState.NONE);
-        }
-        
-        if (TabWirelessUi.this.password != null
+        if (this.verify.isEnabled() && TabWirelessUi.this.password != null
                 && !TabWirelessUi.this.verify.getText().equals(TabWirelessUi.this.password.getText())) {
             TabWirelessUi.this.helpVerify.setText(MSGS.netWifiWirelessPasswordDoesNotMatch());
             TabWirelessUi.this.groupVerify.setValidationState(ValidationState.ERROR);
@@ -1475,6 +1472,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
             TabWirelessUi.this.helpVerify.setText("");
             TabWirelessUi.this.groupVerify.setValidationState(ValidationState.NONE);
         }
+
     }
 
     private void showPasswordVerificationStatus(String statusMessage) {

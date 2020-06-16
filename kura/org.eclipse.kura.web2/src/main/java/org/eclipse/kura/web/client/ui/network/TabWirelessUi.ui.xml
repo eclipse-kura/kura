@@ -75,6 +75,7 @@
                                 <b:FormLabel for="ssid"
                                     ui:field="labelSsid" />
                                 <util:HelpButton ui:field="ssidHelp"/>
+                                <b:InlineHelpBlock iconType="EXCLAMATION_TRIANGLE" />
                                 <b:TextBox b:id="ssid"
                                     ui:field="ssid" />
                                 <b:Button ui:field="buttonSsid"

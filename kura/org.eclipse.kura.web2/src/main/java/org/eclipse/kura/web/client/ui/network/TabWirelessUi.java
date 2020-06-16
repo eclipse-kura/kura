@@ -47,6 +47,7 @@ import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.gwtbootstrap3.client.ui.Alert;
 import org.gwtbootstrap3.client.ui.Button;
+import org.gwtbootstrap3.client.ui.Form;
 import org.gwtbootstrap3.client.ui.FormGroup;
 import org.gwtbootstrap3.client.ui.FormLabel;
 import org.gwtbootstrap3.client.ui.HelpBlock;
@@ -141,6 +142,9 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     Alert noChannels;
     @UiField
     Text noChannelsText;
+    
+    @UiField
+    Form form;
 
     @UiField
     FormLabel labelWireless;
@@ -352,23 +356,19 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
     @Override
     public boolean isValid() {
-        boolean result = false;
-        if (isValidForm()) {
-            result = false;
-        } else {
-            result = true;
-        }
-        return result;
+        return isValidForm();
     }
 
     private boolean isValidForm() {
-        boolean result = this.groupWireless.getValidationState().equals(ValidationState.ERROR)
-                || this.groupPassword.getValidationState().equals(ValidationState.ERROR)
-                || this.groupVerify.getValidationState().equals(ValidationState.ERROR);
+        boolean result = form.validate();
+        result = result && !this.groupWireless.getValidationState().equals(ValidationState.ERROR)
+                && !this.groupPassword.getValidationState().equals(ValidationState.ERROR)
+                && !this.groupVerify.getValidationState().equals(ValidationState.ERROR);
 
-        result = result || this.groupRssi.getValidationState().equals(ValidationState.ERROR)
-                || this.groupShortI.getValidationState().equals(ValidationState.ERROR)
-                || this.groupLongI.getValidationState().equals(ValidationState.ERROR);
+        result = result && !this.groupRssi.getValidationState().equals(ValidationState.ERROR)
+                && !this.groupShortI.getValidationState().equals(ValidationState.ERROR)
+                && !this.groupLongI.getValidationState().equals(ValidationState.ERROR);
+        
         return result;
     }
 
@@ -737,7 +737,10 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
         // SSID
         this.labelSsid.setText(MSGS.netWifiNetworkName());
+        this.labelSsid.setShowRequiredIndicator(true);
         this.ssid.setMaxLength(MAX_SSID_LENGTH);
+        this.ssid.setAllowBlank(false);
+        this.ssid.setValidateOnBlur(true);
         this.ssid.addMouseOverHandler(event -> {
             if (TabWirelessUi.this.ssid.isEnabled()) {
                 TabWirelessUi.this.helpText.clear();

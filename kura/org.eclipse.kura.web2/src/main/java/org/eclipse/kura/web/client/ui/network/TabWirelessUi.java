@@ -585,9 +585,11 @@ public class TabWirelessUi extends Composite implements NetworkTab {
                         .equals(MessageUtils.get(GwtWifiBgscanModule.netWifiBgscanMode_SIMPLE.name()))
                         || this.bgscan.getSelectedItemText()
                                 .equals(MessageUtils.get(GwtWifiBgscanModule.netWifiBgscanMode_LEARN.name()))) {
+                    this.rssi.setEnabled(true);
                     this.shortI.setEnabled(true);
                     this.longI.setEnabled(true);
                 } else {
+                    this.rssi.setEnabled(false);
                     this.shortI.setEnabled(false);
                     this.longI.setEnabled(false);
                 }

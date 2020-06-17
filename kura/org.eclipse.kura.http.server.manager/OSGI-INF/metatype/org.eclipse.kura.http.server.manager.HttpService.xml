@@ -32,7 +32,7 @@
             cardinality="0" 
             required="true"
             default="80" 
-            min = "0"
+            min = "1"
             max = "65535"
             description="Allows to specify the port used by the http service for plain, unencrypted communication.">
         </AD>
@@ -52,7 +52,7 @@
             cardinality="0" 
             required="true"
             default="443" 
-            min = "0"
+            min = "1"
             max = "65535"
             description="Allows to specify the port used by the https service for encrypted communication.">
         </AD>

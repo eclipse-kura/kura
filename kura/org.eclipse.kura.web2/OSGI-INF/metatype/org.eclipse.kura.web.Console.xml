@@ -69,9 +69,9 @@
             name="Access Banner Content"
             type="String"
             cardinality="0"
-            required="false"
-            default=""
-            description="Access banner content. To be displayed at every user access, if the feature is enabled.">
+            required="true"
+            default="Sample Banner Content"
+            description="Access banner content. To be displayed at every user access, if the feature is enabled.|TextArea">
         </AD>
         
         <AD id="new.password.min.length"

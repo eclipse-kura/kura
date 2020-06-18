@@ -123,8 +123,8 @@ public class ServicesUi extends AbstractServicesUi {
         this.delete.addClickHandler(event -> ServicesUi.this.deleteModal.show());
 
         this.deleteButton.addClickHandler(event -> delete());
-        this.deleteButton.setText(MSGS.delete());
-        this.cancelButton.setText(MSGS.cancelButton());
+        this.deleteButton.setText(MSGS.yesButton());
+        this.cancelButton.setText(MSGS.noButton());
         this.deleteModalBody.add(new Span(MSGS.deleteWarning()));
         this.deleteModalHeader.setTitle(MSGS.confirm());
 

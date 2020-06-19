@@ -42,6 +42,7 @@ import org.gwtbootstrap3.client.ui.HelpBlock;
 import org.gwtbootstrap3.client.ui.ListBox;
 import org.gwtbootstrap3.client.ui.Modal;
 import org.gwtbootstrap3.client.ui.PanelHeader;
+import org.gwtbootstrap3.client.ui.TextArea;
 import org.gwtbootstrap3.client.ui.TextBox;
 import org.gwtbootstrap3.client.ui.constants.ValidationState;
 import org.gwtbootstrap3.client.ui.html.Span;
@@ -130,7 +131,7 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
     @UiField
     TextBox gateway;
     @UiField
-    TextBox dns;
+    TextArea dns;
     @UiField
     ListBox status;
     @UiField
@@ -642,7 +643,8 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
             }
 
             if (this.selectedNetIfConfig.getDnsServers() != null) {
-                this.dns.setValue(this.selectedNetIfConfig.getDnsServers());
+                String dnsServersUi = this.selectedNetIfConfig.getDnsServers().replace(" ", "\n");
+                this.dns.setValue(dnsServersUi);
                 this.dns.setVisible(true);
             } else {
                 this.dns.setVisible(false);

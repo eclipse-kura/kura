@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -9,6 +9,7 @@
  * 
  * Contributors:
  *  Eurotech
+ *  Scott Ware
  ******************************************************************************/
 package org.eclipse.kura.bluetooth.le.beacon;
 
@@ -26,16 +27,24 @@ public class AdvertisingReportRecord {
     private AdvertisingReportEventType eventType;
     private AdvertisingReportAddressType addressType;
     private String address;
+    private AdvertisingReportAddressType directAddressType;
+    private String directAddress;
+    private AdvertisingReportPhy primaryPhy;
+    private AdvertisingReportPhy secondaryPhy;
     private byte[] reportData;
+    private int sid;
+    private int txPower;
+    private int periodicAdvertisingInterval;
     private int length;
     private int rssi;
+    private boolean extended;
 
     public AdvertisingReportEventType getEventType() {
         return this.eventType;
     }
 
     public void setEventType(int eventType) {
-        this.eventType = AdvertisingReportEventType.valueOf((byte) eventType);
+        this.eventType = AdvertisingReportEventType.valueOf((byte) eventType, this.extended);
     }
 
     public AdvertisingReportAddressType getAddressType() {
@@ -54,6 +63,46 @@ public class AdvertisingReportRecord {
         this.address = address;
     }
 
+    public AdvertisingReportAddressType getDirectAddressType() {
+        return this.directAddressType;
+    }
+
+    public void setDirectAddressType(int addressType) {
+        this.directAddressType = AdvertisingReportAddressType.valueOf((byte) addressType);
+    }
+
+    public String getDirectAddress() {
+        return this.directAddress;
+    }
+
+    public void setDirectAddress(String address) {
+        this.directAddress = address;
+    }
+
+    public AdvertisingReportPhy getPrimaryPhy() {
+        return this.primaryPhy;
+    }
+
+    public void setPrimaryPhy(int phy) {
+        this.primaryPhy = AdvertisingReportPhy.valueOf((byte) phy);
+    }
+
+    public AdvertisingReportPhy getSecondaryPhy() {
+        return this.secondaryPhy;
+    }
+
+    public void setSecondaryPhy(int phy) {
+        this.secondaryPhy = AdvertisingReportPhy.valueOf((byte) phy);
+    }
+
+    public int getPeriodicAdvertisingInterval() {
+        return this.periodicAdvertisingInterval;
+    }
+
+    public void setPeriodicAdvertisingInterval(int periodicAdvertisingInterval) {
+        this.periodicAdvertisingInterval = periodicAdvertisingInterval;
+    }
+
     public byte[] getReportData() {
         return this.reportData;
     }
@@ -70,11 +119,35 @@ public class AdvertisingReportRecord {
         this.length = length;
     }
 
+    public int getSid() {
+        return this.sid;
+    }
+
+    public void setSid(int sid) {
+        this.sid = sid;
+    }
+
+    public int getTxPower() {
+        return this.txPower;
+    }
+
+    public void setTxPower(int txPower) {
+        this.txPower = txPower;
+    }
+
     public int getRssi() {
         return this.rssi;
     }
 
     public void setRssi(int rssi) {
         this.rssi = rssi;
+    }
+
+    public boolean isExtendedReport() {
+        return this.extended;
+    }
+
+    public void setExtendedReport(boolean extended) {
+        this.extended = extended;
     }
 }

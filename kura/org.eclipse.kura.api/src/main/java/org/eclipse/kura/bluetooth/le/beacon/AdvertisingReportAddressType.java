@@ -17,14 +17,18 @@ package org.eclipse.kura.bluetooth.le.beacon;
  * Possible values are:
  * 0x00 : Public Device Address
  * 0x01 : Random Device Address
- * 0x05 - 0xFF : Reserved for future use
+ * 0x02 : Public Identity Address
+ * 0x03 : Random Identity Address
  *
  * @since 1.3
  */
 public enum AdvertisingReportAddressType {
 
     PUBLIC((byte) 0x00),
-    RANDOM((byte) 0x01);
+    RANDOM((byte) 0x01),
+    PUBLIC_IDENTITY((byte) 0x02),
+    RANDOM_IDENTITY((byte) 0x03),
+    UNRESOLVED((byte) 0xFE);
 
     private final byte addressType;
 
@@ -42,6 +46,12 @@ public enum AdvertisingReportAddressType {
             type = PUBLIC;
         } else if (address == RANDOM.getEventTypeCode()) {
             type = RANDOM;
+        } else if (address == PUBLIC_IDENTITY.getEventTypeCode()) {
+            type = PUBLIC_IDENTITY;
+        } else if (address == RANDOM_IDENTITY.getEventTypeCode()) {
+            type = RANDOM_IDENTITY;
+        } else if (address == UNRESOLVED.getEventTypeCode()) {
+            type = UNRESOLVED;
         } else {
             throw new IllegalArgumentException("Address type not recognized");
         }

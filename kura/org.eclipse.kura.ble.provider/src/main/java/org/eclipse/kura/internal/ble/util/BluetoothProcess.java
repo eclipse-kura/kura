@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -9,6 +9,7 @@
  * 
  * Contributors:
  *  Eurotech
+ *  Scott Ware
  *******************************************************************************/
 package org.eclipse.kura.internal.ble.util;
 
@@ -20,14 +21,16 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
@@ -36,7 +39,7 @@ import org.eclipse.kura.executor.CommandStatus;
 public class BluetoothProcess {
 
     private static final Logger logger = LogManager.getLogger(BluetoothProcess.class);
-    
+
     @SuppressWarnings("checkstyle:constantName")
     private static final ExecutorService streamGobblers = Executors.newCachedThreadPool();
 
@@ -109,9 +112,22 @@ public class BluetoothProcess {
         }
         Consumer<CommandStatus> callback = status -> logger.debug("Command ended with exit value {}",
                 status.getExitStatus().getExitCode());
-        Command command = new Command(cmdArray);
+
+        // Build command
+        List<String> commandLine = new ArrayList<>();
+        commandLine.add("{");
+        commandLine.add("exec");
+        for (int i = 0; i < cmdArray.length; i++) {
+            commandLine.add(cmdArray[i]);
+        }
+        commandLine.add(">/dev/null;");
+        commandLine.add("}");
+        commandLine.add("3>&1");
+
+        Command command = new Command(commandLine.toArray(new String[commandLine.size()]));
         command.setOutputStream(this.outputStream);
         command.setErrorStream(this.errorStream);
+        command.setExecuteInAShell(true);
         this.executorService.execute(command, callback);
 
         this.futureInputGobbler = streamGobblers.submit(() -> {
@@ -119,7 +135,7 @@ public class BluetoothProcess {
             try {
                 readBTSnoopStreamFully(this.readOutputStream, listener);
             } catch (IOException e) {
-                logger.error("Process snoop input stream failed", e);
+                logger.debug("Process snoop input stream failed", e);
             }
         });
 
@@ -129,7 +145,7 @@ public class BluetoothProcess {
             try {
                 readBTErrorStreamFully(this.readErrorStream, listener);
             } catch (IOException e) {
-                logger.error("Process snoop error stream failed", e);
+                logger.debug("Process snoop error stream failed", e);
             }
         });
     }
@@ -165,11 +181,12 @@ public class BluetoothProcess {
         while (this.btSnoopReady) {
             if (is != null) {
                 byte[] packet = this.parser.readRecord();
-                listener.processBTSnoopRecord(packet);
+                if (packet.length > 0) {
+                    listener.processBTSnoopRecord(packet);
+                }
             }
         }
-        closeStreams();
-        logger.debug("End of stream!");
+        logger.debug("End of btsnoop stream!");
     }
 
     private void readErrorStreamFully(InputStream is, BluetoothProcessListener listener)

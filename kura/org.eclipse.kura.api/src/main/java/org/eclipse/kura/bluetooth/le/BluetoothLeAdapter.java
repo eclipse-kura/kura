@@ -109,6 +109,13 @@ public interface BluetoothLeAdapter {
     public void findDevices(long timeout, Consumer<List<BluetoothLeDevice>> consumer);
 
     /**
+     * Starts a BLE discovery.
+     *
+     * @throws KuraBluetoothDiscoveryException
+     */
+    public void startDiscovery() throws KuraBluetoothDiscoveryException;
+
+    /**
      * Stops a BLE discovery.
      *
      * @throws KuraBluetoothDiscoveryException

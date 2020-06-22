@@ -148,6 +148,15 @@ public class BluetoothLeAdapterImpl implements BluetoothLeAdapter {
     }
 
     @Override
+    public void startDiscovery() throws KuraBluetoothDiscoveryException {
+        try {
+            this.adapter.startDiscovery();
+        } catch (BluetoothException e) {
+            throw new KuraBluetoothDiscoveryException(e, "Start discovery failed");
+        }
+    }
+
+    @Override
     public void stopDiscovery() throws KuraBluetoothDiscoveryException {
         try {
             this.adapter.stopDiscovery();

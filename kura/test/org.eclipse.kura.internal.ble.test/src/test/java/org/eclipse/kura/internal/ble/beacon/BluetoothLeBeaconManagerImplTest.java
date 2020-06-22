@@ -474,53 +474,11 @@ public class BluetoothLeBeaconManagerImplTest {
     }
 
     @Test
-    public void testStartBeaconScanNoScanner() throws KuraBluetoothCommandException, NoSuchFieldException {
-        BluetoothLeBeaconManagerImpl svc = new BluetoothLeBeaconManagerImpl() {
-
-            @Override
-            protected BluetoothProcess execHcitool(String interfaceName, String... cmd) throws IOException {
-                throw new IOException("test");
-            }
-        };
-
-        svc.startBeaconScan("devNameNS");
-    }
-
-    @Test(expected = KuraBluetoothCommandException.class)
-    public void testStartBeaconScanFail() throws KuraBluetoothCommandException, NoSuchFieldException {
-        BluetoothLeBeaconManagerImpl svc = new BluetoothLeBeaconManagerImpl() {
-
-            @Override
-            protected BluetoothProcess execHcitool(String interfaceName, String... cmd) throws IOException {
-                throw new IOException("test");
-            }
-        };
-
-        BluetoothLeAdapter adapter = mock(BluetoothLeAdapter.class);
-        BluetoothLeBeaconDecoder<BluetoothLeBeacon> decoder = null;
-
-        String interfaceName = "devName";
-        when(adapter.getInterfaceName()).thenReturn(interfaceName);
-
-        svc.newBeaconScanner(adapter, decoder);
-
-        svc.startBeaconScan("devName");
-    }
-
-    @Test
     public void testStartStopBeaconScan() throws KuraBluetoothCommandException, NoSuchFieldException {
         BluetoothLeBeaconManagerImpl svc = new BluetoothLeBeaconManagerImpl() {
 
             @Override
             protected BluetoothProcess execBtDump(String interfaceName) throws IOException {
-                BluetoothProcess proc = mock(BluetoothProcess.class);
-                when(proc.toString()).thenReturn(interfaceName);
-
-                return proc;
-            }
-
-            @Override
-            protected BluetoothProcess execHcitool(String interfaceName, String... cmd) throws IOException {
                 BluetoothProcess proc = mock(BluetoothProcess.class);
                 when(proc.toString()).thenReturn(interfaceName);
 
@@ -542,13 +500,10 @@ public class BluetoothLeBeaconManagerImplTest {
 
         scanner.startBeaconScan(1);
 
-        BluetoothProcess hProc = (BluetoothProcess) TestUtil.getFieldValue(svc, "hcitoolProc");
         BluetoothProcess dProc = (BluetoothProcess) TestUtil.getFieldValue(svc, "dumpProc");
 
-        assertEquals(interfaceName, hProc.toString());
         assertEquals(interfaceName, dProc.toString());
 
-        verify(hProc, times(1)).destroy();
         verify(dProc, times(1)).destroyBTSnoop();
     }
 
@@ -572,13 +527,6 @@ public class BluetoothLeBeaconManagerImplTest {
                 return proc;
             }
 
-            @Override
-            protected BluetoothProcess execHcitool(String interfaceName, String... cmd) throws IOException {
-                BluetoothProcess proc = mock(BluetoothProcess.class);
-                when(proc.toString()).thenReturn(interfaceName);
-
-                return proc;
-            }
         };
         svc.activate(null);
 
@@ -626,7 +574,7 @@ public class BluetoothLeBeaconManagerImplTest {
 
         Thread.sleep(20); // allow scanner to start
 
-        byte[] record = { 0x4, 0x3e, 0x0, 0x02, 0x1, // advertisement packet and subevent, 1 record
+        byte[] record = { 0x3e, 0x0, 0x02, 0x1, // advertisement packet and subevent, 1 record
                 0x4, 0x1, // scan response and random address
                 1, 2, 3, 4, 5, 6, // address
                 2, // data length - 2

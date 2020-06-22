@@ -12,6 +12,8 @@
 
 package org.eclipse.kura.web.client.util;
 
+import java.util.List;
+
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.DataTransfer;
 import com.google.gwt.dom.client.Element;
@@ -102,32 +104,19 @@ public final class DropSupport extends JavaScriptObject {
             return this.clientY
         }-*/;
 
-        public native String getFileName()
+        public native List<File> getFiles()
         /*-{
-            var files = this.dataTransfer.files;
-            return files[0].name;
-        }-*/;
-
-        public native boolean isFile()
-        /*-{
-            var files = this.dataTransfer.files;
-            var result = true;
-            if(files.length == 0) {
-                return false;
+            var result = @java.util.ArrayList::new()()
+            if (!this.dataTransfer) {
+                return result
             }
-            return result;
-        }-*/;
-
-        public native void handleFile(FileUploadHandler fileUploadHandler)
-        /*-{
-            var file = this.dataTransfer.files[0];
-            var reader = new FileReader();
-            reader.onload = function(e) {
-                console.log(file.name);
-                console.log(e.target.result);
-                fileUploadHandler.@org.eclipse.kura.web.client.util.FileUploadHandler::handleFileContent(Ljava/lang/String;Ljava/lang/String;)(file.name, e.target.result.split(",", 2)[1]);
+            if (!this.dataTransfer.files) {
+                return result
             }
-            reader.readAsDataURL(file);
+            for (var i = 0; i < this.dataTransfer.files.length; i++) {
+                result.@java.util.ArrayList::add(Ljava/lang/Object;)(this.dataTransfer.files[i])
+            }
+            return result
         }-*/;
 
     }

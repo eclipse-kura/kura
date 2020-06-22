@@ -24,7 +24,10 @@ import org.eclipse.kura.web.client.util.DropSupport;
 import org.eclipse.kura.web.client.util.DropSupport.DropEvent;
 import org.eclipse.kura.web.client.util.EventService;
 import org.eclipse.kura.web.client.util.FailureHandler;
+import org.eclipse.kura.web.client.util.File;
 import org.eclipse.kura.web.client.util.FileUploadHandler;
+import org.eclipse.kura.web.client.util.FormData;
+import org.eclipse.kura.web.client.util.request.RequestQueue;
 import org.eclipse.kura.web.shared.ForwardedEventTopic;
 import org.eclipse.kura.web.shared.model.GwtDeploymentPackage;
 import org.eclipse.kura.web.shared.model.GwtMarketplacePackageDescriptor;
@@ -68,6 +71,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
 
 public class PackagesPanelUi extends Composite {
 
+    private static final String UPLOADED_FILE = "uploadedFile";
     private static final String XSRF_TOKEN = "xsrfToken";
     private static final String DROPZONE_ACTIVE_STYLE_NAME = "active";
     private static RegExp marketplaceUrlRegexp = RegExp
@@ -80,6 +84,7 @@ public class PackagesPanelUi extends Composite {
     private final GwtPackageServiceAsync gwtPackageService = GWT.create(GwtPackageService.class);
 
     private static final String SERVLET_URL = Console.ADMIN_ROOT + '/' + GWT.getModuleName() + "/file/deploy";
+    private static final String DP_UPLOAD_URI = SERVLET_URL + "/upload";
 
     private static final Messages MSGS = GWT.create(Messages.class);
     private static final ValidationMessages VMSGS = GWT.create(ValidationMessages.class);
@@ -348,13 +353,13 @@ public class PackagesPanelUi extends Composite {
         this.fileLabel.addClickHandler(
                 event -> PackagesPanelUi.this.packagesGroupFile.setValidationState(ValidationState.NONE));
 
-        this.filePath.setName("uploadedFile");
+        this.filePath.setName(UPLOADED_FILE);
 
         this.xsrfTokenFieldFile.setID(XSRF_TOKEN);
         this.xsrfTokenFieldFile.setName(XSRF_TOKEN);
         this.xsrfTokenFieldFile.setValue("");
 
-        this.packagesFormFile.setAction(SERVLET_URL + "/upload");
+        this.packagesFormFile.setAction(DP_UPLOAD_URI);
         this.packagesFormFile.setEncoding(FormPanel.ENCODING_MULTIPART);
         this.packagesFormFile.setMethod(FormPanel.METHOD_POST);
         this.packagesFormFile.addSubmitCompleteHandler(event -> {
@@ -609,45 +614,19 @@ public class PackagesPanelUi extends Composite {
         return url != null && !url.isEmpty() && marketplaceUrlRegexp.test(url);
     }
 
-    private void installDp(String fileName, String fileContent) {
+    private void installDp(final File file) {
 
-        this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+        RequestQueue.submit(c -> this.gwtXSRFService.generateSecurityToken(c.callback(token -> {
+            final FormData formData = FormData.create();
+            formData.append(XSRF_TOKEN, token.getToken());
+            formData.append(UPLOADED_FILE, file);
+            formData.submit(DP_UPLOAD_URI, c.callback());
+        })));
 
-            @Override
-            public void onFailure(Throwable ex) {
-                EntryClassUi.hideWaitModal();
-                FailureHandler.handle(ex, EntryClassUi.class.getName());
-            }
-
-            @Override
-            public void onSuccess(GwtXSRFToken token) {
-                PackagesPanelUi.this.gwtPackageService.installPackage(token, fileContent, new AsyncCallback<Void>() {
-
-                    @Override
-                    public void onSuccess(Void result) {
-                        EntryClassUi.hideWaitModal();
-                    }
-
-                    @Override
-                    public void onFailure(Throwable ex) {
-                        EntryClassUi.hideWaitModal();
-                        FailureHandler.handle(ex, EntryClassUi.class.getName());
-                    }
-                });
-            }
-        });
     }
 
     private void initDragDrop() {
         DropSupport drop = DropSupport.addIfSupported(this);
-        PackagesPanelUi.this.fileUploadHandler = new FileUploadHandler() {
-
-            @Override
-            public void handleFileContent(String fileName, String fileContent) {
-                installDp(fileName, fileContent);
-            }
-
-        };
 
         if (drop != null) {
             drop.setListener(new DropSupport.Listener() {
@@ -657,10 +636,16 @@ public class PackagesPanelUi extends Composite {
                     event.preventDefault();
                     event.stopPropagation();
                     PackagesPanelUi.this.packagesDropzone.removeStyleName(DROPZONE_ACTIVE_STYLE_NAME);
-                    if (event.isFile()) {
-                        if (event.getFileName().endsWith(".dp")) {
+
+                    final List<File> droppedFiles = event.getFiles();
+
+                    if (!droppedFiles.isEmpty()) {
+
+                        final File first = droppedFiles.get(0);
+
+                        if (first.getName().endsWith(".dp")) {
                             PackagesPanelUi.this.confirmDialog.show(MSGS.packagesConfirmMessage(),
-                                    () -> event.handleFile(fileUploadHandler));
+                                    () -> installDp(first));
                         } else {
                             PackagesPanelUi.this.uploadErrorText.setText(MSGS.packagesMarketplaceInstallDpNotValid());
                             PackagesPanelUi.this.uploadErrorModal.show();
@@ -715,18 +700,5 @@ public class PackagesPanelUi extends Composite {
         this.maxKuraVersionLabel.setText(VMSGS.marketplaceInstallMaxKuraVersion() + " " + maxKuraVersion);
         this.versionCheckModal.show();
 
-    }
-
-    private void log(String message) {
-        PackagesPanelUi.this.gwtPackageService.log(message, new AsyncCallback<Void>() {
-
-            @Override
-            public void onSuccess(Void result) {
-            }
-
-            @Override
-            public void onFailure(Throwable ex) {
-            }
-        });
     }
 }

@@ -123,9 +123,11 @@ public final class DropSupport extends JavaScriptObject {
             var file = this.dataTransfer.files[0];
             var reader = new FileReader();
             reader.onload = function(e) {
-                fileUploadHandler.@org.eclipse.kura.web.client.util.FileUploadHandler::handleFileContent(Ljava/lang/String;Ljava/lang/String;)(file.name, e.target.result);
+                console.log(file.name);
+                console.log(e.target.result);
+                fileUploadHandler.@org.eclipse.kura.web.client.util.FileUploadHandler::handleFileContent(Ljava/lang/String;Ljava/lang/String;)(file.name, e.target.result.split(",", 2)[1]);
             }
-            reader.readAsBinaryString(file);
+            reader.readAsDataURL(file);
         }-*/;
 
     }

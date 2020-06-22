@@ -644,8 +644,7 @@ public class PackagesPanelUi extends Composite {
 
             @Override
             public void handleFileContent(String fileName, String fileContent) {
-                byte[] converted = fileContent.getBytes();
-                installDp(fileName, new String(converted));
+                installDp(fileName, fileContent);
             }
 
         };

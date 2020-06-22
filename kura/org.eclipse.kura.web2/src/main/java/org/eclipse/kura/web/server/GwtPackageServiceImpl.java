@@ -27,6 +27,7 @@ import javax.servlet.http.HttpSession;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.apache.commons.net.util.Base64;
 import org.eclipse.kura.deployment.agent.DeploymentAgentService;
 import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.web.server.util.ServiceLocator;
@@ -297,8 +298,12 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
         final HttpServletRequest request = getThreadLocalRequest();
         final HttpSession session = request.getSession(false);
 
+        Base64 base64 = new Base64();
+        String decodedString = new String(base64.decode(fileContent.getBytes()));
+        // https://stackoverflow.com/questions/7431365/filereader-readasbinarystring-to-upload-files
+
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(path))) {
-            writer.write(fileContent);
+            writer.write(decodedString);
             writer.close();
         } catch (IOException e) {
             throw new GwtKuraException("Failed to write temporary file");

@@ -25,7 +25,6 @@ import org.eclipse.kura.web.client.util.DropSupport.DropEvent;
 import org.eclipse.kura.web.client.util.EventService;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.util.File;
-import org.eclipse.kura.web.client.util.FileUploadHandler;
 import org.eclipse.kura.web.client.util.FormData;
 import org.eclipse.kura.web.client.util.request.RequestQueue;
 import org.eclipse.kura.web.shared.ForwardedEventTopic;
@@ -97,8 +96,6 @@ public class PackagesPanelUi extends Composite {
 
     private GwtSession gwtSession;
     private GwtDeploymentPackage selected;
-
-    private FileUploadHandler fileUploadHandler;
 
     interface PackagesPanelUiUiBinder extends UiBinder<Widget, PackagesPanelUi> {
     }

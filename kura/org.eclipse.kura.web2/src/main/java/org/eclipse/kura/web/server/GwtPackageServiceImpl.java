@@ -13,8 +13,6 @@ package org.eclipse.kura.web.server;
 
 import static java.util.Objects.requireNonNull;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -27,7 +25,6 @@ import javax.servlet.http.HttpSession;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.apache.commons.net.util.Base64;
 import org.eclipse.kura.deployment.agent.DeploymentAgentService;
 import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.web.server.util.ServiceLocator;
@@ -286,52 +283,6 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
                     session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId(), e);
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
         }
-    }
-
-    @Override
-    public void installPackage(GwtXSRFToken xsrfToken, String fileContent) throws GwtKuraException {
-
-        checkXSRFToken(xsrfToken);
-        requireNonNull(fileContent);
-        String path = "/tmp/temp.dp";
-
-        final HttpServletRequest request = getThreadLocalRequest();
-        final HttpSession session = request.getSession(false);
-
-        Base64 base64 = new Base64();
-        String decodedString = new String(base64.decode(fileContent.getBytes()));
-        // https://stackoverflow.com/questions/7431365/filereader-readasbinarystring-to-upload-files
-
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(path))) {
-            writer.write(decodedString);
-            writer.close();
-        } catch (IOException e) {
-            throw new GwtKuraException("Failed to write temporary file");
-        }
-
-        try {
-            ServiceLocator.applyToServiceOptionally(DeploymentAgentService.class, deploymentAgentService -> {
-                if (deploymentAgentService == null) {
-                    throw new IllegalStateException("Deployment Agent Service not running");
-                }
-
-                logger.info("Installing deployment package, URL {}...", path);
-                deploymentAgentService.installDeploymentPackageAsync("file://" + path);
-
-                return (Void) null;
-            });
-
-        } catch (Exception e) {
-            logger.warn("failed to start package install", e);
-            auditLogger.warn("UI Packages - Failure - Failed to install package for user: {}, session: {}",
-                    session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId(), e);
-            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
-        }
-    }
-
-    @Override
-    public void log(String message) {
-        logger.info(message);
     }
 
     private static class MarketplaceFeedbackEventHandler implements EventHandler {

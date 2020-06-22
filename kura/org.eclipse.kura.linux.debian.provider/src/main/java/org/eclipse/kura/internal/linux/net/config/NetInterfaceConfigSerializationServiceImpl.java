@@ -244,7 +244,7 @@ public class NetInterfaceConfigSerializationServiceImpl implements NetInterfaceC
                                 break;
                             }
                         } catch (Exception e) {
-                            logger.warn("Possible malformed configuration file for " + interfaceName, e);
+                            logger.warn("Possible malformed configuration file for {}", interfaceName, e);
                         }
                     }
                 }
@@ -436,22 +436,25 @@ public class NetInterfaceConfigSerializationServiceImpl implements NetInterfaceC
             if (!(netConfig instanceof NetConfigIP4)) {
                 continue;
             }
-            logger.debug("Writing netconfig {} for {}", netConfig.getClass().toString(), interfaceName);
+            logger.debug("Writing netconfig {} for {}", netConfig.getClass(), interfaceName);
+            
+            NetConfigIP4 netConfigIP4 = (NetConfigIP4) netConfig;
+            
 
             // ONBOOT
-            if (((NetConfigIP4) netConfig).isAutoConnect()) {
+            if (netConfigIP4.isAutoConnect()) {
                 sb.append("auto " + interfaceName + "\n");
             }
 
             // BOOTPROTO
             sb.append("iface " + interfaceName + " inet ");
-            if (((NetConfigIP4) netConfig).getStatus() == NetInterfaceStatus.netIPv4StatusL2Only) {
+            if (netConfigIP4.getStatus() == NetInterfaceStatus.netIPv4StatusL2Only) {
                 logger.debug("new config is Layer 2 Only for {}", interfaceName);
                 sb.append("manual\n");
-            } else if (((NetConfigIP4) netConfig).isDhcp()) {
+            } else if (netConfigIP4.isDhcp()) {
                 logger.debug("new config is DHCP for {}", interfaceName);
                 sb.append("dhcp\n");
-                if (((NetConfigIP4) netConfig).getStatus() == NetInterfaceStatus.netIPv4StatusEnabledLAN) {
+                if (netConfigIP4.getStatus() == NetInterfaceStatus.netIPv4StatusEnabledLAN) {
                     // delete default route if configured as LAN
                     sb.append("\tpost-up route del default dev ");
                     sb.append(interfaceName);
@@ -461,24 +464,24 @@ public class NetInterfaceConfigSerializationServiceImpl implements NetInterfaceC
                 logger.debug("new config is STATIC for {}", interfaceName);
                 sb.append("static\n");
                 // IPADDR
-                sb.append("\taddress ").append(((NetConfigIP4) netConfig).getAddress().getHostAddress()).append("\n");
+                sb.append("\taddress ").append(netConfigIP4.getAddress().getHostAddress()).append("\n");
 
                 // NETMASK
-                sb.append("\tnetmask ").append(((NetConfigIP4) netConfig).getSubnetMask().getHostAddress())
+                sb.append("\tnetmask ").append(netConfigIP4.getSubnetMask().getHostAddress())
                         .append("\n");
 
                 // NETWORK
                 // TODO: Handle Debian NETWORK value
 
                 // Gateway
-                if (((NetConfigIP4) netConfig).getGateway() != null) {
-                    sb.append("\tgateway ").append(((NetConfigIP4) netConfig).getGateway().getHostAddress())
+                if (netConfigIP4.getGateway() != null) {
+                    sb.append("\tgateway ").append(netConfigIP4.getGateway().getHostAddress())
                             .append("\n");
                 }
             }
 
             // DNS
-            List<? extends IPAddress> dnsAddresses = ((NetConfigIP4) netConfig).getDnsServers();
+            List<? extends IPAddress> dnsAddresses = netConfigIP4.getDnsServers();
             boolean setDns = false;
             for (IPAddress dnsAddress : dnsAddresses) {
                 if (LOCALHOST.equals(dnsAddress.getHostAddress())) {

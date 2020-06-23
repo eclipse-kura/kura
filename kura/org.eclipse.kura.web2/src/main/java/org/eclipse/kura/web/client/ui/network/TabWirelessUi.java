@@ -142,7 +142,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     Alert noChannels;
     @UiField
     Text noChannelsText;
-    
+
     @UiField
     Form form;
 
@@ -360,7 +360,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     }
 
     private boolean isValidForm() {
-        boolean result = form.validate();
+        boolean result = this.form.validate();
         result = result && !this.groupWireless.getValidationState().equals(ValidationState.ERROR)
                 && !this.groupPassword.getValidationState().equals(ValidationState.ERROR)
                 && !this.groupVerify.getValidationState().equals(ValidationState.ERROR);
@@ -368,7 +368,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         result = result && !this.groupRssi.getValidationState().equals(ValidationState.ERROR)
                 && !this.groupShortI.getValidationState().equals(ValidationState.ERROR)
                 && !this.groupLongI.getValidationState().equals(ValidationState.ERROR);
-        
+
         return result;
     }
 
@@ -517,7 +517,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
             }
         }
 
-        this.rssi.setValue("90");
+        this.rssi.setValue(String.valueOf(this.activeConfig.getBgscanRssiThreshold()));
         this.shortI.setValue(String.valueOf(this.activeConfig.getBgscanShortInterval()));
         this.longI.setValue(String.valueOf(this.activeConfig.getBgscanLongInterval()));
         this.password.setValue(this.activeConfig.getPassword());
@@ -670,7 +670,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
             }
         }
 
-        this.rssi.setValue("0.0");
+        this.rssi.setValue("");
         this.shortI.setValue("");
         this.longI.setValue("");
         this.radio2.setValue(true);
@@ -1434,6 +1434,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
             }
         }
 
+        gwtWifiConfig.setBgscanRssiThreshold(Integer.parseInt(this.rssi.getText()));
         gwtWifiConfig.setBgscanShortInterval(Integer.parseInt(this.shortI.getText()));
         gwtWifiConfig.setBgscanLongInterval(Integer.parseInt(this.longI.getText()));
 

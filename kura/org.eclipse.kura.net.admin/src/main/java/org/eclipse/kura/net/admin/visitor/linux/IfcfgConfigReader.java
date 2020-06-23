@@ -129,7 +129,7 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
 
             String bootproto = kuraProps.getProperty(BOOTPROTO_PROP_NAME);
             if (bootproto == null) {
-                bootproto = "static";
+                bootproto = "dhcp";
             }
 
             // correct the status if needed by validating against the actual properties

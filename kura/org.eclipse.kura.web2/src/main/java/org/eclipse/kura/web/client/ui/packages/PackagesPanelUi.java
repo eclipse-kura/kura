@@ -577,6 +577,17 @@ public class PackagesPanelUi extends Composite {
         });
     }
 
+    private void installFromUrl(DropEvent event) {
+        final String url = event.getAsText();
+        if (isEclipseMarketplaceUrl(url)) {
+            PackagesPanelUi.this.confirmDialog.show(MSGS.packagesMarketplaceInstallConfirmMessage(),
+                    () -> eclipseMarketplaceInstall(url));
+        } else {
+            PackagesPanelUi.this.uploadErrorText.setText(MSGS.packagesMarketplaceInstallDpNotValid());
+            PackagesPanelUi.this.uploadErrorModal.show();
+        }
+    }
+
     private void installMarketplaceDp(final GwtMarketplacePackageDescriptor descriptor) {
 
         this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
@@ -611,6 +622,23 @@ public class PackagesPanelUi extends Composite {
         return url != null && !url.isEmpty() && marketplaceUrlRegexp.test(url);
     }
 
+    private void installFromFile(final List<File> droppedFiles) {
+        if (droppedFiles.size() > 1) {
+            PackagesPanelUi.this.uploadErrorText.setText(MSGS.packagesTooManyDpFiles());
+            PackagesPanelUi.this.uploadErrorModal.show();
+            return;
+        }
+
+        final File first = droppedFiles.get(0);
+
+        if (first.getName().endsWith(".dp")) {
+            PackagesPanelUi.this.confirmDialog.show(MSGS.packagesConfirmMessage(), () -> installDp(first));
+        } else {
+            PackagesPanelUi.this.uploadErrorText.setText(MSGS.packagesMarketplaceInstallDpNotValid());
+            PackagesPanelUi.this.uploadErrorModal.show();
+        }
+    }
+
     private void installDp(final File file) {
 
         RequestQueue.submit(c -> this.gwtXSRFService.generateSecurityToken(c.callback(token -> {
@@ -637,25 +665,9 @@ public class PackagesPanelUi extends Composite {
                     final List<File> droppedFiles = event.getFiles();
 
                     if (!droppedFiles.isEmpty()) {
-
-                        final File first = droppedFiles.get(0);
-
-                        if (first.getName().endsWith(".dp")) {
-                            PackagesPanelUi.this.confirmDialog.show(MSGS.packagesConfirmMessage(),
-                                    () -> installDp(first));
-                        } else {
-                            PackagesPanelUi.this.uploadErrorText.setText(MSGS.packagesMarketplaceInstallDpNotValid());
-                            PackagesPanelUi.this.uploadErrorModal.show();
-                        }
+                        installFromFile(droppedFiles);
                     } else {
-                        final String url = event.getAsText();
-                        if (isEclipseMarketplaceUrl(url)) {
-                            PackagesPanelUi.this.confirmDialog.show(MSGS.packagesMarketplaceInstallConfirmMessage(),
-                                    () -> eclipseMarketplaceInstall(url));
-                        } else {
-                            PackagesPanelUi.this.uploadErrorText.setText(MSGS.packagesMarketplaceInstallDpNotValid());
-                            PackagesPanelUi.this.uploadErrorModal.show();
-                        }
+                        installFromUrl(event);
                     }
 
                     return true;

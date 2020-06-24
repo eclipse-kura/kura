@@ -143,7 +143,8 @@ public class FirewallPanelUi extends Composite {
             if (getTab(FirewallPanelUi.this.currentlySelectedTab).isDirty()) {
                 showDirtyModal(newTabListItem, handler);
             } else {
-                this.currentlySelectedTab = newTabListItem;
+                FirewallPanelUi.this.currentlySelectedTab = newTabListItem;
+                getTab(FirewallPanelUi.this.currentlySelectedTab).setDirty(true);
                 handler.onClick(event);
             }
         }

@@ -451,7 +451,7 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
             }
             if (!validDnsList) {
                 TabTcpIpUi.this.groupDns.setValidationState(ValidationState.ERROR);
-                TabTcpIpUi.this.helpDns.setText(MSGS.netIPv4InvalidAddress());
+                TabTcpIpUi.this.helpDns.setText(MSGS.netIPv4InvalidAddresses());
             } else {
                 TabTcpIpUi.this.groupDns.setValidationState(ValidationState.NONE);
                 TabTcpIpUi.this.helpDns.setText("");

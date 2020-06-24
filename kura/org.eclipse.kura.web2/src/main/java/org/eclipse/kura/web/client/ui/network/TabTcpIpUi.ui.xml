@@ -96,7 +96,7 @@
                                 <b:FormLabel for="dns" ui:field="labelDns"></b:FormLabel>
                                 <util:HelpButton ui:field="dnsHelp" />
                                 <b:HelpBlock color="red" ui:field="helpDns" />
-                                <b:TextBox b:id="dns" ui:field="dns" />
+                                <b:TextArea b:id="dns" ui:field="dns" />
                                 <b:FormControlStatic b:id="dnsRead" ui:field="dnsRead" />
                             </b:FormGroup>
                         </b:FieldSet>

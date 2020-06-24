@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -42,6 +42,7 @@ import org.gwtbootstrap3.client.ui.HelpBlock;
 import org.gwtbootstrap3.client.ui.ListBox;
 import org.gwtbootstrap3.client.ui.Modal;
 import org.gwtbootstrap3.client.ui.PanelHeader;
+import org.gwtbootstrap3.client.ui.TextArea;
 import org.gwtbootstrap3.client.ui.TextBox;
 import org.gwtbootstrap3.client.ui.constants.ValidationState;
 import org.gwtbootstrap3.client.ui.html.Span;
@@ -130,7 +131,7 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
     @UiField
     TextBox gateway;
     @UiField
-    TextBox dns;
+    TextArea dns;
     @UiField
     ListBox status;
     @UiField
@@ -450,7 +451,7 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
             }
             if (!validDnsList) {
                 TabTcpIpUi.this.groupDns.setValidationState(ValidationState.ERROR);
-                TabTcpIpUi.this.helpDns.setText(MSGS.netIPv4InvalidAddress());
+                TabTcpIpUi.this.helpDns.setText(MSGS.netIPv4InvalidAddresses());
             } else {
                 TabTcpIpUi.this.groupDns.setValidationState(ValidationState.NONE);
                 TabTcpIpUi.this.helpDns.setText("");
@@ -642,7 +643,8 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
             }
 
             if (this.selectedNetIfConfig.getDnsServers() != null) {
-                this.dns.setValue(this.selectedNetIfConfig.getDnsServers());
+                String dnsServersUi = this.selectedNetIfConfig.getDnsServers().replace(" ", "\n");
+                this.dns.setValue(dnsServersUi);
                 this.dns.setVisible(true);
             } else {
                 this.dns.setVisible(false);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -12,7 +12,10 @@
 
 package org.eclipse.kura.web.client.util;
 
+import java.util.List;
+
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.dom.client.DataTransfer;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -71,6 +74,21 @@ public final class DropSupport extends JavaScriptObject {
         protected DropEvent() {
         }
 
+        public native DataTransfer getDataTransfer()
+        /*-{
+            return this.dataTransfer;
+        }-*/;
+
+        public native void preventDefault()
+        /*-{
+            this.preventDefault();
+        }-*/;
+
+        public native void stopPropagation()
+        /*-{
+            return this.stopPropagation();
+        }-*/;
+
         public native String getAsText()
         /*-{
             return this.dataTransfer.getData('Text')
@@ -83,7 +101,22 @@ public final class DropSupport extends JavaScriptObject {
 
         public native double getClientY()
         /*-{
-            return thist.clientY
+            return this.clientY
+        }-*/;
+
+        public native List<File> getFiles()
+        /*-{
+            var result = @java.util.ArrayList::new()()
+            if (!this.dataTransfer) {
+                return result
+            }
+            if (!this.dataTransfer.files) {
+                return result
+            }
+            for (var i = 0; i < this.dataTransfer.files.length; i++) {
+                result.@java.util.ArrayList::add(Ljava/lang/Object;)(this.dataTransfer.files[i])
+            }
+            return result
         }-*/;
 
     }

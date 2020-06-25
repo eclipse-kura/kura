@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2019 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -192,6 +192,11 @@ public class SnapshotsTabUi extends Composite implements Tab {
             }
 
         });
+    }
+
+    @Override
+    public void clear() {
+        // Not needed
     }
 
     private void initTable() {

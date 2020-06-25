@@ -339,6 +339,11 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
         }
     }
 
+    @Override
+    public void clear() {
+        // Not needed
+    }
+
     // ---------------Private Methods------------
 
     private void initHelpButtons() {

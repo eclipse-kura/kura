@@ -205,8 +205,8 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
                                     NatTabUi.this.natDataProvider.getList().remove(pair);
                                     NatTabUi.this.natDataProvider.getList().add(pair);
                                 }
+                                setVisibility();
                                 refreshTable();
-
                                 NatTabUi.this.buttonBar.setApplyResetButtonsDirty(false);
                                 NatTabUi.this.buttonBar.setEditDeleteButtonsDirty(false);
                                 EntryClassUi.hideWaitModal();
@@ -229,6 +229,15 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
     @Override
     public boolean isValid() {
         return true;
+    }
+
+    @Override
+    public void clear() {
+        this.natDataProvider.getList().clear();
+        NatTabUi.this.buttonBar.setApplyResetButtonsDirty(false);
+        NatTabUi.this.buttonBar.setEditDeleteButtonsDirty(false);
+        setVisibility();
+        refreshTable();
     }
 
     //
@@ -328,15 +337,6 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
         int size = this.natDataProvider.getList().size();
         this.natGrid.setVisibleRange(0, size);
         this.natDataProvider.flush();
-
-        if (this.natDataProvider.getList().isEmpty()) {
-            this.natGrid.setVisible(false);
-            this.notification.setVisible(true);
-            this.notification.setText(MSGS.firewallPortForwardTableNoPorts());
-        } else {
-            this.natGrid.setVisible(true);
-            this.notification.setVisible(false);
-        }
         this.natGrid.redraw();
     }
 
@@ -393,6 +393,7 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
                 NatTabUi.this.natDataProvider.getList().remove(NatTabUi.this.newNatEntry);
                 if (!duplicateEntry(NatTabUi.this.newNatEntry)) {
                     NatTabUi.this.natDataProvider.getList().add(NatTabUi.this.newNatEntry);
+                    setVisibility();
                     refreshTable();
                     NatTabUi.this.buttonBar.setApplyResetButtonsDirty(true);
                     NatTabUi.this.newNatEntry = null;
@@ -446,10 +447,11 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
         if (selection != null) {
             this.alertDialog.show(MSGS.firewallNatDeleteConfirmation(selection.getInInterface()), () -> {
                 NatTabUi.this.natDataProvider.getList().remove(selection);
-                refreshTable();
                 NatTabUi.this.buttonBar.setApplyResetButtonsDirty(true);
                 NatTabUi.this.buttonBar.setEditDeleteButtonsDirty(false);
                 NatTabUi.this.selectionModel.setSelected(selection, false);
+                setVisibility();
+                refreshTable();
                 setDirty(true);
             });
         }
@@ -464,10 +466,7 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
 
         this.submit.addClickHandler(event -> {
 
-            if (NatTabUi.this.groupInput.getValidationState() == ValidationState.ERROR
-                    || NatTabUi.this.groupOutput.getValidationState() == ValidationState.ERROR
-                    || NatTabUi.this.groupSource.getValidationState() == ValidationState.ERROR
-                    || NatTabUi.this.groupDestination.getValidationState() == ValidationState.ERROR) {
+            if (!checkEntries()) {
                 return;
             }
             // Fetch form data
@@ -656,10 +655,44 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
         return isDuplicateEntry;
     }
 
+    private void setVisibility() {
+        if (this.natDataProvider.getList().isEmpty()) {
+            this.natGrid.setVisible(false);
+            this.notification.setVisible(true);
+            this.notification.setText(MSGS.firewallPortForwardTableNoPorts());
+        } else {
+            this.natGrid.setVisible(true);
+            this.notification.setVisible(false);
+        }
+    }
+
     private void replaceModalHideHandler(ModalHideHandler hideHandler) {
         if (this.modalHideHandlerRegistration != null) {
             this.modalHideHandlerRegistration.removeHandler();
         }
         this.modalHideHandlerRegistration = this.natForm.addHideHandler(hideHandler);
+    }
+
+    private boolean checkEntries() {
+        boolean valid = true;
+
+        if (NatTabUi.this.groupInput.getValidationState() == ValidationState.ERROR
+                || NatTabUi.this.input.getText() == null || "".equals(NatTabUi.this.input.getText().trim())) {
+            NatTabUi.this.groupInput.setValidationState(ValidationState.ERROR);
+            valid = false;
+        }
+
+        if (NatTabUi.this.groupOutput.getValidationState() == ValidationState.ERROR
+                || NatTabUi.this.output.getText() == null || "".equals(NatTabUi.this.output.getText().trim())) {
+            NatTabUi.this.groupOutput.setValidationState(ValidationState.ERROR);
+            valid = false;
+        }
+
+        if (NatTabUi.this.groupSource.getValidationState() == ValidationState.ERROR
+                || NatTabUi.this.groupDestination.getValidationState() == ValidationState.ERROR) {
+            valid = false;
+        }
+
+        return valid;
     }
 }

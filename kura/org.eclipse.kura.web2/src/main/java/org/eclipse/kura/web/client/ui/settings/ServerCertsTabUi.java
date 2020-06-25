@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -108,6 +108,11 @@ public class ServerCertsTabUi extends Composite implements Tab {
             setDirty(false);
             reset();
         }
+    }
+
+    @Override
+    public void clear() {
+        // Not needed
     }
 
     private void initForm() {

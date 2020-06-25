@@ -423,6 +423,11 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         }
     }
 
+    @Override
+    public void clear() {
+        // Not needed
+    }
+
     // -----Private methods-------//
 
     private void update() {

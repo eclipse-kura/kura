@@ -33,7 +33,7 @@
     }
     
     .help {
-    	height: 300px;
+    	height: auto;
     }
     
     .help-header {

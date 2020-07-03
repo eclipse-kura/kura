@@ -446,10 +446,19 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
                 return;
             }
 
-            String[] aDnsServers = TabTcpIpUi.this.dns.getText().trim().split(DNS_REGEX);
+            String[] aDnsServers = TabTcpIpUi.this.dns.getText().split(DNS_REGEX);
+            logger.log(Level.INFO, "aDnsServers size: " + aDnsServers.length);
             boolean validDnsList = true;
+            
+            int dnsContentLength = TabTcpIpUi.this.dns.getText().trim().length();
+            int aDnsServersSize = aDnsServers.length;
+            if (dnsContentLength != 0 && aDnsServersSize == 0) {
+                validDnsList = false;
+            }
+            
             for (String dnsEntry : aDnsServers) {
-                if (dnsEntry.length() > 0 && !dnsEntry.matches(FieldType.IPv4_ADDRESS.getRegex())) {
+                logger.log(Level.INFO, "dnsentry: " + dnsEntry);
+                if (dnsEntry.trim().length() >= 0 && !dnsEntry.trim().matches(FieldType.IPv4_ADDRESS.getRegex())) {
                     validDnsList = false;
                     break;
                 }

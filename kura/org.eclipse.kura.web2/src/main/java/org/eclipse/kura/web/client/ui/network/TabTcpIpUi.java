@@ -447,7 +447,6 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
             }
 
             String[] aDnsServers = TabTcpIpUi.this.dns.getText().split(DNS_REGEX);
-            logger.log(Level.INFO, "aDnsServers size: " + aDnsServers.length);
             boolean validDnsList = true;
             
             int dnsContentLength = TabTcpIpUi.this.dns.getText().trim().length();
@@ -457,7 +456,6 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
             }
             
             for (String dnsEntry : aDnsServers) {
-                logger.log(Level.INFO, "dnsentry: " + dnsEntry);
                 if (dnsEntry.trim().length() >= 0 && !dnsEntry.trim().matches(FieldType.IPv4_ADDRESS.getRegex())) {
                     validDnsList = false;
                     break;

@@ -21,10 +21,15 @@ import org.eclipse.kura.web.shared.service.GwtCertificatesServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.gwtbootstrap3.client.ui.Button;
+import org.gwtbootstrap3.client.ui.ButtonGroup;
 import org.gwtbootstrap3.client.ui.Form;
 import org.gwtbootstrap3.client.ui.FormGroup;
 import org.gwtbootstrap3.client.ui.FormLabel;
 import org.gwtbootstrap3.client.ui.Input;
+import org.gwtbootstrap3.client.ui.Modal;
+import org.gwtbootstrap3.client.ui.ModalBody;
+import org.gwtbootstrap3.client.ui.ModalFooter;
+import org.gwtbootstrap3.client.ui.ModalHeader;
 import org.gwtbootstrap3.client.ui.TextArea;
 import org.gwtbootstrap3.client.ui.constants.ValidationState;
 import org.gwtbootstrap3.client.ui.html.Span;
@@ -108,7 +113,6 @@ public class DeviceCertsTabUi extends Composite implements Tab {
     @Override
     public void refresh() {
         if (isDirty()) {
-            setDirty(false);
             reset();
         }
     }
@@ -149,12 +153,7 @@ public class DeviceCertsTabUi extends Composite implements Tab {
         });
 
         this.reset.setText(MSGS.reset());
-        this.reset.addClickHandler(event -> {
-            reset();
-            setDirty(false);
-            DeviceCertsTabUi.this.apply.setEnabled(false);
-            DeviceCertsTabUi.this.reset.setEnabled(false);
-        });
+        this.reset.addClickHandler(event -> reset());
 
         this.apply.setText(MSGS.apply());
         this.apply.addClickHandler(event -> {
@@ -183,7 +182,9 @@ public class DeviceCertsTabUi extends Composite implements Tab {
 
                                     @Override
                                     public void onSuccess(Integer certsStored) {
-                                        reset();
+                                        DeviceCertsTabUi.this.storageAliasInput.setText("");
+                                        DeviceCertsTabUi.this.privateKeyInput.setText("");
+                                        DeviceCertsTabUi.this.certificateInput.setText("");
                                         setDirty(false);
                                         DeviceCertsTabUi.this.apply.setEnabled(false);
                                         DeviceCertsTabUi.this.reset.setEnabled(false);
@@ -197,9 +198,44 @@ public class DeviceCertsTabUi extends Composite implements Tab {
     }
 
     private void reset() {
-        this.storageAliasInput.setText("");
-        this.privateKeyInput.setText("");
-        this.certificateInput.setText("");
+        if (isDirty()) {
+            // Modal
+            Modal modal = new Modal();
+
+            ModalHeader header = new ModalHeader();
+            header.setTitle(MSGS.confirm());
+            modal.add(header);
+
+            ModalBody body = new ModalBody();
+            body.add(new Span(MSGS.deviceConfigDirty()));
+            modal.add(body);
+
+            ModalFooter footer = new ModalFooter();
+            ButtonGroup group = new ButtonGroup();
+            Button no = new Button();
+            no.setText(MSGS.noButton());
+            no.addStyleName("fa fa-times");
+            no.addClickHandler(event -> modal.hide());
+            group.add(no);
+            Button yes = new Button();
+            yes.setText(MSGS.yesButton());
+            yes.addStyleName("fa fa-check");
+            yes.addClickHandler(event -> {
+                modal.hide();
+                this.storageAliasInput.setText("");
+                this.privateKeyInput.setText("");
+                this.certificateInput.setText("");
+                this.apply.setEnabled(false);
+                this.reset.setEnabled(false);
+                setDirty(false);
+            });
+            group.add(yes);
+            footer.add(group);
+            modal.add(footer);
+            modal.show();
+            no.setFocus(true);
+        }
+
     }
 
     private boolean isAliasValid() {

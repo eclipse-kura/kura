@@ -86,9 +86,9 @@
                     </b:Form>
                 </b:ModalBody>
                 <b:ModalFooter>
-                    <b:Button b:id="btn-create-channel-cancel" icon="REMOVE" type="PRIMARY" dataDismiss="MODAL"
+                    <b:Button b:id="btn-create-channel-cancel" type="PRIMARY" dataDismiss="MODAL"
                         ui:field="btnCancelCreatingNewChannel" />
-                    <b:Button icon="SAVE" type="PRIMARY" b:id="btn-create-channel" ui:field="btnCreateNewChannel" />
+                    <b:Button type="PRIMARY" b:id="btn-create-channel" ui:field="btnCreateNewChannel" />
                 </b:ModalFooter>
             </b:Modal>
             <!-- File Upload Modal -->

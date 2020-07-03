@@ -144,9 +144,9 @@
                 </b:Form>
             </b:ModalBody>
             <b:ModalFooter>
-                <b:Button b:id="btn-create-comp-cancel" icon="REMOVE" type="PRIMARY" dataDismiss="MODAL"
+                <b:Button b:id="btn-create-comp-cancel" type="PRIMARY" dataDismiss="MODAL"
                     ui:field="btnComponentModalNo" text="{msgs.cancelButton}" />
-                <b:Button icon="SAVE" type="PRIMARY" b:id="btn-create-comp" ui:field="btnComponentModalYes"
+                <b:Button type="PRIMARY" b:id="btn-create-comp" ui:field="btnComponentModalYes"
                     text="{msgs.okButton}" />
             </b:ModalFooter>
         </b:Modal>

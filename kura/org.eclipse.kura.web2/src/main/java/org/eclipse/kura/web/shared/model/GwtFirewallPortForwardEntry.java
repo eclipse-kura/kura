@@ -110,4 +110,28 @@ public class GwtFirewallPortForwardEntry extends KuraBaseModel implements Serial
     public void setSourcePortRange(String sourcePortRange) {
         set("sourcePortRange", sourcePortRange);
     }
+
+    @Override
+    public String toString() {
+        StringBuilder output = new StringBuilder();
+        output.append("inboudInterface : ").append(getInboundInterface());
+        output.append(" ");
+        output.append("outboudInterface : ").append(getOutboundInterface());
+        output.append(" ");
+        output.append("addess : ").append(getAddress());
+        output.append(" ");
+        output.append("protocol : ").append(getProtocol());
+        output.append(" ");
+        output.append("inputPort : ").append(getInPort());
+        output.append(" ");
+        output.append("outputPort : ").append(getOutPort());
+        output.append(" ");
+        output.append("network : ").append(getPermittedNetwork());
+        output.append(" ");
+        output.append("permittedMAC : ").append(getPermittedMAC());
+        output.append(" ");
+        output.append("sourcePortRange : ").append(getSourcePortRange());
+
+        return output.toString();
+    }
 }

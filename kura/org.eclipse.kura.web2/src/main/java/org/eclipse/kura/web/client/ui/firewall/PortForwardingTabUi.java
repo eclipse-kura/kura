@@ -808,8 +808,8 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
                         && entry.getOutboundInterface().equals(portForwardEntry.getOutboundInterface())
                         && entry.getAddress().equals(portForwardEntry.getAddress())
                         && entry.getProtocol().equals(portForwardEntry.getProtocol())
-                        && entry.getOutPort() == portForwardEntry.getOutPort()
-                        && entry.getInPort() == portForwardEntry.getInPort()) {
+                        && entry.getOutPort().equals(portForwardEntry.getOutPort())
+                        && entry.getInPort().equals(portForwardEntry.getInPort())) {
 
                     String permittedNetwork = entry.getPermittedNetwork() != null ? entry.getPermittedNetwork()
                             : "0.0.0.0/0";

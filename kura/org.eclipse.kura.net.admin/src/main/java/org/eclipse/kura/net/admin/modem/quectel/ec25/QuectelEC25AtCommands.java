@@ -18,16 +18,13 @@ package org.eclipse.kura.net.admin.modem.quectel.ec25;
  *
  */
 public enum QuectelEC25AtCommands {
-
-    getSimStatus("AT+QSIMSTAT?\r\n"),
-    getSimPinStatus("at+cpin?\r\n"),
-    setAutoSimDetection("at+qsimdet=1,0\r\nat+qsimstat=1"),
-    getSmsc("at+csca?\r\n"),
-    getMobileStationClass("at+cgclass?\r\n"),
-    getRegistrationStatus("at+cgreg?\r\n"),
-    getGprsSessionDataVolume("at+QGDCNT?\r\n"),
-    pdpContext("AT+CGDCONT");
-
+    GET_SIM_STATUS("at+qsimstat?\r\n"),
+    GET_SIM_PIN_STATUS("at+cpin?\r\n"),
+    GET_MOBILESTATION_CLASS("at+cgclass?\r\n"),
+    GET_REGISTRATION_STATUS("at+cgreg?\r\n"),
+    GET_GPRS_SESSION_DATA_VOLUME("at+qgdcnt?\r\n"),
+    PDP_CONTEXT("at+cgdcont\r\n");
+    
     private String command;
 
     private QuectelEC25AtCommands(String atCommand) {

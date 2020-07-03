@@ -51,7 +51,7 @@ public enum SupportedUsbModemInfo {
     Quectel_BG96("BG96", "2c7c", "0296", 4, 0, 3, 3, 1, 5000, 10000, Arrays.asList(ModemTechnologyType.LTE,
             ModemTechnologyType.HSPA,
             ModemTechnologyType.UMTS), Arrays.asList(new UsbModemDriver("cdc_acm", "2c7c", "0296")), "");
-
+	
     private String deviceName;
     private String vendorId;
     private String productId;

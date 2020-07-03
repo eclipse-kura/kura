@@ -14,33 +14,28 @@ package org.eclipse.kura.net.admin.modem.quectel.ec25;
 
 import java.io.IOException;
 import java.util.List;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.comm.CommConnection;
-import org.eclipse.kura.linux.net.modem.SupportedSerialModemInfo;
-import org.eclipse.kura.linux.net.modem.SupportedSerialModemsInfo;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemInfo;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemsInfo;
+import org.eclipse.kura.linux.net.modem.UsbModemDriver;
 import org.eclipse.kura.net.admin.modem.HspaCellularModem;
 import org.eclipse.kura.net.admin.modem.hspa.HspaModem;
 import org.eclipse.kura.net.modem.ModemDevice;
 import org.eclipse.kura.net.modem.ModemRegistrationStatus;
 import org.eclipse.kura.net.modem.ModemTechnologyType;
-import org.eclipse.kura.net.modem.SerialModemDevice;
-import org.eclipse.kura.usb.UsbModemDevice;
+import org.eclipse.kura.usb.UsbDevice;
 import org.osgi.service.io.ConnectionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 /**
  * Defines Quectel EC25 modem
  */
 public class QuectelEC25 extends HspaModem implements HspaCellularModem {
 
     private static final Logger logger = LoggerFactory.getLogger(QuectelEC25.class);
-
-    private final int pdpContext = 1;
+    private static final String MODEM_NOT_AVAILABLE = "Modem not available for AT commands: ";
 
     /**
      * Quectel EC25 modem constructor
@@ -53,38 +48,34 @@ public class QuectelEC25 extends HspaModem implements HspaCellularModem {
      *            - connection factory {@link ConnectionFactory}
      */
     public QuectelEC25(ModemDevice device, String platform, ConnectionFactory connectionFactory) {
-
         super(device, platform, connectionFactory);
-
         try {
-            String atPort = getAtPort();
-            String gpsPort = getGpsPort();
-            if (atPort != null) {
-                if (atPort.equals(getDataPort()) || atPort.equals(gpsPort)) {
-                    this.m_serialNumber = getSerialNumber();
-                    this.m_imsi = getMobileSubscriberIdentity();
-                    this.m_iccid = getIntegratedCirquitCardId();
-                    this.m_model = getModel();
-                    this.m_manufacturer = getManufacturer();
-                    this.m_revisionId = getRevisionID();
-                    this.m_gpsSupported = isGpsSupported();
-                    this.m_rssi = getSignalStrength();
-
-                    logger.trace("{} :: Serial Number={}", getClass().getName(), this.m_serialNumber);
-                    logger.trace("{} :: IMSI={}", getClass().getName(), this.m_imsi);
-                    logger.trace("{} :: ICCID={}", getClass().getName(), this.m_iccid);
-                    logger.trace("{} :: Model={}", getClass().getName(), this.m_model);
-                    logger.trace("{} :: Manufacturer={}", getClass().getName(), this.m_manufacturer);
-                    logger.trace("{} :: Revision ID={}", getClass().getName(), this.m_revisionId);
-                    logger.trace("{} :: GPS Supported={}", getClass().getName(), this.m_gpsSupported);
-                    logger.trace("{} :: RSSI={}", getClass().getName(), this.m_rssi);
-                }
-            }
+          String atPort = getAtPort();
+          String gpsPort = getGpsPort();
+          if (atPort != null && (
+            atPort.equals(getDataPort()) || atPort.equals(gpsPort))) {
+            this.serialNumber = getSerialNumber();
+            this.imsi = getMobileSubscriberIdentity();
+            this.iccid = getIntegratedCirquitCardId();
+            this.model = getModel();
+            this.manufacturer = getManufacturer();
+            this.revisionId = getRevisionID();
+            this.gpsSupported = Boolean.valueOf(isGpsSupported());
+            this.rssi = getSignalStrength();
+            logger.trace("{} :: Serial Number={}", getClass().getName(), this.serialNumber);
+            logger.trace("{} :: IMSI={}", getClass().getName(), this.imsi);
+            logger.trace("{} :: ICCID={}", getClass().getName(), this.iccid);
+            logger.trace("{} :: Model={}", getClass().getName(), this.model);
+            logger.trace("{} :: Manufacturer={}", getClass().getName(), this.manufacturer);
+            logger.trace("{} :: Revision ID={}", getClass().getName(), this.revisionId);
+            logger.trace("{} :: GPS Supported={}", getClass().getName(), this.gpsSupported);
+            logger.trace("{} :: RSSI={}", getClass().getName(), Integer.valueOf(this.rssi));
+          } 
         } catch (KuraException e) {
-            e.printStackTrace();
-        }
-    }
-
+          logger.error("Failed to initialize QuectelEC25", (Throwable)e);
+        } 
+      }
+    
     @Override
     public boolean isSimCardReady() throws KuraException {
 
@@ -97,9 +88,9 @@ public class QuectelEC25 extends HspaModem implements HspaCellularModem {
             port = getAtPort();
         }
 
-        synchronized (s_atLock) {
+        synchronized (atLock) {
             logger.debug("sendCommand getSimStatus :: {} command to port {}",
-                    QuectelEC25AtCommands.getSimStatus.getCommand(), port);
+                    QuectelEC25AtCommands.GET_SIM_STATUS.getCommand(), port);
             byte[] reply = null;
             CommConnection commAtConnection = null;
             try {
@@ -107,10 +98,10 @@ public class QuectelEC25 extends HspaModem implements HspaCellularModem {
                 commAtConnection = openSerialPort(port);
                 if (!isAtReachable(commAtConnection)) {
                     throw new KuraException(KuraErrorCode.NOT_CONNECTED,
-                            "Modem not available for AT commands: " + QuectelEC25.class.getName());
+                            MODEM_NOT_AVAILABLE + QuectelEC25.class.getName());
                 }
 
-                reply = commAtConnection.sendCommand(QuectelEC25AtCommands.getSimStatus.getCommand().getBytes(), 1000,
+                reply = commAtConnection.sendCommand(QuectelEC25AtCommands.GET_SIM_STATUS.getCommand().getBytes(), 1000,
                         100);
                 if (reply != null) {
                     String simStatus = getResponseString(reply);
@@ -119,11 +110,8 @@ public class QuectelEC25 extends HspaModem implements HspaCellularModem {
                         simReady = true;
                     }
                 }
-
-
-                }
             } catch (IOException e) {
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+                throw new KuraException(KuraErrorCode.UNAVAILABLE_DEVICE, e);
             } catch (KuraException e) {
                 throw e;
             } finally {
@@ -131,28 +119,28 @@ public class QuectelEC25 extends HspaModem implements HspaCellularModem {
             }
         }
         return simReady;
-    }
 
+    }
+    
     @Override
     public ModemRegistrationStatus getRegistrationStatus() throws KuraException {
 
         ModemRegistrationStatus modemRegistrationStatus = ModemRegistrationStatus.UNKNOWN;
-        synchronized (s_atLock) {
+        synchronized (atLock) {
             logger.debug("sendCommand getRegistrationStatus :: {}",
-                    QuectelEC25AtCommands.getRegistrationStatus.getCommand());
+                    QuectelEC25AtCommands.GET_REGISTRATION_STATUS.getCommand());
             byte[] reply = null;
             CommConnection commAtConnection = openSerialPort(getAtPort());
             if (!isAtReachable(commAtConnection)) {
                 closeSerialPort(commAtConnection);
-                throw new KuraException(KuraErrorCode.NOT_CONNECTED,
-                        "Modem not available for AT commands: " + QuectelEC25.class.getName());
+                throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE + QuectelEC25.class.getName());
             }
             try {
-                reply = commAtConnection.sendCommand(QuectelEC25AtCommands.getRegistrationStatus.getCommand().getBytes(),
-                        1000, 100);
+                reply = commAtConnection
+                        .sendCommand(QuectelEC25AtCommands.GET_REGISTRATION_STATUS.getCommand().getBytes(), 1000, 100);
             } catch (IOException e) {
                 closeSerialPort(commAtConnection);
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+                throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
             }
             closeSerialPort(commAtConnection);
             if (reply != null) {
@@ -170,57 +158,46 @@ public class QuectelEC25 extends HspaModem implements HspaCellularModem {
                     case 3:
                         modemRegistrationStatus = ModemRegistrationStatus.REGISTRATION_DENIED;
                         break;
+                    case 4:
+                        modemRegistrationStatus = ModemRegistrationStatus.UNKNOWN;
+                        break;
                     case 5:
                         modemRegistrationStatus = ModemRegistrationStatus.REGISTERED_ROAMING;
                         break;
+                    default:
                     }
                 }
             }
         }
         return modemRegistrationStatus;
     }
-
+    
     @Override
     public long getCallTxCounter() throws KuraException {
 
         long txCnt = 0;
-        synchronized (s_atLock) {
+        synchronized (atLock) {
             logger.debug("sendCommand getGprsSessionDataVolume :: {}",
-                    QuectelEC25AtCommands.getGprsSessionDataVolume.getCommand());
+                    QuectelEC25AtCommands.GET_GPRS_SESSION_DATA_VOLUME.getCommand());
             byte[] reply = null;
             CommConnection commAtConnection = openSerialPort(getAtPort());
             if (!isAtReachable(commAtConnection)) {
                 closeSerialPort(commAtConnection);
-                throw new KuraException(KuraErrorCode.NOT_CONNECTED,
-                        "Modem not available for AT commands: " + QuectelEC25.class.getName());
+                throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE + QuectelEC25.class.getName());
             }
             try {
-                reply = commAtConnection
-                        .sendCommand(QuectelEC25AtCommands.getGprsSessionDataVolume.getCommand().getBytes(), 1000, 100);
+                reply = commAtConnection.sendCommand(
+                        QuectelEC25AtCommands.GET_GPRS_SESSION_DATA_VOLUME.getCommand().getBytes(), 1000, 100);
             } catch (IOException e) {
                 closeSerialPort(commAtConnection);
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+                throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
             }
             closeSerialPort(commAtConnection);
             if (reply != null) {
-                String[] splitPdp = null;
-                String[] splitData = null;
-                String sDataVolume = this.getResponseString(reply);
-                splitPdp = sDataVolume.split("#GDATAVOL:");
-                if (splitPdp.length > 1) {
-                    for (String pdp : splitPdp) {
-                        if (pdp.trim().length() > 0) {
-                            splitData = pdp.trim().split(",");
-                            if (splitData.length >= 4) {
-                                int pdpNo = Integer.parseInt(splitData[0]);
-                                if (pdpNo == this.pdpContext) {
-                                    txCnt = Integer.parseInt(splitData[2]);
-                                }
-                            }
-                        }
-                    }
+                String[] sDataVolume = this.getResponseString(reply).split(" ");
+                if (sDataVolume.length >= 2) {
+                    txCnt = Integer.parseInt(sDataVolume[1].split(",")[0]);
                 }
-                reply = null;
             }
         }
         return txCnt;
@@ -229,43 +206,28 @@ public class QuectelEC25 extends HspaModem implements HspaCellularModem {
     @Override
     public long getCallRxCounter() throws KuraException {
         long rxCnt = 0;
-        synchronized (s_atLock) {
+        synchronized (atLock) {
             logger.debug("sendCommand getGprsSessionDataVolume :: {}",
-                    QuectelEC25AtCommands.getGprsSessionDataVolume.getCommand());
+                    QuectelEC25AtCommands.GET_GPRS_SESSION_DATA_VOLUME.getCommand());
             byte[] reply = null;
             CommConnection commAtConnection = openSerialPort(getAtPort());
             if (!isAtReachable(commAtConnection)) {
                 closeSerialPort(commAtConnection);
-                throw new KuraException(KuraErrorCode.NOT_CONNECTED,
-                        "Modem not available for AT commands: " + QuectelEC25.class.getName());
+                throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE + QuectelEC25.class.getName());
             }
             try {
-                reply = commAtConnection
-                        .sendCommand(QuectelEC25AtCommands.getGprsSessionDataVolume.getCommand().getBytes(), 1000, 100);
+                reply = commAtConnection.sendCommand(
+                        QuectelEC25AtCommands.GET_GPRS_SESSION_DATA_VOLUME.getCommand().getBytes(), 1000, 100);
             } catch (IOException e) {
                 closeSerialPort(commAtConnection);
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+                throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
             }
             closeSerialPort(commAtConnection);
             if (reply != null) {
-                String[] splitPdp = null;
-                String[] splitData = null;
-                String sDataVolume = this.getResponseString(reply);
-                splitPdp = sDataVolume.split("#GDATAVOL:");
-                if (splitPdp.length > 1) {
-                    for (String pdp : splitPdp) {
-                        if (pdp.trim().length() > 0) {
-                            splitData = pdp.trim().split(",");
-                            if (splitData.length >= 4) {
-                                int pdpNo = Integer.parseInt(splitData[0]);
-                                if (pdpNo == this.pdpContext) {
-                                    rxCnt = Integer.parseInt(splitData[3]);
-                                }
-                            }
-                        }
-                    }
+                String[] sDataVolume = this.getResponseString(reply).split(" ");
+                if (sDataVolume.length >= 2) {
+                    rxCnt = Integer.parseInt(sDataVolume[1].split(",")[1]);
                 }
-                reply = null;
             }
         }
         return rxCnt;
@@ -274,22 +236,21 @@ public class QuectelEC25 extends HspaModem implements HspaCellularModem {
     @Override
     public String getServiceType() throws KuraException {
         String serviceType = null;
-        synchronized (s_atLock) {
+        synchronized (atLock) {
             logger.debug("sendCommand getMobileStationClass :: {}",
-                    QuectelEC25AtCommands.getMobileStationClass.getCommand());
+                    QuectelEC25AtCommands.GET_MOBILESTATION_CLASS.getCommand());
             byte[] reply = null;
             CommConnection commAtConnection = openSerialPort(getAtPort());
             if (!isAtReachable(commAtConnection)) {
                 closeSerialPort(commAtConnection);
-                throw new KuraException(KuraErrorCode.NOT_CONNECTED,
-                        "Modem not available for AT commands: " + QuectelEC25.class.getName());
+                throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE + QuectelEC25.class.getName());
             }
             try {
-                reply = commAtConnection.sendCommand(QuectelEC25AtCommands.getMobileStationClass.getCommand().getBytes(),
-                        1000, 100);
+                reply = commAtConnection
+                        .sendCommand(QuectelEC25AtCommands.GET_MOBILESTATION_CLASS.getCommand().getBytes(), 1000, 100);
             } catch (IOException e) {
                 closeSerialPort(commAtConnection);
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+                throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
             }
             closeSerialPort(commAtConnection);
             if (reply != null) {
@@ -306,56 +267,31 @@ public class QuectelEC25 extends HspaModem implements HspaCellularModem {
                         serviceType = "GSM";
                     }
                 }
-                reply = null;
             }
         }
 
         return serviceType;
     }
 
-    @Override
-    public List<ModemTechnologyType> getTechnologyTypes() throws KuraException {
+	@Override
+	public List<ModemTechnologyType> getTechnologyTypes() throws KuraException {
+		List<ModemTechnologyType> modemTechnologyTypes = null;
+		ModemDevice device = getModemDevice();
+		if (device == null)
+			throw new KuraException(KuraErrorCode.INVALID_PARAMETER, new Object[] { "No modem device" });
+		if (device instanceof org.eclipse.kura.usb.UsbModemDevice) {
+			SupportedUsbModemInfo usbModemInfo = SupportedUsbModemsInfo.getModem((UsbDevice) device);
+			if (usbModemInfo != null) {
+				modemTechnologyTypes = usbModemInfo.getTechnologyTypes();
+			} else {
+				throw new KuraException(KuraErrorCode.INVALID_PARAMETER, new Object[] { "No usbModemInfo available" });
+			}
+		} else {
+			throw new KuraException(KuraErrorCode.INVALID_PARAMETER, new Object[] { "Unsupported modem device" });
+		}
+		return modemTechnologyTypes;
+	}
 
-        List<ModemTechnologyType> modemTechnologyTypes = null;
-        ModemDevice device = getModemDevice();
-        if (device == null) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "No modem device");
-        }
-        if (device instanceof UsbModemDevice) {
-            SupportedUsbModemInfo usbModemInfo = SupportedUsbModemsInfo.getModem((UsbModemDevice) device);
-            if (usbModemInfo != null) {
-                modemTechnologyTypes = usbModemInfo.getTechnologyTypes();
-            } else {
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "No usbModemInfo available");
-            }
-        } else if (device instanceof SerialModemDevice) {
-            SupportedSerialModemInfo serialModemInfo = SupportedSerialModemsInfo.getModem();
-            if (serialModemInfo != null) {
-                modemTechnologyTypes = serialModemInfo.getTechnologyTypes();
-            } else {
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "No serialModemInfo available");
-            }
-        } else {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "Unsupported modem device");
-        }
-        return modemTechnologyTypes;
-    }
-
-    @Override
-    @Deprecated
-    public ModemTechnologyType getTechnologyType() {
-        ModemTechnologyType modemTechnologyType = null;
-        try {
-            List<ModemTechnologyType> modemTechnologyTypes = getTechnologyTypes();
-            if (modemTechnologyTypes != null && modemTechnologyTypes.size() > 0) {
-                modemTechnologyType = modemTechnologyTypes.get(0);
-            }
-        } catch (KuraException e) {
-            logger.error("Failed to obtain modem technology - {}", e);
-        }
-        return modemTechnologyType;
-    }
-    
     @Override
     public boolean isGpsSupported() throws KuraException {
         return false; // Will be activated later
@@ -363,13 +299,65 @@ public class QuectelEC25 extends HspaModem implements HspaCellularModem {
 
     @Override
     public void enableGps() throws KuraException {
-        logger.warn("Modem GPS not supported");
+        throw new UnsupportedOperationException("Modem GPS not supported");
     }
 
     @Override
     public void disableGps() throws KuraException {
-        logger.warn("Modem GPS not supported");
+        throw new UnsupportedOperationException("Modem GPS not supported");
     }
 
+    @Override
+    public void reset() throws KuraException {
+        sleep(5000);
+        while (true) {
+            try {
+                turnOff();
+                sleep(1000);
+                turnOn();
+                logger.info("reset() :: modem reset successful");
+                break;
+            } catch (Exception e) {
+                logger.error("Failed to reset the modem", e);
+            }
+        }
+    }
 
+    private void turnOff() throws KuraException {
+        UsbModemDriver modemDriver = getModemDriver();
+        if (modemDriver != null) {
+            modemDriver.disable();
+        } else {
+            throw new KuraException(KuraErrorCode.UNAVAILABLE_DEVICE);
+        }
+    }
+
+    private void turnOn() throws KuraException {
+        UsbModemDriver modemDriver = getModemDriver();
+        if (modemDriver != null) {
+            modemDriver.enable();
+        } else {
+            throw new KuraException(KuraErrorCode.UNAVAILABLE_DEVICE);
+        }
+    }
+    
+	@Override
+	public boolean hasDiversityAntenna() {
+		return false;	// To be activated later
+	}
+
+	@Override
+	public boolean isDiversityEnabled() {
+		return false;
+	}
+
+	@Override
+	public void enableDiversity() throws KuraException {
+		throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
+	}
+
+	@Override
+	public void disableDiversity() throws KuraException {
+		throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
+	}
 }

@@ -20,6 +20,8 @@ import org.eclipse.kura.net.modem.ModemConfig.PdpType;
 
 public class QuectelEC25ConfigGenerator implements ModemPppConfigGenerator {
 
+    private static final String ABORT = "ABORT";
+
     @Override
     public PppPeer getPppPeer(String deviceId, ModemConfig modemConfig, String logFile, String connectScript,
             String disconnectScript) {
@@ -68,6 +70,7 @@ public class QuectelEC25ConfigGenerator implements ModemPppConfigGenerator {
 
     @Override
     public ModemXchangeScript getConnectScript(ModemConfig modemConfig) {
+        // PDP context is fixed to 1 for this modem
         int pdpPid = 1;
         String apn = "";
         String dialString = "";
@@ -78,12 +81,12 @@ public class QuectelEC25ConfigGenerator implements ModemPppConfigGenerator {
         }
 
         ModemXchangeScript modemXchange = new ModemXchangeScript();
-        modemXchange.addmodemXchangePair(new ModemXchangePair("\"BUSY\"", "ABORT"));
-        modemXchange.addmodemXchangePair(new ModemXchangePair("\"VOICE\"", "ABORT"));
-        modemXchange.addmodemXchangePair(new ModemXchangePair("\"NO CARRIER\"", "ABORT"));
-        modemXchange.addmodemXchangePair(new ModemXchangePair("\"NO DIALTONE\"", "ABORT"));
-        modemXchange.addmodemXchangePair(new ModemXchangePair("\"NO DIAL TONE\"", "ABORT"));
-        modemXchange.addmodemXchangePair(new ModemXchangePair("\"ERROR\"", "ABORT"));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("\"BUSY\"", ABORT));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("\"VOICE\"", ABORT));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("\"NO CARRIER\"", ABORT));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("\"NO DIALTONE\"", ABORT));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("\"NO DIAL TONE\"", ABORT));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("\"ERROR\"", ABORT));
         modemXchange.addmodemXchangePair(new ModemXchangePair("\"+++ath\"", "\"\""));
         modemXchange.addmodemXchangePair(new ModemXchangePair("\"AT\"", "OK"));
         modemXchange.addmodemXchangePair(new ModemXchangePair(formPDPcontext(pdpPid, PdpType.IP, apn), "OK"));
@@ -98,11 +101,11 @@ public class QuectelEC25ConfigGenerator implements ModemPppConfigGenerator {
     public ModemXchangeScript getDisconnectScript(ModemConfig modemConfig) {
 
         ModemXchangeScript modemXchange = new ModemXchangeScript();
-        modemXchange.addmodemXchangePair(new ModemXchangePair("\"BUSY\"", "ABORT"));
-        modemXchange.addmodemXchangePair(new ModemXchangePair("\"VOICE\"", "ABORT"));
-        modemXchange.addmodemXchangePair(new ModemXchangePair("\"NO CARRIER\"", "ABORT"));
-        modemXchange.addmodemXchangePair(new ModemXchangePair("\"NO DIALTONE\"", "ABORT"));
-        modemXchange.addmodemXchangePair(new ModemXchangePair("\"NO DIAL TONE\"", "ABORT"));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("\"BUSY\"", ABORT));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("\"VOICE\"", ABORT));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("\"NO CARRIER\"", ABORT));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("\"NO DIALTONE\"", ABORT));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("\"NO DIAL TONE\"", ABORT));
         modemXchange.addmodemXchangePair(new ModemXchangePair("BREAK", "\"\""));
         modemXchange.addmodemXchangePair(new ModemXchangePair("\"+++ATH\"", "\"\""));
 
@@ -113,7 +116,7 @@ public class QuectelEC25ConfigGenerator implements ModemPppConfigGenerator {
      * This method forms dial string
      */
     private String formDialString(String dialString) {
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         buf.append('"');
         if (dialString != null) {
             buf.append(dialString);
@@ -128,7 +131,7 @@ public class QuectelEC25ConfigGenerator implements ModemPppConfigGenerator {
      */
     private String formPDPcontext(int pdpPid, PdpType pdpType, String apn) {
 
-        StringBuffer pdpcontext = new StringBuffer(QuectelEC25AtCommands.pdpContext.getCommand());
+        StringBuilder pdpcontext = new StringBuilder(QuectelEC25AtCommands.PDP_CONTEXT.getCommand());
         pdpcontext.append('=');
         pdpcontext.append(pdpPid);
         pdpcontext.append(',');

@@ -140,15 +140,19 @@ public class CloudInstancesUi extends Composite {
         this.selectionModel.addSelectionChangeHandler(event -> {
             Object selected = getSelectedObject();
             boolean isEndpoint = false;
+            boolean isSelected = false;
             boolean isConnection = false;
 
             if (selected instanceof GwtCloudConnectionEntry) {
                 GwtCloudConnectionEntry cloudConnection = (GwtCloudConnectionEntry) selected;
                 isEndpoint = true;
+                isSelected = true;
                 isConnection = cloudConnection.getConnectionType() == GwtCloudConnectionType.CONNECTION;
             }
+            
 
             this.newPubSub.setEnabled(isEndpoint);
+            this.deleteConnection.setEnabled(isSelected);
             this.statusConnectDisconnect.setEnabled(isConnection);
             this.cloudServicesUi.onSelectionChange();
         });

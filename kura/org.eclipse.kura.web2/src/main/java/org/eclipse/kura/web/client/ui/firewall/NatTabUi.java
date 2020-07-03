@@ -501,6 +501,8 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
     }
 
     private void showModal(final GwtFirewallNatEntry existingEntry) {
+        resetValidationStates();
+
         if (existingEntry == null) {
             this.natForm.setTitle(MSGS.firewallNatFormInformation());
         } else {
@@ -516,6 +518,13 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
         }
 
         this.natForm.show();
+    }
+
+    private void resetValidationStates() {
+        NatTabUi.this.groupInput.setValidationState(ValidationState.NONE);
+        NatTabUi.this.groupOutput.setValidationState(ValidationState.NONE);
+        NatTabUi.this.groupSource.setValidationState(ValidationState.NONE);
+        NatTabUi.this.groupDestination.setValidationState(ValidationState.NONE);
     }
 
     private void setModalFieldsHandlers() {

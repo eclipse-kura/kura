@@ -614,6 +614,8 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
     }
 
     private void showModal(final GwtFirewallPortForwardEntry existingEntry) {
+        resetValidationStates();
+
         if (existingEntry == null) {
             // new
             this.portForwardingForm.setTitle(MSGS.firewallPortForwardFormInformation());
@@ -633,6 +635,17 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
 
         this.portForwardingForm.show();
     }// end initModal
+
+    private void resetValidationStates() {
+        PortForwardingTabUi.this.groupInput.setValidationState(ValidationState.NONE);
+        PortForwardingTabUi.this.groupOutput.setValidationState(ValidationState.NONE);
+        PortForwardingTabUi.this.groupLan.setValidationState(ValidationState.NONE);
+        PortForwardingTabUi.this.groupInternal.setValidationState(ValidationState.NONE);
+        PortForwardingTabUi.this.groupExternal.setValidationState(ValidationState.NONE);
+        PortForwardingTabUi.this.groupPermittedNw.setValidationState(ValidationState.NONE);
+        PortForwardingTabUi.this.groupPermittedMac.setValidationState(ValidationState.NONE);
+        PortForwardingTabUi.this.groupSource.setValidationState(ValidationState.NONE);
+    }
 
     private void setModalFieldsHandlers() {
         // Set validations

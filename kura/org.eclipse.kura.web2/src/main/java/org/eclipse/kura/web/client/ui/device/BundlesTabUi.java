@@ -76,17 +76,18 @@ public class BundlesTabUi extends Composite implements Tab {
         initWidget(uiBinder.createAndBindUi(this));
         loadBundlesTable(this.bundlesGrid, this.bundlesDataProvider);
 
-        this.bundlesRefresh.setText("Refresh");
-        this.bundleStart.setText("Start Bundle");
-        this.bundleStop.setText("Stop Bundle");
+        this.bundlesRefresh.setText(MSGS.refresh());
+        this.bundleStart.setText(MSGS.deviceTabBundleStart());
+        this.bundleStop.setText(MSGS.deviceTabBundleStop());
 
-        updateButtons();
-
+        this.selectionModel.clear();
         this.bundlesGrid.setSelectionModel(this.selectionModel);
         this.selectionModel.addSelectionChangeHandler(event -> updateButtons());
         this.bundlesRefresh.addClickHandler(event -> refresh());
         this.bundleStart.addClickHandler(event -> startSelectedBundle());
         this.bundleStop.addClickHandler(event -> stopSelectedBundle());
+
+        updateButtons();
 
         EventService.Handler onBundleUpdatedHandler = eventInfo -> {
             if (BundlesTabUi.this.isVisible() && BundlesTabUi.this.isAttached()) {
@@ -178,6 +179,7 @@ public class BundlesTabUi extends Composite implements Tab {
                             @Override
                             public void onSuccess(Void result) {
                                 EntryClassUi.hideWaitModal();
+                                BundlesTabUi.this.bundleStop.setEnabled(false);
                             }
                         });
             }
@@ -294,6 +296,8 @@ public class BundlesTabUi extends Composite implements Tab {
                         int size = BundlesTabUi.this.bundlesDataProvider.getList().size();
                         BundlesTabUi.this.bundlesGrid.setVisibleRange(0, size);
                         BundlesTabUi.this.bundlesDataProvider.flush();
+                        BundlesTabUi.this.selectionModel.clear();
+                        updateButtons();
                     }
                 });
             }

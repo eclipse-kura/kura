@@ -142,11 +142,14 @@ public class CloudInstancesUi extends Composite {
             boolean isEndpoint = false;
             boolean isSelected = false;
             boolean isConnection = false;
+            
+            if (selected != null) {
+                isSelected = true;                
+            }
 
             if (selected instanceof GwtCloudConnectionEntry) {
                 GwtCloudConnectionEntry cloudConnection = (GwtCloudConnectionEntry) selected;
                 isEndpoint = true;
-                isSelected = true;
                 isConnection = cloudConnection.getConnectionType() == GwtCloudConnectionType.CONNECTION;
             }
             

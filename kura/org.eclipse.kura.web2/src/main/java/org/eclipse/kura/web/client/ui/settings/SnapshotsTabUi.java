@@ -109,11 +109,15 @@ public class SnapshotsTabUi extends Composite implements Tab {
         logger.log(Level.FINER, "Initiating SnapshotsTabUI...");
         initWidget(uiBinder.createAndBindUi(this));
         initTable();
+        this.selectionModel.clear();
         this.snapshotsGrid.setSelectionModel(this.selectionModel);
+        this.selectionModel.addSelectionChangeHandler(event -> updateButtons());
 
         initInterfaceButtons();
 
         initUploadModalHandlers();
+
+        updateButtons();
 
         this.snapshotsForm.addSubmitCompleteHandler(event -> {
             String htmlResponse = event.getResults();
@@ -176,16 +180,15 @@ public class SnapshotsTabUi extends Composite implements Tab {
                                     SnapshotsTabUi.this.snapshotsGrid.setVisible(false);
                                     SnapshotsTabUi.this.notification.setVisible(true);
                                     SnapshotsTabUi.this.notification.setText("No Snapshots Available");
-                                    SnapshotsTabUi.this.download.setEnabled(false);
-                                    SnapshotsTabUi.this.rollback.setEnabled(false);
                                 } else {
                                     SnapshotsTabUi.this.snapshotsGrid.setVisibleRange(0, snapshotsDataSize);
                                     SnapshotsTabUi.this.snapshotsGrid.setVisible(true);
                                     SnapshotsTabUi.this.notification.setVisible(false);
-                                    SnapshotsTabUi.this.download.setEnabled(true);
-                                    SnapshotsTabUi.this.rollback.setEnabled(true);
                                 }
                                 SnapshotsTabUi.this.snapshotsDataProvider.flush();
+
+                                SnapshotsTabUi.this.selectionModel.clear();
+                                updateButtons();
                                 EntryClassUi.hideWaitModal();
                             }
                         });
@@ -269,9 +272,11 @@ public class SnapshotsTabUi extends Composite implements Tab {
                 });
             }
         });
+        this.download.setEnabled(false);
 
         this.rollback.setText(MSGS.rollback());
         this.rollback.addClickHandler(event -> rollback());
+        this.rollback.setEnabled(false);
 
         this.upload.setText(MSGS.upload());
         this.upload.addClickHandler(event -> uploadAndApply());
@@ -351,5 +356,19 @@ public class SnapshotsTabUi extends Composite implements Tab {
         this.xsrfTokenField.setName("xsrfToken");
         this.xsrfTokenField.setValue("");
 
+    }
+
+    private void updateButtons() {
+        this.download.setEnabled(false);
+        this.rollback.setEnabled(false);
+
+        if (this.selectionModel.getSelectedObject() == null) {
+            return;
+        }
+
+        logger.log(Level.INFO, "updatebuttons setting buttons to true");
+
+        this.download.setEnabled(true);
+        this.rollback.setEnabled(true);
     }
 }

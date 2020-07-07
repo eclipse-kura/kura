@@ -126,8 +126,31 @@ public class SettingsPanelUi extends Composite {
     }
 
     public void load() {
-        if (!this.snapshotsPanel.isDirty()) {
+        if (snapshots.isActive() && !this.snapshotsPanel.isDirty()) {
             this.snapshotsPanel.refresh();
+        }
+        if (appCert.isActive() && !this.appCertPanel.isDirty()) {
+            this.appCertPanel.refresh();
+        }
+        
+        if (sslConfig.isActive() && !this.sslConfigPanel.isDirty()) {
+            this.sslConfigPanel.load();
+        }
+        
+        if (serverCert.isActive() && !this.serverCertPanel.isDirty()) {
+            this.serverCertPanel.refresh();
+        }
+        
+        if (deviceCert.isActive() && !this.deviceCertPanel.isDirty()) {
+            this.deviceCertPanel.refresh();
+        }
+        
+        if (security.isActive() && !this.securityPanel.isDirty()) {
+            this.securityPanel.refresh();
+        }
+        
+        if (commandUser.isActive() && !this.commandUserPanel.isDirty()) {
+            this.commandUserPanel.load();
         }
     }
 

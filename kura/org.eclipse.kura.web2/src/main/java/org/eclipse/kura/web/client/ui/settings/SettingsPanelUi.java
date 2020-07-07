@@ -102,9 +102,11 @@ public class SettingsPanelUi extends Composite {
 
     private TabListItem currentlySelectedTab;
     private Tab.RefreshHandler snapshotsHandler;
+    private Tab.RefreshHandler sslConfigHandler;
     private Tab.RefreshHandler serverCertHandler;
     private Tab.RefreshHandler deviceCertHandler;
     private Tab.RefreshHandler securityHandler;
+    private Tab.RefreshHandler commandUserHandler;
 
     public SettingsPanelUi() {
         logger.log(Level.FINER, "Initiating SettingsPanelUI...");
@@ -135,14 +137,16 @@ public class SettingsPanelUi extends Composite {
 
         this.snapshotsHandler = new Tab.RefreshHandler(this.snapshotsPanel);
         this.snapshots.addClickHandler(event -> handleEvent(event, this.snapshotsHandler));
-        this.sslConfig.addClickHandler(event -> SettingsPanelUi.this.sslConfigPanel.load());
+        this.sslConfigHandler = new Tab.RefreshHandler(this.sslConfigPanel);
+        this.sslConfig.addClickHandler(event -> handleEvent(event, this.sslConfigHandler));
         this.serverCertHandler = new Tab.RefreshHandler(this.serverCertPanel);
         this.serverCert.addClickHandler(event -> handleEvent(event, this.serverCertHandler));
         this.deviceCertHandler = new Tab.RefreshHandler(this.deviceCertPanel);
         this.deviceCert.addClickHandler(event -> handleEvent(event, this.deviceCertHandler));
         this.securityHandler = new Tab.RefreshHandler(this.securityPanel);
         this.security.addClickHandler(event -> handleEvent(event, this.securityHandler));
-        this.commandUser.addClickHandler(event -> SettingsPanelUi.this.commandUserPanel.load());
+        this.commandUserHandler = new Tab.RefreshHandler(this.commandUserPanel);
+        this.commandUser.addClickHandler(event -> handleEvent(event, this.commandUserHandler));
 
         this.currentlySelectedTab = this.snapshots;
     }
@@ -216,6 +220,7 @@ public class SettingsPanelUi extends Composite {
         ButtonGroup group = new ButtonGroup();
         Button yes = new Button();
         yes.setText(MSGS.yesButton());
+        yes.addStyleName("fa fa-check");
         yes.addClickHandler(event -> {
             modal.hide();
             SettingsPanelUi.this.getTab(this.currentlySelectedTab).clear();
@@ -223,6 +228,7 @@ public class SettingsPanelUi extends Composite {
             newTabRefreshHandler.onClick(event);
         });
         Button no = new Button();
+        no.addStyleName("fa fa-times");
         no.setText(MSGS.noButton());
         no.addClickHandler(event -> {
             SettingsPanelUi.this.currentlySelectedTab.showTab();
@@ -255,16 +261,16 @@ public class SettingsPanelUi extends Composite {
             return this.snapshotsPanel;
         } else if (item.getDataTarget().equals("#appCertPanel")) {
             return this.appCertPanel;
-            // } else if (item.getDataTarget().equals("#sslConfigPanel")) {
-            // return this.sslConfigPanel;
+        } else if (item.getDataTarget().equals("#sslConfigPanel")) {
+            return this.sslConfigPanel;
         } else if (item.getDataTarget().equals("#serverCertPanel")) {
             return this.serverCertPanel;
         } else if (item.getDataTarget().equals("#deviceCertPanel")) {
             return this.deviceCertPanel;
         } else if (item.getDataTarget().equals("#securityPanel")) {
             return this.securityPanel;
-            // } else if (item.getDataTarget().equals("commandUserPanel")) {
-            // return this.commandUserPanel;
+        } else if (item.getDataTarget().equals("#commandUserPanel")) {
+            return this.commandUserPanel;
         } else {
             return this.snapshotsPanel;
         }

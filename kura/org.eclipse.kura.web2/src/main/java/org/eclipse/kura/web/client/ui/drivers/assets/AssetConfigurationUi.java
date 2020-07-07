@@ -356,7 +356,7 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
     }
 
     @Override
-    protected void reset() {
+    public void reset() {
         // Not needed
     }
 

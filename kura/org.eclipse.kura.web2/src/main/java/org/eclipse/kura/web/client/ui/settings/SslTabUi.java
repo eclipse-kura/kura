@@ -18,6 +18,7 @@ import java.util.logging.Level;
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.AbstractServicesUi;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
+import org.eclipse.kura.web.client.ui.Tab;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter;
@@ -45,7 +46,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
 
-public class SslTabUi extends AbstractServicesUi {
+public class SslTabUi extends AbstractServicesUi implements Tab {
 
     private static final SslTabUiUiBinder uiBinder = GWT.create(SslTabUiUiBinder.class);
 
@@ -232,40 +233,11 @@ public class SslTabUi extends AbstractServicesUi {
     @Override
     public void reset() {
         if (isDirty()) {
-            // Modal
-            this.modal = new Modal();
-
-            ModalHeader header = new ModalHeader();
-            header.setTitle(MSGS.confirm());
-            this.modal.add(header);
-
-            ModalBody body = new ModalBody();
-            body.add(new Span(MSGS.deviceConfigDirty()));
-            this.modal.add(body);
-
-            ModalFooter footer = new ModalFooter();
-            ButtonGroup group = new ButtonGroup();
-            Button no = new Button();
-            no.setText(MSGS.noButton());
-            no.addStyleName("fa fa-times");
-            no.addClickHandler(event -> SslTabUi.this.modal.hide());
-            group.add(no);
-            Button yes = new Button();
-            yes.setText(MSGS.yesButton());
-            yes.addStyleName("fa fa-check");
-            yes.addClickHandler(event -> {
-                SslTabUi.this.modal.hide();
-                restoreConfiguration(SslTabUi.this.originalConfig);
-                renderForm();
-                SslTabUi.this.apply.setEnabled(false);
-                SslTabUi.this.reset.setEnabled(false);
-                setDirty(false);
-            });
-            group.add(yes);
-            footer.add(group);
-            this.modal.add(footer);
-            this.modal.show();
-            no.setFocus(true);
+            restoreConfiguration(SslTabUi.this.originalConfig);
+            renderForm();
+            SslTabUi.this.apply.setEnabled(false);
+            SslTabUi.this.reset.setEnabled(false);
+            setDirty(false);
         }
     }
 
@@ -322,5 +294,15 @@ public class SslTabUi extends AbstractServicesUi {
             }
         }
         return this.configurableComponent;
+    }
+
+    @Override
+    public void refresh() {
+        load();
+    }
+
+    @Override
+    public void clear() {
+        reset();
     }
 }

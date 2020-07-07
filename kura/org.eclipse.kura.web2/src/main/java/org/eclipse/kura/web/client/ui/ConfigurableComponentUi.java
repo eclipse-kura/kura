@@ -72,7 +72,7 @@ public class ConfigurableComponentUi extends AbstractServicesUi implements HasCo
     }
 
     @Override
-    protected void reset() {
+    public void reset() {
         // Nothing to do
     }
 

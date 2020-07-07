@@ -102,6 +102,7 @@ public class SettingsPanelUi extends Composite {
 
     private TabListItem currentlySelectedTab;
     private Tab.RefreshHandler snapshotsHandler;
+    private Tab.RefreshHandler appCertHandler;
     private Tab.RefreshHandler sslConfigHandler;
     private Tab.RefreshHandler serverCertHandler;
     private Tab.RefreshHandler deviceCertHandler;
@@ -137,6 +138,8 @@ public class SettingsPanelUi extends Composite {
 
         this.snapshotsHandler = new Tab.RefreshHandler(this.snapshotsPanel);
         this.snapshots.addClickHandler(event -> handleEvent(event, this.snapshotsHandler));
+        this.appCertHandler = new Tab.RefreshHandler(this.appCertPanel);
+        this.appCert.addClickHandler(event -> handleEvent(event, this.appCertHandler));
         this.sslConfigHandler = new Tab.RefreshHandler(this.sslConfigPanel);
         this.sslConfig.addClickHandler(event -> handleEvent(event, this.sslConfigHandler));
         this.serverCertHandler = new Tab.RefreshHandler(this.serverCertPanel);
@@ -153,9 +156,12 @@ public class SettingsPanelUi extends Composite {
 
     public void load() {
         this.currentlySelectedTab = this.snapshots;
+        this.appCertPanel.clear();
+        this.sslConfigPanel.clear();
         this.serverCertPanel.clear();
         this.deviceCertPanel.clear();
         this.securityPanel.clear();
+        this.commandUserPanel.clear();
         this.snapshotsPanel.refresh();
         this.snapshots.showTab();
     }

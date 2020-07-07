@@ -45,7 +45,7 @@ public enum SupportedUsbModemInfo {
             .asList(new UsbModemDriver("sierra", "1199", "0025")), ""),
     Ublox_SARA_U2("SARA-U2", "1546", "1102", 7, 0, 1, 0, -1, 5000, 10000, Arrays
             .asList(ModemTechnologyType.HSPA), Arrays.asList(new UsbModemDriver("cdc_acm", "1546", "1102")), ""),
-    Ublox_LARA_R2("LARA-R2", "1546", "110a", 6, 0, 1, 0, -1, 5000, 10000, Arrays.asList(ModemTechnologyType.LTE,
+    UBLOX_LARA_R2("LARA-R2", "1546", "110a", 6, 0, 1, 0, -1, 5000, 10000, Arrays.asList(ModemTechnologyType.LTE,
             ModemTechnologyType.HSPA,
             ModemTechnologyType.UMTS), Arrays.asList(new UsbModemDriver("cdc_acm", "1546", "110a")), ""),
     Zte_ME3630("ME3630", "19d2", "1476", 3, 0, 1, 2, 1, 5000, 10000, Arrays.asList(ModemTechnologyType.LTE,

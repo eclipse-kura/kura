@@ -140,22 +140,15 @@ public class CloudInstancesUi extends Composite {
         this.selectionModel.addSelectionChangeHandler(event -> {
             Object selected = getSelectedObject();
             boolean isEndpoint = false;
-            boolean isSelected = false;
             boolean isConnection = false;
-            
-            if (selected != null) {
-                isSelected = true;                
-            }
 
             if (selected instanceof GwtCloudConnectionEntry) {
                 GwtCloudConnectionEntry cloudConnection = (GwtCloudConnectionEntry) selected;
                 isEndpoint = true;
                 isConnection = cloudConnection.getConnectionType() == GwtCloudConnectionType.CONNECTION;
             }
-            
 
             this.newPubSub.setEnabled(isEndpoint);
-            this.deleteConnection.setEnabled(isSelected);
             this.statusConnectDisconnect.setEnabled(isConnection);
             this.cloudServicesUi.onSelectionChange();
         });
@@ -254,6 +247,11 @@ public class CloudInstancesUi extends Composite {
     }
 
     public GwtCloudEntry getSelectedObject() {
+        GwtCloudEntry selectedCloudEntry = this.selectionModel.getSelectedObject();
+        if (selectedCloudEntry == null && !cloudServicesDataProvider.getList().isEmpty()) {
+            GwtCloudEntry firstEntry = this.cloudServicesDataProvider.getList().get(0);
+            this.selectionModel.setSelected(firstEntry, true);
+        }
         return this.selectionModel.getSelectedObject();
     }
 

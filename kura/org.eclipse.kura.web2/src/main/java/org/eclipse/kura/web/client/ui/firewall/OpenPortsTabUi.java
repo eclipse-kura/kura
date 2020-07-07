@@ -558,29 +558,40 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
         if (existingEntry == null) {
             this.submit.setId("new");
         } else {
+            setEnableUnpermittedInterface();
+            setEnablePermittedInterface();
+
             this.submit.setId("edit");
         }
 
         this.openPortsForm.show();
     }
 
+    private void setEnablePermittedInterface() {
+        if (!OpenPortsTabUi.this.unpermittedI.getText().trim().isEmpty()) {
+            OpenPortsTabUi.this.permittedI.clear();
+            OpenPortsTabUi.this.permittedI.setEnabled(false);
+        } else {
+            OpenPortsTabUi.this.permittedI.setEnabled(true);
+        }
+    }
+
+    private void setEnableUnpermittedInterface() {
+        if (!OpenPortsTabUi.this.permittedI.getText().trim().isEmpty()) {
+            OpenPortsTabUi.this.unpermittedI.clear();
+            OpenPortsTabUi.this.unpermittedI.setEnabled(false);
+        } else {
+            OpenPortsTabUi.this.unpermittedI.setEnabled(true);
+        }
+    }
+
     private void setModalFieldsHandlers() {
         this.permittedI.addChangeHandler(event -> {
-            if (!OpenPortsTabUi.this.permittedI.getText().trim().isEmpty()) {
-                OpenPortsTabUi.this.unpermittedI.clear();
-                OpenPortsTabUi.this.unpermittedI.setEnabled(false);
-            } else {
-                OpenPortsTabUi.this.unpermittedI.setEnabled(true);
-            }
+            setEnableUnpermittedInterface();
         });
 
         this.unpermittedI.addChangeHandler(event -> {
-            if (!OpenPortsTabUi.this.unpermittedI.getText().trim().isEmpty()) {
-                OpenPortsTabUi.this.permittedI.clear();
-                OpenPortsTabUi.this.permittedI.setEnabled(false);
-            } else {
-                OpenPortsTabUi.this.permittedI.setEnabled(true);
-            }
+            setEnablePermittedInterface();
         });
 
         // set up validation

@@ -38,7 +38,9 @@ public class FailureHandler {
         if (caught instanceof StatusCodeException) {
             final StatusCodeException statusCodeException = (StatusCodeException) caught;
             if (statusCodeException.getStatusCode() == 401) {
+                showErrorMessage("The session is expired", null);
                 Window.Location.reload();
+                return;
             }
         }
         printMessage(caught, name);

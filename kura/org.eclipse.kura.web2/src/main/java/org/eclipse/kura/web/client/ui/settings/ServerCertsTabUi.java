@@ -77,8 +77,7 @@ public class ServerCertsTabUi extends Composite implements Tab {
         initForm();
 
         setDirty(false);
-        this.apply.setEnabled(false);
-        this.reset.setEnabled(false);
+        setButtonsEnabled(false);
     }
 
     @Override
@@ -128,8 +127,7 @@ public class ServerCertsTabUi extends Composite implements Tab {
         this.storageAliasInput.addChangeHandler(event -> {
             isAliasValid();
             setDirty(true);
-            ServerCertsTabUi.this.apply.setEnabled(true);
-            ServerCertsTabUi.this.reset.setEnabled(true);
+            setButtonsEnabled(true);
         });
 
         this.certificateLabel.setText(MSGS.settingsPublicCertLabel());
@@ -137,16 +135,14 @@ public class ServerCertsTabUi extends Composite implements Tab {
         this.certificateInput.addChangeHandler(event -> {
             isServerCertValid();
             setDirty(true);
-            ServerCertsTabUi.this.apply.setEnabled(true);
-            ServerCertsTabUi.this.reset.setEnabled(true);
+            setButtonsEnabled(true);
         });
 
         this.reset.setText(MSGS.reset());
         this.reset.addClickHandler(event -> {
             reset();
             setDirty(false);
-            ServerCertsTabUi.this.apply.setEnabled(false);
-            ServerCertsTabUi.this.reset.setEnabled(false);
+            setButtonsEnabled(false);
         });
 
         this.apply.setText(MSGS.apply());
@@ -177,8 +173,7 @@ public class ServerCertsTabUi extends Composite implements Tab {
                                     public void onSuccess(Integer certsStored) {
                                         reset();
                                         setDirty(false);
-                                        ServerCertsTabUi.this.apply.setEnabled(false);
-                                        ServerCertsTabUi.this.reset.setEnabled(false);
+                                        setButtonsEnabled(false);
                                         EntryClassUi.hideWaitModal();
                                     }
                                 });
@@ -189,6 +184,7 @@ public class ServerCertsTabUi extends Composite implements Tab {
     }
 
     private void reset() {
+        setButtonsEnabled(false);
         this.storageAliasInput.setText("");
         this.certificateInput.setText("");
     }
@@ -211,5 +207,10 @@ public class ServerCertsTabUi extends Composite implements Tab {
             this.groupCertForm.setValidationState(ValidationState.NONE);
             return true;
         }
+    }
+
+    private void setButtonsEnabled(boolean state) {
+        ServerCertsTabUi.this.apply.setEnabled(state);
+        ServerCertsTabUi.this.reset.setEnabled(state);
     }
 }

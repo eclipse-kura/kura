@@ -124,8 +124,7 @@ public class CommandUserTabUi extends AbstractServicesUi implements Tab {
                                     initInvalidDataModal();
 
                                     setDirty(false);
-                                    CommandUserTabUi.this.apply.setEnabled(false);
-                                    CommandUserTabUi.this.reset.setEnabled(false);
+                                    setButtonsEnabled(false);
                                 }
                             }
                         });
@@ -137,14 +136,23 @@ public class CommandUserTabUi extends AbstractServicesUi implements Tab {
     public void setDirty(boolean flag) {
         this.dirty = flag;
         if (this.dirty && this.initialized) {
-            this.apply.setEnabled(true);
-            this.reset.setEnabled(true);
+            setButtonsEnabled(true);
         }
     }
 
     @Override
     public boolean isDirty() {
         return this.dirty;
+    }
+
+    @Override
+    public void refresh() {
+        load();
+    }
+
+    @Override
+    public void clear() {
+        reset();
     }
 
     private void apply() {
@@ -236,8 +244,7 @@ public class CommandUserTabUi extends AbstractServicesUi implements Tab {
         if (isDirty()) {
             restoreConfiguration(CommandUserTabUi.this.originalConfig);
             renderForm();
-            CommandUserTabUi.this.apply.setEnabled(false);
-            CommandUserTabUi.this.reset.setEnabled(false);
+            setButtonsEnabled(false);
             setDirty(false);
         }
     }
@@ -297,13 +304,8 @@ public class CommandUserTabUi extends AbstractServicesUi implements Tab {
         return this.configurableComponent;
     }
 
-    @Override
-    public void refresh() {
-        load();
-    }
-
-    @Override
-    public void clear() {
-        reset();
+    private void setButtonsEnabled(boolean state) {
+        CommandUserTabUi.this.apply.setEnabled(state);
+        CommandUserTabUi.this.reset.setEnabled(state);
     }
 }

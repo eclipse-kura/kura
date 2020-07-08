@@ -123,8 +123,7 @@ public class SslTabUi extends AbstractServicesUi implements Tab {
                                     initInvalidDataModal();
 
                                     setDirty(false);
-                                    SslTabUi.this.apply.setEnabled(false);
-                                    SslTabUi.this.reset.setEnabled(false);
+                                    setButtonsEnabled(false);
                                 }
                             }
                         });
@@ -136,14 +135,23 @@ public class SslTabUi extends AbstractServicesUi implements Tab {
     public void setDirty(boolean flag) {
         this.dirty = flag;
         if (this.dirty && this.initialized) {
-            this.apply.setEnabled(true);
-            this.reset.setEnabled(true);
+            setButtonsEnabled(true);
         }
     }
 
     @Override
     public boolean isDirty() {
         return this.dirty;
+    }
+
+    @Override
+    public void refresh() {
+        load();
+    }
+
+    @Override
+    public void clear() {
+        reset();
     }
 
     private void apply() {
@@ -207,8 +215,7 @@ public class SslTabUi extends AbstractServicesUi implements Tab {
                                         public void onSuccess(Void result) {
                                             SslTabUi.this.modal.hide();
                                             logger.info(MSGS.info() + ": " + MSGS.deviceConfigApplied());
-                                            SslTabUi.this.apply.setEnabled(false);
-                                            SslTabUi.this.reset.setEnabled(false);
+                                            setButtonsEnabled(false);
                                             setDirty(false);
                                             SslTabUi.this.originalConfig = SslTabUi.this.configurableComponent;
                                             EntryClassUi.hideWaitModal();
@@ -235,8 +242,7 @@ public class SslTabUi extends AbstractServicesUi implements Tab {
         if (isDirty()) {
             restoreConfiguration(SslTabUi.this.originalConfig);
             renderForm();
-            SslTabUi.this.apply.setEnabled(false);
-            SslTabUi.this.reset.setEnabled(false);
+            setButtonsEnabled(false);
             setDirty(false);
         }
     }
@@ -296,13 +302,9 @@ public class SslTabUi extends AbstractServicesUi implements Tab {
         return this.configurableComponent;
     }
 
-    @Override
-    public void refresh() {
-        load();
+    private void setButtonsEnabled(boolean state) {
+        SslTabUi.this.apply.setEnabled(state);
+        SslTabUi.this.reset.setEnabled(state);
     }
 
-    @Override
-    public void clear() {
-        reset();
-    }
 }

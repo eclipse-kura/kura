@@ -77,8 +77,7 @@ public class ApplicationCertsTabUi extends Composite implements Tab {
         initForm();
 
         setDirty(false);
-        this.apply.setEnabled(false);
-        this.reset.setEnabled(false);
+        setButtonsEnabled(false);
     }
 
     @Override
@@ -106,6 +105,11 @@ public class ApplicationCertsTabUi extends Composite implements Tab {
         }
     }
 
+    @Override
+    public void clear() {
+        reset();
+    }
+
     private void initForm() {
         this.description.add(new Span("<p>" + MSGS.settingsAddBundleCertsDescription() + "</p>"));
 
@@ -113,8 +117,7 @@ public class ApplicationCertsTabUi extends Composite implements Tab {
         this.formStorageAlias.addChangeHandler(event -> {
             isAliasValid();
             setDirty(true);
-            ApplicationCertsTabUi.this.apply.setEnabled(true);
-            ApplicationCertsTabUi.this.reset.setEnabled(true);
+            setButtonsEnabled(true);
         });
 
         this.certificateLabel.setText(MSGS.settingsPublicCertLabel());
@@ -122,16 +125,14 @@ public class ApplicationCertsTabUi extends Composite implements Tab {
         this.formCert.addChangeHandler(event -> {
             isAppCertValid();
             setDirty(true);
-            ApplicationCertsTabUi.this.apply.setEnabled(true);
-            ApplicationCertsTabUi.this.reset.setEnabled(true);
+            setButtonsEnabled(true);
         });
 
         this.reset.setText(MSGS.reset());
         this.reset.addClickHandler(event -> {
             reset();
             setDirty(false);
-            ApplicationCertsTabUi.this.apply.setEnabled(false);
-            ApplicationCertsTabUi.this.reset.setEnabled(false);
+            setButtonsEnabled(false);
         });
 
         this.apply.setText(MSGS.apply());
@@ -162,8 +163,7 @@ public class ApplicationCertsTabUi extends Composite implements Tab {
                                     public void onSuccess(Integer certsStored) {
                                         reset();
                                         setDirty(false);
-                                        ApplicationCertsTabUi.this.apply.setEnabled(false);
-                                        ApplicationCertsTabUi.this.reset.setEnabled(false);
+                                        setButtonsEnabled(false);
                                         EntryClassUi.hideWaitModal();
                                     }
                                 });
@@ -174,6 +174,7 @@ public class ApplicationCertsTabUi extends Composite implements Tab {
     }
 
     private void reset() {
+        setButtonsEnabled(false);
         this.formStorageAlias.setText("");
         this.formCert.setText("");
     }
@@ -198,9 +199,9 @@ public class ApplicationCertsTabUi extends Composite implements Tab {
         }
     }
 
-    @Override
-    public void clear() {
-        reset();
+    private void setButtonsEnabled(boolean state) {
+        ApplicationCertsTabUi.this.apply.setEnabled(state);
+        ApplicationCertsTabUi.this.reset.setEnabled(state);
     }
 
 }

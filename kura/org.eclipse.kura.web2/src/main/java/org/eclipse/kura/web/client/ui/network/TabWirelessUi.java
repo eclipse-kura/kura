@@ -945,15 +945,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
             }
         });
         this.shortI.addMouseOutHandler(event -> resetHelp());
-        this.shortI.addChangeHandler(event -> {
-            if (TabWirelessUi.this.shortI.getText().trim().contains(".")
-                    || TabWirelessUi.this.shortI.getText().trim().contains("-")
-                    || !TabWirelessUi.this.shortI.getText().trim().matches("[0-9]+")) {
-                TabWirelessUi.this.groupShortI.setValidationState(ValidationState.ERROR);
-            } else {
-                TabWirelessUi.this.groupShortI.setValidationState(ValidationState.NONE);
-            }
-        });
+        this.shortI.addChangeHandler(event -> checkBgScanIntervals());
 
         // Bgscan long interval
         this.labelLongI.setText(MSGS.netWifiWirelessBgscanLongInterval());
@@ -964,15 +956,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
             }
         });
         this.longI.addMouseOutHandler(event -> resetHelp());
-        this.longI.addChangeHandler(event -> {
-            if (TabWirelessUi.this.longI.getText().trim().contains(".")
-                    || TabWirelessUi.this.longI.getText().trim().contains("-")
-                    || !TabWirelessUi.this.longI.getText().trim().matches("[0-9]+")) {
-                TabWirelessUi.this.groupLongI.setValidationState(ValidationState.ERROR);
-            } else {
-                TabWirelessUi.this.groupLongI.setValidationState(ValidationState.NONE);
-            }
-        });
+        this.longI.addChangeHandler(event -> checkBgScanIntervals());
 
         // Ping Access Point ----
         this.labelPing.setText(MSGS.netWifiWirelessPingAccessPoint());
@@ -1494,6 +1478,27 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         } else {
             TabWirelessUi.this.helpVerify.setText("");
             TabWirelessUi.this.groupVerify.setValidationState(ValidationState.NONE);
+        }
+
+    }
+
+    private void checkBgScanIntervals() {
+        if (TabWirelessUi.this.shortI.getText().trim().contains(".")
+                || TabWirelessUi.this.shortI.getText().trim().contains("-")
+                || !TabWirelessUi.this.shortI.getText().trim().matches("[0-9]+")
+                || Integer.parseInt(TabWirelessUi.this.shortI.getText().trim()) > Integer
+                        .parseInt(TabWirelessUi.this.longI.getText().trim())) {
+            TabWirelessUi.this.groupShortI.setValidationState(ValidationState.ERROR);
+        } else {
+            TabWirelessUi.this.groupShortI.setValidationState(ValidationState.NONE);
+        }
+
+        if (TabWirelessUi.this.longI.getText().trim().contains(".")
+                || TabWirelessUi.this.longI.getText().trim().contains("-")
+                || !TabWirelessUi.this.longI.getText().trim().matches("[0-9]+")) {
+            TabWirelessUi.this.groupLongI.setValidationState(ValidationState.ERROR);
+        } else {
+            TabWirelessUi.this.groupLongI.setValidationState(ValidationState.NONE);
         }
 
     }

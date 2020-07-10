@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -18,6 +18,7 @@ import org.gwtbootstrap3.client.ui.Modal;
 import org.gwtbootstrap3.client.ui.Panel;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.StatusCodeException;
 import com.google.gwt.user.client.ui.Label;
@@ -38,8 +39,16 @@ public class FailureHandler {
         if (caught instanceof StatusCodeException) {
             final StatusCodeException statusCodeException = (StatusCodeException) caught;
             if (statusCodeException.getStatusCode() == 401) {
-                showErrorMessage("The session is expired", null);
-                Window.Location.reload();
+                showErrorMessage("The session has expired", null);
+                Timer timer = new Timer() {
+
+                    @Override
+                    public void run() {
+                        Window.Location.reload();
+                    }
+                };
+
+                timer.schedule(2000);
                 return;
             }
         }

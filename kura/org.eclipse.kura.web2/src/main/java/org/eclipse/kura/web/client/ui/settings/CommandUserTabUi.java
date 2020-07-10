@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -18,6 +18,7 @@ import java.util.logging.Level;
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.AbstractServicesUi;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
+import org.eclipse.kura.web.client.ui.Tab;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter;
@@ -45,7 +46,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
 
-public class CommandUserTabUi extends AbstractServicesUi {
+public class CommandUserTabUi extends AbstractServicesUi implements Tab {
 
     private static final SslTabUiUiBinder uiBinder = GWT.create(SslTabUiUiBinder.class);
 
@@ -123,8 +124,7 @@ public class CommandUserTabUi extends AbstractServicesUi {
                                     initInvalidDataModal();
 
                                     setDirty(false);
-                                    CommandUserTabUi.this.apply.setEnabled(false);
-                                    CommandUserTabUi.this.reset.setEnabled(false);
+                                    setButtonsEnabled(false);
                                 }
                             }
                         });
@@ -136,14 +136,23 @@ public class CommandUserTabUi extends AbstractServicesUi {
     public void setDirty(boolean flag) {
         this.dirty = flag;
         if (this.dirty && this.initialized) {
-            this.apply.setEnabled(true);
-            this.reset.setEnabled(true);
+            setButtonsEnabled(true);
         }
     }
 
     @Override
     public boolean isDirty() {
         return this.dirty;
+    }
+
+    @Override
+    public void refresh() {
+        load();
+    }
+
+    @Override
+    public void clear() {
+        reset();
     }
 
     private void apply() {
@@ -233,40 +242,10 @@ public class CommandUserTabUi extends AbstractServicesUi {
     @Override
     public void reset() {
         if (isDirty()) {
-            // Modal
-            this.modal = new Modal();
-
-            ModalHeader header = new ModalHeader();
-            header.setTitle(MSGS.confirm());
-            this.modal.add(header);
-
-            ModalBody body = new ModalBody();
-            body.add(new Span(MSGS.deviceConfigDirty()));
-            this.modal.add(body);
-
-            ModalFooter footer = new ModalFooter();
-            ButtonGroup group = new ButtonGroup();
-            Button no = new Button();
-            no.setText(MSGS.noButton());
-            no.addStyleName("fa fa-times");
-            no.addClickHandler(event -> CommandUserTabUi.this.modal.hide());
-            group.add(no);
-            Button yes = new Button();
-            yes.setText(MSGS.yesButton());
-            yes.addStyleName("fa fa-check");
-            yes.addClickHandler(event -> {
-                CommandUserTabUi.this.modal.hide();
-                restoreConfiguration(CommandUserTabUi.this.originalConfig);
-                renderForm();
-                CommandUserTabUi.this.apply.setEnabled(false);
-                CommandUserTabUi.this.reset.setEnabled(false);
-                setDirty(false);
-            });
-            group.add(yes);
-            footer.add(group);
-            this.modal.add(footer);
-            this.modal.show();
-            no.setFocus(true);
+            restoreConfiguration(CommandUserTabUi.this.originalConfig);
+            renderForm();
+            setButtonsEnabled(false);
+            setDirty(false);
         }
     }
 
@@ -323,5 +302,10 @@ public class CommandUserTabUi extends AbstractServicesUi {
             }
         }
         return this.configurableComponent;
+    }
+
+    private void setButtonsEnabled(boolean state) {
+        CommandUserTabUi.this.apply.setEnabled(state);
+        CommandUserTabUi.this.reset.setEnabled(state);
     }
 }

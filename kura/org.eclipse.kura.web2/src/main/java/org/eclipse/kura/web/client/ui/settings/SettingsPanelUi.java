@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -16,17 +16,27 @@ import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.Tab;
+import org.eclipse.kura.web.client.ui.Tab.RefreshHandler;
 import org.eclipse.kura.web.shared.model.GwtSession;
 import org.eclipse.kura.web.shared.service.GwtSecurityService;
 import org.eclipse.kura.web.shared.service.GwtSecurityServiceAsync;
 import org.eclipse.kura.web2.ext.WidgetFactory;
+import org.gwtbootstrap3.client.ui.Anchor;
+import org.gwtbootstrap3.client.ui.Button;
+import org.gwtbootstrap3.client.ui.ButtonGroup;
+import org.gwtbootstrap3.client.ui.Modal;
+import org.gwtbootstrap3.client.ui.ModalBody;
+import org.gwtbootstrap3.client.ui.ModalFooter;
+import org.gwtbootstrap3.client.ui.ModalHeader;
 import org.gwtbootstrap3.client.ui.NavTabs;
 import org.gwtbootstrap3.client.ui.TabContent;
 import org.gwtbootstrap3.client.ui.TabListItem;
 import org.gwtbootstrap3.client.ui.TabPane;
 import org.gwtbootstrap3.client.ui.html.Paragraph;
+import org.gwtbootstrap3.client.ui.html.Span;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -90,6 +100,15 @@ public class SettingsPanelUi extends Composite {
     @UiField
     HTMLPanel settingsIntro;
 
+    private TabListItem currentlySelectedTab;
+    private Tab.RefreshHandler snapshotsHandler;
+    private Tab.RefreshHandler appCertHandler;
+    private Tab.RefreshHandler sslConfigHandler;
+    private Tab.RefreshHandler serverCertHandler;
+    private Tab.RefreshHandler deviceCertHandler;
+    private Tab.RefreshHandler securityHandler;
+    private Tab.RefreshHandler commandUserHandler;
+
     public SettingsPanelUi() {
         logger.log(Level.FINER, "Initiating SettingsPanelUI...");
 
@@ -117,18 +136,34 @@ public class SettingsPanelUi extends Composite {
         };
         this.gwtSecurityService.isSecurityServiceAvailable(callback);
 
-        this.snapshots.addClickHandler(new Tab.RefreshHandler(this.snapshotsPanel));
-        this.sslConfig.addClickHandler(event -> SettingsPanelUi.this.sslConfigPanel.load());
-        this.serverCert.addClickHandler(new Tab.RefreshHandler(this.serverCertPanel));
-        this.deviceCert.addClickHandler(new Tab.RefreshHandler(this.deviceCertPanel));
-        this.security.addClickHandler(new Tab.RefreshHandler(this.securityPanel));
-        this.commandUser.addClickHandler(event -> SettingsPanelUi.this.commandUserPanel.load());
+        this.snapshotsHandler = new Tab.RefreshHandler(this.snapshotsPanel);
+        this.snapshots.addClickHandler(event -> handleEvent(event, this.snapshotsHandler));
+        this.appCertHandler = new Tab.RefreshHandler(this.appCertPanel);
+        this.appCert.addClickHandler(event -> handleEvent(event, this.appCertHandler));
+        this.sslConfigHandler = new Tab.RefreshHandler(this.sslConfigPanel);
+        this.sslConfig.addClickHandler(event -> handleEvent(event, this.sslConfigHandler));
+        this.serverCertHandler = new Tab.RefreshHandler(this.serverCertPanel);
+        this.serverCert.addClickHandler(event -> handleEvent(event, this.serverCertHandler));
+        this.deviceCertHandler = new Tab.RefreshHandler(this.deviceCertPanel);
+        this.deviceCert.addClickHandler(event -> handleEvent(event, this.deviceCertHandler));
+        this.securityHandler = new Tab.RefreshHandler(this.securityPanel);
+        this.security.addClickHandler(event -> handleEvent(event, this.securityHandler));
+        this.commandUserHandler = new Tab.RefreshHandler(this.commandUserPanel);
+        this.commandUser.addClickHandler(event -> handleEvent(event, this.commandUserHandler));
+
+        this.currentlySelectedTab = this.snapshots;
     }
 
     public void load() {
-        if (!this.snapshotsPanel.isDirty()) {
-            this.snapshotsPanel.refresh();
-        }
+        this.currentlySelectedTab = this.snapshots;
+        this.appCertPanel.clear();
+        this.sslConfigPanel.clear();
+        this.serverCertPanel.clear();
+        this.deviceCertPanel.clear();
+        this.securityPanel.clear();
+        this.commandUserPanel.clear();
+        this.snapshotsPanel.refresh();
+        this.snapshots.showTab();
     }
 
     public void setSession(GwtSession currentSession) {
@@ -175,4 +210,76 @@ public class SettingsPanelUi extends Composite {
         this.securityPanel.setDirty(b);
         this.commandUserPanel.setDirty(b);
     }
+
+    private void showDirtyModal(TabListItem newTabListItem, RefreshHandler newTabRefreshHandler) {
+        final Modal modal = new Modal();
+
+        ModalHeader header = new ModalHeader();
+        header.setTitle(MSGS.confirm());
+        modal.add(header);
+
+        ModalBody body = new ModalBody();
+        body.add(new Span(MSGS.deviceConfigDirty()));
+        modal.add(body);
+
+        ModalFooter footer = new ModalFooter();
+        ButtonGroup group = new ButtonGroup();
+        Button yes = new Button();
+        yes.setText(MSGS.yesButton());
+        yes.addStyleName("fa fa-check");
+        yes.addClickHandler(event -> {
+            modal.hide();
+            SettingsPanelUi.this.getTab(this.currentlySelectedTab).clear();
+            SettingsPanelUi.this.currentlySelectedTab = newTabListItem;
+            newTabRefreshHandler.onClick(event);
+        });
+        Button no = new Button();
+        no.addStyleName("fa fa-times");
+        no.setText(MSGS.noButton());
+        no.addClickHandler(event -> {
+            SettingsPanelUi.this.currentlySelectedTab.showTab();
+            modal.hide();
+        });
+        group.add(no);
+        group.add(yes);
+        footer.add(group);
+        modal.add(footer);
+        modal.show();
+        no.setFocus(true);
+    }
+
+    private void handleEvent(ClickEvent event, Tab.RefreshHandler handler) {
+        TabListItem newTabListItem = (TabListItem) ((Anchor) event.getSource()).getParent();
+        if (newTabListItem != SettingsPanelUi.this.currentlySelectedTab) {
+            if (getTab(SettingsPanelUi.this.currentlySelectedTab).isDirty()) {
+                showDirtyModal(newTabListItem, handler);
+            } else {
+                SettingsPanelUi.this.currentlySelectedTab = newTabListItem;
+                getTab(SettingsPanelUi.this.currentlySelectedTab).setDirty(true);
+                handler.onClick(event);
+            }
+        }
+    }
+
+    // This is not very clean...
+    private Tab getTab(TabListItem item) {
+        if (item.getDataTarget().equals("#snapshotsPanel")) {
+            return this.snapshotsPanel;
+        } else if (item.getDataTarget().equals("#appCertPanel")) {
+            return this.appCertPanel;
+        } else if (item.getDataTarget().equals("#sslConfigPanel")) {
+            return this.sslConfigPanel;
+        } else if (item.getDataTarget().equals("#serverCertPanel")) {
+            return this.serverCertPanel;
+        } else if (item.getDataTarget().equals("#deviceCertPanel")) {
+            return this.deviceCertPanel;
+        } else if (item.getDataTarget().equals("#securityPanel")) {
+            return this.securityPanel;
+        } else if (item.getDataTarget().equals("#commandUserPanel")) {
+            return this.commandUserPanel;
+        } else {
+            return this.snapshotsPanel;
+        }
+    }
+
 }

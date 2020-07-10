@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2019 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -86,9 +86,9 @@ public abstract class AbstractServicesUi extends Composite {
 
     protected HashMap<String, Boolean> valid = new HashMap<>();
 
-    protected abstract void setDirty(boolean flag);
+    public abstract void setDirty(boolean flag);
 
-    protected abstract boolean isDirty();
+    public abstract boolean isDirty();
 
     protected abstract void reset();
 
@@ -132,7 +132,7 @@ public abstract class AbstractServicesUi extends Composite {
     }
 
     // Checks if all the fields are valid according to the Validate() method
-    protected boolean isValid() {
+    public boolean isValid() {
         // check if all fields are valid
         for (Map.Entry<String, Boolean> entry : this.valid.entrySet()) {
             if (!entry.getValue()) {
@@ -239,7 +239,7 @@ public abstract class AbstractServicesUi extends Composite {
             textBox.validate(true);
         });
         textBox.addValueChangeHandler(event -> {
-        	setDirty(true);
+            setDirty(true);
         });
 
         if (param.getId().endsWith(TARGET_SUFFIX)) {

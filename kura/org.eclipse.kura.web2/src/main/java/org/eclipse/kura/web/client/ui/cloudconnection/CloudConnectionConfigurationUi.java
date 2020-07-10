@@ -81,7 +81,7 @@ public class CloudConnectionConfigurationUi extends AbstractServicesUi {
     }
 
     @Override
-    protected void setDirty(boolean flag) {
+    public void setDirty(boolean flag) {
         this.dirty = flag;
         if (this.dirty && this.initialized) {
             this.applyConnectionEdit.setEnabled(true);
@@ -95,7 +95,7 @@ public class CloudConnectionConfigurationUi extends AbstractServicesUi {
     }
 
     @Override
-    protected void reset() {
+    public void reset() {
         if (isDirty()) {
             this.alertDialog.show(MSGS.deviceConfigDirty(), this::resetVisualization);
         }

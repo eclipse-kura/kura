@@ -117,6 +117,7 @@ public class FirewallPanelUi extends Composite {
         ButtonGroup group = new ButtonGroup();
         Button yes = new Button();
         yes.setText(MSGS.yesButton());
+        yes.addStyleName("fa fa-check");
         yes.addClickHandler(event -> {
             modal.hide();
             FirewallPanelUi.this.getTab(this.currentlySelectedTab).clear();
@@ -125,6 +126,7 @@ public class FirewallPanelUi extends Composite {
         });
         Button no = new Button();
         no.setText(MSGS.noButton());
+        no.addStyleName("fa fa-times");
         no.addClickHandler(event -> {
             FirewallPanelUi.this.currentlySelectedTab.showTab();
             modal.hide();

@@ -83,8 +83,7 @@ public class DeviceCertsTabUi extends Composite implements Tab {
         initForm();
 
         setDirty(false);
-        this.apply.setEnabled(false);
-        this.reset.setEnabled(false);
+        setButtonsEnabled(false);
     }
 
     @Override
@@ -113,6 +112,11 @@ public class DeviceCertsTabUi extends Composite implements Tab {
         }
     }
 
+    @Override
+    public void clear() {
+        reset();
+    }
+
     private void initForm() {
         StringBuilder title = new StringBuilder();
         title.append("<p>");
@@ -126,8 +130,7 @@ public class DeviceCertsTabUi extends Composite implements Tab {
         this.storageAliasInput.addChangeHandler(event -> {
             isAliasValid();
             setDirty(true);
-            DeviceCertsTabUi.this.apply.setEnabled(true);
-            DeviceCertsTabUi.this.reset.setEnabled(true);
+            setButtonsEnabled(true);
         });
 
         this.privateKeyLabel.setText(MSGS.settingsPrivateCertLabel());
@@ -135,8 +138,7 @@ public class DeviceCertsTabUi extends Composite implements Tab {
         this.privateKeyInput.addChangeHandler(event -> {
             isPrivateKeyValid();
             setDirty(true);
-            DeviceCertsTabUi.this.apply.setEnabled(true);
-            DeviceCertsTabUi.this.reset.setEnabled(true);
+            setButtonsEnabled(true);
         });
 
         this.certificateLabel.setText(MSGS.settingsPublicCertLabel());
@@ -144,16 +146,14 @@ public class DeviceCertsTabUi extends Composite implements Tab {
         this.certificateInput.addChangeHandler(event -> {
             isDeviceCertValid();
             setDirty(true);
-            DeviceCertsTabUi.this.apply.setEnabled(true);
-            DeviceCertsTabUi.this.reset.setEnabled(true);
+            setButtonsEnabled(true);
         });
 
         this.reset.setText(MSGS.reset());
         this.reset.addClickHandler(event -> {
             reset();
             setDirty(false);
-            DeviceCertsTabUi.this.apply.setEnabled(false);
-            DeviceCertsTabUi.this.reset.setEnabled(false);
+            setButtonsEnabled(false);
         });
 
         this.apply.setText(MSGS.apply());
@@ -185,8 +185,7 @@ public class DeviceCertsTabUi extends Composite implements Tab {
                                     public void onSuccess(Integer certsStored) {
                                         reset();
                                         setDirty(false);
-                                        DeviceCertsTabUi.this.apply.setEnabled(false);
-                                        DeviceCertsTabUi.this.reset.setEnabled(false);
+                                        setButtonsEnabled(false);
                                         EntryClassUi.hideWaitModal();
                                     }
                                 });
@@ -197,6 +196,7 @@ public class DeviceCertsTabUi extends Composite implements Tab {
     }
 
     private void reset() {
+        setButtonsEnabled(false);
         this.storageAliasInput.setText("");
         this.privateKeyInput.setText("");
         this.certificateInput.setText("");
@@ -232,8 +232,8 @@ public class DeviceCertsTabUi extends Composite implements Tab {
         }
     }
 
-    @Override
-    public void clear() {
-        // Not needed
+    private void setButtonsEnabled(boolean state) {
+        DeviceCertsTabUi.this.apply.setEnabled(state);
+        DeviceCertsTabUi.this.reset.setEnabled(state);
     }
 }

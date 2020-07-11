@@ -60,6 +60,8 @@ import org.gwtbootstrap3.client.ui.ModalFooter;
 import org.gwtbootstrap3.client.ui.PanelHeader;
 import org.gwtbootstrap3.client.ui.TextBox;
 import org.gwtbootstrap3.client.ui.constants.ValidationState;
+import org.gwtbootstrap3.client.ui.form.error.BasicEditorError;
+import org.gwtbootstrap3.client.ui.form.validator.Validator;
 import org.gwtbootstrap3.client.ui.gwt.CellTable;
 import org.gwtbootstrap3.client.ui.html.Span;
 import org.gwtbootstrap3.client.ui.html.Text;
@@ -67,6 +69,8 @@ import org.gwtbootstrap3.client.ui.html.Text;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.editor.client.Editor;
+import com.google.gwt.editor.client.EditorError;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.DomEvent;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -242,6 +246,8 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     HelpBlock helpPassword;
     @UiField
     HelpBlock helpVerify;
+    @UiField
+    HelpBlock helpShortI;
 
     @UiField
     Modal ssidModal;
@@ -356,18 +362,24 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
     @Override
     public boolean isValid() {
-        return isValidForm();
+        boolean valid = isValidForm();
+        logger.info("valid: " + Boolean.toString(valid));
+        return valid;
     }
 
     private boolean isValidForm() {
         boolean result = this.form.validate();
+        logger.info("form valid: " + Boolean.toString(result));
         result = result && !this.groupWireless.getValidationState().equals(ValidationState.ERROR)
                 && !this.groupPassword.getValidationState().equals(ValidationState.ERROR)
                 && !this.groupVerify.getValidationState().equals(ValidationState.ERROR);
 
-        result = result && !this.groupRssi.getValidationState().equals(ValidationState.ERROR)
-                && !this.groupShortI.getValidationState().equals(ValidationState.ERROR)
+        logger.info("password valid: " + Boolean.toString(result));
+
+        result = result && !this.groupShortI.getValidationState().equals(ValidationState.ERROR)
                 && !this.groupLongI.getValidationState().equals(ValidationState.ERROR);
+        
+        logger.info("last valid: " + this.groupShortI.getValidationState());
 
         return result;
     }
@@ -945,10 +957,55 @@ public class TabWirelessUi extends Composite implements NetworkTab {
             }
         });
         this.shortI.addMouseOutHandler(event -> resetHelp());
-        this.shortI.addChangeHandler(event -> checkBgScanIntervals());
+        this.shortI.addValidator(new Validator<String>() {
+            
+            @Override
+            public List<EditorError> validate(Editor<String> editor, String value) {
+                List<EditorError> result = new ArrayList<>();
+                if (Integer.parseInt(TabWirelessUi.this.shortI.getText().trim()) > Integer
+                        .parseInt(TabWirelessUi.this.longI.getText().trim())) {
+                    result.add(new BasicEditorError(shortI, value, MSGS.netWifiBgScanIntervalValues()));
+                } else if (TabWirelessUi.this.shortI.getText().trim().contains(".")
+                || TabWirelessUi.this.shortI.getText().trim().contains("-")
+                || !TabWirelessUi.this.shortI.getText().trim().matches("[0-9]+")) {
+                    result.add(new BasicEditorError(shortI, value, MSGS.netWifiBgScanInterval()));
+                }
+                return result;
+            }
+
+            @Override
+            public int getPriority() {
+                return 0;
+            }
+
+        });
+        this.shortI.addChangeHandler(event -> this.longI.validate());
 
         // Bgscan long interval
         this.labelLongI.setText(MSGS.netWifiWirelessBgscanLongInterval());
+        this.longI.addValidator(new Validator<String>() {
+            
+            @Override
+            public List<EditorError> validate(Editor<String> editor, String value) {
+                List<EditorError> result = new ArrayList<>();
+                if (Integer.parseInt(TabWirelessUi.this.shortI.getText().trim()) > Integer
+                        .parseInt(TabWirelessUi.this.longI.getText().trim())) {
+                    result.add(new BasicEditorError(longI, value, MSGS.netWifiBgScanIntervalValues()));
+                } else if (TabWirelessUi.this.longI.getText().trim().contains(".")
+                || TabWirelessUi.this.longI.getText().trim().contains("-")
+                || !TabWirelessUi.this.longI.getText().trim().matches("[0-9]+")) {
+                    result.add(new BasicEditorError(longI, value, MSGS.netWifiBgScanInterval()));
+                }
+                return result;
+            }
+
+            @Override
+            public int getPriority() {
+                return 0;
+            }
+
+        });
+        this.longI.addChangeHandler(event -> this.shortI.validate());
         this.longI.addMouseOverHandler(event -> {
             if (TabWirelessUi.this.longI.isEnabled()) {
                 TabWirelessUi.this.helpText.clear();
@@ -956,7 +1013,6 @@ public class TabWirelessUi extends Composite implements NetworkTab {
             }
         });
         this.longI.addMouseOutHandler(event -> resetHelp());
-        this.longI.addChangeHandler(event -> checkBgScanIntervals());
 
         // Ping Access Point ----
         this.labelPing.setText(MSGS.netWifiWirelessPingAccessPoint());
@@ -1478,27 +1534,6 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         } else {
             TabWirelessUi.this.helpVerify.setText("");
             TabWirelessUi.this.groupVerify.setValidationState(ValidationState.NONE);
-        }
-
-    }
-
-    private void checkBgScanIntervals() {
-        if (TabWirelessUi.this.shortI.getText().trim().contains(".")
-                || TabWirelessUi.this.shortI.getText().trim().contains("-")
-                || !TabWirelessUi.this.shortI.getText().trim().matches("[0-9]+")
-                || Integer.parseInt(TabWirelessUi.this.shortI.getText().trim()) > Integer
-                        .parseInt(TabWirelessUi.this.longI.getText().trim())) {
-            TabWirelessUi.this.groupShortI.setValidationState(ValidationState.ERROR);
-        } else {
-            TabWirelessUi.this.groupShortI.setValidationState(ValidationState.NONE);
-        }
-
-        if (TabWirelessUi.this.longI.getText().trim().contains(".")
-                || TabWirelessUi.this.longI.getText().trim().contains("-")
-                || !TabWirelessUi.this.longI.getText().trim().matches("[0-9]+")) {
-            TabWirelessUi.this.groupLongI.setValidationState(ValidationState.ERROR);
-        } else {
-            TabWirelessUi.this.groupLongI.setValidationState(ValidationState.NONE);
         }
 
     }

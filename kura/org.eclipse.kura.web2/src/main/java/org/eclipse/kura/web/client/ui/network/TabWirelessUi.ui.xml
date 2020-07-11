@@ -167,8 +167,10 @@
                                 <b:FormLabel for="shortI"
                                     ui:field="labelShortI" />
                                 <util:HelpButton ui:field="shortIHelp"/>
+                                <b:HelpBlock color="red"
+                                    ui:field="helpShortI" />
                                 <b:TextBox b:id="shortI"
-                                    ui:field="shortI" />
+                                    ui:field="shortI" validateOnBlur="true" />
                             </b:FormGroup>
 
                             <b:FormGroup ui:field="groupLongI">
@@ -176,7 +178,7 @@
                                     ui:field="labelLongI" />
                                 <util:HelpButton ui:field="longIHelp"/>
                                 <b:TextBox b:id="longI"
-                                    ui:field="longI" />
+                                    ui:field="longI" validateOnBlur="true" />
                             </b:FormGroup>
 
                             <b:FormGroup>

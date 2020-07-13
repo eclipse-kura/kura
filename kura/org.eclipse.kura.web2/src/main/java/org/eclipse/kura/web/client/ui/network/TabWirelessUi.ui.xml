@@ -177,6 +177,8 @@
                                 <b:FormLabel for="longI"
                                     ui:field="labelLongI" />
                                 <util:HelpButton ui:field="longIHelp"/>
+                                <b:HelpBlock color="red"
+                                    ui:field="helpLongI" />
                                 <b:TextBox b:id="longI"
                                     ui:field="longI" validateOnBlur="true" />
                             </b:FormGroup>

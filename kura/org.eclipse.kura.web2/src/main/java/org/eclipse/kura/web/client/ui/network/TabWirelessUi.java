@@ -248,6 +248,8 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     HelpBlock helpVerify;
     @UiField
     HelpBlock helpShortI;
+    @UiField
+    HelpBlock helpLongI;
 
     @UiField
     Modal ssidModal;
@@ -378,7 +380,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
         result = result && !this.groupShortI.getValidationState().equals(ValidationState.ERROR)
                 && !this.groupLongI.getValidationState().equals(ValidationState.ERROR);
-        
+
         logger.info("last valid: " + this.groupShortI.getValidationState());
 
         return result;
@@ -957,54 +959,12 @@ public class TabWirelessUi extends Composite implements NetworkTab {
             }
         });
         this.shortI.addMouseOutHandler(event -> resetHelp());
-        this.shortI.addValidator(new Validator<String>() {
-            
-            @Override
-            public List<EditorError> validate(Editor<String> editor, String value) {
-                List<EditorError> result = new ArrayList<>();
-                if (Integer.parseInt(TabWirelessUi.this.shortI.getText().trim()) > Integer
-                        .parseInt(TabWirelessUi.this.longI.getText().trim())) {
-                    result.add(new BasicEditorError(shortI, value, MSGS.netWifiBgScanIntervalValues()));
-                } else if (TabWirelessUi.this.shortI.getText().trim().contains(".")
-                || TabWirelessUi.this.shortI.getText().trim().contains("-")
-                || !TabWirelessUi.this.shortI.getText().trim().matches("[0-9]+")) {
-                    result.add(new BasicEditorError(shortI, value, MSGS.netWifiBgScanInterval()));
-                }
-                return result;
-            }
-
-            @Override
-            public int getPriority() {
-                return 0;
-            }
-
-        });
+        this.shortI.addValidator(newBgScanValidator(this.shortI));
         this.shortI.addChangeHandler(event -> this.longI.validate());
 
         // Bgscan long interval
         this.labelLongI.setText(MSGS.netWifiWirelessBgscanLongInterval());
-        this.longI.addValidator(new Validator<String>() {
-            
-            @Override
-            public List<EditorError> validate(Editor<String> editor, String value) {
-                List<EditorError> result = new ArrayList<>();
-                if (Integer.parseInt(TabWirelessUi.this.shortI.getText().trim()) > Integer
-                        .parseInt(TabWirelessUi.this.longI.getText().trim())) {
-                    result.add(new BasicEditorError(longI, value, MSGS.netWifiBgScanIntervalValues()));
-                } else if (TabWirelessUi.this.longI.getText().trim().contains(".")
-                || TabWirelessUi.this.longI.getText().trim().contains("-")
-                || !TabWirelessUi.this.longI.getText().trim().matches("[0-9]+")) {
-                    result.add(new BasicEditorError(longI, value, MSGS.netWifiBgScanInterval()));
-                }
-                return result;
-            }
-
-            @Override
-            public int getPriority() {
-                return 0;
-            }
-
-        });
+        this.longI.addValidator(newBgScanValidator(this.longI));
         this.longI.addChangeHandler(event -> this.shortI.validate());
         this.longI.addMouseOverHandler(event -> {
             if (TabWirelessUi.this.longI.isEnabled()) {
@@ -1056,6 +1016,34 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         initGrid();
 
         this.helpTitle.setText(MSGS.netHelpTitle());
+    }
+
+    private Validator<String> newBgScanValidator(TextBox field) {
+        return new Validator<String>() {
+
+            @Override
+            public List<EditorError> validate(Editor<String> editor, String value) {
+                List<EditorError> result = new ArrayList<>();
+                try {
+                    if (field.getText().trim().contains(".") || field.getText().trim().contains("-")
+                            || !field.getText().trim().matches("[0-9]+")) {
+                        result.add(new BasicEditorError(field, value, MSGS.netWifiBgScanInterval()));
+                    } else if (Integer.parseInt(TabWirelessUi.this.shortI.getText().trim()) >= Integer
+                            .parseInt(TabWirelessUi.this.longI.getText().trim())) {
+                        result.add(new BasicEditorError(field, value, MSGS.netWifiBgScanIntervalValues()));
+                    }
+                } catch (NumberFormatException e) {
+                    result.add(new BasicEditorError(field, value, MSGS.deviceConfigError()));
+                }
+                return result;
+            }
+
+            @Override
+            public int getPriority() {
+                return 0;
+            }
+
+        };
     }
 
     private void resetHelp() {

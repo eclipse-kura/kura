@@ -332,6 +332,11 @@
                                     <version>${osgi.annotation.version}</version>
                                 </artifactItem>
                                 <artifactItem>
+                                    <groupId>org.osgi</groupId>
+                                    <artifactId>org.osgi.service.metatype.annotations</artifactId>
+                                    <version>${org.osgi.service.metatype.annotations.version}</version>
+                                </artifactItem>
+                                <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
                                     <artifactId>com.eclipsesource.jaxrs.jersey-min</artifactId>
                                     <version>${com.eclipsesource.jaxrs.jersey-min.version}</version>
@@ -539,6 +544,7 @@
                                 <move file="target/source/plugins/qpid-jms-client.jar" tofile="target/source/plugins/org.apache.qpid.jms.client_${apache-qpid-jms-client.version}.jar"/>
                                 <move file="target/source/plugins/minimal-json.jar" tofile="target/source/plugins/minimal-json_${com.eclipsesource.minimal-json.version}.jar"/>
                                 <move file="target/source/plugins/osgi.annotation.jar" tofile="target/source/plugins/osgi.annotation_${osgi.annotation.version}.jar"/>
+                                <move file="target/source/plugins/org.osgi.service.metatype.annotations.jar" tofile="target/source/plugins/org.osgi.service.metatype.annotations_${org.osgi.service.metatype.annotations.version}.jar"/>
                                 <move file="target/source/plugins/org.moka7.jar" tofile="target/source/plugins/org.moka7_${org.moka7.version}.jar"/>
                                 <move file="target/source/plugins/com.eclipsesource.jaxrs.jersey-min.jar" tofile="target/source/plugins/com.eclipsesource.jaxrs.jersey-min_${com.eclipsesource.jaxrs.jersey-min.version}.jar"/>
                                 <move file="target/source/plugins/com.eclipsesource.jaxrs.publisher.jar" tofile="target/source/plugins/com.eclipsesource.jaxrs.publisher_${com.eclipsesource.jaxrs.publisher.version}.jar"/>

@@ -140,8 +140,6 @@ public class CloudConnectionConfigurationsUi extends Composite {
     }
 
     private void getCloudStackConfigurations(final String factoryPid, final String cloudServicePid) {
-
-        this.connectionNavtabs.clear();
         RequestQueue.submit(context -> this.gwtCloudService.findStackPidsByFactory(factoryPid, cloudServicePid,
                 context.callback(pidsResult -> {
                     if (pidsResult.isEmpty()) {
@@ -153,6 +151,7 @@ public class CloudConnectionConfigurationsUi extends Composite {
                                     FilterUtil.getPidFilter(pidsResult.iterator()), context.callback(result -> {
                                         final ArrayList<GwtConfigComponent> sorted = new ArrayList<>(result);
                                         sorted.sort(Comparator.comparing(this::getSimplifiedComponentName));
+                                        this.connectionNavtabs.clear();
                                         boolean isFirstEntry = true;
                                         for (GwtConfigComponent pair : sorted) {
                                             if (pidsResult.contains(pair.getComponentId())) {

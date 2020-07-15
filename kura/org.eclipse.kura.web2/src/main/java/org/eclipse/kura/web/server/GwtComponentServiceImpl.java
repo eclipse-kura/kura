@@ -873,18 +873,14 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
 
             referenceInterfaces.forEach(reference -> {
                 try {
-                    Class<?> t = Class.forName(reference);
-                    Collection<?> cloudServiceReferences = ServiceLocator.getInstance().getServiceReferences(t, null);
+                    ServiceReference<?>[] serviceReferences = context.getServiceReferences(reference, null);
 
-                    for (Object cloudServiceReferenceObject : cloudServiceReferences) {
-                        if (cloudServiceReferenceObject instanceof ServiceReference) {
-                            ServiceReference<?> cloudServiceReference = (ServiceReference<?>) cloudServiceReferenceObject;
-                            String cloudServicePid = (String) cloudServiceReference.getProperty(KURA_SERVICE_PID);
-                            result.add(cloudServicePid);
-                            ServiceLocator.getInstance().ungetService(cloudServiceReference);
-                        }
+                    for (ServiceReference<?> serviceReference : serviceReferences) {
+                        String cloudServicePid = (String) serviceReference.getProperty(KURA_SERVICE_PID);
+                        result.add(cloudServicePid);
+                        ServiceLocator.getInstance().ungetService(serviceReference);
                     }
-                } catch (ClassNotFoundException | GwtKuraException e) {
+                } catch (InvalidSyntaxException e) {
 
                 }
             });

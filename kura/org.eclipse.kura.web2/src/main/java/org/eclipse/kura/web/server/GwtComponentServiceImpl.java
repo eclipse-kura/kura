@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2019 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -732,18 +732,14 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
 
             referenceInterfaces.forEach(reference -> {
                 try {
-                    Class<?> t = Class.forName(reference);
-                    Collection<?> cloudServiceReferences = ServiceLocator.getInstance().getServiceReferences(t, null);
+                    ServiceReference<?>[] serviceReferences = context.getServiceReferences(reference, null);
 
-                    for (Object cloudServiceReferenceObject : cloudServiceReferences) {
-                        if (cloudServiceReferenceObject instanceof ServiceReference) {
-                            ServiceReference<?> cloudServiceReference = (ServiceReference<?>) cloudServiceReferenceObject;
-                            String cloudServicePid = (String) cloudServiceReference.getProperty(KURA_SERVICE_PID);
-                            result.add(cloudServicePid);
-                            ServiceLocator.getInstance().ungetService(cloudServiceReference);
-                        }
+                    for (ServiceReference<?> serviceReference : serviceReferences) {
+                        String cloudServicePid = (String) serviceReference.getProperty(KURA_SERVICE_PID);
+                        result.add(cloudServicePid);
+                        ServiceLocator.getInstance().ungetService(serviceReference);
                     }
-                } catch (ClassNotFoundException | GwtKuraException e) {
+                } catch (InvalidSyntaxException e) {
 
                 }
             });

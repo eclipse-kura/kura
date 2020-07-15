@@ -61,8 +61,9 @@ public final class BaseAssetConfiguration {
     private final boolean hasReadChannels;
     private final String kuraServicePid;
 
-    public BaseAssetConfiguration(final Map<String, Object> properties) {
-        this.properties = properties;
+    public BaseAssetConfiguration(final Tocd baseOcd, final ComponentContext context,
+            final Map<String, Object> properties) {
+        this.properties = fillOcdDefaults(properties, baseOcd, context);
         this.assetConfiguration = new AssetConfiguration(getDescription(properties), getDriverPid(properties),
                 retreiveChannelList(properties));
         this.hasReadChannels = !getAllReadRecords().isEmpty();
@@ -355,5 +356,12 @@ public final class BaseAssetConfiguration {
             logger.debug("Retrieving single channel information from the properties...Done");
             return channel;
         }
+    }
+
+    private static Map<String, Object> fillOcdDefaults(final Map<String, Object> properties, final Tocd ocd,
+            final ComponentContext context) {
+        final Map<String, Object> defaultProperties = ComponentUtil.getDefaultProperties(ocd, context);
+        defaultProperties.putAll(properties);
+        return defaultProperties;
     }
 }

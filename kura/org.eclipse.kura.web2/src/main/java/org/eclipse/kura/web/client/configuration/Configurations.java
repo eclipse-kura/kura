@@ -18,10 +18,16 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.eclipse.kura.web.client.ui.drivers.assets.AssetModel;
+import org.eclipse.kura.web.client.ui.drivers.assets.AssetModelImpl;
 import org.eclipse.kura.web.client.util.ValidationUtil;
+import org.eclipse.kura.web.shared.AssetConstants;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
+import org.eclipse.kura.web.shared.model.GwtConfigParameter;
 
 public class Configurations {
+
+    private static final String WIRE_ASSET_PID = "org.eclipse.kura.wire.WireAsset";
 
     private final Set<String> allActivePids = new HashSet<>();
     private final Map<String, GwtConfigComponent> componentDefinitions = new HashMap<>();
@@ -42,6 +48,11 @@ public class Configurations {
         final GwtConfigComponent cloned = new GwtConfigComponent(definition);
         cloned.setComponentId(pid);
         cloned.setFactoryPid(factoryPid);
+        for (final GwtConfigParameter param : cloned.getParameters()) {
+            if (param.getValue() == null && param.isRequired()) {
+                param.setValue(param.getDefault());
+            }
+        }
         return cloned;
     }
 
@@ -98,7 +109,7 @@ public class Configurations {
     }
 
     public void setConfiguration(HasConfiguration configuration) {
-        this.currentConfigurations.put(configuration.getConfiguration().getComponentId(), configuration);
+        this.currentConfigurations.put(configuration.getComponentId(), configuration);
     }
 
     public void deleteConfiguration(String pid) {
@@ -229,8 +240,34 @@ public class Configurations {
 
         @Override
         public boolean isValid() {
-            return this.configuration != null && this.configuration.isValid()
-                    && ValidationUtil.validateParameters(configuration);
+            if (this.configuration == null || !this.configuration.isValid()) {
+                return false;
+            }
+
+            if (!WIRE_ASSET_PID.equals(this.configuration.getFactoryId())) {
+                return ValidationUtil.validateParameters(configuration);
+            } else {
+                return validateAssetConfiguration();
+            }
+        }
+
+        private boolean validateAssetConfiguration() {
+            final String driverPid = this.configuration.getParameterValue(AssetConstants.ASSET_DRIVER_PROP.value());
+
+            if (driverPid == null) {
+                return false;
+            }
+
+            final GwtConfigComponent driverDescriptor = channelDescriptors.get(driverPid);
+
+            if (driverDescriptor == null) {
+                return false;
+            }
+
+            final AssetModel assetModelImpl = new AssetModelImpl(configuration, driverDescriptor,
+                    baseChannelDescriptor);
+
+            return assetModelImpl.isValid();
         }
 
         @Override
@@ -246,6 +283,11 @@ public class Configurations {
         @Override
         public void setListener(Listener listener) {
             // Not needed
+        }
+
+        @Override
+        public String getComponentId() {
+            return configuration != null ? configuration.getComponentId() : null;
         }
     }
 
@@ -285,6 +327,11 @@ public class Configurations {
         @Override
         public void setListener(Listener listener) {
             this.wrapped.setListener(listener);
+        }
+
+        @Override
+        public String getComponentId() {
+            return wrapped.getComponentId();
         }
     }
 }

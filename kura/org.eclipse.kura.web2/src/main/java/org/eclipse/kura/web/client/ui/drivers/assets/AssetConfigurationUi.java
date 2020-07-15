@@ -38,11 +38,9 @@ import org.eclipse.kura.web.client.ui.AbstractServicesUi;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.ui.drivers.assets.AssetModel.ChannelModel;
 import org.eclipse.kura.web.client.ui.wires.ValidationData;
-import org.eclipse.kura.web.client.ui.wires.ValidationInputCell;
 import org.eclipse.kura.web.client.util.DownloadHelper;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.util.ResizableTableHeader;
-import org.eclipse.kura.web.client.util.ValidationUtil;
 import org.eclipse.kura.web.client.util.request.RequestContext;
 import org.eclipse.kura.web.client.util.request.RequestQueue;
 import org.eclipse.kura.web.shared.AssetConstants;
@@ -68,8 +66,10 @@ import org.gwtbootstrap3.client.ui.html.Paragraph;
 import org.gwtbootstrap3.client.ui.html.Strong;
 
 import com.google.gwt.cell.client.AbstractCell;
+import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.cell.client.SelectionCell;
 import com.google.gwt.cell.client.TextCell;
+import com.google.gwt.cell.client.TextInputCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -165,7 +165,7 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
 
     private static final String SERVLET_URL = Console.ADMIN_ROOT + '/' + GWT.getModuleName() + "/file/asset";
 
-    private final Set<String> nonValidatedCells;
+    private final Set<String> invalidParameters;
 
     private boolean dirty;
 
@@ -194,7 +194,7 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
         this.btnRemove.setEnabled(false);
         this.associatedView = associatedView;
 
-        this.nonValidatedCells = new HashSet<>();
+        this.invalidParameters = new HashSet<>();
 
         this.channelTable.setAutoFooterRefreshDisabled(true);
         this.channelTable.setAutoHeaderRefreshDisabled(true);
@@ -327,9 +327,7 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
             if (isDirtyStateChanged) {
                 this.listener.onDirtyStateChanged(this);
             }
-            if (isValid()) {
-                this.listener.onConfigurationChanged(this);
-            }
+            this.listener.onConfigurationChanged(this);
         }
     }
 
@@ -387,7 +385,7 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
         } else if (param.getType() == GwtConfigParameterType.BOOLEAN) {
             cell = new BooleanInputCell();
         } else {
-            cell = new ValidationInputCell();
+            cell = new TextInputCell();
         }
 
         final Column<ChannelModel, String> result = new Column<ChannelModel, String>(cell) {
@@ -400,21 +398,30 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
                 }
                 return param.isRequired() ? param.getDefault() : null;
             }
+
+            @Override
+            public String getCellStyleNames(Context context, ChannelModel object) {
+                if (!object.isValid(param.getId())) {
+                    return "config-cell-not-valid";
+                } else {
+                    return "";
+                }
+            }
         };
 
         if (!isReadOnly) {
             result.setFieldUpdater((index, object, value) -> {
-                ValidationData viewData;
-                if (!ValidationUtil.validateParameter(param, value)) {
-                    viewData = ((ValidationInputCell) cell).getViewData(object);
-                    viewData.setInvalid(true);
-                    AssetConfigurationUi.this.nonValidatedCells.add(object.getChannelName());
-                    return;
-                }
-                AssetConfigurationUi.this.nonValidatedCells.remove(object.getChannelName());
-                AssetConfigurationUi.this.setDirty(true);
+                final String paramId = object.getChannelName() + '#' + param.getId();
                 object.setValue(param.getId(), value);
+                if (!object.isValid(param.getId())) {
+                    AssetConfigurationUi.this.invalidParameters.add(paramId);
+                } else {
+                    AssetConfigurationUi.this.invalidParameters.remove(paramId);
+                }
+                AssetConfigurationUi.this.setDirty(true);
+                channelTable.redrawRow(index);
             });
+
         }
 
         if (param.getType() == GwtConfigParameterType.BOOLEAN) {
@@ -593,7 +600,7 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
 
     @Override
     public boolean isValid() {
-        return this.nonValidatedCells.isEmpty() && super.isValid();
+        return this.invalidParameters.isEmpty() && super.isValid();
     }
 
     @Override
@@ -641,5 +648,10 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
         this.appendCheckField.setName("doReplace");
         this.appendCheckField.setValue("");
 
+    }
+
+    @Override
+    public String getComponentId() {
+        return this.model.getAssetPid();
     }
 }

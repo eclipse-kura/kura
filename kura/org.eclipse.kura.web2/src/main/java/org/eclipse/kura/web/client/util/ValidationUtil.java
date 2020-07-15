@@ -43,55 +43,60 @@ public final class ValidationUtil {
     public static void validateParameter(GwtConfigParameter param, String value, ValidationErrorConsumer consumer) {
 
         if (value == null) {
+            if (!param.isRequired()) {
+                return;
+            } else {
+                consumer.addError(MSGS.formRequiredParameter());
+                return;
+            }
+        }
+
+        String trimmedValue = value.trim();
+
+        if (param.isRequired() && trimmedValue.isEmpty()) {
             consumer.addError(MSGS.formRequiredParameter());
             return;
         }
 
-        String trimmedValue = value.trim();
-        final boolean isEmpty = trimmedValue.isEmpty();
-
-        if (param.isRequired() && isEmpty) {
-            consumer.addError(MSGS.formRequiredParameter());
-        }
-
-        if (!isEmpty) {
-            try {
-                switch (param.getType()) {
-                case BOOLEAN:
-                    validateBoolean(trimmedValue, param, consumer);
-                    break;
-                case CHAR:
-                    validateChar(trimmedValue, param, consumer);
-                    break;
-                case STRING:
-                    validateString(trimmedValue, param, consumer);
-                    break;
-                case FLOAT:
-                    validateFloat(trimmedValue, param, consumer);
-                    break;
-                case INTEGER:
-                    validateInteger(trimmedValue, param, consumer);
-                    break;
-                case SHORT:
-                    validateShort(trimmedValue, param, consumer);
-                    break;
-                case BYTE:
-                    validateByte(trimmedValue, param, consumer);
-                    break;
-                case LONG:
-                    validateLong(trimmedValue, param, consumer);
-                    break;
-                case DOUBLE:
-                    validateDouble(trimmedValue, param, consumer);
-                    break;
-                default:
-                    consumer.addError("Unsupported data type: " + param.getType().toString());
-                    break;
-                }
-            } catch (NumberFormatException e) {
-                consumer.addError(MessageUtils.get(INVALID_VALUE, trimmedValue));
+        try {
+            switch (param.getType()) {
+            case BOOLEAN:
+                validateBoolean(trimmedValue, param, consumer);
+                break;
+            case CHAR:
+                validateChar(trimmedValue, param, consumer);
+                break;
+            case STRING:
+                validateString(trimmedValue, param, consumer);
+                break;
+            case FLOAT:
+                validateFloat(trimmedValue, param, consumer);
+                break;
+            case INTEGER:
+                validateInteger(trimmedValue, param, consumer);
+                break;
+            case SHORT:
+                validateShort(trimmedValue, param, consumer);
+                break;
+            case BYTE:
+                validateByte(trimmedValue, param, consumer);
+                break;
+            case LONG:
+                validateLong(trimmedValue, param, consumer);
+                break;
+            case DOUBLE:
+                validateDouble(trimmedValue, param, consumer);
+                break;
+            case PASSWORD:
+                break;
+            default:
+                consumer.addError("Unsupported data type: " + param.getType().toString());
+                break;
             }
+        } catch (NumberFormatException e) {
+            consumer.addError(MessageUtils.get(INVALID_VALUE, trimmedValue));
         }
+
     }
 
     public static boolean validateParameters(GwtConfigComponent component) {
@@ -110,7 +115,10 @@ public final class ValidationUtil {
             }
         };
 
-        validateParameters(component, errorDescription -> isValid.setValue(false));
+        validateParameters(component, errorDescription -> {
+            errorLogger.info("parameter is not valid " + errorDescription);
+            isValid.setValue(false);
+        });
 
         return isValid.getValue();
     }
@@ -131,7 +139,10 @@ public final class ValidationUtil {
             }
         };
 
-        validateParameter(param, value, errorDescription -> isValid.setValue(false));
+        validateParameter(param, value, errorDescription -> {
+            errorLogger.info("parameter is not valid " + errorDescription);
+            isValid.setValue(false);
+        });
 
         return isValid.getValue();
     }

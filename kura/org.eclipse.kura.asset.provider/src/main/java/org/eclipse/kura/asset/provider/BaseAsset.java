@@ -157,7 +157,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         logger.info("loading asset configuration...");
         final long start = System.currentTimeMillis();
         try {
-            this.config = new BaseAssetConfiguration(properties);
+            this.config = new BaseAssetConfiguration(getOCD(), context, properties);
         } catch (final Exception e) {
             logger.warn("Failed to retrieve properties from config", e);
         }

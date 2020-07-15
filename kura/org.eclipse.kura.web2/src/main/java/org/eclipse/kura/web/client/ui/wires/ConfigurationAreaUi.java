@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.wires;
 
+import java.util.Optional;
+
 import org.eclipse.kura.web.client.configuration.Configurations;
 import org.eclipse.kura.web.client.configuration.HasConfiguration;
 import org.eclipse.kura.web.client.ui.ConfigurableComponentUi;
@@ -23,6 +25,7 @@ import org.eclipse.kura.web.shared.AssetConstants;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.gwtbootstrap3.client.ui.TabListItem;
 import org.gwtbootstrap3.client.ui.TabPane;
+import org.gwtbootstrap3.client.ui.constants.IconType;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -30,7 +33,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 
-public class ConfigurationAreaUi extends Composite {
+public class ConfigurationAreaUi extends Composite implements HasConfiguration.Listener {
 
     private static ConfigurationAreaUiUiBinder uiBinder = GWT.create(ConfigurationAreaUiUiBinder.class);
 
@@ -48,6 +51,8 @@ public class ConfigurationAreaUi extends Composite {
     TabPane tab1Pane;
     @UiField
     TabPane tab2Pane;
+
+    private Optional<HasConfiguration.Listener> listener = Optional.empty();
 
     public ConfigurationAreaUi(HasConfiguration hasConfiguration, Configurations configurations) {
         initWidget(uiBinder.createAndBindUi(this));
@@ -68,6 +73,16 @@ public class ConfigurationAreaUi extends Composite {
             this.tab2NavTab.setVisible(false);
             this.tab1Pane.add(this.genericWireComponentUi);
             this.tab1NavTab.setText(this.genericWireComponentUi.getTitle());
+        }
+
+        if (this.assetWireComponentUi != null) {
+            this.assetWireComponentUi.setListener(this);
+            updateValidState(this.assetWireComponentUi);
+        }
+
+        if (this.genericWireComponentUi != null) {
+            this.genericWireComponentUi.setListener(this);
+            updateValidState(this.genericWireComponentUi);
         }
     }
 
@@ -106,18 +121,52 @@ public class ConfigurationAreaUi extends Composite {
             this.assetWireComponentUi
                     .setTitle(WiresPanelUi.getComponentLabel(configuration) + " - " + configuration.getComponentId());
             this.assetWireComponentUi.renderForm();
+
         } else {
             this.genericWireComponentUi = new ConfigurableComponentUi(hasConfiguration.getConfiguration());
             this.genericWireComponentUi
                     .setTitle(WiresPanelUi.getComponentLabel(configuration) + " - " + configuration.getComponentId());
             this.genericWireComponentUi.renderForm();
         }
+
     }
 
     public void setListener(HasConfiguration.Listener listener) {
-        if (this.assetWireComponentUi != null) {
-            this.assetWireComponentUi.setListener(listener);
-        }
-        this.genericWireComponentUi.setListener(listener);
+        this.listener = Optional.ofNullable(listener);
     }
+
+    private void updateValidState(final HasConfiguration config) {
+        final TabListItem target;
+
+        if (config == this.assetWireComponentUi) {
+            target = tab1NavTab;
+        } else if (config == this.genericWireComponentUi) {
+            if (this.assetWireComponentUi != null) {
+                target = tab2NavTab;
+            } else {
+                target = tab1NavTab;
+            }
+        } else {
+            return;
+        }
+
+        target.setIcon(config.isValid() ? null : IconType.WARNING);
+    }
+
+    @Override
+    public void onConfigurationChanged(HasConfiguration hasConfiguration) {
+        if (listener.isPresent()) {
+            listener.get().onConfigurationChanged(hasConfiguration);
+        }
+        updateValidState(hasConfiguration);
+    }
+
+    @Override
+    public void onDirtyStateChanged(HasConfiguration hasConfiguration) {
+        if (listener.isPresent()) {
+            listener.get().onDirtyStateChanged(hasConfiguration);
+        }
+        updateValidState(hasConfiguration);
+    }
+
 }

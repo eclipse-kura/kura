@@ -154,7 +154,11 @@ public class WiresPanelUi extends Composite
         this.btnZoomFit.addClickHandler(event -> WiresPanelUi.this.wireComposer.fitContent(true));
         this.btnSave.addClickHandler(event -> {
             final List<String> invalidConfigurationPids = this.configurations.getInvalidConfigurationPids();
-            if (!invalidConfigurationPids.isEmpty()) {
+
+            final long notBoundAssetsNotInGraphCount = invalidConfigurationPids.stream()
+                    .filter(p -> wireComposer.getWireComponent(p) == null && isNotBoundAsset(p)).count();
+
+            if (invalidConfigurationPids.size() != notBoundAssetsNotInGraphCount) {
                 this.confirmDialog.show(
                         MSGS.cannotSaveWiresConfigurationInvalid(
                                 invalidConfigurationPids.toString().replaceAll("[\\[\\]]", "")),
@@ -328,6 +332,23 @@ public class WiresPanelUi extends Composite
         return result;
     }
 
+    private boolean isNotBoundAsset(final String pid) {
+        final HasConfiguration config = configurations.getConfiguration(pid);
+
+        if (config == null) {
+            return false;
+        }
+
+        final GwtConfigComponent component = config.getConfiguration();
+
+        if (component == null || !WIRE_ASSET_PID.equals(component.getFactoryId())) {
+            return false;
+        }
+
+        return configurations
+                .getChannelDescriptor(component.getParameterValue(AssetConstants.ASSET_DRIVER_PROP.value())) == null;
+    }
+
     private void clearConfigurationArea() {
         Window.scrollTo(0, 0);
         this.configurationRow.setVisible(false);
@@ -445,7 +466,7 @@ public class WiresPanelUi extends Composite
                 throw new IllegalArgumentException(MSGS.errorComponentConfigurationMissing(pid));
             }
             if (WIRE_ASSET_PID.equals(gwtConfig.getFactoryId())) {
-                final String driverPid = gwtConfig.getParameterValue(DRIVER_PID);
+                final String driverPid = gwtConfig.getParameterValue(AssetConstants.ASSET_DRIVER_PROP.value());
                 if (this.configurations.getConfiguration(driverPid) == null) {
                     throw new IllegalArgumentException(MSGS.errorDriverConfigurationMissing(pid, driverPid));
                 }
@@ -503,7 +524,9 @@ public class WiresPanelUi extends Composite
         this.btnGraphDelete.setEnabled(true);
         updateDirtyState();
         if (this.configurations.getConfiguration(component.getPid()) == null) {
-            this.configurations.createAndRegisterConfiguration(component.getPid(), component.getFactoryPid());
+            final HasConfiguration config = this.configurations.createAndRegisterConfiguration(component.getPid(),
+                    component.getFactoryPid());
+            updateComponentsValidState(config);
         }
         this.dialogs.setAssetPids(getAssetsNotInComposer());
     }
@@ -545,10 +568,44 @@ public class WiresPanelUi extends Composite
         });
     }
 
+    private void updateComponentsValidState(final HasConfiguration changed) {
+        final GwtConfigComponent config = changed.getConfiguration();
+
+        if (configurations.getDriverPids().contains(changed.getComponentId())) {
+            for (final HasConfiguration conf : this.configurations.getConfigurations()) {
+                if (WIRE_ASSET_PID.equals(conf.getConfiguration().getFactoryId())
+                        && changed.getComponentId().equals(conf.getConfiguration().getParameterValue(DRIVER_PID))) {
+                    updateAssetValidState(conf, changed);
+                }
+            }
+        } else if (WIRE_ASSET_PID.equals(config.getFactoryId())) {
+
+            final HasConfiguration driverConfig = this.configurations
+                    .getConfiguration(config.getParameterValue(DRIVER_PID));
+
+            updateAssetValidState(changed, driverConfig);
+        } else {
+            updateComponentValidState(changed.getComponentId(), changed.isValid());
+        }
+    }
+
+    private void updateComponentValidState(final String pid, final boolean isValid) {
+        final WireComponent wireComponent = this.wireComposer.getWireComponent(pid);
+        if (wireComponent != null) {
+            wireComponent.setValid(isValid);
+        }
+    }
+
+    private void updateAssetValidState(final HasConfiguration assetConfig, final HasConfiguration driverConfig) {
+        updateComponentValidState(assetConfig.getComponentId(),
+                assetConfig.isValid() && driverConfig != null && driverConfig.isValid());
+    }
+
     @Override
     public void onConfigurationChanged(HasConfiguration newConfiguration) {
         this.configurations.setConfiguration(newConfiguration);
         updateDirtyState();
+        updateComponentsValidState(newConfiguration);
     }
 
     @Override

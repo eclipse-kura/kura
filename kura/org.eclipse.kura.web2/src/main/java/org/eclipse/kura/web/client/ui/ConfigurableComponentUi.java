@@ -65,9 +65,7 @@ public class ConfigurableComponentUi extends AbstractServicesUi implements HasCo
             if (isDirtyStateChanged) {
                 this.listener.onDirtyStateChanged(this);
             }
-            if (isValid()) {
-                this.listener.onConfigurationChanged(this);
-            }
+            this.listener.onConfigurationChanged(this);
         }
     }
 
@@ -156,5 +154,10 @@ public class ConfigurableComponentUi extends AbstractServicesUi implements HasCo
     @Override
     public void markAsDirty() {
         setDirty(true);
+    }
+
+    @Override
+    public String getComponentId() {
+        return this.configurableComponent != null ? this.configurableComponent.getComponentId() : null;
     }
 }

@@ -184,7 +184,13 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
         this.configurations = configurations;
         this.fields.clear();
 
-        this.channelPager = new SimplePager(TextLocation.CENTER, true, MAXIMUM_PAGE_SIZE * 6, true);
+        this.channelPager = new SimplePager(TextLocation.CENTER, false, 0, true) {
+
+            @Override
+            public void nextPage() {
+                setPage(getPage() + 1);
+            }
+        };
         this.channelPager.setPageSize(MAXIMUM_PAGE_SIZE);
         this.channelPager.setDisplay(this.channelTable);
         this.channelTable.setSelectionModel(this.selectionModel);

@@ -69,7 +69,7 @@
                     </g:ScrollPanel>
                 </b:Well>
             </b:Row>
-            <b:Modal closable="true" fade="true" dataBackdrop="STATIC" dataKeyboard="true" b:id="new-channel-modal"
+            <b:Modal closable="false" fade="true" dataBackdrop="STATIC" dataKeyboard="true" b:id="new-channel-modal"
                 ui:field="newChannelModal">
                 <b:ModalHeader />
                 <b:ModalBody>
@@ -91,7 +91,7 @@
                 </b:ModalFooter>
             </b:Modal>
             <!-- File Upload Modal -->
-            <b:Modal closable="true" fade="true" title="Upload" b:id="upload-modal" 
+            <b:Modal closable="false" fade="true" dataBackdrop="STATIC" dataKeyboard="true" title="Upload" b:id="upload-modal" 
             	ui:field="uploadModal">
                 <b:ModalBody>
                         <b:Container fluid="true">

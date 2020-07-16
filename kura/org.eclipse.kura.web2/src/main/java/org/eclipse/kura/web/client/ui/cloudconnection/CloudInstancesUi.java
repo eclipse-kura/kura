@@ -40,13 +40,9 @@ import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.Icon;
 import org.gwtbootstrap3.client.ui.ListBox;
 import org.gwtbootstrap3.client.ui.Modal;
-import org.gwtbootstrap3.client.ui.ModalBody;
-import org.gwtbootstrap3.client.ui.ModalFooter;
-import org.gwtbootstrap3.client.ui.ModalHeader;
 import org.gwtbootstrap3.client.ui.Well;
 import org.gwtbootstrap3.client.ui.form.validator.RegExValidator;
 import org.gwtbootstrap3.client.ui.gwt.CellTable;
-import org.gwtbootstrap3.client.ui.html.Span;
 
 import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.core.client.GWT;
@@ -589,18 +585,7 @@ public class CloudInstancesUi extends Composite {
     }
 
     private void showDeleteModal() {
-        final Modal modal = new Modal();
-
-        ModalHeader header = new ModalHeader();
-        header.setTitle(MSGS.warning());
-        modal.add(header);
-
-        ModalBody body = new ModalBody();
-        body.add(new Span(MSGS.cloudServiceDeleteConfirmation()));
-        modal.add(body);
-
-        ModalFooter footer = new ModalFooter();
-        Button yes = new Button(MSGS.yesButton(), event -> {
+        alertDialog.show(MSGS.cloudServiceDeleteConfirmation(), () -> {
             GwtCloudEntry selection = CloudInstancesUi.this.selectionModel.getSelectedObject();
 
             if (selection instanceof GwtCloudConnectionEntry) {
@@ -612,16 +597,7 @@ public class CloudInstancesUi extends Composite {
             } else {
                 deletePubSub(selection.getPid());
             }
-            modal.hide();
         });
-
-        Button no = new Button(MSGS.noButton(), event -> modal.hide());
-
-        footer.add(no);
-        footer.add(yes);
-        modal.add(footer);
-        modal.show();
-        no.setFocus(true);
     }
 
     private void getSuggestedCloudConnectionPid(final String factoryPid) {

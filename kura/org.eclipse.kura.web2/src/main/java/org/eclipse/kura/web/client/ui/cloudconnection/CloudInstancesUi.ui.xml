@@ -67,7 +67,8 @@
                         width="100%" ui:field="connectionsGrid" />
                 </b:Well>
             </b:Row>
-            <b:Modal ui:field="newConnectionModal" b:id="newConnectionModal" title="{msgs.newCloudService}">
+            <b:Modal closable="false" fade="true" dataBackdrop="STATIC"
+             dataKeyboard="true" ui:field="newConnectionModal" b:id="newConnectionModal" title="{msgs.newCloudService}">
                 <b:ModalBody addStyleNames="{style.asset-comp-modal-body}">
                     <b:Form>
                         <b:FormGroup addStyleNames="{style.drivers-list}">
@@ -91,7 +92,8 @@
                     <b:Button type="PRIMARY" b:id="btn-create-comp" ui:field="btnCreateComp" text="{msgs.apply}"/>
                 </b:ModalFooter>
             </b:Modal>
-            <b:Modal ui:field="newPubSubModal" b:id="newPubSubModal" title="{msgs.newPubSub}">
+            <b:Modal closable="false" fade="true" dataBackdrop="STATIC"
+             dataKeyboard="true" ui:field="newPubSubModal" b:id="newPubSubModal" title="{msgs.newPubSub}">
                 <b:ModalBody addStyleNames="{style.asset-comp-modal-body}">
                     <b:Form>
                         <b:FormGroup addStyleNames="{style.drivers-list}">

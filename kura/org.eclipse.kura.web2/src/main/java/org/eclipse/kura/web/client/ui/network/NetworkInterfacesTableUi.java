@@ -25,6 +25,7 @@ import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.Modal;
 import org.gwtbootstrap3.client.ui.ModalBody;
 import org.gwtbootstrap3.client.ui.ModalFooter;
+import org.gwtbootstrap3.client.ui.constants.ModalBackdrop;
 import org.gwtbootstrap3.client.ui.gwt.CellTable;
 import org.gwtbootstrap3.client.ui.html.Span;
 
@@ -81,6 +82,11 @@ public class NetworkInterfacesTableUi extends Composite {
                 // there was an earlier selection, changes have not
                 // been saved
                 final Modal confirm = new Modal();
+                confirm.setClosable(false);
+                confirm.setFade(true);
+                confirm.setDataKeyboard(true);
+                confirm.setDataBackdrop(ModalBackdrop.STATIC);
+                
                 ModalBody confirmBody = new ModalBody();
                 ModalFooter confirmFooter = new ModalFooter();
 
@@ -127,6 +133,11 @@ public class NetworkInterfacesTableUi extends Composite {
         if (this.selection != null && this.tabs.isDirty()) {
             // there was an earlier selection, changes have not been saved
             final Modal confirm = new Modal();
+            confirm.setClosable(false);
+            confirm.setFade(true);
+            confirm.setDataKeyboard(true);
+            confirm.setDataBackdrop(ModalBackdrop.STATIC);
+            
             ModalBody confirmBody = new ModalBody();
             ModalFooter confirmFooter = new ModalFooter();
 

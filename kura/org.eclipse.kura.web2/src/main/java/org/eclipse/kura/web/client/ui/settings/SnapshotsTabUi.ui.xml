@@ -50,8 +50,8 @@
                     ui:field="snapshotsGrid" />
             </b:Row>
 			<!-- Modal -->
-            <b:Modal title="Upload" closable="true" fade="true"
-                b:id="uploadModal" ui:field="uploadModal">
+            <b:Modal closable="false" fade="true" dataBackdrop="STATIC"
+             dataKeyboard="true" b:id="uploadModal" ui:field="uploadModal">
                 <b:ModalBody>
                         <b:Container fluid="true">
                             <g:FormPanel ui:field="snapshotsForm">

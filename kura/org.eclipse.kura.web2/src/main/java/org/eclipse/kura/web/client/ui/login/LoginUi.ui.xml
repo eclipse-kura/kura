@@ -41,7 +41,7 @@
 		</b:Modal>
 		</g:FormPanel>
         
-        <b:Modal closable="true" fade="true" dataBackdrop="STATIC"
+        <b:Modal closable="false" fade="true" dataBackdrop="STATIC"
             dataKeyboard="true" ui:field="accessBannerModal"
             b:id="accessBannerModal">
             <b:ModalBody>

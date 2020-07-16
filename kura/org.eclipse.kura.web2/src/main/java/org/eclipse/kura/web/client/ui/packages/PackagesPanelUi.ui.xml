@@ -66,7 +66,8 @@
         </b:Row>
 
 		<!-- MODAL -->
-        <b:Modal title="Install/Upgrade Package" closable="true" fade="true" b:id="uploadModal" ui:field="uploadModal">
+        <b:Modal closable="false" fade="true" dataBackdrop="STATIC"
+             dataKeyboard="true" title="Install/Upgrade Package" b:id="uploadModal" ui:field="uploadModal">
             <b:ModalBody>
                 <b:Well>
                     <b:Container fluid="true">
@@ -124,7 +125,8 @@
         </b:Panel>
 
 
-        <b:Modal closable="true" dataKeyboard="true" ui:field="uploadErrorModal" b:id="uploadErrorModal">
+        <b:Modal closable="false" fade="true" dataBackdrop="STATIC"
+             dataKeyboard="true" ui:field="uploadErrorModal" b:id="uploadErrorModal">
             <b:ModalBody>
                 <b:Panel>
                     <b:PanelBody>
@@ -135,7 +137,8 @@
                 </b:Panel>
             </b:ModalBody>
         </b:Modal>
-        <b:Modal closable="true" dataKeyboard="true" ui:field="versionCheckModal" b:id="versionCheckModal">
+        <b:Modal closable="false" fade="true" dataBackdrop="STATIC"
+             dataKeyboard="true" ui:field="versionCheckModal" b:id="versionCheckModal">
             <b:ModalBody>
                 <b:Panel>
                     <b:PanelBody>

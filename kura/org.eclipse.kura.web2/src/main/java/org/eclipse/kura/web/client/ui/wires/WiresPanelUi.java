@@ -523,19 +523,17 @@ public class WiresPanelUi extends Composite
     public void onWireComponentCreated(WireComponent component) {
         this.btnGraphDelete.setEnabled(true);
         updateDirtyState();
-        if (this.configurations.getConfiguration(component.getPid()) == null) {
-            final HasConfiguration config = this.configurations.createAndRegisterConfiguration(component.getPid(),
-                    component.getFactoryPid());
-            updateComponentsValidState(config);
+        HasConfiguration config = this.configurations.getConfiguration(component.getPid());
+        if (config == null) {
+            config = this.configurations.createAndRegisterConfiguration(component.getPid(), component.getFactoryPid());
         }
+        updateComponentsValidState(config);
         this.dialogs.setAssetPids(getAssetsNotInComposer());
     }
 
     @Override
     public void onWireComponentDeleted(WireComponent component) {
-        if (!WIRE_ASSET_PID.equals(component.getFactoryPid())) {
-            this.configurations.deleteConfiguration(component.getPid());
-        }
+        this.configurations.deleteConfiguration(component.getPid());
         updateDirtyState();
         this.btnGraphDelete.setEnabled(this.wireComposer.getWireComponentCount() > 0);
         this.dialogs.setAssetPids(getAssetsNotInComposer());

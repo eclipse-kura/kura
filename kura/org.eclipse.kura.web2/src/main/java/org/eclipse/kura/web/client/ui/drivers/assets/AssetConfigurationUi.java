@@ -82,6 +82,7 @@ import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Hidden;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.HasRows;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
 
@@ -189,6 +190,14 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
             @Override
             public void nextPage() {
                 setPage(getPage() + 1);
+            }
+
+            @Override
+            public void setPageStart(int index) {
+                final HasRows display = getDisplay();
+                if (display != null) {
+                    display.setVisibleRange(index, getPageSize());
+                }
             }
         };
         this.channelPager.setPageSize(MAXIMUM_PAGE_SIZE);
@@ -510,11 +519,14 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
         });
 
         this.btnRemove.addClickHandler(event -> {
+            final int startIndex = this.channelPager.getPageStart();
+
             final ChannelModel ci = AssetConfigurationUi.this.selectionModel.getSelectedObject();
             AssetConfigurationUi.this.model.deleteChannel(ci.getChannelName());
 
             AssetConfigurationUi.this.channelsDataProvider.setList(AssetConfigurationUi.this.model.getChannels());
             AssetConfigurationUi.this.channelsDataProvider.refresh();
+            this.channelPager.setPageStart(startIndex);
             AssetConfigurationUi.this.btnRemove.setEnabled(false);
             AssetConfigurationUi.this.setDirty(true);
             handleChannelTableVisibility();

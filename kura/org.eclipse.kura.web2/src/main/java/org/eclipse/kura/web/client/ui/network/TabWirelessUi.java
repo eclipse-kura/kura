@@ -1467,9 +1467,9 @@ public class TabWirelessUi extends Composite implements NetworkTab {
             }
         }
 
-        gwtWifiConfig.setBgscanRssiThreshold(Integer.parseInt(this.rssi.getText()));
-        gwtWifiConfig.setBgscanShortInterval(Integer.parseInt(this.shortI.getText()));
-        gwtWifiConfig.setBgscanLongInterval(Integer.parseInt(this.longI.getText()));
+        gwtWifiConfig.setBgscanRssiThreshold(Integer.parseInt(this.rssi.getText().trim()));
+        gwtWifiConfig.setBgscanShortInterval(Integer.parseInt(this.shortI.getText().trim()));
+        gwtWifiConfig.setBgscanLongInterval(Integer.parseInt(this.longI.getText().trim()));
 
         // password
         if (this.groupPassword.getValidationState().equals(ValidationState.NONE)) {

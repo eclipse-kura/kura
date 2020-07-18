@@ -46,7 +46,7 @@ public class HidApplet extends JApplet
             File libFile = File.createTempFile("hdapi", ".lib");
             System.out.println("Copying library to: " + libFile.getAbsolutePath());
             
-            byte buf = new byte[16384];
+            byte buf[] = new byte[16384];
             OutputStream libDest = new FileOutputStream(libFile);
             int l;
             while ((l = libSrc.read(buf)) > 0)

@@ -18,7 +18,7 @@ public enum QuectelEG25AtCommands {
     GET_MOBILESTATION_CLASS("at+cgclass?\r\n"),
     GET_REGISTRATION_STATUS("at+cgreg?\r\n"),
     GET_GPRS_SESSION_DATA_VOLUME("at+qgdcnt?\r\n"),
-    PDP_CONTEXT("at+cgdcont\r\n");
+    PDP_CONTEXT("at+cgdcont");
 
     private String command;
 

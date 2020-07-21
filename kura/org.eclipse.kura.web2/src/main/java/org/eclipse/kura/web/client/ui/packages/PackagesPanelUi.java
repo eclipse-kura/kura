@@ -279,6 +279,8 @@ public class PackagesPanelUi extends Composite {
     }
 
     private void initModalHandlers() {
+        this.filePath.getElement().setAttribute("accept", ".dp");
+
         this.fileSubmit.addClickHandler(
                 event -> PackagesPanelUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 

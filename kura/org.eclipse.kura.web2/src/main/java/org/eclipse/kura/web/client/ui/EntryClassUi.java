@@ -37,7 +37,6 @@ import org.eclipse.kura.web.client.util.PidTextBox;
 import org.eclipse.kura.web.client.util.request.Request;
 import org.eclipse.kura.web.client.util.request.RequestContext;
 import org.eclipse.kura.web.client.util.request.RequestQueue;
-import org.eclipse.kura.web.shared.IdHelper;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConsoleUserOptions;
 import org.eclipse.kura.web.shared.model.GwtSession;
@@ -61,9 +60,6 @@ import org.gwtbootstrap3.client.ui.FormLabel;
 import org.gwtbootstrap3.client.ui.Icon;
 import org.gwtbootstrap3.client.ui.ListBox;
 import org.gwtbootstrap3.client.ui.Modal;
-import org.gwtbootstrap3.client.ui.ModalBody;
-import org.gwtbootstrap3.client.ui.ModalFooter;
-import org.gwtbootstrap3.client.ui.ModalHeader;
 import org.gwtbootstrap3.client.ui.NavPills;
 import org.gwtbootstrap3.client.ui.Panel;
 import org.gwtbootstrap3.client.ui.PanelBody;
@@ -73,7 +69,6 @@ import org.gwtbootstrap3.client.ui.TabListItem;
 import org.gwtbootstrap3.client.ui.TextBox;
 import org.gwtbootstrap3.client.ui.constants.IconSize;
 import org.gwtbootstrap3.client.ui.constants.IconType;
-import org.gwtbootstrap3.client.ui.html.Span;
 import org.gwtbootstrap3.client.ui.html.Strong;
 
 import com.google.gwt.core.client.Callback;
@@ -227,7 +222,6 @@ public class EntryClassUi extends Composite implements Context {
     private GwtSession currentSession;
     private GwtConfigComponent selected = null;
 
-    private Modal modal;
     private ServicesUi servicesUi;
     private AnchorListItem selectedAnchorListItem;
 
@@ -342,179 +336,114 @@ public class EntryClassUi extends Composite implements Context {
     }
 
     private void initDriversAndAssetsPanel() {
-        this.driversAndAssetsServices.addClickHandler(event -> {
-            Button b = new Button(MSGS.yesButton(), event1 -> {
-                forceTabsCleaning();
-                if (EntryClassUi.this.modal != null) {
-                    EntryClassUi.this.modal.hide();
-                }
-                EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.driversAndAssetsServices);
-                EntryClassUi.this.contentPanel.setVisible(true);
-                setHeader(MSGS.driversAndAssetsServices(), null);
-                EntryClassUi.this.contentPanelBody.clear();
-                EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.driversAndTwinsBinder);
-                EntryClassUi.this.driversAndTwinsBinder.refresh();
-
-            });
-            renderDirtyConfigModal(b);
-        });
+        this.driversAndAssetsServices.addClickHandler(event -> confirmIfUiDirty(() -> {
+            EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.driversAndAssetsServices);
+            EntryClassUi.this.contentPanel.setVisible(true);
+            setHeader(MSGS.driversAndAssetsServices(), null);
+            EntryClassUi.this.contentPanelBody.clear();
+            EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.driversAndTwinsBinder);
+            EntryClassUi.this.driversAndTwinsBinder.refresh();
+        }));
     }
 
     private void initWiresPanel() {
-        this.wires.addClickHandler(event -> {
-            Button b = new Button(MSGS.yesButton(), event1 -> {
-                forceTabsCleaning();
-                if (EntryClassUi.this.modal != null) {
-                    EntryClassUi.this.modal.hide();
-                }
-                EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.wires);
-                EntryClassUi.this.contentPanel.setVisible(true);
-                setHeader(MSGS.wires(), null);
-                EntryClassUi.this.contentPanelBody.clear();
-                EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.wiresBinder);
-                EntryClassUi.this.wiresBinder.load();
-            });
-            renderDirtyConfigModal(b);
-        });
+        this.wires.addClickHandler(event -> confirmIfUiDirty(() -> {
+            EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.wires);
+            EntryClassUi.this.contentPanel.setVisible(true);
+            setHeader(MSGS.wires(), null);
+            EntryClassUi.this.contentPanelBody.clear();
+            EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.wiresBinder);
+            EntryClassUi.this.wiresBinder.load();
+        }));
     }
 
     private void initCloudServicesPanel() {
-        this.cloudServices.addClickHandler(event -> {
-            Button b = new Button(MSGS.yesButton(), event1 -> {
-                forceTabsCleaning();
-                if (EntryClassUi.this.modal != null) {
-                    EntryClassUi.this.modal.hide();
-                }
-                EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.cloudServices);
-                EntryClassUi.this.contentPanel.setVisible(true);
-                setHeader(MSGS.cloudServices(), null);
-                EntryClassUi.this.contentPanelBody.clear();
-                EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.cloudServicesBinder);
-                EntryClassUi.this.cloudServicesBinder.refresh();
+        this.cloudServices.addClickHandler(event -> confirmIfUiDirty(() -> {
+            EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.cloudServices);
+            EntryClassUi.this.contentPanel.setVisible(true);
+            setHeader(MSGS.cloudServices(), null);
+            EntryClassUi.this.contentPanelBody.clear();
+            EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.cloudServicesBinder);
+            EntryClassUi.this.cloudServicesBinder.refresh();
 
-            });
-            renderDirtyConfigModal(b);
-        });
+        }));
     }
 
     private void initSettingsPanel() {
-        this.settings.addClickHandler(event -> {
-            Button b = new Button(MSGS.yesButton(), event1 -> {
-                forceTabsCleaning();
-                if (EntryClassUi.this.modal != null) {
-                    EntryClassUi.this.modal.hide();
-                }
-                EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.settings);
-                EntryClassUi.this.contentPanel.setVisible(true);
-                setHeader(MSGS.settings(), null);
-                EntryClassUi.this.contentPanelBody.clear();
-                EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.settingsBinder);
-                EntryClassUi.this.settingsBinder.setSession(EntryClassUi.this.currentSession);
-                EntryClassUi.this.settingsBinder.load();
-            });
-            renderDirtyConfigModal(b);
-        });
+        this.settings.addClickHandler(event -> confirmIfUiDirty(() -> {
+            EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.settings);
+            EntryClassUi.this.contentPanel.setVisible(true);
+            setHeader(MSGS.settings(), null);
+            EntryClassUi.this.contentPanelBody.clear();
+            EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.settingsBinder);
+            EntryClassUi.this.settingsBinder.setSession(EntryClassUi.this.currentSession);
+            EntryClassUi.this.settingsBinder.load();
+        }));
     }
 
     private void initPackagesPanel() {
-        this.packages.addClickHandler(event -> {
-            Button b = new Button(MSGS.yesButton(), event1 -> {
-                forceTabsCleaning();
-                if (EntryClassUi.this.modal != null) {
-                    EntryClassUi.this.modal.hide();
-                }
-                EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.packages);
-                EntryClassUi.this.contentPanel.setVisible(true);
-                setHeader(MSGS.packages(), null);
-                EntryClassUi.this.contentPanelBody.clear();
-                EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.packagesBinder);
-                EntryClassUi.this.packagesBinder.setSession(EntryClassUi.this.currentSession);
-                EntryClassUi.this.packagesBinder.setMainUi(EntryClassUi.this.ui);
-                EntryClassUi.this.packagesBinder.refresh();
-            });
-            renderDirtyConfigModal(b);
-        });
+        this.packages.addClickHandler(event -> confirmIfUiDirty(() -> {
+            EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.packages);
+            EntryClassUi.this.contentPanel.setVisible(true);
+            setHeader(MSGS.packages(), null);
+            EntryClassUi.this.contentPanelBody.clear();
+            EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.packagesBinder);
+            EntryClassUi.this.packagesBinder.setSession(EntryClassUi.this.currentSession);
+            EntryClassUi.this.packagesBinder.setMainUi(EntryClassUi.this.ui);
+            EntryClassUi.this.packagesBinder.refresh();
+        }));
     }
 
     private void initFirewallPanel() {
         if (this.firewall.isVisible()) {
-            this.firewall.addClickHandler(event -> {
-                Button b = new Button(MSGS.yesButton(), event1 -> {
-                    forceTabsCleaning();
-                    if (EntryClassUi.this.modal != null) {
-                        EntryClassUi.this.modal.hide();
-                    }
-                    EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.firewall);
-                    EntryClassUi.this.contentPanel.setVisible(true);
-                    setHeader(MSGS.firewall(), null);
-                    EntryClassUi.this.contentPanelBody.clear();
-                    EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.firewallBinder);
-                    EntryClassUi.this.firewallBinder.initFirewallPanel();
-                });
-                renderDirtyConfigModal(b);
-            });
+            this.firewall.addClickHandler(event -> confirmIfUiDirty(() -> {
+                EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.firewall);
+                EntryClassUi.this.contentPanel.setVisible(true);
+                setHeader(MSGS.firewall(), null);
+                EntryClassUi.this.contentPanelBody.clear();
+                EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.firewallBinder);
+                EntryClassUi.this.firewallBinder.initFirewallPanel();
+            }));
         }
     }
 
     private void initNetworkPanel() {
         if (this.network.isVisible()) {
-            this.network.addClickHandler(event -> {
-                Button b = new Button(MSGS.yesButton(), event1 -> {
-                    forceTabsCleaning();
-                    if (EntryClassUi.this.modal != null) {
-                        EntryClassUi.this.modal.hide();
-                    }
-                    EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.network);
-                    EntryClassUi.this.contentPanel.setVisible(true);
-                    setHeader(MSGS.network(), null);
-                    EntryClassUi.this.contentPanelBody.clear();
-                    EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.networkBinder);
-                    EntryClassUi.this.networkBinder.setSession(EntryClassUi.this.currentSession);
-                    EntryClassUi.this.networkBinder.initNetworkPanel();
-                });
-                renderDirtyConfigModal(b);
-            });
+            this.network.addClickHandler(event -> confirmIfUiDirty(() -> {
+                EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.network);
+                EntryClassUi.this.contentPanel.setVisible(true);
+                setHeader(MSGS.network(), null);
+                EntryClassUi.this.contentPanelBody.clear();
+                EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.networkBinder);
+                EntryClassUi.this.networkBinder.setSession(EntryClassUi.this.currentSession);
+                EntryClassUi.this.networkBinder.initNetworkPanel();
+            }));
         }
     }
 
     private void initDevicePanel() {
-        this.device.addClickHandler(event -> {
-            Button b = new Button(MSGS.yesButton(), event1 -> {
-                forceTabsCleaning();
-                if (EntryClassUi.this.modal != null) {
-                    EntryClassUi.this.modal.hide();
-                }
-                EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.device);
-                EntryClassUi.this.contentPanel.setVisible(true);
-                setHeader(MSGS.device(), null);
-                EntryClassUi.this.contentPanelBody.clear();
-                EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.deviceBinder);
-                EntryClassUi.this.deviceBinder.setSession(EntryClassUi.this.currentSession);
-                EntryClassUi.this.deviceBinder.initDevicePanel();
-            });
-            renderDirtyConfigModal(b);
-        });
+        this.device.addClickHandler(event -> confirmIfUiDirty(() -> {
+            EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.device);
+            EntryClassUi.this.contentPanel.setVisible(true);
+            setHeader(MSGS.device(), null);
+            EntryClassUi.this.contentPanelBody.clear();
+            EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.deviceBinder);
+            EntryClassUi.this.deviceBinder.setSession(EntryClassUi.this.currentSession);
+            EntryClassUi.this.deviceBinder.initDevicePanel();
+        }));
     }
 
     private void initStatusPanel(final EntryClassUi instanceReference) {
-        this.status.addClickHandler(event -> {
-            Button b = new Button(MSGS.yesButton(), event1 -> {
-                forceTabsCleaning();
-                if (EntryClassUi.this.modal != null) {
-                    EntryClassUi.this.modal.hide();
-                }
-                EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.status);
-                EntryClassUi.this.contentPanel.setVisible(true);
-                setHeader("Status", null);
-                EntryClassUi.this.contentPanelBody.clear();
-                EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.statusBinder);
-                EntryClassUi.this.statusBinder.setSession(EntryClassUi.this.currentSession);
-                EntryClassUi.this.statusBinder.setParent(instanceReference);
-                EntryClassUi.this.statusBinder.loadStatusData();
-            });
-
-            renderDirtyConfigModal(b);
-        });
+        this.status.addClickHandler(event -> confirmIfUiDirty(() -> {
+            EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.status);
+            EntryClassUi.this.contentPanel.setVisible(true);
+            setHeader("Status", null);
+            EntryClassUi.this.contentPanelBody.clear();
+            EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.statusBinder);
+            EntryClassUi.this.statusBinder.setSession(EntryClassUi.this.currentSession);
+            EntryClassUi.this.statusBinder.setParent(instanceReference);
+            EntryClassUi.this.statusBinder.loadStatusData();
+        }));
     }
 
     private void filterAvailableServices(String serviceName) {
@@ -595,10 +524,15 @@ public class EntryClassUi extends Composite implements Context {
                             public void onSuccess(List<GwtConfigComponent> result) {
                                 sortConfigurationsByName(result);
                                 EntryClassUi.this.servicesMenu.clear();
-                                for (GwtConfigComponent pair : result) {
-                                    if (!pair.isWireComponent()) {
-                                        EntryClassUi.this.servicesMenu
-                                                .add(new ServicesAnchorListItem(pair, EntryClassUi.this.ui));
+                                for (GwtConfigComponent configComponent : result) {
+                                    if (!configComponent.isWireComponent()) {
+                                        final ServicesAnchorListItem item = new ServicesAnchorListItem(configComponent);
+                                        item.addClickHandler(e -> confirmIfUiDirty(() -> {
+                                            setSelected(configComponent);
+                                            setSelectedAnchorListItem(item);
+                                            render(configComponent);
+                                        }));
+                                        EntryClassUi.this.servicesMenu.add(item);
                                     }
                                 }
                                 filterAvailableServices(EntryClassUi.this.textSearch.getValue());
@@ -742,41 +676,20 @@ public class EntryClassUi extends Composite implements Context {
         this.contentPanelBody.add(this.servicesUi);
     }
 
-    // create the prompt for dirty configuration before switching to another tab
-    private void renderDirtyConfigModal(Button b) {
-
-        boolean isUiDirty = isServicesUiDirty() || isNetworkDirty();
-        isUiDirty = isUiDirty || isFirewallDirty() || isSettingsDirty();
-        isUiDirty = isUiDirty || isCloudServicesDirty() || isWiresDirty();
-        isUiDirty = isUiDirty || isDriversAndTwinsDirty();
-
-        if (isUiDirty) {
-            this.modal = new Modal();
-
-            ModalHeader header = new ModalHeader();
-            header.setTitle(MSGS.warning());
-            this.modal.add(header);
-
-            ModalBody body = new ModalBody();
-            body.add(new Span(MSGS.deviceConfigDirty()));
-            this.modal.add(body);
-
-            ModalFooter footer = new ModalFooter();
-            Button no = new Button();
-            no.setText(MSGS.noButton());
-            no.addStyleName("fa fa-times");
-            no.addClickHandler(event -> EntryClassUi.this.modal.hide());
-            footer.add(no);
-
-            b.addStyleName("fa fa-check");
-            footer.add(b);
-            this.modal.add(footer);
-            this.modal.show();
-            no.setFocus(true);
+    public void confirmIfUiDirty(final Runnable action) {
+        if (isUiDirty()) {
+            alertDialog.show(MSGS.deviceConfigDirty(), () -> {
+                forceTabsCleaning();
+                action.run();
+            });
         } else {
-            b.click();
+            action.run();
         }
+    }
 
+    public boolean isUiDirty() {
+        return isServicesUiDirty() || isNetworkDirty() || isFirewallDirty() || isSettingsDirty()
+                || isCloudServicesDirty() || isWiresDirty() || isDriversAndTwinsDirty();
     }
 
     public boolean isServicesUiDirty() {
@@ -832,24 +745,6 @@ public class EntryClassUi extends Composite implements Context {
             return this.driversAndTwinsBinder.isDirty();
         } else {
             return false;
-        }
-    }
-
-    public void setDirty() {
-        if (this.servicesUi != null) {
-            this.servicesUi.setDirty(false);
-        }
-        if (this.network.isVisible()) {
-            this.networkBinder.setDirty(false);
-        }
-        if (this.firewall.isVisible()) {
-            this.firewallBinder.setDirty(false);
-        }
-        if (this.settings.isVisible()) {
-            this.settingsBinder.setDirty(false);
-        }
-        if (this.driversAndTwinsBinder.isVisible()) {
-            this.driversAndTwinsBinder.clearDirtyState();
         }
     }
 
@@ -949,14 +844,10 @@ public class EntryClassUi extends Composite implements Context {
             // do nothing
         }
 
-        item.addClickHandler(evt -> {
-
+        item.addClickHandler(evt -> confirmIfUiDirty(() -> {
             EntryClassUi.this.contentPanelBody.clear();
 
             forceTabsCleaning();
-            if (EntryClassUi.this.modal != null) {
-                EntryClassUi.this.modal.hide();
-            }
             EntryClassUi.this.setSelectedAnchorListItem(item);
             EntryClassUi.this.contentPanel.setVisible(true);
             setHeader(name, null);
@@ -966,7 +857,7 @@ public class EntryClassUi extends Composite implements Context {
 
             EntryClassUi.this.deviceBinder.setSession(EntryClassUi.this.currentSession);
             EntryClassUi.this.deviceBinder.initDevicePanel();
-        });
+        }));
 
         this.sidenavPills.add(item);
     }

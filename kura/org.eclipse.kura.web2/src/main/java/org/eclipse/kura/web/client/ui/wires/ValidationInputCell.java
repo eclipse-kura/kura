@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -38,10 +38,9 @@ public final class ValidationInputCell extends AbstractInputCell<String, Validat
     }
 
     private static final String CHANGE_EVENT = "change";
-    private static final String NONPENDING_COLOR = "black";
+    private static final String VALIDATED_COLOR = "black";
     private static final String NONVALIDATED_COLOR = "red";
     private static final String NONVALIDATED_CSS_CLASS_NAME = "error-text-box";
-    private static final String VALIDATED_COLOR = "blue";
     private static final String VALIDATED_CSS_CLASS_NAME = "noerror-text-box";
 
     private ValidationInputTemplate validationTemplate;
@@ -67,7 +66,6 @@ public final class ValidationInputCell extends AbstractInputCell<String, Validat
         final String eventType = event.getType();
         if (CHANGE_EVENT.equals(eventType)) {
             final InputElement input = parent.getFirstChild().cast();
-            input.getStyle().setColor(VALIDATED_COLOR);
             if (viewData == null) {
                 viewData = new ValidationData();
                 setViewData(key, viewData);
@@ -98,19 +96,13 @@ public final class ValidationInputCell extends AbstractInputCell<String, Validat
     public void render(final Context context, String value, final SafeHtmlBuilder shb) {
         final Object key = context.getKey();
         ValidationData validationViewData = getViewData(key);
-        if (validationViewData != null && validationViewData.getValue().equals(value)) {
-            clearViewData(key);
-            validationViewData = null;
-        }
         if (value == null) {
             value = "";
         }
-        final String processingValue = validationViewData == null ? null : validationViewData.getValue();
-        final boolean invalid = validationViewData == null ? false : validationViewData.isInvalid();
-        final String color = processingValue != null ? invalid ? NONVALIDATED_COLOR : VALIDATED_COLOR
-                : NONPENDING_COLOR;
+        final boolean invalid = validationViewData != null && validationViewData.isInvalid();
+        final String color = invalid ? NONVALIDATED_COLOR : VALIDATED_COLOR;
         final SafeStyles safeColor = SafeStylesUtils.fromTrustedString("color: " + color + ";");
-        shb.append(this.validationTemplate.input(processingValue != null ? processingValue : value, safeColor,
+        shb.append(this.validationTemplate.input(value, safeColor,
                 invalid ? NONVALIDATED_CSS_CLASS_NAME : VALIDATED_CSS_CLASS_NAME));
     }
 }

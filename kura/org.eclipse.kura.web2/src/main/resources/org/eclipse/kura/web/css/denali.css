@@ -297,6 +297,10 @@ Channel Table Validation START
 	color: red !important;
 }
 
+.config-cell-not-valid, .config-cell-not-valid *{
+	color: red !important;
+}
+
 .cell-readonly .cell-readonly * {
 	pointer-events: none;
 }

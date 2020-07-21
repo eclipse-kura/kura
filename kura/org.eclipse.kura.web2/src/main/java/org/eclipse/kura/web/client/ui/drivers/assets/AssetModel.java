@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -33,11 +33,15 @@ public interface AssetModel {
 
     public GwtConfigComponent getConfiguration();
 
+    public boolean isValid();
+
     public interface ChannelModel {
 
         public GwtConfigParameter getParameter(int index);
 
         public void setValue(String id, String value);
+
+        public boolean isValid(String id);
 
         public String getValue(String id);
 

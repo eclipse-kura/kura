@@ -228,6 +228,8 @@ public class SnapshotsTabUi extends Composite implements Tab {
     }
 
     private void initUploadModalHandlers() {
+        this.filePath.getElement().setAttribute("accept", ".xml");
+
         this.uploadCancel.addClickHandler(event -> SnapshotsTabUi.this.uploadModal.hide());
 
         this.uploadUpload.addClickHandler(

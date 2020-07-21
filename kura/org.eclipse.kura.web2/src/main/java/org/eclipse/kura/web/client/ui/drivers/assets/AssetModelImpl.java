@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -20,8 +20,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.util.LabelComparator;
+import org.eclipse.kura.web.client.util.ValidationUtil;
 import org.eclipse.kura.web.shared.AssetConstants;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter;
@@ -36,6 +38,7 @@ public class AssetModelImpl implements AssetModel {
     private Set<String> channelNames = new HashSet<>();
     private final Map<String, Integer> paramIndexes = new HashMap<>();
     private final List<ChannelModel> channelModels = new ArrayList<>();
+    private final List<GwtConfigParameter> extraParameters = new ArrayList<>();
 
     public AssetModelImpl(GwtConfigComponent assetConfiguration, GwtConfigComponent channelDescriptor,
             GwtConfigComponent baseChannelDescriptor) {
@@ -54,7 +57,7 @@ public class AssetModelImpl implements AssetModel {
             i++;
         }
 
-        findChannelNames();
+        probeChannels();
         loadChannelModels();
     }
 
@@ -74,12 +77,14 @@ public class AssetModelImpl implements AssetModel {
         return null;
     }
 
-    private void findChannelNames() {
+    private void probeChannels() {
         final Set<String> result = new HashSet<>();
         for (GwtConfigParameter param : this.assetConfiguration.getParameters()) {
             final String name = getChannelName(param.getId());
-            if (name != null && !result.contains(name)) {
+            if (name != null) {
                 result.add(name);
+            } else {
+                extraParameters.add(param);
             }
         }
         this.channelNames = result;
@@ -198,6 +203,17 @@ public class AssetModelImpl implements AssetModel {
         }
 
         @Override
+        public boolean isValid(final String id) {
+            final Integer index = AssetModelImpl.this.paramIndexes.get(id);
+            if (index == null) {
+                return false;
+            }
+            final GwtConfigParameter param = getParameter(index);
+
+            return ValidationUtil.validateParameter(param, param.getValue());
+        }
+
+        @Override
         public String getValue(String id) {
             final Integer index = AssetModelImpl.this.paramIndexes.get(id);
             if (index == null) {
@@ -228,6 +244,31 @@ public class AssetModelImpl implements AssetModel {
     @Override
     public String getAssetPid() {
         return this.assetConfiguration.getComponentId();
+    }
+
+    private final Logger logger = Logger.getGlobal();
+
+    @Override
+    public boolean isValid() {
+        for (final ChannelModel model : this.channelModels) {
+            for (final String param : paramIndexes.keySet()) {
+                if (!model.isValid(param)) {
+                    return false;
+                }
+            }
+        }
+
+        for (final GwtConfigParameter extraParam : extraParameters) {
+
+            if (!ValidationUtil.validateParameter(extraParam, extraParam.getValue())) {
+                logger.info(extraParam.getName() + " is not valid");
+                return false;
+            }
+
+            logger.info(extraParam.getName() + " is valid");
+        }
+
+        return true;
     }
 
 }

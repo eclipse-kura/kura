@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -10,10 +10,15 @@
 package org.eclipse.kura.web.client.ui.wires;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.util.PidTextBox;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
+import org.gwtbootstrap3.client.shared.event.ModalHideEvent;
+import org.gwtbootstrap3.client.shared.event.ModalHideHandler;
+import org.gwtbootstrap3.client.shared.event.ModalShowEvent;
+import org.gwtbootstrap3.client.shared.event.ModalShowHandler;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.FormLabel;
 import org.gwtbootstrap3.client.ui.ListBox;
@@ -90,14 +95,15 @@ public class WiresDialogs extends Composite {
     PidTextBox componentName;
 
     private Listener listener;
-    private Callback pickCallback;
+    private final ModalVisibilityHandler modalVisibilityHandler = new ModalVisibilityHandler();
+    private Optional<Callback> pickCallback = Optional.empty();
 
     public WiresDialogs() {
         initWidget(uiBinder.createAndBindUi(this));
 
         initSelectAssetModal();
         initSelectDriverModal();
-        initAssetModal();
+        initGenericComponentModal();
         initNewAssetModal();
         initNewDriverModal();
     }
@@ -133,20 +139,22 @@ public class WiresDialogs extends Composite {
 
     private void initSelectAssetModal() {
 
-        this.buttonNewAsset.addClickHandler(event -> WiresDialogs.this.selectDriverModal.show());
+        this.buttonNewAsset.addClickHandler(event -> {
+            WiresDialogs.this.selectDriverModal.show();
+            WiresDialogs.this.selectAssetModal.hide();
+        });
 
         this.buttonSelectAssetOk.addClickHandler(event -> {
-            if (WiresDialogs.this.pickCallback != null) {
-                WiresDialogs.this.pickCallback
+            if (WiresDialogs.this.pickCallback.isPresent()) {
+                WiresDialogs.this.pickCallback.get()
                         .onNewComponentCreated(WiresDialogs.this.assetInstance.getSelectedValue());
+                WiresDialogs.this.pickCallback = Optional.empty();
             }
             WiresDialogs.this.selectAssetModal.hide();
         });
-        this.buttonSelectAssetCancel.addClickHandler(event -> {
-            if (WiresDialogs.this.pickCallback != null) {
-                WiresDialogs.this.pickCallback.onCancel();
-            }
-        });
+
+        this.selectAssetModal.addHideHandler(this.modalVisibilityHandler);
+        this.selectAssetModal.addShowHandler(modalVisibilityHandler);
     }
 
     private void initSelectDriverModal() {
@@ -154,6 +162,7 @@ public class WiresDialogs extends Composite {
             WiresDialogs.this.newDriverName.setValue("");
             WiresDialogs.this.newDriverName.setText("");
             WiresDialogs.this.newDriverModal.show();
+            WiresDialogs.this.selectDriverModal.hide();
         });
 
         this.buttonSelectDriverOk.addClickHandler(event -> {
@@ -161,12 +170,11 @@ public class WiresDialogs extends Composite {
             WiresDialogs.this.newAssetDriverInstance.setText(driverPid);
             WiresDialogs.this.newAssetName.setText("");
             WiresDialogs.this.newAssetModal.show();
+            WiresDialogs.this.selectDriverModal.hide();
         });
-        this.buttonSelectDriverCancel.addClickHandler(event -> {
-            if (WiresDialogs.this.pickCallback != null) {
-                WiresDialogs.this.pickCallback.onCancel();
-            }
-        });
+
+        this.selectDriverModal.addHideHandler(this.modalVisibilityHandler);
+        this.selectDriverModal.addShowHandler(this.modalVisibilityHandler);
     }
 
     private void initNewAssetModal() {
@@ -178,17 +186,15 @@ public class WiresDialogs extends Composite {
                 return;
             }
             String driverPid = WiresDialogs.this.newAssetDriverInstance.getText();
-            WiresDialogs.this.newAssetModal.hide();
-            if (WiresDialogs.this.pickCallback != null) {
-                WiresDialogs.this.pickCallback.onNewAssetCreated(wireAssetPid, driverPid);
+            if (WiresDialogs.this.pickCallback.isPresent()) {
+                WiresDialogs.this.pickCallback.get().onNewAssetCreated(wireAssetPid, driverPid);
+                WiresDialogs.this.pickCallback = Optional.empty();
             }
+            WiresDialogs.this.newAssetModal.hide();
         });
 
-        this.newAssetCancel.addClickHandler(event -> {
-            if (WiresDialogs.this.pickCallback != null) {
-                WiresDialogs.this.pickCallback.onCancel();
-            }
-        });
+        this.newAssetModal.addHideHandler(this.modalVisibilityHandler);
+        this.newAssetModal.addShowHandler(this.modalVisibilityHandler);
     }
 
     private void initNewDriverModal() {
@@ -203,24 +209,21 @@ public class WiresDialogs extends Composite {
             }
             final String factoryPid = WiresDialogs.this.newDriverFactory.getSelectedValue();
             WiresRPC.createNewDriver(factoryPid, pid, result -> {
-                WiresDialogs.this.newDriverModal.hide();
                 WiresDialogs.this.newAssetDriverInstance.setText(pid);
                 WiresDialogs.this.newAssetName.setText("");
                 WiresDialogs.this.newAssetModal.show();
+                WiresDialogs.this.newDriverModal.hide();
                 if (WiresDialogs.this.listener != null) {
                     WiresDialogs.this.listener.onNewDriverCreated(pid, factoryPid, result);
                 }
             });
         });
 
-        this.newDriverCancel.addClickHandler(event -> {
-            if (WiresDialogs.this.pickCallback != null) {
-                WiresDialogs.this.pickCallback.onCancel();
-            }
-        });
+        this.newDriverModal.addHideHandler(this.modalVisibilityHandler);
+        this.newDriverModal.addShowHandler(this.modalVisibilityHandler);
     }
 
-    private void initAssetModal() {
+    private void initGenericComponentModal() {
         this.componentNameLabel.setText(MSGS.wiresComponentName());
         this.btnComponentModalYes.addClickHandler(event -> {
             String value = WiresDialogs.this.componentName.getPid();
@@ -228,18 +231,17 @@ public class WiresDialogs extends Composite {
                 if (WiresDialogs.this.listener == null || !WiresDialogs.this.listener.onNewPidInserted(value)) {
                     return;
                 }
-                if (WiresDialogs.this.pickCallback != null) {
-                    WiresDialogs.this.pickCallback.onNewComponentCreated(value);
+                if (WiresDialogs.this.pickCallback.isPresent()) {
+                    WiresDialogs.this.pickCallback.get().onNewComponentCreated(value);
+                    WiresDialogs.this.pickCallback = Optional.empty();
                 }
                 WiresDialogs.this.genericCompModal.hide();
                 WiresDialogs.this.componentName.clear();
             }
         });
-        this.btnComponentModalNo.addClickHandler(event -> {
-            if (WiresDialogs.this.pickCallback != null) {
-                WiresDialogs.this.pickCallback.onCancel();
-            }
-        });
+
+        this.genericCompModal.addHideHandler(this.modalVisibilityHandler);
+        this.genericCompModal.addShowHandler(this.modalVisibilityHandler);
     }
 
     public void setListener(Listener listener) {
@@ -247,7 +249,7 @@ public class WiresDialogs extends Composite {
     }
 
     public void pickComponent(String factoryPid, Callback callback) {
-        this.pickCallback = callback;
+        this.pickCallback = Optional.ofNullable(callback);
         if (factoryPid.contains(WiresPanelUi.WIRE_ASSET)) {
             if (this.assetInstance.getItemCount() > 0) {
                 this.selectAssetModal.show();
@@ -280,4 +282,22 @@ public class WiresDialogs extends Composite {
         public void onCancel();
     }
 
+    private class ModalVisibilityHandler implements ModalShowHandler, ModalHideHandler {
+
+        private int modalCount;
+
+        @Override
+        public void onHide(ModalHideEvent evt) {
+            modalCount--;
+            if (modalCount == 0 && pickCallback.isPresent()) {
+                pickCallback.get().onCancel();
+            }
+        }
+
+        @Override
+        public void onShow(ModalShowEvent evt) {
+            modalCount++;
+        }
+
+    }
 }

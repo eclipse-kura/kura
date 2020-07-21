@@ -61,8 +61,7 @@
                                         ui:field="channelTable" />
                                     <b.html:Paragraph ui:field="emptyTableLabel" addStyleNames="empty-table-label" text="No channels defined"></b.html:Paragraph>
                                 </b:PanelBody>
-                                <b:PanelFooter>
-                                    <cv:SimplePager location="CENTER" ui:field="channelPager" />
+                                <b:PanelFooter ui:field="tablePanelFooter">
                                 </b:PanelFooter>
                             </b:Panel>
                             <b:FieldSet ui:field="fields" />

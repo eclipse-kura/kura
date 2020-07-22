@@ -33,6 +33,10 @@ public interface AssetModel {
 
     public GwtConfigComponent getConfiguration();
 
+    public void addAllChannels(final AssetModel other);
+
+    public void replaceChannels(final AssetModel other);
+
     public boolean isValid();
 
     public interface ChannelModel {

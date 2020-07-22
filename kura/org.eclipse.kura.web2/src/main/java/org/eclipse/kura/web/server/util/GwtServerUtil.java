@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -281,58 +281,64 @@ public final class GwtServerUtil {
         List<GwtConfigParameter> gwtParams = new ArrayList<>();
         OCD ocd = config.getDefinition();
         for (AD ad : ocd.getAD()) {
-            GwtConfigParameter gwtParam = new GwtConfigParameter();
-            gwtParam.setId(ad.getId());
-            gwtParam.setName(ad.getName());
-            gwtParam.setDescription(ad.getDescription());
-            gwtParam.setType(GwtConfigParameterType.valueOf(ad.getType().name()));
-            gwtParam.setRequired(ad.isRequired());
-            gwtParam.setCardinality(ad.getCardinality());
-            gwtParam.setDefault(ad.getDefault());
-            if (ad.getOption() != null && !ad.getOption().isEmpty()) {
-                Map<String, String> options = new HashMap<>();
-                for (Option option : ad.getOption()) {
-                    options.put(option.getLabel(), option.getValue());
-                }
-                gwtParam.setOptions(options);
-            }
-            gwtParam.setMin(ad.getMin());
-            gwtParam.setMax(ad.getMax());
-
-            // handle the value based on the cardinality of the attribute
-            int cardinality = ad.getCardinality();
             Object value = null;
             if (config.getConfigurationProperties() != null) {
                 value = config.getConfigurationProperties().get(ad.getId());
             }
-            if (value != null) {
-                if (cardinality == 0 || cardinality == 1 || cardinality == -1) {
-                    if (gwtParam.getType().equals(GwtConfigParameterType.PASSWORD)) {
-                        gwtParam.setValue(GwtServerUtil.PASSWORD_PLACEHOLDER);
-                    } else {
-                        gwtParam.setValue(String.valueOf(value));
-                    }
-                } else {
-                    // this could be an array value
-                    if (value instanceof Object[]) {
-                        Object[] objValues = (Object[]) value;
-                        List<String> strValues = new ArrayList<>();
-                        for (Object v : objValues) {
-                            if (v != null) {
-                                if (gwtParam.getType().equals(GwtConfigParameterType.PASSWORD)) {
-                                    strValues.add(GwtServerUtil.PASSWORD_PLACEHOLDER);
-                                } else {
-                                    strValues.add(String.valueOf(v));
-                                }
-                            }
-                        }
-                        gwtParam.setValues(strValues.toArray(new String[] {}));
-                    }
-                }
-            }
-            gwtParams.add(gwtParam);
+            gwtParams.add(toGwtConfigParameter(ad, value));
         }
         return gwtParams;
+    }
+
+    public static GwtConfigParameter toGwtConfigParameter(final AD ad, final Object value) {
+        GwtConfigParameter gwtParam = new GwtConfigParameter();
+        gwtParam.setId(ad.getId());
+        gwtParam.setName(ad.getName());
+        gwtParam.setDescription(ad.getDescription());
+        gwtParam.setType(GwtConfigParameterType.valueOf(ad.getType().name()));
+        gwtParam.setRequired(ad.isRequired());
+        gwtParam.setCardinality(ad.getCardinality());
+        gwtParam.setDefault(ad.getDefault());
+        if (ad.getOption() != null && !ad.getOption().isEmpty()) {
+            Map<String, String> options = new HashMap<>();
+            for (Option option : ad.getOption()) {
+                options.put(option.getLabel(), option.getValue());
+            }
+            gwtParam.setOptions(options);
+        }
+        gwtParam.setMin(ad.getMin());
+        gwtParam.setMax(ad.getMax());
+
+        // handle the value based on the cardinality of the attribute
+        int cardinality = ad.getCardinality();
+
+        if (value != null) {
+            if (cardinality == 0 || cardinality == 1 || cardinality == -1) {
+                if (gwtParam.getType().equals(GwtConfigParameterType.PASSWORD)) {
+                    gwtParam.setValue(GwtServerUtil.PASSWORD_PLACEHOLDER);
+                } else {
+                    gwtParam.setValue(String.valueOf(value));
+                }
+            } else {
+                // this could be an array value
+                if (value instanceof Object[]) {
+                    Object[] objValues = (Object[]) value;
+                    List<String> strValues = new ArrayList<>();
+                    for (Object v : objValues) {
+                        if (v != null) {
+                            if (gwtParam.getType().equals(GwtConfigParameterType.PASSWORD)) {
+                                strValues.add(GwtServerUtil.PASSWORD_PLACEHOLDER);
+                            } else {
+                                strValues.add(String.valueOf(v));
+                            }
+                        }
+                    }
+                    gwtParam.setValues(strValues.toArray(new String[] {}));
+                }
+            }
+        }
+
+        return gwtParam;
     }
 
     public static GwtConfigComponent toGwtConfigComponent(ComponentConfiguration config) {
@@ -374,8 +380,7 @@ public final class GwtServerUtil {
             List<GwtConfigParameter> gwtParams = new ArrayList<>();
             gwtConfig.setParameters(gwtParams);
 
-            List<GwtConfigParameter> metatypeProps = getADProperties(config);
-            gwtParams.addAll(metatypeProps);
+            gwtParams.addAll(getADProperties(config));
         }
         return gwtConfig;
     }
@@ -446,4 +451,5 @@ public final class GwtServerUtil {
         }
         return toGwtConfigComponent(descriptor.getPid(), channelDescriptor);
     }
+
 }

@@ -65,7 +65,9 @@ public class ConfigurableComponentUi extends AbstractServicesUi implements HasCo
             if (isDirtyStateChanged) {
                 this.listener.onDirtyStateChanged(this);
             }
-            this.listener.onConfigurationChanged(this);
+            if (this.dirty) {
+                this.listener.onConfigurationChanged(this);
+            }
         }
     }
 

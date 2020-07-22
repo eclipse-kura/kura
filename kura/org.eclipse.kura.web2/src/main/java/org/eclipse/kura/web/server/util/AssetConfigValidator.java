@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2018, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -16,11 +16,10 @@ import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_P
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import javax.servlet.ServletException;
 
@@ -32,6 +31,7 @@ import org.eclipse.kura.core.configuration.metatype.Tad;
 import org.eclipse.kura.driver.Driver;
 import org.eclipse.kura.internal.wire.asset.WireAssetChannelDescriptor;
 import org.eclipse.kura.web.server.util.ServiceLocator.ServiceConsumer;
+import org.eclipse.kura.web.shared.model.GwtConfigParameter;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
@@ -63,8 +63,8 @@ public class AssetConfigValidator {
                 }));
     }
 
-    private String scanLine(CSVRecord line, List<Object> channelValues, List<Tad> fullChannelMetatype,
-            List<String> errors) {
+    private String scanLine(CSVRecord line, Consumer<GwtConfigParameter> parameterConsumer,
+            List<Tad> fullChannelMetatype, List<String> errors) {
         String channelName = "";
         boolean errorInChannel = false;
         if (line.size() != fullChannelMetatype.size()) {
@@ -81,7 +81,10 @@ public class AssetConfigValidator {
                         token = token.replace("+", "_");
                         channelName = token;
                     }
-                    channelValues.add(validate(fullChannelMetatype.get(i), token, errors, this.lineNumber));
+                    final Tad ad = fullChannelMetatype.get(i);
+                    final Object value = validate(ad, token, errors, this.lineNumber);
+
+                    parameterConsumer.accept(GwtServerUtil.toGwtConfigParameter(ad, value));
                 } catch (Exception ex) {
                     errorInChannel = true;
                 }
@@ -94,14 +97,15 @@ public class AssetConfigValidator {
         return channelName;
     }
 
-    public Map<String, Object> validateCsv(String csv, String driverPid, List<String> errors) throws ServletException {
+    public List<GwtConfigParameter> validateCsv(String csv, String driverPid, List<String> errors)
+            throws ServletException {
 
         try (CSVParser parser = CSVParser.parse(csv, CSVFormat.RFC4180)) {
             errors.clear();
             List<Tad> fullChannelMetatype = new ArrayList<>();
             List<String> propertyNames = new ArrayList<>();
             fillLists(fullChannelMetatype, propertyNames, driverPid);
-            Map<String, Object> updatedAssetProps = new HashMap<>();
+            List<GwtConfigParameter> updatedAssetProps = new ArrayList<>();
             List<CSVRecord> lines = parser.getRecords();
             Set<String> channels = new HashSet<>();
             if (lines.size() <= 1) {
@@ -112,12 +116,14 @@ public class AssetConfigValidator {
             this.lineNumber = 1;
             lines.forEach(record -> {
                 this.lineNumber++;
-                List<Object> channelValues = new ArrayList<>();
-                String channelName = scanLine(record, channelValues, fullChannelMetatype, errors);
+                final List<GwtConfigParameter> params = new ArrayList<>();
+                String channelName = scanLine(record, params::add, fullChannelMetatype, errors);
                 if (!channelName.isEmpty() && !channels.contains(channelName)) {
                     channels.add(channelName);
-                    for (int i = 0; i < propertyNames.size(); i++) {
-                        updatedAssetProps.put(channelName + "#" + propertyNames.get(i), channelValues.get(i));
+                    for (final GwtConfigParameter param : params) {
+                        final String id = channelName + "#" + param.getId();
+                        param.setId(id);
+                        updatedAssetProps.add(param);
                     }
                 }
             });

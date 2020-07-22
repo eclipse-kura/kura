@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -39,6 +39,7 @@ import org.eclipse.kura.web.session.Attributes;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtChannelOperationResult;
 import org.eclipse.kura.web.shared.model.GwtChannelRecord;
+import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtAssetService;
 import org.osgi.framework.BundleContext;
@@ -81,6 +82,25 @@ public class GwtAssetServiceImpl extends OsgiRemoteServiceServlet implements Gwt
                     session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
             return getFailureResult(e);
         }
+    }
+
+    @Override
+    public GwtConfigComponent getUploadedCsvConfig(final GwtXSRFToken xsrfToken, final String assetPid)
+            throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+
+        final HttpSession session = getThreadLocalRequest().getSession(false);
+        final String key = "kura.csv.config." + assetPid;
+
+        final GwtConfigComponent result = (GwtConfigComponent) session.getAttribute(key);
+
+        if (result == null) {
+            throw new GwtKuraException("Uploaded configuration not available");
+        }
+
+        session.removeAttribute(key);
+
+        return result;
     }
 
     @Override

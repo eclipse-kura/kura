@@ -29,7 +29,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -62,6 +61,8 @@ import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.session.Attributes;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
+import org.eclipse.kura.web.shared.model.GwtConfigComponent;
+import org.eclipse.kura.web.shared.model.GwtConfigParameter;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -474,37 +475,17 @@ public class FileServlet extends HttpServlet {
             String csvString = new String(data, StandardCharsets.UTF_8);
             String assetPid = formFields.get("assetPid");
             String driverPid = formFields.get("driverPid");
-            boolean doReplace = formFields.get("doReplace").trim().equalsIgnoreCase("true");
 
-            Map<String, Object> newProps = AssetConfigValidator.get().validateCsv(csvString, driverPid, errors);
+            List<GwtConfigParameter> parametersFromCsv = AssetConfigValidator.get().validateCsv(csvString, driverPid,
+                    errors);
 
-            ServiceLocator locator = ServiceLocator.getInstance();
+            final GwtConfigComponent config = new GwtConfigComponent();
+            config.setParameters(parametersFromCsv);
 
-            ConfigurationService cs = locator.getService(ConfigurationService.class);
+            session.setAttribute("kura.csv.config." + assetPid, config);
 
-            if (doReplace) {
-                Map<String, Object> oldConfigProps = cs.getComponentConfiguration(assetPid)
-                        .getConfigurationProperties();
-                Map<String, Object> oldNonChannelProps = oldConfigProps.entrySet().stream()
-                        .filter(entry -> !entry.getKey().contains("#"))
-                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-                String fp = oldConfigProps.get("service.factoryPid").toString();
-                cs.deleteFactoryConfiguration(assetPid, false);
-                newProps.putAll(oldNonChannelProps);
-                cs.createFactoryConfiguration(fp, assetPid, newProps, true);
-            } else {
-                cs.updateConfiguration(assetPid, newProps);
-            }
-
-            // Add an additional delay after the configuration update
-            // to give the time to the device to apply the received configuration
-            SystemService ss = locator.getService(SystemService.class);
-            long delay = Long.parseLong(ss.getProperties().getProperty("console.updateConfigDelay", "5000"));
-            if (delay > 0) {
-                Thread.sleep(delay);
-            }
             auditLogger.info(
-                    "UI Asset - Success - Successfully uploaded asset configuration for user: {}, session: {}, asset PID: {}, driver PID: {}",
+                    "UI Asset - Success - Successfully parsed CSV asset configuration for user: {}, session: {}, asset PID: {}, driver PID: {}",
                     session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId(), assetPid, driverPid);
         } catch (KuraException | GwtKuraException | InterruptedException e) {
             logger.error("Error updating device configuration", e);

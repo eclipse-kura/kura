@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -110,22 +110,24 @@ public class ConfigurationAreaUi extends Composite implements HasConfiguration.L
             } else {
                 this.genericWireComponentUi = new ConfigurableComponentUi(driverConfiguration.getConfiguration());
                 this.genericWireComponentUi.setTitle("Driver - " + driverPid);
+                this.genericWireComponentUi.setDirty(driverConfiguration.isDirty());
                 this.genericWireComponentUi.renderForm();
             }
 
             final AssetModel assetModel = new AssetModelImpl(hasConfiguration.getConfiguration(),
                     configurations.getChannelDescriptor(driverPid), configurations.getBaseChannelDescriptor());
 
-            this.assetWireComponentUi = new AssetConfigurationUi(assetModel, this.genericWireComponentUi,
-                    configurations);
+            this.assetWireComponentUi = new AssetConfigurationUi(assetModel, this.genericWireComponentUi);
             this.assetWireComponentUi
                     .setTitle(WiresPanelUi.getComponentLabel(configuration) + " - " + configuration.getComponentId());
+            this.assetWireComponentUi.setDirty(hasConfiguration.isDirty());
             this.assetWireComponentUi.renderForm();
 
         } else {
             this.genericWireComponentUi = new ConfigurableComponentUi(hasConfiguration.getConfiguration());
             this.genericWireComponentUi
                     .setTitle(WiresPanelUi.getComponentLabel(configuration) + " - " + configuration.getComponentId());
+            this.genericWireComponentUi.setDirty(hasConfiguration.isDirty());
             this.genericWireComponentUi.renderForm();
         }
 

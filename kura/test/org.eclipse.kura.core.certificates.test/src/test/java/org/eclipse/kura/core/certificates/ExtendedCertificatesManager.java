@@ -40,7 +40,7 @@ public class ExtendedCertificatesManager extends CertificatesManager {
 			throw new IOException(new UnrecoverableKeyException("Invalid password"));
 		}
 
-		if (alias != fakeCertificateAlias) {
+		if (!alias.equals(fakeCertificateAlias)) {
 			return null;
 		}
 

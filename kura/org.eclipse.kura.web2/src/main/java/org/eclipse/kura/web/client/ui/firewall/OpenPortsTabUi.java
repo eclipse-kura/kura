@@ -545,6 +545,8 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
     }
 
     private void showModal(final GwtFirewallOpenPortEntry existingEntry) {
+        resetValidationStates();
+
         if (existingEntry == null) {
             // new
             this.openPortsForm.setTitle(MSGS.firewallOpenPortFormInformation());
@@ -583,6 +585,16 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
         } else {
             OpenPortsTabUi.this.unpermittedI.setEnabled(true);
         }
+    }
+
+    private void resetValidationStates() {
+        OpenPortsTabUi.this.groupPort.setValidationState(ValidationState.NONE);
+        OpenPortsTabUi.this.groupPermittedNw.setValidationState(ValidationState.NONE);
+        OpenPortsTabUi.this.groupPermittedI.setValidationState(ValidationState.NONE);
+        OpenPortsTabUi.this.groupPermittedI.setValidationState(ValidationState.NONE);
+        OpenPortsTabUi.this.groupUnpermittedI.setValidationState(ValidationState.NONE);
+        OpenPortsTabUi.this.groupPermittedMac.setValidationState(ValidationState.NONE);
+        OpenPortsTabUi.this.groupSource.setValidationState(ValidationState.NONE);
     }
 
     private void setModalFieldsHandlers() {

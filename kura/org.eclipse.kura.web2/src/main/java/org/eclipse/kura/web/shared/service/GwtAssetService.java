@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.eclipse.kura.web.shared.service;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.eclipse.kura.web.shared.GwtKuraException;
@@ -36,5 +37,8 @@ public interface GwtAssetService extends RemoteService {
             List<GwtChannelRecord> channelRecords) throws GwtKuraException;
 
     public GwtConfigComponent getUploadedCsvConfig(GwtXSRFToken xsrfToken, String assetPid) throws GwtKuraException;
+
+    public int convertToCsv(GwtXSRFToken token, String driverPid, GwtConfigComponent assetConfig)
+            throws GwtKuraException, IOException;
 
 }

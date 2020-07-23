@@ -211,8 +211,7 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
         this.channelTable.setAutoHeaderRefreshDisabled(true);
 
         this.btnDownload.setEnabled(true);
-        this.btnDownload.addClickHandler(event -> RequestQueue.submit(
-                context -> this.gwtXSRFService.generateSecurityToken(context.callback(this::downloadChannels))));
+        this.btnDownload.addClickHandler(event -> this.downloadChannels());
 
         this.btnUpload.addClickHandler(event -> uploadAndApply());
 
@@ -335,7 +334,7 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
         boolean isDirtyStateChanged = flag != this.dirty;
         this.dirty = flag;
 
-        this.btnDownload.setEnabled(!this.dirty && !this.model.getChannels().isEmpty());
+        this.btnDownload.setEnabled(!this.model.getChannels().isEmpty() && this.isValid());
 
         if (this.listener != null) {
             if (isDirtyStateChanged) {
@@ -632,11 +631,18 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
         setDirty(true);
     }
 
-    private void downloadChannels(GwtXSRFToken token) {
-        final StringBuilder sbUrl = new StringBuilder();
-        sbUrl.append("/assetsUpDownload?assetPid=").append(this.model.getAssetPid()).append("&driverPid=")
-                .append(this.model.getConfiguration().getParameterValue(AssetConstants.ASSET_DRIVER_PROP.value()));
-        DownloadHelper.instance().startDownload(token, sbUrl.toString());
+    private void downloadChannels() {
+        final GwtConfigComponent configuration = this.model.getConfiguration();
+        final String driverPid = configuration.getParameterValue(AssetConstants.ASSET_DRIVER_PROP.value());
+
+        RequestQueue.submit(c -> gwtXSRFService
+                .generateSecurityToken(c.callback(token -> gwtAssetService.convertToCsv(token, driverPid, configuration,
+                        c.callback(id -> gwtXSRFService.generateSecurityToken(c.callback(token2 -> {
+                            final StringBuilder sbUrl = new StringBuilder();
+                            sbUrl.append("/assetsUpDownload?assetPid=").append(this.model.getAssetPid()).append("&id=")
+                                    .append(id);
+                            DownloadHelper.instance().startDownload(token2, sbUrl.toString());
+                        })))))));
     }
 
     private void uploadAndApply() {

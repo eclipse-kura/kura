@@ -17,7 +17,7 @@ categories: [intro]
 This section provides Eclipse Kura&trade; quick installation procedures for the
 Raspberry Pi and the Kura development environment.
 
-{% include alerts.html message="This quickstart will install the version of Kura with the administraive web UI and netwowrk configuration support but not CAN support. For more information on this please visit the [Eclipse Kura download page](https://www.eclipse.org/kura/downloads.php)" %}
+{% include alerts.html message="This quickstart will install the version of Kura with the administrative web UI and network  configuration support but not CAN support. For more information on this please visit the [Eclipse Kura download page](https://www.eclipse.org/kura/downloads.php)" %}
 
 This quickstart has been tested using the following image:
 
@@ -27,12 +27,12 @@ downloaded from
 
 <pre>https://www.raspberrypi.org/downloads/raspbian/</pre>
 
-and with the NOOBS image installed on the sdcard bundled with the Raspberry Pi 3.
+and with the NOOBS image installed on the sd card bundled with the Raspberry Pi 3.
 
 ## Enable SSH Access
 
 The ssh server is disabled by default on Raspbian images released after November 2016,
-in order to enable it follow the instructions available at the following URL:
+in order to enable it to follow the instructions available at the following URL:
 
 <pre>https://www.raspberrypi.org/documentation/remote-access/ssh/</pre>
 

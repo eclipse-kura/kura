@@ -44,7 +44,7 @@ If the network interface is _Enabled for LAN_ and manually configured (i.e., not
 The **DHCP & NAT** tab contains the following configuration parameters:
 
 - **Router Mode**
-  - DHCP and NAT - indicate that both DHCP server and NAT are enabled.
+  - DHCP and NAT - indicates that both DHCP server and NAT are enabled.
   - DHCP Only - indicates that DHCP server is enabled and NAT is disabled.
   - NAT Only - indicates that NAT is enabled and DHCP server is disabled.
   - Off - indicates that both DHCP server and NAT are disabled.
@@ -86,4 +86,4 @@ The rules shown above create an _Overloaded_ (i.e., many-to-one) NAT. This type 
 
 When applying a new network configuration, Kura changes the configuration files of the Linux networking subsystem. Please read the following note before proceeding with manual changes in the Linux networking configuration.
 
-{% include alerts.html message='It is NOT recommended to perform manual editing of the Linux networking configuration files when the gateway configuration is being managed through Kura. While Linux may correctly accept manual changes, Kura may not be able to interpret the new configuration resulting in an inconsistent state.' %}
+{% include alerts.html message='Manual editing of the Linux networking configuration file is NOT recommended when the gateway configuration is being managed through Kura. While Linux may correctly accept manual changes, Kura may not be able to interpret the new configuration resulting in an inconsistent state.' %}

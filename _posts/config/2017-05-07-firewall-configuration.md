@@ -20,7 +20,7 @@ Open Ports, Port Forwarding, and IP Forwarding and Masquerading are configured v
 
 This section describes the changes applied by Kura at the Linux networking configuration. Please read the following note before proceeding with manual changes in the Linux networking configuration.
 
-{% include alerts.html message='It is NOT recommended to perform manual editing of the Linux networking configuration files when the gateway configuration is being managed through Kura. While Linux may correctly accept manual changes, Kura may not be able to interpret the new configuration resulting in an inconsistent state.' %}
+{% include alerts.html message='Manual editing of the Linux networking configuration file is NOT recommended when the gateway configuration is being managed through Kura. While Linux may correctly accept manual changes, Kura may not be able to interpret the new configuration resulting in an inconsistent state.' %}
 
 When a new firewall configuration is submitted, the iptables command is executed accordingly the desired configuration and the rules are saved into the /etc/sysconfig/iptables file.
 

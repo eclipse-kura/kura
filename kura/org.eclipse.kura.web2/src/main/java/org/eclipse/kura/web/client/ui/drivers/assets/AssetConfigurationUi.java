@@ -335,7 +335,7 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
         boolean isDirtyStateChanged = flag != this.dirty;
         this.dirty = flag;
 
-        this.btnDownload.setEnabled(!this.dirty);
+        this.btnDownload.setEnabled(!this.dirty && !this.model.getChannels().isEmpty());
 
         if (this.listener != null) {
             if (isDirtyStateChanged) {

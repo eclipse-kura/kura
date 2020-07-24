@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.util.LabelComparator;
 import org.eclipse.kura.web.client.util.ValidationUtil;
@@ -40,25 +39,37 @@ public class AssetModelImpl implements AssetModel {
     private final List<ChannelModel> channelModels = new ArrayList<>();
     private final List<GwtConfigParameter> extraParameters = new ArrayList<>();
 
-    public AssetModelImpl(GwtConfigComponent assetConfiguration, GwtConfigComponent channelDescriptor,
-            GwtConfigComponent baseChannelDescriptor) {
+    public AssetModelImpl(GwtConfigComponent assetConfiguration, GwtConfigComponent channelDescriptor) {
         this.assetConfiguration = assetConfiguration;
 
-        this.channelDescriptor = new GwtConfigComponent();
+        this.channelDescriptor = channelDescriptor;
         int i = 0;
-        for (final GwtConfigParameter param : baseChannelDescriptor.getParameters()) {
-            this.channelDescriptor.getParameters().add(param);
-            this.paramIndexes.put(param.getId(), i);
-            i++;
-        }
         for (final GwtConfigParameter param : channelDescriptor.getParameters()) {
-            this.channelDescriptor.getParameters().add(param);
             this.paramIndexes.put(param.getId(), i);
             i++;
         }
 
         probeChannels();
         loadChannelModels();
+    }
+
+    public AssetModelImpl(GwtConfigComponent assetConfiguration, GwtConfigComponent channelDescriptor,
+            GwtConfigComponent baseChannelDescriptor) {
+        this(assetConfiguration, concat(baseChannelDescriptor, channelDescriptor));
+    }
+
+    private static GwtConfigComponent concat(final GwtConfigComponent first, final GwtConfigComponent second) {
+        final GwtConfigComponent result = new GwtConfigComponent();
+
+        for (final GwtConfigParameter c : first.getParameters()) {
+            result.getParameters().add(c);
+        }
+
+        for (final GwtConfigParameter c : second.getParameters()) {
+            result.getParameters().add(c);
+        }
+
+        return result;
     }
 
     private String getChannelName(String propertyName) {
@@ -246,8 +257,6 @@ public class AssetModelImpl implements AssetModel {
         return this.assetConfiguration.getComponentId();
     }
 
-    private final Logger logger = Logger.getGlobal();
-
     @Override
     public boolean isValid() {
         for (final ChannelModel model : this.channelModels) {
@@ -261,14 +270,31 @@ public class AssetModelImpl implements AssetModel {
         for (final GwtConfigParameter extraParam : extraParameters) {
 
             if (!ValidationUtil.validateParameter(extraParam, extraParam.getValue())) {
-                logger.info(extraParam.getName() + " is not valid");
                 return false;
             }
-
-            logger.info(extraParam.getName() + " is valid");
         }
 
         return true;
+    }
+
+    @Override
+    public void addAllChannels(final AssetModel other) {
+        for (final ChannelModel model : other.getChannels()) {
+            final ChannelModel channel = channelModels.stream()
+                    .filter(c -> c.getChannelName().contentEquals(model.getChannelName())).findAny()
+                    .orElseGet(() -> createNewChannel(model.getChannelName()));
+            for (final String param : paramIndexes.keySet()) {
+                channel.setValue(param, model.getValue(param));
+            }
+        }
+    }
+
+    @Override
+    public void replaceChannels(final AssetModel other) {
+        while (!channelNames.isEmpty()) {
+            deleteChannel(channelNames.iterator().next());
+        }
+        addAllChannels(other);
     }
 
 }

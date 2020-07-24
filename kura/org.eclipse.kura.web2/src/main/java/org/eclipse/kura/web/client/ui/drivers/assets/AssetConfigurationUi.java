@@ -32,7 +32,6 @@ import java.util.Set;
 import java.util.logging.Level;
 
 import org.eclipse.kura.web.Console;
-import org.eclipse.kura.web.client.configuration.Configurations;
 import org.eclipse.kura.web.client.configuration.HasConfiguration;
 import org.eclipse.kura.web.client.ui.AbstractServicesUi;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
@@ -48,8 +47,8 @@ import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter.GwtConfigParameterType;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
-import org.eclipse.kura.web.shared.service.GwtComponentService;
-import org.eclipse.kura.web.shared.service.GwtComponentServiceAsync;
+import org.eclipse.kura.web.shared.service.GwtAssetService;
+import org.eclipse.kura.web.shared.service.GwtAssetServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.gwtbootstrap3.client.ui.Button;
@@ -89,7 +88,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
 public class AssetConfigurationUi extends AbstractServicesUi implements HasConfiguration {
 
     private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
-    private final GwtComponentServiceAsync gwtComponentService = GWT.create(GwtComponentService.class);
+    private final GwtAssetServiceAsync gwtAssetService = GWT.create(GwtAssetService.class);
 
     interface AssetConfigurationUiBinder extends UiBinder<Widget, AssetConfigurationUi> {
     }
@@ -172,17 +171,14 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
 
     private AssetModel model;
     private final Widget associatedView;
-    private final Configurations configurations;
 
     private final SimplePager channelPager;
 
     private HasConfiguration.Listener listener;
 
-    public AssetConfigurationUi(final AssetModel assetModel, final Widget associatedView,
-            final Configurations configurations) {
+    public AssetConfigurationUi(final AssetModel assetModel, final Widget associatedView) {
         initWidget(uiBinder.createAndBindUi(this));
         this.model = assetModel;
-        this.configurations = configurations;
         this.fields.clear();
 
         this.channelPager = new SimplePager(TextLocation.CENTER, false, 0, true) {
@@ -245,8 +241,8 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
         this.uploadForm.addSubmitCompleteHandler(event -> {
             String htmlResponse = event.getResults();
             if (htmlResponse == null || htmlResponse.isEmpty()) {
-                RequestQueue.submit(context -> this.gwtXSRFService.generateSecurityToken(
-                        context.callback(token -> RequestQueue.submit(context1 -> getConfiguration(token, context1)))));
+                RequestQueue.submit(c -> this.gwtXSRFService.generateSecurityToken(
+                        c.callback(token -> fetchUploadedChannels(token, appendCheck.getValue(), c))));
 
             } else {
                 EntryClassUi.hideWaitModal();
@@ -261,20 +257,23 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
         initNewChannelModal();
     }
 
-    private void getConfiguration(GwtXSRFToken token, final RequestContext context) {
-        AssetConfigurationUi.this.gwtComponentService.findFilteredComponentConfiguration(token,
-                AssetConfigurationUi.this.model.getAssetPid(), context.callback(result -> {
-                    final GwtConfigComponent newConfiguration = result.get(0);
-                    DriversAndAssetsRPC.loadStaticInfo(result1 -> {
-                        AssetConfigurationUi.this.model = new AssetModelImpl(newConfiguration,
-                                AssetConfigurationUi.this.configurations
-                                        .getChannelDescriptor(AssetConfigurationUi.this.model.getConfiguration()
-                                                .getParameterValue(AssetConstants.ASSET_DRIVER_PROP.value())),
-                                AssetConfigurationUi.this.configurations.getBaseChannelDescriptor());
-                        EntryClassUi.hideWaitModal();
-                        AssetConfigurationUi.this.renderForm();
-                    });
-                }));
+    private void fetchUploadedChannels(GwtXSRFToken token, final boolean replace, final RequestContext context) {
+        final String assetPid = this.model.getAssetPid();
+
+        gwtAssetService.getUploadedCsvConfig(token, assetPid, context.callback(newConfiguration -> {
+            final GwtConfigComponent descriptor = this.model.getChannelDescriptor();
+
+            final AssetModelImpl importedChannels = new AssetModelImpl(newConfiguration, descriptor);
+
+            if (replace) {
+                this.model.replaceChannels(importedChannels);
+            } else {
+                this.model.addAllChannels(importedChannels);
+            }
+
+            this.renderForm();
+            setDirty(true);
+        }));
     }
 
     public void setModel(AssetModel model) {
@@ -336,13 +335,15 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
         boolean isDirtyStateChanged = flag != this.dirty;
         this.dirty = flag;
 
-        this.btnDownload.setEnabled(!this.dirty);
+        this.btnDownload.setEnabled(!this.dirty && !this.model.getChannels().isEmpty());
 
         if (this.listener != null) {
             if (isDirtyStateChanged) {
                 this.listener.onDirtyStateChanged(this);
             }
-            this.listener.onConfigurationChanged(this);
+            if (this.dirty) {
+                this.listener.onConfigurationChanged(this);
+            }
         }
     }
 
@@ -623,8 +624,7 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
 
     @Override
     public void clearDirtyState() {
-        this.dirty = false;
-        this.btnDownload.setEnabled(true);
+        setDirty(false);
     }
 
     @Override

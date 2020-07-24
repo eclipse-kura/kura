@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -65,7 +65,7 @@ public class AssetMgmtUi extends Composite {
         final AssetModel model = new AssetModelImpl(new GwtConfigComponent(assetConfiguration), channelDescriptor,
                 configurations.getBaseChannelDescriptor());
         this.assetDataUi = new AssetDataUi(model);
-        this.assetConfigUi = new AssetConfigurationUi(model, this.assetDataUi, configurations);
+        this.assetConfigUi = new AssetConfigurationUi(model, this.assetDataUi);
         final ConfigurationUiButtons buttonBar = createAssetUiButtonBar(this.assetConfigUi, configurations);
 
         final Panel panel = new Panel();
@@ -84,6 +84,8 @@ public class AssetMgmtUi extends Composite {
             }
             AssetMgmtUi.this.assetDataUi.renderForm();
         });
+
+        setDirty(hasConfiguration.isDirty());
     }
 
     public void refresh() {

@@ -393,6 +393,7 @@ public class WiresPanelUi extends Composite
 
     private WireComponent createAsset(String pid, String driverPid) {
         final HasConfiguration assetConfig = this.configurations.createAndRegisterConfiguration(pid, WIRE_ASSET_PID);
+        assetConfig.markAsDirty();
         assetConfig.getConfiguration().getParameter(AssetConstants.ASSET_DRIVER_PROP.value()).setValue(driverPid);
         return this.descriptors.createNewComponent(pid, WIRE_ASSET_PID);
     }
@@ -526,6 +527,7 @@ public class WiresPanelUi extends Composite
         HasConfiguration config = this.configurations.getConfiguration(component.getPid());
         if (config == null) {
             config = this.configurations.createAndRegisterConfiguration(component.getPid(), component.getFactoryPid());
+            config.markAsDirty();
         }
         updateComponentsValidState(config);
         this.dialogs.setAssetPids(getAssetsNotInComposer());

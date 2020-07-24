@@ -291,8 +291,9 @@ public class AssetModelImpl implements AssetModel {
 
     @Override
     public void replaceChannels(final AssetModel other) {
-        this.channelNames.clear();
-        this.channelModels.clear();
+        while (!channelNames.isEmpty()) {
+            deleteChannel(channelNames.iterator().next());
+        }
         addAllChannels(other);
     }
 

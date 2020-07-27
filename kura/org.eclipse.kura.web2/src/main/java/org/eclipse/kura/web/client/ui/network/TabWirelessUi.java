@@ -60,6 +60,8 @@ import org.gwtbootstrap3.client.ui.ModalFooter;
 import org.gwtbootstrap3.client.ui.PanelHeader;
 import org.gwtbootstrap3.client.ui.TextBox;
 import org.gwtbootstrap3.client.ui.constants.ValidationState;
+import org.gwtbootstrap3.client.ui.form.error.BasicEditorError;
+import org.gwtbootstrap3.client.ui.form.validator.Validator;
 import org.gwtbootstrap3.client.ui.gwt.CellTable;
 import org.gwtbootstrap3.client.ui.html.Span;
 import org.gwtbootstrap3.client.ui.html.Text;
@@ -67,6 +69,8 @@ import org.gwtbootstrap3.client.ui.html.Text;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.editor.client.Editor;
+import com.google.gwt.editor.client.EditorError;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.DomEvent;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -242,6 +246,10 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     HelpBlock helpPassword;
     @UiField
     HelpBlock helpVerify;
+    @UiField
+    HelpBlock helpShortI;
+    @UiField
+    HelpBlock helpLongI;
 
     @UiField
     Modal ssidModal;
@@ -356,18 +364,24 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
     @Override
     public boolean isValid() {
-        return isValidForm();
+        boolean valid = isValidForm();
+        logger.info("valid: " + Boolean.toString(valid));
+        return valid;
     }
 
     private boolean isValidForm() {
         boolean result = this.form.validate();
+        logger.info("form valid: " + Boolean.toString(result));
         result = result && !this.groupWireless.getValidationState().equals(ValidationState.ERROR)
                 && !this.groupPassword.getValidationState().equals(ValidationState.ERROR)
                 && !this.groupVerify.getValidationState().equals(ValidationState.ERROR);
 
-        result = result && !this.groupRssi.getValidationState().equals(ValidationState.ERROR)
-                && !this.groupShortI.getValidationState().equals(ValidationState.ERROR)
+        logger.info("password valid: " + Boolean.toString(result));
+
+        result = result && !this.groupShortI.getValidationState().equals(ValidationState.ERROR)
                 && !this.groupLongI.getValidationState().equals(ValidationState.ERROR);
+
+        logger.info("last valid: " + this.groupShortI.getValidationState());
 
         return result;
     }
@@ -945,18 +959,13 @@ public class TabWirelessUi extends Composite implements NetworkTab {
             }
         });
         this.shortI.addMouseOutHandler(event -> resetHelp());
-        this.shortI.addChangeHandler(event -> {
-            if (TabWirelessUi.this.shortI.getText().trim().contains(".")
-                    || TabWirelessUi.this.shortI.getText().trim().contains("-")
-                    || !TabWirelessUi.this.shortI.getText().trim().matches("[0-9]+")) {
-                TabWirelessUi.this.groupShortI.setValidationState(ValidationState.ERROR);
-            } else {
-                TabWirelessUi.this.groupShortI.setValidationState(ValidationState.NONE);
-            }
-        });
+        this.shortI.addValidator(newBgScanValidator(this.shortI));
+        this.shortI.addChangeHandler(event -> this.longI.validate());
 
         // Bgscan long interval
         this.labelLongI.setText(MSGS.netWifiWirelessBgscanLongInterval());
+        this.longI.addValidator(newBgScanValidator(this.longI));
+        this.longI.addChangeHandler(event -> this.shortI.validate());
         this.longI.addMouseOverHandler(event -> {
             if (TabWirelessUi.this.longI.isEnabled()) {
                 TabWirelessUi.this.helpText.clear();
@@ -964,15 +973,6 @@ public class TabWirelessUi extends Composite implements NetworkTab {
             }
         });
         this.longI.addMouseOutHandler(event -> resetHelp());
-        this.longI.addChangeHandler(event -> {
-            if (TabWirelessUi.this.longI.getText().trim().contains(".")
-                    || TabWirelessUi.this.longI.getText().trim().contains("-")
-                    || !TabWirelessUi.this.longI.getText().trim().matches("[0-9]+")) {
-                TabWirelessUi.this.groupLongI.setValidationState(ValidationState.ERROR);
-            } else {
-                TabWirelessUi.this.groupLongI.setValidationState(ValidationState.NONE);
-            }
-        });
 
         // Ping Access Point ----
         this.labelPing.setText(MSGS.netWifiWirelessPingAccessPoint());
@@ -1016,6 +1016,34 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         initGrid();
 
         this.helpTitle.setText(MSGS.netHelpTitle());
+    }
+
+    private Validator<String> newBgScanValidator(TextBox field) {
+        return new Validator<String>() {
+
+            @Override
+            public List<EditorError> validate(Editor<String> editor, String value) {
+                List<EditorError> result = new ArrayList<>();
+                try {
+                    if (field.getText().trim().contains(".") || field.getText().trim().contains("-")
+                            || !field.getText().trim().matches("[0-9]+")) {
+                        result.add(new BasicEditorError(field, value, MSGS.netWifiBgScanInterval()));
+                    } else if (Integer.parseInt(TabWirelessUi.this.shortI.getText().trim()) >= Integer
+                            .parseInt(TabWirelessUi.this.longI.getText().trim())) {
+                        result.add(new BasicEditorError(field, value, MSGS.netWifiBgScanIntervalValues()));
+                    }
+                } catch (NumberFormatException e) {
+                    result.add(new BasicEditorError(field, value, MSGS.deviceConfigError()));
+                }
+                return result;
+            }
+
+            @Override
+            public int getPriority() {
+                return 0;
+            }
+
+        };
     }
 
     private void resetHelp() {
@@ -1439,9 +1467,9 @@ public class TabWirelessUi extends Composite implements NetworkTab {
             }
         }
 
-        gwtWifiConfig.setBgscanRssiThreshold(Integer.parseInt(this.rssi.getText()));
-        gwtWifiConfig.setBgscanShortInterval(Integer.parseInt(this.shortI.getText()));
-        gwtWifiConfig.setBgscanLongInterval(Integer.parseInt(this.longI.getText()));
+        gwtWifiConfig.setBgscanRssiThreshold(Integer.parseInt(this.rssi.getText().trim()));
+        gwtWifiConfig.setBgscanShortInterval(Integer.parseInt(this.shortI.getText().trim()));
+        gwtWifiConfig.setBgscanLongInterval(Integer.parseInt(this.longI.getText().trim()));
 
         // password
         if (this.groupPassword.getValidationState().equals(ValidationState.NONE)) {

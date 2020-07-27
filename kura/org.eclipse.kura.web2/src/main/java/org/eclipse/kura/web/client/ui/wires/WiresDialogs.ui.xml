@@ -23,7 +23,7 @@
     </ui:style>
 
     <b:Container fluid="true">
-        <b:Modal closable="false" dataKeyboard="true" b:id="select-asset-modal" ui:field="selectAssetModal"
+        <b:Modal closable="false" fade="true" dataBackdrop="STATIC" dataKeyboard="true" b:id="select-asset-modal" ui:field="selectAssetModal"
             title="{msgs.selectAssetLabel}">
             <b:ModalBody>
                 <b.html:Paragraph text="{msgs.selectAssetIntroLabel}" />
@@ -46,7 +46,7 @@
             </b:ModalFooter>
         </b:Modal>
 
-        <b:Modal closable="false" dataKeyboard="true" b:id="select-driver-modal"
+        <b:Modal closable="false" fade="true" dataBackdrop="STATIC" dataKeyboard="true" b:id="select-driver-modal"
             ui:field="selectDriverModal" title="{msgs.selectDriverLabel}">
             <b:ModalBody>
                 <b.html:Paragraph text="{msgs.selectDriverIntroLabel}" />
@@ -69,7 +69,7 @@
             </b:ModalFooter>
         </b:Modal>
 
-        <b:Modal closable="false" dataKeyboard="true" b:id="new-asset-modal"
+        <b:Modal closable="false" fade="true" dataBackdrop="STATIC" dataKeyboard="true" b:id="new-asset-modal"
             ui:field="newAssetModal" title="{msgs.newAsset}">
             <b:ModalBody>
                 <b.html:Paragraph text="{msgs.createNewAssetIntroLabel2}" />
@@ -98,7 +98,7 @@
             </b:ModalFooter>
         </b:Modal>
 
-        <b:Modal closable="false" dataKeyboard="true" b:id="new-driver-modal"
+        <b:Modal closable="false" fade="true" dataBackdrop="STATIC" dataKeyboard="true" b:id="new-driver-modal"
             ui:field="newDriverModal" title="{msgs.newDriver}">
             <b:ModalBody>
                 <b.html:Paragraph text="{msgs.createNewDriverIntroLabel}" />

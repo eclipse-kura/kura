@@ -37,6 +37,7 @@ import org.gwtbootstrap3.client.ui.Modal;
 import org.gwtbootstrap3.client.ui.ModalBody;
 import org.gwtbootstrap3.client.ui.ModalFooter;
 import org.gwtbootstrap3.client.ui.ModalHeader;
+import org.gwtbootstrap3.client.ui.constants.ModalBackdrop;
 import org.gwtbootstrap3.client.ui.html.Span;
 import org.gwtbootstrap3.client.ui.html.Text;
 
@@ -160,6 +161,10 @@ public class CommandUserTabUi extends AbstractServicesUi implements Tab {
             if (isDirty()) {
                 // TODO ask for confirmation first
                 this.modal = new Modal();
+                modal.setClosable(false);
+                modal.setFade(true);
+                modal.setDataKeyboard(true);
+                modal.setDataBackdrop(ModalBackdrop.STATIC);
 
                 ModalHeader header = new ModalHeader();
                 header.setTitle(MSGS.confirm());

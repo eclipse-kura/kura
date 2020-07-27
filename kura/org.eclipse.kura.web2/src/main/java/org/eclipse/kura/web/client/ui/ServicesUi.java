@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -41,6 +41,7 @@ import org.gwtbootstrap3.client.ui.ModalHeader;
 import org.gwtbootstrap3.client.ui.NavPills;
 import org.gwtbootstrap3.client.ui.PanelBody;
 import org.gwtbootstrap3.client.ui.TextBox;
+import org.gwtbootstrap3.client.ui.constants.ModalBackdrop;
 import org.gwtbootstrap3.client.ui.html.Span;
 import org.gwtbootstrap3.client.ui.html.Text;
 
@@ -156,6 +157,10 @@ public class ServicesUi extends AbstractServicesUi {
         if (isDirty()) {
             // Modal
             this.modal = new Modal();
+            modal.setClosable(false);
+            modal.setFade(true);
+            modal.setDataKeyboard(true);
+            modal.setDataBackdrop(ModalBackdrop.STATIC);
 
             ModalHeader header = new ModalHeader();
             header.setTitle(MSGS.confirm());

@@ -35,7 +35,8 @@
             </b:Row>
         </b:Column>
 
-        <b:Modal ui:field="portForwardingForm" b:id="portForwardingForm">
+        <b:Modal closable="false" fade="true" dataBackdrop="STATIC"
+            dataKeyboard="true" ui:field="portForwardingForm" b:id="portForwardingForm">
             <b:ModalBody>
                 <b:Form>
                     <b:FieldSet>
@@ -143,7 +144,8 @@
 
         </b:Modal>
 
-        <b:Modal ui:field="existingRule" b:id="existingRule" title="{msgs.warning}" >
+        <b:Modal closable="false" fade="true" dataBackdrop="STATIC"
+            dataKeyboard="true" ui:field="existingRule" b:id="existingRule" title="{msgs.warning}" >
             <b:ModalBody>
                 <b:Panel>
                     <b:PanelBody>

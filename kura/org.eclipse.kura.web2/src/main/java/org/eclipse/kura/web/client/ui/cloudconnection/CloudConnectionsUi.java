@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2016, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -32,6 +32,7 @@ import org.gwtbootstrap3.client.ui.ModalFooter;
 import org.gwtbootstrap3.client.ui.ModalHeader;
 import org.gwtbootstrap3.client.ui.Panel;
 import org.gwtbootstrap3.client.ui.TabListItem;
+import org.gwtbootstrap3.client.ui.constants.ModalBackdrop;
 import org.gwtbootstrap3.client.ui.html.Span;
 
 import com.google.gwt.core.client.GWT;
@@ -161,6 +162,10 @@ public class CloudConnectionsUi extends Composite {
 
     private void showDirtyModal() {
         final Modal modal = new Modal();
+        modal.setClosable(false);
+        modal.setFade(true);
+        modal.setDataKeyboard(true);
+        modal.setDataBackdrop(ModalBackdrop.STATIC);
 
         ModalHeader header = new ModalHeader();
         header.setTitle(MSGS.confirm());

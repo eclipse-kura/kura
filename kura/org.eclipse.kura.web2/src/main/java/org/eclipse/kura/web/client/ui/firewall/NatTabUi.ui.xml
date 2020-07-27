@@ -38,7 +38,8 @@
 
 
 		<!--******Modals***** -->
-        <b:Modal ui:field="natForm" b:id="natForm">
+        <b:Modal closable="false" fade="true" dataBackdrop="STATIC"
+            dataKeyboard="true" ui:field="natForm" b:id="natForm">
             <b:ModalBody>
                 <b:Form>
                     <b:FieldSet>
@@ -111,7 +112,8 @@
             </b:ModalFooter>
         </b:Modal>
 
-        <b:Modal ui:field="existingRule" b:id="existingRule" title="{msgs.warning}" >
+        <b:Modal closable="false" fade="true" dataBackdrop="STATIC"
+            dataKeyboard="true" ui:field="existingRule" b:id="existingRule" title="{msgs.warning}" >
             <b:ModalBody>
                 <b:Panel>
                     <b:PanelBody>

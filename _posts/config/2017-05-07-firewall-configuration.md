@@ -18,15 +18,15 @@ Open Ports, Port Forwarding, and IP Forwarding and Masquerading are configured v
 
 ## Firewall Linux Configuration
 
-This section describes the changes applied by Kura at the Linux networking configuration. Please read the following note before proceeding with manual changes of the Linux networking configuration.
+This section describes the changes applied by Kura at the Linux networking configuration. Please read the following note before proceeding with manual changes in the Linux networking configuration.
 
-{% include alerts.html message='It is NOT recommended performing manual editing of the Linux networking configuration files when the gateway configuration is being managed through Kura. While Linux may correctly accept manual changes, Kura may not be able to interpret the new configuration resulting in an inconsistent state.' %}
+{% include alerts.html message='Manual editing of the Linux networking configuration file is NOT recommended when the gateway configuration is being managed through Kura. While Linux may correctly accept manual changes, Kura may not be able to interpret the new configuration resulting in an inconsistent state.' %}
 
 When a new firewall configuration is submitted, the iptables command is executed accordingly the desired configuration and the rules are saved into the /etc/sysconfig/iptables file.
 
 ## Open Ports
 
-If Kura is running on a gateway, all TCP/UDP ports are closed by default unless custom rules are added to the /etc/sysconfig/iptables file. . Therefore, if a user needs to connect to a specific port on a gateway, it is insufficient to have an application listening on the desired port; the port also needs to be opened in the firewall.
+If Kura is running on a gateway, all TCP/UDP ports are closed by default unless custom rules are added to the /etc/sysconfig/iptables file. Therefore, if a user needs to connect to a specific port on a gateway, it is insufficient to have an application listening on the desired port; the port also needs to be opened in the firewall.
 
 To open a port using the Administration Console, select the **Firewall** option located in the **System** area. The **Firewall** configuration display appears in the main window. With the **Open Ports** tab selected, click the **New** button. The **New Open Port Entry** form appears.
 
@@ -62,11 +62,11 @@ The **Port Forward Entry** form contains the following configuration parameters:
 
 - **Output Interface** - specifies the interface through which a packet is going to be forwarded to its destination. (Required field.)
 
-- **LAN Address** - supplies the IP address of destination host. (Required field.)
+- **LAN Address** - supplies the IP address of the destination host. (Required field.)
 
 - **Protocol** - defines the protocol (tcp or udp). (Required field.)
 
-- **External Port** - provides the external destination port on gateway unit. (Required field.)
+- **External Port** - provides the external destination port on the gateway unit. (Required field.)
 
 - **Internal Port** - provides the port on a destination host. (Required field.)
 
@@ -82,7 +82,7 @@ Complete the **Port Forward Entry** form and click the **Apply** button for the 
 
 ### Port Forwarding example
 
-This section describes an example on port forwarding rules. The initial setup is described below.
+This section describes an example of port forwarding rules. The initial setup is described below.
 
 - A couple of RaspberryPi 3 that shares the same LAN over Ethernet.
 
@@ -118,7 +118,7 @@ The following port forwarding entries are added to the second RaspberryPi config
 
 - Masquerade - yes
 
-The _Permitted Network_, _Permited MAC Address_, and _Source Port Range_ fields are left blank.
+The _Permitted Network_, _Permitted MAC Address_, and _Source Port Range_ fields are left blank.
 
 The following iptables rules are added to the /etc/sysconfig/iptables file:
 
@@ -178,7 +178,7 @@ The **IP Forwarding/Masquerading** form contains the following configuration par
 
 - **Destination Network/Host** - identifies the destination network or host name (CIDR notation). Set to 0.0.0.0/0 if empty.
 
-- **Enable Masquerading** - defines whether masquerading is used (yes or no). If set to 'yes', masquerading is enabled. If set to 'no', only FORWARDING rules are be added. (Required field.)
+- **Enable Masquerading** - defines whether masquerading is used (yes or no). If set to 'yes', masquerading is enabled. If set to 'no', only FORWARDING rules are being added. (Required field.)
 
 As a use-case scenario, consider the same setup as in port forwarding. In this case, the interfaces of the gateway are configured as follows:
 

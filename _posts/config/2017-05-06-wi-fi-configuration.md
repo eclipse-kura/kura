@@ -61,7 +61,7 @@ The **Wireless** tab contains the following configuration parameters:
 
 - **Bgscan Module** - requests background scans for the purpose of roaming within an ESS (i.e., within a single network block with all the APs using the same SSID).
   - None - background scan is disabled
-  - Simple - periodic background scans based on signal strength
+  - Simple - periodic background scans based on the signal strength
   - Learn - learn channels used by the network and try to avoid bgscans on other channels
 
 
@@ -74,7 +74,7 @@ The **Wireless** tab contains the following configuration parameters:
 - **Bgscan Long Interval** - defines the interval  between background scans (in seconds) if the actual signal level of the currently connected access point is better than signal_strength.
 
 
-- **Ping Access Point & renew DHCP lease if not reachable** - enables pinging the access point after connection is established.
+- **Ping Access Point & renew DHCP lease if not reachable** - enables pinging the access point after the connection is established.
   - In _Access Point_ mode, this option is disabled.
   - In _Station_ mode, if set to _true_, the unit will ping the access point and attempt to renew the DHCP lease if the access point is not reachable.  
 
@@ -108,9 +108,9 @@ If you select one of these access points, respective wireless controls (i.e., _N
 
 ## Wi-Fi Linux Configuration
 
-This section describes the changes applied by Kura at the Linux networking configuration. Please read the following note before proceeding with manual changes of the Linux networking configuration.
+This section describes the changes applied by Kura at the Linux networking configuration. Please read the following note before proceeding with manual changes in the Linux networking configuration.
 
-{% include alerts.html message='It is NOT recommended performing manual editing of the Linux networking configuration files when the gateway configuration is being managed through Kura. While Linux may correctly accept manual changes, Kura may not be able to interpret the new configuration resulting in an inconsistent state.' %}
+{% include alerts.html message='Manual editing of the Linux networking configuration file is NOT recommended when the gateway configuration is being managed through Kura. While Linux may correctly accept manual changes, Kura may not be able to interpret the new configuration resulting in an inconsistent state.' %}
 
 When the Wi-Fi configuration for the _Access Point_ mode is submitted, Kura generates the /etc/hostapd.conf file and launches the hostapd program as shown below.
 
@@ -125,7 +125,7 @@ interface=wlan0
 
 driver=nl80211
 
-# SSID to use. This will be the "name" of the accesspoint
+# SSID to use. This will be the "name" of the access point
 ssid=kura_gateway_00:E0:C7:09:35:D8
 
 # basic operational settings
@@ -148,7 +148,7 @@ dump_file=/tmp/hostapd.dump
 # bit1 = IEEE 802.11i/RSN (WPA2) (dot11RSNAEnabled)
 wpa=2
 
-# Preshared key of between 8-63 ASCII characters.
+# Preshared key between 8-63 ASCII characters.
 # If you define the key in here, make sure that the file is not readable
 # by anyone but root. Alternatively you can use a separate file for the
 # key; see original hostapd.conf for more information.
@@ -163,7 +163,7 @@ wpa_pairwise=CCMP
 # Change the broadcasted/multicasted keys after this many seconds.
 wpa_group_rekey=600
 
-# Change the master key after this many seconds. Master key is used as a basis
+# Change the master key after this many seconds. The master key is used as a basis
 # (source) for the encryption keys.
 wpa_gmk_rekey=86400
 

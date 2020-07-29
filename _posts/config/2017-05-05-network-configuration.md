@@ -74,7 +74,7 @@ iptables -A FORWARD -i eth0 -o ppp0 -j ACCEPT
 Also, IP forwarding is enabled in the kernel as follows:
 
 ```
-# allow fowarding if any masquerade is defined
+# allow forwarding if any masquerade is defined
 echo 1 > /proc/sys/net/ipv4/ip_forward
 ```
 
@@ -84,6 +84,6 @@ The rules shown above create an _Overloaded_ (i.e., many-to-one) NAT. This type 
 
 ## Network Linux Configuration
 
-When applying a new network configuration, Kura changes the configuration files of the Linux networking subsystem. Please read the following note before proceeding with manual changes of the Linux networking configuration.
+When applying a new network configuration, Kura changes the configuration files of the Linux networking subsystem. Please read the following note before proceeding with manual changes in the Linux networking configuration.
 
-{% include alerts.html message='It is NOT recommended performing manual editing of the Linux networking configuration files when the gateway configuration is being managed through Kura. While Linux may correctly accept manual changes, Kura may not be able to interpret the new configuration resulting in an inconsistent state.' %}
+{% include alerts.html message='Manual editing of the Linux networking configuration file is NOT recommended when the gateway configuration is being managed through Kura. While Linux may correctly accept manual changes, Kura may not be able to interpret the new configuration resulting in an inconsistent state.' %}

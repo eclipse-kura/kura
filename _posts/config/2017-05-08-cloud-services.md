@@ -4,7 +4,7 @@ title:  "Cloud Services"
 categories: [config]
 ---
 
-The Cloud Services section of the Kura Administrative Web UI allows to create and manage cloud connections.
+The Cloud Services section of the Kura Administrative Web UI allows user to create and manage cloud connections.
 
 By default, Kura starts with a single cloud connection, as depicted in the following image:
 

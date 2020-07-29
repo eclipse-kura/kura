@@ -14,6 +14,9 @@ package org.eclipse.kura.web.server;
 import static java.lang.String.format;
 import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_PID;
 
+import java.io.IOException;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Base64.Decoder;
@@ -22,14 +25,22 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.eclipse.kura.asset.Asset;
 import org.eclipse.kura.channel.ChannelFlag;
 import org.eclipse.kura.channel.ChannelRecord;
 import org.eclipse.kura.channel.ChannelStatus;
+import org.eclipse.kura.configuration.metatype.AD;
+import org.eclipse.kura.driver.Driver;
+import org.eclipse.kura.internal.wire.asset.WireAssetChannelDescriptor;
 import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
@@ -40,6 +51,7 @@ import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtChannelOperationResult;
 import org.eclipse.kura.web.shared.model.GwtChannelRecord;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
+import org.eclipse.kura.web.shared.model.GwtConfigParameter;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtAssetService;
 import org.osgi.framework.BundleContext;
@@ -56,6 +68,7 @@ public class GwtAssetServiceImpl extends OsgiRemoteServiceServlet implements Gwt
 
     private static final Decoder BASE64_DECODER = Base64.getDecoder();
     private static final Encoder BASE64_ENCODER = Base64.getEncoder();
+    private static final AtomicInteger nextId = new AtomicInteger();
 
     @Override
     public GwtChannelOperationResult readAllChannels(GwtXSRFToken xsrfToken, String assetPid) throws GwtKuraException {
@@ -265,5 +278,79 @@ public class GwtAssetServiceImpl extends OsgiRemoteServiceServlet implements Gwt
             return BASE64_ENCODER.encodeToString((byte[]) typedValue.getValue());
         }
         return typedValue.getValue().toString();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public int convertToCsv(final GwtXSRFToken token, final String driverPid, final GwtConfigComponent assetConfig)
+            throws GwtKuraException, IOException {
+
+        checkXSRFToken(token);
+
+        final List<AD> wireAssetDescriptor = (List<AD>) WireAssetChannelDescriptor.get().getDescriptor();
+
+        final List<AD> channelDescriptor = new ArrayList<>();
+
+        for (final AD ad : wireAssetDescriptor) {
+            channelDescriptor.add(ad);
+        }
+
+        ServiceLocator.withAllServices(Driver.class, "(kura.service.pid=" + driverPid + ")", d -> {
+            final List<AD> desc = (List<AD>) d.getChannelDescriptor().getDescriptor();
+
+            channelDescriptor.addAll(desc);
+        });
+
+        if (channelDescriptor.size() == wireAssetDescriptor.size()) {
+            throw new GwtKuraException("Driver not found");
+        }
+
+        final Set<String> channelNames = new TreeSet<>();
+        final Map<String, GwtConfigParameter> paramsById = new HashMap<>();
+
+        assetConfig.getParameters().forEach(p -> {
+            final String id = p.getId();
+            final int index = id.indexOf('#');
+            if (index == -1) {
+                return;
+            }
+            channelNames.add(id.substring(0, index));
+            paramsById.put(id, p);
+        });
+
+        final Writer out = new StringWriter();
+
+        try (final CSVPrinter printer = new CSVPrinter(out, CSVFormat.RFC4180)) {
+
+            for (int i = 0; i < channelDescriptor.size(); i++) {
+                final String id = channelDescriptor.get(i).getId();
+
+                if (i < wireAssetDescriptor.size()) {
+                    printer.print(id.substring(1));
+                } else {
+                    printer.print(id);
+                }
+            }
+
+            printer.println();
+
+            for (final String channel : channelNames) {
+                for (final AD ad : channelDescriptor) {
+                    final String key = channel + '#' + ad.getId();
+                    final GwtConfigParameter param = paramsById.get(key);
+                    printer.print(param != null ? param.getValue() : null);
+                }
+                printer.println();
+            }
+
+        }
+
+        final int id = nextId.getAndIncrement();
+
+        final HttpSession session = getThreadLocalRequest().getSession(false);
+
+        session.setAttribute("kura.csv.download." + id, out.toString());
+
+        return id;
     }
 }

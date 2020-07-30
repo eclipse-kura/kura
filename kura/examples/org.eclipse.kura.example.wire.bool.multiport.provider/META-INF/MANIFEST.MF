@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: org.eclipse.kura.example.wire.bool.multiport.provider;singleton:=true
+Bundle-Version: 1.0.000.qualifier
+Bundle-Name: Boolean Components for Wires
+Bundle-Category: Kura Wires
+Bundle-Vendor: EUROTECH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: org.eclipse.kura.configuration;version="[1.1.2,2.0)",
+ org.eclipse.kura.type;version="[1.1.0,2.0)",
+ org.eclipse.kura.wire;version="[2.0,3.0)",
+ org.eclipse.kura.wire.graph;version="[1.0,2.0)",
+ org.eclipse.kura.wire.multiport;version="[1.0,2.0)",
+ org.osgi.framework;version="[1.5.0,2.0.0)",
+ org.osgi.service.component;version="1.2.0",
+ org.osgi.service.wireadmin;version="1.0.1",
+ org.slf4j;version="1.7"
+Bundle-ActivationPolicy: lazy
+Service-Component: OSGI-INF/*.xml

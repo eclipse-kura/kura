@@ -4,7 +4,7 @@ title:  "Deployment Service"
 categories: [builtin]
 ---
 
-The Deployment Service allows to download files to the gateway and to perform actions on them. In the configuration tab it is possible to specify which is the directory that has to be used to store the downloaded files and the list of actions declared as deployment hooks that will be invoked when a corresponding metric is received with the download request.
+The Deployment Service allows user to download files to the gateway and to perform actions on them. In the configuration tab it is possible to specify which is the directory that has to be used to store the downloaded files and the list of actions declared as deployment hooks that will be invoked when a corresponding metric is received with the download request.
 
 ![deployment_service]({{ site.baseurl }}/assets/images/builtin/deployment_service.png)
 

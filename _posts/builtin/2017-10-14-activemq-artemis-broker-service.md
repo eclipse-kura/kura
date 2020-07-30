@@ -4,7 +4,7 @@ title:  "ActiveMQ Artemis Broker Service"
 categories: [builtin]
 ---
 
-Apart from using the simple ActiveMQ Artemis MQTT instance available in the [Simple Artemis MQTT Broker Service](simple-artemis-mqtt-broker-service.html) this service allows to configure, in a more detailed way, the characteristics of the [ActiveMQ Artemis broker](https://activemq.apache.org/artemis/index.html) instance running in Eclipse Kura.
+Apart from using the simple ActiveMQ Artemis MQTT instance available in the [Simple Artemis MQTT Broker Service](simple-artemis-mqtt-broker-service.html) this service allows user to configure, in a more detailed way, the characteristics of the [ActiveMQ Artemis broker](https://activemq.apache.org/artemis/index.html) instance running in Eclipse Kura.
 
 ![kura_artemis_broker]({{ site.baseurl }}/assets/images/builtin/Kura_artemis_broker.png)
 
@@ -12,7 +12,7 @@ This service exposes the following configuration parameters:
 
   - **Enabled** - (Required) - Enables the broker instance
   - **Broker XML** - Broker XML configuration. An empty broker configuration will disable the broker.
-  - **Required protocols** - A comma seperated list of all required protocol factories (e.g. AMQP or MQTT)
+  - **Required protocols** - A comma separated list of all required protocol factories (e.g. AMQP or MQTT)
   - **User configuration** - (Required) - User configuration in the format: ```user=password|role1,role2,...```
   - **Default user name** - The name of the default user
 
@@ -86,4 +86,4 @@ Configuring the **MqttDataTransport** in System -> Cloud Services -> MqttDataTra
 
 Clicking on the **Connect** button will result in a successful connection of Kura cloud service to the Apache ActiveMQ Artemis MQTT broker.
 
-> Note: The XML configuration above only allows connections originating from the gateway itself. In order to allow external connection the bind URLs specified using the `acceptor` tag must be modified by specifying an external accessible address instead of `localhost`. If the bind address is set to `0.0.0.0`, the broker will listen on all available addresses.
+> Note: The XML configuration above only allows connections originating from the gateway itself. In order to allow external connection the bind URLs specified using the `acceptor` tag must be modified by specifying an externally accessible address instead of `localhost`. If the bind address is set to `0.0.0.0`, the broker will listen on all available addresses.

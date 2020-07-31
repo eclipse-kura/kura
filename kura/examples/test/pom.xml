@@ -273,6 +273,7 @@
         <module>org.eclipse.kura.example.ble.tisensortag.test</module>
         <module>org.eclipse.kura.example.ble.tisensortag.tinyb.test</module>
         <module>org.eclipse.kura.example.testutil</module>
+        <module>org.eclipse.kura.example.wire.bool.multiport.provider.test</module>
     </modules>
 
     <repositories>

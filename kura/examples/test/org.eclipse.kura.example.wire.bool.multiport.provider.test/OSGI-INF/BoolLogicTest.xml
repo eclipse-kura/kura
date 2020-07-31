@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+Copyright (c) 2019 Eurotech and/or its affiliates. All rights reserved.
+
+-->
+<scr:component
+	xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
+	activate="activate"
+	configuration-policy="ignore"
+	enabled="true"
+	immediate="true"
+	name="org.eclipse.kura.example.wire.bool.multiport.provider.test.BoolLogicTest">
+	<implementation
+		class="org.eclipse.kura.example.wire.bool.multiport.provider.test.BoolLogicTest" />
+	<property
+		name="service.pid"
+		value="org.eclipse.kura.example.wire.bool.multiport.provider.test.BoolLogicTest" />
+	<reference
+		bind="bindWireGraphService"
+		cardinality="1..1"
+		interface="org.eclipse.kura.wire.graph.WireGraphService"
+		name="WireGraphService"
+		policy="static" />
+ <reference bind="bindConfigurationService" cardinality="1..1" interface="org.eclipse.kura.configuration.ConfigurationService" name="ConfigurationService" policy="static"/>
+</scr:component>

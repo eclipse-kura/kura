@@ -28,6 +28,7 @@ public class LogicalComponentOptions {
         OR,
         XOR,
         NOR,
+        NAND,
         NOT
     }
 

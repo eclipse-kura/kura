@@ -131,6 +131,8 @@ public class LogicalComponent implements WireEmitter, ConfigurableComponent, Mul
             return firstOperand.booleanValue() || secondOperand.booleanValue();
         case NOR:
             return !(firstOperand.booleanValue() || secondOperand.booleanValue());
+        case NAND:
+            return !(firstOperand.booleanValue() && secondOperand.booleanValue());
         case XOR:
             return firstOperand.booleanValue() ^ secondOperand.booleanValue();
         default:

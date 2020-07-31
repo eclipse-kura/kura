@@ -21,6 +21,7 @@
 			<Option label="AND" value="AND" />
 			<Option label="OR" value="OR" />
 			<Option label="NOR" value="NOR" />
+			<Option label="NAND" value="NAND" />
 			<Option label="XOR" value="XOR" />
 			<Option label="NOT" value="NOT" />
 		</AD>

@@ -25,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
@@ -73,7 +74,7 @@ public class BoolLogicTest {
 
     private static final String OPERAND_NAME_DEFAULT = "operand";
     private static final String RESULT_NAME_DEFAULT = "result";
-    private static final boolean BARRIER_MODALITY_PROPERTY_DEFAULT = true;
+    private static final boolean BARRIER_MODALITY_PROPERTY_DEFAULT = false;
     private static final String BOOLEAN_OPERATION_DEFAULT = "AND";
 
     private static WireGraphService wireGraphService;
@@ -143,7 +144,7 @@ public class BoolLogicTest {
 
         final BundleContext bundleContext = FrameworkUtil.getBundle(BoolLogicTest.class).getBundleContext();
 
-        builder.addWireComponent(UNDER_TEST_PID, "org.eclipse.kura.wire.bool.logic.provider.BooleanComponent", 2, 1) //
+        builder.addWireComponent(UNDER_TEST_PID, "org.eclipse.kura.wire.LogicalOperators", 2, 1) //
                 .addTestEmitterReceiver(TEST_FIRST_EMITTER_PID) //
                 .addTestEmitterReceiver(TEST_SECOND_EMITTER_PID).addTestEmitterReceiver(TEST_RECEIVER_PID) //
                 .addWire(TEST_FIRST_EMITTER_PID, 0, UNDER_TEST_PID, IN0_PORT) //
@@ -191,14 +192,18 @@ public class BoolLogicTest {
         }
 
         assertTrue(wgc.getWireComponentConfigurations().stream()
-                .anyMatch(wcc -> matchesDefaultConfiguration(wcc.getConfiguration().getConfigurationProperties())));
+                .anyMatch(wcc -> matchesDefaultConfiguration(wcc.getConfiguration())));
     }
 
-    private boolean matchesDefaultConfiguration(Map<String, Object> props) {
-        return props.get(FIRST_OPERAND_NAME_PROP_NAME).equals(OPERAND_NAME_DEFAULT)
-                && props.get(SECOND_OPERAND_NAME_PROP_NAME).equals(OPERAND_NAME_DEFAULT)
-                && props.get(BARRIER_MODALITY_PROPERTY_KEY).equals(BARRIER_MODALITY_PROPERTY_DEFAULT)
-                && props.get(BOOLEAN_OPERATION).equals(BOOLEAN_OPERATION_DEFAULT);
+    private boolean matchesDefaultConfiguration(ComponentConfiguration cc) {
+        if (cc.getPid().equals(UNDER_TEST_PID)) {
+            Map<String, Object> props = cc.getConfigurationProperties();
+            return OPERAND_NAME_DEFAULT.equals(props.get(FIRST_OPERAND_NAME_PROP_NAME))
+                    && OPERAND_NAME_DEFAULT.equals(props.get(SECOND_OPERAND_NAME_PROP_NAME))
+                    && BARRIER_MODALITY_PROPERTY_DEFAULT == (boolean) props.get(BARRIER_MODALITY_PROPERTY_KEY)
+                    && BOOLEAN_OPERATION_DEFAULT.equals(props.get(BOOLEAN_OPERATION));
+        }
+        return false;
     }
 
     @Test

@@ -10,14 +10,14 @@
 -->
 
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" 
-name="org.eclipse.kura.example.wire.bool.multiport.provider.BooleanComponent"
+name="org.eclipse.kura.wire.LogicalOperators"
                activate="activate"
                deactivate="deactivate"
                modified="updated"
                enabled="true"
                immediate="true"
                configuration-policy="require">
-   <implementation class="org.eclipse.kura.example.wire.bool.multiport.provider.BooleanComponent"/>
+   <implementation class="org.eclipse.kura.example.wire.bool.multiport.provider.LogicalComponent"/>
    
    <service>
       <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>

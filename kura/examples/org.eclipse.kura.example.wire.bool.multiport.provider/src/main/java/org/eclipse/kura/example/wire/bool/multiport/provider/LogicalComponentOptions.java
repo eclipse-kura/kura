@@ -21,7 +21,7 @@ import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class BooleanComponentOptions {
+public class LogicalComponentOptions {
 
     public enum AllowedOperations {
         AND,
@@ -39,10 +39,10 @@ public class BooleanComponentOptions {
 
     private static final String OPERAND_NAME_DEFAULT = "operand";
     private static final String RESULT_NAME_DEFAULT = "result";
-    private static final boolean BARRIER_MODALITY_PROPERTY_DEFAULT = true;
+    private static final boolean BARRIER_MODALITY_PROPERTY_DEFAULT = false;
     private static final AllowedOperations BOOLEAN_OPERATION_DEFAULT = AllowedOperations.AND;
 
-    private static final Logger logger = LoggerFactory.getLogger(BooleanComponentOptions.class);
+    private static final Logger logger = LoggerFactory.getLogger(LogicalComponentOptions.class);
 
     private String firstOperandName;
     private String secondOperandName;
@@ -51,7 +51,7 @@ public class BooleanComponentOptions {
 
     private final PortAggregatorFactory portAggregatorFactory;
 
-    public BooleanComponentOptions(final Map<String, Object> properties, BundleContext context) {
+    public LogicalComponentOptions(final Map<String, Object> properties, BundleContext context) {
         this.firstOperandName = getSafe(properties.get(FIRST_OPERAND_NAME_PROP_NAME), OPERAND_NAME_DEFAULT);
         this.secondOperandName = getSafe(properties.get(SECOND_OPERAND_NAME_PROP_NAME), OPERAND_NAME_DEFAULT);
         this.resultName = getSafe(properties.get(RESULT_NAME_PROP_NAME), RESULT_NAME_DEFAULT);
@@ -65,7 +65,7 @@ public class BooleanComponentOptions {
         final boolean useBarrier = getSafe(properties.get(BARRIER_MODALITY_PROPERTY_KEY),
                 BARRIER_MODALITY_PROPERTY_DEFAULT);
 
-        if (useBarrier) {
+        if (useBarrier && !AllowedOperations.NOT.equals(this.booleanOperation)) {
             this.portAggregatorFactory = context
                     .getService(context.getServiceReference(BarrierAggregatorFactory.class));
         } else {

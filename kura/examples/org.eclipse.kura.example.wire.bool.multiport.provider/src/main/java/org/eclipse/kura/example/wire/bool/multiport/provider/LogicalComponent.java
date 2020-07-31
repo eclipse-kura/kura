@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
-import org.eclipse.kura.example.wire.bool.multiport.provider.BooleanComponentOptions.AllowedOperations;
+import org.eclipse.kura.example.wire.bool.multiport.provider.LogicalComponentOptions.AllowedOperations;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
 import org.eclipse.kura.wire.WireComponent;
@@ -34,14 +34,14 @@ import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class BooleanComponent implements WireEmitter, ConfigurableComponent, MultiportWireReceiver {
+public class LogicalComponent implements WireEmitter, ConfigurableComponent, MultiportWireReceiver {
 
-    private static final Logger logger = LoggerFactory.getLogger(BooleanComponent.class);
+    private static final Logger logger = LoggerFactory.getLogger(LogicalComponent.class);
 
     private WireHelperService wireHelperService;
     private MultiportWireSupport wireSupport;
 
-    protected BooleanComponentOptions options;
+    protected LogicalComponentOptions options;
     protected BundleContext context;
 
     public void bindWireHelperService(final WireHelperService wireHelperService) {
@@ -61,7 +61,7 @@ public class BooleanComponent implements WireEmitter, ConfigurableComponent, Mul
 
     public void updated(final Map<String, Object> properties, ComponentContext componentContext) {
         logger.info("updating...");
-        this.options = new BooleanComponentOptions(properties, this.context);
+        this.options = new LogicalComponentOptions(properties, this.context);
         logger.info("updated, properties: {}", properties);
         this.options.getPortAggregatorFactory().build(this.wireSupport.getReceiverPorts())
                 .onWireReceive(this::onWireReceive);
@@ -94,34 +94,31 @@ public class BooleanComponent implements WireEmitter, ConfigurableComponent, Mul
         this.wireSupport.producersConnected(wires);
     }
 
-    private TypedValue<Boolean> extractOperand(WireEnvelope wireEnvelope, String operandName) {
+    private Boolean extractOperand(WireEnvelope wireEnvelope, String operandName) {
         if (wireEnvelope == null) {
-            return null;
+            throw new NullPointerException();
         }
         final List<WireRecord> records = wireEnvelope.getRecords();
         if (records.isEmpty()) {
-            return null;
+            throw new NullPointerException();
         }
         final Map<String, TypedValue<?>> properties = records.get(0).getProperties();
-        return TypedValues.newBooleanValue((Boolean) properties.get(operandName).getValue());
+        return (Boolean) properties.get(operandName).getValue();
     }
 
     public void onWireReceive(List<WireEnvelope> wireEnvelopes) {
-        final TypedValue<Boolean> firstOperand = extractOperand(wireEnvelopes.get(0),
-                this.options.getFirstOperandName());
-        TypedValue<Boolean> secondOperand;
-        if (this.options.getBooleanOperation().equals(AllowedOperations.NOT)) {
+        final Boolean firstOperand = extractOperand(wireEnvelopes.get(0), this.options.getFirstOperandName());
+        final Boolean secondOperand;
+        if (AllowedOperations.NOT.equals(this.options.getBooleanOperation())) {
             secondOperand = firstOperand;
         } else {
             secondOperand = extractOperand(wireEnvelopes.get(1), this.options.getSecondOperandName());
         }
         logger.debug("Wire received, firstOperand is {} and secondOperand is {}", firstOperand, secondOperand);
-        if (firstOperand != null && secondOperand != null) {
-            final TypedValue<Boolean> result = TypedValues
-                    .newBooleanValue(performBooleanOperation(firstOperand.getValue(), secondOperand.getValue()));
-            this.wireSupport.emit(Collections
-                    .singletonList(new WireRecord(Collections.singletonMap(this.options.getResultName(), result))));
-        }
+        final TypedValue<Boolean> result = TypedValues
+                .newBooleanValue(performBooleanOperation(firstOperand, secondOperand));
+        this.wireSupport.emit(Collections
+                .singletonList(new WireRecord(Collections.singletonMap(this.options.getResultName(), result))));
     }
 
     private boolean performBooleanOperation(Boolean firstOperand, Boolean secondOperand) {

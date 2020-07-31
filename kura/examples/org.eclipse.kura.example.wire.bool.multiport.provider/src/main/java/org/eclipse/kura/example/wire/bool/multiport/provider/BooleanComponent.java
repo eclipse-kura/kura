@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
+import org.eclipse.kura.example.wire.bool.multiport.provider.BooleanComponentOptions.AllowedOperations;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
 import org.eclipse.kura.wire.WireComponent;
@@ -109,7 +110,7 @@ public class BooleanComponent implements WireEmitter, ConfigurableComponent, Mul
         final TypedValue<Boolean> firstOperand = extractOperand(wireEnvelopes.get(0),
                 this.options.getFirstOperandName());
         TypedValue<Boolean> secondOperand;
-        if (this.options.getBooleanOperation().equals("NOT")) {
+        if (this.options.getBooleanOperation().equals(AllowedOperations.NOT)) {
             secondOperand = firstOperand;
         } else {
             secondOperand = extractOperand(wireEnvelopes.get(1), this.options.getSecondOperandName());
@@ -125,15 +126,15 @@ public class BooleanComponent implements WireEmitter, ConfigurableComponent, Mul
 
     private boolean performBooleanOperation(Boolean firstOperand, Boolean secondOperand) {
         switch (this.options.getBooleanOperation()) {
-        case "NOT":
+        case NOT:
             return !(firstOperand.booleanValue());
-        case "AND":
+        case AND:
             return firstOperand.booleanValue() && secondOperand.booleanValue();
-        case "OR":
+        case OR:
             return firstOperand.booleanValue() || secondOperand.booleanValue();
-        case "NOR":
+        case NOR:
             return !(firstOperand.booleanValue() || secondOperand.booleanValue());
-        case "XOR":
+        case XOR:
             return firstOperand.booleanValue() ^ secondOperand.booleanValue();
         default:
             return false;

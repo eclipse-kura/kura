@@ -12,7 +12,6 @@
 
 package org.eclipse.kura.example.wire.bool.multiport.provider;
 
-import java.util.Arrays;
 import java.util.Map;
 
 import org.eclipse.kura.wire.graph.BarrierAggregatorFactory;
@@ -24,6 +23,14 @@ import org.slf4j.LoggerFactory;
 
 public class BooleanComponentOptions {
 
+    public enum AllowedOperations {
+        AND,
+        OR,
+        XOR,
+        NOR,
+        NOT
+    }
+
     private static final String FIRST_OPERAND_NAME_PROP_NAME = "operand.name.1";
     private static final String SECOND_OPERAND_NAME_PROP_NAME = "operand.name.2";
     private static final String RESULT_NAME_PROP_NAME = "result.name";
@@ -33,16 +40,14 @@ public class BooleanComponentOptions {
     private static final String OPERAND_NAME_DEFAULT = "operand";
     private static final String RESULT_NAME_DEFAULT = "result";
     private static final boolean BARRIER_MODALITY_PROPERTY_DEFAULT = true;
-    private static final String BOOLEAN_OPERATION_DEFAULT = "AND";
+    private static final AllowedOperations BOOLEAN_OPERATION_DEFAULT = AllowedOperations.AND;
 
     private static final Logger logger = LoggerFactory.getLogger(BooleanComponentOptions.class);
-
-    private String[] operations = { "AND", "OR", "NOT", "NOR", "XOR" };
 
     private String firstOperandName;
     private String secondOperandName;
     private String resultName;
-    private String booleanOperation;
+    private AllowedOperations booleanOperation;
 
     private final PortAggregatorFactory portAggregatorFactory;
 
@@ -50,10 +55,11 @@ public class BooleanComponentOptions {
         this.firstOperandName = getSafe(properties.get(FIRST_OPERAND_NAME_PROP_NAME), OPERAND_NAME_DEFAULT);
         this.secondOperandName = getSafe(properties.get(SECOND_OPERAND_NAME_PROP_NAME), OPERAND_NAME_DEFAULT);
         this.resultName = getSafe(properties.get(RESULT_NAME_PROP_NAME), RESULT_NAME_DEFAULT);
-        this.booleanOperation = getSafe(properties.get(BOOLEAN_OPERATION), BOOLEAN_OPERATION_DEFAULT);
-        if (Arrays.stream(operations).noneMatch(this.booleanOperation::equals)) {
+        try {
+            this.booleanOperation = AllowedOperations.valueOf(properties.get(BOOLEAN_OPERATION).toString());
+        } catch (IllegalArgumentException | NullPointerException e) {
             logger.error("ERROR! Unknown operator, falling back to AND operator");
-            this.booleanOperation = BooleanComponentOptions.BOOLEAN_OPERATION_DEFAULT;
+            this.booleanOperation = BOOLEAN_OPERATION_DEFAULT;
         }
 
         final boolean useBarrier = getSafe(properties.get(BARRIER_MODALITY_PROPERTY_KEY),
@@ -84,7 +90,7 @@ public class BooleanComponentOptions {
         return portAggregatorFactory;
     }
 
-    public String getBooleanOperation() {
+    public AllowedOperations getBooleanOperation() {
         return booleanOperation;
     }
 

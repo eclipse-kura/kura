@@ -12,8 +12,8 @@
 	localization="en_us">
 	<OCD
 		id="org.eclipse.kura.example.wire.bool.multiport.provider.BooleanComponent"
-		name="Boolean Components for Wires"
-		description="An example configurable component implementation.">
+		name="Logical Operators for Wires"
+		description="A component which allows to perform logical operations on Wires.">
 
 		<AD id="boolean.operation" name="Operator" type="String"
 			cardinality="0" required="true" default="AND"
@@ -36,12 +36,12 @@
 
 		<AD id="result.name" name="Result Name" type="String"
 			cardinality="0" required="true" default="result"
-			description="Specifies the name of the result property in emitted envelope.">
+			description="Specifies the name of the result property in the emitted envelope.">
 		</AD>
 
 		<AD id="barrier" name="Barrier" type="Boolean" cardinality="0"
 			required="true" default="true"
-			description="Specifies if the component should use a barrier for input ports or perform caching of messages; must be disabled with NOT Operator">
+			description="Specifies if the component should use a barrier for input ports or perform caching of messages; must be disabled with NOT operator">
 		</AD>
 
 	</OCD>

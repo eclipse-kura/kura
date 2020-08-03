@@ -1,4 +1,4 @@
-package org.eclipse.kura.example.wire.math.median;
+package org.eclipse.kura.example.wire.math.singleport.median;
 
 import org.eclipse.kura.example.wire.math.singleport.AbstractSingleportMathComponent;
 import org.eclipse.kura.example.wire.math.singleport.RunningMedian;

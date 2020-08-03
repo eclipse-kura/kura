@@ -82,6 +82,7 @@ public class AlertDialog extends Composite implements HasId {
     public void setListener(DismissListener listener) {
         this.listener = Optional.ofNullable(listener);
         this.alertFooter.setVisible(listener != null);
+        this.modal.setClosable(listener == null);
     }
 
     public void show(String title, String message, Severity severity, DismissListener listener) {

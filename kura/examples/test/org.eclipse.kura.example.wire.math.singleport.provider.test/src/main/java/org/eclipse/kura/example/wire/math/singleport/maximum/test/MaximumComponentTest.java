@@ -1,4 +1,4 @@
-package org.eclipse.kura.example.wire.math.singleport.median.test;
+package org.eclipse.kura.example.wire.math.singleport.maximum.test;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -33,12 +33,12 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.LoggerFactory;
 
-public class MedianComponentTest {
-    
+public class MaximumComponentTest {
+
     // See:
     // http://stackoverflow.com/questions/7161338/using-osgi-declarative-services-in-the-context-of-a-junit-test
 
-    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(MedianComponentTest.class);
+    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(MaximumComponentTest.class);
 
     private static final String UNDER_TEST_PID = "under.test";
     private static final String TEST_EMITTER_PID = "test.emitter.pid";
@@ -68,7 +68,7 @@ public class MedianComponentTest {
     private static TestEmitterReceiver outReceiver;
     private static TestEmitterReceiver inEmitter;
 
-    public MedianComponentTest() {
+    public MaximumComponentTest() {
         super();
         logger.info("{} created", System.identityHashCode(this));
     }
@@ -87,13 +87,13 @@ public class MedianComponentTest {
 
     public void bindWireGraphService(WireGraphService wireGraphService) {
         logger.info("{} bound", System.identityHashCode(this));
-        MedianComponentTest.wireGraphService = wireGraphService;
+        MaximumComponentTest.wireGraphService = wireGraphService;
         dependencyLatch.countDown();
     }
 
     public void bindConfigurationService(ConfigurationService configurationService) {
         logger.info("{} bound", System.identityHashCode(this));
-        MedianComponentTest.configurationService = configurationService;
+        MaximumComponentTest.configurationService = configurationService;
         dependencyLatch.countDown();
     }
 
@@ -121,9 +121,9 @@ public class MedianComponentTest {
 
         final GraphBuilder builder = new GraphBuilder();
 
-        final BundleContext bundleContext = FrameworkUtil.getBundle(MedianComponentTest.class).getBundleContext();
+        final BundleContext bundleContext = FrameworkUtil.getBundle(MaximumComponentTest.class).getBundleContext();
 
-        builder.addWireComponent(UNDER_TEST_PID, "org.eclipse.kura.wire.Median", 1, 1) //
+        builder.addWireComponent(UNDER_TEST_PID, "org.eclipse.kura.wire.Maximum", 1, 1) //
                 .addTestEmitterReceiver(TEST_EMITTER_PID) //
                 .addTestEmitterReceiver(TEST_RECEIVER_PID) //
                 .addWire(TEST_EMITTER_PID, 0, UNDER_TEST_PID, IN_PORT) //
@@ -142,7 +142,7 @@ public class MedianComponentTest {
     }
 
     @Test
-    public void medianWireComponentExists() throws KuraException {
+    public void maximumWireComponentExists() throws KuraException {
         WireGraphConfiguration wgc;
         try {
             wgc = wireGraphService.get();
@@ -156,7 +156,7 @@ public class MedianComponentTest {
     }
 
     @Test
-    public void medianWireComponentHasDefaultProperties() throws KuraException {
+    public void maximumWireComponentHasDefaultProperties() throws KuraException {
         WireGraphConfiguration wgc;
         try {
             wgc = wireGraphService.get();
@@ -181,8 +181,8 @@ public class MedianComponentTest {
     }
 
     @Test
-    public void testOddMedian() throws Exception {
-        logger.info("### TESTING ODD MEDIAN COMPONENT ###");
+    public void testMaximum() throws Exception {
+        logger.info("### TESTING MAXIMUM COMPONENT ###");
         Map<String, Object> props = new HashMap<>();
         props.put(WINDOW_SIZE_PROP_NAME, 9);
         try {
@@ -194,6 +194,7 @@ public class MedianComponentTest {
         }
 
         Map<String, TypedValue<?>> myMap = new HashMap<>();
+
         for (int i = 1; i < 9; i++) {
             myMap.clear();
             myMap.put(OPERAND_NAME_DEFAULT, TypedValues.newDoubleValue(i));
@@ -207,40 +208,7 @@ public class MedianComponentTest {
         try {
             WireRecord receivedRecord = out0Recfuture.get(1, TimeUnit.SECONDS).getRecords().get(0);
             logger.info("received {}", receivedRecord.getProperties());
-            assertTrue(((double) receivedRecord.getProperties().get(RESULT_NAME_DEFAULT).getValue() == 5));
-
-        } catch (TimeoutException e) {
-            fail("Timeout waiting for envelope");
-        }
-    }
-
-    @Test
-    public void testEvenMedian() throws Exception {
-        logger.info("### TESTING EVEN MEDIAN COMPONENT ###");
-        Map<String, Object> props = new HashMap<>();
-        props.put(WINDOW_SIZE_PROP_NAME, 10);
-        try {
-            WireTestUtil.updateWireComponentConfiguration(configurationService, UNDER_TEST_PID, props).get(30,
-                    TimeUnit.SECONDS);
-        } catch (InterruptedException | TimeoutException e) {
-            logger.error("Test error", e);
-            throw e;
-        }
-        Map<String, TypedValue<?>> myMap = new HashMap<>();
-        for (int i = 1; i < 10; i++) {
-            myMap.clear();
-            myMap.put(OPERAND_NAME_DEFAULT, TypedValues.newDoubleValue(i));
-            inEmitter.emit(new WireRecord(myMap));
-        }
-        CompletableFuture<WireEnvelope> out0Recfuture = outReceiver.nextEnvelope();
-        myMap.clear();
-        myMap.put(OPERAND_NAME_DEFAULT, TypedValues.newDoubleValue(10));
-        inEmitter.emit(new WireRecord(myMap));
-
-        try {
-            WireRecord receivedRecord = out0Recfuture.get(1, TimeUnit.SECONDS).getRecords().get(0);
-            logger.info("received {}", receivedRecord.getProperties());
-            assertTrue(((double) receivedRecord.getProperties().get(RESULT_NAME_DEFAULT).getValue() == 5.5));
+            assertTrue(((double) receivedRecord.getProperties().get(RESULT_NAME_DEFAULT).getValue() == 9));
 
         } catch (TimeoutException e) {
             fail("Timeout waiting for envelope");

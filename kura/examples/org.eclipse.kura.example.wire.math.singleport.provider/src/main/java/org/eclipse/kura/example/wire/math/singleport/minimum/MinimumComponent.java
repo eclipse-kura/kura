@@ -1,4 +1,4 @@
-package org.eclipse.kura.example.wire.math.singleport.provider.minimum;
+package org.eclipse.kura.example.wire.math.singleport.minimum;
 
 import org.eclipse.kura.example.wire.math.singleport.AbstractSingleportMathComponent;
 import org.eclipse.kura.example.wire.math.singleport.RunningExtremes;

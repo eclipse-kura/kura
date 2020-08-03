@@ -15,7 +15,7 @@
                enabled="true"
                immediate="true"
                configuration-policy="require">
-   <implementation class="org.eclipse.kura.example.wire.math.singleport.provider.minimum.MinimumComponent"/>
+   <implementation class="org.eclipse.kura.example.wire.math.singleport.minimum.MinimumComponent"/>
    <service>
       <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
       <provide interface="org.eclipse.kura.wire.WireComponent"/>

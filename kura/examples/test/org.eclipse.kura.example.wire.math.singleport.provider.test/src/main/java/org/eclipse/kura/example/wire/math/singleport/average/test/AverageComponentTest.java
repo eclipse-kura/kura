@@ -1,4 +1,4 @@
-package org.eclipse.kura.example.wire.math.singleport.median.test;
+package org.eclipse.kura.example.wire.math.singleport.average.test;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -33,12 +33,12 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.LoggerFactory;
 
-public class MedianComponentTest {
-    
+public class AverageComponentTest {
+
     // See:
     // http://stackoverflow.com/questions/7161338/using-osgi-declarative-services-in-the-context-of-a-junit-test
 
-    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(MedianComponentTest.class);
+    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(AverageComponentTest.class);
 
     private static final String UNDER_TEST_PID = "under.test";
     private static final String TEST_EMITTER_PID = "test.emitter.pid";
@@ -68,7 +68,7 @@ public class MedianComponentTest {
     private static TestEmitterReceiver outReceiver;
     private static TestEmitterReceiver inEmitter;
 
-    public MedianComponentTest() {
+    public AverageComponentTest() {
         super();
         logger.info("{} created", System.identityHashCode(this));
     }
@@ -87,13 +87,13 @@ public class MedianComponentTest {
 
     public void bindWireGraphService(WireGraphService wireGraphService) {
         logger.info("{} bound", System.identityHashCode(this));
-        MedianComponentTest.wireGraphService = wireGraphService;
+        AverageComponentTest.wireGraphService = wireGraphService;
         dependencyLatch.countDown();
     }
 
     public void bindConfigurationService(ConfigurationService configurationService) {
         logger.info("{} bound", System.identityHashCode(this));
-        MedianComponentTest.configurationService = configurationService;
+        AverageComponentTest.configurationService = configurationService;
         dependencyLatch.countDown();
     }
 
@@ -121,9 +121,9 @@ public class MedianComponentTest {
 
         final GraphBuilder builder = new GraphBuilder();
 
-        final BundleContext bundleContext = FrameworkUtil.getBundle(MedianComponentTest.class).getBundleContext();
+        final BundleContext bundleContext = FrameworkUtil.getBundle(AverageComponentTest.class).getBundleContext();
 
-        builder.addWireComponent(UNDER_TEST_PID, "org.eclipse.kura.wire.Median", 1, 1) //
+        builder.addWireComponent(UNDER_TEST_PID, "org.eclipse.kura.wire.Average", 1, 1) //
                 .addTestEmitterReceiver(TEST_EMITTER_PID) //
                 .addTestEmitterReceiver(TEST_RECEIVER_PID) //
                 .addWire(TEST_EMITTER_PID, 0, UNDER_TEST_PID, IN_PORT) //
@@ -142,7 +142,7 @@ public class MedianComponentTest {
     }
 
     @Test
-    public void medianWireComponentExists() throws KuraException {
+    public void averageWireComponentExists() throws KuraException {
         WireGraphConfiguration wgc;
         try {
             wgc = wireGraphService.get();
@@ -156,7 +156,7 @@ public class MedianComponentTest {
     }
 
     @Test
-    public void medianWireComponentHasDefaultProperties() throws KuraException {
+    public void averageWireComponentHasDefaultProperties() throws KuraException {
         WireGraphConfiguration wgc;
         try {
             wgc = wireGraphService.get();
@@ -181,8 +181,8 @@ public class MedianComponentTest {
     }
 
     @Test
-    public void testOddMedian() throws Exception {
-        logger.info("### TESTING ODD MEDIAN COMPONENT ###");
+    public void testOddaverage() throws Exception {
+        logger.info("### TESTING ODD AVERAGE COMPONENT ###");
         Map<String, Object> props = new HashMap<>();
         props.put(WINDOW_SIZE_PROP_NAME, 9);
         try {
@@ -194,6 +194,7 @@ public class MedianComponentTest {
         }
 
         Map<String, TypedValue<?>> myMap = new HashMap<>();
+
         for (int i = 1; i < 9; i++) {
             myMap.clear();
             myMap.put(OPERAND_NAME_DEFAULT, TypedValues.newDoubleValue(i));
@@ -215,8 +216,8 @@ public class MedianComponentTest {
     }
 
     @Test
-    public void testEvenMedian() throws Exception {
-        logger.info("### TESTING EVEN MEDIAN COMPONENT ###");
+    public void testEvenaverage() throws Exception {
+        logger.info("### TESTING EVEN AVERAGE COMPONENT ###");
         Map<String, Object> props = new HashMap<>();
         props.put(WINDOW_SIZE_PROP_NAME, 10);
         try {

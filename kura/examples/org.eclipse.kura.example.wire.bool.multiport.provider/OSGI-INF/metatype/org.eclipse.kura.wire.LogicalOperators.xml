@@ -1,21 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-    Copyright (c) 2020 Eurotech and/or its affiliates
-     All rights reserved. This program and the accompanying materials
-     are made available under the terms of the Eclipse Public License v1.0
-     which accompanies this distribution, and is available at
-     http://www.eclipse.org/legal/epl-v10.html
-    Contributors:
-      Eurotech
--->
+<!-- Copyright (c) 2020 Eurotech and/or its affiliates All rights reserved. 
+	This program and the accompanying materials are made available under the 
+	terms of the Eclipse Public License v1.0 which accompanies this distribution, 
+	and is available at http://www.eclipse.org/legal/epl-v10.html -->
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0"
 	localization="en_us">
-	<OCD
-		id="org.eclipse.kura.wire.LogicalOperators"
+	<OCD id="org.eclipse.kura.wire.LogicalOperators"
 		name="Logical Operators for Wires"
-		description="A component which allows to perform logical operations on Wires.">
+		description="A component that applies a logical operator to one or two boolean properties received from the first and, optionally, the second input port, emitting the result. For binary operators, the operation is performed when a new envelope is received on a port, using the envelope cached by the other port; alternatively, new envelopes must be received on both ports. For the NOT operator, the operand must be received from the first port.">
 
-		<AD id="boolean.operation" name="Operator" type="String"
+		<AD id="logical.operator" name="Operator" type="String"
 			cardinality="0" required="true" default="AND"
 			description="Specifies the logical operation to be executed by the component">
 			<Option label="AND" value="AND" />
@@ -32,7 +26,7 @@
 
 		<AD id="operand.name.2" name="Second Operand" type="String"
 			cardinality="0" required="true" default="operand"
-			description="Specifies the name of the operand property in the envelope received on the second port. Will be ignored if the operation is NOT.">
+			description="Specifies the name of the operand property in the envelope received on the second port; ignored by the NOT operator.">
 		</AD>
 
 		<AD id="result.name" name="Result Name" type="String"
@@ -42,14 +36,13 @@
 
 		<AD id="barrier" name="Barrier" type="Boolean" cardinality="0"
 			required="true" default="false"
-			description="Specifies if the component should use a barrier for input ports or perform caching of messages;ignored by NOT operator">
+			description="Specifies if the component should use a barrier for input ports or perform caching of messages; ignored by the NOT operator">
 		</AD>
 
 	</OCD>
 
 	<Designate
 		factoryPid="org.eclipse.kura.wire.LogicalOperators">
-		<Object
-			ocdref="org.eclipse.kura.wire.LogicalOperators" />
+		<Object ocdref="org.eclipse.kura.wire.LogicalOperators" />
 	</Designate>
 </MetaData>

@@ -70,7 +70,7 @@ public class BoolLogicTest {
     private static final String SECOND_OPERAND_NAME_PROP_NAME = "operand.name.2";
     // private static final String RESULT_NAME_PROP_NAME = "result.name";
     private static final String BARRIER_MODALITY_PROPERTY_KEY = "barrier";
-    private static final String BOOLEAN_OPERATION = "boolean.operation";
+    private static final String BOOLEAN_OPERATION = "logical.operator";
 
     private static final String OPERAND_NAME_DEFAULT = "operand";
     private static final String RESULT_NAME_DEFAULT = "result";

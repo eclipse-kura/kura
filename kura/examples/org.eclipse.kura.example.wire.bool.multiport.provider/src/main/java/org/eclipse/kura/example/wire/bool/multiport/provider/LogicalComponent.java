@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
-import org.eclipse.kura.example.wire.bool.multiport.provider.LogicalComponentOptions.AllowedOperations;
+import org.eclipse.kura.example.wire.bool.multiport.provider.LogicalComponentOptions.OperatorOption;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
 import org.eclipse.kura.wire.WireComponent;
@@ -109,12 +109,11 @@ public class LogicalComponent implements WireEmitter, ConfigurableComponent, Mul
     public void onWireReceive(List<WireEnvelope> wireEnvelopes) {
         final Boolean firstOperand = extractOperand(wireEnvelopes.get(0), this.options.getFirstOperandName());
         final Boolean secondOperand;
-        if (AllowedOperations.NOT.equals(this.options.getBooleanOperation())) {
+        if (OperatorOption.NOT.equals(this.options.getBooleanOperation())) {
             secondOperand = firstOperand;
         } else {
             secondOperand = extractOperand(wireEnvelopes.get(1), this.options.getSecondOperandName());
         }
-        logger.debug("Wire received, firstOperand is {} and secondOperand is {}", firstOperand, secondOperand);
         final TypedValue<Boolean> result = TypedValues
                 .newBooleanValue(performBooleanOperation(firstOperand, secondOperand));
         this.wireSupport.emit(Collections

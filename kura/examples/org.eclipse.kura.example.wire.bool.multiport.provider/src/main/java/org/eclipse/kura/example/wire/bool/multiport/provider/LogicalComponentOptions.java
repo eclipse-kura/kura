@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 
 public class LogicalComponentOptions {
 
-    public enum AllowedOperations {
+    public enum OperatorOption {
         AND,
         OR,
         XOR,
@@ -36,19 +36,19 @@ public class LogicalComponentOptions {
     private static final String SECOND_OPERAND_NAME_PROP_NAME = "operand.name.2";
     private static final String RESULT_NAME_PROP_NAME = "result.name";
     private static final String BARRIER_MODALITY_PROPERTY_KEY = "barrier";
-    private static final String BOOLEAN_OPERATION = "boolean.operation";
+    private static final String BOOLEAN_OPERATION = "logical.operator";
 
     private static final String OPERAND_NAME_DEFAULT = "operand";
     private static final String RESULT_NAME_DEFAULT = "result";
     private static final boolean BARRIER_MODALITY_PROPERTY_DEFAULT = false;
-    private static final AllowedOperations BOOLEAN_OPERATION_DEFAULT = AllowedOperations.AND;
+    private static final OperatorOption BOOLEAN_OPERATION_DEFAULT = OperatorOption.AND;
 
     private static final Logger logger = LoggerFactory.getLogger(LogicalComponentOptions.class);
 
-    private String firstOperandName;
-    private String secondOperandName;
-    private String resultName;
-    private AllowedOperations booleanOperation;
+    private final String firstOperandName;
+    private final String secondOperandName;
+    private final String resultName;
+    private OperatorOption booleanOperation;
 
     private final PortAggregatorFactory portAggregatorFactory;
 
@@ -57,16 +57,16 @@ public class LogicalComponentOptions {
         this.secondOperandName = getSafe(properties.get(SECOND_OPERAND_NAME_PROP_NAME), OPERAND_NAME_DEFAULT);
         this.resultName = getSafe(properties.get(RESULT_NAME_PROP_NAME), RESULT_NAME_DEFAULT);
         try {
-            this.booleanOperation = AllowedOperations.valueOf(properties.get(BOOLEAN_OPERATION).toString());
-        } catch (IllegalArgumentException | NullPointerException e) {
-            logger.error("ERROR! Unknown operator, falling back to AND operator");
+            this.booleanOperation = OperatorOption.valueOf(properties.get(BOOLEAN_OPERATION).toString());
+        } catch (IllegalArgumentException e) {
+            logger.warn("Unknown operator, falling back to default operator AND");
             this.booleanOperation = BOOLEAN_OPERATION_DEFAULT;
         }
 
         final boolean useBarrier = getSafe(properties.get(BARRIER_MODALITY_PROPERTY_KEY),
                 BARRIER_MODALITY_PROPERTY_DEFAULT);
 
-        if (useBarrier && !AllowedOperations.NOT.equals(this.booleanOperation)) {
+        if (useBarrier && !OperatorOption.NOT.equals(this.booleanOperation)) {
             this.portAggregatorFactory = context
                     .getService(context.getServiceReference(BarrierAggregatorFactory.class));
         } else {
@@ -91,7 +91,7 @@ public class LogicalComponentOptions {
         return portAggregatorFactory;
     }
 
-    public AllowedOperations getBooleanOperation() {
+    public OperatorOption getBooleanOperation() {
         return booleanOperation;
     }
 

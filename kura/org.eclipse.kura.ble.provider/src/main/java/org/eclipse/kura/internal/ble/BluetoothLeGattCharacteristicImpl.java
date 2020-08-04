@@ -131,7 +131,7 @@ public class BluetoothLeGattCharacteristicImpl implements BluetoothLeGattCharact
     public List<BluetoothLeGattCharacteristicProperties> getProperties() {
         List<BluetoothLeGattCharacteristicProperties> properties = new ArrayList<>();
         for (String flag : this.characteristic.getFlags()) {
-            properties.add(BluetoothLeGattCharacteristicProperties.valueOf(flag));
+            properties.add(BluetoothLeGattCharacteristicProperties.valueOf(flag.toUpperCase()));
         }
         return properties;
     }

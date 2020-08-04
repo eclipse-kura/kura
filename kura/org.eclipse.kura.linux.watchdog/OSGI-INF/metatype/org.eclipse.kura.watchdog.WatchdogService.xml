@@ -34,7 +34,7 @@
             required="true"
             default="10000"
             max="60000"
-            description="WatchdogService\'s refresh interval in ms of the Watchdog device. The value can be set between 1 and 60 seconds and should not be set to a value greater or equal to the Watchdog device\'s timeout value"/>
+            description="WatchdogService's refresh interval in ms of the Watchdog device. The value can be set between 1 and 60 seconds and should not be set to a value greater or equal to the Watchdog device's timeout value"/>
 
         <AD id="watchdogDevice"
             name="Watchdog device path"

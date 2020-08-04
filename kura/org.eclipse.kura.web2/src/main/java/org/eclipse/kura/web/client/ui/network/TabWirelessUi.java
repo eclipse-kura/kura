@@ -1024,16 +1024,18 @@ public class TabWirelessUi extends Composite implements NetworkTab {
             @Override
             public List<EditorError> validate(Editor<String> editor, String value) {
                 List<EditorError> result = new ArrayList<>();
-                try {
-                    if (field.getText().trim().contains(".") || field.getText().trim().contains("-")
-                            || !field.getText().trim().matches("[0-9]+")) {
-                        result.add(new BasicEditorError(field, value, MSGS.netWifiBgScanInterval()));
-                    } else if (Integer.parseInt(TabWirelessUi.this.shortI.getText().trim()) >= Integer
-                            .parseInt(TabWirelessUi.this.longI.getText().trim())) {
-                        result.add(new BasicEditorError(field, value, MSGS.netWifiBgScanIntervalValues()));
+                if (TabWirelessUi.this.shortI.isEnabled() && TabWirelessUi.this.longI.isEnabled()) {
+                    try {
+                        if (field.getText().trim().contains(".") || field.getText().trim().contains("-")
+                                || !field.getText().trim().matches("[0-9]+")) {
+                            result.add(new BasicEditorError(field, value, MSGS.netWifiBgScanInterval()));
+                        } else if (Integer.parseInt(TabWirelessUi.this.shortI.getText().trim()) >= Integer
+                                .parseInt(TabWirelessUi.this.longI.getText().trim())) {
+                            result.add(new BasicEditorError(field, value, MSGS.netWifiBgScanIntervalValues()));
+                        }
+                    } catch (NumberFormatException e) {
+                        result.add(new BasicEditorError(field, value, MSGS.deviceConfigError()));
                     }
-                } catch (NumberFormatException e) {
-                    result.add(new BasicEditorError(field, value, MSGS.deviceConfigError()));
                 }
                 return result;
             }

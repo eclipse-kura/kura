@@ -554,6 +554,9 @@ public abstract class AbstractServicesUi extends Composite {
 
             final String text = currentText.getText();
 
+            if ((text == null || text.isEmpty()) && !param.isRequired()) {
+                return editorErrors;
+            }
             ValidationUtil.validateParameter(param, text, errorDescription -> {
                 AbstractServicesUi.this.valid.put(param.getId(), false);
                 editorErrors.add(new BasicEditorError(currentText, text, errorDescription));

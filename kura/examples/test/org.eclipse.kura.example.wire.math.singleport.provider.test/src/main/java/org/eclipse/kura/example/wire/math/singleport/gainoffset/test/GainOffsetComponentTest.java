@@ -8,7 +8,7 @@
  *
  *******************************************************************************/
 
-package org.eclipse.kura.example.wire.math.singleport.average.test;
+package org.eclipse.kura.example.wire.math.singleport.gainoffset.test;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -43,12 +43,11 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.LoggerFactory;
 
-public class AverageComponentTest {
-
+public class GainOffsetComponentTest {
     // See:
     // http://stackoverflow.com/questions/7161338/using-osgi-declarative-services-in-the-context-of-a-junit-test
 
-    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(AverageComponentTest.class);
+    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(GainOffsetComponentTest.class);
 
     private static final String UNDER_TEST_PID = "under.test";
     private static final String TEST_EMITTER_PID = "test.emitter.pid";
@@ -61,15 +60,11 @@ public class AverageComponentTest {
     private static final int OUT_PORT = 0;
 
     // configuration properties of component under test
-    private static final String OPERAND_NAME_PROP_NAME = "operand.name";
-    private static final String RESULT_NAME_PROP_NAME = "result.name";
+    private static final String CONFIGURATION_PROP_NAME = "configuration";
     private static final String EMIT_RECEIVED_PROPERTIES = "emit.received.properties";
-    private static final String WINDOW_SIZE_PROP_NAME = "window.size";
 
-    private static final String OPERAND_NAME_DEFAULT = "operand";
-    private static final String RESULT_NAME_DEFAULT = "result";
+    private static final String CONFIGURATION_PROP_NAME_DEFAULT = "toBeMultipliedByTwo | 2\ntoBeMultipliedBy3AndIncreasedBy1 | 3 | 1";
     private static final boolean EMIT_RECEIVED_PROPERTIES_DEFAULT = false;
-    private static final int WINDOW_SIZE_DEFAULT = 10;
 
     private static WireGraphService wireGraphService;
     private static ConfigurationService configurationService;
@@ -78,7 +73,7 @@ public class AverageComponentTest {
     private static TestEmitterReceiver outReceiver;
     private static TestEmitterReceiver inEmitter;
 
-    public AverageComponentTest() {
+    public GainOffsetComponentTest() {
         super();
         logger.info("{} created", System.identityHashCode(this));
     }
@@ -97,13 +92,13 @@ public class AverageComponentTest {
 
     public void bindWireGraphService(WireGraphService wireGraphService) {
         logger.info("{} bound", System.identityHashCode(this));
-        AverageComponentTest.wireGraphService = wireGraphService;
+        GainOffsetComponentTest.wireGraphService = wireGraphService;
         dependencyLatch.countDown();
     }
 
     public void bindConfigurationService(ConfigurationService configurationService) {
         logger.info("{} bound", System.identityHashCode(this));
-        AverageComponentTest.configurationService = configurationService;
+        GainOffsetComponentTest.configurationService = configurationService;
         dependencyLatch.countDown();
     }
 
@@ -131,9 +126,9 @@ public class AverageComponentTest {
 
         final GraphBuilder builder = new GraphBuilder();
 
-        final BundleContext bundleContext = FrameworkUtil.getBundle(AverageComponentTest.class).getBundleContext();
+        final BundleContext bundleContext = FrameworkUtil.getBundle(GainOffsetComponentTest.class).getBundleContext();
 
-        builder.addWireComponent(UNDER_TEST_PID, "org.eclipse.kura.wire.Average", 1, 1) //
+        builder.addWireComponent(UNDER_TEST_PID, "org.eclipse.kura.wire.GainOffset", 1, 1) //
                 .addTestEmitterReceiver(TEST_EMITTER_PID) //
                 .addTestEmitterReceiver(TEST_RECEIVER_PID) //
                 .addWire(TEST_EMITTER_PID, 0, UNDER_TEST_PID, IN_PORT) //
@@ -152,7 +147,7 @@ public class AverageComponentTest {
     }
 
     @Test
-    public void averageWireComponentExists() throws KuraException {
+    public void gainOffsetWireComponentExists() throws KuraException {
         WireGraphConfiguration wgc;
         try {
             wgc = wireGraphService.get();
@@ -166,7 +161,7 @@ public class AverageComponentTest {
     }
 
     @Test
-    public void averageWireComponentHasDefaultProperties() throws KuraException {
+    public void gainOffsetWireComponentHasDefaultProperties() throws KuraException {
         WireGraphConfiguration wgc;
         try {
             wgc = wireGraphService.get();
@@ -182,19 +177,17 @@ public class AverageComponentTest {
     private boolean matchesDefaultConfiguration(ComponentConfiguration cc) {
         if (cc.getPid().equals(UNDER_TEST_PID)) {
             Map<String, Object> props = cc.getConfigurationProperties();
-            return OPERAND_NAME_DEFAULT.equals(props.get(OPERAND_NAME_PROP_NAME))
-                    && EMIT_RECEIVED_PROPERTIES_DEFAULT == (boolean) props.get(EMIT_RECEIVED_PROPERTIES)
-                    && WINDOW_SIZE_DEFAULT == (int) props.get(WINDOW_SIZE_PROP_NAME)
-                    && RESULT_NAME_DEFAULT.equals(props.get(RESULT_NAME_PROP_NAME));
+            return CONFIGURATION_PROP_NAME_DEFAULT.equals(props.get(CONFIGURATION_PROP_NAME))
+                    && EMIT_RECEIVED_PROPERTIES_DEFAULT == (boolean) props.get(EMIT_RECEIVED_PROPERTIES);
         }
         return false;
     }
 
     @Test
-    public void testOddaverage() throws Exception {
-        logger.info("### TESTING ODD AVERAGE COMPONENT ###");
+    public void testGainOffset() throws Exception {
+        logger.info("### TESTING GAIN OFFSET COMPONENT ###");
         Map<String, Object> props = new HashMap<>();
-        props.put(WINDOW_SIZE_PROP_NAME, 9);
+
         try {
             WireTestUtil.updateWireComponentConfiguration(configurationService, UNDER_TEST_PID, props).get(30,
                     TimeUnit.SECONDS);
@@ -203,55 +196,18 @@ public class AverageComponentTest {
             throw e;
         }
 
-        Map<String, TypedValue<?>> myMap = new HashMap<>();
-
-        for (int i = 1; i < 9; i++) {
-            myMap.clear();
-            myMap.put(OPERAND_NAME_DEFAULT, TypedValues.newDoubleValue(i));
-            inEmitter.emit(new WireRecord(myMap));
-        }
         CompletableFuture<WireEnvelope> out0Recfuture = outReceiver.nextEnvelope();
-        myMap.clear();
-        myMap.put(OPERAND_NAME_DEFAULT, TypedValues.newDoubleValue(9));
+
+        Map<String, TypedValue<?>> myMap = new HashMap<>();
+        myMap.put("toBeMultipliedByTwo", TypedValues.newDoubleValue(4));
+        myMap.put("toBeMultipliedBy3AndIncreasedBy1", TypedValues.newDoubleValue(2));
         inEmitter.emit(new WireRecord(myMap));
 
         try {
             WireRecord receivedRecord = out0Recfuture.get(1, TimeUnit.SECONDS).getRecords().get(0);
             logger.info("received {}", receivedRecord.getProperties());
-            assertTrue(((double) receivedRecord.getProperties().get(RESULT_NAME_DEFAULT).getValue() == 5));
-
-        } catch (TimeoutException e) {
-            fail("Timeout waiting for envelope");
-        }
-    }
-
-    @Test
-    public void testEvenaverage() throws Exception {
-        logger.info("### TESTING EVEN AVERAGE COMPONENT ###");
-        Map<String, Object> props = new HashMap<>();
-        props.put(WINDOW_SIZE_PROP_NAME, 10);
-        try {
-            WireTestUtil.updateWireComponentConfiguration(configurationService, UNDER_TEST_PID, props).get(30,
-                    TimeUnit.SECONDS);
-        } catch (InterruptedException | TimeoutException e) {
-            logger.error("Test error", e);
-            throw e;
-        }
-        Map<String, TypedValue<?>> myMap = new HashMap<>();
-        for (int i = 1; i < 10; i++) {
-            myMap.clear();
-            myMap.put(OPERAND_NAME_DEFAULT, TypedValues.newDoubleValue(i));
-            inEmitter.emit(new WireRecord(myMap));
-        }
-        CompletableFuture<WireEnvelope> out0Recfuture = outReceiver.nextEnvelope();
-        myMap.clear();
-        myMap.put(OPERAND_NAME_DEFAULT, TypedValues.newDoubleValue(10));
-        inEmitter.emit(new WireRecord(myMap));
-
-        try {
-            WireRecord receivedRecord = out0Recfuture.get(1, TimeUnit.SECONDS).getRecords().get(0);
-            logger.info("received {}", receivedRecord.getProperties());
-            assertTrue(((double) receivedRecord.getProperties().get(RESULT_NAME_DEFAULT).getValue() == 5.5));
+            assertTrue((double) receivedRecord.getProperties().get("toBeMultipliedByTwo").getValue() == 8);
+            assertTrue((double) receivedRecord.getProperties().get("toBeMultipliedBy3AndIncreasedBy1").getValue() == 7);
 
         } catch (TimeoutException e) {
             fail("Timeout waiting for envelope");

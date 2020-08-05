@@ -16,7 +16,7 @@
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
     <OCD id="org.eclipse.kura.wire.Average" 
          name="Average" 
-         description="A wire component that performs a running average on a configurable input property.">
+         description="A wire component that finds the average value of a numeric property in a fixed size buffer containing the last received values, emitting the result. For comparison, values are promoted to double which is also the type of the result.">
          
          <AD id="operand.name"
             name="operand.name"
@@ -38,6 +38,7 @@
             name="window.size"
             type="Integer" cardinality="0"
             required="true"
+            minimum="1"
             default="10"
             description="Specifies the window size.">
         </AD>

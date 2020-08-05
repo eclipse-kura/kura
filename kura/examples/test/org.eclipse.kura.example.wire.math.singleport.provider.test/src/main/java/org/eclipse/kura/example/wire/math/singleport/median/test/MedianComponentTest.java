@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2020 Eurotech and/or its affiliates and others
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ *******************************************************************************/
+
 package org.eclipse.kura.example.wire.math.singleport.median.test;
 
 import static org.junit.Assert.assertTrue;
@@ -34,7 +44,7 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.LoggerFactory;
 
 public class MedianComponentTest {
-    
+
     // See:
     // http://stackoverflow.com/questions/7161338/using-osgi-declarative-services-in-the-context-of-a-junit-test
 

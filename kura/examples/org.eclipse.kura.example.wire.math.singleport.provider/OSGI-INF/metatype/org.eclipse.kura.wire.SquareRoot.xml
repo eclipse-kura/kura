@@ -1,43 +1,50 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    Copyright (c) 2018 Eurotech and/or its affiliates and others
-
-     All rights reserved. This program and the accompanying materials
-     are made available under the terms of the Eclipse Public License v1.0
-     which accompanies this distribution, and is available at
-     http://www.eclipse.org/legal/epl-v10.html
--->
-<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
-    <OCD id="org.eclipse.kura.wire.SquareRoot" 
-         name="SquareRoot" 
-         description="A wire component that performs the Square Root of a configurable input property.">
-         
-         <AD id="operand.name"
-            name="operand.name"
-            type="String" cardinality="0"
-            required="true"
-            default="operand"
-            description="Specifies the name of the operand property in the received envelope.">
-        </AD>
-        
-        <AD id="result.name"
-            name="result.name"
-            type="String" cardinality="0"
-            required="true"
-            default="result"
-            description="Specifies the name of the result property in emitted envelope.">
-        </AD>
-        
-        <AD id="emit.received.properties"
-            name="emit.received.properties"
-            type="Boolean" cardinality="0"
-            required="true"
-            default="false"
-            description="Specifies whether received properties should be included in the emitted envelope or not.">
-        </AD>
-    </OCD>
     
-    <Designate pid="org.eclipse.kura.wire.SquareRoot" factoryPid="org.eclipse.kura.wire.SquareRoot">
-        <Object ocdref="org.eclipse.kura.wire.SquareRoot"/>
-    </Designate>
+   Copyright (c) 2020 Eurotech and/or its affiliates and others
+  
+   This program and the accompanying materials are made
+   available under the terms of the Eclipse Public License 2.0
+   which is available at https://www.eclipse.org/legal/epl-2.0/
+ 
+	SPDX-License-Identifier: EPL-2.0
+	
+	Contributors:
+    Eurotech
+    
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0"
+	localization="en_us">
+	<OCD id="org.eclipse.kura.wire.SquareRoot" 
+		name="Square Root"
+		description="A wire component that performs the square root of a configurable numeric property received in input in the component. The result will be emitted as a new property of type double ">
+		
+		<AD id="operand.name" 
+			name="operand.name" 
+			type="String" cardinality="0" 
+			required="true" 
+			default="operand"
+			description="Specifies the name of the operand property in the received envelope.">
+		</AD>
+
+		<AD id="result.name" 
+			name="result.name" 
+			type="String" cardinality="0" 
+			required="true" 
+			default="result"
+			description="Specifies the name of the result property in emitted envelope.">
+		</AD>
+
+		<AD id="emit.received.properties" 
+			name="emit.received.properties"
+			type="Boolean" cardinality="0" 
+			required="true" 
+			default="false"
+			description="Specifies whether received properties should be included in the emitted envelope or not.">
+		</AD>
+	</OCD>
+
+	<Designate pid="org.eclipse.kura.wire.SquareRoot" factoryPid="org.eclipse.kura.wire.SquareRoot">
+		<Object ocdref="org.eclipse.kura.wire.SquareRoot" />
+	</Designate>
 </MetaData>

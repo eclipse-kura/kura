@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2020 Eurotech and/or its affiliates and others
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ *******************************************************************************/
+
 package org.eclipse.kura.example.wire.math.singleport;
 
 import java.util.ArrayDeque;
@@ -24,7 +34,7 @@ public class RunningMedian {
             values[index++] = windowValue.doubleValue();
         }
         Arrays.sort(values);
-        if (windowSize % 2 == 0) {
+        if (window.size() % 2 == 0) {
             return (values[windowSize / 2] + values[windowSize / 2 - 1]) / 2;
         } else {
             return values[windowSize / 2];

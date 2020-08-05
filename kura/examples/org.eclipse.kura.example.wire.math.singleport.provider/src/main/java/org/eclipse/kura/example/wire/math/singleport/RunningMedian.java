@@ -11,33 +11,35 @@
 package org.eclipse.kura.example.wire.math.singleport;
 
 import java.util.ArrayDeque;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collections;
 
 public class RunningMedian {
 
     private final ArrayDeque<Double> window;
     private final int windowSize;
+    private final ArrayList<Double> sortedWindow;
 
     public RunningMedian(final int windowSize) {
         this.window = new ArrayDeque<>(windowSize);
         this.windowSize = windowSize;
+        this.sortedWindow = new ArrayList<>();
     }
 
     public double updateAndGetMedian(double value) {
-        int index = 0;
         if (this.window.size() >= windowSize) {
-            this.window.removeFirst();
+            Double last = this.window.removeFirst();
+            sortedWindow.remove(last);
         }
         this.window.addLast(value);
-        double[] values = new double[windowSize];
-        for (Double windowValue : window) {
-            values[index++] = windowValue.doubleValue();
-        }
-        Arrays.sort(values);
-        if (window.size() % 2 == 0) {
-            return (values[windowSize / 2] + values[windowSize / 2 - 1]) / 2;
+        this.sortedWindow.add(value);
+        Collections.sort(this.sortedWindow);
+        int currentSize = window.size();
+        if (currentSize % 2 == 0) {
+            return ((Double) sortedWindow.toArray()[currentSize / 2]
+                    + (Double) sortedWindow.toArray()[currentSize / 2 - 1]) / 2;
         } else {
-            return values[windowSize / 2];
+            return (Double) sortedWindow.toArray()[currentSize / 2];
         }
 
     }

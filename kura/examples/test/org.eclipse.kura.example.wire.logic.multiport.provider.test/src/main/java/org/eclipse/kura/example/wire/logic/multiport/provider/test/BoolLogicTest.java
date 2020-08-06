@@ -206,63 +206,26 @@ public class BoolLogicTest {
 
     @Test
     public void testAndOperation() throws Exception {
-        logger.info("### TESTING AND OPERATION ###");
-        CompletableFuture<WireEnvelope> out0Recfuture = outReceiver.nextEnvelope();
-        in0emitter.emit(new WireRecord(mapWithTrue));
-        in1emitter.emit(new WireRecord(mapWithTrue));
-
         try {
-            WireRecord receivedRecord = out0Recfuture.get(1, TimeUnit.SECONDS).getRecords().get(0);
-            assertTrue((boolean) receivedRecord.getProperties().get(RESULT_NAME_DEFAULT).getValue());
-
+            Map<String, Boolean> result = calculateTruthTable();
+            assertTrue(result.get("tt"));
+            assertFalse(result.get("tf"));
+            assertFalse(result.get("ft"));
+            assertFalse(result.get("ff"));
         } catch (TimeoutException e) {
             fail("Timeout waiting for envelope");
         }
-        in0emitter.emit(new WireRecord(mapWithTrue));
-        CompletableFuture<WireEnvelope> out1Recfuture = outReceiver.nextEnvelope();
-        in1emitter.emit(new WireRecord(mapWithFalse));
-        try {
-            WireRecord receivedRecord = out1Recfuture.get(1, TimeUnit.SECONDS).getRecords().get(0);
-            assertFalse((boolean) receivedRecord.getProperties().get(RESULT_NAME_DEFAULT).getValue());
-
-        } catch (TimeoutException e) {
-            fail("Timeout waiting for envelope");
-        }
-
     }
 
     @Test
     public void testXorOperation() throws Exception {
-        logger.info("### TESTING XOR OPERATION ###");
-        Map<String, Object> props = new HashMap<>();
-        props.put(BOOLEAN_OPERATION, "XOR");
-
+        updateLogicOperation("XOR");
         try {
-            WireTestUtil.updateWireComponentConfiguration(configurationService, UNDER_TEST_PID, props).get(30,
-                    TimeUnit.SECONDS);
-        } catch (InterruptedException | TimeoutException e) {
-            logger.error("Test error", e);
-            throw e;
-        }
-
-        CompletableFuture<WireEnvelope> out0Recfuture = outReceiver.nextEnvelope();
-        in0emitter.emit(new WireRecord(mapWithTrue));
-        in1emitter.emit(new WireRecord(mapWithTrue));
-
-        try {
-            WireRecord receivedRecord = out0Recfuture.get(1, TimeUnit.SECONDS).getRecords().get(0);
-            assertFalse((boolean) receivedRecord.getProperties().get(RESULT_NAME_DEFAULT).getValue());
-
-        } catch (TimeoutException e) {
-            fail("Timeout waiting for envelope");
-        }
-        in0emitter.emit(new WireRecord(mapWithTrue));
-        CompletableFuture<WireEnvelope> out1Recfuture = outReceiver.nextEnvelope();
-        in1emitter.emit(new WireRecord(mapWithFalse));
-        try {
-            WireRecord receivedRecord = out1Recfuture.get(1, TimeUnit.SECONDS).getRecords().get(0);
-            assertTrue((boolean) receivedRecord.getProperties().get(RESULT_NAME_DEFAULT).getValue());
-
+            Map<String, Boolean> result = calculateTruthTable();
+            assertFalse(result.get("tt"));
+            assertTrue(result.get("tf"));
+            assertTrue(result.get("ft"));
+            assertFalse(result.get("ff"));
         } catch (TimeoutException e) {
             fail("Timeout waiting for envelope");
         }
@@ -270,36 +233,13 @@ public class BoolLogicTest {
 
     @Test
     public void testOrOperation() throws Exception {
-        logger.info("### TESTING OR OPERATION ###");
-        Map<String, Object> props = new HashMap<>();
-        props.put(BOOLEAN_OPERATION, "OR");
-
+        updateLogicOperation("OR");
         try {
-            WireTestUtil.updateWireComponentConfiguration(configurationService, UNDER_TEST_PID, props).get(30,
-                    TimeUnit.SECONDS);
-        } catch (InterruptedException | TimeoutException e) {
-            logger.error("Test error", e);
-            throw e;
-        }
-
-        CompletableFuture<WireEnvelope> out0Recfuture = outReceiver.nextEnvelope();
-        in0emitter.emit(new WireRecord(mapWithTrue));
-        in1emitter.emit(new WireRecord(mapWithFalse));
-
-        try {
-            WireRecord receivedRecord = out0Recfuture.get(1, TimeUnit.SECONDS).getRecords().get(0);
-            assertTrue((boolean) receivedRecord.getProperties().get(RESULT_NAME_DEFAULT).getValue());
-
-        } catch (TimeoutException e) {
-            fail("Timeout waiting for envelope");
-        }
-        in0emitter.emit(new WireRecord(mapWithFalse));
-        CompletableFuture<WireEnvelope> out1Recfuture = outReceiver.nextEnvelope();
-        in1emitter.emit(new WireRecord(mapWithFalse));
-        try {
-            WireRecord receivedRecord = out1Recfuture.get(1, TimeUnit.SECONDS).getRecords().get(0);
-            assertFalse((boolean) receivedRecord.getProperties().get(RESULT_NAME_DEFAULT).getValue());
-
+            Map<String, Boolean> result = calculateTruthTable();
+            assertTrue(result.get("tt"));
+            assertTrue(result.get("tf"));
+            assertTrue(result.get("ft"));
+            assertFalse(result.get("ff"));
         } catch (TimeoutException e) {
             fail("Timeout waiting for envelope");
         }
@@ -307,36 +247,13 @@ public class BoolLogicTest {
 
     @Test
     public void testNorOperation() throws Exception {
-        logger.info("### TESTING NOR OPERATION ###");
-        Map<String, Object> props = new HashMap<>();
-        props.put(BOOLEAN_OPERATION, "NOR");
-
+        updateLogicOperation("NOR");
         try {
-            WireTestUtil.updateWireComponentConfiguration(configurationService, UNDER_TEST_PID, props).get(30,
-                    TimeUnit.SECONDS);
-        } catch (InterruptedException | TimeoutException e) {
-            logger.error("Test error", e);
-            throw e;
-        }
-
-        CompletableFuture<WireEnvelope> out0Recfuture = outReceiver.nextEnvelope();
-        in0emitter.emit(new WireRecord(mapWithFalse));
-        in1emitter.emit(new WireRecord(mapWithFalse));
-
-        try {
-            WireRecord receivedRecord = out0Recfuture.get(1, TimeUnit.SECONDS).getRecords().get(0);
-            assertTrue((boolean) receivedRecord.getProperties().get(RESULT_NAME_DEFAULT).getValue());
-
-        } catch (TimeoutException e) {
-            fail("Timeout waiting for envelope");
-        }
-        in0emitter.emit(new WireRecord(mapWithTrue));
-        CompletableFuture<WireEnvelope> out1Recfuture = outReceiver.nextEnvelope();
-        in1emitter.emit(new WireRecord(mapWithFalse));
-        try {
-            WireRecord receivedRecord = out1Recfuture.get(1, TimeUnit.SECONDS).getRecords().get(0);
-            assertFalse((boolean) receivedRecord.getProperties().get(RESULT_NAME_DEFAULT).getValue());
-
+            Map<String, Boolean> result = calculateTruthTable();
+            assertFalse(result.get("tt"));
+            assertFalse(result.get("tf"));
+            assertFalse(result.get("ft"));
+            assertTrue(result.get("ff"));
         } catch (TimeoutException e) {
             fail("Timeout waiting for envelope");
         }
@@ -344,36 +261,13 @@ public class BoolLogicTest {
 
     @Test
     public void testNandOperation() throws Exception {
-        logger.info("### TESTING NAND OPERATION ###");
-        Map<String, Object> props = new HashMap<>();
-        props.put(BOOLEAN_OPERATION, "NAND");
-
         try {
-            WireTestUtil.updateWireComponentConfiguration(configurationService, UNDER_TEST_PID, props).get(30,
-                    TimeUnit.SECONDS);
-        } catch (InterruptedException | TimeoutException e) {
-            logger.error("Test error", e);
-            throw e;
-        }
-
-        CompletableFuture<WireEnvelope> out0Recfuture = outReceiver.nextEnvelope();
-        in0emitter.emit(new WireRecord(mapWithTrue));
-        in1emitter.emit(new WireRecord(mapWithTrue));
-
-        try {
-            WireRecord receivedRecord = out0Recfuture.get(1, TimeUnit.SECONDS).getRecords().get(0);
-            assertFalse((boolean) receivedRecord.getProperties().get(RESULT_NAME_DEFAULT).getValue());
-
-        } catch (TimeoutException e) {
-            fail("Timeout waiting for envelope");
-        }
-        in0emitter.emit(new WireRecord(mapWithTrue));
-        CompletableFuture<WireEnvelope> out1Recfuture = outReceiver.nextEnvelope();
-        in1emitter.emit(new WireRecord(mapWithFalse));
-        try {
-            WireRecord receivedRecord = out1Recfuture.get(1, TimeUnit.SECONDS).getRecords().get(0);
-            assertTrue((boolean) receivedRecord.getProperties().get(RESULT_NAME_DEFAULT).getValue());
-
+            updateLogicOperation("NAND");
+            Map<String, Boolean> result = calculateTruthTable();
+            assertFalse(result.get("tt"));
+            assertTrue(result.get("tf"));
+            assertTrue(result.get("ft"));
+            assertTrue(result.get("ff"));
         } catch (TimeoutException e) {
             fail("Timeout waiting for envelope");
         }
@@ -381,33 +275,15 @@ public class BoolLogicTest {
 
     @Test
     public void testNotOperation() throws Exception {
-        Map<String, Object> props = new HashMap<>();
-        logger.info("### TESTING NOT OPERATION ###");
-        props.put(BOOLEAN_OPERATION, "NOT");
-        props.put(BARRIER_MODALITY_PROPERTY_KEY, false);
-
+        updateLogicOperation("NOT");
         try {
-            WireTestUtil.updateWireComponentConfiguration(configurationService, UNDER_TEST_PID, props).get(30,
-                    TimeUnit.SECONDS);
-        } catch (InterruptedException | TimeoutException e) {
-            logger.error("Test error", e);
-            throw e;
-        }
-
-        CompletableFuture<WireEnvelope> out0Recfuture = outReceiver.nextEnvelope();
-        in0emitter.emit(new WireRecord(mapWithTrue));
-
-        try {
+            CompletableFuture<WireEnvelope> out0Recfuture = outReceiver.nextEnvelope();
+            in0emitter.emit(new WireRecord(mapWithTrue));
             WireRecord receivedRecord = out0Recfuture.get(1, TimeUnit.SECONDS).getRecords().get(0);
             assertFalse((boolean) receivedRecord.getProperties().get(RESULT_NAME_DEFAULT).getValue());
-
-        } catch (TimeoutException e) {
-            fail("Timeout waiting for envelope");
-        }
-        CompletableFuture<WireEnvelope> out1Recfuture = outReceiver.nextEnvelope();
-        in0emitter.emit(new WireRecord(mapWithFalse));
-        try {
-            WireRecord receivedRecord = out1Recfuture.get(1, TimeUnit.SECONDS).getRecords().get(0);
+            out0Recfuture = outReceiver.nextEnvelope();
+            in0emitter.emit(new WireRecord(mapWithFalse));
+            receivedRecord = out0Recfuture.get(1, TimeUnit.SECONDS).getRecords().get(0);
             assertTrue((boolean) receivedRecord.getProperties().get(RESULT_NAME_DEFAULT).getValue());
 
         } catch (TimeoutException e) {
@@ -417,40 +293,52 @@ public class BoolLogicTest {
 
     @Test
     public void testIllegalOperation() throws Exception {
-        Map<String, Object> props = new HashMap<>();
-        logger.info("### TESTING ILLEGAL OPERATION ###");
-        props.put(BOOLEAN_OPERATION, "ILLEGAL");
-        props.put(BARRIER_MODALITY_PROPERTY_KEY, false);
-
+        updateLogicOperation("ILLEGAL");
         try {
-            WireTestUtil.updateWireComponentConfiguration(configurationService, UNDER_TEST_PID, props).get(30,
-                    TimeUnit.SECONDS);
-        } catch (InterruptedException | TimeoutException e) {
-            logger.error("Test error", e);
-            throw e;
+            Map<String, Boolean> result = calculateTruthTable();
+            assertTrue(result.get("tt"));
+            assertFalse(result.get("tf"));
+            assertFalse(result.get("ft"));
+            assertFalse(result.get("ff"));
+        } catch (TimeoutException e) {
+            fail("Timeout waiting for envelope");
         }
+    }
 
+    private Map<String, Boolean> calculateTruthTable()
+            throws InterruptedException, ExecutionException, TimeoutException {
+        Map<String, Boolean> results = new HashMap<>();
+        results.put("tt", performBooleanOperation(true, true));
+        results.put("tf", performBooleanOperation(true, false));
+        results.put("ft", performBooleanOperation(false, true));
+        results.put("ff", performBooleanOperation(false, false));
+        return results;
+    }
+
+    private Boolean performBooleanOperation(boolean operator1, boolean operator2)
+            throws InterruptedException, ExecutionException, TimeoutException {
+        if (operator1) {
+            in0emitter.emit(new WireRecord(mapWithTrue));
+        } else {
+            in0emitter.emit(new WireRecord(mapWithFalse));
+        }
         CompletableFuture<WireEnvelope> out0Recfuture = outReceiver.nextEnvelope();
-        in0emitter.emit(new WireRecord(mapWithTrue));
-        in1emitter.emit(new WireRecord(mapWithTrue));
-
-        try {
-            WireRecord receivedRecord = out0Recfuture.get(1, TimeUnit.SECONDS).getRecords().get(0);
-            assertTrue((boolean) receivedRecord.getProperties().get(RESULT_NAME_DEFAULT).getValue());
-
-        } catch (TimeoutException e) {
-            fail("Timeout waiting for envelope");
+        if (operator2) {
+            in1emitter.emit(new WireRecord(mapWithTrue));
+        } else {
+            in1emitter.emit(new WireRecord(mapWithFalse));
         }
-        in0emitter.emit(new WireRecord(mapWithTrue));
-        CompletableFuture<WireEnvelope> out1Recfuture = outReceiver.nextEnvelope();
-        in1emitter.emit(new WireRecord(mapWithFalse));
-        try {
-            WireRecord receivedRecord = out1Recfuture.get(1, TimeUnit.SECONDS).getRecords().get(0);
-            assertFalse((boolean) receivedRecord.getProperties().get(RESULT_NAME_DEFAULT).getValue());
+        WireRecord receivedRecord = out0Recfuture.get(1, TimeUnit.SECONDS).getRecords().get(0);
+        return (boolean) receivedRecord.getProperties().get(RESULT_NAME_DEFAULT).getValue();
+    }
 
-        } catch (TimeoutException e) {
-            fail("Timeout waiting for envelope");
-        }
+    private void updateLogicOperation(String operation)
+            throws InterruptedException, ExecutionException, TimeoutException {
+
+        Map<String, Object> props = new HashMap<>();
+        props.put(BOOLEAN_OPERATION, operation);
+        WireTestUtil.updateWireComponentConfiguration(configurationService, UNDER_TEST_PID, props).get(30,
+                TimeUnit.SECONDS);
     }
 
     @After

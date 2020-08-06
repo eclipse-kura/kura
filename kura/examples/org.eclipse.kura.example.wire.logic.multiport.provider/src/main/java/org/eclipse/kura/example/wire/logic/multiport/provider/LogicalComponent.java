@@ -5,7 +5,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *******************************************************************************/
 
 package org.eclipse.kura.example.wire.logic.multiport.provider;
@@ -27,10 +27,10 @@ import org.eclipse.kura.wire.WireHelperService;
 import org.eclipse.kura.wire.WireRecord;
 import org.eclipse.kura.wire.graph.MultiportWireSupport;
 import org.eclipse.kura.wire.multiport.MultiportWireReceiver;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.wireadmin.Wire;
-import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,7 +54,7 @@ public class LogicalComponent implements WireEmitter, ConfigurableComponent, Mul
         this.wireSupport = (MultiportWireSupport) this.wireHelperService.newWireSupport(this,
                 (ServiceReference<WireComponent>) componentContext.getServiceReference());
         logger.info("activated, properties: {}", properties);
-        context = componentContext.getBundleContext();
+        this.context = componentContext.getBundleContext();
         updated(properties, componentContext);
         logger.info("activating...done");
     }

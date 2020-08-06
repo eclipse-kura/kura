@@ -5,7 +5,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *******************************************************************************/
 
 package org.eclipse.kura.example.wire.logic.multiport.provider;
@@ -79,27 +79,27 @@ public class LogicalComponentOptions {
     }
 
     public String getFirstOperandName() {
-        return firstOperandName;
+        return this.firstOperandName;
     }
 
     public String getSecondOperandName() {
-        return secondOperandName;
+        return this.secondOperandName;
     }
 
     public String getResultName() {
-        return resultName;
+        return this.resultName;
     }
 
     public PortAggregatorFactory getPortAggregatorFactory() {
-        return portAggregatorFactory;
+        return this.portAggregatorFactory;
     }
 
     public OperatorOption getBooleanOperation() {
-        return booleanOperation;
+        return this.booleanOperation;
     }
 
     @SuppressWarnings("unchecked")
     private <T> T getSafe(Object o, T defaultValue) {
-        return (defaultValue.getClass().isInstance(o) ? (T) o : defaultValue);
+        return defaultValue.getClass().isInstance(o) ? (T) o : defaultValue;
     }
 }

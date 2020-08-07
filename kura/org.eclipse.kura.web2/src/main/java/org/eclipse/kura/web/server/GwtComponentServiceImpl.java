@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.kura.web.server;
 
+import static java.util.Objects.isNull;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -733,6 +735,10 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
             referenceInterfaces.forEach(reference -> {
                 try {
                     ServiceReference<?>[] serviceReferences = context.getServiceReferences(reference, null);
+
+                    if (isNull(serviceReferences)) {
+                        return;
+                    }
 
                     for (ServiceReference<?> serviceReference : serviceReferences) {
                         String cloudServicePid = (String) serviceReference.getProperty(KURA_SERVICE_PID);

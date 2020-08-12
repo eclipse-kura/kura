@@ -21,7 +21,7 @@ This tutorial will explain how to configure a Wire graph that connects with a Se
 ![sensortag_driver]({{ site.baseurl }}/assets/images/wires/SensorTagDriver.png)
 
 {:start="3"}
-3. From the "Drivers and Assets" tab, add a new asset binded to the SensorTag driver:
+3. From the "Drivers and Assets" tab, add a new asset bound to the SensorTag driver:
   * Click on the "New Asset" button and fill the form with the "Asset Name" and selecting the driver created in step 2. as "Driver Name". Click "Apply" and a new asset will be listed under the SensorTag driver.
 
   ![sensortag_asset]({{ site.baseurl }}/assets/images/wires/SensorTagAsset.png)

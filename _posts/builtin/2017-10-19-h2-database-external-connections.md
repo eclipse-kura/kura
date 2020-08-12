@@ -61,7 +61,7 @@ The H2 JDBC Driver can be used to access database data using LibreOffice. The st
 ![Base]({{ site.baseurl }}/assets/images/database/base.png)
 
 {:start="2"}
-2. Select **Connect to and existing database** and click next.
+2. Select **Connect to an existing database** and click next.
 
 3. Set the JDBC driver and DB URL as follows:
 
@@ -75,7 +75,7 @@ The H2 JDBC Driver can be used to access database data using LibreOffice. The st
 {:start="4"}
 4. Click on **Test Class** to make sure that the driver can be loaded successfully.
 
-5. Set the credentials: enter `SA` in the user name field, check the **Password required** field and click **Test connection**. Then enter `password` in the **Password** field when required. Finally click **Next**. Leave the settings unchanged on the next screen, press **Finish** and save the database.
+5. Set the credentials: enter `SA` in the user name field, check the **Password required** field and click **Test connection**. Then enter the `password` in the **Password** field when required. Finally click **Next**. Leave the settings unchanged on the next screen, press **Finish** and save the database.
 
 {% include alerts.html message="Make sure that the port 9123 is open on the device firewall before connecting." %}
 

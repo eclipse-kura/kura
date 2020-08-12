@@ -22,7 +22,7 @@ Interested applications can then subscribe to (or query a message datastore for)
 
 In a more complex scenario there might be filters between the WireAsset "source" and the CloudPublisher "sink" and the emitterPID of the WireEnvelope received by the publisher no longer matches the emitterPID of the WireEnvelope emitted by the WireAsset. However the published data still represents "Asset" (filtered) data and should be published under the topic above.
 
-The Kura Wires model haven't the notion of source of an WireEnvelope since a given WireEnvelope instance does not move across the graph but only from one WireEmitter to downstream WireReceiverS that are free to emit something semantically different.
+The Kura Wires model haven't the notion of source of a WireEnvelope since a given WireEnvelope instance does not move across the graph but only from one WireEmitter to downstream WireReceiverS that are free to emit something semantically different.
 
 To overcome this issue:
 

@@ -15,14 +15,14 @@ The DB Store component allows the wire graphs to interact with the database inst
 The DB Filter component, instead, can run a custom SQL query on the Kura database. It can be configured as follows:
 
 * sql.view : SQL to be executed to build a view.
-* cache.expiration.interval : cache validity in seconds. When cache expires, it will cause a new read in the database.
+* cache.expiration.interval : cache validity in seconds. When the cache expires, it will cause a new read in the database.
 
-The following procedure will create a wire graph that collects data from a simulated OPC/UA server, stores them in table using the DB Store component and publishes them on the cloud platform. Moreover, the DB Filter is used to read from the database and write data to the OPC/UA server based on the read values.
+The following procedure will create a wire graph that collects data from a simulated OPC/UA server, stores them in a table using the DB Store component and publishes them on the cloud platform. Moreover, the DB Filter is used to read from the database and write data to the OPC/UA server based on the read values.
 
 ## Configure OPC/UA server simulator
 
 1. Download the [OPC/UA server simulator](https://s3.amazonaws.com/kura-resources/opcua_demo_server.dp) bundle and install it on Kura. It will create a simulated OPC/UA server that exposes some sensors (light, temperature and water sensor) and some actuators (buzzer, led and fan).
-2. On the Kura web interface, select "OPCUA Server demo" under "Services" and set "server.port" to 1234. Click "Apply" button. This will start a OPCUA server on port 1234.
+2. On the Kura web interface, select "OPCUA Server demo" under "Services" and set "server.port" to 1234. Click "Apply" button. This will start an OPCUA server on port 1234.
 
 ## Configure Kura Wires OPC/UA application
 
@@ -41,7 +41,7 @@ The following procedure will create a wire graph that collects data from a simul
 3. Click on "Wires" under "System"
 4. Add a new "Timer" component and configure the interval at which the OPC/UA server will be sampled
 5. Add a new "Asset" with the previously added OPC/UA driver
-6. Configure the new OPC/UA asset, adding new Channels as shown in the following image. Be sure that all channel are set to READ.
+6. Configure the new OPC/UA asset, adding new Channels as shown in the following image. Be sure that all channels are set to READ.
 
 ![opcua_driver_config1]({{ site.baseurl }}/assets/images/wires/OPCUADriverConfig1.png)
 
@@ -56,7 +56,7 @@ The following procedure will create a wire graph that collects data from a simul
 11. Add a new "DBFilter" component and configure as follows. The query will get the values from the light sensor and if they are less than 200, the fan is activated.
   * sql.view : SELECT (CASE WHEN "light" < 200 THEN 1 ELSE 0 END) AS "led" FROM "WR_data" ORDER BY TIMESTAMP DESC LIMIT 1;
   * cache.expiration.interval : 0
-12. Add another "Asset" with the OPC/UA driver, configured as shown in the following image. Be sure that all channel are set to WRITE.
+12. Add another "Asset" with the OPC/UA driver, configured as shown in the following image. Be sure that all channels are set to WRITE.
 
 ![opcua_driver_config2]({{ site.baseurl }}/assets/images/wires/OPCUADriverConfig2.png)
 

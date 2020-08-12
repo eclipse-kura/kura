@@ -34,16 +34,16 @@ In this way the **NODELAY** and **DB** components are decoupled because they are
 
 ## Configuration
 
-The FIFO component configuration is composed by the following properties:
+The FIFO component configuration is composed of the following properties:
 
-* **queue.capacity**: The size of the queue in terms of number of storable wire envelopes.
+* **queue.capacity**: The size of the queue in terms of the number of storable wire envelopes.
 
 * **discard.envelopes** : Configures the behavior of the component in case of full queue.
 
   * If set to `true`, envelopes received when the queue is full will be dropped. In this mode submitting an envelope to the queue is always a non blocking operation.
   This mode should be used if occasionally losing wire envelopes is acceptable for the application, but introducing delays for upstream components is not.
 
-  * If set to `false`, adding an envelope when the queue is full will block the submitting thread until there is space on the queue.
+  * If set to `false`, adding an envelope when the queue is full will block the submitting thread until there is space in the queue.
   In this mode submitting an envelope to the FIFO component can be a blocking operation if the queue is full.
   This mode should be used if dropping wire envelopes is unacceptable for upstream components.
 

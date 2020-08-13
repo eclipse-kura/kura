@@ -35,7 +35,7 @@ The corresponding Channels definition in the Asset is as follows:
 
 As shown in the previous image, the Channel definition in an Asset results easily mappable to what available in a generic PLC documentation. 
 
-Once defined the Channels in an Asset, a simple Java application that leverages the Asset API can easily communicate with the Field device by simply referring the specific Channel of interest.
+Once defined the Channels in an Asset, a simple Java application that leverages the Asset API can easily communicate with the Field device by simply referring to the specific Channel of interest.
 
 ## Drivers and Assets in ESF Administrative UI
 Kura provides a specific section of the UI to allow users to manage the different instances of Drivers and Assets.

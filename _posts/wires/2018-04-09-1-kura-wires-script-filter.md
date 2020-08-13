@@ -12,7 +12,7 @@ The Script Filter component provides scripting functionalities in Kura Wires usi
 * It is possible to access to the received envelope and inspect the wire records contained in it form the script.
 * The script can optionally emit a wire envelope containing one or more wire records for each wire envelope received.
 * The script context is persisted across multiple executions, allowing to perform stateful computations like running a counter, performing time averages etc.
-* A slf4j Logger is available to the script for debug purposes.
+* A slf4j Logger is available to the script for debugging purposes.
 * The script context is restricted in order to allow only Wires related processing. Any attempt to load additional Java classes will fail.
 
 ## Usage
@@ -57,7 +57,7 @@ Each element of the **records** array is an immutable object that represents a r
 * `getType(void) -> DataType`: Returns the type of the value, as a DataType enum variant. Can be matched against the data type constants described above.
 * `getValue(void) -> Object`: Returns the actual value.
 
-The javascript objects referred as WireRecords in this guide are not instances of the `org.eclipse.kura.wire.WireRecord` class, but are wrappers that map WireRecord properties into javascript properties.
+The javascript objects referred to as WireRecords in this guide are not instances of the `org.eclipse.kura.wire.WireRecord` class, but are wrappers that map WireRecord properties into javascript properties.
 The following code is a simple example script that show how to use the filter:
 
 ```javascript
@@ -81,7 +81,7 @@ New mutable Wire Record instances can be created using the `newWireRecord(void) 
 The properties of a mutable WireRecord can be modified by setting Javascript object properties.
 
 The properties of a WireRecord object must be instances of the TypedValue
- class created using the `new<type>Value()` family of functions. Setting different kind of objects as properties of a WireRecord will result in an exception.
+ class created using the `new<type>Value()` family of functions. Setting different kinds of objects as properties of a WireRecord will result in an exception.
 
 The **output** global variable is an object that can be used for emitting WireRecords.
 This object contains a list of WireRecords that will be emitted when the script execution finishes, if no exceptions are thrown.
@@ -89,7 +89,7 @@ This object contains a list of WireRecords that will be emitted when the script 
 New records can be added to the list using the `add(WireRecordWrapper)` function.
 It is also possible to emit records contained in the received WireEnvelope.
 
-The script filter will emit a wire envelope only if the WireRecord list is not empty when the script execution completes. The following code is an example about how to emit a value:
+The script filter will emit a wire envelope only if the WireRecord list is not empty when the script execution completes. The following code is an example of how to emit a value:
 
 ```javascript
 // create a new record

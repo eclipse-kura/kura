@@ -196,7 +196,7 @@ and may be a hierarchical topic. It is recommended to design resource
 identifiers following the best practices established for REST API. For
 example, to set the value for an actuator, a message can be published to
 the topic "**$EDC/account_name/client_id/app_id/PUT/actuator/1**"
-with the new value suplliied in the message payload.
+with the new value supplied in the message payload.
 
 ### Delete Resources
 
@@ -400,7 +400,7 @@ service configuration updates via MQTT though a web user-interface.
 
 The screen capture that follows shows an example administration
 application where, for a given IOT gateway, a list of all configurable
-services is presented to the administrator.
+services are presented to the administrator.
 
 ![]({{ site.baseurl }}/assets/images/mqtt_namespace/media/image1.png)
 
@@ -627,7 +627,7 @@ This operation stops a bundle identified by its ID.
 
 The previously described read, start/stop, and install/uninstall
 resource operations can be leveraged to develop a web application that
-allows for remote package deployment via MQTT though a web
+allows for remote package deployment via MQTT through a web
 user-interface.
 
 The screen capture that follows shows an example administration
@@ -646,7 +646,7 @@ to start and stop them as shown in the screen capture that follows.
 #### DEPLOY-V2
 Kura 1.4.0 introduces a new version of the DEPLOY application named "DEPLOY-V2".
 The main feature introduced is related to a different approach for package
-distribution: instead of receiving the package inside a MQTT message, the device
+distribution: instead of receiving the package inside an MQTT message, the device
 receives only a download request with all the information needed to perform an
 independent download via HTTP.
 The "DEPLOY-V2" application continues to support the *read*, *start/stop*, and
@@ -775,8 +775,8 @@ progress using the request parameter dp.download.block.size.
 Next, the client will report the download progress to the platform by
 publishing, with QoS==2, one or more unsolicited messages. If HTTP header is
 not available, the device will report 50% as dp.download.progress for all the
-download process.
-The value of requester.client.id is the one of the last download or install
+download processes.
+The value of requester.client.id is one of the last downloads or install
 request received.
 
 Download Notification:
@@ -867,7 +867,7 @@ _Unsolicited messages for install progress:_
 
 If the value of **dp.install** in the original download request is true the client will start installing the DP.
 Due to the limitations of the OSGi DeploymentAdmin, it's not possible to have feedback on the install progress.
-However this operations should normally complete in a few seconds, even for an upgrade.
+However, these operations should normally complete in a few seconds, even for an upgrade.
 Otherwise (dp.install==false), the platform can request the installation of an already downloaded package through the following message:
 
 Install notification:

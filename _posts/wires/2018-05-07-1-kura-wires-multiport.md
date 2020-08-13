@@ -27,8 +27,8 @@ The following properties need to be specified in the component configuration:
 - **output.cardinality.minimum**: an integer that specifies the minimum number of output ports that the component can be configured to manage.
 - **output.cardinality.maximum**: an integer that specifies the maximum number of output ports that the component can be configured to manage.
 - **output.cardinality.default**: an integer that specifies the default number of output ports that the component will be created with, if not specified in a different way.
-- **input.port.names**: optional mapping between input ports and friendly names
-- **output.port.names**: optional mapping between output ports and friendly names
+- **input.port.names**: an optional mapping between input ports and friendly names
+- **output.port.names**: an optional mapping between output ports and friendly names
 
 The component should also provide service interface **org.eclipse.kura.wire.WireComponent**
 

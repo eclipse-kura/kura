@@ -4,7 +4,7 @@ title:  "GPIO driver in Kura Wires"
 categories: [wires]
 ---
 
-In this section a simple but effective example about the GPIO Driver on Wires will be presented. This example will implement a Wire graph that toggles a digital GPIO. A listener will be attached to an input GPIO externally connected to the first one.
+In this section a simple but effective example of the GPIO Driver on Wires will be presented. This example will implement a Wire graph that toggles a digital GPIO. A listener will be attached to an input GPIO externally connected to the first one.
 
 Setup a RaspberryPi as shown in [GPIO Driver](../devices/1-gpio-driver.html#drive-a-led-using-the-gpio-driver) section. Add a cable from the LED contact near the red cable to pin 37 (gpio 26) on the RaspberryPi.
 
@@ -14,7 +14,7 @@ Setup a RaspberryPi as shown in [GPIO Driver](../devices/1-gpio-driver.html#driv
 2. On the Kura web interface, instantiate a GPIO Driver:
   * Under "System", select "Drivers and Assets" and click on the "New Driver" button.
   * Select "org.eclipse.kura.driver.gpio" as "Driver Factory", type a name in to "Driver Name" and click "Apply": a new driver will be instantiated and shown up under the "Drivers and Assets" tab.
-3. From the "Drivers and Assets" tab, add a new asset binded to the GPIO driver:
+3. From the "Drivers and Assets" tab, add a new asset bound to the GPIO driver:
   * Click on the "New Asset" button and fill the form with the "Asset Name" and selecting the driver created in step 2. as "Driver Name". Click "Apply" and a new asset will be listed under the GPIO driver.
   * Click on the new asset and configure it, adding only one channel called **LED** as shown in the following picture:
 

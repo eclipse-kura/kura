@@ -20,21 +20,37 @@ public class FirewallPanelUtils {
 
     public static final int INTERFACE_NAME_MAX_LENGTH = 15;
 
+    private FirewallPanelUtils() {
+        // Not needed
+    }
+
     public static boolean isPortInRange(String ports) {
-        String[] portRange = ports.trim().split(":");
-        if (portRange.length == 2) {
-            return checkPort(portRange[0]) && checkPort(portRange[1])
-                    && Integer.parseInt(portRange[0]) < Integer.parseInt(portRange[1]);
-        } else {
-            return checkPort(portRange[0]);
+        boolean isInRange = false;
+        try {
+            String[] portRange = ports.split(":");
+            if (portRange.length == 2) {
+                portRange[0] = portRange[0].trim();
+                portRange[1] = portRange[1].trim();
+                isInRange = checkPort(portRange[0]) && checkPort(portRange[1])
+                        && Integer.parseInt(portRange[0]) < Integer.parseInt(portRange[1]);
+            } else if (portRange.length == 1) {
+                isInRange = checkPort(portRange[0].trim());
+            }
+        } catch (Exception e) {
+            // do nothing
         }
+        return isInRange;
     }
 
     private static boolean checkPort(String port) {
         boolean isInRange = false;
-        Integer portInt = Integer.parseInt(port);
-        if (!port.startsWith("0") && portInt > 0 && portInt <= 65535) {
-            isInRange = true;
+        try {
+            Integer portInt = Integer.parseInt(port);
+            if (!port.startsWith("0") && portInt > 0 && portInt <= 65535) {
+                isInRange = true;
+            }
+        } catch (Exception e) {
+            // do nothing
         }
         return isInRange;
     }

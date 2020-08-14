@@ -187,6 +187,8 @@ public class ServerCertsTabUi extends Composite implements Tab {
         setButtonsEnabled(false);
         this.storageAliasInput.setText("");
         this.certificateInput.setText("");
+        this.groupStorageAliasForm.setValidationState(ValidationState.NONE);
+        this.groupCertForm.setValidationState(ValidationState.NONE);
     }
 
     private boolean isAliasValid() {

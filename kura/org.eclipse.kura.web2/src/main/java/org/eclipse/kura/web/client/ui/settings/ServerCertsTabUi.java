@@ -92,13 +92,7 @@ public class ServerCertsTabUi extends Composite implements Tab {
 
     @Override
     public boolean isValid() {
-        boolean validAlias = isAliasValid();
-        boolean validAppCert = isServerCertValid();
-        boolean result = false;
-        if (validAlias && validAppCert) {
-            result = true;
-        }
-        return result;
+        return this.serverSslCertsForm.validate();
     }
 
     @Override
@@ -125,7 +119,6 @@ public class ServerCertsTabUi extends Composite implements Tab {
 
         this.storageAliasLabel.setText(MSGS.settingsStorageAliasLabel());
         this.storageAliasInput.addChangeHandler(event -> {
-            isAliasValid();
             setDirty(true);
             setButtonsEnabled(true);
         });
@@ -133,7 +126,6 @@ public class ServerCertsTabUi extends Composite implements Tab {
         this.certificateLabel.setText(MSGS.settingsPublicCertLabel());
         this.certificateInput.setVisibleLines(20);
         this.certificateInput.addChangeHandler(event -> {
-            isServerCertValid();
             setDirty(true);
             setButtonsEnabled(true);
         });
@@ -189,26 +181,6 @@ public class ServerCertsTabUi extends Composite implements Tab {
         this.certificateInput.setText("");
         this.groupStorageAliasForm.setValidationState(ValidationState.NONE);
         this.groupCertForm.setValidationState(ValidationState.NONE);
-    }
-
-    private boolean isAliasValid() {
-        if (this.storageAliasInput.getText() == null || "".equals(this.storageAliasInput.getText().trim())) {
-            this.groupStorageAliasForm.setValidationState(ValidationState.ERROR);
-            return false;
-        } else {
-            this.groupStorageAliasForm.setValidationState(ValidationState.NONE);
-            return true;
-        }
-    }
-
-    private boolean isServerCertValid() {
-        if (this.certificateInput.getText() == null || "".equals(this.certificateInput.getText().trim())) {
-            this.groupCertForm.setValidationState(ValidationState.ERROR);
-            return false;
-        } else {
-            this.groupCertForm.setValidationState(ValidationState.NONE);
-            return true;
-        }
     }
 
     private void setButtonsEnabled(boolean state) {

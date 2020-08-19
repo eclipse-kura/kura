@@ -55,17 +55,19 @@
                     <b:FieldSet>
                         <b:FormGroup ui:field="groupStorageAliasForm">
                             <b:FormLabel for="storageAliasInput"
-                                ui:field="storageAliasLabel" />
+                                ui:field="storageAliasLabel" showRequiredIndicator="true"/>
+                            <b:InlineHelpBlock iconType="EXCLAMATION_TRIANGLE" />
                             <b:Input type="TEXT" b:id="storageAlias"
-                                ui:field="storageAliasInput" />
+                                ui:field="storageAliasInput" allowBlank="false" validateOnBlur="true"/>
                         </b:FormGroup>
 
                         <b:FormGroup ui:field="groupCertForm">
                             <b:FormLabel for="certificateInput"
-                                ui:field="certificateLabel" />
+                                ui:field="certificateLabel" showRequiredIndicator="true"/>
+                            <b:InlineHelpBlock iconType="EXCLAMATION_TRIANGLE" />
                             <b:TextArea b:id="certificateInput"
                                 addStyleNames="{style.center-panel}"
-                                ui:field="certificateInput" />
+                                ui:field="certificateInput" allowBlank="false" validateOnBlur="true"/>
                         </b:FormGroup>
                     </b:FieldSet>
                 </b:Form>

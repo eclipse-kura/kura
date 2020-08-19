@@ -6,16 +6,16 @@ categories: [wires]
 
 As presented in the [Beacon Driver](/kura/devices/2-beacon-drivers.html) page, Eclipse Kura provides a specific driver that can be used to listen for iBeacons packets. The driver is available only for gateways that support the new Kura BLE APIs.
 
-This tutorial will explain how to configure a Wire graph that get iBeacon&trade; data and show them to a logger.
+This tutorial will explain how to configure a Wire graph that gets iBeacon&trade; data and show them to a logger.
 
 ## Configure Kura Wires iBeacon&trade; application
 
 1. Install the iBeacon driver from the [Eclipse Kura Marketplace](https://marketplace.eclipse.org/content/ibeacon-driver-eclipse-kura-4xy)
-2. On the Kura web interface, instantiate a iBeacon Driver:
+2. On the Kura web interface, instantiate an iBeacon Driver:
   * Under "System", select "Drivers and Assets" and click on the "New Driver" button.
   * Select "org.eclipse.kura.driver.ibeacon" as "Driver Factory", type a name in to "Driver Name" and click "Apply": a new driver will be instantiated and shown up under the "Drivers and Assets" tab.
   * Configure the new driver setting the bluetooth interface name (e.g. hci0).
-3. From the "Drivers and Assets" tab, add a new asset binded to the iBeacon driver:
+3. From the "Drivers and Assets" tab, add a new asset bound to the iBeacon driver:
   * Click on the "New Asset" button and fill the form with the "Asset Name" and selecting the driver created in step 2. as "Driver Name". Click "Apply" and a new asset will be listed under the iBeacon driver.
 
   ![ibeacon_asset]({{ site.baseurl }}/assets/images/wires/iBeaconDriver.png)

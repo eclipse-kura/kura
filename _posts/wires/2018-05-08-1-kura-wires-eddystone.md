@@ -15,12 +15,12 @@ This tutorial will explain how to configure an Eddystone&trade; driver and put i
   * Under "System", select "Drivers and Assets" and click on the "New Driver" button.
   * Select "org.eclipse.kura.driver.eddystone" as "Driver Factory", type a name in to "Driver Name" and click "Apply": a new driver will be instantiated and shown up under the "Drivers and Assets" tab.
   * Configure the new driver setting the bluetooth interface name (e.g. hci0).
-3. From the "Drivers and Assets" tab, add a new asset binded to the Eddystone driver:
+3. From the "Drivers and Assets" tab, add a new asset bound to the Eddystone driver:
   * Click on the "New Asset" button and fill the form with the "Asset Name" and selecting the driver created in step 2. as "Driver Name". Click "Apply" and a new asset will be listed under the Eddystone driver.
 
   ![eddystone_driver]({{ site.baseurl }}/assets/images/wires/eddystoneDriver.png)
 
-  * Click on the new asset and configure it, adding the channels. Each channel represents a type of frame the Driver is interested to. Please note that in the above picture two channels are created: one for the `UID` type and the second for the `URL`. In this example only the `URL` will be used.
+  * Click on the new asset and configure it, adding the channels. Each channel represents a type of frame the Driver is interested in. Please note that in the above picture two channels are created: one for the `UID` type and the second for the `URL`. In this example only the `URL` will be used.
   * Check the **listen** checkbox for both channels.
   * Click "Apply".
 

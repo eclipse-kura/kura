@@ -63,8 +63,6 @@ public class CommandUserTabUi extends AbstractServicesUi implements Tab {
     private boolean initialized;
     private GwtConfigComponent originalConfig;
 
-    private Modal modal;
-
     @UiField
     Button apply;
     @UiField
@@ -160,7 +158,7 @@ public class CommandUserTabUi extends AbstractServicesUi implements Tab {
         if (isValid()) {
             if (isDirty()) {
                 // TODO ask for confirmation first
-                this.modal = new Modal();
+                Modal modal = new Modal();
                 modal.setClosable(false);
                 modal.setFade(true);
                 modal.setDataKeyboard(true);
@@ -168,18 +166,18 @@ public class CommandUserTabUi extends AbstractServicesUi implements Tab {
 
                 ModalHeader header = new ModalHeader();
                 header.setTitle(MSGS.confirm());
-                this.modal.add(header);
+                modal.add(header);
 
                 ModalBody body = new ModalBody();
                 body.add(new Span(MSGS.deviceConfigConfirmation(this.configurableComponent.getComponentName())));
-                this.modal.add(body);
+                modal.add(body);
 
                 ModalFooter footer = new ModalFooter();
                 ButtonGroup group = new ButtonGroup();
                 Button no = new Button();
                 no.setText(MSGS.noButton());
                 no.addStyleName("fa fa-times");
-                no.addClickHandler(event -> CommandUserTabUi.this.modal.hide());
+                no.addClickHandler(event -> modal.hide());
 
                 group.add(no);
                 Button yes = new Button();
@@ -219,7 +217,7 @@ public class CommandUserTabUi extends AbstractServicesUi implements Tab {
 
                                         @Override
                                         public void onSuccess(Void result) {
-                                            CommandUserTabUi.this.modal.hide();
+                                            modal.hide();
                                             logger.info(MSGS.info() + ": " + MSGS.deviceConfigApplied());
                                             CommandUserTabUi.this.apply.setEnabled(false);
                                             CommandUserTabUi.this.reset.setEnabled(false);
@@ -234,8 +232,8 @@ public class CommandUserTabUi extends AbstractServicesUi implements Tab {
                 });
                 group.add(yes);
                 footer.add(group);
-                this.modal.add(footer);
-                this.modal.show();
+                modal.add(footer);
+                modal.show();
                 no.setFocus(true);
             }
         } else {
@@ -247,10 +245,43 @@ public class CommandUserTabUi extends AbstractServicesUi implements Tab {
     @Override
     public void reset() {
         if (isDirty()) {
-            restoreConfiguration(CommandUserTabUi.this.originalConfig);
-            renderForm();
-            setButtonsEnabled(false);
-            setDirty(false);
+            // Modal
+            Modal modal = new Modal();
+            modal.setClosable(false);
+            modal.setFade(true);
+            modal.setDataKeyboard(true);
+            modal.setDataBackdrop(ModalBackdrop.STATIC);
+
+            ModalHeader header = new ModalHeader();
+            header.setTitle(MSGS.confirm());
+            modal.add(header);
+
+            ModalBody body = new ModalBody();
+            body.add(new Span(MSGS.deviceConfigDirty()));
+            modal.add(body);
+
+            ModalFooter footer = new ModalFooter();
+            ButtonGroup group = new ButtonGroup();
+            Button no = new Button();
+            no.setText(MSGS.noButton());
+            no.addStyleName("fa fa-times");
+            no.addClickHandler(event -> modal.hide());
+            group.add(no);
+            Button yes = new Button();
+            yes.setText(MSGS.yesButton());
+            yes.addStyleName("fa fa-check");
+            yes.addClickHandler(event -> {
+                modal.hide();
+                restoreConfiguration(CommandUserTabUi.this.originalConfig);
+                renderForm();
+                setButtonsEnabled(false);
+                setDirty(false);
+            });
+            group.add(yes);
+            footer.add(group);
+            modal.add(footer);
+            modal.show();
+            no.setFocus(true);
         }
     }
 

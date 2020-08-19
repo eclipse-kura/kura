@@ -160,10 +160,10 @@ public class SslTabUi extends AbstractServicesUi implements Tab {
             if (isDirty()) {
                 // TODO ask for confirmation first
                 this.modal = new Modal();
-                modal.setClosable(false);
-                modal.setFade(true);
-                modal.setDataKeyboard(true);
-                modal.setDataBackdrop(ModalBackdrop.STATIC);
+                this.modal.setClosable(false);
+                this.modal.setFade(true);
+                this.modal.setDataKeyboard(true);
+                this.modal.setDataBackdrop(ModalBackdrop.STATIC);
 
                 ModalHeader header = new ModalHeader();
                 header.setTitle(MSGS.confirm());
@@ -245,10 +245,43 @@ public class SslTabUi extends AbstractServicesUi implements Tab {
     @Override
     public void reset() {
         if (isDirty()) {
-            restoreConfiguration(SslTabUi.this.originalConfig);
-            renderForm();
-            setButtonsEnabled(false);
-            setDirty(false);
+            // Modal
+            this.modal = new Modal();
+            this.modal.setClosable(false);
+            this.modal.setFade(true);
+            this.modal.setDataKeyboard(true);
+            this.modal.setDataBackdrop(ModalBackdrop.STATIC);
+
+            ModalHeader header = new ModalHeader();
+            header.setTitle(MSGS.confirm());
+            this.modal.add(header);
+
+            ModalBody body = new ModalBody();
+            body.add(new Span(MSGS.deviceConfigDirty()));
+            this.modal.add(body);
+
+            ModalFooter footer = new ModalFooter();
+            ButtonGroup group = new ButtonGroup();
+            Button no = new Button();
+            no.setText(MSGS.noButton());
+            no.addStyleName("fa fa-times");
+            no.addClickHandler(event -> this.modal.hide());
+            group.add(no);
+            Button yes = new Button();
+            yes.setText(MSGS.yesButton());
+            yes.addStyleName("fa fa-check");
+            yes.addClickHandler(event -> {
+                this.modal.hide();
+                restoreConfiguration(SslTabUi.this.originalConfig);
+                renderForm();
+                setButtonsEnabled(false);
+                setDirty(false);
+            });
+            group.add(yes);
+            footer.add(group);
+            this.modal.add(footer);
+            this.modal.show();
+            no.setFocus(true);
         }
     }
 

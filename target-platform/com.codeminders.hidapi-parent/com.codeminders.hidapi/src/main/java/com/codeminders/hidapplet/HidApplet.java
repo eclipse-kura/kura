@@ -8,7 +8,7 @@ import java.awt.*;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.io.OutputStream;;
+import java.io.OutputStream;
 
 public class HidApplet extends JApplet
 {
@@ -37,7 +37,7 @@ public class HidApplet extends JApplet
         System.out.println("Using library: " + library);
         try
         {
-            InputStream libSrc = getClass().getClassLoader().getResourceAsStream("native/" + library);
+            InputStream libSrc = Thread.currentThread().getContextClassLoader().getResourceAsStream("native/" + library);
             if (libSrc == null) {
                 System.err.println("No library found");
                 return;

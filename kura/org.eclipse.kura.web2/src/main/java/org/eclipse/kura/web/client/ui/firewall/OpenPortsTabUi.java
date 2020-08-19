@@ -622,8 +622,8 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
             }
         });
         this.permittedI.addBlurHandler(event -> {
-            if ((!OpenPortsTabUi.this.permittedI.getText().trim().matches(FieldType.ALPHANUMERIC.getRegex())
-                    && OpenPortsTabUi.this.permittedI.getText().trim().length() > 0)
+            if (!OpenPortsTabUi.this.permittedI.getText().trim().matches(FieldType.ALPHANUMERIC.getRegex())
+                    && OpenPortsTabUi.this.permittedI.getText().trim().length() > 0
                     || OpenPortsTabUi.this.permittedI.getText().trim()
                             .length() > FirewallPanelUtils.INTERFACE_NAME_MAX_LENGTH) {
                 OpenPortsTabUi.this.groupPermittedI.setValidationState(ValidationState.ERROR);
@@ -632,8 +632,8 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
             }
         });
         this.unpermittedI.addBlurHandler(event -> {
-            if ((!OpenPortsTabUi.this.unpermittedI.getText().trim().matches(FieldType.ALPHANUMERIC.getRegex())
-                    && OpenPortsTabUi.this.unpermittedI.getText().trim().length() > 0)
+            if (!OpenPortsTabUi.this.unpermittedI.getText().trim().matches(FieldType.ALPHANUMERIC.getRegex())
+                    && OpenPortsTabUi.this.unpermittedI.getText().trim().length() > 0
                     || OpenPortsTabUi.this.unpermittedI.getText().trim()
                             .length() > FirewallPanelUtils.INTERFACE_NAME_MAX_LENGTH) {
                 OpenPortsTabUi.this.groupUnpermittedI.setValidationState(ValidationState.ERROR);

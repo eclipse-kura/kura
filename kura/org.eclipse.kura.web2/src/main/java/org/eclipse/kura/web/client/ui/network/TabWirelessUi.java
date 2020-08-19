@@ -364,24 +364,14 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
     @Override
     public boolean isValid() {
-        boolean valid = isValidForm();
-        logger.info("valid: " + Boolean.toString(valid));
-        return valid;
-    }
-
-    private boolean isValidForm() {
         boolean result = this.form.validate();
-        logger.info("form valid: " + Boolean.toString(result));
+
         result = result && !this.groupWireless.getValidationState().equals(ValidationState.ERROR)
                 && !this.groupPassword.getValidationState().equals(ValidationState.ERROR)
                 && !this.groupVerify.getValidationState().equals(ValidationState.ERROR);
 
-        logger.info("password valid: " + Boolean.toString(result));
-
         result = result && !this.groupShortI.getValidationState().equals(ValidationState.ERROR)
                 && !this.groupLongI.getValidationState().equals(ValidationState.ERROR);
-
-        logger.info("last valid: " + this.groupShortI.getValidationState());
 
         return result;
     }

@@ -20,20 +20,31 @@ public class FirewallPanelUtils {
 
     public static final int INTERFACE_NAME_MAX_LENGTH = 15;
 
-    public static boolean isPortInRange(String ports) {
-        String[] portRange = ports.trim().split(":");
-        if (portRange.length == 2) {
-            return checkPort(portRange[0]) && checkPort(portRange[1])
-                    && Integer.parseInt(portRange[0]) < Integer.parseInt(portRange[1]);
-        } else {
-            return checkPort(portRange[0]);
-        }
+    private FirewallPanelUtils() {
+        // Not needed
     }
 
-    private static boolean checkPort(String port) {
+    public static boolean isPortInRange(String ports) {
+        boolean result = false;
+        try {
+            String[] portRange = ports.split(":");
+            if (portRange.length == 2) {
+                int lowerPort = Integer.parseInt(portRange[0].trim());
+                int upperPort = Integer.parseInt(portRange[1].trim());
+                result = isInRange(lowerPort) && isInRange(upperPort) && lowerPort < upperPort;
+            } else if (portRange.length == 1) {
+                int port = Integer.parseInt(portRange[0].trim());
+                result = isInRange(port);
+            }
+        } catch (NumberFormatException e) {
+            // do nothing
+        }
+        return result;
+    }
+
+    private static boolean isInRange(int port) {
         boolean isInRange = false;
-        Integer portInt = Integer.parseInt(port);
-        if (!port.startsWith("0") && portInt > 0 && portInt <= 65535) {
+        if (port > 0 && port <= 65535) {
             isInRange = true;
         }
         return isInRange;

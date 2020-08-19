@@ -4,7 +4,7 @@ title:  "GPIO Driver"
 categories: [devices]
 ---
 
-The GPIO Driver manages the General Purpose IOs on a gateway using the Driver model. Based on the GPIO Service, the driver can be used in to the Wires framework, the Asset model or directly using the Driver itself.
+The GPIO Driver manages the General Purpose IOs on a gateway using the Driver model. Based on the GPIO Service, the driver can be used in the Wires framework, the Asset model or directly using the Driver itself.
 
 ## Features
 
@@ -16,7 +16,7 @@ The GPIO Driver includes the following features:
 
 ## Installation
 
-As the others Drivers supported by Eclipse Kura, it is distributed as a deployment package on the Eclipse Marketplace for Kura [3.x](https://marketplace.eclipse.org/content/gpio-driver-eclipse-kura-3xy) and [4.x](https://marketplace.eclipse.org/content/gpio-driver-eclipse-kura-4xy). It can be installed following the instructions provided [here](/kura/admin/application-management.html#installation-from-eclipse-marketplace).
+As the other Drivers supported by Eclipse Kura, it is distributed as a deployment package on the Eclipse Marketplace for Kura [3.x](https://marketplace.eclipse.org/content/gpio-driver-eclipse-kura-3xy) and [4.x](https://marketplace.eclipse.org/content/gpio-driver-eclipse-kura-4xy). It can be installed following the instructions provided [here](/kura/admin/application-management.html#installation-from-eclipse-marketplace).
 
 ## Instance creation
 

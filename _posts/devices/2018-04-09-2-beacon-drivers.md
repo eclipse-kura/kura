@@ -4,7 +4,7 @@ title:  "BLE Beacon Drivers"
 categories: [devices]
 ---
 
-Eclipse Kura provides a set of drivers specifically developed to manage BLE Beacons. In particular, the framework offers support for iBeacon&trade; and Eddystone&trade; protocols. The drivers are available only for gateways that support the new Bluetooth LE APIs. They can be used in to the Wires framework, the Asset model or directly using the Driver itself.
+Eclipse Kura provides a set of drivers specifically developed to manage BLE Beacons. In particular, the framework offers support for iBeacon&trade; and Eddystone&trade; protocols. The drivers are available only for gateways that support the new Bluetooth LE APIs. They can be used in the Wires framework, the Asset model or directly using the Driver itself.
 
 ## Features
 
@@ -12,7 +12,7 @@ The iBeacon&trade; and Eddystone&trade; drivers are designed to listen for incom
  
 ## Installation
 
-As the others Drivers supported by Kura, it is distributed as a deployment package on the Eclipse Marketplace [here](https://marketplace.eclipse.org/content/ibeacon-driver-eclipse-kura-4xy) and [here](https://marketplace.eclipse.org/content/eddystone-driver-eclipse-kura-4xy). It can be installed following the instructions provided [here](../admin/application-management.html#section-eclipse-kura-marketplace).
+As the other Drivers supported by Kura, it is distributed as a deployment package on the Eclipse Marketplace [here](https://marketplace.eclipse.org/content/ibeacon-driver-eclipse-kura-4xy) and [here](https://marketplace.eclipse.org/content/eddystone-driver-eclipse-kura-4xy). It can be installed following the instructions provided [here](../admin/application-management.html#section-eclipse-kura-marketplace).
 
 ## Instance creation
 

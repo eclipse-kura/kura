@@ -5,7 +5,7 @@ categories: [devices]
 ---
 
 Eclipse Kura provides a specific driver that can be used to interact with Texas Instruments SensorTag devices. The driver is available only for gateways that support the new Bluetooth LE APIs. 
-It can be used in to the Wires framework, the Asset model or directly using the Driver itself.
+It can be used in the Wires framework, the Asset model or directly using the Driver itself.
 
 {% include alerts.html message='The SensorTag driver can be used only with TI SensorTags with firmware version >1.20. If your device has an older firmware, please update it.' %}
 
@@ -29,7 +29,7 @@ When a notification is enabled for a specific channel (sensor), the notification
  
 ## Installation
 
-As the others Drivers supported by Kura, it is distributed as a deployment package on the Eclipse Marketplace [here](https://marketplace.eclipse.org/content/ti-sensortag-driver-eclipse-kura-3xy) and [here](https://marketplace.eclipse.org/content/ti-sensortag-driver-eclipse-kura-4xy). It can be installed following the instructions provided [here](../admin/application-management.html#section-eclipse-kura-marketplace).
+As the other Drivers supported by Kura, it is distributed as a deployment package on the Eclipse Marketplace [here](https://marketplace.eclipse.org/content/ti-sensortag-driver-eclipse-kura-3xy) and [here](https://marketplace.eclipse.org/content/ti-sensortag-driver-eclipse-kura-4xy). It can be installed following the instructions provided [here](../admin/application-management.html#section-eclipse-kura-marketplace).
 
 ## Instance creation
 

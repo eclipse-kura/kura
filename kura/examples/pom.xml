@@ -74,7 +74,7 @@
         <module>org.eclipse.kura.example.camel.aggregation</module>
         <module>org.eclipse.kura.raspberrypi.sensehat</module>
         <module>org.eclipse.kura.raspberrypi.sensehat.example</module>
-        <module>org.eclipse.kura.example.wire.bool.multiport.provider</module>
+        <module>org.eclipse.kura.example.wire.logic.multiport.provider</module>
         <module>org.eclipse.kura.example.wire.math.multiport.provider</module>
         <module>org.eclipse.kura.example.wire.math.singleport.provider</module>
         <module>org.eclipse.kura.example.driver.sensehat</module>

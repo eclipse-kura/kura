@@ -17,7 +17,7 @@ import org.eclipse.kura.type.TypedValues;
 
 public class MedianComponent extends AbstractSingleportMathComponent {
 
-    private RunningMedian runningMedian;
+    private RunningMedian<Double> runningMedian;
 
     @Override
     protected void init() {
@@ -27,10 +27,11 @@ public class MedianComponent extends AbstractSingleportMathComponent {
     @Override
     public TypedValue<?> apply(TypedValue<?> t) {
         if (runningMedian == null) {
-            this.runningMedian = new RunningMedian(this.options.getWindowSize());
+            this.runningMedian = new RunningMedian<>(this.options.getWindowSize());
         }
         final double value = ((Number) t.getValue()).doubleValue();
-        return TypedValues.newDoubleValue(this.runningMedian.updateAndGetMedian(value));
+        this.runningMedian.add(value);
+        return TypedValues.newDoubleValue(this.runningMedian.median());
     }
 
 }

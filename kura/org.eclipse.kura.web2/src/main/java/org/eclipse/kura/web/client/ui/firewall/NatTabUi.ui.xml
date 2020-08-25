@@ -49,7 +49,7 @@
                                 ui:field="labelInput"></b:FormLabel>
                             <b:Tooltip ui:field="tooltipInput">
                                 <b:TextBox allowBlank="false"
-                                    b:id="input" ui:field="input" />
+                                    b:id="natInput" ui:field="input" />
                             </b:Tooltip>
                         </b:FormGroup>
 
@@ -58,7 +58,7 @@
                                 ui:field="labelOutput"></b:FormLabel>
                             <b:Tooltip ui:field="tooltipOutput">
                                 <b:TextBox allowBlank="false"
-                                    b:id="output" ui:field="output" />
+                                    b:id="natOutput" ui:field="output" />
                             </b:Tooltip>
                         </b:FormGroup>
 
@@ -67,7 +67,7 @@
                                 ui:field="labelProtocol"></b:FormLabel>
                             <b:Tooltip ui:field="tooltipProtocol">
                                 <g:FlowPanel>
-                                    <b:ListBox b:id="protocol"
+                                    <b:ListBox b:id="natProtocol"
                                         ui:field="protocol" />
                                 </g:FlowPanel>
                             </b:Tooltip>
@@ -78,7 +78,7 @@
                             <b:FormLabel for="source"
                                 ui:field="labelSource"></b:FormLabel>
                             <b:Tooltip ui:field="tooltipSource">
-                                <b:TextBox b:id="source"
+                                <b:TextBox b:id="natSource"
                                     ui:field="source" />
                             </b:Tooltip>
                         </b:FormGroup>
@@ -87,7 +87,7 @@
                             <b:FormLabel for="destination"
                                 ui:field="labelDestination"></b:FormLabel>
                             <b:Tooltip ui:field="tooltipDestination">
-                                <b:TextBox b:id="destination"
+                                <b:TextBox b:id="natDestination"
                                     ui:field="destination" />
                             </b:Tooltip>
                         </b:FormGroup>
@@ -97,7 +97,7 @@
                                 ui:field="labelEnable"></b:FormLabel>
                             <b:Tooltip ui:field="tooltipEnable">
                                 <g:FlowPanel>
-                                    <b:ListBox b:id="enable"
+                                    <b:ListBox b:id="natEnable"
                                         ui:field="enable" />
                                 </g:FlowPanel>
                             </b:Tooltip>

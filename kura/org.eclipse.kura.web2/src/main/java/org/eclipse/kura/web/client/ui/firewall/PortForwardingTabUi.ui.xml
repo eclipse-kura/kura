@@ -45,7 +45,7 @@
                             <b:FormLabel for="input"
                                 ui:field="labelInput"></b:FormLabel>
                             <b:Tooltip ui:field="tooltipInput">
-                                <b:TextBox b:id="input"
+                                <b:TextBox b:id="portForwardingInput"
                                     ui:field="input" />
                             </b:Tooltip>
                         </b:FormGroup>
@@ -54,7 +54,7 @@
                             <b:FormLabel for="output"
                                 ui:field="labelOutput"></b:FormLabel>
                             <b:Tooltip ui:field="tooltipOutput">
-                                <b:TextBox b:id="output"
+                                <b:TextBox b:id="portForwardingOutput"
                                     ui:field="output" />
                             </b:Tooltip>
                         </b:FormGroup>
@@ -62,7 +62,7 @@
                         <b:FormGroup ui:field="groupLan">
                             <b:FormLabel for="lan" ui:field="labelLan"></b:FormLabel>
                             <b:Tooltip ui:field="tooltipLan">
-                                <b:TextBox b:id="lan"
+                                <b:TextBox b:id="portForwardingLan"
                                     ui:field="lan" />
                             </b:Tooltip>
                         </b:FormGroup>
@@ -72,7 +72,7 @@
                                 ui:field="labelProtocol"></b:FormLabel>
                             <b:Tooltip ui:field="tooltipProtocol">
                                 <g:FlowPanel>
-                                    <b:ListBox b:id="protocol"
+                                    <b:ListBox b:id="portForwardingProtocol"
                                         ui:field="protocol" />
                                 </g:FlowPanel>
                             </b:Tooltip>
@@ -82,7 +82,7 @@
                             <b:FormLabel for="internal"
                                 ui:field="labelInternal"></b:FormLabel>
                             <b:Tooltip ui:field="tooltipInternal">
-                                <b:TextBox b:id="internal"
+                                <b:TextBox b:id="portForwardingInternal"
                                     ui:field="internal" />
                             </b:Tooltip>
                         </b:FormGroup>
@@ -91,7 +91,7 @@
                             <b:FormLabel for="external"
                                 ui:field="labelExternal"></b:FormLabel>
                             <b:Tooltip ui:field="tooltipExternal">
-                                <b:TextBox b:id="external"
+                                <b:TextBox b:id="portForwardingExternal"
                                     ui:field="external" />
                             </b:Tooltip>
                         </b:FormGroup>
@@ -101,7 +101,7 @@
                                 ui:field="labelEnable"></b:FormLabel>
                             <b:Tooltip ui:field="tooltipEnable">
                                 <g:FlowPanel>
-                                    <b:ListBox b:id="enable"
+                                    <b:ListBox b:id="portForwardingEnable"
                                         ui:field="enable" />
                                 </g:FlowPanel>
                             </b:Tooltip>
@@ -111,7 +111,7 @@
                             <b:FormLabel for="permittedNw"
                                 ui:field="labelPermitttedNw"></b:FormLabel>
                             <b:Tooltip ui:field="tooltipPermittedNw">
-                                <b:TextBox b:id="permittedNw"
+                                <b:TextBox b:id="portForwardingPermittedNw"
                                     ui:field="permittedNw" />
                             </b:Tooltip>
                         </b:FormGroup>
@@ -120,7 +120,7 @@
                             <b:FormLabel for="permittedMac"
                                 ui:field="labelPermitttedMac"></b:FormLabel>
                             <b:Tooltip ui:field="tooltipPermittedMac">
-                                <b:TextBox b:id="permittedMac"
+                                <b:TextBox b:id="portForwardingPermittedMac"
                                     ui:field="permittedMac" />
                             </b:Tooltip>
                         </b:FormGroup>
@@ -129,7 +129,7 @@
                             <b:FormLabel for="source"
                                 ui:field="labelSource"></b:FormLabel>
                             <b:Tooltip ui:field="tooltipSource">
-                                <b:TextBox b:id="source"
+                                <b:TextBox b:id="portForwardingSource"
                                     ui:field="source" />
                             </b:Tooltip>
                         </b:FormGroup>

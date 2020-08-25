@@ -485,8 +485,6 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
         replaceModalHideHandler(evt -> {
             if (PortForwardingTabUi.this.newPortForwardEntry != null) {
                 // Avoid duplicates
-                PortForwardingTabUi.this.portForwardDataProvider.getList()
-                        .remove(PortForwardingTabUi.this.newPortForwardEntry);
                 if (!duplicateEntry(PortForwardingTabUi.this.newPortForwardEntry)) {
                     PortForwardingTabUi.this.portForwardDataProvider.getList()
                             .add(PortForwardingTabUi.this.newPortForwardEntry);

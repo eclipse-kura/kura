@@ -98,10 +98,7 @@ public class DeviceCertsTabUi extends Composite implements Tab {
 
     @Override
     public boolean isValid() {
-        boolean validAlias = isAliasValid();
-        boolean validPrivateKey = isPrivateKeyValid();
-        boolean validDeviceCert = isDeviceCertValid();
-        return validAlias && validPrivateKey && validDeviceCert;
+        return deviceSslCertsForm.validate();
     }
 
     @Override
@@ -128,7 +125,6 @@ public class DeviceCertsTabUi extends Composite implements Tab {
 
         this.storageAliasLabel.setText(MSGS.settingsStorageAliasLabel());
         this.storageAliasInput.addChangeHandler(event -> {
-            isAliasValid();
             setDirty(true);
             setButtonsEnabled(true);
         });
@@ -136,7 +132,6 @@ public class DeviceCertsTabUi extends Composite implements Tab {
         this.privateKeyLabel.setText(MSGS.settingsPrivateCertLabel());
         this.privateKeyInput.setVisibleLines(20);
         this.privateKeyInput.addChangeHandler(event -> {
-            isPrivateKeyValid();
             setDirty(true);
             setButtonsEnabled(true);
         });
@@ -144,7 +139,6 @@ public class DeviceCertsTabUi extends Composite implements Tab {
         this.certificateLabel.setText(MSGS.settingsPublicCertLabel());
         this.certificateInput.setVisibleLines(20);
         this.certificateInput.addChangeHandler(event -> {
-            isDeviceCertValid();
             setDirty(true);
             setButtonsEnabled(true);
         });
@@ -200,36 +194,9 @@ public class DeviceCertsTabUi extends Composite implements Tab {
         this.storageAliasInput.setText("");
         this.privateKeyInput.setText("");
         this.certificateInput.setText("");
-    }
-
-    private boolean isAliasValid() {
-        if (this.storageAliasInput.getText() == null || "".equals(this.storageAliasInput.getText().trim())) {
-            this.groupStorageAliasForm.setValidationState(ValidationState.ERROR);
-            return false;
-        } else {
-            this.groupStorageAliasForm.setValidationState(ValidationState.NONE);
-            return true;
-        }
-    }
-
-    private boolean isPrivateKeyValid() {
-        if (this.certificateInput.getText() == null || "".equals(this.certificateInput.getText().trim())) {
-            this.groupCertForm.setValidationState(ValidationState.ERROR);
-            return false;
-        } else {
-            this.groupCertForm.setValidationState(ValidationState.NONE);
-            return true;
-        }
-    }
-
-    private boolean isDeviceCertValid() {
-        if (this.certificateInput.getText() == null || "".equals(this.certificateInput.getText().trim())) {
-            this.groupCertForm.setValidationState(ValidationState.ERROR);
-            return false;
-        } else {
-            this.groupCertForm.setValidationState(ValidationState.NONE);
-            return true;
-        }
+        this.groupStorageAliasForm.setValidationState(ValidationState.NONE);
+        this.groupCertForm.setValidationState(ValidationState.NONE);
+        this.groupCertForm.setValidationState(ValidationState.NONE);
     }
 
     private void setButtonsEnabled(boolean state) {

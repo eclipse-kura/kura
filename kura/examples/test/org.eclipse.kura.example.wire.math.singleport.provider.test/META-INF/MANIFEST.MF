@@ -3,7 +3,8 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Integration Tests for math singleport Components
 Bundle-SymbolicName: org.eclipse.kura.example.wire.math.singleport.provider.test
 Bundle-Version: 4.2.0.qualifier
-Bundle-Vendor: EUROTECH
+Bundle-Vendor: Eclipse Kura
+Bundle-License: Eclipse Public License v1.0
 Import-Package: org.eclipse.kura;version="[1.5,2.0)",
  org.eclipse.kura.type;version="[1.1,2.0)",
  org.eclipse.kura.util.wire.test;version="[1.0,2.0)",

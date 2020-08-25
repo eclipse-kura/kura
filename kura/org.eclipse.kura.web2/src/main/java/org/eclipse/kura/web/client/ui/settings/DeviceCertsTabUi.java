@@ -111,13 +111,19 @@ public class DeviceCertsTabUi extends Composite implements Tab {
     public void refresh() {
         if (isDirty()) {
             setDirty(false);
-            reset();
+            this.storageAliasInput.setText("");
+            this.certificateInput.setText("");
+            this.groupStorageAliasForm.setValidationState(ValidationState.NONE);
+            this.groupCertForm.setValidationState(ValidationState.NONE);
         }
     }
 
     @Override
     public void clear() {
-        reset();
+        this.storageAliasInput.setText("");
+        this.certificateInput.setText("");
+        this.groupStorageAliasForm.setValidationState(ValidationState.NONE);
+        this.groupCertForm.setValidationState(ValidationState.NONE);
     }
 
     private void initForm() {
@@ -179,7 +185,7 @@ public class DeviceCertsTabUi extends Composite implements Tab {
 
                                     @Override
                                     public void onSuccess(Integer certsStored) {
-                                        reset();
+                                        clear();
                                         setDirty(false);
                                         setButtonsEnabled(false);
                                         EntryClassUi.hideWaitModal();

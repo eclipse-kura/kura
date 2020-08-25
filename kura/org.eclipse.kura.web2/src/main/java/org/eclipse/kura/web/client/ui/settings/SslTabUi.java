@@ -152,7 +152,10 @@ public class SslTabUi extends AbstractServicesUi implements Tab {
 
     @Override
     public void clear() {
-        reset();
+        restoreConfiguration(SslTabUi.this.originalConfig);
+        renderForm();
+        setButtonsEnabled(false);
+        setDirty(false);
     }
 
     private void apply() {

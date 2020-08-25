@@ -390,9 +390,9 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
         replaceModalHideHandler(evt -> {
             if (NatTabUi.this.newNatEntry != null) {
                 // Avoid duplicates
-                NatTabUi.this.natDataProvider.getList().remove(NatTabUi.this.newNatEntry);
                 if (!duplicateEntry(NatTabUi.this.newNatEntry)) {
                     NatTabUi.this.natDataProvider.getList().add(NatTabUi.this.newNatEntry);
+                    NatTabUi.this.natDataProvider.flush();
                     setVisibility();
                     refreshTable();
                     NatTabUi.this.buttonBar.setApplyResetButtonsDirty(true);
@@ -474,8 +474,19 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
             natEntry.setInInterface(NatTabUi.this.input.getText());
             natEntry.setOutInterface(NatTabUi.this.output.getText());
             natEntry.setProtocol(NatTabUi.this.protocol.getSelectedItemText());
-            natEntry.setSourceNetwork(NatTabUi.this.source.getText());
-            natEntry.setDestinationNetwork(NatTabUi.this.destination.getText());
+
+            if (NatTabUi.this.source.getText() != null && !"".equals(NatTabUi.this.source.getText().trim())) {
+                natEntry.setSourceNetwork(NatTabUi.this.source.getText());
+            } else {
+                natEntry.setSourceNetwork("0.0.0.0/0");
+            }
+
+            if (NatTabUi.this.destination.getText() != null && !"".equals(NatTabUi.this.destination.getText().trim())) {
+                natEntry.setDestinationNetwork(NatTabUi.this.destination.getText());
+            } else {
+                natEntry.setDestinationNetwork("0.0.0.0/0");
+            }
+
             natEntry.setMasquerade(NatTabUi.this.enable.getSelectedItemText());
 
             if (NatTabUi.this.submit.getId().equals("new")) {

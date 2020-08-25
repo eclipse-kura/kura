@@ -137,11 +137,7 @@ public class ServerCertsTabUi extends Composite implements Tab {
         });
 
         this.reset.setText(MSGS.reset());
-        this.reset.addClickHandler(event -> {
-            reset();
-            setDirty(false);
-            setButtonsEnabled(false);
-        });
+        this.reset.addClickHandler(event -> reset());
 
         this.apply.setText(MSGS.apply());
         this.apply.addClickHandler(event -> {

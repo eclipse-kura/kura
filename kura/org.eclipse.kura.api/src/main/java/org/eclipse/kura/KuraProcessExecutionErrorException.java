@@ -17,6 +17,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * KuraProcessExecutionErrorException is raised when a command/process execution fails.
  *
  * @noextend This class is not intended to be subclassed by clients.
+ * @since 2.2
  */
 @ProviderType
 public class KuraProcessExecutionErrorException extends KuraException {

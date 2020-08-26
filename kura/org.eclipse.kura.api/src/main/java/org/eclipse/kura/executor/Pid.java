@@ -11,6 +11,11 @@
  *******************************************************************************/
 package org.eclipse.kura.executor;
 
+/**
+ * 
+ * @since 2.2
+ *
+ */
 public interface Pid {
 
     public int getPid();

@@ -17,6 +17,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * This interface provides a method to retrieve the exit status of a system command.
  *
  * @noimplement This interface is not intended to be implemented by clients.
+ * @since 2.2
  */
 @ProviderType
 public interface ExitStatus {

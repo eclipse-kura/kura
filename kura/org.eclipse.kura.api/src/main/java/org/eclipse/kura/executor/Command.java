@@ -39,6 +39,8 @@ import org.apache.commons.io.output.NullOutputStream;
  * <li>executeInAShell : a flag that indicates if the command should be executed in a shell/terminal. Default is
  * false.</li>
  * </ul>
+ * 
+ * @since 2.2
  *
  */
 public class Command {

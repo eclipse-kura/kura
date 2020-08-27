@@ -102,7 +102,7 @@ public class BluetoothUtil {
             String[] errorLines = new String(errorStream.toByteArray(), Charsets.UTF_8).split("\n");
             for (String line : errorLines) {
                 if (line.toLowerCase().contains("command not found")) {
-                    throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
+                    throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED, HCICONFIG);
                 } else if (line.toLowerCase().contains("no such device")) {
                     throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
                 }

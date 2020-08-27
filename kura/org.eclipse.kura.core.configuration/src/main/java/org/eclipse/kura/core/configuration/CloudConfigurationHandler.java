@@ -477,7 +477,7 @@ public class CloudConfigurationHandler implements RequestHandler {
             ungetServiceReferences(unmarshallerSRs);
         }
         if (result == null) {
-            throw new KuraException(KuraErrorCode.DECODER_ERROR);
+            throw new KuraException(KuraErrorCode.DECODER_ERROR, "value");
         }
         return result;
     }

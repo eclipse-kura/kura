@@ -82,7 +82,7 @@ public class CertificatesManager implements CertificatesService {
 
     @Override
     public void storeCertificate(Certificate arg1, String alias) throws KuraException {
-        throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
+        throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED, "storeCertificate");
     }
 
     @Override
@@ -107,7 +107,7 @@ public class CertificatesManager implements CertificatesService {
 
     @Override
     public void removeCertificate(String alias) throws KuraException {
-        throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
+        throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED, "removeCertificate");
     }
 
     @Override

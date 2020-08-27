@@ -546,7 +546,7 @@ public class WireGraphServiceImpl implements ConfigurableComponent, WireGraphSer
             logger.warn("Failed to extract persisted configuration.", e);
         }
         if (result == null) {
-            throw new KuraException(KuraErrorCode.DECODER_ERROR);
+            throw new KuraException(KuraErrorCode.DECODER_ERROR, "configuration");
         }
         return result;
     }

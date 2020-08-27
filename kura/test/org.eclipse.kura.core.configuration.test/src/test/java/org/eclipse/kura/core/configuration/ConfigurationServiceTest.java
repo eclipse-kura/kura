@@ -833,7 +833,7 @@ public class ConfigurationServiceTest {
 
         // first decryption must fail
         when(cryptoServiceMock.decryptAes("pass".toCharArray()))
-                .thenThrow(new KuraException(KuraErrorCode.DECODER_ERROR));
+                .thenThrow(new KuraException(KuraErrorCode.DECODER_ERROR, "password"));
         // then also encryption can fail
         when(cryptoServiceMock.encryptAes("pass".toCharArray()))
                 .thenThrow(new KuraException(KuraErrorCode.ENCODE_ERROR, "password"));
@@ -865,7 +865,7 @@ public class ConfigurationServiceTest {
 
         // first decryption must fail
         when(cryptoServiceMock.decryptAes("pass".toCharArray()))
-                .thenThrow(new KuraException(KuraErrorCode.DECODER_ERROR));
+                .thenThrow(new KuraException(KuraErrorCode.DECODER_ERROR, "configuration"));
         // so that encryption is attempted at all
         when(cryptoServiceMock.encryptAes("pass".toCharArray())).thenReturn("encrypted".toCharArray());
 
@@ -1339,7 +1339,7 @@ public class ConfigurationServiceTest {
         } catch (NullPointerException e) {
             fail("Decryption result not checked for null value.");
         } catch (KuraException e) {
-            assertEquals(KuraErrorCode.DECODER_ERROR, e.getCode());
+            assertEquals(KuraErrorCode.DECODER_ERROR, "snapshot", e.getCode());
         }
 
         verify(systemServiceMock, times(1)).getKuraSnapshotsDirectory();

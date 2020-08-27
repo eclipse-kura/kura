@@ -624,7 +624,7 @@ public class LinuxNetworkUtil {
         } else if (toolExists("iw")) {
             return IwCapabilityTool.probeCapabilities(ifaceName, this.executorService);
         } else {
-            throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
+            throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED, "getWifiCapabilities");
         }
     }
 

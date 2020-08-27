@@ -219,12 +219,12 @@ public abstract class AbstractBlockDriver<T> implements Driver {
     @Override
     public void registerChannelListener(final Map<String, Object> channelConfig, final ChannelListener listener)
             throws ConnectionException {
-        throw new KuraRuntimeException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
+        throw new KuraRuntimeException(KuraErrorCode.OPERATION_NOT_SUPPORTED, "register listener");
     }
 
     @Override
     public void unregisterChannelListener(final ChannelListener listener) throws ConnectionException {
-        throw new KuraRuntimeException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
+        throw new KuraRuntimeException(KuraErrorCode.OPERATION_NOT_SUPPORTED, "unregister listener");
     }
 
     @Override

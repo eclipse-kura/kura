@@ -143,7 +143,7 @@ public class CloudPublisherImpl
     public String publish(KuraMessage message) throws KuraException {
         if (this.cloudServiceImpl == null) {
             logger.info("Null cloud service");
-            throw new KuraException(KuraErrorCode.SERVICE_UNAVAILABLE);
+            throw new KuraException(KuraErrorCode.SERVICE_UNAVAILABLE, "The Cloud Service is null.");
         }
 
         if (message == null) {

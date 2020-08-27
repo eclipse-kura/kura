@@ -151,7 +151,7 @@ public class ConfigurationServiceTest {
             public boolean validateDecryptArgs(Object[] args) throws KuraException {
                 String arg0 = new String((char[]) args[0]);
                 if (arg0.startsWith("<?xml")) {
-                    throw new KuraException(KuraErrorCode.DECODER_ERROR);
+                    throw new KuraException(KuraErrorCode.DECODER_ERROR, "value");
                 }
 
                 return true;
@@ -1026,7 +1026,7 @@ class MultiStepCSValidator implements CSValidator {
     public boolean validateDecryptArgs(Object[] args) throws KuraException {
         String arg0 = new String((char[]) args[0]);
         if (arg0.startsWith("<?xml")) {
-            throw new KuraException(KuraErrorCode.DECODER_ERROR);
+            throw new KuraException(KuraErrorCode.DECODER_ERROR, "value");
         }
 
         return true;

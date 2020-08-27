@@ -167,7 +167,7 @@ public class XmlMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
             doc = parser.parse(is);
             doc.getDocumentElement().normalize();
         } catch (SAXException | IOException | IllegalArgumentException se) {
-            throw new KuraException(KuraErrorCode.DECODER_ERROR, se);
+            throw new KuraException(KuraErrorCode.DECODER_ERROR, "value", se);
         }
 
         // identify the correct parser that has to execute
@@ -176,7 +176,7 @@ public class XmlMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
                 // Snapshot parser
                 return new XmlJavaComponentConfigurationsMapper().unmarshal(doc);
             } catch (Exception e) {
-                throw new KuraException(KuraErrorCode.DECODER_ERROR, e);
+                throw new KuraException(KuraErrorCode.DECODER_ERROR, "value", e);
             }
         } else if (clazz.equals(MetaData.class) || clazz.equals(Tmetadata.class)) {
             // MetaData parser

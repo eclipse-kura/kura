@@ -723,7 +723,7 @@ public class CloudServiceImpl
             kuraPayload = encoder.buildFromByteArray();
             return kuraPayload;
         } catch (KuraInvalidMessageException | IOException e) {
-            throw new KuraException(KuraErrorCode.DECODER_ERROR, e);
+            throw new KuraException(KuraErrorCode.DECODER_ERROR, "KuraPayload", e);
         }
     }
 

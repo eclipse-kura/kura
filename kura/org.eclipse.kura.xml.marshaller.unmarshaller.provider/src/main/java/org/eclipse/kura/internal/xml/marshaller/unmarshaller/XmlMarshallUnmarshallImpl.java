@@ -55,7 +55,7 @@ public class XmlMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
         try {
             marshal(object, sw);
         } catch (Exception e) {
-            throw new KuraException(KuraErrorCode.ENCODE_ERROR);
+            throw new KuraException(KuraErrorCode.ENCODE_ERROR, "value");
         }
         return sw.toString();
     }

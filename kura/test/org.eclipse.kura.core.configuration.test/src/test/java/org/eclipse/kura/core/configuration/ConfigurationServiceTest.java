@@ -836,7 +836,7 @@ public class ConfigurationServiceTest {
                 .thenThrow(new KuraException(KuraErrorCode.DECODER_ERROR));
         // then also encryption can fail
         when(cryptoServiceMock.encryptAes("pass".toCharArray()))
-                .thenThrow(new KuraException(KuraErrorCode.ENCODE_ERROR));
+                .thenThrow(new KuraException(KuraErrorCode.ENCODE_ERROR, "password"));
 
         List<ComponentConfigurationImpl> configs = new ArrayList<>();
 

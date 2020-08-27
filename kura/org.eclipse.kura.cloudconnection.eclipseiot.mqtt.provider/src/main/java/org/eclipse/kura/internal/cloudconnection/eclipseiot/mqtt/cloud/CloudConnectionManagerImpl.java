@@ -369,7 +369,7 @@ public class CloudConnectionManagerImpl
         } else if (preferencesEncoding == SIMPLE_JSON) {
             bytes = encodeJsonPayload(payload);
         } else {
-            throw new KuraException(KuraErrorCode.ENCODE_ERROR);
+            throw new KuraException(KuraErrorCode.ENCODE_ERROR, "KuraPayload");
         }
         return bytes;
     }
@@ -530,7 +530,7 @@ public class CloudConnectionManagerImpl
             bytes = encoder.getBytes();
             return bytes;
         } catch (IOException e) {
-            throw new KuraException(KuraErrorCode.ENCODE_ERROR, e);
+            throw new KuraException(KuraErrorCode.ENCODE_ERROR, "KuraPayload", e);
         }
     }
 
@@ -661,7 +661,7 @@ public class CloudConnectionManagerImpl
         try {
             bytes = encoder.getBytes();
         } catch (IOException e) {
-            throw new KuraException(KuraErrorCode.ENCODE_ERROR, e);
+            throw new KuraException(KuraErrorCode.ENCODE_ERROR, "KuraPayload", e);
         }
         return bytes;
     }

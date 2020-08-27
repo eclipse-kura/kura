@@ -80,7 +80,7 @@ public class CryptoServiceImpl implements CryptoService {
         } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
             throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
         } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
-            throw new KuraException(KuraErrorCode.ENCODE_ERROR);
+            throw new KuraException(KuraErrorCode.ENCODE_ERROR, "value");
         }
 
         return encryptedValue.toCharArray();

@@ -1773,7 +1773,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         try {
             return requireNonNull(this.xmlMarshaller.marshal(object));
         } catch (Exception e) {
-            throw new KuraException(KuraErrorCode.ENCODE_ERROR, e);
+            throw new KuraException(KuraErrorCode.ENCODE_ERROR, "configuration", e);
         }
     }
 

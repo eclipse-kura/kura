@@ -53,6 +53,8 @@ import com.google.web.bindery.event.shared.HandlerRegistration;
 
 public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
 
+    private static final String ZERO_ADDRESS_CIDR = "0.0.0.0/0";
+
     private static NatTabUiUiBinder uiBinder = GWT.create(NatTabUiUiBinder.class);
 
     interface NatTabUiUiBinder extends UiBinder<Widget, NatTabUi> {
@@ -478,13 +480,13 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
             if (NatTabUi.this.source.getText() != null && !"".equals(NatTabUi.this.source.getText().trim())) {
                 natEntry.setSourceNetwork(NatTabUi.this.source.getText());
             } else {
-                natEntry.setSourceNetwork("0.0.0.0/0");
+                natEntry.setSourceNetwork(ZERO_ADDRESS_CIDR);
             }
 
             if (NatTabUi.this.destination.getText() != null && !"".equals(NatTabUi.this.destination.getText().trim())) {
                 natEntry.setDestinationNetwork(NatTabUi.this.destination.getText());
             } else {
-                natEntry.setDestinationNetwork("0.0.0.0/0");
+                natEntry.setDestinationNetwork(ZERO_ADDRESS_CIDR);
             }
 
             natEntry.setMasquerade(NatTabUi.this.enable.getSelectedItemText());
@@ -652,15 +654,15 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
         List<GwtFirewallNatEntry> entries = this.natDataProvider.getList();
         if (entries != null && firewallNatEntry != null) {
             for (GwtFirewallNatEntry entry : entries) {
-                String sourceNetwork = entry.getSourceNetwork() != null ? entry.getSourceNetwork() : "0.0.0.0/0";
+                String sourceNetwork = entry.getSourceNetwork() != null ? entry.getSourceNetwork() : ZERO_ADDRESS_CIDR;
                 String destinationNetwork = entry.getDestinationNetwork() != null ? entry.getDestinationNetwork()
-                        : "0.0.0.0/0";
+                        : ZERO_ADDRESS_CIDR;
                 String newSourceNetwork = firewallNatEntry.getSourceNetwork() != null
                         ? firewallNatEntry.getSourceNetwork()
-                        : "0.0.0.0/0";
+                        : ZERO_ADDRESS_CIDR;
                 String newDestinationNetwork = firewallNatEntry.getDestinationNetwork() != null
                         ? firewallNatEntry.getDestinationNetwork()
-                        : "0.0.0.0/0";
+                        : ZERO_ADDRESS_CIDR;
 
                 if (entry.getInInterface().equals(firewallNatEntry.getInInterface())
                         && entry.getOutInterface().equals(firewallNatEntry.getOutInterface())

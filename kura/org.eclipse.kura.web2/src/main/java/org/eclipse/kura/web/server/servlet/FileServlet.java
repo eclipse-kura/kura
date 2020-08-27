@@ -459,8 +459,9 @@ public class FileServlet extends HttpServlet {
             // END XSRF security check
 
             List<FileItem> fileItems = upload.getFileItems();
-            if (fileItems.size() != 1) {
-                logger.error(EXPECTED_1_FILE_PATTERN, fileItems.size());
+            int fileItemsSize = fileItems.size();
+            if (fileItemsSize != 1) {
+                logger.error(EXPECTED_1_FILE_PATTERN, fileItemsSize);
                 errors.add("Security error: please retry this operation.");
 
                 auditLogger.warn(

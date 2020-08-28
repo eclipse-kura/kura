@@ -118,7 +118,7 @@
             </b:Column>
         </b:Column>
 
-        <b:Modal closable="true" dataKeyboard="true" ui:field="wanModal" b:id="wanModal">
+        <b:Modal closable="true" dataKeyboard="false" dataBackdrop="STATIC" ui:field="wanModal" b:id="wanModal">
             <b:ModalBody>
                 <b:Panel>
                     <b:PanelBody>

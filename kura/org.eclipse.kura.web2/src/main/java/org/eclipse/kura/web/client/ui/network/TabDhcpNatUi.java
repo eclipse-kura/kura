@@ -52,11 +52,12 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
 
     private static final String REGEX_IPV4 = "\\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\b";
     private static final Messages MSGS = GWT.create(Messages.class);
-    GwtSession session;
-    TabTcpIpUi tcpTab;
-    TabWirelessUi wirelessTab;
-    Boolean dirty;
-    GwtNetInterfaceConfig selectedNetIfConfig;
+    private final GwtSession session;
+    private final TabTcpIpUi tcpTab;
+    private final TabWirelessUi wirelessTab;
+    private Boolean dirty;
+    private GwtNetInterfaceConfig selectedNetIfConfig;
+    private final NetworkTabsUi tabs;
 
     @UiField
     Form form;
@@ -132,8 +133,9 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
     @UiField
     HelpButton passHelp;
 
-    public TabDhcpNatUi(GwtSession currentSession, TabTcpIpUi tcp, TabWirelessUi wireless) {
+    public TabDhcpNatUi(GwtSession currentSession, TabTcpIpUi tcp, TabWirelessUi wireless, NetworkTabsUi netTabs) {
         initWidget(uiBinder.createAndBindUi(this));
+        this.tabs = netTabs;
         this.tcpTab = tcp;
         this.wirelessTab = wireless;
         this.session = currentSession;
@@ -150,6 +152,9 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
     @Override
     public void setDirty(boolean flag) {
         this.dirty = flag;
+        if (this.tabs.getButtons() != null) {
+            this.tabs.getButtons().setApplyButtonDirty(flag);
+        }
     }
 
     @Override

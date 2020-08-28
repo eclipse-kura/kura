@@ -21,11 +21,17 @@ import org.eclipse.kura.web.shared.service.GwtCertificatesServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.gwtbootstrap3.client.ui.Button;
+import org.gwtbootstrap3.client.ui.ButtonGroup;
 import org.gwtbootstrap3.client.ui.Form;
 import org.gwtbootstrap3.client.ui.FormGroup;
 import org.gwtbootstrap3.client.ui.FormLabel;
 import org.gwtbootstrap3.client.ui.Input;
+import org.gwtbootstrap3.client.ui.Modal;
+import org.gwtbootstrap3.client.ui.ModalBody;
+import org.gwtbootstrap3.client.ui.ModalFooter;
+import org.gwtbootstrap3.client.ui.ModalHeader;
 import org.gwtbootstrap3.client.ui.TextArea;
+import org.gwtbootstrap3.client.ui.constants.ModalBackdrop;
 import org.gwtbootstrap3.client.ui.constants.ValidationState;
 import org.gwtbootstrap3.client.ui.html.Span;
 
@@ -99,13 +105,19 @@ public class ServerCertsTabUi extends Composite implements Tab {
     public void refresh() {
         if (isDirty()) {
             setDirty(false);
-            reset();
+            this.storageAliasInput.setText("");
+            this.certificateInput.setText("");
+            this.groupStorageAliasForm.setValidationState(ValidationState.NONE);
+            this.groupCertForm.setValidationState(ValidationState.NONE);
         }
     }
 
     @Override
     public void clear() {
-        reset();
+        this.storageAliasInput.setText("");
+        this.certificateInput.setText("");
+        this.groupStorageAliasForm.setValidationState(ValidationState.NONE);
+        this.groupCertForm.setValidationState(ValidationState.NONE);
     }
 
     private void initForm() {
@@ -131,11 +143,7 @@ public class ServerCertsTabUi extends Composite implements Tab {
         });
 
         this.reset.setText(MSGS.reset());
-        this.reset.addClickHandler(event -> {
-            reset();
-            setDirty(false);
-            setButtonsEnabled(false);
-        });
+        this.reset.addClickHandler(event -> reset());
 
         this.apply.setText(MSGS.apply());
         this.apply.addClickHandler(event -> {
@@ -163,7 +171,7 @@ public class ServerCertsTabUi extends Composite implements Tab {
 
                                     @Override
                                     public void onSuccess(Integer certsStored) {
-                                        reset();
+                                        clear();
                                         setDirty(false);
                                         setButtonsEnabled(false);
                                         EntryClassUi.hideWaitModal();
@@ -176,11 +184,47 @@ public class ServerCertsTabUi extends Composite implements Tab {
     }
 
     private void reset() {
-        setButtonsEnabled(false);
-        this.storageAliasInput.setText("");
-        this.certificateInput.setText("");
-        this.groupStorageAliasForm.setValidationState(ValidationState.NONE);
-        this.groupCertForm.setValidationState(ValidationState.NONE);
+        if (isDirty()) {
+            // Modal
+            Modal modal = new Modal();
+            modal.setClosable(false);
+            modal.setFade(true);
+            modal.setDataKeyboard(true);
+            modal.setDataBackdrop(ModalBackdrop.STATIC);
+
+            ModalHeader header = new ModalHeader();
+            header.setTitle(MSGS.confirm());
+            modal.add(header);
+
+            ModalBody body = new ModalBody();
+            body.add(new Span(MSGS.deviceConfigDirty()));
+            modal.add(body);
+
+            ModalFooter footer = new ModalFooter();
+            ButtonGroup group = new ButtonGroup();
+            Button no = new Button();
+            no.setText(MSGS.noButton());
+            no.addStyleName("fa fa-times");
+            no.addClickHandler(event -> modal.hide());
+            group.add(no);
+            Button yes = new Button();
+            yes.setText(MSGS.yesButton());
+            yes.addStyleName("fa fa-check");
+            yes.addClickHandler(event -> {
+                modal.hide();
+                setButtonsEnabled(false);
+                this.storageAliasInput.setText("");
+                this.certificateInput.setText("");
+                this.groupStorageAliasForm.setValidationState(ValidationState.NONE);
+                this.groupCertForm.setValidationState(ValidationState.NONE);
+                setDirty(false);
+            });
+            group.add(yes);
+            footer.add(group);
+            modal.add(footer);
+            modal.show();
+            no.setFocus(true);
+        }
     }
 
     private void setButtonsEnabled(boolean state) {

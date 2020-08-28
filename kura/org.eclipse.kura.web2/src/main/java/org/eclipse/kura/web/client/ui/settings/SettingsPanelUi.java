@@ -156,12 +156,6 @@ public class SettingsPanelUi extends Composite {
 
     public void load() {
         this.currentlySelectedTab = this.snapshots;
-        this.appCertPanel.clear();
-        this.sslConfigPanel.clear();
-        this.serverCertPanel.clear();
-        this.deviceCertPanel.clear();
-        this.securityPanel.clear();
-        this.commandUserPanel.clear();
         this.snapshotsPanel.refresh();
         this.snapshots.showTab();
     }

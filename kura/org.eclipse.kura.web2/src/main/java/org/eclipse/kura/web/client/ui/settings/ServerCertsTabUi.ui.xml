@@ -57,7 +57,7 @@
                             <b:FormLabel for="storageAliasInput"
                                 ui:field="storageAliasLabel" showRequiredIndicator="true"/>
                             <b:InlineHelpBlock iconType="EXCLAMATION_TRIANGLE" />
-                            <b:Input type="TEXT" b:id="storageAlias"
+                            <b:Input type="TEXT" b:id="serverCertStorageAlias"
                                 ui:field="storageAliasInput" allowBlank="false" validateOnBlur="true"/>
                         </b:FormGroup>
 
@@ -65,7 +65,7 @@
                             <b:FormLabel for="certificateInput"
                                 ui:field="certificateLabel" showRequiredIndicator="true"/>
                             <b:InlineHelpBlock iconType="EXCLAMATION_TRIANGLE" />
-                            <b:TextArea b:id="certificateInput"
+                            <b:TextArea b:id="serverCertificateInput"
                                 addStyleNames="{style.center-panel}"
                                 ui:field="certificateInput" allowBlank="false" validateOnBlur="true"/>
                         </b:FormGroup>

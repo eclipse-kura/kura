@@ -348,7 +348,7 @@ public class ConfigurationServiceTest {
 
             fail("Null parameter - exception expected.");
         } catch (KuraException e) {
-            assertTrue(e.getMessage().contains("INVALID_PARAMETER"));
+            assertTrue(e.getMessage().contains("Invalid parameter"));
         }
     }
 
@@ -1339,7 +1339,7 @@ public class ConfigurationServiceTest {
         } catch (NullPointerException e) {
             fail("Decryption result not checked for null value.");
         } catch (KuraException e) {
-            assertEquals(KuraErrorCode.DECODER_ERROR, "snapshot", e.getCode());
+            assertEquals(KuraErrorCode.DECODER_ERROR, e.getCode());
         }
 
         verify(systemServiceMock, times(1)).getKuraSnapshotsDirectory();

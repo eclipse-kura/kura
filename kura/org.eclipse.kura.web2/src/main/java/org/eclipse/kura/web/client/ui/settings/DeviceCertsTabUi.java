@@ -114,6 +114,7 @@ public class DeviceCertsTabUi extends Composite implements Tab {
             this.storageAliasInput.setText("");
             this.certificateInput.setText("");
             this.groupStorageAliasForm.setValidationState(ValidationState.NONE);
+            this.groupPrivateKeyForm.setValidationState(ValidationState.NONE);
             this.groupCertForm.setValidationState(ValidationState.NONE);
         }
     }
@@ -123,6 +124,7 @@ public class DeviceCertsTabUi extends Composite implements Tab {
         this.storageAliasInput.setText("");
         this.certificateInput.setText("");
         this.groupStorageAliasForm.setValidationState(ValidationState.NONE);
+        this.groupPrivateKeyForm.setValidationState(ValidationState.NONE);
         this.groupCertForm.setValidationState(ValidationState.NONE);
     }
 
@@ -231,7 +233,7 @@ public class DeviceCertsTabUi extends Composite implements Tab {
                 this.privateKeyInput.setText("");
                 this.certificateInput.setText("");
                 this.groupStorageAliasForm.setValidationState(ValidationState.NONE);
-                this.groupCertForm.setValidationState(ValidationState.NONE);
+                this.groupPrivateKeyForm.setValidationState(ValidationState.NONE);
                 this.groupCertForm.setValidationState(ValidationState.NONE);
                 setDirty(false);
             });

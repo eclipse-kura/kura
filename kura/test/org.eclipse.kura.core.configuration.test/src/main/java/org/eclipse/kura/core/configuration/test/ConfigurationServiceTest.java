@@ -353,7 +353,7 @@ public class ConfigurationServiceTest {
 
             fail("Null parameter - exception expected.");
         } catch (KuraException e) {
-            assertTrue(e.getMessage().contains("INVALID_PARAMETER"));
+            assertTrue(e.getMessage().contains("Invalid parameter"));
         }
     }
 

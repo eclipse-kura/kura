@@ -110,6 +110,8 @@
 
         <!-- final p2 repository -->
         <module>org.eclipse.kura-p2</module>
+
+        <module>test-util</module>
     </modules>
 
     <properties>

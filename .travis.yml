@@ -45,9 +45,9 @@ jobs:
     - stage: distrib-examples-tests
       script: $M2_HOME/bin/mvn -f kura/distrib/pom.xml clean install
       name: Distribution
-      - script: $M2_HOME/bin/mvn -f kura/examples/pom.xml clean install
+    - script: $M2_HOME/bin/mvn -f kura/examples/pom.xml clean install
       name: Examples
-      - script: $M2_HOME/bin/mvn -f kura/test/pom.xml clean install
+    - script: $M2_HOME/bin/mvn -f kura/test/pom.xml clean install
       name: Tests
 
 after_script:

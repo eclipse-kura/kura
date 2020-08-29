@@ -42,13 +42,13 @@ jobs:
         - rm -rf kura/target-definition/{common,equinox*,test-deps}
         - $M2_HOME/bin/mvn -B -f target-platform/pom.xml clean install
         - $M2_HOME/bin/mvn -B -f kura/pom.xml clean install -DskipTests
-    - stage: distrib-examples-tests-karaf
+    - stage: distrib-examples-tests
       script: $M2_HOME/bin/mvn -f kura/distrib/pom.xml clean install
-    - # stage name not required, will continue to use the previous
-      script:
-      - $M2_HOME/bin/mvn -f kura/examples/pom.xml clean install
-    - # stage name not required, will continue to use the previous 
+      name: Distribution
+      script: $M2_HOME/bin/mvn -f kura/examples/pom.xml clean install
+      name: Examples
       script: $M2_HOME/bin/mvn -f kura/test/pom.xml clean install
+      name: Tests
 
 after_script:
   - sudo userdel kura

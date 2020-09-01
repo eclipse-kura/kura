@@ -103,17 +103,13 @@ public class ServerCertsTabUi extends Composite implements Tab {
 
     @Override
     public void refresh() {
-        if (isDirty()) {
-            setDirty(false);
-            this.storageAliasInput.setText("");
-            this.certificateInput.setText("");
-            this.groupStorageAliasForm.setValidationState(ValidationState.NONE);
-            this.groupCertForm.setValidationState(ValidationState.NONE);
-        }
+        clear();
     }
 
     @Override
     public void clear() {
+        setButtonsEnabled(false);
+        setDirty(false);
         this.storageAliasInput.setText("");
         this.certificateInput.setText("");
         this.groupStorageAliasForm.setValidationState(ValidationState.NONE);
@@ -172,8 +168,6 @@ public class ServerCertsTabUi extends Composite implements Tab {
                                     @Override
                                     public void onSuccess(Integer certsStored) {
                                         clear();
-                                        setDirty(false);
-                                        setButtonsEnabled(false);
                                         EntryClassUi.hideWaitModal();
                                     }
                                 });
@@ -212,12 +206,7 @@ public class ServerCertsTabUi extends Composite implements Tab {
             yes.addStyleName("fa fa-check");
             yes.addClickHandler(event -> {
                 modal.hide();
-                setButtonsEnabled(false);
-                this.storageAliasInput.setText("");
-                this.certificateInput.setText("");
-                this.groupStorageAliasForm.setValidationState(ValidationState.NONE);
-                this.groupCertForm.setValidationState(ValidationState.NONE);
-                setDirty(false);
+                clear();
             });
             group.add(yes);
             footer.add(group);

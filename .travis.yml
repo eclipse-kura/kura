@@ -57,8 +57,11 @@ jobs:
       - $M2_HOME/bin/mvn -f kura/examples/pom.xml clean install
     - # stage name not required, will continue to use the previous 
       script: $M2_HOME/bin/mvn -f kura/test/pom.xml clean install
+<<<<<<< HEAD
         
 >>>>>>> reverted changes to travis yaml file
+=======
+>>>>>>> reverted changes to travis yaml and examples pom
 
 after_script:
   - sudo userdel kura

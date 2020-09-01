@@ -43,7 +43,7 @@
             cardinality="0"
             required="true"
             default="/admin/console"
-            description="Default Web Server Entry Point for Applications running of framework\'s Web Server">
+            description="Default Web Server Entry Point for Applications running on the framework's Web Server">
         </AD>
 
         <AD id="session.max.inactivity.interval"

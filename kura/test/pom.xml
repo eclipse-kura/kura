@@ -270,7 +270,6 @@ Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
         <module>org.eclipse.kura.wire.script.filter.provider.test</module>
         <module>org.eclipse.kura.json.marshaller.unmarshaller.provider.test</module>
         <module>org.eclipse.kura.xml.marshaller.unmarshaller.provider.test</module>
-        <module>org.eclipse.kura.util.wire.test</module>
         <!--
         <module>org.eclipse.kura.raspberrypi.sensehat.test</module>
         -->

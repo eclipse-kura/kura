@@ -19,6 +19,8 @@
     xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt"
     xmlns:firewall="urn:import:org.eclipse.kura.web.client.ui.firewall">
 
+	<ui:with field="msgs" type="org.eclipse.kura.web.client.messages.Messages"></ui:with>
+
     <ui:style>
     .important {
     	font-weight: bold;
@@ -59,5 +61,20 @@
             </b:Well>
         </b:Row>
 
+	    <b:Modal closable="false" fade="true" dataBackdrop="STATIC"
+	        dataKeyboard="true" ui:field="dirtyModal" b:id="dirtyModal" title="{msgs.confirm}" >
+	        <b:ModalBody>
+	            <b:Panel>
+	                <b:PanelBody>
+	                    <b.html:Span text="{msgs.deviceConfigDirty}" />
+	                </b:PanelBody>
+	            </b:Panel>
+	        </b:ModalBody>
+	        <b:ModalFooter>
+	            <b:Button ui:field="yes" addStyleNames="fa fa-check" text="{msgs.yesButton}" />
+	            <b:Button ui:field="no" addStyleNames="fa fa-times" text="{msgs.noButton}" />
+	        </b:ModalFooter>
+	    </b:Modal>
+    
     </b:Container>
 </ui:UiBinder> 

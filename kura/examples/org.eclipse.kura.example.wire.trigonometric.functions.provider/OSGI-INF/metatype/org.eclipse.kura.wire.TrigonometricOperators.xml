@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) 2020 Eurotech and/or its affiliates and others All rights 
+	reserved. This program and the accompanying materials are made available 
+	under the terms of the Eclipse Public License v1.0 which accompanies this 
+	distribution, and is available at http://www.eclipse.org/legal/epl-v10.html -->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0"
+	localization="en_us">
+	<OCD id="org.eclipse.kura.wire.TrigonometricOperators"
+		name="Trigonometric Operations for Wires"
+		description="A component that applies a trigonometric function to a numeric property received in input in the component. The result will be emitted as a new property of type double.">
+
+		<AD id="operand.name" name="Operand Name" type="String"
+			cardinality="0" required="true" default="operand"
+			description="Specifies the name of the operand property in the received envelope.">
+		</AD>
+
+		<AD id="trigonometric.operator" name="Operator" type="String"
+			cardinality="0" required="true" default="SIN"
+			description="Specifies the trigonometric function to be executed by the component">
+			<Option label="SIN" value="SIN" />
+			<Option label="COS" value="COS" />
+			<Option label="TAN" value="TAN" />
+			<Option label="ASIN" value="ASIN" />
+			<Option label="ACOS" value="ACOS" />
+			<Option label="ATAN" value="ATAN" />
+		</AD>
+
+		<AD id="result.name" name="Result Name" type="String"
+			cardinality="0" required="true" default="result"
+			description="Specifies the name of the result property in emitted envelope.">
+		</AD>
+
+		<AD id="emit.received.properties" name="Emit Received Properties"
+			type="Boolean" cardinality="0" required="true" default="false"
+			description="Specifies whether received properties should be included in the emitted envelope or not.">
+		</AD>
+	</OCD>
+
+
+	<Designate
+		factoryPid="org.eclipse.kura.wire.TrigonometricOperators">
+		<Object ocdref="org.eclipse.kura.wire.TrigonometricOperators" />
+	</Designate>
+</MetaData>

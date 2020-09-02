@@ -43,6 +43,10 @@ import org.junit.Test;
 
 public class IBeaconDriverTest {
 
+    private static final String IBEACON1 = "ibeacon1";
+    private static final String IBEACON = "ibeacon";
+    private static final String EXCEPTION_WAS_EXPECTED_MSG = "Exception was expected";
+
     @Test
     public void testActivateDeactivate() {
 
@@ -55,8 +59,9 @@ public class IBeaconDriverTest {
         properties.put("iname", interfaceName);
         try {
             svc.activate(properties);
-            fail("Exception was expected");
+            fail(EXCEPTION_WAS_EXPECTED_MSG);
         } catch (NullPointerException e) {
+            // Do nothing
         }
 
         BluetoothLeAdapter adapterMock = mock(BluetoothLeAdapter.class);
@@ -73,8 +78,9 @@ public class IBeaconDriverTest {
         // Try without IBeaconService
         try {
             svc.activate(properties);
-            fail("Exception was expected");
+            fail(EXCEPTION_WAS_EXPECTED_MSG);
         } catch (NullPointerException e) {
+            // Do nothing
         }
 
         @SuppressWarnings("unchecked")
@@ -103,8 +109,9 @@ public class IBeaconDriverTest {
 
         try {
             svc.activate(properties);
-            fail("Exception was expected");
+            fail(EXCEPTION_WAS_EXPECTED_MSG);
         } catch (NullPointerException e) {
+            // Do nothing
         }
     }
 
@@ -113,7 +120,7 @@ public class IBeaconDriverTest {
         IBeaconDriver svc = new IBeaconDriver();
 
         List<ChannelRecord> records = new ArrayList<>();
-        ChannelRecord record = ChannelRecord.createReadRecord("ibeacon", DataType.INTEGER);
+        ChannelRecord record = ChannelRecord.createReadRecord(IBEACON, DataType.INTEGER);
         Map<String, Object> config = new HashMap<>();
 
         record.setChannelConfig(config);
@@ -133,7 +140,7 @@ public class IBeaconDriverTest {
         IBeaconDriver svc = new IBeaconDriver();
 
         List<ChannelRecord> records = new ArrayList<>();
-        ChannelRecord record = ChannelRecord.createReadRecord("ibeacon", DataType.INTEGER);
+        ChannelRecord record = ChannelRecord.createReadRecord(IBEACON, DataType.INTEGER);
         Map<String, Object> config = new HashMap<>();
 
         record.setChannelConfig(config);
@@ -141,7 +148,7 @@ public class IBeaconDriverTest {
         try {
             svc.write(records);
         } catch (Exception e) {
-            assertTrue(e.getMessage().contains("OPERATION_NOT_SUPPORTED"));
+            assertTrue(e.getMessage().contains("Operation write not supported."));
         }
     }
 
@@ -153,17 +160,16 @@ public class IBeaconDriverTest {
         TestUtil.setFieldValue(svc, "iBeaconListeners", ibeaconListeners);
 
         List<ChannelRecord> records = new ArrayList<>();
-        ChannelRecord record = ChannelRecord.createReadRecord("ibeacon", DataType.INTEGER);
+        ChannelRecord record = ChannelRecord.createReadRecord(IBEACON, DataType.INTEGER);
         Map<String, Object> config = new HashMap<>();
-        config.put("+name", "ibeacon");
+        config.put("+name", IBEACON);
         config.put("+value.type", "integer");
         record.setChannelConfig(config);
         records.add(record);
 
-        ChannelListener listener = event -> {
-            assertTrue("00000000-1111-2222-3333-444444444444;-10;0;1;1;0.31622776601683794"
-                    .equals(((StringValue) event.getChannelRecord().getValue()).getValue()));
-        };
+        ChannelListener listener = event -> assertTrue(
+                "00000000-1111-2222-3333-444444444444;-10;0;1;1;0.31622776601683794"
+                        .equals(((StringValue) event.getChannelRecord().getValue()).getValue()));
 
         svc.registerChannelListener(config, listener);
         assertEquals(1, ibeaconListeners.size());
@@ -190,10 +196,10 @@ public class IBeaconDriverTest {
 
         ChannelListener channelListener1 = event -> {
         };
-        IBeaconListener iBeaconListener1 = new IBeaconListener("ibeacon1", channelListener1);
+        IBeaconListener iBeaconListener1 = new IBeaconListener(IBEACON1, channelListener1);
 
         assertTrue(iBeaconListener1.equals(iBeaconListener1));
-        assertFalse(iBeaconListener1.equals(null));
+        assertFalse(iBeaconListener1 == null);
         assertFalse(iBeaconListener1.equals(channelListener1));
 
         ChannelListener channelListener2 = event -> {
@@ -204,13 +210,13 @@ public class IBeaconDriverTest {
         iBeaconListener2 = new IBeaconListener("ibeacon2", channelListener2);
         assertFalse(iBeaconListener2.equals(iBeaconListener1));
 
-        iBeaconListener2 = new IBeaconListener("ibeacon1", null);
+        iBeaconListener2 = new IBeaconListener(IBEACON1, null);
         assertFalse(iBeaconListener2.equals(iBeaconListener1));
 
-        iBeaconListener2 = new IBeaconListener("ibeacon1", channelListener2);
+        iBeaconListener2 = new IBeaconListener(IBEACON1, channelListener2);
         assertFalse(iBeaconListener2.equals(iBeaconListener1));
 
-        iBeaconListener2 = new IBeaconListener("ibeacon1", channelListener1);
+        iBeaconListener2 = new IBeaconListener(IBEACON1, channelListener1);
         assertTrue(iBeaconListener2.equals(iBeaconListener1));
     }
 }

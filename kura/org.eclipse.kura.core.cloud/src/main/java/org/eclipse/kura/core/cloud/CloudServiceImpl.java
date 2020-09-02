@@ -452,7 +452,7 @@ public class CloudServiceImpl
         } else if (preferencesEncoding == SIMPLE_JSON) {
             bytes = encodeJsonPayload(payload);
         } else {
-            throw new KuraException(KuraErrorCode.ENCODE_ERROR);
+            throw new KuraException(KuraErrorCode.ENCODE_ERROR, "KuraPayload");
         }
         return bytes;
     }
@@ -704,7 +704,7 @@ public class CloudServiceImpl
             bytes = encoder.getBytes();
             return bytes;
         } catch (IOException e) {
-            throw new KuraException(KuraErrorCode.ENCODE_ERROR, e);
+            throw new KuraException(KuraErrorCode.ENCODE_ERROR, "KuraPayload", e);
         }
     }
 
@@ -723,7 +723,7 @@ public class CloudServiceImpl
             kuraPayload = encoder.buildFromByteArray();
             return kuraPayload;
         } catch (KuraInvalidMessageException | IOException e) {
-            throw new KuraException(KuraErrorCode.DECODER_ERROR, e);
+            throw new KuraException(KuraErrorCode.DECODER_ERROR, "KuraPayload", e);
         }
     }
 
@@ -861,7 +861,7 @@ public class CloudServiceImpl
         try {
             bytes = encoder.getBytes();
         } catch (IOException e) {
-            throw new KuraException(KuraErrorCode.ENCODE_ERROR, e);
+            throw new KuraException(KuraErrorCode.ENCODE_ERROR, "KuraPayload", e);
         }
         return bytes;
     }

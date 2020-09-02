@@ -325,7 +325,7 @@ public class ExampleComponent implements CloudClientListener, EventHandler {
                 || (sStop = connectionConfig.getProperty("stopBits")) == null
                 || (sParity = connectionConfig.getProperty("parity")) == null
                 || (sBits = connectionConfig.getProperty("bitsPerWord")) == null) {
-            throw new KuraException(KuraErrorCode.SERIAL_PORT_INVALID_CONFIGURATION);
+            throw new KuraException(KuraErrorCode.SERIAL_PORT_INVALID_CONFIGURATION, "One or more parameters are null.");
         }
 
         int baud = Integer.valueOf(sBaud).intValue();

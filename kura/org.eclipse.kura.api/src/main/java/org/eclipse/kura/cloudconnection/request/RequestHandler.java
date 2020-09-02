@@ -53,7 +53,7 @@ public interface RequestHandler {
      *             request parameters or exceptions during processing
      */
     public default KuraMessage doGet(RequestHandlerContext context, KuraMessage reqMessage) throws KuraException {
-        throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
+        throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED, "get");
     }
 
     /**
@@ -70,7 +70,7 @@ public interface RequestHandler {
      *             request parameters or exceptions during processing
      */
     public default KuraMessage doPut(RequestHandlerContext context, KuraMessage reqMessage) throws KuraException {
-        throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
+        throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED, "put");
     }
 
     /**
@@ -87,7 +87,7 @@ public interface RequestHandler {
      *             request parameters or exceptions during processing
      */
     public default KuraMessage doPost(RequestHandlerContext context, KuraMessage reqMessage) throws KuraException {
-        throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
+        throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED, "post");
     }
 
     /**
@@ -104,7 +104,7 @@ public interface RequestHandler {
      *             request parameters or exceptions during processing
      */
     public default KuraMessage doDel(RequestHandlerContext context, KuraMessage reqMessage) throws KuraException {
-        throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
+        throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED, "delete");
     }
 
     /**
@@ -121,7 +121,7 @@ public interface RequestHandler {
      *             request parameters or exceptions during processing
      */
     public default KuraMessage doExec(RequestHandlerContext context, KuraMessage reqMessage) throws KuraException {
-        throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
+        throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED, "exec");
     }
 
 }

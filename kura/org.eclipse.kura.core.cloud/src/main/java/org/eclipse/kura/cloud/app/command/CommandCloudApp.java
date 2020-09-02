@@ -214,7 +214,7 @@ public class CommandCloudApp implements ConfigurableComponent, PasswordCommandSe
                     UnZip.unZipBytes(zipBytes, dir);
                 } catch (IOException e) {
                     logger.error("Error unzipping command zip bytes", e);
-                    throw new KuraException(KuraErrorCode.DECODER_ERROR);
+                    throw new KuraException(KuraErrorCode.DECODER_ERROR, "file");
                 }
             }
 
@@ -263,7 +263,7 @@ public class CommandCloudApp implements ConfigurableComponent, PasswordCommandSe
                 throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
             }
         } else {
-            throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
+            throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED, "command");
         }
     }
 

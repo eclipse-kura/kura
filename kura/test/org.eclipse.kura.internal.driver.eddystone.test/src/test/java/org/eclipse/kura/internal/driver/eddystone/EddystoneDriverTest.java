@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
  *
  *   All rights reserved. This program and the accompanying materials
  *   are made available under the terms of the Eclipse Public License v1.0
@@ -42,6 +42,11 @@ import org.junit.Test;
 
 public class EddystoneDriverTest {
 
+    private static final String EXCEPTION_WAS_EXPECTED_MSG = "Exception was expected";
+    private static final String EDDYSTONE_TYPE = "eddystone.type";
+    private static final String EDDYSTONE_UID = "eddystoneUID";
+    private static final String EDDYSTONE_URL = "eddystoneURL";
+
     @Test
     public void testActivateDeactivate() {
 
@@ -54,8 +59,9 @@ public class EddystoneDriverTest {
         properties.put("iname", interfaceName);
         try {
             svc.activate(properties);
-            fail("Exception was expected");
+            fail(EXCEPTION_WAS_EXPECTED_MSG);
         } catch (NullPointerException e) {
+            // Do nothing
         }
 
         BluetoothLeAdapter adapterMock = mock(BluetoothLeAdapter.class);
@@ -72,8 +78,9 @@ public class EddystoneDriverTest {
         // Try without EddystoneService
         try {
             svc.activate(properties);
-            fail("Exception was expected");
+            fail(EXCEPTION_WAS_EXPECTED_MSG);
         } catch (NullPointerException e) {
+            // Do nothing
         }
 
         @SuppressWarnings("unchecked")
@@ -102,8 +109,9 @@ public class EddystoneDriverTest {
 
         try {
             svc.activate(properties);
-            fail("Exception was expected");
+            fail(EXCEPTION_WAS_EXPECTED_MSG);
         } catch (NullPointerException e) {
+            // Do nothing
         }
     }
 
@@ -114,7 +122,7 @@ public class EddystoneDriverTest {
         List<ChannelRecord> records = new ArrayList<>();
         ChannelRecord record = ChannelRecord.createReadRecord("eddystone", DataType.INTEGER);
         Map<String, Object> config = new HashMap<>();
-        config.put("eddystone.type", EddystoneFrameType.URL);
+        config.put(EDDYSTONE_TYPE, EddystoneFrameType.URL);
 
         record.setChannelConfig(config);
         records.add(record);
@@ -135,14 +143,14 @@ public class EddystoneDriverTest {
         List<ChannelRecord> records = new ArrayList<>();
         ChannelRecord record = ChannelRecord.createReadRecord("eddystone", DataType.INTEGER);
         Map<String, Object> config = new HashMap<>();
-        config.put("eddystone.type", EddystoneFrameType.URL.toString());
+        config.put(EDDYSTONE_TYPE, EddystoneFrameType.URL.toString());
 
         record.setChannelConfig(config);
         records.add(record);
         try {
             svc.write(records);
         } catch (Exception e) {
-            assertTrue(e.getMessage().contains("OPERATION_NOT_SUPPORTED"));
+            assertTrue(e.getMessage().contains("Operation write not supported."));
         }
     }
 
@@ -154,31 +162,28 @@ public class EddystoneDriverTest {
         TestUtil.setFieldValue(svc, "eddystoneListeners", eddystoneListeners);
 
         List<ChannelRecord> records = new ArrayList<>();
-        ChannelRecord urlRecord = ChannelRecord.createReadRecord("eddystoneURL", DataType.INTEGER);
+        ChannelRecord urlRecord = ChannelRecord.createReadRecord(EDDYSTONE_URL, DataType.INTEGER);
         Map<String, Object> urlConfig = new HashMap<>();
-        urlConfig.put("eddystone.type", EddystoneFrameType.URL.toString());
-        urlConfig.put("+name", "eddystoneURL");
+        urlConfig.put(EDDYSTONE_TYPE, EddystoneFrameType.URL.toString());
+        urlConfig.put("+name", EDDYSTONE_URL);
         urlConfig.put("+value.type", "integer");
         urlRecord.setChannelConfig(urlConfig);
         records.add(urlRecord);
 
-        ChannelListener urlListener = event -> {
-            assertTrue("URL;www.eclipse.org/kura;-10;0;0.31622776601683794"
-                    .equals(((StringValue) event.getChannelRecord().getValue()).getValue()));
-        };
+        ChannelListener urlListener = event -> assertTrue("URL;www.eclipse.org/kura;-10;0;0.31622776601683794"
+                .equals(((StringValue) event.getChannelRecord().getValue()).getValue()));
 
-        ChannelRecord uidRecord = ChannelRecord.createReadRecord("eddystoneUID", DataType.INTEGER);
+        ChannelRecord uidRecord = ChannelRecord.createReadRecord(EDDYSTONE_UID, DataType.INTEGER);
         Map<String, Object> uidConfig = new HashMap<>();
-        uidConfig.put("eddystone.type", EddystoneFrameType.UID.toString());
-        uidConfig.put("+name", "eddystoneUID");
+        uidConfig.put(EDDYSTONE_TYPE, EddystoneFrameType.UID.toString());
+        uidConfig.put("+name", EDDYSTONE_UID);
         uidConfig.put("+value.type", "integer");
         uidRecord.setChannelConfig(uidConfig);
         records.add(uidRecord);
 
-        ChannelListener uidListener = event -> {
-            assertTrue("UID;0001020304050607090A;000102030405;-10;0;0.31622776601683794"
-                    .equals(((StringValue) event.getChannelRecord().getValue()).getValue()));
-        };
+        ChannelListener uidListener = event -> assertTrue(
+                "UID;0001020304050607090A;000102030405;-10;0;0.31622776601683794"
+                        .equals(((StringValue) event.getChannelRecord().getValue()).getValue()));
 
         svc.registerChannelListener(urlConfig, urlListener);
         svc.registerChannelListener(uidConfig, uidListener);
@@ -219,26 +224,26 @@ public class EddystoneDriverTest {
         EddystoneListener listenerURL = new EddystoneListener(null, urlListener, EddystoneFrameType.URL);
 
         assertTrue(listenerURL.equals(listenerURL));
-        assertFalse(listenerURL.equals(null));
+        assertFalse(listenerURL == null);
         assertFalse(listenerURL.equals(urlListener));
 
-        EddystoneListener listenerUID = new EddystoneListener("eddystoneUID", uidListener, EddystoneFrameType.UID);
+        EddystoneListener listenerUID = new EddystoneListener(EDDYSTONE_UID, uidListener, EddystoneFrameType.UID);
         assertFalse(listenerURL.equals(listenerUID));
 
-        listenerURL = new EddystoneListener("eddystoneURL", urlListener, EddystoneFrameType.URL);
+        listenerURL = new EddystoneListener(EDDYSTONE_URL, urlListener, EddystoneFrameType.URL);
         assertFalse(listenerURL.equals(listenerUID));
 
-        listenerUID = new EddystoneListener("eddystoneURL", uidListener, EddystoneFrameType.UID);
+        listenerUID = new EddystoneListener(EDDYSTONE_URL, uidListener, EddystoneFrameType.UID);
         assertFalse(listenerURL.equals(listenerUID));
 
-        listenerUID = new EddystoneListener("eddystoneURL", uidListener, EddystoneFrameType.URL);
-        listenerURL = new EddystoneListener("eddystoneURL", null, EddystoneFrameType.URL);
+        listenerUID = new EddystoneListener(EDDYSTONE_URL, uidListener, EddystoneFrameType.URL);
+        listenerURL = new EddystoneListener(EDDYSTONE_URL, null, EddystoneFrameType.URL);
         assertFalse(listenerURL.equals(listenerUID));
 
-        listenerURL = new EddystoneListener("eddystoneURL", urlListener, EddystoneFrameType.URL);
+        listenerURL = new EddystoneListener(EDDYSTONE_URL, urlListener, EddystoneFrameType.URL);
         assertFalse(listenerURL.equals(listenerUID));
 
-        listenerUID = new EddystoneListener("eddystoneURL", urlListener, EddystoneFrameType.URL);
+        listenerUID = new EddystoneListener(EDDYSTONE_URL, urlListener, EddystoneFrameType.URL);
         assertTrue(listenerUID.equals(listenerURL));
     }
 }

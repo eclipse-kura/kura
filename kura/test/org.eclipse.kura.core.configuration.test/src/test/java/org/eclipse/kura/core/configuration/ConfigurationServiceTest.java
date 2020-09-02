@@ -348,7 +348,7 @@ public class ConfigurationServiceTest {
 
             fail("Null parameter - exception expected.");
         } catch (KuraException e) {
-            assertTrue(e.getMessage().contains("INVALID_PARAMETER"));
+            assertTrue(e.getMessage().contains("Invalid parameter"));
         }
     }
 
@@ -833,10 +833,10 @@ public class ConfigurationServiceTest {
 
         // first decryption must fail
         when(cryptoServiceMock.decryptAes("pass".toCharArray()))
-                .thenThrow(new KuraException(KuraErrorCode.DECODER_ERROR));
+                .thenThrow(new KuraException(KuraErrorCode.DECODER_ERROR, "password"));
         // then also encryption can fail
         when(cryptoServiceMock.encryptAes("pass".toCharArray()))
-                .thenThrow(new KuraException(KuraErrorCode.ENCODE_ERROR));
+                .thenThrow(new KuraException(KuraErrorCode.ENCODE_ERROR, "password"));
 
         List<ComponentConfigurationImpl> configs = new ArrayList<>();
 
@@ -865,7 +865,7 @@ public class ConfigurationServiceTest {
 
         // first decryption must fail
         when(cryptoServiceMock.decryptAes("pass".toCharArray()))
-                .thenThrow(new KuraException(KuraErrorCode.DECODER_ERROR));
+                .thenThrow(new KuraException(KuraErrorCode.DECODER_ERROR, "configuration"));
         // so that encryption is attempted at all
         when(cryptoServiceMock.encryptAes("pass".toCharArray())).thenReturn("encrypted".toCharArray());
 

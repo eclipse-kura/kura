@@ -42,15 +42,15 @@ public class FileMoveDeploymentHook implements DeploymentHook {
             File destinationFile = new File(options.getDestinationPath());
 
             if (!sourceFile.exists()) {
-                throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED, "Source file not found: " + sourceFile);
+                throw new KuraException(KuraErrorCode.INVALID_PARAMETER, "Source file not found: " + sourceFile);
             }
 
             if (sourceFile.isDirectory()) {
-                throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED, "Moving directories is not supported");
+                throw new KuraException(KuraErrorCode.INVALID_PARAMETER, "Moving directories is not supported");
             }
 
             if (!destinationFile.isAbsolute()) {
-                throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED, "Destination path must be absolute");
+                throw new KuraException(KuraErrorCode.INVALID_PARAMETER, "Destination path must be absolute");
             }
 
             if (destinationFile.isDirectory()) {

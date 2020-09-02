@@ -438,11 +438,11 @@ public class TelitDe910 extends TelitModem implements EvdoCellularModem {
 
     @Override
     public void enableDiversity() throws KuraException {
-        throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
+        throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED, "enableDiversity");
     }
 
     @Override
     public void disableDiversity() throws KuraException {
-        throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
+        throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED, "disableDiversity");
     }
 }

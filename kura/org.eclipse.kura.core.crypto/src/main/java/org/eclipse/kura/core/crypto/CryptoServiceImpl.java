@@ -78,9 +78,9 @@ public class CryptoServiceImpl implements CryptoService {
             byte[] encryptedBytes = c.doFinal(new String(value).getBytes());
             encryptedValue = base64Encode(encryptedBytes);
         } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-            throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
+            throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED, "encrypt");
         } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
-            throw new KuraException(KuraErrorCode.ENCODE_ERROR);
+            throw new KuraException(KuraErrorCode.ENCODE_ERROR, "value");
         }
 
         return encryptedValue.toCharArray();
@@ -104,15 +104,15 @@ public class CryptoServiceImpl implements CryptoService {
             String internalStringValue = new String(encryptedValue);
             byte[] decodedValue = base64Decode(internalStringValue);
             if (encryptedValue.length > 0 && decodedValue.length == 0) {
-                throw new KuraException(KuraErrorCode.DECODER_ERROR);
+                throw new KuraException(KuraErrorCode.DECODER_ERROR, "value");
             }
             byte[] decryptedBytes = c.doFinal(decodedValue);
             String decryptedValue = new String(decryptedBytes);
             return decryptedValue.toCharArray();
         } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-            throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
+            throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED, "decrypt");
         } catch (InvalidKeyException | BadPaddingException | IllegalBlockSizeException e) {
-            throw new KuraException(KuraErrorCode.DECODER_ERROR);
+            throw new KuraException(KuraErrorCode.DECODER_ERROR, "value");
         }
     }
 

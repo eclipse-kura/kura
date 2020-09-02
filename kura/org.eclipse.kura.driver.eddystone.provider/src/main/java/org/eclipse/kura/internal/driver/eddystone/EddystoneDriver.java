@@ -232,7 +232,7 @@ public final class EddystoneDriver
     @Override
     public void write(final List<ChannelRecord> records) throws ConnectionException {
         logger.warn("Write operation not supported");
-        throw new KuraRuntimeException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
+        throw new KuraRuntimeException(KuraErrorCode.OPERATION_NOT_SUPPORTED, "write");
     }
 
     private void releaseResources() {

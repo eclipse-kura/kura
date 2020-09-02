@@ -41,12 +41,12 @@ public class TelitLe910v2 extends TelitHe910 implements HspaCellularModem {
 
     @Override
     public void enableGps() throws KuraException {
-        throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
+        throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED, "enableGps");
     }
 
     @Override
     public void disableGps() throws KuraException {
-        throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
+        throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED, "disableGps");
     }
 
     @Override

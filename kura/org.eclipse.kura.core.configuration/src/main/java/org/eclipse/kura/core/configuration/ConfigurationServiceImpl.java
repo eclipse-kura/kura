@@ -1408,7 +1408,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         // File loaded, try to decrypt and unmarshall
         char[] decryptAes = this.cryptoService.decryptAes(rawSnapshot.toCharArray());
         if (decryptAes == null) {
-            throw new KuraException(KuraErrorCode.DECODER_ERROR);
+            throw new KuraException(KuraErrorCode.DECODER_ERROR, "snapshot");
         }
         String decryptedContent = new String(decryptAes);
 
@@ -1765,7 +1765,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         try {
             return requireNonNull(this.xmlUnmarshaller.unmarshal(string, clazz));
         } catch (final Exception e) {
-            throw new KuraException(KuraErrorCode.DECODER_ERROR, e);
+            throw new KuraException(KuraErrorCode.DECODER_ERROR, "configuration", e);
         }
     }
 
@@ -1773,7 +1773,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         try {
             return requireNonNull(this.xmlMarshaller.marshal(object));
         } catch (Exception e) {
-            throw new KuraException(KuraErrorCode.ENCODE_ERROR, e);
+            throw new KuraException(KuraErrorCode.ENCODE_ERROR, "configuration", e);
         }
     }
 

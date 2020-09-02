@@ -491,7 +491,7 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
             ungetServiceReferences(unmarshallerSRs);
         }
         if (result == null) {
-            throw new KuraException(KuraErrorCode.DECODER_ERROR);
+            throw new KuraException(KuraErrorCode.DECODER_ERROR, "configuration");
         }
         return result;
     }

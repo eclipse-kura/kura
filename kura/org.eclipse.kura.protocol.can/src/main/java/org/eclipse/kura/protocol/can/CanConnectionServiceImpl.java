@@ -64,7 +64,7 @@ public class CanConnectionServiceImpl implements CanConnectionService {
     @Override
     public void sendCanMessage(String ifName, int canId, byte[] message) throws KuraException, IOException {
         if (message.length > 8) {
-            throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED, "CAN send : Incorrect frame length");
+            throw new KuraException(KuraErrorCode.INVALID_PARAMETER, "CAN send : Incorrect frame length");
         }
         if (this.socket == null) {
             throw new KuraException(KuraErrorCode.BAD_REQUEST, "CAN Socket must be open before sending");

@@ -41,8 +41,11 @@ import org.gwtbootstrap3.client.ui.html.Strong;
 
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
@@ -83,6 +86,8 @@ public class LoginUi extends Composite implements Context {
     ModalBody loginModalBody;
     @UiField
     FormGroup authenticationMethodGroup;
+    @UiField
+    Button loginResetButton;
 
     private PopupPanel waitModal;
 
@@ -145,13 +150,18 @@ public class LoginUi extends Composite implements Context {
                 @Override
                 public void onFailure(String reason) {
                     LoginUi.this.waitModal.hide();
-                    LoginUi.this.alertDialog.show(reason, AlertDialog.Severity.ALERT, (ConfirmListener) null);
+                    LoginUi.this.alertDialog.show(reason, AlertDialog.Severity.ERROR, (ConfirmListener) null);
                 }
             });
         });
 
         this.loginDialog.show();
         initLoginBannerModal();
+    }
+    
+    @UiHandler("loginResetButton")
+    public void onFormResetClick(ClickEvent event) {
+        loginForm.reset();
     }
 
     private void setAuthenticationMethod(final String authenticationMethod) {

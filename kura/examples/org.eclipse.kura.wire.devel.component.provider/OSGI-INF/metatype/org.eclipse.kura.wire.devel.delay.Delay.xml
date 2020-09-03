@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    Copyright (c) 2018 Eurotech and/or its affiliates and others
+    Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -19,6 +19,7 @@
             cardinality="0"
             required="true"
             default="1000"
+            min="0"
             description="The average delay in milliseconds">
         </AD>
         
@@ -28,6 +29,7 @@
             cardinality="0"
             required="true"
             default="100"
+            min="0" 
             description="The standard deviation of the delay in milliseconds">
         </AD>
         

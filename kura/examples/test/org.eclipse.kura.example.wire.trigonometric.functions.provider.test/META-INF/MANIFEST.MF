@@ -1,0 +1,21 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Integration Tests for Trigonometric Functions Component
+Bundle-SymbolicName: org.eclipse.kura.example.wire.trigonometric.functions.provider.test
+Bundle-Version: 4.2.0.qualifier
+Bundle-Vendor: Eclipse Kura
+Bundle-License: Eclipse Public License v1.0
+Import-Package: org.eclipse.kura;version="[1.5,2.0)",
+ org.eclipse.kura.type;version="[1.1,2.0)",
+ org.eclipse.kura.util.wire.test;version="[1.0,2.0)",
+ org.eclipse.kura.wire;version="[2.0,3.0)",
+ org.eclipse.kura.wire.graph;version="[1.0,2.0)",
+ org.junit;version="4.12.0",
+ org.osgi.framework;version="1.8.0",
+ org.osgi.service.component;version="1.2.0",
+ org.slf4j;version="1.6.4"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-ActivationPolicy: lazy
+Service-Component: OSGI-INF/*.xml
+Bundle-ClassPath: .
+Fragment-Host: org.eclipse.kura.example.wire.trigonometric.functions.provider;bundle-version="0.0.0"

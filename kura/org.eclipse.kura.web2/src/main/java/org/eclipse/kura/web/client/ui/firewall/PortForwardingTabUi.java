@@ -39,9 +39,13 @@ import org.gwtbootstrap3.client.ui.Modal;
 import org.gwtbootstrap3.client.ui.TextBox;
 import org.gwtbootstrap3.client.ui.Tooltip;
 import org.gwtbootstrap3.client.ui.constants.ValidationState;
+import org.gwtbootstrap3.client.ui.form.error.BasicEditorError;
+import org.gwtbootstrap3.client.ui.form.validator.Validator;
 import org.gwtbootstrap3.client.ui.gwt.CellTable;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.editor.client.Editor;
+import com.google.gwt.editor.client.EditorError;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -647,79 +651,207 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
 
     private void setModalFieldsHandlers() {
         // Set validations
-        this.input.addBlurHandler(event -> {
-            if (PortForwardingTabUi.this.input.getText().trim().isEmpty()
-                    || !PortForwardingTabUi.this.input.getText().trim().matches(FieldType.ALPHANUMERIC.getRegex())
-                    || PortForwardingTabUi.this.input.getText().trim()
-                            .length() > FirewallPanelUtils.INTERFACE_NAME_MAX_LENGTH) {
-                PortForwardingTabUi.this.groupInput.setValidationState(ValidationState.ERROR);
-            } else {
-                PortForwardingTabUi.this.groupInput.setValidationState(ValidationState.NONE);
+        this.input.addValidator(newInputValidator());
+        this.input.addBlurHandler(event -> this.input.validate());
+
+        this.output.addValidator(newOutputValidator());
+        this.output.addBlurHandler(event -> this.output.validate());
+
+        this.lan.addValidator(newLanValidator());
+        this.lan.addBlurHandler(event -> this.lan.validate());
+
+        this.internal.addValidator(newInternalValidator());
+        this.internal.addBlurHandler(event -> this.internal.validate());
+
+        this.external.addValidator(newExternalValidator());
+        this.external.addBlurHandler(event -> this.external.validate());
+
+        this.permittedNw.addValidator(newPermittedNwValidator());
+        this.permittedNw.addBlurHandler(event -> this.permittedNw.validate());
+
+        this.permittedMac.addValidator(newPermittedMacValidator());
+        this.permittedMac.addBlurHandler(event -> this.permittedMac.validate());
+
+        this.source.addValidator(newSourceValidator());
+        this.source.addBlurHandler(event -> this.source.validate());
+    }
+
+    private Validator<String> newInputValidator() {
+        return new Validator<String>() {
+
+            @Override
+            public List<EditorError> validate(Editor<String> editor, String value) {
+                List<EditorError> result = new ArrayList<>();
+                if (PortForwardingTabUi.this.input.getText().trim().isEmpty()
+                        || !PortForwardingTabUi.this.input.getText().trim().matches(FieldType.ALPHANUMERIC.getRegex())
+                        || PortForwardingTabUi.this.input.getText().trim()
+                                .length() > FirewallPanelUtils.INTERFACE_NAME_MAX_LENGTH) {
+                    result.add(new BasicEditorError(PortForwardingTabUi.this.input, value,
+                            MSGS.firewallPortForwardFormInboundInterfaceToolTip()));
+                }
+                return result;
             }
-        });
-        this.output.addBlurHandler(event -> {
-            if (PortForwardingTabUi.this.output.getText().trim().isEmpty()
-                    || !PortForwardingTabUi.this.output.getText().trim().matches(FieldType.ALPHANUMERIC.getRegex())
-                    || PortForwardingTabUi.this.output.getText().trim()
-                            .length() > FirewallPanelUtils.INTERFACE_NAME_MAX_LENGTH) {
-                PortForwardingTabUi.this.groupOutput.setValidationState(ValidationState.ERROR);
-            } else {
-                PortForwardingTabUi.this.groupOutput.setValidationState(ValidationState.NONE);
+
+            @Override
+            public int getPriority() {
+                return 0;
             }
-        });
-        this.lan.addBlurHandler(event -> {
-            if (PortForwardingTabUi.this.lan.getText().trim().isEmpty()
-                    || !PortForwardingTabUi.this.lan.getText().trim().matches(FieldType.IPv4_ADDRESS.getRegex())) {
-                PortForwardingTabUi.this.groupLan.setValidationState(ValidationState.ERROR);
-            } else {
-                PortForwardingTabUi.this.groupLan.setValidationState(ValidationState.NONE);
+        };
+    }
+
+    private Validator<String> newOutputValidator() {
+        return new Validator<String>() {
+
+            @Override
+            public List<EditorError> validate(Editor<String> editor, String value) {
+                List<EditorError> result = new ArrayList<>();
+                if (PortForwardingTabUi.this.output.getText().trim().isEmpty()
+                        || !PortForwardingTabUi.this.output.getText().trim().matches(FieldType.ALPHANUMERIC.getRegex())
+                        || PortForwardingTabUi.this.output.getText().trim()
+                                .length() > FirewallPanelUtils.INTERFACE_NAME_MAX_LENGTH) {
+                    result.add(new BasicEditorError(PortForwardingTabUi.this.output, value,
+                            MSGS.firewallPortForwardFormOutboundInterfaceToolTip()));
+                }
+                return result;
             }
-        });
-        this.internal.addBlurHandler(event -> {
-            if (PortForwardingTabUi.this.internal.getText().trim().isEmpty()
-                    || !FirewallPanelUtils.checkPortRegex(PortForwardingTabUi.this.internal.getText())
-                    || !FirewallPanelUtils.isPortInRange(PortForwardingTabUi.this.internal.getText())) {
-                PortForwardingTabUi.this.groupInternal.setValidationState(ValidationState.ERROR);
-            } else {
-                PortForwardingTabUi.this.groupInternal.setValidationState(ValidationState.NONE);
+
+            @Override
+            public int getPriority() {
+                return 0;
             }
-        });
-        this.external.addBlurHandler(event -> {
-            if (PortForwardingTabUi.this.external.getText().trim().isEmpty()
-                    || !FirewallPanelUtils.checkPortRegex(PortForwardingTabUi.this.external.getText())
-                    || !FirewallPanelUtils.isPortInRange(PortForwardingTabUi.this.external.getText())) {
-                PortForwardingTabUi.this.groupExternal.setValidationState(ValidationState.ERROR);
-            } else {
-                PortForwardingTabUi.this.groupExternal.setValidationState(ValidationState.NONE);
+        };
+    }
+
+    private Validator<String> newLanValidator() {
+        return new Validator<String>() {
+
+            @Override
+            public List<EditorError> validate(Editor<String> editor, String value) {
+                List<EditorError> result = new ArrayList<>();
+                if (PortForwardingTabUi.this.lan.getText().trim().isEmpty()
+                        || !PortForwardingTabUi.this.lan.getText().trim().matches(FieldType.IPv4_ADDRESS.getRegex())) {
+                    result.add(new BasicEditorError(PortForwardingTabUi.this.lan, value,
+                            MSGS.firewallPortForwardFormLanAddressToolTip()));
+                }
+                return result;
             }
-        });
-        this.permittedNw.addBlurHandler(event -> {
-            if (!PortForwardingTabUi.this.permittedNw.getText().trim().isEmpty()
-                    && !PortForwardingTabUi.this.permittedNw.getText().trim().matches(FieldType.NETWORK.getRegex())) {
-                PortForwardingTabUi.this.groupPermittedNw.setValidationState(ValidationState.ERROR);
-            } else {
-                PortForwardingTabUi.this.groupPermittedNw.setValidationState(ValidationState.NONE);
+
+            @Override
+            public int getPriority() {
+                return 0;
             }
-        });
-        this.permittedMac.addBlurHandler(event -> {
-            if (!PortForwardingTabUi.this.permittedMac.getText().trim().isEmpty()
-                    && !PortForwardingTabUi.this.permittedMac.getText().trim()
-                            .matches(FieldType.MAC_ADDRESS.getRegex())) {
-                PortForwardingTabUi.this.groupPermittedMac.setValidationState(ValidationState.ERROR);
-            } else {
-                PortForwardingTabUi.this.groupPermittedMac.setValidationState(ValidationState.NONE);
+        };
+    }
+
+    private Validator<String> newInternalValidator() {
+        return new Validator<String>() {
+
+            @Override
+            public List<EditorError> validate(Editor<String> editor, String value) {
+                List<EditorError> result = new ArrayList<>();
+                if (PortForwardingTabUi.this.internal.getText().trim().isEmpty()
+                        || !FirewallPanelUtils.checkPortRegex(PortForwardingTabUi.this.internal.getText())
+                        || !FirewallPanelUtils.isPortInRange(PortForwardingTabUi.this.internal.getText())) {
+                    result.add(new BasicEditorError(PortForwardingTabUi.this.internal, value,
+                            MSGS.firewallPortForwardFormInternalPortToolTip()));
+                }
+                return result;
             }
-        });
-        this.source.addBlurHandler(event -> {
-            if (!PortForwardingTabUi.this.source.getText().trim().isEmpty()
-                    && (!(FirewallPanelUtils.checkPortRegex(PortForwardingTabUi.this.source.getText())
-                            || FirewallPanelUtils.checkPortRangeRegex(PortForwardingTabUi.this.source.getText()))
-                            || !FirewallPanelUtils.isPortInRange(PortForwardingTabUi.this.source.getText()))) {
-                PortForwardingTabUi.this.groupSource.setValidationState(ValidationState.ERROR);
-            } else {
-                PortForwardingTabUi.this.groupSource.setValidationState(ValidationState.NONE);
+
+            @Override
+            public int getPriority() {
+                return 0;
             }
-        });
+        };
+    }
+
+    private Validator<String> newExternalValidator() {
+        return new Validator<String>() {
+
+            @Override
+            public List<EditorError> validate(Editor<String> editor, String value) {
+                List<EditorError> result = new ArrayList<>();
+                if (PortForwardingTabUi.this.external.getText().trim().isEmpty()
+                        || !FirewallPanelUtils.checkPortRegex(PortForwardingTabUi.this.external.getText())
+                        || !FirewallPanelUtils.isPortInRange(PortForwardingTabUi.this.external.getText())) {
+                    result.add(new BasicEditorError(PortForwardingTabUi.this.external, value,
+                            MSGS.firewallPortForwardFormExternalPortToolTip()));
+                }
+                return result;
+            }
+
+            @Override
+            public int getPriority() {
+                return 0;
+            }
+        };
+    }
+
+    private Validator<String> newPermittedNwValidator() {
+        return new Validator<String>() {
+
+            @Override
+            public List<EditorError> validate(Editor<String> editor, String value) {
+                List<EditorError> result = new ArrayList<>();
+                if (!PortForwardingTabUi.this.permittedNw.getText().trim().isEmpty()
+                        && !PortForwardingTabUi.this.permittedNw.getText().trim()
+                                .matches(FieldType.NETWORK.getRegex())) {
+                    result.add(new BasicEditorError(PortForwardingTabUi.this.permittedNw, value,
+                            MSGS.firewallPortForwardFormPermittedNetworkToolTip()));
+                }
+                return result;
+            }
+
+            @Override
+            public int getPriority() {
+                return 0;
+            }
+        };
+    }
+
+    private Validator<String> newPermittedMacValidator() {
+        return new Validator<String>() {
+
+            @Override
+            public List<EditorError> validate(Editor<String> editor, String value) {
+                List<EditorError> result = new ArrayList<>();
+                if (!PortForwardingTabUi.this.permittedMac.getText().trim().isEmpty()
+                        && !PortForwardingTabUi.this.permittedMac.getText().trim()
+                                .matches(FieldType.MAC_ADDRESS.getRegex())) {
+                    result.add(new BasicEditorError(PortForwardingTabUi.this.permittedMac, value,
+                            MSGS.firewallPortForwardFormPermittedMacAddressToolTip()));
+                }
+                return result;
+            }
+
+            @Override
+            public int getPriority() {
+                return 0;
+            }
+        };
+    }
+
+    private Validator<String> newSourceValidator() {
+        return new Validator<String>() {
+
+            @Override
+            public List<EditorError> validate(Editor<String> editor, String value) {
+                List<EditorError> result = new ArrayList<>();
+                if (!PortForwardingTabUi.this.source.getText().trim().isEmpty()
+                        && (!(FirewallPanelUtils.checkPortRegex(PortForwardingTabUi.this.source.getText())
+                                || FirewallPanelUtils.checkPortRangeRegex(PortForwardingTabUi.this.source.getText()))
+                                || !FirewallPanelUtils.isPortInRange(PortForwardingTabUi.this.source.getText()))) {
+                    result.add(new BasicEditorError(PortForwardingTabUi.this.source, value,
+                            MSGS.firewallPortForwardFormSourcePortRangeToolTip()));
+                }
+                return result;
+            }
+
+            @Override
+            public int getPriority() {
+                return 0;
+            }
+        };
     }
 
     private void setModalFieldsValues(final GwtFirewallPortForwardEntry existingEntry) {

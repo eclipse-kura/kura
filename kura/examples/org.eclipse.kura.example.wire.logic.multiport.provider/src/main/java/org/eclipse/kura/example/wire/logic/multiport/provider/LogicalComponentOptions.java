@@ -11,13 +11,12 @@
 package org.eclipse.kura.example.wire.logic.multiport.provider;
 
 import java.util.Map;
+import java.util.function.BiFunction;
 
 import org.eclipse.kura.wire.graph.BarrierAggregatorFactory;
 import org.eclipse.kura.wire.graph.CachingAggregatorFactory;
 import org.eclipse.kura.wire.graph.PortAggregatorFactory;
 import org.osgi.framework.BundleContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class LogicalComponentOptions {
 
@@ -41,21 +40,22 @@ public class LogicalComponentOptions {
     private static final boolean BARRIER_MODALITY_PROPERTY_DEFAULT = false;
     private static final OperatorOption BOOLEAN_OPERATION_DEFAULT = OperatorOption.AND;
 
-    private static final Logger logger = LoggerFactory.getLogger(LogicalComponentOptions.class);
-
     private final String firstOperandName;
     private final String secondOperandName;
     private final String resultName;
+    private final BiFunction<Boolean, Boolean, Boolean> booleanFunction;
     private final OperatorOption booleanOperation;
 
     private final PortAggregatorFactory portAggregatorFactory;
 
     public LogicalComponentOptions(final Map<String, Object> properties, BundleContext context) {
+        this.booleanOperation = OperatorOption
+                .valueOf(getSafe(properties.get(BOOLEAN_OPERATION), BOOLEAN_OPERATION_DEFAULT.name()));
+
         this.firstOperandName = getSafe(properties.get(FIRST_OPERAND_NAME_PROP_NAME), OPERAND_NAME_DEFAULT);
         this.secondOperandName = getSafe(properties.get(SECOND_OPERAND_NAME_PROP_NAME), OPERAND_NAME_DEFAULT);
         this.resultName = getSafe(properties.get(RESULT_NAME_PROP_NAME), RESULT_NAME_DEFAULT);
-        this.booleanOperation = getLogicalOperator(
-                getSafe(properties.get(BOOLEAN_OPERATION), BOOLEAN_OPERATION_DEFAULT.name()));
+        this.booleanFunction = getLogicalFunction(this.booleanOperation);
 
         final boolean useBarrier = getSafe(properties.get(BARRIER_MODALITY_PROPERTY_KEY),
                 BARRIER_MODALITY_PROPERTY_DEFAULT);
@@ -69,13 +69,23 @@ public class LogicalComponentOptions {
         }
     }
 
-    private OperatorOption getLogicalOperator(String op) {
-        try {
-            return OperatorOption.valueOf(op);
-        } catch (Exception e) {
-            logger.warn("Unknown operator, falling back to default operator {}", BOOLEAN_OPERATION_DEFAULT);
-            return BOOLEAN_OPERATION_DEFAULT;
+    private BiFunction<Boolean, Boolean, Boolean> getLogicalFunction(OperatorOption op) {
+        switch (op) {
+        case OR:
+            return (t, u) -> t || u;
+        case NOR:
+            return (t, u) -> !(t || u);
+        case NAND:
+            return (t, u) -> !(t && u);
+        case XOR:
+            return (t, u) -> t ^ u;
+        case NOT: // Will never get to this case
+            return (t, u) -> !t;
+        case AND:
+        default:
+            return (t, u) -> t && u;
         }
+
     }
 
     public String getFirstOperandName() {
@@ -92,6 +102,10 @@ public class LogicalComponentOptions {
 
     public PortAggregatorFactory getPortAggregatorFactory() {
         return this.portAggregatorFactory;
+    }
+
+    public BiFunction<Boolean, Boolean, Boolean> getBooleanFunction() {
+        return this.booleanFunction;
     }
 
     public OperatorOption getBooleanOperation() {

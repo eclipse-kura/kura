@@ -13,11 +13,9 @@ package org.eclipse.kura.example.wire.logic.multiport.provider;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.example.wire.logic.multiport.provider.LogicalComponentOptions.OperatorOption;
-import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
 import org.eclipse.kura.wire.WireComponent;
@@ -94,56 +92,22 @@ public class LogicalComponent implements WireEmitter, ConfigurableComponent, Mul
         this.wireSupport.producersConnected(wires);
     }
 
-    private Optional<Boolean> extractOperand(WireEnvelope wireEnvelope, String operandName) {
-        if (wireEnvelope == null) {
-            return Optional.empty();
-        }
-        final List<WireRecord> records = wireEnvelope.getRecords();
-        if (records.isEmpty()) {
-            return Optional.empty();
-        }
-        final Map<String, TypedValue<?>> properties = records.get(0).getProperties();
-        if (DataType.BOOLEAN.equals(properties.get(operandName).getType())) {
-            return Optional.of((Boolean) properties.get(operandName).getValue());
-        }
-        return Optional.empty();
-
+    private Boolean extractOperand(WireEnvelope wireEnvelope, String operandName) {
+        final Map<String, TypedValue<?>> properties = wireEnvelope.getRecords().get(0).getProperties();
+        return (Boolean) properties.get(operandName).getValue();
     }
 
     public void onWireReceive(List<WireEnvelope> wireEnvelopes) {
-        final Optional<Boolean> firstOperand = extractOperand(wireEnvelopes.get(0), this.options.getFirstOperandName());
-        final Optional<Boolean> secondOperand = extractOperand(wireEnvelopes.get(1),
-                this.options.getSecondOperandName());
-        final Optional<Boolean> result = performBooleanOperation(firstOperand, secondOperand);
-        if (result.isPresent()) {
-            WireRecord toBeEmitted = new WireRecord(
-                    Collections.singletonMap(this.options.getResultName(), TypedValues.newBooleanValue(result.get())));
-            this.wireSupport.emit(Collections.singletonList(toBeEmitted));
+        final Boolean firstOperand = extractOperand(wireEnvelopes.get(0), this.options.getFirstOperandName());
+        final Boolean result;
+        if (OperatorOption.NOT.equals(this.options.getBooleanOperation())) {
+            result = !firstOperand.booleanValue();
+        } else {
+            result = this.options.getBooleanFunction().apply(firstOperand,
+                    extractOperand(wireEnvelopes.get(1), this.options.getSecondOperandName()));
         }
+        WireRecord toBeEmitted = new WireRecord(
+                Collections.singletonMap(this.options.getResultName(), TypedValues.newBooleanValue(result)));
+        this.wireSupport.emit(Collections.singletonList(toBeEmitted));
     }
-
-    private Optional<Boolean> performBooleanOperation(Optional<Boolean> firstOperand, Optional<Boolean> secondOperand) {
-        if (firstOperand.isPresent()) {
-            if (OperatorOption.NOT.equals(this.options.getBooleanOperation())) {
-                return Optional.of(!firstOperand.get().booleanValue());
-            } else if (secondOperand.isPresent()) {
-                switch (this.options.getBooleanOperation()) {
-                case AND:
-                    return Optional.of(firstOperand.get().booleanValue() && secondOperand.get().booleanValue());
-                case OR:
-                    return Optional.of(firstOperand.get().booleanValue() || secondOperand.get().booleanValue());
-                case NOR:
-                    return Optional.of(!(firstOperand.get().booleanValue() || secondOperand.get().booleanValue()));
-                case NAND:
-                    return Optional.of(!(firstOperand.get().booleanValue() && secondOperand.get().booleanValue()));
-                case XOR:
-                    return Optional.of(firstOperand.get().booleanValue() ^ secondOperand.get().booleanValue());
-                default:
-                    return Optional.empty();
-                }
-            }
-        }
-        return Optional.empty();
-    }
-
 }

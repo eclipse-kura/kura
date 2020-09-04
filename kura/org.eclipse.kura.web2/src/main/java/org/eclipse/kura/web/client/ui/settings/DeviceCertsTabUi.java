@@ -122,6 +122,8 @@ public class DeviceCertsTabUi extends Composite implements Tab {
         this.groupStorageAliasForm.setValidationState(ValidationState.NONE);
         this.groupPrivateKeyForm.setValidationState(ValidationState.NONE);
         this.groupCertForm.setValidationState(ValidationState.NONE);
+        this.deviceSslCertsForm.reset();
+        setButtonsEnabled(false);
     }
 
     private void initForm() {

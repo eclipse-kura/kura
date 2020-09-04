@@ -114,6 +114,8 @@ public class ServerCertsTabUi extends Composite implements Tab {
         this.certificateInput.setText("");
         this.groupStorageAliasForm.setValidationState(ValidationState.NONE);
         this.groupCertForm.setValidationState(ValidationState.NONE);
+        this.serverSslCertsForm.reset();
+        setButtonsEnabled(false);
     }
 
     private void initForm() {

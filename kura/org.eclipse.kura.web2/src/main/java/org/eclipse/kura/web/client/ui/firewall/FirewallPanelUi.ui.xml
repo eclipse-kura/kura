@@ -62,7 +62,7 @@
         </b:Row>
 
 	    <b:Modal closable="false" fade="true" dataBackdrop="STATIC"
-	        dataKeyboard="true" ui:field="dirtyModal" b:id="dirtyModal" title="{msgs.confirm}" >
+	        dataKeyboard="false" ui:field="dirtyModal" b:id="dirtyModal" title="{msgs.confirm}" >
 	        <b:ModalBody>
 	            <b:Panel>
 	                <b:PanelBody>

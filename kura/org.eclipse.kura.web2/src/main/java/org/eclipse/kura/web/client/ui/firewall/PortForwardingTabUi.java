@@ -687,7 +687,7 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
                         || PortForwardingTabUi.this.input.getText().trim()
                                 .length() > FirewallPanelUtils.INTERFACE_NAME_MAX_LENGTH) {
                     result.add(new BasicEditorError(PortForwardingTabUi.this.input, value,
-                            MSGS.firewallPortForwardFormInboundInterfaceToolTip()));
+                            MSGS.firewallPortForwardFormInboundInterfaceErrorMessage()));
                 }
                 return result;
             }
@@ -710,7 +710,7 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
                         || PortForwardingTabUi.this.output.getText().trim()
                                 .length() > FirewallPanelUtils.INTERFACE_NAME_MAX_LENGTH) {
                     result.add(new BasicEditorError(PortForwardingTabUi.this.output, value,
-                            MSGS.firewallPortForwardFormOutboundInterfaceToolTip()));
+                            MSGS.firewallPortForwardFormOutboundInterfaceErrorMessage()));
                 }
                 return result;
             }
@@ -731,7 +731,7 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
                 if (PortForwardingTabUi.this.lan.getText().trim().isEmpty()
                         || !PortForwardingTabUi.this.lan.getText().trim().matches(FieldType.IPv4_ADDRESS.getRegex())) {
                     result.add(new BasicEditorError(PortForwardingTabUi.this.lan, value,
-                            MSGS.firewallPortForwardFormLanAddressToolTip()));
+                            MSGS.firewallPortForwardFormLanAddressErrorMessage()));
                 }
                 return result;
             }
@@ -753,7 +753,7 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
                         || !FirewallPanelUtils.checkPortRegex(PortForwardingTabUi.this.internal.getText())
                         || !FirewallPanelUtils.isPortInRange(PortForwardingTabUi.this.internal.getText())) {
                     result.add(new BasicEditorError(PortForwardingTabUi.this.internal, value,
-                            MSGS.firewallPortForwardFormInternalPortToolTip()));
+                            MSGS.firewallPortForwardFormInternalPortErrorMessage()));
                 }
                 return result;
             }
@@ -775,7 +775,7 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
                         || !FirewallPanelUtils.checkPortRegex(PortForwardingTabUi.this.external.getText())
                         || !FirewallPanelUtils.isPortInRange(PortForwardingTabUi.this.external.getText())) {
                     result.add(new BasicEditorError(PortForwardingTabUi.this.external, value,
-                            MSGS.firewallPortForwardFormExternalPortToolTip()));
+                            MSGS.firewallPortForwardFormExternalPortErrorMessage()));
                 }
                 return result;
             }
@@ -797,7 +797,7 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
                         && !PortForwardingTabUi.this.permittedNw.getText().trim()
                                 .matches(FieldType.NETWORK.getRegex())) {
                     result.add(new BasicEditorError(PortForwardingTabUi.this.permittedNw, value,
-                            MSGS.firewallPortForwardFormPermittedNetworkToolTip()));
+                            MSGS.firewallPortForwardFormPermittedNetworkErrorMessage()));
                 }
                 return result;
             }
@@ -819,7 +819,7 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
                         && !PortForwardingTabUi.this.permittedMac.getText().trim()
                                 .matches(FieldType.MAC_ADDRESS.getRegex())) {
                     result.add(new BasicEditorError(PortForwardingTabUi.this.permittedMac, value,
-                            MSGS.firewallPortForwardFormPermittedMacAddressToolTip()));
+                            MSGS.firewallPortForwardFormPermittedMacAddressErrorMessage()));
                 }
                 return result;
             }
@@ -842,7 +842,7 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
                                 || FirewallPanelUtils.checkPortRangeRegex(PortForwardingTabUi.this.source.getText()))
                                 || !FirewallPanelUtils.isPortInRange(PortForwardingTabUi.this.source.getText()))) {
                     result.add(new BasicEditorError(PortForwardingTabUi.this.source, value,
-                            MSGS.firewallPortForwardFormSourcePortRangeToolTip()));
+                            MSGS.firewallPortForwardFormSourcePortRangeErrorMessage()));
                 }
                 return result;
             }

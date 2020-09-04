@@ -635,7 +635,7 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
                                 || FirewallPanelUtils.checkPortRangeRegex(OpenPortsTabUi.this.source.getText().trim()))
                                 || !FirewallPanelUtils.isPortInRange(OpenPortsTabUi.this.source.getText().trim()))) {
                     result.add(new BasicEditorError(OpenPortsTabUi.this.source, value,
-                            MSGS.firewallOpenPortFormSourcePortRangeToolTip()));
+                            MSGS.firewallOpenPortFormSourcePortRangeErrorMessage()));
                 }
                 return result;
             }
@@ -656,7 +656,7 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
                 if (!OpenPortsTabUi.this.permittedMac.getText().trim().matches(FieldType.MAC_ADDRESS.getRegex())
                         && OpenPortsTabUi.this.permittedMac.getText().trim().length() > 0) {
                     result.add(new BasicEditorError(OpenPortsTabUi.this.permittedMac, value,
-                            MSGS.firewallOpenPortFormPermittedMacAddressToolTip()));
+                            MSGS.firewallOpenPortFormPermittedMacAddressErrorMessage()));
                 }
                 return result;
             }
@@ -679,7 +679,7 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
                         || OpenPortsTabUi.this.unpermittedI.getText().trim()
                                 .length() > FirewallPanelUtils.INTERFACE_NAME_MAX_LENGTH) {
                     result.add(new BasicEditorError(OpenPortsTabUi.this.unpermittedI, value,
-                            MSGS.firewallOpenPortFormUnpermittedInterfaceToolTip()));
+                            MSGS.firewallOpenPortFormUnpermittedInterfaceErrorMessage()));
                 }
                 return result;
             }
@@ -702,7 +702,7 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
                         || OpenPortsTabUi.this.permittedI.getText().trim()
                                 .length() > FirewallPanelUtils.INTERFACE_NAME_MAX_LENGTH) {
                     result.add(new BasicEditorError(OpenPortsTabUi.this.permittedI, value,
-                            MSGS.firewallOpenPortFormPermittedInterfaceToolTip()));
+                            MSGS.firewallOpenPortFormPermittedInterfaceErrorMessage()));
                 }
                 return result;
             }
@@ -723,7 +723,7 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
                 if (!OpenPortsTabUi.this.permittedNw.getText().trim().matches(FieldType.NETWORK.getRegex())
                         && OpenPortsTabUi.this.permittedNw.getText().trim().length() > 0) {
                     result.add(new BasicEditorError(OpenPortsTabUi.this.permittedNw, value,
-                            MSGS.firewallOpenPortFormPermittedNetworkToolTip()));
+                            MSGS.firewallOpenPortFormPermittedNetworkErrorMessage()));
                 }
                 return result;
             }
@@ -747,7 +747,7 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
                                 || FirewallPanelUtils.checkPortRangeRegex(OpenPortsTabUi.this.port.getText().trim()))
                         || !FirewallPanelUtils.isPortInRange(OpenPortsTabUi.this.port.getText().trim())) {
                     result.add(new BasicEditorError(OpenPortsTabUi.this.port, value,
-                            MSGS.firewallOpenPortFormPortToolTip()));
+                            MSGS.firewallOpenPortFormPortErrorMessage()));
                 }
                 return result;
             }

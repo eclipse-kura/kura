@@ -571,7 +571,7 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
                         || NatTabUi.this.input.getText().trim()
                                 .length() > FirewallPanelUtils.INTERFACE_NAME_MAX_LENGTH) {
                     result.add(new BasicEditorError(NatTabUi.this.input, value,
-                            MSGS.firewallNatFormInputInterfaceToolTip()));
+                            MSGS.firewallNatFormInputInterfaceErrorMessage()));
                 }
                 return result;
             }
@@ -595,7 +595,7 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
                         || NatTabUi.this.output.getText().trim()
                                 .length() > FirewallPanelUtils.INTERFACE_NAME_MAX_LENGTH) {
                     result.add(new BasicEditorError(NatTabUi.this.output, value,
-                            MSGS.firewallNatFormOutputInterfaceToolTip()));
+                            MSGS.firewallNatFormOutputInterfaceErrorMessage()));
                 }
                 return result;
             }
@@ -615,7 +615,7 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
                 List<EditorError> result = new ArrayList<>();
                 if (!NatTabUi.this.source.getText().trim().isEmpty()
                         && !NatTabUi.this.source.getText().trim().matches(FieldType.NETWORK.getRegex())) {
-                    result.add(new BasicEditorError(NatTabUi.this.source, value, MSGS.firewallNatFormSourceNetwork()));
+                    result.add(new BasicEditorError(NatTabUi.this.source, value, MSGS.firewallNatFormSourceNetworkErrorMessage()));
                 }
                 return result;
             }
@@ -636,7 +636,7 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
                 if (!NatTabUi.this.destination.getText().trim().isEmpty()
                         && !NatTabUi.this.destination.getText().trim().matches(FieldType.NETWORK.getRegex())) {
                     result.add(new BasicEditorError(NatTabUi.this.destination, value,
-                            MSGS.firewallNatFormDestinationNetworkToolTip()));
+                            MSGS.firewallNatFormDestinationNetworkErrorMessage()));
                 }
                 return result;
             }

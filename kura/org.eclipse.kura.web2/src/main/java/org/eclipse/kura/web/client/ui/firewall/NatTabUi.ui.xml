@@ -47,6 +47,7 @@
                         <b:FormGroup ui:field="groupInput">
                             <b:FormLabel for="input"
                                 ui:field="labelInput"></b:FormLabel>
+                            <b:InlineHelpBlock iconType="EXCLAMATION_TRIANGLE" />
                             <b:Tooltip ui:field="tooltipInput">
                                 <b:TextBox allowBlank="false"
                                     b:id="natInput" ui:field="input" />
@@ -56,6 +57,7 @@
                         <b:FormGroup ui:field="groupOutput">
                             <b:FormLabel for="output"
                                 ui:field="labelOutput"></b:FormLabel>
+                            <b:InlineHelpBlock iconType="EXCLAMATION_TRIANGLE" />
                             <b:Tooltip ui:field="tooltipOutput">
                                 <b:TextBox allowBlank="false"
                                     b:id="natOutput" ui:field="output" />
@@ -77,6 +79,7 @@
                         <b:FormGroup ui:field="groupSource">
                             <b:FormLabel for="source"
                                 ui:field="labelSource"></b:FormLabel>
+                            <b:InlineHelpBlock iconType="EXCLAMATION_TRIANGLE" />
                             <b:Tooltip ui:field="tooltipSource">
                                 <b:TextBox b:id="natSource"
                                     ui:field="source" />
@@ -86,6 +89,7 @@
                         <b:FormGroup ui:field="groupDestination">
                             <b:FormLabel for="destination"
                                 ui:field="labelDestination"></b:FormLabel>
+                            <b:InlineHelpBlock iconType="EXCLAMATION_TRIANGLE" />
                             <b:Tooltip ui:field="tooltipDestination">
                                 <b:TextBox b:id="natDestination"
                                     ui:field="destination" />

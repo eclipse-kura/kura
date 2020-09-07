@@ -44,6 +44,7 @@
                         <b:FormGroup ui:field="groupInput">
                             <b:FormLabel for="input"
                                 ui:field="labelInput"></b:FormLabel>
+                            <b:InlineHelpBlock iconType="EXCLAMATION_TRIANGLE" />
                             <b:Tooltip ui:field="tooltipInput">
                                 <b:TextBox b:id="portForwardingInput"
                                     ui:field="input" />
@@ -53,6 +54,7 @@
                         <b:FormGroup ui:field="groupOutput">
                             <b:FormLabel for="output"
                                 ui:field="labelOutput"></b:FormLabel>
+                            <b:InlineHelpBlock iconType="EXCLAMATION_TRIANGLE" />
                             <b:Tooltip ui:field="tooltipOutput">
                                 <b:TextBox b:id="portForwardingOutput"
                                     ui:field="output" />
@@ -61,6 +63,7 @@
 
                         <b:FormGroup ui:field="groupLan">
                             <b:FormLabel for="lan" ui:field="labelLan"></b:FormLabel>
+                            <b:InlineHelpBlock iconType="EXCLAMATION_TRIANGLE" />
                             <b:Tooltip ui:field="tooltipLan">
                                 <b:TextBox b:id="portForwardingLan"
                                     ui:field="lan" />
@@ -81,6 +84,7 @@
                         <b:FormGroup ui:field="groupInternal">
                             <b:FormLabel for="internal"
                                 ui:field="labelInternal"></b:FormLabel>
+                            <b:InlineHelpBlock iconType="EXCLAMATION_TRIANGLE" />
                             <b:Tooltip ui:field="tooltipInternal">
                                 <b:TextBox b:id="portForwardingInternal"
                                     ui:field="internal" />
@@ -90,6 +94,7 @@
                         <b:FormGroup ui:field="groupExternal">
                             <b:FormLabel for="external"
                                 ui:field="labelExternal"></b:FormLabel>
+                            <b:InlineHelpBlock iconType="EXCLAMATION_TRIANGLE" />
                             <b:Tooltip ui:field="tooltipExternal">
                                 <b:TextBox b:id="portForwardingExternal"
                                     ui:field="external" />
@@ -110,6 +115,7 @@
                         <b:FormGroup ui:field="groupPermittedNw">
                             <b:FormLabel for="permittedNw"
                                 ui:field="labelPermitttedNw"></b:FormLabel>
+                            <b:InlineHelpBlock iconType="EXCLAMATION_TRIANGLE" />
                             <b:Tooltip ui:field="tooltipPermittedNw">
                                 <b:TextBox b:id="portForwardingPermittedNw"
                                     ui:field="permittedNw" />
@@ -119,6 +125,7 @@
                         <b:FormGroup ui:field="groupPermittedMac">
                             <b:FormLabel for="permittedMac"
                                 ui:field="labelPermitttedMac"></b:FormLabel>
+                            <b:InlineHelpBlock iconType="EXCLAMATION_TRIANGLE" />
                             <b:Tooltip ui:field="tooltipPermittedMac">
                                 <b:TextBox b:id="portForwardingPermittedMac"
                                     ui:field="permittedMac" />
@@ -128,6 +135,7 @@
                         <b:FormGroup ui:field="groupSource">
                             <b:FormLabel for="source"
                                 ui:field="labelSource"></b:FormLabel>
+                            <b:InlineHelpBlock iconType="EXCLAMATION_TRIANGLE" />
                             <b:Tooltip ui:field="tooltipSource">
                                 <b:TextBox b:id="portForwardingSource"
                                     ui:field="source" />

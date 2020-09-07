@@ -38,9 +38,13 @@ import org.gwtbootstrap3.client.ui.Modal;
 import org.gwtbootstrap3.client.ui.TextBox;
 import org.gwtbootstrap3.client.ui.Tooltip;
 import org.gwtbootstrap3.client.ui.constants.ValidationState;
+import org.gwtbootstrap3.client.ui.form.error.BasicEditorError;
+import org.gwtbootstrap3.client.ui.form.validator.Validator;
 import org.gwtbootstrap3.client.ui.gwt.CellTable;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.editor.client.Editor;
+import com.google.gwt.editor.client.EditorError;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -542,42 +546,106 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
 
     private void setModalFieldsHandlers() {
         // Set up validation
-        this.input.addBlurHandler(event -> {
-            if (this.input.getText() == null || "".equals(this.input.getText().trim())
-                    || NatTabUi.this.input.getText().trim().isEmpty()
-                    || !NatTabUi.this.input.getText().trim().matches(FieldType.ALPHANUMERIC.getRegex())
-                    || NatTabUi.this.input.getText().trim().length() > FirewallPanelUtils.INTERFACE_NAME_MAX_LENGTH) {
-                NatTabUi.this.groupInput.setValidationState(ValidationState.ERROR);
-            } else {
-                NatTabUi.this.groupInput.setValidationState(ValidationState.NONE);
+        this.input.addValidator(newInputValidator());
+        this.input.addBlurHandler(event -> this.input.validate());
+
+        this.output.addValidator(newOutputValidator());
+        this.output.addBlurHandler(event -> this.output.validate());
+
+        this.source.addValidator(newSourceValidator());
+        this.source.addBlurHandler(event -> this.source.validate());
+
+        this.destination.addValidator(newDestinationValidator());
+        this.destination.addBlurHandler(event -> this.destination.validate());
+    }
+
+    private Validator<String> newInputValidator() {
+        return new Validator<String>() {
+
+            @Override
+            public List<EditorError> validate(Editor<String> editor, String value) {
+                List<EditorError> result = new ArrayList<>();
+                if (NatTabUi.this.input.getText() == null || "".equals(NatTabUi.this.input.getText().trim())
+                        || NatTabUi.this.input.getText().trim().isEmpty()
+                        || !NatTabUi.this.input.getText().trim().matches(FieldType.ALPHANUMERIC.getRegex())
+                        || NatTabUi.this.input.getText().trim()
+                                .length() > FirewallPanelUtils.INTERFACE_NAME_MAX_LENGTH) {
+                    result.add(new BasicEditorError(NatTabUi.this.input, value,
+                            MSGS.firewallNatFormInputInterfaceErrorMessage()));
+                }
+                return result;
             }
-        });
-        this.output.addBlurHandler(event -> {
-            if (this.output.getText() == null || "".equals(this.output.getText().trim())
-                    || NatTabUi.this.output.getText().trim().isEmpty()
-                    || !NatTabUi.this.output.getText().trim().matches(FieldType.ALPHANUMERIC.getRegex())
-                    || NatTabUi.this.output.getText().trim().length() > FirewallPanelUtils.INTERFACE_NAME_MAX_LENGTH) {
-                NatTabUi.this.groupOutput.setValidationState(ValidationState.ERROR);
-            } else {
-                NatTabUi.this.groupOutput.setValidationState(ValidationState.NONE);
+
+            @Override
+            public int getPriority() {
+                return 0;
             }
-        });
-        this.source.addBlurHandler(event -> {
-            if (!NatTabUi.this.source.getText().trim().isEmpty()
-                    && !NatTabUi.this.source.getText().trim().matches(FieldType.NETWORK.getRegex())) {
-                NatTabUi.this.groupSource.setValidationState(ValidationState.ERROR);
-            } else {
-                NatTabUi.this.groupSource.setValidationState(ValidationState.NONE);
+        };
+    }
+
+    private Validator<String> newOutputValidator() {
+        return new Validator<String>() {
+
+            @Override
+            public List<EditorError> validate(Editor<String> editor, String value) {
+                List<EditorError> result = new ArrayList<>();
+                if (NatTabUi.this.output.getText() == null || "".equals(NatTabUi.this.output.getText().trim())
+                        || NatTabUi.this.output.getText().trim().isEmpty()
+                        || !NatTabUi.this.output.getText().trim().matches(FieldType.ALPHANUMERIC.getRegex())
+                        || NatTabUi.this.output.getText().trim()
+                                .length() > FirewallPanelUtils.INTERFACE_NAME_MAX_LENGTH) {
+                    result.add(new BasicEditorError(NatTabUi.this.output, value,
+                            MSGS.firewallNatFormOutputInterfaceErrorMessage()));
+                }
+                return result;
             }
-        });
-        this.destination.addBlurHandler(event -> {
-            if (!NatTabUi.this.destination.getText().trim().isEmpty()
-                    && !NatTabUi.this.destination.getText().trim().matches(FieldType.NETWORK.getRegex())) {
-                NatTabUi.this.groupDestination.setValidationState(ValidationState.ERROR);
-            } else {
-                NatTabUi.this.groupDestination.setValidationState(ValidationState.NONE);
+
+            @Override
+            public int getPriority() {
+                return 0;
             }
-        });
+        };
+    }
+
+    private Validator<String> newSourceValidator() {
+        return new Validator<String>() {
+
+            @Override
+            public List<EditorError> validate(Editor<String> editor, String value) {
+                List<EditorError> result = new ArrayList<>();
+                if (!NatTabUi.this.source.getText().trim().isEmpty()
+                        && !NatTabUi.this.source.getText().trim().matches(FieldType.NETWORK.getRegex())) {
+                    result.add(new BasicEditorError(NatTabUi.this.source, value, MSGS.firewallNatFormSourceNetworkErrorMessage()));
+                }
+                return result;
+            }
+
+            @Override
+            public int getPriority() {
+                return 0;
+            }
+        };
+    }
+
+    private Validator<String> newDestinationValidator() {
+        return new Validator<String>() {
+
+            @Override
+            public List<EditorError> validate(Editor<String> editor, String value) {
+                List<EditorError> result = new ArrayList<>();
+                if (!NatTabUi.this.destination.getText().trim().isEmpty()
+                        && !NatTabUi.this.destination.getText().trim().matches(FieldType.NETWORK.getRegex())) {
+                    result.add(new BasicEditorError(NatTabUi.this.destination, value,
+                            MSGS.firewallNatFormDestinationNetworkErrorMessage()));
+                }
+                return result;
+            }
+
+            @Override
+            public int getPriority() {
+                return 0;
+            }
+        };
     }
 
     private void setModalFieldsValues(final GwtFirewallNatEntry existingEntry) {

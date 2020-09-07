@@ -44,6 +44,7 @@
                         <b:FormGroup ui:field="groupPort">
                             <b:FormLabel for="port"
                                 ui:field="labelPort"></b:FormLabel>
+                            <b:InlineHelpBlock iconType="EXCLAMATION_TRIANGLE" />
                             <b:Tooltip ui:field="tooltipPort">
                                 <b:TextBox b:id="port" ui:field="port" />
                             </b:Tooltip>
@@ -61,6 +62,7 @@
                         <b:FormGroup ui:field="groupPermittedNw">
                             <b:FormLabel for="permittedNw"
                                 ui:field="labelPermitttedNw"></b:FormLabel>
+                            <b:InlineHelpBlock iconType="EXCLAMATION_TRIANGLE" />
                             <b:Tooltip ui:field="tooltipPermittedNw">
 	                            <b:TextBox b:id="permittedNw"
 	                                ui:field="permittedNw" />
@@ -69,6 +71,7 @@
                         <b:FormGroup ui:field="groupPermittedI">
                             <b:FormLabel for="permittedI"
                                 ui:field="labelPermitttedI"></b:FormLabel>
+                            <b:InlineHelpBlock iconType="EXCLAMATION_TRIANGLE" />
                             <b:Tooltip ui:field="tooltipPermittedI">
                                 <b:TextBox b:id="permittedI"
                                     ui:field="permittedI" />
@@ -77,6 +80,7 @@
                         <b:FormGroup ui:field="groupUnpermittedI">
                             <b:FormLabel for="unpermittedI"
                                 ui:field="labelUnPermitttedI"></b:FormLabel>
+                            <b:InlineHelpBlock iconType="EXCLAMATION_TRIANGLE" />
                             <b:Tooltip ui:field="tooltipUnpermittedI">
                                 <b:TextBox b:id="unpermittedI"
                                     ui:field="unpermittedI" />
@@ -85,6 +89,7 @@
                         <b:FormGroup ui:field="groupPermittedMac">
                             <b:FormLabel for="permittedMac"
                                 ui:field="labelPermitttedMac"></b:FormLabel>
+                            <b:InlineHelpBlock iconType="EXCLAMATION_TRIANGLE" />
                             <b:Tooltip ui:field="tooltipPermittedMac">
 	                            <b:TextBox b:id="permittedMac"
 	                                ui:field="permittedMac" />
@@ -93,6 +98,7 @@
                         <b:FormGroup ui:field="groupSource">
                             <b:FormLabel for="source"
                                 ui:field="labelSource"></b:FormLabel>
+                            <b:InlineHelpBlock iconType="EXCLAMATION_TRIANGLE" />
                             <b:Tooltip ui:field="tooltipSource">
                                 <b:TextBox b:id="source" ui:field="source" />
                             </b:Tooltip>

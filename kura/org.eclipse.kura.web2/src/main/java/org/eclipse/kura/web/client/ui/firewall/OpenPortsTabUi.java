@@ -39,9 +39,13 @@ import org.gwtbootstrap3.client.ui.Modal;
 import org.gwtbootstrap3.client.ui.TextBox;
 import org.gwtbootstrap3.client.ui.Tooltip;
 import org.gwtbootstrap3.client.ui.constants.ValidationState;
+import org.gwtbootstrap3.client.ui.form.error.BasicEditorError;
+import org.gwtbootstrap3.client.ui.form.validator.Validator;
 import org.gwtbootstrap3.client.ui.gwt.CellTable;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.editor.client.Editor;
+import com.google.gwt.editor.client.EditorError;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -601,64 +605,158 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
         this.unpermittedI.addChangeHandler(event -> setEnablePermittedInterface());
 
         // set up validation
-        this.port.addBlurHandler(event -> {
-            if (OpenPortsTabUi.this.port.getText() == null || "".equals(OpenPortsTabUi.this.port.getText().trim())
-                    || OpenPortsTabUi.this.port.getText().trim().length() == 0
-                    || !(FirewallPanelUtils.checkPortRegex(OpenPortsTabUi.this.port.getText().trim())
-                            || FirewallPanelUtils.checkPortRangeRegex(OpenPortsTabUi.this.port.getText().trim()))
-                    || !FirewallPanelUtils.isPortInRange(OpenPortsTabUi.this.port.getText().trim())) {
-                OpenPortsTabUi.this.groupPort.setValidationState(ValidationState.ERROR);
-            } else {
-                OpenPortsTabUi.this.groupPort.setValidationState(ValidationState.NONE);
-            }
-        });
+        this.port.addValidator(newPortValidator());
+        this.port.addBlurHandler(event -> this.port.validate());
 
-        this.permittedNw.addBlurHandler(event -> {
-            if (!OpenPortsTabUi.this.permittedNw.getText().trim().matches(FieldType.NETWORK.getRegex())
-                    && OpenPortsTabUi.this.permittedNw.getText().trim().length() > 0) {
-                OpenPortsTabUi.this.groupPermittedNw.setValidationState(ValidationState.ERROR);
-            } else {
-                OpenPortsTabUi.this.groupPermittedNw.setValidationState(ValidationState.NONE);
+        this.permittedNw.addValidator(newPermittedNwValidator());
+        this.permittedNw.addBlurHandler(event -> this.permittedNw.validate());
+
+        this.permittedI.addValidator(newPermittedIValidator());
+        this.permittedI.addBlurHandler(event -> this.permittedI.validate());
+
+        this.unpermittedI.addValidator(newUnpermittedIValidator());
+        this.unpermittedI.addBlurHandler(event -> this.unpermittedI.validate());
+
+        this.permittedMac.addValidator(newPermittedMacValidator());
+        this.permittedMac.addBlurHandler(event -> this.permittedMac.validate());
+
+        this.source.addValidator(newSourceValidator());
+        this.source.addBlurHandler(event -> this.source.validate());
+    }
+
+    private Validator<String> newSourceValidator() {
+        return new Validator<String>() {
+
+            @Override
+            public List<EditorError> validate(Editor<String> editor, String value) {
+                List<EditorError> result = new ArrayList<>();
+                if (OpenPortsTabUi.this.source.getText().trim().length() > 0
+                        && (!(FirewallPanelUtils.checkPortRegex(OpenPortsTabUi.this.source.getText().trim())
+                                || FirewallPanelUtils.checkPortRangeRegex(OpenPortsTabUi.this.source.getText().trim()))
+                                || !FirewallPanelUtils.isPortInRange(OpenPortsTabUi.this.source.getText().trim()))) {
+                    result.add(new BasicEditorError(OpenPortsTabUi.this.source, value,
+                            MSGS.firewallOpenPortFormSourcePortRangeErrorMessage()));
+                }
+                return result;
             }
-        });
-        this.permittedI.addBlurHandler(event -> {
-            if (!OpenPortsTabUi.this.permittedI.getText().trim().matches(FieldType.ALPHANUMERIC.getRegex())
-                    && OpenPortsTabUi.this.permittedI.getText().trim().length() > 0
-                    || OpenPortsTabUi.this.permittedI.getText().trim()
-                            .length() > FirewallPanelUtils.INTERFACE_NAME_MAX_LENGTH) {
-                OpenPortsTabUi.this.groupPermittedI.setValidationState(ValidationState.ERROR);
-            } else {
-                OpenPortsTabUi.this.groupPermittedI.setValidationState(ValidationState.NONE);
+
+            @Override
+            public int getPriority() {
+                return 0;
             }
-        });
-        this.unpermittedI.addBlurHandler(event -> {
-            if (!OpenPortsTabUi.this.unpermittedI.getText().trim().matches(FieldType.ALPHANUMERIC.getRegex())
-                    && OpenPortsTabUi.this.unpermittedI.getText().trim().length() > 0
-                    || OpenPortsTabUi.this.unpermittedI.getText().trim()
-                            .length() > FirewallPanelUtils.INTERFACE_NAME_MAX_LENGTH) {
-                OpenPortsTabUi.this.groupUnpermittedI.setValidationState(ValidationState.ERROR);
-            } else {
-                OpenPortsTabUi.this.groupUnpermittedI.setValidationState(ValidationState.NONE);
+        };
+    }
+
+    private Validator<String> newPermittedMacValidator() {
+        return new Validator<String>() {
+
+            @Override
+            public List<EditorError> validate(Editor<String> editor, String value) {
+                List<EditorError> result = new ArrayList<>();
+                if (!OpenPortsTabUi.this.permittedMac.getText().trim().matches(FieldType.MAC_ADDRESS.getRegex())
+                        && OpenPortsTabUi.this.permittedMac.getText().trim().length() > 0) {
+                    result.add(new BasicEditorError(OpenPortsTabUi.this.permittedMac, value,
+                            MSGS.firewallOpenPortFormPermittedMacAddressErrorMessage()));
+                }
+                return result;
             }
-        });
-        this.permittedMac.addBlurHandler(event -> {
-            if (!OpenPortsTabUi.this.permittedMac.getText().trim().matches(FieldType.MAC_ADDRESS.getRegex())
-                    && OpenPortsTabUi.this.permittedMac.getText().trim().length() > 0) {
-                OpenPortsTabUi.this.groupPermittedMac.setValidationState(ValidationState.ERROR);
-            } else {
-                OpenPortsTabUi.this.groupPermittedMac.setValidationState(ValidationState.NONE);
+
+            @Override
+            public int getPriority() {
+                return 0;
             }
-        });
-        this.source.addBlurHandler(event -> {
-            if (OpenPortsTabUi.this.source.getText().trim().length() > 0
-                    && (!(FirewallPanelUtils.checkPortRegex(OpenPortsTabUi.this.source.getText().trim())
-                            || FirewallPanelUtils.checkPortRangeRegex(OpenPortsTabUi.this.source.getText().trim()))
-                            || !FirewallPanelUtils.isPortInRange(OpenPortsTabUi.this.source.getText().trim()))) {
-                OpenPortsTabUi.this.groupSource.setValidationState(ValidationState.ERROR);
-            } else {
-                OpenPortsTabUi.this.groupSource.setValidationState(ValidationState.NONE);
+        };
+    }
+
+    private Validator<String> newUnpermittedIValidator() {
+        return new Validator<String>() {
+
+            @Override
+            public List<EditorError> validate(Editor<String> editor, String value) {
+                List<EditorError> result = new ArrayList<>();
+                if (!OpenPortsTabUi.this.unpermittedI.getText().trim().matches(FieldType.ALPHANUMERIC.getRegex())
+                        && OpenPortsTabUi.this.unpermittedI.getText().trim().length() > 0
+                        || OpenPortsTabUi.this.unpermittedI.getText().trim()
+                                .length() > FirewallPanelUtils.INTERFACE_NAME_MAX_LENGTH) {
+                    result.add(new BasicEditorError(OpenPortsTabUi.this.unpermittedI, value,
+                            MSGS.firewallOpenPortFormUnpermittedInterfaceErrorMessage()));
+                }
+                return result;
             }
-        });
+
+            @Override
+            public int getPriority() {
+                return 0;
+            }
+        };
+    }
+
+    private Validator<String> newPermittedIValidator() {
+        return new Validator<String>() {
+
+            @Override
+            public List<EditorError> validate(Editor<String> editor, String value) {
+                List<EditorError> result = new ArrayList<>();
+                if (!OpenPortsTabUi.this.permittedI.getText().trim().matches(FieldType.ALPHANUMERIC.getRegex())
+                        && OpenPortsTabUi.this.permittedI.getText().trim().length() > 0
+                        || OpenPortsTabUi.this.permittedI.getText().trim()
+                                .length() > FirewallPanelUtils.INTERFACE_NAME_MAX_LENGTH) {
+                    result.add(new BasicEditorError(OpenPortsTabUi.this.permittedI, value,
+                            MSGS.firewallOpenPortFormPermittedInterfaceErrorMessage()));
+                }
+                return result;
+            }
+
+            @Override
+            public int getPriority() {
+                return 0;
+            }
+        };
+    }
+
+    private Validator<String> newPermittedNwValidator() {
+        return new Validator<String>() {
+
+            @Override
+            public List<EditorError> validate(Editor<String> editor, String value) {
+                List<EditorError> result = new ArrayList<>();
+                if (!OpenPortsTabUi.this.permittedNw.getText().trim().matches(FieldType.NETWORK.getRegex())
+                        && OpenPortsTabUi.this.permittedNw.getText().trim().length() > 0) {
+                    result.add(new BasicEditorError(OpenPortsTabUi.this.permittedNw, value,
+                            MSGS.firewallOpenPortFormPermittedNetworkErrorMessage()));
+                }
+                return result;
+            }
+
+            @Override
+            public int getPriority() {
+                return 0;
+            }
+        };
+    }
+
+    private Validator<String> newPortValidator() {
+        return new Validator<String>() {
+
+            @Override
+            public List<EditorError> validate(Editor<String> editor, String value) {
+                List<EditorError> result = new ArrayList<>();
+                if (OpenPortsTabUi.this.port.getText() == null || "".equals(OpenPortsTabUi.this.port.getText().trim())
+                        || OpenPortsTabUi.this.port.getText().trim().length() == 0
+                        || !(FirewallPanelUtils.checkPortRegex(OpenPortsTabUi.this.port.getText().trim())
+                                || FirewallPanelUtils.checkPortRangeRegex(OpenPortsTabUi.this.port.getText().trim()))
+                        || !FirewallPanelUtils.isPortInRange(OpenPortsTabUi.this.port.getText().trim())) {
+                    result.add(new BasicEditorError(OpenPortsTabUi.this.port, value,
+                            MSGS.firewallOpenPortFormPortErrorMessage()));
+                }
+                return result;
+            }
+
+            @Override
+            public int getPriority() {
+                return 0;
+            }
+        };
     }
 
     private void setModalFieldsTooltips() {

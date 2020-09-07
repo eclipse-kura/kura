@@ -36,8 +36,10 @@ import org.gwtbootstrap3.client.ui.constants.ValidationState;
 import org.gwtbootstrap3.client.ui.html.Span;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
@@ -116,6 +118,11 @@ public class ServerCertsTabUi extends Composite implements Tab {
         this.groupCertForm.setValidationState(ValidationState.NONE);
         this.serverSslCertsForm.reset();
         setButtonsEnabled(false);
+    }
+
+    @UiHandler(value = { "groupStorageAliasForm", "groupCertForm" })
+    public void onFormBlur(BlurEvent e) {
+        setDirty(true);
     }
 
     private void initForm() {

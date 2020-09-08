@@ -128,9 +128,10 @@ public class DeviceCertsTabUi extends Composite implements Tab {
         setButtonsEnabled(false);
     }
 
-    @UiHandler(value = { "groupStorageAliasForm", "groupPrivateKeyForm", "groupCertForm" })
+    @UiHandler(value = { "storageAliasInput", "privateKeyInput", "certificateInput" })
     public void onFormBlur(BlurEvent e) {
         setDirty(true);
+        setButtonsEnabled(true);
     }
 
     private void initForm() {

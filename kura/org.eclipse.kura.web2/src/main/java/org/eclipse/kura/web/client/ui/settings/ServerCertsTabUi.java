@@ -120,9 +120,10 @@ public class ServerCertsTabUi extends Composite implements Tab {
         setButtonsEnabled(false);
     }
 
-    @UiHandler(value = { "groupStorageAliasForm", "groupCertForm" })
+    @UiHandler(value = { "storageAliasInput", "certificateInput" })
     public void onFormBlur(BlurEvent e) {
         setDirty(true);
+        setButtonsEnabled(true);
     }
 
     private void initForm() {

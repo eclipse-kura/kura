@@ -219,7 +219,7 @@ public class TrigonometricComponentTest {
             Map<String, Double> result = calculateResults();
             assertTrue(0.0 == result.get("zero").doubleValue());
             assertTrue(1.0 == result.get("halfPi").doubleValue());
-            assertTrue(0.0 == result.get("pi").doubleValue());
+            assertTrue(Math.abs(0.0 - result.get("pi").doubleValue()) < ACCEPTABLE_ERROR);
             assertTrue(-1.0 == result.get("threeHalvesPi").doubleValue());
         } catch (TimeoutException e) {
             fail("Timeout waiting for envelope");
@@ -232,9 +232,9 @@ public class TrigonometricComponentTest {
             updateTrigonometricOperation("COS");
             Map<String, Double> result = calculateResults();
             assertTrue(1.0 == result.get("zero").doubleValue());
-            assertTrue(0.0 == result.get("halfPi").doubleValue());
+            assertTrue(Math.abs(0.0 - result.get("halfPi").doubleValue()) < ACCEPTABLE_ERROR);
             assertTrue(-1.0 == result.get("pi").doubleValue());
-            assertTrue(0.0 == result.get("threeHalvesPi").doubleValue());
+            assertTrue(Math.abs(0.0 - result.get("threeHalvesPi").doubleValue()) < ACCEPTABLE_ERROR);
         } catch (TimeoutException e) {
             fail("Timeout waiting for envelope");
         }
@@ -245,9 +245,9 @@ public class TrigonometricComponentTest {
         try {
             updateTrigonometricOperation("TAN");
             Map<String, Double> result = calculateResults();
-            assertTrue(0.0 == result.get("zero").doubleValue());
-            assertTrue(1.0 == result.get("quarterPi").doubleValue());
-            assertTrue(0.0 == result.get("pi").doubleValue());
+            assertTrue(Math.abs(0.0 - result.get("zero").doubleValue()) < ACCEPTABLE_ERROR);
+            assertTrue(Math.abs(1.0 - result.get("quarterPi").doubleValue()) < ACCEPTABLE_ERROR);
+            assertTrue(Math.abs(0.0 - result.get("pi").doubleValue()) < ACCEPTABLE_ERROR);
         } catch (TimeoutException e) {
             fail("Timeout waiting for envelope");
         }

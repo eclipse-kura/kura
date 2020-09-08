@@ -128,11 +128,11 @@ public class TrigonometricComponent implements WireEmitter, ConfigurableComponen
         if (operand.isPresent()) {
             switch (this.options.getTrigonometricOperation()) {
             case SIN:
-                return Optional.of((double) Math.round(Math.sin(operand.get().doubleValue())));
+                return Optional.of(Math.sin(operand.get().doubleValue()));
             case COS:
-                return Optional.of((double) Math.round(Math.cos(operand.get().doubleValue())));
+                return Optional.of(Math.cos(operand.get().doubleValue()));
             case TAN:
-                return Optional.of((double) Math.round(Math.tan(operand.get().doubleValue())));
+                return Optional.of(Math.tan(operand.get().doubleValue()));
             case ASIN:
                 return Optional.of(Math.asin(operand.get().doubleValue()));
             case ACOS:

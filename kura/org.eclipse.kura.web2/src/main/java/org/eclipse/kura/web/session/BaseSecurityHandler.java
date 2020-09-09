@@ -27,8 +27,9 @@ public class BaseSecurityHandler implements SecurityHandler {
         response.setHeader("X-FRAME-OPTIONS", "SAMEORIGIN");
         response.setHeader("X-XSS-protection", "1; mode=block");
         response.setHeader("X-Content-Type-Options", "nosniff");
-        response.setHeader("Cache-Control", "no-cache,no-store,must-revalidate");
+        response.setHeader("Cache-Control", "no-cache,no-store,max-age=0,must-revalidate");
         response.setHeader("Pragma", "no-cache");
+        response.setHeader("Content-Security-Policy", "default-src 'self' 'nonce-YmOhe4LWmI1czapJnE2D3UOoYbPthMkM' 'nonce-3TicouQMegMuj4ZQN6HvjNPo8BGiijJF' 'nonce-MxFCwIVsMGEul9B2RHTa7duCrD2YT3nA' 'nonce-hsaWBVY3TvVTKAUfhyQPdWXzhXOsl7rQ' 'nonce-Qgt9F8AWPOPcanFX064DolVI0VqdAVgh' 'sha256-+EAvjC+lrPs2ZhgImb+lNQ7yJG8Xerz5tP8OlHkQXBM=' 'sha256-4lbaG/yI+Yas40MYds60CXl+zg9DGuBKbYRCXZwNZVo='; script-src-elem 'self' 'unsafe-inline'");
 
         fixTrailingSlashes(request, response);
 

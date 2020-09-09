@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -131,7 +131,7 @@ public class BluetoothLeGattCharacteristicImpl implements BluetoothLeGattCharact
     public List<BluetoothLeGattCharacteristicProperties> getProperties() {
         List<BluetoothLeGattCharacteristicProperties> properties = new ArrayList<>();
         for (String flag : this.characteristic.getFlags()) {
-            properties.add(BluetoothLeGattCharacteristicProperties.valueOf(flag));
+            properties.add(BluetoothLeGattCharacteristicProperties.valueOf(flag.toUpperCase()));
         }
         return properties;
     }

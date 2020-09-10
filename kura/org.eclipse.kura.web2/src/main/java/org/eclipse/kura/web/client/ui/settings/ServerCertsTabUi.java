@@ -112,12 +112,7 @@ public class ServerCertsTabUi extends Composite implements Tab {
     public void clear() {
         setButtonsEnabled(false);
         setDirty(false);
-        this.storageAliasInput.setText("");
-        this.certificateInput.setText("");
-        this.groupStorageAliasForm.setValidationState(ValidationState.NONE);
-        this.groupCertForm.setValidationState(ValidationState.NONE);
         this.serverSslCertsForm.reset();
-        setButtonsEnabled(false);
     }
 
     @UiHandler(value = { "storageAliasInput", "certificateInput" })

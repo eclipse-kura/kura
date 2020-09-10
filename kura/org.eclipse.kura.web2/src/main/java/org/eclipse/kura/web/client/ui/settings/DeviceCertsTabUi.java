@@ -32,7 +32,6 @@ import org.gwtbootstrap3.client.ui.ModalFooter;
 import org.gwtbootstrap3.client.ui.ModalHeader;
 import org.gwtbootstrap3.client.ui.TextArea;
 import org.gwtbootstrap3.client.ui.constants.ModalBackdrop;
-import org.gwtbootstrap3.client.ui.constants.ValidationState;
 import org.gwtbootstrap3.client.ui.html.Span;
 
 import com.google.gwt.core.client.GWT;
@@ -118,14 +117,7 @@ public class DeviceCertsTabUi extends Composite implements Tab {
     public void clear() {
         setButtonsEnabled(false);
         setDirty(false);
-        this.storageAliasInput.setText("");
-        this.privateKeyInput.setText("");
-        this.certificateInput.setText("");
-        this.groupStorageAliasForm.setValidationState(ValidationState.NONE);
-        this.groupPrivateKeyForm.setValidationState(ValidationState.NONE);
-        this.groupCertForm.setValidationState(ValidationState.NONE);
         this.deviceSslCertsForm.reset();
-        setButtonsEnabled(false);
     }
 
     @UiHandler(value = { "storageAliasInput", "privateKeyInput", "certificateInput" })
